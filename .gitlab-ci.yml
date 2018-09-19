@@ -7,6 +7,7 @@ rpm build:
   image: f5devcentral/containthedocs:rpmbuild
   stage: build
   script:
+  - echo "CI BUILD"
   - scripts/rpmbuild.sh
   tags:
   - cm-official-docker-executor

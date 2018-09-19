@@ -1,13 +1,13 @@
 #!/bin/bash
 
-echo "RUNNING RPM BUILD SCRIPT"
+echo "RPM BUILD SCRIPT"
 
 RELEASE=$(($(ls -v dist/*.rpm|tail -1|sed -rn 's/.*-([0-9]+).noarch.rpm/\1/p') + 1))
 MAINDIR=$(pwd)
 
 set -e
 
-rpmbuild --quiet -bb \
+rpmbuild -bb \
     --define "main $(pwd)" \
     --define '_topdir %{main}/rpmbuild' \
     --define "_name f5-telemetry" \
