@@ -1,0 +1,16 @@
+image: node:4.8.0
+
+stages:
+- build
+
+rpm build:
+  image: f5devcentral/containthedocs:rpmbuild
+  stage: build
+  script:
+  - scripts/rpmbuild.sh
+  tags:
+  - cm-official-docker-executor
+  artifacts:
+    name: f5-telemetry-$CI_BUILD_REF
+    paths:
+    - dist
