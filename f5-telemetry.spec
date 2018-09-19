@@ -15,8 +15,7 @@ Telemetry Services declarative configuration method for BIG-IP
 %define _unpackaged_files_terminate_build 0
 
 %prep
-cp -r %{main}/src/dist/ %{_builddir}/src/
-cp -r %{_topdir}/cloud-libs/ %{_builddir}/pkgs/
+cp -r %{main}/src/ %{_builddir}/src/
 echo -n %{version}-%{release} > %{_builddir}/src/version
 
 %install
