@@ -26,6 +26,8 @@ class RestWorker {
      * @returns {undefined}
      */
     onStart(success, failure) {
+        log.debug('onStart');
+        success();
     }
 
 
