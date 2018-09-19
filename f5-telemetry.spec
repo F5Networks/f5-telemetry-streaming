@@ -11,8 +11,6 @@ Packager: F5 Networks <support@f5.com>
 Telemetry Services declarative configuration method for BIG-IP
 
 %define IAPP_INSTALL_DIR /var/config/rest/iapps/%{name}
-%define PKGS_DIR /var/config/rest/iapps/%{name}/packages
-%define _unpackaged_files_terminate_build 0
 
 %prep
 cp -r %{main}/src/ %{_builddir}/src/
@@ -22,8 +20,6 @@ echo -n %{version}-%{release} > %{_builddir}/src/version
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{IAPP_INSTALL_DIR}
 cp -r %{_builddir}/src/* $RPM_BUILD_ROOT%{IAPP_INSTALL_DIR}
-mkdir -p $RPM_BUILD_ROOT%{PKGS_DIR}
-cp -r %{_builddir}/pkgs/* $RPM_BUILD_ROOT%{PKGS_DIR}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
