@@ -8,7 +8,10 @@
 
 'use strict';
 
-const log = require('./log');
+const logger = require('f5-logger').getInstance();
+const log = function(str) {
+    logger[info](`[telemetry] ${str}`);
+}
 
 class RestWorker {
     constructor() {
@@ -26,7 +29,7 @@ class RestWorker {
      * @returns {undefined}
      */
     onStart(success, failure) {
-        log.debug('onStart');
+        log('onStart');
         success();
     }
 
@@ -44,7 +47,7 @@ class RestWorker {
      * @returns {undefined}
      */
     onStartCompleted(success, failure, loadedState, errMsg) {
-        log.debug('onStartCompleted');
+        log('onStartCompleted');
         success();
     } // onStartCompleted()
 
@@ -55,7 +58,7 @@ class RestWorker {
      */
     onGet(restOperation) {
         const urlpath = restOperation.getUri().href;
-        log.debug('GET operation ' + urlpath);
+        log.debug(`GET operation ${urlpath}`);
     }
 
     /**
@@ -66,7 +69,7 @@ class RestWorker {
     onPost(restOperation) {
         const urlpath = restOperation.getUri().href;
         const body = restOperation.getBody();
-        log.debug('POST operation ' + urlpath);
+        log.debug(`POST operation ${urlpath}`);
     }
 
 
@@ -77,7 +80,7 @@ class RestWorker {
      */
     onDelete(restOperation) {
         const urlpath = restOperation.getUri().href;
-        log.debug('DELETE operation ' + urlpath);
+        log.debug(`DELETE operation ${urlpath}`);
     }
 }
 
