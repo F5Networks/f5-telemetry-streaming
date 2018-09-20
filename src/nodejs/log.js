@@ -8,37 +8,21 @@
 
 'use strict';
 
-const fs = require('fs');
 const logger = require('f5-logger').getInstance();
 
 // Variable to force debug log level by default during development
 const DEBUG = true;
 
 // map syslog level values to names
-const syslogLevels = [
-    'emergency', 'alert', 'critical', 'error',
-    'warning', 'notice', 'info', 'debug'
-];
-
-// map syslog level values to f5 iLX names
-const f5restLevels = [
-    'severe', 'severe', 'severe', 'severe',
-    'warning', 'config', 'info', 'fine'
-];
+// const syslogLevels = [ 'emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug' ];
 
 // map syslog/iLX log-level names to values
 const logLevelNames = {
-    emergency: 0,
-    alert: 1,
-    critical: 2,
     error: 3,
     warning: 4,
     notice: 5,
     info: 6,
-    debug: 7,
-    severe: 3,
-    config: 5,
-    fine: 7
+    debug: 7
 };
 
 /**
@@ -55,22 +39,14 @@ const logLevelNames = {
  * @private
  * @param {string|Error|object} info
  * @param {string} [info.message] - if present, primary message
- * @param {string|number} [level="error"]
- * @param {boolean} [stack=false] - if true, log Error stack trace
+ * @param {string} [level="error"]
  * @returns {object} - log message as object (not string)
  */
-const log = function (info, level, stack) {
-    if (typeof level === 'string') {
-        if (logLevelNames[level] === undefined) { level = 'error'; }
-        level = logLevelNames[level]; // now a number
-    } else if (typeof level !== 'number') {
-        level = logLevelNames.error;
-    } else {
-        level = ((level < 0) || (level > syslogLevels.length))
-            ? logLevelNames.error : (level | 0);
+const log = function (info, levelName) {
+    var level = 7;
+    if (!DEBUG && typeof level === 'string' && logLevelNames[levelName] !== undefined) {
+        level = logLevelNames[levelName];
     }
-    const levelName = syslogLevels[level];
-    const restLevel = f5restLevels[level];
 
     let data = {
         message: '' // make message appear first in JSON
@@ -98,12 +74,6 @@ const log = function (info, level, stack) {
 
             if (['string', 'number'].indexOf(typeof info.code) + 1) {
                 data.code = info.code.toString();
-            }
-            if ((typeof stack === 'boolean') && stack) {
-                const s = info.stack;
-                if ((typeof s === 'string') && s.length) {
-                    data.stack = s.split(/\n +at +/);
-                }
             }
         } else if (!Object.keys(info).length) {
             tmp = new Error(`log.${levelName}() given empty object`);
@@ -161,20 +131,17 @@ const log = function (info, level, stack) {
 
 
 /**
- * These log.foo(info[,stack]) functions alias log(info,foo[,stack])
+ * These log.foo(info) functions alias log(info,foo)
  *
  * @public
  * @param {string|Error|object} info
  * @returns {object}
  */
-const debug = function (x, s) { return log(x, 'debug', s); };
-const notice = function (x, s) { return log(x, 'notice', s); };
-const info = function (x, s) { return log(x, 'info', s); };
-const warning = function (x, s) { return log(x, 'warning', s); };
-const error = function (x, s) { return log(x, 'error', s); };
-const critical = error;
-const alert = error;
-const emergency = error;
+const debug = function (x)   { return log(x, 'debug'); };
+const notice = function (x)  { return log(x, 'notice'); };
+const info = function (x)    { return log(x, 'info'); };
+const warning = function (x) { return log(x, 'warning'); };
+const error = function (x)   { return log(x, 'error'); };
 
 module.exports = {
     DEBUG,
@@ -183,8 +150,5 @@ module.exports = {
     notice,
     info,
     warning,
-    error,
-    critical,
-    alert,
-    emergency
+    error
 };
