@@ -8,10 +8,8 @@
 
 'use strict';
 
-const logger = require('f5-logger').getInstance();
-const log = function(str) {
-    logger[info](`[telemetry] ${str}`);
-}
+const log = require('./logger.js');
+const systemStats = require('./systemStatsHandler.js');
 
 class RestWorker {
     constructor() {
@@ -29,10 +27,9 @@ class RestWorker {
      * @returns {undefined}
      */
     onStart(success, failure) {
-        log('onStart');
+        log.info('onStart');
         success();
     }
-
 
     /**
      * Recognize readiness to handle AS3 requests.
@@ -47,7 +44,7 @@ class RestWorker {
      * @returns {undefined}
      */
     onStartCompleted(success, failure, loadedState, errMsg) {
-        log('onStartCompleted');
+        log.info('onStartCompleted');
         success();
     } // onStartCompleted()
 
@@ -58,7 +55,18 @@ class RestWorker {
      */
     onGet(restOperation) {
         const urlpath = restOperation.getUri().href;
-        log.debug(`GET operation ${urlpath}`);
+        log.info(`GET operation ${urlpath}`);
+        systemStats.pull()
+        .then(res => {
+            restOperation.setStatusCode(200);
+            restOperation.setBody(res);
+            restOperation.complete();
+        })
+        .catch((e) => {
+            restOperation.setStatusCode(401);
+            restOperation.setBody(e);
+            restOperation.complete();
+        });
     }
 
     /**
@@ -69,7 +77,7 @@ class RestWorker {
     onPost(restOperation) {
         const urlpath = restOperation.getUri().href;
         const body = restOperation.getBody();
-        log.debug(`POST operation ${urlpath}`);
+        log.info(`POST operation ${urlpath}`);
     }
 
 
@@ -80,7 +88,7 @@ class RestWorker {
      */
     onDelete(restOperation) {
         const urlpath = restOperation.getUri().href;
-        log.debug(`DELETE operation ${urlpath}`);
+        log.info(`DELETE operation ${urlpath}`);
     }
 }
 
