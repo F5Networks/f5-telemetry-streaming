@@ -19,6 +19,8 @@ const uriMap = {
     db: '/mgmt/tm/sys/db'
 };
 
+// comment
+
 const pull = function() {
     var promises = [];
     Object.keys(uriMap).forEach(key => {
