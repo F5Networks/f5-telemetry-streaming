@@ -8,18 +8,18 @@
 
 'use strict';
 
-const logger = require('f5-logger').getInstance();
+const logger = require('f5-logger').getInstance(); // eslint-disable-line import/no-unresolved
 
-const stringify = function(info) {
-    if (typeof(info) === 'object') {
-        info = JSON.stringify(info);
+const stringify = function (msg) {
+    if (typeof msg === 'object') {
+        msg = JSON.stringify(msg);
     }
-    return `[telemetry] ${info}`;
-}
+    return `[telemetry] ${msg}`;
+};
 
-const error = function(info) { logger.severe(stringify(info)) };
-const info =  function(info) { logger.info(stringify(info)) };
-const debug = function(info) { logger.debug(stringify(info)) };
+const error = function (msg) { logger.severe(stringify(msg)); };
+const info = function (msg) { logger.info(stringify(msg)); };
+const debug = function (msg) { logger.debug(stringify(msg)); };
 
 module.exports = {
     error,
