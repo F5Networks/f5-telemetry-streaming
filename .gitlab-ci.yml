@@ -1,16 +1,24 @@
 image: node:4.8.0
 
 stages:
+- test
 - build
+
+test package:
+    image: f5devcentral/containthedocs:rpmbuild
+    stage: test
+    script:
+        - echo 'Running Tests'
+        - npm install
+        - npm run lint
+    tags:
+    - cm-official-docker-executor
 
 rpm build:
   image: f5devcentral/containthedocs:rpmbuild
   stage: build
   script:
   - echo 'CI BUILD'
-  - npm install
-  # run linter
-  - npm run lint
   - RELEASE=$(($(ls -v dist/*.rpm|tail -1|sed -rn 's/.*-([0-9]+).noarch.rpm/\1/p') + 1))
   - MAINDIR=$(pwd)
   - rpmbuild -bb --define "main $(pwd)" --define '_topdir %{main}/rpmbuild' --define "_name f5-telemetry" --define "_release ${RELEASE}" f5-telemetry.spec
