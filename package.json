@@ -1,5 +1,5 @@
 {
-    "name": "f5-telemtry",
+    "name": "f5-telemetry",
     "version": "1.0.0",
     "scripts": {
         "lint": "eslint src"
