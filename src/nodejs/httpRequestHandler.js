@@ -8,20 +8,20 @@
 
 'use strict';
 
-const log = require('./logger.js');
 const http = require('http');
+const log = require('./logger.js'); // eslint-disable-line no-unused-vars
 
-const get = function(uri) {
-    var options = {
+const get = function (uri) {
+    const options = {
         host: 'localhost',
         port: 8100,
         path: uri,
         headers: {
-           'Authorization': 'Basic ' + new Buffer('admin:').toString('base64')
-        }   
+            Authorization: `Basic ${new Buffer('admin:').toString('base64')}`
+        }
     };
     return new Promise((resolve, reject) => {
-        var req = http.request(options, (res) => {
+        const req = http.request(options, (res) => {
             let data = '';
             res.on('data', (chunk) => {
                 data += chunk;
@@ -29,7 +29,7 @@ const get = function(uri) {
             res.on('end', () => {
                 try {
                     resolve(JSON.parse(data));
-                } catch(e) {
+                } catch (e) {
                     resolve(data);
                 }
             });
@@ -41,5 +41,5 @@ const get = function(uri) {
 };
 
 module.exports = {
-    get: get
+    get
 };

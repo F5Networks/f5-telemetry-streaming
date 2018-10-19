@@ -1,7 +1,18 @@
 image: node:4.8.0
 
 stages:
+- test
 - build
+
+test package:
+    image: f5devcentral/containthedocs:rpmbuild
+    stage: test
+    script:
+        - echo 'Running Tests'
+        - npm install
+        - npm run lint
+    tags:
+    - cm-official-docker-executor
 
 rpm build:
   image: f5devcentral/containthedocs:rpmbuild

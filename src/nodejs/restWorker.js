@@ -26,7 +26,7 @@ class RestWorker {
      * @param {function} failure - callback to indicate startup failure
      * @returns {undefined}
      */
-    onStart(success, failure) {
+    onStart(success, failure) { // eslint-disable-line no-unused-vars
         log.info('onStart');
         success();
     }
@@ -43,7 +43,7 @@ class RestWorker {
      * @param {string} [errMsg=null] - framework's error message if onStart() failed
      * @returns {undefined}
      */
-    onStartCompleted(success, failure, loadedState, errMsg) {
+    onStartCompleted(success, failure, loadedState, errMsg) { // eslint-disable-line no-unused-vars
         log.info('onStartCompleted');
         success();
     } // onStartCompleted()
@@ -57,16 +57,16 @@ class RestWorker {
         const urlpath = restOperation.getUri().href;
         log.info(`GET operation ${urlpath}`);
         systemStats.pull()
-        .then(res => {
-            restOperation.setStatusCode(200);
-            restOperation.setBody(res);
-            restOperation.complete();
-        })
-        .catch((e) => {
-            restOperation.setStatusCode(401);
-            restOperation.setBody(e);
-            restOperation.complete();
-        });
+            .then((res) => {
+                restOperation.setStatusCode(200);
+                restOperation.setBody(res);
+                restOperation.complete();
+            })
+            .catch((e) => {
+                restOperation.setStatusCode(401);
+                restOperation.setBody(e);
+                restOperation.complete();
+            });
     }
 
     /**
@@ -76,7 +76,7 @@ class RestWorker {
      */
     onPost(restOperation) {
         const urlpath = restOperation.getUri().href;
-        const body = restOperation.getBody();
+        const body = restOperation.getBody(); // eslint-disable-line no-unused-vars
         log.info(`POST operation ${urlpath}`);
     }
 

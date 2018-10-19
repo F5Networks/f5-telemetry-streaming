@@ -1,0 +1,12 @@
+{
+    "name": "f5-telemetry",
+    "version": "1.0.0",
+    "scripts": {
+        "lint": "eslint src"
+    },
+    "devDependencies": {
+        "eslint": "^4.19.1",
+        "eslint-config-airbnb-base": "^13.1.0",
+        "eslint-plugin-import": "^2.14.0"
+    }
+}

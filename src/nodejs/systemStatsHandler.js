@@ -8,7 +8,7 @@
 
 'use strict';
 
-const log = require('./logger.js');
+const log = require('./logger.js'); // eslint-disable-line no-unused-vars
 const http = require('./httpRequestHandler.js');
 
 const uriMap = {
@@ -21,14 +21,14 @@ const uriMap = {
 
 // comment
 
-const pull = function() {
-    var promises = [];
-    Object.keys(uriMap).forEach(key => {
+const pull = function () {
+    const promises = [];
+    Object.keys(uriMap).forEach((key) => {
         promises.push(http.get(uriMap[key]));
     });
     return Promise.all(promises);
 };
 
 module.exports = {
-    pull: pull
+    pull
 };
