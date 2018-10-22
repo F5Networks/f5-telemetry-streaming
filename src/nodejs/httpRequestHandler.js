@@ -41,5 +41,5 @@ const get = function (uri) {
 };
 
 module.exports = {
-    get
+    get: get // eslint-disable-line object-shorthand
 };
