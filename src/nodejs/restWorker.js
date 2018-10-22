@@ -26,7 +26,8 @@ class RestWorker {
      * @param {function} failure - callback to indicate startup failure
      * @returns {undefined}
      */
-    onStart(success, failure) { // eslint-disable-line no-unused-vars
+    // eslint-disable-next-line no-unused-vars
+    onStart(success, failure) {
         log.info('onStart');
         success();
     }
@@ -43,7 +44,8 @@ class RestWorker {
      * @param {string} [errMsg=null] - framework's error message if onStart() failed
      * @returns {undefined}
      */
-    onStartCompleted(success, failure, loadedState, errMsg) { // eslint-disable-line no-unused-vars
+    // eslint-disable-next-line no-unused-vars
+    onStartCompleted(success, failure, loadedState, errMsg) {
         log.info('onStartCompleted');
         success();
     } // onStartCompleted()
