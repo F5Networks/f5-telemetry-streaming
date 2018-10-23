@@ -4,6 +4,9 @@
     "scripts": {
         "lint": "eslint src"
     },
+    "dependencies": {
+        "q": "^1.5.1"
+    },
     "devDependencies": {
         "eslint": "^4.19.1",
         "eslint-config-airbnb-base": "^13.1.0",

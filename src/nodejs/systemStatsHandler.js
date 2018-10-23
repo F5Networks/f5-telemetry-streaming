@@ -11,24 +11,42 @@
 const log = require('./logger.js'); // eslint-disable-line no-unused-vars
 const http = require('./httpRequestHandler.js');
 
-const uriMap = {
-    cpu: '/mgmt/tm/cloud/sys/cpu-info-stat',
-    host: '/mgmt/tm/cloud/sys/host-info-stat',
-    disk: '/mgmt/tm/cloud/sys/disk-info',
-    tmm: '/mgmt/tm/cloud/sys/tmm-stat',
-    db: '/mgmt/tm/sys/db'
+// array of stats to pull
+const statsMap = {
+    tmmCpu: {
+        uri: '/mgmt/tm/sys/tmm-info/stats',
+        normalize: normalizeData
+    },
+    tmmTraffic: {
+        uri: '/mgmt/tm/sys/tmm-traffic/stats',
+        normalize: normalizeData
+    }
 };
 
-// comment
+// TODO: place in normalize.js or similar as this is going to grow
+function normalizeData(data) {
+    let normalizedData;
+    try {
+        normalizedData = data.entries;
+    } catch (e) {
+        normalizedData = data;
+    }
+    return normalizedData;
+}
 
-const pull = function () {
+function getStat(name, stat) {
+    return http.get(stat.uri)
+        .then(data => ({ name, data: stat.normalize(data) }));
+}
+
+function pullStats() {
     const promises = [];
-    Object.keys(uriMap).forEach((key) => {
-        promises.push(http.get(uriMap[key]));
+    Object.keys(statsMap).forEach((key) => {
+        promises.push(getStat(key, statsMap[key]));
     });
     return Promise.all(promises);
-};
+}
 
 module.exports = {
-    pull
+    pull: pullStats
 };
