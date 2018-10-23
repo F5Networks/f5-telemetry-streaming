@@ -21,6 +21,8 @@ function normalizeData(data) {
             let v = data.entries[k];
             v = v.nestedStats ? v.nestedStats : v;
             v = v.entries ? v.entries : v;
+            // child entries key may look like https://mgmt/tm/sys/tmm-info/0.0/stats,
+            // we should simplify this
             const kM = k.replace('https://localhost/', '');
             nData[kM] = v;
         });
