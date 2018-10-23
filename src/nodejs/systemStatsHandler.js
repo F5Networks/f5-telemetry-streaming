@@ -13,7 +13,7 @@ const http = require('./httpRequestHandler.js');
 
 // array of stats to pull
 const statsMap = {
-    tmmCpu: {
+    tmmInfo: {
         uri: '/mgmt/tm/sys/tmm-info/stats',
         normalize: normalizeData
     },
@@ -36,7 +36,13 @@ function normalizeData(data) {
 
 function getStat(name, stat) {
     return http.get(stat.uri)
-        .then(data => ({ name, data: stat.normalize(data) }));
+        .then((data) => {
+            const normalizedData = stat.normalize(data);
+            return { name, data: normalizedData };
+        })
+        .catch((err) => {
+            throw err;
+        });
 }
 
 function pullStats() {
