@@ -1,0 +1,13 @@
+{
+    "stats": {
+        "tmmInfo": {
+            "uri": "/mgmt/tm/sys/tmm-info/stats"
+        },
+        "tmmTraffic": {
+            "uri": "/mgmt/tm/sys/tmm-traffic/stats"
+        },
+        "deviceVersion": {
+            "uri": "/mgmt/tm/sys/version"
+        }
+    }
+}

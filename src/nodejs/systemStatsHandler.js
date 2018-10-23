@@ -10,45 +10,44 @@
 
 const log = require('./logger.js'); // eslint-disable-line no-unused-vars
 const http = require('./httpRequestHandler.js');
-
-// array of stats to pull
-const statsMap = {
-    tmmInfo: {
-        uri: '/mgmt/tm/sys/tmm-info/stats',
-        normalize: normalizeData
-    },
-    tmmTraffic: {
-        uri: '/mgmt/tm/sys/tmm-traffic/stats',
-        normalize: normalizeData
-    }
-};
+const pStats = require('./properties.json').stats;
 
 // TODO: place in normalize.js or similar as this is going to grow
 function normalizeData(data) {
-    let normalizedData;
-    try {
-        normalizedData = data.entries;
-    } catch (e) {
-        normalizedData = data;
+    let nData = {};
+    if (data.entries) {
+        // device object returned is complicated, simplify
+        Object.keys(data.entries).forEach((k) => {
+            let v = data.entries[k];
+            v = v.nestedStats ? v.nestedStats : v;
+            v = v.entries ? v.entries : v;
+            const kM = k.replace('https://localhost/', '');
+            nData[kM] = v;
+        });
+    } else {
+        nData = data;
     }
-    return normalizedData;
+
+    return nData;
 }
 
 function getStat(name, stat) {
     return http.get(stat.uri)
         .then((data) => {
-            const normalizedData = stat.normalize(data);
+            const normalizedData = normalizeData(data);
             return { name, data: normalizedData };
         })
         .catch((err) => {
-            throw err;
+            const msg = `getStat: ${err}`;
+            log.error(msg);
+            throw new Error(msg);
         });
 }
 
 function pullStats() {
     const promises = [];
-    Object.keys(statsMap).forEach((key) => {
-        promises.push(getStat(key, statsMap[key]));
+    Object.keys(pStats).forEach((k) => {
+        promises.push(getStat(k, pStats[k]));
     });
     return Promise.all(promises);
 }

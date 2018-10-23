@@ -65,8 +65,8 @@ class RestWorker {
                 restOperation.complete();
             })
             .catch((e) => {
-                restOperation.setStatusCode(401);
-                restOperation.setBody(e);
+                restOperation.setStatusCode(500);
+                restOperation.setBody(`systemStats.pull error: ${e}`);
                 restOperation.complete();
             });
     }
