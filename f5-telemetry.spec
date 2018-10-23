@@ -8,12 +8,13 @@ License: Commercial
 Packager: F5 Networks <support@f5.com>
 
 %description
-Telemetry Services declarative configuration method for BIG-IP
+Telemetry Services for BIG-IP
 
 %define IAPP_INSTALL_DIR /var/config/rest/iapps/%{name}
 
 %prep
 cp -r %{main}/src/ %{_builddir}/src/
+cp -r %{main}/node_modules/ %{_builddir}/src/
 echo -n %{version}-%{release} > %{_builddir}/src/version
 
 %install
