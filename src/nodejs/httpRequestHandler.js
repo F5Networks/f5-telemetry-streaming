@@ -9,7 +9,7 @@
 'use strict';
 
 const http = require('http');
-const log = require('./logger.js'); // eslint-disable-line no-unused-vars
+const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 
 const get = function (uri) {
     const options = {

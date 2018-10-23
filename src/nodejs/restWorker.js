@@ -8,7 +8,8 @@
 
 'use strict';
 
-const log = require('./logger.js');
+const logger = require('./logger.js');
+const scheduler = require('./scheduler.js');
 const systemStats = require('./systemStatsHandler.js');
 
 class RestWorker {
@@ -28,12 +29,12 @@ class RestWorker {
      */
     // eslint-disable-next-line no-unused-vars
     onStart(success, failure) {
-        log.info('onStart');
+        logger.info('onStart');
         success();
     }
 
     /**
-     * Recognize readiness to handle AS3 requests.
+     * Recognize readiness to handle requests.
      * The iControl LX framework calls this method when
      * onStart() work is complete.
      *
@@ -46,7 +47,11 @@ class RestWorker {
      */
     // eslint-disable-next-line no-unused-vars
     onStartCompleted(success, failure, loadedState, errMsg) {
-        log.info('onStartCompleted');
+        // TODO: this needs to be configurable
+        const interval = 30;
+        scheduler.schedule(systemStats.collect, interval);
+
+        logger.info('onStartCompleted');
         success();
     } // onStartCompleted()
 
@@ -57,8 +62,8 @@ class RestWorker {
      */
     onGet(restOperation) {
         const urlpath = restOperation.getUri().href;
-        log.info(`GET operation ${urlpath}`);
-        systemStats.pull()
+        logger.info(`GET operation ${urlpath}`);
+        systemStats.collect()
             .then((res) => {
                 restOperation.setStatusCode(200);
                 restOperation.setBody(res);
@@ -66,7 +71,7 @@ class RestWorker {
             })
             .catch((e) => {
                 restOperation.setStatusCode(500);
-                restOperation.setBody(`systemStats.pull error: ${e}`);
+                restOperation.setBody(`systemStats.collect error: ${e}`);
                 restOperation.complete();
             });
     }
@@ -79,9 +84,8 @@ class RestWorker {
     onPost(restOperation) {
         const urlpath = restOperation.getUri().href;
         const body = restOperation.getBody(); // eslint-disable-line no-unused-vars
-        log.info(`POST operation ${urlpath}`);
+        logger.info(`POST operation ${urlpath}`);
     }
-
 
     /**
      * Handles Delete requests.
@@ -90,7 +94,7 @@ class RestWorker {
      */
     onDelete(restOperation) {
         const urlpath = restOperation.getUri().href;
-        log.info(`DELETE operation ${urlpath}`);
+        logger.info(`DELETE operation ${urlpath}`);
     }
 }
 

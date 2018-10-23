@@ -8,6 +8,9 @@
         },
         "deviceVersion": {
             "uri": "/mgmt/tm/sys/version"
+        },
+        "deviceSyncStatus": {
+            "uri": "/mgmt/tm/cm/sync-status"
         }
     }
 }

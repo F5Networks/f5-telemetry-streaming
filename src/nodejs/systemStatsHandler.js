@@ -8,52 +8,49 @@
 
 'use strict';
 
-const log = require('./logger.js'); // eslint-disable-line no-unused-vars
+const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 const http = require('./httpRequestHandler.js');
-const pStats = require('./properties.json').stats;
+const normalize = require('./normalize.js');
+const pStats = require('./config/properties.json').stats;
 
-// TODO: place in normalize.js or similar as this is going to grow
-function normalizeData(data) {
-    let nData = {};
-    if (data.entries) {
-        // device object returned is complicated, simplify
-        Object.keys(data.entries).forEach((k) => {
-            let v = data.entries[k];
-            v = v.nestedStats ? v.nestedStats : v;
-            v = v.entries ? v.entries : v;
-            // child entries key may look like https://mgmt/tm/sys/tmm-info/0.0/stats,
-            // we should simplify this
-            const kM = k.replace('https://localhost/', '');
-            nData[kM] = v;
-        });
-    } else {
-        nData = data;
-    }
-
-    return nData;
-}
-
+/**
+ * Get a specific stat from the REST API
+ *
+ * @returns {Object} Promise which is resolved with the normalized statistic
+ */
 function getStat(name, stat) {
     return http.get(stat.uri)
         .then((data) => {
-            const normalizedData = normalizeData(data);
+            const normalizedData = normalize.stats(data);
             return { name, data: normalizedData };
         })
         .catch((err) => {
             const msg = `getStat: ${err}`;
-            log.error(msg);
             throw new Error(msg);
         });
 }
 
-function pullStats() {
+/**
+ * Collect statistics based on list provided in properties object
+ *
+ * @returns {Object} Promise which is resolved with an array of statistics
+ */
+function collectStats() {
     const promises = [];
     Object.keys(pStats).forEach((k) => {
         promises.push(getStat(k, pStats[k]));
     });
-    return Promise.all(promises);
+    return Promise.all(promises)
+        .then((data) => {
+            logger.debug('collectStats() success');
+            return data;
+        })
+        .catch((err) => {
+            const msg = `collectStats error: ${err}`;
+            throw new Error(msg);
+        });
 }
 
 module.exports = {
-    pull: pullStats
+    collect: collectStats
 };

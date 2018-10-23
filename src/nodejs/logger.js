@@ -17,9 +17,20 @@ const stringify = function (msg) {
     return `[telemetry] ${msg}`;
 };
 
+/* f5-logger module supports the following levels
+levels: {
+    finest: 0,
+    finer: 1,
+    fine: 2,
+    config: 3,
+    info: 4,
+    warning: 5,
+    severe: 6
+}
+*/
 const error = function (msg) { logger.severe(stringify(msg)); };
 const info = function (msg) { logger.info(stringify(msg)); };
-const debug = function (msg) { logger.debug(stringify(msg)); };
+const debug = function (msg) { logger.finest(stringify(msg)); };
 
 module.exports = {
     error,
