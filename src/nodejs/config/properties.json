@@ -1,16 +1,20 @@
 {
     "stats": {
         "tmmInfo": {
-            "uri": "/mgmt/tm/sys/tmm-info/stats"
+            "uri": "/mgmt/tm/sys/tmm-info"
         },
         "tmmTraffic": {
-            "uri": "/mgmt/tm/sys/tmm-traffic/stats"
+            "uri": "/mgmt/tm/sys/tmm-traffic"
         },
         "deviceVersion": {
             "uri": "/mgmt/tm/sys/version"
         },
         "deviceSyncStatus": {
             "uri": "/mgmt/tm/cm/sync-status"
+        },
+        "deviceNetInterface": {
+            "uri": "/mgmt/tm/net/interface",
+            "normalize": true
         }
     }
 }

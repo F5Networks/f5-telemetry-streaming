@@ -21,7 +21,8 @@ const pStats = require('./config/properties.json').stats;
 function getStat(name, stat) {
     return http.get(stat.uri)
         .then((data) => {
-            const normalizedData = normalize.stats(data);
+            // default to true
+            const normalizedData = stat.normalize === false ? data : normalize.stats(data);
             return { name, data: normalizedData };
         })
         .catch((err) => {

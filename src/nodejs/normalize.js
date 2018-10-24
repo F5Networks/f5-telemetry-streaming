@@ -21,13 +21,15 @@ function normalizeData(data) {
     const nData = data;
 
     const reduceNested = function (obj) {
-        let objRet = {};
+        let objRet = Array.isArray(obj) ? [] : {};
 
         if (obj.nestedStats) {
             objRet = obj.nestedStats;
             return reduceNested(objRet);
         }
-        if (obj.entries) {
+
+        // .entries evaluates to true if obj is array
+        if (!Array.isArray(obj) && obj.entries) {
             Object.keys(obj.entries).forEach((k) => {
                 const v = obj.entries[k];
 
@@ -38,12 +40,19 @@ function normalizeData(data) {
             });
             return reduceNested(objRet);
         }
-        if (typeof obj === 'object') {
-            Object.keys(obj).forEach((k) => {
-                const v = obj[k];
 
-                objRet[k] = reduceNested(v);
-            });
+        if (typeof obj === 'object') {
+            if (Array.isArray(obj)) {
+                obj.forEach((i) => {
+                    objRet.push(reduceNested(i));
+                });
+            } else {
+                Object.keys(obj).forEach((k) => {
+                    const v = obj[k];
+                    objRet[k] = reduceNested(v);
+                });
+            }
+
             return objRet;
         }
 
