@@ -10,17 +10,29 @@
 
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 
+// NOTE: instead of setInterval could use REST API task scheduler
+// '/mgmt/shared/task-scheduler/scheduler'
+
 /**
- * Scheduler
+ * Start poller
  *
  * @returns {Object}
  */
-function scheduler(func, intervalInS) {
-    // note: instead of setInterval should this use REST API task scheduler?
-    // '/mgmt/shared/task-scheduler/scheduler'
-    setInterval(func, intervalInS * 1000);
+function start(func, intervalInS) {
+    return setInterval(func, intervalInS * 1000);
+}
+
+/**
+ * Update poller
+ *
+ * @returns {Object}
+ */
+function update(setIntervalId, func, intervalInS) {
+    clearInterval(setIntervalId);
+    return start(func, intervalInS);
 }
 
 module.exports = {
-    schedule: scheduler
+    start: start, // eslint-disable-line object-shorthand
+    update: update // eslint-disable-line object-shorthand
 };

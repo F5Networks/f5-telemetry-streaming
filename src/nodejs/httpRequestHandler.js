@@ -11,7 +11,14 @@
 const http = require('http');
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 
-const get = function (uri) {
+/**
+ * Perform GET request
+ *
+ * @param {String} uri - uri to use
+ *
+ * @returns {Object}
+ */
+function get(uri) {
     const options = {
         host: 'localhost',
         port: 8100,
@@ -38,7 +45,7 @@ const get = function (uri) {
         });
         req.end();
     });
-};
+}
 
 module.exports = {
     get: get // eslint-disable-line object-shorthand

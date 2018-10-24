@@ -1,0 +1,24 @@
+{
+    "$id": "telemetry-svcs-main",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry services title",
+    "description": "Telemetry services description",
+    "type": "object",
+    "properties": {
+       "class": {
+           "title": "Class",
+           "description": "Indicates the structure of this request",
+           "type": "string",
+           "enum": [ "Telemetry" ]
+       },
+       "interval": {
+           "title": "Collection Interval",
+           "description": "" ,
+           "type": "integer",
+           "minimum": 10,
+           "maximum": 600,
+           "default": 30
+       }
+    },
+    "required": [ "class" ]
+}
