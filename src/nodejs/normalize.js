@@ -29,7 +29,7 @@ function normalizeData(data) {
         }
 
         // .entries evaluates to true if obj is array
-        if (!Array.isArray(obj) && obj.entries) {
+        if (obj.entries && !Array.isArray(obj)) {
             Object.keys(obj.entries).forEach((k) => {
                 const v = obj.entries[k];
 

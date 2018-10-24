@@ -1,20 +1,28 @@
 {
     "stats": {
+        "version": {
+            "uri": "/mgmt/tm/sys/version"
+        },
+        "ready": {
+            "uri": "/mgmt/tm/sys/ready"
+        },
+        "syncStatus": {
+            "uri": "/mgmt/tm/cm/sync-status"
+        },
+        "failoverStatus": {
+            "uri": "/mgmt/tm/cm/failover-status"
+        },
+        "netInterfaceStats": {
+            "uri": "/mgmt/tm/net/interface/stats"
+        },
         "tmmInfo": {
             "uri": "/mgmt/tm/sys/tmm-info"
         },
         "tmmTraffic": {
             "uri": "/mgmt/tm/sys/tmm-traffic"
         },
-        "deviceVersion": {
-            "uri": "/mgmt/tm/sys/version"
-        },
-        "deviceSyncStatus": {
-            "uri": "/mgmt/tm/cm/sync-status"
-        },
-        "deviceNetInterface": {
-            "uri": "/mgmt/tm/net/interface",
-            "normalize": true
+        "virtualServerStats": {
+            "uri": "/mgmt/tm/ltm/virtual/stats"
         }
     }
 }

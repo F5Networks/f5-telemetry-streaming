@@ -8,13 +8,13 @@
 
 'use strict';
 
-const logger = require('./logger.js');
-const scheduler = require('./scheduler.js');
-const systemStats = require('./systemStatsHandler.js');
+const logger = require('../logger.js');
+const scheduler = require('../scheduler.js');
+const systemStats = require('../systemStatsHandler.js');
 
 class RestWorker {
     constructor() {
-        this.WORKER_URI_PATH = 'shared/telemetry';
+        this.WORKER_URI_PATH = 'shared/telemetry/stats';
         this.isPassThrough = true;
         this.isPublic = true;
     }
