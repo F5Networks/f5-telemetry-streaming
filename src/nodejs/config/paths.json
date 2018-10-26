@@ -1,0 +1,28 @@
+{
+    "endpoints": [
+        {
+            "endpoint": "/mgmt/tm/sys/version"
+        },
+        {
+            "endpoint": "/mgmt/tm/sys/ready"
+        },
+        {
+            "endpoint": "/mgmt/tm/cm/sync-status"
+        },
+        {
+            "endpoint": "/mgmt/tm/cm/failover-status"
+        },
+        {
+            "endpoint": "/mgmt/tm/net/interface/stats"
+        },
+        {
+            "endpoint": "/mgmt/tm/sys/tmm-info"
+        },
+        {
+            "endpoint": "/mgmt/tm/sys/tmm-traffic"
+        },
+        {
+            "endpoint": "/mgmt/tm/ltm/virtual/stats"
+        }
+    ]
+}

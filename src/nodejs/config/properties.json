@@ -1,38 +1,34 @@
 {
     "stats": {
         "version": {
-            "uri": "/mgmt/tm/sys/version",
-            "key": "sys/version/0..Version..description" 
+            "key": "/mgmt/tm/sys/version::sys/version/0::Version::description"
         },
         "configReady": {
-            "uri": "/mgmt/tm/sys/ready",
-            "key": "sys/ready/0..configReady..description"
+            "key": "/mgmt/tm/sys/ready::sys/ready/0::configReady::description"
         },
         "licenseReady": {
-            "uri": "/mgmt/tm/sys/ready",
-            "key": "sys/ready/0..licenseReady..description"
+            "key": "/mgmt/tm/sys/ready::sys/ready/0::licenseReady::description"
         },
         "provisionReady": {
-            "uri": "/mgmt/tm/sys/ready",
-            "key": "sys/ready/0..provisionReady..description"
+            "key": "/mgmt/tm/sys/ready::sys/ready/0::provisionReady::description"
         },
         "syncStatus": {
-            "uri": "/mgmt/tm/cm/sync-status"
+            "key": "/mgmt/tm/cm/sync-status::cm/sync-status/0::color::description"
         },
         "failoverStatus": {
-            "uri": "/mgmt/tm/cm/failover-status"
+            "key": "/mgmt/tm/cm/failover-status::cm/failover-status/0::color::description"
         },
         "netInterfaceStats": {
-            "uri": "/mgmt/tm/net/interface/stats"
+            "key": "/mgmt/tm/net/interface/stats"
         },
         "tmmInfo": {
-            "uri": "/mgmt/tm/sys/tmm-info"
+            "key": "/mgmt/tm/sys/tmm-info"
         },
         "tmmTraffic": {
-            "uri": "/mgmt/tm/sys/tmm-traffic"
+            "key": "/mgmt/tm/sys/tmm-traffic"
         },
         "virtualServerStats": {
-            "uri": "/mgmt/tm/ltm/virtual/stats"
+            "key": "/mgmt/tm/ltm/virtual/stats"
         }
     }
 }

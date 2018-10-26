@@ -11,19 +11,23 @@
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 const http = require('./httpRequestHandler.js');
 const normalize = require('./normalize.js');
-const pStats = require('./config/properties.json').stats;
+const properties = require('./config/properties.json');
+const paths = require('./config/paths.json');
+
+const pStats = properties.stats;
 
 /**
  * Get a specific stat from the REST API
  *
- * @returns {Object} Promise which is resolved with the normalized statistic
+ * @param {Object} uri - uri to get stat data from
+ *
+ * @returns {Object} Promise which is resolved with the normalized stat
  */
-function getStat(name, stat) {
-    return http.get(stat.uri)
+function getStat(uri) {
+    return http.get(uri)
         .then((data) => {
-            // defaults true
-            const normalizedData = stat.normalize === false ? data : normalize.stats(data, stat);
-            return { name, data: normalizedData };
+            const ret = { name: uri, data };
+            return ret;
         })
         .catch((err) => {
             const msg = `getStat: ${err}`;
@@ -32,20 +36,59 @@ function getStat(name, stat) {
 }
 
 /**
- * Collect statistics based on list provided in properties object
+ * Get a list of stats
  *
- * @returns {Object} Promise which is resolved with an array of statistics
+ * @param {Object} uris - list of uris formatted like so: { endpoint: 'uri' }
+ *
+ * @returns {Object} Promise which is resolved with a hash of stats
  */
-function collectStats() {
+function getStats(uris) {
     const promises = [];
-    // TODO: dedupe HTTP Get against same uri
-    Object.keys(pStats).forEach((k) => {
-        promises.push(getStat(k, pStats[k]));
+    uris.forEach((i) => {
+        promises.push(getStat(i.endpoint));
     });
+
     return Promise.all(promises)
         .then((data) => {
+            const ret = {};
+            data.forEach((i) => {
+                ret[i.name] = i.data;
+            });
+            return ret;
+        })
+        .catch((err) => {
+            const msg = `getStats: ${err}`;
+            throw new Error(msg);
+        });
+}
+
+/**
+ * Collect stats based on list provided in properties
+ *
+ * @returns {Object} Promise which is resolved with a hash of stats
+ */
+function collectStats() {
+    return getStats(paths.endpoints)
+        .then((data) => {
+            const ret = {};
+            Object.keys(pStats).forEach((k) => {
+                const stat = pStats[k];
+                const sep = '::';
+                const splitKeys = stat.key.split(sep);
+
+                const endpoint = splitKeys[0];
+                // throw friendly error if endpoint was not previously defined in paths.json
+                if (endpoint in data === false) { throw new Error(`Endpoint not defined in file: ${endpoint}`); }
+
+                // remove uri from splitKeys
+                splitKeys.shift();
+                const key = splitKeys.length > 0 ? splitKeys.join(sep) : undefined;
+
+                ret[k] = normalize.stat(data[endpoint], { key });
+            });
+
             logger.debug('collectStats() success');
-            return data;
+            return ret;
         })
         .catch((err) => {
             const msg = `collectStats error: ${err}`;

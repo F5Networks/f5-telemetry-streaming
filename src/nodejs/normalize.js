@@ -19,8 +19,9 @@ const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
  * @returns {Object} Promise which is resolved with the data
  */
 function getDataByKey(data, key) {
-    const keys = key.split('..');
+    const keys = key.split('::');
     let ret = data;
+
     keys.forEach((k) => {
         try {
             ret = ret[k];
@@ -83,7 +84,7 @@ function reduceData(obj) {
  *
  * @param {Object} data          - data to normalize
  * @param {Object} options       - options
- * @param {Object} [options.key] - Key to drill down into data, using defined notation
+ * @param {Object} [options.key] - Key to drill down into data, using a defined notation
  *
  * @returns {Object} Promise which is resolved with the normalized data
  */
@@ -94,5 +95,5 @@ function normalizeData(data, options) {
 }
 
 module.exports = {
-    stats: normalizeData
+    stat: normalizeData
 };
