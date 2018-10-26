@@ -1,10 +1,20 @@
 {
     "stats": {
         "version": {
-            "uri": "/mgmt/tm/sys/version"
+            "uri": "/mgmt/tm/sys/version",
+            "key": "sys/version/0..Version..description" 
         },
-        "ready": {
-            "uri": "/mgmt/tm/sys/ready"
+        "configReady": {
+            "uri": "/mgmt/tm/sys/ready",
+            "key": "sys/ready/0..configReady..description"
+        },
+        "licenseReady": {
+            "uri": "/mgmt/tm/sys/ready",
+            "key": "sys/ready/0..licenseReady..description"
+        },
+        "provisionReady": {
+            "uri": "/mgmt/tm/sys/ready",
+            "key": "sys/ready/0..provisionReady..description"
         },
         "syncStatus": {
             "uri": "/mgmt/tm/cm/sync-status"

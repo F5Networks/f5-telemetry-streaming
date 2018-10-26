@@ -22,7 +22,7 @@ function getStat(name, stat) {
     return http.get(stat.uri)
         .then((data) => {
             // defaults true
-            const normalizedData = stat.normalize === false ? data : normalize.stats(data);
+            const normalizedData = stat.normalize === false ? data : normalize.stats(data, stat);
             return { name, data: normalizedData };
         })
         .catch((err) => {
@@ -38,6 +38,7 @@ function getStat(name, stat) {
  */
 function collectStats() {
     const promises = [];
+    // TODO: dedupe HTTP Get against same uri
     Object.keys(pStats).forEach((k) => {
         promises.push(getStat(k, pStats[k]));
     });
