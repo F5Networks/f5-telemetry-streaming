@@ -23,6 +23,11 @@
         },
         {
             "endpoint": "/mgmt/tm/ltm/virtual/stats"
+        },
+        {
+            "endpoint": "/mgmt/tm/util/bash",
+            "body": "{ \"command\": \"run\", \"utilCmdArgs\": \"-c \\\"cat /VERSION | grep -i sequence | cut -d ':' -f 2 | tr -d '[:space:]'\\\"\" }",
+            "name": "sequenceFromBash"
         }
     ]
 }

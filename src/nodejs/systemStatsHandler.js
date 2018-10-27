@@ -19,14 +19,22 @@ const pStats = properties.stats;
 /**
  * Get a specific stat from the REST API
  *
- * @param {Object} uri - uri to get stat data from
+ * @param {Object} uri            - uri to get stat data from
+ * @param {Object} options        - options to provide
+ * @param {Object} [options.body] - body to send during get stat
+ * @param {Object} [options.name] - name of key to store as, will override just using the uri
  *
  * @returns {Object} Promise which is resolved with the normalized stat
  */
-function getStat(uri) {
-    return http.get(uri)
+function getStat(uri, options) {
+    // for now assume if body is provided we want to POST
+    const promise = options.body ? http.post(uri, options.body) : http.get(uri);
+
+    return Promise.resolve(promise)
         .then((data) => {
-            const ret = { name: uri, data };
+            // use uri unless explicit name is provided
+            const nameToUse = options.name ? options.name : uri;
+            const ret = { name: nameToUse, data };
             return ret;
         })
         .catch((err) => {
@@ -45,7 +53,7 @@ function getStat(uri) {
 function getStats(uris) {
     const promises = [];
     uris.forEach((i) => {
-        promises.push(getStat(i.endpoint));
+        promises.push(getStat(i.endpoint, { body: i.body, name: i.name }));
     });
 
     return Promise.all(promises)

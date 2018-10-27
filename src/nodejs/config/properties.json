@@ -3,6 +3,9 @@
         "version": {
             "key": "/mgmt/tm/sys/version::sys/version/0::Version::description"
         },
+        "versionSequence": {
+            "key": "sequenceFromBash::commandResult"
+        },
         "configReady": {
             "key": "/mgmt/tm/sys/ready::sys/ready/0::configReady::description"
         },
