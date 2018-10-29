@@ -12,7 +12,7 @@
            "enum": [ "Telemetry" ]
        },
        "interval": {
-           "title": "Collection Interval",
+           "title": "Collection Interval (in seconds)",
            "description": "" ,
            "type": "integer",
            "minimum": 10,

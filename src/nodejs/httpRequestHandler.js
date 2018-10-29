@@ -29,7 +29,7 @@ const defaultOptions = {
  * @returns {Object}
  */
 function get(uri) {
-    const options = defaultOptions;
+    const options = Object.assign({}, defaultOptions);
     options.path = uri;
 
     return new Promise((resolve, reject) => {
@@ -61,7 +61,7 @@ function get(uri) {
  * @returns {Object}
  */
 function post(uri, body) {
-    const options = defaultOptions;
+    const options = Object.assign({}, defaultOptions);
     options.path = uri;
     options.method = 'POST';
 

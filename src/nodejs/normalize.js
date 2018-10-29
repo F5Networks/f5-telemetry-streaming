@@ -26,7 +26,8 @@ function getDataByKey(data, key) {
         try {
             ret = ret[k];
         } catch (e) {
-            throw new Error(`Incorrect dot notation: ${e}`);
+            const msg = `Incorrect dot notation: ${e} data: ${JSON.stringify(data)}`;
+            throw new Error(msg);
         }
     });
     return ret;
