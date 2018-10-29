@@ -9,7 +9,7 @@
 'use strict';
 
 const Ajv = require('ajv');
-const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
+const logger = require('./logger.js');
 const schema = require('./config/schema-main.json');
 
 /**

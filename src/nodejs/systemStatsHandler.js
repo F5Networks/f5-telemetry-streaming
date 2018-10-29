@@ -8,7 +8,8 @@
 
 'use strict';
 
-const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
+const logger = require('./logger.js');
+const constants = require('./constants.js');
 const http = require('./httpRequestHandler.js');
 const normalize = require('./normalize.js');
 const properties = require('./config/properties.json');
@@ -81,18 +82,20 @@ function collectStats() {
             const ret = {};
             Object.keys(pStats).forEach((k) => {
                 const stat = pStats[k];
-                const sep = '::';
-                const splitKeys = stat.key.split(sep);
-
+                const splitKeys = stat.key.split(constants.STATS_KEY_SEP);
                 const endpoint = splitKeys[0];
                 // throw friendly error if endpoint was not previously defined in paths.json
                 if (endpoint in data === false) { throw new Error(`Endpoint not defined in file: ${endpoint}`); }
 
                 // remove uri from splitKeys
                 splitKeys.shift();
-                const key = splitKeys.length > 0 ? splitKeys.join(sep) : undefined;
+                const key = splitKeys.length > 0 ? splitKeys.join(constants.STATS_KEY_SEP) : undefined;
+                const eData = data[endpoint];
 
-                ret[k] = normalize.stat(data[endpoint], { key });
+                const options = { key, filterByKeys: stat.filterByKeys };
+                // normalize unless normalize flag is specifically set to false
+                const statData = stat.normalize === false ? eData : normalize.stat(eData, options);
+                ret[k] = statData;
             });
 
             logger.debug('collectStats() success');

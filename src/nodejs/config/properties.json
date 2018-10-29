@@ -1,37 +1,42 @@
 {
     "stats": {
         "version": {
-            "key": "/mgmt/tm/sys/version::sys/version/0::Version::description"
+            "key": "/mgmt/tm/sys/version::sys/version/0::Version",
+            "normalize": true
         },
         "versionSequence": {
             "key": "sequenceFromBash::commandResult"
         },
         "configReady": {
-            "key": "/mgmt/tm/sys/ready::sys/ready/0::configReady::description"
+            "key": "/mgmt/tm/sys/ready::sys/ready/0::configReady"
         },
         "licenseReady": {
-            "key": "/mgmt/tm/sys/ready::sys/ready/0::licenseReady::description"
+            "key": "/mgmt/tm/sys/ready::sys/ready/0::licenseReady"
         },
         "provisionReady": {
-            "key": "/mgmt/tm/sys/ready::sys/ready/0::provisionReady::description"
+            "key": "/mgmt/tm/sys/ready::sys/ready/0::provisionReady"
         },
         "syncStatus": {
-            "key": "/mgmt/tm/cm/sync-status::cm/sync-status/0::color::description"
+            "key": "/mgmt/tm/cm/sync-status::cm/sync-status/0"
         },
         "failoverStatus": {
-            "key": "/mgmt/tm/cm/failover-status::cm/failover-status/0::color::description"
+            "key": "/mgmt/tm/cm/failover-status::cm/failover-status/0"
         },
         "netInterfaceStats": {
-            "key": "/mgmt/tm/net/interface/stats"
+            "key": "/mgmt/tm/net/interface/stats",
+            "filterByKeys": [ "/stats", "counters.bitsIn", "counters.bitsOut" ]
         },
         "tmmInfo": {
-            "key": "/mgmt/tm/sys/tmm-info"
+            "key": "/mgmt/tm/sys/tmm-info",
+            "filterByKeys": [ "/tmm-info", "oneMinAvgUsageRatio" ]
         },
         "tmmTraffic": {
-            "key": "/mgmt/tm/sys/tmm-traffic"
+            "key": "/mgmt/tm/sys/tmm-traffic",
+            "filterByKeys": [ "/tmm-traffic", "clientSideTraffic.bitsIn", "clientSideTraffic.bitsOut", "clientSideTraffic.pktsIn", "clientSideTraffic.pktsOut" ]
         },
         "virtualServerStats": {
-            "key": "/mgmt/tm/ltm/virtual/stats"
+            "key": "/mgmt/tm/ltm/virtual/stats",
+            "filterByKeys": [ "/stats", "clientside.bitsIn", "clientside.bitsOut", "clientside.pktsIn", "clientside.pktsOut", "clientside.curConns", "availabilityState",  "enabledState", "destination" ]
         }
     }
 }

@@ -9,6 +9,7 @@
 'use strict';
 
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
+const constants = require('./constants.js');
 
 /**
  * Get data using provided key
@@ -19,17 +20,52 @@ const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
  * @returns {Object} Promise which is resolved with the data
  */
 function getDataByKey(data, key) {
-    const keys = key.split('::');
+    const keys = key.split(constants.STATS_KEY_SEP);
     let ret = data;
 
-    keys.forEach((k) => {
-        try {
-            ret = ret[k];
-        } catch (e) {
-            const msg = `Incorrect dot notation: ${e} data: ${JSON.stringify(data)}`;
+    keys.forEach((i) => {
+        if (typeof ret === 'object' && i in ret) {
+            ret = ret[i];
+        } else {
+            const msg = `Incorrect dot notation in key: ${key} data: ${JSON.stringify(data)}`;
             throw new Error(msg);
         }
     });
+    return ret;
+}
+
+/**
+ * Filter data based on a list of keys
+ *
+ * @param {Object} data - data
+ * @param {Object} keys - list of keys to filter data by
+ *
+ * @returns {Object} Promise which is resolved with the data
+ */
+function filterDataByKeys(data, keys) {
+    const ret = data;
+
+    if (typeof data === 'object') {
+        // for now just ignore arrays
+        if (Array.isArray(data)) {
+            return ret;
+        }
+
+        Object.keys(data).forEach((k) => {
+            let deleteKey = true;
+            keys.forEach((i) => {
+                if (k.includes(i)) {
+                    deleteKey = false;
+                }
+            });
+            if (deleteKey) {
+                delete ret[k];
+            } else {
+                ret[k] = filterDataByKeys(ret[k], keys);
+            }
+        });
+    }
+
     return ret;
 }
 
@@ -43,9 +79,13 @@ function getDataByKey(data, key) {
 function reduceData(obj) {
     let objRet = Array.isArray(obj) ? [] : {};
 
-    if (obj.nestedStats) {
-        objRet = obj.nestedStats;
-        return reduceData(objRet);
+    // reduce down the nested structure for some well known keys
+    const keysToReduce = ['nestedStats', 'value', 'description', 'color'];
+    for (let i = 0; i < keysToReduce.length; i += 1) {
+        const item = obj[keysToReduce[i]];
+        if (item !== undefined) {
+            return reduceData(item);
+        }
     }
 
     // .entries evaluates to true if obj is array
@@ -61,6 +101,7 @@ function reduceData(obj) {
         return reduceData(objRet);
     }
 
+    // simply include and then recurse
     if (typeof obj === 'object') {
         if (Array.isArray(obj)) {
             obj.forEach((i) => {
@@ -75,7 +116,7 @@ function reduceData(obj) {
 
         return objRet;
     }
-
+    // simply return if no previous return
     objRet = obj;
     return objRet;
 }
@@ -83,16 +124,21 @@ function reduceData(obj) {
 /**
  * Normalize data - standardize and reduce complexity
  *
- * @param {Object} data          - data to normalize
- * @param {Object} options       - options
- * @param {Object} [options.key] - Key to drill down into data, using a defined notation
+ * @param {Object} data                   - data to normalize
+ * @param {Object} options                - options
+ * @param {Object} [options.key]          - key to drill down into data, using a defined notation
+ * @param {Object} [options.filterByKeys] - list of keys to filter data further
  *
  * @returns {Object} Promise which is resolved with the normalized data
  */
 function normalizeData(data, options) {
-    const reducedData = reduceData(data);
+    let reducedData = reduceData(data);
 
-    return options.key ? getDataByKey(reducedData, options.key) : reducedData;
+    // additional filtering may be required
+    reducedData = options.key ? getDataByKey(reducedData, options.key) : reducedData;
+    reducedData = options.filterByKeys ? filterDataByKeys(reducedData, options.filterByKeys) : reducedData;
+
+    return reducedData;
 }
 
 module.exports = {
