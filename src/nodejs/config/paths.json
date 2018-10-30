@@ -1,6 +1,15 @@
 {
     "endpoints": [
         {
+            "endpoint": "/mgmt/tm/sys/global-settings"
+        },
+        {
+            "endpoint": "/mgmt/tm/cm/device"
+        },
+        {
+            "endpoint": "/mgmt/tm/sys/hardware"
+        },
+        {
             "endpoint": "/mgmt/tm/sys/version"
         },
         {
@@ -32,6 +41,9 @@
         },
         {
             "endpoint": "/mgmt/tm/ltm/virtual/stats"
+        },
+        {
+            "endpoint": "/mgmt/tm/ltm/pool/stats"
         },
         {
             "endpoint": "/mgmt/tm/util/bash",

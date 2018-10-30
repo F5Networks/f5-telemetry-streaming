@@ -94,8 +94,8 @@ function collectStats() {
 
                 const options = {
                     key,
-                    filterByKeys: stat.filterByKeys,
-                    renameKeysByPattern: stat.renameKeysByPattern,
+                    filterByKeys: stat.filterKeys,
+                    renameKeysByPattern: stat.renameKeys,
                     convertArrayToMap: stat.convertArrayToMap
                 };
                 // normalize unless normalize flag is specifically set to false

@@ -146,11 +146,11 @@ function renameKeysInData(data, patterns) {
 function reduceData(data) {
     let ret = Array.isArray(data) ? [] : {};
 
-    // reduce down the nested structure for some well known keys
+    // reduce down the nested structure for some well known keys (only one in object)
     const keysToReduce = ['nestedStats', 'value', 'description', 'color'];
     for (let i = 0; i < keysToReduce.length; i += 1) {
         const item = data[keysToReduce[i]];
-        if (item !== undefined) {
+        if (item !== undefined && Object.keys(data).length === 1) {
             return reduceData(item);
         }
     }
@@ -207,7 +207,7 @@ function normalizeData(data, options) {
     // shorten some options
     const catm = options.convertArrayToMap;
 
-    // additional filtering may be required
+    // additional normalization may be required - the order here matters
     ret = options.key ? getDataByKey(ret, options.key) : ret;
     ret = catm ? convertArrayToMap(ret, catm.keyName, { keyPrefix: catm.keyNamePrefix }) : ret;
     ret = options.filterByKeys ? filterDataByKeys(ret, options.filterByKeys) : ret;

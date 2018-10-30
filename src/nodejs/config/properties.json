@@ -1,5 +1,18 @@
 {
     "stats": {
+        "hostname": {
+            "key": "/mgmt/tm/sys/global-settings::hostname"
+        },
+        "location": {
+            "key": "/mgmt/tm/cm/device::items",
+            "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" },
+            "filterKeys": [ "/name", "location" ],
+            "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 } },
+            "comment": "have to get specific device values inside hostname key, which is dynamic, use this for now"
+        },
+        "baseMac": {
+            "key": "/mgmt/tm/sys/hardware::sys/hardware/platform::sys/hardware/platform/0::baseMac"
+        },
         "version": {
             "key": "/mgmt/tm/sys/version::sys/version/0::Version",
             "normalize": true
@@ -16,46 +29,63 @@
         "provisionReady": {
             "key": "/mgmt/tm/sys/ready::sys/ready/0::provisionReady"
         },
+        "syncMode": {
+            "key": "/mgmt/tm/cm/sync-status::cm/sync-status/0::mode"
+        },
+        "syncColor": {
+            "key": "/mgmt/tm/cm/sync-status::cm/sync-status/0::color"
+        },
         "syncStatus": {
-            "key": "/mgmt/tm/cm/sync-status::cm/sync-status/0"
+            "key": "/mgmt/tm/cm/sync-status::cm/sync-status/0::status"
+        },
+        "syncSummary": {
+            "key": "/mgmt/tm/cm/sync-status::cm/sync-status/0::summary"
         },
         "failoverStatus": {
-            "key": "/mgmt/tm/cm/failover-status::cm/failover-status/0"
+            "key": "/mgmt/tm/cm/failover-status::cm/failover-status/0::status"
+        },
+        "failoverColor": {
+            "key": "/mgmt/tm/cm/failover-status::cm/failover-status/0::color"
         },
         "cpu": {
             "key": "/mgmt/tm/sys/host-info::sys/host-info/0::sys/hostInfo/0/cpuInfo",
-            "filterByKeys": [ "/cpuInfo", "fiveSecAvgRatio", "oneMinAvgUser", "oneMinAvgSystem" ],
-            "renameKeysByPattern": { "/cpuInfo": { "pattern": "cpuInfo\/(.*)", "group": 1 } }
+            "filterKeys": [ "/cpuInfo", "fiveSecAvgRatio", "oneMinAvgUser", "oneMinAvgSystem" ],
+            "renameKeys": { "/cpuInfo": { "pattern": "cpuInfo\/(.*)", "group": 1 } }
         },
         "memory": {
             "key": "/mgmt/tm/sys/memory::sys/memory/memory-host::sys/memory/memory-host/0",
-            "filterByKeys": [ "memoryTotal", "memoryFree", "tmmMemoryTotal", "tmmMemoryFree" ]
+            "filterKeys": [ "memoryTotal", "memoryFree", "tmmMemoryTotal", "tmmMemoryFree" ]
         },
         "provisionState": {
             "key": "/mgmt/tm/sys/provision::items",
-            "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "module/" },
-            "filterByKeys": [ "module/", "level" ],
-            "renameKeysByPattern": { "module/": { "pattern": "module\/(.*)", "group": 1 } }
+            "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" },
+            "filterKeys": [ "name/", "level" ],
+            "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 } }
         },
         "networkInterfaces": {
             "key": "/mgmt/tm/net/interface/stats",
-            "filterByKeys": [ "/stats", "counters.bitsIn", "counters.bitsOut" ],
-            "renameKeysByPattern": { "net/interface": "([0-9]\\.[0-9]|(?!\/)mgmt(?=\/))" }
+            "filterKeys": [ "/stats", "counters.bitsIn", "counters.bitsOut" ],
+            "renameKeys": { "net/interface": "([0-9]\\.[0-9]|(?!\/)mgmt(?=\/))" }
         },
         "tmmCpu": {
             "key": "/mgmt/tm/sys/tmm-info",
-            "filterByKeys": [ "/tmm-info", "oneMinAvgUsageRatio" ],
-            "renameKeysByPattern": { "sys/tmm-info": "([0-9]\\.[0-9])" }
+            "filterKeys": [ "/tmm-info", "oneMinAvgUsageRatio" ],
+            "renameKeys": { "sys/tmm-info": "([0-9]\\.[0-9])" }
         },
         "tmmTraffic": {
             "key": "/mgmt/tm/sys/tmm-traffic",
-            "filterByKeys": [ "/tmm-traffic", "clientSideTraffic.bitsIn", "clientSideTraffic.bitsOut", "clientSideTraffic.pktsIn", "clientSideTraffic.pktsOut" ],
-            "renameKeysByPattern": { "sys/tmm-traffic": "([0-9]\\.[0-9])" }
+            "filterKeys": [ "/tmm-traffic", "clientSideTraffic.bitsIn", "clientSideTraffic.bitsOut", "clientSideTraffic.pktsIn", "clientSideTraffic.pktsOut" ],
+            "renameKeys": { "sys/tmm-traffic": "([0-9]\\.[0-9])" }
         },
         "virtualServerStats": {
             "key": "/mgmt/tm/ltm/virtual/stats",
-            "filterByKeys": [ "/stats", "clientside.bitsIn", "clientside.bitsOut", "clientside.pktsIn", "clientside.pktsOut", "clientside.curConns", "availabilityState",  "enabledState", "destination" ],
-            "renameKeysByPattern": { "ltm/virtual": { "pattern": "virtual\/(.*)\/", "group": 1 } }
+            "filterKeys": [ "/stats", "clientside.bitsIn", "clientside.bitsOut", "clientside.pktsIn", "clientside.pktsOut", "clientside.curConns", "availabilityState",  "enabledState", "destination" ],
+            "renameKeys": { "ltm/virtual": { "pattern": "virtual\/(.*)\/", "group": 1 } }
+        },
+        "poolStats": {
+            "key": "/mgmt/tm/ltm/pool/stats",
+            "filterKeys": [ "/stats", "serverside.bitsIn", "serverside.bitsOut", "serverside.pktsIn", "serverside.pktsOut", "serverside.curConns", "availabilityState",  "enabledState" ],
+            "renameKeys": { "ltm/pool": { "pattern": "pool\/(.*)\/", "group": 1 } }
         }
     }
 }
