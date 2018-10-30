@@ -5,20 +5,64 @@
     "description": "Telemetry services description",
     "type": "object",
     "properties": {
-       "class": {
-           "title": "Class",
-           "description": "Indicates the structure of this request",
-           "type": "string",
-           "enum": [ "Telemetry" ]
-       },
-       "interval": {
-           "title": "Collection Interval (in seconds)",
-           "description": "" ,
-           "type": "integer",
-           "minimum": 10,
-           "maximum": 600,
-           "default": 30
-       }
+        "class": {
+            "title": "Class",
+            "description": "Indicates the structure of this request",
+            "type": "string",
+            "enum": [ "Telemetry" ]
+        },
+        "interval": {
+            "title": "Collection Interval (in seconds)",
+            "description": "" ,
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 600,
+            "default": 30
+        },
+        "consumers": {
+            "title": "Analytics data consumers",
+            "description": "",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "minItems": 1,
+                "uniqueItems": true,
+                "properties": {
+                    "consumer": {
+                        "title": "Consumer type",
+                        "description": "",
+                        "type": "string",
+                        "enum": [
+                            "Splunk",
+                            "Sumo"
+                        ]
+                    },
+                    "api_key": {
+                        "title": "API auth token/key",
+                        "description": "",
+                        "type": "string"
+                    },
+                    "destination": {
+                        "title": "Destination host/address",
+                        "description": "proto://address[:port]",
+                        "type": "string"
+                    },
+                    "api_path": {
+                        "title": "API URL path to post data to",
+                        "description": "/path/to/post/data",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "consumer",
+                    "api_key",
+                    "destination"
+                ]
+            }
+        }
     },
-    "required": [ "class" ]
+    "required": [
+        "class",
+        "consumers"
+    ]
 }
