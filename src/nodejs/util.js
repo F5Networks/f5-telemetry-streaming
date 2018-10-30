@@ -26,5 +26,5 @@ function restOperationResponder(restOperation, status, body) {
 }
 
 module.exports = {
-    restOperationResponder: restOperationResponder // eslint-disable-line object-shorthand
+    restOperationResponder
 };

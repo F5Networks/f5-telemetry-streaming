@@ -54,6 +54,7 @@ function filterDataByKeys(data, keys) {
         Object.keys(data).forEach((k) => {
             let deleteKey = true;
             keys.forEach((i) => {
+                // simple includes for now - no exact match
                 if (k.includes(i)) {
                     deleteKey = false;
                 }
@@ -70,77 +71,120 @@ function filterDataByKeys(data, keys) {
 }
 
 /**
+ * Rename keys in object using regex pattern
+ *
+ * @param {Object} data     - data
+ * @param {Object} patterns - map of patterns
+ *
+ * @returns {Object} Promise which is resolved with the data
+ */
+function renameKeysInData(data, patterns) {
+    let ret = Array.isArray(data) ? [] : {};
+
+    // only check non array objects
+    if (typeof data === 'object' && !Array.isArray(data)) {
+        Object.keys(data).forEach((k) => {
+            let renameKey = false;
+            let renamedKey;
+            Object.keys(patterns).forEach((pK) => {
+                // check if key contains base match pattern
+                if (k.includes(pK)) {
+                    // now check if regex pattern matches
+                    const checkForMatch = k.match(patterns[pK]);
+                    if (checkForMatch) {
+                        renameKey = true;
+                        renamedKey = checkForMatch[0];
+                    }
+                }
+            });
+            if (renameKey) {
+                ret[renamedKey] = renameKeysInData(data[k], patterns);
+            } else {
+                ret[k] = renameKeysInData(data[k], patterns);
+            }
+        });
+        return ret;
+    }
+
+    ret = data;
+    return ret;
+}
+
+/**
  * Standardize and reduce complexity of provided data
  *
- * @param {Object} obj - object to reduce
+ * @param {Object} data - data to reduce
  *
  * @returns {Object} Promise which is resolved with the reduced object
  */
-function reduceData(obj) {
-    let objRet = Array.isArray(obj) ? [] : {};
+function reduceData(data) {
+    let ret = Array.isArray(data) ? [] : {};
 
     // reduce down the nested structure for some well known keys
     const keysToReduce = ['nestedStats', 'value', 'description', 'color'];
     for (let i = 0; i < keysToReduce.length; i += 1) {
-        const item = obj[keysToReduce[i]];
+        const item = data[keysToReduce[i]];
         if (item !== undefined) {
             return reduceData(item);
         }
     }
 
-    // .entries evaluates to true if obj is array
-    if (obj.entries && !Array.isArray(obj)) {
-        Object.keys(obj.entries).forEach((k) => {
-            const v = obj.entries[k];
+    // .entries evaluates to true if data is array
+    if (data.entries && !Array.isArray(data)) {
+        Object.keys(data.entries).forEach((k) => {
+            const v = data.entries[k];
 
             // child entry keys may look like https://localhost/mgmt/tm/sys/tmm-info/0.0/stats,
             // we should simplify this somewhat
             const kM = k.replace('https://localhost/', '').replace('mgmt/tm/', '');
-            objRet[kM] = v;
+            ret[kM] = v;
         });
-        return reduceData(objRet);
+        return reduceData(ret);
     }
 
     // simply include and then recurse
-    if (typeof obj === 'object') {
-        if (Array.isArray(obj)) {
-            obj.forEach((i) => {
-                objRet.push(reduceData(i));
+    if (typeof data === 'object') {
+        if (Array.isArray(data)) {
+            data.forEach((i) => {
+                ret.push(reduceData(i));
             });
         } else {
-            Object.keys(obj).forEach((k) => {
-                const v = obj[k];
-                objRet[k] = reduceData(v);
+            Object.keys(data).forEach((k) => {
+                const v = data[k];
+                ret[k] = reduceData(v);
             });
         }
 
-        return objRet;
+        return ret;
     }
-    // simply return if no previous return
-    objRet = obj;
-    return objRet;
+    // base case - just return
+    ret = data;
+    return ret;
 }
 
 /**
  * Normalize data - standardize and reduce complexity
  *
- * @param {Object} data                   - data to normalize
- * @param {Object} options                - options
- * @param {Object} [options.key]          - key to drill down into data, using a defined notation
- * @param {Object} [options.filterByKeys] - list of keys to filter data further
+ * @param {Object} data                          - data to normalize
+ * @param {Object} options                       - options
+ * @param {Object} [options.key]                 - key to drill down into data, using a defined notation
+ * @param {Object} [options.filterByKeys]        - list of keys to filter data further
+ * @param {Object} [options.renameKeysByPattern] - map of keys to rename by pattern
  *
  * @returns {Object} Promise which is resolved with the normalized data
  */
 function normalizeData(data, options) {
-    let reducedData = reduceData(data);
+    // standard reduce first
+    let ret = reduceData(data);
 
     // additional filtering may be required
-    reducedData = options.key ? getDataByKey(reducedData, options.key) : reducedData;
-    reducedData = options.filterByKeys ? filterDataByKeys(reducedData, options.filterByKeys) : reducedData;
+    ret = options.key ? getDataByKey(ret, options.key) : ret;
+    ret = options.filterByKeys ? filterDataByKeys(ret, options.filterByKeys) : ret;
+    ret = options.renameKeysByPattern ? renameKeysInData(ret, options.renameKeysByPattern) : ret;
 
-    return reducedData;
+    return ret;
 }
 
 module.exports = {
-    stat: normalizeData
+    data: normalizeData
 };

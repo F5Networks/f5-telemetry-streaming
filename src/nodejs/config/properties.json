@@ -24,19 +24,23 @@
         },
         "netInterfaceStats": {
             "key": "/mgmt/tm/net/interface/stats",
-            "filterByKeys": [ "/stats", "counters.bitsIn", "counters.bitsOut" ]
+            "filterByKeys": [ "/stats", "counters.bitsIn", "counters.bitsOut" ],
+            "renameKeysByPattern": { "net/interface": "([0-9]\\.[0-9]|(?!\/)mgmt(?=\/))" }
         },
         "tmmInfo": {
             "key": "/mgmt/tm/sys/tmm-info",
-            "filterByKeys": [ "/tmm-info", "oneMinAvgUsageRatio" ]
+            "filterByKeys": [ "/tmm-info", "oneMinAvgUsageRatio" ],
+            "renameKeysByPattern": { "sys/tmm-info": "([0-9]\\.[0-9])" }
         },
         "tmmTraffic": {
             "key": "/mgmt/tm/sys/tmm-traffic",
-            "filterByKeys": [ "/tmm-traffic", "clientSideTraffic.bitsIn", "clientSideTraffic.bitsOut", "clientSideTraffic.pktsIn", "clientSideTraffic.pktsOut" ]
+            "filterByKeys": [ "/tmm-traffic", "clientSideTraffic.bitsIn", "clientSideTraffic.bitsOut", "clientSideTraffic.pktsIn", "clientSideTraffic.pktsOut" ],
+            "renameKeysByPattern": { "sys/tmm-traffic": "([0-9]\\.[0-9])" }
         },
         "virtualServerStats": {
             "key": "/mgmt/tm/ltm/virtual/stats",
-            "filterByKeys": [ "/stats", "clientside.bitsIn", "clientside.bitsOut", "clientside.pktsIn", "clientside.pktsOut", "clientside.curConns", "availabilityState",  "enabledState", "destination" ]
+            "filterByKeys": [ "/stats", "clientside.bitsIn", "clientside.bitsOut", "clientside.pktsIn", "clientside.pktsOut", "clientside.curConns", "availabilityState",  "enabledState", "destination" ],
+            "renameKeysByPattern": { "ltm/virtual": "((\/)(.*)(?=\/))" }
         }
     }
 }
