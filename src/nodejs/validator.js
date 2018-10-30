@@ -20,7 +20,8 @@ const schema = require('./config/schema-main.json');
  * @returns {Object} Promise which is resolved with the validated schema
  */
 function validateSchema(obj) {
-    const ajv = new Ajv();
+    // allows defaults assigment
+    const ajv = new Ajv({ useDefaults: true });
     const validate = ajv.compile(schema);
     const valid = validate(obj);
 
