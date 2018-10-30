@@ -22,12 +22,27 @@
         "failoverStatus": {
             "key": "/mgmt/tm/cm/failover-status::cm/failover-status/0"
         },
-        "netInterfaceStats": {
+        "cpu": {
+            "key": "/mgmt/tm/sys/host-info::sys/host-info/0::sys/hostInfo/0/cpuInfo",
+            "filterByKeys": [ "/cpuInfo", "fiveSecAvgRatio", "oneMinAvgUser", "oneMinAvgSystem" ],
+            "renameKeysByPattern": { "/cpuInfo": { "pattern": "cpuInfo\/(.*)", "group": 1 } }
+        },
+        "memory": {
+            "key": "/mgmt/tm/sys/memory::sys/memory/memory-host::sys/memory/memory-host/0",
+            "filterByKeys": [ "memoryTotal", "memoryFree", "tmmMemoryTotal", "tmmMemoryFree" ]
+        },
+        "provisionState": {
+            "key": "/mgmt/tm/sys/provision::items",
+            "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "module/" },
+            "filterByKeys": [ "module/", "level" ],
+            "renameKeysByPattern": { "module/": { "pattern": "module\/(.*)", "group": 1 } }
+        },
+        "networkInterfaces": {
             "key": "/mgmt/tm/net/interface/stats",
             "filterByKeys": [ "/stats", "counters.bitsIn", "counters.bitsOut" ],
             "renameKeysByPattern": { "net/interface": "([0-9]\\.[0-9]|(?!\/)mgmt(?=\/))" }
         },
-        "tmmInfo": {
+        "tmmCpu": {
             "key": "/mgmt/tm/sys/tmm-info",
             "filterByKeys": [ "/tmm-info", "oneMinAvgUsageRatio" ],
             "renameKeysByPattern": { "sys/tmm-info": "([0-9]\\.[0-9])" }
@@ -40,7 +55,7 @@
         "virtualServerStats": {
             "key": "/mgmt/tm/ltm/virtual/stats",
             "filterByKeys": [ "/stats", "clientside.bitsIn", "clientside.bitsOut", "clientside.pktsIn", "clientside.pktsOut", "clientside.curConns", "availabilityState",  "enabledState", "destination" ],
-            "renameKeysByPattern": { "ltm/virtual": "((\/)(.*)(?=\/))" }
+            "renameKeysByPattern": { "ltm/virtual": { "pattern": "virtual\/(.*)\/", "group": 1 } }
         }
     }
 }

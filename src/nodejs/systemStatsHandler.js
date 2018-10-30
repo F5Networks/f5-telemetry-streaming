@@ -92,7 +92,12 @@ function collectStats() {
                 const key = splitKeys.length > 0 ? splitKeys.join(constants.STATS_KEY_SEP) : undefined;
                 const eData = data[endpoint];
 
-                const options = { key, filterByKeys: stat.filterByKeys, renameKeysByPattern: stat.renameKeysByPattern };
+                const options = {
+                    key,
+                    filterByKeys: stat.filterByKeys,
+                    renameKeysByPattern: stat.renameKeysByPattern,
+                    convertArrayToMap: stat.convertArrayToMap
+                };
                 // normalize unless normalize flag is specifically set to false
                 const statData = stat.normalize === false ? eData : normalize.data(eData, options);
                 ret[k] = statData;

@@ -35,6 +35,30 @@ function getDataByKey(data, key) {
 }
 
 /**
+ * Convert array to map using provided options
+ *
+ * @param {Object} data                - data
+ * @param {Object} keyName             - key in array containing value to use as key in map
+ * @param {Object} options             - optional arguments
+ * @param {Object} [options.keyPrefix] - prefix for key
+ *
+ * @returns {Object} Promise which is resolved with the data
+ */
+function convertArrayToMap(data, key, options) {
+    const ret = {};
+
+    if (!Array.isArray(data)) {
+        throw new Error(`convertArrayToMap() array required: ${JSON.stringify(data)}`);
+    }
+
+    data.forEach((i) => {
+        const keyName = options.keyPrefix ? `${options.keyPrefix}${i[key]}` : i[key];
+        ret[keyName] = i;
+    });
+    return ret;
+}
+
+/**
  * Filter data based on a list of keys
  *
  * @param {Object} data - data
@@ -89,11 +113,13 @@ function renameKeysInData(data, patterns) {
             Object.keys(patterns).forEach((pK) => {
                 // check if key contains base match pattern
                 if (k.includes(pK)) {
-                    // now check if regex pattern matches
-                    const checkForMatch = k.match(patterns[pK]);
+                    // now check if regex pattern matches - support object with { pattern, group }
+                    const pattern = patterns[pK].pattern ? patterns[pK].pattern : patterns[pK];
+                    const group = patterns[pK].group ? patterns[pK].group : 0;
+                    const checkForMatch = k.match(pattern);
                     if (checkForMatch) {
                         renameKey = true;
-                        renamedKey = checkForMatch[0];
+                        renamedKey = checkForMatch[group];
                     }
                 }
             });
@@ -170,6 +196,7 @@ function reduceData(data) {
  * @param {Object} [options.key]                 - key to drill down into data, using a defined notation
  * @param {Object} [options.filterByKeys]        - list of keys to filter data further
  * @param {Object} [options.renameKeysByPattern] - map of keys to rename by pattern
+ * @param {Object} [options.convertArrayToMap]   - convert array to map using defined key name
  *
  * @returns {Object} Promise which is resolved with the normalized data
  */
@@ -177,8 +204,12 @@ function normalizeData(data, options) {
     // standard reduce first
     let ret = reduceData(data);
 
+    // shorten some options
+    const catm = options.convertArrayToMap;
+
     // additional filtering may be required
     ret = options.key ? getDataByKey(ret, options.key) : ret;
+    ret = catm ? convertArrayToMap(ret, catm.keyName, { keyPrefix: catm.keyNamePrefix }) : ret;
     ret = options.filterByKeys ? filterDataByKeys(ret, options.filterByKeys) : ret;
     ret = options.renameKeysByPattern ? renameKeysInData(ret, options.renameKeysByPattern) : ret;
 

@@ -13,6 +13,15 @@
             "endpoint": "/mgmt/tm/cm/failover-status"
         },
         {
+            "endpoint": "/mgmt/tm/sys/host-info"
+        },
+        {
+            "endpoint": "/mgmt/tm/sys/memory"
+        },
+        {
+            "endpoint": "/mgmt/tm/sys/provision"
+        },
+        {
             "endpoint": "/mgmt/tm/net/interface/stats"
         },
         {
