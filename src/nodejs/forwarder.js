@@ -62,7 +62,7 @@ function forwardData(mapping, consumer, data) {
             logger.error(`forward error: ${error}`);
             reject(new Error(error));
         }
-        resolve(mapping[consumer.consumer](data));
+        resolve(mapping[consumer.consumer](consumer, data));
     });
 }
 

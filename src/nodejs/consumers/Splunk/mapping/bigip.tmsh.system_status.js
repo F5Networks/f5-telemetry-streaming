@@ -9,7 +9,7 @@
 'use strict';
 
 
-function translateData(data) {
+function translateData(consumer, data) {
     return data;
 }
 

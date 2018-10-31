@@ -80,7 +80,7 @@ function translateData(mapping, consumer, sourceType, data) {
             logger.error(`translateData error: ${error}`);
             reject(new Error(error));
         }
-        resolve(mapping[consumer.consumer][sourceType](data));
+        resolve(mapping[consumer.consumer][sourceType](consumer, data));
     });
 }
 
