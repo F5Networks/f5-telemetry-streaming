@@ -61,25 +61,31 @@ async function buildTranslationMaps(config) {
 
 /**
  * Translate data to consumer's format
- * @param {Object} mapping    - translation mapping for consumer
+ * @param {Object} mapping    - consumers translation mapping
+ * @param {Object} consumer   - consumer object
  * @param {string} sourceType - data's sourceType
  * @param {Object} data       - data to transform
  *
  * @returns {Object} Promise which is resolved with the translated data
  */
-function translateData(mapping, sourceType, data) {
+function translateData(mapping, consumer, sourceType, data) {
     return new Promise((resolve, reject) => {
-        if (mapping[sourceType] === undefined) {
-            const error = `Missing sourceType: mapping has no sourceType "${sourceType}"`;
+        if (mapping[consumer.consumer] === undefined) {
+            const error = `Missing data mapping: no data mapping for "${consumer.consumer}"`;
             logger.error(`translateData error: ${error}`);
             reject(new Error(error));
         }
-        resolve(mapping[sourceType](data));
+        if (mapping[consumer.consumer][sourceType] === undefined) {
+            const error = `Missing data sourceType: "${consumer.consumer}" mapping has no sourceType "${sourceType}"`;
+            logger.error(`translateData error: ${error}`);
+            reject(new Error(error));
+        }
+        resolve(mapping[consumer.consumer][sourceType](data));
     });
 }
 
 
 module.exports = {
-    buildMapping: buildTranslationMaps,
+    build: buildTranslationMaps,
     translate: translateData
 };
