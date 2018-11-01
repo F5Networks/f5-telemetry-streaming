@@ -1,24 +1,43 @@
 {
     "stats": {
         "hostname": {
-            "key": "/mgmt/tm/sys/global-settings::hostname"
-        },
-        "location": {
-            "key": "/mgmt/tm/cm/device::items",
-            "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" },
-            "filterKeys": [ "/name", "location" ],
-            "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 } },
-            "comment": "have to get specific device values inside hostname key, which is dynamic, use this for now"
-        },
-        "baseMac": {
-            "key": "/mgmt/tm/sys/hardware::sys/hardware/platform::sys/hardware/platform/0::baseMac"
+            "key": "/mgmt/tm/sys/global-settings::hostname",
+            "normalize": null,
+            "convertArrayToMap": null,
+            "filterKeys": null,
+            "renameKeys": null
         },
         "version": {
-            "key": "/mgmt/tm/sys/version::sys/version/0::Version",
-            "normalize": true
+            "key": "/mgmt/tm/sys/version::sys/version/0::Version"
+        },
+        "versionBuild": {
+            "key": "/mgmt/tm/sys/version::sys/version/0::Build"
         },
         "versionSequence": {
             "key": "sequenceFromBash::commandResult"
+        },
+        "location": {
+            "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::location",
+            "convertArrayToMap": { "keyName": "name" }
+        },
+        "description": {
+            "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::description",
+            "convertArrayToMap": { "keyName": "name" }
+        },
+        "marketingName": {
+            "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::marketingName",
+            "convertArrayToMap": { "keyName": "name" }
+        },
+        "platformId": {
+            "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::platformId",
+            "convertArrayToMap": { "keyName": "name" }
+        },
+        "chassisId": {
+            "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::chassisId",
+            "convertArrayToMap": { "keyName": "name" }
+        },
+        "baseMac": {
+            "key": "/mgmt/tm/sys/hardware::sys/hardware/platform::sys/hardware/platform/0::baseMac"
         },
         "configReady": {
             "key": "/mgmt/tm/sys/ready::sys/ready/0::configReady"
@@ -86,6 +105,11 @@
             "key": "/mgmt/tm/ltm/pool/stats",
             "filterKeys": [ "/stats", "serverside.bitsIn", "serverside.bitsOut", "serverside.pktsIn", "serverside.pktsOut", "serverside.curConns", "availabilityState",  "enabledState" ],
             "renameKeys": { "ltm/pool": { "pattern": "pool\/(.*)\/", "group": 1 } }
+        }
+    },
+    "context": {
+        "HOSTNAME": {
+            "key": "/mgmt/tm/sys/global-settings::hostname"
         }
     }
 }

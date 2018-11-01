@@ -27,8 +27,10 @@ function getDataByKey(data, key) {
         if (typeof ret === 'object' && i in ret) {
             ret = ret[i];
         } else {
-            const msg = `Incorrect dot notation in key: ${key} data: ${JSON.stringify(data)}`;
-            throw new Error(msg);
+            // do not throw error as some keys do not exist if not configured with a value on BIG-IP
+            // const msg = `Incorrect dot notation in key: ${key} data: ${JSON.stringify(data)}`;
+            // throw new Error(msg);
+            ret = 'missing key';
         }
     });
     return ret;
@@ -139,11 +141,13 @@ function renameKeysInData(data, patterns) {
 /**
  * Standardize and reduce complexity of provided data
  *
- * @param {Object} data - data to reduce
+ * @param {Object} data                        - data to reduce
+ * @param {Object} options                     - options
+ * @param {Object} [options.convertArrayToMap] - key to drill down into data, using a defined notation
  *
  * @returns {Object} Promise which is resolved with the reduced object
  */
-function reduceData(data) {
+function reduceData(data, options) {
     let ret = Array.isArray(data) ? [] : {};
 
     // reduce down the nested structure for some well known keys (only one in object)
@@ -151,7 +155,7 @@ function reduceData(data) {
     for (let i = 0; i < keysToReduce.length; i += 1) {
         const item = data[keysToReduce[i]];
         if (item !== undefined && Object.keys(data).length === 1) {
-            return reduceData(item);
+            return reduceData(item, options);
         }
     }
 
@@ -165,19 +169,27 @@ function reduceData(data) {
             const kM = k.replace('https://localhost/', '').replace('mgmt/tm/', '');
             ret[kM] = v;
         });
-        return reduceData(ret);
+        return reduceData(ret, options);
     }
 
     // simply include and then recurse
     if (typeof data === 'object') {
         if (Array.isArray(data)) {
-            data.forEach((i) => {
-                ret.push(reduceData(i));
-            });
+            // convert array to map if required, otherwise just include
+            const catm = options.convertArrayToMap;
+            if (catm && catm.keyName) {
+                ret = convertArrayToMap(data, catm.keyName, { keyPrefix: catm.keyNamePrefix });
+                // now reduce
+                ret = reduceData(ret, options);
+            } else {
+                data.forEach((i) => {
+                    ret.push(reduceData(i, options));
+                });
+            }
         } else {
             Object.keys(data).forEach((k) => {
                 const v = data[k];
-                ret[k] = reduceData(v);
+                ret[k] = reduceData(v, options);
             });
         }
 
@@ -202,14 +214,11 @@ function reduceData(data) {
  */
 function normalizeData(data, options) {
     // standard reduce first
-    let ret = reduceData(data);
-
-    // shorten some options
-    const catm = options.convertArrayToMap;
+    const reduceDataOptions = { convertArrayToMap: options.convertArrayToMap };
+    let ret = reduceData(data, reduceDataOptions);
 
     // additional normalization may be required - the order here matters
     ret = options.key ? getDataByKey(ret, options.key) : ret;
-    ret = catm ? convertArrayToMap(ret, catm.keyName, { keyPrefix: catm.keyNamePrefix }) : ret;
     ret = options.filterByKeys ? filterDataByKeys(ret, options.filterByKeys) : ret;
     ret = options.renameKeysByPattern ? renameKeysInData(ret, options.renameKeysByPattern) : ret;
 

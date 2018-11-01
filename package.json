@@ -5,7 +5,8 @@
         "lint": "eslint src"
     },
     "dependencies": {
-        "ajv": "^6.5.4"
+        "ajv": "^6.5.4",
+        "mustache": "^3.0.0"
     },
     "devDependencies": {
         "eslint": "^4.19.1",
