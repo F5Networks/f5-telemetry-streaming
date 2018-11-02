@@ -5,7 +5,8 @@
             "normalize": null,
             "convertArrayToMap": null,
             "filterKeys": null,
-            "renameKeys": null
+            "renameKeys": null,
+            "runFunction": null
         },
         "version": {
             "key": "/mgmt/tm/sys/version::sys/version/0::Version"
@@ -68,33 +69,31 @@
         },
         "cpu": {
             "key": "/mgmt/tm/sys/host-info::sys/host-info/0::sys/hostInfo/0/cpuInfo",
-            "filterKeys": [ "/cpuInfo", "fiveSecAvgRatio", "oneMinAvgUser", "oneMinAvgSystem" ],
-            "renameKeys": { "/cpuInfo": { "pattern": "cpuInfo\/(.*)", "group": 1 } }
+            "runFunction": { "name": "getAverage", "args": { "keyWithValue": "oneMinAvgSystem" } }
+        },
+        "tmmCpu": {
+            "key": "/mgmt/tm/sys/tmm-info",
+            "runFunction": { "name": "getAverage", "args": { "keyWithValue": "oneMinAvgUsageRatio" } }
         },
         "memory": {
             "key": "/mgmt/tm/sys/memory::sys/memory/memory-host::sys/memory/memory-host/0",
             "filterKeys": [ "memoryTotal", "memoryFree", "tmmMemoryTotal", "tmmMemoryFree" ]
-        },
-        "provisionState": {
-            "key": "/mgmt/tm/sys/provision::items",
-            "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" },
-            "filterKeys": [ "name/", "level" ],
-            "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 } }
         },
         "networkInterfaces": {
             "key": "/mgmt/tm/net/interface/stats",
             "filterKeys": [ "/stats", "counters.bitsIn", "counters.bitsOut" ],
             "renameKeys": { "net/interface": "([0-9]\\.[0-9]|(?!\/)mgmt(?=\/))" }
         },
-        "tmmCpu": {
-            "key": "/mgmt/tm/sys/tmm-info",
-            "filterKeys": [ "/tmm-info", "oneMinAvgUsageRatio" ],
-            "renameKeys": { "sys/tmm-info": "([0-9]\\.[0-9])" }
-        },
         "tmmTraffic": {
             "key": "/mgmt/tm/sys/tmm-traffic",
             "filterKeys": [ "/tmm-traffic", "clientSideTraffic.bitsIn", "clientSideTraffic.bitsOut", "clientSideTraffic.pktsIn", "clientSideTraffic.pktsOut" ],
             "renameKeys": { "sys/tmm-traffic": "([0-9]\\.[0-9])" }
+        },
+        "provisionState": {
+            "key": "/mgmt/tm/sys/provision::items",
+            "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" },
+            "filterKeys": [ "name/", "level" ],
+            "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 } }
         },
         "virtualServerStats": {
             "key": "/mgmt/tm/ltm/virtual/stats",

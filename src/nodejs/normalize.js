@@ -10,6 +10,34 @@
 
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 const constants = require('./constants.js');
+const normalizeUtil = require('./normalizeUtil.js');
+
+/**
+ * Run custom function
+ *
+ * @param {Object} data           - data
+ * @param {Object} options        - optional arguments
+ * @param {Object} [options.func] - function to run
+ * @param {Object} [options.args] - args to provide to function
+ *
+ * @returns {Object} Promise which is resolved with the response
+ */
+function runCustomFunction(data, options) {
+    const args = { data };
+
+    const optionalArgs = options.args;
+    if (optionalArgs && typeof optionalArgs === 'object') {
+        Object.keys(optionalArgs).forEach((k) => {
+            if (k === 'data') { throw new Error('Named argument (data) is not allowed'); }
+            args[k] = optionalArgs[k];
+        });
+    }
+    try {
+        return normalizeUtil[options.func](args);
+    } catch (e) {
+        throw new Error(`runCustomFunction failed: ${e}`);
+    }
+}
 
 /**
  * Get data using provided key
@@ -209,6 +237,7 @@ function reduceData(data, options) {
  * @param {Object} [options.filterByKeys]        - list of keys to filter data further
  * @param {Object} [options.renameKeysByPattern] - map of keys to rename by pattern
  * @param {Object} [options.convertArrayToMap]   - convert array to map using defined key name
+ * @param {Object} [options.runCustomFunction]   - run custom function on data
  *
  * @returns {Object} Promise which is resolved with the normalized data
  */
@@ -221,6 +250,13 @@ function normalizeData(data, options) {
     ret = options.key ? getDataByKey(ret, options.key) : ret;
     ret = options.filterByKeys ? filterDataByKeys(ret, options.filterByKeys) : ret;
     ret = options.renameKeysByPattern ? renameKeysInData(ret, options.renameKeysByPattern) : ret;
+    if (options.runCustomFunction) {
+        const rCFOptions = {
+            func: options.runCustomFunction.name,
+            args: options.runCustomFunction.args
+        };
+        ret = runCustomFunction(ret, rCFOptions);
+    }
 
     return ret;
 }

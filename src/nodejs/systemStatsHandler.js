@@ -127,7 +127,8 @@ function collectStats() {
                         key: splitKey(key).childKey,
                         filterByKeys: stat.filterKeys,
                         renameKeysByPattern: stat.renameKeys,
-                        convertArrayToMap: stat.convertArrayToMap
+                        convertArrayToMap: stat.convertArrayToMap,
+                        runCustomFunction: stat.runFunction
                     };
                     // normalize unless flag is specifically set to false
                     const statData = stat.normalize === false ? endpointData : normalize.data(endpointData, options);
