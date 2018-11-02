@@ -8,12 +8,14 @@
 
 'use strict';
 
+const http = require('http');
+// const logger = require('../../logger.js'); // eslint-disable-line no-unused-vars
 
-function translateData(consumer, data) {
+
+async function translateData(data, consumer) {
+    console.log('Splunk translator', data, consumer);
     return data;
 }
 
 
-module.exports = {
-    translator: translateData
-};
+module.exports = translateData;

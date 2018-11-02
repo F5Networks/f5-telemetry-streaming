@@ -9,14 +9,12 @@
 'use strict';
 
 const http = require('http');
-const logger = require('../../logger.js'); // eslint-disable-line no-unused-vars
+// const logger = require('../../logger.js'); // eslint-disable-line no-unused-vars
 
 
-function forwardData(consumer, data) {
-
+async function forwardData(data, consumer) {
+    console.log('Splunk forwarder', data, consumer);
 }
 
 
-module.exports = {
-    forwarder: forwardData
-};
+module.exports = forwardData;

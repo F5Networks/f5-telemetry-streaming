@@ -8,24 +8,27 @@
 
 'use strict';
 
+const forwarder = require('./forwarder.js');
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
+const translator = require('./translator.js');
 
 
 /**
-* Translate data for consumer
+* Send data to pipeline
 *
-* @param {Object} data - data to translate
+* @param {Object} data - data to forward
 * @param {Object} consumer - consumer object
 * @param {Object} consumer.consumer - consumer's config
-* @param {function} consumer.translate - async function to translate data
 *
-* @returns {Object} Promise object
+* @returns {function} Promise object
 */
-function translateData(data, consumer) {
-    return new Promise((resolve, reject) => {
-        consumer.translate(data, consumer.consumer).then(resolve);
-    });
+function pipeline(data, consumer) {
+    return translator(data, consumer)
+        .then(res => forwarder(res, consumer))
+        .catch((err) => {
+            logger.error(`pipeline error! Consumer ${consumer.consumer}.\nDetailed error:`, err);
+        });
 }
 
 
-module.exports = translateData;
+module.exports = pipeline;
