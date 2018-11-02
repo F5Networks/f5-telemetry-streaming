@@ -10,6 +10,7 @@
 
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 const constants = require('./constants.js');
+const util = require('./util.js');
 const normalizeUtil = require('./normalizeUtil.js');
 
 /**
@@ -60,30 +61,6 @@ function getDataByKey(data, key) {
             // throw new Error(msg);
             ret = 'missing key';
         }
-    });
-    return ret;
-}
-
-/**
- * Convert array to map using provided options
- *
- * @param {Object} data                - data
- * @param {Object} keyName             - key in array containing value to use as key in map
- * @param {Object} options             - optional arguments
- * @param {Object} [options.keyPrefix] - prefix for key
- *
- * @returns {Object} Promise which is resolved with the data
- */
-function convertArrayToMap(data, key, options) {
-    const ret = {};
-
-    if (!Array.isArray(data)) {
-        throw new Error(`convertArrayToMap() array required: ${JSON.stringify(data)}`);
-    }
-
-    data.forEach((i) => {
-        const keyName = options.keyPrefix ? `${options.keyPrefix}${i[key]}` : i[key];
-        ret[keyName] = i;
     });
     return ret;
 }
@@ -206,7 +183,7 @@ function reduceData(data, options) {
             // convert array to map if required, otherwise just include
             const catm = options.convertArrayToMap;
             if (catm && catm.keyName) {
-                ret = convertArrayToMap(data, catm.keyName, { keyPrefix: catm.keyNamePrefix });
+                ret = util.convertArrayToMap(data, catm.keyName, { keyPrefix: catm.keyNamePrefix });
                 // now reduce
                 ret = reduceData(ret, options);
             } else {

@@ -28,6 +28,9 @@
             "endpoint": "/mgmt/tm/sys/memory"
         },
         {
+            "endpoint": "/mgmt/tm/sys/management-ip"
+        },
+        {
             "endpoint": "/mgmt/tm/sys/provision"
         },
         {
@@ -47,8 +50,8 @@
         },
         {
             "endpoint": "/mgmt/tm/util/bash",
-            "body": "{ \"command\": \"run\", \"utilCmdArgs\": \"-c \\\"cat /VERSION | grep -i sequence | cut -d ':' -f 2 | tr -d '[:space:]'\\\"\" }",
-            "name": "sequenceFromBash"
+            "body": "{ \"command\": \"run\", \"utilCmdArgs\": \"-c \\\"/bin/df -P | /usr/bin/tr -s ' ' ','\\\"\" }",
+            "name": "diskStorageRef"
         }
     ]
 }

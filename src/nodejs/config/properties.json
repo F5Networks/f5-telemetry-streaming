@@ -14,9 +14,6 @@
         "versionBuild": {
             "key": "/mgmt/tm/sys/version::sys/version/0::Build"
         },
-        "versionSequence": {
-            "key": "sequenceFromBash::commandResult"
-        },
         "location": {
             "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::location",
             "convertArrayToMap": { "keyName": "name" }
@@ -39,6 +36,11 @@
         },
         "baseMac": {
             "key": "/mgmt/tm/sys/hardware::sys/hardware/platform::sys/hardware/platform/0::baseMac"
+        },
+        "callBackUrl": {
+            "key": "/mgmt/tm/sys/management-ip::items",
+            "convertArrayToMap": { "keyName": "name" },
+            "runFunction": { "name": "getFirstKey", "args": { "splitOnValue": "/", "keyPrefix": "https://" } }
         },
         "configReady": {
             "key": "/mgmt/tm/sys/ready::sys/ready/0::configReady"
@@ -69,25 +71,35 @@
         },
         "cpu": {
             "key": "/mgmt/tm/sys/host-info::sys/host-info/0::sys/hostInfo/0/cpuInfo",
-            "runFunction": { "name": "getAverage", "args": { "keyWithValue": "oneMinAvgSystem" } }
+            "runFunction": { "name": "getAverage", "args": { "keyWithValue": "oneMinAvgSystem" } },
+            "comment": "also oneMinAvgUser, need to determine how that should be factored in"
+        },
+        "memory": {
+            "key": "/mgmt/tm/sys/memory::sys/memory/memory-host::sys/memory/memory-host/0",
+            "runFunction": { "name": "getPercentFromKeys", "args": { "totalKey": "memoryTotal", "partialKey": "memoryUsed" } }
         },
         "tmmCpu": {
             "key": "/mgmt/tm/sys/tmm-info",
             "runFunction": { "name": "getAverage", "args": { "keyWithValue": "oneMinAvgUsageRatio" } }
         },
-        "memory": {
+        "tmmMemory": {
             "key": "/mgmt/tm/sys/memory::sys/memory/memory-host::sys/memory/memory-host/0",
-            "filterKeys": [ "memoryTotal", "memoryFree", "tmmMemoryTotal", "tmmMemoryFree" ]
-        },
-        "networkInterfaces": {
-            "key": "/mgmt/tm/net/interface/stats",
-            "filterKeys": [ "/stats", "counters.bitsIn", "counters.bitsOut" ],
-            "renameKeys": { "net/interface": "([0-9]\\.[0-9]|(?!\/)mgmt(?=\/))" }
+            "runFunction": { "name": "getPercentFromKeys", "args": { "totalKey": "tmmMemoryTotal", "partialKey": "tmmMemoryUsed" } }
         },
         "tmmTraffic": {
             "key": "/mgmt/tm/sys/tmm-traffic",
-            "filterKeys": [ "/tmm-traffic", "clientSideTraffic.bitsIn", "clientSideTraffic.bitsOut", "clientSideTraffic.pktsIn", "clientSideTraffic.pktsOut" ],
-            "renameKeys": { "sys/tmm-traffic": "([0-9]\\.[0-9])" }
+            "filterKeys": [ "/tmm-traffic", "clientSideTraffic.bitsIn", "clientSideTraffic.bitsOut" ],
+            "renameKeys": { "sys/tmm-traffic": "([0-9]\\.[0-9])" },
+            "comment": "bits, but over what time period?"
+        },
+        "diskStorage": {
+            "key": "diskStorageRef::commandResult",
+            "runFunction": { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Mounted" } }
+        },
+        "networkInterfaces": {
+            "key": "/mgmt/tm/net/interface/stats",
+            "filterKeys": [ "/stats", "counters.bitsIn", "counters.bitsOut", "status" ],
+            "renameKeys": { "net/interface": "([0-9]\\.[0-9]|(?!\/)mgmt(?=\/))" }
         },
         "provisionState": {
             "key": "/mgmt/tm/sys/provision::items",
@@ -97,12 +109,12 @@
         },
         "virtualServerStats": {
             "key": "/mgmt/tm/ltm/virtual/stats",
-            "filterKeys": [ "/stats", "clientside.bitsIn", "clientside.bitsOut", "clientside.pktsIn", "clientside.pktsOut", "clientside.curConns", "availabilityState",  "enabledState", "destination" ],
+            "filterKeys": [ "/stats", "clientside.bitsIn", "clientside.bitsOut", "clientside.curConns", "availabilityState",  "enabledState", "destination" ],
             "renameKeys": { "ltm/virtual": { "pattern": "virtual\/(.*)\/", "group": 1 } }
         },
         "poolStats": {
             "key": "/mgmt/tm/ltm/pool/stats",
-            "filterKeys": [ "/stats", "serverside.bitsIn", "serverside.bitsOut", "serverside.pktsIn", "serverside.pktsOut", "serverside.curConns", "availabilityState",  "enabledState" ],
+            "filterKeys": [ "/stats", "serverside.bitsIn", "serverside.bitsOut", "serverside.curConns", "availabilityState",  "enabledState" ],
             "renameKeys": { "ltm/pool": { "pattern": "pool\/(.*)\/", "group": 1 } }
         }
     },
