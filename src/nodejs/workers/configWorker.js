@@ -20,7 +20,8 @@ class RestWorker {
         this.isPassThrough = true;
         this.isPublic = true;
 
-        this.pollerInterval = 30;
+        // default 60
+        this.pollerInterval = 60;
     }
 
     /**
