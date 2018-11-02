@@ -33,6 +33,6 @@ function update(setIntervalId, func, intervalInS) {
 }
 
 module.exports = {
-    start: start, // eslint-disable-line object-shorthand
-    update: update // eslint-disable-line object-shorthand
+    start,
+    update
 };

@@ -6,7 +6,7 @@
     },
     "dependencies": {
         "ajv": "^6.5.4",
-        "node-json-transform": "^1.0.17"
+        "mustache": "^3.0.0"
     },
     "devDependencies": {
         "eslint": "^4.19.1",
