@@ -10,8 +10,7 @@
 
 const path = require('path');
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
-
-const CONSUMERS_DIR = './consumers';
+const CONSUMERS_DIR = require('./constants.js').CONSUMERS_DIR;
 
 
 /**

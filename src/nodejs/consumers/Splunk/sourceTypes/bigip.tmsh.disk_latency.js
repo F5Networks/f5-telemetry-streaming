@@ -8,7 +8,6 @@
 
 'use strict';
 
-module.exports = {
-    STATS_KEY_SEP: '::',
-    CONSUMERS_DIR: './consumers'
-};
+module.exports = async function (data, consumer) {
+    return undefined;
+}

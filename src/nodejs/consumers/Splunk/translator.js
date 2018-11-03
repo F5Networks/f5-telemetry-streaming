@@ -8,13 +8,67 @@
 
 'use strict';
 
-const http = require('http');
-// const logger = require('../../logger.js'); // eslint-disable-line no-unused-vars
+const fs = require('fs');
+const path = require('path');
+const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
+
+// Load all sourceTypes at initialization just once
+const sourceTypesDir = './sourceTypes';
+const moduleExt = '.js';
+
+const sourceTypes = (function loadSourceTypes() {
+    // absolute path to sourceTypes dir is required
+    const absolutePath = path.join(path.dirname(__filename), sourceTypesDir);
+    const loadedSourceTypes = {};
+
+    fs.readdirSync(absolutePath).forEach((fname) => {
+        const modulePath = './'.concat(path.join(sourceTypesDir, fname));
+        logger.debug(`Loading module ${modulePath}`);
+
+        try {
+            loadedSourceTypes[path.basename(fname, moduleExt)] = require(modulePath);
+        } catch (err) {
+            logger.error(`Unable to load ${modulePath}. Detailed error:\n`, err);
+            return
+        }
+        logger.debug(`Module ${modulePath} - loaded!`);
+    });
+    return loadedSourceTypes;
+}());
 
 
 async function translateData(data, consumer) {
-    console.log('Splunk translator', data, consumer);
-    return data;
+    logger.debug('Incoming data for translation');
+    const translatedData = [];
+    const maxPromises = 2;
+    let promises = [];
+
+    Object.keys(sourceTypes).forEach((sourceType) => {
+        if (promises.length === maxPromises) {
+            Promise.all(promises).catch((err) => {
+                logger.error(`translateData error: ${err}\nDetailed error info:\n`, err);
+            });
+            promises = [];
+        }
+        promises.push(new Promise((resolve, reject) => {
+            sourceTypes[sourceType](data, consumer).then((res) => {
+                if (res !== undefined) {
+                    if (Array.isArray(res)) {
+                        res.forEach(part => translatedData.push(part));
+                    } else {
+                        translatedData.push(res);
+                    }
+                }
+                resolve();
+            }).catch(err => console.log(`translateData::${sourceType} error: ${err}.\nDetailed error info:\n`, err));
+        }));
+    });
+    if (promises.length) {
+        Promise.all(promises).catch((err) => {
+            logger.error(`translateData error: ${err}\nDetailed error info:\n`, err);
+        });
+    }
+    return translatedData;
 }
 
 
