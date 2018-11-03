@@ -12,6 +12,7 @@ const logger = require('../logger.js');
 const util = require('../util.js');
 const scheduler = require('../scheduler.js');
 const systemStats = require('../systemStatsHandler.js');
+const eventListener = require('../eventListenerHandler.js');
 const validator = require('../validator.js');
 
 class RestWorker {
@@ -20,8 +21,10 @@ class RestWorker {
         this.isPassThrough = true;
         this.isPublic = true;
 
-        // default 60
+        // default poller interval
         this.pollerInterval = 60;
+        // default listener port
+        this.eventListenerPort = 40000;
     }
 
     /**
@@ -55,6 +58,8 @@ class RestWorker {
     // eslint-disable-next-line no-unused-vars
     onStartCompleted(success, failure, loadedState, errMsg) {
         this.poller = scheduler.start(systemStats.collect, this.pollerInterval);
+        // TODO: re-evaluate this
+        eventListener.start(this.eventListenerPort);
 
         logger.info('onStartCompleted');
         success();
