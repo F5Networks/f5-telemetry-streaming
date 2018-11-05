@@ -52,7 +52,7 @@ function getData(uri, options) {
  *
  * @param {Object} uris - list of uris formatted like so: { endpoint: 'uri' }
  *
- * @returns {Object} Promise which is resolved with a map of data
+ * @returns {Object} Promise which is resolved with an array containing data
  */
 function getAllData(uris) {
     const promises = [];

@@ -51,14 +51,14 @@ class RestWorker {
      * @param {Object} state     - DOES NOT WORK: previously-persisted state
      * @param {String} errMsg    - framework's error message if onStart() failed
      *
-     * @returns {undefined}
+     * @returns {void}
      */
     // eslint-disable-next-line no-unused-vars
     onStartCompleted(success, failure, state, errMsg) {
         // first load state from rest storage
         load.call(this)
             .then(() => {
-                logger.debug(`loaded this.state: ${JSON.stringify(this.state)}`);
+                logger.debug(`loaded this.state: ${util.stringify(this.state)}`);
 
                 // start poller if config (interval) exists
                 if (this.state.config.interval) {
