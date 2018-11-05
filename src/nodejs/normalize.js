@@ -24,16 +24,16 @@ function formatAsJson(data) {
     const ret = {};
     // place in try/catch in case this event is malformed
     try {
-        const baseSplit = data.split(',');
+        const dataToFormat = data.replace(/\n/g, '');
+        const baseSplit = dataToFormat.split(',');
         baseSplit.forEach((i) => {
             const keySplit = i.split('=');
-            ret[keySplit[0]] = keySplit[1].replace(/"/g, '');
+            const keyValue = keySplit[1].replace(/"/g, '');
+            ret[keySplit[0]] = keyValue;
         });
     } catch (e) {
         logger.error(`formatAsJson error: ${e}`);
     }
-    // verbose even for debug - remove at some point
-    logger.debug(`formatAsJson data: ${JSON.stringify(ret)}`);
     return ret;
 }
 

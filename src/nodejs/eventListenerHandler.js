@@ -10,7 +10,7 @@
 
 const net = require('net');
 const logger = require('./logger.js');
-const normalize = require('./normalize.js');
+const event = require('./event.js');
 
 // LTM request log (example)
 // eslint-disable-next-line max-len
@@ -24,8 +24,8 @@ const normalize = require('./normalize.js');
  * @returns {Object}
  */
 function start(port) {
-    // TODO: need to limit listener by adding host: localhost (or similar), however
-    // for now cannot do so until valid on box host is determined - loopback not allowed for LTM objects
+    // TODO: investigate constraining listener if running on BIG-IP with host: localhost (or similar),
+    // however for now cannot do so until valid address found - loopback address not allowed for LTM objects
     const options = {
         port
     };
@@ -35,8 +35,8 @@ function start(port) {
         c.on('data', (data) => {
             // logger.debug(`Client: ${c.remoteAddress} sent data: ${data}`);
 
-            // TODO: send to async function which handles normalize/translate/forward, etc.
-            normalize.event(String(data)); // force string
+            // send to function which handles normalize/translate/forward, etc.
+            event.process(String(data)); // force string
         });
         // event on client connection close
         c.on('end', () => {
