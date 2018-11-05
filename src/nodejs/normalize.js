@@ -64,42 +64,6 @@ function getDataByKey(data, key) {
 }
 
 /**
- * Filter data based on a list of keys
- *
- * @param {Object} data - data
- * @param {Object} keys - list of keys to filter data by
- *
- * @returns {Object} Filtered data
- */
-function filterDataByKeys(data, keys) {
-    const ret = data;
-
-    if (typeof data === 'object') {
-        // for now just ignore arrays
-        if (Array.isArray(data)) {
-            return ret;
-        }
-
-        Object.keys(data).forEach((k) => {
-            let deleteKey = true;
-            keys.forEach((i) => {
-                // simple includes for now - no exact match
-                if (k.includes(i)) {
-                    deleteKey = false;
-                }
-            });
-            if (deleteKey) {
-                delete ret[k];
-            } else {
-                ret[k] = filterDataByKeys(ret[k], keys);
-            }
-        });
-    }
-
-    return ret;
-}
-
-/**
  * Rename keys in object using regex pattern
  *
  * @param {Object} data     - data
@@ -223,7 +187,7 @@ function normalizeData(data, options) {
 
     // additional normalization may be required - the order here matters
     ret = options.key ? getDataByKey(ret, options.key) : ret;
-    ret = options.filterByKeys ? filterDataByKeys(ret, options.filterByKeys) : ret;
+    ret = options.filterByKeys ? util.filterDataByKeys(ret, options.filterByKeys) : ret;
     ret = options.renameKeysByPattern ? renameKeysInData(ret, options.renameKeysByPattern) : ret;
     if (options.runCustomFunction) {
         const rCFOptions = {

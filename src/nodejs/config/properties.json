@@ -94,7 +94,7 @@
         },
         "diskStorage": {
             "key": "diskStorageRef::commandResult",
-            "runFunction": { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Mounted" } }
+            "runFunction": { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Mounted", "filterKeys": [ "/", "Capacity" ] } }
         },
         "networkInterfaces": {
             "key": "/mgmt/tm/net/interface/stats",

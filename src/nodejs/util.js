@@ -50,6 +50,42 @@ function convertArrayToMap(data, key, options) {
 }
 
 /**
+ * Filter data based on a list of keys
+ *
+ * @param {Object} data - data
+ * @param {Object} keys - list of keys to use to filter data
+ *
+ * @returns {Object} Filtered data
+ */
+function filterDataByKeys(data, keys) {
+    const ret = data;
+
+    if (typeof data === 'object') {
+        // for now just ignore arrays
+        if (Array.isArray(data)) {
+            return ret;
+        }
+
+        Object.keys(data).forEach((k) => {
+            let deleteKey = true;
+            keys.forEach((i) => {
+                // simple includes for now - no exact match
+                if (k.includes(i)) {
+                    deleteKey = false;
+                }
+            });
+            if (deleteKey) {
+                delete ret[k];
+            } else {
+                ret[k] = filterDataByKeys(ret[k], keys);
+            }
+        });
+    }
+
+    return ret;
+}
+
+/**
  * Stringify a message
  *
  * @param {Object} msg - message to stringify
@@ -70,5 +106,6 @@ function stringify(msg) {
 module.exports = {
     restOperationResponder,
     convertArrayToMap,
+    filterDataByKeys,
     stringify
 };

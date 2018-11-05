@@ -83,10 +83,11 @@ function getPercentFromKeys(args) {
 /**
  * formatAsJson
  *
- * @param {Object} args          - args object
- * @param {Object} [args.data]   - data to process (always included)
- * @param {Object} [args.type]   - type, such as csv
- * @param {Object} [args.mapKey] - key to use during convertArrayToMap
+ * @param {Object} args              - args object
+ * @param {Object} [args.data]       - data to process (always included)
+ * @param {Object} [args.type]       - type, such as csv
+ * @param {Object} [args.mapKey]     - key to use during convertArrayToMap
+ * @param {Object} [args.filterKeys] - filter keys according to array
  *
  * @returns {Object} Returns formatted data
  */
@@ -114,6 +115,8 @@ function formatAsJson(args) {
         });
         // now convert to map
         ret = util.convertArrayToMap(ret, args.mapKey, {});
+        // finally filter keys - if required
+        ret = args.filterKeys ? util.filterDataByKeys(ret, args.filterKeys) : ret;
     } else {
         throw new Error(`Unsupported type: ${args.type}`);
     }
