@@ -4,6 +4,72 @@
     "title": "Telemetry services title",
     "description": "Telemetry services description",
     "type": "object",
+    "definitions": {
+        "proxy": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "title": "Proxy server's address",
+                    "description": "",
+                    "type": "string"
+                },
+                "port": {
+                    "title": "Proxy server's port",
+                    "description": "",
+                    "type": "string"
+                },
+                "user": {
+                    "title": "Proxy server's user for auth",
+                    "description": "",
+                    "type": "string"
+                },
+                "password": {
+                    "title": "Proxy server's password for auth",
+                    "description": "",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "address",
+                "port"
+            ]
+        },
+        "consumer": {
+            "type": "object",
+            "properties": {
+                "consumer": {
+                    "title": "Consumer type",
+                    "description": "",
+                    "type": "string",
+                    "enum": [
+                        "Splunk",
+                        "Sumo"
+                    ]
+                },
+                "api_key": {
+                    "title": "API auth token/key",
+                    "description": "",
+                    "type": "string"
+                },
+                "destination": {
+                    "title": "Destination host/address",
+                    "description": "proto://address[:port]",
+                    "type": "string"
+                },
+                "api_path": {
+                    "title": "API URL path to post data to",
+                    "description": "/path/to/post/data",
+                    "type": "string"
+                },
+                "proxy": { "$ref": "#/definitions/proxy" }
+            },
+            "required": [
+                "consumer",
+                "api_key",
+                "destination"
+            ]
+        }
+    },
     "properties": {
         "class": {
             "title": "Class",
@@ -23,43 +89,11 @@
             "title": "Analytics data consumers",
             "description": "",
             "type": "array",
-            "items": {
-                "type": "object",
-                "minItems": 1,
-                "uniqueItems": true,
-                "properties": {
-                    "consumer": {
-                        "title": "Consumer type",
-                        "description": "",
-                        "type": "string",
-                        "enum": [
-                            "Splunk",
-                            "Sumo"
-                        ]
-                    },
-                    "api_key": {
-                        "title": "API auth token/key",
-                        "description": "",
-                        "type": "string"
-                    },
-                    "destination": {
-                        "title": "Destination host/address",
-                        "description": "proto://address[:port]",
-                        "type": "string"
-                    },
-                    "api_path": {
-                        "title": "API URL path to post data to",
-                        "description": "/path/to/post/data",
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "consumer",
-                    "api_key",
-                    "destination"
-                ]
-            }
-        }
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {"$ref": "#/definitions/consumer" }
+        },
+        "proxy": { "$ref": "#/definitions/proxy" }
     },
     "required": [
         "class",
