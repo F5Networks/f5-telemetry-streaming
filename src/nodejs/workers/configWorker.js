@@ -14,6 +14,10 @@ const scheduler = require('../scheduler.js');
 const systemStats = require('../systemStatsHandler.js');
 const validator = require('../validator.js');
 
+const baseStateObj = {
+    config: {}
+};
+
 class RestWorker {
     constructor() {
         this.WORKER_URI_PATH = 'shared/telemetry/declare';
@@ -21,9 +25,7 @@ class RestWorker {
         this.isPublic = true;
 
         // default state object
-        this.state = {
-            config: {}
-        };
+        this.state = baseStateObj;
     }
 
     /**
@@ -151,7 +153,7 @@ function load() {
                 logger.error(message);
                 reject(err);
             }
-            this.state = state || {};
+            this.state = state || baseStateObj;
             resolve();
         });
     });
