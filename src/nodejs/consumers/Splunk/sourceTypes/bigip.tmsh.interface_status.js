@@ -8,7 +8,8 @@
 
 'use strict';
 
-module.exports = async function (data, consumer) {
+module.exports = function (request) {
+    const data = request.data;
     const networkInterfaces = data.networkInterfaces;
     if (networkInterfaces === undefined) return undefined;
 
@@ -33,4 +34,4 @@ module.exports = async function (data, consumer) {
         newData.event.interface_status = networkInterfaces[key].status;
         return newData;
     });
-}
+};

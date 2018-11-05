@@ -8,7 +8,8 @@
 
 'use strict';
 
-module.exports = async function (data, consumer) {
+module.exports = function (request) {
+    const data = request.data;
     const diskStorage = data.diskStorage;
     if (diskStorage === undefined) return undefined;
 
@@ -32,4 +33,4 @@ module.exports = async function (data, consumer) {
         Object.assign(newData.event, template.event);
         return newData;
     });
-}
+};
