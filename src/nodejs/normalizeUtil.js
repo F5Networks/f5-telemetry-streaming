@@ -29,7 +29,7 @@ function getAverage(args) {
     Object.keys(data).forEach((k) => {
         const key = args.keyWithValue;
         // throw error if key is missing
-        if (!(key in data[k])) { throw new Error(`Expecting key: ${key} in object: ${JSON.stringify(data[k])}`); }
+        if (!(key in data[k])) { throw new Error(`Expecting key: ${key} in object: ${util.stringify(data[k])}`); }
         values.push(data[k][key]);
     });
     const averageFunc = arr => Math.round(arr.reduce((a, b) => a + b, 0) / arr.length);

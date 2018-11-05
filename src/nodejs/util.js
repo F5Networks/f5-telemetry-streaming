@@ -33,13 +33,13 @@ function restOperationResponder(restOperation, status, body) {
  * @param {Object} options             - optional arguments
  * @param {Object} [options.keyPrefix] - prefix for key
  *
- * @returns {Object} Promise which is resolved with the data
+ * @returns {Object} Converted data
  */
 function convertArrayToMap(data, key, options) {
     const ret = {};
 
     if (!Array.isArray(data)) {
-        throw new Error(`convertArrayToMap() array required: ${JSON.stringify(data)}`);
+        throw new Error(`convertArrayToMap() array required: ${stringify(data)}`);
     }
 
     data.forEach((i) => {
@@ -49,7 +49,26 @@ function convertArrayToMap(data, key, options) {
     return ret;
 }
 
+/**
+ * Stringify a message
+ *
+ * @param {Object} msg - message to stringify
+ *
+ * @returns {Object} Stringified message
+ */
+function stringify(msg) {
+    if (typeof msg === 'object') {
+        try {
+            msg = JSON.stringify(msg);
+        } catch (e) {
+            // just leave original message intact
+        }
+    }
+    return msg;
+}
+
 module.exports = {
     restOperationResponder,
-    convertArrayToMap
+    convertArrayToMap,
+    stringify
 };

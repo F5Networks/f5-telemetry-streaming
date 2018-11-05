@@ -16,7 +16,7 @@ const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 /**
  * Start poller
  *
- * @returns {Object}
+ * @returns {Object} setInterval ID (to be used by clearInterval)
  */
 function start(func, intervalInS) {
     return setInterval(func, intervalInS * 1000);
@@ -25,7 +25,7 @@ function start(func, intervalInS) {
 /**
  * Update poller
  *
- * @returns {Object}
+ * @returns {Object} Result of function start()
  */
 function update(setIntervalId, func, intervalInS) {
     clearInterval(setIntervalId);

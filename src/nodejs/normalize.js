@@ -45,7 +45,7 @@ function formatAsJson(data) {
  * @param {Object} [options.func] - function to run
  * @param {Object} [options.args] - args to provide to function
  *
- * @returns {Object} Promise which is resolved with the response
+ * @returns {Object} Function result
  */
 function runCustomFunction(data, options) {
     const args = { data };
@@ -70,7 +70,7 @@ function runCustomFunction(data, options) {
  * @param {Object} data - data
  * @param {Object} key  - key to use when accessing item in data
  *
- * @returns {Object} Promise which is resolved with the data
+ * @returns {Object} Data in key
  */
 function getDataByKey(data, key) {
     const keys = key.split(constants.STATS_KEY_SEP);
@@ -81,8 +81,6 @@ function getDataByKey(data, key) {
             ret = ret[i];
         } else {
             // do not throw error as some keys do not exist if not configured with a value on BIG-IP
-            // const msg = `Incorrect dot notation in key: ${key} data: ${JSON.stringify(data)}`;
-            // throw new Error(msg);
             ret = 'missing key';
         }
     });
@@ -95,7 +93,7 @@ function getDataByKey(data, key) {
  * @param {Object} data - data
  * @param {Object} keys - list of keys to filter data by
  *
- * @returns {Object} Promise which is resolved with the data
+ * @returns {Object} Filtered data
  */
 function filterDataByKeys(data, keys) {
     const ret = data;
@@ -131,7 +129,7 @@ function filterDataByKeys(data, keys) {
  * @param {Object} data     - data
  * @param {Object} patterns - map of patterns
  *
- * @returns {Object} Promise which is resolved with the data
+ * @returns {Object} Renamed data
  */
 function renameKeysInData(data, patterns) {
     let ret = Array.isArray(data) ? [] : {};
@@ -174,7 +172,7 @@ function renameKeysInData(data, patterns) {
  * @param {Object} options                     - options
  * @param {Object} [options.convertArrayToMap] - key to drill down into data, using a defined notation
  *
- * @returns {Object} Promise which is resolved with the reduced object
+ * @returns {Object} Reduced object
  */
 function reduceData(data, options) {
     let ret = Array.isArray(data) ? [] : {};
@@ -252,7 +250,7 @@ function normalizeEvent(data) {
  * @param {Object} [options.convertArrayToMap]   - convert array to map using defined key name
  * @param {Object} [options.runCustomFunction]   - run custom function on data
  *
- * @returns {Object} Promise which is resolved with the normalized data
+ * @returns {Object} Normalized data
  */
 function normalizeData(data, options) {
     // standard reduce first

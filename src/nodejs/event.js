@@ -9,6 +9,7 @@
 'use strict';
 
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
+const util = require('./util.js');
 const normalize = require('./normalize.js');
 
 /**
@@ -20,7 +21,7 @@ const normalize = require('./normalize.js');
  */
 function process(data) {
     const normalizedData = normalize.event(data);
-    logger.debug(`Event: ${JSON.stringify(normalizedData)}`);
+    logger.debug(`Event: ${util.stringify(normalizedData)}`);
 }
 
 module.exports = {
