@@ -8,6 +8,4 @@
 
 'use strict';
 
-module.exports = async function (request) {
-    return undefined;
-};
+module.exports = async () => undefined;
