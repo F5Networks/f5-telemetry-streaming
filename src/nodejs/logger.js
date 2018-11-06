@@ -9,12 +9,10 @@
 'use strict';
 
 const logger = require('f5-logger').getInstance(); // eslint-disable-line import/no-unresolved
+const util = require('./util.js');
 
-const stringify = function (msg) {
-    if (typeof msg === 'object') {
-        msg = JSON.stringify(msg);
-    }
-    return `[telemetry] ${msg}`;
+const addPrefix = function (msg) {
+    return `[telemetry] ${util.stringify(msg)}`;
 };
 
 /* f5-logger module supports the following levels
@@ -28,9 +26,9 @@ levels: {
     severe: 6
 }
 */
-const error = function (msg) { logger.severe(stringify(msg)); };
-const info = function (msg) { logger.info(stringify(msg)); };
-const debug = function (msg) { logger.finest(stringify(msg)); };
+const error = function (msg) { logger.severe(addPrefix(msg)); };
+const info = function (msg) { logger.info(addPrefix(msg)); };
+const debug = function (msg) { logger.finest(addPrefix(msg)); };
 
 module.exports = {
     error,

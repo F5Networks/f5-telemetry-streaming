@@ -10,6 +10,7 @@
 
 const Ajv = require('ajv');
 const logger = require('./logger.js');
+const util = require('./util.js');
 const schema = require('./config/schema-main.json');
 
 /**
@@ -26,7 +27,7 @@ function validateSchema(obj) {
     const valid = validate(obj);
 
     if (!valid) {
-        const error = JSON.stringify(validate.errors);
+        const error = util.stringify(validate.errors);
         logger.error(`validateSchema invalid: ${error}`);
         return Promise.reject(new Error(error));
     }

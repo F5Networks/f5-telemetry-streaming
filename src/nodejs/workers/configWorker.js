@@ -14,27 +14,31 @@ const scheduler = require('../scheduler.js');
 const systemStats = require('../systemStatsHandler.js');
 const validator = require('../validator.js');
 
+const baseStateObj = {
+    config: {}
+};
+
 class RestWorker {
     constructor() {
         this.WORKER_URI_PATH = 'shared/telemetry/declare';
         this.isPassThrough = true;
         this.isPublic = true;
 
-        this.pollerInterval = 30;
+        // default state object
+        this.state = baseStateObj;
     }
 
     /**
      * Called by LX framework when plugin is initialized.
      *
      * @public
-     * @param {function} success - callback to indicate successful startup
-     * @param {function} failure - callback to indicate startup failure
+     * @param {Function} success - callback to indicate successful startup
+     * @param {Function} failure - callback to indicate startup failure
      *
      * @returns {undefined}
      */
     // eslint-disable-next-line no-unused-vars
     onStart(success, failure) {
-        logger.info('onStart');
         success();
     }
 
@@ -44,24 +48,37 @@ class RestWorker {
      * onStart() work is complete.
      *
      * @public
-     * @param {function} success - callback to indicate successful startup
-     * @param {function} failure - callback to indicate startup failure
-     * @param {object} [state=undefined] - NOT USED: previously-persisted state
-     * @param {string} [errMsg=null] - framework's error message if onStart() failed
+     * @param {Function} success - callback to indicate successful startup
+     * @param {Function} failure - callback to indicate startup failure
+     * @param {Object} state     - DOES NOT WORK: previously-persisted state
+     * @param {String} errMsg    - framework's error message if onStart() failed
      *
-     * @returns {undefined}
+     * @returns {void}
      */
     // eslint-disable-next-line no-unused-vars
-    onStartCompleted(success, failure, loadedState, errMsg) {
-        this.poller = scheduler.start(systemStats.collect, this.pollerInterval);
+    onStartCompleted(success, failure, state, errMsg) {
+        // first load state from rest storage
+        load.call(this)
+            .then(() => {
+                logger.debug(`loaded this.state: ${util.stringify(this.state)}`);
 
-        logger.info('onStartCompleted');
-        success();
+                // start poller if config (interval) exists
+                if (this.state.config.interval) {
+                    this.poller = scheduler.start(systemStats.collect, this.state.config.interval);
+                }
+                logger.info('onStartCompleted success');
+                success();
+            })
+            .catch((err) => {
+                const msg = `onStartCompleted error: ${err}`;
+                logger.error(msg);
+                failure(msg);
+            });
     }
 
     /**
      * Handles Get requests
-     * @param {object} restOperation
+     * @param {Object} restOperation
      *
      * @returns {void}
      */
@@ -74,19 +91,25 @@ class RestWorker {
 
     /**
      * Handles Post requests.
-     * @param {object} restOperation
+     * @param {Object} restOperation
      *
      * @returns {void}
      */
     onPost(restOperation) {
         const urlpath = restOperation.getUri().href;
-        const body = restOperation.getBody(); // eslint-disable-line no-unused-vars
+        const body = restOperation.getBody();
         logger.info(`POST operation ${urlpath}`);
 
         validator.validateConfig(body)
-            .then((res) => {
-                this.pollerInterval = res.interval;
-                this.poller = scheduler.update(this.poller, systemStats.collect, this.pollerInterval);
+            .then((config) => {
+                // place config in state object and save to rest storage
+                this.state.config = config;
+                // TODO: handle sensitive values prior to save
+                return save.call(this);
+            })
+            .then(() => {
+                // update poller (interval)
+                this.poller = scheduler.update(this.poller, systemStats.collect, this.state.config.interval);
 
                 util.restOperationResponder(restOperation, 200, { message: 'success' });
             })
@@ -98,7 +121,7 @@ class RestWorker {
 
     /**
      * Handles Delete requests.
-     * @param {object} restOperation
+     * @param {Object} restOperation
      *
      * @returns {void}
      */
@@ -108,6 +131,32 @@ class RestWorker {
 
         util.restOperationResponder(restOperation, 200, {});
     }
+}
+
+// rest worker helper functions
+function save() {
+    return new Promise((resolve, reject) => {
+        this.saveState(null, this.state, (err) => {
+            if (err) {
+                reject(err);
+            }
+            resolve();
+        });
+    });
+}
+
+function load() {
+    return new Promise((resolve, reject) => {
+        this.loadState(null, (err, state) => {
+            if (err) {
+                const message = `error loading state: ${err.message}`;
+                logger.error(message);
+                reject(err);
+            }
+            this.state = state || baseStateObj;
+            resolve();
+        });
+    });
 }
 
 module.exports = RestWorker;

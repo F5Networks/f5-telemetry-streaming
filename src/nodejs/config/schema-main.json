@@ -1,8 +1,8 @@
 {
     "$id": "telemetry-svcs-main",
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Telemetry services title",
-    "description": "Telemetry services description",
+    "title": "Telemetry services",
+    "description": "Telemetry services",
     "type": "object",
     "definitions": {
         "consumer": {
@@ -92,7 +92,7 @@
             "title": "Collection Interval (in seconds)",
             "description": "" ,
             "type": "integer",
-            "minimum": 10,
+            "minimum": 30,
             "maximum": 600,
             "default": 30
         },

@@ -23,14 +23,13 @@ class RestWorker {
      * Called by LX framework when plugin is initialized.
      *
      * @public
-     * @param {function} success - callback to indicate successful startup
-     * @param {function} failure - callback to indicate startup failure
+     * @param {Function} success - callback to indicate successful startup
+     * @param {Function} failure - callback to indicate startup failure
      *
      * @returns {undefined}
      */
     // eslint-disable-next-line no-unused-vars
     onStart(success, failure) {
-        logger.info('onStart');
         success();
     }
 
@@ -40,22 +39,22 @@ class RestWorker {
      * onStart() work is complete.
      *
      * @public
-     * @param {function} success - callback to indicate successful startup
-     * @param {function} failure - callback to indicate startup failure
-     * @param {object} [state=undefined] - NOT USED: previously-persisted state
-     * @param {string} [errMsg=null] - framework's error message if onStart() failed
+     * @param {Function} success - callback to indicate successful startup
+     * @param {Function} failure - callback to indicate startup failure
+     * @param {Object} state     - DOES NOT WORK: previously-persisted state
+     * @param {String} errMsg    - framework's error message if onStart() failed
      *
      * @returns {undefined}
      */
     // eslint-disable-next-line no-unused-vars
-    onStartCompleted(success, failure, loadedState, errMsg) {
-        logger.info('onStartCompleted');
+    onStartCompleted(success, failure, state, errMsg) {
+        logger.info('onStartCompleted success');
         success();
     }
 
     /**
      * Handles Get requests
-     * @param {object} restOperation
+     * @param {Object} restOperation
      *
      * @returns {void}
      */
@@ -74,7 +73,7 @@ class RestWorker {
 
     /**
      * Handles Post requests.
-     * @param {object} restOperation
+     * @param {Object} restOperation
      *
      * @returns {void}
      */
@@ -88,7 +87,7 @@ class RestWorker {
 
     /**
      * Handles Delete requests.
-     * @param {object} restOperation
+     * @param {Object} restOperation
      *
      * @returns {void}
      */
