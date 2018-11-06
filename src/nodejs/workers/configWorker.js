@@ -12,6 +12,7 @@ const logger = require('../logger.js');
 const util = require('../util.js');
 const scheduler = require('../scheduler.js');
 const systemStats = require('../systemStatsHandler.js');
+const eventListener = require('../eventListenerHandler.js');
 const validator = require('../validator.js');
 
 const baseStateObj = {
@@ -26,6 +27,8 @@ class RestWorker {
 
         // default state object
         this.state = baseStateObj;
+        // default listener port
+        this.eventListenerPort = 40000;
     }
 
     /**
@@ -66,6 +69,9 @@ class RestWorker {
                 if (this.state.config.interval) {
                     this.poller = scheduler.start(systemStats.collect, this.state.config.interval);
                 }
+                // TODO: re-evaluate this
+                eventListener.start(this.eventListenerPort);
+
                 logger.info('onStartCompleted success');
                 success();
             })
