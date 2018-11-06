@@ -12,13 +12,15 @@ const mustache = require('mustache');
 
 const logger = require('./logger.js');
 const constants = require('./constants.js');
-const http = require('./httpRequestHandler.js');
+const httpRequest = require('./httpRequestHandler.js');
 const normalize = require('./normalize.js');
 const properties = require('./config/properties.json');
 const paths = require('./config/paths.json');
 
 const pStats = properties.stats;
 const context = properties.context;
+// const host = constants.DEFAULT_HOST;
+const host = 'sevedge3nic01latest.westus.cloudapp.azure.com';
 
 /**
  * Get specific data from the REST API
@@ -31,10 +33,11 @@ const context = properties.context;
  * @returns {Object} Promise which is resolved with data
  */
 function getData(uri, options) {
-    // for now assume if body is provided we want to POST
-    const promise = options.body ? http.post(uri, options.body) : http.get(uri);
-
-    return Promise.resolve(promise)
+    return Promise.resolve(httpRequest.getToken(host, 'admin', 'admin', {}))
+        .then((token) => {
+            logger.debug(`token: ${token}`);
+            return options.body ? httpRequest.post(host, uri, options.body, {}) : httpRequest.get(host, uri, {});
+        })
         .then((data) => {
             // use uri unless explicit name is provided
             const nameToUse = options.name ? options.name : uri;
