@@ -8,45 +8,66 @@
 
 'use strict';
 
-const http = require('http');
+const request = require('request');
+const url = require('url');
 const zlib = require('zlib');
 
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 const constants = require('./constants.js');
 
 
-function requestOptions(consumer) {
-    const options = {
-        protocol: `${consumer.destination.protocol}:`,
-        host: consumer.destination.address,
-        port: consumer.destination.port,
-        path: consumer.api.path !== undefined ? consumer.api.path : constants.api.postData,
-        method: 'POST',
+/**
+* Create default options for request
+*
+* @param {Object} consumer             - consumer object
+* @param {Object} consumer.destination - destination info
+* @param {Object} consumer.api         - API info
+*
+* @returns {Object} request.defaults instance
+*/
+function defaultRequest(consumer) {
+    const baseURL = new url.URL(`${consumer.destination.protocol}://${consumer.destination.address}`);
+    baseURL.port = consumer.destination.port;
+    baseURL.pathname = consumer.api.path !== undefined ? consumer.api.path : constants.api.postData;
+
+    const defaults = {
+        url: baseURL,
         headers: {
-            Host: `${consumer.destination.address}:${consumer.destination.port}`,
-            'Content-Type': 'application/json',
             Authorization: `Splunk ${consumer.api.token}`
         }
     };
+
     if (consumer.api.gzip) {
-        Object.assign(options.headers, {
+        defaults.gzip = true;
+        Object.assign(defaults.headers, {
             'Accept-Encoding': 'gzip',
             'Content-Encoding': 'gzip'
         });
     }
-    return options;
+    return request.defaults(defaults);
 }
 
 
-async function sendDataChunk(dataChunk, consumer) {
+/**
+* Send data to consumer
+*
+* @param {string[]} dataChunk      - list of strings to send
+* @param {Object} context          - context
+* @param {Object} context.request  - request object
+* @param {Object} context.consumer - consumer object
+*
+* @returns {Object} Promise object resolved with response's statusCode
+*/
+async function sendDataChunk(dataChunk, context) {
     return new Promise((resolve, reject) => {
         const data = dataChunk.join('');
-        if (consumer.api.gzip) {
+
+        if (context.consumer.api.gzip) {
             zlib.gzip(data, (err, buffer) => {
                 if (!err) {
                     resolve(buffer);
                 } else {
-                    err = `sendDataChunk error: ${err}`;
+                    err = `sendDataChunk::zlib.gzip error: ${err}`;
                     logger.error(err);
                     reject(err);
                 }
@@ -54,45 +75,50 @@ async function sendDataChunk(dataChunk, consumer) {
         } else {
             resolve(data);
         }
-    }).then((data) => {
+    }).then(data => new Promise((resolve, reject) => {
         logger.debug('sending data');
-        const options = requestOptions(consumer);
-        options.headers['Content-Length'] = data.length;
 
-        const buffers = [];
-        let gzip = false;
-        const req = http.request(options, (res) => {
-            res.on('data', (rdata) => {
-                buffers.push(rdata);
-                if (res.headers['content-encoding'] === 'gzip') {
-                    gzip = true;
-                }
-            });
-            res.on('end', () => {
-                if (gzip) {
-                    zlib.gunzip(Buffer.concat(buffers), (err, buffer) => {
-                        if (err) {
-                            logger.debug('Response1: gzip error', err);
-                        } else {
-                            logger.debug('Response1: ', buffer.toString('utf8'));
-                        }
-                    });
-                } else {
-                    logger.debug('Response2: ', Buffer.concat(buffers).toString('utf8'));
-                }
-            });
+        const opts = {
+            body: data,
+            headers: {
+                'Content-Length': data.length
+            }
+        };
+        context.request.post(opts, async (error, response, body) => {
+            if (error || !response || response.statusCode >= 300) {
+                logger.error('sendDataChunk::response error:\n', JSON.stringify({
+                    error,
+                    body,
+                    statusCode: response.statusCode
+                }, null, 2));
+                reject(new Error('badResponse'));
+            } else {
+                resolve(response.statusCode);
+            }
         });
-        req.write(data);
-        req.end();
-    });
+    }));
 }
 
 
+/**
+* Forward data to consumer
+*
+* @param {string[]} dataToSend - list of strings to send
+* @param {Object} consumer     - consumer object
+*
+*/
 async function forwardData(dataToSend, consumer) {
     logger.debug('Incoming data for forwarding');
 
+    const context = {
+        request: defaultRequest(consumer),
+        consumer
+    };
+
     let dataChunk = [];
     let chunkSize = 0;
+
+    // eslint-disable-next-line
     for (let i = 0; i < dataToSend.length; i++) {
         const data = dataToSend[i];
 
@@ -100,10 +126,12 @@ async function forwardData(dataToSend, consumer) {
             chunkSize += data.length;
             dataChunk.push(data);
         }
-        if (chunkSize >= constants.maxDataChunkSize
-            || i === dataToSend.length - 1) {
-
-            sendDataChunk(dataChunk, consumer);
+        if (chunkSize >= constants.maxDataChunkSize || i === dataToSend.length - 1) {
+            sendDataChunk(dataChunk, context).then((res) => {
+                logger.debug(`Response status code: ${res}`);
+            }).catch((err) => {
+                logger.err(`Unable to send data chuck: ${err}`);
+            });
 
             if (i !== dataToSend.length) {
                 dataChunk = [];
