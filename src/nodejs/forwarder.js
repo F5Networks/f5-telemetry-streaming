@@ -22,9 +22,7 @@ const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 * @returns {Object} Promise object
 */
 function forwardData(data, consumer) {
-    return new Promise((resolve, reject) => {
-        consumer.forward(data, consumer.consumer).then(resolve);
-    });
+    return new Promise(resolve => consumer.forward(data, consumer.consumer).then(resolve));
 }
 
 

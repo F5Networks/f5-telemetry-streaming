@@ -22,9 +22,7 @@ const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 * @returns {Object} Promise object
 */
 function translateData(data, consumer) {
-    return new Promise((resolve, reject) => {
-        consumer.translate(data, consumer.consumer).then(resolve);
-    });
+    return new Promise(resolve => consumer.translate(data, consumer.consumer).then(resolve));
 }
 
 
