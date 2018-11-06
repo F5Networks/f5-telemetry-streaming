@@ -71,8 +71,7 @@
                         }
                     },
                     "required": [
-                        "address",
-                        "port"
+                        "address"
                     ]
                 }
             },
