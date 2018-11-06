@@ -77,7 +77,8 @@
             },
             "required": [
                 "consumer",
-                "destination"
+                "destination",
+                "api"
             ]
         }
     },
