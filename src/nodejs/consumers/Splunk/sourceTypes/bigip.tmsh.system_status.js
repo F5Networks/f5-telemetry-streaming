@@ -8,7 +8,7 @@
 
 'use strict';
 
-module.exports = function (request) {
+module.exports = async function (request) {
     const data = request.data;
     const networkInterfaces = data.networkInterfaces;
     if (networkInterfaces === undefined) return undefined;

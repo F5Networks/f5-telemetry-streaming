@@ -8,7 +8,7 @@
 
 'use strict';
 
-module.exports = function (request) {
+module.exports = async function (request) {
     const data = request.data;
     const diskStorage = data.diskStorage;
     if (diskStorage === undefined) return undefined;

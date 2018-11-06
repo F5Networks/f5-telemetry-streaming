@@ -8,6 +8,6 @@
 
 'use strict';
 
-module.exports = function (request) {
+module.exports = async function (request) {
     return undefined;
 };
