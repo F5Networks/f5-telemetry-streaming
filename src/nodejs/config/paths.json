@@ -1,0 +1,57 @@
+{
+    "endpoints": [
+        {
+            "endpoint": "/mgmt/tm/sys/global-settings"
+        },
+        {
+            "endpoint": "/mgmt/tm/cm/device"
+        },
+        {
+            "endpoint": "/mgmt/tm/sys/hardware"
+        },
+        {
+            "endpoint": "/mgmt/tm/sys/version"
+        },
+        {
+            "endpoint": "/mgmt/tm/sys/ready"
+        },
+        {
+            "endpoint": "/mgmt/tm/cm/sync-status"
+        },
+        {
+            "endpoint": "/mgmt/tm/cm/failover-status"
+        },
+        {
+            "endpoint": "/mgmt/tm/sys/host-info"
+        },
+        {
+            "endpoint": "/mgmt/tm/sys/memory"
+        },
+        {
+            "endpoint": "/mgmt/tm/sys/management-ip"
+        },
+        {
+            "endpoint": "/mgmt/tm/sys/provision"
+        },
+        {
+            "endpoint": "/mgmt/tm/net/interface/stats"
+        },
+        {
+            "endpoint": "/mgmt/tm/sys/tmm-info"
+        },
+        {
+            "endpoint": "/mgmt/tm/sys/tmm-traffic"
+        },
+        {
+            "endpoint": "/mgmt/tm/ltm/virtual/stats"
+        },
+        {
+            "endpoint": "/mgmt/tm/ltm/pool/stats"
+        },
+        {
+            "endpoint": "/mgmt/tm/util/bash",
+            "body": "{ \"command\": \"run\", \"utilCmdArgs\": \"-c \\\"/bin/df -P | /usr/bin/tr -s ' ' ','\\\"\" }",
+            "name": "diskStorageRef"
+        }
+    ]
+}

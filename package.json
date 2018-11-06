@@ -4,6 +4,10 @@
     "scripts": {
         "lint": "eslint src"
     },
+    "dependencies": {
+        "ajv": "^6.5.4",
+        "mustache": "^3.0.0"
+    },
     "devDependencies": {
         "eslint": "^4.19.1",
         "eslint-config-airbnb-base": "^13.1.0",
