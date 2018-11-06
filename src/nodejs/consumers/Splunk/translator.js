@@ -14,7 +14,12 @@ const path = require('path');
 const constants = require('./constants.js');
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 
-// Load all sourceTypes at initialization just once
+/**
+* Load all sourceTypes at initialization just once
+*
+* @returns {Object} object, where key is sourceType string and
+*                   value is function(request, consumer) -> object
+*/
 const sourceTypes = (function loadSourceTypes() {
     const sourceTypesDir = constants.sourceTypes.dir;
     const sourceTypeExt = constants.sourceTypes.ext;
@@ -28,6 +33,7 @@ const sourceTypes = (function loadSourceTypes() {
         logger.debug(`Loading module ${modulePath}`);
 
         try {
+            // eslint-disable-next-line
             loadedSourceTypes[path.basename(fname, sourceTypeExt)] = require(modulePath);
         } catch (err) {
             logger.error(`Unable to load ${modulePath}. Detailed error:\n`, err);
@@ -39,9 +45,17 @@ const sourceTypes = (function loadSourceTypes() {
 }());
 
 
-async function addReportStats(request, translatedData) {
+/**
+* Add overll all summary to report
+*
+* @param {Object} request      - request with included context
+* @param {Object} request.data - normalized data
+* @param {Object} request.context - context information
+*
+* @returns {Object} Promise resolved with summary object
+*/
+async function addReportStats(request) {
     const data = request.data;
-    // bytes_transfered = data length + ',' * translatedData.length - 1 (no ',' after last element)
     return {
         time: data.timestamp,
         host: data.hostname,
@@ -53,14 +67,23 @@ async function addReportStats(request, translatedData) {
             devicegroup: data.deviceGroup,
             facility: data.facility,
             files_sent: request.context.numberOfRequests,
-            bytes_transfered: request.context.dataLength + translateData.length - 1
+            bytes_transfered: request.context.dataLength
         }
     };
 }
 
 
+/**
+* Translate normalized data to Consumer's format
+*
+* @param {Object} data      - normalized data
+* @param {Object} consumer  - consumer object
+*
+* @returns {Object} Promise resolved with list of translated data
+*/
 async function translateData(data, consumer) {
     logger.debug('Incoming data for translation');
+
     const translatedData = [];
     const request = {
         data,
@@ -74,12 +97,12 @@ async function translateData(data, consumer) {
     const appendData = function (newData) {
         const context = request.context;
         const newDataStr = JSON.stringify(newData);
-        
+
         context.currentChunkLength += newDataStr.length;
         if (context.currentChunkLength >= constants.maxDataChunkSize) {
             context.dataLength += context.currentChunkLength;
             context.currentChunkLength = 0;
-            context.numberOfRequests++;
+            context.numberOfRequests += 1;
         }
         translatedData.push(newDataStr);
     };
