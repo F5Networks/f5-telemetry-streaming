@@ -25,7 +25,7 @@ function loadModule(modulePath) {
 
     let module = null;
     try {
-        module = require(modulePath);
+        module = require(modulePath); // eslint-disable-line
     } catch (err) {
         logger.error(`Unable to load module ${modulePath}: ${err}\nDetailed error info:\n`, err);
     }
@@ -40,8 +40,8 @@ function loadModule(modulePath) {
 *
 * @returns {Object} data
 */
-const dummyFunction = async (data, ...args) => {
-    logger.info("dummy function");
+const dummyFunction = async (data) => {
+    logger.debug('dummy function');
     return data;
 };
 
@@ -72,7 +72,7 @@ async function loadConsumers(config) {
 
     return Promise.all(config.consumers.map(async (consumerObj) => {
         const consumerName = consumerObj.consumer;
-        const consumerDir = path.join(CONSUMERS_DIR, consumerName);
+        const consumerDir = './'.concat(path.join(CONSUMERS_DIR, consumerName));
         // copy consumer's data
         const newConsumerObj = {
             consumer: JSON.parse(JSON.stringify(consumerObj))
@@ -80,11 +80,14 @@ async function loadConsumers(config) {
 
         logger.info(`Trying to load ${consumerName} plugin from ${consumerDir}`);
 
-        const translator = loadModule('./'.concat(path.join(consumerDir, 'translator.js')));
-        newConsumerObj['translate'] = translator === null ? dummyFunction : translator;
-
-        const forwarder = loadModule('./'.concat(path.join(consumerDir, 'forwarder.js')));
-        newConsumerObj['forward'] = forwarder === null ? dummyFunction : forwarder;
+        const consumerModule = loadModule(consumerDir);
+        if (consumerModule === null) {
+            newConsumerObj.translate = dummyFunction;
+            newConsumerObj.forward = dummyFunction;
+        } else {
+            newConsumerObj.translate = consumerModule.translator;
+            newConsumerObj.forward = consumerModule.forwarder;
+        }
 
         return newConsumerObj;
     }));
