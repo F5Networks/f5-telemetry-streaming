@@ -14,7 +14,7 @@ const stringify = function (msg) {
     if (typeof msg === 'object') {
         msg = JSON.stringify(msg);
     }
-    return `[SplunkAgent] ${msg}`;
+    return `[telemetry] ${msg}`;
 };
 
 /* f5-logger module supports the following levels
