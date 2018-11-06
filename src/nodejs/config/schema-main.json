@@ -5,35 +5,6 @@
     "description": "Telemetry services description",
     "type": "object",
     "definitions": {
-        "proxy": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "title": "Proxy server's address",
-                    "description": "",
-                    "type": "string"
-                },
-                "port": {
-                    "title": "Proxy server's port",
-                    "description": "",
-                    "type": "string"
-                },
-                "user": {
-                    "title": "Proxy server's user for auth",
-                    "description": "",
-                    "type": "string"
-                },
-                "password": {
-                    "title": "Proxy server's password for auth",
-                    "description": "",
-                    "type": "string"
-                }
-            },
-            "required": [
-                "address",
-                "port"
-            ]
-        },
         "consumer": {
             "type": "object",
             "properties": {
@@ -46,26 +17,67 @@
                         "Sumo"
                     ]
                 },
-                "api_key": {
-                    "title": "API auth token/key",
+                "api": {
+                    "title": "API configuration",
                     "description": "",
-                    "type": "string"
+                    "type": "object",
+                    "properties": {
+                        "path": {
+                            "title": "API path to post data",
+                            "description": "",
+                            "type": "string",
+                            "default": ""
+                        },
+                        "token": {
+                            "title": "API auth token",
+                            "description": "",
+                            "type": "string"
+                        },
+                        "gzip": {
+                            "title": "Compress data",
+                            "description": "",
+                            "type": "boolean",
+                            "default": true
+                        }
+                    },
+                    "required": [
+                        "token"
+                    ]
                 },
                 "destination": {
                     "title": "Destination host/address",
-                    "description": "proto://address[:port]",
-                    "type": "string"
-                },
-                "api_path": {
-                    "title": "API URL path to post data to",
-                    "description": "/path/to/post/data",
-                    "type": "string"
-                },
-                "proxy": { "$ref": "#/definitions/proxy" }
+                    "description": "",
+                    "type": "object",
+                    "properties": {
+                        "address": {
+                            "title": "Address",
+                            "description": "",
+                            "type": "string"
+                        },
+                        "port": {
+                            "title": "Port",
+                            "description": "",
+                            "type": "integer"
+                        },
+                        "protocol": {
+                            "title": "Protocol",
+                            "description": "",
+                            "type": "string",
+                            "default": "http",
+                            "enum": [
+                                "http",
+                                "https"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "address",
+                        "port"
+                    ]
+                }
             },
             "required": [
                 "consumer",
-                "api_key",
                 "destination"
             ]
         }
@@ -89,11 +101,9 @@
             "title": "Analytics data consumers",
             "description": "",
             "type": "array",
-            "minItems": 1,
             "uniqueItems": true,
             "items": {"$ref": "#/definitions/consumer" }
-        },
-        "proxy": { "$ref": "#/definitions/proxy" }
+        }
     },
     "required": [
         "class",
