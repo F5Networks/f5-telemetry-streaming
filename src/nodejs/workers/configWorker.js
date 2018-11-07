@@ -11,9 +11,11 @@
 const logger = require('../logger.js');
 const util = require('../util.js');
 const scheduler = require('../scheduler.js');
-const systemStats = require('../systemStatsHandler.js');
 const eventListener = require('../eventListenerHandler.js');
 const validator = require('../validator.js');
+const consumers = require('../consumers.js');
+const pipeline = require('../pipeline.js');
+
 
 const baseStateObj = {
     config: {}
@@ -61,19 +63,27 @@ class RestWorker {
     // eslint-disable-next-line no-unused-vars
     onStartCompleted(success, failure, state, errMsg) {
         // first load state from rest storage
+        // TODO: pipeline initialization should be moved to function
         load.call(this)
             .then(() => {
                 logger.debug(`loaded this.state: ${util.stringify(this.state)}`);
 
-                // start poller if config (interval) exists
-                if (this.state.config.interval) {
-                    this.poller = scheduler.start(systemStats.collect, this.state.config.interval);
-                }
-                // TODO: re-evaluate this
-                eventListener.start(this.eventListenerPort);
+                consumers.load(this.state.config)
+                    .then((consumersObjs) => {
+                        this.consumers = consumersObjs;
+                        return Promise.resolve();
+                    }).then(() => {
+                        // start poller if config (interval) exists
+                        if (this.state.config.interval) {
+                            const dataPipeline = pipeline.create(this.consumers);
+                            this.poller = scheduler.start(dataPipeline, this.state.config.interval);
+                        }
+                        // TODO: re-evaluate this
+                        eventListener.start(this.eventListenerPort);
 
-                logger.info('onStartCompleted success');
-                success();
+                        logger.info('onStartCompleted success');
+                        success();
+                    });
             })
             .catch((err) => {
                 const msg = `onStartCompleted error: ${err}`;
@@ -106,6 +116,7 @@ class RestWorker {
         const body = restOperation.getBody();
         logger.info(`POST operation ${urlpath}`);
 
+        // TODO: pipeline initialization should be moved to function
         validator.validateConfig(body)
             .then((config) => {
                 // place config in state object and save to rest storage
@@ -113,9 +124,14 @@ class RestWorker {
                 // TODO: handle sensitive values prior to save
                 return save.call(this);
             })
+            .then(() => consumers.load(this.state.config))
+            .then((consumersObjs) => {
+                this.consumers = consumersObjs;
+            })
             .then(() => {
-                // update poller (interval)
-                this.poller = scheduler.update(this.poller, systemStats.collect, this.state.config.interval);
+                // start poller if config (interval) exists
+                const dataPipeline = pipeline.create(this.consumers);
+                this.poller = scheduler.start(dataPipeline, this.state.config.interval);
 
                 util.restOperationResponder(restOperation, 200, { message: 'success' });
             })
