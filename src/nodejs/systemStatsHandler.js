@@ -12,7 +12,7 @@ const mustache = require('mustache');
 
 const logger = require('./logger.js');
 const constants = require('./constants.js');
-const http = require('./httpRequestHandler.js');
+const httpRequest = require('./httpRequestHandler.js');
 const normalize = require('./normalize.js');
 const properties = require('./config/properties.json');
 const paths = require('./config/paths.json');
@@ -20,19 +20,31 @@ const paths = require('./config/paths.json');
 const pStats = properties.stats;
 const context = properties.context;
 
+let host;
+let username;
+let password;
+
 /**
  * Get specific data from the REST API
  *
- * @param {Object} uri            - uri to get stat data from
- * @param {Object} options        - options to provide
- * @param {Object} [options.body] - body to send during get stat
- * @param {Object} [options.name] - name of key to store as, will override just using the uri
+ * @param {Object} uri             - uri to get stat data from
+ * @param {Object} options         - options to provide
+ * @param {Object} [options.token] - shared auth token to use for http requests
+ * @param {Object} [options.body]  - body to send, sent via POST request
+ * @param {Object} [options.name]  - name of key to store as, will override default of uri
  *
  * @returns {Object} Promise which is resolved with data
  */
 function getData(uri, options) {
-    // for now assume if body is provided we want to POST
-    const promise = options.body ? http.post(uri, options.body) : http.get(uri);
+    const httpOptions = {};
+    if (options.token) {
+        httpOptions.headers = {
+            'x-f5-auth-token': options.token,
+            'User-Agent': constants.USER_AGENT
+        };
+    }
+    const body = options.body ? options.body : undefined;
+    const promise = body ? httpRequest.post(host, uri, body, httpOptions) : httpRequest.get(host, uri, httpOptions);
 
     return Promise.resolve(promise)
         .then((data) => {
@@ -55,12 +67,21 @@ function getData(uri, options) {
  * @returns {Object} Promise which is resolved with an array containing data
  */
 function getAllData(uris) {
-    const promises = [];
-    uris.forEach((i) => {
-        promises.push(getData(i.endpoint, { body: i.body, name: i.name }));
-    });
+    let promise;
+    if (host === 'localhost') {
+        promise = Promise.resolve({ token: undefined });
+    } else {
+        promise = httpRequest.getAuthToken(host, username, password, {});
+    }
 
-    return Promise.all(promises)
+    return Promise.resolve(promise)
+        .then((token) => {
+            const promises = [];
+            uris.forEach((i) => {
+                promises.push(getData(i.endpoint, { body: i.body, name: i.name, token: token.token }));
+            });
+            return Promise.all(promises);
+        })
         .then((data) => {
             const ret = {};
             data.forEach((i) => {
@@ -77,9 +98,11 @@ function getAllData(uris) {
 /**
  * Collect stats based on array provided in properties
  *
+ * @param {Object} args - required args: { config: {} }
+ *
  * @returns {Object} Promise which is resolved with a map of stats
  */
-function collectStats() {
+function collectStats(args) {
     // simple helper functions
     const splitKey = function (key) {
         const splitKeys = key.split(constants.STATS_KEY_SEP);
@@ -96,6 +119,14 @@ function collectStats() {
         return data[endpoint];
     };
     // end simple helper functions
+
+    const config = args.config;
+    // assume only one target host, for now
+    const targetHost = config.targetHosts[0];
+    host = targetHost.host;
+    username = targetHost.username;
+    password = targetHost.password;
+    if (!host) { throw new Error('Host is required'); }
 
     return getAllData(paths.endpoints)
         .then((data) => {

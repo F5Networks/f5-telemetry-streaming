@@ -9,44 +9,64 @@
 'use strict';
 
 const http = require('http');
+const https = require('https');
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
+const constants = require('./constants');
 
-const defaultOptions = {
-    host: 'localhost',
-    port: 8100,
+const defaultHttpOptions = {
+    host: constants.DEFAULT_HOST,
+    port: constants.DEFAULT_PORT,
     path: '/',
     method: 'GET',
     headers: {
-        Authorization: `Basic ${new Buffer('admin:').toString('base64')}`
-    }
+        Authorization: `Basic ${new Buffer('admin:').toString('base64')}`,
+        'User-Agent': constants.USER_AGENT
+    },
+    rejectUnauthorized: false // default to false for TLS cert verification, for now
 };
 
 /**
  * Perform GET request
  *
- * @param {String} uri - uri to use
+ * @param {String} host              - HTTP host
+ * @param {String} uri               - HTTP uri
+ * @param {Object} options           - function options
+ * @param {Integer} [options.port]   - HTTP port - optional
+ * @param {Object} [options.headers] - HTTP headers - optional
  *
  * @returns {Object}
  */
-function get(uri) {
-    const options = Object.assign({}, defaultOptions);
-    options.path = uri;
+function get(host, uri, options) {
+    const httpOptions = Object.assign({}, defaultHttpOptions);
+    httpOptions.host = host;
+    httpOptions.path = uri;
+    httpOptions.method = 'GET';
 
+    const opts = options === undefined ? {} : options;
+    if (opts.port) { httpOptions.port = opts.port; }
+    if (opts.headers) { httpOptions.headers = opts.headers; }
+
+    const httpRequest = httpOptions.port === 443 ? https : http;
     return new Promise((resolve, reject) => {
-        const req = http.request(options, (res) => {
+        const req = httpRequest.request(httpOptions, (res) => {
             let data = '';
             res.on('data', (chunk) => {
                 data += chunk;
             });
             res.on('end', () => {
-                try {
-                    resolve(JSON.parse(data));
-                } catch (e) {
-                    resolve(data);
+                if (res.statusCode === 200) {
+                    try {
+                        resolve(JSON.parse(data));
+                    } catch (e) {
+                        resolve(data);
+                    }
+                } else {
+                    const msg = `Bad status code: ${res.statusCode} ${res.statusMessage} for GET ${uri}`;
+                    reject(new Error(msg));
                 }
             });
         }).on('error', (e) => {
-            reject(e);
+            reject(new Error(`HTTP error: ${e}`));
         });
         req.end();
     });
@@ -55,31 +75,46 @@ function get(uri) {
 /**
  * Perform POST request
  *
- * @param {String} uri  - uri to use
- * @param {String} body - body to use
+ * @param {String} host              - HTTP host
+ * @param {String} uri               - HTTP uri
+ * @param {String} body              - HTTP body
+ * @param {Object} options           - function options
+ * @param {Integer} [options.port]   - HTTP port - optional
+ * @param {Object} [options.headers] - HTTP headers - optional
  *
  * @returns {Object}
  */
-function post(uri, body) {
-    const options = Object.assign({}, defaultOptions);
-    options.path = uri;
-    options.method = 'POST';
+function post(host, uri, body, options) {
+    const httpOptions = Object.assign({}, defaultHttpOptions);
+    httpOptions.host = host;
+    httpOptions.path = uri;
+    httpOptions.method = 'POST';
 
+    const opts = options === undefined ? {} : options;
+    if (opts.port) { httpOptions.port = opts.port; }
+    if (opts.headers) { httpOptions.headers = opts.headers; }
+
+    const httpRequest = httpOptions.port === 443 ? https : http;
     return new Promise((resolve, reject) => {
-        const req = http.request(options, (res) => {
+        const req = httpRequest.request(httpOptions, (res) => {
             let data = '';
             res.on('data', (chunk) => {
                 data += chunk;
             });
             res.on('end', () => {
-                try {
-                    resolve(JSON.parse(data));
-                } catch (e) {
-                    resolve(data);
+                if (res.statusCode === 200) {
+                    try {
+                        resolve(JSON.parse(data));
+                    } catch (e) {
+                        resolve(data);
+                    }
+                } else {
+                    const msg = `Bad status code: ${res.statusCode} ${res.statusMessage} for POST ${uri} ${body}`;
+                    reject(new Error(msg));
                 }
             });
         }).on('error', (e) => {
-            reject(e);
+            reject(new Error(`HTTP error: ${e}`));
         });
         // write body
         if (body) { req.write(body); }
@@ -87,7 +122,41 @@ function post(uri, body) {
     });
 }
 
+/**
+ * Get auth token
+ *
+ * @param {String} host              - HTTP host
+ * @param {String} username          - device username
+ * @param {String} password          - device password
+ * @param {Object} options           - function options
+ * @param {Integer} [options.port]   - HTTP port - optional
+ *
+ * @returns {Object}
+ */
+function getAuthToken(host, username, password, options) {
+    const uri = '/mgmt/shared/authn/login';
+    const body = JSON.stringify({
+        username,
+        password,
+        loginProviderName: 'tmos'
+    });
+    const postOptions = {
+        port: options.port
+    };
+
+    return post(host, uri, body, postOptions)
+        .then((data) => {
+            const ret = { token: data.token.token };
+            return ret;
+        })
+        .catch((err) => {
+            const msg = `getAuthToken: ${err}`;
+            throw new Error(msg);
+        });
+}
+
 module.exports = {
     get: get, // eslint-disable-line object-shorthand
-    post: post // eslint-disable-line object-shorthand
+    post: post, // eslint-disable-line object-shorthand
+    getAuthToken: getAuthToken // eslint-disable-line object-shorthand
 };
