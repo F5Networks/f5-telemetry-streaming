@@ -16,5 +16,8 @@ module.exports = {
     },
     api: {
         postData: '/services/collector/event'
+    },
+    logging: {
+        prefix: '[telemetry::Splunk]'
     }
 };
