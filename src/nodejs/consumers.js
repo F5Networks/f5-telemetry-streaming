@@ -12,13 +12,12 @@ const path = require('path');
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 const CONSUMERS_DIR = require('./constants.js').CONSUMERS_DIR;
 
-
 /**
 * Load consumer's module
 *
 * @param {Object} modulePath - path to module
 *
-* @returns {Object} module or null when failed to load module
+* @returns {Object|null} module or null when failed to load module
 */
 function loadModule(modulePath) {
     logger.debug(`Trying to load module ${modulePath}`);
@@ -27,26 +26,10 @@ function loadModule(modulePath) {
     try {
         module = require(modulePath); // eslint-disable-line
     } catch (err) {
-        logger.error(`Unable to load module ${modulePath}: ${err}\nDetailed error info:\n`, err);
+        logger.exception(`Unable to load module ${modulePath}`, err);
     }
     return module;
 }
-
-
-/**
-* Dummy function-placeholder
-*
-* @param {Object} data - data for forwarder or translator
-*
-* @returns {Object} data
-*/
-const dummyFunction = function (data) {
-    return new Promise((resolve) => {
-        logger.debug('dummy function');
-        resolve(data);
-    });
-};
-
 
 /**
 * Load plugins for requested consumers
@@ -59,9 +42,8 @@ const dummyFunction = function (data) {
                     loaded plugins. Looks like following:
                     [
                         {
-                            consumer: consumerObj,
-                            translate: translateFunc,
-                            forward: forwardFunc
+                            consumer: function(data, config),
+                            config: [object]
                         },
                         ...
                     ]
@@ -72,29 +54,25 @@ function loadConsumers(config) {
         return Promise.resolve([]);
     }
 
-    return Promise.all(config.consumers.map((consumerObj) => {
+    logger.info(`Loading consumer specific plugins from ${CONSUMERS_DIR}`);
+    return Promise.all(config.consumers.map((consumerConf) => {
         return new Promise((resolve) => {
-            const consumerName = consumerObj.consumer;
+            const consumerName = consumerConf.consumer;
             const consumerDir = './'.concat(path.join(CONSUMERS_DIR, consumerName));
-            // copy consumer's data
-            const newConsumerObj = {
-                consumer: JSON.parse(JSON.stringify(consumerObj))
-            };
 
             logger.info(`Trying to load ${consumerName} plugin from ${consumerDir}`);
-
             const consumerModule = loadModule(consumerDir);
             if (consumerModule === null) {
-                newConsumerObj.translate = dummyFunction;
-                newConsumerObj.forward = dummyFunction;
+                resolve(undefined);
             } else {
-                newConsumerObj.translate = consumerModule.translator;
-                newConsumerObj.forward = consumerModule.forwarder;
+                // copy consumer's data
+                resolve({
+                    config: JSON.parse(JSON.stringify(consumerConf)),
+                    consumer: consumerModule
+                });
             }
-
-            resolve(newConsumerObj);
         });
-    }));
+    })).then(consumers => consumers.filter(consumer => consumer !== undefined));
 }
 
 
