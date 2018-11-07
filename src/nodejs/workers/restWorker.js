@@ -11,7 +11,7 @@
 const logger = require('../logger.js');
 const util = require('../util.js');
 const scheduler = require('../scheduler.js');
-const systemStats = require('../systemStatsHandler.js');
+const stats = require('../stats.js');
 const eventListener = require('../eventListenerHandler.js');
 const validator = require('../validator.js');
 const State = require('../state.js');
@@ -68,7 +68,7 @@ class RestWorker {
                 // start poller, if config exists
                 if (this.state.config.interval) {
                     this.poller = scheduler.start(
-                        systemStats.collect,
+                        stats.process,
                         { config: this.state.config },
                         this.state.config.interval
                     );
@@ -103,12 +103,12 @@ class RestWorker {
             if (!this.state.config.targetHosts) {
                 util.restOperationResponder(restOperation, 400, 'Error: No targetHosts specified, configuration required');
             } else {
-                systemStats.collect({ config: this.state.config })
+                stats.process({ config: this.state.config, noForward: true })
                     .then((data) => {
                         util.restOperationResponder(restOperation, 200, data);
                     })
                     .catch((e) => {
-                        util.restOperationResponder(restOperation, 500, `systemStats.collect error: ${e}`);
+                        util.restOperationResponder(restOperation, 500, `stats.process error: ${e}`);
                     });
             }
             break;
@@ -146,13 +146,13 @@ class RestWorker {
                     if (this.poller) {
                         this.poller = scheduler.update(
                             this.poller,
-                            systemStats.collect,
+                            stats.process,
                             { config: this.state.config },
                             this.state.config.interval
                         );
                     } else {
                         this.poller = scheduler.start(
-                            systemStats.collect,
+                            stats.process,
                             { config: this.state.config },
                             this.state.config.interval
                         );
