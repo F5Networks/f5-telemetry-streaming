@@ -20,7 +20,7 @@ const stringify = function (msg) {
         }
     }
     return msg;
-}
+};
 
 const addPrefix = function (msg) {
     return `${msgPrefix} ${stringify(msg)}`;

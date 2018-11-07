@@ -55,6 +55,7 @@ function loadConsumers(config) {
     }
 
     logger.info(`Loading consumer specific plugins from ${CONSUMERS_DIR}`);
+    // eslint-disable-next-line
     return Promise.all(config.consumers.map((consumerConf) => {
         return new Promise((resolve) => {
             const consumerName = consumerConf.consumer;

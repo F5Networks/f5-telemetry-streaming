@@ -18,6 +18,7 @@
 * @returns {Object} Promise resolved with summary object
 */
 module.exports = function (request) {
+    // eslint-disable-next-line
     return new Promise((resolve) => {
         const data = request.data;
         const networkInterfaces = data.networkInterfaces;
@@ -45,5 +46,4 @@ module.exports = function (request) {
             return newData;
         }));
     });
-    
 };

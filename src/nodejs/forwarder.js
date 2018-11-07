@@ -26,6 +26,7 @@ function forwardData(data, consumers) {
     return new Promise((resolve) => {
         if (Array.isArray(consumers)) {
             // don't relying on plugins' code, wrap consumer's call to Promise
+            // eslint-disable-next-line
             consumers.forEach((consumer) => {
                 return new Promise((lresolve) => {
                     consumer.consumer(data, consumer.config);
