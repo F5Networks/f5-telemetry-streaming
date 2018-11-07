@@ -41,39 +41,53 @@ const sourceTypes = (function loadSourceTypes() {
         }
         logger.debug(`Module ${modulePath} - loaded!`);
     });
+
+    logger.info(`${Object.keys(loadedSourceTypes).length} sourceTypes loaded`);
     return loadedSourceTypes;
 }());
 
-
 /**
-* Add overll all summary to report
+* Add translated data
 *
-* @param {Object} request      - request with included context
-* @param {Object} request.data - normalized data
-* @param {Object} request.context - context information
-*
-* @returns {Object} Promise resolved with summary object
+* @param {Object} request - request object
+* @param {Object} newData - translated data
 */
-function addReportStats(request) {
-    return new Promise((resolve) => {
-        const data = request.data;
-        resolve({
-            time: data.timestamp,
-            host: data.hostname,
-            index: data.rbac_system_index,
-            source: 'bigip.tmsh.stats.summary',
-            sourcetype: 'f5:bigip:stats:iapp:json',
-            event: {
-                aggr_period: data.aggregationPeriod,
-                devicegroup: data.deviceGroup,
-                facility: data.facility,
-                files_sent: request.context.numberOfRequests,
-                bytes_transfered: request.context.dataLength
-            }
-        });
-    });
+function appendData(request, newData) {
+    const context = request.context;
+    const newDataStr = JSON.stringify(newData);
+
+    context.currentChunkLength += newDataStr.length;
+    if (context.currentChunkLength >= constants.maxDataChunkSize) {
+        context.dataLength += context.currentChunkLength;
+        context.currentChunkLength = 0;
+        context.numberOfRequests += 1;
+    }
+    context.translatedData.push(newDataStr);
 }
 
+/**
+* Translate data for specific sourceType
+*
+* @param {string} sourceType - source type
+* @param {Object} request    - request object
+*
+* @returns {Object} Promise resolved with undefined
+*/
+function computeSourceType(sourceType, request) {
+    return new Promise((resolve) => {
+        resolve(sourceTypes[sourceType](request));
+    }).then((data) => {
+        if (data) {
+            if (Array.isArray(data)) {
+                data.forEach(part => appendData(request, part));
+            } else {
+                appendData(request, data);
+            }
+        }
+    }).catch((err) => {
+        logger.error(`computeSourceType::${sourceType} error: ${err}\nDetailed error:\n`, err);
+    });
+}
 
 /**
 * Translate normalized data to Consumer's format
@@ -86,47 +100,23 @@ function addReportStats(request) {
 function translateData(data, consumer) {
     logger.debug('Incoming data for translation');
 
-    const translatedData = [];
     const request = {
         data,
         context: {
             consumer,
             dataLength: 0,
             currentChunkLength: 0,
-            numberOfRequests: 0
+            numberOfRequests: 0,
+            translatedData: []
         }
     };
-    const appendData = function (newData) {
-        const context = request.context;
-        const newDataStr = JSON.stringify(newData);
 
-        context.currentChunkLength += newDataStr.length;
-        if (context.currentChunkLength >= constants.maxDataChunkSize) {
-            context.dataLength += context.currentChunkLength;
-            context.currentChunkLength = 0;
-            context.numberOfRequests += 1;
-        }
-        translatedData.push(newDataStr);
-    };
-
-    const promises = Object.keys(sourceTypes)
-        .map(sourceType => new Promise((resolve) => {
-            resolve(sourceTypes[sourceType](request, consumer));
-        }).then((res) => {
-            if (res !== undefined) {
-                if (Array.isArray(res)) {
-                    res.forEach(part => appendData(part));
-                } else {
-                    appendData(res);
-                }
-            }
-        }).catch(err => logger.error(`translateData::${sourceType} error: ${err}\nDetailed error info:\n`, err)));
-
-    return Promise.all(promises)
-        .then(() => addReportStats(request, translatedData))
-        .then((res) => {
-            appendData(res);
-            return translatedData;
+    return Promise.all(Object.keys(sourceTypes).map(sourceType => computeSourceType(sourceType, request)))
+        .then(() => computeSourceType('bigip.tmsh.stats.summary', request))
+        .then(() => {
+            const translatedData = request.context.translatedData;
+            logger.debug(`Done with data translation. ${translatedData.length} object(s) were translated`);
+            return Promise.resolve(translatedData);
         });
 }
 
