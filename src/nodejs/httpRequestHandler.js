@@ -60,7 +60,7 @@ function get(host, uri, options) {
                         resolve(data);
                     }
                 } else {
-                    reject(new Error(`Bad status code: ${res.statusCode}`));
+                    reject(new Error(`Bad status code: ${res.statusCode} ${res.statusMessage}`));
                 }
             });
         }).on('error', (e) => {
@@ -106,7 +106,7 @@ function post(host, uri, body, options) {
                         resolve(data);
                     }
                 } else {
-                    reject(new Error(`Bad status code: ${res.statusCode}`));
+                    reject(new Error(`Bad status code: ${res.statusCode} ${res.statusMessage}`));
                 }
             });
         }).on('error', (e) => {
@@ -129,25 +129,24 @@ function post(host, uri, body, options) {
  *
  * @returns {Object}
  */
-function getToken(host, username, password, options) {
+function getAuthToken(host, username, password, options) {
     const uri = '/mgmt/shared/authn/login';
     const body = JSON.stringify({
         username,
         password,
         loginProviderName: 'tmos'
     });
-
     const postOptions = {
         port: options.port
     };
 
-    return Promise.resolve(post(host, uri, body, postOptions))
+    return post(host, uri, body, postOptions)
         .then((data) => {
-            logger.debug(`data: ${JSON.stringify(data)}`);
-            return data;
+            const ret = { token: data.token.token };
+            return ret;
         })
         .catch((err) => {
-            const msg = `getToken: ${err}`;
+            const msg = `getAuthToken: ${err}`;
             throw new Error(msg);
         });
 }
@@ -155,5 +154,5 @@ function getToken(host, username, password, options) {
 module.exports = {
     get: get, // eslint-disable-line object-shorthand
     post: post, // eslint-disable-line object-shorthand
-    getToken: getToken // eslint-disable-line object-shorthand
+    getAuthToken: getAuthToken // eslint-disable-line object-shorthand
 };

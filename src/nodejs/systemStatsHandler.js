@@ -19,25 +19,32 @@ const paths = require('./config/paths.json');
 
 const pStats = properties.stats;
 const context = properties.context;
-// const host = constants.DEFAULT_HOST;
-const host = 'sevedge3nic01latest.westus.cloudapp.azure.com';
+
+const host = constants.DEFAULT_HOST;
+const onBigIp = true; // static true, for now
 
 /**
  * Get specific data from the REST API
  *
- * @param {Object} uri            - uri to get stat data from
- * @param {Object} options        - options to provide
- * @param {Object} [options.body] - body to send during get stat
- * @param {Object} [options.name] - name of key to store as, will override just using the uri
+ * @param {Object} uri             - uri to get stat data from
+ * @param {Object} options         - options to provide
+ * @param {Object} [options.token] - shared auth token to use for http requests
+ * @param {Object} [options.body]  - body to send during get stat
+ * @param {Object} [options.name]  - name of key to store as, will override just using the uri
  *
  * @returns {Object} Promise which is resolved with data
  */
 function getData(uri, options) {
-    return Promise.resolve(httpRequest.getToken(host, 'admin', 'admin', {}))
-        .then((token) => {
-            logger.debug(`token: ${token}`);
-            return options.body ? httpRequest.post(host, uri, options.body, {}) : httpRequest.get(host, uri, {});
-        })
+    const httpOptions = {};
+    if (options.token) {
+        httpOptions.headers = {
+            'x-f5-auth-token': options.token
+        };
+    }
+    const body = options.body ? options.body : undefined;
+    const promise = body ? httpRequest.post(host, uri, body, httpOptions) : httpRequest.get(host, uri, httpOptions);
+
+    return Promise.resolve(promise)
         .then((data) => {
             // use uri unless explicit name is provided
             const nameToUse = options.name ? options.name : uri;
@@ -58,12 +65,22 @@ function getData(uri, options) {
  * @returns {Object} Promise which is resolved with an array containing data
  */
 function getAllData(uris) {
-    const promises = [];
-    uris.forEach((i) => {
-        promises.push(getData(i.endpoint, { body: i.body, name: i.name }));
-    });
+    let promise;
+    if (onBigIp) {
+        promise = Promise.resolve({ token: undefined });
+    } else {
+        // TODO: provide via declaration
+        promise = httpRequest.getAuthToken(host, 'admin', 'admin', {});
+    }
 
-    return Promise.all(promises)
+    return Promise.resolve(promise)
+        .then((token) => {
+            const promises = [];
+            uris.forEach((i) => {
+                promises.push(getData(i.endpoint, { body: i.body, name: i.name, token: token.token }));
+            });
+            return Promise.all(promises);
+        })
         .then((data) => {
             const ret = {};
             data.forEach((i) => {
