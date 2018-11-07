@@ -25,8 +25,7 @@
                         "path": {
                             "title": "API path to post data",
                             "description": "",
-                            "type": "string",
-                            "default": ""
+                            "type": "string"
                         },
                         "token": {
                             "title": "API auth token",
