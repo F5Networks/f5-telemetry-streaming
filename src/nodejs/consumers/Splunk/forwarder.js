@@ -9,7 +9,6 @@
 'use strict';
 
 const request = require('request');
-const url = require('url');
 const zlib = require('zlib');
 
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
@@ -89,11 +88,12 @@ function sendDataChunk(dataChunk, context) {
         };
         context.request.post(opts, (error, response, body) => {
             if (error || !response || response.statusCode >= 300) {
-                logger.error('sendDataChunk::response error:\n', JSON.stringify({
+                const errMsg = JSON.stringify({
                     error,
                     body,
                     statusCode: response ? response.statusCode : undefined
-                }, null, 2));
+                }, null, 2);
+                logger.error(`sendDataChunk::response error:\n${errMsg}`);
                 reject(new Error('badResponse'));
             } else {
                 resolve(response.statusCode);
@@ -134,7 +134,7 @@ function forwardData(dataToSend, consumer) {
                 sendDataChunk(dataChunk, context).then((res) => {
                     logger.debug(`Response status code: ${res}`);
                 }).catch((err) => {
-                    logger.error(`Unable to send data chuck: ${err}\n`, err);
+                    logger.exception('Unable to send data chuck', err);
                 });
 
                 if (i !== dataToSend.length) {
