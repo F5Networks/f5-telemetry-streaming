@@ -14,6 +14,30 @@ const util = require('./util.js');
 const normalizeUtil = require('./normalizeUtil.js');
 
 /**
+ * Format as JSON - assume data looks similar to this: KEY1="value",KEY2="value"
+ *
+ * @param {Object} data - data
+ *
+ * @returns {Object} Returns data as JSON
+ */
+function formatAsJson(data) {
+    const ret = {};
+    // place in try/catch in case this event is malformed
+    try {
+        const dataToFormat = data.replace(/\n/g, '');
+        const baseSplit = dataToFormat.split(',');
+        baseSplit.forEach((i) => {
+            const keySplit = i.split('=');
+            const keyValue = keySplit[1].replace(/"/g, '');
+            ret[keySplit[0]] = keyValue;
+        });
+    } catch (e) {
+        logger.error(`formatAsJson error: ${e}`);
+    }
+    return ret;
+}
+
+/**
  * Run custom function
  *
  * @param {Object} data           - data
@@ -168,6 +192,18 @@ function reduceData(data, options) {
 }
 
 /**
+ * Normalize event
+ *
+ * @param {Object} data - data to normalize
+ *
+ * @returns {Object} Returns normalized data
+ */
+function normalizeEvent(data) {
+    const ret = formatAsJson(data);
+    return ret;
+}
+
+/**
  * Normalize data - standardize and reduce complexity
  *
  * @param {Object} data                          - data to normalize
@@ -201,5 +237,6 @@ function normalizeData(data, options) {
 }
 
 module.exports = {
-    data: normalizeData
+    data: normalizeData,
+    event: normalizeEvent
 };
