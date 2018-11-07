@@ -5,7 +5,7 @@ This is where you put your list of files.
 
 
 .. toctree::
-   :caption: Telmeetry Services:
+   :caption: Telemetry Services:
    :glob:
    :maxdepth: 3
 
