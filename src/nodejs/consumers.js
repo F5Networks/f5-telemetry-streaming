@@ -40,9 +40,11 @@ function loadModule(modulePath) {
 *
 * @returns {Object} data
 */
-const dummyFunction = async (data) => {
-    logger.debug('dummy function');
-    return data;
+const dummyFunction = function (data) {
+    return new Promise((resolve) => {
+        logger.debug('dummy function');
+        resolve(data);
+    });
 };
 
 
@@ -64,32 +66,34 @@ const dummyFunction = async (data) => {
                         ...
                     ]
 */
-async function loadConsumers(config) {
+function loadConsumers(config) {
     if (!Array.isArray(config.consumers)) {
         logger.info('No consumer(s) defined in config');
         return Promise.resolve([]);
     }
 
-    return Promise.all(config.consumers.map(async (consumerObj) => {
-        const consumerName = consumerObj.consumer;
-        const consumerDir = './'.concat(path.join(CONSUMERS_DIR, consumerName));
-        // copy consumer's data
-        const newConsumerObj = {
-            consumer: JSON.parse(JSON.stringify(consumerObj))
-        };
+    return Promise.all(config.consumers.map((consumerObj) => {
+        return new Promise((resolve) => {
+            const consumerName = consumerObj.consumer;
+            const consumerDir = './'.concat(path.join(CONSUMERS_DIR, consumerName));
+            // copy consumer's data
+            const newConsumerObj = {
+                consumer: JSON.parse(JSON.stringify(consumerObj))
+            };
 
-        logger.info(`Trying to load ${consumerName} plugin from ${consumerDir}`);
+            logger.info(`Trying to load ${consumerName} plugin from ${consumerDir}`);
 
-        const consumerModule = loadModule(consumerDir);
-        if (consumerModule === null) {
-            newConsumerObj.translate = dummyFunction;
-            newConsumerObj.forward = dummyFunction;
-        } else {
-            newConsumerObj.translate = consumerModule.translator;
-            newConsumerObj.forward = consumerModule.forwarder;
-        }
+            const consumerModule = loadModule(consumerDir);
+            if (consumerModule === null) {
+                newConsumerObj.translate = dummyFunction;
+                newConsumerObj.forward = dummyFunction;
+            } else {
+                newConsumerObj.translate = consumerModule.translator;
+                newConsumerObj.forward = consumerModule.forwarder;
+            }
 
-        return newConsumerObj;
+            resolve(newConsumerObj);
+        });
     }));
 }
 

@@ -8,4 +8,6 @@
 
 'use strict';
 
-module.exports = async () => undefined;
+module.exports = function () {
+    return new Promise(resolve => resolve());
+};

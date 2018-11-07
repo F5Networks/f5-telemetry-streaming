@@ -54,22 +54,24 @@ const sourceTypes = (function loadSourceTypes() {
 *
 * @returns {Object} Promise resolved with summary object
 */
-async function addReportStats(request) {
-    const data = request.data;
-    return {
-        time: data.timestamp,
-        host: data.hostname,
-        index: data.rbac_system_index,
-        source: 'bigip.tmsh.stats.summary',
-        sourcetype: 'f5:bigip:stats:iapp:json',
-        event: {
-            aggr_period: data.aggregationPeriod,
-            devicegroup: data.deviceGroup,
-            facility: data.facility,
-            files_sent: request.context.numberOfRequests,
-            bytes_transfered: request.context.dataLength
-        }
-    };
+function addReportStats(request) {
+    return new Promise((resolve) => {
+        const data = request.data;
+        resolve({
+            time: data.timestamp,
+            host: data.hostname,
+            index: data.rbac_system_index,
+            source: 'bigip.tmsh.stats.summary',
+            sourcetype: 'f5:bigip:stats:iapp:json',
+            event: {
+                aggr_period: data.aggregationPeriod,
+                devicegroup: data.deviceGroup,
+                facility: data.facility,
+                files_sent: request.context.numberOfRequests,
+                bytes_transfered: request.context.dataLength
+            }
+        });
+    });
 }
 
 
@@ -81,7 +83,7 @@ async function addReportStats(request) {
 *
 * @returns {Object} Promise resolved with list of translated data
 */
-async function translateData(data, consumer) {
+function translateData(data, consumer) {
     logger.debug('Incoming data for translation');
 
     const translatedData = [];

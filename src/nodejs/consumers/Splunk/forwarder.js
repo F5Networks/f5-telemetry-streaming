@@ -26,9 +26,12 @@ const constants = require('./constants.js');
 * @returns {Object} request.defaults instance
 */
 function defaultRequest(consumer) {
-    const baseURL = new url.URL(`${consumer.destination.protocol}://${consumer.destination.address}`);
-    baseURL.port = consumer.destination.port;
-    baseURL.pathname = consumer.api.path !== undefined ? consumer.api.path : constants.api.postData;
+    let baseURL = `${consumer.destination.protocol}://${consumer.destination.address}`;
+    if (consumer.destination.port !== undefined) {
+        baseURL = `${baseURL}:${consumer.destination.port}`;
+    }
+    const pathname = consumer.api.path !== undefined ? consumer.api.path : constants.api.postData;
+    baseURL = `${baseURL}${pathname}`;
 
     const defaults = {
         url: baseURL,
@@ -58,7 +61,7 @@ function defaultRequest(consumer) {
 *
 * @returns {Object} Promise object resolved with response's statusCode
 */
-async function sendDataChunk(dataChunk, context) {
+function sendDataChunk(dataChunk, context) {
     return new Promise((resolve, reject) => {
         const data = dataChunk.join('');
 
@@ -84,12 +87,12 @@ async function sendDataChunk(dataChunk, context) {
                 'Content-Length': data.length
             }
         };
-        context.request.post(opts, async (error, response, body) => {
+        context.request.post(opts, (error, response, body) => {
             if (error || !response || response.statusCode >= 300) {
                 logger.error('sendDataChunk::response error:\n', JSON.stringify({
                     error,
                     body,
-                    statusCode: response.statusCode
+                    statusCode: response ? response.statusCode : undefined
                 }, null, 2));
                 reject(new Error('badResponse'));
             } else {
@@ -107,38 +110,41 @@ async function sendDataChunk(dataChunk, context) {
 * @param {Object} consumer     - consumer object
 *
 */
-async function forwardData(dataToSend, consumer) {
-    logger.debug('Incoming data for forwarding');
+function forwardData(dataToSend, consumer) {
+    return new Promise((resolve) => {
+        logger.debug('Incoming data for forwarding');
 
-    const context = {
-        request: defaultRequest(consumer),
-        consumer
-    };
+        const context = {
+            request: defaultRequest(consumer),
+            consumer
+        };
 
-    let dataChunk = [];
-    let chunkSize = 0;
+        let dataChunk = [];
+        let chunkSize = 0;
 
-    // eslint-disable-next-line
-    for (let i = 0; i < dataToSend.length; i++) {
-        const data = dataToSend[i];
+        // eslint-disable-next-line
+        for (let i = 0; i < dataToSend.length; i++) {
+            const data = dataToSend[i];
 
-        if (chunkSize < constants.maxDataChunkSize) {
-            chunkSize += data.length;
-            dataChunk.push(data);
-        }
-        if (chunkSize >= constants.maxDataChunkSize || i === dataToSend.length - 1) {
-            sendDataChunk(dataChunk, context).then((res) => {
-                logger.debug(`Response status code: ${res}`);
-            }).catch((err) => {
-                logger.err(`Unable to send data chuck: ${err}`);
-            });
+            if (chunkSize < constants.maxDataChunkSize) {
+                chunkSize += data.length;
+                dataChunk.push(data);
+            }
+            if (chunkSize >= constants.maxDataChunkSize || i === dataToSend.length - 1) {
+                sendDataChunk(dataChunk, context).then((res) => {
+                    logger.debug(`Response status code: ${res}`);
+                }).catch((err) => {
+                    logger.error(`Unable to send data chuck: ${err}\n`, err);
+                });
 
-            if (i !== dataToSend.length) {
-                dataChunk = [];
-                chunkSize = 0;
+                if (i !== dataToSend.length) {
+                    dataChunk = [];
+                    chunkSize = 0;
+                }
             }
         }
-    }
+        resolve(true);
+    });
 }
 
 
