@@ -3,11 +3,9 @@ F5 Telemetry Services
 
 This is where you put your list of files.
 
-This is a story about elephants. You will use it to learn about GitHub and markdown. Yay.
-
 
 .. toctree::
-   :caption: Our Story:
+   :caption: Telmeetry Services:
    :glob:
    :maxdepth: 3
 
