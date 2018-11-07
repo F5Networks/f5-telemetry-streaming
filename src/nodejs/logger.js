@@ -29,8 +29,10 @@ levels: {
 const error = function (msg) { logger.severe(addPrefix(msg)); };
 const info = function (msg) { logger.info(addPrefix(msg)); };
 const debug = function (msg) { logger.finest(addPrefix(msg)); };
+const exception = function (msg, err) { logger.finest(addPrefix(`${msg}\nTraceback:\n${err.stack || 'no traceback available'}`)); };
 
 module.exports = {
+    exception,
     error,
     info,
     debug
