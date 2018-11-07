@@ -61,7 +61,8 @@ function get(host, uri, options) {
                         resolve(data);
                     }
                 } else {
-                    reject(new Error(`Bad status code: ${res.statusCode} ${res.statusMessage}`));
+                    const msg = `Bad status code: ${res.statusCode} ${res.statusMessage} for GET ${uri}`;
+                    reject(new Error(msg));
                 }
             });
         }).on('error', (e) => {
@@ -85,6 +86,7 @@ function get(host, uri, options) {
  */
 function post(host, uri, body, options) {
     const httpOptions = Object.assign({}, defaultHttpOptions);
+    httpOptions.host = host;
     httpOptions.path = uri;
     httpOptions.method = 'POST';
 
@@ -107,7 +109,8 @@ function post(host, uri, body, options) {
                         resolve(data);
                     }
                 } else {
-                    reject(new Error(`Bad status code: ${res.statusCode} ${res.statusMessage}`));
+                    const msg = `Bad status code: ${res.statusCode} ${res.statusMessage} for POST ${uri} ${body}`;
+                    reject(new Error(msg));
                 }
             });
         }).on('error', (e) => {

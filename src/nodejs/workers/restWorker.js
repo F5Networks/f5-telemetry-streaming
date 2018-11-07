@@ -99,13 +99,17 @@ class RestWorker {
 
         switch (path[3]) {
         case 'statsInfo':
-            systemStats.collect({ config: this.state.config })
-                .then((data) => {
-                    util.restOperationResponder(restOperation, 200, data);
-                })
-                .catch((e) => {
-                    util.restOperationResponder(restOperation, 500, `systemStats.collect error: ${e}`);
-                });
+            if (!this.state.config.targetHosts) {
+                util.restOperationResponder(restOperation, 400, 'Error: No targetHosts specified, configuration required');
+            } else {
+                systemStats.collect({ config: this.state.config })
+                    .then((data) => {
+                        util.restOperationResponder(restOperation, 200, data);
+                    })
+                    .catch((e) => {
+                        util.restOperationResponder(restOperation, 500, `systemStats.collect error: ${e}`);
+                    });
+            }
             break;
         default:
             util.restOperationResponder(restOperation, 400, `Bad URL: ${urlPath}`);

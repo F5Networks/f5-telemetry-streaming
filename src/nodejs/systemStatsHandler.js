@@ -72,7 +72,6 @@ function getAllData(uris) {
     if (host === 'localhost') {
         promise = Promise.resolve({ token: undefined });
     } else {
-        // TODO: provide via declaration
         promise = httpRequest.getAuthToken(host, username, password, {});
     }
 
