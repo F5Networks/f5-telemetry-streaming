@@ -10,7 +10,7 @@
 
 const mustache = require('mustache');
 
-const logger = require('./logger.js');
+const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 const constants = require('./constants.js');
 const httpRequest = require('./httpRequestHandler.js');
 const normalize = require('./normalize.js');
@@ -20,22 +20,19 @@ const paths = require('./config/paths.json');
 const pStats = properties.stats;
 const context = properties.context;
 
-let host;
-let username;
-let password;
-
 /**
  * Get specific data from the REST API
  *
  * @param {Object} uri             - uri to get stat data from
- * @param {Object} options         - options to provide
+ * @param {Object} host            - host to get stat data from
+ * @param {Object} options         - function options
  * @param {Object} [options.token] - shared auth token to use for http requests
  * @param {Object} [options.body]  - body to send, sent via POST request
  * @param {Object} [options.name]  - name of key to store as, will override default of uri
  *
  * @returns {Object} Promise which is resolved with data
  */
-function getData(uri, options) {
+function getData(uri, host, options) {
     const httpOptions = {};
     if (options.token) {
         httpOptions.headers = {
@@ -62,15 +59,19 @@ function getData(uri, options) {
 /**
  * Get all data
  *
- * @param {Object} uris - list of uris formatted like so: { endpoint: 'uri' }
+ * @param {Object} uris     - list of uris formatted like so: { endpoint: 'uri' }
+ * @param {String} host     - host
+ * @param {String} username - username for host
+ * @param {String} password - password for host
  *
  * @returns {Object} Promise which is resolved with an array containing data
  */
-function getAllData(uris) {
+function getAllData(uris, host, username, password) {
     let promise;
     if (host === 'localhost') {
         promise = Promise.resolve({ token: undefined });
     } else {
+        if (!username || !password) { throw new Error('Username and password required'); }
         promise = httpRequest.getAuthToken(host, username, password, {});
     }
 
@@ -78,7 +79,7 @@ function getAllData(uris) {
         .then((token) => {
             const promises = [];
             uris.forEach((i) => {
-                promises.push(getData(i.endpoint, { body: i.body, name: i.name, token: token.token }));
+                promises.push(getData(i.endpoint, host, { body: i.body, name: i.name, token: token.token }));
             });
             return Promise.all(promises);
         })
@@ -98,11 +99,13 @@ function getAllData(uris) {
 /**
  * Collect stats based on array provided in properties
  *
- * @param {Object} args - required args: { config: {} }
+ * @param {String} host     - host
+ * @param {String} username - username for host
+ * @param {String} password - password for host
  *
  * @returns {Object} Promise which is resolved with a map of stats
  */
-function collectStats(args) {
+function collectStats(host, username, password) {
     // simple helper functions
     const splitKey = function (key) {
         const splitKeys = key.split(constants.STATS_KEY_SEP);
@@ -120,15 +123,7 @@ function collectStats(args) {
     };
     // end simple helper functions
 
-    const config = args.config;
-    // assume only one target host, for now
-    const targetHost = config.targetHosts[0];
-    host = targetHost.host;
-    username = targetHost.username;
-    password = targetHost.password;
-    if (!host) { throw new Error('Host is required'); }
-
-    return getAllData(paths.endpoints)
+    return getAllData(paths.endpoints, host, username, password)
         .then((data) => {
             const ret = data;
             return Promise.resolve(ret);
@@ -166,8 +161,6 @@ function collectStats(args) {
                     ret[k] = statData;
                 }
             });
-
-            logger.debug('collectStats success');
             return ret;
         })
         .catch((err) => {
