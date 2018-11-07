@@ -9,12 +9,21 @@
 'use strict';
 
 const logger = require('f5-logger').getInstance(); // eslint-disable-line import/no-unresolved
+const msgPrefix = require('./constants.js').logging.prefix;
 
 const stringify = function (msg) {
     if (typeof msg === 'object') {
-        msg = JSON.stringify(msg);
+        try {
+            msg = JSON.stringify(msg);
+        } catch (e) {
+            // just leave original message intact
+        }
     }
-    return `[telemetry::Splunk] ${msg}`;
+    return msg;
+}
+
+const addPrefix = function (msg) {
+    return `${msgPrefix} ${stringify(msg)}`;
 };
 
 /* f5-logger module supports the following levels
@@ -28,11 +37,13 @@ levels: {
     severe: 6
 }
 */
-const error = function (msg) { logger.severe(stringify(msg)); };
-const info = function (msg) { logger.info(stringify(msg)); };
-const debug = function (msg) { logger.finest(stringify(msg)); };
+const error = function (msg) { logger.severe(addPrefix(msg)); };
+const info = function (msg) { logger.info(addPrefix(msg)); };
+const debug = function (msg) { logger.finest(addPrefix(msg)); };
+const exception = function (msg, err) { logger.finest(addPrefix(`${msg}\nTraceback:\n${err.stack || 'no traceback available'}`)); };
 
 module.exports = {
+    exception,
     error,
     info,
     debug
