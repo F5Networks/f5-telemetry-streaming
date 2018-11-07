@@ -20,10 +20,10 @@ const paths = require('./config/paths.json');
 const pStats = properties.stats;
 const context = properties.context;
 
-const host = constants.DEFAULT_HOST;
-const onBigIp = true; // static true, for now
-
 let persistedConfig;
+let host;
+let username;
+let password;
 
 /**
  * Get specific data from the REST API
@@ -69,11 +69,11 @@ function getData(uri, options) {
  */
 function getAllData(uris) {
     let promise;
-    if (onBigIp) {
+    if (host === 'localhost') {
         promise = Promise.resolve({ token: undefined });
     } else {
         // TODO: provide via declaration
-        promise = httpRequest.getAuthToken(host, 'admin', 'admin', {});
+        promise = httpRequest.getAuthToken(host, username, password, {});
     }
 
     return Promise.resolve(promise)
@@ -100,9 +100,11 @@ function getAllData(uris) {
 /**
  * Collect stats based on array provided in properties
  *
+ * @param {Object} args - required args: { config: {} }
+ *
  * @returns {Object} Promise which is resolved with a map of stats
  */
-function collectStats(config) {
+function collectStats(args) {
     // simple helper functions
     const splitKey = function (key) {
         const splitKeys = key.split(constants.STATS_KEY_SEP);
@@ -120,9 +122,13 @@ function collectStats(config) {
     };
     // end simple helper functions
 
-    // TODO: use this
-    persistedConfig = config;
-    logger.debug(`persistedConfig: ${JSON.stringify(persistedConfig)}`);
+    persistedConfig = args.config;
+    // assume only one target host, for now
+    const targetHost = persistedConfig.targetHosts[0];
+    host = targetHost.host;
+    username = targetHost.username;
+    password = targetHost.password;
+    if (!host) { throw new Error('Host is required'); }
 
     return getAllData(paths.endpoints)
         .then((data) => {

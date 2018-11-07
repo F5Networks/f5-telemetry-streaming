@@ -129,6 +129,8 @@ class RestWorker {
         case 'declare':
             validator.validateConfig(body)
                 .then((config) => {
+                    logger.debug(`Validated Config: ${util.stringify(config)}`);
+
                     // place config in state object and save to rest storage
                     this.state.config = config;
                     // TODO: handle sensitive values prior to save
