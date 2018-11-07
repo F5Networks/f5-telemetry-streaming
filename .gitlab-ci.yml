@@ -84,36 +84,36 @@ pages:
  - branches
 
  # Publish ONLY staging branch to clouddocs.f5networks.net.
-Publish docs to staging:
- image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
- stage: deploy
- environment: 
- name: staging
- url: https://clouddocs.f5networks.net/cloud/public/v1
- tags:
- - cm-official-docker-executor
- only:
- - staging@cloudsolutions/ve-public-cloud
- dependencies:
- - build docs
- script:
- - aws s3 sync docs/_build/html s3://clouddocs.f5networks.net/cloud/public/v1
+# Publish docs to staging:
+#  image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
+#  stage: deploy
+#  environment: 
+#  name: staging
+#  url: https://clouddocs.f5networks.net/cloud/public/v1
+#  tags:
+#  - cm-official-docker-executor
+#  only:
+#  - staging@cloudsolutions/ve-public-cloud
+#  dependencies:
+#  - build docs
+#  script:
+#  - aws s3 sync docs/_build/html s3://clouddocs.f5networks.net/cloud/public/v1
  # create invalidation to clear cloudfront cache
- - aws cloudfront create-invalidation --distribution-id $AWS_DIST --paths /cloud/public/v1/
+#  - aws cloudfront create-invalidation --distribution-id $AWS_DIST --paths /cloud/public/v1/
  # Publish ONLY master branch to clouddocs.f5.com
-Publish docs to internet:
- image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
- stage: deploy
- environment: 
- name: production
- url: https://clouddocs.f5.com/cloud/public/v1
- tags:
- - cm-official-docker-executor
- only:
- - master@cloudsolutions/ve-public-cloud
- dependencies:
- - build docs
- script:
- - publish-cloud-docs-to-prod public v1
- # create invalidation to clear cloudfront cache
- - aws cloudfront create-invalidation --distribution-id $AWS_DIST --paths /cloud/public/v1/
+# Publish docs to internet:
+#  image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
+#  stage: deploy
+#  environment: 
+#  name: production
+#  url: https://clouddocs.f5.com/cloud/public/v1
+#  tags:
+#  - cm-official-docker-executor
+#  only:
+#  - master@cloudsolutions/ve-public-cloud
+#  dependencies:
+#  - build docs
+# script:
+# - publish-cloud-docs-to-prod public v1
+# create invalidation to clear cloudfront cache
+# - aws cloudfront create-invalidation --distribution-id $AWS_DIST --paths /cloud/public/v1/
