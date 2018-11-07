@@ -10,19 +10,32 @@
 
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 
-
 /**
 * Forward data to consumer
 *
 * @param {Object} data - data to forward
 * @param {Object} consumer - consumer object
-* @param {Object} consumer.consumer - consumer's config
-* @param {function} consumer.forward - async function to forward data
+* @param {Object} consumer.consumer - consumer's function(data, config)
+* @param {Object} consumer.config - consumer's config
 *
-* @returns {Object} Promise object
+* @returns {Object} Promise object resolved with undefined
 */
-function forwardData(data, consumer) {
-    return new Promise(resolve => consumer.forward(data, consumer.consumer).then(resolve));
+function forwardData(data, consumers) {
+    logger.debug('Data forwarder');
+
+    return new Promise((resolve) => {
+        if (Array.isArray(consumers)) {
+            // don't relying on plugins' code, wrap consumer's call to Promise
+            consumers.forEach((consumer) => {
+                return new Promise((lresolve) => {
+                    consumer.consumer(data, consumer.config);
+                    lresolve();
+                }).catch(err => logger.exception('Error on data forwarding to consumer', err));
+            });
+        }
+        // anyway resolve promise
+        resolve();
+    });
 }
 
 

@@ -10,19 +10,16 @@
 
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 
-
 /**
-* Translate data for consumer
+* Translate data, add additional info if needed
 *
 * @param {Object} data - data to translate
-* @param {Object} consumer - consumer object
-* @param {Object} consumer.consumer - consumer's config
-* @param {function} consumer.translate - async function to translate data
 *
-* @returns {Object} Promise object
+* @returns {Object} Promise object resolved with translated data
 */
-function translateData(data, consumer) {
-    return new Promise(resolve => consumer.translate(data, consumer.consumer).then(resolve));
+function translateData(data) {
+    logger.debug('Data translator');
+    return new Promise(resolve => resolve(data));
 }
 
 

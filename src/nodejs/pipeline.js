@@ -8,9 +8,10 @@
 
 'use strict';
 
-const forwarder = require('./forwarder.js');
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
+const forwarder = require('./forwarder.js');
 const translator = require('./translator.js');
+const stats = require('./systemStatsHandler.js');
 
 
 /**
@@ -22,13 +23,19 @@ const translator = require('./translator.js');
 *
 * @returns {function} Promise object
 */
-function pipeline(data, consumer) {
-    return translator(data, consumer)
-        .then(res => forwarder(res, consumer))
-        .catch((err) => {
-            logger.error(`pipeline error! Consumer ${consumer.consumer}.\nDetailed error:`, err);
-        });
+function createPipeline(consumers) {
+    logger.info('Initializing pipeline');
+    return function () {
+        return stats.collect()
+            .then(translator)
+            .then(data => forwarder(data, consumers))
+            .catch((err) => {
+                logger.exception('Data pipeline error', err);
+            });
+    };
 }
 
 
-module.exports = pipeline;
+module.exports = {
+    create: createPipeline
+};
