@@ -8,11 +8,15 @@
 
 'use strict';
 
+const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 const forwarder = require('./forwarder.js');
 const translator = require('./translator.js');
 
-
-module.exports = {
-    forwarder,
-    translator
+module.exports = function (data, consumer) {
+    logger.debug('Received data');
+    translator(data, consumer)
+        .then(translatedData => forwarder(translatedData, consumer))
+        .catch((err) => {
+            logger.exception('Data processing error.', err);
+        });
 };
