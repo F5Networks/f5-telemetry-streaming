@@ -4,7 +4,7 @@ stages:
 - test
 - build
 - review
-- deploy
+# - deploy
 
 test package:
     image: f5devcentral/containthedocs:rpmbuild
