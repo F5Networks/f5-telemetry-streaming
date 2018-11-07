@@ -8,6 +8,15 @@
 
 'use strict';
 
+/**
+* Device status summary
+*
+* @param {Object} request         - request with included context
+* @param {Object} request.data    - normalized data
+* @param {Object} request.context - context information
+*
+* @returns {Object} Promise resolved with summary object
+*/
 module.exports = function (request) {
     return new Promise((resolve) => {
         const data = request.data;

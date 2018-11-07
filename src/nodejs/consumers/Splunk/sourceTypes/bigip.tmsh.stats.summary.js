@@ -9,7 +9,7 @@
 'use strict';
 
 /**
-* Network interfaces summary
+* Report's overll summary
 *
 * @param {Object} request         - request with included context
 * @param {Object} request.data    - normalized data
@@ -20,30 +20,19 @@
 module.exports = function (request) {
     return new Promise((resolve) => {
         const data = request.data;
-        const networkInterfaces = data.networkInterfaces;
-        if (networkInterfaces === undefined) return undefined;
-
-        const template = {
+        resolve({
             time: data.timestamp,
             host: data.hostname,
             index: data.rbac_system_index,
-            source: 'bigip.tmsh.interface_status',
-            sourcetype: 'f5:bigip:status:iapp:json',
+            source: 'bigip.tmsh.stats.summary',
+            sourcetype: 'f5:bigip:stats:iapp:json',
             event: {
                 aggr_period: data.aggregationPeriod,
-                device_base_mac: data.baseMac,
                 devicegroup: data.deviceGroup,
-                facility: data.facility
+                facility: data.facility,
+                files_sent: request.context.numberOfRequests,
+                bytes_transfered: request.context.dataLength
             }
-        };
-
-        resolve(Object.keys(networkInterfaces).map((key) => {
-            const newData = Object.assign({}, template);
-            newData.event = Object.assign({}, template.event);
-            newData.event.interface_name = key;
-            newData.event.interface_status = networkInterfaces[key].status;
-            return newData;
-        }));
+        });
     });
-    
 };
