@@ -66,7 +66,7 @@ source_encoding = 'utf-8-sig'
 master_doc = 'index'
 
 # General information about the project.
-project = u'The elephant story'
+project = u'Telemetry Services'
 copyright = u'2018 F5 Networks Inc'
 author = u'F5 Networks'
 
