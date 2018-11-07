@@ -19,7 +19,8 @@ const defaultHttpOptions = {
     path: '/',
     method: 'GET',
     headers: {
-        Authorization: `Basic ${new Buffer('admin:').toString('base64')}`
+        Authorization: `Basic ${new Buffer('admin:').toString('base64')}`,
+        'User-Agent': constants.USER_AGENT
     },
     rejectUnauthorized: false // default to false for TLS cert verification, for now
 };

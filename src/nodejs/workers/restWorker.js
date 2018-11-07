@@ -14,19 +14,18 @@ const scheduler = require('../scheduler.js');
 const systemStats = require('../systemStatsHandler.js');
 const eventListener = require('../eventListenerHandler.js');
 const validator = require('../validator.js');
-
-const baseStateObj = {
-    config: {}
-};
+const State = require('../state.js');
 
 class RestWorker {
     constructor() {
-        this.WORKER_URI_PATH = 'shared/telemetry/declare';
+        this.WORKER_URI_PATH = 'shared/telemetry';
         this.isPassThrough = true;
         this.isPublic = true;
 
-        // default state object
-        this.state = baseStateObj;
+        // default state assignment
+        this.state = {};
+        // default poller assignment
+        this.poller = undefined;
         // default listener port
         this.eventListenerPort = 40000;
     }
@@ -61,13 +60,18 @@ class RestWorker {
     // eslint-disable-next-line no-unused-vars
     onStartCompleted(success, failure, state, errMsg) {
         // first load state from rest storage
-        load.call(this)
-            .then(() => {
+        State.load(this)
+            .then((loadedState) => {
+                this.state = loadedState;
                 logger.debug(`loaded this.state: ${util.stringify(this.state)}`);
 
-                // start poller if config (interval) exists
+                // start poller, if config (interval) exists
                 if (this.state.config.interval) {
-                    this.poller = scheduler.start(systemStats.collect, this.state.config.interval);
+                    this.poller = scheduler.start(
+                        systemStats.collect,
+                        { config: this.state.config },
+                        this.state.config.interval
+                    );
                 }
                 // TODO: re-evaluate this
                 eventListener.start(this.eventListenerPort);
@@ -89,10 +93,24 @@ class RestWorker {
      * @returns {void}
      */
     onGet(restOperation) {
-        const urlpath = restOperation.getUri().href;
-        logger.info(`GET operation ${urlpath}`);
+        const urlPath = restOperation.getUri().href;
+        const path = restOperation.getUri().pathname.split('/');
+        logger.debug(`GET operation ${urlPath}`);
 
-        util.restOperationResponder(restOperation, 200, {});
+        switch (path[3]) {
+        case 'statsInfo':
+            systemStats.collect({ config: this.state.config })
+                .then((data) => {
+                    util.restOperationResponder(restOperation, 200, data);
+                })
+                .catch((e) => {
+                    util.restOperationResponder(restOperation, 500, `systemStats.collect error: ${e}`);
+                });
+            break;
+        default:
+            util.restOperationResponder(restOperation, 400, `Bad URL: ${urlPath}`);
+            break;
+        }
     }
 
     /**
@@ -102,27 +120,47 @@ class RestWorker {
      * @returns {void}
      */
     onPost(restOperation) {
-        const urlpath = restOperation.getUri().href;
+        const urlPath = restOperation.getUri().href;
+        const path = restOperation.getUri().pathname.split('/');
         const body = restOperation.getBody();
-        logger.info(`POST operation ${urlpath}`);
+        logger.debug(`POST operation ${urlPath}`);
 
-        validator.validateConfig(body)
-            .then((config) => {
-                // place config in state object and save to rest storage
-                this.state.config = config;
-                // TODO: handle sensitive values prior to save
-                return save.call(this);
-            })
-            .then(() => {
-                // update poller (interval)
-                this.poller = scheduler.update(this.poller, systemStats.collect, this.state.config.interval);
-
-                util.restOperationResponder(restOperation, 200, { message: 'success' });
-            })
-            .catch((e) => {
-                const res = `validator.validateConfig error: ${e}`;
-                util.restOperationResponder(restOperation, 500, res);
-            });
+        switch (path[3]) {
+        case 'declare':
+            validator.validateConfig(body)
+                .then((config) => {
+                    // place config in state object and save to rest storage
+                    this.state.config = config;
+                    // TODO: handle sensitive values prior to save
+                    return State.save(this);
+                })
+                .then(() => {
+                    // start/update poller
+                    if (this.poller) {
+                        this.poller = scheduler.update(
+                            this.poller,
+                            systemStats.collect,
+                            { config: this.state.config },
+                            this.state.config.interval
+                        );
+                    } else {
+                        this.poller = scheduler.start(
+                            systemStats.collect,
+                            { config: this.state.config },
+                            this.state.config.interval
+                        );
+                    }
+                    util.restOperationResponder(restOperation, 200, { message: 'success' });
+                })
+                .catch((e) => {
+                    const res = `validator.validateConfig error: ${e}`;
+                    util.restOperationResponder(restOperation, 500, res);
+                });
+            break;
+        default:
+            util.restOperationResponder(restOperation, 400, `Bad URL: ${urlPath}`);
+            break;
+        }
     }
 
     /**
@@ -137,32 +175,6 @@ class RestWorker {
 
         util.restOperationResponder(restOperation, 200, {});
     }
-}
-
-// rest worker helper functions
-function save() {
-    return new Promise((resolve, reject) => {
-        this.saveState(null, this.state, (err) => {
-            if (err) {
-                reject(err);
-            }
-            resolve();
-        });
-    });
-}
-
-function load() {
-    return new Promise((resolve, reject) => {
-        this.loadState(null, (err, state) => {
-            if (err) {
-                const message = `error loading state: ${err.message}`;
-                logger.error(message);
-                reject(err);
-            }
-            this.state = state || baseStateObj;
-            resolve();
-        });
-    });
 }
 
 module.exports = RestWorker;

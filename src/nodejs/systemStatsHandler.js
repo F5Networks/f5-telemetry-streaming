@@ -23,14 +23,16 @@ const context = properties.context;
 const host = constants.DEFAULT_HOST;
 const onBigIp = true; // static true, for now
 
+let persistedConfig;
+
 /**
  * Get specific data from the REST API
  *
  * @param {Object} uri             - uri to get stat data from
  * @param {Object} options         - options to provide
  * @param {Object} [options.token] - shared auth token to use for http requests
- * @param {Object} [options.body]  - body to send during get stat
- * @param {Object} [options.name]  - name of key to store as, will override just using the uri
+ * @param {Object} [options.body]  - body to send, sent via POST request
+ * @param {Object} [options.name]  - name of key to store as, will override default of uri
  *
  * @returns {Object} Promise which is resolved with data
  */
@@ -38,7 +40,8 @@ function getData(uri, options) {
     const httpOptions = {};
     if (options.token) {
         httpOptions.headers = {
-            'x-f5-auth-token': options.token
+            'x-f5-auth-token': options.token,
+            'User-Agent': constants.USER_AGENT
         };
     }
     const body = options.body ? options.body : undefined;
@@ -99,7 +102,7 @@ function getAllData(uris) {
  *
  * @returns {Object} Promise which is resolved with a map of stats
  */
-function collectStats() {
+function collectStats(config) {
     // simple helper functions
     const splitKey = function (key) {
         const splitKeys = key.split(constants.STATS_KEY_SEP);
@@ -116,6 +119,10 @@ function collectStats() {
         return data[endpoint];
     };
     // end simple helper functions
+
+    // TODO: use this
+    persistedConfig = config;
+    logger.debug(`persistedConfig: ${JSON.stringify(persistedConfig)}`);
 
     return getAllData(paths.endpoints)
         .then((data) => {

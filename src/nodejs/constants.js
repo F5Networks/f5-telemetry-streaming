@@ -11,5 +11,6 @@
 module.exports = {
     STATS_KEY_SEP: '::',
     DEFAULT_HOST: 'localhost',
-    DEFAULT_PORT: 443
+    DEFAULT_PORT: 443,
+    USER_AGENT: 'f5-telemetry/1.0'
 };
