@@ -20,7 +20,6 @@ const paths = require('./config/paths.json');
 const pStats = properties.stats;
 const context = properties.context;
 
-let persistedConfig;
 let host;
 let username;
 let password;
@@ -121,9 +120,9 @@ function collectStats(args) {
     };
     // end simple helper functions
 
-    persistedConfig = args.config;
+    const config = args.config;
     // assume only one target host, for now
-    const targetHost = persistedConfig.targetHosts[0];
+    const targetHost = config.targetHosts[0];
     host = targetHost.host;
     username = targetHost.username;
     password = targetHost.password;

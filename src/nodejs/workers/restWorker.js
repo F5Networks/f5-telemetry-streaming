@@ -65,7 +65,7 @@ class RestWorker {
                 this.state = loadedState;
                 logger.debug(`loaded this.state: ${util.stringify(this.state)}`);
 
-                // start poller, if config (interval) exists
+                // start poller, if config exists
                 if (this.state.config.interval) {
                     this.poller = scheduler.start(
                         systemStats.collect,
@@ -73,6 +73,7 @@ class RestWorker {
                         this.state.config.interval
                     );
                 }
+                // start event listener
                 // TODO: re-evaluate this
                 eventListener.start(this.eventListenerPort);
 
