@@ -48,6 +48,7 @@ function loadModule(modulePath) {
                         ...
                     ]
 */
+// TODO: add logic to remove cached module from memory
 function loadConsumers(config) {
     if (!Array.isArray(config.consumers)) {
         logger.info('No consumer(s) defined in config');
@@ -61,7 +62,7 @@ function loadConsumers(config) {
             const consumerName = consumerConf.consumer;
             const consumerDir = './'.concat(path.join(CONSUMERS_DIR, consumerName));
 
-            logger.info(`Trying to load ${consumerName} plugin from ${consumerDir}`);
+            logger.info(`Trying to load ${consumerName} plug-in from ${consumerDir}`);
             const consumerModule = loadModule(consumerDir);
             if (consumerModule === null) {
                 resolve(undefined);
@@ -73,7 +74,12 @@ function loadConsumers(config) {
                 });
             }
         });
-    })).then(consumers => consumers.filter(consumer => consumer !== undefined));
+    }))
+        .then((consumers) => {
+            const availableConsumers = consumers.filter(consumer => consumer !== undefined);
+            logger.info(`${availableConsumers.length} plug-in(s) loaded`);
+            return availableConsumers;
+        });
 }
 
 
