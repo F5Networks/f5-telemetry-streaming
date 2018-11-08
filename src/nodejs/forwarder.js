@@ -20,10 +20,11 @@ const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 *
 * @returns {Object} Promise object resolved with undefined
 */
-function forwardData(data, consumers) {
+function forwardData(data, args) {
     logger.debug('Data forwarder');
 
     return new Promise((resolve) => {
+        const consumers = args.consumers;
         if (Array.isArray(consumers)) {
             // don't relying on plugins' code, wrap consumer's call to Promise
             // eslint-disable-next-line

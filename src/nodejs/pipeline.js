@@ -23,19 +23,14 @@ const stats = require('./systemStatsHandler.js');
 *
 * @returns {function} Promise object
 */
-function createPipeline(consumers) {
-    logger.info('Initializing pipeline');
-    return function () {
-        return stats.collect()
-            .then(translator)
-            .then(data => forwarder(data, consumers))
-            .catch((err) => {
-                logger.exception('Data pipeline error', err);
-            });
-    };
+function pipeline(args) {
+    stats.collect(args)
+        .then(data => translator(data, args))
+        .then(data => forwarder(data, args))
+        .catch((err) => {
+            logger.exception('Data pipeline error', err);
+        });
 }
 
 
-module.exports = {
-    create: createPipeline
-};
+module.exports = pipeline;

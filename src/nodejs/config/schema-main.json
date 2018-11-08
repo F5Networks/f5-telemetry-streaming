@@ -82,19 +82,44 @@
         }
     },
     "properties": {
-        "class": {
-            "title": "Class",
-            "description": "Indicates the structure of this request",
-            "type": "string",
-            "enum": [ "Telemetry" ]
-        },
-        "interval": {
-            "title": "Collection Interval (in seconds)",
+       "class": {
+           "title": "Class",
+           "description": "Indicates the structure of this request",
+           "type": "string",
+           "enum": [ "Telemetry" ]
+       },
+       "interval": {
+           "title": "Collection Interval (in seconds)",
+           "description": "" ,
+           "type": "integer",
+           "minimum": 30,
+           "maximum": 600,
+           "default": 60
+       },
+       "targetHosts": {
+            "title": "Target hosts to collect telemetry from",
             "description": "" ,
-            "type": "integer",
-            "minimum": 30,
-            "maximum": 600,
-            "default": 30
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "host": {
+                        "type": "string"
+                    },
+                    "username": {
+                        "type": ["string", "null"]
+                    },
+                    "password": {
+                        "type": ["string", "null"]
+                    }
+                },
+                "required": [
+                    "host"
+                ]
+            },
+            "default": [{ "host": "localhost" }]
         },
         "consumers": {
             "title": "Analytics data consumers",
