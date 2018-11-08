@@ -69,7 +69,7 @@ class RestWorker {
                 logger.debug(`loaded this.state: ${util.stringify(this.state)}`);
             })
             .then(() => consumers.load(this.state.config))
-            .thne((consumersObjs) => {
+            .then((consumersObjs) => {
                 // start poller if config (interval) exists
                 if (this.state.config.interval) {
                     const pipelineArgs = {
