@@ -10,7 +10,7 @@
 
 module.exports = {
     STATS_KEY_SEP: '::',
-    CONSUMERS_DIR: './consumers',
+    CONSUMERS_DIR: '../consumers',
     DEFAULT_HOST: 'localhost',
     DEFAULT_PORT: 443,
     USER_AGENT: 'f5-telemetry/1.0',
