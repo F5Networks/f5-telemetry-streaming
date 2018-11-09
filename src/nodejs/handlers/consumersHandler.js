@@ -11,7 +11,7 @@
 const path = require('path');
 const logger = require('../logger.js'); // eslint-disable-line no-unused-vars
 const CONSUMERS_DIR = require('../constants.js').CONSUMERS_DIR;
-const configHandler = require('./configHandler');
+const configHandler = require('./configHandler.js');
 
 let CONSUMERS = null;
 
@@ -87,6 +87,7 @@ function loadConsumers(config) {
 
 
 configHandler.on('change', (config) => {
+    logger.debug('configHandler change event in consumersHandler'); // helpful debug
     loadConsumers(config)
         .then((consumers) => {
             CONSUMERS = consumers;

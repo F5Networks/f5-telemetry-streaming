@@ -13,10 +13,9 @@ const net = require('net');
 const DEFAULT_PORT = require('../constants.js').DEFAULT_EVENT_LISTENER_PORT;
 const logger = require('../logger.js');
 const event = require('../event.js');
-const configHandler = require('./configHandler');
+const configHandler = require('./configHandler.js');
 
 let listener = null;
-
 
 // LTM request log (example)
 // eslint-disable-next-line max-len
@@ -52,7 +51,7 @@ function start(port) {
         });
         // listen
         server.listen(options, () => {
-            logger.info(`Listener started on port ${port}`);
+            logger.debug(`Listener started on port ${port}`);
         });
         // catch any errors
         server.on('error', (err) => {
@@ -66,6 +65,7 @@ function start(port) {
 
 
 configHandler.on('change', () => {
+    logger.debug('configHandler change event in eventListenerHandler'); // helpful debug
     if (!listener) {
         logger.info(`Starting listener on port ${DEFAULT_PORT}`);
         try {
@@ -73,6 +73,8 @@ configHandler.on('change', () => {
         } catch (err) {
             logger.exception('Unhandled exception on listener start', err);
         }
+    } else {
+        logger.info(`Already listening on port ${DEFAULT_PORT}`);
     }
 });
 

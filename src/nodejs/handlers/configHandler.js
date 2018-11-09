@@ -86,7 +86,7 @@ class ConfigHandler extends EventEmitter {
     }
 
     /**
-     * Save state to rest storage
+     * Save state
      *
      * @returns {Object} Promise which is resolved once state is saved
      */
@@ -121,7 +121,7 @@ class ConfigHandler extends EventEmitter {
     }
 
     /**
-     * Load state from rest storage
+     * Load state
      *
      * @emits ConfigHandler#loadState
      *
@@ -141,9 +141,9 @@ class ConfigHandler extends EventEmitter {
     }
 
     /**
-     * Validate JSON data agains config schema
+     * Validate JSON data against config schema
      *
-     * @param {Object} data - data to validate agains config schema
+     * @param {Object} data - data to validate against config schema
      *
      * @returns {Object} Promise which is resolved with the validated schema
      */
@@ -152,9 +152,9 @@ class ConfigHandler extends EventEmitter {
     }
 
     /**
-     * Validate JSON data agains config schema and apply it to current app
+     * Validate JSON data against config schema and apply it to current app
      *
-     * @param {Object} data - data to validate agains config schema
+     * @param {Object} data - data to validate against config schema
      *
      * @returns {Object} Promise resolved on success
      */

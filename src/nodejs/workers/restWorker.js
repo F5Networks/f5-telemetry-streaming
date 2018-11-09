@@ -13,6 +13,8 @@ const util = require('../util.js');
 
 
 const configHandler = require('../handlers/configHandler.js');
+const eventListenerHandler = require('../handlers/eventListenerHandler'); // eslint-disable-line no-unused-vars
+const consumersHandler = require('../handlers/consumersHandler.js'); // eslint-disable-line no-unused-vars
 const stats = require('../stats.js');
 
 class RestWorker {
@@ -84,7 +86,7 @@ class RestWorker {
             if (!configHandler.config.targetHosts) {
                 util.restOperationResponder(restOperation, 400, 'Error: No targetHosts specified, configuration required');
             } else {
-                stats.process({ config: configHandler.config, noForward: false })
+                stats.process({ config: configHandler.config, noForward: true })
                     .then((data) => {
                         util.restOperationResponder(restOperation, 200, data);
                     })
