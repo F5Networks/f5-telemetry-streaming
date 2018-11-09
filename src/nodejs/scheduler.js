@@ -32,7 +32,19 @@ function update(setIntervalId, func, args, intervalInS) {
     return start(func, args, intervalInS);
 }
 
+
+/**
+ * Stop poller
+ *
+ * @param {integer} intervalID - poller ID
+ */
+function stop(intervalID) {
+    clearInterval(intervalID);
+}
+
+
 module.exports = {
     start,
+    stop,
     update
 };

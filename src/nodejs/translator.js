@@ -8,11 +8,19 @@
 
 'use strict';
 
-module.exports = {
-    STATS_KEY_SEP: '::',
-    CONSUMERS_DIR: '../consumers',
-    DEFAULT_HOST: 'localhost',
-    DEFAULT_PORT: 443,
-    DEFAULT_EVENT_LISTENER_PORT: 6514,
-    USER_AGENT: 'f5-telemetry/1.0'
-};
+const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
+
+/**
+* Translate data, add additional info if needed
+*
+* @param {Object} data - data to translate
+*
+* @returns {Object} Promise object resolved with translated data
+*/
+function translateData(data) {
+    logger.debug('Data translator');
+    return Promise.resolve(data);
+}
+
+
+module.exports = translateData;

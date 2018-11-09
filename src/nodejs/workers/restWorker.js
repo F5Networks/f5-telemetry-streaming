@@ -10,23 +10,16 @@
 
 const logger = require('../logger.js');
 const util = require('../util.js');
-const scheduler = require('../scheduler.js');
+
+
+const configHandler = require('../handlers/configHandler.js');
 const stats = require('../stats.js');
-const eventListener = require('../eventListenerHandler.js');
-const validator = require('../validator.js');
-const constants = require('../constants.js');
-const State = require('../state.js');
 
 class RestWorker {
     constructor() {
         this.WORKER_URI_PATH = 'shared/telemetry';
         this.isPassThrough = true;
         this.isPublic = true;
-
-        // default state assignment
-        this.state = {};
-        // default poller assignment
-        this.poller = undefined;
     }
 
     /**
@@ -59,31 +52,20 @@ class RestWorker {
     // eslint-disable-next-line no-unused-vars
     onStartCompleted(success, failure, state, errMsg) {
         // first load state from rest storage
-        State.load(this)
-            .then((loadedState) => {
-                this.state = loadedState;
-                logger.debug(`loaded this.state: ${util.stringify(this.state)}`);
+        logger.info(`Node version ${process.version}`);
 
-                // start poller, if config exists
-                if (this.state.config.interval) {
-                    this.poller = scheduler.start(
-                        stats.process,
-                        { config: this.state.config },
-                        this.state.config.interval
-                    );
-                }
-                // start event listener
-                // TODO: re-evaluate this
-                eventListener.start(constants.DEFAULT_EVENT_LISTENER_PORT);
-
-                logger.info('onStartCompleted success');
+        // better to use try/catch to handle unexpected errors
+        try {
+            configHandler.restWorker = this;
+            configHandler.loadState().then((loadedState) => {
+                logger.debug(`loaded state ${util.stringify(loadedState)}`);
                 success();
-            })
-            .catch((err) => {
-                const msg = `onStartCompleted error: ${err}`;
-                logger.error(msg);
-                failure(msg);
             });
+        } catch (err) {
+            const msg = `onStartCompleted error: ${err}`;
+            logger.exception(msg, err);
+            failure(msg);
+        }
     }
 
     /**
@@ -99,10 +81,10 @@ class RestWorker {
 
         switch (path[3]) {
         case 'statsInfo':
-            if (!this.state.config.targetHosts) {
+            if (!configHandler.config.targetHosts) {
                 util.restOperationResponder(restOperation, 400, 'Error: No targetHosts specified, configuration required');
             } else {
-                stats.process({ config: this.state.config, noForward: true })
+                stats.process({ config: configHandler.config, noForward: false })
                     .then((data) => {
                         util.restOperationResponder(restOperation, 200, data);
                     })
@@ -131,36 +113,14 @@ class RestWorker {
 
         switch (path[3]) {
         case 'declare':
-            validator.validateConfig(body)
-                .then((config) => {
-                    logger.debug(`Validated Config: ${util.stringify(config)}`);
-
-                    // place config in state object and save to rest storage
-                    this.state.config = config;
-                    // TODO: handle sensitive values prior to save
-                    return State.save(this);
-                })
+            // try to validate new config
+            // TODO:
+            configHandler.validateAndApply(body)
                 .then(() => {
-                    // start/update poller
-                    if (this.poller) {
-                        this.poller = scheduler.update(
-                            this.poller,
-                            stats.process,
-                            { config: this.state.config },
-                            this.state.config.interval
-                        );
-                    } else {
-                        this.poller = scheduler.start(
-                            stats.process,
-                            { config: this.state.config },
-                            this.state.config.interval
-                        );
-                    }
                     util.restOperationResponder(restOperation, 200, { message: 'success' });
                 })
-                .catch((e) => {
-                    const res = `validator.validateConfig error: ${e}`;
-                    util.restOperationResponder(restOperation, 500, res);
+                .catch((err) => {
+                    util.restOperationResponder(restOperation, 500, `${err}`);
                 });
             break;
         default:

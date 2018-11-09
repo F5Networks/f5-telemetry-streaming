@@ -9,8 +9,14 @@
 'use strict';
 
 const net = require('net');
-const logger = require('./logger.js');
-const event = require('./event.js');
+
+const DEFAULT_PORT = require('../constants.js').DEFAULT_EVENT_LISTENER_PORT;
+const logger = require('../logger.js');
+const event = require('../event.js');
+const configHandler = require('./configHandler');
+
+let listener = null;
+
 
 // LTM request log (example)
 // eslint-disable-next-line max-len
@@ -21,18 +27,19 @@ const event = require('./event.js');
  *
  * @param {String} port - port to listen on
  *
- * @returns {Object}
+ * @returns {Object} server object
  */
 function start(port) {
     // TODO: investigate constraining listener if running on BIG-IP with host: localhost (or similar),
     // however for now cannot do so until valid address found - loopback address not allowed for LTM objects
+    let server;
     const options = {
         port
     };
 
     // place in try/catch to avoid bombing on things such as port conflicts
     try {
-        const server = net.createServer((c) => {
+        server = net.createServer((c) => {
             // event on client data
             c.on('data', (data) => {
                 // send to function which handles normalize/translate/forward, etc.
@@ -54,7 +61,21 @@ function start(port) {
     } catch (e) {
         logger.error(`Unable to start event listener: ${e}`);
     }
+    return server;
 }
+
+
+configHandler.on('change', () => {
+    if (!listener) {
+        logger.info(`Starting listener on port ${DEFAULT_PORT}`);
+        try {
+            listener = start(DEFAULT_PORT);
+        } catch (err) {
+            logger.exception('Unhandled exception on listener start', err);
+        }
+    }
+});
+
 
 module.exports = {
     start

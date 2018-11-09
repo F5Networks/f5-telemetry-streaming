@@ -8,11 +8,6 @@
 
 'use strict';
 
-module.exports = {
-    STATS_KEY_SEP: '::',
-    CONSUMERS_DIR: '../consumers',
-    DEFAULT_HOST: 'localhost',
-    DEFAULT_PORT: 443,
-    DEFAULT_EVENT_LISTENER_PORT: 6514,
-    USER_AGENT: 'f5-telemetry/1.0'
+module.exports = function () {
+    return new Promise(resolve => resolve());
 };

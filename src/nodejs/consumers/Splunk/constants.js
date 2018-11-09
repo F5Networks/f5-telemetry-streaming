@@ -9,10 +9,15 @@
 'use strict';
 
 module.exports = {
-    STATS_KEY_SEP: '::',
-    CONSUMERS_DIR: '../consumers',
-    DEFAULT_HOST: 'localhost',
-    DEFAULT_PORT: 443,
-    DEFAULT_EVENT_LISTENER_PORT: 6514,
-    USER_AGENT: 'f5-telemetry/1.0'
+    maxDataChunkSize: 99000,
+    sourceTypes: {
+        dir: './sourceTypes',
+        ext: '.js'
+    },
+    api: {
+        postData: '/services/collector/event'
+    },
+    logging: {
+        prefix: '[telemetry::Splunk]'
+    }
 };

@@ -9,7 +9,14 @@
 'use strict';
 
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
-const systemStats = require('./systemStatsHandler.js');
+const scheduler = require('./scheduler.js');
+const configHandler = require('./handlers/configHandler.js');
+const systemStats = require('./handlers/systemStatsHandler.js');
+const translator = require('./translator.js');
+const forwarder = require('./forwarder.js');
+
+let pollerID = null;
+
 
 /**
  * Process stats
@@ -27,15 +34,13 @@ function process(args) {
     if (!targetHost.host) { throw new Error('Host is required'); }
 
     return systemStats.collect(targetHost.host, targetHost.username, targetHost.password)
+        .then(data => translator(data, args))
         .then((data) => {
-            const ret = data;
-
-            // TODO: translator would go here
-
+            let ret = null;
             if (noForward === true) {
-                // skipping forward, primarily for statsInfo worker
+                ret = Promise.resolve(data);
             } else {
-                // TODO: forwarder would go here
+                ret = forwarder(data, args);
             }
             logger.debug('stats.process() success');
             return ret;
@@ -44,6 +49,42 @@ function process(args) {
             throw e;
         });
 }
+
+
+function safeProcess() {
+    try {
+        // eslint-disable-next-line
+        process.apply(null, arguments)
+            .then()
+            .catch((err) => {
+                logger.exception('safeProcess unhandled exception in promise-chain', err);
+            });
+    } catch (err) {
+        logger.exception('safeProcess unhandled exception', err);
+    }
+}
+
+
+configHandler.on('change', (config) => {
+    // just in case we will need to have ability to disable it
+    if (!config.interval) {
+        if (pollerID) {
+            logger.info(`Stop collecting stats due interval == ${config.interval}`);
+            scheduler.stop(pollerID);
+            pollerID = null;
+        }
+    } else {
+        const args = { config };
+        if (pollerID) {
+            logger.info(`Update collecting stats interval == ${config.interval} sec.`);
+            pollerID = scheduler.update(pollerID, safeProcess, args, config.interval);
+        } else {
+            logger.info(`Start collecting stats with interval == ${config.interval} sec.`);
+            pollerID = scheduler.start(safeProcess, args, config.interval);
+        }
+    }
+});
+
 
 module.exports = {
     process
