@@ -14,6 +14,7 @@ const scheduler = require('../scheduler.js');
 const stats = require('../stats.js');
 const eventListener = require('../eventListenerHandler.js');
 const validator = require('../validator.js');
+const constants = require('../constants.js');
 const State = require('../state.js');
 
 class RestWorker {
@@ -26,8 +27,6 @@ class RestWorker {
         this.state = {};
         // default poller assignment
         this.poller = undefined;
-        // default listener port
-        this.eventListenerPort = 40000;
     }
 
     /**
@@ -75,7 +74,7 @@ class RestWorker {
                 }
                 // start event listener
                 // TODO: re-evaluate this
-                eventListener.start(this.eventListenerPort);
+                eventListener.start(constants.DEFAULT_EVENT_LISTENER_PORT);
 
                 logger.info('onStartCompleted success');
                 success();

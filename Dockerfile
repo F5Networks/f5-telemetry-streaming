@@ -6,4 +6,4 @@ COPY ./node_modules /var/config/rest/iapps/f5-telemetry/node_modules/
 
 # Define ports required
 EXPOSE 443/tcp
-EXPOSE 40000/tcp
+EXPOSE 6514/tcp

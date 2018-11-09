@@ -69,6 +69,9 @@
         "failoverColor": {
             "key": "/mgmt/tm/cm/failover-status::cm/failover-status/0::color"
         },
+        "deviceTimestamp": {
+            "key": "/mgmt/tm/sys/clock::sys/clock/0::fullDate"
+        },
         "cpu": {
             "key": "/mgmt/tm/sys/host-info::sys/host-info/0::sys/hostInfo/0/cpuInfo",
             "runFunction": { "name": "getAverage", "args": { "keyWithValue": "oneMinAvgSystem" } },
@@ -94,7 +97,11 @@
         },
         "diskStorage": {
             "key": "diskStorageRef::commandResult",
-            "runFunction": { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Mounted", "filterKeys": [ "/", "Capacity" ] } }
+            "runFunction": { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Mounted", "filterKeys": [ "/", "Capacity", "1024-blocks" ] } }
+        },
+        "diskLatency": {
+            "key": "diskLatencyRef::commandResult",
+            "runFunction": { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Device:", "filterKeys": [ "sd", "dm", "rsec/s", "wsec/s" ] } }
         },
         "networkInterfaces": {
             "key": "/mgmt/tm/net/interface/stats",
@@ -116,6 +123,12 @@
             "key": "/mgmt/tm/ltm/pool/stats",
             "filterKeys": [ "/stats", "serverside.bitsIn", "serverside.bitsOut", "serverside.curConns", "availabilityState",  "enabledState" ],
             "renameKeys": { "ltm/pool": { "pattern": "pool\/(.*)\/", "group": 1 } }
+        },
+        "tlsCerts": {
+            "key": "/mgmt/tm/sys/file/ssl-cert::items",
+            "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" },
+            "filterKeys": [ "name/", "expirationDate", "expirationString", "subject", "issuer", "email" ],
+            "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 } }
         }
     },
     "context": {

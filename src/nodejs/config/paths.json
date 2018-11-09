@@ -22,6 +22,9 @@
             "endpoint": "/mgmt/tm/cm/failover-status"
         },
         {
+            "endpoint": "/mgmt/tm/sys/clock"
+        },
+        {
             "endpoint": "/mgmt/tm/sys/host-info"
         },
         {
@@ -49,9 +52,17 @@
             "endpoint": "/mgmt/tm/ltm/pool/stats"
         },
         {
+            "endpoint": "/mgmt/tm/sys/file/ssl-cert"
+        },
+        {
             "endpoint": "/mgmt/tm/util/bash",
             "body": "{ \"command\": \"run\", \"utilCmdArgs\": \"-c \\\"/bin/df -P | /usr/bin/tr -s ' ' ','\\\"\" }",
             "name": "diskStorageRef"
+        },
+        {
+            "endpoint": "/mgmt/tm/util/bash",
+            "body": "{ \"command\": \"run\", \"utilCmdArgs\": \"-c \\\"/usr/bin/iostat -x -d | /usr/bin/tail -n +3 | /usr/bin/tr -s ' ' ','\\\"\" }",
+            "name": "diskLatencyRef"
         }
     ]
 }

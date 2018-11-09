@@ -30,27 +30,30 @@ function start(port) {
         port
     };
 
-    const server = net.createServer((c) => {
-        // event on client data
-        c.on('data', (data) => {
-            // logger.debug(`Client: ${c.remoteAddress} sent data: ${data}`);
-
-            // send to function which handles normalize/translate/forward, etc.
-            event.process(String(data)); // force string
+    // place in try/catch to avoid bombing on things such as port conflicts
+    try {
+        const server = net.createServer((c) => {
+            // event on client data
+            c.on('data', (data) => {
+                // send to function which handles normalize/translate/forward, etc.
+                event.process(String(data)); // force string
+            });
+            // event on client connection close
+            c.on('end', () => {
+                // logger.debug(`Client disconnected: ${c.remoteAddress}`);
+            });
         });
-        // event on client connection close
-        c.on('end', () => {
-            // logger.debug(`Client disconnected: ${c.remoteAddress}`);
+        // listen
+        server.listen(options, () => {
+            logger.info(`Listener started on port ${port}`);
         });
-    });
-    // listen
-    server.listen(options, () => {
-        logger.info(`Listener started on port ${port}`);
-    });
-    // catch any errors
-    server.on('error', (err) => {
-        throw err;
-    });
+        // catch any errors
+        server.on('error', (err) => {
+            throw err;
+        });
+    } catch (e) {
+        logger.error(`Unable to start event listener: ${e}`);
+    }
 }
 
 module.exports = {
