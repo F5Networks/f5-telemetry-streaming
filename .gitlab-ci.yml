@@ -1,119 +1,86 @@
-image: node:6.14.4
+image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
 
 stages:
-- test
-- build
-- review
-# - deploy
-
-test package:
-    image: f5devcentral/containthedocs:rpmbuild
-    stage: test
-    script:
-        - echo 'Running Tests'
-        - npm install
-        - npm run lint
-    tags:
-    - cm-official-docker-executor
-
-rpm build:
-  image: f5devcentral/containthedocs:rpmbuild
-  stage: build
-  script:
-  - echo 'CI BUILD'
-  # install packages first
-  - npm install --production
-  - RELEASE=$(($(ls -v dist/*.rpm|tail -1|sed -rn 's/.*-([0-9]+).noarch.rpm/\1/p') + 1))
-  - MAINDIR=$(pwd)
-  - rpmbuild -bb --define "main $(pwd)" --define '_topdir %{main}/rpmbuild' --define "_name f5-telemetry" --define "_release ${RELEASE}" f5-telemetry.spec
-  - cd rpmbuild/RPMS/noarch
-  - FN=$(ls -t *.rpm 2>/dev/null | head -1)
-  - cp ${FN} ${MAINDIR}/dist
-  - sha256sum "${FN}" > "${MAINDIR}/dist/${FN}.sha256"
-  - cd ${MAINDIR}
-  - echo "RPM FILE dist/${FN}"
-  tags:
-  - cm-official-docker-executor
-  artifacts:
-    name: f5-telemetry-$CI_BUILD_REF
-    paths:
-    - dist
-    expire_in: 1 month
+  - build
+  - review
+  - deploy
 
 build docs:
- image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
- script:
- - make html
- tags:
- - docker-executor
- stage: build
- artifacts:
- paths: 
- - docs/_build/html
+  script:
+    - make html
+  tags:
+    - docker-executor
+  stage: build
+  artifacts:
+    paths: 
+    - docs/_build/html
+
 # Test docs
 test grammar:
- stage: review
- tags:
- - docker-executor
- script:
- - vale --glob='*.{md,rst}' .
+  stage: review
+  tags:
+    - docker-executor
+  script:
+    - vale --glob='*.{md,rst}' .  
+
 test links:
- stage: review
- tags:
- - docker-executor
- script:
- - make linkcheck
+  stage: review
+  tags:
+    - docker-executor
+  script:
+    - make linkcheck
+
 # Deploy docs to Pages for review
 pages:
- image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
- stage: review
- environment: 
- name: review
- url: https://${CI_PROJECT_NAMESPACE}.pages.gitswarm.f5net.com/${CI_PROJECT_NAME}
- tags:
- - cm-official-docker-executor
- dependencies:
- - build docs 
- script:
- - mkdir -p ./public
- - cp -R docs/_build/html/* ./public
- artifacts:
- paths:
- - public
- only:
- - branches
+  stage: review
+  environment: 
+    name: review
+    url: https://${CI_PROJECT_NAMESPACE}.pages.gitswarm.f5net.com/${CI_PROJECT_NAME}/$CI_COMMIT_REF_SLUG
+  tags:
+  - cm-official-docker-executor
+  dependencies:
+  - build docs  
+  script:
+  - mkdir -p ./public
+  - cp -R docs/_build/html/* ./public
+  artifacts:
+    paths:
+    - public
+  only:
+  - branches
+  except:
+  - master@cloudsolutions/f5-telemetry
+  - staging@cloudsolutions/f5-telemetry
 
- # Publish ONLY staging branch to clouddocs.f5networks.net.
+# Publish ONLY staging branch to clouddocs.f5networks.net.
 # Publish docs to staging:
-#  image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
-#  stage: deploy
-#  environment: 
-#  name: staging
-#  url: https://clouddocs.f5networks.net/cloud/public/v1
-#  tags:
-#  - cm-official-docker-executor
-#  only:
-#  - staging@cloudsolutions/ve-public-cloud
-#  dependencies:
-#  - build docs
-#  script:
-#  - aws s3 sync docs/_build/html s3://clouddocs.f5networks.net/cloud/public/v1
- # create invalidation to clear cloudfront cache
-#  - aws cloudfront create-invalidation --distribution-id $AWS_DIST --paths /cloud/public/v1/
- # Publish ONLY master branch to clouddocs.f5.com
+#   stage: deploy
+#   environment: 
+#     name: staging
+#     url: https://clouddocs.f5networks.net/cloud/telemetry/v1
+#   tags:
+#     - cm-official-docker-executor
+#   only:
+#     - staging@cloudsolutions/f5-telemetry
+#   dependencies:
+#     - build docs
+#   script:
+#     - aws s3 sync docs/_build/html s3://clouddocs.f5networks.net/cloud/telemetry/v1
+
+
+# Publish ONLY master branch to clouddocs.f5.com
 # Publish docs to internet:
-#  image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
-#  stage: deploy
-#  environment: 
-#  name: production
-#  url: https://clouddocs.f5.com/cloud/public/v1
-#  tags:
-#  - cm-official-docker-executor
-#  only:
-#  - master@cloudsolutions/ve-public-cloud
-#  dependencies:
-#  - build docs
-# script:
-# - publish-cloud-docs-to-prod public v1
-# create invalidation to clear cloudfront cache
-# - aws cloudfront create-invalidation --distribution-id $AWS_DIST --paths /cloud/public/v1/
+#   stage: deploy
+#   environment: 
+#     name: production
+#     url: https://clouddocs.f5.com/cloud/telemetry/v1
+#   tags:
+#     - cm-official-docker-executor
+#   only:
+#   - master@cloudsolutions/f5-telemetry
+#   dependencies:
+#   - build docs
+#   script:
+#   - publish-cloud-docs-to-prod telemetry v1
+  # create invalidation to clear cloudfront cache
+#   - aws cloudfront create-invalidation --distribution-id $AWS_DIST --paths /cloud/telemetry/v1/
