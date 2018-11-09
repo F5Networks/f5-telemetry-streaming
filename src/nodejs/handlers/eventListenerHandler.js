@@ -9,8 +9,14 @@
 'use strict';
 
 const net = require('net');
-const logger = require('./logger.js');
-const event = require('./event.js');
+
+const DEFAULT_PORT = require('../constants.js').DEFAULT_LISTENER_PORT;
+const logger = require('../logger.js');
+const event = require('../event.js');
+const configHandler = require('./configHandler');
+
+let listener = null;
+
 
 // LTM request log (example)
 // eslint-disable-next-line max-len
@@ -21,7 +27,7 @@ const event = require('./event.js');
  *
  * @param {String} port - port to listen on
  *
- * @returns {Object}
+ * @returns {Object} server object
  */
 function start(port) {
     // TODO: investigate constraining listener if running on BIG-IP with host: localhost (or similar),
@@ -47,11 +53,25 @@ function start(port) {
     server.listen(options, () => {
         logger.info(`Listener started on port ${port}`);
     });
-    // catch any errors
+    // catch any errors to avoid NodeJS crashing
     server.on('error', (err) => {
         throw err;
     });
+    return server;
 }
+
+
+configHandler.on('change', () => {
+    if (!listener) {
+        logger.info(`Starting listener on port ${DEFAULT_PORT}`);
+        try {
+            listener = start(DEFAULT_PORT);
+        } catch (err) {
+            logger.exception('Unhandled exception on listener start', err);
+        }
+    }
+});
+
 
 module.exports = {
     start

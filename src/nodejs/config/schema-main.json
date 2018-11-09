@@ -4,6 +4,86 @@
     "title": "Telemetry services",
     "description": "Telemetry services",
     "type": "object",
+    "definitions": {
+        "consumer": {
+            "type": "object",
+            "properties": {
+                "consumer": {
+                    "title": "Consumer type",
+                    "description": "",
+                    "type": "string",
+                    "enum": [
+                        "Splunk",
+                        "Sumo"
+                    ]
+                },
+                "api": {
+                    "title": "API configuration",
+                    "description": "",
+                    "type": "object",
+                    "properties": {
+                        "path": {
+                            "title": "API path to post data",
+                            "description": "",
+                            "type": "string"
+                        },
+                        "token": {
+                            "title": "API auth token",
+                            "description": "",
+                            "type": "string"
+                        },
+                        "gzip": {
+                            "title": "Compress data",
+                            "description": "",
+                            "type": "boolean",
+                            "default": true
+                        }
+                    },
+                    "required": [
+                        "token"
+                    ]
+                },
+                "destination": {
+                    "title": "Destination host/address",
+                    "description": "",
+                    "type": "object",
+                    "properties": {
+                        "address": {
+                            "title": "Address",
+                            "description": "",
+                            "type": "string"
+                        },
+                        "port": {
+                            "title": "Port",
+                            "description": "",
+                            "type": "integer"
+                        },
+                        "protocol": {
+                            "title": "Protocol",
+                            "description": "",
+                            "type": "string",
+                            "enum": [
+                                "http",
+                                "https"
+                            ]
+                        }
+                    },
+                    "default": [
+                        { "port": 80 },
+                        { "protocol": "http" }
+                    ],
+                    "required": [
+                        "address"
+                    ]
+                }
+            },
+            "required": [
+                "consumer",
+                "destination",
+                "api"
+            ]
+        }
+    },
     "properties": {
        "class": {
            "title": "Class",
@@ -43,7 +123,16 @@
                 ]
             },
             "default": [{ "host": "localhost" }]
+        },
+        "consumers": {
+            "title": "Analytics data consumers",
+            "description": "",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {"$ref": "#/definitions/consumer" }
         }
     },
-    "required": [ "class" ]
+    "required": [
+        "class"
+    ]
 }

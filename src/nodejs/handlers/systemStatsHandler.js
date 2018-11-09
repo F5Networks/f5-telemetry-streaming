@@ -10,12 +10,12 @@
 
 const mustache = require('mustache');
 
-const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
-const constants = require('./constants.js');
-const httpRequest = require('./httpRequestHandler.js');
-const normalize = require('./normalize.js');
-const properties = require('./config/properties.json');
-const paths = require('./config/paths.json');
+const logger = require('../logger.js'); // eslint-disable-line no-unused-vars
+const constants = require('../constants.js');
+const httpRequest = require('../httpRequestHandler.js');
+const normalize = require('../normalize.js');
+const properties = require('../config/properties.json');
+const paths = require('../config/paths.json');
 
 const pStats = properties.stats;
 const context = properties.context;
@@ -168,6 +168,7 @@ function collectStats(host, username, password) {
             throw new Error(msg);
         });
 }
+
 
 module.exports = {
     collect: collectStats
