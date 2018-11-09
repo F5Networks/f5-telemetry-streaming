@@ -9,6 +9,7 @@
 'use strict';
 
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
+const consumersHandler = require('./handlers/consumersHandler.js');
 
 /**
 * Forward data to consumer
@@ -20,11 +21,11 @@ const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 *
 * @returns {Object} Promise object resolved with undefined
 */
-function forwardData(data, args) {
+function forwardData(data) {
     logger.debug('Data forwarder');
 
     return new Promise((resolve) => {
-        const consumers = args.consumers;
+        const consumers = consumersHandler.getConsumers();
         if (Array.isArray(consumers)) {
             // don't relying on plugins' code, wrap consumer's call to Promise
             // eslint-disable-next-line

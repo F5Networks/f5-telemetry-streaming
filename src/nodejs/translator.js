@@ -19,7 +19,7 @@ const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 */
 function translateData(data) {
     logger.debug('Data translator');
-    return new Promise(resolve => resolve(data));
+    return Promise.resolve(data);
 }
 
 
