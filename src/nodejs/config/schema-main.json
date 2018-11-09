@@ -62,13 +62,16 @@
                             "title": "Protocol",
                             "description": "",
                             "type": "string",
-                            "default": "http",
                             "enum": [
                                 "http",
                                 "https"
                             ]
                         }
                     },
+                    "default": [
+                        { "port": 80 },
+                        { "protocol": "http" }
+                    ],
                     "required": [
                         "address"
                     ]
