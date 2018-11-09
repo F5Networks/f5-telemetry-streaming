@@ -9,8 +9,11 @@
 'use strict';
 
 const path = require('path');
-const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
-const CONSUMERS_DIR = require('./constants.js').CONSUMERS_DIR;
+const logger = require('../logger.js'); // eslint-disable-line no-unused-vars
+const CONSUMERS_DIR = require('../constants.js').CONSUMERS_DIR;
+const configHandler = require('./configHandler');
+
+let CONSUMERS = null;
 
 /**
 * Load consumer's module
@@ -83,6 +86,18 @@ function loadConsumers(config) {
 }
 
 
+configHandler.on('change', (config) => {
+    loadConsumers(config)
+        .then((consumers) => {
+            CONSUMERS = consumers;
+        })
+        .catch((err) => {
+            logger.exception('Unhandled exception when loading consumers', err);
+        });
+});
+
+
 module.exports = {
-    load: loadConsumers
+    load: loadConsumers,
+    getConsumers: () => CONSUMERS
 };

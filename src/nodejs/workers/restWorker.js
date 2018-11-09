@@ -10,13 +10,12 @@
 
 const logger = require('../logger.js');
 const util = require('../util.js');
-const scheduler = require('../scheduler.js');
-const systemStats = require('../systemStatsHandler.js');
-const eventListener = require('../eventListenerHandler.js');
-const validator = require('../validator.js');
-const consumers = require('../consumers.js');
-const pipeline = require('../pipeline.js');
-const State = require('../state.js');
+
+
+const configHandler = require('../handlers/configHandler.js');
+const eventListener = require('../handlers/eventListenerHandler'); // eslint-disable-line no-unused-vars
+const consumersHandler = require('../handlers/consumersHandler.js'); // eslint-disable-line no-unused-vars
+const stats = require('../stats.js');
 
 
 class RestWorker {
@@ -24,13 +23,6 @@ class RestWorker {
         this.WORKER_URI_PATH = 'shared/telemetry';
         this.isPassThrough = true;
         this.isPublic = true;
-
-        // default state assignment
-        this.state = {};
-        // default poller assignment
-        this.poller = undefined;
-        // default listener port
-        this.eventListenerPort = 40000;
     }
 
     /**
@@ -63,32 +55,20 @@ class RestWorker {
     // eslint-disable-next-line no-unused-vars
     onStartCompleted(success, failure, state, errMsg) {
         // first load state from rest storage
-        State.load(this)
-            .then((loadedState) => {
-                this.state = loadedState;
-                logger.debug(`loaded this.state: ${util.stringify(this.state)}`);
-            })
-            .then(() => consumers.load(this.state.config))
-            .then((consumersObjs) => {
-                // start poller if config (interval) exists
-                if (this.state.config.interval) {
-                    const pipelineArgs = {
-                        consumers: consumersObjs,
-                        config: this.state.config
-                    };
-                    this.poller = scheduler.start(pipeline, pipelineArgs, this.state.config.interval);
-                }
-                // TODO: re-evaluate this
-                eventListener.start(this.eventListenerPort);
+        logger.info(`Node version ${process.version}`);
 
-                logger.info('onStartCompleted success');
+        // better to use try/catch to handle unexpected errors
+        try {
+            configHandler.restWorker = this;
+            configHandler.loadState().then((loadedState) => {
+                logger.debug(`loaded state ${util.stringify(loadedState)}`);
                 success();
-            })
-            .catch((err) => {
-                const msg = `onStartCompleted error: ${err}`;
-                logger.exception(msg, err);
-                failure(msg);
             });
+        } catch (err) {
+            const msg = `onStartCompleted error: ${err}`;
+            logger.exception(msg, err);
+            failure(msg);
+        }
     }
 
     /**
@@ -104,15 +84,15 @@ class RestWorker {
 
         switch (path[3]) {
         case 'statsInfo':
-            if (!this.state.config.targetHosts) {
+            if (!configHandler.config.targetHosts) {
                 util.restOperationResponder(restOperation, 400, 'Error: No targetHosts specified, configuration required');
             } else {
-                systemStats.collect({ config: this.state.config })
+                stats.process({ config: configHandler.config, noForward: false })
                     .then((data) => {
                         util.restOperationResponder(restOperation, 200, data);
                     })
                     .catch((e) => {
-                        util.restOperationResponder(restOperation, 500, `systemStats.collect error: ${e}`);
+                        util.restOperationResponder(restOperation, 500, `stats.process error: ${e}`);
                     });
             }
             break;
@@ -136,43 +116,14 @@ class RestWorker {
 
         switch (path[3]) {
         case 'declare':
-            validator.validateConfig(body)
-                .then((config) => {
-                    logger.debug(`Validated Config: ${util.stringify(config)}`);
-
-                    // place config in state object and save to rest storage
-                    this.state.config = config;
-                    // TODO: handle sensitive values prior to save
-                    return State.save(this);
-                })
-                .then(() => consumers.load(this.state.config))
-                .then((consumersObjs) => {
-                    const pipelineArgs = {
-                        consumers: consumersObjs,
-                        config: this.state.config
-                    };
-
-                    // start/update poller
-                    if (this.poller) {
-                        this.poller = scheduler.update(
-                            this.poller,
-                            pipeline,
-                            pipelineArgs,
-                            this.state.config.interval
-                        );
-                    } else {
-                        this.poller = scheduler.start(
-                            pipeline,
-                            pipelineArgs,
-                            this.state.config.interval
-                        );
-                    }
+            // try to validate new config
+            // TODO:
+            configHandler.validateAndApply(body)
+                .then(() => {
                     util.restOperationResponder(restOperation, 200, { message: 'success' });
                 })
-                .catch((e) => {
-                    const res = `validator.validateConfig error: ${e}`;
-                    util.restOperationResponder(restOperation, 500, res);
-                    logger.exception('validator.validateConfig: Unhandled error', e);
+                .catch((err) => {
+                    util.restOperationResponder(restOperation, 500, `${err}`);
                 });
             break;
         default:
