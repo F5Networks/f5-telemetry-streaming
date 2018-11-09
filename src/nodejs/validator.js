@@ -11,16 +11,16 @@
 const Ajv = require('ajv');
 const logger = require('./logger.js');
 const util = require('./util.js');
-const schema = require('./config/schema-main.json');
 
 /**
  * Validate schema
  *
  * @param {Object} obj - object to validate
+ * @param {Object} schema - schema to validate against
  *
  * @returns {Object} Promise which is resolved with the validated schema
  */
-function validateSchema(obj) {
+function validateSchema(obj, schema) {
     const ajv = new Ajv({ useDefaults: true });
     const validate = ajv.compile(schema);
     const valid = validate(obj);
@@ -34,5 +34,5 @@ function validateSchema(obj) {
 }
 
 module.exports = {
-    validateConfig: validateSchema
+    validateSchema
 };
