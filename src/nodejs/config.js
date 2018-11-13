@@ -9,18 +9,13 @@
 'use strict';
 
 const EventEmitter = require('events');
-const configSchema = require('../config/schema-main.json');
-const logger = require('../logger.js');
-const validator = require('../validator.js');
+const configSchema = require('./config/schema-main.json');
+const logger = require('./logger.js');
+const util = require('./util.js');
 
-
-const baseStateObj = {
-    config: {}
-};
-
-class ConfigHandler extends EventEmitter {
+class ConfigWorker extends EventEmitter {
     /**
-     * ConfigHandler class
+     * ConfigWorker class
      *
      * @property {Object} state - current state
      * @property {Object} state.config - current config object
@@ -56,7 +51,7 @@ class ConfigHandler extends EventEmitter {
     /**
      * Notify listeners about config change
      *
-     * @emits ConfigHandler#change
+     * @emits ConfigWorker#change
      */
     _notifyConfigChange() {
         // copy config to avoid changes from listeners
@@ -109,12 +104,15 @@ class ConfigHandler extends EventEmitter {
             return Promise.reject(new Error(err));
         }
         const _this = this;
+        const baseState = {
+            config: {}
+        };
         return new Promise((resolve, reject) => {
             _this.restWorker.loadState(null, (err, state) => {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve(state || baseStateObj);
+                    resolve(state || baseState);
                 }
             });
         });
@@ -123,7 +121,7 @@ class ConfigHandler extends EventEmitter {
     /**
      * Load state
      *
-     * @emits ConfigHandler#loadState
+     * @emits ConfigWorker#loadState
      *
      * @returns {Object} Promise which is resolved with the loaded state
      */
@@ -148,7 +146,7 @@ class ConfigHandler extends EventEmitter {
      * @returns {Object} Promise which is resolved with the validated schema
      */
     validate(data) {
-        return validator.validateSchema(data, configSchema);
+        return util.validateSchema(data, configSchema);
     }
 
     /**
@@ -187,11 +185,11 @@ class ConfigHandler extends EventEmitter {
 }
 
 // initialize singleton
-const configHandler = new ConfigHandler();
+const configWorker = new ConfigWorker();
 
 // handle EventEmitter errors to avoid NodeJS crashing
-configHandler.on('error', (err) => {
-    logger.exception('Unhandled error in ConfigHandler', err);
+configWorker.on('error', (err) => {
+    logger.exception('Unhandled error in ConfigWorker', err);
 });
 
-module.exports = configHandler;
+module.exports = configWorker;

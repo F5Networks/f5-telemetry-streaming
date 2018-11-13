@@ -9,31 +9,34 @@
 'use strict';
 
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
-const consumersHandler = require('./handlers/consumersHandler.js');
+const consumersWorker = require('./consumers.js');
 
 /**
 * Forward data to consumer
 *
 * @param {Object} data - data to forward
-* @param {Object} consumer - consumer object
-* @param {Object} consumer.consumer - consumer's function(data, config)
-* @param {Object} consumer.config - consumer's config
 *
-* @returns {Object} Promise object resolved with undefined
+* @returns {Void} Promise object resolved with undefined
 */
 function forwardData(data) {
-    logger.debug('Data forwarder');
-
     return new Promise((resolve) => {
-        const consumers = consumersHandler.getConsumers();
+        const consumers = consumersWorker.getConsumers();
         if (Array.isArray(consumers)) {
-            // don't relying on plugins' code, wrap consumer's call to Promise
+            // don't rely on plugins' code, wrap consumer's call to Promise
             // eslint-disable-next-line
             consumers.forEach((consumer) => {
-                return new Promise((lresolve) => {
-                    consumer.consumer(data, consumer.config);
-                    lresolve();
-                }).catch(err => logger.exception('Error on data forwarding to consumer', err));
+                // standard context
+                const context = {
+                    data,
+                    config: consumer.config,
+                    logger
+                };
+                // place in try/catch
+                try {
+                    consumer.consumer(context);
+                } catch (err) {
+                    logger.exception(`Error forwarding data: ${err}`);
+                }
             });
         }
         // anyway resolve promise

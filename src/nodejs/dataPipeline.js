@@ -10,18 +10,28 @@
 
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 const util = require('./util.js');
-const normalize = require('./normalize.js');
+const forwarder = require('./forwarder.js');
 
 /**
- * Process event
- *
- * @param {Object} data - data to process
- *
- * @returns {void}
- */
-function process(data) {
-    const normalizedData = normalize.event(data);
-    logger.debug(`Event: ${util.stringify(normalizedData)}`);
+* Pipeline to process data
+*
+* @param {Object} data - data to process
+* @param {Object} type - type of data, such as stats|event
+*
+* @returns {Void}
+*/
+function process(data, type) {
+    // log event, for now
+    if (type === 'event') { logger.debug(`Event: ${util.stringify(data)}`); }
+
+    // no translator, for now
+    forwarder(data)
+        .then(() => {
+            logger.debug(`Pipeline processed data of type: ${type}`);
+        })
+        .catch((e) => {
+            throw e;
+        });
 }
 
 module.exports = {

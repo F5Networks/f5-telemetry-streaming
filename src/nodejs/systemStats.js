@@ -10,12 +10,11 @@
 
 const mustache = require('mustache');
 
-const logger = require('../logger.js'); // eslint-disable-line no-unused-vars
-const constants = require('../constants.js');
-const httpRequest = require('../httpRequest.js');
-const normalize = require('../normalize.js');
-const properties = require('../config/properties.json');
-const paths = require('../config/paths.json');
+const constants = require('./constants.js');
+const util = require('./util.js');
+const normalize = require('./normalize.js');
+const properties = require('./config/properties.json');
+const paths = require('./config/paths.json');
 
 const pStats = properties.stats;
 const context = properties.context;
@@ -28,6 +27,7 @@ class SystemStats {
         this.host = null;
         this.username = null;
         this.password = null;
+        this.port = constants.DEFAULT_PORT;
     }
 
     /**
@@ -64,27 +64,30 @@ class SystemStats {
     /**
      * Get specific data from the REST API
      *
-     * @param {Object} uri             - uri to get stat data from
+     * @param {String} uri             - uri to get stat data from
      * @param {Object} options         - function options
-     * @param {Object} [options.token] - shared auth token to use for http requests
-     * @param {Object} [options.body]  - body to send, sent via POST request
-     * @param {Object} [options.name]  - name of key to store as, will override default of uri
+     * @param {String} [options.token] - shared auth token to use for http requests
+     * @param {String} [options.body]  - body to send, sent via POST request
+     * @param {String} [options.name]  - name of key to store as, will override default of uri
      *
      * @returns {Object} Promise which is resolved with data
      */
     _getData(uri, options) {
-        const httpOptions = {};
+        const httpOptions = {
+            port: this.port
+        };
         if (options.token) {
             httpOptions.headers = {
                 'x-f5-auth-token': options.token,
                 'User-Agent': constants.USER_AGENT
             };
         }
-        const body = options.body ? options.body : undefined;
-        const promise = body
-            ? httpRequest.post(this.host, uri, body, httpOptions) : httpRequest.get(this.host, uri, httpOptions);
+        if (options.body) {
+            httpOptions.method = 'POST';
+            httpOptions.body = options.body;
+        }
 
-        return Promise.resolve(promise)
+        return Promise.resolve(util.makeRequest(this.host, uri, httpOptions))
             .then((data) => {
                 // use uri unless explicit name is provided
                 const nameToUse = options.name ? options.name : uri;
@@ -105,11 +108,11 @@ class SystemStats {
      */
     _getAllData(uris) {
         let promise;
-        if (this.host === 'localhost') {
+        if (this.host === constants.DEFAULT_HOST) {
             promise = Promise.resolve({ token: undefined });
         } else {
             if (!this.username || !this.password) { throw new Error('Username and password required'); }
-            promise = httpRequest.getAuthToken(this.host, this.username, this.password, {});
+            promise = util.getAuthToken(this.host, this.username, this.password, { port: this.port });
         }
 
         return Promise.resolve(promise)
@@ -147,6 +150,8 @@ class SystemStats {
         if (!this.host) { throw new Error('Host required'); }
         if (username) { this.username = username; }
         if (password) { this.password = password; }
+        // set to 443 if not default host
+        if (this.host !== constants.DEFAULT_HOST) { this.port = 443; }
 
         return this._getAllData(paths.endpoints)
             .then((data) => {
@@ -168,12 +173,13 @@ class SystemStats {
                 // now load each stat
                 Object.keys(pStats).forEach((k) => {
                     const stat = pStats[k];
-                    // render mustache template only for stat.key, for now
-                    const key = mustache.render(stat.key, loadedContext);
-                    const endpointData = this._loadEndpoint(key, data);
 
-                    // now return normalized stat, unless stat.disabled is true
+                    // stat could be disabled
                     if (stat.disabled !== true) {
+                        // render mustache template only for stat.key, for now
+                        const key = mustache.render(stat.key, loadedContext);
+                        const endpointData = this._loadEndpoint(key, data);
+                        // now return normalized stat, unless flag set to false
                         const options = {
                             key: this._splitKey(key).childKey,
                             filterByKeys: stat.filterKeys,
@@ -181,7 +187,6 @@ class SystemStats {
                             convertArrayToMap: stat.convertArrayToMap,
                             runCustomFunction: stat.runFunction
                         };
-                        // normalize unless flag is specifically set to false
                         const statData = stat.normalize === false
                             ? endpointData : normalize.data(endpointData, options);
                         ret[k] = statData;

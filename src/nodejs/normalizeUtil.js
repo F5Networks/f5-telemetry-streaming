@@ -85,9 +85,9 @@ function getPercentFromKeys(args) {
  *
  * @param {Object} args              - args object
  * @param {Object} [args.data]       - data to process (always included)
- * @param {Object} [args.type]       - type, such as csv
- * @param {Object} [args.mapKey]     - key to use during convertArrayToMap
- * @param {Object} [args.filterKeys] - filter keys according to array
+ * @param {String} [args.type]       - type, such as csv
+ * @param {String} [args.mapKey]     - key to use during convertArrayToMap
+ * @param {Array} [args.filterKeys]  - filter keys according to array
  *
  * @returns {Object} Returns formatted data
  */

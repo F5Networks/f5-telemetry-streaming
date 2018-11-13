@@ -12,10 +12,10 @@ const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 const forwarder = require('./forwarder.js');
 const translator = require('./translator.js');
 
-module.exports = function (data, consumer) {
+module.exports = function (context) {
     logger.debug('Received data');
-    translator(data, consumer)
-        .then(translatedData => forwarder(translatedData, consumer))
+    translator(context.data, context.config)
+        .then(translatedData => forwarder(translatedData, context.config))
         .catch((err) => {
             logger.exception('Data processing error.', err);
         });

@@ -9,9 +9,9 @@
 'use strict';
 
 const path = require('path');
-const logger = require('../logger.js'); // eslint-disable-line no-unused-vars
-const CONSUMERS_DIR = require('../constants.js').CONSUMERS_DIR;
-const configHandler = require('./configHandler.js');
+const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
+const CONSUMERS_DIR = require('./constants.js').CONSUMERS_DIR;
+const configWorker = require('./config.js');
 
 let CONSUMERS = null;
 
@@ -45,7 +45,7 @@ function loadModule(modulePath) {
                     loaded plugins. Looks like following:
                     [
                         {
-                            consumer: function(data, config),
+                            consumer: function(context),
                             config: [object]
                         },
                         ...
@@ -85,9 +85,9 @@ function loadConsumers(config) {
         });
 }
 
-
-configHandler.on('change', (config) => {
-    logger.debug('configHandler change event in consumersHandler'); // helpful debug
+// config worker change event
+configWorker.on('change', (config) => {
+    logger.debug('configWorker change event in consumers'); // helpful debug
     loadConsumers(config)
         .then((consumers) => {
             CONSUMERS = consumers;

@@ -11,11 +11,10 @@
 const logger = require('../logger.js');
 const util = require('../util.js');
 
-
-const configHandler = require('../handlers/configHandler.js');
-const eventListenerHandler = require('../handlers/eventListenerHandler'); // eslint-disable-line no-unused-vars
-const consumersHandler = require('../handlers/consumersHandler.js'); // eslint-disable-line no-unused-vars
-const stats = require('../stats.js');
+const configWorker = require('../config.js');
+const eventListener = require('../eventListener.js'); // eslint-disable-line no-unused-vars
+const consumers = require('../consumers.js'); // eslint-disable-line no-unused-vars
+const systemPoller = require('../systemPoller.js');
 
 class RestWorker {
     constructor() {
@@ -58,8 +57,8 @@ class RestWorker {
 
         // better to use try/catch to handle unexpected errors
         try {
-            configHandler.restWorker = this;
-            configHandler.loadState().then((loadedState) => {
+            configWorker.restWorker = this;
+            configWorker.loadState().then((loadedState) => {
                 logger.debug(`loaded state ${util.stringify(loadedState)}`);
                 success();
             });
@@ -83,15 +82,15 @@ class RestWorker {
 
         switch (path[3]) {
         case 'statsInfo':
-            if (!configHandler.config.targetHosts) {
+            if (!configWorker.config.targetHosts) {
                 util.restOperationResponder(restOperation, 400, 'Error: No targetHosts specified, configuration required');
             } else {
-                stats.process({ config: configHandler.config, noForward: true })
+                systemPoller.process({ config: configWorker.config, process: false })
                     .then((data) => {
                         util.restOperationResponder(restOperation, 200, data);
                     })
                     .catch((e) => {
-                        util.restOperationResponder(restOperation, 500, `stats.process error: ${e}`);
+                        util.restOperationResponder(restOperation, 500, `systemPoller.process error: ${e}`);
                     });
             }
             break;
@@ -117,7 +116,7 @@ class RestWorker {
         case 'declare':
             // try to validate new config
             // TODO:
-            configHandler.validateAndApply(body)
+            configWorker.validateAndApply(body)
                 .then(() => {
                     util.restOperationResponder(restOperation, 200, { message: 'success' });
                 })
