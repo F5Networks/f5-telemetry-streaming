@@ -14,7 +14,7 @@
                     "type": "string",
                     "enum": [
                         "Splunk",
-                        "Sumo"
+                        "Azure_Log_Analytics"
                     ]
                 },
                 "api": {
@@ -30,7 +30,7 @@
                         "token": {
                             "title": "API auth token",
                             "description": "",
-                            "type": "string"
+                            "type": [ "string", "object" ]
                         },
                         "gzip": {
                             "title": "Compress data",

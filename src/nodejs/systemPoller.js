@@ -9,40 +9,37 @@
 'use strict';
 
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
-const scheduler = require('./scheduler.js');
-const configHandler = require('./handlers/configHandler.js');
-const systemStats = require('./handlers/systemStatsHandler.js');
-const translator = require('./translator.js');
-const forwarder = require('./forwarder.js');
+const util = require('./util.js');
+const configWorker = require('./config.js');
+const systemStats = require('./systemStats.js');
+const dataPipeline = require('./dataPipeline.js');
 
 let pollerID = null;
 
-
 /**
- * Process stats
+ * Process system(s) stats
  *
- * @param {Object} args - args, such as { config: {}, noForward: true }
+ * @param {Object} args - args, such as { config: {}, process: false }
  *
  * @returns {Promise} Promise which is resolved with data sent
  */
 function process(args) {
     const config = args.config;
-    const noForward = args.noForward;
 
     // assume only one target host, for now
     const targetHost = config.targetHosts[0];
     if (!targetHost.host) { throw new Error('Host is required'); }
 
     return systemStats.collect(targetHost.host, targetHost.username, targetHost.password)
-        .then(data => translator(data, args))
         .then((data) => {
             let ret = null;
-            if (noForward === true) {
+            if (args.process === false) {
                 ret = Promise.resolve(data);
             } else {
-                ret = forwarder(data, args);
+                // call out to pipeline
+                dataPipeline.process(data, 'stats');
             }
-            logger.debug('stats.process() success');
+            logger.debug('systemPoller.process() success');
             return ret;
         })
         .catch((e) => {
@@ -50,7 +47,11 @@ function process(args) {
         });
 }
 
-
+/**
+ * Safe process - start process safely
+ *
+ * @returns {Promise} Promise which is resolved with data sent
+ */
 function safeProcess() {
     try {
         // eslint-disable-next-line
@@ -64,23 +65,24 @@ function safeProcess() {
     }
 }
 
-
-configHandler.on('change', (config) => {
+// config worker change event
+configWorker.on('change', (config) => {
+    logger.debug('configWorker change event in systemPoller'); // helpful debug
     // just in case we will need to have ability to disable it
     if (!config.interval) {
         if (pollerID) {
-            logger.info(`Stop collecting stats due interval == ${config.interval}`);
-            scheduler.stop(pollerID);
+            logger.info('Stop collecting stats');
+            util.stop(pollerID);
             pollerID = null;
         }
     } else {
         const args = { config };
         if (pollerID) {
-            logger.info(`Update collecting stats interval == ${config.interval} sec.`);
-            pollerID = scheduler.update(pollerID, safeProcess, args, config.interval);
+            logger.info(`Update collecting stats interval == ${config.interval} sec`);
+            pollerID = util.update(pollerID, safeProcess, args, config.interval);
         } else {
-            logger.info(`Start collecting stats with interval == ${config.interval} sec.`);
-            pollerID = scheduler.start(safeProcess, args, config.interval);
+            logger.info(`Start collecting stats with interval == ${config.interval} sec`);
+            pollerID = util.start(safeProcess, args, config.interval);
         }
     }
 });

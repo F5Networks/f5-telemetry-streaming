@@ -10,10 +10,11 @@
 
 const net = require('net');
 
-const DEFAULT_PORT = require('../constants.js').DEFAULT_EVENT_LISTENER_PORT;
-const logger = require('../logger.js');
-const event = require('../event.js');
-const configHandler = require('./configHandler.js');
+const DEFAULT_PORT = require('./constants.js').DEFAULT_EVENT_LISTENER_PORT;
+const logger = require('./logger.js');
+const normalize = require('./normalize.js');
+const dataPipeline = require('./dataPipeline.js');
+const configWorker = require('./config.js');
 
 let listener = null;
 
@@ -26,7 +27,7 @@ let listener = null;
  *
  * @param {String} port - port to listen on
  *
- * @returns {Object} server object
+ * @returns {Object} Returns server object
  */
 function start(port) {
     // TODO: investigate constraining listener if running on BIG-IP with host: localhost (or similar),
@@ -41,8 +42,9 @@ function start(port) {
         server = net.createServer((c) => {
             // event on client data
             c.on('data', (data) => {
-                // send to function which handles normalize/translate/forward, etc.
-                event.process(String(data)); // force string
+                // normalize and send to data pipeline
+                const normalizedData = normalize.event(String(data)); // force string
+                dataPipeline.process(normalizedData, 'event');
             });
             // event on client connection close
             c.on('end', () => {
@@ -63,9 +65,9 @@ function start(port) {
     return server;
 }
 
-
-configHandler.on('change', () => {
-    logger.debug('configHandler change event in eventListenerHandler'); // helpful debug
+// config worker change event
+configWorker.on('change', () => {
+    logger.debug('configWorker change event in eventListener'); // helpful debug
     if (!listener) {
         logger.info(`Starting listener on port ${DEFAULT_PORT}`);
         try {
@@ -77,7 +79,6 @@ configHandler.on('change', () => {
         logger.info(`Already listening on port ${DEFAULT_PORT}`);
     }
 });
-
 
 module.exports = {
     start

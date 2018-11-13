@@ -40,12 +40,12 @@ function formatAsJson(data) {
 /**
  * Run custom function
  *
- * @param {Object} data           - data
- * @param {Object} options        - optional arguments
- * @param {Object} [options.func] - function to run
- * @param {Object} [options.args] - args to provide to function
+ * @param {Object} data             - data
+ * @param {Object} options          - optional arguments
+ * @param {Function} [options.func] - function to run
+ * @param {Object} [options.args]   - args to provide to function
  *
- * @returns {Object} Function result
+ * @returns {Object} Returns function result
  */
 function runCustomFunction(data, options) {
     const args = { data };
@@ -68,9 +68,9 @@ function runCustomFunction(data, options) {
  * Get data using provided key
  *
  * @param {Object} data - data
- * @param {Object} key  - key to use when accessing item in data
+ * @param {String} key  - key to use when accessing item in data
  *
- * @returns {Object} Data in key
+ * @returns {Object} Returns data in key
  */
 function getDataByKey(data, key) {
     const keys = key.split(constants.STATS_KEY_SEP);
@@ -93,7 +93,7 @@ function getDataByKey(data, key) {
  * @param {Object} data     - data
  * @param {Object} patterns - map of patterns
  *
- * @returns {Object} Renamed data
+ * @returns {Object} Returns renamed data
  */
 function renameKeysInData(data, patterns) {
     let ret = Array.isArray(data) ? [] : {};
@@ -136,7 +136,7 @@ function renameKeysInData(data, patterns) {
  * @param {Object} options                     - options
  * @param {Object} [options.convertArrayToMap] - key to drill down into data, using a defined notation
  *
- * @returns {Object} Reduced object
+ * @returns {Object} Returns reduced object
  */
 function reduceData(data, options) {
     let ret = Array.isArray(data) ? [] : {};
@@ -196,7 +196,7 @@ function reduceData(data, options) {
  *
  * @param {Object} data - data to normalize
  *
- * @returns {Object} Returns normalized data
+ * @returns {Object} Returns normalized event
  */
 function normalizeEvent(data) {
     const ret = formatAsJson(data);
@@ -214,7 +214,7 @@ function normalizeEvent(data) {
  * @param {Object} [options.convertArrayToMap]   - convert array to map using defined key name
  * @param {Object} [options.runCustomFunction]   - run custom function on data
  *
- * @returns {Object} Normalized data
+ * @returns {Object} Returns normalized data
  */
 function normalizeData(data, options) {
     // standard reduce first
