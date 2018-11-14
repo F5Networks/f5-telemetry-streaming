@@ -16,6 +16,7 @@ Telemetry Services is an iControl LX extension that sends telemetry information,
    :maxdepth: 3
 
    overview.rst
+   faq.rst
 
 
 
