@@ -219,7 +219,8 @@ module.exports = {
         };
 
         // well, should be more sophisticated than this
-        let fullUri = options.port === 443 ? `https://${host}` : `http://${host}`;
+        // default to https, unless in defined list of http ports
+        let fullUri = [80, 8080, 8100].indexOf(options.port) !== -1 ? `http://${host}` : `https://${host}`;
         fullUri = options.port ? `${fullUri}:${options.port}${uri}` : `${fullUri}:${constants.DEFAULT_PORT}${uri}`;
         const requestOptions = {
             uri: fullUri,

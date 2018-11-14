@@ -26,7 +26,7 @@ class SystemStats {
     constructor() {
         this.host = null;
         this.username = null;
-        this.password = null;
+        this.passphrase = null;
         this.port = constants.DEFAULT_PORT;
     }
 
@@ -112,8 +112,8 @@ class SystemStats {
         if (this.host === constants.LOCAL_HOST) {
             promise = Promise.resolve({ token: undefined });
         } else {
-            if (!this.username || !this.password) { throw new Error('Username and password required'); }
-            promise = util.getAuthToken(this.host, this.username, this.password, { port: this.port });
+            if (!this.username || !this.passphrase) { throw new Error('Username and passphrase required'); }
+            promise = util.getAuthToken(this.host, this.username, this.passphrase, { port: this.port });
         }
 
         return Promise.resolve(promise)
@@ -140,19 +140,19 @@ class SystemStats {
     /**
      * Collect info based on array provided in properties
      *
-     * @param {String} host     - host
-     * @param {Integer} port    - port
-     * @param {String} username - username for host
-     * @param {String} password - password for host
+     * @param {String} host       - host
+     * @param {Integer} port      - port
+     * @param {String} username   - username for host
+     * @param {String} passphrase - password for host
      *
      * @returns {Object} Promise which is resolved with a map of stats
      */
-    collect(host, port, username, password) {
+    collect(host, port, username, passphrase) {
         this.host = host;
         if (!this.host) { throw new Error('Host required'); }
         if (port) { this.port = port; }
         if (username) { this.username = username; }
-        if (password) { this.password = password; }
+        if (passphrase) { this.passphrase = passphrase; }
 
         return this._getAllData(paths.endpoints)
             .then((data) => {

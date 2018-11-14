@@ -28,7 +28,7 @@ const pollerIDs = {};
 function process(args) {
     const config = args.config;
 
-    return systemStats.collect(config.host, config.port, config.username, config.password)
+    return systemStats.collect(config.host, config.port, config.username, config.passphrase)
         .then((data) => {
             let ret = null;
             if (args.process === false) {
