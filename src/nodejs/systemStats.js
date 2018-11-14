@@ -108,7 +108,8 @@ class SystemStats {
      */
     _getAllData(uris) {
         let promise;
-        if (this.host === constants.DEFAULT_HOST) {
+        // if host is localhost we do not need an auth token
+        if (this.host === constants.LOCAL_HOST) {
             promise = Promise.resolve({ token: undefined });
         } else {
             if (!this.username || !this.password) { throw new Error('Username and password required'); }
@@ -137,21 +138,21 @@ class SystemStats {
     }
 
     /**
-     * Collect stats based on array provided in properties
+     * Collect info based on array provided in properties
      *
      * @param {String} host     - host
+     * @param {Integer} port    - port
      * @param {String} username - username for host
      * @param {String} password - password for host
      *
      * @returns {Object} Promise which is resolved with a map of stats
      */
-    collect(host, username, password) {
+    collect(host, port, username, password) {
         this.host = host;
         if (!this.host) { throw new Error('Host required'); }
+        if (port) { this.port = port; }
         if (username) { this.username = username; }
         if (password) { this.password = password; }
-        // set to 443 if not default host
-        if (this.host !== constants.DEFAULT_HOST) { this.port = 443; }
 
         return this._getAllData(paths.endpoints)
             .then((data) => {
@@ -195,7 +196,7 @@ class SystemStats {
                 return ret;
             })
             .catch((err) => {
-                const msg = `collectStats error: ${err}`;
+                const msg = `collect error: ${err}`;
                 throw new Error(msg);
             });
     }

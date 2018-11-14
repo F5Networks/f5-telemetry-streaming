@@ -25,7 +25,7 @@ let CONSUMERS = null;
 * @returns {Object|null} module or null when failed to load module
 */
 function loadModule(modulePath) {
-    logger.debug(`Trying to load module ${modulePath}`);
+    logger.debug(`Loading module ${modulePath}`);
 
     let module = null;
     try {
@@ -67,7 +67,7 @@ function loadConsumers(config) {
             const consumerType = consumerConfig.type;
             const consumerDir = './'.concat(path.join(CONSUMERS_DIR, consumerType));
 
-            logger.info(`Trying to load ${consumerType} plug-in from ${consumerDir}`);
+            logger.info(`Loading ${consumerType} plug-in from ${consumerDir}`);
             const consumerModule = loadModule(consumerDir);
             if (consumerModule === null) {
                 resolve(undefined);

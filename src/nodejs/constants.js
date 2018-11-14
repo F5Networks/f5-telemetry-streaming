@@ -11,7 +11,7 @@
 module.exports = {
     STATS_KEY_SEP: '::',
     CONSUMERS_DIR: './consumers',
-    DEFAULT_HOST: 'localhost',
+    LOCAL_HOST: 'localhost',
     DEFAULT_PORT: 8100,
     STRICT_TLS_REQUIRED: false, // for now, default to false
     DEFAULT_EVENT_LISTENER_PORT: 6514,

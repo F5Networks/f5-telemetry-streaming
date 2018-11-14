@@ -28,7 +28,7 @@ const pollerIDs = {};
 function process(args) {
     const config = args.config;
 
-    return systemStats.collect(config.host, config.username, config.password)
+    return systemStats.collect(config.host, config.port, config.username, config.password)
         .then((data) => {
             let ret = null;
             if (args.process === false) {
@@ -74,21 +74,27 @@ configWorker.on('change', (config) => {
     // now check for system pollers and start/stop/update accordingly
     if (!systemPollers) {
         if (pollerIDs) {
-            logger.info('Stop collecting stats');
+            logger.info('Stoping system poller(s)');
             Object.keys(pollerIDs).forEach((k) => {
                 util.stop(pollerIDs[k]);
-                delete pollerIDs[k]; // remove reference
+                delete pollerIDs[k];
             });
         }
     } else {
-        // we have pollers to process, now determine if we are starting or updating
+        // we have pollers to process, now determine if we need to start or update
         Object.keys(systemPollers).forEach((k) => {
             const args = { config: systemPollers[k] };
-            if (pollerIDs[k]) {
-                logger.info(`Update system poller interval: ${args.config.interval} secs`);
+
+            // check for enabled=false first
+            if (args.config.enabled === false && pollerIDs[k]) {
+                logger.info(`System poller ${k} disabled, stopping`);
+                util.stop(pollerIDs[k]);
+                delete pollerIDs[k];
+            } else if (pollerIDs[k]) {
+                logger.info(`Updating system poller ${k} interval: ${args.config.interval} secs`);
                 pollerIDs[k] = util.update(pollerIDs[k], safeProcess, args, args.config.interval);
             } else {
-                logger.info(`Start system poller with interval: ${args.config.interval} sec`);
+                logger.info(`Starting system poller ${k} interval: ${args.config.interval} secs`);
                 pollerIDs[k] = util.start(safeProcess, args, args.config.interval);
             }
         });

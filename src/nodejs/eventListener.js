@@ -62,7 +62,7 @@ function start(port) {
             throw err;
         });
     } catch (e) {
-        logger.exception(`Unable to start event listener: ${e}`);
+        logger.exception(`Unable to start event listener: ${e}`, e);
     }
     return server;
 }
@@ -82,7 +82,7 @@ function stop(server) {
             if (err) { throw err; }
         });
     } catch (e) {
-        logger.exception(`Unable to stop event listener: ${e}`);
+        logger.exception(`Unable to stop event listener: ${e}`, e);
     }
 }
 
@@ -96,23 +96,29 @@ configWorker.on('change', (config) => {
 
     if (!eventListeners) {
         if (listeners) {
-            logger.info('Stopping listeners');
+            logger.info('Stopping listener(s)');
             Object.keys(listeners).forEach((k) => {
                 stop(listeners[k]);
-                delete listeners[k]; // remove reference
+                delete listeners[k];
             });
         }
     } else {
         Object.keys(eventListeners).forEach((k) => {
             const lConfig = eventListeners[k];
             const port = lConfig.port ? lConfig.port : DEFAULT_PORT;
-            if (listeners[k]) {
-                logger.info(`Updating listener on port: ${port}`);
+
+            // check for enabled=false first
+            if (lConfig.enabled === false && listeners[k]) {
+                logger.info(`Listener ${k} disabled, stopping`);
+                stop(listeners[k]);
+                delete listeners[k];
+            } else if (listeners[k]) {
+                logger.info(`Updating listener ${k} on port: ${port}`);
                 // TODO: only need to stop/start if port is different
                 stop(listeners[k]);
                 listeners[k] = start(port);
             } else {
-                logger.info(`Starting listener on port: ${port}`);
+                logger.info(`Starting listener ${k} on port: ${port}`);
                 listeners[k] = start(port);
             }
         });
