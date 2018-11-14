@@ -11,11 +11,10 @@
 const Ajv = require('ajv');
 const request = require('request');
 
-const logger = require('./logger.js');
 const constants = require('./constants');
 
 /**
- * Start poller
+ * Start function
  *
  * @returns {Object} setInterval ID (to be used by clearInterval)
  */
@@ -24,7 +23,7 @@ function start(func, args, intervalInS) {
 }
 
 /**
- * Update poller
+ * Update function
  *
  * @returns {Object} Result of function start()
  */
@@ -34,9 +33,9 @@ function update(setIntervalId, func, args, intervalInS) {
 }
 
 /**
- * Stop poller
+ * Stop function
  *
- * @param {integer} intervalID - poller ID
+ * @param {integer} intervalID - interval ID
  */
 function stop(intervalID) {
     clearInterval(intervalID);
@@ -136,21 +135,27 @@ function stringify(msg) {
 }
 
 /**
- * Validate schema
+ * Validate data against schema
  *
  * @param {Object} data - data to validate
- * @param {Object} schema - schema to validate against
+ * @param {Object} schema - schema(s) to validate against
+ * { base: baseSchema, schema1: schema, schema2: schema }
  *
- * @returns {Object} Promise which is resolved with the validated schema
+ * @returns {Object} Promise which is resolved with the validated data
  */
-function validateSchema(data, schema) {
-    const ajv = new Ajv({ useDefaults: true });
-    const validate = ajv.compile(schema);
-    const valid = validate(data);
+function validateSchema(data, schemas) {
+    const ajv = new Ajv({ useDefaults: true, coerceTypes: true });
+    Object.keys(schemas).forEach((k) => {
+        // ignore base, that will be added later
+        if (k !== 'base') {
+            ajv.addSchema(schemas[k]);
+        }
+    });
+    const validator = ajv.compile(schemas.base);
+    const isValid = validator(data);
 
-    if (!valid) {
-        const error = stringify(validate.errors);
-        logger.error(`validateSchema invalid: ${error}`);
+    if (!isValid) {
+        const error = stringify(validator.errors);
         return Promise.reject(new Error(error));
     }
     return Promise.resolve(data);

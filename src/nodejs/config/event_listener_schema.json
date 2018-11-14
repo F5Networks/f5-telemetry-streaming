@@ -1,0 +1,36 @@
+{
+    "$id": "event_listener_schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry services event listener schema",
+    "description": "",
+    "type": "object",
+    "properties": {
+       "class": {
+           "title": "Class",
+           "description": "Telemetry services event listener class",
+           "type": "string",
+           "enum": [ "Event_Listener" ]
+       },
+       "enabled": {
+            "title": "Enabled",
+            "description": "" ,
+            "type": "boolean"
+        },
+        "trace": {
+            "title": "Trace",
+            "description": "" ,
+            "type": "boolean"
+        },
+        "port": {
+            "title": "Port",
+            "description": "" ,
+            "type": "integer",
+            "minimum": 1024,
+            "maximum": 65535
+        }
+    },
+    "required": [
+        "class",
+        "port"
+    ]
+}

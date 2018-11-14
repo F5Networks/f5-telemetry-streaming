@@ -9,9 +9,13 @@
 'use strict';
 
 const EventEmitter = require('events');
-const configSchema = require('./config/schema-main.json');
 const logger = require('./logger.js');
 const util = require('./util.js');
+
+const baseSchema = require('./config/base_schema.json');
+const systemPollerSchema = require('./config/system_poller_schema.json');
+const eventListenerSchema = require('./config/event_listener_schema.json');
+const consumersSchema = require('./config/consumers_schema.json');
 
 class ConfigWorker extends EventEmitter {
     /**
@@ -146,7 +150,13 @@ class ConfigWorker extends EventEmitter {
      * @returns {Object} Promise which is resolved with the validated schema
      */
     validate(data) {
-        return util.validateSchema(data, configSchema);
+        const schemas = {
+            base: baseSchema,
+            systemPoller: systemPollerSchema,
+            eventListener: eventListenerSchema,
+            consumers: consumersSchema
+        };
+        return util.validateSchema(data, schemas);
     }
 
     /**
@@ -158,12 +168,8 @@ class ConfigWorker extends EventEmitter {
      */
     validateAndApply(data) {
         return this.validate(data)
-            .catch((err) => {
-                err = new Error(`config.validateConfig error: ${err}`);
-                err.validationError = true;
-                return Promise.reject(err);
-            })
             .then((newConfig) => {
+                logger.debug(`New config: ${util.stringify(newConfig)}`);
                 // do not fire event until state saved
                 logger.info('New config successfully validated');
                 this.setConfig(newConfig, false);
@@ -174,12 +180,9 @@ class ConfigWorker extends EventEmitter {
                 this.setConfig(this.config);
             })
             .catch((err) => {
-                if (!err.validationError) {
-                    const res = `config.applyConfig error: ${err}`;
-                    logger.exception(res, err);
-                    err = new Error(res);
-                }
-                return Promise.reject(err);
+                const res = `config.validateAndApply error: ${err.message ? err.message : err}`;
+                logger.exception(res, err);
+                return Promise.reject(new Error(res));
             });
     }
 }

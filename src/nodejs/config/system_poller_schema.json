@@ -1,0 +1,69 @@
+{
+    "$id": "system_poller_schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry services system poller schema",
+    "description": "",
+    "type": "object",
+    "properties": {
+       "class": {
+           "title": "Class",
+           "description": "Telemetry services system poller class",
+           "type": "string",
+           "enum": [ "System_Poller" ]
+       },
+       "enabled": {
+            "title": "Enabled",
+            "description": "" ,
+            "type": "boolean"
+        },
+        "trace": {
+            "title": "Trace",
+            "description": "" ,
+            "type": "boolean"
+        },
+       "interval": {
+            "title": "Collection interval (in seconds)",
+            "description": "" ,
+            "type": "integer",
+            "minimum": 30,
+            "maximum": 600
+        },
+        "host": {
+            "title": "Host",
+            "description": "" ,
+            "type": "string",
+            "default": "localhost"
+        },
+        "port": {
+            "title": "Port",
+            "description": "" ,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+        },
+        "protocol": {
+            "title": "Protocol",
+            "description": "" ,
+            "type": "string",
+            "enum": [ "http", "https" ]
+        },
+        "username": {
+            "title": "Username",
+            "description": "" ,
+            "type": "string"
+        },
+        "passphrase": {
+            "title": "Passphrase (password)",
+            "description": "" ,
+            "type": "string"
+        }
+    },
+    "defaultProperties": {
+        "port": 8100
+    },
+    "required": [
+        "class",
+        "interval",
+        "host"
+    ]
+}

@@ -1,0 +1,40 @@
+{
+    "$id": "base_schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry Services",
+    "description": "",
+    "type": "object",
+    "properties": {
+       "class": {
+           "title": "Class",
+           "description": "Telemetry services top level class",
+           "type": "string",
+           "enum": [ "Telemetry" ]
+       },
+       "configuration": {
+           "title": "Configuration object",
+           "description": "",
+           "type": "object",
+           "required": [],
+           "properties": {},
+            "additionalProperties": {
+                "$comment": "AJV does not resolve defaults inside oneOf, or even if using switch with if statements",
+                "anyOf": [
+                    {
+                        "$ref": "system_poller_schema.json#"
+                    },
+                    {
+                        "$ref": "event_listener_schema.json#"
+                    },
+                    {
+                        "$ref": "consumers_schema.json#"
+                    }
+                ]
+            }
+        }
+    },
+    "required": [
+        "class",
+        "configuration"
+    ]
+}

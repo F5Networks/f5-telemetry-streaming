@@ -89,8 +89,9 @@ class RestWorker {
                     .then((data) => {
                         util.restOperationResponder(restOperation, 200, data);
                     })
-                    .catch((e) => {
-                        util.restOperationResponder(restOperation, 500, `systemPoller.process error: ${e}`);
+                    .catch((err) => {
+                        logger.error(err);
+                        util.restOperationResponder(restOperation, 500, `systemPoller.process error: ${err}`);
                     });
             }
             break;
@@ -121,6 +122,7 @@ class RestWorker {
                     util.restOperationResponder(restOperation, 200, { message: 'success' });
                 })
                 .catch((err) => {
+                    logger.error(err);
                     util.restOperationResponder(restOperation, 500, `${err}`);
                 });
             break;
