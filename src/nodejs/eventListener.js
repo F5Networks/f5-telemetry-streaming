@@ -10,20 +10,22 @@
 
 const net = require('net');
 
-const DEFAULT_PORT = require('./constants.js').DEFAULT_EVENT_LISTENER_PORT;
 const logger = require('./logger.js');
+const constants = require('./constants.js');
 const normalize = require('./normalize.js');
 const dataPipeline = require('./dataPipeline.js');
 const configWorker = require('./config.js');
 
-let listener = null;
+const DEFAULT_PORT = constants.DEFAULT_EVENT_LISTENER_PORT;
+const CLASS_NAME = constants.EVENT_LISTENER_CLASS_NAME;
+const listeners = {};
 
 // LTM request log (example)
 // eslint-disable-next-line max-len
 // [telemetry] Client: ::ffff:10.0.2.4 sent data: EVENT_SOURCE="request_logging",BIGIP_HOSTNAME="hostname.test.com",CLIENT_IP="x.x.x.x",SERVER_IP="",HTTP_METHOD="GET",HTTP_URI="/",VIRTUAL_NAME="/Common/app.app/app_vs"
 
 /**
- * Create listener (TCP)
+ * Start listener
  *
  * @param {String} port - port to listen on
  *
@@ -60,23 +62,60 @@ function start(port) {
             throw err;
         });
     } catch (e) {
-        logger.error(`Unable to start event listener: ${e}`);
+        logger.exception(`Unable to start event listener: ${e}`);
     }
     return server;
 }
 
+/**
+ * Stop listener
+ *
+ * @param {Object} server - server to stop
+ *
+ * @returns {Void}
+ */
+function stop(server) {
+    // place in try/catch
+    try {
+        server.close();
+        server.on('close', (err) => {
+            if (err) { throw err; }
+        });
+    } catch (e) {
+        logger.exception(`Unable to stop event listener: ${e}`);
+    }
+}
+
 // config worker change event
-configWorker.on('change', () => {
+configWorker.on('change', (config) => {
     logger.debug('configWorker change event in eventListener'); // helpful debug
-    if (!listener) {
-        logger.info(`Starting listener on port ${DEFAULT_PORT}`);
-        try {
-            listener = start(DEFAULT_PORT);
-        } catch (err) {
-            logger.exception('Unhandled exception on listener start', err);
+    let eventListeners;
+    if (config.parsed && config.parsed[CLASS_NAME]) {
+        eventListeners = config.parsed[CLASS_NAME];
+    }
+
+    if (!eventListeners) {
+        if (listeners) {
+            logger.info('Stopping listeners');
+            Object.keys(listeners).forEach((k) => {
+                stop(listeners[k]);
+                delete listeners[k]; // remove reference
+            });
         }
     } else {
-        logger.info(`Already listening on port ${DEFAULT_PORT}`);
+        Object.keys(eventListeners).forEach((k) => {
+            const lConfig = eventListeners[k];
+            const port = lConfig.port ? lConfig.port : DEFAULT_PORT;
+            if (listeners[k]) {
+                logger.info(`Updating listener on port: ${port}`);
+                // TODO: only need to stop/start if port is different
+                stop(listeners[k]);
+                listeners[k] = start(port);
+            } else {
+                logger.info(`Starting listener on port: ${port}`);
+                listeners[k] = start(port);
+            }
+        });
     }
 });
 

@@ -156,7 +156,7 @@ class ConfigWorker extends EventEmitter {
             eventListener: eventListenerSchema,
             consumers: consumersSchema
         };
-        return util.validateSchema(data, schemas);
+        return util.validateAgainstSchema(data, schemas);
     }
 
     /**
@@ -169,10 +169,16 @@ class ConfigWorker extends EventEmitter {
     validateAndApply(data) {
         return this.validate(data)
             .then((newConfig) => {
-                logger.debug(`New config: ${util.stringify(newConfig)}`);
+                // for now, retain raw config along with parsed
+                const configToSave = {
+                    raw: newConfig,
+                    parsed: util.formatConfig(newConfig)
+                };
+                logger.debug(`Configuration to save: ${util.stringify(configToSave)}`); // helpful debug, for now
+
                 // do not fire event until state saved
-                logger.info('New config successfully validated');
-                this.setConfig(newConfig, false);
+                logger.info('Configuration successfully validated');
+                this.setConfig(configToSave, false);
                 return this.saveState();
             })
             .then(() => {

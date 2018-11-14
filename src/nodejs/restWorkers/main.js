@@ -10,6 +10,7 @@
 
 const logger = require('../logger.js');
 const util = require('../util.js');
+const constants = require('../constants.js');
 
 const configWorker = require('../config.js');
 const eventListener = require('../eventListener.js'); // eslint-disable-line no-unused-vars
@@ -80,12 +81,19 @@ class RestWorker {
         const path = restOperation.getUri().pathname.split('/');
         logger.debug(`GET operation ${urlPath}`);
 
+        let systemPollers;
+        let firstPoller;
         switch (path[3]) {
         case 'statsInfo':
-            if (!configWorker.config.targetHosts) {
-                util.restOperationResponder(restOperation, 400, 'Error: No targetHosts specified, configuration required');
+            if (configWorker.config.parsed && configWorker.config.parsed[constants.SYSTEM_POLLER_CLASS_NAME]) {
+                systemPollers = configWorker.config.parsed[constants.SYSTEM_POLLER_CLASS_NAME];
+            }
+
+            if (!systemPollers) {
+                util.restOperationResponder(restOperation, 400, 'Error: No system poller specified, configuration required');
             } else {
-                systemPoller.process({ config: configWorker.config, process: false })
+                firstPoller = systemPollers[Object.keys(systemPollers)[0]]; // for now just process first one
+                systemPoller.process({ config: firstPoller, process: false })
                     .then((data) => {
                         util.restOperationResponder(restOperation, 200, data);
                     })

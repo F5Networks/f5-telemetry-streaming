@@ -29,6 +29,7 @@
             "maximum": 65535
         }
     },
+    "additionalProperties": false,
     "required": [
         "class",
         "port"

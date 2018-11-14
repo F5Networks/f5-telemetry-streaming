@@ -46,6 +46,7 @@
             "type": [ "string", "object" ]
         }
     },
+    "additionalProperties": true,
     "required": [
         "class",
         "type",

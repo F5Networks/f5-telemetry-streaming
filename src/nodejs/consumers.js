@@ -10,9 +10,11 @@
 
 const path = require('path');
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
-const CONSUMERS_DIR = require('./constants.js').CONSUMERS_DIR;
+const constants = require('./constants.js');
 const configWorker = require('./config.js');
 
+const CONSUMERS_DIR = constants.CONSUMERS_DIR;
+const CLASS_NAME = constants.CONSUMERS_CLASS_NAME;
 let CONSUMERS = null;
 
 /**
@@ -53,26 +55,26 @@ function loadModule(modulePath) {
 */
 // TODO: add logic to remove cached module from memory
 function loadConsumers(config) {
-    if (!Array.isArray(config.consumers)) {
-        logger.info('No consumer(s) defined in config');
+    if (!Array.isArray(config)) {
+        logger.info('No consumer(s) to load, define in configuration first');
         return Promise.resolve([]);
     }
 
     logger.info(`Loading consumer specific plugins from ${CONSUMERS_DIR}`);
     // eslint-disable-next-line
-    return Promise.all(config.consumers.map((consumerConf) => {
+    return Promise.all(config.map((consumerConfig) => {
         return new Promise((resolve) => {
-            const consumerName = consumerConf.consumer;
-            const consumerDir = './'.concat(path.join(CONSUMERS_DIR, consumerName));
+            const consumerType = consumerConfig.type;
+            const consumerDir = './'.concat(path.join(CONSUMERS_DIR, consumerType));
 
-            logger.info(`Trying to load ${consumerName} plug-in from ${consumerDir}`);
+            logger.info(`Trying to load ${consumerType} plug-in from ${consumerDir}`);
             const consumerModule = loadModule(consumerDir);
             if (consumerModule === null) {
                 resolve(undefined);
             } else {
                 // copy consumer's data
                 resolve({
-                    config: JSON.parse(JSON.stringify(consumerConf)),
+                    config: JSON.parse(JSON.stringify(consumerConfig.config)),
                     consumer: consumerModule
                 });
             }
@@ -88,7 +90,20 @@ function loadConsumers(config) {
 // config worker change event
 configWorker.on('change', (config) => {
     logger.debug('configWorker change event in consumers'); // helpful debug
-    loadConsumers(config)
+    let consumersConfig;
+    if (config.parsed && config.parsed[CLASS_NAME]) {
+        consumersConfig = config.parsed[CLASS_NAME];
+    }
+
+    let consumersToLoad = [];
+    if (!consumersConfig) {
+        consumersToLoad = undefined;
+    } else {
+        Object.keys(consumersConfig).forEach((k) => {
+            consumersToLoad.push({ type: consumersConfig[k].type, config: consumersConfig[k] });
+        });
+    }
+    loadConsumers(consumersToLoad)
         .then((consumers) => {
             CONSUMERS = consumers;
         })

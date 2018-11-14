@@ -13,8 +13,8 @@ const crypto = require('crypto');
 
 module.exports = function (context) {
     // context.logger.debug(`Azure_Log_Analytics: config ${JSON.stringify(context.config)}`);
-    const workspaceId = context.config.api.token.workspaceId; // this will change
-    const sharedKey = context.config.api.token.sharedKey; // this will change
+    const workspaceId = context.config.host;
+    const sharedKey = context.config.passphrase;
 
     const apiVersion = '2016-04-01';
     const date = new Date().toUTCString();

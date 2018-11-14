@@ -9,12 +9,14 @@
 'use strict';
 
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
+const constants = require('./constants.js');
 const util = require('./util.js');
 const configWorker = require('./config.js');
 const systemStats = require('./systemStats.js');
 const dataPipeline = require('./dataPipeline.js');
 
-let pollerID = null;
+const CLASS_NAME = constants.SYSTEM_POLLER_CLASS_NAME;
+const pollerIDs = {};
 
 /**
  * Process system(s) stats
@@ -26,11 +28,7 @@ let pollerID = null;
 function process(args) {
     const config = args.config;
 
-    // assume only one target host, for now
-    const targetHost = config.targetHosts[0];
-    if (!targetHost.host) { throw new Error('Host is required'); }
-
-    return systemStats.collect(targetHost.host, targetHost.username, targetHost.password)
+    return systemStats.collect(config.host, config.username, config.password)
         .then((data) => {
             let ret = null;
             if (args.process === false) {
@@ -68,22 +66,32 @@ function safeProcess() {
 // config worker change event
 configWorker.on('change', (config) => {
     logger.debug('configWorker change event in systemPoller'); // helpful debug
-    // just in case we will need to have ability to disable it
-    if (!config.interval) {
-        if (pollerID) {
+    let systemPollers;
+    if (config.parsed && config.parsed[CLASS_NAME]) {
+        systemPollers = config.parsed[CLASS_NAME];
+    }
+
+    // now check for system pollers and start/stop/update accordingly
+    if (!systemPollers) {
+        if (pollerIDs) {
             logger.info('Stop collecting stats');
-            util.stop(pollerID);
-            pollerID = null;
+            Object.keys(pollerIDs).forEach((k) => {
+                util.stop(pollerIDs[k]);
+                delete pollerIDs[k]; // remove reference
+            });
         }
     } else {
-        const args = { config };
-        if (pollerID) {
-            logger.info(`Update collecting stats interval == ${config.interval} sec`);
-            pollerID = util.update(pollerID, safeProcess, args, config.interval);
-        } else {
-            logger.info(`Start collecting stats with interval == ${config.interval} sec`);
-            pollerID = util.start(safeProcess, args, config.interval);
-        }
+        // we have pollers to process, now determine if we are starting or updating
+        Object.keys(systemPollers).forEach((k) => {
+            const args = { config: systemPollers[k] };
+            if (pollerIDs[k]) {
+                logger.info(`Update system poller interval: ${args.config.interval} secs`);
+                pollerIDs[k] = util.update(pollerIDs[k], safeProcess, args, args.config.interval);
+            } else {
+                logger.info(`Start system poller with interval: ${args.config.interval} sec`);
+                pollerIDs[k] = util.start(safeProcess, args, args.config.interval);
+            }
+        });
     }
 });
 

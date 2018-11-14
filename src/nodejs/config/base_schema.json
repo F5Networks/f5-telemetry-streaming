@@ -18,7 +18,7 @@
            "required": [],
            "properties": {},
             "additionalProperties": {
-                "$comment": "AJV does not resolve defaults inside oneOf, or even if using switch with if statements",
+                "$comment": "AJV does not resolve defaults inside oneOf/anyOf, or even when using switch with if statements",
                 "anyOf": [
                     {
                         "$ref": "system_poller_schema.json#"
