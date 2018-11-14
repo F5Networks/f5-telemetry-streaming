@@ -29,7 +29,7 @@ module.exports = function (context) {
     const httpHeaders = {
         'content-type': 'application/json',
         Authorization: authorization,
-        'Log-Type': 'F5Telemetry', // TODO: schema should allow this to be custom
+        'Log-Type': context.config.logType ? context.config.logType : 'F5Telemetry',
         'x-ms-date': date
     };
     const requestOptions = {
