@@ -6,20 +6,20 @@
     "type": "object",
     "properties": {
        "class": {
-           "title": "Class",
-           "description": "Telemetry services top level class",
-           "type": "string",
-           "enum": [ "Telemetry" ]
+            "title": "Class",
+            "description": "Telemetry services top level class",
+            "type": "string",
+            "enum": [ "Telemetry" ]
        },
        "configuration": {
-           "title": "Configuration object",
-           "description": "",
-           "type": "object",
-           "required": [],
-           "properties": {},
+            "title": "Configuration object",
+            "description": "",
+            "type": "object",
+            "required": [],
+            "properties": {},
             "additionalProperties": {
-                "$comment": "AJV does not resolve defaults inside oneOf/anyOf, or even when using switch with if statements",
-                "anyOf": [
+                "$comment": "AJV does not resolve defaults inside oneOf/anyOf, so instead use allOf.  Any schema refs should also use allOf with an if/then/else on class",
+                "allOf": [
                     {
                         "$ref": "system_poller_schema.json#"
                     },
@@ -27,7 +27,7 @@
                         "$ref": "event_listener_schema.json#"
                     },
                     {
-                        "$ref": "consumers_schema.json#"
+                        "$ref": "consumer_schema.json#"
                     }
                 ]
             }

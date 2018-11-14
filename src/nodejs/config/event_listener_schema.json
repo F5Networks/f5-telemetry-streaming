@@ -4,34 +4,45 @@
     "title": "Telemetry services event listener schema",
     "description": "",
     "type": "object",
-    "properties": {
-       "class": {
-           "title": "Class",
-           "description": "Telemetry services event listener class",
-           "type": "string",
-           "enum": [ "Event_Listener" ]
-       },
-       "enabled": {
-            "title": "Enabled",
-            "description": "" ,
-            "type": "boolean"
-        },
-        "trace": {
-            "title": "Trace",
-            "description": "" ,
-            "type": "boolean"
-        },
-        "port": {
-            "title": "Port",
-            "description": "" ,
-            "type": "integer",
-            "minimum": 1024,
-            "maximum": 65535
+    "allOf": [
+        {
+            "if": { "properties": { "class": { "const": "Event_Listener" } } },
+            "then": {
+                "required": [
+                    "class",
+                    "port"
+                ],
+                "properties": {
+                    "class": {
+                        "title": "Class",
+                        "description": "Telemetry services event listener class",
+                        "type": "string",
+                        "enum": [ "Event_Listener" ]
+                    },
+                    "enabled": {
+                        "title": "Enabled",
+                        "description": "" ,
+                        "type": "boolean",
+                        "default": true
+                    },
+                    "trace": {
+                        "title": "Trace",
+                        "description": "" ,
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "port": {
+                        "title": "Port",
+                        "description": "" ,
+                        "type": "integer",
+                        "minimum": 1024,
+                        "maximum": 65535,
+                        "default": 6514
+                    }
+                },
+                "additionalProperties": false
+            },
+            "else": {}
         }
-    },
-    "additionalProperties": false,
-    "required": [
-        "class",
-        "port"
     ]
 }

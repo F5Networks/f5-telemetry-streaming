@@ -15,7 +15,7 @@ const util = require('./util.js');
 const baseSchema = require('./config/base_schema.json');
 const systemPollerSchema = require('./config/system_poller_schema.json');
 const eventListenerSchema = require('./config/event_listener_schema.json');
-const consumersSchema = require('./config/consumers_schema.json');
+const consumerSchema = require('./config/consumer_schema.json');
 
 class ConfigWorker extends EventEmitter {
     /**
@@ -154,7 +154,7 @@ class ConfigWorker extends EventEmitter {
             base: baseSchema,
             systemPoller: systemPollerSchema,
             eventListener: eventListenerSchema,
-            consumers: consumersSchema
+            consumer: consumerSchema
         };
         return util.validateAgainstSchema(data, schemas);
     }
