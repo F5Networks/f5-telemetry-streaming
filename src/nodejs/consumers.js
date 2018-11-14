@@ -67,7 +67,7 @@ function loadConsumers(config) {
             const consumerType = consumerConfig.type;
             const consumerDir = './'.concat(path.join(CONSUMERS_DIR, consumerType));
 
-            logger.info(`Loading ${consumerType} plug-in from ${consumerDir}`);
+            logger.info(`Loading consumer ${consumerType} plug-in from ${consumerDir}`);
             const consumerModule = loadModule(consumerDir);
             if (consumerModule === null) {
                 resolve(undefined);
@@ -82,7 +82,7 @@ function loadConsumers(config) {
     }))
         .then((consumers) => {
             const availableConsumers = consumers.filter(consumer => consumer !== undefined);
-            logger.info(`${availableConsumers.length} plug-in(s) loaded`);
+            logger.info(`${availableConsumers.length} consumer plug-in(s) loaded`);
             return availableConsumers;
         });
 }
