@@ -19,6 +19,17 @@
             "properties": {},
             "additionalProperties": {
                 "$comment": "AJV does not resolve defaults inside oneOf/anyOf, so instead use allOf.  Any schema refs should also use allOf with an if/then/else on class",
+                "properties": {
+                    "class": {
+                        "title": "Class",
+                        "type": "string",
+                        "enum": [
+                            "System_Poller",
+                            "Event_Listener",
+                            "Consumer"
+                        ]
+                    }
+                },    
                 "allOf": [
                     {
                         "$ref": "system_poller_schema.json#"

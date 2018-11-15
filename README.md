@@ -36,7 +36,7 @@ Attach Shell: ```docker exec -it <running container name> /bin/sh```
    "class": "Telemetry",
    "configuration": {
         "My_Poller": {
-        "class": "System_Poller",
+            "class": "System_Poller",
             "enabled": true,
             "trace": false,
             "interval": 60,
