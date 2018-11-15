@@ -125,6 +125,10 @@
             "renameKeys": { "ltm/pool/": { "pattern": "pool\/(.*)\/", "group": 1 } },
             "comment": "getting pool member stats requires call to uri pool/<pool>/members/stats, pool/members/stats only returns single pool"
         },
+        "poolMemberStats": {
+            "key": "poolMembersRef",
+            "normalize": false
+        },
         "tlsCerts": {
             "key": "/mgmt/tm/sys/file/ssl-cert::items",
             "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" },
