@@ -34,36 +34,42 @@ Attach Shell: ```docker exec -it <running container name> /bin/sh```
 ```json
 {
    "class": "Telemetry",
-   "interval": 60,
-   "targetHosts": [
-        {
+   "configuration": {
+        "My_Poller": {
+            "class": "System_Poller",
+            "enabled": true,
+            "trace": false,
+            "interval": 60,
             "host": "x.x.x.x",
-            "username": "test_user",
-            "password": "test_password"
+            "port": 443,
+            "username": "myuser",
+            "passphrase": "mypassphrase"
+        },
+        "My_Listener": {
+            "class": "Event_Listener",
+            "enabled": true,
+            "trace": false,
+            "port": 6514
+        },
+        "My_Consumer": {
+            "class": "Consumer",
+            "enabled": true,
+            "trace": false,
+            "type": "Azure_Log_Analytics",
+            "host": "myworkspaceid",
+            "passphrase": "mysharedkey"
         }
-    ],
-    "consumers": [
-        {
-            "consumer": "Splunk",
-            "api": {
-                "token": "test_token"
-            },
-            "destination": {
-                "address": "x.x.x.x"
-            }
-        }
-    ]
+   }
 }
 ```
 
 Note: To run on a BIG-IP target hosts should reference localhost with no credentials.
 
 ```json
-"targetHosts": [
-    {
-        "host": "localhost"
-    }
-]
+"My_Poller": {
+    "class": "System_Poller",
+    "host": "localhost"
+}
 ```
 
 ## Output Example

@@ -9,10 +9,27 @@
 'use strict';
 
 const logger = require('f5-logger').getInstance(); // eslint-disable-line import/no-unresolved
-const util = require('./util.js');
+
+/**
+ * Stringify a message
+ *
+ * @param {Object|String} msg - message to stringify
+ *
+ * @returns {Object} Stringified message
+ */
+function stringify(msg) {
+    if (typeof msg === 'object') {
+        try {
+            msg = JSON.stringify(msg);
+        } catch (e) {
+            // just leave original message intact
+        }
+    }
+    return msg;
+}
 
 const addPrefix = function (msg) {
-    return `[telemetry] ${util.stringify(msg)}`;
+    return `[telemetry] ${stringify(msg)}`;
 };
 
 /* f5-logger module supports the following levels
