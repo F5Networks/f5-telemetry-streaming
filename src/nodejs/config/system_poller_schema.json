@@ -1,0 +1,80 @@
+{
+    "$id": "system_poller_schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry services system poller schema",
+    "description": "",
+    "type": "object",
+    "allOf": [
+        {
+            "if": { "properties": { "class": { "const": "System_Poller" } } },
+            "then": {
+                "required": [
+                    "class",
+                    "interval",
+                    "host"
+                ],
+                "properties": {
+                    "class": {
+                        "title": "Class",
+                        "description": "Telemetry services system poller class",
+                        "type": "string",
+                        "enum": [ "System_Poller" ]
+                    },
+                    "enabled": {
+                        "title": "Enabled",
+                        "description": "" ,
+                        "type": "boolean",
+                        "default": true
+                    },
+                    "trace": {
+                        "title": "Trace",
+                        "description": "" ,
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "interval": {
+                        "title": "Collection interval (in seconds)",
+                        "description": "" ,
+                        "type": "integer",
+                        "minimum": 30,
+                        "maximum": 600,
+                        "default": 60
+                    },
+                    "host": {
+                        "title": "Host",
+                        "description": "" ,
+                        "type": "string",
+                        "default": "localhost"
+                    },
+                    "port": {
+                        "title": "Port",
+                        "description": "" ,
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 65535,
+                        "default": 8100
+                    },
+                    "protocol": {
+                        "title": "Protocol",
+                        "description": "" ,
+                        "type": "string",
+                        "enum": [ "http", "https" ],
+                        "default": "https"
+                    },
+                    "username": {
+                        "title": "Username",
+                        "description": "" ,
+                        "type": "string"
+                    },
+                    "passphrase": {
+                        "title": "Passphrase (password)",
+                        "description": "" ,
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "else": {}
+        }
+    ]
+}

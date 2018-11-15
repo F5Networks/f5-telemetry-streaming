@@ -1,0 +1,66 @@
+{
+    "$id": "consumer_schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry services consumer schema",
+    "description": "",
+    "type": "object",
+    "allOf": [
+        {
+            "if": { "properties": { "class": { "const": "Consumer" } } },
+            "then": {
+                "required": [
+                    "class",
+                    "type",
+                    "host",
+                    "passphrase"
+                ],
+                "properties": {
+                   "class": {
+                       "title": "Class",
+                       "description": "Telemetry services consumer class",
+                       "type": "string",
+                       "enum": [ "Consumer" ]
+                   },
+                   "enabled": {
+                        "title": "Enabled",
+                        "description": "" ,
+                        "type": "boolean",
+                        "default": true
+                    },
+                    "trace": {
+                        "title": "Trace",
+                        "description": "" ,
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "type": {
+                        "title": "Type",
+                        "description": "" ,
+                        "type": "string",
+                        "enum": [ "Splunk", "Azure_Log_Analytics" ]
+                    },
+                    "host": {
+                        "title": "Host",
+                        "description": "" ,
+                        "type": "string"
+                    },
+                    "port": {
+                        "$comment": "Certain consumers may not require this",
+                        "title": "Port",
+                        "description": "" ,
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 65535
+                    },
+                    "passphrase": {
+                        "title": "Passphrase (secret)",
+                        "description": "" ,
+                        "type": [ "string", "object" ]
+                    }
+                },
+                "additionalProperties": true
+            },
+            "else": {}
+        }
+    ]
+}

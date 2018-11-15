@@ -1,0 +1,51 @@
+{
+    "$id": "base_schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry Services",
+    "description": "",
+    "type": "object",
+    "properties": {
+       "class": {
+            "title": "Class",
+            "description": "Telemetry services top level class",
+            "type": "string",
+            "enum": [ "Telemetry" ]
+       },
+       "configuration": {
+            "title": "Configuration object",
+            "description": "",
+            "type": "object",
+            "required": [],
+            "properties": {},
+            "additionalProperties": {
+                "$comment": "AJV does not resolve defaults inside oneOf/anyOf, so instead use allOf.  Any schema refs should also use allOf with an if/then/else on class",
+                "properties": {
+                    "class": {
+                        "title": "Class",
+                        "type": "string",
+                        "enum": [
+                            "System_Poller",
+                            "Event_Listener",
+                            "Consumer"
+                        ]
+                    }
+                },    
+                "allOf": [
+                    {
+                        "$ref": "system_poller_schema.json#"
+                    },
+                    {
+                        "$ref": "event_listener_schema.json#"
+                    },
+                    {
+                        "$ref": "consumer_schema.json#"
+                    }
+                ]
+            }
+        }
+    },
+    "required": [
+        "class",
+        "configuration"
+    ]
+}

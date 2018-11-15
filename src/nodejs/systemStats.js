@@ -26,7 +26,7 @@ class SystemStats {
     constructor() {
         this.host = null;
         this.username = null;
-        this.password = null;
+        this.passphrase = null;
         this.port = constants.DEFAULT_PORT;
     }
 
@@ -108,11 +108,12 @@ class SystemStats {
      */
     _getAllData(uris) {
         let promise;
-        if (this.host === constants.DEFAULT_HOST) {
+        // if host is localhost we do not need an auth token
+        if (this.host === constants.LOCAL_HOST) {
             promise = Promise.resolve({ token: undefined });
         } else {
-            if (!this.username || !this.password) { throw new Error('Username and password required'); }
-            promise = util.getAuthToken(this.host, this.username, this.password, { port: this.port });
+            if (!this.username || !this.passphrase) { throw new Error('Username and passphrase required'); }
+            promise = util.getAuthToken(this.host, this.username, this.passphrase, { port: this.port });
         }
 
         return Promise.resolve(promise)
@@ -137,21 +138,21 @@ class SystemStats {
     }
 
     /**
-     * Collect stats based on array provided in properties
+     * Collect info based on array provided in properties
      *
-     * @param {String} host     - host
-     * @param {String} username - username for host
-     * @param {String} password - password for host
+     * @param {String} host       - host
+     * @param {Integer} port      - port
+     * @param {String} username   - username for host
+     * @param {String} passphrase - password for host
      *
      * @returns {Object} Promise which is resolved with a map of stats
      */
-    collect(host, username, password) {
+    collect(host, port, username, passphrase) {
         this.host = host;
         if (!this.host) { throw new Error('Host required'); }
+        if (port) { this.port = port; }
         if (username) { this.username = username; }
-        if (password) { this.password = password; }
-        // set to 443 if not default host
-        if (this.host !== constants.DEFAULT_HOST) { this.port = 443; }
+        if (passphrase) { this.passphrase = passphrase; }
 
         return this._getAllData(paths.endpoints)
             .then((data) => {
@@ -195,7 +196,7 @@ class SystemStats {
                 return ret;
             })
             .catch((err) => {
-                const msg = `collectStats error: ${err}`;
+                const msg = `collect error: ${err}`;
                 throw new Error(msg);
             });
     }
