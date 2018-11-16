@@ -7,6 +7,7 @@ Telemetry Services is an iControl LX extension to stream telemetry from BIG-IP(s
 - Splunk
 - Kafka
 - Azure Log Analytics
+- AWS S3
 - AWS CloudWatch
 
 ## Contents
@@ -73,6 +74,8 @@ Note: To run on a BIG-IP target hosts should reference localhost with no credent
 ```
 
 ## Output Example
+
+### System Info
 
 ```json
 {
@@ -364,3 +367,31 @@ Note: To run on a BIG-IP target hosts should reference localhost with no credent
     }
 }
 ```
+
+### Events (Logs)
+
+#### LTM Request Log
+
+```json
+{
+    "EVENT_SOURCE":"request_logging",
+    "BIGIP_HOSTNAME":"hostname",
+    "CLIENT_IP":"177.47.192.42",
+    "SERVER_IP":"",
+    "HTTP_METHOD":"GET",
+    "HTTP_URI":"/",
+    "VIRTUAL_NAME":"/Common/app.app/app_vs"
+}
+```
+
+#### AFM Log
+
+TBD
+
+#### ASM Log
+
+TBD
+
+#### APM Log
+
+TBD
