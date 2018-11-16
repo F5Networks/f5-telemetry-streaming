@@ -93,6 +93,7 @@
             "key": "/mgmt/tm/sys/tmm-traffic",
             "filterKeys": [ "/tmm-traffic", "clientSideTraffic.bitsIn", "clientSideTraffic.bitsOut" ],
             "renameKeys": { "sys/tmm-traffic": "([0-9]\\.[0-9])" },
+            "runFunction": { "name": "getSum", "args": { "allKeys": true } },
             "comment": "bits, but over what time period?"
         },
         "diskStorage": {
@@ -119,15 +120,19 @@
             "filterKeys": [ "/stats", "clientside.bitsIn", "clientside.bitsOut", "clientside.curConns", "availabilityState", "enabledState", "destination" ],
             "renameKeys": { "ltm/virtual": { "pattern": "virtual\/(.*)\/", "group": 1 } }
         },
-        "poolStats": {
+        "poolStatsDisabled": {
+            "disabled": true,
             "key": "/mgmt/tm/ltm/pool/stats",
             "filterKeys": [ "/stats", "serverside.bitsIn", "serverside.bitsOut", "serverside.curConns", "availabilityState", "statusReason", "enabledState" ],
             "renameKeys": { "ltm/pool/": { "pattern": "pool\/(.*)\/", "group": 1 } },
-            "comment": "getting pool member stats requires call to uri pool/<pool>/members/stats, pool/members/stats only returns single pool"
+            "comment": "disabled, using new method to get stats for each pool member"
         },
-        "poolMemberStats": {
-            "key": "poolMembersRef",
-            "normalize": false
+        "poolStats": {
+            "key": "poolMembersRef::items",
+            "convertArrayToMap": { "keyName": "selfLink", "keyNamePrefix": "name/" },
+            "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/pool/": { "pattern": "pool\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members" },
+            "filterKeys": [ "name/", "/stats", "membersReference", "addr", "port", "serverside.bitsIn", "serverside.bitsOut", "serverside.curConns", "availabilityState", "statusReason", "enabledState" ],
+            "comment": "whew, got those pesky pool stats"
         },
         "tlsCerts": {
             "key": "/mgmt/tm/sys/file/ssl-cert::items",

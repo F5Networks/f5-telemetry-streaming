@@ -119,6 +119,7 @@ class SystemStats {
                     const actualData = data.data;
                     // for now let's just support a single reference
                     referenceKey = Object.keys(p.expandReferences)[0];
+                    const referenceObj = p.expandReferences[Object.keys(p.expandReferences)[0]];
 
                     const promises = [];
                     // assumes we are looking inside of single property, might need to extend this to 'entries', etc.
@@ -128,8 +129,11 @@ class SystemStats {
                             // first check for reference and then link property
                             if (item[referenceKey] && item[referenceKey].link) {
                                 // remove protocol/host from self link
-                                const referenceEndpoint = item[referenceKey].link.replace('https://localhost', '');
-                                // use index as name for later use
+                                let referenceEndpoint = item[referenceKey].link.replace('https://localhost', '').split('?')[0];
+                                if (referenceObj.endpointSuffix) {
+                                    referenceEndpoint = referenceEndpoint.split('?')[0]; // simple avoidance of query params
+                                    referenceEndpoint = `${referenceEndpoint}${referenceObj.endpointSuffix}`;
+                                }
                                 promises.push(this._getData(referenceEndpoint, { name: i }));
                             }
                         }
@@ -142,9 +146,13 @@ class SystemStats {
             .then((data) => {
                 // this tells us we (might) need to modify the raw data
                 if (rawDataToModify) {
-                    // always return the raw data, but attempt to modify in place
                     data.forEach((i) => {
-                        rawDataToModify.data[childItemKey][i.name][referenceKey] = i.data;
+                        // try/catch, default should be just to continue
+                        try {
+                            rawDataToModify.data[childItemKey][i.name][referenceKey] = i.data;
+                        } catch (e) {
+                            // continue
+                        }
                     });
                     return Promise.resolve(rawDataToModify);
                 }

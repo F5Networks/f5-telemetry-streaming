@@ -40,6 +40,39 @@ module.exports = {
     },
 
     /**
+     * Sum values
+     *
+     * @param {Object} args            - args object
+     * @param {Object} [args.data]     - data to process (always included)
+     * @param {Boolean} [args.allKeys] - sum all keys in object (in child object actually)
+     *
+     * @returns {Object} Returns object containing sum
+     */
+    getSum(args) {
+        if (!args.allKeys) { args.allKeys = true; }
+        const data = args.data;
+        const values = {};
+
+        // for now only supports allKeys, but that could change
+        if (args.allKeys) {
+            // assume we are processing an object which also has a child object containing the keys interested in
+            Object.keys(data).forEach((k) => {
+                logger.info(`data[k]: ${util.stringify(data[k])}`);
+                if (typeof data[k] === 'object') {
+                    Object.keys(data[k]).forEach((cK) => {
+                        if (values[cK] === undefined) {
+                            values[cK] = data[k][cK];
+                        } else {
+                            values[cK] += data[k][cK];
+                        }
+                    });
+                }
+            });
+        }
+        return values;
+    },
+
+    /**
      * getFirstKey
      *
      * @param {Object} args                - args object
