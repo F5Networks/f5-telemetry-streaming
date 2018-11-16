@@ -115,6 +115,7 @@ class SystemStats {
         return Promise.resolve(this._getData(p.endpoint, { name: p.name, body: p.body }))
             .then((data) => {
                 // data is { name: foo, data: bar }
+                // check if expandReferences is requested
                 if (p.expandReferences) {
                     const actualData = data.data;
                     // for now let's just support a single reference
@@ -129,7 +130,7 @@ class SystemStats {
                             // first check for reference and then link property
                             if (item[referenceKey] && item[referenceKey].link) {
                                 // remove protocol/host from self link
-                                let referenceEndpoint = item[referenceKey].link.replace('https://localhost', '').split('?')[0];
+                                let referenceEndpoint = item[referenceKey].link.replace('https://localhost', '');
                                 if (referenceObj.endpointSuffix) {
                                     referenceEndpoint = referenceEndpoint.split('?')[0]; // simple avoidance of query params
                                     referenceEndpoint = `${referenceEndpoint}${referenceObj.endpointSuffix}`;
@@ -141,13 +142,14 @@ class SystemStats {
                     rawDataToModify = data; // retain raw data for later use
                     return Promise.all(promises);
                 }
+                // default is to just return the data
                 return Promise.resolve(data);
             })
             .then((data) => {
-                // this tells us we (might) need to modify the raw data
+                // this tells us we need to modify the raw data, or at least attempt to do so
                 if (rawDataToModify) {
                     data.forEach((i) => {
-                        // try/catch, default should be just to continue
+                        // try/catch, default should be to just continue
                         try {
                             rawDataToModify.data[childItemKey][i.name][referenceKey] = i.data;
                         } catch (e) {
@@ -156,6 +158,7 @@ class SystemStats {
                     });
                     return Promise.resolve(rawDataToModify);
                 }
+                // again default is to just return the data
                 return Promise.resolve(data);
             })
             .catch((err) => {

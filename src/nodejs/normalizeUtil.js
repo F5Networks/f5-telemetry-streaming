@@ -57,7 +57,6 @@ module.exports = {
         if (args.allKeys) {
             // assume we are processing an object which also has a child object containing the keys interested in
             Object.keys(data).forEach((k) => {
-                logger.info(`data[k]: ${util.stringify(data[k])}`);
                 if (typeof data[k] === 'object') {
                     Object.keys(data[k]).forEach((cK) => {
                         if (values[cK] === undefined) {
