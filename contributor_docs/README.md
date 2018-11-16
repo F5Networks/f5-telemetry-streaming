@@ -9,14 +9,14 @@ This is the top-level documentation which provides notes and information about c
 1. Collect the raw data from the device by adding a new endpoint to paths.json, which resides under the */config* directory.
     * Example (basic):
 
-        ```json
+        ```javscript
         {
             "endpoint": "/mgmt/tm/sys/global-settings"
         }
         ```
     * Macros (advanced): Paths.json can retrieve the data in some additional, specific ways using custom macros.  These are defined with some explanation in the following block.
 
-        ```json
+        ```javascript
         {
             "endpoint": "/mgmt/tm/sys/someEndpoint", // REST endpoint
             "expandReferences": { "membersReference": { "endpointSuffix": "/stats" } }, // Certain data requires getting a list of objects and then in each object expanding/following references to a child object.  'membersReference' is the name of that key (currently looking under 'items' in the data returned) and will result in self link data being retrived and 'membersReference' key being replaced with that data.  'endpointSuffix' defines adding a suffix for each self link prior to retrieval.
@@ -27,14 +27,14 @@ This is the top-level documentation which provides notes and information about c
 2. Enable and define how the data should look by adding a new key under *stats* in properties.json, which resides under the */config* directory.
     * Example (basic):
 
-        ```json
+        ```javascript
         "hostname": {
             "key": "/mgmt/tm/sys/global-settings::hostname"
         }
         ```
     * Macros (advanced): Properties.json can manipulate the data in some additional, specific ways using custom macros.  These are defined along with some explanation in the following block.
 
-        ```json
+        ```javascript
         "someKey": {
             "key": "/mgmt/tm/sys/someUri::someChildKey", // /uri (or alt name in paths.json) + key(s) seperated by '::' to navigate into object and get a specific value
             "normalize": false, // This can override normalization, can be useful when adding new info/stat
