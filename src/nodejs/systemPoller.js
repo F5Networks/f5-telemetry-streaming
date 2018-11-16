@@ -12,7 +12,7 @@ const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 const constants = require('./constants.js');
 const util = require('./util.js');
 const configWorker = require('./config.js');
-const systemStats = require('./systemStats.js');
+const SystemStats = require('./systemStats.js');
 const dataPipeline = require('./dataPipeline.js');
 
 const CLASS_NAME = constants.SYSTEM_POLLER_CLASS_NAME;
@@ -28,7 +28,7 @@ const pollerIDs = {};
 function process(args) {
     const config = args.config;
 
-    return systemStats.collect(config.host, config.port, config.username, config.passphrase)
+    return new SystemStats().collect(config.host, config.port, config.username, config.passphrase)
         .then((data) => {
             let ret = null;
             if (args.process === false) {

@@ -64,7 +64,7 @@ Attach Shell: ```docker exec -it <running container name> /bin/sh```
 }
 ```
 
-Note: To run on a BIG-IP target hosts should reference localhost with no credentials.
+Note: To run on a BIG-IP system poller should specify localhost with no credentials.
 
 ```json
 "My_Poller": {

@@ -271,4 +271,4 @@ class SystemStats {
     }
 }
 
-module.exports = new SystemStats();
+module.exports = SystemStats;
