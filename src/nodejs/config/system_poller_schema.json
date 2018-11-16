@@ -28,8 +28,8 @@
                     },
                     "trace": {
                         "title": "Trace",
-                        "description": "" ,
-                        "type": "boolean",
+                        "description": "Enables data dumping to file. Value could be string - path to file to dump data to." ,
+                        "type": ["boolean", "string"],
                         "default": false
                     },
                     "interval": {
