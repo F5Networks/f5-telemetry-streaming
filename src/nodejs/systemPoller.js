@@ -27,9 +27,13 @@ const pollerIDs = {};
  */
 function process(args) {
     const config = args.config;
+    const tracer = args.tracer;
 
     return systemStats.collect(config.host, config.port, config.username, config.passphrase)
         .then((data) => {
+            if (tracer) {
+                tracer.write(JSON.stringify(data, null, 4));
+            }
             let ret = null;
             if (args.process === false) {
                 ret = Promise.resolve(data);
@@ -63,6 +67,7 @@ function safeProcess() {
     }
 }
 
+
 // config worker change event
 configWorker.on('change', (config) => {
     logger.debug('configWorker change event in systemPoller'); // helpful debug
@@ -70,6 +75,9 @@ configWorker.on('change', (config) => {
     if (config.parsed && config.parsed[CLASS_NAME]) {
         systemPollers = config.parsed[CLASS_NAME];
     }
+
+    // timestamp to filed out-dated tracers
+    const tracersTimestamp = new Date().getTime();
 
     // now check for system pollers and start/stop/update accordingly
     if (!systemPollers) {
@@ -84,21 +92,26 @@ configWorker.on('change', (config) => {
         // we have pollers to process, now determine if we need to start or update
         Object.keys(systemPollers).forEach((k) => {
             const args = { config: systemPollers[k] };
-
             // check for enabled=false first
-            if (args.config.enabled === false && pollerIDs[k]) {
-                logger.info(`System poller ${k} disabled, stopping`);
-                util.stop(pollerIDs[k]);
-                delete pollerIDs[k];
+            if (args.config.enabled === false) {
+                if (pollerIDs[k]) {
+                    logger.info(`System poller ${k} disabled, stopping`);
+                    util.stop(pollerIDs[k]);
+                    delete pollerIDs[k];
+                }
             } else if (pollerIDs[k]) {
                 logger.info(`Updating system poller ${k} interval: ${args.config.interval} secs`);
+                args.tracer = util.tracer.createFromConfig(CLASS_NAME, k, args.config);
                 pollerIDs[k] = util.update(pollerIDs[k], safeProcess, args, args.config.interval);
             } else {
                 logger.info(`Starting system poller ${k} interval: ${args.config.interval} secs`);
+                args.tracer = util.tracer.createFromConfig(CLASS_NAME, k, args.config);
                 pollerIDs[k] = util.start(safeProcess, args, args.config.interval);
             }
         });
     }
+    util.tracer.remove(null, tracer => tracer.name.startsWith(CLASS_NAME)
+                                       && tracer.lastGetTouch < tracersTimestamp);
 });
 
 
