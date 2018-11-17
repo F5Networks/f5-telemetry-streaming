@@ -11,6 +11,7 @@
 const net = require('net');
 
 const logger = require('./logger.js');
+const tracers = require('./util.js').tracer;
 const constants = require('./constants.js');
 const normalize = require('./normalize.js');
 const dataPipeline = require('./dataPipeline.js');
@@ -31,7 +32,7 @@ const listeners = {};
  *
  * @returns {Object} Returns server object
  */
-function start(port) {
+function start(port, tracer) {
     // TODO: investigate constraining listener if running on BIG-IP with host: localhost (or similar),
     // however for now cannot do so until valid address found - loopback address not allowed for LTM objects
     let server;
@@ -46,6 +47,9 @@ function start(port) {
             c.on('data', (data) => {
                 // normalize and send to data pipeline
                 const normalizedData = normalize.event(String(data)); // force string
+                if (tracer) {
+                    tracer.write(JSON.stringify(normalizedData, null, 4));
+                }
                 dataPipeline.process(normalizedData, 'event');
             });
             // event on client connection close
@@ -93,6 +97,8 @@ configWorker.on('change', (config) => {
     if (config.parsed && config.parsed[CLASS_NAME]) {
         eventListeners = config.parsed[CLASS_NAME];
     }
+    // timestamp to filed out-dated tracers
+    const tracersTimestamp = new Date().getTime();
 
     if (!eventListeners) {
         if (listeners) {
@@ -108,21 +114,25 @@ configWorker.on('change', (config) => {
             const port = lConfig.port ? lConfig.port : DEFAULT_PORT;
 
             // check for enabled=false first
-            if (lConfig.enabled === false && listeners[k]) {
-                logger.info(`Listener ${k} disabled, stopping`);
-                stop(listeners[k]);
-                delete listeners[k];
+            if (lConfig.enabled === false) {
+                if (listeners[k]) {
+                    logger.info(`Listener ${k} disabled, stopping`);
+                    stop(listeners[k]);
+                    delete listeners[k];
+                }
             } else if (listeners[k]) {
                 logger.info(`Updating listener ${k} on port: ${port}`);
                 // TODO: only need to stop/start if port is different
                 stop(listeners[k]);
-                listeners[k] = start(port);
+                listeners[k] = start(port, tracers.createFromConfig(CLASS_NAME, k, lConfig));
             } else {
                 logger.info(`Starting listener ${k} on port: ${port}`);
-                listeners[k] = start(port);
+                listeners[k] = start(port, tracers.createFromConfig(CLASS_NAME, k, lConfig));
             }
         });
     }
+    tracers.remove(null, tracer => tracer.name.startsWith(CLASS_NAME)
+                                   && tracer.lastGetTouch < tracersTimestamp);
 });
 
 module.exports = {
