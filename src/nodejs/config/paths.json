@@ -13,6 +13,9 @@
             "endpoint": "/mgmt/tm/sys/version"
         },
         {
+            "endpoint": "/mgmt/tm/sys/ready"
+        },
+        {
             "endpoint": "/mgmt/tm/cm/sync-status"
         },
         {
