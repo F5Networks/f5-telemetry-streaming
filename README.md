@@ -7,6 +7,7 @@ Telemetry Services is an iControl LX extension to stream telemetry from BIG-IP(s
 - Splunk
 - Kafka
 - Azure Log Analytics
+- AWS S3
 - AWS CloudWatch
 
 ## Contents
@@ -63,7 +64,7 @@ Attach Shell: ```docker exec -it <running container name> /bin/sh```
 }
 ```
 
-Note: To run on a BIG-IP target hosts should reference localhost with no credentials.
+Note: To run on a BIG-IP system poller should specify localhost with no credentials.
 
 ```json
 "My_Poller": {
@@ -73,6 +74,8 @@ Note: To run on a BIG-IP target hosts should reference localhost with no credent
 ```
 
 ## Output Example
+
+### System Info
 
 ```json
 {
@@ -95,28 +98,14 @@ Note: To run on a BIG-IP target hosts should reference localhost with no credent
     "syncSummary": " ",
     "failoverStatus": "ACTIVE",
     "failoverColor": "green",
-    "deviceTimestamp": "2018-11-09T18:30:16Z",
-    "cpu": 2,
-    "memory": 50,
+    "deviceTimestamp": "2018-11-16T00:40:18Z",
+    "cpu": 4,
+    "memory": 51,
     "tmmCpu": 1,
     "tmmMemory": 10,
     "tmmTraffic": {
-        "0.0": {
-            "clientSideTraffic.bitsIn": 88589048,
-            "clientSideTraffic.bitsOut": 112507072
-        },
-        "0.1": {
-            "clientSideTraffic.bitsIn": 3247338816,
-            "clientSideTraffic.bitsOut": 9998209360
-        },
-        "0.2": {
-            "clientSideTraffic.bitsIn": 90876144,
-            "clientSideTraffic.bitsOut": 121086968
-        },
-        "0.3": {
-            "clientSideTraffic.bitsIn": 3244881224,
-            "clientSideTraffic.bitsOut": 9962121096
-        }
+        "clientSideTraffic.bitsIn": 22020094176,
+        "clientSideTraffic.bitsOut": 66095376960
     },
     "diskStorage": {
         "/": {
@@ -137,7 +126,7 @@ Note: To run on a BIG-IP target hosts should reference localhost with no credent
         },
         "/var": {
             "1024-blocks": "3096336",
-            "Capacity": "32%"
+            "Capacity": "33%"
         },
         "/shared": {
             "1024-blocks": "20642428",
@@ -182,64 +171,64 @@ Note: To run on a BIG-IP target hosts should reference localhost with no credent
     },
     "diskLatency": {
         "sda": {
-            "rsec/s": "16.51",
-            "wsec/s": "202.96"
+            "rsec/s": "6.41",
+            "wsec/s": "189.75"
         },
         "sdb": {
-            "rsec/s": "1.02",
+            "rsec/s": "1.01",
             "wsec/s": "0.00"
         },
         "dm-0": {
-            "rsec/s": "0.01",
+            "rsec/s": "0.00",
             "wsec/s": "0.00"
         },
         "dm-1": {
-            "rsec/s": "0.58",
-            "wsec/s": "97.94"
+            "rsec/s": "0.18",
+            "wsec/s": "97.72"
         },
         "dm-2": {
-            "rsec/s": "0.85",
-            "wsec/s": "30.23"
+            "rsec/s": "0.27",
+            "wsec/s": "30.26"
         },
         "dm-3": {
-            "rsec/s": "0.47",
-            "wsec/s": "30.55"
+            "rsec/s": "0.27",
+            "wsec/s": "26.19"
         },
         "dm-4": {
             "rsec/s": "0.02",
-            "wsec/s": "0.01"
+            "wsec/s": "0.06"
         },
         "dm-5": {
-            "rsec/s": "0.73",
-            "wsec/s": "3.13"
+            "rsec/s": "0.25",
+            "wsec/s": "3.03"
         },
         "dm-6": {
-            "rsec/s": "8.64",
+            "rsec/s": "3.06",
             "wsec/s": "0.00"
         },
         "dm-7": {
-            "rsec/s": "0.11",
-            "wsec/s": "0.14"
+            "rsec/s": "0.07",
+            "wsec/s": "0.09"
         },
         "dm-8": {
-            "rsec/s": "4.01",
-            "wsec/s": "40.98"
+            "rsec/s": "1.25",
+            "wsec/s": "32.40"
         }
     },
     "networkInterfaces": {
         "1.1": {
-            "counters.bitsIn": 20329242824,
-            "counters.bitsOut": 6866947736,
+            "counters.bitsIn": 66541031568,
+            "counters.bitsOut": 22639094120,
             "status": "up"
         },
         "1.2": {
-            "counters.bitsIn": 0,
+            "counters.bitsIn": 2400,
             "counters.bitsOut": 18240,
             "status": "up"
         },
         "mgmt": {
-            "counters.bitsIn": 2645461912,
-            "counters.bitsOut": 1405234728,
+            "counters.bitsIn": 8638870752,
+            "counters.bitsOut": 5048056112,
             "status": "up"
         }
     },
@@ -292,8 +281,8 @@ Note: To run on a BIG-IP target hosts should reference localhost with no credent
     },
     "virtualServerStats": {
         "~Common~app.app~app_vs": {
-            "clientside.bitsIn": 5735888,
-            "clientside.bitsOut": 24373512,
+            "clientside.bitsIn": 14561768,
+            "clientside.bitsOut": 58749616,
             "clientside.curConns": 0,
             "destination": "10.0.2.10:80",
             "status.availabilityState": "available",
@@ -310,20 +299,42 @@ Note: To run on a BIG-IP target hosts should reference localhost with no credent
     },
     "poolStats": {
         "~Common~app.app~app_pool": {
-            "serverside.bitsIn": 960352,
-            "serverside.bitsOut": 3344936,
-            "serverside.curConns": 0,
-            "status.availabilityState": "available",
-            "status.enabledState": "enabled",
-            "status.statusReason": "The pool is available"
+            "members": {
+                "~Common~216.58.217.36:80": {
+                    "addr": "216.58.217.36",
+                    "port": 80,
+                    "serverside.bitsIn": 9345128,
+                    "serverside.bitsOut": 36115312,
+                    "serverside.curConns": 0,
+                    "status.availabilityState": "available",
+                    "status.enabledState": "enabled",
+                    "status.statusReason": "Pool member is available"
+                }
+            }
         },
         "~Sample_01~A1~web_pool": {
-            "serverside.bitsIn": 0,
-            "serverside.bitsOut": 0,
-            "serverside.curConns": 0,
-            "status.availabilityState": "offline",
-            "status.enabledState": "enabled",
-            "status.statusReason": "The children pool member(s) are down"
+            "members": {
+                "~Sample_01~192.0.1.10:80": {
+                    "addr": "192.0.1.10",
+                    "port": 80,
+                    "serverside.bitsIn": 0,
+                    "serverside.bitsOut": 0,
+                    "serverside.curConns": 0,
+                    "status.availabilityState": "offline",
+                    "status.enabledState": "enabled",
+                    "status.statusReason": "Pool member has been marked down by a monitor"
+                },
+                "~Sample_01~192.0.1.11:80": {
+                    "addr": "192.0.1.11",
+                    "port": 80,
+                    "serverside.bitsIn": 0,
+                    "serverside.bitsOut": 0,
+                    "serverside.curConns": 0,
+                    "status.availabilityState": "offline",
+                    "status.enabledState": "enabled",
+                    "status.statusReason": "Pool member has been marked down by a monitor"
+                }
+            }
         }
     },
     "tlsCerts": {
@@ -356,3 +367,31 @@ Note: To run on a BIG-IP target hosts should reference localhost with no credent
     }
 }
 ```
+
+### Events (Logs)
+
+#### LTM Request Log
+
+```json
+{
+    "EVENT_SOURCE":"request_logging",
+    "BIGIP_HOSTNAME":"hostname",
+    "CLIENT_IP":"177.47.192.42",
+    "SERVER_IP":"",
+    "HTTP_METHOD":"GET",
+    "HTTP_URI":"/",
+    "VIRTUAL_NAME":"/Common/app.app/app_vs"
+}
+```
+
+#### AFM Log
+
+TBD
+
+#### ASM Log
+
+TBD
+
+#### APM Log
+
+TBD
