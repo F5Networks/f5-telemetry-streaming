@@ -12,7 +12,7 @@ const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 const constants = require('./constants.js');
 const util = require('./util.js');
 const configWorker = require('./config.js');
-const systemStats = require('./systemStats.js');
+const SystemStats = require('./systemStats.js');
 const dataPipeline = require('./dataPipeline.js');
 
 const CLASS_NAME = constants.SYSTEM_POLLER_CLASS_NAME;
@@ -28,7 +28,7 @@ const pollerIDs = {};
 function process(args) {
     const config = args.config;
 
-    return systemStats.collect(config.host, config.port, config.username, config.passphrase)
+    return new SystemStats().collect(config.host, config.port, config.username, config.passphrase)
         .then((data) => {
             let ret = null;
             if (args.process === false) {
@@ -74,7 +74,7 @@ configWorker.on('change', (config) => {
     // now check for system pollers and start/stop/update accordingly
     if (!systemPollers) {
         if (pollerIDs) {
-            logger.info('Stoping system poller(s)');
+            logger.info('Stopping all running system poller(s)');
             Object.keys(pollerIDs).forEach((k) => {
                 util.stop(pollerIDs[k]);
                 delete pollerIDs[k];
@@ -86,15 +86,16 @@ configWorker.on('change', (config) => {
             const args = { config: systemPollers[k] };
 
             // check for enabled=false first
+            const baseMsg = `system poller ${k} interval: ${args.config.interval} secs`;
             if (args.config.enabled === false && pollerIDs[k]) {
-                logger.info(`System poller ${k} disabled, stopping`);
+                logger.info(`Disabling ${baseMsg}`);
                 util.stop(pollerIDs[k]);
                 delete pollerIDs[k];
             } else if (pollerIDs[k]) {
-                logger.info(`Updating system poller ${k} interval: ${args.config.interval} secs`);
+                logger.info(`Updating ${baseMsg}`);
                 pollerIDs[k] = util.update(pollerIDs[k], safeProcess, args, args.config.interval);
             } else {
-                logger.info(`Starting system poller ${k} interval: ${args.config.interval} secs`);
+                logger.info(`Starting ${baseMsg}`);
                 pollerIDs[k] = util.start(safeProcess, args, args.config.interval);
             }
         });
