@@ -11,6 +11,24 @@
 const request = require('request');
 const crypto = require('crypto');
 
+/**
+ * Implementation for consumer - Azure LA
+ *
+ * @param {Object} context                                      - context of execution
+ * @param {Object} context.config                               - consumer's config
+ * @param {Object} context.logger                               - logger instance
+ * @param {function(string):void} context.logger.info           - log infomrational message
+ * @param {function(string):void} context.logger.error          - log error message
+ * @param {function(string):void} context.logger.debug          - log debug message
+ * @param {function(string, err):void} context.logger.exception - log error message with error's traceback
+ * @param {Object} context.event                                - event to process
+ * @param {Object} context.event.data                           - actual data to process
+ * @param {string} context.event.type                           - type of data to process
+ * @param {Object|undefined} context.tracer                     - tracer object
+ * @param {function(string):void} context.tracer.write          - write data to tracer
+ *
+ * @returns {void}
+ */
 module.exports = function (context) {
     // context.logger.debug(`Azure_Log_Analytics: config ${JSON.stringify(context.config)}`);
     const workspaceId = context.config.host;
@@ -18,7 +36,7 @@ module.exports = function (context) {
 
     const apiVersion = '2016-04-01';
     const date = new Date().toUTCString();
-    const httpBody = JSON.stringify(context.data);
+    const httpBody = JSON.stringify(context.event.data);
 
     const contentLength = Buffer.byteLength(httpBody, 'utf8');
     const stringToSign = `POST\n${contentLength}\napplication/json\nx-ms-date:${date}\n/api/logs`;
@@ -37,6 +55,9 @@ module.exports = function (context) {
         headers: httpHeaders,
         body: httpBody
     };
+    if (context.tracer) {
+        context.tracer.write(JSON.stringify(requestOptions, null, 4));
+    }
 
     // eslint-disable-next-line no-unused-vars
     request.post(requestOptions, (error, response, body) => {
