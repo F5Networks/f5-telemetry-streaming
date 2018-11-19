@@ -10,6 +10,7 @@
 
 const path = require('path');
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
+const tracers = require('./util.js').tracer;
 const constants = require('./constants.js');
 const configWorker = require('./config.js');
 
@@ -60,11 +61,16 @@ function loadConsumers(config) {
         return Promise.resolve([]);
     }
 
-    logger.info(`Loading consumer specific plugins from ${CONSUMERS_DIR}`);
+    logger.info(`Loading consumer specific plug-ins from ${CONSUMERS_DIR}`);
     // eslint-disable-next-line
     return Promise.all(config.map((consumerConfig) => {
+        if (consumerConfig.config.enabled === false) {
+            return Promise.resolve(undefined);
+        }
         return new Promise((resolve) => {
             const consumerType = consumerConfig.type;
+            // path.join removes './' from string, so we need to
+            // prepend it manually
             const consumerDir = './'.concat(path.join(CONSUMERS_DIR, consumerType));
 
             logger.info(`Loading consumer ${consumerType} plug-in from ${consumerDir}`);
@@ -75,7 +81,8 @@ function loadConsumers(config) {
                 // copy consumer's data
                 resolve({
                     config: JSON.parse(JSON.stringify(consumerConfig.config)),
-                    consumer: consumerModule
+                    consumer: consumerModule,
+                    tracer: tracers.createFromConfig(CLASS_NAME, consumerConfig.name, consumerConfig.config)
                 });
             }
         });
@@ -95,12 +102,19 @@ configWorker.on('change', (config) => {
         consumersConfig = config.parsed[CLASS_NAME];
     }
 
+    // timestamp to filed out-dated tracers
+    const tracersTimestamp = new Date().getTime();
+
     let consumersToLoad = [];
     if (!consumersConfig) {
         consumersToLoad = undefined;
     } else {
         Object.keys(consumersConfig).forEach((k) => {
-            consumersToLoad.push({ type: consumersConfig[k].type, config: consumersConfig[k] });
+            consumersToLoad.push({
+                name: k,
+                type: consumersConfig[k].type,
+                config: consumersConfig[k]
+            });
         });
     }
     loadConsumers(consumersToLoad)
@@ -109,6 +123,10 @@ configWorker.on('change', (config) => {
         })
         .catch((err) => {
             logger.exception('Unhandled exception when loading consumers', err);
+        })
+        .then(() => {
+            tracers.remove(null, tracer => tracer.name.startsWith(CLASS_NAME)
+                                           && tracer.lastGetTouch < tracersTimestamp);
         });
 });
 
