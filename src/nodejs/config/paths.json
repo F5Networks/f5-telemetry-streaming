@@ -52,6 +52,11 @@
             "endpoint": "/mgmt/tm/ltm/pool/stats"
         },
         {
+            "endpoint": "/mgmt/tm/ltm/pool",
+            "expandReferences": { "membersReference": { "endpointSuffix": "/stats" } },
+            "name": "poolMembersRef"
+        },
+        {
             "endpoint": "/mgmt/tm/sys/file/ssl-cert"
         },
         {

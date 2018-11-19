@@ -114,19 +114,20 @@ configWorker.on('change', (config) => {
             const port = lConfig.port ? lConfig.port : DEFAULT_PORT;
 
             // check for enabled=false first
+            const baseMsg = `listener ${k} on port: ${port}`;
             if (lConfig.enabled === false) {
                 if (listeners[k]) {
-                    logger.info(`Listener ${k} disabled, stopping`);
+                    logger.info(`Disabling ${baseMsg}`);
                     stop(listeners[k]);
                     delete listeners[k];
                 }
             } else if (listeners[k]) {
-                logger.info(`Updating listener ${k} on port: ${port}`);
+                logger.info(`Updating ${baseMsg}`);
                 // TODO: only need to stop/start if port is different
                 stop(listeners[k]);
                 listeners[k] = start(port, tracers.createFromConfig(CLASS_NAME, k, lConfig));
             } else {
-                logger.info(`Starting listener ${k} on port: ${port}`);
+                logger.info(`Starting ${baseMsg}`);
                 listeners[k] = start(port, tracers.createFromConfig(CLASS_NAME, k, lConfig));
             }
         });
@@ -136,5 +137,6 @@ configWorker.on('change', (config) => {
 });
 
 module.exports = {
-    start
+    start,
+    stop
 };

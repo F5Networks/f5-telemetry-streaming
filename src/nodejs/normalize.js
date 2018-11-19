@@ -60,6 +60,7 @@ function runCustomFunction(data, options) {
     try {
         return normalizeUtil[options.func](args);
     } catch (e) {
+        // should possibly just return an empty string/object instead
         throw new Error(`runCustomFunction failed: ${e}`);
     }
 }
