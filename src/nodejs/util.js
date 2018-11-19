@@ -657,12 +657,12 @@ module.exports = {
      * @param {String} host              - HTTP host
      * @param {String} uri               - HTTP uri
      * @param {Object} options           - function options
-     * @param {Integer} [options.port]   - HTTP port - optional
-     * @param {String} [options.method]  - HTTP method - optional
-     * @param {String} [options.body]    - HTTP body - optional
-     * @param {Object} [options.headers] - HTTP headers - optional
+     * @param {Integer} [options.port]   - HTTP port
+     * @param {String} [options.method]  - HTTP method
+     * @param {String} [options.body]    - HTTP body
+     * @param {Object} [options.headers] - HTTP headers
      *
-     * @returns {Object} Returns promise resolved with reponse
+     * @returns {Object} Returns promise resolved with response
      */
     makeRequest(host, uri, options) {
         const opts = options === undefined ? {} : options;
@@ -708,7 +708,7 @@ module.exports = {
      * @param {String} username        - device username
      * @param {String} password        - device password
      * @param {Object} options         - function options
-     * @param {Integer} [options.port] - HTTP port - optional
+     * @param {Integer} [options.port] - HTTP port
      *
      * @returns {Object} Returns promise resolved with auth token
      */
