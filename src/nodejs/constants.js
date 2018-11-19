@@ -18,5 +18,6 @@ module.exports = {
     USER_AGENT: 'f5-telemetry/1.0',
     SYSTEM_POLLER_CLASS_NAME: 'System_Poller',
     EVENT_LISTENER_CLASS_NAME: 'Event_Listener',
-    CONSUMERS_CLASS_NAME: 'Consumer'
+    CONSUMERS_CLASS_NAME: 'Consumer',
+    TRACER_DIR: '/var/tmp/telemetry'
 };
