@@ -25,7 +25,7 @@ function process(data, type) {
     if (type === 'event') { logger.debug(`Event: ${util.stringify(data)}`); }
 
     // no translator, for now
-    forwarder(data)
+    forwarder({ type, data })
         .then(() => {
             logger.debug(`Pipeline processed data of type: ${type}`);
         })
