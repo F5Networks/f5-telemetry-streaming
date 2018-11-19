@@ -42,15 +42,6 @@
             "convertArrayToMap": { "keyName": "name" },
             "runFunction": { "name": "getFirstKey", "args": { "splitOnValue": "/", "keyPrefix": "https://" } }
         },
-        "configReady": {
-            "key": "/mgmt/tm/sys/ready::sys/ready/0::configReady"
-        },
-        "licenseReady": {
-            "key": "/mgmt/tm/sys/ready::sys/ready/0::licenseReady"
-        },
-        "provisionReady": {
-            "key": "/mgmt/tm/sys/ready::sys/ready/0::provisionReady"
-        },
         "syncMode": {
             "key": "/mgmt/tm/cm/sync-status::cm/sync-status/0::mode"
         },

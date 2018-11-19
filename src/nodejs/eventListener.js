@@ -112,7 +112,7 @@ configWorker.on('change', (config) => {
         Object.keys(eventListeners).forEach((k) => {
             const lConfig = eventListeners[k];
             const port = lConfig.port ? lConfig.port : DEFAULT_PORT;
-            
+
             // check for enabled=false first
             const baseMsg = `listener ${k} on port: ${port}`;
             if (lConfig.enabled === false) {
