@@ -13,6 +13,7 @@ Telemetry Services is an iControl LX extension to stream telemetry from BIG-IP(s
 
 - [Container](#Container)
 - [Configuration Example](#configuration-example)
+- [Data tracer](#data-tracer)
 - [Output Example](#output-example)
 
 ## Container
@@ -71,6 +72,16 @@ Note: To run on a BIG-IP target hosts should reference localhost with no credent
     "host": "localhost"
 }
 ```
+
+## Data tracer
+
+Tracer is useful for debug because it dumps intermediate to file.
+Default location for files is **/var/tmp/telemetry**
+Each config object has 'tracer' property. Possible values are:
+- *false* - tracer disabled
+- *true* - tracer enabled, file name will be **DEFAULT_LOCATION/OBJ_TYPE.OBJ_NAME**
+- *string* - custom path to file to steam data to
+
 
 ## Output Example
 
