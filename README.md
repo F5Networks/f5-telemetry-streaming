@@ -75,7 +75,7 @@ Note: To run on a BIG-IP target hosts should reference localhost with no credent
 
 ## Data tracer
 
-Tracer is useful for debug because it dumps intermediate to file.
+Tracer is useful for debug because it dumps intermediate data to file.
 Default location for files is **/var/tmp/telemetry**
 Each config object has 'tracer' property. Possible values are:
 - *false* - tracer disabled
