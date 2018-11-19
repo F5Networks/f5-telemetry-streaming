@@ -9,39 +9,43 @@
 'use strict';
 
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
-const consumersWorker = require('./consumers.js');
+const consumersHndlr = require('./consumers.js');
 
 /**
 * Forward data to consumer
 *
-* @param {Object} data - data to forward
+* @param {Object} dataCtx - data context
+* @param {Object} dataCtx.data - actual data to forward
+* @param {string} dataCtx.type - type of data to forward
 *
 * @returns {Void} Promise object resolved with undefined
 */
-function forwardData(data) {
-    return new Promise((resolve) => {
-        const consumers = consumersWorker.getConsumers();
-        if (Array.isArray(consumers)) {
-            // don't rely on plugins' code, wrap consumer's call to Promise
-            // eslint-disable-next-line
-            consumers.forEach((consumer) => {
-                // standard context
-                const context = {
-                    data,
-                    config: consumer.config,
-                    logger
-                };
-                // place in try/catch
-                try {
-                    consumer.consumer(context);
-                } catch (err) {
-                    logger.exception(`Error forwarding data: ${err}`);
-                }
-            });
-        }
-        // anyway resolve promise
-        resolve();
-    });
+function forwardData(dataCtx) {
+    const consumers = consumersHndlr.getConsumers();
+    if (!Array.isArray(consumers)) {
+        return Promise.resolve();
+    }
+    // don't rely on plugins' code, wrap consumer's call to Promise
+    // eslint-disable-next-line
+    return Promise.all(consumers.map((consumer) => {
+        return new Promise((resolve) => {
+            // standard context
+            const context = {
+                event: dataCtx,
+                config: consumer.config,
+                tracer: consumer.tracer,
+                logger
+            };
+            // place in try/catch
+            try {
+                consumer.consumer(context);
+            } catch (err) {
+                logger.exception(`Error forwarding data: ${err}`);
+            } finally {
+                resolve();
+            }
+        });
+    }));
 }
 
 
