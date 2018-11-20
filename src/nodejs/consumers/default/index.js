@@ -37,11 +37,9 @@ module.exports = function (context) {
         return;
     }
 
-    if (event.type === 'event' || event.type === 'stats') {
-        logger.info(`Data type '${event.type}' processed`);
-        if (tracer) {
-            // pretty JSON dump
-            tracer.write(JSON.stringify(event.data, null, 4));
-        }
+    logger.info(`Data type '${event.type}' processed`);
+    if (tracer) {
+        // pretty JSON dump
+        tracer.write(JSON.stringify(event.data, null, 4));
     }
 };
