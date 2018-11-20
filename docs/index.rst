@@ -9,6 +9,12 @@ Introduction
 
 Telemetry Services is an iControl LX extension that sends telemetry information, such as client/server stats, from the BIG-IP to third-party monitoring and stats aggregation tools. 
 
+You can also watch this video on Telemetry Services
+
+|video|
+
+Use the following links, the navigation on the left, and/or the Next and
+Previous buttons to explore the documentation.
 
 .. toctree::
    :caption: Telemetry Services:
