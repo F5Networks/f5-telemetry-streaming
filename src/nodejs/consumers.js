@@ -87,11 +87,7 @@ function loadConsumers(config) {
             }
         });
     }))
-        .then((consumers) => {
-            const availableConsumers = consumers.filter(consumer => consumer !== undefined);
-            logger.info(`${availableConsumers.length} consumer plug-in(s) loaded`);
-            return availableConsumers;
-        });
+        .then(consumers => consumers.filter(consumer => consumer !== undefined));
 }
 
 // config worker change event
@@ -120,6 +116,7 @@ configWorker.on('change', (config) => {
     loadConsumers(consumersToLoad)
         .then((consumers) => {
             CONSUMERS = consumers;
+            logger.info(`${CONSUMERS.length} consumer plug-in(s) loaded`);
         })
         .catch((err) => {
             logger.exception('Unhandled exception when loading consumers', err);
@@ -132,6 +129,5 @@ configWorker.on('change', (config) => {
 
 
 module.exports = {
-    load: loadConsumers,
     getConsumers: () => CONSUMERS
 };
