@@ -24,8 +24,8 @@ function formatAsJson(data) {
     const ret = {};
     // place in try/catch in case this event is malformed
     try {
-        const dataToFormat = data.replace(/\n/g, '');
-        const baseSplit = dataToFormat.split(',');
+        const dataToFormat = data.trim(); // remove new line char or whitespace from end of line
+        const baseSplit = dataToFormat.split('",'); // don't split on just comma, that may appear inside a specific key
         baseSplit.forEach((i) => {
             const keySplit = i.split('=');
             const keyValue = keySplit[1].replace(/"/g, '');
@@ -107,13 +107,19 @@ function renameKeysInData(data, patterns) {
             Object.keys(patterns).forEach((pK) => {
                 // check if key contains base match pattern
                 if (k.includes(pK)) {
-                    // now check if regex pattern matches - support object with { pattern, group }
-                    const pattern = patterns[pK].pattern ? patterns[pK].pattern : patterns[pK];
-                    const group = patterns[pK].group ? patterns[pK].group : 0;
-                    const checkForMatch = k.match(pattern);
-                    if (checkForMatch) {
+                    // support constant keyword: { constant: "foo" }
+                    if (patterns[pK].constant) {
                         renameKey = true;
-                        renamedKey = checkForMatch[group];
+                        renamedKey = patterns[pK].constant;
+                    } else {
+                        // check if regex pattern matches - support pattern/group keywords: { pattern: "foo", group: 1 }
+                        const pattern = patterns[pK].pattern ? patterns[pK].pattern : patterns[pK];
+                        const group = patterns[pK].group ? patterns[pK].group : 0;
+                        const checkForMatch = k.match(pattern);
+                        if (checkForMatch) {
+                            renameKey = true;
+                            renamedKey = checkForMatch[group];
+                        }
                     }
                 }
             });
@@ -197,10 +203,14 @@ function reduceData(data, options) {
  *
  * @param {Object} data - data to normalize
  *
+ * @param {Object} options                       - options
+ * @param {Object} [options.renameKeysByPattern] - map of keys to rename
+ *
  * @returns {Object} Returns normalized event
  */
-function normalizeEvent(data) {
-    const ret = formatAsJson(data);
+function normalizeEvent(data, options) {
+    let ret = formatAsJson(data);
+    ret = renameKeysInData(ret, options.renameKeysByPattern);
     return ret;
 }
 

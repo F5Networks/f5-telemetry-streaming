@@ -30,7 +30,6 @@ const crypto = require('crypto');
  * @returns {void}
  */
 module.exports = function (context) {
-    // context.logger.debug(`Azure_Log_Analytics: config ${JSON.stringify(context.config)}`);
     const workspaceId = context.config.host;
     const sharedKey = context.config.passphrase;
 

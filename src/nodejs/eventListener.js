@@ -16,6 +16,9 @@ const constants = require('./constants.js');
 const normalize = require('./normalize.js');
 const dataPipeline = require('./dataPipeline.js');
 const configWorker = require('./config.js');
+const properties = require('./config/properties.json');
+
+const pEvents = properties.events;
 
 const DEFAULT_PORT = constants.DEFAULT_EVENT_LISTENER_PORT;
 const CLASS_NAME = constants.EVENT_LISTENER_CLASS_NAME;
@@ -46,7 +49,10 @@ function start(port, tracer) {
             // event on client data
             c.on('data', (data) => {
                 // normalize and send to data pipeline
-                const normalizedData = normalize.event(String(data)); // force string
+                const nOptions = {
+                    renameKeysByPattern: pEvents.global.renameKeys
+                };
+                const normalizedData = normalize.event(String(data), nOptions); // force string
                 if (tracer) {
                     tracer.write(JSON.stringify(normalizedData, null, 4));
                 }

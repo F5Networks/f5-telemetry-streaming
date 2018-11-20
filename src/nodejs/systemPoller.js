@@ -39,7 +39,7 @@ function process(args) {
                 ret = Promise.resolve(data);
             } else {
                 // call out to pipeline
-                dataPipeline.process(data, 'stats');
+                dataPipeline.process(data, 'systemInfo');
             }
             logger.debug('systemPoller.process() success');
             return ret;

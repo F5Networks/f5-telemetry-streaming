@@ -16,14 +16,16 @@ const forwarder = require('./forwarder.js');
 * Pipeline to process data
 *
 * @param {Object} data - data to process
-* @param {Object} type - type of data, such as stats|event
+* @param {Object} type - type of data, such as systemInfo|event
 *
 * @returns {Void}
 */
 function process(data, type) {
-    // log event, for now
-    if (type === 'event') { logger.debug(`Event: ${util.stringify(data)}`); }
+    // add telemetryCategory to data, fairly verbose name to avoid conflicts
+    data.telemetryCategory = type;
 
+    // log events, for now
+    if (type === 'event') { logger.debug(`Event: ${util.stringify(data)}`); }
     // no translator, for now
     forwarder({ type, data })
         .then(() => {

@@ -79,10 +79,10 @@ Note: To run on a BIG-IP system poller should specify localhost with no credenti
 Tracer is useful for debug because it dumps intermediate data to file.
 Default location for files is **/var/tmp/telemetry**
 Each config object has 'tracer' property. Possible values are:
+
 - *false* - tracer disabled
 - *true* - tracer enabled, file name will be **DEFAULT_LOCATION/OBJ_TYPE.OBJ_NAME**
 - *string* - custom path to file to steam data to
-
 
 ## Output Example
 
@@ -385,13 +385,13 @@ Each config object has 'tracer' property. Possible values are:
 
 ```json
 {
-    "EVENT_SOURCE":"request_logging",
-    "BIGIP_HOSTNAME":"hostname",
-    "CLIENT_IP":"177.47.192.42",
-    "SERVER_IP":"",
-    "HTTP_METHOD":"GET",
-    "HTTP_URI":"/",
-    "VIRTUAL_NAME":"/Common/app.app/app_vs"
+    "event_source":"request_logging",
+    "hostname":"hostname",
+    "client_ip":"177.47.192.42",
+    "server_ip":"",
+    "http_method":"GET",
+    "http_uri":"/",
+    "virtual_name":"/Common/app.app/app_vs"
 }
 ```
 
@@ -401,7 +401,54 @@ TBD
 
 #### ASM Log
 
-TBD
+```json
+{
+    "hostname":"hostname",
+    "management_ip_address":"10.0.1.4",
+    "management_ip_address_2":"",
+    "http_class_name":"/Common/app.app/app_policy",
+    "web_application_name":"/Common/app.app/app_policy",
+    "policy_name":"/Common/app.app/app_policy",
+    "policy_apply_date":"2018-11-19 22:17:57",
+    "violations":"Evasion technique detected",
+    "support_id":"1730614276869062795",
+    "request_status":"blocked",
+    "response_code":"0",
+    "ip_client":"50.206.82.144",
+    "route_domain":"0",
+    "method":"GET",
+    "protocol":"HTTP",
+    "query_string":"",
+    "x_forwarded_for_header_value":"50.206.82.144",
+    "sig_ids":"",
+    "sig_names":"",
+    "date_time":"2018-11-19 22:34:40",
+    "severity":"Critical",
+    "attack_type":"Detection Evasion,Path Traversal",
+    "geo_location":"US",
+    "ip_address_intelligence":"N/A",
+    "username":"N/A",
+    "session_id":"f609d8a924419638",
+    "src_port":"49804",
+    "dest_port":"80",
+    "dest_ip":"10.0.2.10",
+    "sub_violations":"Evasion technique detected:Directory traversals",
+    "virus_name":"N/A",
+    "violation_rating":"3",
+    "websocket_direction":"N/A",
+    "websocket_message_type":"N/A",
+    "device_id":"N/A",
+    "staged_sig_ids":"",
+    "staged_sig_names":"",
+    "threat_campaign_names":"",
+    "staged_threat_campaign_names":"",
+    "blocking_exception_reason":"N/A",
+    "captcha_result":"not_received",
+    "uri":"/directory/file",
+    "fragment":"",
+    "request":"GET /admin/..%2F..%2F..%2Fdirectory/file HTTP/1.0\\r\\nHost: host.westus.cloudapp.azure.com\\r\\nConnection: keep-alive\\r\\nCache-Control: max-age"
+}
+```
 
 #### APM Log
 
