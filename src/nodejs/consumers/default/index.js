@@ -14,7 +14,7 @@
  * @param {Object} context                                      - context of execution
  * @param {Object} context.config                               - consumer's config
  * @param {Object} context.logger                               - logger instance
- * @param {function(string):void} context.logger.info           - log infomrational message
+ * @param {function(string):void} context.logger.info           - log info message
  * @param {function(string):void} context.logger.error          - log error message
  * @param {function(string):void} context.logger.debug          - log debug message
  * @param {function(string, err):void} context.logger.exception - log error message with error's traceback
