@@ -37,7 +37,7 @@
                         "title": "Type",
                         "description": "" ,
                         "type": "string",
-                        "enum": [ "default", "Splunk", "Azure_Log_Analytics" ]
+                        "enum": [ "default", "Splunk_F5_Dashboard", "Azure_Log_Analytics" ]
                     },
                     "host": {
                         "title": "Host",
