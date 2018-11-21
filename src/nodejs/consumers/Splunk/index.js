@@ -109,12 +109,12 @@ function transformData(globalCtx) {
         };
     }
     let p = null;
-    if (globalCtx.event.type === 'stats') {
+    if (globalCtx.event.type === 'systemInfo') {
         p = Promise.all(dataMapping.stats.map(func => safeDataTransform(func, requestCtx)));
     }
 
     if (!p) {
-        return Promise.resolve();
+        return Promise.resolve([]);
     }
     return p
         .then(() => safeDataTransform(dataMapping.overall, requestCtx))
@@ -210,6 +210,11 @@ function sendDataChunk(dataChunk, context) {
 *
 */
 function forwardData(dataToSend, globalCtx) {
+    if (!dataToSend || dataToSend.length === 0) {
+        globalCtx.logger.debug('No data to forward to Splunk');
+        return Promise.resolve(true);
+    }
+
     return new Promise((resolve) => {
         const context = {
             globalCtx,
