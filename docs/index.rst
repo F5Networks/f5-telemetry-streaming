@@ -24,6 +24,7 @@ asdf
 
    overview.rst
    prereqs.rst
+   quick-start.rst
    faq.rst
 
 
