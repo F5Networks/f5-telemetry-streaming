@@ -9,7 +9,7 @@ up and running with Telemetry Services.
 .. code-block:: json
    :linenos:
 
-    {
+{
    "class": "Telemetry",
    "configuration": {
         "My_Poller": {
@@ -41,4 +41,4 @@ up and running with Telemetry Services.
 
 
 
-.. |github| raw:: html
+.. 
