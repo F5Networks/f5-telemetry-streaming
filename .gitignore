@@ -1,3 +1,5 @@
 node_modules/
 rpmbuild/
 .vscode/
+_build/
+docs/_build/
