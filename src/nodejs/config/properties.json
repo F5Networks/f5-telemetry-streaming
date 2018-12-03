@@ -43,12 +43,30 @@
             "runFunction": { "name": "getFirstKey", "args": { "splitOnValue": "/", "keyPrefix": "https://" } }
         },
         "configReady": {
+            "if": {
+                "deviceVersionGreaterOrEqual": "13.1"
+            },
+            "else": {
+                "disabled": true
+            },
             "key": "/mgmt/tm/sys/ready::sys/ready/0::configReady"
         },
         "licenseReady": {
+            "if": {
+                "deviceVersionGreaterOrEqual": "13.1"
+            },
+            "else": {
+                "disabled": true
+            },
             "key": "/mgmt/tm/sys/ready::sys/ready/0::licenseReady"
         },
         "provisionReady": {
+            "if": {
+                "deviceVersionGreaterOrEqual": "13.1"
+            },
+            "else": {
+                "disabled": true
+            },
             "key": "/mgmt/tm/sys/ready::sys/ready/0::provisionReady"
         },
         "syncMode": {
@@ -149,6 +167,9 @@
     "context": {
         "HOSTNAME": {
             "key": "/mgmt/tm/sys/global-settings::hostname"
+        },
+        "deviceVersion": {
+            "key": "/mgmt/tm/sys/version::sys/version/0::Version"
         }
     }
 }
