@@ -89,6 +89,44 @@ function loadConsumers(config) {
     }))
         .then(consumers => consumers.filter(consumer => consumer !== undefined));
 }
+/**
+ * Get set of loaded Consumers' types
+ *
+ * @returns {Set} set with loaded Consumers' types
+ */
+function getLoadedConsumerTypes() {
+    if (CONSUMERS) {
+        return new Set(CONSUMERS.map(consumer => consumer.config.type));
+    }
+    return new Set();
+}
+/**
+ * Unload garbage modules from cache
+ *
+ * @param {Set} before - set of Consumers' types before
+ */
+function unloadUnusedModules(before) {
+    if (!before.size) {
+        return;
+    }
+    logger.info('Unloading unused Consumers\' modules');
+    const loadedTypes = getLoadedConsumerTypes();
+
+    before.forEach((consumerType) => {
+        if (!loadedTypes.has(consumerType)) {
+            logger.info(`Unloading Consumer module '${consumerType}'`);
+            const consumerDir = './'.concat(path.join(CONSUMERS_DIR, consumerType));
+
+            try {
+                delete require.cache[require.resolve(consumerDir)];
+            } catch (err) {
+                logger.exception(`Exception on attempt to unload '${consumerDir}' from cache`, err);
+                return;
+            }
+            logger.info(`Consumer module '${consumerDir}' (${consumerType}) was unloaded`);
+        }
+    });
+}
 
 // config worker change event
 configWorker.on('change', (config) => {
@@ -113,6 +151,7 @@ configWorker.on('change', (config) => {
             });
         });
     }
+    const typesBefore = getLoadedConsumerTypes();
     loadConsumers(consumersToLoad)
         .then((consumers) => {
             CONSUMERS = consumers;
@@ -122,6 +161,7 @@ configWorker.on('change', (config) => {
             logger.exception('Unhandled exception when loading consumers', err);
         })
         .then(() => {
+            unloadUnusedModules(typesBefore);
             tracers.remove(null, tracer => tracer.name.startsWith(CLASS_NAME)
                                            && tracer.lastGetTouch < tracersTimestamp);
         });

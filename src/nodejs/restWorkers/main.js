@@ -98,7 +98,7 @@ class RestWorker {
                         util.restOperationResponder(restOperation, 200, data);
                     })
                     .catch((err) => {
-                        logger.error(err);
+                        logger.error(`statsInfo request ended up with error: ${err}`);
                         util.restOperationResponder(restOperation, 500, `systemPoller.process error: ${err}`);
                     });
             }
