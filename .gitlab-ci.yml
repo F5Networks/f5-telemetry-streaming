@@ -110,7 +110,7 @@ docs to production:
   tags:
   - cm-official-docker-executor
   dependencies:
-  - create docs
+  - build docs
   script:
   # Uncomment and set to create desired version format
     - aws s3 sync docs/_build/html s3://clouddocs.f5.com/products/extensions/telemetry-services/latest
