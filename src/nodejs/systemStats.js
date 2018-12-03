@@ -491,7 +491,13 @@ SystemStats.prototype.collect = function (host, port, username, passphrase) {
     return this.loader.auth()
         .then(() => this._computeContextData(context))
         .then(() => this._computePropertiesData(pStats))
-        .then(() => Promise.resolve(this.collectedData));
+        .then(() => {
+            const orderedData = {};
+            Object.keys(pStats).forEach((key) => {
+                orderedData[key] = this.collectedData[key];
+            });
+            return Promise.resolve(orderedData);
+        });
 };
 
 /**

@@ -866,7 +866,7 @@ module.exports = {
         // deep copy of the data, then remove passphrases and get a diff using deep-diff module
         // telling us where exactly in the config each passphrase is and how many there are
         const dataCopy = JSON.parse(JSON.stringify(data));
-        const passphrases = diff(removePassphrase(dataCopy), data);
+        const passphrases = diff(removePassphrase(dataCopy), data) || [];
 
         // now for each passphrase determine if decryption (or download, etc.) is required
         const promises = [];
