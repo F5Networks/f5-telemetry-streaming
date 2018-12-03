@@ -80,7 +80,7 @@ pages:
 
 Publish docs to staging:
   image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
-  stage: build
+  stage: review
   environment: 
     name: staging
     url: https://clouddocs.f5networks.net/products/extensions/telemetry-services/latest
@@ -99,7 +99,7 @@ Publish docs to staging:
 # Publish docs to clouddocs.f5.com
 docs to production:
   image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
-  stage: build
+  stage: review
   environment:
     name: production
     url: https://clouddocs.f5.com/products/extensions/telemetry-services/latest
