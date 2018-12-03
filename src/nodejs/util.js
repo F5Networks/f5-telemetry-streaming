@@ -8,10 +8,12 @@
 
 'use strict';
 
-const Ajv = require('ajv');
 const fs = require('fs');
 const path = require('path');
 const request = require('request');
+const childProcess = require('child_process');
+const crypto = require('crypto');
+const diff = require('deep-diff');
 
 const constants = require('./constants');
 const logger = require('./logger.js');
@@ -511,6 +513,28 @@ module.exports = {
     },
 
     /**
+     * Performs a check of the local environment and returns device type
+     *
+     * @returns {Promise} A promise which is resolved with the device type.
+     *
+     */
+    getDeviceType() {
+        // eslint-disable-next-line no-unused-vars
+        return new Promise((resolve, reject) => {
+            // eslint-disable-next-line no-unused-vars
+            childProcess.exec('/usr/bin/tmsh -a show sys version', (error, stdout, stderr) => {
+                if (error) {
+                    // don't reject, just assume we are running on a container
+                    resolve(constants.CONTAINER_DEVICE_TYPE);
+                } else {
+                    // command did not error so we must be a BIG-IP
+                    resolve(constants.BIG_IP_DEVICE_TYPE);
+                }
+            });
+        });
+    },
+
+    /**
      * Convert array to map using provided options
      *
      * @param {Object} data                - data
@@ -589,33 +613,6 @@ module.exports = {
     },
 
     /**
-     * Validate data against schema
-     *
-     * @param {Object} data - data to validate
-     * @param {Object} schema - schema(s) to validate against
-     * { base: baseSchema, schema1: schema, schema2: schema }
-     *
-     * @returns {Object} Promise which is resolved with the validated data
-     */
-    validateAgainstSchema(data, schemas) {
-        const ajv = new Ajv({ useDefaults: true, coerceTypes: true });
-        Object.keys(schemas).forEach((k) => {
-            // ignore base, that will be added later
-            if (k !== 'base') {
-                ajv.addSchema(schemas[k]);
-            }
-        });
-        const validator = ajv.compile(schemas.base);
-        const isValid = validator(data);
-
-        if (!isValid) {
-            const error = this.stringify(validator.errors);
-            return Promise.reject(new Error(error));
-        }
-        return Promise.resolve(data);
-    },
-
-    /**
      * Format data by class
      *
      * @param {Object} data - data to format
@@ -624,15 +621,16 @@ module.exports = {
      */
     formatDataByClass(data) {
         let ret = {};
-        if (typeof data === 'object' && !Array.isArray(data)) {
+        if (data && typeof data === 'object' && !Array.isArray(data)) {
             Object.keys(data).forEach((k) => {
-                const childData = data[k];
-                if (typeof childData === 'object' && childData.class) {
-                    if (!ret[childData.class]) { ret[childData.class] = {}; }
-                    ret[childData.class][k] = childData;
+                const v = data[k];
+                // check if value for v is an object that contains a class
+                if (typeof v === 'object' && v.class) {
+                    if (!ret[v.class]) { ret[v.class] = {}; }
+                    ret[v.class][k] = v;
                 } else {
-                    // might need to introspect child objects
-                    ret = this.formatDataByClass(childData);
+                    // need to introspect child objects
+                    ret = this.formatDataByClass(v);
                 }
             });
         }
@@ -654,13 +652,14 @@ module.exports = {
     /**
      * Perform HTTP request
      *
-     * @param {String} host              - HTTP host
-     * @param {String} uri               - HTTP uri
-     * @param {Object} options           - function options
-     * @param {Integer} [options.port]   - HTTP port
-     * @param {String} [options.method]  - HTTP method
-     * @param {String} [options.body]    - HTTP body
-     * @param {Object} [options.headers] - HTTP headers
+     * @param {String} host                          - HTTP host
+     * @param {String} uri                           - HTTP uri
+     * @param {Object} options                       - function options
+     * @param {Integer} [options.port]               - HTTP port
+     * @param {String} [options.method]              - HTTP method
+     * @param {String} [options.body]                - HTTP body
+     * @param {Object} [options.headers]             - HTTP headers
+     * @param {Object} [options.continueOnErrorCode] - resolve promise even on non-successful response code
      *
      * @returns {Object} Returns promise resolved with response
      */
@@ -678,11 +677,12 @@ module.exports = {
         const requestOptions = {
             uri: fullUri,
             method: opts.method ? opts.method : 'GET',
-            body: opts.body ? String(opts.body) : undefined,
+            body: opts.body ? this.stringify(opts.body) : undefined,
             headers: opts.headers ? opts.headers : defaultHeaders,
             strictSSL: constants.STRICT_TLS_REQUIRED
         };
 
+        // logger.debug(this.stringify(requestOptions));
         return new Promise((resolve, reject) => {
             request(requestOptions, (err, res, body) => {
                 if (err) {
@@ -693,6 +693,9 @@ module.exports = {
                     } catch (e) {
                         resolve(body);
                     }
+                } else if (options.continueOnErrorCode === true) {
+                    // hope caller knows what they are doing...
+                    resolve(body);
                 } else {
                     const msg = `Bad status code: ${res.statusCode} ${res.statusMessage} for ${uri}`;
                     reject(new Error(msg));
@@ -733,6 +736,173 @@ module.exports = {
             .catch((err) => {
                 const msg = `getAuthToken: ${err}`;
                 throw new Error(msg);
+            });
+    },
+
+    /**
+     * Base64 helper
+     *
+     * @param {String} type - decode|encode
+     * @param {String} data - data to process
+     *
+     * @returns {String} Returns processed data as a string
+     */
+    base64(type, data) {
+        // just decode for now
+        if (type === 'decode') {
+            if ((typeof Buffer.from === 'function') && (Buffer.from !== Uint8Array.from)) {
+                return Buffer.from(data, 'base64').toString().trim();
+            }
+            return new Buffer(data, 'base64').toString().trim();
+        }
+        throw new Error('type requires: decode');
+    },
+
+    /**
+     * Encrypt secret
+     *
+     * @param {String} data - data to encrypt
+     *
+     * @returns {Object} Returns promise resolved with encrypted secret
+     */
+    encryptSecret(data) {
+        let encryptedData = null;
+        // can't have a + or / in the radius object name, so replace those if they exist
+        const radiusObjectName = `telemetry_delete_me_${crypto.randomBytes(6)
+            .toString('base64')
+            .replace(/[+]/g, '-')
+            .replace(/\x2f/g, '_')}`;
+        const uri = '/mgmt/tm/ltm/auth/radius-server';
+        const httpPostOptions = {
+            method: 'POST',
+            port: constants.DEFAULT_PORT,
+            body: {
+                name: radiusObjectName,
+                secret: data,
+                server: 'foo'
+            }
+        };
+        const httpDeleteOptions = {
+            method: 'DELETE',
+            port: constants.DEFAULT_PORT,
+            continueOnErrorCode: true
+        };
+
+        return this.makeRequest(constants.LOCAL_HOST, uri, httpPostOptions)
+            .then((res) => {
+                if (typeof res.secret !== 'string') {
+                    // well this can't be good
+                    logger.error(`Secret could not be retrieved: ${this.stringify(res)}`);
+                }
+                // update text field with Secure Vault cryptogram - should we base64 encode?
+                encryptedData = res.secret;
+
+                // delete radius object
+                return this.makeRequest(constants.LOCAL_HOST, `${uri}/${radiusObjectName}`, httpDeleteOptions);
+            })
+            .then(() => encryptedData)
+            .catch((e) => {
+                // best effort to delete radius object - we don't know where we failed
+                this.makeRequest(constants.LOCAL_HOST, `${uri}/${radiusObjectName}`, httpDeleteOptions);
+
+                throw e;
+            });
+    },
+
+    /**
+     * Decrypt secret
+     *
+     * @param {String} data - data to decrypt
+     *
+     * @returns {Object} Returns promise resolved with decrypted secret
+     */
+    decryptSecret(data) {
+        return new Promise((resolve, reject) => {
+            childProcess.exec(`/usr/bin/php ${__dirname}/scripts/decryptConfValue.php '${data}'`, (error, stdout, stderr) => {
+                if (error) {
+                    reject(new Error(`decryptSecret exec error: ${error} ${stderr}`));
+                } else {
+                    // stdout should simply contain decrypted secret
+                    resolve(stdout);
+                }
+            });
+        });
+    },
+
+    /**
+     * Decrypt all secrets in config
+     *
+     * @param {String} data - data (config)
+     *
+     * @returns {Object} Returns promise resolved with config containing decrypted secrets
+     */
+    decryptAllSecrets(data) {
+        // helper functions strictly for this function
+        const removePassphrase = (iData) => {
+            if (iData && typeof iData === 'object' && !Array.isArray(iData)) {
+                const keys = Object.keys(iData);
+                if (keys.indexOf('passphrase') !== -1) {
+                    delete iData.passphrase;
+                } else {
+                    // recurse child objects
+                    keys.forEach((k) => {
+                        iData[k] = removePassphrase(iData[k]);
+                    });
+                }
+            }
+            return iData;
+        };
+        const getPassphrase = (iData, iPath) => {
+            // assume diff returned valid path, so let's start at root and then
+            // navigate down to object
+            let passphrase = iData;
+            iPath.forEach((i) => {
+                passphrase = passphrase[i];
+            });
+            return passphrase;
+        };
+        // end helper functions
+
+        // deep copy of the data, then remove passphrases and get a diff using deep-diff module
+        // telling us where exactly in the config each passphrase is and how many there are
+        const dataCopy = JSON.parse(JSON.stringify(data));
+        const passphrases = diff(removePassphrase(dataCopy), data);
+
+        // now for each passphrase determine if decryption (or download, etc.) is required
+        const promises = [];
+        passphrases.forEach((i) => {
+            const passphrase = getPassphrase(data, i.path);
+
+            if (passphrase[constants.PASSPHRASE_CIPHER_TEXT] !== undefined) {
+                // constants.PASSPHRASE_CIPHER_TEXT means local decryption is required
+                promises.push(this.decryptSecret(passphrase[constants.PASSPHRASE_CIPHER_TEXT]));
+            } else if (passphrase[constants.PASSPHRASE_ENVIRONMENT_VAR] !== undefined) {
+                // constants.PASSPHRASE_ENVIRONMENT_VAR means secret resides in an environment variable
+                let envValue = process.env[passphrase[constants.PASSPHRASE_ENVIRONMENT_VAR]];
+                if (envValue === undefined) {
+                    envValue = null;
+                    logger.error(`Environment variable does not exist: ${passphrase[constants.PASSPHRASE_ENVIRONMENT_VAR]}`);
+                }
+                promises.push(envValue);
+            } else {
+                // always push a promise to keep index in sync
+                promises.push(null);
+            }
+        });
+
+        return Promise.all(promises)
+            .then((res) => {
+                let idx = 0;
+                passphrases.forEach((i) => {
+                    // navigate to passphrase in data object and update
+                    // place decrypted value in 'text' key as this is more flexible,
+                    // could instead just make passphrase the decrypted value.
+                    const passphrase = getPassphrase(data, i.path);
+                    passphrase.text = res[idx];
+                    idx += 1;
+                });
+                // return (modified) data
+                return data;
             });
     },
 

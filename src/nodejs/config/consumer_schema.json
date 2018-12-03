@@ -1,12 +1,13 @@
 {
     "$id": "consumer_schema.json",
+    "$async": true,
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Telemetry services consumer schema",
     "description": "",
     "type": "object",
     "allOf": [
         {
-            "if": { "properties": { "class": { "const": "Consumer" } } },
+            "if": { "properties": { "class": { "const": "Telemetry_Consumer" } } },
             "then": {
                 "required": [
                     "class",
@@ -19,7 +20,7 @@
                        "title": "Class",
                        "description": "Telemetry services consumer class",
                        "type": "string",
-                       "enum": [ "Consumer" ]
+                       "enum": [ "Telemetry_Consumer" ]
                    },
                    "enabled": {
                         "title": "Enabled",
@@ -42,7 +43,8 @@
                     "host": {
                         "title": "Host",
                         "description": "" ,
-                        "type": "string"
+                        "type": "string",
+                        "format": "hostname"
                     },
                     "port": {
                         "$comment": "Certain consumers may not require this",
@@ -52,13 +54,16 @@
                         "minimum": 0,
                         "maximum": 65535
                     },
-                    "passphrase": {
-                        "title": "Passphrase (secret)",
+                    "protocol": {
+                        "title": "Protocol",
                         "description": "" ,
-                        "type": [ "string", "object" ]
-                    }
+                        "type": "string",
+                        "enum": [ "http", "https" ],
+                        "default": "https"
+                    },
+                    "passphrase": { "$ref": "base_schema.json#/definitions/secret" }
                 },
-                "additionalProperties": true
+                "additionalProperties": false
             },
             "else": {}
         }

@@ -8,14 +8,17 @@
 
 'use strict';
 
+const Ajv = require('ajv');
+const setupAsync = require('ajv-async');
 const EventEmitter = require('events');
 const logger = require('./logger.js');
 const util = require('./util.js');
 
 const baseSchema = require('./config/base_schema.json');
 const systemPollerSchema = require('./config/system_poller_schema.json');
-const eventListenerSchema = require('./config/event_listener_schema.json');
+const listenerSchema = require('./config/listener_schema.json');
 const consumerSchema = require('./config/consumer_schema.json');
+const customKeywords = require('./customKeywords.js');
 
 class ConfigWorker extends EventEmitter {
     /**
@@ -30,6 +33,7 @@ class ConfigWorker extends EventEmitter {
         super();
         this._state = {};
         this.restWorker = null;
+        this.validator = this.compileSchema();
     }
 
     /** Getter for config
@@ -58,8 +62,15 @@ class ConfigWorker extends EventEmitter {
      * @emits ConfigWorker#change
      */
     _notifyConfigChange() {
-        // copy config to avoid changes from listeners
-        this.emit('change', JSON.parse(JSON.stringify(this._state.config)));
+        // handle passphrases first - decrypt, download, etc.
+        util.decryptAllSecrets(this._state.config)
+            .then((config) => {
+                // copy config to avoid changes from listeners
+                this.emit('change', JSON.parse(JSON.stringify(config)));
+            })
+            .catch((err) => {
+                logger.error(`notifyConfigChange error: ${err}`);
+            });
     }
 
     /**
@@ -143,6 +154,36 @@ class ConfigWorker extends EventEmitter {
     }
 
     /**
+     * Pre-compile schema (avoids ~5 second delay during config event, when using ajv-async nodent transpiler)
+     *
+     * @returns {Object} Promise which is resolved with the validated schema validator
+     */
+    compileSchema() {
+        const schemas = {
+            base: baseSchema,
+            systemPoller: systemPollerSchema,
+            listener: listenerSchema,
+            consumer: consumerSchema
+        };
+        const keywords = customKeywords;
+
+        const ajv = setupAsync(new Ajv({ useDefaults: true, coerceTypes: true, async: true }));
+        // add schemas
+        Object.keys(schemas).forEach((k) => {
+            // ignore base, that will be added later
+            if (k !== 'base') {
+                ajv.addSchema(schemas[k]);
+            }
+        });
+        // add keywords
+        Object.keys(keywords).forEach((k) => {
+            ajv.addKeyword(k, keywords[k]);
+        });
+        // ajv-async nodent transpiler very slow, for now simply prime the pump with seperate compile function
+        return ajv.compile(schemas.base);
+    }
+
+    /**
      * Validate JSON data against config schema
      *
      * @param {Object} data - data to validate against config schema
@@ -150,13 +191,17 @@ class ConfigWorker extends EventEmitter {
      * @returns {Object} Promise which is resolved with the validated schema
      */
     validate(data) {
-        const schemas = {
-            base: baseSchema,
-            systemPoller: systemPollerSchema,
-            eventListener: eventListenerSchema,
-            consumer: consumerSchema
-        };
-        return util.validateAgainstSchema(data, schemas);
+        if (this.validator) {
+            return this.validator(data)
+                .then(() => data)
+                .catch((e) => {
+                    if (e instanceof Ajv.ValidationError) {
+                        throw new Error(`validation errors: ${util.stringify(e.errors)}`);
+                    }
+                    throw e;
+                });
+        }
+        return Promise.reject(new Error('Validator is not available'));
     }
 
     /**
@@ -164,15 +209,17 @@ class ConfigWorker extends EventEmitter {
      *
      * @param {Object} data - data to validate against config schema
      *
-     * @returns {Object} Promise resolved on success
+     * @returns {Object} Promise with validate config resolved on success
      */
     validateAndApply(data) {
+        let validatedConfig = {};
         return this.validate(data)
-            .then((newConfig) => {
-                // for now, retain raw config along with parsed
+            .then((config) => {
+                validatedConfig = config;
+                // no need for raw config
                 const configToSave = {
-                    raw: newConfig,
-                    parsed: util.formatConfig(newConfig)
+                    raw: null,
+                    parsed: util.formatConfig(config)
                 };
                 logger.debug(`Configuration to save: ${util.stringify(configToSave)}`); // helpful debug, for now
 
@@ -184,6 +231,7 @@ class ConfigWorker extends EventEmitter {
             .then(() => {
                 // propagate config change
                 this.setConfig(this.config);
+                return validatedConfig;
             })
             .catch((err) => {
                 const res = `config.validateAndApply error: ${err.message ? err.message : err}`;

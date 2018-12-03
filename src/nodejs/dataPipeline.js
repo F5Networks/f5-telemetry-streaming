@@ -21,8 +21,9 @@ const forwarder = require('./forwarder.js');
 * @returns {Void}
 */
 function process(data, type) {
-    // add telemetryCategory to data, fairly verbose name to avoid conflicts
-    data.telemetryCategory = type;
+    // add telemetryEventCategory to data, fairly verbose name to avoid conflicts
+    // TODO: also add a telemetryEventType which would have a value like LTM Request Log/ASM Log/etc.
+    data.telemetryEventCategory = type;
 
     // log events, for now
     if (type === 'event') { logger.debug(`Event: ${util.stringify(data)}`); }

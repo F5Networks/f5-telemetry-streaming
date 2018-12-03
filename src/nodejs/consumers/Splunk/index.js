@@ -128,7 +128,9 @@ function transformData(globalCtx) {
 * @returns {Object} default options for request
 */
 function getDefaultRequestOpts(consumer) {
-    let baseURL = consumer.host;
+    // we should always get a protocol, but having a default here doesn't hurt
+    const protocol = consumer.protocol ? consumer.protocol : 'https';
+    let baseURL = `${protocol}://${consumer.host}`;
     if (consumer.port) {
         baseURL = `${baseURL}:${consumer.port}`;
     }
@@ -136,7 +138,7 @@ function getDefaultRequestOpts(consumer) {
     const defaults = {
         url: baseURL,
         headers: {
-            Authorization: `Splunk ${consumer.passphrase}`
+            Authorization: `Splunk ${consumer.passphrase.text}`
         }
     };
     // easier for debug to turn it off

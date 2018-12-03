@@ -1,12 +1,13 @@
 {
-    "$id": "event_listener_schema.json",
+    "$id": "listener_schema.json",
+    "$async": true,
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Telemetry services event listener schema",
     "description": "",
     "type": "object",
     "allOf": [
         {
-            "if": { "properties": { "class": { "const": "Event_Listener" } } },
+            "if": { "properties": { "class": { "const": "Telemetry_Listener" } } },
             "then": {
                 "required": [
                     "class",
@@ -17,7 +18,7 @@
                         "title": "Class",
                         "description": "Telemetry services event listener class",
                         "type": "string",
-                        "enum": [ "Event_Listener" ]
+                        "enum": [ "Telemetry_Listener" ]
                     },
                     "enabled": {
                         "title": "Enabled",

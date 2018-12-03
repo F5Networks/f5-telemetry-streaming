@@ -25,7 +25,7 @@ Note: Currently this is building from local node_modules, src, etc.  This should
 
 Build: ```docker build . -t f5-telemetry``` Note: From root folder of this project
 
-Run: ```docker run --rm -d -p 443:443/tcp -p 6514:6514/tcp f5-telemetry:latest```
+Run: ```docker run --rm -d -p 443:443/tcp -p 6514:6514/tcp -e MY_SECRET_ENV_VAR='mysecret' f5-telemetry:latest```
 
 Attach Shell: ```docker exec -it <running container name> /bin/sh```
 
@@ -36,41 +36,51 @@ Attach Shell: ```docker exec -it <running container name> /bin/sh```
 ```json
 {
    "class": "Telemetry",
-   "configuration": {
-        "My_Poller": {
-            "class": "System_Poller",
-            "enabled": true,
-            "trace": false,
-            "interval": 60,
-            "host": "x.x.x.x",
-            "port": 443,
-            "username": "myuser",
-            "passphrase": "mypassphrase"
-        },
-        "My_Listener": {
-            "class": "Event_Listener",
-            "enabled": true,
-            "trace": false,
-            "port": 6514
-        },
-        "My_Consumer": {
-            "class": "Consumer",
-            "enabled": true,
-            "trace": false,
-            "type": "Azure_Log_Analytics",
-            "host": "myworkspaceid",
-            "passphrase": "mysharedkey"
+    "My_Poller": {
+        "class": "Telemetry_System_Poller",
+        "enabled": true,
+        "trace": false,
+        "interval": 60,
+        "host": "x.x.x.x",
+        "port": 443,
+        "username": "myuser",
+        "passphrase": {
+            "cipherText": "mypassphrase"
         }
-   }
+    },
+    "My_Listener": {
+        "class": "Telemetry_Listener",
+        "enabled": true,
+        "trace": false,
+        "port": 6514
+    },
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "enabled": true,
+        "trace": false,
+        "type": "Azure_Log_Analytics",
+        "host": "myworkspaceid",
+        "passphrase": {
+            "cipherText": "mysharedkey"
+        }
+    }
 }
 ```
 
-Note: To run on a BIG-IP system poller should specify localhost with no credentials.
+Note: To run on a BIG-IP the system poller object should look like the following example.
 
 ```json
 "My_Poller": {
-    "class": "System_Poller",
-    "host": "localhost"
+    "class": "Telemetry_System_Poller",
+    "interval": 60
+}
+```
+
+Note: To run in a container, each passphrase object should look like the following example.
+
+```json
+"passphrase": {
+    "environmentVar": "MY_SECRET_ENV_VAR"
 }
 ```
 

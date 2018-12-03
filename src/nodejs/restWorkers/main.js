@@ -124,13 +124,13 @@ class RestWorker {
         switch (path[3]) {
         case 'declare':
             // try to validate new config
-            // TODO:
             configWorker.validateAndApply(body)
-                .then(() => {
-                    util.restOperationResponder(restOperation, 200, { message: 'success' });
+                .then((config) => {
+                    util.restOperationResponder(restOperation, 200, { message: 'success', declaration: config });
                 })
                 .catch((err) => {
                     logger.error(err);
+                    // TODO: account for config validation errors, that should result in 400 level error
                     util.restOperationResponder(restOperation, 500, `${err}`);
                 });
             break;
