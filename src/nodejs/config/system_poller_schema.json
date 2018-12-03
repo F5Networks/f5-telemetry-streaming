@@ -1,24 +1,24 @@
 {
     "$id": "system_poller_schema.json",
+    "$async": true,
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Telemetry services system poller schema",
     "description": "",
     "type": "object",
     "allOf": [
         {
-            "if": { "properties": { "class": { "const": "System_Poller" } } },
+            "if": { "properties": { "class": { "const": "Telemetry_System_Poller" } } },
             "then": {
                 "required": [
                     "class",
-                    "interval",
-                    "host"
+                    "interval"
                 ],
                 "properties": {
                     "class": {
                         "title": "Class",
                         "description": "Telemetry services system poller class",
                         "type": "string",
-                        "enum": [ "System_Poller" ]
+                        "enum": [ "Telemetry_System_Poller" ]
                     },
                     "enabled": {
                         "title": "Enabled",
@@ -36,14 +36,15 @@
                         "title": "Collection interval (in seconds)",
                         "description": "" ,
                         "type": "integer",
-                        "minimum": 30,
-                        "maximum": 600,
-                        "default": 60
+                        "minimum": 60,
+                        "maximum": 6000,
+                        "default": 300
                     },
                     "host": {
                         "title": "Host",
                         "description": "" ,
                         "type": "string",
+                        "format": "hostname",
                         "default": "localhost"
                     },
                     "port": {
@@ -59,18 +60,14 @@
                         "description": "" ,
                         "type": "string",
                         "enum": [ "http", "https" ],
-                        "default": "https"
+                        "default": "http"
                     },
                     "username": {
                         "title": "Username",
                         "description": "" ,
                         "type": "string"
                     },
-                    "passphrase": {
-                        "title": "Passphrase (password)",
-                        "description": "" ,
-                        "type": "string"
-                    }
+                    "passphrase": { "$ref": "base_schema.json#/definitions/secret" }
                 },
                 "additionalProperties": false
             },

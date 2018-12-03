@@ -29,7 +29,12 @@ function process(args) {
     const config = args.config;
     const tracer = args.tracer;
 
-    return new SystemStats().collect(config.host, config.port, config.username, config.passphrase)
+    return new SystemStats().collect(
+        config.host,
+        config.port,
+        config.username,
+        config.passphrase ? config.passphrase.text : undefined
+    )
         .then((data) => {
             if (tracer) {
                 tracer.write(JSON.stringify(data, null, 4));

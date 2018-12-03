@@ -28,8 +28,33 @@ function stringify(msg) {
     return msg;
 }
 
-const addPrefix = function (msg) {
-    return `[telemetry] ${stringify(msg)}`;
+/**
+ * Mask Secrets (as needed)
+ *
+ * @param {String} msg - message to mask
+ *
+ * @returns {Object} Masked message
+ */
+function maskSecrets(msg) {
+    let ret = msg;
+    const secrets = {
+        passphrase: { replace: /(?:"passphrase":{)(.*?)(?:})/g, with: '"passphrase":{*********}' }
+    };
+    // place in try/catch
+    try {
+        Object.keys(secrets).forEach((k) => {
+            if (msg.indexOf(k) !== -1) {
+                ret = ret.replace(secrets[k].replace, secrets[k].with);
+            }
+        });
+    } catch (e) {
+        // just continue
+    }
+    return ret;
+}
+
+const prepareMsg = function (msg) {
+    return `[telemetry] ${maskSecrets(stringify(msg))}`;
 };
 
 /* f5-logger module supports the following levels
@@ -43,10 +68,10 @@ levels: {
     severe: 6
 }
 */
-const error = function (msg) { logger.severe(addPrefix(msg)); };
-const info = function (msg) { logger.info(addPrefix(msg)); };
-const debug = function (msg) { logger.finest(addPrefix(msg)); };
-const exception = function (msg, err) { logger.finest(addPrefix(`${msg}\nTraceback:\n${err.stack || 'no traceback available'}`)); };
+const error = function (msg) { logger.severe(prepareMsg(msg)); };
+const info = function (msg) { logger.info(prepareMsg(msg)); };
+const debug = function (msg) { logger.finest(prepareMsg(msg)); };
+const exception = function (msg, err) { logger.finest(prepareMsg(`${msg}\nTraceback:\n${err.stack || 'no traceback available'}`)); };
 
 module.exports = {
     exception,
