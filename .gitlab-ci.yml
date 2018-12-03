@@ -77,3 +77,43 @@ pages:
             - public
     only:
         - branches
+
+Publish docs to staging:
+  image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
+  stage: build
+  environment: 
+    name: staging
+    url: https://clouddocs.f5networks.net/products/extensions/telemetry-services/latest
+  tags:
+    - cm-official-docker-executor
+  only:
+    - docs-staging@cloudsolutions/f5-telemetry-services
+  dependencies:
+    - build docs
+  script:
+    - aws s3 sync docs/_build/html s3://clouddocs.f5networks.net/products/extensions/telemetry-services/latest
+    # - aws s3 cp versions.json s3://clouddocs.f5networks.net/products/extensions/telemetry-services/versions.json
+    # create invalidation to clear cloudfront cache
+    - aws cloudfront create-invalidation --distribution-id $AWS_DIST --paths /products/extensions/telemetry-services/latest
+
+# Publish docs to clouddocs.f5.com
+docs to production:
+  image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
+  stage: build
+  environment:
+    name: production
+    url: https://clouddocs.f5.com/products/extensions/telemetry-services/latest
+  only:
+  # Currently will only deploy to clouddocs.f5.com on commits to doc-publish
+  # fill in desired release branch name and uncomment to add deployment from a branch
+  - docs-publish@cloudsolutions/f5-telemetry-services
+  tags:
+  - cm-official-docker-executor
+  dependencies:
+  - create docs
+  script:
+  # Uncomment and set to create desired version format
+    - aws s3 sync docs/_build/html s3://clouddocs.f5.com/products/extensions/telemetry-services/latest
+    # - aws s3 cp versions.json s3://clouddocs.f5.com/products/extensions/telemetry-services/versions.json
+    # create invalidation to clear cloudfront cache
+    - aws cloudfront create-invalidation --distribution-id $AWS_DIST --paths /products/extensions/telemetry-services/latest
