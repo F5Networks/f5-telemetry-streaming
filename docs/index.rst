@@ -27,10 +27,8 @@ Previous buttons to explore the documentation.
    :glob:
    :maxdepth: 3
 
-   overview.rst
-   prereqs.rst
-   quick-start.rst
-   faq.rst
+   userguide/index
+   refguide/index
 
 
 
