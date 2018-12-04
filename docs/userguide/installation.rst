@@ -1,7 +1,7 @@
 .. _installation:
 
 Downloading and installing the Telemetry
-------------------------------------------
+----------------------------------------
 The Telemetry package is an RPM file you download, and then upload to the BIG-IP system using the iControl/iApp LX framework. Alternatively, you can see our :doc:`quick-start`.
 
 Downloading the RPM file
@@ -9,13 +9,13 @@ Downloading the RPM file
 The first task is to download the latest RPM file.  Go to the |github|, and download the latest (highest numbered) RPM file.
 
 Uploading and installing the Telemetry file on the BIG-IP
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 After you download the RPM, you must upload and then install it on your BIG-IP system.  You can use the BIG-IP Configuration utility or cURL (you can alternatively use SCP to upload the file to **/var/config/rest/downloads**, but you would still have to use cURL command to install the package).  Use only one of the following procedures.
 
 .. _installgui-ref:
 
 Installing Telemetry Services using the BIG-IP Configuration utility
-`````````````````````````````````````````````````````
+````````````````````````````````````````````````````````````````````
 
 From the Configuration utility:
 
@@ -39,7 +39,7 @@ From the Configuration utility:
 .. _installcurl-ref:
 
 Installing Telemetry Services using cURL from the Linux shell
-``````````````````````````````````````````````
+`````````````````````````````````````````````````````````````
 
 If you want to use cURL to install Telemetry Services, use the following command syntax.  First, set the file name and the BIG-IP IP address and credentials, making sure you use the appropriate RPM file name, including build number (36 in the following example), and BIG-IP credentials.
 
