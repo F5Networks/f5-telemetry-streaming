@@ -15,7 +15,7 @@ const childProcess = require('child_process');
 const crypto = require('crypto');
 const diff = require('deep-diff');
 
-const constants = require('./constants');
+const constants = require('./constants.js');
 const logger = require('./logger.js');
 
 /**

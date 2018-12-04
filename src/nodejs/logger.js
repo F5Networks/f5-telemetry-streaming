@@ -8,7 +8,12 @@
 
 'use strict';
 
-const logger = require('f5-logger').getInstance(); // eslint-disable-line import/no-unresolved
+let logger;
+try {
+    logger = require('f5-logger').getInstance(); // eslint-disable-line
+} catch (e) {
+    // just continue
+}
 
 /**
  * Stringify a message

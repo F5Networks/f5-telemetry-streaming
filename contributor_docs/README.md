@@ -41,7 +41,7 @@ This is the top-level documentation which provides notes and information about c
             "disabled": true, // This alerts the engine to ignore specific info/stat
             "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" }, // Converts an array to a map using the value of a standard key such as 'name' in each object in the array.  Optionally add a prefix to that value (useful if filterKeys is also used)
             "filterKeys": [ "name/", "hostname" ], // Filter all keys in object using provided list
-            "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 } }, // Rename keys using a regex pattern, typically useful if key contains unneccesary prefix/suffix
+            "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "~": { "replaceCharacter": "/" },  }, // Rename keys, useful if key contains unneccesary prefix/suffix or needs a specific character replaced
             "runFunction": { "name": "getPercentFromKeys", "args": { "totalKey": "memoryTotal", "partialKey": "memoryUsed" } }, // Run custom function, nail meet hammer.  This is to be used for one-offs where creating a standard macro does not make sense, keeping in mind each custom function could be used multiple times.  The function should already exist inside of normalizeUtil.js.
             "comment": "some comment", // Simple means to provide a comment in properties.json about a particular info/stat for other contributors
             "if": { "deviceVersionGreaterOrEqual": "13.0" }, // Simple conditional block. Every key inside "if" is predefined function to test which returns 'true' or 'false'. If several key are encountered then logical AND will be used to compute final result. More information about available function below. By default result is true for empty block.
@@ -50,7 +50,7 @@ This is the top-level documentation which provides notes and information about c
         }
         ```
 
-    * Context Macros: [Properties.json](../src/nodejs/config/properties.json) allows to define the data which should be preloaded before *stats* processing. It allows to parametrize Macros' "key" property using following syntax:
+    * Context Macros: [Properties.json](../src/nodejs/config/properties.json) allows to define the data which should be preloaded before *stats* processing. It allows to parametrize Macros "key" property using following syntax:
 
         ```javascript
         "someKey": {
@@ -60,28 +60,28 @@ This is the top-level documentation which provides notes and information about c
 
         Context data should be defined on the same level as *stats* in [Properties.json](../src/nodejs/config/properties.json). There are two ways how the context object can be defined:
 
-        * Object with Macroses:
+        * Object with Macros:
 
             ```javascript
             "context": {
                 "someCtxKey1": {
-                    "key": "/mgmt/tm/sys/global-settings::hostname" // other Macros' properties are available too. Context data is not availble!
+                    "key": "/mgmt/tm/sys/global-settings::hostname" // other Macros properties are available too. Context data is not availble!
                 }
             }
             ```
 
-        * Array of objects with Macroses. This definition allows to specify loading order to resolve dependency when context Macros requires contextual information from other Macros:
+        * Array of objects with Macros. This definition allows to specify loading order to resolve dependency when context Macros requires contextual information from other Macros:
 
             ```javascript
             "context": [
                 {
                     "someCtxKey1": {
-                        "key": "/mgmt/tm/sys/global-settings::hostname" // other Macros' properties are available too. Context data is not availble for the first set of Macroses.
+                        "key": "/mgmt/tm/sys/global-settings::hostname" // other Macros properties are available too. Context data is not availble for the first set of Macros.
                     }
                 },
                 {
                     "someCtxKey2": {
-                        "key": "/mgmt/tm/sys/global-settings::{{ someCtxKey1 }}" // other Macros' properties are available too. Context data is available now! 
+                        "key": "/mgmt/tm/sys/global-settings::{{ someCtxKey1 }}" // other Macros properties are available too. Context data is available now! 
                     }
                 }
             ]
