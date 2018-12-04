@@ -12,10 +12,11 @@ test package:
         - echo 'Running Tests'
         - npm install
         - npm run lint
+        - npm run test
     tags:
     - cm-official-docker-executor
 
-rpm build:
+build package:
   image: f5devcentral/containthedocs:rpmbuild
   stage: build
   script:

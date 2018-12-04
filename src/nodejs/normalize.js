@@ -89,7 +89,7 @@ function getDataByKey(data, key) {
 }
 
 /**
- * Rename keys in object using regex pattern
+ * Rename keys in object using regex or constant
  *
  * @param {Object} data     - data
  * @param {Object} patterns - map of patterns
@@ -102,32 +102,29 @@ function renameKeysInData(data, patterns) {
     // only check non array objects
     if (typeof data === 'object' && !Array.isArray(data)) {
         Object.keys(data).forEach((k) => {
-            let renameKey = false;
-            let renamedKey;
+            let renamedKey = k;
             Object.keys(patterns).forEach((pK) => {
-                // check if key contains base match pattern
+                // first check if key contains base match pattern
                 if (k.includes(pK)) {
                     // support constant keyword: { constant: "foo" }
                     if (patterns[pK].constant) {
-                        renameKey = true;
                         renamedKey = patterns[pK].constant;
+                    } else if (patterns[pK].replaceCharacter) {
+                        // support replaceCharacter keyword: { char: "/" }
+                        renamedKey = renamedKey.replace(new RegExp(pK, 'g'), patterns[pK].replaceCharacter);
                     } else {
-                        // check if regex pattern matches - support pattern/group keywords: { pattern: "foo", group: 1 }
+                        // support pattern (regex) keyword
+                        // check for pattern/group in object: { pattern: "foo", group: 1 }
                         const pattern = patterns[pK].pattern ? patterns[pK].pattern : patterns[pK];
                         const group = patterns[pK].group ? patterns[pK].group : 0;
-                        const checkForMatch = k.match(pattern);
-                        if (checkForMatch) {
-                            renameKey = true;
-                            renamedKey = checkForMatch[group];
+                        const match = renamedKey.match(pattern);
+                        if (match) {
+                            renamedKey = match[group];
                         }
                     }
                 }
             });
-            if (renameKey) {
-                ret[renamedKey] = renameKeysInData(data[k], patterns);
-            } else {
-                ret[k] = renameKeysInData(data[k], patterns);
-            }
+            ret[renamedKey] = renameKeysInData(data[k], patterns);
         });
         return ret;
     }

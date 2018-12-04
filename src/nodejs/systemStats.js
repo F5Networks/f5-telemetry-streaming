@@ -345,7 +345,7 @@ SystemStats.prototype._renderProperty = function (property) {
     // but not sure we are really need it now.
     // For now just supporting simple templates which
     // generates single string only
-    property.key = mustache.render(property.key, this.contextData);
+    if (property.key) property.key = mustache.render(property.key, this.contextData);
     return property;
 };
 /**

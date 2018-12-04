@@ -35,7 +35,7 @@ Attach Shell: ```docker exec -it <running container name> /bin/sh```
 
 ```json
 {
-   "class": "Telemetry",
+    "class": "Telemetry",
     "My_Poller": {
         "class": "Telemetry_System_Poller",
         "enabled": true,
@@ -301,7 +301,7 @@ Each config object has 'tracer' property. Possible values are:
         }
     },
     "virtualServerStats": {
-        "~Common~app.app~app_vs": {
+        "/Common/app.app/app_vs": {
             "clientside.bitsIn": 14561768,
             "clientside.bitsOut": 58749616,
             "clientside.curConns": 0,
@@ -309,7 +309,7 @@ Each config object has 'tracer' property. Possible values are:
             "status.availabilityState": "available",
             "status.enabledState": "enabled"
         },
-        "~Sample_01~A1~serviceMain": {
+        "/Sample_01/A1/serviceMain": {
             "clientside.bitsIn": 0,
             "clientside.bitsOut": 0,
             "clientside.curConns": 0,
@@ -319,9 +319,9 @@ Each config object has 'tracer' property. Possible values are:
         }
     },
     "poolStats": {
-        "~Common~app.app~app_pool": {
+        "/Common/app.app/app_pool": {
             "members": {
-                "~Common~216.58.217.36:80": {
+                "/Common/216.58.217.36:80": {
                     "addr": "216.58.217.36",
                     "port": 80,
                     "serverside.bitsIn": 9345128,
@@ -333,9 +333,9 @@ Each config object has 'tracer' property. Possible values are:
                 }
             }
         },
-        "~Sample_01~A1~web_pool": {
+        "/Sample_01/A1/web_pool": {
             "members": {
-                "~Sample_01~192.0.1.10:80": {
+                "/Sample_01/192.0.1.10:80": {
                     "addr": "192.0.1.10",
                     "port": 80,
                     "serverside.bitsIn": 0,
@@ -345,7 +345,7 @@ Each config object has 'tracer' property. Possible values are:
                     "status.enabledState": "enabled",
                     "status.statusReason": "Pool member has been marked down by a monitor"
                 },
-                "~Sample_01~192.0.1.11:80": {
+                "/Sample_01/192.0.1.11:80": {
                     "addr": "192.0.1.11",
                     "port": 80,
                     "serverside.bitsIn": 0,

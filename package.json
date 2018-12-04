@@ -2,7 +2,8 @@
     "name": "f5-telemetry",
     "version": "1.0.0",
     "scripts": {
-        "lint": "eslint src"
+        "lint": "eslint src",
+        "test": "mocha --recursive \"./test/*.js\""
     },
     "dependencies": {
         "ajv": "^6.5.4",
@@ -14,6 +15,7 @@
     "devDependencies": {
         "eslint": "^4.19.1",
         "eslint-config-airbnb-base": "^13.1.0",
-        "eslint-plugin-import": "^2.14.0"
+        "eslint-plugin-import": "^2.14.0",
+        "mocha": "^5.2.0"
     }
 }
