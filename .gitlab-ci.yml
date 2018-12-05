@@ -37,26 +37,15 @@ build docs:
     image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
     script:
         - make html
+        - vale --glob='*.{md,rst}' .
+        - make linkcheck
     tags:
         - docker-executor
     stage: build
     artifacts:
         paths:
             - docs/_build/html
-test grammar:
-    image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
-    stage: review
-    tags:
-        - docker-executor
-    script:
-        - vale --glob='*.{md,rst}' .
-test links:
-    image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
-    stage: review
-    tags:
-        - docker-executor
-    script:
-        - make linkcheck
+
 pages:
     image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
     stage: review
