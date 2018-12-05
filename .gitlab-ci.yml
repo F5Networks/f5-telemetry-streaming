@@ -50,7 +50,7 @@ pages:
     image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
     stage: review
     environment:
-        name: review
+        name: staging
         url: https://${CI_PROJECT_NAMESPACE}.pages.gitswarm.f5net.com/${CI_PROJECT_NAME}
     tags:
         - cm-official-docker-executor
