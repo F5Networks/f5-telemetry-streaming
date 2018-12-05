@@ -38,7 +38,7 @@ build docs:
     script:
         - make html
         - vale --glob='*.{md,rst}' .
-        - make linkcheck
+      #  - make linkcheck
     tags:
         - docker-executor
     stage: build
@@ -63,8 +63,8 @@ pages:
         paths:
             - public
     only:
-        - develop@cloudsolutions/f5-telemetry-services
-        - docs-vanessa@cloudsolutions/f5-telemetry-services
+        - develop@cloudsolutions/f5-telemetry
+        - docs-vanessa@cloudsolutions/f5-telemetry
 
 Publish docs to staging:
   image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
