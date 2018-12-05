@@ -74,7 +74,8 @@ pages:
         paths:
             - public
     only:
-        - branches
+        - develop@cloudsolutions/f5-telemetry-services
+        - docs-vanessa@cloudsolutions/f5-telemetry-services
 
 Publish docs to staging:
   image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
