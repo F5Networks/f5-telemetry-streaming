@@ -11,26 +11,12 @@
 const AWS = require('aws-sdk');
 
 /**
- * Implementation for consumer - AWS S3
- *
- * @param {Object} context                                      - context of execution
- * @param {Object} context.config                               - consumer's config
- * @param {Object} context.logger                               - logger instance
- * @param {function(string):void} context.logger.info           - log info message
- * @param {function(string):void} context.logger.error          - log error message
- * @param {function(string):void} context.logger.debug          - log debug message
- * @param {function(string, err):void} context.logger.exception - log error message with error's traceback
- * @param {Object} context.event                                - event to process
- * @param {Object} context.event.data                           - actual data to process
- * @param {string} context.event.type                           - type of data to process
- * @param {Object|undefined} context.tracer                     - tracer object
- * @param {function(string):void} context.tracer.write          - write data to tracer
- *
- * @returns {void}
+ * See {@link ../README.md#context} for documentation
  */
 module.exports = function (context) {
+    const consumerName = context.config.type ? context.config.type : 'AWS_S3';
     const region = context.config.region;
-    const bucket = context.config.host; // host should contain bucket name
+    const bucket = context.config.bucket ? context.config.bucket : context.config.host; // fall back is host
     const httpBody = JSON.stringify(context.event.data);
 
     // place file in folder(s) by date
@@ -39,7 +25,7 @@ module.exports = function (context) {
     const year = date.getFullYear();
     const month = date.getMonth();
     const day = date.getDay();
-    const file = `${year}/${month}/${day}/${dateString}.log`; // TODO: reconsider this
+    const file = `${year}/${month}/${day}/${dateString}.log`;
 
     AWS.config.update({
         region,
@@ -51,9 +37,9 @@ module.exports = function (context) {
     const s3 = new AWS.S3({ apiVersion: '2006-03-01' });
 
     const params = {
-        Body: httpBody,
         Bucket: bucket,
         Key: file,
+        Body: httpBody,
         ContentType: 'application/json',
         Metadata: {
             f5telemetry: 'true'
@@ -61,15 +47,15 @@ module.exports = function (context) {
     };
 
     if (context.tracer) {
-        context.tracer.write(JSON.stringify({ Key: file, Bucket: bucket, Body: JSON.parse(httpBody) }, null, 4));
+        context.tracer.write(JSON.stringify({ Bucket: bucket, Key: file, Body: JSON.parse(httpBody) }, null, 4));
     }
 
     // eslint-disable-next-line no-unused-vars
     s3.putObject(params, (error, body) => {
         if (error) {
-            context.logger.error(`AWS_S3: error ${error.message ? error.message : error}`);
+            context.logger.error(`${consumerName}: error ${error.message ? error.message : error}`);
         } else {
-            context.logger.debug('AWS_S3: success');
+            context.logger.debug(`${consumerName}: success`);
         }
     });
 };

@@ -119,9 +119,9 @@ configWorker.on('change', (config) => {
             const lConfig = eventListeners[k];
             const port = lConfig.port ? lConfig.port : DEFAULT_PORT;
 
-            // check for enabled=false first
+            // check for enable=false first
             const baseMsg = `listener ${k} on port: ${port}`;
-            if (lConfig.enabled === false) {
+            if (lConfig.enable === false) {
                 if (listeners[k]) {
                     logger.info(`Disabling ${baseMsg}`);
                     stop(listeners[k]);

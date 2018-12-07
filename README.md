@@ -5,31 +5,21 @@
 Telemetry Services is an iControl LX extension to stream telemetry from BIG-IP(s) to analytics consumers such as the following.
 
 - Splunk
-- Kafka
 - Azure Log Analytics
-- AWS S3
 - AWS CloudWatch
+- AWS S3
+- Graphite
 
 ## Contents
 
-- [Container](#Container)
 - [Configuration Example](#configuration-example)
 - [Data tracer](#data-tracer)
 - [Output Example](#output-example)
+- [Container](#container)
 
-## Container
+## Configuration example(s)
 
-This project builds a container, here are the current steps to build and run that container. Note: Additional steps TBD around pushing to docker hub, etc.
-
-Note: Currently this is building from local node_modules, src, etc.  This should change to using the RPM package.
-
-Build: ```docker build . -t f5-telemetry``` Note: From root folder of this project
-
-Run: ```docker run --rm -d -p 443:443/tcp -p 6514:6514/tcp -e MY_SECRET_ENV_VAR='mysecret' f5-telemetry:latest```
-
-Attach Shell: ```docker exec -it <running container name> /bin/sh```
-
-## Configuration example
+### Basic example
 
 `POST /mgmt/shared/telemetry/declare`
 
@@ -38,10 +28,10 @@ Attach Shell: ```docker exec -it <running container name> /bin/sh```
     "class": "Telemetry",
     "My_Poller": {
         "class": "Telemetry_System_Poller",
-        "enabled": true,
+        "enable": true,
         "trace": false,
         "interval": 60,
-        "host": "x.x.x.x",
+        "host": "192.0.2.1",
         "port": 443,
         "username": "myuser",
         "passphrase": {
@@ -50,19 +40,100 @@ Attach Shell: ```docker exec -it <running container name> /bin/sh```
     },
     "My_Listener": {
         "class": "Telemetry_Listener",
-        "enabled": true,
+        "enable": true,
         "trace": false,
         "port": 6514
     },
     "My_Consumer": {
         "class": "Telemetry_Consumer",
-        "enabled": true,
+        "enable": true,
         "trace": false,
         "type": "Azure_Log_Analytics",
-        "host": "myworkspaceid",
+        "host": "workspaceid",
         "passphrase": {
-            "cipherText": "mysharedkey"
+            "cipherText": "sharedkey"
         }
+    }
+}
+```
+
+### Splunk
+
+```json
+{
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Splunk",
+        "host": "192.0.2.1",
+        "protocol": "http",
+        "port": "8088",
+        "passphrase": {
+            "cipherText": "apikey"
+        }
+    }
+}
+```
+
+### Azure Log Analytics
+
+```json
+{
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Azure_Log_Analytics",
+        "host": "workspaceid",
+        "passphrase": {
+            "cipherText": "sharedkey"
+        }
+    }
+}
+```
+
+### AWS Cloud Watch
+
+```json
+{
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "AWS_CloudWatch",
+        "region": "us-west-1",
+        "logGroup": "f5telemetry",
+        "logStream": "default",
+        "username": "accesskey",
+        "passphrase": {
+            "cipherText": "secretkey"
+        }
+    }
+}
+```
+
+### AWS S3
+
+```json
+{
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "AWS_S3",
+        "region": "us-west-1",
+        "bucket": "bucketname",
+        "username": "accesskey",
+        "passphrase": {
+            "cipherText": "secretkey"
+        }
+    }
+}
+```
+
+### Graphite
+
+```json
+{
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Graphite",
+        "host": "192.0.2.1",
+        "protocol": "http",
+        "port": "80"
     }
 }
 ```
@@ -479,3 +550,15 @@ TBD
 #### APM Log
 
 TBD
+
+## Container
+
+This project builds a container, here are the current steps to build and run that container. Note: Additional steps TBD around pushing to docker hub, etc.
+
+Note: Currently this is building from local node_modules, src, etc.  This should change to using the RPM package.
+
+Build: ```docker build . -t f5-telemetry``` Note: From root folder of this project
+
+Run: ```docker run --rm -d -p 443:443/tcp -p 6514:6514/tcp -e MY_SECRET_ENV_VAR='mysecret' f5-telemetry:latest```
+
+Attach Shell: ```docker exec -it <running container name> /bin/sh```

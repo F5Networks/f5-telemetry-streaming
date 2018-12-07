@@ -97,9 +97,9 @@ configWorker.on('change', (config) => {
         // we have pollers to process, now determine if we need to start or update
         Object.keys(systemPollers).forEach((k) => {
             const args = { config: systemPollers[k] };
-            // check for enabled=false first
+            // check for enable=false first
             const baseMsg = `system poller ${k} interval: ${args.config.interval} secs`;
-            if (args.config.enabled === false) {
+            if (args.config.enable === false) {
                 if (pollerIDs[k]) {
                     logger.info(`Disabling ${baseMsg}`);
                     util.stop(pollerIDs[k]);

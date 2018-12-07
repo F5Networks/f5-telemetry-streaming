@@ -11,9 +11,7 @@
             "then": {
                 "required": [
                     "class",
-                    "type",
-                    "host",
-                    "passphrase"
+                    "type"
                 ],
                 "properties": {
                    "class": {
@@ -22,8 +20,8 @@
                        "type": "string",
                        "enum": [ "Telemetry_Consumer" ]
                    },
-                   "enabled": {
-                        "title": "Enabled",
+                   "enable": {
+                        "title": "Enable",
                         "description": "" ,
                         "type": "boolean",
                         "default": true
@@ -38,7 +36,7 @@
                         "title": "Type",
                         "description": "" ,
                         "type": "string",
-                        "enum": [ "default", "Splunk", "Azure_Log_Analytics", "AWS_S3" ]
+                        "enum": [ "default", "Splunk", "Graphite", "Azure_Log_Analytics", "AWS_S3" , "AWS_CloudWatch" ]
                     },
                     "host": {
                         "title": "Host",
@@ -47,7 +45,7 @@
                         "format": "hostname"
                     },
                     "port": {
-                        "$comment": "Certain consumers may not require this",
+                        "$comment": "Required for certain consumers",
                         "title": "Port",
                         "description": "" ,
                         "type": "integer",
@@ -55,21 +53,45 @@
                         "maximum": 65535
                     },
                     "protocol": {
+                        "$comment": "Required for certain consumers",
                         "title": "Protocol",
                         "description": "" ,
                         "type": "string",
-                        "enum": [ "http", "https" ],
-                        "default": "https"
+                        "enum": [ "http", "https" ]
                     },
-                    "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
+                    "username": {
+                        "$comment": "Required for certain consumers",
+                        "title": "Username",
+                        "description": "" ,
+                        "type": "string"
+                    },
                     "region": {
                         "$comment": "Required for certain consumers",
                         "title": "Region",
                         "description": "" ,
                         "type": "string"
-                    }
+                    },
+                    "bucket": {
+                        "$comment": "Required for certain consumers",
+                        "title": "Bucket",
+                        "description": "" ,
+                        "type": "string"
+                    },
+                    "logGroup": {
+                        "$comment": "Required for certain consumers",
+                        "title": "Log Group",
+                        "description": "" ,
+                        "type": "string"
+                    },
+                    "logStream": {
+                        "$comment": "Required for certain consumers",
+                        "title": "Log Stream",
+                        "description": "" ,
+                        "type": "string"
+                    },
+                    "passphrase": { "$ref": "base_schema.json#/definitions/secret" }
                 },
-                "additionalProperties": true
+                "additionalProperties": false
             },
             "else": {}
         }
