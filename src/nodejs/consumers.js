@@ -109,12 +109,12 @@ function unloadUnusedModules(before) {
     if (!before.size) {
         return;
     }
-    logger.info('Unloading unused Consumers\' modules');
+    logger.debug('Unloading unused Consumer modules');
     const loadedTypes = getLoadedConsumerTypes();
 
     before.forEach((consumerType) => {
         if (!loadedTypes.has(consumerType)) {
-            logger.info(`Unloading Consumer module '${consumerType}'`);
+            logger.debug(`Unloading Consumer module '${consumerType}'`);
             const consumerDir = './'.concat(path.join(CONSUMERS_DIR, consumerType));
 
             try {
@@ -123,7 +123,7 @@ function unloadUnusedModules(before) {
                 logger.exception(`Exception on attempt to unload '${consumerDir}' from cache`, err);
                 return;
             }
-            logger.info(`Consumer module '${consumerDir}' (${consumerType}) was unloaded`);
+            logger.debug(`Consumer module '${consumerDir}' (${consumerType}) was unloaded`);
         }
     });
 }

@@ -147,8 +147,13 @@
         "poolStats": {
             "key": "poolMembersRef::items",
             "convertArrayToMap": { "keyName": "selfLink", "keyNamePrefix": "name/" },
-            "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/pool/": { "pattern": "pool\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members", "~": { "replaceCharacter": "/" } },
-            "filterKeys": [ "name/", "/stats", "membersReference", "addr", "port", "serverside.bitsIn", "serverside.bitsOut", "serverside.curConns", "availabilityState", "statusReason", "enabledState" ]
+            "filterKeys": [ "name/", "/stats", "membersReference", "addr", "port", "serverside.bitsIn", "serverside.bitsOut", "serverside.curConns", "availabilityState", "statusReason", "enabledState" ],
+            "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/pool/": { "pattern": "pool\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members", "~": { "replaceCharacter": "/" } }
+        },
+        "ltmPolicyStats": {
+            "key": "/mgmt/tm/ltm/policy/stats",
+            "filterKeys": [ "ltm/policy", "invoked", "succeeded" ],
+            "renameKeys": [ { "ltm/policy/": { "pattern": "policy\/(.*)\/", "group": 1 }, "/actions/": { "pattern": "actions\/(.*)", "group": 1 }, "~": { "replaceCharacter": "/" } }, { "/actions": { "constant": "actions" } } ]
         },
         "tlsCerts": {
             "key": "/mgmt/tm/sys/file/ssl-cert::items",

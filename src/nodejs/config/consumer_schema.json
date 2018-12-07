@@ -38,7 +38,7 @@
                         "title": "Type",
                         "description": "" ,
                         "type": "string",
-                        "enum": [ "default", "Splunk", "Azure_Log_Analytics" ]
+                        "enum": [ "default", "Splunk", "Azure_Log_Analytics", "AWS_S3" ]
                     },
                     "host": {
                         "title": "Host",
@@ -61,9 +61,15 @@
                         "enum": [ "http", "https" ],
                         "default": "https"
                     },
-                    "passphrase": { "$ref": "base_schema.json#/definitions/secret" }
+                    "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
+                    "region": {
+                        "$comment": "Required for certain consumers",
+                        "title": "Region",
+                        "description": "" ,
+                        "type": "string"
+                    }
                 },
-                "additionalProperties": false
+                "additionalProperties": true
             },
             "else": {}
         }

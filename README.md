@@ -358,6 +358,22 @@ Each config object has 'tracer' property. Possible values are:
             }
         }
     },
+    "ltmPolicyStats": {
+        "/Common/example_policy": {
+            "invoked": 0,
+            "succeeded": 0,
+            "actions": {
+                "default:0": {
+                    "invoked": 0,
+                    "succeeded": 0
+                },
+                "rule_1:0": {
+                    "invoked": 0,
+                    "succeeded": 0
+                }
+            }
+        }
+    },
     "tlsCerts": {
         "ca-bundle.crt": {
             "expirationDate": 1893455999,

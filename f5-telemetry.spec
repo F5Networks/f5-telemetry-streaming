@@ -14,7 +14,7 @@ Telemetry Services for BIG-IP
 
 %prep
 cp -r %{main}/src/ %{_builddir}/src/
-if [ -d "%{main}/node_modules" ] ; then cp -r %{main}/node_modules/ %{_builddir}/src/ ; fi
+if [ -d "%{main}/node_modules" ] ; then cp -r %{main}/node_modules %{_builddir}/src/ ; fi
 echo -n %{version}-%{release} > %{_builddir}/src/version
 
 %install
