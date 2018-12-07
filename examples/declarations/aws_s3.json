@@ -1,0 +1,13 @@
+{
+    "class": "Telemetry",
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "AWS_S3",
+        "region": "us-west-1",
+        "bucket": "bucketname",
+        "username": "accesskey",
+        "passphrase": {
+            "cipherText": "secretkey"
+        }
+    }
+}

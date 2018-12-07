@@ -2,21 +2,18 @@
     "class": "Telemetry",
     "My_Poller": {
         "class": "Telemetry_System_Poller",
-        "enabled": true,
-        "interval": 300
+        "interval": 60
     },
     "My_Listener": {
         "class": "Telemetry_Listener",
-        "enabled": true,
         "port": 6514
     },
     "My_Consumer": {
         "class": "Telemetry_Consumer",
-        "enabled": true,
         "type": "Azure_Log_Analytics",
-        "host": "myworkspaceid",
+        "host": "exampleworkspaceid",
         "passphrase": {
-            "cipherText": "mysharedkey"
+            "cipherText": "examplesharedkey"
         }
     }
- }
+}

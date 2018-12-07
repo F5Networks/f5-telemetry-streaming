@@ -45,7 +45,7 @@ up and running with Telemetry Services.
         "configuration": {
             "My_Poller": {
                 "class": "System_Poller",
-                "enabled": true,
+                "enable": true,
                 "trace": false,
                 "interval": 60,
                 "host": "x.x.x.x",
@@ -55,13 +55,13 @@ up and running with Telemetry Services.
             },
             "My_Listener": {
                 "class": "Event_Listener",
-                "enabled": true,
+                "enable": true,
                 "trace": false,
                 "port": 6514
             },
             "My_Consumer": {
                 "class": "Consumer",
-                "enabled": true,
+                "enable": true,
                 "trace": false,
                 "type": "Azure_Log_Analytics",
                 "host": "myworkspaceid",

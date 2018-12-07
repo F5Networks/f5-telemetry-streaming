@@ -40,7 +40,12 @@
             "description": "Telemetry services top level class",
             "type": "string",
             "enum": [ "Telemetry" ]
-       }
+       },
+       "$schema": {
+        "title": "Schema",
+        "description": "",
+        "type": "string"
+   }
     },
     "additionalProperties": {
         "$comment": "AJV does not resolve defaults inside oneOf/anyOf, so instead use allOf.  Any schema refs should also use allOf with an if/then/else on class",

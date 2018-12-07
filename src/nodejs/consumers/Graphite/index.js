@@ -9,32 +9,23 @@
 'use strict';
 
 const request = require('request');
-const crypto = require('crypto');
 
 /**
  * See {@link ../README.md#context} for documentation
  */
 module.exports = function (context) {
-    const consumerName = context.config.type ? context.config.type : 'Azure_Log_Analytics';
-    const workspaceId = context.config.host;
-    const sharedKey = context.config.passphrase.text;
+    const consumerName = context.config.type ? context.config.type : 'Graphite';
+    const httpBody = JSON.stringify({
+        what: 'f5telemetry',
+        tags: [context.event.type],
+        data: context.event.data
+    });
 
-    const apiVersion = '2016-04-01';
-    const date = new Date().toUTCString();
-    const httpBody = JSON.stringify(context.event.data);
-
-    const contentLength = Buffer.byteLength(httpBody, 'utf8');
-    const stringToSign = `POST\n${contentLength}\napplication/json\nx-ms-date:${date}\n/api/logs`;
-    const signature = crypto.createHmac('sha256', new Buffer(sharedKey, 'base64')).update(stringToSign, 'utf-8').digest('base64');
-    const authorization = `SharedKey ${workspaceId}:${signature}`;
-
-    // simply ignore context.config.protocol as log analytics only supports https anyways
-    const url = `https://${workspaceId}.ods.opinsights.azure.com/api/logs?api-version=${apiVersion}`;
+    const protocol = context.config.protocol ? context.config.protocol : 'http';
+    const port = context.config.port ? `:${context.config.port}` : '';
+    const url = `${protocol}://${context.config.host}${port}/events`;
     const httpHeaders = {
-        'content-type': 'application/json',
-        Authorization: authorization,
-        'Log-Type': context.config.logType ? context.config.logType : 'F5Telemetry',
-        'x-ms-date': date
+        'content-type': 'application/json'
     };
     const requestOptions = {
         url,
@@ -51,6 +42,8 @@ module.exports = function (context) {
             context.logger.error(`${consumerName}: error ${error.message ? error.message : error}`);
         } else {
             context.logger.debug(`${consumerName}: response ${response.statusCode} ${response.statusMessage}`);
+            // API may provide error text via body
+            if (body) context.logger.debug(`${consumerName}: response body ${body}`);
         }
     });
 };

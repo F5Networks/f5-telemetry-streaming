@@ -1,0 +1,14 @@
+{
+    "class": "Telemetry",
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "AWS_CloudWatch",
+        "region": "us-west-1",
+        "logGroup": "f5telemetry",
+        "logStream": "default",
+        "username": "accesskey",
+        "passphrase": {
+            "cipherText": "secretkey"
+        }
+    }
+}

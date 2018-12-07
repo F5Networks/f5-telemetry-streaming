@@ -2,10 +2,8 @@
     "class": "Telemetry",
     "My_Poller": {
         "class": "Telemetry_System_Poller",
-        "enabled": true,
-        "trace": false,
-        "interval": 300,
-        "host": "x.x.x.x",
+        "interval": 60,
+        "host": "192.0.2.1",
         "port": 443,
         "username": "myuser",
         "passphrase": {
@@ -14,14 +12,10 @@
     },
     "My_Listener": {
         "class": "Telemetry_Listener",
-        "enabled": true,
-        "trace": false,
         "port": 6514
     },
     "My_Consumer": {
         "class": "Telemetry_Consumer",
-        "enabled": true,
-        "trace": false,
         "type": "Azure_Log_Analytics",
         "host": "myworkspaceid",
         "passphrase": {
