@@ -8,11 +8,10 @@
 
 'use strict';
 
-const request = require('request');
-const crypto = require('crypto');
+const AWS = require('aws-sdk');
 
 /**
- * Implementation for consumer - Azure LA
+ * Implementation for consumer - AWS S3
  *
  * @param {Object} context                                      - context of execution
  * @param {Object} context.config                               - consumer's config
@@ -30,41 +29,47 @@ const crypto = require('crypto');
  * @returns {void}
  */
 module.exports = function (context) {
-    const workspaceId = context.config.host;
-    const sharedKey = context.config.passphrase.text;
-
-    const apiVersion = '2016-04-01';
-    const date = new Date().toUTCString();
+    const region = context.config.region;
+    const bucket = context.config.host; // host should contain bucket name
     const httpBody = JSON.stringify(context.event.data);
 
-    const contentLength = Buffer.byteLength(httpBody, 'utf8');
-    const stringToSign = `POST\n${contentLength}\napplication/json\nx-ms-date:${date}\n/api/logs`;
-    const signature = crypto.createHmac('sha256', new Buffer(sharedKey, 'base64')).update(stringToSign, 'utf-8').digest('base64');
-    const authorization = `SharedKey ${workspaceId}:${signature}`;
+    // place file in folder(s) by date
+    const date = new Date();
+    const dateString = date.toISOString();
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const day = date.getDay();
+    const file = `${year}/${month}/${day}/${dateString}.log`; // TODO: reconsider this
 
-    // simply ignore context.config.protocol as log analytics only supports https anyways
-    const url = `https://${workspaceId}.ods.opinsights.azure.com/api/logs?api-version=${apiVersion}`;
-    const httpHeaders = {
-        'content-type': 'application/json',
-        Authorization: authorization,
-        'Log-Type': context.config.logType ? context.config.logType : 'F5Telemetry',
-        'x-ms-date': date
+    AWS.config.update({
+        region,
+        credentials: new AWS.Credentials({
+            accessKeyId: context.config.username,
+            secretAccessKey: context.config.passphrase.text
+        })
+    });
+    const s3 = new AWS.S3({ apiVersion: '2006-03-01' });
+
+    const params = {
+        Body: httpBody,
+        Bucket: bucket,
+        Key: file,
+        ContentType: 'application/json',
+        Metadata: {
+            f5telemetry: 'true'
+        }
     };
-    const requestOptions = {
-        url,
-        headers: httpHeaders,
-        body: httpBody
-    };
+
     if (context.tracer) {
-        context.tracer.write(JSON.stringify({ url, headers: httpHeaders, body: JSON.parse(httpBody) }, null, 4));
+        context.tracer.write(JSON.stringify({ Key: file, Bucket: bucket, Body: JSON.parse(httpBody) }, null, 4));
     }
 
     // eslint-disable-next-line no-unused-vars
-    request.post(requestOptions, (error, response, body) => {
+    s3.putObject(params, (error, body) => {
         if (error) {
-            context.logger.error(`Azure_Log_Analytics: error ${error.message ? error.message : error}`);
+            context.logger.error(`AWS_S3: error ${error.message ? error.message : error}`);
         } else {
-            context.logger.debug(`Azure_Log_Analytics: response ${response.statusCode} ${response.statusMessage}`);
+            context.logger.debug('AWS_S3: success');
         }
     });
 };

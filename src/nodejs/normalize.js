@@ -99,31 +99,45 @@ function getDataByKey(data, key) {
 function renameKeysInData(data, patterns) {
     let ret = Array.isArray(data) ? [] : {};
 
-    // only check non array objects
+    const rename = (key, childPatterns) => {
+        let retKey = key;
+        Object.keys(childPatterns).forEach((pK) => {
+            // first check if key contains base match pattern
+            if (key.includes(pK)) {
+                // support constant keyword: { constant: "foo" }
+                if (childPatterns[pK].constant) {
+                    retKey = childPatterns[pK].constant;
+                } else if (childPatterns[pK].replaceCharacter) {
+                    // support replaceCharacter keyword: { char: "/" }
+                    retKey = retKey.replace(new RegExp(pK, 'g'), childPatterns[pK].replaceCharacter);
+                } else {
+                    // support pattern (regex) keyword
+                    // check for pattern/group in object: { pattern: "foo", group: 1 }
+                    const pattern = childPatterns[pK].pattern ? childPatterns[pK].pattern : childPatterns[pK];
+                    const group = childPatterns[pK].group ? childPatterns[pK].group : 0;
+                    const match = retKey.match(pattern);
+                    if (match) {
+                        retKey = match[group];
+                    }
+                }
+            }
+        });
+        return retKey;
+    };
+
+    // only process non array objects
     if (typeof data === 'object' && !Array.isArray(data)) {
         Object.keys(data).forEach((k) => {
             let renamedKey = k;
-            Object.keys(patterns).forEach((pK) => {
-                // first check if key contains base match pattern
-                if (k.includes(pK)) {
-                    // support constant keyword: { constant: "foo" }
-                    if (patterns[pK].constant) {
-                        renamedKey = patterns[pK].constant;
-                    } else if (patterns[pK].replaceCharacter) {
-                        // support replaceCharacter keyword: { char: "/" }
-                        renamedKey = renamedKey.replace(new RegExp(pK, 'g'), patterns[pK].replaceCharacter);
-                    } else {
-                        // support pattern (regex) keyword
-                        // check for pattern/group in object: { pattern: "foo", group: 1 }
-                        const pattern = patterns[pK].pattern ? patterns[pK].pattern : patterns[pK];
-                        const group = patterns[pK].group ? patterns[pK].group : 0;
-                        const match = renamedKey.match(pattern);
-                        if (match) {
-                            renamedKey = match[group];
-                        }
-                    }
-                }
-            });
+            // if patterns is an array assume it contains 1+ maps to process
+            // this provides a means to guarantee order
+            if (Array.isArray(patterns)) {
+                patterns.forEach((i) => {
+                    renamedKey = rename(renamedKey, i);
+                });
+            } else {
+                renamedKey = rename(renamedKey, patterns);
+            }
             ret[renamedKey] = renameKeysInData(data[k], patterns);
         });
         return ret;

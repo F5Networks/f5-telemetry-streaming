@@ -57,6 +57,9 @@
             "name": "poolMembersRef"
         },
         {
+            "endpoint": "/mgmt/tm/ltm/policy/stats"
+        },
+        {
             "endpoint": "/mgmt/tm/sys/file/ssl-cert"
         },
         {
