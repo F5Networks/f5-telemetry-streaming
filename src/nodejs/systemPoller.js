@@ -72,6 +72,44 @@ function safeProcess() {
     }
 }
 
+/**
+ * Process client's request via REST API
+ *
+ * @param {Object} restOperation - request object
+ */
+function processClientRequest(restOperation) {
+    // shared/telemetry/poller/pollerName
+    const pollerName = restOperation.getUri().pathname.split('/')[4];
+    if (!pollerName) {
+        util.restOperationResponder(restOperation, 400,
+            { code: 400, message: 'Bad Request. Poller\'s name not specified.' });
+        return;
+    }
+
+    let systemPollers;
+    if (configWorker.config.parsed && configWorker.config.parsed[constants.SYSTEM_POLLER_CLASS_NAME]) {
+        systemPollers = configWorker.config.parsed[constants.SYSTEM_POLLER_CLASS_NAME];
+    } else {
+        systemPollers = {};
+    }
+
+    if (!systemPollers[pollerName]) {
+        util.restOperationResponder(restOperation, 404,
+            { code: 404, message: 'Poller with such name not found.' });
+        return;
+    }
+
+    process({ config: systemPollers[pollerName], process: false })
+        .then((data) => {
+            util.restOperationResponder(restOperation, 200, data);
+        })
+        .catch((err) => {
+            logger.error(`poller request ended up with error: ${err}`);
+            util.restOperationResponder(restOperation, 500,
+                { code: 500, message: `systemPoller.process error: ${err}` });
+        });
+}
+
 
 // config worker change event
 configWorker.on('change', (config) => {
@@ -122,5 +160,6 @@ configWorker.on('change', (config) => {
 
 
 module.exports = {
-    process
+    process,
+    processClientRequest
 };

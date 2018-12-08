@@ -13,6 +13,7 @@ Telemetry Services is an iControl LX extension to stream telemetry from BIG-IP(s
 ## Contents
 
 - [Configuration Example](#configuration-example)
+- [REST API Endpoints](#rest-api-endpoints)
 - [Data tracer](#data-tracer)
 - [Output Example](#output-example)
 - [Container](#container)
@@ -154,6 +155,66 @@ Note: To run in a container, each passphrase object should look like the followi
     "environmentVar": "MY_SECRET_ENV_VAR"
 }
 ```
+
+## REST API Endpoints
+
+### Base endpoint
+
+- Telemetry's base URI is **mgmt/shared/telemetry**
+- Allowed **Content-Type** for *POST* requests is **application/json**. Otherwise HTTP code 415 **Unsupported Media Type** will be returned.
+- Response is valid JSON data.
+
+Request example:
+```bash
+curl -v -u admin:<admin_password> -X GET http://localhost:8100/mgmt/shared/telemetry/info
+```
+Output:
+```json
+{"nodeVersion":"v4.6.0","version":"1.0.0","release":"2","schemaCurrent":"1.0.0","schemaMinimum":"1.0.0"}
+```
+
+#### Response
+
+As mentioned above - response is valid JSON data. When response is *HTTP 200* - everything went well, response body - JSON data.
+
+When response code is other than 2xx then response body in general will looks like following object: 
+```json
+{
+    code: ERROR_CODE, // number
+    message: "ERROR_MESSAGE" // string
+}
+```
+Additional properties might be added (depends on error type).
+
+### Info
+
+**<base_endpoint>/info** - endpoint to retrieve information about application.
+Allowed HTTP method - **GET**.
+Output:
+```json
+{
+    "nodeVersion": "v4.6.0",
+    "version": "1.0.0",
+    "release": "2",
+    "schemaCurrent": "1.0.0",
+    "schemaMinimum": "1.0.0"
+}
+```
+
+### Declare configuration
+
+**<base_endpoint>/declare** - endpoint to declare configuration.
+Allowed HTTP method - **POST**.
+Request body - valid JSON object. For example see [Configuration Example](#configuration-example).
+
+
+### System poller
+
+**<base_endpoint>/systempoller/<pollerName>** - endpoint to retrieve data from configured poller.
+Allowed HTTP method - **GET**.
+Useful for demo or to check if poller was able to connect to device.
+**pollerName** should match the name of one of configured pollers.
+Otherwise *HTTP 404* will be returned. For output example see [System Info](#system-info).
 
 ## Data tracer
 
