@@ -620,17 +620,16 @@ module.exports = {
      * @returns {Object} Returns the data formatted by class
      */
     formatDataByClass(data) {
-        let ret = {};
+        const ret = {};
         if (data && typeof data === 'object' && !Array.isArray(data)) {
+            // assuming a flat declaration where each object contains a class
+            // if that assumption changes this will need to be modified
             Object.keys(data).forEach((k) => {
                 const v = data[k];
                 // check if value for v is an object that contains a class
                 if (typeof v === 'object' && v.class) {
                     if (!ret[v.class]) { ret[v.class] = {}; }
                     ret[v.class][k] = v;
-                } else {
-                    // need to introspect child objects
-                    ret = this.formatDataByClass(v);
                 }
             });
         }
