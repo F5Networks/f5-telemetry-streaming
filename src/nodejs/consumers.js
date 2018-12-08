@@ -109,9 +109,7 @@ function unloadUnusedModules(before) {
     if (!before.size) {
         return;
     }
-    logger.debug('Unloading unused Consumer modules');
     const loadedTypes = getLoadedConsumerTypes();
-
     before.forEach((consumerType) => {
         if (!loadedTypes.has(consumerType)) {
             logger.debug(`Unloading Consumer module '${consumerType}'`);

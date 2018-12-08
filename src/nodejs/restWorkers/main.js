@@ -8,150 +8,219 @@
 
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
+
 const logger = require('../logger.js');
 const util = require('../util.js');
-const constants = require('../constants.js');
 
+const baseSchema = require('../config/base_schema.json');
 const configWorker = require('../config.js');
 const eventListener = require('../eventListener.js'); // eslint-disable-line no-unused-vars
 const consumers = require('../consumers.js'); // eslint-disable-line no-unused-vars
 const systemPoller = require('../systemPoller.js');
 
-class RestWorker {
-    constructor() {
-        this.WORKER_URI_PATH = 'shared/telemetry';
-        this.isPassThrough = true;
-        this.isPublic = true;
-    }
 
-    /**
-     * Called by LX framework when plugin is initialized.
-     *
-     * @public
-     * @param {Function} success - callback to indicate successful startup
-     * @param {Function} failure - callback to indicate startup failure
-     *
-     * @returns {undefined}
-     */
-    // eslint-disable-next-line no-unused-vars
-    onStart(success, failure) {
-        success();
-    }
-
-    /**
-     * Recognize readiness to handle requests.
-     * The iControl LX framework calls this method when
-     * onStart() work is complete.
-     *
-     * @public
-     * @param {Function} success - callback to indicate successful startup
-     * @param {Function} failure - callback to indicate startup failure
-     * @param {Object} state     - DOES NOT WORK: previously-persisted state
-     * @param {String} errMsg    - framework's error message if onStart() failed
-     *
-     * @returns {void}
-     */
-    // eslint-disable-next-line no-unused-vars
-    onStartCompleted(success, failure, state, errMsg) {
-        // first load state from rest storage
-        logger.info(`Node version ${process.version}`);
-
-        // better to use try/catch to handle unexpected errors
-        try {
-            configWorker.restWorker = this;
-            configWorker.loadState().then((loadedState) => {
-                logger.debug(`loaded state ${util.stringify(loadedState)}`);
-                success();
-            });
-        } catch (err) {
-            const msg = `onStartCompleted error: ${err}`;
-            logger.exception(msg, err);
-            failure(msg);
-        }
-    }
-
-    /**
-     * Handles Get requests
-     * @param {Object} restOperation
-     *
-     * @returns {void}
-     */
-    onGet(restOperation) {
-        const urlPath = restOperation.getUri().href;
-        const path = restOperation.getUri().pathname.split('/');
-        logger.debug(`GET operation ${urlPath}`);
-
-        let systemPollers;
-        let firstPoller;
-        switch (path[3]) {
-        case 'statsInfo':
-            if (configWorker.config.parsed && configWorker.config.parsed[constants.SYSTEM_POLLER_CLASS_NAME]) {
-                systemPollers = configWorker.config.parsed[constants.SYSTEM_POLLER_CLASS_NAME];
-            }
-
-            if (!systemPollers) {
-                util.restOperationResponder(restOperation, 400, 'Error: No system poller specified, configuration required');
-            } else {
-                firstPoller = systemPollers[Object.keys(systemPollers)[0]]; // for now just process first one
-                systemPoller.process({ config: firstPoller, process: false })
-                    .then((data) => {
-                        util.restOperationResponder(restOperation, 200, data);
-                    })
-                    .catch((err) => {
-                        logger.error(`statsInfo request ended up with error: ${err}`);
-                        util.restOperationResponder(restOperation, 500, `systemPoller.process error: ${err}`);
-                    });
-            }
-            break;
-        default:
-            util.restOperationResponder(restOperation, 400, `Bad URL: ${urlPath}`);
-            break;
-        }
-    }
-
-    /**
-     * Handles Post requests.
-     * @param {Object} restOperation
-     *
-     * @returns {void}
-     */
-    onPost(restOperation) {
-        const urlPath = restOperation.getUri().href;
-        const path = restOperation.getUri().pathname.split('/');
-        const body = restOperation.getBody();
-        logger.debug(`POST operation ${urlPath}`);
-
-        switch (path[3]) {
-        case 'declare':
-            // try to validate new config
-            configWorker.validateAndApply(body)
-                .then((config) => {
-                    util.restOperationResponder(restOperation, 200, { message: 'success', declaration: config });
-                })
-                .catch((err) => {
-                    logger.error(err);
-                    // TODO: account for config validation errors, that should result in 400 level error
-                    util.restOperationResponder(restOperation, 500, `${err}`);
-                });
-            break;
-        default:
-            util.restOperationResponder(restOperation, 400, `Bad URL: ${urlPath}`);
-            break;
-        }
-    }
-
-    /**
-     * Handles Delete requests.
-     * @param {Object} restOperation
-     *
-     * @returns {void}
-     */
-    onDelete(restOperation) {
-        const urlpath = restOperation.getUri().href;
-        logger.info(`DELETE operation ${urlpath}`);
-
-        util.restOperationResponder(restOperation, 200, {});
-    }
+/**
+ * Simple router to route incomming requests to REST API.
+ */
+function SimpleRouter() {
+    this.routes = {};
 }
+
+/**
+ * Register request habdler.
+ *
+ * @public
+ * @param {String} method             - HTTP method (POST, GET, etc.)
+ * @param {String} endpointURI        - URI path, string should be alphanumeric only
+ * @param {Function(Object)} callback - request handler
+ */
+SimpleRouter.prototype.register = function (method, endpointURI, callback) {
+    if (this.routes[endpointURI] === undefined) {
+        this.routes[endpointURI] = {};
+    }
+    this.routes[endpointURI][method] = callback;
+};
+
+/**
+ * Process request.
+ *
+ * @public
+ * @param {Object} restOperation - request object
+ */
+SimpleRouter.prototype.processRestOperation = function (restOperation) {
+    try {
+        this._processRestOperation(restOperation);
+    } catch (err) {
+        logger.exception(`restOperation processing error: ${err}`, err);
+        util.restOperationResponder(restOperation, 500,
+            { code: 500, message: 'Internal Server Error' });
+    }
+};
+
+/**
+ * Process request, private method.
+ *
+ * @private
+ * @param {Object} restOperation - request object
+ */
+SimpleRouter.prototype._processRestOperation = function (restOperation) {
+    const urlPath = restOperation.getUri().href;
+    const method = restOperation.getMethod().toUpperCase();
+    logger.debug(`'${method}' operation ${urlPath}`);
+
+    // Somehow we need to respond to such requests.
+    // When Content-Type === application/json then getBody() tries to
+    // evaluate data as JSON and returns code 500 on failure.
+    // Don't know how to re-define this behavior.
+    if (restOperation.getBody() && restOperation.getContentType().toLowerCase() !== 'application/json') {
+        util.restOperationResponder(restOperation, 405,
+            { code: 415, message: 'Unsupported Media Type', accept: ['application/json'] });
+        return;
+    }
+
+    const endpointURI = restOperation.getUri().pathname.split('/')[3];
+    if (!this.routes[endpointURI]) {
+        util.restOperationResponder(restOperation, 400, `Bad URL: ${urlPath}`);
+    } else if (!this.routes[endpointURI][method]) {
+        const allowedMethods = Object.keys(this.routes[endpointURI]).map(item => item.toUpperCase());
+        util.restOperationResponder(restOperation, 405,
+            { code: 405, message: 'Method Not Allowed', allow: allowedMethods });
+    } else {
+        this.routes[endpointURI][method](restOperation);
+    }
+};
+
+
+function RestWorker() {
+    this.WORKER_URI_PATH = 'shared/telemetry';
+    this.isPassThrough = true;
+    this.isPublic = true;
+}
+
+/**
+ * Called by LX framework when plugin is initialized.
+ *
+ * @public
+ * @param {Function} success - callback to indicate successful startup
+ * @param {Function} failure - callback to indicate startup failure
+ *
+ * @returns {undefined}
+ */
+// eslint-disable-next-line no-unused-vars
+RestWorker.prototype.onStart = function (success, failure) {
+    success();
+};
+
+/**
+ * Recognize readiness to handle requests.
+ * The iControl LX framework calls this method when
+ * onStart() work is complete.
+ *
+ * @public
+ * @param {Function} success - callback to indicate successful startup
+ * @param {Function} failure - callback to indicate startup failure
+ * @param {Object} state     - DOES NOT WORK: previously-persisted state
+ * @param {String} errMsg    - framework's error message if onStart() failed
+ *
+ * @returns {void}
+ */
+// eslint-disable-next-line no-unused-vars
+RestWorker.prototype.onStartCompleted = function (success, failure, state, errMsg) {
+    // better to use try/catch to handle unexpected errors
+    try {
+        this._initializeApplication(success, failure);
+    } catch (err) {
+        const msg = `onStartCompleted error: ${err}`;
+        logger.exception(msg, err);
+        failure(msg);
+    }
+};
+
+/**
+ * Initialize application components.
+ *
+ * @private
+ * @param {Function} success - callback to indicate successful startup
+ * @param {Function} failure - callback to indicate startup failure
+ */
+// eslint-disable-next-line no-unused-vars
+RestWorker.prototype._initializeApplication = function (success, failure) {
+    // first load state from rest storage
+    logger.info(`Node version ${process.version}`);
+    // register REST endpoints
+    this.router = new SimpleRouter();
+
+    this.router.register('GET', 'info',
+        restOperation => this.processInfoRequest(restOperation));
+
+    this.router.register('POST', 'declare',
+        restOperation => configWorker.processClientRequest(restOperation));
+
+    this.router.register('GET', 'systempoller',
+        restOperation => systemPoller.processClientRequest(restOperation));
+
+    // try to load pre-existing configuration
+    configWorker.restWorker = this;
+    configWorker.loadState().then((loadedState) => {
+        logger.debug(`loaded state ${util.stringify(loadedState)}`);
+        success();
+    });
+};
+
+/**
+ * Handles Delete requests.
+ *
+ * @param {Object} restOperation
+ *
+ * @returns {void}
+ */
+RestWorker.prototype.onDelete = function (restOperation) {
+    this.onPost(restOperation);
+};
+
+/**
+ * Handles Get requests
+ *
+ * @param {Object} restOperation
+ *
+ * @returns {void}
+ */
+RestWorker.prototype.onGet = function (restOperation) {
+    this.onPost(restOperation);
+};
+
+/**
+ * Handles Post requests.
+ *
+ * @param {Object} restOperation
+ *
+ * @returns {void}
+ */
+RestWorker.prototype.onPost = function (restOperation) {
+    this.router.processRestOperation(restOperation);
+};
+
+/**
+ * Handler for /info endpoint
+ *
+ * @param {Object} restOperation
+ *
+ * @returns {void}
+ */
+RestWorker.prototype.processInfoRequest = function (restOperation) {
+    // usually version located at this path - /var/config/rest/iapps/f5-telemetry/version,
+    // we are in /var/config/rest/iapps/f5-telemetry/nodejs/restWorkers/ dir.
+    const vinfo = fs.readFileSync(path.join(__dirname, '../..', 'version'), 'ascii').split('-');
+
+    util.restOperationResponder(restOperation, 200, {
+        nodeVersion: process.version,
+        version: vinfo[0],
+        release: vinfo[1],
+        schemaCurrent: baseSchema.properties.schemaVersion.enum[0],
+        schemaMinimum: baseSchema.properties.schemaVersion.enum.reverse()[0]
+    });
+};
 
 module.exports = RestWorker;

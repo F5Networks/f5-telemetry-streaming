@@ -41,6 +41,14 @@
             "type": "string",
             "enum": [ "Telemetry" ]
        },
+       "schemaVersion": {
+            "title": "Schema version",
+            "description": "Version of ADC Declaration schema this declaration uses",
+            "type": "string",
+            "$comment": "IMPORTANT: In enum array, please put current schema version first, oldest-supported version last.  Keep enum array sorted most-recent-first.",
+            "enum": [ "1.0.0" ],
+            "default": "1.0.0"
+       },
        "$schema": {
         "title": "Schema",
         "description": "",
