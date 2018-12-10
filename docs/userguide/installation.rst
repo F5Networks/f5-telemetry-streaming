@@ -1,7 +1,7 @@
 .. _installation:
 
-Downloading and installing the Telemetry Services pakage
-----------------------------------------
+Downloading and installing the Telemetry Streaming package
+----------------------------------------------------------
 The Telemetry package is an RPM file you download, and then upload to the BIG-IP system using the iControl/iApp LX framework. Alternatively, you can see our :doc:`quick-start`.
 
 Downloading the RPM file

@@ -1,5 +1,5 @@
 Azure Log Analytics Example
---------------
+---------------------------
 
 #. Go to portal.azure.My_Consumer
 
