@@ -10,5 +10,6 @@ User Guide
    prereqs.rst
    quick-start.rst
    installation.rst
+   setting-up-consumer.rst
    declarations.rst
    troubleshooting.rst
