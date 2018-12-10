@@ -7,7 +7,7 @@ up and running with Telemetry Services.
 
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Note:
 
-   The Package Management LX tab will not show up in the user interface unless you have previously...
+   The Package Management LX tab will not show up in the user interface unless you have previously used the command line to create a file called "enable" in the directory /var/log/.
 
 #. Download the latest RPM package from |github| in the **dist** directory.
 #. Upload and install the RPM package on the using the BIG-IP GUI:
@@ -25,7 +25,7 @@ up and running with Telemetry Services.
 
 #. *Optional*: Using a RESTful API client like Postman, POST an open and
    closed bracket (**{}**) to the URI
-   ``https://<BIG-IP>/mgmt/shared/appsvcs/selftest`` to ensure AS3 is running
+   ``https://<BIG-IP>/mgmt/shared/telemetry/selftest`` to ensure Telemetry Services is running
    properly.
 
 #. Copy one of the :ref:`examples` which best matches the configuration you want
@@ -36,7 +36,7 @@ up and running with Telemetry Services.
    as applicable.  See :ref:`schema-reference` for additional options you can
    declare.
 
-#. POST to the URI ``https://<BIG-IP>/mgmt/shared/appsvcs/declare``
+#. POST to the URI ``https://<BIG-IP>/mgmt/shared/telemetry/declare``
 
 **Quick Start Example**
 
