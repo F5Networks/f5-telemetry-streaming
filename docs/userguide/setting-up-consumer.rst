@@ -43,5 +43,5 @@ Choose a consumer
 
    aws_index.rst
    azure_index.rst
-   google_index.rst
+   splunk_index.rst
 
