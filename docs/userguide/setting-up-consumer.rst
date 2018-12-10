@@ -3,7 +3,9 @@ Setting up a Consumer
 
 .. _awslink:
 .. _azurelink:
-.. _googlelink:
+.. _grafanalink:
+.. _kafkalink:
+.. _splunklink:
 
 Choose a consumer
 -----------------
@@ -20,15 +22,15 @@ Choose a consumer
    :target: azure_index.html
    :alt: Microsoft Azure
 
-.. |gcp_img| image:: /images/grafana-logo.png
+.. |grafana_img| image:: /images/grafana-logo.png
    :target: google_index.html
    :alt: Grafana
 
-.. |gcp_img| image:: /images/kafka-logo-wide.png
+.. |kafka_img| image:: /images/kafka-logo-wide.png
    :target: google_index.html
    :alt: Kafka
 
-.. |gcp_img| image:: /images/splunk-logo.png
+.. |splunk_img| image:: /images/splunk-logo.png
    :target: google_index.html
    :alt: Splunk
 
