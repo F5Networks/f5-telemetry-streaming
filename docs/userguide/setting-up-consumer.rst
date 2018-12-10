@@ -23,7 +23,7 @@ Choose a consumer
    :alt: Microsoft Azure
 
 .. |grafana_img| image:: /images/grafana-logo.png
-   :target: graphana_index.html
+   :target: grafana_index.html
    :alt: Grafana
 
 .. |kafka_img| image:: /images/kafka-logo-wide.png
