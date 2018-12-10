@@ -7,8 +7,8 @@ User Guide
    :glob:
 
    about-telemetry.rst
-   quick-start.rst
    prereqs.rst
+   quick-start.rst
    installation.rst
    declarations.rst
    troubleshooting.rst
