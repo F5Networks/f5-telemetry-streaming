@@ -43,5 +43,8 @@ Choose a consumer
 
    aws_index.rst
    azure_index.rst
+   grafana_index.rst
+   kafka_index.rst
    splunk_index.rst
+   
 
