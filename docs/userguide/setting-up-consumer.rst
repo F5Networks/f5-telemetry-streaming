@@ -30,7 +30,7 @@ Choose a consumer
    :target: kafka_index.html
    :alt: Kafka
 
-.. |splunk_img| image:: /images/splunk-logo.png
+.. |splunk_img| image:: /images/splunk_logo.png
    :target: splunk_index.html
    :alt: Splunk
 
