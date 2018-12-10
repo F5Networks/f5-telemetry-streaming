@@ -45,7 +45,7 @@ If you want to use cURL to install Telemetry Services, use the following command
 
 .. code-block:: shell
 
-    FN=f5-appsvcs-3.0.0-36.noarch.rpm
+    FN=f5-telemetry-3.0.0-36.noarch.rpm
 
     CREDS=admin:password
 
@@ -87,11 +87,11 @@ When F5 releases a new version of Telemetry Services, use the same procedure you
 
 Reverting to a previous version of Telemetry Services
 `````````````````````````````````````````````````````
-If for any reason you want to revert to a previous version of Telemetry Services, you must first remove the version of Telemetry Services on your BIG-IP system (:guilabel:`iApps > Package Management LX > f5-appsvcs > Uninstall`).  After you uninstall, you can import the RPM for the version of Telemetry Services you want to use.
+If for any reason you want to revert to a previous version of Telemetry Services, you must first remove the version of Telemetry Services on your BIG-IP system (:guilabel:`iApps > Package Management LX > f5-telemetry > Uninstall`).  After you uninstall, you can import the RPM for the version of Telemetry Services you want to use.
 
 .. |github| raw:: html
 
-   <a href="https://github.com/F5Networks/f5-appsvcs-extension" target="_blank">F5 AS3 site on GitHub</a>
+   <a href="https://github.com/F5Networks/f5-telemetry" target="_blank">F5 Telemetry site on GitHub</a>
 
 |
 
@@ -107,4 +107,4 @@ Linux: ``sha256sum <path_to_template>``
 
 Windows using CertUtil: ``CertUtil –hashfile <path_to_template> SHA256``
 
-You can compare the checksum produced by that command against the **.sha256** file in the **dist** directory (https://github.com/F5Networks/f5-appsvcs-extension/tree/master/dist).
+You can compare the checksum produced by that command against the **.sha256** file in the **dist** directory (https://github.com/F5Networks/f5-telemetry/tree/master/dist).

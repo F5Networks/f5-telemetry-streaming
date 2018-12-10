@@ -13,6 +13,11 @@ up and running with Telemetry Services.
    - For complete instructions see :ref:`installgui-ref` or
      :ref:`installcurl-ref`.
 
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Note:
+
+   The Package Management LX tab will not show up in the user interface unless you have previously...
+
+
 #. Be sure to see the known issues on GitHub (https://github.com/F5Networks/f5-telemetry/issues)  and :doc:`tips-warnings` pages to review any known issues and other important information before you attempt to use Telemetry.
 
 #. Provide authorization (basic auth) to the BIG-IP system:  
