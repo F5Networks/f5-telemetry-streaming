@@ -19,7 +19,7 @@ Choose a consumer
    :alt: Amazon Web Services
 
 .. |azure_img| image:: /images/azure_logo.png
-   :target: azure_index.html
+   :target: https://portal.azure.com
    :alt: Microsoft Azure
 
 .. |grafana_img| image:: /images/grafana-logo.png
