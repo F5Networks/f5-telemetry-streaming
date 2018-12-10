@@ -5,6 +5,10 @@ If you are familiar with the BIG-IP system, and generally familiar with REST and
 using APIs, this section contains the minimum amount of information to get you
 up and running with Telemetry Services.
 
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Note:
+
+   The Package Management LX tab will not show up in the user interface unless you have previously...
+
 #. Download the latest RPM package from |github| in the **dist** directory.
 #. Upload and install the RPM package on the using the BIG-IP GUI:
 
@@ -13,13 +17,7 @@ up and running with Telemetry Services.
    - For complete instructions see :ref:`installgui-ref` or
      :ref:`installcurl-ref`.
 
-.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Note:
-
-   The Package Management LX tab will not show up in the user interface unless you have previously...
-
-
 #. Be sure to see the known issues on GitHub (https://github.com/F5Networks/f5-telemetry/issues)  and :doc:`tips-warnings` pages to review any known issues and other important information before you attempt to use Telemetry.
-
 #. Provide authorization (basic auth) to the BIG-IP system:  
 
    - If using a RESTful API client like Postman, in the :guilabel:`Authorization` tab, type the user name and password for a BIG-IP user account with Administrator permissions.
