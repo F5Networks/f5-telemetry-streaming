@@ -17,19 +17,17 @@ up and running with Telemetry Services.
    - For complete instructions see :ref:`installgui-ref` or
      :ref:`installcurl-ref`.
 
-#. Be sure to see the known issues on GitHub (https://github.com/F5Networks/f5-telemetry/issues)  and :doc:`tips-warnings` pages to review any known issues and other important information before you attempt to use Telemetry Services.
+#. Be sure to see the known issues on GitHub (https://github.com/DevCentral/f5-telemetry/issues)  and :doc:`tips-warnings` pages to review any known issues and other important information before you attempt to use Telemetry Services.
 
 #. Provide authorization (basic auth) to the BIG-IP system:  
 
    - If using a RESTful API client like Postman, in the :guilabel:`Authorization` tab, type the user name and password for a BIG-IP user account with Administrator permissions.
    - If using cURL, see :ref:`installcurl-ref`.
 
-#. Using a RESTful API client like Postman, POST an open and
+#. Using a RESTful API client like Postman, GET an open and
    closed bracket (**{}**) to the URI
-   ``https://{{host}}/mgmt/shared/telemetry/declare`` to ensure Telemetry Services is running
+   ``https://{{host}}/mgmt/shared/telemetry/info`` to ensure Telemetry Services is running
    properly.
-
-#. Verify that the post was successful by opening the SSH session.
 
 #. Copy one of the :ref:`examples` which best matches the configuration you want
    to use.  Alternatively, you can use the simple "Hello World" example below,
