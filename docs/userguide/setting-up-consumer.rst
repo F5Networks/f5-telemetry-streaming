@@ -19,19 +19,19 @@ Choose a consumer
    :alt: Amazon Web Services
 
 .. |azure_img| image:: /images/azure_logo.png
-   :target: https://portal.azure.com
+   :target: azure_index.html
    :alt: Microsoft Azure
 
 .. |grafana_img| image:: /images/grafana-logo.png
-   :target: google_index.html
+   :target: graphana_index.html
    :alt: Grafana
 
 .. |kafka_img| image:: /images/kafka-logo-wide.png
-   :target: google_index.html
+   :target: kafka_index.html
    :alt: Kafka
 
 .. |splunk_img| image:: /images/splunk-logo.png
-   :target: google_index.html
+   :target: splunk_index.html
    :alt: Splunk
 
 

@@ -17,7 +17,7 @@ up and running with Telemetry Services.
    - For complete instructions see :ref:`installgui-ref` or
      :ref:`installcurl-ref`.
 
-#. Be sure to see the known issues on GitHub (https://github.com/F5Networks/f5-telemetry/issues)  and :doc:`tips-warnings` pages to review any known issues and other important information before you attempt to use Telemetry.
+#. Be sure to see the known issues on GitHub (https://github.com/F5Networks/f5-telemetry/issues)  and :doc:`tips-warnings` pages to review any known issues and other important information before you attempt to use Telemetry Services.
 #. Provide authorization (basic auth) to the BIG-IP system:  
 
    - If using a RESTful API client like Postman, in the :guilabel:`Authorization` tab, type the user name and password for a BIG-IP user account with Administrator permissions.
