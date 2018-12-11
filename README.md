@@ -654,6 +654,11 @@ Each config object has 'tracer' property. Possible values are:
 
 #### LTM Request Log
 
+Create LTM Request Log Profile:
+
+- Create Pool (tmsh): ```create ltm pool telemetry-local-test monitor tcp members replace-all-with { 10.0.1.100:6514 }```
+- Create Profile (tmsh): ```create ltm profile request-log telemetry-test request-log-pool telemetry-local request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\" request-logging enabled``` - Note: If creating from the GUI the ```\``` are not required.
+
 ```json
 {
     "event_source":"request_logging",
