@@ -14,14 +14,14 @@ const request = require('request');
  * See {@link ../README.md#context} for documentation
  */
 module.exports = function (context) {
-    const consumerName = context.config.type ? context.config.type : 'Graphite';
+    const consumerName = context.config.type || 'Graphite';
     const httpBody = JSON.stringify({
         what: 'f5telemetry',
         tags: [context.event.type],
         data: context.event.data
     });
 
-    const protocol = context.config.protocol ? context.config.protocol : 'http';
+    const protocol = context.config.protocol || 'http';
     const port = context.config.port ? `:${context.config.port}` : '';
     const url = `${protocol}://${context.config.host}${port}/events`;
     const httpHeaders = {

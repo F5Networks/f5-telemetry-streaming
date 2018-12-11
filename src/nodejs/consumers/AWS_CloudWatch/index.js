@@ -14,7 +14,7 @@ const AWS = require('aws-sdk');
  * See {@link ../README.md#context} for documentation
  */
 module.exports = function (context) {
-    const consumerName = context.config.type ? context.config.type : 'AWS_CloudWatch';
+    const consumerName = context.config.type || 'AWS_CloudWatch';
     const region = context.config.region;
     const logGroup = context.config.logGroup;
     const logStream = context.config.logStream;

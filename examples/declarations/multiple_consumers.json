@@ -10,6 +10,14 @@
     },
     "My_Consumer": {
         "class": "Telemetry_Consumer",
+        "type": "Azure_Log_Analytics",
+        "host": "workspaceid",
+        "passphrase": {
+            "cipherText": "sharedkey"
+        }
+    },
+    "My_Second_Consumer": {
+        "class": "Telemetry_Consumer",
         "type": "Splunk",
         "host": "192.0.2.1",
         "protocol": "http",

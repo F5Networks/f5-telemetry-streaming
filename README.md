@@ -2,7 +2,7 @@
 
 <img align="right" src="docs/logo/Telemetry-Streaming.png" width="125">
 
-Telemetry Services is an iControl LX extension to stream telemetry from BIG-IP(s) to analytics consumers such as the following.
+Telemetry Streaming is an iControl LX extension to stream telemetry from BIG-IP(s) to analytics consumers such as the following.
 
 - Splunk
 - Azure Log Analytics
@@ -12,15 +12,34 @@ Telemetry Services is an iControl LX extension to stream telemetry from BIG-IP(s
 
 ## Contents
 
-- [Configuration Example](#configuration-example)
+- [Overview](#overview)
+- [Configuration Examples](#configuration-examples)
 - [REST API Endpoints](#rest-api-endpoints)
 - [Data tracer](#data-tracer)
 - [Output Example](#output-example)
 - [Container](#container)
 
-## Configuration example(s)
+## Overview
 
-### Basic example
+The telemetry streaming design accounts for a number of key components, including ***System Poller***, ***Event Listener*** and ***Consumer***.  Those are described in more detail below.
+
+### System Poller
+
+Definition: Polls a system on a defined interval for information such as device statistics, virtual server statistics, pool statistics and much more.
+
+### Event Listener
+
+Definition: Provides a listener, currently TCP, that can accept events in a specic format and process them.
+
+Event Format: ```key1="value",key2="value"```
+
+### Consumer
+
+Definition: Accepts information from disparate systems and provides the tools to process that information.  In the context of Telemetry Streaming this simply means providing a mechanism by which to integrate with existing analytics products.
+
+## Configuration examples
+
+### Basic
 
 `POST /mgmt/shared/telemetry/declare`
 
@@ -29,36 +48,37 @@ Telemetry Services is an iControl LX extension to stream telemetry from BIG-IP(s
     "class": "Telemetry",
     "My_Poller": {
         "class": "Telemetry_System_Poller",
-        "enable": true,
-        "trace": false,
-        "interval": 60,
-        "host": "192.0.2.1",
-        "port": 443,
-        "username": "myuser",
-        "passphrase": {
-            "cipherText": "mypassphrase"
-        }
+        "interval": 60
     },
     "My_Listener": {
         "class": "Telemetry_Listener",
-        "enable": true,
-        "trace": false,
         "port": 6514
     },
     "My_Consumer": {
         "class": "Telemetry_Consumer",
-        "enable": true,
-        "trace": false,
-        "type": "Azure_Log_Analytics",
-        "host": "workspaceid",
+        "type": "Splunk",
+        "host": "192.0.2.1",
+        "protocol": "http",
+        "port": "8088",
         "passphrase": {
-            "cipherText": "sharedkey"
+            "cipherText": "apikey"
         }
     }
 }
 ```
 
 ### Splunk
+
+Website: [https://www.splunk.com](https://www.splunk.com).
+
+Required information:
+
+- Host: The address of the Splunk instance that runs the HTTP event collector (HEC).
+- Protocol: Check if TLS is enabled within the HEC settings (Settings > Data Inputs > HTTP Event Collector).
+- Port: Default is 8088, this can be configured within the Global Settings section of the Splunk HEC.
+- API Key: An API key must be created and provided in the passphrase object of the declaration, refer to Splunk documentation for the correct way to create an HEC token.
+
+Note: More information about using the HEC can be found on the Splunk website [here](http://docs.splunk.com/Documentation/Splunk/latest/Data/UsetheHTTPEventCollector).
 
 ```json
 {
@@ -77,12 +97,21 @@ Telemetry Services is an iControl LX extension to stream telemetry from BIG-IP(s
 
 ### Azure Log Analytics
 
+Website: [https://docs.microsoft.com/en-us/azure/azure-monitor/log-query/log-query-overview](https://docs.microsoft.com/en-us/azure/azure-monitor/log-query/log-query-overview).
+
+Required information:
+
+- Workspace ID: Navigate to the Log Analaytics workspace > Advanced Settings > Connected Sources to find the workspace ID.  More information [here](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/data-collector-api).
+- Shared Key: Navigate to the Log Analaytics workspace > Advanced Settings > Connected Sources to find the primary key.  More information [here](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/data-collector-api).
+
+Note: More information about using the data collector API can be found [here](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/data-collector-api).
+
 ```json
 {
     "My_Consumer": {
         "class": "Telemetry_Consumer",
         "type": "Azure_Log_Analytics",
-        "host": "workspaceid",
+        "workspaceId": "workspaceid",
         "passphrase": {
             "cipherText": "sharedkey"
         }
@@ -91,6 +120,18 @@ Telemetry Services is an iControl LX extension to stream telemetry from BIG-IP(s
 ```
 
 ### AWS Cloud Watch
+
+Website: [https://aws.amazon.com/cloudwatch](https://aws.amazon.com/cloudwatch).
+
+Required information:
+
+- Region: AWS region of the cloud watch resource.
+- Log Group: Navigate to Cloud Watch > Logs to find the name of the log group.
+- Log Stream: Navigate to Cloud Watch > Logs > Your_Log_Group_Name to find the name of the log stream.
+- Access Key: Navigate to IAM > Users to find the access key.
+- Secret Key: Navigate to IAM > Users to find the secret key.
+
+Note: More information about creating and using IAM roles can be found [here](https://aws.amazon.com/iam).
 
 ```json
 {
@@ -110,6 +151,17 @@ Telemetry Services is an iControl LX extension to stream telemetry from BIG-IP(s
 
 ### AWS S3
 
+Website: [https://aws.amazon.com/s3](https://aws.amazon.com/s3).
+
+Required information:
+
+- Region: AWS region of the S3 bucket.
+- Bucket: Navigate to S3 to find the name of the bucket.
+- Access Key: Navigate to IAM > Users to find the access key.
+- Secret Key: Navigate to IAM > Users to find the secret key.
+
+Note: More information about creating and using IAM roles can be found [here](https://aws.amazon.com/iam).
+
 ```json
 {
     "My_Consumer": {
@@ -127,6 +179,18 @@ Telemetry Services is an iControl LX extension to stream telemetry from BIG-IP(s
 
 ### Graphite
 
+Website: [https://graphiteapp.org](https://graphiteapp.org).
+
+Required information:
+
+- Host: The address of the Graphite system.
+- Protocol: Check Graphite documentation for configuration.
+- Port: Check Graphite documentation for configuration.
+
+Note: More information about installing Graphite can be found [here](https://graphite.readthedocs.io/en/latest/install.html).
+
+Note: More information about Graphite events can be found [here](https://graphite.readthedocs.io/en/latest/events.html).
+
 ```json
 {
     "My_Consumer": {
@@ -139,20 +203,64 @@ Telemetry Services is an iControl LX extension to stream telemetry from BIG-IP(s
 }
 ```
 
-Note: To run on a BIG-IP the system poller object should look like the following example.
+### 2 Consumers
 
 ```json
-"My_Poller": {
-    "class": "Telemetry_System_Poller",
-    "interval": 60
+{
+    "class": "Telemetry",
+    "My_Poller": {
+        "class": "Telemetry_System_Poller",
+        "interval": 60
+    },
+    "My_Listener": {
+        "class": "Telemetry_Listener",
+        "port": 6514
+    },
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Azure_Log_Analytics",
+        "host": "workspaceid",
+        "passphrase": {
+            "cipherText": "sharedkey"
+        }
+    },
+    "My_Second_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Splunk",
+        "host": "192.0.2.1",
+        "protocol": "http",
+        "port": "8088",
+        "passphrase": {
+            "cipherText": "apikey"
+        }
+    }
 }
 ```
 
-Note: To run in a container, each passphrase object should look like the following example.
+### External system (BIG-IP)
 
 ```json
-"passphrase": {
-    "environmentVar": "MY_SECRET_ENV_VAR"
+{
+    "My_Poller": {
+        "class": "Telemetry_System_Poller",
+        "interval": 60,
+        "host": "192.0.2.1",
+        "port": 443,
+        "username": "myuser",
+        "passphrase": {
+            "cipherText": "mypassphrase"
+        }
+    }
+}
+```
+
+### Container passphrase handling
+
+```json
+{
+    "passphrase": {
+        "environmentVar": "MY_SECRET_ENV_VAR"
+    }
 }
 ```
 
@@ -165,10 +273,13 @@ Note: To run in a container, each passphrase object should look like the followi
 - Response is valid JSON data.
 
 Request example:
+
 ```bash
 curl -v -u admin:<admin_password> -X GET http://localhost:8100/mgmt/shared/telemetry/info
 ```
+
 Output:
+
 ```json
 {"nodeVersion":"v4.6.0","version":"1.0.0","release":"2","schemaCurrent":"1.0.0","schemaMinimum":"1.0.0"}
 ```
@@ -177,13 +288,15 @@ Output:
 
 As mentioned above - response is valid JSON data. When response is *HTTP 200* - everything went well, response body - JSON data.
 
-When response code is other than 2xx then response body in general will looks like following object: 
+When response code is other than 2xx then response body in general will looks like following object:
+
 ```json
 {
     code: ERROR_CODE, // number
     message: "ERROR_MESSAGE" // string
 }
 ```
+
 Additional properties might be added (depends on error type).
 
 ### Info
@@ -191,6 +304,7 @@ Additional properties might be added (depends on error type).
 **<base_endpoint>/info** - endpoint to retrieve information about application.
 Allowed HTTP method - **GET**.
 Output:
+
 ```json
 {
     "nodeVersion": "v4.6.0",
@@ -206,7 +320,6 @@ Output:
 **<base_endpoint>/declare** - endpoint to declare configuration.
 Allowed HTTP method - **POST**.
 Request body - valid JSON object. For example see [Configuration Example](#configuration-example).
-
 
 ### System poller
 

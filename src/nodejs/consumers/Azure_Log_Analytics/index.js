@@ -15,8 +15,8 @@ const crypto = require('crypto');
  * See {@link ../README.md#context} for documentation
  */
 module.exports = function (context) {
-    const consumerName = context.config.type ? context.config.type : 'Azure_Log_Analytics';
-    const workspaceId = context.config.host;
+    const consumerName = context.config.type || 'Azure_Log_Analytics';
+    const workspaceId = context.config.workspaceId || context.config.host; // fallback to host
     const sharedKey = context.config.passphrase.text;
 
     const apiVersion = '2016-04-01';
@@ -33,7 +33,7 @@ module.exports = function (context) {
     const httpHeaders = {
         'content-type': 'application/json',
         Authorization: authorization,
-        'Log-Type': context.config.logType ? context.config.logType : 'F5Telemetry',
+        'Log-Type': context.config.logType || 'F5Telemetry',
         'x-ms-date': date
     };
     const requestOptions = {

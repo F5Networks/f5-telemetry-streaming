@@ -3,7 +3,7 @@
     "My_Consumer": {
         "class": "Telemetry_Consumer",
         "type": "Azure_Log_Analytics",
-        "host": "workspaceid",
+        "workspaceId": "workspaceid",
         "passphrase": {
             "cipherText": "sharedkey"
         }

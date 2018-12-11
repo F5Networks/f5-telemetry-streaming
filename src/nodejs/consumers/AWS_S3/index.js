@@ -14,9 +14,9 @@ const AWS = require('aws-sdk');
  * See {@link ../README.md#context} for documentation
  */
 module.exports = function (context) {
-    const consumerName = context.config.type ? context.config.type : 'AWS_S3';
+    const consumerName = context.config.type || 'AWS_S3';
     const region = context.config.region;
-    const bucket = context.config.bucket ? context.config.bucket : context.config.host; // fall back is host
+    const bucket = context.config.bucket || context.config.host; // fallback to host
     const httpBody = JSON.stringify(context.event.data);
 
     // place file in folder(s) by date

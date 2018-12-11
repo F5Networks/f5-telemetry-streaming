@@ -89,6 +89,12 @@
                         "description": "" ,
                         "type": "string"
                     },
+                    "workspaceId": {
+                        "$comment": "Required for certain consumers",
+                        "title": "Workspace ID",
+                        "description": "" ,
+                        "type": "string"
+                    },
                     "passphrase": { "$ref": "base_schema.json#/definitions/secret" }
                 },
                 "additionalProperties": false

@@ -675,9 +675,9 @@ module.exports = {
         fullUri = options.port ? `${fullUri}:${options.port}${uri}` : `${fullUri}:${constants.DEFAULT_PORT}${uri}`;
         const requestOptions = {
             uri: fullUri,
-            method: opts.method ? opts.method : 'GET',
+            method: opts.method || 'GET',
             body: opts.body ? this.stringify(opts.body) : undefined,
-            headers: opts.headers ? opts.headers : defaultHeaders,
+            headers: opts.headers || defaultHeaders,
             strictSSL: constants.STRICT_TLS_REQUIRED
         };
 
