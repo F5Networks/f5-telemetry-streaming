@@ -7,7 +7,7 @@ up and running with Telemetry Streaming.
 
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Note:
 
-   The Package Management LX tab will not show up in the user interface unless you have previously used the command line to create a file called "enable" in the directory /var/log/.
+   In BIG-IP versions prior to 14.0.0, the Package Management LX tab will not show up in the user interface unless you have previously used the command line to create a file called "enable" in the directory /var/config/rest/iApps.
 
 #. Download the latest RPM package from |github| in the **dist** directory.
 #. Upload and install the RPM package on the using the BIG-IP GUI:
@@ -46,36 +46,22 @@ up and running with Telemetry Streaming.
 
     {
         "class": "Telemetry",
-        "configuration": {
-            "My_Poller": {
-                "class": "System_Poller",
-                "enabled": true,
-                "trace": false,
-                "interval": 60,
-                "host": "x.x.x.x",
-                "port": 443,
-                "username": "myuser",
-                "passphrase": "mypassphrase",
-            },
-            "My_Listener": {
-                "class": "Event_Listener",
-                "enabled": true,
-                "trace": false,
-                "port": 6514
-            },
-            "My_Consumer": {
-                "class": "Consumer",
-                "enabled": true,
-                "trace": false,
-                "type": "Azure_Log_Analytics",
-                "host": "myworkspaceid",
-                "passphrase": "mysharedkey"
-                
+        "My_Poller": {
+            "class": "Telemetry_System_Poller",
+            "interval": 60
+        },
+        "My_Listener": {
+            "class": "Telemetry_Listener",
+            "port": 6514
+        },
+        "My_Consumer": {
+            "class": "Telemetry_Consumer",
+            "type": "Splunk",
+            "host": "myworkspaceid",
+            "protocol": "http",
+            "port": "8088"
+            "passphrase": {
+                "cipherText": "apikey"
             }
         }
     }
-
-
-
-
-
