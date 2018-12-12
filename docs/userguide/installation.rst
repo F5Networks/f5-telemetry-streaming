@@ -2,25 +2,25 @@
 
 Downloading and installing the Telemetry Streaming package
 ----------------------------------------------------------
-The Telemetry package is an RPM file you download, and then upload to the BIG-IP system using the iControl/iApp LX framework. Alternatively, you can see our :doc:`quick-start`.
+The Telemetry Streaming package is an RPM file you download, and then upload to the BIG-IP system using the iControl/iApp LX framework. Alternatively, you can see our :doc:`quick-start`.
 
 Downloading the RPM file
 ~~~~~~~~~~~~~~~~~~~~~~~~
 The first task is to download the latest RPM file.  Go to the |github|, and download the latest (highest numbered) RPM file.
 
-Uploading and installing the Telemetry file on the BIG-IP
+Uploading and installing the Telemetry Streaming file on the BIG-IP
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-After you download the RPM, you must upload and then install it on your BIG-IP system.  You can use the BIG-IP Configuration utility or cURL (you can alternatively use SCP to upload the file to **/var/config/rest/downloads**, but you would still have to use cURL command to install the package).  Use only one of the following procedures.
+After you download the RPM, you must upload and then install it on your BIG-IP system. You can use the BIG-IP Configuration utility or cURL (you can alternatively use SCP to upload the file to **/var/config/rest/downloads**, but you would still have to use cURL command to install the package).  Use only one of the following procedures.
 
 .. _installgui-ref:
 
-Installing Telemetry Services using the BIG-IP Configuration utility
+Installing Telemetry Streaming using the BIG-IP Configuration utility
 ````````````````````````````````````````````````````````````````````
 
 From the Configuration utility:
 
-1. Before you can use the Configuration utility, you must enable the framework using the BIG-IP command line. From the CLI, type the following command:  ``touch /var/config/rest/iapps/enable``.  You only need to run this command once (per BIG-IP system).
-2. Click **iApps > Package Management LX**.  Your Telemetry Services version number may be different than the one shown in the following example.
+1. Before you can use the Configuration utility, you must enable the framework using the BIG-IP command line. From the CLI, type the following command:  ``touch /var/config/rest/iapps/enable``.  You only need to run this command once (per BIG-IP system).*note about version 13.0 and 13.1*
+2. Click **iApps > Package Management LX**.  Your Telemetry Streaming version number may be different than the one shown in the following example.
 
    .. image:: /images/install1.png
 
@@ -38,14 +38,14 @@ From the Configuration utility:
 
 .. _installcurl-ref:
 
-Installing Telemetry Services using cURL from the Linux shell
+Installing Telemetry Streaming using cURL from the Linux shell
 `````````````````````````````````````````````````````````````
 
-If you want to use cURL to install Telemetry Services, use the following command syntax.  First, set the file name and the BIG-IP IP address and credentials, making sure you use the appropriate RPM file name, including build number (36 in the following example), and BIG-IP credentials.
+If you want to use cURL to install Telemetry Streaming, use the following command syntax. First, set the file name and the BIG-IP IP address and credentials, making sure you use the appropriate RPM file name, including build number (36 in the following example), and BIG-IP credentials.
 
 .. code-block:: shell
 
-    FN=f5-telemetry-3.0.0-36.noarch.rpm
+    FN=f5-telemetry-1.0.0-1.noarch.rpm
 
     CREDS=admin:password
 
@@ -74,20 +74,17 @@ Copy the following commands to install the package.
 
 |
 
-Updating Telemetry Services
-```````````````````````````
-When F5 releases a new version of Telemetry Services, use the same procedure you used to initially install the RPM.  For example, if you used the Configuration utility, when you click Import and then select the new RPM, the system recognizes you are upgrading Telemetry:
+Updating Telemetry Streaming
+````````````````````````````
+When F5 releases a new version of Telemetry Streaming, use the same procedure you used to initially install the RPM. For example, if you used the Configuration utility, when you click Import and then select the new RPM, the system recognizes you are upgrading Telemetry:
 
 .. figure:: /images/upgrade.png
 
 |
 
-.. NOTE:: Installing or uninstalling Telemetry Services does not affect the BIG-IP configuration created by Telemetry Services.
-
-
-Reverting to a previous version of Telemetry Services
-`````````````````````````````````````````````````````
-If for any reason you want to revert to a previous version of Telemetry Services, you must first remove the version of Telemetry Services on your BIG-IP system (:guilabel:`iApps > Package Management LX > f5-telemetry > Uninstall`).  After you uninstall, you can import the RPM for the version of Telemetry Services you want to use.
+Reverting to a previous version of Telemetry Streaming
+``````````````````````````````````````````````````````
+If for any reason you want to revert to a previous version of Telemetry Streaming, you must first remove the version of Telemetry Streaming on your BIG-IP system (:guilabel:`iApps > Package Management LX > f5-telemetry > Uninstall`).  After you uninstall, you can import the RPM for the version of Telemetry Streaming you want to use.
 
 .. |github| raw:: html
 
@@ -99,7 +96,7 @@ If for any reason you want to revert to a previous version of Telemetry Services
 
 Verifying the integrity of the Telemetry RPM package
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-F5 Networks provides a checksum for each of our Telemetry releases so you can confirm the integrity of the RPM package.
+F5 Networks provides a checksum for each of our Telemetry Streaming releases so you can confirm the integrity of the RPM package.
 
 You can get a checksum for a particular template by running one of the following commands, depending on your operating system:
 

@@ -3,7 +3,7 @@ Quick Start
 
 If you are familiar with the BIG-IP system, and generally familiar with REST and
 using APIs, this section contains the minimum amount of information to get you
-up and running with Telemetry Services.
+up and running with Telemetry Streaming.
 
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Note:
 
@@ -17,7 +17,7 @@ up and running with Telemetry Services.
    - For complete instructions see :ref:`installgui-ref` or
      :ref:`installcurl-ref`.
 
-#. Be sure to see the known issues on GitHub (https://github.com/DevCentral/f5-telemetry/issues)  and :doc:`tips-warnings` pages to review any known issues and other important information before you attempt to use Telemetry Services.
+#. Be sure to see the known issues on GitHub (https://github.com/DevCentral/f5-telemetry/issues)  and :doc:`tips-warnings` pages to review any known issues and other important information before you attempt to use Telemetry Streaming.
 
 #. Provide authorization (basic auth) to the BIG-IP system:  
 
@@ -26,7 +26,7 @@ up and running with Telemetry Services.
 
 #. Using a RESTful API client like Postman, GET an open and
    closed bracket (**{}**) to the URI
-   ``https://{{host}}/mgmt/shared/telemetry/info`` to ensure Telemetry Services is running
+   ``https://{{host}}/mgmt/shared/telemetry/info`` to ensure Telemetry Streaming is running
    properly.
 
 #. Copy one of the :ref:`examples` which best matches the configuration you want

@@ -1,10 +1,10 @@
 Prerequisites and Requirements
 ------------------------------
 
-The following are prerequisites for using Telemetry Services:
+The following are prerequisites for using Telemetry Streaming:
 
-- You must be using BIG-IP version 13.0 or later to use Telemetry Services.
-- To use Telemetry Services, your BIG-IP user account must have the **Administrator**
+- You must be using BIG-IP version 13.0 or later to use Telemetry Streaming.
+- To use Telemetry Streaming, your BIG-IP user account must have the **Administrator**
   role.
 - You should be familiar with the F5 BIG-IP and F5 terminology.  For
   general information and documentation on the BIG-IP system, see the
