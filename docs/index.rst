@@ -29,7 +29,6 @@ Previous buttons to explore the documentation.
    :maxdepth: 3
 
    userguide/index
-   refguide/index
 
 
 
