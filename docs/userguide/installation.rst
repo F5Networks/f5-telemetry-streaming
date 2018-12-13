@@ -78,9 +78,6 @@ Updating Telemetry Streaming
 ````````````````````````````
 When F5 releases a new version of Telemetry Streaming, use the same procedure you used to initially install the RPM. For example, if you used the Configuration utility, when you click Import and then select the new RPM, the system recognizes you are upgrading Telemetry:
 
-.. figure:: /images/upgrade.png
-
-|
 
 Reverting to a previous version of Telemetry Streaming
 ``````````````````````````````````````````````````````
