@@ -1,5 +1,5 @@
-Setting up a Consumer
-=========================
+Configuring a Consumer Stream
+=============================
 
 .. _awslink:
 .. _azurelink:

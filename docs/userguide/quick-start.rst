@@ -5,7 +5,7 @@ If you are familiar with the BIG-IP system, and generally familiar with REST and
 using APIs, this section contains the minimum amount of information to get you
 up and running with Telemetry Streaming.
 
-.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Note:
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
    In BIG-IP versions prior to 14.0.0, the Package Management LX tab will not show up in the user interface unless you have previously used the command line to create a file called "enable" in the directory /var/config/rest/iApps.
 
