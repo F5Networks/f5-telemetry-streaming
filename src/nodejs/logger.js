@@ -58,9 +58,10 @@ function maskSecrets(msg) {
     return ret;
 }
 
-const prepareMsg = function (msg) {
-    return `[telemetry] ${maskSecrets(stringify(msg))}`;
+const prepareMsg = function (prefix, msg) {
+    return `[${prefix}] ${maskSecrets(stringify(msg))}`;
 };
+
 
 /* f5-logger module supports the following levels
 levels: {
@@ -73,14 +74,36 @@ levels: {
     severe: 6
 }
 */
-const error = function (msg) { logger.severe(prepareMsg(msg)); };
-const info = function (msg) { logger.info(prepareMsg(msg)); };
-const debug = function (msg) { logger.finest(prepareMsg(msg)); };
-const exception = function (msg, err) { logger.finest(prepareMsg(`${msg}\nTraceback:\n${err.stack || 'no traceback available'}`)); };
-
-module.exports = {
-    exception,
-    error,
-    info,
-    debug
+/**
+ * Logger class
+ *
+ * @param {String} prefix - message prefix, will be printed inside '[]' in the beginning of message
+ */
+function Logger(prefix) {
+    this.prefix = prefix || '';
+}
+/**
+ * Get child logger
+ *
+ * @param {String} prefix - message prefix, will be joined with parent's prefix
+ *
+ * @returns {Logger} new Logger object
+ */
+Logger.prototype.getChild = function (prefix) {
+    return new Logger(`${this.prefix}.${prefix}`);
 };
+Logger.prototype.error = function (msg) {
+    logger.severe(prepareMsg(this.prefix, msg));
+};
+Logger.prototype.info = function (msg) {
+    logger.info(prepareMsg(this.prefix, msg));
+};
+Logger.prototype.debug = function (msg) {
+    logger.finest(prepareMsg(this.prefix, msg));
+};
+Logger.prototype.exception = function (msg, err) {
+    logger.finest(prepareMsg(this.prefix, `${msg}\nTraceback:\n${err.stack || 'no traceback available'}`));
+};
+
+
+module.exports = new Logger('telemetry');
