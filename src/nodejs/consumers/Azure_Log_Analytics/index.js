@@ -15,7 +15,6 @@ const crypto = require('crypto');
  * See {@link ../README.md#context} for documentation
  */
 module.exports = function (context) {
-    const consumerName = context.config.type || 'Azure_Log_Analytics';
     const workspaceId = context.config.workspaceId || context.config.host; // fallback to host
     const sharedKey = context.config.passphrase.text;
 
@@ -48,9 +47,9 @@ module.exports = function (context) {
     // eslint-disable-next-line no-unused-vars
     request.post(requestOptions, (error, response, body) => {
         if (error) {
-            context.logger.error(`${consumerName}: error ${error.message ? error.message : error}`);
+            context.logger.error(`error: ${error.message ? error.message : error}`);
         } else {
-            context.logger.debug(`${consumerName}: response ${response.statusCode} ${response.statusMessage}`);
+            context.logger.debug(`response: ${response.statusCode} ${response.statusMessage}`);
         }
     });
 };

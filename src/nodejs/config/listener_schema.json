@@ -2,7 +2,7 @@
     "$id": "listener_schema.json",
     "$async": true,
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Telemetry services event listener schema",
+    "title": "Telemetry streaming event listener schema",
     "description": "",
     "type": "object",
     "allOf": [
@@ -10,13 +10,12 @@
             "if": { "properties": { "class": { "const": "Telemetry_Listener" } } },
             "then": {
                 "required": [
-                    "class",
-                    "port"
+                    "class"
                 ],
                 "properties": {
                     "class": {
                         "title": "Class",
-                        "description": "Telemetry services event listener class",
+                        "description": "Telemetry streaming event listener class",
                         "type": "string",
                         "enum": [ "Telemetry_Listener" ]
                     },
@@ -39,6 +38,10 @@
                         "minimum": 1024,
                         "maximum": 65535,
                         "default": 6514
+                    },
+                    "tag": {
+                        "default": { "tenant": "`T`", "application": "`A`"},
+                        "$ref": "base_schema.json#/definitions/tag"
                     }
                 },
                 "additionalProperties": false

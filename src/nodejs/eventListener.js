@@ -18,7 +18,8 @@ const dataPipeline = require('./dataPipeline.js');
 const configWorker = require('./config.js');
 const properties = require('./config/properties.json');
 
-const pEvents = properties.events;
+const events = properties.events;
+const definitions = properties.definitions;
 
 const DEFAULT_PORT = constants.DEFAULT_EVENT_LISTENER_PORT;
 const CLASS_NAME = constants.EVENT_LISTENER_CLASS_NAME;
@@ -31,26 +32,36 @@ const listeners = {};
 /**
  * Start listener
  *
- * @param {String} port - port to listen on
+ * @param {String} port     - port to listen on
+ * @param {Function} tracer - tracer
+ * @param {Object} tags     - tags to add to the event data
  *
  * @returns {Object} Returns server object
  */
-function start(port, tracer) {
-    // TODO: investigate constraining listener if running on BIG-IP with host: localhost (or similar),
-    // however for now cannot do so until valid address found - loopback address not allowed for LTM objects
+function start(port, tracer, tags) {
+    // TODO: investigate constraining listener when running on local BIG-IP
+    // For now cannot until a valid address is found - loopback address not allowed for LTM objects
     let server;
     const options = {
         port
     };
 
-    // place in try/catch to avoid bombing on things such as port conflicts
+    // place in try/catch - avoids bombing on port conflicts, etc.
     try {
         server = net.createServer((c) => {
             // event on client data
             c.on('data', (data) => {
                 // normalize and send to data pipeline
+                // note: addKeysByTag uses regex for default tags parsing (tenant/app)
                 const nOptions = {
-                    renameKeysByPattern: pEvents.global.renameKeys
+                    renameKeysByPattern: events.renameKeys,
+                    addKeysByTag: {
+                        tags,
+                        definitions,
+                        opts: {
+                            classifyByKeys: events.classifyByKeys
+                        }
+                    }
                 };
                 const normalizedData = normalize.event(String(data), nOptions); // force string
                 if (tracer) {
@@ -118,6 +129,7 @@ configWorker.on('change', (config) => {
         Object.keys(eventListeners).forEach((k) => {
             const lConfig = eventListeners[k];
             const port = lConfig.port || DEFAULT_PORT;
+            const tags = lConfig.tag || {};
 
             // check for enable=false first
             const baseMsg = `listener ${k} on port: ${port}`;
@@ -131,10 +143,10 @@ configWorker.on('change', (config) => {
                 logger.info(`Updating ${baseMsg}`);
                 // TODO: only need to stop/start if port is different
                 stop(listeners[k]);
-                listeners[k] = start(port, tracers.createFromConfig(CLASS_NAME, k, lConfig));
+                listeners[k] = start(port, tracers.createFromConfig(CLASS_NAME, k, lConfig), tags);
             } else {
                 logger.info(`Starting ${baseMsg}`);
-                listeners[k] = start(port, tracers.createFromConfig(CLASS_NAME, k, lConfig));
+                listeners[k] = start(port, tracers.createFromConfig(CLASS_NAME, k, lConfig), tags);
             }
         });
     }

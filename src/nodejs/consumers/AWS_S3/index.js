@@ -14,7 +14,6 @@ const AWS = require('aws-sdk');
  * See {@link ../README.md#context} for documentation
  */
 module.exports = function (context) {
-    const consumerName = context.config.type || 'AWS_S3';
     const region = context.config.region;
     const bucket = context.config.bucket || context.config.host; // fallback to host
     const httpBody = JSON.stringify(context.event.data);
@@ -53,9 +52,9 @@ module.exports = function (context) {
     // eslint-disable-next-line no-unused-vars
     s3.putObject(params, (error, body) => {
         if (error) {
-            context.logger.error(`${consumerName}: error ${error.message ? error.message : error}`);
+            context.logger.error(`error: ${error.message ? error.message : error}`);
         } else {
-            context.logger.debug(`${consumerName}: success`);
+            context.logger.debug('success');
         }
     });
 };

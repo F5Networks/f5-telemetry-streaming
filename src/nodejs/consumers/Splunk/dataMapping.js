@@ -8,7 +8,7 @@
 
 'use strict';
 
-// Canonical F5 Telemetry Services format
+// Canonical format
 function defaultFormat(globalCtx) {
     const data = globalCtx.event.data;
     return {
@@ -49,7 +49,7 @@ function getTemplate(sourceName, data, cache) {
 
 function getData(request, key) {
     let data = request.globalCtx.event.data[key];
-    if (data === undefined || data === 'missing key') {
+    if (data === undefined || data === 'missing data') {
         data = undefined;
     }
     return data;

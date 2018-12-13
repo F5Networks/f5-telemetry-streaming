@@ -243,7 +243,8 @@ ConfigWorker.prototype.validateAndApply = function (data) {
             // propagate config change
             this.setConfig(this.config);
             return validatedConfig;
-        });
+        })
+        .catch(error => Promise.reject(error));
 };
 
 /**

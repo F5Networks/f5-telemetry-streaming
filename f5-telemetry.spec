@@ -1,4 +1,4 @@
-Summary: F5 Telemetry Services
+Summary: F5 Telemetry Streaming
 Version: 0.9.0
 Name: %{_name}
 Release: %{_release}
@@ -8,7 +8,7 @@ License: Commercial
 Packager: F5 Networks <support@f5.com>
 
 %description
-Telemetry Services for BIG-IP
+Telemetry Streaming for BIG-IP
 
 %define IAPP_INSTALL_DIR /var/config/rest/iapps/%{name}
 

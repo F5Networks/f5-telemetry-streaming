@@ -2,7 +2,7 @@
     "$id": "system_poller_schema.json",
     "$async": true,
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Telemetry services system poller schema",
+    "title": "Telemetry streaming system poller schema",
     "description": "",
     "type": "object",
     "allOf": [
@@ -16,7 +16,7 @@
                 "properties": {
                     "class": {
                         "title": "Class",
-                        "description": "Telemetry services system poller class",
+                        "description": "Telemetry streaming system poller class",
                         "type": "string",
                         "enum": [ "Telemetry_System_Poller" ]
                     },
@@ -67,7 +67,11 @@
                         "description": "" ,
                         "type": "string"
                     },
-                    "passphrase": { "$ref": "base_schema.json#/definitions/secret" }
+                    "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
+                    "tag": {
+                        "default": { "tenant": "`T`", "application": "`A`"},
+                        "$ref": "base_schema.json#/definitions/tag"
+                    }
                 },
                 "additionalProperties": false
             },
