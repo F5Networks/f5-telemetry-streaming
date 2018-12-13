@@ -7,11 +7,18 @@ Configuring a Consumer Stream
 .. _kafkalink:
 .. _splunklink:
 
-Choose a consumer
------------------
 
 
-|aws_img|  |azure_img| |grafana_img| |kafka_img| |splunk_img|
+Microsoft Azure
+---------------
+|azure_img|
+
+Amazon WebServices
+------------------
+|aws_img|   
+
+
+|grafana_img| |kafka_img| |splunk_img|
 
 
 .. |aws_img| image:: /images/aws_logo.png
