@@ -72,6 +72,14 @@ function safeDataTransform(cb, ctx) {
     });
 }
 /**
+ * Convert data to default format
+ * @param {Object} ctx - context object
+ * @returns {Object} Promise resolved with string (converted data)
+ */
+function defaultDataFormat(ctx) {
+    return Promise.resolve([JSON.stringify(dataMapping.defaultFormat(ctx))]);
+}
+/**
 * Transform incomming data
 *
 * @param {Object} globalCtx - global context
@@ -79,13 +87,20 @@ function safeDataTransform(cb, ctx) {
 * @returns {Object} Promise resolved with transformed data
 */
 function transformData(globalCtx) {
+    if (globalCtx.config.format !== 'f5dashboard') {
+        return defaultDataFormat(globalCtx);
+    }
+
     const requestCtx = {
         globalCtx,
         results: {
             dataLength: 0,
             currentChunkLength: 0,
-            numberOfRequests: 0,
+            numberOfRequests: 1,
             translatedData: []
+        },
+        cache: {
+            dataTimestamp: Date.parse(globalCtx.event.data.deviceTimestamp)
         }
     };
     if (globalCtx.config.dumpUndefinedValues) {
@@ -166,7 +181,7 @@ function sendDataChunk(dataChunk, context) {
             resolve(data);
         }
     }).then(data => new Promise((resolve, reject) => {
-        logger.debug('sending data');
+        logger.debug(`sending data - ${data.length} bytes`);
 
         const opts = {
             body: data,

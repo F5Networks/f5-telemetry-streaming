@@ -292,8 +292,8 @@ When response code is other than 2xx then response body in general will looks li
 
 ```json
 {
-    code: ERROR_CODE, // number
-    message: "ERROR_MESSAGE" // string
+    "code": ERROR_CODE, // number
+    "message": "ERROR_MESSAGE" // string
 }
 ```
 
@@ -646,6 +646,9 @@ Each config object has 'tracer' property. Possible values are:
             "issuer": "emailAddress=support@f5.com,CN=support.f5.com,OU=Product Development,O=F5 Networks,L=Seattle,ST=Washington,C=US",
             "subject": "emailAddress=support@f5.com,CN=support.f5.com,OU=Product Development,O=F5 Networks,L=Seattle,ST=Washington,C=US"
         }
+    },
+    "telemetryServiceInfo": {
+        "pollingInterval": 15
     }
 }
 ```

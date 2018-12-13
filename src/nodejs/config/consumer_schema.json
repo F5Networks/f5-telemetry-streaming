@@ -89,6 +89,17 @@
                         "description": "" ,
                         "type": "string"
                     },
+                    "format": {
+                        "$comment": "Required for Splunk",
+                        "title": "Splunk consumer output format",
+                        "description": "",
+                        "type": "string",
+                        "default": "default",
+                        "enum": [
+                            "default",
+                            "f5dashboard"
+                        ]
+                    },
                     "workspaceId": {
                         "$comment": "Required for certain consumers",
                         "title": "Workspace ID",

@@ -33,7 +33,10 @@ function process(args) {
         config.host,
         config.port,
         config.username,
-        config.passphrase ? config.passphrase.text : undefined
+        config.passphrase ? config.passphrase.text : undefined,
+        {
+            pollingInterval: config.interval
+        }
     )
         .then((data) => {
             if (tracer) {

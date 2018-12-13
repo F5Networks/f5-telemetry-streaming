@@ -483,7 +483,7 @@ SystemStats.prototype._computePropertiesData = function (propertiesData) {
  *
  * @returns {Object} Promise which is resolved with a map of stats
  */
-SystemStats.prototype.collect = function (host, port, username, passphrase) {
+SystemStats.prototype.collect = function (host, port, username, passphrase, otherPropsToInject) {
     this.loader = new EndpointLoader({
         host, port, username, passphrase
     });
@@ -497,6 +497,15 @@ SystemStats.prototype.collect = function (host, port, username, passphrase) {
                 orderedData[key] = this.collectedData[key];
             });
             return Promise.resolve(orderedData);
+        })
+        .then((data) => {
+            // inject service data
+            const serviceProps = {};
+            if (otherPropsToInject) {
+                Object.assign(serviceProps, otherPropsToInject);
+            }
+            data.telemetryServiceInfo = serviceProps;
+            return Promise.resolve(data);
         });
 };
 
