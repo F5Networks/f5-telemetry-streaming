@@ -17,8 +17,10 @@ const properties = require('./config/properties.json');
 const paths = require('./config/paths.json');
 const logger = require('./logger.js');
 
-const pStats = properties.stats;
+const stats = properties.stats;
 const context = properties.context;
+const definitions = properties.definitions;
+const global = properties.global;
 
 const CONDITIONAL_FUNCS = {
     deviceVersionGreaterOrEqual
@@ -198,23 +200,24 @@ EndpointLoader.prototype._getData = function (uri, options) {
  */
 EndpointLoader.prototype._getAndExpandData = function (endpointProperties) {
     const p = endpointProperties;
-    let rawDataToModify;
+    let rawData;
     let referenceKey;
     const childItemKey = 'items';
 
     return Promise.resolve(this._getData(p.endpoint, { name: p.name, body: p.body }))
         .then((data) => {
-            // data is { name: foo, data: bar }
+            // data: { name: foo, data: bar }
             // check if expandReferences is requested
             if (p.expandReferences) {
+                rawData = data; // retain for later
                 const actualData = data.data;
                 // for now let's just support a single reference
                 referenceKey = Object.keys(p.expandReferences)[0];
                 const referenceObj = p.expandReferences[Object.keys(p.expandReferences)[0]];
 
                 const promises = [];
-                // assumes we are looking inside of single property, might need to extend this to 'entries', etc.
-                if (typeof actualData === 'object' && actualData[childItemKey] !== undefined && Array.isArray(actualData[childItemKey])) {
+                // assumes we are looking inside of 'items', might need to extend this to 'entries', etc.
+                if (typeof actualData === 'object' && Array.isArray(actualData[childItemKey])) {
                     for (let i = 0; i < actualData[childItemKey].length; i += 1) {
                         const item = actualData[childItemKey][i];
                         // first check for reference and then link property
@@ -229,7 +232,6 @@ EndpointLoader.prototype._getAndExpandData = function (endpointProperties) {
                         }
                     }
                 }
-                rawDataToModify = data; // retain raw data for later use
                 return Promise.all(promises);
             }
             // default is to just return the data
@@ -237,16 +239,15 @@ EndpointLoader.prototype._getAndExpandData = function (endpointProperties) {
         })
         .then((data) => {
             // this tells us we need to modify the raw data, or at least attempt to do so
-            if (rawDataToModify) {
+            if (rawData) {
                 data.forEach((i) => {
-                    // try/catch, default should be to just continue
                     try {
-                        rawDataToModify.data[childItemKey][i.name][referenceKey] = i.data;
+                        rawData.data[childItemKey][i.name][referenceKey] = i.data;
                     } catch (e) {
-                        // continue
+                        // just continue
                     }
                 });
-                return Promise.resolve(rawDataToModify);
+                return Promise.resolve(rawData);
             }
             // again default is to just return the data
             return Promise.resolve(data);
@@ -264,6 +265,7 @@ function SystemStats() {
     this.loader = null;
     this.contextData = {};
     this.collectedData = {};
+    this.tags = {};
 }
 /**
  * Split key
@@ -357,12 +359,21 @@ SystemStats.prototype._renderProperty = function (property) {
  * @returns {Object} normalized data (if needed)
  */
 SystemStats.prototype._processData = function (property, data) {
+    const defaultTags = { name: { pattern: '(.*)', group: 1 } };
+    const addKeysByTagIsObject = property.addKeysByTag && typeof property.addKeysByTag === 'object';
+
+    // standard options for normalize, these are driven primarily by the properties file
     const options = {
         key: this._splitKey(property.key).childKey,
         filterByKeys: property.filterKeys,
         renameKeysByPattern: property.renameKeys,
         convertArrayToMap: property.convertArrayToMap,
-        runCustomFunction: property.runFunction
+        runCustomFunction: property.runFunction,
+        addKeysByTag: { // add 'name' + any user configured tags if specified by prop
+            tags: property.addKeysByTag ? Object.assign(defaultTags, this.tags) : defaultTags,
+            definitions,
+            opts: addKeysByTagIsObject ? property.addKeysByTag : global.addKeysByTag
+        }
     };
     return property.normalize === false ? data : normalize.data(data, options);
 };
@@ -394,25 +405,19 @@ SystemStats.prototype._loadData = function (property) {
  * @returns {Object} Promise resolved when data was successfully colleted
  */
 SystemStats.prototype._processProperty = function (key, property) {
-    return new Promise((resolve, reject) => {
-        property = this._renderProperty(this._preprocessProperty(property));
-        /**
-         * if endpoints will have their own 'disabled' flag
-         * we will need to add additional check here or simply return empty value.
-         * An Empty value will result in 'missing key' after normalization.
-         */
-        if (property.disabled) {
-            resolve();
-        } else {
-            this._loadData(property)
-                .then(data => Promise.resolve(this._processData(property, data)))
-                .then((data) => {
-                    this.collectedData[key] = data;
-                })
-                .then(resolve)
-                .catch(reject);
-        }
-    })
+    property = this._renderProperty(this._preprocessProperty(property));
+    /**
+     * if endpoints will have their own 'disabled' flag
+     * we will need to add additional check here or simply return empty value.
+     * An Empty value will result in 'missing key' after normalization.
+     */
+    if (property.disabled) {
+        return Promise.resolve();
+    }
+    return this._loadData(property)
+        .then((data) => {
+            this.collectedData[key] = this._processData(property, data);
+        })
         .catch((err) => {
             logger.error(`Error: SystemStats._processProperty: ${key} (${property.key}): ${err}`);
             return Promise.reject(err);
@@ -449,8 +454,7 @@ SystemStats.prototype._computeContextData = function (contextData) {
     if (Array.isArray(contextData)) {
         if (contextData.length) {
             promise = this._processContext(contextData[0]);
-            // eslint-disable-next-line no-plusplus
-            for (let i = 1; i < contextData.length; i++) {
+            for (let i = 1; i < contextData.length; i += 1) {
                 promise.then(this._processContext(contextData[i]));
             }
         }
@@ -476,24 +480,29 @@ SystemStats.prototype._computePropertiesData = function (propertiesData) {
 /**
  * Collect info based on object provided in properties
  *
- * @param {String}  host       - host
- * @param {Integer} port       - port
- * @param {String}  username   - username for host
- * @param {String}  passphrase - password for host
+ * @param {String}  host                      - host
+ * @param {Integer} port                      - port
+ * @param {String}  username                  - username for host
+ * @param {String}  passphrase                - password for host
+ * @param {Object}  options                   - options
+ * @param {Object}  [options.tags]            - tags to add to the data (each key)
+ * @param {Object}  [options.addtlProperties] - additional properties to add to the top-level data
  *
  * @returns {Object} Promise which is resolved with a map of stats
  */
-SystemStats.prototype.collect = function (host, port, username, passphrase, otherPropsToInject) {
+SystemStats.prototype.collect = function (host, port, username, passphrase, options) {
+    if (options.tags) this.tags = options.tags;
+
     this.loader = new EndpointLoader({
         host, port, username, passphrase
     });
     this.loader.setEndpoints(paths.endpoints);
     return this.loader.auth()
         .then(() => this._computeContextData(context))
-        .then(() => this._computePropertiesData(pStats))
+        .then(() => this._computePropertiesData(stats))
         .then(() => {
             const orderedData = {};
-            Object.keys(pStats).forEach((key) => {
+            Object.keys(stats).forEach((key) => {
                 orderedData[key] = this.collectedData[key];
             });
             return Promise.resolve(orderedData);
@@ -501,8 +510,8 @@ SystemStats.prototype.collect = function (host, port, username, passphrase, othe
         .then((data) => {
             // inject service data
             const serviceProps = {};
-            if (otherPropsToInject) {
-                Object.assign(serviceProps, otherPropsToInject);
+            if (options.addtlProperties) {
+                Object.assign(serviceProps, options.addtlProperties);
             }
             data.telemetryServiceInfo = serviceProps;
             return Promise.resolve(data);

@@ -82,11 +82,28 @@ function getDataByKey(data, key) {
             ret = ret[i];
         } else {
             // do not throw error as some keys do not exist if not configured with a value on BIG-IP
-            ret = 'missing key';
+            ret = 'missing data';
         }
     });
     return ret;
 }
+
+/**
+ * Check for a match
+ *
+ * @param {String} data    - data
+ * @param {String} pattern - pattern to match on
+ * @param {Integer} group  - group to choose from match
+ *
+ * @returns {String} Returns matched key
+ */
+const checkForMatch = (data, pattern, group) => {
+    let ret;
+    const g = group || 0;
+    const match = data.match(pattern);
+    if (match && match[g]) ret = match[g];
+    return ret;
+};
 
 /**
  * Rename keys in object using regex or constant
@@ -104,21 +121,20 @@ function renameKeysInData(data, patterns) {
         Object.keys(childPatterns).forEach((pK) => {
             // first check if key contains base match pattern
             if (key.includes(pK)) {
-                // support constant keyword: { constant: "foo" }
+                // support constant keyword
                 if (childPatterns[pK].constant) {
                     retKey = childPatterns[pK].constant;
                 } else if (childPatterns[pK].replaceCharacter) {
-                    // support replaceCharacter keyword: { char: "/" }
+                    // support replaceCharacter keyword
                     retKey = retKey.replace(new RegExp(pK, 'g'), childPatterns[pK].replaceCharacter);
                 } else {
-                    // support pattern (regex) keyword
-                    // check for pattern/group in object: { pattern: "foo", group: 1 }
-                    const pattern = childPatterns[pK].pattern ? childPatterns[pK].pattern : childPatterns[pK];
-                    const group = childPatterns[pK].group ? childPatterns[pK].group : 0;
-                    const match = retKey.match(pattern);
-                    if (match) {
-                        retKey = match[group];
-                    }
+                    // assume a pattern, either in .pattern or as the value
+                    const match = checkForMatch(
+                        retKey,
+                        childPatterns[pK].pattern || childPatterns[pK],
+                        childPatterns[pK].group
+                    );
+                    if (match) retKey = match;
                 }
             }
         });
@@ -204,9 +220,70 @@ function reduceData(data, options) {
 
         return ret;
     }
-    // base case - just return
-    ret = data;
-    return ret;
+    // just return data
+    return data;
+}
+
+/**
+ * Add key to object by tag(s)
+ *
+ * @param {Object} data                    - data
+ * @param {Object} tags                    - map of tags
+ * @param {Object} definitions             - map of standard definitions
+ * @param {Object} options                 - options
+ * @param {Array} [options.skip]           - array of child object keys to skip
+ * @param {Array} [options.classifyByKeys] - classify by specific keys (used by events)
+ *
+ * @returns {Object} Returns data with added tags
+ */
+function addKeysByTag(data, tags, definitions, options) {
+    const tagKeys = Object.keys(tags);
+    const skip = options.skip || [];
+    const def = definitions || {};
+
+    const processTags = (thisData, key) => {
+        tagKeys.forEach((t) => {
+            let val = ''; // default value
+
+            // certain tag values will contain standard definitions like '`T`', check for those
+            // then check if the tag value contains 'pattern'
+            // otherwise assume the tag value is a 'constant'
+            let tagValue = tags[t];
+            if (tagValue in def) tagValue = def[tagValue]; // overwrite with def value
+
+            if (tagValue.pattern) {
+                const match = checkForMatch(key, tagValue.pattern, tagValue.group);
+                if (match) val = match;
+            } else {
+                val = tagValue;
+            }
+            thisData[t] = val;
+        });
+        return thisData;
+    };
+
+    if (typeof data === 'object' && !Array.isArray(data)) {
+        // if we are classifying by keys (already defined) assume we are processing a flat
+        // data structure
+        if (options.classifyByKeys) {
+            options.classifyByKeys.forEach((i) => {
+                if (i in data) {
+                    data = processTags(data, data[i]);
+                }
+            });
+        } else {
+            // assume we are adding keys to child object based on value of parent key
+            Object.keys(data).forEach((k) => {
+                if (skip.length && skip.indexOf(k) !== -1) return; // skip
+                if (tagKeys.length && k.indexOf(tagKeys) !== -1) return; // already exists, skip
+                if (typeof data[k] === 'object') {
+                    data[k] = processTags(data[k], k);
+                    data[k] = addKeysByTag(data[k], tags, def, options); // may require introspection
+                }
+            });
+        }
+    }
+    return data;
 }
 
 /**
@@ -216,12 +293,21 @@ function reduceData(data, options) {
  *
  * @param {Object} options                       - options
  * @param {Object} [options.renameKeysByPattern] - map of keys to rename
+ * @param {Array} [options.addKeysByTag]         - add key to data based on tag(s)
  *
  * @returns {Object} Returns normalized event
  */
 function normalizeEvent(data, options) {
     let ret = formatAsJson(data);
     ret = renameKeysInData(ret, options.renameKeysByPattern);
+    if (options.addKeysByTag) {
+        ret = addKeysByTag(
+            ret,
+            options.addKeysByTag.tags,
+            options.addKeysByTag.definitions,
+            options.addKeysByTag.opts
+        );
+    }
     return ret;
 }
 
@@ -230,11 +316,12 @@ function normalizeEvent(data, options) {
  *
  * @param {Object} data                          - data to normalize
  * @param {Object} options                       - options
- * @param {Object} [options.key]                 - key to drill down into data, using a defined notation
- * @param {Object} [options.filterByKeys]        - list of keys to filter data further
+ * @param {String} [options.key]                 - key to drill down into data, using a defined notation
+ * @param {Array} [options.filterByKeys]        - list of keys to filter data further
  * @param {Object} [options.renameKeysByPattern] - map of keys to rename by pattern
  * @param {Object} [options.convertArrayToMap]   - convert array to map using defined key name
  * @param {Object} [options.runCustomFunction]   - run custom function on data
+ * @param {Object} [options.addKeysByTag]        - add key to data based on tag(s)
  *
  * @returns {Object} Returns normalized data
  */
@@ -253,6 +340,15 @@ function normalizeData(data, options) {
             args: options.runCustomFunction.args
         };
         ret = runCustomFunction(ret, rCFOptions);
+    }
+    // add keys by tag - after custom function runs
+    if (options.addKeysByTag) {
+        ret = addKeysByTag(
+            ret,
+            options.addKeysByTag.tags,
+            options.addKeysByTag.definitions,
+            options.addKeysByTag.opts
+        );
     }
 
     return ret;

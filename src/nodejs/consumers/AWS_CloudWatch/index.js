@@ -14,7 +14,6 @@ const AWS = require('aws-sdk');
  * See {@link ../README.md#context} for documentation
  */
 module.exports = function (context) {
-    const consumerName = context.config.type || 'AWS_CloudWatch';
     const region = context.config.region;
     const logGroup = context.config.logGroup;
     const logStream = context.config.logStream;
@@ -56,15 +55,15 @@ module.exports = function (context) {
     cloudWatchLogs.describeLogStreams(describeParams).promise()
         .then((data) => {
             const logStreamData = data.logStreams[0]; // there should only be one item
-            const tokenKey = 'uploadSequenceToken';
+            const token = logStreamData ? logStreamData.uploadSequenceToken : null;
             // if token exists update putLogEvents params, otherwise leave as undefined
-            if (logStreamData[tokenKey]) params.sequenceToken = logStreamData[tokenKey];
+            if (token) params.sequenceToken = token;
             return cloudWatchLogs.putLogEvents(params).promise();
         })
         .then(() => {
-            context.logger.debug(`${consumerName}: success`);
+            context.logger.debug('success');
         })
         .catch((error) => {
-            context.logger.error(`${consumerName}: error ${error.message ? error.message : error}`);
+            context.logger.error(`error: ${error.message ? error.message : error}`);
         });
 };

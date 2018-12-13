@@ -21,7 +21,10 @@ const pollerIDs = {};
 /**
  * Process system(s) stats
  *
- * @param {Object} args - args, such as { config: {}, process: false }
+ * @param {Object}   args           - args object
+ * @param {Object}   args.config    - system config
+ * @param {Boolean}  [args.process] - determine whether to process through pipeline
+ * @param {Function} [args.tracer]  - tracer to write to disk
  *
  * @returns {Promise} Promise which is resolved with data sent
  */
@@ -35,7 +38,10 @@ function process(args) {
         config.username,
         config.passphrase ? config.passphrase.text : undefined,
         {
-            pollingInterval: config.interval
+            tags: config.tag,
+            addtlProperties: {
+                pollingInterval: config.interval
+            }
         }
     )
         .then((data) => {
@@ -138,9 +144,10 @@ configWorker.on('change', (config) => {
         // we have pollers to process, now determine if we need to start or update
         Object.keys(systemPollers).forEach((k) => {
             const args = { config: systemPollers[k] };
-            // check for enable=false first
             const baseMsg = `system poller ${k} interval: ${args.config.interval} secs`;
+            // check for enable=false first
             if (args.config.enable === false) {
+                // if already running, disable
                 if (pollerIDs[k]) {
                     logger.info(`Disabling ${baseMsg}`);
                     util.stop(pollerIDs[k]);

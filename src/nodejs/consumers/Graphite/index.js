@@ -14,7 +14,6 @@ const request = require('request');
  * See {@link ../README.md#context} for documentation
  */
 module.exports = function (context) {
-    const consumerName = context.config.type || 'Graphite';
     const httpBody = JSON.stringify({
         what: 'f5telemetry',
         tags: [context.event.type],
@@ -39,11 +38,11 @@ module.exports = function (context) {
     // eslint-disable-next-line no-unused-vars
     request.post(requestOptions, (error, response, body) => {
         if (error) {
-            context.logger.error(`${consumerName}: error ${error.message ? error.message : error}`);
+            context.logger.error(`error: ${error.message ? error.message : error}`);
         } else {
-            context.logger.debug(`${consumerName}: response ${response.statusCode} ${response.statusMessage}`);
+            context.logger.debug(`response: ${response.statusCode} ${response.statusMessage}`);
             // API may provide error text via body
-            if (body) context.logger.debug(`${consumerName}: response body ${body}`);
+            if (body) context.logger.debug(`response body: ${body}`);
         }
     });
 };

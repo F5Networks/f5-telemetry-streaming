@@ -6,7 +6,8 @@
             "convertArrayToMap": null,
             "filterKeys": null,
             "renameKeys": null,
-            "runFunction": null
+            "runFunction": null,
+            "addKeysByTag": null
         },
         "version": {
             "key": "/mgmt/tm/sys/version::sys/version/0::Version"
@@ -142,18 +143,21 @@
         "virtualServerStats": {
             "key": "/mgmt/tm/ltm/virtual/stats",
             "filterKeys": [ "/stats", "clientside.bitsIn", "clientside.bitsOut", "clientside.curConns", "availabilityState", "enabledState", "destination" ],
-            "renameKeys": { "ltm/virtual": { "pattern": "virtual\/(.*)\/", "group": 1 }, "~": { "replaceCharacter": "/" } }
+            "renameKeys": { "ltm/virtual": { "pattern": "virtual\/(.*)\/", "group": 1 }, "~": { "replaceCharacter": "/" } },
+            "addKeysByTag": true
         },
         "poolStats": {
             "key": "poolMembersRef::items",
             "convertArrayToMap": { "keyName": "selfLink", "keyNamePrefix": "name/" },
             "filterKeys": [ "name/", "/stats", "membersReference", "addr", "port", "serverside.bitsIn", "serverside.bitsOut", "serverside.curConns", "availabilityState", "statusReason", "enabledState", "sessionStatus" ],
-            "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/pool/": { "pattern": "pool\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members", "~": { "replaceCharacter": "/" } }
+            "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/pool/": { "pattern": "pool\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members", "~": { "replaceCharacter": "/" } },
+            "addKeysByTag": true
         },
         "ltmPolicyStats": {
             "key": "/mgmt/tm/ltm/policy/stats",
             "filterKeys": [ "ltm/policy", "invoked", "succeeded" ],
-            "renameKeys": [ { "ltm/policy/": { "pattern": "policy\/(.*)\/", "group": 1 }, "/actions/": { "pattern": "actions\/(.*)", "group": 1 }, "~": { "replaceCharacter": "/" } }, { "/actions": { "constant": "actions" } } ]
+            "renameKeys": [ { "ltm/policy/": { "pattern": "policy\/(.*)\/", "group": 1 }, "/actions/": { "pattern": "actions\/(.*)", "group": 1 }, "~": { "replaceCharacter": "/" } }, { "/actions": { "constant": "actions" } } ],
+            "addKeysByTag": true
         },
         "tlsCerts": {
             "key": "/mgmt/tm/sys/file/ssl-cert::items",
@@ -163,9 +167,8 @@
         }
     },
     "events": {
-        "global": {
-            "renameKeys": { "ASM:unit_hostname": { "constant": "hostname" }, "BIGIP_HOSTNAME": { "constant": "hostname" } }
-        }
+        "renameKeys": { "ASM:unit_hostname": { "constant": "hostname" }, "BIGIP_HOSTNAME": { "constant": "hostname" } },
+        "classifyByKeys": [ "virtual_name", "policy_name" ]
     },
     "context": {
         "HOSTNAME": {
@@ -174,5 +177,12 @@
         "deviceVersion": {
             "key": "/mgmt/tm/sys/version::sys/version/0::Version"
         }
+    },
+    "global": {
+        "addKeysByTag": { "skip": [ "actions", "members" ] }
+    },
+    "definitions": {
+        "`T`": { "pattern": "\/(.*?)\/", "group": 1 },
+        "`A`": { "pattern": "\/(.*?)\/(.*?)\/", "group": 2 }
     }
 }
