@@ -1,5 +1,5 @@
 F5 Telemetry Streaming
-=====================
+======================
 
 Welcome to the F5 Telemetry Streaming User Guide.
 To provide feedback on this documentation, you can file a GitHub Issue, or email us at solutionsfeedback@f5.com.
