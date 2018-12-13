@@ -15,7 +15,7 @@ module.exports = {
     DEFAULT_PORT: 8100,
     STRICT_TLS_REQUIRED: false, // for now, default to false
     DEFAULT_EVENT_LISTENER_PORT: 6514,
-    USER_AGENT: 'f5-telemetry/1.0',
+    USER_AGENT: 'f5-telemetry/0.9',
     SYSTEM_POLLER_CLASS_NAME: 'Telemetry_System_Poller',
     EVENT_LISTENER_CLASS_NAME: 'Telemetry_Listener',
     CONSUMERS_CLASS_NAME: 'Telemetry_Consumer',
