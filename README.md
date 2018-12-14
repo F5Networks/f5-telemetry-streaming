@@ -212,14 +212,6 @@ Note: More information about Graphite events can be found [here](https://graphit
 ```json
 {
     "class": "Telemetry",
-    "My_Poller": {
-        "class": "Telemetry_System_Poller",
-        "interval": 60
-    },
-    "My_Listener": {
-        "class": "Telemetry_Listener",
-        "port": 6514
-    },
     "My_Consumer": {
         "class": "Telemetry_Consumer",
         "type": "Azure_Log_Analytics",

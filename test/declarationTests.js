@@ -9,23 +9,28 @@
 const fs = require('fs');
 
 const constants = require('../src/nodejs/constants.js');
-const config = require('../src/nodejs/config.js');
 
-const utilMock = require('../src/nodejs/util.js');
+/* eslint-disable global-require */
 
-// Purpose: validate all example declarations against validator
+// purpose: validate all example declarations against validator
 describe('Example Declarations', () => {
-    beforeEach(() => {
+    let util;
+    let config;
+
+    before(() => {
+        util = require('../src/nodejs/util.js');
+        config = require('../src/nodejs/config.js');
     });
-    afterEach(() => {
+    beforeEach(() => {
+        // mocks required for ajv custom keywords, among others
+        util.getDeviceType = () => Promise.resolve(constants.BIG_IP_DEVICE_TYPE);
+        util.encryptSecret = () => Promise.resolve('foo');
+    });
+    after(() => {
         Object.keys(require.cache).forEach((key) => {
             delete require.cache[key];
         });
     });
-
-    // mocks required for ajv custom keywords, among others
-    utilMock.getDeviceType = () => Promise.resolve(constants.BIG_IP_DEVICE_TYPE);
-    utilMock.encryptSecret = () => Promise.resolve('foo');
 
     const baseDir = `${__dirname}/../examples/declarations`;
     const files = fs.readdirSync(baseDir);

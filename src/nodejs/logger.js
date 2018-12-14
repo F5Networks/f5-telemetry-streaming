@@ -10,9 +10,10 @@
 
 let logger;
 try {
-    logger = require('f5-logger').getInstance(); // eslint-disable-line
+    // eslint-disable-next-line global-require, import/no-unresolved
+    logger = require('f5-logger').getInstance();
 } catch (e) {
-    // just continue
+    // continue
 }
 
 /**
@@ -43,7 +44,10 @@ function stringify(msg) {
 function maskSecrets(msg) {
     let ret = msg;
     const secrets = {
-        passphrase: { replace: /(?:"passphrase":{)(.*?)(?:})/g, with: '"passphrase":{*********}' }
+        passphrase: {
+            replace: /(?:"passphrase":{)(.*?)(?:})/g,
+            with: '"passphrase":{*********}'
+        }
     };
     // place in try/catch
     try {
@@ -74,12 +78,20 @@ levels: {
     severe: 6
 }
 */
+
 /**
  * Logger class
  *
  * @param {String} prefix - message prefix, will be printed inside '[]' in the beginning of message
  */
 function Logger(prefix) {
+    // the f5-logger only exists on BIG-IP, so for unit tests provide a mock
+    this.logger = logger
+    || {
+        severe() {},
+        info() {},
+        finest() {}
+    };
     this.prefix = prefix || '';
 }
 /**
@@ -93,16 +105,16 @@ Logger.prototype.getChild = function (prefix) {
     return new Logger(`${this.prefix}.${prefix}`);
 };
 Logger.prototype.error = function (msg) {
-    logger.severe(prepareMsg(this.prefix, msg));
+    this.logger.severe(prepareMsg(this.prefix, msg));
 };
 Logger.prototype.info = function (msg) {
-    logger.info(prepareMsg(this.prefix, msg));
+    this.logger.info(prepareMsg(this.prefix, msg));
 };
 Logger.prototype.debug = function (msg) {
-    logger.finest(prepareMsg(this.prefix, msg));
+    this.logger.finest(prepareMsg(this.prefix, msg));
 };
 Logger.prototype.exception = function (msg, err) {
-    logger.finest(prepareMsg(this.prefix, `${msg}\nTraceback:\n${err.stack || 'no traceback available'}`));
+    this.logger.severe(prepareMsg(this.prefix, `${msg}\nTraceback:\n${err.stack || 'no traceback available'}`));
 };
 
 

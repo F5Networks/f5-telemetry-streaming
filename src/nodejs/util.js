@@ -546,6 +546,7 @@ module.exports = {
      */
     convertArrayToMap(data, key, options) {
         const ret = {};
+        options = options || {};
 
         if (!Array.isArray(data)) {
             throw new Error(`convertArrayToMap() array required: ${this.stringify(data)}`);
@@ -663,7 +664,7 @@ module.exports = {
      * @returns {Object} Returns promise resolved with response
      */
     makeRequest(host, uri, options) {
-        const opts = options === undefined ? {} : options;
+        options = options || {};
         const defaultHeaders = {
             Authorization: `Basic ${new Buffer('admin:').toString('base64')}`,
             'User-Agent': constants.USER_AGENT
@@ -673,17 +674,18 @@ module.exports = {
         // default to https, unless in defined list of http ports
         let fullUri = [80, 8080, 8100].indexOf(options.port) !== -1 ? `http://${host}` : `https://${host}`;
         fullUri = options.port ? `${fullUri}:${options.port}${uri}` : `${fullUri}:${constants.DEFAULT_PORT}${uri}`;
+        const method = options.method || 'GET';
         const requestOptions = {
             uri: fullUri,
-            method: opts.method || 'GET',
-            body: opts.body ? this.stringify(opts.body) : undefined,
-            headers: opts.headers || defaultHeaders,
+            method,
+            body: options.body ? this.stringify(options.body) : undefined,
+            headers: options.headers || defaultHeaders,
             strictSSL: constants.STRICT_TLS_REQUIRED
         };
 
-        // logger.debug(this.stringify(requestOptions));
         return new Promise((resolve, reject) => {
-            request(requestOptions, (err, res, body) => {
+            // using request.get, request.post, etc. - useful during unit test mocking
+            request[method.toLowerCase()](requestOptions, (err, res, body) => {
                 if (err) {
                     reject(new Error(`HTTP error: ${err}`));
                 } else if (res.statusCode === 200) {
@@ -712,9 +714,10 @@ module.exports = {
      * @param {Object} options         - function options
      * @param {Integer} [options.port] - HTTP port
      *
-     * @returns {Object} Returns promise resolved with auth token
+     * @returns {Object} Returns promise resolved with auth token: { token: 'token' }
      */
     getAuthToken(host, username, password, options) {
+        options = options || {};
         const uri = '/mgmt/shared/authn/login';
         const body = JSON.stringify({
             username,
@@ -728,10 +731,7 @@ module.exports = {
         };
 
         return this.makeRequest(host, uri, postOptions)
-            .then((data) => {
-                const ret = { token: data.token.token };
-                return ret;
-            })
+            .then(data => ({ token: data.token.token }))
             .catch((err) => {
                 const msg = `getAuthToken: ${err}`;
                 throw new Error(msg);
@@ -894,8 +894,7 @@ module.exports = {
                 let idx = 0;
                 passphrases.forEach((i) => {
                     // navigate to passphrase in data object and update
-                    // place decrypted value in 'text' key as this is more flexible,
-                    // could instead just make passphrase the decrypted value.
+                    // place decrypted value in 'text' key as this is more flexible
                     const passphrase = getPassphrase(data, i.path);
                     passphrase.text = res[idx];
                     idx += 1;

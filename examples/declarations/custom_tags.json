@@ -1,0 +1,21 @@
+{
+    "class": "Telemetry",
+    "My_Poller": {
+        "class": "Telemetry_System_Poller",
+        "interval": 60,
+        "tag": {
+            "tenant": "`T`",
+            "application": "`A`",
+            "foo": "bar"
+        }
+    },
+    "My_Listener": {
+        "class": "Telemetry_Listener",
+        "port": 6514,
+        "tag": {
+            "tenant": "`T`",
+            "application": "`A`",
+            "foo": "bar"
+        }
+    }
+}
