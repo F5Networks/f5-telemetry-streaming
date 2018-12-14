@@ -7,7 +7,7 @@ Telemetry Streaming is an iControl LX extension that sends telemetry information
 
 Definitions
 ```````````
-**Poller:** Polls a system on a defined interval for information such as device statistics, virtual server statistics, pools statistics, and more. 
+**System Poller:** Polls a system on a defined interval for information such as device statistics, virtual server statistics, pools statistics, and more. 
 
 **Event Listener:** Provides a listener, currently TCP, that can accept events in a specific format and process them.
 Event Format: ``key1="value",key2="value"``
