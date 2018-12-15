@@ -29,7 +29,6 @@ describe('Util', () => {
         childProcess = require('child_process');
         request = require('request');
     });
-    beforeEach(() => {});
     after(() => {
         Object.keys(require.cache).forEach((key) => {
             delete require.cache[key];
@@ -275,5 +274,27 @@ describe('Util', () => {
                 return Promise.resolve();
             })
             .catch(err => Promise.reject(err));
+    });
+});
+
+// purpose: validate util (tracer)
+describe('Util (Tracer)', () => {
+    let util;
+
+    before(() => {
+        util = require('../src/nodejs/util.js');
+    });
+    after(() => {
+        Object.keys(require.cache).forEach((key) => {
+            delete require.cache[key];
+        });
+    });
+
+    it('should create tracer', () => {
+        const config = {
+            trace: true
+        };
+        const tracer = util.tracer.createFromConfig('class', 'obj', config);
+        assert.strictEqual(tracer ? tracer.name : null, 'class.obj');
     });
 });

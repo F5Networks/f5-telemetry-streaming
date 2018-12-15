@@ -29,7 +29,6 @@ describe('Config', () => {
 
         util = require('../src/nodejs/util.js');
     });
-    beforeEach(() => {});
     afterEach(() => {
         config.validator = configValidator;
     });

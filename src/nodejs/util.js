@@ -36,7 +36,7 @@ function Tracer(name, tracerPath) {
     this.state = Tracer.STATE.NEW;
     this.touch();
 }
-// check every 15 sec. if file eixsts or not
+// check every 15 sec. if file exists or not
 Tracer.REOPEN_INTERVAL = 15000;
 /**
  * Tracer states

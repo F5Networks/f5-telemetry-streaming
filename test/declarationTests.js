@@ -20,8 +20,7 @@ describe('Example Declarations', () => {
     before(() => {
         util = require('../src/nodejs/util.js');
         config = require('../src/nodejs/config.js');
-    });
-    beforeEach(() => {
+
         // mocks required for ajv custom keywords, among others
         util.getDeviceType = () => Promise.resolve(constants.BIG_IP_DEVICE_TYPE);
         util.encryptSecret = () => Promise.resolve('foo');
