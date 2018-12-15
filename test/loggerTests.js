@@ -22,7 +22,7 @@ const loggerMock = {
 
 logger.logger = loggerMock;
 
-// purpose: validate logger functionality
+// purpose: validate logger
 describe('Logger', () => {
     beforeEach(() => {
         Object.keys(loggedMessages).forEach((level) => {
@@ -77,10 +77,11 @@ describe('Logger', () => {
     });
 
     it('should get a child logger', () => {
-        const childLogger = logger.getChild('prefix');
+        const prefix = 'prefix';
+        const childLogger = logger.getChild(prefix);
         childLogger.logger = loggerMock;
 
         childLogger.info('foo');
-        assert.notStrictEqual(loggedMessages.info[0].indexOf('[telemetry.prefix] foo'), -1);
+        assert.notStrictEqual(loggedMessages.info[0].indexOf(`[telemetry.${prefix}]`), -1);
     });
 });

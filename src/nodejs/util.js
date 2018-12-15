@@ -831,7 +831,7 @@ module.exports = {
     /**
      * Decrypt all secrets in config
      *
-     * @param {String} data - data (config)
+     * @param {Object} data - data (config)
      *
      * @returns {Object} Returns promise resolved with config containing decrypted secrets
      */

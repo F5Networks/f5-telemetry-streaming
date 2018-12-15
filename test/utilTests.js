@@ -12,7 +12,7 @@ const constants = require('../src/nodejs/constants.js');
 
 /* eslint-disable global-require */
 
-// purpose: validate util functionality
+// purpose: validate util
 describe('Util', () => {
     let util;
     let childProcess;
@@ -208,6 +208,70 @@ describe('Util', () => {
         return util.getAuthToken('example.com', 'admin', 'password')
             .then((data) => {
                 assert.strictEqual(data.token, token);
+                return Promise.resolve();
+            })
+            .catch(err => Promise.reject(err));
+    });
+
+    it('should base64 decode', () => {
+        const string = 'f5string';
+        const encString = Buffer.from(string, 'ascii').toString('base64');
+
+        const decString = util.base64('decode', encString);
+        assert.strictEqual(decString, string);
+    });
+
+    it('should encrypt secret', () => {
+        const secret = 'asecret';
+        const mockRes = { statusCode: 200, statusMessage: 'message' };
+        const mockBody = { secret };
+        setupRequestMock(mockRes, mockBody);
+
+        return util.encryptSecret('foo')
+            .then((data) => {
+                assert.strictEqual(data, secret);
+                return Promise.resolve();
+            })
+            .catch(err => Promise.reject(err));
+    });
+
+    it('should decrypt secret', () => {
+        const secret = 'asecret';
+        childProcess.exec = (cmd, cb) => { cb(null, secret, null); };
+
+        return util.decryptSecret('foo')
+            .then((data) => {
+                assert.strictEqual(data, secret);
+                return Promise.resolve();
+            })
+            .catch(err => Promise.reject(err));
+    });
+
+    it('should decrypt all secrets', () => {
+        const secret = 'asecret';
+        childProcess.exec = (cmd, cb) => { cb(null, secret, null); };
+
+        const obj = {
+            my_item: {
+                class: 'Consumer',
+                passphrase: {
+                    cipherText: 'foo'
+                }
+            }
+        };
+        const decryptedObj = {
+            my_item: {
+                class: 'Consumer',
+                passphrase: {
+                    cipherText: 'foo',
+                    text: secret
+                }
+            }
+        };
+
+        return util.decryptAllSecrets(obj)
+            .then((data) => {
+                assert.deepEqual(data, decryptedObj);
                 return Promise.resolve();
             })
             .catch(err => Promise.reject(err));
