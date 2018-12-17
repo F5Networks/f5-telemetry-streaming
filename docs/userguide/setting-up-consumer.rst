@@ -19,26 +19,29 @@ Splunk
 .. code-block:: json
    :linenos:
 
-{
-    "My_Consumer": {
-        "class": "Telemetry_Consumer",
-        "type": "Splunk",
-        "host": "192.0.2.1",
-        "protocol": "http",
-        "port": "8088",
-        "passphrase": {
-            "cipherText": "apikey"
+    {
+        "My_Consumer": {
+            "class": "Telemetry_Consumer",
+            "type": "Splunk",
+            "host": "192.0.2.1",
+            "protocol": "http",
+            "port": "8088",
+            "passphrase": {
+                "cipherText": "apikey"
+            }
         }
     }
-}
 
 
 Microsoft Azure Log Analytics
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 |azure_img|
 
+To find the Workspace ID, navigate to the Log Analytics workspace > Advanced Settings > Connected Sources. For more information see |Azure documentation|.
+
 .. code-block:: json
    :linenos:
+
     {
         "My_Consumer": {
             "class": "Telemetry_Consumer",
@@ -56,14 +59,60 @@ AWS Cloud Watch
 ~~~~~~~~~~~~~~~
 |aws_img|   
 
+.. code-block:: json
+   :linenos:
+
+    {
+        "My_Consumer": {
+            "class": "Telemetry_Consumer",
+            "type": "AWS_CloudWatch",
+            "region": "us-west-1",
+            "logGroup": "f5telemetry",
+            "logStream": "default",
+            "username": "accesskey",
+            "passphrase": {
+                "cipherText": "secretkey"
+            }
+        }
+    }
+
 AWS S3
 ~~~~~~
+
+.. code-block:: json
+   :linenos:
+
+    {
+        "My_Consumer": {
+            "class": "Telemetry_Consumer",
+            "type": "AWS_S3",
+            "region": "us-west-1",
+            "bucket": "bucketname",
+            "username": "accesskey",
+            "passphrase": {
+                "cipherText": "secretkey"
+            }
+        }
+    }
+
 
 Graphite
 ~~~~~~~~
 
+.. code-block:: json
+   :linenos:
 
-|grafana_img| |kafka_img| 
+    {
+        "My_Consumer": {
+            "class": "Telemetry_Consumer",
+            "type": "Graphite",
+            "host": "192.0.2.1",
+            "protocol": "http",
+            "port": "80"
+        }
+    }
+
+
 
 
 .. |aws_img| image:: /images/aws_logo.png
@@ -71,7 +120,7 @@ Graphite
    :alt: Amazon Web Services
 
 .. |azure_img| image:: /images/azure_logo.png
-   :target: azure_index.html
+   :target: https://docs.microsoft.com/en-us/azure/azure-monitor/log-query/log-query-overview
    :alt: Microsoft Azure
 
 .. |grafana_img| image:: /images/grafana-logo.png
@@ -99,4 +148,8 @@ Graphite
    kafka_index.rst
    splunk_index.rst
    
+.. |Azure documentation| raw:: html
+
+   <a href="https://docs.microsoft.com/en-us/azure/azure-monitor/platform/data-collector-api" target="_blank">Azure Log Analytics</a>
+
 
