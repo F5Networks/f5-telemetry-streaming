@@ -37,7 +37,8 @@ Microsoft Azure Log Analytics
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 |azure_img|
 
-To find the Workspace ID, navigate to the Log Analytics workspace > Advanced Settings > Connected Sources. For more information see |Azure documentation|.
+To find the Workspace ID, navigate to :guilabel:`Log Analytics workspace > Advanced Settings > Connected Sources`. For more information see |Azure documentation|.
+To find the Shared Key, navigate to :guilabel:`Log Analytics workspace > Advanced Settings > Connected Sources` and use the primary key.
 
 .. code-block:: json
    :linenos:
@@ -55,9 +56,21 @@ To find the Workspace ID, navigate to the Log Analytics workspace > Advanced Set
 
 
 
+
+
+
 AWS Cloud Watch
 ~~~~~~~~~~~~~~~
 |aws_img|   
+
+Required information:
+ - Region: AWS region of the cloud watch resource.
+ - Log Group: Navigate to :guilabel:`Cloud Watch > Logs`
+ - Log Stream: Navigate to :guilabel:`Cloud Watch > Logs > Your_Log_Group_Name`
+ - Access Key: Navigate to :guilabel:`IAM > Users`
+ - Secret Key: Navigate to :guilabel:`IAM > Users`
+
+.. NOTE:: To see more information about creating and using IAM roles, see |IAM roles|.
 
 .. code-block:: json
    :linenos:
@@ -150,6 +163,10 @@ Graphite
    
 .. |Azure documentation| raw:: html
 
-   <a href="https://docs.microsoft.com/en-us/azure/azure-monitor/platform/data-collector-api" target="_blank">Azure Log Analytics</a>
+   <a href="https://docs.microsoft.com/en-us/azure/azure-monitor/platform/data-collector-api" target="_blank">Azure documentation</a>
+
+.. |IAM roles| raw:: html
+
+   <a href="https://aws.amazon.com/iam/" target="_blank">AWS Identity and Access Management (IAM) documentation</a>
 
 
