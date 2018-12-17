@@ -14,7 +14,7 @@ const consumersHndlr = require('./consumers.js');
 /**
 * Forward data to consumer
 *
-* @param {Object} dataCtx - data context
+* @param {Object} dataCtx      - data context
 * @param {Object} dataCtx.data - actual data to forward
 * @param {string} dataCtx.type - type of data to forward
 *

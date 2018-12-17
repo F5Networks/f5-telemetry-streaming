@@ -33,6 +33,6 @@ This describes the structure of the context object.
 * @param {Object|undefined} context.tracer                     - tracer object
 * @param {function(string):void} context.tracer.write          - write data to tracer
 *
-* @returns {void}
+* @returns {Void|Promise}
 */
 ```
