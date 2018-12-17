@@ -12,4 +12,5 @@ User Guide
    installation.rst
    setting-up-consumer.rst
    declarations.rst
+   output-example.rst
    troubleshooting.rst
