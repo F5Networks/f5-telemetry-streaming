@@ -1,5 +1,5 @@
-Configuring a Consumer Stream
-=============================
+Consumers
+=========
 
 Use this section to find example declarations and notes for supported consumers.
 

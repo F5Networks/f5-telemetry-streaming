@@ -6,395 +6,395 @@ Output Example
    :linenos:
 
     {
-    "hostname": "hostname",
-    "version": "14.0.0.1",
-    "versionBuild": "0.0.2",
-    "location": "Seattle",
-    "description": "My BIG-IP description",
-    "marketingName": "BIG-IP Virtual Edition",
-    "platformId": "Z100",
-    "chassisId": "9c3abad5-513a-1c43-5bc2be62e957",
-    "baseMac": "00:0d:3a:30:34:51",
-    "callBackUrl": "https://192.0.2.1",
-    "configReady": "yes",
-    "licenseReady": "yes",
-    "provisionReady": "yes",
-    "syncMode": "standalone",
-    "syncColor": "green",
-    "syncStatus": "Standalone",
-    "syncSummary": " ",
-    "failoverStatus": "ACTIVE",
-    "failoverColor": "green",
-    "deviceTimestamp": "2018-12-13T20:24:20Z",
-    "cpu": 1,
-    "memory": 15,
-    "tmmCpu": 1,
-    "tmmMemory": 4,
-    "tmmTraffic": {
-        "clientSideTraffic.bitsIn": 5682858224,
-        "clientSideTraffic.bitsOut": 18756943624
-    },
-    "diskStorage": {
-        "/": {
-            "1024-blocks": "436342",
-            "Capacity": "55%",
-            "name": "/"
+        "hostname": "hostname",
+        "version": "14.0.0.1",
+        "versionBuild": "0.0.2",
+        "location": "Seattle",
+        "description": "My BIG-IP description",
+        "marketingName": "BIG-IP Virtual Edition",
+        "platformId": "Z100",
+        "chassisId": "9c3abad5-513a-1c43-5bc2be62e957",
+        "baseMac": "00:0d:3a:30:34:51",
+        "callBackUrl": "https://192.0.2.1",
+        "configReady": "yes",
+        "licenseReady": "yes",
+        "provisionReady": "yes",
+        "syncMode": "standalone",
+        "syncColor": "green",
+        "syncStatus": "Standalone",
+        "syncSummary": " ",
+        "failoverStatus": "ACTIVE",
+        "failoverColor": "green",
+        "deviceTimestamp": "2018-12-13T20:24:20Z",
+        "cpu": 1,
+        "memory": 15,
+        "tmmCpu": 1,
+        "tmmMemory": 4,
+        "tmmTraffic": {
+            "clientSideTraffic.bitsIn": 5682858224,
+            "clientSideTraffic.bitsOut": 18756943624
         },
-        "/dev/shm": {
-            "1024-blocks": "7181064",
-            "Capacity": "1%",
-            "name": "/dev/shm"
-        },
-        "/config": {
-            "1024-blocks": "3269592",
-            "Capacity": "3%",
-            "name": "/config"
-        },
-        "/usr": {
-            "1024-blocks": "4136432",
-            "Capacity": "83%",
-            "name": "/usr"
-        },
-        "/var": {
-            "1024-blocks": "3096336",
-            "Capacity": "28%",
-            "name": "/var"
-        },
-        "/shared": {
-            "1024-blocks": "20642428",
-            "Capacity": "2%",
-            "name": "/shared"
-        },
-        "/var/log": {
-            "1024-blocks": "3023760",
-            "Capacity": "5%",
-            "name": "/var/log"
-        },
-        "/appdata": {
-            "1024-blocks": "25717852",
-            "Capacity": "1%",
-            "name": "/appdata"
-        },
-        "/shared/rrd.1.2": {
-            "1024-blocks": "7181064",
-            "Capacity": "1%",
-            "name": "/shared/rrd.1.2"
-        },
-        "/var/run": {
-            "1024-blocks": "7181064",
-            "Capacity": "1%",
-            "name": "/var/run"
-        },
-        "/var/tmstat": {
-            "1024-blocks": "7181064",
-            "Capacity": "1%",
-            "name": "/var/tmstat"
-        },
-        "/var/prompt": {
-            "1024-blocks": "4096",
-            "Capacity": "1%",
-            "name": "/var/prompt"
-        },
-        "/var/loipc": {
-            "1024-blocks": "7181064",
-            "Capacity": "0%",
-            "name": "/var/loipc"
-        }
-    },
-    "diskLatency": {
-        "sda": {
-            "rsec/s": "356.44",
-            "wsec/s": "109.09",
-            "name": "sda"
-        },
-        "sdb": {
-            "rsec/s": "1.03",
-            "wsec/s": "0.00",
-            "name": "sdb"
-        },
-        "dm-0": {
-            "rsec/s": "0.02",
-            "wsec/s": "0.00",
-            "name": "dm-0"
-        },
-        "dm-1": {
-            "rsec/s": "1.16",
-            "wsec/s": "64.68",
-            "name": "dm-1"
-        },
-        "dm-2": {
-            "rsec/s": "0.02",
-            "wsec/s": "0.00",
-            "name": "dm-2"
-        },
-        "dm-3": {
-            "rsec/s": "0.83",
-            "wsec/s": "26.54",
-            "name": "dm-3"
-        },
-        "dm-4": {
-            "rsec/s": "1.16",
-            "wsec/s": "5.80",
-            "name": "dm-4"
-        },
-        "dm-5": {
-            "rsec/s": "19.59",
-            "wsec/s": "2.23",
-            "name": "dm-5"
-        },
-        "dm-6": {
-            "rsec/s": "327.64",
-            "wsec/s": "0.00",
-            "name": "dm-6"
-        },
-        "dm-7": {
-            "rsec/s": "0.62",
-            "wsec/s": "0.80",
-            "name": "dm-7"
-        },
-        "dm-8": {
-            "rsec/s": "4.28",
-            "wsec/s": "9.04",
-            "name": "dm-8"
-        }
-    },
-    "networkInterfaces": {
-        "1.1": {
-            "counters.bitsIn": 18226797032,
-            "counters.bitsOut": 5242940808,
-            "status": "up",
-            "name": "1.1"
-        },
-        "1.2": {
-            "counters.bitsIn": 1534110872,
-            "counters.bitsOut": 84389728,
-            "status": "up",
-            "name": "1.2"
-        },
-        "mgmt": {
-            "counters.bitsIn": 2242676328,
-            "counters.bitsOut": 1143046952,
-            "status": "up",
-            "name": "mgmt"
-        }
-    },
-    "provisionState": {
-        "afm": {
-            "level": "none",
-            "name": "afm"
-        },
-        "am": {
-            "level": "none",
-            "name": "am"
-        },
-        "apm": {
-            "level": "none",
-            "name": "apm"
-        },
-        "asm": {
-            "level": "none",
-            "name": "asm"
-        },
-        "avr": {
-            "level": "none",
-            "name": "avr"
-        },
-        "dos": {
-            "level": "none",
-            "name": "dos"
-        },
-        "fps": {
-            "level": "none",
-            "name": "fps"
-        },
-        "gtm": {
-            "level": "none",
-            "name": "gtm"
-        },
-        "ilx": {
-            "level": "none",
-            "name": "ilx"
-        },
-        "lc": {
-            "level": "none",
-            "name": "lc"
-        },
-        "ltm": {
-            "level": "nominal",
-            "name": "ltm"
-        },
-        "pem": {
-            "level": "none",
-            "name": "pem"
-        },
-        "sslo": {
-            "level": "none",
-            "name": "sslo"
-        },
-        "swg": {
-            "level": "none",
-            "name": "swg"
-        },
-        "urldb": {
-            "level": "none",
-            "name": "urldb"
-        }
-    },
-    "virtualServerStats": {
-        "/Common/app.app/app_vs": {
-            "clientside.bitsIn": 5474952,
-            "clientside.bitsOut": 66039264,
-            "clientside.curConns": 0,
-            "destination": "10.0.2.101:80",
-            "status.availabilityState": "available",
-            "status.enabledState": "enabled",
-            "name": "/Common/app.app/app_vs",
-            "tenant": "Common",
-            "application": "app.app"
-        },
-        "/Sample_02/A1/serviceMain": {
-            "clientside.bitsIn": 0,
-            "clientside.bitsOut": 0,
-            "clientside.curConns": 0,
-            "destination": "192.0.2.11:443",
-            "status.availabilityState": "offline",
-            "status.enabledState": "enabled",
-            "name": "/Sample_02/A1/serviceMain",
-            "tenant": "Sample_02",
-            "application": "A1"
-        },
-        "/Sample_02/A1/serviceMain-Redirect": {
-            "clientside.bitsIn": 0,
-            "clientside.bitsOut": 0,
-            "clientside.curConns": 0,
-            "destination": "192.0.2.11:80",
-            "status.availabilityState": "unknown",
-            "status.enabledState": "enabled",
-            "name": "/Sample_02/A1/serviceMain-Redirect",
-            "tenant": "Sample_02",
-            "application": "A1"
-        }
-    },
-    "poolStats": {
-        "/Common/app.app/app_pool": {
-            "members": {
-                "/Common/10.0.3.5:80": {
-                    "addr": "10.0.3.5",
-                    "port": 80,
-                    "serverside.bitsIn": 7392800,
-                    "serverside.bitsOut": 67086632,
-                    "serverside.curConns": 0,
-                    "sessionStatus": "enabled",
-                    "status.availabilityState": "available",
-                    "status.enabledState": "enabled",
-                    "status.statusReason": "Pool member is available"
-                }
+        "diskStorage": {
+            "/": {
+                "1024-blocks": "436342",
+                "Capacity": "55%",
+                "name": "/"
             },
-            "name": "/Common/app.app/app_pool",
-            "tenant": "Common",
-            "application": "app.app"
-        },
-        "/Common/telemetry-local": {
-            "members": {
-                "/Common/10.0.1.100:6514": {
-                    "addr": "10.0.1.100",
-                    "port": 6514,
-                    "serverside.bitsIn": 2881560,
-                    "serverside.bitsOut": 615872,
-                    "serverside.curConns": 0,
-                    "sessionStatus": "enabled",
-                    "status.availabilityState": "available",
-                    "status.enabledState": "enabled",
-                    "status.statusReason": "Pool member is available"
-                }
+            "/dev/shm": {
+                "1024-blocks": "7181064",
+                "Capacity": "1%",
+                "name": "/dev/shm"
             },
-            "name": "/Common/telemetry-local",
-            "tenant": "Common",
-            "application": ""
+            "/config": {
+                "1024-blocks": "3269592",
+                "Capacity": "3%",
+                "name": "/config"
+            },
+            "/usr": {
+                "1024-blocks": "4136432",
+                "Capacity": "83%",
+                "name": "/usr"
+            },
+            "/var": {
+                "1024-blocks": "3096336",
+                "Capacity": "28%",
+                "name": "/var"
+            },
+            "/shared": {
+                "1024-blocks": "20642428",
+                "Capacity": "2%",
+                "name": "/shared"
+            },
+            "/var/log": {
+                "1024-blocks": "3023760",
+                "Capacity": "5%",
+                "name": "/var/log"
+            },
+            "/appdata": {
+                "1024-blocks": "25717852",
+                "Capacity": "1%",
+                "name": "/appdata"
+            },
+            "/shared/rrd.1.2": {
+                "1024-blocks": "7181064",
+                "Capacity": "1%",
+                "name": "/shared/rrd.1.2"
+            },
+            "/var/run": {
+                "1024-blocks": "7181064",
+                "Capacity": "1%",
+                "name": "/var/run"
+            },
+            "/var/tmstat": {
+                "1024-blocks": "7181064",
+                "Capacity": "1%",
+                "name": "/var/tmstat"
+            },
+            "/var/prompt": {
+                "1024-blocks": "4096",
+                "Capacity": "1%",
+                "name": "/var/prompt"
+            },
+            "/var/loipc": {
+                "1024-blocks": "7181064",
+                "Capacity": "0%",
+                "name": "/var/loipc"
+            }
         },
-        "/Sample_02/A1/web_pool": {
-            "members": {
-                "/Sample_02/192.0.2.12:80": {
-                    "addr": "192.0.2.12",
-                    "port": 80,
-                    "serverside.bitsIn": 0,
-                    "serverside.bitsOut": 0,
-                    "serverside.curConns": 0,
-                    "sessionStatus": "enabled",
-                    "status.availabilityState": "offline",
-                    "status.enabledState": "enabled",
-                    "status.statusReason": "Pool member has been marked down by a monitor"
+        "diskLatency": {
+            "sda": {
+                "rsec/s": "356.44",
+                "wsec/s": "109.09",
+                "name": "sda"
+            },
+            "sdb": {
+                "rsec/s": "1.03",
+                "wsec/s": "0.00",
+                "name": "sdb"
+            },
+            "dm-0": {
+                "rsec/s": "0.02",
+                "wsec/s": "0.00",
+                "name": "dm-0"
+            },
+            "dm-1": {
+                "rsec/s": "1.16",
+                "wsec/s": "64.68",
+                "name": "dm-1"
+            },
+            "dm-2": {
+                "rsec/s": "0.02",
+                "wsec/s": "0.00",
+                "name": "dm-2"
+            },
+            "dm-3": {
+                "rsec/s": "0.83",
+                "wsec/s": "26.54",
+                "name": "dm-3"
+            },
+            "dm-4": {
+                "rsec/s": "1.16",
+                "wsec/s": "5.80",
+                "name": "dm-4"
+            },
+            "dm-5": {
+                "rsec/s": "19.59",
+                "wsec/s": "2.23",
+                "name": "dm-5"
+            },
+            "dm-6": {
+                "rsec/s": "327.64",
+                "wsec/s": "0.00",
+                "name": "dm-6"
+            },
+            "dm-7": {
+                "rsec/s": "0.62",
+                "wsec/s": "0.80",
+                "name": "dm-7"
+            },
+            "dm-8": {
+                "rsec/s": "4.28",
+                "wsec/s": "9.04",
+                "name": "dm-8"
+            }
+        },
+        "networkInterfaces": {
+            "1.1": {
+                "counters.bitsIn": 18226797032,
+                "counters.bitsOut": 5242940808,
+                "status": "up",
+                "name": "1.1"
+            },
+            "1.2": {
+                "counters.bitsIn": 1534110872,
+                "counters.bitsOut": 84389728,
+                "status": "up",
+                "name": "1.2"
+            },
+            "mgmt": {
+                "counters.bitsIn": 2242676328,
+                "counters.bitsOut": 1143046952,
+                "status": "up",
+                "name": "mgmt"
+            }
+        },
+        "provisionState": {
+            "afm": {
+                "level": "none",
+                "name": "afm"
+            },
+            "am": {
+                "level": "none",
+                "name": "am"
+            },
+            "apm": {
+                "level": "none",
+                "name": "apm"
+            },
+            "asm": {
+                "level": "none",
+                "name": "asm"
+            },
+            "avr": {
+                "level": "none",
+                "name": "avr"
+            },
+            "dos": {
+                "level": "none",
+                "name": "dos"
+            },
+            "fps": {
+                "level": "none",
+                "name": "fps"
+            },
+            "gtm": {
+                "level": "none",
+                "name": "gtm"
+            },
+            "ilx": {
+                "level": "none",
+                "name": "ilx"
+            },
+            "lc": {
+                "level": "none",
+                "name": "lc"
+            },
+            "ltm": {
+                "level": "nominal",
+                "name": "ltm"
+            },
+            "pem": {
+                "level": "none",
+                "name": "pem"
+            },
+            "sslo": {
+                "level": "none",
+                "name": "sslo"
+            },
+            "swg": {
+                "level": "none",
+                "name": "swg"
+            },
+            "urldb": {
+                "level": "none",
+                "name": "urldb"
+            }
+        },
+        "virtualServerStats": {
+            "/Common/app.app/app_vs": {
+                "clientside.bitsIn": 5474952,
+                "clientside.bitsOut": 66039264,
+                "clientside.curConns": 0,
+                "destination": "10.0.2.101:80",
+                "status.availabilityState": "available",
+                "status.enabledState": "enabled",
+                "name": "/Common/app.app/app_vs",
+                "tenant": "Common",
+                "application": "app.app"
+            },
+            "/Sample_02/A1/serviceMain": {
+                "clientside.bitsIn": 0,
+                "clientside.bitsOut": 0,
+                "clientside.curConns": 0,
+                "destination": "192.0.2.11:443",
+                "status.availabilityState": "offline",
+                "status.enabledState": "enabled",
+                "name": "/Sample_02/A1/serviceMain",
+                "tenant": "Sample_02",
+                "application": "A1"
+            },
+            "/Sample_02/A1/serviceMain-Redirect": {
+                "clientside.bitsIn": 0,
+                "clientside.bitsOut": 0,
+                "clientside.curConns": 0,
+                "destination": "192.0.2.11:80",
+                "status.availabilityState": "unknown",
+                "status.enabledState": "enabled",
+                "name": "/Sample_02/A1/serviceMain-Redirect",
+                "tenant": "Sample_02",
+                "application": "A1"
+            }
+        },
+        "poolStats": {
+            "/Common/app.app/app_pool": {
+                "members": {
+                    "/Common/10.0.3.5:80": {
+                        "addr": "10.0.3.5",
+                        "port": 80,
+                        "serverside.bitsIn": 7392800,
+                        "serverside.bitsOut": 67086632,
+                        "serverside.curConns": 0,
+                        "sessionStatus": "enabled",
+                        "status.availabilityState": "available",
+                        "status.enabledState": "enabled",
+                        "status.statusReason": "Pool member is available"
+                    }
                 },
-                "/Sample_02/192.0.2.13:80": {
-                    "addr": "192.0.2.13",
-                    "port": 80,
-                    "serverside.bitsIn": 0,
-                    "serverside.bitsOut": 0,
-                    "serverside.curConns": 0,
-                    "sessionStatus": "enabled",
-                    "status.availabilityState": "offline",
-                    "status.enabledState": "enabled",
-                    "status.statusReason": "Pool member has been marked down by a monitor"
-                }
+                "name": "/Common/app.app/app_pool",
+                "tenant": "Common",
+                "application": "app.app"
             },
-            "name": "/Sample_02/A1/web_pool",
-            "tenant": "Sample_02",
-            "application": "A1"
-        }
-    },
-    "ltmPolicyStats": {
-        "/Common/example_policy": {
-            "invoked": 0,
-            "succeeded": 0,
-            "actions": {
-                "default:0": {
-                    "invoked": 0,
-                    "succeeded": 0
+            "/Common/telemetry-local": {
+                "members": {
+                    "/Common/10.0.1.100:6514": {
+                        "addr": "10.0.1.100",
+                        "port": 6514,
+                        "serverside.bitsIn": 2881560,
+                        "serverside.bitsOut": 615872,
+                        "serverside.curConns": 0,
+                        "sessionStatus": "enabled",
+                        "status.availabilityState": "available",
+                        "status.enabledState": "enabled",
+                        "status.statusReason": "Pool member is available"
+                    }
                 },
-                "rule_1:0": {
-                    "invoked": 0,
-                    "succeeded": 0
-                }
+                "name": "/Common/telemetry-local",
+                "tenant": "Common",
+                "application": ""
             },
-            "name": "/Common/telemetry",
-            "tenant": "Common",
-            "application": ""
-        }
-    },
-    "tlsCerts": {
-        "ca-bundle.crt": {
-            "expirationDate": 1893455999,
-            "expirationString": "Dec 31 23:59:59 2029 GMT",
-            "issuer": "CN=Starfield Services Root Certificate Authority,OU=http://certificates.starfieldtech.com/repository/,O=Starfield Technologies, Inc.,L=Scottsdale,ST=Arizona,C=US",
-            "subject": "CN=Starfield Services Root Certificate Authority,OU=http://certificates.starfieldtech.com/repository/,O=Starfield Technologies, Inc.,L=Scottsdale,ST=Arizona,C=US",
-            "name": "ca-bundle.crt"
+            "/Sample_02/A1/web_pool": {
+                "members": {
+                    "/Sample_02/192.0.2.12:80": {
+                        "addr": "192.0.2.12",
+                        "port": 80,
+                        "serverside.bitsIn": 0,
+                        "serverside.bitsOut": 0,
+                        "serverside.curConns": 0,
+                        "sessionStatus": "enabled",
+                        "status.availabilityState": "offline",
+                        "status.enabledState": "enabled",
+                        "status.statusReason": "Pool member has been marked down by a monitor"
+                    },
+                    "/Sample_02/192.0.2.13:80": {
+                        "addr": "192.0.2.13",
+                        "port": 80,
+                        "serverside.bitsIn": 0,
+                        "serverside.bitsOut": 0,
+                        "serverside.curConns": 0,
+                        "sessionStatus": "enabled",
+                        "status.availabilityState": "offline",
+                        "status.enabledState": "enabled",
+                        "status.statusReason": "Pool member has been marked down by a monitor"
+                    }
+                },
+                "name": "/Sample_02/A1/web_pool",
+                "tenant": "Sample_02",
+                "application": "A1"
+            }
         },
-        "default.crt": {
-            "email": "root@localhost.localdomain",
-            "expirationDate": 1859497229,
-            "expirationString": "Dec  3 23:00:29 2028 GMT",
-            "issuer": "emailAddress=root@localhost.localdomain,CN=localhost.localdomain,OU=IT,O=MyCompany,L=Seattle,ST=WA,C=US",
-            "subject": "emailAddress=root@localhost.localdomain,CN=localhost.localdomain,OU=IT,O=MyCompany,L=Seattle,ST=WA,C=US",
-            "name": "default.crt"
+        "ltmPolicyStats": {
+            "/Common/example_policy": {
+                "invoked": 0,
+                "succeeded": 0,
+                "actions": {
+                    "default:0": {
+                        "invoked": 0,
+                        "succeeded": 0
+                    },
+                    "rule_1:0": {
+                        "invoked": 0,
+                        "succeeded": 0
+                    }
+                },
+                "name": "/Common/telemetry",
+                "tenant": "Common",
+                "application": ""
+            }
         },
-        "f5-ca-bundle.crt": {
-            "expirationDate": 1922896554,
-            "expirationString": "Dec  7 17:55:54 2030 GMT",
-            "issuer": "CN=Entrust Root Certification Authority - G2,OU=(c) 2009 Entrust, Inc. - for authorized use only,OU=See www.entrust.net/legal-terms,O=Entrust, Inc.,C=US",
-            "subject": "CN=Entrust Root Certification Authority - G2,OU=(c) 2009 Entrust, Inc. - for authorized use only,OU=See www.entrust.net/legal-terms,O=Entrust, Inc.,C=US",
-            "name": "f5-ca-bundle.crt"
+        "tlsCerts": {
+            "ca-bundle.crt": {
+                "expirationDate": 1893455999,
+                "expirationString": "Dec 31 23:59:59 2029 GMT",
+                "issuer": "CN=Starfield Services Root Certificate Authority,OU=http://certificates.starfieldtech.com/repository/,O=Starfield Technologies, Inc.,L=Scottsdale,ST=Arizona,C=US",
+                "subject": "CN=Starfield Services Root Certificate Authority,OU=http://certificates.starfieldtech.com/repository/,O=Starfield Technologies, Inc.,L=Scottsdale,ST=Arizona,C=US",
+                "name": "ca-bundle.crt"
+            },
+            "default.crt": {
+                "email": "root@localhost.localdomain",
+                "expirationDate": 1859497229,
+                "expirationString": "Dec  3 23:00:29 2028 GMT",
+                "issuer": "emailAddress=root@localhost.localdomain,CN=localhost.localdomain,OU=IT,O=MyCompany,L=Seattle,ST=WA,C=US",
+                "subject": "emailAddress=root@localhost.localdomain,CN=localhost.localdomain,OU=IT,O=MyCompany,L=Seattle,ST=WA,C=US",
+                "name": "default.crt"
+            },
+            "f5-ca-bundle.crt": {
+                "expirationDate": 1922896554,
+                "expirationString": "Dec  7 17:55:54 2030 GMT",
+                "issuer": "CN=Entrust Root Certification Authority - G2,OU=(c) 2009 Entrust, Inc. - for authorized use only,OU=See www.entrust.net/legal-terms,O=Entrust, Inc.,C=US",
+                "subject": "CN=Entrust Root Certification Authority - G2,OU=(c) 2009 Entrust, Inc. - for authorized use only,OU=See www.entrust.net/legal-terms,O=Entrust, Inc.,C=US",
+                "name": "f5-ca-bundle.crt"
+            },
+            "f5-irule.crt": {
+                "email": "support@f5.com",
+                "expirationDate": 1815944413,
+                "expirationString": "Jul 18 21:00:13 2027 GMT",
+                "issuer": "emailAddress=support@f5.com,CN=support.f5.com,OU=Product Development,O=F5 Networks,L=Seattle,ST=Washington,C=US",
+                "subject": "emailAddress=support@f5.com,CN=support.f5.com,OU=Product Development,O=F5 Networks,L=Seattle,ST=Washington,C=US",
+                "name": "f5-irule.crt"
+            }
         },
-        "f5-irule.crt": {
-            "email": "support@f5.com",
-            "expirationDate": 1815944413,
-            "expirationString": "Jul 18 21:00:13 2027 GMT",
-            "issuer": "emailAddress=support@f5.com,CN=support.f5.com,OU=Product Development,O=F5 Networks,L=Seattle,ST=Washington,C=US",
-            "subject": "emailAddress=support@f5.com,CN=support.f5.com,OU=Product Development,O=F5 Networks,L=Seattle,ST=Washington,C=US",
-            "name": "f5-irule.crt"
-        }
-    },
-    "telemetryServiceInfo": {
-        "pollingInterval": 300
-    },
-    "telemetryEventCategory": "systemInfo"
-}
+        "telemetryServiceInfo": {
+            "pollingInterval": 300
+        },
+        "telemetryEventCategory": "systemInfo"
+    }
