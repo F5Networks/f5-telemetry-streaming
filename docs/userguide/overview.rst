@@ -1,11 +1,11 @@
 Overview
 ========
 
-This is an overview of the tasks you will perform to implement F5 Telemetry Services.
+This is an overview of the tasks you will perform to implement F5 Telemetry Streaming.
 
 - Go to GitHub
-- Download Telemetry Services
-- Install Telemetry Services
+- Download Telemetry Streaming
+- Install Telemetry Streaming
 - Use API
 - Send a declaration
 
