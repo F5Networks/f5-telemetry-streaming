@@ -7,6 +7,8 @@
  */
 
 const assert = require('assert');
+const os = require('os');
+const fs = require('fs');
 
 const constants = require('../src/nodejs/constants.js');
 
@@ -280,9 +282,15 @@ describe('Util', () => {
 // purpose: validate util (tracer)
 describe('Util (Tracer)', () => {
     let util;
+    const tracerFile = `${os.tmpdir()}/telemetry`; // os.tmpdir for windows + linux
 
     before(() => {
         util = require('../src/nodejs/util.js');
+    });
+    beforeEach(() => {
+        if (fs.existsSync(tracerFile)) {
+            fs.unlinkSync(tracerFile);
+        }
     });
     after(() => {
         Object.keys(require.cache).forEach((key) => {
@@ -290,11 +298,18 @@ describe('Util (Tracer)', () => {
         });
     });
 
-    it('should create tracer', () => {
+    it('should write to tracer', () => {
+        const msg = 'foobar';
         const config = {
-            trace: true
+            trace: tracerFile
         };
         const tracer = util.tracer.createFromConfig('class', 'obj', config);
-        assert.strictEqual(tracer ? tracer.name : null, 'class.obj');
+        return tracer.write(msg)
+            .then(() => {
+                const contents = fs.readFileSync(tracerFile, 'utf8');
+                assert.strictEqual(msg, contents);
+                tracer.stop(); // cleanup, otherwise will not exit
+            })
+            .catch(err => Promise.reject(err));
     });
 });

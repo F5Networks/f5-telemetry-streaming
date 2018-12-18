@@ -36,6 +36,7 @@ function Tracer(name, tracerPath) {
     this.state = Tracer.STATE.NEW;
     this.touch();
 }
+
 // check every 15 sec. if file exists or not
 Tracer.REOPEN_INTERVAL = 15000;
 /**
@@ -51,6 +52,7 @@ Tracer.STATE = Object.freeze({
     REOPEN: 'REOPEN',
     STOP: 'STOP'
 });
+
 /**
  * Remove schedule 'reopen' function
  */
@@ -60,6 +62,7 @@ Tracer.prototype.removeScheduledReopen = function () {
         this.timeoutID = undefined;
     }
 };
+
 /**
  * Set state
  *
@@ -74,6 +77,7 @@ Tracer.prototype._setState = function (newState) {
     this.state = newState;
     logger.debug(`Tracer '${this.name}' changed state from ${oldState} to ${newState}`);
 };
+
 /**
  * Mark tracer as ready
  */
@@ -82,6 +86,7 @@ Tracer.prototype._setReady = function () {
     this.reopenIfNeeded(true);
     this._setState(Tracer.STATE.READY);
 };
+
 /**
  * Mark tracer as closed
  */
@@ -92,6 +97,7 @@ Tracer.prototype._setClosed = function () {
     this._setState(Tracer.STATE.CLOSED);
     logger.info(`Tracer '${this.name}' stream to file '${this.path}' closed`);
 };
+
 /**
  * Mark tracer as closing
  */
@@ -103,6 +109,7 @@ Tracer.prototype._setClosing = function () {
     }
     this._setState(Tracer.STATE.CLOSING);
 };
+
 /**
  * Update file's inode to handle situations when file was recreated outside.
  */
@@ -117,6 +124,7 @@ Tracer.prototype._updateInode = function () {
         }
     });
 };
+
 /**
  * Re-open tracer if destination file doesn't exists
  *
@@ -183,6 +191,7 @@ Tracer.prototype._reopenIfNeeded = function () {
         })
         .catch(err => logger.exception(`tracer._reopenIfNeeded exception: ${err}`, err));
 };
+
 /**
  * Create destination directory if needed
  *
@@ -199,19 +208,21 @@ Tracer.prototype._mkdir = function () {
             }
             resolve(exists);
         });
-    }).then((dirExists) => {
-        if (dirExists) {
-            return Promise.resolve();
-        }
-        return new Promise((resolve, reject) => {
-            logger.info(`Creating dir '${baseDir}' for tracer '${this.name}'`);
-            fs.mkdir(baseDir, { recursive: true }, (mkdirErr) => {
-                if (mkdirErr) reject(mkdirErr);
-                else resolve();
+    })
+        .then((dirExists) => {
+            if (dirExists) {
+                return Promise.resolve();
+            }
+            return new Promise((resolve, reject) => {
+                logger.info(`Creating dir '${baseDir}' for tracer '${this.name}'`);
+                fs.mkdir(baseDir, { recursive: true }, (mkdirErr) => {
+                    if (mkdirErr) reject(mkdirErr);
+                    else resolve();
+                });
             });
         });
-    });
 };
+
 /**
  * Open tracer's stream
  *
@@ -244,8 +255,10 @@ Tracer.prototype._open = function () {
             // resolving here, because it is more simplier and reliable
             // than wait inside 'open'
             return Promise.resolve();
-        });
+        })
+        .catch(err => Promise.reject(err));
 };
+
 /**
  * Truncate destination file if needed
  *
@@ -280,6 +293,7 @@ Tracer.prototype._truncate = function () {
         }
     });
 };
+
 /**
  * Write data to stream. If tracer is not available then
  * no data will be written to stream.
@@ -301,6 +315,7 @@ Tracer.prototype._write = function (data) {
         }
     });
 };
+
 /**
  * Check if tracer ready to process data
  *
@@ -309,6 +324,7 @@ Tracer.prototype._write = function (data) {
 Tracer.prototype.isReady = function () {
     return this.state === Tracer.STATE.READY;
 };
+
 /**
  * Check if tracer is able to process/buffer data
  *
@@ -319,6 +335,7 @@ Tracer.prototype.isAvailable = function () {
         || this.state === Tracer.STATE.CREATED
         || this.state === Tracer.STATE.REOPEN;
 };
+
 /**
  * Check if tracer should be initialized
  *
@@ -328,12 +345,14 @@ Tracer.prototype.isNew = function () {
     return this.state === Tracer.STATE.NEW
         || this.state === Tracer.STATE.CLOSED;
 };
+
 /**
  * Update last touch timestamp
  */
 Tracer.prototype.touch = function () {
     this.lastGetTouch = new Date().getTime();
 };
+
 /**
  * Reopen stream if needed
  *
@@ -351,12 +370,14 @@ Tracer.prototype.reopenIfNeeded = function (schedule) {
         });
     }
 };
+
 /**
  * Close tracer's stream
  */
 Tracer.prototype.close = function () {
     this._setClosing();
 };
+
 /**
  * Stop tracer permanently
  */
@@ -365,19 +386,23 @@ Tracer.prototype.stop = function () {
     this._setState(Tracer.STATE.STOP);
     this.close();
 };
+
 /**
  * Write data to tracer
  *
  * @param {string} data - data to write to tracer
  */
 Tracer.prototype.write = function (data) {
-    this._open()
+    if (!data) return Promise.reject(new Error('Missing data to write'));
+
+    return this._open()
         .then(() => this._truncate())
         .then(() => this._write(data))
         .catch((err) => {
             logger.error(`tracer.write error: ${err}`);
         });
 };
+
 /**
  * instances cache
  */
@@ -407,6 +432,7 @@ Tracer.get = function (name, tracerPath) {
     }
     return tracer;
 };
+
 /**
  * Create tracer from config
  *
@@ -428,6 +454,7 @@ Tracer.createFromConfig = function (className, objName, config) {
     }
     return tracer;
 };
+
 /**
  * Remove registered tracer
  *
@@ -441,6 +468,7 @@ Tracer.removeTracer = function (tracer) {
         delete Tracer.instances[tracer.name];
     }
 };
+
 /**
  * Remove Tracer instance
  *
