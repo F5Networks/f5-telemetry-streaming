@@ -168,7 +168,7 @@
     },
     "events": {
         "renameKeys": { "ASM:unit_hostname": { "constant": "hostname" }, "BIGIP_HOSTNAME": { "constant": "hostname" } },
-        "classifyByKeys": [ "virtual_name", "policy_name" ]
+        "classifyByKeys": [ "virtual_name", "policy_name", "Access_Profile", "context_name" ]
     },
     "context": {
         "HOSTNAME": {

@@ -3,3 +3,4 @@ rpmbuild/
 .vscode/
 _build/
 docs/_build/
+.nyc_output/

@@ -63,22 +63,28 @@ function start(port, tracer, tags) {
                         }
                     }
                 };
-                const normalizedData = normalize.event(String(data), nOptions); // force string
-                if (tracer) {
-                    tracer.write(JSON.stringify(normalizedData, null, 4));
-                }
-                dataPipeline.process(normalizedData, 'event');
+                data = String(data).trim();
+                // note: data may contain multiple events seperated by newline
+                // however newline chars may also show up inside a given event
+                // so split only on newline with preceeding double quote
+                data = data.split('"\n');
+                data.forEach((i) => {
+                    const normalizedData = normalize.event(i, nOptions);
+                    if (tracer) {
+                        tracer.write(JSON.stringify(normalizedData, null, 4));
+                    }
+                    dataPipeline.process(normalizedData, 'event');
+                });
             });
-            // event on client connection close
             c.on('end', () => {
                 // logger.debug(`Client disconnected: ${c.remoteAddress}`);
             });
         });
-        // listen
+
         server.listen(options, () => {
             logger.debug(`Listener started on port ${port}`);
         });
-        // catch any errors
+
         server.on('error', (err) => {
             throw err;
         });

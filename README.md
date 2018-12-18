@@ -212,14 +212,6 @@ Note: More information about Graphite events can be found [here](https://graphit
 ```json
 {
     "class": "Telemetry",
-    "My_Poller": {
-        "class": "Telemetry_System_Poller",
-        "interval": 60
-    },
-    "My_Listener": {
-        "class": "Telemetry_Listener",
-        "port": 6514
-    },
     "My_Consumer": {
         "class": "Telemetry_Consumer",
         "type": "Azure_Log_Analytics",
@@ -349,11 +341,11 @@ Each config object has 'tracer' property. Possible values are:
 
 ```json
 {
-    "hostname": "hostname",
+    "hostname": "telemetry.bigip.com",
     "version": "14.0.0.1",
     "versionBuild": "0.0.2",
     "location": "Seattle",
-    "description": "My BIG-IP description",
+    "description": "Telemetry BIG-IP",
     "marketingName": "BIG-IP Virtual Edition",
     "platformId": "Z100",
     "chassisId": "9c3abad5-513a-1c43-5bc2be62e957",
@@ -769,9 +761,64 @@ Create LTM Request Log Profile:
 
 #### AFM Log
 
+Create Security Log Profile:
+
 TBD
 
+```json
+{
+    "acl_policy_name":"/Common/app",
+    "acl_policy_type":"Enforced",
+    "acl_rule_name":"ping",
+    "action":"Reject",
+    "hostname":"telemetry.bigip.com",
+    "bigip_mgmt_ip":"10.0.1.100",
+    "context_name":"/Common/app.app/app_vs",
+    "context_type":"Virtual Server",
+    "date_time":"Dec 17 2018 22:46:04",
+    "dest_fqdn":"unknown",
+    "dest_ip":"10.0.2.101",
+    "dst_geo":"Unknown",
+    "dest_port":"80",
+    "device_product":"Advanced Firewall Module",
+    "device_vendor":"F5",
+    "device_version":"14.0.0.1.0.0.2",
+    "drop_reason":"Policy",
+    "errdefs_msgno":"23003137",
+    "errdefs_msg_name":"Network Event",
+    "flow_id":"0000000000000000",
+    "ip_protocol":"TCP",
+    "severity":"8",
+    "partition_name":"Common",
+    "route_domain":"0",
+    "sa_translation_pool":"",
+    "sa_translation_type":"",
+    "source_fqdn":"unknown",
+    "source_ip":"50.206.82.144",
+    "src_geo":"US/Washington",
+    "source_port":"62204",
+    "source_user":"unknown",
+    "source_user_group":"unknown",
+    "translated_dest_ip":"",
+    "translated_dest_port":"",
+    "translated_ip_protocol":"",
+    "translated_route_domain":"",
+    "translated_source_ip":"",
+    "translated_source_port":"",
+    "translated_vlan":"",
+    "vlan":"/Common/external",
+    "send_to_vs":"",
+    "tenant":"Common",
+    "application":"app.app",
+    "telemetryEventCategory":"event"
+}
+```
+
 #### ASM Log
+
+Create Security Log Profile:
+
+TBD
 
 ```json
 {
@@ -827,7 +874,38 @@ TBD
 
 #### APM Log
 
-TBD
+Create APM Log Profile:
+
+- Create Pool (tmsh): ```create ltm pool telemetry-local monitor tcp members replace-all-with { 192.0.2.1:6514 }``` - Note: Replace example address with valid listener address, for example the mgmt IP.
+- Create Log Destination: System -> Logs -> Configuration -> Log Destinations
+  - Name: telemetry-hsl (or similar)
+  - Type: Remote HSL
+  - Protocol: TCP
+  - Pool: telemetry-local
+- Create Log Destination (format): System -> Logs -> Configuration -> Log Destinations
+  - Name: telemetry-formatted (or similar)
+  - Forward To: telemetry-hsl
+- Create Log Publisher: System -> Logs -> Configuration -> Log Publishers
+  - Name: telemetry-publisher (or similar)
+  - Destinations: telemetry-formatted
+- Create Profile (tmsh): ```create apm log-setting telemetry access replace-all-with { access { publisher telemetry-publisher } }```
+
+```json
+{
+    "hostname":"telemetry.bigip.com",
+    "errdefs_msgno":"01490102:5:",
+    "partition_name":"Common",
+    "session_id":"ec7fd55d",
+    "Access_Profile":"/Common/access_app",
+    "Partition":"Common",
+    "Session_Id":"ec7fd55d",
+    "Access_Policy_Result":"Logon_Deny",
+    "tenant":"Common",
+    "application":"",
+    "telemetryEventCategory":"event"
+}
+
+```
 
 ## Container
 

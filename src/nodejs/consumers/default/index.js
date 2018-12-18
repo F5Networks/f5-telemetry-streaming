@@ -18,8 +18,9 @@ module.exports = function (context) {
     const tracer = context.tracer; // eslint-disable-line no-unused-vars
 
     if (!event) {
-        logger.info('No event to process');
-        return;
+        const msg = 'No event to process';
+        logger.error(msg);
+        return Promise.reject(new Error(msg));
     }
 
     logger.info(`Data type '${event.type}' processed`);
@@ -27,4 +28,6 @@ module.exports = function (context) {
         // pretty JSON dump
         tracer.write(JSON.stringify(event.data, null, 4));
     }
+    // nothing to do, default plugin
+    return Promise.resolve();
 };

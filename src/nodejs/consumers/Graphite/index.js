@@ -39,10 +39,12 @@ module.exports = function (context) {
     request.post(requestOptions, (error, response, body) => {
         if (error) {
             context.logger.error(`error: ${error.message ? error.message : error}`);
+            if (body) context.logger.error(`response body: ${body}`); // API may provide error text via body
+        } else if (response.statusCode === 200) {
+            context.logger.debug('success');
         } else {
-            context.logger.debug(`response: ${response.statusCode} ${response.statusMessage}`);
-            // API may provide error text via body
-            if (body) context.logger.debug(`response body: ${body}`);
+            context.logger.info(`response: ${response.statusCode} ${response.statusMessage}`);
+            if (body) context.logger.info(`response body: ${body}`);
         }
     });
 };

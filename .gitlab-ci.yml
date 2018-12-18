@@ -1,4 +1,4 @@
-image: node:6.14.4
+image: node:8
 
 stages:
 - test
@@ -6,10 +6,8 @@ stages:
 - review
 
 test package:
-    image: f5devcentral/containthedocs:rpmbuild
     stage: test
     script:
-        - echo 'Running Tests'
         - npm install
         - npm run lint
         - npm run test

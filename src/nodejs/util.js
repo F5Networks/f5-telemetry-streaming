@@ -36,7 +36,8 @@ function Tracer(name, tracerPath) {
     this.state = Tracer.STATE.NEW;
     this.touch();
 }
-// check every 15 sec. if file eixsts or not
+
+// check every 15 sec. if file exists or not
 Tracer.REOPEN_INTERVAL = 15000;
 /**
  * Tracer states
@@ -51,6 +52,7 @@ Tracer.STATE = Object.freeze({
     REOPEN: 'REOPEN',
     STOP: 'STOP'
 });
+
 /**
  * Remove schedule 'reopen' function
  */
@@ -60,6 +62,7 @@ Tracer.prototype.removeScheduledReopen = function () {
         this.timeoutID = undefined;
     }
 };
+
 /**
  * Set state
  *
@@ -74,6 +77,7 @@ Tracer.prototype._setState = function (newState) {
     this.state = newState;
     logger.debug(`Tracer '${this.name}' changed state from ${oldState} to ${newState}`);
 };
+
 /**
  * Mark tracer as ready
  */
@@ -82,6 +86,7 @@ Tracer.prototype._setReady = function () {
     this.reopenIfNeeded(true);
     this._setState(Tracer.STATE.READY);
 };
+
 /**
  * Mark tracer as closed
  */
@@ -92,6 +97,7 @@ Tracer.prototype._setClosed = function () {
     this._setState(Tracer.STATE.CLOSED);
     logger.info(`Tracer '${this.name}' stream to file '${this.path}' closed`);
 };
+
 /**
  * Mark tracer as closing
  */
@@ -103,6 +109,7 @@ Tracer.prototype._setClosing = function () {
     }
     this._setState(Tracer.STATE.CLOSING);
 };
+
 /**
  * Update file's inode to handle situations when file was recreated outside.
  */
@@ -117,6 +124,7 @@ Tracer.prototype._updateInode = function () {
         }
     });
 };
+
 /**
  * Re-open tracer if destination file doesn't exists
  *
@@ -183,6 +191,7 @@ Tracer.prototype._reopenIfNeeded = function () {
         })
         .catch(err => logger.exception(`tracer._reopenIfNeeded exception: ${err}`, err));
 };
+
 /**
  * Create destination directory if needed
  *
@@ -199,19 +208,21 @@ Tracer.prototype._mkdir = function () {
             }
             resolve(exists);
         });
-    }).then((dirExists) => {
-        if (dirExists) {
-            return Promise.resolve();
-        }
-        return new Promise((resolve, reject) => {
-            logger.info(`Creating dir '${baseDir}' for tracer '${this.name}'`);
-            fs.mkdir(baseDir, { recursive: true }, (mkdirErr) => {
-                if (mkdirErr) reject(mkdirErr);
-                else resolve();
+    })
+        .then((dirExists) => {
+            if (dirExists) {
+                return Promise.resolve();
+            }
+            return new Promise((resolve, reject) => {
+                logger.info(`Creating dir '${baseDir}' for tracer '${this.name}'`);
+                fs.mkdir(baseDir, { recursive: true }, (mkdirErr) => {
+                    if (mkdirErr) reject(mkdirErr);
+                    else resolve();
+                });
             });
         });
-    });
 };
+
 /**
  * Open tracer's stream
  *
@@ -244,8 +255,10 @@ Tracer.prototype._open = function () {
             // resolving here, because it is more simplier and reliable
             // than wait inside 'open'
             return Promise.resolve();
-        });
+        })
+        .catch(err => Promise.reject(err));
 };
+
 /**
  * Truncate destination file if needed
  *
@@ -280,6 +293,7 @@ Tracer.prototype._truncate = function () {
         }
     });
 };
+
 /**
  * Write data to stream. If tracer is not available then
  * no data will be written to stream.
@@ -301,6 +315,7 @@ Tracer.prototype._write = function (data) {
         }
     });
 };
+
 /**
  * Check if tracer ready to process data
  *
@@ -309,6 +324,7 @@ Tracer.prototype._write = function (data) {
 Tracer.prototype.isReady = function () {
     return this.state === Tracer.STATE.READY;
 };
+
 /**
  * Check if tracer is able to process/buffer data
  *
@@ -319,6 +335,7 @@ Tracer.prototype.isAvailable = function () {
         || this.state === Tracer.STATE.CREATED
         || this.state === Tracer.STATE.REOPEN;
 };
+
 /**
  * Check if tracer should be initialized
  *
@@ -328,12 +345,14 @@ Tracer.prototype.isNew = function () {
     return this.state === Tracer.STATE.NEW
         || this.state === Tracer.STATE.CLOSED;
 };
+
 /**
  * Update last touch timestamp
  */
 Tracer.prototype.touch = function () {
     this.lastGetTouch = new Date().getTime();
 };
+
 /**
  * Reopen stream if needed
  *
@@ -351,12 +370,14 @@ Tracer.prototype.reopenIfNeeded = function (schedule) {
         });
     }
 };
+
 /**
  * Close tracer's stream
  */
 Tracer.prototype.close = function () {
     this._setClosing();
 };
+
 /**
  * Stop tracer permanently
  */
@@ -365,19 +386,23 @@ Tracer.prototype.stop = function () {
     this._setState(Tracer.STATE.STOP);
     this.close();
 };
+
 /**
  * Write data to tracer
  *
  * @param {string} data - data to write to tracer
  */
 Tracer.prototype.write = function (data) {
-    this._open()
+    if (!data) return Promise.reject(new Error('Missing data to write'));
+
+    return this._open()
         .then(() => this._truncate())
         .then(() => this._write(data))
         .catch((err) => {
             logger.error(`tracer.write error: ${err}`);
         });
 };
+
 /**
  * instances cache
  */
@@ -407,6 +432,7 @@ Tracer.get = function (name, tracerPath) {
     }
     return tracer;
 };
+
 /**
  * Create tracer from config
  *
@@ -428,6 +454,7 @@ Tracer.createFromConfig = function (className, objName, config) {
     }
     return tracer;
 };
+
 /**
  * Remove registered tracer
  *
@@ -441,6 +468,7 @@ Tracer.removeTracer = function (tracer) {
         delete Tracer.instances[tracer.name];
     }
 };
+
 /**
  * Remove Tracer instance
  *
@@ -546,6 +574,7 @@ module.exports = {
      */
     convertArrayToMap(data, key, options) {
         const ret = {};
+        options = options || {};
 
         if (!Array.isArray(data)) {
             throw new Error(`convertArrayToMap() array required: ${this.stringify(data)}`);
@@ -663,7 +692,7 @@ module.exports = {
      * @returns {Object} Returns promise resolved with response
      */
     makeRequest(host, uri, options) {
-        const opts = options === undefined ? {} : options;
+        options = options || {};
         const defaultHeaders = {
             Authorization: `Basic ${new Buffer('admin:').toString('base64')}`,
             'User-Agent': constants.USER_AGENT
@@ -673,17 +702,18 @@ module.exports = {
         // default to https, unless in defined list of http ports
         let fullUri = [80, 8080, 8100].indexOf(options.port) !== -1 ? `http://${host}` : `https://${host}`;
         fullUri = options.port ? `${fullUri}:${options.port}${uri}` : `${fullUri}:${constants.DEFAULT_PORT}${uri}`;
+        const method = options.method || 'GET';
         const requestOptions = {
             uri: fullUri,
-            method: opts.method || 'GET',
-            body: opts.body ? this.stringify(opts.body) : undefined,
-            headers: opts.headers || defaultHeaders,
+            method,
+            body: options.body ? this.stringify(options.body) : undefined,
+            headers: options.headers || defaultHeaders,
             strictSSL: constants.STRICT_TLS_REQUIRED
         };
 
-        // logger.debug(this.stringify(requestOptions));
         return new Promise((resolve, reject) => {
-            request(requestOptions, (err, res, body) => {
+            // using request.get, request.post, etc. - useful during unit test mocking
+            request[method.toLowerCase()](requestOptions, (err, res, body) => {
                 if (err) {
                     reject(new Error(`HTTP error: ${err}`));
                 } else if (res.statusCode === 200) {
@@ -712,9 +742,10 @@ module.exports = {
      * @param {Object} options         - function options
      * @param {Integer} [options.port] - HTTP port
      *
-     * @returns {Object} Returns promise resolved with auth token
+     * @returns {Object} Returns promise resolved with auth token: { token: 'token' }
      */
     getAuthToken(host, username, password, options) {
+        options = options || {};
         const uri = '/mgmt/shared/authn/login';
         const body = JSON.stringify({
             username,
@@ -728,10 +759,7 @@ module.exports = {
         };
 
         return this.makeRequest(host, uri, postOptions)
-            .then((data) => {
-                const ret = { token: data.token.token };
-                return ret;
-            })
+            .then(data => ({ token: data.token.token }))
             .catch((err) => {
                 const msg = `getAuthToken: ${err}`;
                 throw new Error(msg);
@@ -831,7 +859,7 @@ module.exports = {
     /**
      * Decrypt all secrets in config
      *
-     * @param {String} data - data (config)
+     * @param {Object} data - data (config)
      *
      * @returns {Object} Returns promise resolved with config containing decrypted secrets
      */
@@ -894,8 +922,7 @@ module.exports = {
                 let idx = 0;
                 passphrases.forEach((i) => {
                     // navigate to passphrase in data object and update
-                    // place decrypted value in 'text' key as this is more flexible,
-                    // could instead just make passphrase the decrypted value.
+                    // place decrypted value in 'text' key as this is more flexible
                     const passphrase = getPassphrase(data, i.path);
                     passphrase.text = res[idx];
                     idx += 1;

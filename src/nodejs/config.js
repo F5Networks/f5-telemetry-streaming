@@ -257,7 +257,7 @@ ConfigWorker.prototype.validateAndApply = function (data) {
  */
 ConfigWorker.prototype.processClientRequest = function (restOperation) {
     // try to validate new config
-    this.validateAndApply(restOperation.getBody())
+    return this.validateAndApply(restOperation.getBody())
         .then((config) => {
             util.restOperationResponder(restOperation, 200,
                 { message: 'success', declaration: config });

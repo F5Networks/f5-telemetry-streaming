@@ -48,8 +48,10 @@ module.exports = function (context) {
     request.post(requestOptions, (error, response, body) => {
         if (error) {
             context.logger.error(`error: ${error.message ? error.message : error}`);
+        } else if (response.statusCode === 200) {
+            context.logger.debug('success');
         } else {
-            context.logger.debug(`response: ${response.statusCode} ${response.statusMessage}`);
+            context.logger.info(`response: ${response.statusCode} ${response.statusMessage}`);
         }
     });
 };

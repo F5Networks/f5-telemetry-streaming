@@ -54,7 +54,6 @@ function loadModule(modulePath) {
                         ...
                     ]
 */
-// TODO: add logic to remove cached module from memory
 function loadConsumers(config) {
     if (!Array.isArray(config)) {
         logger.info('No consumer(s) to load, define in configuration first');
@@ -89,6 +88,7 @@ function loadConsumers(config) {
     }))
         .then(consumers => consumers.filter(consumer => consumer !== undefined));
 }
+
 /**
  * Get set of loaded Consumers' types
  *
@@ -100,8 +100,9 @@ function getLoadedConsumerTypes() {
     }
     return new Set();
 }
+
 /**
- * Unload garbage modules from cache
+ * Unload unused modules from cache
  *
  * @param {Set} before - set of Consumers' types before
  */
@@ -139,7 +140,7 @@ configWorker.on('change', (config) => {
 
     let consumersToLoad = [];
     if (!consumersConfig) {
-        consumersToLoad = undefined;
+        consumersToLoad = null;
     } else {
         Object.keys(consumersConfig).forEach((k) => {
             consumersToLoad.push({
@@ -150,7 +151,7 @@ configWorker.on('change', (config) => {
         });
     }
     const typesBefore = getLoadedConsumerTypes();
-    loadConsumers(consumersToLoad)
+    return loadConsumers(consumersToLoad)
         .then((consumers) => {
             CONSUMERS = consumers;
             logger.info(`${CONSUMERS.length} consumer plug-in(s) loaded`);
