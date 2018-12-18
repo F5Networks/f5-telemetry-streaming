@@ -737,6 +737,8 @@ Each config object has 'tracer' property. Possible values are:
 
 ### Events (Logs)
 
+**Note**: all 'keys' inside of events should be in lower case to enable classification (tenant/application).
+
 #### LTM Request Log
 
 Create LTM Request Log Profile:
