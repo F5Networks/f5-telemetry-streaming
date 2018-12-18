@@ -49,6 +49,12 @@
                 }
             },
             "additionalProperties": true
+        },
+        "match": {
+            "$comment": "Defaults do not get applied for $ref objects, so place defaults alongside instead.",
+            "title": "Pattern to filter data",
+            "description": "",
+            "type": "string"
         }
     },
     "properties": {
