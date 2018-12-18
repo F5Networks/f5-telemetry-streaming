@@ -3,11 +3,6 @@ Consumers
 
 Use this section to find example declarations and notes for supported consumers.
 
-.. _awslink:
-.. _azurelink:
-.. _grafanalink:
-.. _kafkalink:
-.. _splunklink:
 
 Splunk
 ~~~~~~
@@ -69,7 +64,7 @@ Example Declaration:
 
 Example Dashboard:
 
-|azure_dashboard_img|
+|azure_log_analytics_dashboard|
 
 AWS Cloud Watch
 ~~~~~~~~~~~~~~~
@@ -167,6 +162,8 @@ Required Information:
    :target: https://docs.microsoft.com/en-us/azure/azure-monitor/log-query/log-query-overview
    :alt: Microsoft Azure
 
+.. |azure_log_analytics_dashboard| image:: /images/azure_log_analytics_dashboard.png
+
 .. |grafana_img| image:: /images/grafana-logo.png
    :target: grafana_index.html
    :alt: Grafana
@@ -178,6 +175,7 @@ Required Information:
 .. |splunk_img| image:: /images/splunk_logo.png
    :target: https://www.splunk.com
    :alt: Splunk
+
 
 
 .. toctree::
