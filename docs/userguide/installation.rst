@@ -19,7 +19,7 @@ Installing Telemetry Streaming using the BIG-IP Configuration utility
 
 From the Configuration utility:
 
-1. Before you can use the Configuration utility, you must enable the framework using the BIG-IP command line. From the CLI, type the following command:  ``touch /var/config/rest/iapps/enable``.  You only need to run this command once (per BIG-IP system).*note about version 13.0 and 13.1*
+1. If you are using a BIG-IP version prior to 14.0,  before you can use the Configuration utility, you must enable the framework using the BIG-IP command line. From the CLI, type the following command:  ``touch /var/config/rest/iapps/enable``.  You only need to run this command once (per BIG-IP system).
 2. Click **iApps > Package Management LX**.  Your Telemetry Streaming version number may be different than the one shown in the following example.
 
    .. image:: /images/install1.png
