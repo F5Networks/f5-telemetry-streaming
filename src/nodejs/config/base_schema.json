@@ -67,10 +67,10 @@
             "default": "0.9.0"
        },
        "$schema": {
-        "title": "Schema",
-        "description": "",
-        "type": "string"
-   }
+            "title": "Schema",
+            "description": "",
+            "type": "string"
+        }
     },
     "additionalProperties": {
         "$comment": "AJV does not resolve defaults inside oneOf/anyOf, so instead use allOf.  Any schema refs should also use allOf with an if/then/else on class",

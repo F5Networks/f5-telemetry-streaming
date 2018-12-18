@@ -1,0 +1,118 @@
+{
+    "$id": "schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "",
+    "description": "",
+    "type": "object",
+    "properties": {
+        "hostname": {
+            "type": "string"
+        },
+        "version": {
+            "type": "string"
+        },
+        "versionBuild": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string"
+        },
+        "description": {
+            "type": "string"
+        },
+        "marketingName": {
+            "type": "string"
+        },
+        "platformId": {
+            "type": "string"
+        },
+        "chassisId": {
+            "type": "string"
+        },
+        "baseMac": {
+            "type": "string"
+        },
+        "callBackUrl": {
+            "type": "string"
+        },
+        "configReady": {
+            "type": "string"
+        },
+        "licenseReady": {
+            "type": "string"
+        },
+        "provisionReady": {
+            "type": "string"
+        },
+        "syncMode": {
+            "type": "string"
+        },
+        "syncColor": {
+            "type": "string"
+        },
+        "syncStatus": {
+            "type": "string"
+        },
+        "syncSummary": {
+            "type": "string"
+        },
+        "failoverStatus": {
+            "type": "string"
+        },
+        "failoverColor": {
+            "type": "string"
+        },
+        "deviceTimestamp": {
+            "type": "string"
+        },
+        "cpu": {
+            "type": "integer"
+        },
+        "memory": {
+            "type": "integer"
+        },
+        "tmmCpu": {
+            "type": "integer"
+        },
+        "tmmMemory": {
+            "type": "integer"
+        },
+        "tmmTraffic": {
+            "type": "object"
+        },
+        "diskStorage": {
+            "type": "object"
+        },
+        "diskLatency": {
+            "type": "object"
+        },
+        "networkInterfaces": {
+            "type": "object"
+        },
+        "provisionState": {
+            "type": "object"
+        },
+        "virtualServerStats": {
+            "type": "object"
+        },
+        "poolStats": {
+            "type": "object"
+        },
+        "ltmPolicyStats": {
+            "type": "object"
+        },
+        "tlsCerts": {
+            "type": "object"
+        },
+        "telemetryServiceInfo": {
+            "type": "object"
+        },
+        "telemetryEventCategory": {
+            "type": "string",
+            "enum": [ "systemInfo" ]
+        }
+    },
+    "additionalProperties": false,
+    "$comment": "The 'required' keyword will be enumerated with all 'properties' keys at validation runtime",
+    "required": []
+}
