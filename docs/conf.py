@@ -66,7 +66,7 @@ source_encoding = 'utf-8-sig'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Telemetry Services'
+project = u'Telemetry Streaming'
 copyright = u'2018 F5 Networks Inc'
 author = u'F5 Networks'
 
@@ -75,7 +75,7 @@ author = u'F5 Networks'
 # built documents.
 #
 # The short X.Y version.
-version = u'1.0'
+version = u'0.9'
 # The full version, including alpha/beta/rc tags.
 #release = u'0.1.0'
 

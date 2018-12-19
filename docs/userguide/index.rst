@@ -7,8 +7,10 @@ User Guide
    :glob:
 
    about-telemetry.rst
-   quick-start.rst
    prereqs.rst
+   quick-start.rst
    installation.rst
+   setting-up-consumer.rst
    declarations.rst
+   output-example.rst
    troubleshooting.rst
