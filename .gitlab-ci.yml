@@ -18,16 +18,15 @@ test functional:
     stage: test
     script:
         - npm install
-        - echo "$VIO_HOST $VIO_HOST_USER"
         - npm run test-functional
     tags:
         - cm-official-docker-executor
     only:
+        # run if scheduled
         - schedules
+        # run for specific branches
         - develop
         - master
-        # temp
-        - /.*functional/
 
 build package:
   image: f5devcentral/containthedocs:rpmbuild
