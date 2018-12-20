@@ -6,16 +6,16 @@
  * the software product on devcentral.f5.com.
  */
 
-const assert = require('assert');
-const fs = require('fs');
-
-const util = require('./util.js');
-
 /* eslint-disable global-require */
 
-const host = '10.144.73.16'; // replace
-const user = 'admin'; // replace
-const password = 'admin'; // replace
+const assert = require('assert');
+const fs = require('fs');
+const util = require('./util.js');
+
+// environment variables should exist when run (whether via pipeline or manually)
+const host = process.env.VIO_HOST;
+const user = process.env.VIO_HOST_USER;
+const password = process.env.VIO_HOST_PWD;
 
 const baseILXUri = '/mgmt/shared/telemetry';
 
@@ -25,6 +25,7 @@ describe('Basic', function () {
     this.timeout(1000 * 60 * 30); // 30 minutes
     this.slow(1000 * 60 * 5); // 5 minutes
 
+    let packageFile;
     let authToken = null;
     let options = {};
     // prior to running any tests need to setup environment
@@ -52,11 +53,9 @@ describe('Basic', function () {
     it('should install package', () => {
         const distDir = `${__dirname}/../../dist`;
         const distFiles = fs.readdirSync(distDir);
-        const packageName = distFiles.filter(f => f.includes('.rpm') && !f.includes('.sha256'))[0];
-        const file = `${distDir}/${packageName}`;
+        packageFile = distFiles.filter(f => f.includes('.rpm') && !f.includes('.sha256'))[0];
 
-        // return util.installPackage(host, authToken, file) - dependency does not support yet
-        return util.installPackage(host, user, password, file)
+        return util.installPackage(host, authToken, `${distDir}/${packageFile}`)
             .then(() => {})
             .catch(err => Promise.reject(err));
     });
@@ -87,5 +86,14 @@ describe('Basic', function () {
                 data = data || {};
                 assert.strictEqual(data.message, 'success');
             });
+    });
+
+    it('should uninstall package', () => {
+        // package name should be the file name without the .rpm at the end
+        const installedPackage = `${packageFile.replace('.rpm', '')}`;
+
+        return util.uninstallPackage(host, authToken, installedPackage)
+            .then(() => {})
+            .catch(err => Promise.reject(err));
     });
 });

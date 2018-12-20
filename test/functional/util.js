@@ -34,13 +34,13 @@ module.exports = {
     /**
      * Perform HTTP request
      *
-     * @param {String} host                          - HTTP host
-     * @param {String} uri                           - HTTP uri
-     * @param {Object} options                       - function options
-     * @param {Integer} [options.port]               - HTTP port
-     * @param {String} [options.method]              - HTTP method
-     * @param {String} [options.body]                - HTTP body
-     * @param {Object} [options.headers]             - HTTP headers
+     * @param {String} host              - HTTP host
+     * @param {String} uri               - HTTP uri
+     * @param {Object} options           - function options
+     * @param {Integer} [options.port]   - HTTP port
+     * @param {String} [options.method]  - HTTP method
+     * @param {String} [options.body]    - HTTP body
+     * @param {Object} [options.headers] - HTTP headers
      *
      * @returns {Object} Returns promise resolved with response
      */
@@ -78,9 +78,9 @@ module.exports = {
     /**
      * Get auth token
      *
-     * @param {String} host     - HTTP host
-     * @param {String} username - device username
-     * @param {String} password - device password
+     * @param {String} host     - host
+     * @param {String} username - username
+     * @param {String} password - password
      *
      * @returns {Object} Returns promise resolved with auth token: { token: 'token' }
      */
@@ -107,19 +107,16 @@ module.exports = {
     /**
      * Install ILX package
      *
-     * @param {String} host     - host
-     * @param {String} username - username
-     * @param {String} password - password
-     * @param {String} file     - local file (RPM) to install
+     * @param {String} host      - host
+     * @param {String} authToken - auth token
+     * @param {String} file      - local file (RPM) to install
      *
      * @returns {Promise} Returns promise resolved upon completion
      */
-    installPackage(host, username, password, file) {
+    installPackage(host, authToken, file) {
         const opts = {
             HOST: host,
-            USER: username,
-            PASS: password,
-            AUTH_TOKEN: undefined // not used, for now
+            AUTH_TOKEN: authToken
         };
 
         return new Promise((resolve, reject) => {
@@ -129,6 +126,32 @@ module.exports = {
                     // in that case error is of type 'string' - instead of in .message
                     if (typeof err === 'string' && err.includes('already installed')) resolve();
                     else reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
+    },
+
+    /**
+     * Uninstall ILX package
+     *
+     * @param {String} host      - host
+     * @param {String} authToken - auth token
+     * @param {String} pkg       - package to remove from device
+     *
+     * @returns {Promise} Returns promise resolved upon completion
+     */
+    uninstallPackage(host, authToken, pkg) {
+        const opts = {
+            HOST: host,
+            AUTH_TOKEN: authToken
+        };
+
+        return new Promise((resolve, reject) => {
+            icrdk.uninstallPackage(opts, pkg, (err) => {
+                if (err) {
+                    reject(err);
                 } else {
                     resolve();
                 }

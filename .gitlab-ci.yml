@@ -14,21 +14,35 @@ test package:
     tags:
     - cm-official-docker-executor
 
+test functional:
+    stage: test
+    script:
+        - npm install
+        - npm run test-functional
+    tags:
+        - cm-official-docker-executor
+    only:
+        - schedules
+        - develop
+        - master
+        # temp
+        - /.*functional/
+
 build package:
   image: f5devcentral/containthedocs:rpmbuild
   stage: build
   script:
-  - echo 'CI BUILD'
-  # install packages first
-  - npm install --production
-  # run build_rpm script
-  - bash ./scripts/build_rpm.sh
+    - echo 'CI BUILD'
+    # install packages first
+    - npm install --production
+    # run build_rpm script
+    - bash ./scripts/build_rpm.sh
   tags:
-  - cm-official-docker-executor
+    - cm-official-docker-executor
   artifacts:
     name: f5-telemetry-$CI_BUILD_REF
     paths:
-    - dist
+        - dist
     expire_in: 1 month
 
 build docs:
