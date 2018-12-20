@@ -10,25 +10,27 @@
 
 const assert = require('assert');
 const fs = require('fs');
+const net = require('net');
 const util = require('./util.js');
 
 // environment variables should exist when run (whether via pipeline or manually)
 const host = process.env.VIO_HOST;
 const user = process.env.VIO_HOST_USER;
 const password = process.env.VIO_HOST_PWD;
+// end environment variables
 
 const baseILXUri = '/mgmt/shared/telemetry';
 
 // purpose: basic functional test
 describe('Basic', function () {
-    // set long-lived timeouts for test suite
+    // set long(er) lived timeouts for test suite
     this.timeout(1000 * 60 * 30); // 30 minutes
     this.slow(1000 * 60 * 5); // 5 minutes
 
     let packageFile;
     let authToken = null;
     let options = {};
-    // prior to running any tests need to setup environment
+
     // eslint-disable-next-line arrow-body-style
     before(() => {
         // get auth token
@@ -49,6 +51,9 @@ describe('Basic', function () {
             delete require.cache[key];
         });
     });
+
+    const basicExample = `${__dirname}/basic.json`;
+    const basicConfig = fs.readFileSync(basicExample).toString();
 
     it('should install package', () => {
         const distDir = `${__dirname}/../../dist`;
@@ -72,13 +77,11 @@ describe('Basic', function () {
 
     it('should accept configuration', () => {
         const uri = `${baseILXUri}/declare`;
-        const baseExample = `${__dirname}/../../examples/declarations/basic.json`;
-        const config = fs.readFileSync(baseExample).toString();
 
         const postOptions = {
             method: 'POST',
             headers: options.headers,
-            body: config
+            body: basicConfig
         };
 
         return util.makeRequest(host, uri, postOptions)
@@ -86,6 +89,35 @@ describe('Basic', function () {
                 data = data || {};
                 assert.strictEqual(data.message, 'success');
             });
+    });
+
+    it('should get systempoller info', () => {
+        const uri = `${baseILXUri}/systempoller/My_Poller`;
+
+        return util.makeRequest(host, uri, options)
+            .then((data) => {
+                data = data || {};
+                assert.notStrictEqual(data.hostname, undefined);
+            });
+    });
+
+    it('should ensure event listener is up', () => {
+        const port = 6514;
+        // to reach listener via mgmt IP requires allowing through host fw using below command (or similar)
+        // tmsh modify security firewall management-ip-rules rules replace-all-with { telemetry
+        // { place-before first ip-protocol tcp destination { ports replace-all-with { 6514 } } action accept } }
+
+        return new Promise((resolve, reject) => {
+            const client = net.createConnection({ host, port }, () => {
+                client.end();
+            });
+            client.on('end', () => {
+                resolve();
+            });
+            client.on('error', (err) => {
+                reject(err);
+            });
+        });
     });
 
     it('should uninstall package', () => {

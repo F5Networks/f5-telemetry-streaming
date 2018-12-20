@@ -12,7 +12,7 @@ test package:
         - npm run lint
         - npm run test
     tags:
-    - cm-official-docker-executor
+        - cm-official-docker-executor
 
 test functional:
     stage: test
@@ -35,7 +35,6 @@ build package:
     - echo 'CI BUILD'
     # install packages first
     - npm install --production
-    # run build_rpm script
     - bash ./scripts/build_rpm.sh
   tags:
     - cm-official-docker-executor
