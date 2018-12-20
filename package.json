@@ -3,7 +3,8 @@
     "version": "0.9.0",
     "scripts": {
         "lint": "eslint src",
-        "test": "nyc mocha --recursive \"./test/*.js\""
+        "test": "nyc mocha --recursive \"./test/*.js\"",
+        "test-functional": "mocha --recursive \"./test/functional/*.js\""
     },
     "dependencies": {
         "ajv": "^6.5.4",
@@ -18,6 +19,7 @@
         "eslint-config-airbnb-base": "^13.1.0",
         "eslint-plugin-import": "^2.14.0",
         "mocha": "^5.2.0",
-        "nyc": "^13.1.0"
+        "nyc": "^13.1.0",
+        "icrdk": "git://github.com/f5devcentral/f5-icontrollx-dev-kit#master"
     }
 }
