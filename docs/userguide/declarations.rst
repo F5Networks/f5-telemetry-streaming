@@ -8,31 +8,22 @@ Base Declaration
 
     {
         "class": "Telemetry",
-        "configuration": {
-            "My_Poller": {
-                "class": "System_Poller",
-                "enabled": true,
-                "trace": false,
-                "interval": 60,
-                "host": "x.x.x.x",
-                "port": 443,
-                "username": "myuser",
-                "passphrase": "mypassphrase",
-            },
-            "My_Listener": {
-                "class": "Event_Listener",
-                "enabled": true,
-                "trace": false,
-                "port": 6514
-            },
-            "My_Consumer": {
-                "class": "Consumer",
-                "enabled": true,
-                "trace": false,
-                "type": "Azure_Log_Analytics",
-                "host": "myworkspaceid",
-                "passphrase": "mysharedkey"
-                
+        "My_Poller": {
+            "class": "Telemetry_System_Poller",
+            "interval": 60
+        },
+        "My_Listener": {
+            "class": "Telemetry_Listener",
+            "port": 6514
+        },
+        "My_Consumer": {
+            "class": "Telemetry_Consumer",
+            "type": "Splunk",
+            "host": "192.0.2.1",
+            "protocol": "http",
+            "port": "8088",
+            "passphrase": {
+                "cipherText": "apikey"
             }
         }
     }
@@ -45,14 +36,6 @@ Example 2: Two Consumers
 
     {
         "class": "Telemetry",
-        "My_Poller": {
-            "class": "Telemetry_System_Poller",
-            "interval": 60
-        },
-        "My_Listener": {
-            "class": "Telemetry_Listener",
-            "port": 6514
-        },
         "My_Consumer": {
             "class": "Telemetry_Consumer",
             "type": "Azure_Log_Analytics",
@@ -74,6 +57,7 @@ Example 2: Two Consumers
     }
 
 
+
 Example 3: External System (BIG-IP)
 -----------------------------------
 .. code-block:: json
@@ -89,5 +73,17 @@ Example 3: External System (BIG-IP)
             "passphrase": {
                 "cipherText": "mypassphrase"
             }
+        }
+    }
+
+
+Example 4: Container passphrase handling
+----------------------------------------
+.. code-block:: json
+   :linenos:
+   
+    {
+        "passphrase": {
+            "environmentVar": "MY_SECRET_ENV_VAR"
         }
     }
