@@ -16,10 +16,6 @@ Telemetry Streaming is an iControl LX extension that sends telemetry information
 -  Graphite
 
 
-You can also watch this video on Telemetry Streaming:
-
-|video|
-
 Use the following links, the navigation on the left, and/or the Next and
 Previous buttons to explore the documentation.
 

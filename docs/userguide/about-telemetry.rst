@@ -1,7 +1,7 @@
 About Telemetry Streaming
 =========================
 
-Telemetry Streaming is an iControl LX extension that sends telemetry information, such as client/server stats, from the BIG-IP to third-party monitoring and stats aggregation tools.
+Telemetry Streaming is an iControl LX extension that aggregates, normalizes, and forwards statistics and events from the BIG-IP to a consumer application.
 
 .. image:: /images/telemetry-streaming-diagram.png
 
