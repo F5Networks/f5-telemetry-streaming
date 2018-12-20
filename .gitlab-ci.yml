@@ -18,6 +18,7 @@ test functional:
     stage: test
     script:
         - npm install
+        - echo "$VIO_HOST $VIO_HOST_USER"
         - npm run test-functional
     tags:
         - cm-official-docker-executor
