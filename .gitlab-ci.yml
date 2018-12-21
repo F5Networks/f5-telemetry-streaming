@@ -21,6 +21,20 @@ build package:
         - dist
     expire_in: 1 month
 
+build docs:
+    image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
+    stage: build
+    script:
+        - make html
+        - vale --glob='*.{md,rst}' .
+      #  - make linkcheck
+    tags:
+        - docker-executor
+    artifacts:
+        paths:
+            - docs/_build/html
+        expire_in: 1 month
+
 test package:
     stage: test
     script:
@@ -32,8 +46,11 @@ test package:
 
 test functional:
     stage: test
+    dependencies:
+        - build package
     script:
         - npm install
+        - ls ./dist -ls
         - npm run test-functional
     tags:
         - cm-official-docker-executor
@@ -44,19 +61,6 @@ test functional:
         - develop
         - master
         - /.*functional/
-
-build docs:
-    image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
-    script:
-        - make html
-        - vale --glob='*.{md,rst}' .
-      #  - make linkcheck
-    tags:
-        - docker-executor
-    stage: build
-    artifacts:
-        paths:
-            - docs/_build/html
 
 pages:
     image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
