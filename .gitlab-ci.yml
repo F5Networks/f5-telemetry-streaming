@@ -1,36 +1,9 @@
 image: node:8
 
 stages:
-- test
 - build
+- test
 - review
-
-test package:
-    stage: test
-    script:
-        - npm install
-        - npm run lint
-        - npm run test
-    tags:
-        - cm-official-docker-executor
-
-test functional:
-    stage: test
-    script:
-        - npm install
-        # build new rpm for functional tests to consume - avoid silent failure
-        - bash ./scripts/build_rpm.sh
-        - if [ $? -ne 0 ]; then exit 1; fi
-        - npm run test-functional
-    tags:
-        - cm-official-docker-executor
-    only:
-        # run if scheduled
-        - schedules
-        # run for specific branches
-        - develop
-        - master
-        - /.*functional/
 
 build package:
   image: f5devcentral/containthedocs:rpmbuild
@@ -47,6 +20,30 @@ build package:
     paths:
         - dist
     expire_in: 1 month
+
+test package:
+    stage: test
+    script:
+        - npm install
+        - npm run lint
+        - npm run test
+    tags:
+        - cm-official-docker-executor
+
+test functional:
+    stage: test
+    script:
+        - npm install
+        - npm run test-functional
+    tags:
+        - cm-official-docker-executor
+    only:
+        # run if scheduled
+        - schedules
+        # run for specific branches
+        - develop
+        - master
+        - /.*functional/
 
 build docs:
     image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
