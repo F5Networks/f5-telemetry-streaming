@@ -34,8 +34,7 @@ up and running with Telemetry Streaming.
    which is a good start if you don't have an example in mind.
 
 #. Paste the declaration into your API client, and modify names and IP addresses
-   as applicable.  See :ref:`schema-reference` for additional options you can
-   declare.
+   as applicable.
 
 #. POST to the URI ``https://<BIG-IP>/mgmt/shared/telemetry/declare``
 
