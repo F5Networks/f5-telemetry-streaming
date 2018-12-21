@@ -85,7 +85,7 @@ If for any reason you want to revert to a previous version of Telemetry Streamin
 
 .. |github| raw:: html
 
-   <a href="https://github.com/F5Networks/f5-telemetry" target="_blank">F5 Telemetry site on GitHub</a>
+   <a href="https://github.com/F5Networks/f5-telemetry-streaming" target="_blank">F5 Telemetry site on GitHub</a>
 
 |
 
@@ -101,4 +101,4 @@ Linux: ``sha256sum <path_to_template>``
 
 Windows using CertUtil: ``CertUtil –hashfile <path_to_template> SHA256``
 
-You can compare the checksum produced by that command against the **.sha256** file in the **dist** directory (https://github.com/F5Networks/f5-telemetry/tree/master/dist).
+You can compare the checksum produced by that command against the **.sha256** file in the **dist** directory (https://github.com/f5devcentral/f5-telemetry-streaming/tree/master/dist).

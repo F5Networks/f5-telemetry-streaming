@@ -40,8 +40,8 @@ Microsoft Azure Log Analytics
 |azure_img|
 
 Required Information:
- -Workspace ID: Navigate to :guilabel:`Log Analytics workspace > Advanced Settings > Connected Sources`.
- -Shared Key: Navigate to :guilabel:`Log Analytics workspace > Advanced Settings > Connected Sources` and use the primary key.
+ - Workspace ID: Navigate to :guilabel:`Log Analytics workspace > Advanced Settings > Connected Sources`.
+ - Shared Key: Navigate to :guilabel:`Log Analytics workspace > Advanced Settings > Connected Sources` and use the primary key.
 
 .. NOTE:: To see more information about sending data to Log Analytics, see |HTTP Data Collector API|.
 
@@ -100,6 +100,7 @@ Example Declaration:
 
 AWS S3
 ~~~~~~
+|aws_s3|
 
 Required Information:
  - Region: AWS region of the S3 bucket.
@@ -130,6 +131,7 @@ Example Declaration:
 
 Graphite
 ~~~~~~~~
+|graphite|
 
 Required Information:
  - Host: The address of the Graphite system.
@@ -155,8 +157,16 @@ Required Information:
 
 
 .. |aws_img| image:: /images/aws_logo.png
-   :target: aws_index.html
+   :target: https://aws.amazon.com/cloudwatch/
    :alt: Amazon Web Services
+
+.. |aws_s3| image:: /images/aws_s3.png
+   :target: https://aws.amazon.com/s3/
+   :alt: Amazon Web Services
+
+.. |graphite| image:: /images/graphite.png
+   :target: https://graphiteapp.org/
+   :alt: Graphite
 
 .. |azure_img| image:: /images/azure_logo.png
    :target: https://docs.microsoft.com/en-us/azure/azure-monitor/log-query/log-query-overview
