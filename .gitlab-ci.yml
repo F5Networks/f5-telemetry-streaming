@@ -46,8 +46,8 @@ test package:
 
 test functional:
     stage: test
-    dependencies:
-        - build package
+    #dependencies:
+    #    - build package
     script:
         - npm install
         - ls ./dist -ls

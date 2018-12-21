@@ -39,6 +39,7 @@ describe('Basic', function () {
     packageFiles.forEach((f) => {
         const fStats = fs.lstatSync(`${distDir}/${f}`);
         if (fStats.birthtimeMs > latest.time) latest.file = f; latest.time = fStats.birthtimeMs;
+        console.log('fStats', fStats);
     });
     const packageFile = latest.file;
     console.log(`Package File: ${packageFile}`); // eslint-disable-line no-console
