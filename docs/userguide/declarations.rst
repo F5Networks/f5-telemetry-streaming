@@ -76,14 +76,3 @@ Example 3: External System (BIG-IP)
         }
     }
 
-
-Example 4: Container passphrase handling
-----------------------------------------
-.. code-block:: json
-   :linenos:
-   
-    {
-        "passphrase": {
-            "environmentVar": "MY_SECRET_ENV_VAR"
-        }
-    }
