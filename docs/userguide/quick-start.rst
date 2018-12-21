@@ -57,14 +57,15 @@ up and running with Telemetry Streaming.
         "My_Consumer": {
             "class": "Telemetry_Consumer",
             "type": "Splunk",
-            "host": "myworkspaceid",
+            "host": "192.0.2.1",
             "protocol": "http",
-            "port": "8088"
+            "port": "8088",
             "passphrase": {
                 "cipherText": "apikey"
             }
         }
     }
+
 
     
 .. |github| raw:: html
