@@ -15,13 +15,12 @@ test package:
         - cm-official-docker-executor
 
 test functional:
-    image: f5devcentral/containthedocs:rpmbuild
     stage: test
     script:
         - npm install
-        # build new rpm for functional tests to consume
+        # build new rpm for functional tests to consume - avoid silent failure
         - bash ./scripts/build_rpm.sh
-        # ok, now test
+        - if [ $? -ne 0 ]; then exit 1; fi
         - npm run test-functional
     tags:
         - cm-official-docker-executor
