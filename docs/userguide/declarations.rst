@@ -2,7 +2,7 @@ Example Declarations
 ====================
 
 Example 1: Base Declaration
-----------------
+---------------------------
 .. code-block:: json
    :linenos:
 
