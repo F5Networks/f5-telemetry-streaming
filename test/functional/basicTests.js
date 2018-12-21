@@ -27,10 +27,24 @@ describe('Basic', function () {
     this.timeout(1000 * 60 * 30); // 30 minutes
     this.slow(1000 * 60 * 5); // 5 minutes
 
-    let packageFile;
+    const basicExample = `${__dirname}/basic.json`;
+    const basicConfig = fs.readFileSync(basicExample).toString();
+
+    const distDir = `${__dirname}/../../dist`;
+    const distFiles = fs.readdirSync(distDir);
+    const packageFiles = distFiles.filter(f => f.includes('.rpm') && !f.includes('.sha256'));
+
+    // get latest rpm file (by timestamp since epoch)
+    const latest = { file: null, time: 0 };
+    packageFiles.forEach((f) => {
+        const fStats = fs.lstatSync(`${distDir}/${f}`);
+        if (fStats.birthtimeMs > latest.time) latest.file = f; latest.time = fStats.birthtimeMs;
+    });
+    const packageFile = latest.file;
+    console.log(`Package File: ${packageFile}`); // eslint-disable-line no-console
+
     let authToken = null;
     let options = {};
-
     // eslint-disable-next-line arrow-body-style
     before(() => {
         // get auth token
@@ -52,15 +66,9 @@ describe('Basic', function () {
         });
     });
 
-    const basicExample = `${__dirname}/basic.json`;
-    const basicConfig = fs.readFileSync(basicExample).toString();
-
     it('should install package', () => {
-        const distDir = `${__dirname}/../../dist`;
-        const distFiles = fs.readdirSync(distDir);
-        packageFile = distFiles.filter(f => f.includes('.rpm') && !f.includes('.sha256'))[0];
-
-        return util.installPackage(host, authToken, `${distDir}/${packageFile}`)
+        const fullPath = `${distDir}/${packageFile}`;
+        return util.installPackage(host, authToken, fullPath)
             .then(() => {})
             .catch(err => Promise.reject(err));
     });

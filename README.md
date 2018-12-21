@@ -820,7 +820,10 @@ TBD
 
 Create Security Log Profile:
 
-TBD
+- Storage Destination: Remote Storage
+- Logging Format: Key-Value Pairs (Splunk)
+- Protocol: TCP
+- Server Addresses: 192.0.2.1:6514
 
 ```json
 {

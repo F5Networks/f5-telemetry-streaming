@@ -57,13 +57,14 @@ Object.defineProperty(ConfigWorker.prototype, 'config', {
  *
  * @public
  * @param {Object} newConfig - new config
- * @param {bool} fire - fire 'change' event or not
+ * @param {Boolean} fire     - fire 'change' event or not
  */
 ConfigWorker.prototype.setConfig = function (newConfig, fire) {
     this._state.config = newConfig;
-    if (fire === undefined || fire) {
-        this._notifyConfigChange();
+    if (fire !== false) {
+        return this._notifyConfigChange();
     }
+    return Promise.resolve();
 };
 
 /**
@@ -74,7 +75,7 @@ ConfigWorker.prototype.setConfig = function (newConfig, fire) {
  */
 ConfigWorker.prototype._notifyConfigChange = function () {
     // handle passphrases first - decrypt, download, etc.
-    util.decryptAllSecrets(this._state.config)
+    return util.decryptAllSecrets(this._state.config)
         .then((config) => {
             // copy config to avoid changes from listeners
             this.emit('change', JSON.parse(JSON.stringify(config)));
@@ -241,7 +242,7 @@ ConfigWorker.prototype.validateAndApply = function (data) {
         })
         .then(() => {
             // propagate config change
-            this.setConfig(this.config);
+            this.setConfig(this.config, true);
             return validatedConfig;
         })
         .catch(error => Promise.reject(error));

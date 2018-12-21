@@ -56,7 +56,7 @@ describe('Consumers plugins', () => {
                 assert.fail('Should throw an error');
             })
             .catch((err) => {
-                if (err.code === 'ERR_ASSERTION') return Promise.reject();
+                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
                 return Promise.resolve(); // resolve, expected an error
             });
     });

@@ -17,6 +17,9 @@ test package:
 test functional:
     stage: test
     script:
+        # build new rpm for functional tests to consume
+        - bash ./scripts/build_rpm.sh
+        # ok, now test
         - npm install
         - npm run test-functional
     tags:
@@ -27,6 +30,7 @@ test functional:
         # run for specific branches
         - develop
         - master
+        - /.*functional/
 
 build package:
   image: f5devcentral/containthedocs:rpmbuild
