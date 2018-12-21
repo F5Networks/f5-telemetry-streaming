@@ -46,8 +46,6 @@ test package:
 
 test functional:
     stage: test
-    #dependencies:
-    #    - build package
     script:
         - npm install
         - ls ./dist -ls
@@ -60,7 +58,6 @@ test functional:
         # run for specific branches
         - develop
         - master
-        - /.*functional/
 
 pages:
     image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed

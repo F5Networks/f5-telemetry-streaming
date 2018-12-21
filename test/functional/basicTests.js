@@ -35,7 +35,7 @@ describe('Basic', function () {
     const packageFiles = distFiles.filter(f => f.includes('.rpm') && !f.includes('.sha256'));
 
     // get latest rpm file (by timestamp since epoch)
-    // this might not work if the artifact updates timestamps
+    // note: this might not work if the artifact resets the timestamps
     const latest = { file: null, time: 0 };
     packageFiles.forEach((f) => {
         const fStats = fs.lstatSync(`${distDir}/${f}`);
