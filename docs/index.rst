@@ -7,7 +7,7 @@ To provide feedback on this documentation, you can file a GitHub Issue, or email
 Introduction
 ------------
 
-Telemetry Streaming is an iControl LX extension that sends telemetry information, such as client/server stats, from the BIG-IP to third-party monitoring and stats aggregation tools. The supported third-party consumers include:
+Telemetry Streaming (TS) is an iControl LX Extension delivered as a TMOS-independent RPM file. Installing the TS Extension on BIG-IP enables you to declaratively aggregate, normalize, and forward statistics and events from the BIG-IP to a consumer application by POSTing a single TS JSON declaration to TS’s declarative REST API endpoint. The supported third-party consumers include:
 
 -  Splunk
 -  Azure Log Analytics
