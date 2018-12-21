@@ -1,45 +1,8 @@
 Example Declarations
 ====================
 
-Base Declaration
-----------------
-.. code-block:: json
-   :linenos:
-
-    {
-        "class": "Telemetry",
-        "configuration": {
-            "My_Poller": {
-                "class": "System_Poller",
-                "enabled": true,
-                "trace": false,
-                "interval": 60,
-                "host": "x.x.x.x",
-                "port": 443,
-                "username": "myuser",
-                "passphrase": "mypassphrase",
-            },
-            "My_Listener": {
-                "class": "Event_Listener",
-                "enabled": true,
-                "trace": false,
-                "port": 6514
-            },
-            "My_Consumer": {
-                "class": "Consumer",
-                "enabled": true,
-                "trace": false,
-                "type": "Azure_Log_Analytics",
-                "host": "myworkspaceid",
-                "passphrase": "mysharedkey"
-                
-            }
-        }
-    }
-
-
-Example 2: Two Consumers
-------------------------
+Example 1: Base Declaration
+---------------------------
 .. code-block:: json
    :linenos:
 
@@ -53,6 +16,26 @@ Example 2: Two Consumers
             "class": "Telemetry_Listener",
             "port": 6514
         },
+        "My_Consumer": {
+            "class": "Telemetry_Consumer",
+            "type": "Splunk",
+            "host": "192.0.2.1",
+            "protocol": "http",
+            "port": "8088",
+            "passphrase": {
+                "cipherText": "apikey"
+            }
+        }
+    }
+
+
+Example 2: Two Consumers
+------------------------
+.. code-block:: json
+   :linenos:
+
+    {
+        "class": "Telemetry",
         "My_Consumer": {
             "class": "Telemetry_Consumer",
             "type": "Azure_Log_Analytics",
@@ -74,6 +57,7 @@ Example 2: Two Consumers
     }
 
 
+
 Example 3: External System (BIG-IP)
 -----------------------------------
 .. code-block:: json
@@ -91,3 +75,4 @@ Example 3: External System (BIG-IP)
             }
         }
     }
+
