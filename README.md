@@ -11,7 +11,7 @@ Telemetry Streaming (TS) is an iControl LX Extension delivered as a TMOS-indepen
 For the documentation on Telemetry Streaming, including download, installation, and usage instructions, see the Telemetry Streaming User guides at http://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/.
 
 ### Example Telemetry Streaming declarations
-The Telemetry Streaming documentation contains a variety of example declarations you can use directly or modify to suit your needs. See the [Consumers](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/userguide/setting-up-consumer.html) and [Example Declarations](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/userguide/declarations.html) pages.
+The Telemetry Streaming documentation contains a variety of example declarations you can use directly or modify to suit your needs. See the [Consumers](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/userguide/setting-up-consumer.html) and [Example Declarations](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/userguide/declarations.html) pages.
 
 ## Filing Issues and Getting Help
 If you come across a bug or other issue when using Telemetry Streaming, use [GitHub Issues](https://github.com/f5devcentral/f5-telemetry-streaming/issues) to submit an issue for our team.  You can also see the current known issues on that page, which are tagged with a purple Known Issue label.  
