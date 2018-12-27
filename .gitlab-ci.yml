@@ -22,7 +22,7 @@ build package:
     expire_in: 1 month
 
 build docs:
-    image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
+    image: ${CONTAINTHEDOCS_IMAGE}
     stage: build
     script:
         - make html
@@ -60,11 +60,11 @@ test functional:
         - master
 
 pages:
-    image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
+    image: ${CONTAINTHEDOCS_IMAGE}
     stage: review
     environment:
         name: staging
-        url: https://${CI_PROJECT_NAMESPACE}.pages.gitswarm.f5net.com/${CI_PROJECT_NAME}
+        url: https://${CI_PROJECT_NAMESPACE}.${PAGES_DOMAIN}/${CI_PROJECT_NAME}
     tags:
         - cm-official-docker-executor
     dependencies:
@@ -76,11 +76,10 @@ pages:
         paths:
             - public
     only:
-        - develop@cloudsolutions/f5-telemetry
         - docs-vanessa@cloudsolutions/f5-telemetry
 
 Publish docs to staging:
-  image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
+  image: ${CONTAINTHEDOCS_IMAGE}
   stage: review
   environment: 
     name: staging
@@ -88,7 +87,7 @@ Publish docs to staging:
   tags:
     - cm-official-docker-executor
   only:
-    - docs-staging@cloudsolutions/f5-telemetry
+    - develop@cloudsolutions/f5-telemetry
   dependencies:
     - build docs
   script:
@@ -99,7 +98,7 @@ Publish docs to staging:
 
 # Publish docs to clouddocs.f5.com
 docs to production:
-  image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
+  image: ${CONTAINTHEDOCS_IMAGE}
   stage: review
   environment:
     name: production
@@ -107,7 +106,7 @@ docs to production:
   only:
   # Currently will only deploy to clouddocs.f5.com on commits to doc-publish
   # fill in desired release branch name and uncomment to add deployment from a branch
-  - docs-publish@cloudsolutions/f5-telemetry
+  - master@cloudsolutions/f5-telemetry
   tags:
   - cm-official-docker-executor
   dependencies:
