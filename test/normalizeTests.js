@@ -8,6 +8,7 @@
 
 const assert = require('assert');
 const normalize = require('../src/nodejs/normalize.js');
+const normalizeUtil = require('../src/nodejs/normalizeUtil.js');
 
 const properties = require('../src/nodejs/config/properties.json');
 
@@ -171,6 +172,51 @@ describe('Normalize', () => {
         };
 
         const result = normalize.data(data, options);
+        assert.deepEqual(result, expectedResult);
+    });
+});
+
+describe('Normalize Util', () => {
+    after(() => {
+        Object.keys(require.cache).forEach((key) => {
+            delete require.cache[key];
+        });
+    });
+
+    it('should get average', () => {
+        const data = {
+            tmm0: {
+                oneMinAverageSystem: 10
+            },
+            tmm1: {
+                oneMinAverageSystem: 20
+            }
+        };
+
+        const expectedResult = 15;
+
+        const result = normalizeUtil.getAverage({ data, keyWithValue: 'oneMinAverageSystem' });
+        assert.strictEqual(result, expectedResult);
+    });
+
+    it('should get sum', () => {
+        const data = {
+            tmm0: {
+                clientSideTrafficBitsIn: 10,
+                clientSideTrafficBitsOut: 20
+            },
+            tmm1: {
+                clientSideTrafficBitsIn: 20,
+                clientSideTrafficBitsOut: 40
+            }
+        };
+
+        const expectedResult = {
+            clientSideTrafficBitsIn: 30,
+            clientSideTrafficBitsOut: 60
+        };
+
+        const result = normalizeUtil.getSum({ data, allKeys: true });
         assert.deepEqual(result, expectedResult);
     });
 });
