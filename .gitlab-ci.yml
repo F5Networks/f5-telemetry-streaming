@@ -32,7 +32,7 @@ build package:
     expire_in: 1 month
 
 build docs:
-    image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
+    image: ${CONTAINTHEDOCS_IMAGE}
     script:
         - make html
         - vale --glob='*.{md,rst}' .
@@ -45,11 +45,11 @@ build docs:
             - docs/_build/html
 
 pages:
-    image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
+    image: ${CONTAINTHEDOCS_IMAGE}
     stage: review
     environment:
         name: staging
-        url: https://${CI_PROJECT_NAMESPACE}.pages.gitswarm.f5net.com/${CI_PROJECT_NAME}
+        url: https://${CI_PROJECT_NAMESPACE}.${PAGES_DOMAIN}/${CI_PROJECT_NAME}
     tags:
         - cm-official-docker-executor
     dependencies:
@@ -64,7 +64,7 @@ pages:
         - docs-vanessa@cloudsolutions/f5-telemetry
 
 Publish docs to staging:
-  image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
+  image: ${CONTAINTHEDOCS_IMAGE}
   stage: review
   environment: 
     name: staging
@@ -83,7 +83,7 @@ Publish docs to staging:
 
 # Publish docs to clouddocs.f5.com
 docs to production:
-  image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
+  image: ${CONTAINTHEDOCS_IMAGE}
   stage: review
   environment:
     name: production
