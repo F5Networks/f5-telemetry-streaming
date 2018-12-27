@@ -61,7 +61,6 @@ pages:
         paths:
             - public
     only:
-        - develop@cloudsolutions/f5-telemetry
         - docs-vanessa@cloudsolutions/f5-telemetry
 
 Publish docs to staging:
@@ -73,7 +72,7 @@ Publish docs to staging:
   tags:
     - cm-official-docker-executor
   only:
-    - docs-staging@cloudsolutions/f5-telemetry
+    - develop@cloudsolutions/f5-telemetry
   dependencies:
     - build docs
   script:
@@ -92,7 +91,7 @@ docs to production:
   only:
   # Currently will only deploy to clouddocs.f5.com on commits to doc-publish
   # fill in desired release branch name and uncomment to add deployment from a branch
-  - docs-publish@cloudsolutions/f5-telemetry
+  - master@cloudsolutions/f5-telemetry
   tags:
   - cm-official-docker-executor
   dependencies:
