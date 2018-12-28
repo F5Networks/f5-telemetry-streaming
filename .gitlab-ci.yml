@@ -44,8 +44,12 @@ build docs:
 # or
 # CICD_AUTH_OS_TOKEN - VIO auth token
 # CICD_AUTH_OS_PROJECT - VIO project
-# also one more variablre should be defined
+# also one more variable should be defined
 # CICD_PIPELINE_TRIGGER_FOR_DEPLOY - CI/CD trigger ID
+#
+# job triggers CI/CD trigger to initiate separate pipelie for deployment
+# this allows to parametrize pipeline to test packages agains different
+# versions of BIG-IP
 trigger_deploy_job:
     stage: deploy
     image: node:8
@@ -104,12 +108,13 @@ test functional:
         - npm run test-functional
     tags:
         - cm-official-docker-executor
-    only:
-        # run if scheduled
-        - schedules
-        # run for specific branches
-        - develop
-        - master
+    when: manual
+    # only:
+    #     # run if scheduled
+    #     - schedules
+    #     # run for specific branches
+    #     - develop
+    #     - master
 
 teardown_bigip:
     stage: teardown
