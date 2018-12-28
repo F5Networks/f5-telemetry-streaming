@@ -13,7 +13,6 @@ const constants = require('../src/nodejs/constants.js');
 
 /* eslint-disable global-require */
 
-// purpose: validate different declarations against validator
 describe('Declarations', () => {
     let util;
     let config;

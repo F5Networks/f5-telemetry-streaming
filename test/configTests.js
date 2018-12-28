@@ -12,7 +12,6 @@ const constants = require('../src/nodejs/constants.js');
 
 /* eslint-disable global-require */
 
-// purpose: validate config
 describe('Config', () => {
     let config;
     let util;

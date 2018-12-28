@@ -124,6 +124,48 @@ describe('Normalize', () => {
         assert.notStrictEqual(result['/0'], undefined);
     });
 
+    it('should convert array to map', () => {
+        const data = {
+            list: [
+                {
+                    name: 'foo'
+                }
+            ]
+        };
+        const expectedResult = {
+            list: {
+                'name/foo': {
+                    name: 'foo'
+                }
+            }
+        };
+        const options = {
+            convertArrayToMap: {
+                keyName: 'name',
+                keyNamePrefix: 'name/'
+            }
+        };
+
+        const result = normalize.data(data, options);
+        assert.deepEqual(result, expectedResult);
+    });
+
+    it('should leave array untouched', () => {
+        const data = {
+            list: [
+                {
+                    name: 'foo'
+                }
+            ]
+        };
+        const options = {
+            convertArrayToMap: undefined
+        };
+
+        const result = normalize.data(data, options);
+        assert.deepEqual(result, result);
+    });
+
     it('should run custom function', () => {
         const options = {
             runCustomFunction: {
@@ -155,8 +197,36 @@ describe('Normalize', () => {
             '/Common/app.app/foo': {
                 key: 'value',
                 tenant: 'Common',
-                application: 'app.app'
+                application: 'app.app',
+                foo: 'bar'
             }
+        };
+        const options = {
+            addKeysByTag: {
+                tags: {
+                    tenant: '`T`',
+                    application: '`A`',
+                    foo: 'bar'
+                },
+                definitions: properties.definitions,
+                opts: {
+                    skip: ['somekey']
+                }
+            }
+        };
+
+        const result = normalize.data(data, options);
+        assert.deepEqual(result, expectedResult);
+    });
+
+    it('should add keys by tag (flat classify)', () => {
+        const data = {
+            vs: '/Common/app.app/foo'
+        };
+        const expectedResult = {
+            vs: '/Common/app.app/foo',
+            tenant: 'Common',
+            application: 'app.app'
         };
         const options = {
             addKeysByTag: {
@@ -166,7 +236,7 @@ describe('Normalize', () => {
                 },
                 definitions: properties.definitions,
                 opts: {
-                    skip: ['somekey']
+                    classifyByKeys: ['vs']
                 }
             }
         };
@@ -214,7 +284,16 @@ describe('Normalize Util', () => {
             clientSideTrafficBitsOut: 60
         };
 
-        const result = normalizeUtil.getSum({ data, allKeys: true });
+        let result = normalizeUtil.getSum({ data });
+        assert.deepEqual(result, expectedResult);
+
+        // check empty object is returned
+        result = normalizeUtil.getSum({ data: '' });
+        assert.deepEqual(result, {});
+
+        // check that child non object does not cause issues
+        data.mangled = 'foo';
+        result = normalizeUtil.getSum({ data });
         assert.deepEqual(result, expectedResult);
     });
 
@@ -227,24 +306,17 @@ describe('Normalize Util', () => {
                 description: 'foo'
             }
         };
-        const expectedResult = '10.0.0.1/24';
-
-        const result = normalizeUtil.getFirstKey({ data });
+        // check multiple branches
+        let expectedResult = '10.0.0.1/24';
+        let result = normalizeUtil.getFirstKey({ data });
         assert.strictEqual(result, expectedResult);
-    });
 
-    it('should get first key with split and prefix', () => {
-        const data = {
-            '10.0.0.1/24': {
-                description: 'foo'
-            },
-            '10.0.0.2/24': {
-                description: 'foo'
-            }
-        };
-        const expectedResult = 'https://10.0.0.1';
+        expectedResult = 'https://10.0.0.1';
+        result = normalizeUtil.getFirstKey({ data, splitOnValue: '/', keyPrefix: 'https://' });
+        assert.strictEqual(result, expectedResult);
 
-        const result = normalizeUtil.getFirstKey({ data, splitOnValue: '/', keyPrefix: 'https://' });
+        expectedResult = 'null';
+        result = normalizeUtil.getFirstKey({ data: '' });
         assert.strictEqual(result, expectedResult);
     });
 

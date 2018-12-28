@@ -22,7 +22,6 @@ const loggerMock = {
 
 logger.logger = loggerMock;
 
-// purpose: validate logger
 describe('Logger', () => {
     beforeEach(() => {
         Object.keys(loggedMessages).forEach((level) => {
