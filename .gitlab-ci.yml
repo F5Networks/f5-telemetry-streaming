@@ -63,7 +63,9 @@ trigger_deploy_job:
       -F "variables[REQ_BIGIP_VERSION]=13.0.0"
       -F "variables[REQ_BIGIP_BUILD]=0.0.1650"
       https://gitswarm.f5net.com/api/v4/projects/5073/trigger/pipeline
-    when: manual
+  except:
+    variables:
+    - $CI_PIPELINE_SOURCE == "trigger"
 
 deploy_bigip:
     stage: deploy
@@ -108,13 +110,9 @@ test functional:
         - npm run test-functional
     tags:
         - cm-official-docker-executor
-    when: manual
-    # only:
-    #     # run if scheduled
-    #     - schedules
-    #     # run for specific branches
-    #     - develop
-    #     - master
+    only:
+        variables:
+        - $REQ_DEVICE_PIPELINE == "true"
 
 teardown_bigip:
     stage: teardown
