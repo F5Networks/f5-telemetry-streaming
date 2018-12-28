@@ -62,16 +62,20 @@ trigger_deploy_job:
       -F "variables[REQ_PROJECT_NAME]=cicd_bigip_13.0.0"
       -F "variables[REQ_BIGIP_VERSION]=13.0.0"
       -F "variables[REQ_BIGIP_BUILD]=0.0.1650"
-      https://gitswarm.f5net.com/api/v4/projects/5073/trigger/pipeline
-    except:
-        variables:
-        - $CI_PIPELINE_SOURCE == "trigger"
+      $CICD_PIPLINE_TRIGGER_URL
+    only:
+        # run if scheduled
+        - schedules
+        # run for specific branches
+        - develop
+        - master
+
 
 deploy_bigip:
     stage: deploy
     tags:
     - cm-official-docker-executor
-    image: quay.pdsea.f5net.com/petrov/cicd-bigip-deploy:v0.1
+    image: ${CICD_CONTAINER_DEPLOY}
     variables:
         PROJECT_NAME: $REQ_PROJECT_NAME
         PROJECT_DIR: /root/deploy-projects/$REQ_PROJECT_NAME
@@ -118,7 +122,7 @@ teardown_bigip:
     stage: teardown
     tags:
     - cm-official-docker-executor
-    image: quay.pdsea.f5net.com/petrov/cicd-bigip-deploy:v0.1
+    image: ${CICD_CONTAINER_DEPLOY}
     variables:
         PROJECT_NAME: $REQ_PROJECT_NAME
         PROJECT_DIR: /root/deploy-projects/$REQ_PROJECT_NAME
