@@ -192,7 +192,6 @@ describe('Normalize Util', () => {
                 oneMinAverageSystem: 20
             }
         };
-
         const expectedResult = 15;
 
         const result = normalizeUtil.getAverage({ data, keyWithValue: 'oneMinAverageSystem' });
@@ -210,7 +209,6 @@ describe('Normalize Util', () => {
                 clientSideTrafficBitsOut: 40
             }
         };
-
         const expectedResult = {
             clientSideTrafficBitsIn: 30,
             clientSideTrafficBitsOut: 60
@@ -218,5 +216,71 @@ describe('Normalize Util', () => {
 
         const result = normalizeUtil.getSum({ data, allKeys: true });
         assert.deepEqual(result, expectedResult);
+    });
+
+    it('should get first key', () => {
+        const data = {
+            '10.0.0.1/24': {
+                description: 'foo'
+            },
+            '10.0.0.2/24': {
+                description: 'foo'
+            }
+        };
+        const expectedResult = '10.0.0.1/24';
+
+        const result = normalizeUtil.getFirstKey({ data });
+        assert.strictEqual(result, expectedResult);
+    });
+
+    it('should get first key with split and prefix', () => {
+        const data = {
+            '10.0.0.1/24': {
+                description: 'foo'
+            },
+            '10.0.0.2/24': {
+                description: 'foo'
+            }
+        };
+        const expectedResult = 'https://10.0.0.1';
+
+        const result = normalizeUtil.getFirstKey({ data, splitOnValue: '/', keyPrefix: 'https://' });
+        assert.strictEqual(result, expectedResult);
+    });
+
+    it('should get percent from keys', () => {
+        const data = {
+            total: 10000,
+            partial: 2000
+        };
+        const expectedResult = 20; // percent
+
+        const result = normalizeUtil.getPercentFromKeys({ data, totalKey: 'total', partialKey: 'partial' });
+        assert.strictEqual(result, expectedResult);
+    });
+
+    it('should format as json', () => {
+        const data = 'named_key,key1\nname,value';
+        const expectedResult = {
+            name: {
+                named_key: 'name',
+                key1: 'value'
+            }
+        };
+
+        const result = normalizeUtil.formatAsJson({ data, type: 'csv', mapKey: 'named_key' });
+        assert.deepEqual(result, expectedResult);
+    });
+
+    it('should throw error about incorrect type', () => {
+        const data = 'named_key,key1\nname,value';
+
+        try {
+            normalizeUtil.formatAsJson({ data, type: 'foo', mapKey: 'named_key' });
+            assert.fail('Error expected');
+        } catch (err) {
+            const msg = err.message || err;
+            assert.notStrictEqual(msg.indexOf('Unsupported type'), -1);
+        }
     });
 });
