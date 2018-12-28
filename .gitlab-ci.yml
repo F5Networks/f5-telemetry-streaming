@@ -3,7 +3,7 @@ image: node:8
 stages:
 - build
 - deploy
-- testc
+- test
 - teardown
 - review
 
@@ -47,7 +47,7 @@ build docs:
 # also one more variablre should be defined
 # CICD_PIPELINE_TRIGGER_FOR_DEPLOY - CI/CD trigger ID
 trigger_deploy_job:
-    stage: deploy   
+    stage: deploy
     image: node:8
     tags:
     - docker-executor
