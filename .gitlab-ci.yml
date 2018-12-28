@@ -2,7 +2,9 @@ image: node:8
 
 stages:
 - build
-- test
+- deploy
+- testc
+- teardown
 - review
 
 build package:
@@ -35,6 +37,55 @@ build docs:
             - docs/_build/html
         expire_in: 1 month
 
+# for this job following variables should be defined:
+# CICD_AUTH_OS_USERNAME - VIO user
+# CICD_AUTH_OS_PASSWORD - VIO password
+# CICD_AUTH_OS_PROJECT  - VIO project
+# or
+# CICD_AUTH_OS_TOKEN - VIO auth token
+# CICD_AUTH_OS_PROJECT - VIO project
+# also one more variablre should be defined
+# CICD_PIPELINE_TRIGGER_FOR_DEPLOY - CI/CD trigger ID
+trigger_deploy_job:
+    stage: deploy   
+    image: node:8
+    tags:
+    - docker-executor
+    script:
+    - curl -k -X POST -F token=$CICD_PIPELINE_TRIGGER_FOR_DEPLOY
+      -F ref=$CI_COMMIT_REF_NAME
+      -F "variables[REQ_DEVICE_PIPELINE]=true"
+      -F "variables[REQ_PROJECT_NAME]=cicd_bigip_13.0.0"
+      -F "variables[REQ_BIGIP_VERSION]=13.0.0"
+      -F "variables[REQ_BIGIP_BUILD]=0.0.1650"
+      https://gitswarm.f5net.com/api/v4/projects/5073/trigger/pipeline
+    when: manual
+
+deploy_bigip:
+    stage: deploy
+    tags:
+    - cm-official-docker-executor
+    image: quay.pdsea.f5net.com/petrov/cicd-bigip-deploy:v0.1
+    variables:
+        PROJECT_NAME: $REQ_PROJECT_NAME
+        PROJECT_DIR: /root/deploy-projects/$REQ_PROJECT_NAME
+        BIGIP_VERSION: $REQ_BIGIP_VERSION
+        BIGIP_BUILD: $REQ_BIGIP_BUILD
+        BIGIP_BRANCH: $REQ_BIGIP_BRANCH
+    artifacts:
+        name: bigip_$BIGIP_BRANCH.$BIGIP_VERSION.$BIGIP_BUILD_harness_info
+        paths:
+        - $CI_PROJECT_DIR/harness_facts_flat.json
+        when: on_success
+    only:
+        variables:
+        - $REQ_DEVICE_PIPELINE == "true"
+    script:
+    - cd /root/cicd-bigip-deploy && make configure &&
+      make printvars && cat $PROJECT_DIR/project-vars &&
+      make setup && ls -als $PROJECT_DIR &&
+      cp $PROJECT_DIR/harness_facts_flat.json $CI_PROJECT_DIR/harness_facts_flat.json
+
 test package:
     stage: test
     script:
@@ -47,6 +98,7 @@ test package:
 test functional:
     stage: test
     script:
+        - export TEST_HARNESS_FILE=$CI_PROJECT_DIR/harness_facts_flat.json
         - npm install
         - ls ./dist -ls
         - npm run test-functional
@@ -58,6 +110,22 @@ test functional:
         # run for specific branches
         - develop
         - master
+
+teardown_bigip:
+    stage: teardown
+    tags:
+    - cm-official-docker-executor
+    image: quay.pdsea.f5net.com/petrov/cicd-bigip-deploy:v0.1
+    variables:
+        PROJECT_NAME: $REQ_PROJECT_NAME
+        PROJECT_DIR: /root/deploy-projects/$REQ_PROJECT_NAME
+    script:
+    - cd /root/cicd-bigip-deploy && make configure && make teardown
+    when: always
+    only:
+        variables:
+        - $REQ_DEVICE_PIPELINE == "true"
+
 
 pages:
     image: quay.pdsea.f5net.com/doc-ops/containthedocs:710e05a8ed
