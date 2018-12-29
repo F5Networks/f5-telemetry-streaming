@@ -59,7 +59,7 @@ trigger_deploy_job:
     - curl -k -X POST -F token=$CICD_PIPELINE_TRIGGER_FOR_DEPLOY
       -F ref=$CI_COMMIT_REF_NAME
       -F "variables[REQ_DEVICE_PIPELINE]=true"
-      -F "variables[REQ_PROJECT_NAME]=cicd_bigip_13.0.0"
+      -F "variables[REQ_PROJECT_NAME]=cicd_bigip_13.0.0_$CI_COMMIT_REF_NAME"
       -F "variables[REQ_BIGIP_VERSION]=13.0.0"
       -F "variables[REQ_BIGIP_BUILD]=0.0.1650"
       $CICD_PIPLINE_TRIGGER_URL
@@ -83,7 +83,7 @@ deploy_bigip:
         BIGIP_BUILD: $REQ_BIGIP_BUILD
         BIGIP_BRANCH: $REQ_BIGIP_BRANCH
     artifacts:
-        name: bigip_$BIGIP_BRANCH.$BIGIP_VERSION.$BIGIP_BUILD_harness_info
+        name: $CI_COMMIT_REF_NAME_bigip_$BIGIP_BRANCH.$BIGIP_VERSION.$BIGIP_BUILD_harness_info
         paths:
         - $CI_PROJECT_DIR/harness_facts_flat.json
         when: on_success
