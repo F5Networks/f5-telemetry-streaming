@@ -59,9 +59,9 @@ trigger_deploy_job:
     - curl -k -X POST -F token=$CICD_PIPELINE_TRIGGER_FOR_DEPLOY
       -F ref=$CI_COMMIT_REF_NAME
       -F "variables[REQ_DEVICE_PIPELINE]=true"
-      -F "variables[REQ_PROJECT_NAME]=cicd_bigip_13.0.0"
-      -F "variables[REQ_BIGIP_VERSION]=13.0.0"
-      -F "variables[REQ_BIGIP_BUILD]=0.0.1650"
+      -F "variables[REQ_PROJECT_NAME]=cicd_bigip_14.0.0.2"
+      -F "variables[REQ_BIGIP_VERSION]=14.0.0.2"
+      -F "variables[REQ_BIGIP_BUILD]=0.0.2187"
       $CICD_PIPLINE_TRIGGER_URL
     only:
         # run if scheduled
