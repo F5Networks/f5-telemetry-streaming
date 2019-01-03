@@ -96,8 +96,8 @@ describe('Basic', function () {
 
         it('should verify installation', () => {
             const uri = `${baseILXUri}/info`;
-
-            return util.makeRequest(host, uri, options)
+            return new Promise(resolve => setTimeout(resolve, 5000))
+                .then(() => util.makeRequest(host, uri, options))
                 .then((data) => {
                     data = data || {};
                     assert.notStrictEqual(data.version, undefined);
