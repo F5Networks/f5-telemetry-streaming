@@ -56,19 +56,16 @@ trigger_deploy_job:
     tags:
     - docker-executor
     script:
-    - curl -k -X POST -F token=$CICD_PIPELINE_TRIGGER_FOR_DEPLOY
-      -F ref=$CI_COMMIT_REF_NAME
+    - curl -k -X POST -F token=${CICD_PIPELINE_TRIGGER_FOR_DEPLOY}
+      -F ref=${CI_COMMIT_REF_NAME}
       -F "variables[REQ_DEVICE_PIPELINE]=true"
-      -F "variables[REQ_PROJECT_NAME]=cicd_bigip_14.0.0.2"
+      -F "variables[REQ_PROJECT_NAME]=ts_cicd_bigip_14.0.0.2"
       -F "variables[REQ_BIGIP_VERSION]=14.0.0.2"
       -F "variables[REQ_BIGIP_BUILD]=0.0.2"
-      $CICD_PIPLINE_TRIGGER_URL
+      ${CICD_PIPLINE_TRIGGER_URL}
     only:
         # run if scheduled
         - schedules
-        # run for specific branches
-        - develop
-        - master
 
 
 deploy_bigip:
@@ -77,11 +74,11 @@ deploy_bigip:
     - cm-official-docker-executor
     image: ${CICD_CONTAINER_DEPLOY}
     variables:
-        PROJECT_NAME: $REQ_PROJECT_NAME
+        PROJECT_NAME: ${REQ_PROJECT_NAME}
         PROJECT_DIR: /root/deploy-projects/${REQ_PROJECT_NAME}
-        BIGIP_VERSION: $REQ_BIGIP_VERSION
-        BIGIP_BUILD: $REQ_BIGIP_BUILD
-        BIGIP_BRANCH: $REQ_BIGIP_BRANCH
+        BIGIP_VERSION: ${REQ_BIGIP_VERSION}
+        BIGIP_BUILD: ${REQ_BIGIP_BUILD}
+        BIGIP_BRANCH: ${REQ_BIGIP_BRANCH}
     artifacts:
         name: ${CI_COMMIT_REF_NAME}_bigip_${BIGIP_BRANCH}.${BIGIP_VERSION}.${BIGIP_BUILD}_harness_info
         paths:
@@ -89,7 +86,7 @@ deploy_bigip:
         when: on_success
     only:
         variables:
-        - $REQ_DEVICE_PIPELINE == "true"
+        - ${REQ_DEVICE_PIPELINE} == "true"
     script:
     - cd /root/cicd-bigip-deploy && make configure &&
       make printvars && cat ${PROJECT_DIR}/project-vars &&
@@ -116,7 +113,7 @@ test functional:
         - cm-official-docker-executor
     only:
         variables:
-        - $REQ_DEVICE_PIPELINE == "true"
+        - ${REQ_DEVICE_PIPELINE} == "true"
 
 teardown_bigip:
     stage: teardown
@@ -124,14 +121,14 @@ teardown_bigip:
     - cm-official-docker-executor
     image: ${CICD_CONTAINER_DEPLOY}
     variables:
-        PROJECT_NAME: $REQ_PROJECT_NAME
+        PROJECT_NAME: ${REQ_PROJECT_NAME}
         PROJECT_DIR: /root/deploy-projects/${REQ_PROJECT_NAME}
     script:
     - cd /root/cicd-bigip-deploy && make configure && make teardown
     when: always
     only:
         variables:
-        - $REQ_DEVICE_PIPELINE == "true"
+        - ${REQ_DEVICE_PIPELINE} == "true"
 
 
 pages:
