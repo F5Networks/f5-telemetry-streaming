@@ -151,6 +151,7 @@
             "convertArrayToMap": { "keyName": "selfLink", "keyNamePrefix": "name/" },
             "filterKeys": [ "name/", "/stats", "membersReference", "addr", "port", "serverside.bitsIn", "serverside.bitsOut", "serverside.curConns", "availabilityState", "statusReason", "enabledState", "sessionStatus" ],
             "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/pool/": { "pattern": "pool\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members", "~": { "replaceCharacter": "/" } },
+            "includeFirstEntry": { "pattern": "/stats", "excludePattern": "/members/" },
             "addKeysByTag": true
         },
         "ltmPolicyStats": {

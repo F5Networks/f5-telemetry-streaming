@@ -49,11 +49,9 @@
             "endpoint": "/mgmt/tm/ltm/virtual/stats"
         },
         {
-            "endpoint": "/mgmt/tm/ltm/pool/stats"
-        },
-        {
             "endpoint": "/mgmt/tm/ltm/pool",
             "expandReferences": { "membersReference": { "endpointSuffix": "/stats" } },
+            "includeStats": true,
             "name": "poolMembersRef"
         },
         {

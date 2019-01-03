@@ -222,7 +222,7 @@ EndpointLoader.prototype._getAndExpandData = function (endpointProperties) {
                         const item = actualData[childItemKey][i];
                         // first check for reference and then link property
                         if (item[referenceKey] && item[referenceKey].link) {
-                            // remove protocol/host from self link
+                            // remove protocol\host from self link
                             let referenceEndpoint = item[referenceKey].link.replace('https://localhost', '');
                             if (referenceObj.endpointSuffix) {
                                 referenceEndpoint = referenceEndpoint.split('?')[0]; // simple avoidance of query params
@@ -243,6 +243,47 @@ EndpointLoader.prototype._getAndExpandData = function (endpointProperties) {
                 data.forEach((i) => {
                     try {
                         rawData.data[childItemKey][i.name][referenceKey] = i.data;
+                    } catch (e) {
+                        // just continue
+                    }
+                });
+                return Promise.resolve(rawData);
+            }
+            // again default is to just return the data
+            return Promise.resolve(data);
+        })
+        .then((data) => {
+            // check if includeStats is required
+            if (p.includeStats) {
+                rawData = data; // retain for later
+                const actualData = data.data;
+
+                const promises = [];
+                // assumes we are looking inside of 'items', might need to extend this to 'entries', etc.
+                if (typeof actualData === 'object' && Array.isArray(actualData[childItemKey])) {
+                    for (let i = 0; i < actualData[childItemKey].length; i += 1) {
+                        const item = actualData[childItemKey][i];
+                        // first check for reference and then link property
+                        if (item.selfLink) {
+                            // remove protocol\host from self link
+                            let endpoint = item.selfLink.replace('https://localhost', '');
+                            endpoint = endpoint.split('?')[0]; // simple avoidance of query params
+                            endpoint = `${endpoint}/stats`;
+                            promises.push(this._getData(endpoint, { name: i }));
+                        }
+                    }
+                }
+                return Promise.all(promises);
+            }
+            // default is to just return the data
+            return Promise.resolve(data);
+        })
+        .then((data) => {
+            // this tells us we need to modify the raw data, or at least attempt to do so
+            if (rawData) {
+                data.forEach((i) => {
+                    try {
+                        rawData.data[childItemKey][i.name] = Object.assign(i.data, rawData.data[childItemKey][i.name]);
                     } catch (e) {
                         // just continue
                     }
@@ -368,6 +409,7 @@ SystemStats.prototype._processData = function (property, data) {
         filterByKeys: property.filterKeys,
         renameKeysByPattern: property.renameKeys,
         convertArrayToMap: property.convertArrayToMap,
+        includeFirstEntry: property.includeFirstEntry,
         runCustomFunction: property.runFunction,
         addKeysByTag: { // add 'name' + any user configured tags if specified by prop
             tags: property.addKeysByTag ? Object.assign(defaultTags, this.tags) : defaultTags,
