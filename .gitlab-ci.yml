@@ -86,7 +86,7 @@ deploy_bigip:
         when: on_success
     only:
         variables:
-        - ${REQ_DEVICE_PIPELINE} == "true"
+        - $REQ_DEVICE_PIPELINE == "true"
     script:
     - cd /root/cicd-bigip-deploy && make configure &&
       make printvars && cat ${PROJECT_DIR}/project-vars &&
@@ -113,7 +113,7 @@ test functional:
         - cm-official-docker-executor
     only:
         variables:
-        - ${REQ_DEVICE_PIPELINE} == "true"
+        - $REQ_DEVICE_PIPELINE == "true"
 
 teardown_bigip:
     stage: teardown
@@ -128,7 +128,7 @@ teardown_bigip:
     when: always
     only:
         variables:
-        - ${REQ_DEVICE_PIPELINE} == "true"
+        - $REQ_DEVICE_PIPELINE == "true"
 
 
 pages:
