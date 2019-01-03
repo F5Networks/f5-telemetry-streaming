@@ -12,13 +12,13 @@ Document Revision History
         - Date
         
       
-      * - 1.0
+      * - 1.0.0
         - Initial release of AS3 documentation
-        - 04-30-18
+        - 01-30-19
 
 
       * - 0.9.0
-        - Initial Internal release of AS3 documentation
+        - Initial internal release of AS3 documentation
         - 12-27-18
 
     
