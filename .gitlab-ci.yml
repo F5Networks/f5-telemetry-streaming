@@ -78,23 +78,23 @@ deploy_bigip:
     image: ${CICD_CONTAINER_DEPLOY}
     variables:
         PROJECT_NAME: $REQ_PROJECT_NAME
-        PROJECT_DIR: /root/deploy-projects/$REQ_PROJECT_NAME
+        PROJECT_DIR: /root/deploy-projects/${REQ_PROJECT_NAME}
         BIGIP_VERSION: $REQ_BIGIP_VERSION
         BIGIP_BUILD: $REQ_BIGIP_BUILD
         BIGIP_BRANCH: $REQ_BIGIP_BRANCH
     artifacts:
-        name: $CI_COMMIT_REF_NAME_bigip_$BIGIP_BRANCH.$BIGIP_VERSION.$BIGIP_BUILD_harness_info
+        name: ${CI_COMMIT_REF_NAME}_bigip_${BIGIP_BRANCH}.${BIGIP_VERSION}.${BIGIP_BUILD}_harness_info
         paths:
-        - $CI_PROJECT_DIR/harness_facts_flat.json
+        - ${CI_PROJECT_DIR}/harness_facts_flat.json
         when: on_success
     only:
         variables:
         - $REQ_DEVICE_PIPELINE == "true"
     script:
     - cd /root/cicd-bigip-deploy && make configure &&
-      make printvars && cat $PROJECT_DIR/project-vars &&
-      make setup && ls -als $PROJECT_DIR &&
-      cp $PROJECT_DIR/harness_facts_flat.json $CI_PROJECT_DIR/harness_facts_flat.json
+      make printvars && cat ${PROJECT_DIR}/project-vars &&
+      make setup && ls -als ${PROJECT_DIR} &&
+      cp ${PROJECT_DIR}/harness_facts_flat.json ${CI_PROJECT_DIR}/harness_facts_flat.json
 
 test package:
     stage: test
@@ -108,7 +108,7 @@ test package:
 test functional:
     stage: test
     script:
-        - export TEST_HARNESS_FILE=$CI_PROJECT_DIR/harness_facts_flat.json
+        - export TEST_HARNESS_FILE=${CI_PROJECT_DIR}/harness_facts_flat.json
         - npm install
         - ls ./dist -ls
         - npm run test-functional
@@ -125,7 +125,7 @@ teardown_bigip:
     image: ${CICD_CONTAINER_DEPLOY}
     variables:
         PROJECT_NAME: $REQ_PROJECT_NAME
-        PROJECT_DIR: /root/deploy-projects/$REQ_PROJECT_NAME
+        PROJECT_DIR: /root/deploy-projects/${REQ_PROJECT_NAME}
     script:
     - cd /root/cicd-bigip-deploy && make configure && make teardown
     when: always
