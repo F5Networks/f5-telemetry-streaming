@@ -769,20 +769,20 @@ module.exports = {
     /**
      * Base64 helper
      *
-     * @param {String} type - decode|encode
+     * @param {String} action - decode|encode
      * @param {String} data - data to process
      *
      * @returns {String} Returns processed data as a string
      */
-    base64(type, data) {
+    base64(action, data) {
         // just decode for now
-        if (type === 'decode') {
+        if (action === 'decode') {
             if ((typeof Buffer.from === 'function') && (Buffer.from !== Uint8Array.from)) {
                 return Buffer.from(data, 'base64').toString().trim();
             }
             return new Buffer(data, 'base64').toString().trim();
         }
-        throw new Error('type requires: decode');
+        throw new Error('Unsupported action, try one of these: decode');
     },
 
     /**

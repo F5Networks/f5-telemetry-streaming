@@ -1,9 +1,97 @@
 image: node:8
 
 stages:
-- test
 - build
+- deploy
+- test
+- teardown
 - review
+
+build package:
+  image: f5devcentral/containthedocs:rpmbuild
+  stage: build
+  script:
+    - echo 'CI BUILD'
+    # install packages first
+    - npm install --production
+    - bash ./scripts/build_rpm.sh
+  tags:
+    - cm-official-docker-executor
+  artifacts:
+    name: f5-telemetry-$CI_BUILD_REF
+    paths:
+        - dist
+    expire_in: 1 month
+
+build docs:
+    image: ${CONTAINTHEDOCS_IMAGE}
+    stage: build
+    script:
+        - make html
+        - vale --glob='*.{md,rst}' .
+      #  - make linkcheck
+    tags:
+        - docker-executor
+    artifacts:
+        name: docs
+        paths:
+            - docs/_build/html
+        expire_in: 1 month
+
+# for this job following variables should be defined:
+# CICD_AUTH_OS_USERNAME - VIO user
+# CICD_AUTH_OS_PASSWORD - VIO password
+# CICD_AUTH_OS_PROJECT  - VIO project
+# or
+# CICD_AUTH_OS_TOKEN - VIO auth token
+# CICD_AUTH_OS_PROJECT - VIO project
+# also one more variable should be defined
+# CICD_PIPELINE_TRIGGER_FOR_DEPLOY - CI/CD trigger ID
+#
+# job triggers CI/CD trigger to initiate seperate pipeline for deployment
+# this allows to parameterize pipeline to test packages against different
+# versions of BIG-IP
+trigger_deploy_job:
+    stage: deploy
+    image: node:8
+    tags:
+    - docker-executor
+    script:
+    - curl -k -X POST -F token=${CICD_PIPELINE_TRIGGER_FOR_DEPLOY}
+      -F ref=${CI_COMMIT_REF_NAME}
+      -F "variables[REQ_DEVICE_PIPELINE]=true"
+      -F "variables[REQ_PROJECT_NAME]=ts_cicd_bigip_14.0.0.2"
+      -F "variables[REQ_BIGIP_VERSION]=14.0.0.2"
+      -F "variables[REQ_BIGIP_BUILD]=0.0.2"
+      ${CICD_PIPLINE_TRIGGER_URL}
+    only:
+        # run if scheduled
+        - schedules
+
+deploy_bigip:
+    stage: deploy
+    tags:
+    - cm-official-docker-executor
+    image: ${CICD_CONTAINER_DEPLOY}
+    variables:
+        PROJECT_NAME: ${REQ_PROJECT_NAME}
+        PROJECT_DIR: /root/deploy-projects/${REQ_PROJECT_NAME}
+        BIGIP_VERSION: ${REQ_BIGIP_VERSION}
+        BIGIP_BUILD: ${REQ_BIGIP_BUILD}
+        BIGIP_BRANCH: ${REQ_BIGIP_BRANCH}
+    artifacts:
+        name: ${CI_COMMIT_REF_NAME}_bigip_${BIGIP_BRANCH}.${BIGIP_VERSION}.${BIGIP_BUILD}_harness_info
+        paths:
+        - ${CI_PROJECT_DIR}/harness_facts_flat.json
+        when: on_success
+    only:
+        variables:
+        - $REQ_DEVICE_PIPELINE == "true"
+    script:
+    - cd /root/cicd-bigip-deploy && make configure &&
+      make printvars && cat ${PROJECT_DIR}/project-vars &&
+      make setup && ls -als ${PROJECT_DIR} &&
+      cp ${PROJECT_DIR}/harness_facts_flat.json ${CI_PROJECT_DIR}/harness_facts_flat.json
 
 test package:
     stage: test
@@ -12,39 +100,35 @@ test package:
         - npm run lint
         - npm run test
     tags:
-    - cm-official-docker-executor
+        - cm-official-docker-executor
 
-build package:
-  image: f5devcentral/containthedocs:rpmbuild
-  stage: build
-  script:
-  - echo 'CI BUILD'
-  # install packages first
-  - npm install --production
-  # run build_rpm script
-  - bash ./scripts/build_rpm.sh
-  tags:
-  - cm-official-docker-executor
-  artifacts:
-    name: f5-telemetry-$CI_BUILD_REF
-    paths:
-    - dist
-    expire_in: 1 month
-
-build docs:
-    image: ${CONTAINTHEDOCS_IMAGE}
+test functional:
+    stage: test
     script:
-        - make html
-        - vale --glob='*.{md,rst}' .
-      #  - make linkcheck
+        - export TEST_HARNESS_FILE=${CI_PROJECT_DIR}/harness_facts_flat.json
+        - npm install
+        - ls ./dist -ls
+        - npm run test-functional
     tags:
-        - docker-executor
-    stage: build
-    artifacts:
-        name: docs
-        paths:
-            - docs/_build/html
-        expire_in: 1 month
+        - cm-official-docker-executor
+    only:
+        variables:
+        - $REQ_DEVICE_PIPELINE == "true"
+
+teardown_bigip:
+    stage: teardown
+    tags:
+    - cm-official-docker-executor
+    image: ${CICD_CONTAINER_DEPLOY}
+    variables:
+        PROJECT_NAME: ${REQ_PROJECT_NAME}
+        PROJECT_DIR: /root/deploy-projects/${REQ_PROJECT_NAME}
+    script:
+    - cd /root/cicd-bigip-deploy && make configure && make teardown
+    when: always
+    only:
+        variables:
+        - $REQ_DEVICE_PIPELINE == "true"
 
 docs to pages:
     image: ${CONTAINTHEDOCS_IMAGE}

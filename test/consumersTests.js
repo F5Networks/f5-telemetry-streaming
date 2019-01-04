@@ -12,7 +12,6 @@ const constants = require('../src/nodejs/constants.js');
 
 /* eslint-disable global-require */
 
-// purpose: validate forwarder
 describe('Consumers', () => {
     let config;
     let consumers;
@@ -27,14 +26,18 @@ describe('Consumers', () => {
         });
     });
 
-    it('should get consumers', () => {
+    it('should get valid consumers', () => {
         const exampleConfig = {
             parsed: {}
         };
         exampleConfig.parsed[constants.CONSUMERS_CLASS_NAME] = {
-            my_item: {
+            My_Consumer: {
                 class: 'Consumer',
                 type: 'default'
+            },
+            My_Consumer_Fake: {
+                class: 'Consumer',
+                type: 'unknowntype'
             }
         };
         config.emit('change', exampleConfig); // emit change event, then wait a short period
@@ -47,7 +50,7 @@ describe('Consumers', () => {
             .catch(err => Promise.reject(err));
     });
 
-    it('should return empty list', () => {
+    it('should return empty list of consumers', () => {
         config.emit('change', {}); // emit change event, then wait a short period
 
         return new Promise(resolve => setTimeout(() => { resolve(); }, 250))

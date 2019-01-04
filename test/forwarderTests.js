@@ -10,7 +10,6 @@ const assert = require('assert');
 
 /* eslint-disable global-require */
 
-// purpose: validate forwarder
 describe('Forwarder', () => {
     let forwarder;
     let consumers;
@@ -43,7 +42,7 @@ describe('Forwarder', () => {
             }
         ];
 
-        return forwarder({ type, data })
+        return forwarder.forward({ type, data })
             .then(() => {
                 assert.deepEqual(actualContext.event.data, data);
                 assert.deepEqual(actualContext.config, config);
@@ -54,7 +53,7 @@ describe('Forwarder', () => {
     it('should resolve with no consumers', () => {
         consumers.getConsumers = () => null;
 
-        return forwarder({ type, data })
+        return forwarder.forward({ type, data })
             .then(() => {})
             .catch(err => Promise.reject(new Error(`Should not error: ${err}`)));
     });
@@ -70,7 +69,7 @@ describe('Forwarder', () => {
             }
         ];
 
-        return forwarder({ type, data })
+        return forwarder.forward({ type, data })
             .then(() => {})
             .catch(err => Promise.reject(new Error(`Should not error: ${err}`)));
     });

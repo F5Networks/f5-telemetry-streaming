@@ -12,7 +12,6 @@ const constants = require('../src/nodejs/constants.js');
 
 /* eslint-disable global-require */
 
-// purpose: validate config
 describe('Config', () => {
     let config;
     let util;
@@ -25,6 +24,7 @@ describe('Config', () => {
             loadState: (cb) => { cb(null, {}); },
             saveState: (first, state, cb) => { cb(null); }
         };
+        config._loadState = () => Promise.resolve({});
         configValidator = config.validator;
 
         util = require('../src/nodejs/util.js');
@@ -51,8 +51,13 @@ describe('Config', () => {
         };
         config.validator = null;
         return config.validate(obj)
-            .then(() => Promise.reject(new Error('should fail')))
-            .catch(() => Promise.resolve());
+            .then(() => {
+                assert.fail('Should throw an error');
+            })
+            .catch((err) => {
+                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
+                return Promise.resolve(); // resolve, expected an error
+            });
     });
 
     it('should compile schema', () => {
@@ -72,6 +77,16 @@ describe('Config', () => {
             .then((data) => {
                 assert.deepEqual(data, validatedObj);
                 return Promise.resolve();
+            })
+            .catch(err => Promise.reject(err));
+    });
+
+    it('should load state', () => {
+        util.decryptAllSecrets = () => Promise.resolve({});
+
+        return config.loadState()
+            .then((data) => {
+                assert.deepEqual(data, {});
             })
             .catch(err => Promise.reject(err));
     });

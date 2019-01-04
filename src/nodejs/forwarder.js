@@ -49,4 +49,6 @@ function forwardData(dataCtx) {
 }
 
 
-module.exports = forwardData;
+module.exports = {
+    forward: forwardData
+};
