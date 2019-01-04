@@ -166,6 +166,30 @@ describe('Normalize', () => {
         assert.deepEqual(result, result);
     });
 
+    it('should include first entry', () => {
+        const data = {
+            foo: 'bar',
+            entries: {
+                'https://localhost/mgmt/tm/sys/endpoint/stats': {
+                    childKey: 'bar'
+                }
+            }
+        };
+        const expectedResult = {
+            foo: 'bar',
+            childKey: 'bar'
+        };
+        const options = {
+            includeFirstEntry: {
+                pattern: '/stats',
+                excludePattern: '/members/'
+            }
+        };
+
+        const result = normalize.data(data, options);
+        assert.deepEqual(result, expectedResult);
+    });
+
     it('should run custom function', () => {
         const options = {
             runCustomFunction: {

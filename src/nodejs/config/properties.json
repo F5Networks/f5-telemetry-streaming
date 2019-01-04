@@ -141,13 +141,15 @@
             "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 } }
         },
         "virtualServerStats": {
-            "key": "/mgmt/tm/ltm/virtual/stats",
-            "filterKeys": [ "/stats", "clientside.bitsIn", "clientside.bitsOut", "clientside.curConns", "availabilityState", "enabledState", "destination" ],
-            "renameKeys": { "ltm/virtual": { "pattern": "virtual\/(.*)\/", "group": 1 }, "~": { "replaceCharacter": "/" } },
+            "key": "/mgmt/tm/ltm/virtual::items",
+            "convertArrayToMap": { "keyName": "fullPath", "keyNamePrefix": "name/" },
+            "filterKeys": [ "name/", "/stats", "clientside.bitsIn", "clientside.bitsOut", "clientside.curConns", "availabilityState", "enabledState", "destination" ],
+            "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/virtual": { "pattern": "virtual\/(.*)\/", "group": 1 }, "~": { "replaceCharacter": "/" } },
+            "includeFirstEntry": { "pattern": "/stats" },
             "addKeysByTag": true
         },
         "poolStats": {
-            "key": "poolMembersRef::items",
+            "key": "/mgmt/tm/ltm/pool::items",
             "convertArrayToMap": { "keyName": "selfLink", "keyNamePrefix": "name/" },
             "filterKeys": [ "name/", "/stats", "membersReference", "addr", "port", "serverside.bitsIn", "serverside.bitsOut", "serverside.curConns", "availabilityState", "statusReason", "enabledState", "sessionStatus" ],
             "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/pool/": { "pattern": "pool\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members", "~": { "replaceCharacter": "/" } },
