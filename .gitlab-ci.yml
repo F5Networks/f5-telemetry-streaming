@@ -47,8 +47,8 @@ build docs:
 # also one more variable should be defined
 # CICD_PIPELINE_TRIGGER_FOR_DEPLOY - CI/CD trigger ID
 #
-# job triggers CI/CD trigger to initiate separate pipelie for deployment
-# this allows to parametrize pipeline to test packages agains different
+# job triggers CI/CD trigger to initiate seperate pipeline for deployment
+# this allows to parameterize pipeline to test packages against different
 # versions of BIG-IP
 trigger_deploy_job:
     stage: deploy
@@ -66,7 +66,6 @@ trigger_deploy_job:
     only:
         # run if scheduled
         - schedules
-
 
 deploy_bigip:
     stage: deploy
@@ -129,7 +128,6 @@ teardown_bigip:
     only:
         variables:
         - $REQ_DEVICE_PIPELINE == "true"
-
 
 pages:
     image: ${CONTAINTHEDOCS_IMAGE}
