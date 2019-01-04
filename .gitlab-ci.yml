@@ -33,6 +33,7 @@ build docs:
     tags:
         - docker-executor
     artifacts:
+        name: docs
         paths:
             - docs/_build/html
         expire_in: 1 month
@@ -129,7 +130,7 @@ teardown_bigip:
         variables:
         - $REQ_DEVICE_PIPELINE == "true"
 
-pages:
+docs to pages:
     image: ${CONTAINTHEDOCS_IMAGE}
     stage: review
     environment:
@@ -148,7 +149,8 @@ pages:
     only:
         - docs-vanessa@cloudsolutions/f5-telemetry
 
-Publish docs to staging:
+# Publish docs to clouddocs.f5networks.net
+docs to staging:
   image: ${CONTAINTHEDOCS_IMAGE}
   stage: review
   environment: 
@@ -174,8 +176,7 @@ docs to production:
     name: production
     url: https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest
   only:
-  # Currently will only deploy to clouddocs.f5.com on commits to doc-publish
-  # fill in desired release branch name and uncomment to add deployment from a branch
+  # fill in desired release branch name to add deployment from a branch: currently *master*
   - master@cloudsolutions/f5-telemetry
   tags:
   - cm-official-docker-executor
