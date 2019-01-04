@@ -13,11 +13,22 @@ const fs = require('fs');
 const net = require('net');
 const util = require('./util.js');
 
-// environment variables should exist when run (whether via pipeline or manually)
-const hosts = process.env.VIO_HOSTS.split(','); // it could be 1+: x.x.x.x,x.x.x.y
-const user = process.env.VIO_HOST_USER;
-const password = process.env.VIO_HOST_PWD;
-// end environment variables
+let hosts;
+
+if (process.env.TEST_HARNESS_FILE !== 'undefined') {
+    // eslint-disable-next-line
+    hosts = require(process.env.TEST_HARNESS_FILE);
+} else {
+    // environment variables should exist when run (whether via pipeline or manually)
+    // it could be 1+: x.x.x.x,x.x.x.y
+    hosts = process.env.VIO_HOSTS.split(',').map(host => ({
+        admin_ip: host,
+        admin_username: process.env.VIO_HOST_USER,
+        admin_password: process.env.VIO_HOST_PWD
+    }));
+    // end environment variables
+}
+
 
 const baseILXUri = '/mgmt/shared/telemetry';
 
@@ -63,7 +74,11 @@ describe('Basic', function () {
     });
 
     // run tests for each host
-    hosts.forEach((host) => {
+    hosts.forEach((hostObj) => {
+        const host = hostObj.admin_ip;
+        const user = hostObj.admin_username;
+        const password = hostObj.admin_password;
+
         it(`--- Running tests against host: ${host} ---`, () => {}); // keeps in sync
 
         it('should get auth token', () => util.getAuthToken(host, user, password)
@@ -81,8 +96,8 @@ describe('Basic', function () {
 
         it('should verify installation', () => {
             const uri = `${baseILXUri}/info`;
-
-            return util.makeRequest(host, uri, options)
+            return new Promise(resolve => setTimeout(resolve, 5000))
+                .then(() => util.makeRequest(host, uri, options))
                 .then((data) => {
                     data = data || {};
                     assert.notStrictEqual(data.version, undefined);
