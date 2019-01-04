@@ -198,7 +198,7 @@ function reduceData(data, options) {
         const entryKey = Object.keys(data[entries])[0];
         if (iFE && checkForMatch(entryKey, iFE.pattern, iFE.group, iFE.excludePattern)) {
             data = Object.assign(data[entries][entryKey], data);
-            delete data[entries];
+            delete data[entries]; // delete entries key after merge
             Object.keys(data).forEach((k) => {
                 ret[simplifyKey(k)] = reduceData(data[k], options);
             });

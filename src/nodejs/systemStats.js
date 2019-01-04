@@ -200,32 +200,58 @@ EndpointLoader.prototype._getData = function (uri, options) {
  */
 EndpointLoader.prototype._getAndExpandData = function (endpointProperties) {
     const p = endpointProperties;
-    let rawData;
+    let completeData;
     let referenceKey;
-    const childItemKey = 'items';
+    const childItemKey = 'items'; // assume we are looking inside of 'items'
+
+    // remote protocol, host and query params
+    const fixEndpoint = i => i.replace('https://localhost', '').split('?')[0];
+
+    const substituteData = (data, childKey, assign) => {
+        // this tells us we need to modify the data
+        if (completeData) {
+            data.forEach((i) => {
+                try {
+                    let dataToSubstitute;
+                    if (assign === true) {
+                        dataToSubstitute = Object.assign(i.data, completeData.data[childItemKey][i.name]);
+                    } else {
+                        dataToSubstitute = i.data;
+                    }
+
+                    if (childKey) {
+                        completeData.data[childItemKey][i.name][childKey] = dataToSubstitute;
+                    } else {
+                        completeData.data[childItemKey][i.name] = dataToSubstitute;
+                    }
+                } catch (e) {
+                    // just continue
+                }
+            });
+            return Promise.resolve(completeData); // return substituted data
+        }
+        return Promise.resolve(data); // return data
+    };
 
     return Promise.resolve(this._getData(p.endpoint, { name: p.name, body: p.body }))
         .then((data) => {
             // data: { name: foo, data: bar }
-            // check if expandReferences is requested
+
+            // check if expandReferences property was specified
             if (p.expandReferences) {
-                rawData = data; // retain for later
+                completeData = data;
                 const actualData = data.data;
-                // for now let's just support a single reference
-                referenceKey = Object.keys(p.expandReferences)[0];
+                referenceKey = Object.keys(p.expandReferences)[0]; // for now let's just support a single reference
                 const referenceObj = p.expandReferences[Object.keys(p.expandReferences)[0]];
 
                 const promises = [];
-                // assumes we are looking inside of 'items', might need to extend this to 'entries', etc.
                 if (typeof actualData === 'object' && Array.isArray(actualData[childItemKey])) {
                     for (let i = 0; i < actualData[childItemKey].length; i += 1) {
                         const item = actualData[childItemKey][i];
                         // first check for reference and then link property
                         if (item[referenceKey] && item[referenceKey].link) {
-                            // remove protocol\host from self link
-                            let referenceEndpoint = item[referenceKey].link.replace('https://localhost', '');
+                            let referenceEndpoint = fixEndpoint(item[referenceKey].link);
                             if (referenceObj.endpointSuffix) {
-                                referenceEndpoint = referenceEndpoint.split('?')[0]; // simple avoidance of query params
                                 referenceEndpoint = `${referenceEndpoint}${referenceObj.endpointSuffix}`;
                             }
                             promises.push(this._getData(referenceEndpoint, { name: i }));
@@ -234,65 +260,30 @@ EndpointLoader.prototype._getAndExpandData = function (endpointProperties) {
                 }
                 return Promise.all(promises);
             }
-            // default is to just return the data
-            return Promise.resolve(data);
+            return Promise.resolve(data); // just return the data
         })
+        .then(data => substituteData(data, referenceKey, false))
         .then((data) => {
-            // this tells us we need to modify the raw data, or at least attempt to do so
-            if (rawData) {
-                data.forEach((i) => {
-                    try {
-                        rawData.data[childItemKey][i.name][referenceKey] = i.data;
-                    } catch (e) {
-                        // just continue
-                    }
-                });
-                return Promise.resolve(rawData);
-            }
-            // again default is to just return the data
-            return Promise.resolve(data);
-        })
-        .then((data) => {
-            // check if includeStats is required
+            // check if includeStats property was specified
             if (p.includeStats) {
-                rawData = data; // retain for later
+                completeData = data;
                 const actualData = data.data;
 
                 const promises = [];
-                // assumes we are looking inside of 'items', might need to extend this to 'entries', etc.
                 if (typeof actualData === 'object' && Array.isArray(actualData[childItemKey])) {
                     for (let i = 0; i < actualData[childItemKey].length; i += 1) {
                         const item = actualData[childItemKey][i];
-                        // first check for reference and then link property
+                        // check for selfLink property
                         if (item.selfLink) {
-                            // remove protocol\host from self link
-                            let endpoint = item.selfLink.replace('https://localhost', '');
-                            endpoint = endpoint.split('?')[0]; // simple avoidance of query params
-                            endpoint = `${endpoint}/stats`;
-                            promises.push(this._getData(endpoint, { name: i }));
+                            promises.push(this._getData(`${fixEndpoint(item.selfLink)}/stats`, { name: i }));
                         }
                     }
                 }
                 return Promise.all(promises);
             }
-            // default is to just return the data
-            return Promise.resolve(data);
+            return Promise.resolve(data); // just return the data
         })
-        .then((data) => {
-            // this tells us we need to modify the raw data, or at least attempt to do so
-            if (rawData) {
-                data.forEach((i) => {
-                    try {
-                        rawData.data[childItemKey][i.name] = Object.assign(i.data, rawData.data[childItemKey][i.name]);
-                    } catch (e) {
-                        // just continue
-                    }
-                });
-                return Promise.resolve(rawData);
-            }
-            // again default is to just return the data
-            return Promise.resolve(data);
-        })
+        .then(data => substituteData(data, null, true))
         .catch((err) => {
             throw err;
         });
