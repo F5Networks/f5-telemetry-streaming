@@ -295,7 +295,7 @@ module.exports = {
                     if (tagKeys.length && k.indexOf(tagKeys) !== -1) return; // already exists, skip
                     if (typeof data[k] === 'object') {
                         data[k] = processTags(data[k], k);
-                        data[k] = this._addKeysByTag(data[k], tags, def, options); // may require introspection
+                        data[k] = this._addKeysByTag(data[k], tags, def, options); // may require further introspection
                     }
                 });
             }
