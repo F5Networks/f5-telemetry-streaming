@@ -12,7 +12,6 @@ const Ajv = require('ajv');
 
 /* eslint-disable global-require */
 
-// purpose: validate all example output against defined JSON schema
 describe('Example Output', () => {
     after(() => {
         Object.keys(require.cache).forEach((key) => {

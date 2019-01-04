@@ -14,7 +14,6 @@ const constants = require('../src/nodejs/constants.js');
 
 /* eslint-disable global-require */
 
-// purpose: validate util
 describe('Util', () => {
     let util;
     let childProcess;
@@ -222,6 +221,16 @@ describe('Util', () => {
         assert.strictEqual(decString, string);
     });
 
+    it('should error on incorrect base64 action', () => {
+        try {
+            util.base64('someaction', 'foo');
+            assert.fail('Error expected');
+        } catch (err) {
+            const msg = err.message || err;
+            assert.notStrictEqual(msg.indexOf('Unsupported action'), -1);
+        }
+    });
+
     it('should encrypt secret', () => {
         const secret = 'asecret';
         const mockRes = { statusCode: 200, statusMessage: 'message' };
@@ -234,6 +243,20 @@ describe('Util', () => {
                 return Promise.resolve();
             })
             .catch(err => Promise.reject(err));
+    });
+
+    it('should error during encrypt secret', () => {
+        const mockRes = { statusCode: 400, statusMessage: 'message' };
+        setupRequestMock(mockRes, {});
+
+        return util.encryptSecret('foo')
+            .then(() => {
+                assert.fail('Should throw an error');
+            })
+            .catch((err) => {
+                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
+                return Promise.resolve(); // resolve, expected an error
+            });
     });
 
     it('should decrypt secret', () => {
@@ -251,21 +274,61 @@ describe('Util', () => {
     it('should decrypt all secrets', () => {
         const secret = 'asecret';
         childProcess.exec = (cmd, cb) => { cb(null, secret, null); };
+        process.env.MY_SECRET_TEST_VAR = secret;
 
         const obj = {
-            my_item: {
+            My_Consumer: {
                 class: 'Consumer',
                 passphrase: {
                     cipherText: 'foo'
                 }
+            },
+            My_Consumer2: {
+                class: 'Consumer',
+                passphrase: {
+                    environmentVar: 'MY_SECRET_TEST_VAR'
+                }
+            },
+            My_Consumer3: {
+                class: 'Consumer',
+                passphrase: {
+                    environmentVar: 'VAR_THAT_DOES_NOT_EXIST'
+                }
+            },
+            My_Consumer4: {
+                class: 'Consumer',
+                passphrase: {
+                    someUnknownKey: 'foo'
+                }
             }
         };
         const decryptedObj = {
-            my_item: {
+            My_Consumer: {
                 class: 'Consumer',
                 passphrase: {
                     cipherText: 'foo',
                     text: secret
+                }
+            },
+            My_Consumer2: {
+                class: 'Consumer',
+                passphrase: {
+                    environmentVar: 'MY_SECRET_TEST_VAR',
+                    text: secret
+                }
+            },
+            My_Consumer3: {
+                class: 'Consumer',
+                passphrase: {
+                    environmentVar: 'VAR_THAT_DOES_NOT_EXIST',
+                    text: null
+                }
+            },
+            My_Consumer4: {
+                class: 'Consumer',
+                passphrase: {
+                    someUnknownKey: 'foo',
+                    text: null
                 }
             }
         };

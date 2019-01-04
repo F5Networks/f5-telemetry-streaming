@@ -10,29 +10,13 @@ const assert = require('assert');
 
 /* eslint-disable global-require */
 
-describe('Consumers plugins', () => {
-    let cDefault;
-    let context;
+describe('Data Pipeline', () => {
+    let dataPipeline;
+    let forwarder;
 
     before(() => {
-        cDefault = require('../src/nodejs/consumers/default');
-    });
-    beforeEach(() => {
-        const tracerMock = {
-            write() {}
-        };
-        const loggerMock = {
-            error() {},
-            exception() {},
-            info() {},
-            debug() {}
-        };
-        context = {
-            event: {},
-            config: {},
-            tracer: tracerMock,
-            logger: loggerMock
-        };
+        dataPipeline = require('../src/nodejs/dataPipeline.js');
+        forwarder = require('../src/nodejs/forwarder.js');
     });
     after(() => {
         Object.keys(require.cache).forEach((key) => {
@@ -40,17 +24,29 @@ describe('Consumers plugins', () => {
         });
     });
 
-    it('default: should process event', () => {
-        cDefault(context)
+    it('should process data', () => {
+        let fwdData;
+        forwarder.forward = (ctx) => {
+            fwdData = ctx.data;
+            return Promise.resolve();
+        };
+
+        const expectedResult = {
+            foo: 'bar',
+            telemetryEventCategory: 'event'
+        };
+
+        return dataPipeline.process({ foo: 'bar' }, 'event')
             .then(() => {
-                assert.strictEqual(1, 1);
+                assert.deepEqual(fwdData, expectedResult);
             })
             .catch(err => Promise.reject(err));
     });
 
-    it('default: should reject on missing event', () => {
-        context.event = undefined;
-        return cDefault(context)
+    it('should fail to process data', () => {
+        forwarder.forward = () => Promise.reject(new Error('some message'));
+
+        return dataPipeline.process({ foo: 'bar' }, 'systemInfo')
             .then(() => {
                 assert.fail('Should throw an error');
             })
@@ -58,12 +54,5 @@ describe('Consumers plugins', () => {
                 if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
                 return Promise.resolve(); // resolve, expected an error
             });
-    });
-
-    it('default: should continue without tracer', () => {
-        context.tracer = undefined;
-        return cDefault(context)
-            .then(() => Promise.resolve())
-            .catch(() => Promise.reject());
     });
 });
