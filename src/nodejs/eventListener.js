@@ -69,7 +69,7 @@ EventListener.prototype.getServerOptions = function () {
  * Start Event listener
  */
 EventListener.prototype.start = function () {
-    this.logger.debug('Configuring server to listen');
+    this.logger.debug(`Configuring server to listen on port ${this.port}`);
     try {
         this._start();
     } catch (err) {
@@ -134,7 +134,7 @@ EventListener.prototype._start = function () {
     });
 
     this._server.on('listening', () => {
-        this.logger.debug(`Started on port ${this.port}`);
+        this.logger.debug(`Started listening on port ${this.port}`);
     });
 
     this._server.on('close', (err) => {
