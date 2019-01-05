@@ -176,9 +176,10 @@ describe('Config', () => {
         const logLevelBefore = logger.getLevel();
         const logLevelNameBefore = logger.getLevelName();
 
-        config.validateAndApply(obj).then(() => {
+        return config.validateAndApply(obj).then(() => {
             assert.strictEqual(logLevelBefore, logger.getLevel());
             assert.strictEqual(logLevelNameBefore, logger.getLevelName());
+            return Promise.resolve();
         });
     });
 
@@ -193,9 +194,10 @@ describe('Config', () => {
         };
 
         logger.setLogLevel('info');
-        config.validateAndApply(obj).then(() => {
+        return config.validateAndApply(obj).then(() => {
             assert.StrictEqual(logger.getLevel(logLevel), logger.getLevel());
             assert.StrictEqual(logLevel, logger.getLevelName());
+            return Promise.resolve();
         });
     });
 });
