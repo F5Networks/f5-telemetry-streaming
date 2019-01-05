@@ -93,11 +93,11 @@ describe('Logger', () => {
                 logger[logType](msg);
 
                 if (logger.getLevel(logType) >= logger.getLevel()) {
-                    assert.strictEqual(loggedMessages[logType].length, 2);
+                    assert.strictEqual(loggedMessages[logType].length, 1);
                     // check it contains the message - no exact match as prefix [telemetry] will be added
                     assert.notStrictEqual(loggedMessages[logType][0].indexOf(msg), -1);
                 } else {
-                    assert.strictEqual(loggedMessages[logType].length, 1);
+                    assert.strictEqual(loggedMessages[logType].length, 0);
                 }
             });
         });
