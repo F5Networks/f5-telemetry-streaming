@@ -10,7 +10,7 @@ const assert = require('assert');
 const logger = require('../src/nodejs/logger.js');
 
 const logLevels = [
-    'noset',
+    'notset',
     'debug',
     'info',
     'error'
@@ -30,6 +30,7 @@ logger.logger = loggerMock;
 
 describe('Logger', () => {
     beforeEach(() => {
+        logger.setLogLevel('info');
         Object.keys(loggedMessages).forEach((msgType) => {
             loggedMessages[msgType] = [];
         });
@@ -71,7 +72,7 @@ describe('Logger', () => {
                 const msg = `this is a ${logType} message`;
                 logger[logType](msg);
 
-                if (logger.getLevel() >= logger.getLevel(logType)) {
+                if (logger.getLevel(logType) >= logger.getLevel()) {
                     assert.strictEqual(loggedMessages[logType].length, 1);
                     // check it contains the message - no exact match as prefix [telemetry] will be added
                     assert.notStrictEqual(loggedMessages[logType][0].indexOf(msg), -1);
