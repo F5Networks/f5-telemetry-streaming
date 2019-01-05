@@ -197,7 +197,7 @@ function buildFilterFunc(config) {
     }
     const pattern = new RegExp(config.match, 'i');
     const props = events.classifyByKeys;
-    logger.debug(`Building events filter function with following params: patter=${pattern} props=${JSON.stringify(props)}`);
+    logger.debug(`Building events filter function with following params: pattern=${pattern} properties=${JSON.stringify(props)}`);
 
     return function (data) {
         for (let i = 0; i < props.length; i += 1) {
