@@ -65,7 +65,7 @@ describe('Logger', () => {
         });
     });
 
-    it('should log error message on attempt to set logLevelName', () => {
+    it('should log error message on attempt to set invalid logLevelName', () => {
         const invalidName = 'invalidErrorLevelName';
         logger.setLogLevel(invalidName);
 
@@ -85,8 +85,10 @@ describe('Logger', () => {
     logLevels.forEach((logLevel) => {
         Object.keys(loggedMessages).forEach((logType) => {
             it(`should log at the appropriate '${logType}' level and preserve global "${logLevel}" level`, () => {
-                // this call logs message about level change, so we already have 1 item
+                // this call logs message about level change, so we already have 1 item in loggedMessages.info
                 logger.setLogLevel(logLevel);
+                loggedMessages.info = [];
+
                 const msg = `this is a ${logType} message`;
                 logger[logType](msg);
 
