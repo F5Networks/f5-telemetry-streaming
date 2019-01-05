@@ -143,6 +143,7 @@ describe('Config', () => {
             .catch(err => Promise.reject(err));
     });
 
+    // no more tests beyond that test, because it modifies util.formatConfig
     it('should fail to process client request', () => {
         let restOperationStatusCode;
         let restOperationBody;
@@ -165,39 +166,5 @@ describe('Config', () => {
                 return Promise.resolve();
             })
             .catch(err => Promise.reject(err));
-    });
-
-    it('should not modify logLevel when not specified', () => {
-        const obj = {
-            class: 'Telemetry'
-        };
-
-        logger.setLogLevel('info');
-        const logLevelBefore = logger.getLevel();
-        const logLevelNameBefore = logger.getLevelName();
-
-        return config.validateAndApply(obj).then(() => {
-            assert.strictEqual(logLevelBefore, logger.getLevel());
-            assert.strictEqual(logLevelNameBefore, logger.getLevelName());
-            return Promise.resolve();
-        });
-    });
-
-    it('should set logLevel when specified', () => {
-        const logLevel = 'debug';
-        const obj = {
-            class: 'Telemetry',
-            MySettings: {
-                class: 'Telemetry_Settings',
-                logLevel
-            }
-        };
-
-        logger.setLogLevel('info');
-        return config.validateAndApply(obj).then(() => {
-            assert.StrictEqual(logger.getLevel(logLevel), logger.getLevel());
-            assert.StrictEqual(logLevel, logger.getLevelName());
-            return Promise.resolve();
-        });
     });
 });
