@@ -65,7 +65,7 @@ describe('Logger', () => {
     });
 
     logLevels.forEach((logLevel) => {
-        loggedMessages.forEach((logType) => {
+        Object.keys(loggedMessages).forEach((logType) => {
             it(`should log at the appropriate '${logType}' level and preserve global "${logLevel}" level`, () => {
                 logger.setLogLevel(logLevel);
                 const msg = `this is a ${logType} message`;
