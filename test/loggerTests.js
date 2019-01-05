@@ -9,6 +9,12 @@
 const assert = require('assert');
 const logger = require('../src/nodejs/logger.js');
 
+const logLevels = [
+    'noset',
+    'debug',
+    'info',
+    'error'
+];
 const loggedMessages = {
     error: [],
     info: [],
@@ -24,8 +30,8 @@ logger.logger = loggerMock;
 
 describe('Logger', () => {
     beforeEach(() => {
-        Object.keys(loggedMessages).forEach((level) => {
-            loggedMessages[level] = [];
+        Object.keys(loggedMessages).forEach((msgType) => {
+            loggedMessages[msgType] = [];
         });
     });
     after(() => {
@@ -34,17 +40,46 @@ describe('Logger', () => {
         });
     });
 
-    it('should log at the appropriate level', () => {
-        Object.keys(loggedMessages).forEach((level) => {
-            logger[level](`this is a ${level} message`);
-        });
+    it('defaults: should be by default "info" level', () => {
+        assert.strictEqual(logger.getLevelName(), 'info');
+    });
 
-        ['error', 'info', 'debug'].forEach((level) => {
-            assert.strictEqual(loggedMessages[level].length, 1);
+    it('should return appropriate log level value for standard value', () => {
+        logLevels.forEach((logLevelName) => {
+            [logLevelName, logger.getLevel(logLevelName)].forEach((value) => {
+                logger.setLogLevel(value);
+                assert.strictEqual(logger.getLevelName(), logLevelName);
+                assert.strictEqual(logger.getLevel(), logger.getLevel(logLevelName));
+                assert.strictEqual(logger.getLevel(), logger.getLevel(logger.getLevelName()));
+            });
         });
+    });
 
-        // check it contains the message - no exact match as prefix [telemetry] will be added
-        assert.notStrictEqual(loggedMessages.info[0].indexOf('this is a info message'), -1);
+    it('should return appropriate log level name for non-standard value', () => {
+        const value = 9999;
+        const desiredName = `Level ${value}`;
+
+        logger.setLogLevel(value);
+        assert.strictEqual(logger.getLevelName(), desiredName);
+        assert.strictEqual(logger.getLevelName(value), desiredName);
+    });
+
+    logLevels.forEach((logLevel) => {
+        loggedMessages.forEach((logType) => {
+            it(`should log at the appropriate '${logType}' level and preserve global "${logLevel}" level`, () => {
+                logger.setLogLevel(logLevel);
+                const msg = `this is a ${logType} message`;
+                logger[logType](msg);
+
+                if (logger.getLevel() >= logger.getLevel(logType)) {
+                    assert.strictEqual(loggedMessages[logType].length, 1);
+                    // check it contains the message - no exact match as prefix [telemetry] will be added
+                    assert.notStrictEqual(loggedMessages[logType][0].indexOf(msg), -1);
+                } else {
+                    assert.strictEqual(loggedMessages[logType].length, 0);
+                }
+            });
+        });
     });
 
     it('should log an exception', () => {
