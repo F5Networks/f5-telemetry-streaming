@@ -21,7 +21,7 @@ try {
  *
  * @param {Object|String} msg - message to stringify
  *
- * @returns {Object} Stringified message
+ * @returns {Object|String} Stringified message (or at least we tried to)
  */
 function stringify(msg) {
     if (typeof msg === 'object') {
@@ -39,7 +39,7 @@ function stringify(msg) {
  *
  * @param {String} msg - message to mask
  *
- * @returns {Object} Masked message
+ * @returns {String} Masked message
  */
 function maskSecrets(msg) {
     let ret = msg;
