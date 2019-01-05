@@ -21,6 +21,7 @@ module.exports = {
     USER_AGENT: `f5-telemetry/${VERSION}`,
     SYSTEM_POLLER_CLASS_NAME: 'Telemetry_System_Poller',
     EVENT_LISTENER_CLASS_NAME: 'Telemetry_Listener',
+    SETTINGS_CLASS_NAME: 'Telemetry_Settings',
     CONSUMERS_CLASS_NAME: 'Telemetry_Consumer',
     TRACER_DIR: '/var/tmp/telemetry',
     BIG_IP_DEVICE_TYPE: 'BIG-IP',
