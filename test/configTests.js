@@ -9,6 +9,7 @@
 const assert = require('assert');
 
 const constants = require('../src/nodejs/constants.js');
+const logger = require('../src/nodejs/logger.js');
 
 /* eslint-disable global-require */
 
@@ -164,5 +165,37 @@ describe('Config', () => {
                 return Promise.resolve();
             })
             .catch(err => Promise.reject(err));
+    });
+
+    it('should not modify logLevel when not specified', () => {
+        const obj = {
+            class: 'Telemetry'
+        };
+
+        logger.setLogLevel('info');
+        const logLevelBefore = logger.getLevel();
+        const logLevelNameBefore = logger.getLevelName();
+
+        config.validateAndApply(obj).then(() => {
+            assert.strictEqual(logLevelBefore, logger.getLevel());
+            assert.strictEqual(logLevelNameBefore, logger.getLevelName());
+        });
+    });
+
+    it('should set logLevel when specified', () => {
+        const logLevel = 'debug';
+        const obj = {
+            class: 'Telemetry',
+            MySettings: {
+                class: 'Telemetry_Settings',
+                logLevel
+            }
+        };
+
+        logger.setLogLevel('info');
+        config.validateAndApply(obj).then(() => {
+            assert.StrictEqual(logger.getLevel(logLevel), logger.getLevel());
+            assert.StrictEqual(logLevel, logger.getLevelName());
+        });
     });
 });
