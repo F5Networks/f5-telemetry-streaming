@@ -297,7 +297,7 @@ const configWorker = new ConfigWorker();
 // config worker change event, should be first in the handlers chain
 configWorker.on('change', (config) => {
     let settings;
-    if (config.parsed[SETTINGS_CLASS_NAME]) {
+    if (config.parsed && config.parsed[SETTINGS_CLASS_NAME]) {
         settings = config.parsed[SETTINGS_CLASS_NAME];
         settings = settings[Object.keys(settings)[0]];
     }
