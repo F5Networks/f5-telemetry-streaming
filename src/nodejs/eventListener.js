@@ -11,12 +11,14 @@
 const net = require('net');
 
 const logger = require('./logger.js');
-const tracers = require('./util.js').tracer;
 const constants = require('./constants.js');
 const normalize = require('./normalize.js');
 const dataPipeline = require('./dataPipeline.js');
 const configWorker = require('./config.js');
 const properties = require('./config/properties.json');
+
+const tracers = require('./util.js').tracer;
+const stringify = require('./util.js').stringify;
 
 const events = properties.events;
 const definitions = properties.definitions;
@@ -197,7 +199,7 @@ function buildFilterFunc(config) {
     }
     const pattern = new RegExp(config.match, 'i');
     const props = events.classifyByKeys;
-    logger.debug(`Building events filter function with following params: pattern=${pattern} properties=${JSON.stringify(props)}`);
+    logger.debug(`Building events filter function with following params: pattern=${pattern} properties=${stringify(props)}`);
 
     return function (data) {
         for (let i = 0; i < props.length; i += 1) {
