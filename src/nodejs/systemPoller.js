@@ -34,10 +34,11 @@ function process(args) {
 
     return new SystemStats().collect(
         config.host,
-        config.port,
-        config.username,
-        config.passphrase ? config.passphrase.text : undefined,
         {
+            protocol: config.protocol,
+            port: config.port,
+            username: config.username,
+            passphrase: config.passphrase ? config.passphrase.text : undefined,
             tags: config.tag,
             addtlProperties: {
                 pollingInterval: config.interval

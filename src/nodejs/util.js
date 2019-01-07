@@ -683,6 +683,7 @@ module.exports = {
      * @param {String} host                          - HTTP host
      * @param {String} uri                           - HTTP uri
      * @param {Object} options                       - function options
+     * @param {String} [options.protocol]            - HTTP protocol
      * @param {Integer} [options.port]               - HTTP port
      * @param {String} [options.method]              - HTTP method
      * @param {String} [options.body]                - HTTP body
@@ -698,10 +699,8 @@ module.exports = {
             'User-Agent': constants.USER_AGENT
         };
 
-        // well, should be more sophisticated than this
-        // default to https, unless in defined list of http ports
-        let fullUri = [80, 8080, 8100].indexOf(options.port) !== -1 ? `http://${host}` : `https://${host}`;
-        fullUri = options.port ? `${fullUri}:${options.port}${uri}` : `${fullUri}:${constants.DEFAULT_PORT}${uri}`;
+        const protocol = options.protocol || constants.DEFAULT_PROTOCOL;
+        const fullUri = `${protocol}://${host}:${options.port || constants.DEFAULT_PORT}${uri}`;
         const method = options.method || 'GET';
         const requestOptions = {
             uri: fullUri,
@@ -736,11 +735,12 @@ module.exports = {
     /**
      * Get auth token
      *
-     * @param {String} host            - HTTP host
-     * @param {String} username        - device username
-     * @param {String} password        - device password
-     * @param {Object} options         - function options
-     * @param {Integer} [options.port] - HTTP port
+     * @param {String} host                - HTTP host
+     * @param {String} username            - device username
+     * @param {String} password            - device password
+     * @param {Object} options             - function options
+     * @param {String} [options.protocol] - HTTP protocol
+     * @param {Integer} [options.port]     - HTTP port
      *
      * @returns {Object} Returns promise resolved with auth token: { token: 'token' }
      */
@@ -754,6 +754,7 @@ module.exports = {
         });
         const postOptions = {
             method: 'POST',
+            protocol: options.protocol,
             port: options.port,
             body
         };
@@ -802,7 +803,6 @@ module.exports = {
         const uri = '/mgmt/tm/ltm/auth/radius-server';
         const httpPostOptions = {
             method: 'POST',
-            port: constants.DEFAULT_PORT,
             body: {
                 name: radiusObjectName,
                 secret: data,
@@ -811,7 +811,6 @@ module.exports = {
         };
         const httpDeleteOptions = {
             method: 'DELETE',
-            port: constants.DEFAULT_PORT,
             continueOnErrorCode: true
         };
 

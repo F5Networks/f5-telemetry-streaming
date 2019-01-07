@@ -46,15 +46,13 @@
             "endpoint": "/mgmt/tm/sys/tmm-traffic"
         },
         {
-            "endpoint": "/mgmt/tm/ltm/virtual/stats"
-        },
-        {
-            "endpoint": "/mgmt/tm/ltm/pool/stats"
+            "endpoint": "/mgmt/tm/ltm/virtual",
+            "includeStats": true
         },
         {
             "endpoint": "/mgmt/tm/ltm/pool",
-            "expandReferences": { "membersReference": { "endpointSuffix": "/stats" } },
-            "name": "poolMembersRef"
+            "includeStats": true,
+            "expandReferences": { "membersReference": { "endpointSuffix": "/stats" } }
         },
         {
             "endpoint": "/mgmt/tm/ltm/policy/stats"
@@ -63,14 +61,14 @@
             "endpoint": "/mgmt/tm/sys/file/ssl-cert"
         },
         {
+            "name": "diskStorageRef",
             "endpoint": "/mgmt/tm/util/bash",
-            "body": "{ \"command\": \"run\", \"utilCmdArgs\": \"-c \\\"/bin/df -P | /usr/bin/tr -s ' ' ','\\\"\" }",
-            "name": "diskStorageRef"
+            "body": "{ \"command\": \"run\", \"utilCmdArgs\": \"-c \\\"/bin/df -P | /usr/bin/tr -s ' ' ','\\\"\" }"
         },
         {
+            "name": "diskLatencyRef",
             "endpoint": "/mgmt/tm/util/bash",
-            "body": "{ \"command\": \"run\", \"utilCmdArgs\": \"-c \\\"/usr/bin/iostat -x -d | /usr/bin/tail -n +3 | /usr/bin/tr -s ' ' ','\\\"\" }",
-            "name": "diskLatencyRef"
+            "body": "{ \"command\": \"run\", \"utilCmdArgs\": \"-c \\\"/usr/bin/iostat -x -d | /usr/bin/tail -n +3 | /usr/bin/tr -s ' ' ','\\\"\" }"
         }
     ]
 }
