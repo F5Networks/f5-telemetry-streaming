@@ -46,6 +46,10 @@ Definition: Accepts information from disparate systems and provides the tools to
 ```json
 {
     "class": "Telemetry",
+    "My_Settings": {
+        "class": "Telemetry_Settings",
+        "logLevel": "info"
+    },
     "My_Poller": {
         "class": "Telemetry_System_Poller",
         "interval": 60
