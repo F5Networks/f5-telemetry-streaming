@@ -41,7 +41,7 @@ describe('Logger', () => {
         });
     });
 
-    it('defaults: should be by default "info" level', () => {
+    it('defaults: should be by default \'info\' level', () => {
         assert.strictEqual(logger.getLevelName(), 'info');
     });
 
@@ -84,7 +84,7 @@ describe('Logger', () => {
 
     logLevels.forEach((logLevel) => {
         Object.keys(loggedMessages).forEach((logType) => {
-            it(`should log at the appropriate '${logType}' level and preserve global "${logLevel}" level`, () => {
+            it(`should log at the appropriate '${logType}' level and preserve global '${logLevel}' level`, () => {
                 // this call logs message about level change, so we already have 1 item in loggedMessages.info
                 logger.setLogLevel(logLevel);
                 loggedMessages.info = [];
