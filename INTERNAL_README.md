@@ -581,10 +581,10 @@ Each config object has 'tracer' property. Possible values are:
     },
     "virtualServerStats": {
         "/Common/app.app/app_vs": {
-            "clientside.bitsIn": 5474952,
-            "clientside.bitsOut": 66039264,
+            "clientside.bitsIn": 31417200,
+            "clientside.bitsOut": 297731408,
             "clientside.curConns": 0,
-            "destination": "10.0.2.101:80",
+            "destination": "/Common/10.0.2.101:80",
             "status.availabilityState": "available",
             "status.enabledState": "enabled",
             "name": "/Common/app.app/app_vs",
@@ -595,7 +595,7 @@ Each config object has 'tracer' property. Possible values are:
             "clientside.bitsIn": 0,
             "clientside.bitsOut": 0,
             "clientside.curConns": 0,
-            "destination": "192.0.2.11:443",
+            "destination": "/Sample_02/192.0.2.11:443",
             "status.availabilityState": "offline",
             "status.enabledState": "enabled",
             "name": "/Sample_02/A1/serviceMain",
@@ -606,7 +606,7 @@ Each config object has 'tracer' property. Possible values are:
             "clientside.bitsIn": 0,
             "clientside.bitsOut": 0,
             "clientside.curConns": 0,
-            "destination": "192.0.2.11:80",
+            "destination": "/Sample_02/192.0.2.11:80",
             "status.availabilityState": "unknown",
             "status.enabledState": "enabled",
             "name": "/Sample_02/A1/serviceMain-Redirect",
@@ -616,12 +616,18 @@ Each config object has 'tracer' property. Possible values are:
     },
     "poolStats": {
         "/Common/app.app/app_pool": {
+            "serverside.bitsIn": 39075976,
+            "serverside.bitsOut": 299502400,
+            "serverside.curConns": 0,
+            "status.availabilityState": "available",
+            "status.enabledState": "enabled",
+            "status.statusReason": "The pool is available",
             "members": {
                 "/Common/10.0.3.5:80": {
                     "addr": "10.0.3.5",
                     "port": 80,
-                    "serverside.bitsIn": 7392800,
-                    "serverside.bitsOut": 67086632,
+                    "serverside.bitsIn": 39075976,
+                    "serverside.bitsOut": 299502400,
                     "serverside.curConns": 0,
                     "sessionStatus": "enabled",
                     "status.availabilityState": "available",
@@ -634,13 +640,19 @@ Each config object has 'tracer' property. Possible values are:
             "application": "app.app"
         },
         "/Common/telemetry-local": {
+            "serverside.bitsIn": 14780176,
+            "serverside.bitsOut": 3354112,
+            "serverside.curConns": 1,
+            "status.availabilityState": "available",
+            "status.enabledState": "enabled",
+            "status.statusReason": "The pool is available",
             "members": {
                 "/Common/10.0.1.100:6514": {
                     "addr": "10.0.1.100",
                     "port": 6514,
-                    "serverside.bitsIn": 2881560,
-                    "serverside.bitsOut": 615872,
-                    "serverside.curConns": 0,
+                    "serverside.bitsIn": 14780176,
+                    "serverside.bitsOut": 3354112,
+                    "serverside.curConns": 1,
                     "sessionStatus": "enabled",
                     "status.availabilityState": "available",
                     "status.enabledState": "enabled",
@@ -652,6 +664,12 @@ Each config object has 'tracer' property. Possible values are:
             "application": ""
         },
         "/Sample_02/A1/web_pool": {
+            "serverside.bitsIn": 0,
+            "serverside.bitsOut": 0,
+            "serverside.curConns": 0,
+            "status.availabilityState": "offline",
+            "status.enabledState": "enabled",
+            "status.statusReason": "The children pool member(s) are down",
             "members": {
                 "/Sample_02/192.0.2.12:80": {
                     "addr": "192.0.2.12",
@@ -662,7 +680,7 @@ Each config object has 'tracer' property. Possible values are:
                     "sessionStatus": "enabled",
                     "status.availabilityState": "offline",
                     "status.enabledState": "enabled",
-                    "status.statusReason": "Pool member has been marked down by a monitor"
+                    "status.statusReason": "/Common/http: No successful responses received before deadline. @2018/12/17 21:07:54. "
                 },
                 "/Sample_02/192.0.2.13:80": {
                     "addr": "192.0.2.13",
@@ -673,7 +691,7 @@ Each config object has 'tracer' property. Possible values are:
                     "sessionStatus": "enabled",
                     "status.availabilityState": "offline",
                     "status.enabledState": "enabled",
-                    "status.statusReason": "Pool member has been marked down by a monitor"
+                    "status.statusReason": "/Common/http: No successful responses received before deadline. @2018/12/17 21:07:54. "
                 }
             },
             "name": "/Sample_02/A1/web_pool",

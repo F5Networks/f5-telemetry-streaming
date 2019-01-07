@@ -95,14 +95,19 @@ module.exports = {
      * @param {String} data    - data
      * @param {String} pattern - pattern to match on
      * @param {Integer} group  - group to choose from match
+     * @param {String} excludePattern - even if 'pattern' has a match, optionally check for exclude pattern
      *
      * @returns {String} Returns matched key
      */
-    _checkForMatch(data, pattern, group) {
+    _checkForMatch(data, pattern, group, excludePattern) {
         let ret;
         const g = group || 0;
-        const match = data.match(pattern);
+        let match = data.match(pattern);
         if (match && match[g]) ret = match[g];
+        if (excludePattern) {
+            match = data.match(excludePattern);
+            if (match) ret = false;
+        }
         return ret;
     },
 
@@ -177,24 +182,32 @@ module.exports = {
     _reduceData(data, options) {
         let ret = Array.isArray(data) ? [] : {};
 
-        // reduce down the nested structure for some well known keys (only one in object)
+        // reduce down the nested structure for some well known keys - assuming only one in object
         const keysToReduce = ['nestedStats', 'value', 'description', 'color'];
         for (let i = 0; i < keysToReduce.length; i += 1) {
             const item = data[keysToReduce[i]];
-            if (item !== undefined && Object.keys(data).length === 1) {
-                return this._reduceData(item, options);
-            }
+            if (item !== undefined && Object.keys(data).length === 1) return this._reduceData(item, options);
         }
 
-        // .entries evaluates to true if data is array
-        if (data.entries && !Array.isArray(data)) {
-            Object.keys(data.entries).forEach((k) => {
-                const v = data.entries[k];
+        // .entries evaluates to true if data is an array
+        const entries = 'entries';
+        if (data[entries] && !Array.isArray(data)) {
+            // entry keys may look like https://localhost/mgmt/tm/sys/tmm-info/0.0/stats, we should simplify this somewhat
+            const simplifyKey = key => key.replace('https://localhost/', '').replace('mgmt/tm/', '');
 
-                // child entry keys may look like https://localhost/mgmt/tm/sys/tmm-info/0.0/stats,
-                // we should simplify this somewhat
-                const kM = k.replace('https://localhost/', '').replace('mgmt/tm/', '');
-                ret[kM] = v;
+            const iFE = options.includeFirstEntry;
+            const entryKey = Object.keys(data[entries])[0];
+            if (iFE && this._checkForMatch(entryKey, iFE.pattern, iFE.group, iFE.excludePattern)) {
+                data = Object.assign(data[entries][entryKey], data);
+                delete data[entries]; // delete entries key after merge
+                Object.keys(data).forEach((k) => {
+                    ret[simplifyKey(k)] = this._reduceData(data[k], options);
+                });
+                return this._reduceData(ret, options);
+            }
+            // standard entries reduce
+            Object.keys(data[entries]).forEach((k) => {
+                ret[simplifyKey(k)] = this._reduceData(data[entries][k], options);
             });
             return this._reduceData(ret, options);
         }
@@ -206,7 +219,6 @@ module.exports = {
                 const catm = options.convertArrayToMap;
                 if (catm && catm.keyName) {
                     ret = util.convertArrayToMap(data, catm.keyName, { keyPrefix: catm.keyNamePrefix });
-                    // now reduce
                     ret = this._reduceData(ret, options);
                 } else {
                     data.forEach((i) => {
@@ -215,15 +227,18 @@ module.exports = {
                 }
             } else {
                 Object.keys(data).forEach((k) => {
-                    const v = data[k];
-                    ret[k] = this._reduceData(v, options);
+                    if (k === 'nestedStats') {
+                        Object.keys(data[k]).forEach((cK) => {
+                            ret[cK] = this._reduceData(data[k][cK], options);
+                        });
+                    } else {
+                        ret[k] = this._reduceData(data[k], options);
+                    }
                 });
             }
-
             return ret;
         }
-        // just return data
-        return data;
+        return data; // just return data
     },
 
     /**
@@ -280,7 +295,7 @@ module.exports = {
                     if (tagKeys.length && k.indexOf(tagKeys) !== -1) return; // already exists, skip
                     if (typeof data[k] === 'object') {
                         data[k] = processTags(data[k], k);
-                        data[k] = this._addKeysByTag(data[k], tags, def, options); // may require introspection
+                        data[k] = this._addKeysByTag(data[k], tags, def, options); // may require further introspection
                     }
                 });
             }
@@ -324,6 +339,7 @@ module.exports = {
      * @param {Array} [options.filterByKeys]         - list of keys to filter data further
      * @param {Object} [options.renameKeysByPattern] - map of keys to rename by pattern
      * @param {Object} [options.convertArrayToMap]   - convert array to map using defined key name
+     * @param {Object} [options.includeFirstEntry]   - include first item in 'entries' at the top level
      * @param {Object} [options.runCustomFunction]   - run custom function on data
      * @param {Object} [options.addKeysByTag]        - add key to data based on tag(s)
      *
@@ -333,7 +349,10 @@ module.exports = {
         options = options || {};
 
         // standard reduce first
-        const reduceDataOptions = { convertArrayToMap: options.convertArrayToMap };
+        const reduceDataOptions = {
+            convertArrayToMap: options.convertArrayToMap,
+            includeFirstEntry: options.includeFirstEntry
+        };
         let ret = this._reduceData(data, reduceDataOptions);
 
         // additional normalization may be required - the order here matters
