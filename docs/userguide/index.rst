@@ -14,3 +14,4 @@ User Guide
    declarations.rst
    output-example.rst
    troubleshooting.rst
+   revision-history.rst
