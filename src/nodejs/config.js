@@ -21,7 +21,8 @@ const systemPollerSchema = require('./config/system_poller_schema.json');
 const listenerSchema = require('./config/listener_schema.json');
 const consumerSchema = require('./config/consumer_schema.json');
 const customKeywords = require('./customKeywords.js');
-const SETTINGS_CLASS_NAME = require('./constants.js').SETTINGS_CLASS_NAME;
+const CONTROLS_CLASS_NAME = require('./constants.js').CONTROLS_CLASS_NAME;
+const CONTROLS_PROPERTY_NAME = require('./constants.js').CONTROLS_PROPERTY_NAME;
 
 /**
  * ConfigWorker class
@@ -297,13 +298,15 @@ const configWorker = new ConfigWorker();
 // config worker change event, should be first in the handlers chain
 configWorker.on('change', (config) => {
     let settings;
-    if (config.parsed && config.parsed[SETTINGS_CLASS_NAME]) {
-        settings = config.parsed[SETTINGS_CLASS_NAME];
-        settings = settings[Object.keys(settings)[0]];
+    if (config.parsed
+            && config.parsed[CONTROLS_CLASS_NAME]
+            && config.parsed[CONTROLS_CLASS_NAME][CONTROLS_PROPERTY_NAME]) {
+        settings = config.parsed[CONTROLS_CLASS_NAME][CONTROLS_PROPERTY_NAME];
     }
     if (!settings) {
         return;
     }
+    // default value should be 'info'
     logger.setLogLevel(settings.logLevel);
 });
 
