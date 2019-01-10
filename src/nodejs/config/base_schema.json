@@ -87,7 +87,8 @@
                 "enum": [
                     "Telemetry_System_Poller",
                     "Telemetry_Listener",
-                    "Telemetry_Consumer"
+                    "Telemetry_Consumer",
+                    "Controls"
                 ]
             }
         },    
@@ -100,6 +101,9 @@
             },
             {
                 "$ref": "consumer_schema.json#"
+            },
+            {
+                "$ref": "controls_schema.json#"
             }
         ]
     },

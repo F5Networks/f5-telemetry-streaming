@@ -11,12 +11,14 @@
 const net = require('net');
 
 const logger = require('./logger.js');
-const tracers = require('./util.js').tracer;
 const constants = require('./constants.js');
 const normalize = require('./normalize.js');
 const dataPipeline = require('./dataPipeline.js');
 const configWorker = require('./config.js');
 const properties = require('./config/properties.json');
+
+const tracers = require('./util.js').tracer;
+const stringify = require('./util.js').stringify;
 
 const events = properties.events;
 const definitions = properties.definitions;
@@ -69,7 +71,7 @@ EventListener.prototype.getServerOptions = function () {
  * Start Event listener
  */
 EventListener.prototype.start = function () {
-    this.logger.debug('Configuring server to listen');
+    this.logger.debug(`Configuring server to listen on port ${this.port}`);
     try {
         this._start();
     } catch (err) {
@@ -134,7 +136,7 @@ EventListener.prototype._start = function () {
     });
 
     this._server.on('listening', () => {
-        this.logger.debug(`Started on port ${this.port}`);
+        this.logger.debug(`Started listening on port ${this.port}`);
     });
 
     this._server.on('close', (err) => {
@@ -197,7 +199,7 @@ function buildFilterFunc(config) {
     }
     const pattern = new RegExp(config.match, 'i');
     const props = events.classifyByKeys;
-    logger.debug(`Building events filter function with following params: patter=${pattern} props=${JSON.stringify(props)}`);
+    logger.debug(`Building events filter function with following params: pattern=${pattern} properties=${stringify(props)}`);
 
     return function (data) {
         for (let i = 0; i < props.length; i += 1) {

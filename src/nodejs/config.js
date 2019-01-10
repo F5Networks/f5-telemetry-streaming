@@ -16,10 +16,13 @@ const logger = require('./logger.js');
 const util = require('./util.js');
 
 const baseSchema = require('./config/base_schema.json');
+const controlsSchema = require('./config/controls_schema.json');
 const systemPollerSchema = require('./config/system_poller_schema.json');
 const listenerSchema = require('./config/listener_schema.json');
 const consumerSchema = require('./config/consumer_schema.json');
 const customKeywords = require('./customKeywords.js');
+const CONTROLS_CLASS_NAME = require('./constants.js').CONTROLS_CLASS_NAME;
+const CONTROLS_PROPERTY_NAME = require('./constants.js').CONTROLS_PROPERTY_NAME;
 
 /**
  * ConfigWorker class
@@ -116,9 +119,9 @@ ConfigWorker.prototype._saveState = function () {
  */
 ConfigWorker.prototype.saveState = function () {
     return this._saveState()
-        .then(() => logger.info('state saved'))
+        .then(() => logger.info('application state saved'))
         .catch((err) => {
-            logger.exception('Unexpected error on attempt to save state', err);
+            logger.exception('Unexpected error on attempt to save application state', err);
         });
 };
 
@@ -159,13 +162,13 @@ ConfigWorker.prototype._loadState = function () {
 ConfigWorker.prototype.loadState = function () {
     return this._loadState()
         .then((state) => {
-            logger.info('state loaded');
+            logger.info('application state loaded');
             this._state = state;
             this._notifyConfigChange();
             return Promise.resolve(state);
         })
         .catch((err) => {
-            logger.exception('Unexpected error on attempt to load state', err);
+            logger.exception('Unexpected error on attempt to load application state', err);
         });
 };
 
@@ -178,6 +181,7 @@ ConfigWorker.prototype.loadState = function () {
 ConfigWorker.prototype.compileSchema = function () {
     const schemas = {
         base: baseSchema,
+        contorls: controlsSchema,
         systemPoller: systemPollerSchema,
         listener: listenerSchema,
         consumer: consumerSchema
@@ -290,6 +294,21 @@ ConfigWorker.prototype.processClientRequest = function (restOperation) {
 
 // initialize singleton
 const configWorker = new ConfigWorker();
+
+// config worker change event, should be first in the handlers chain
+configWorker.on('change', (config) => {
+    let settings;
+    if (config.parsed
+            && config.parsed[CONTROLS_CLASS_NAME]
+            && config.parsed[CONTROLS_CLASS_NAME][CONTROLS_PROPERTY_NAME]) {
+        settings = config.parsed[CONTROLS_CLASS_NAME][CONTROLS_PROPERTY_NAME];
+    }
+    if (!settings) {
+        return;
+    }
+    // default value should be 'info'
+    logger.setLogLevel(settings.logLevel);
+});
 
 // handle EventEmitter errors to avoid NodeJS crashing
 configWorker.on('error', (err) => {

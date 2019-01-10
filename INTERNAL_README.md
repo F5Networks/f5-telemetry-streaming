@@ -46,6 +46,10 @@ Definition: Accepts information from disparate systems and provides the tools to
 ```json
 {
     "class": "Telemetry",
+    "controls": {
+        "class": "Controls",
+        "logLevel": "info"
+    },
     "My_Poller": {
         "class": "Telemetry_System_Poller",
         "interval": 60
@@ -66,6 +70,10 @@ Definition: Accepts information from disparate systems and provides the tools to
     }
 }
 ```
+
+There is a fixed class called "Controls", which contains a number of properties:
+- logLevel - logging level, possible values are **debug**, **info**, **error**. Default value is **info**
+
 
 ### Splunk
 

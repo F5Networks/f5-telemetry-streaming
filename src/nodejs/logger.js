@@ -16,6 +16,25 @@ try {
     // continue
 }
 
+/** Logging levels
+ */
+const NOTSET = 0;
+const DEBUG = 10;
+const INFO = 20;
+const ERROR = 30;
+
+const logLevels = {
+    notset: NOTSET,
+    debug: DEBUG,
+    info: INFO,
+    error: ERROR
+};
+Object.keys(logLevels).forEach((key) => {
+    logLevels[logLevels[key]] = key;
+});
+let currentLogLevel = NOTSET;
+
+
 /**
  * Stringify a message
  *
@@ -105,17 +124,82 @@ Logger.prototype.getChild = function (prefix) {
     return new Logger(`${this.prefix}.${prefix}`);
 };
 Logger.prototype.error = function (msg) {
-    this.logger.severe(prepareMsg(this.prefix, msg));
+    if (ERROR >= currentLogLevel) {
+        this.logger.severe(prepareMsg(this.prefix, msg));
+    }
 };
 Logger.prototype.info = function (msg) {
-    this.logger.info(prepareMsg(this.prefix, msg));
+    if (INFO >= currentLogLevel) {
+        this.logger.info(prepareMsg(this.prefix, msg));
+    }
 };
 Logger.prototype.debug = function (msg) {
-    this.logger.finest(prepareMsg(this.prefix, msg));
+    if (DEBUG >= currentLogLevel) {
+        this.logger.finest(prepareMsg(this.prefix, msg));
+    }
 };
 Logger.prototype.exception = function (msg, err) {
-    this.logger.severe(prepareMsg(this.prefix, `${msg}\nTraceback:\n${err.stack || 'no traceback available'}`));
+    if (ERROR >= currentLogLevel) {
+        this.logger.severe(prepareMsg(this.prefix, `${msg}\nTraceback:\n${err.stack || 'no traceback available'}`));
+    }
 };
 
+/**
+ * Get Log Level name, by default returns name for current global logLevel
+ *
+ * @property {Number} [level] - log level value.
+ *
+ * @returns {String} log level name
+ */
+Logger.prototype.getLevelName = function (level) {
+    if (level === undefined) {
+        level = currentLogLevel;
+    }
+    let levelName = logLevels[level];
+    if (levelName === undefined) {
+        levelName = `Level ${level}`;
+    }
+    return levelName;
+};
 
-module.exports = new Logger('telemetry');
+/**
+ * Get Log Level  value by name, by default returns value for current global logLevel
+ *
+ * @param {String} [levelName] - log level name
+ *
+ * @returns {Number} log level value
+ */
+Logger.prototype.getLevel = function (levelName) {
+    return levelName ? logLevels[levelName] : currentLogLevel;
+};
+
+const mainLogger = new Logger('telemetry');
+/**
+ * Set global logging level
+ *
+ * @param {String | Number} newLevel - new logging level
+ */
+mainLogger.setLogLevel = function (newLevel) {
+    let level;
+    let levelName;
+
+    if (typeof newLevel === 'string') {
+        levelName = newLevel.toLowerCase();
+        level = mainLogger.getLevel(levelName);
+    } else if (typeof newLevel === 'number') {
+        level = newLevel;
+        levelName = mainLogger.getLevelName(level);
+    }
+    if (level === undefined) {
+        mainLogger.error(`Unknown logLevel - ${newLevel}`);
+        return;
+    }
+    // allow user to see this log message to help us understand what happened with logLevel
+    currentLogLevel = INFO;
+    mainLogger.info(`Global logLevel was set to '${levelName}'`);
+    currentLogLevel = level;
+};
+mainLogger.setLogLevel(INFO);
+
+
+module.exports = mainLogger;

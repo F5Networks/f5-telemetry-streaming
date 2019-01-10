@@ -9,6 +9,7 @@
 const assert = require('assert');
 
 const constants = require('../src/nodejs/constants.js');
+const logger = require('../src/nodejs/logger.js');
 
 /* eslint-disable global-require */
 
@@ -142,6 +143,7 @@ describe('Config', () => {
             .catch(err => Promise.reject(err));
     });
 
+    // no more tests beyond that test, because it modifies util.formatConfig
     it('should fail to process client request', () => {
         let restOperationStatusCode;
         let restOperationBody;
