@@ -7,7 +7,7 @@
     "type": "object",
     "allOf": [
         {
-            "if": { "properties": { "class": { "const": "Telemetry_Settings" } } },
+            "if": { "properties": { "class": { "const": "Controls" } } },
             "then": {
                 "required": [
                     "class"
@@ -15,9 +15,9 @@
                 "properties": {
                     "class": {
                         "title": "Class",
-                        "description": "Telemetry streaming settings class",
+                        "description": "Telemetry streaming Controls class",
                         "type": "string",
-                        "enum": [ "Telemetry_Settings" ]
+                        "enum": [ "Controls" ]
                     },
                     "logLevel": {
                         "title": "Logging Level",

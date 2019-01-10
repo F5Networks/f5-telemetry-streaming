@@ -88,7 +88,7 @@
                     "Telemetry_System_Poller",
                     "Telemetry_Listener",
                     "Telemetry_Consumer",
-                    "Telemetry_Settings"
+                    "Controls"
                 ]
             }
         },    
@@ -103,7 +103,7 @@
                 "$ref": "consumer_schema.json#"
             },
             {
-                "$ref": "settings_schema.json#"
+                "$ref": "controls_schema.json#"
             }
         ]
     },
