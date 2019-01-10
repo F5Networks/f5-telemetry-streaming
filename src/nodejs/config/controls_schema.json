@@ -1,8 +1,8 @@
 {
-    "$id": "settings_schema.json",
+    "$id": "controls_schema.json",
     "$async": true,
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Telemetry streaming settings schema",
+    "title": "Telemetry streaming Controls schema",
     "description": "",
     "type": "object",
     "allOf": [

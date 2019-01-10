@@ -16,7 +16,7 @@ const logger = require('./logger.js');
 const util = require('./util.js');
 
 const baseSchema = require('./config/base_schema.json');
-const settingsSchema = require('./config/settings_schema.json');
+const controlsSchema = require('./config/controls_schema.json');
 const systemPollerSchema = require('./config/system_poller_schema.json');
 const listenerSchema = require('./config/listener_schema.json');
 const consumerSchema = require('./config/consumer_schema.json');
@@ -181,7 +181,7 @@ ConfigWorker.prototype.loadState = function () {
 ConfigWorker.prototype.compileSchema = function () {
     const schemas = {
         base: baseSchema,
-        settings: settingsSchema,
+        contorls: controlsSchema,
         systemPoller: systemPollerSchema,
         listener: listenerSchema,
         consumer: consumerSchema
