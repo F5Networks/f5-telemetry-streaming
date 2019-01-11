@@ -9,6 +9,7 @@ Telemetry Streaming is an iControl LX extension to stream telemetry from BIG-IP(
 - AWS CloudWatch
 - AWS S3
 - Graphite
+- Kafka
 
 ## Contents
 
@@ -72,8 +73,8 @@ Definition: Accepts information from disparate systems and provides the tools to
 ```
 
 There is a fixed class called "Controls", which contains a number of properties:
-- logLevel - logging level, possible values are **debug**, **info**, **error**. Default value is **info**
 
+- logLevel - logging level, possible values are **debug**, **info**, **error**. Default value is **info**
 
 ### Splunk
 

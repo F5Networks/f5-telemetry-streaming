@@ -118,9 +118,8 @@ describe('Declarations', () => {
             class: 'Telemetry',
             My_Consumer: {
                 class: 'Telemetry_Consumer',
-                type: 'Splunk',
+                type: 'Graphite',
                 host: '192.0.2.1',
-                port: '80',
                 enableHostReachableCheck: true
             }
         };
@@ -139,9 +138,8 @@ describe('Declarations', () => {
             class: 'Telemetry',
             My_Consumer: {
                 class: 'Telemetry_Consumer',
-                type: 'Splunk',
+                type: 'Graphite',
                 host: '192.0.2.1',
-                port: '80',
                 enableHostReachableCheck: true
             }
         };

@@ -5,6 +5,76 @@
     "title": "Telemetry streaming consumer schema",
     "description": "",
     "type": "object",
+    "definitions": {
+        "host": {
+            "title": "Host",
+            "description": "" ,
+            "type": "string",
+            "anyOf": [
+                { "format": "ipv4" },
+                { "format": "ipv6" },
+                { "format": "hostname" }
+            ],
+            "hostNetworkCheck": true         
+        },
+        "protocol": {
+            "title": "Protocol",
+            "description": "" ,
+            "type": "string",
+            "enum": [ "http", "https" ]
+        },
+        "port": {
+            "title": "Port",
+            "description": "" ,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+        },
+        "format": {
+            "title": "Format (informs consumer additional formatting may be required)",
+            "description": "",
+            "type": "string",
+            "enum": [
+                "default",
+                "f5dashboard"
+            ]
+        },
+        "username": {
+            "title": "Username",
+            "description": "" ,
+            "type": "string"
+        },
+        "region": {
+            "title": "Region",
+            "description": "" ,
+            "type": "string"
+        },
+        "bucket": {
+            "title": "Bucket",
+            "description": "" ,
+            "type": "string"
+        },
+        "logGroup": {
+            "title": "Log Group",
+            "description": "" ,
+            "type": "string"
+        },
+        "logStream": {
+            "title": "Log Stream",
+            "description": "" ,
+            "type": "string"
+        },
+        "workspaceId": {
+            "title": "Workspace ID",
+            "description": "" ,
+            "type": "string"
+        },
+        "topic": {
+            "title": "Topic",
+            "description": "" ,
+            "type": "string"
+        }
+    },
     "allOf": [
         {
             "if": { "properties": { "class": { "const": "Telemetry_Consumer" } } },
@@ -36,92 +106,118 @@
                         "title": "Type",
                         "description": "" ,
                         "type": "string",
-                        "enum": [ "default", "Splunk", "Graphite", "Azure_Log_Analytics", "AWS_S3", "AWS_CloudWatch", "Kafka" ]
+                        "enum": [ "default", "Splunk", "Azure_Log_Analytics", "AWS_CloudWatch", "AWS_S3", "Graphite", "Kafka" ]
                     },
-                    "host": {
-                        "$comment": "Required for certain consumers: standard property",
-                        "title": "Host",
-                        "description": "" ,
-                        "type": "string",
-                        "anyOf": [
-                            { "format": "ipv4" },
-                            { "format": "ipv6" },
-                            { "format": "hostname" }
-                        ],
-                        "hostNetworkCheck": true         
-                    },
-                    "enableHostReachableCheck": { "$ref": "base_schema.json#/definitions/enableHostReachableCheck" },
-                    "port": {
-                        "$comment": "Required for certain consumers: standard property",
-                        "title": "Port",
-                        "description": "" ,
-                        "type": "integer",
-                        "minimum": 0,
-                        "maximum": 65535
-                    },
-                    "protocol": {
-                        "$comment": "Required for certain consumers: standard property",
-                        "title": "Protocol",
-                        "description": "" ,
-                        "type": "string",
-                        "enum": [ "http", "https" ]
-                    },
-                    "username": {
-                        "$comment": "Required for certain consumers: standard property",
-                        "title": "Username",
-                        "description": "" ,
-                        "type": "string"
-                    },
-                    "region": {
-                        "$comment": "Required for certain consumers: Azure LA, AWS CW, AWS S3",
-                        "title": "Region",
-                        "description": "" ,
-                        "type": "string"
-                    },
-                    "bucket": {
-                        "$comment": "Required for certain consumers: AWS S3",
-                        "title": "Bucket",
-                        "description": "" ,
-                        "type": "string"
-                    },
-                    "logGroup": {
-                        "$comment": "Required for certain consumers: AWS CW",
-                        "title": "Log Group",
-                        "description": "" ,
-                        "type": "string"
-                    },
-                    "logStream": {
-                        "$comment": "Required for certain consumers: AWS CW",
-                        "title": "Log Stream",
-                        "description": "" ,
-                        "type": "string"
-                    },
-                    "format": {
-                        "$comment": "Required for certain consumers: Splunk",
-                        "title": "Splunk consumer output format",
-                        "description": "",
-                        "type": "string",
-                        "default": "default",
-                        "enum": [
-                            "default",
-                            "f5dashboard"
-                        ]
-                    },
-                    "workspaceId": {
-                        "$comment": "Required for certain consumers: Azure LA",
-                        "title": "Workspace ID",
-                        "description": "" ,
-                        "type": "string"
-                    },
-                    "topic": {
-                        "$comment": "Required for certain consumers: Kafka",
-                        "title": "Topic",
-                        "description": "" ,
-                        "type": "string"
-                    },
-                    "passphrase": { "$ref": "base_schema.json#/definitions/secret" }
+                    "enableHostReachableCheck": { "$ref": "base_schema.json#/definitions/enableHostReachableCheck" }
                 },
-                "additionalProperties": false
+                "allOf": [
+                    {
+                        "if": { "properties": { "type": { "const": "default" } } },
+                        "then": {
+                            "required": [],
+                            "properties": {}
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "Splunk" } } },
+                        "then": {
+                            "required": [
+                                "host",
+                                "passphrase"
+                            ],
+                            "properties": {
+                                "host": { "$ref": "#/definitions/host" },
+                                "protocol": { "$ref": "#/definitions/protocol", "default": "http" },
+                                "port": { "$ref": "#/definitions/port", "default": 8088 },
+                                "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
+                                "format": { "$ref": "#/definitions/format", "default": "default"  }
+                            }
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "Azure_Log_Analytics" } } },
+                        "then": {
+                            "required": [
+                                "workspaceId",
+                                "passphrase"
+                            ],
+                            "properties": {
+                                "workspaceId": { "$ref": "#/definitions/workspaceId" },
+                                "passphrase": { "$ref": "base_schema.json#/definitions/secret" }
+                            }
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "AWS_CloudWatch" } } },
+                        "then": {
+                            "required": [
+                                "region",
+                                "logGroup",
+                                "logStream",
+                                "username",
+                                "passphrase"
+                            ],
+                            "properties": {
+                                "region": { "$ref": "#/definitions/region" },
+                                "logGroup": { "$ref": "#/definitions/logGroup" },
+                                "logStream": { "$ref": "#/definitions/logStream" },
+                                "username": { "$ref": "#/definitions/username" },
+                                "passphrase": { "$ref": "base_schema.json#/definitions/secret" }
+                            }
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "AWS_S3" } } },
+                        "then": {
+                            "required": [
+                                "region",
+                                "bucket",
+                                "username",
+                                "passphrase"
+                            ],
+                            "properties": {
+                                "region": { "$ref": "#/definitions/region" },
+                                "bucket": { "$ref": "#/definitions/bucket" },
+                                "username": { "$ref": "#/definitions/username" },
+                                "passphrase": { "$ref": "base_schema.json#/definitions/secret" }
+                            }
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "Graphite" } } },
+                        "then": {
+                            "required": [
+                                "host"
+                            ],
+                            "properties": {
+                                "host": { "$ref": "#/definitions/host" },
+                                "protocol": { "$ref": "#/definitions/protocol", "default": "http" },
+                                "port": { "$ref": "#/definitions/port", "default": 80 }
+                            }
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "Kafka" } } },
+                        "then": {
+                            "required": [
+                                "host",
+                                "topic"
+                            ],
+                            "properties": {
+                                "host": { "$ref": "#/definitions/host" },
+                                "port": { "$ref": "#/definitions/port", "default": 9092 },
+                                "topic": { "$ref": "#/definitions/topic" } 
+                            }
+                        },
+                        "else": {}
+                    }
+                ]
             },
             "else": {}
         }
