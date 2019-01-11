@@ -17,7 +17,7 @@
     "My_Consumer": {
         "class": "Telemetry_Consumer",
         "type": "Azure_Log_Analytics",
-        "host": "myworkspaceid",
+        "workspaceId": "myworkspaceid",
         "passphrase": {
             "environmentVar": "MY_CONSUMER_ENV_VAR"
         }

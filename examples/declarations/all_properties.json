@@ -6,8 +6,8 @@
         "trace": false,
         "interval": 60,
         "host": "192.0.2.1",
-        "port": 443,
         "protocol": "https",
+        "port": 443,
         "tag": {
             "tenant": "`T`",
             "application": "`A`"
@@ -29,8 +29,8 @@
         "enable": true,
         "trace": true,
         "type": "Splunk",
-        "protocol": "http",
         "host": "192.0.2.1",
+        "protocol": "http",
         "port": "8088",
         "passphrase": {
             "cipherText": "apikey"

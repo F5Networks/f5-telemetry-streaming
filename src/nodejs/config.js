@@ -181,14 +181,20 @@ ConfigWorker.prototype.loadState = function () {
 ConfigWorker.prototype.compileSchema = function () {
     const schemas = {
         base: baseSchema,
-        contorls: controlsSchema,
+        controls: controlsSchema,
         systemPoller: systemPollerSchema,
         listener: listenerSchema,
         consumer: consumerSchema
     };
     const keywords = customKeywords;
 
-    const ajv = setupAsync(new Ajv({ useDefaults: true, coerceTypes: true, async: true }));
+    const ajvOptions = {
+        useDefaults: true,
+        coerceTypes: true,
+        async: true,
+        extendRefs: true
+    };
+    const ajv = setupAsync(new Ajv(ajvOptions));
     // add schemas
     Object.keys(schemas).forEach((k) => {
         // ignore base, that will be added later
@@ -214,7 +220,26 @@ ConfigWorker.prototype.compileSchema = function () {
  */
 ConfigWorker.prototype.validate = function (data) {
     if (this.validator) {
-        return this.validator(data).then(() => data);
+        return this.validator(data)
+            .then(() => data)
+            .catch((err) => {
+                if (err instanceof Ajv.ValidationError) {
+                    // eslint-disable-next-line arrow-body-style
+                    const errorMap = err.errors.map((errItem) => {
+                        return {
+                            keyword: errItem.keyword,
+                            dataPath: errItem.dataPath,
+                            schemaPath: errItem.schemaPath,
+                            params: errItem.params,
+                            message: errItem.message
+                        };
+                    });
+                    const customError = new Error(util.stringify(errorMap));
+                    customError.code = 'ValidationError';
+                    return Promise.reject(customError);
+                }
+                return Promise.reject(err);
+            });
     }
     return Promise.reject(new Error('Validator is not available'));
 };
@@ -269,19 +294,10 @@ ConfigWorker.prototype.processClientRequest = function (restOperation) {
         })
         .catch((err) => {
             const errObj = {};
-            if (err instanceof Ajv.ValidationError) {
+            if (err.code === 'ValidationError') {
                 errObj.code = 422;
                 errObj.message = 'Unprocessable entity';
-                // eslint-disable-next-line
-                errObj.error = err.errors.map((errItem) => {
-                    return {
-                        keyword: errItem.keyword,
-                        dataPath: errItem.dataPath,
-                        schemaPath: errItem.schemaPath,
-                        params: errItem.params,
-                        message: errItem.message
-                    };
-                });
+                errObj.error = err.message;
             } else {
                 errObj.code = 500;
                 errObj.message = 'Internal Server Error';

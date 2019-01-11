@@ -15,7 +15,7 @@ const crypto = require('crypto');
  * See {@link ../README.md#context} for documentation
  */
 module.exports = function (context) {
-    const workspaceId = context.config.workspaceId || context.config.host; // fallback to host
+    const workspaceId = context.config.workspaceId;
     const sharedKey = context.config.passphrase.text;
 
     const apiVersion = '2016-04-01';
