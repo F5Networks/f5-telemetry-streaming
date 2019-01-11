@@ -215,6 +215,30 @@ Note: More information about Graphite events can be found [here](https://graphit
 }
 ```
 
+### Kafka
+
+Website: [https://kafka.apache.org/](https://kafka.apache.org/).
+
+Required information:
+
+- Host: The address of the Kafka system.
+- Port: The port of the Kafka system.
+- Topic: The topic where data should go within the Kafka system.
+
+Note: More information about installing Kafka can be found [here](https://kafka.apache.org/quickstart).
+
+```json
+{
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Kafka",
+        "host": "192.0.2.1",
+        "port": "9092",
+        "topic": "f5-telemetry"
+    }
+}
+```
+
 ### 2 Consumers
 
 ```json

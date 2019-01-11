@@ -82,6 +82,36 @@ const keywords = {
                 return Promise.reject(new Ajv.ValidationError([{ keyword: 'f5secret', message, params: {} }]));
             };
         }
+    },
+    hostNetworkCheck: {
+        type: 'string',
+        errors: true,
+        modifying: true,
+        async: true,
+        metaSchema: {
+            type: 'boolean'
+        },
+        // eslint-disable-next-line no-unused-vars
+        compile(schema, parentSchema) {
+            // eslint-disable-next-line no-unused-vars
+            return function (data, dataPath, parentData, propertyName, rootData) {
+                const pData = parentData || {};
+                const ajvErrors = [];
+
+                // enable host reachable check with this property - return otherwise
+                if (pData.enableHostReachableCheck !== true) return Promise.resolve(true);
+
+                // port required - schema should validate this
+                if (!pData.port) return Promise.resolve(true);
+
+                return util.networkCheck(data, pData.port)
+                    .then(() => true)
+                    .catch((e) => {
+                        ajvErrors.push({ keyword: 'hostNetworkCheck', message: e.message, params: {} });
+                        throw new Ajv.ValidationError(ajvErrors);
+                    });
+            };
+        }
     }
 };
 
