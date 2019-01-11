@@ -36,9 +36,10 @@
                         "title": "Type",
                         "description": "" ,
                         "type": "string",
-                        "enum": [ "default", "Splunk", "Graphite", "Azure_Log_Analytics", "AWS_S3" , "AWS_CloudWatch" ]
+                        "enum": [ "default", "Splunk", "Graphite", "Azure_Log_Analytics", "AWS_S3", "AWS_CloudWatch", "Kafka" ]
                     },
                     "host": {
+                        "$comment": "Required for certain consumers: standard property",
                         "title": "Host",
                         "description": "" ,
                         "type": "string",
@@ -46,10 +47,12 @@
                             { "format": "ipv4" },
                             { "format": "ipv6" },
                             { "format": "hostname" }
-                        ]            
+                        ],
+                        "hostNetworkCheck": true         
                     },
+                    "enableHostReachableCheck": { "$ref": "base_schema.json#/definitions/enableHostReachableCheck" },
                     "port": {
-                        "$comment": "Required for certain consumers",
+                        "$comment": "Required for certain consumers: standard property",
                         "title": "Port",
                         "description": "" ,
                         "type": "integer",
@@ -57,44 +60,44 @@
                         "maximum": 65535
                     },
                     "protocol": {
-                        "$comment": "Required for certain consumers",
+                        "$comment": "Required for certain consumers: standard property",
                         "title": "Protocol",
                         "description": "" ,
                         "type": "string",
                         "enum": [ "http", "https" ]
                     },
                     "username": {
-                        "$comment": "Required for certain consumers",
+                        "$comment": "Required for certain consumers: standard property",
                         "title": "Username",
                         "description": "" ,
                         "type": "string"
                     },
                     "region": {
-                        "$comment": "Required for certain consumers",
+                        "$comment": "Required for certain consumers: Azure LA, AWS CW, AWS S3",
                         "title": "Region",
                         "description": "" ,
                         "type": "string"
                     },
                     "bucket": {
-                        "$comment": "Required for certain consumers",
+                        "$comment": "Required for certain consumers: AWS S3",
                         "title": "Bucket",
                         "description": "" ,
                         "type": "string"
                     },
                     "logGroup": {
-                        "$comment": "Required for certain consumers",
+                        "$comment": "Required for certain consumers: AWS CW",
                         "title": "Log Group",
                         "description": "" ,
                         "type": "string"
                     },
                     "logStream": {
-                        "$comment": "Required for certain consumers",
+                        "$comment": "Required for certain consumers: AWS CW",
                         "title": "Log Stream",
                         "description": "" ,
                         "type": "string"
                     },
                     "format": {
-                        "$comment": "Required for Splunk",
+                        "$comment": "Required for certain consumers: Splunk",
                         "title": "Splunk consumer output format",
                         "description": "",
                         "type": "string",
@@ -105,8 +108,14 @@
                         ]
                     },
                     "workspaceId": {
-                        "$comment": "Required for certain consumers",
+                        "$comment": "Required for certain consumers: Azure LA",
                         "title": "Workspace ID",
+                        "description": "" ,
+                        "type": "string"
+                    },
+                    "topic": {
+                        "$comment": "Required for certain consumers: Kafka",
+                        "title": "Topic",
                         "description": "" ,
                         "type": "string"
                     },

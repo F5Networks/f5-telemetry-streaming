@@ -49,8 +49,10 @@
                             { "format": "ipv6" },
                             { "format": "hostname" }
                         ],
-                        "default": "localhost"
+                        "default": "localhost",
+                        "hostNetworkCheck": true
                     },
+                    "enableHostReachableCheck": { "$ref": "base_schema.json#/definitions/enableHostReachableCheck" },
                     "port": {
                         "title": "Port",
                         "description": "" ,

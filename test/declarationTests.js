@@ -106,4 +106,53 @@ describe('Declarations', () => {
             })
             .catch(err => Promise.reject(err));
     });
+
+    it('should pass host network check', () => {
+        let called = false;
+        util.networkCheck = () => {
+            called = true;
+            return Promise.resolve();
+        };
+
+        const data = {
+            class: 'Telemetry',
+            My_Consumer: {
+                class: 'Telemetry_Consumer',
+                type: 'Splunk',
+                host: '192.0.2.1',
+                port: '80',
+                enableHostReachableCheck: true
+            }
+        };
+
+        return config.validate(data)
+            .then(() => {
+                assert.strictEqual(called, true);
+            })
+            .catch(err => Promise.reject(err));
+    });
+
+    it('should fail host network check', () => {
+        util.networkCheck = () => Promise.reject(new Error('foo'));
+
+        const data = {
+            class: 'Telemetry',
+            My_Consumer: {
+                class: 'Telemetry_Consumer',
+                type: 'Splunk',
+                host: '192.0.2.1',
+                port: '80',
+                enableHostReachableCheck: true
+            }
+        };
+
+        return config.validate(data)
+            .then(() => {
+                assert.fail('Should throw an error');
+            })
+            .catch((err) => {
+                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
+                return Promise.resolve(); // resolve, expected an error
+            });
+    });
 });

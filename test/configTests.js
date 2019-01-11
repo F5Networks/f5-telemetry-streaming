@@ -9,7 +9,6 @@
 const assert = require('assert');
 
 const constants = require('../src/nodejs/constants.js');
-const logger = require('../src/nodejs/logger.js');
 
 /* eslint-disable global-require */
 
@@ -18,9 +17,11 @@ describe('Config', () => {
     let util;
 
     let configValidator;
+    let formatConfig;
 
     before(() => {
         config = require('../src/nodejs/config.js');
+        util = require('../src/nodejs/util.js');
         config.restWorker = {
             loadState: (cb) => { cb(null, {}); },
             saveState: (first, state, cb) => { cb(null); }
@@ -28,10 +29,11 @@ describe('Config', () => {
         config._loadState = () => Promise.resolve({});
         configValidator = config.validator;
 
-        util = require('../src/nodejs/util.js');
+        formatConfig = util.formatConfig;
     });
     afterEach(() => {
         config.validator = configValidator;
+        util.formatConfig = formatConfig;
     });
     after(() => {
         Object.keys(require.cache).forEach((key) => {
@@ -143,7 +145,6 @@ describe('Config', () => {
             .catch(err => Promise.reject(err));
     });
 
-    // no more tests beyond that test, because it modifies util.formatConfig
     it('should fail to process client request', () => {
         let restOperationStatusCode;
         let restOperationBody;

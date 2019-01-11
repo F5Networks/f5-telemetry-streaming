@@ -50,9 +50,7 @@ describe('Util', () => {
         const BIG_IP_DEVICE_TYPE = constants.BIG_IP_DEVICE_TYPE;
         return util.getDeviceType()
             .then((data) => {
-                if (data !== BIG_IP_DEVICE_TYPE) {
-                    return Promise.reject(new Error(`incorrect device type: ${data}`));
-                }
+                assert.strictEqual(data, BIG_IP_DEVICE_TYPE, 'incorrect device type');
                 return Promise.resolve();
             })
             .catch(err => Promise.reject(err));
@@ -64,9 +62,7 @@ describe('Util', () => {
         const CONTAINER_DEVICE_TYPE = constants.CONTAINER_DEVICE_TYPE;
         return util.getDeviceType()
             .then((data) => {
-                if (data !== CONTAINER_DEVICE_TYPE) {
-                    return Promise.reject(new Error(`incorrect device type: ${data}`));
-                }
+                assert.strictEqual(data, CONTAINER_DEVICE_TYPE, 'incorrect device type');
                 return Promise.resolve();
             })
             .catch(err => Promise.reject(err));
@@ -339,6 +335,20 @@ describe('Util', () => {
                 return Promise.resolve();
             })
             .catch(err => Promise.reject(err));
+    });
+
+    it('should fail network check', () => {
+        const host = 'localhost';
+        const port = 0;
+
+        return util.networkCheck(host, port)
+            .then(() => {
+                assert.fail('Should throw an error');
+            })
+            .catch((err) => {
+                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
+                return Promise.resolve(); // resolve, expected an error
+            });
     });
 });
 

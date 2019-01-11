@@ -9,6 +9,7 @@
 'use strict';
 
 const fs = require('fs');
+const net = require('net');
 const path = require('path');
 const request = require('request');
 const childProcess = require('child_process');
@@ -928,6 +929,60 @@ module.exports = {
                 });
                 // return (modified) data
                 return data;
+            })
+            .catch((e) => {
+                throw e;
+            });
+    },
+
+    /**
+     * Network check - with max timeout interval (5 seconds)
+     *
+     * @param {String} host  - host address
+     * @param {Integer} port - host port
+     *
+     * @returns {Promise} Returns promise resolved on successful check
+     */
+    networkCheck(host, port) {
+        let done = false;
+        const connectPromise = new Promise((resolve, reject) => {
+            const client = net.createConnection({ host, port })
+                .on('connect', () => {
+                    client.end();
+                })
+                .on('end', () => {
+                    done = true;
+                    resolve();
+                })
+                .on('error', (err) => {
+                    done = 'error';
+                    reject(err);
+                });
+        });
+
+        // 100 ms period with 50 max tries = 5 sec
+        const period = 100; const maxTries = 50; let currentTry = 1;
+        const timeoutPromise = new Promise((resolve, reject) => {
+            const interval = setInterval(() => {
+                const fail = () => {
+                    clearInterval(interval);
+                    reject(new Error(`unable to connect: ${host}:${port}`)); // max timeout, reject
+                };
+
+                if (done === true) {
+                    clearInterval(interval);
+                    resolve(); // connection success, resolve
+                } else if (done === 'error') fail();
+                else if (currentTry < maxTries) ; // try again
+                else fail();
+                currentTry += 1;
+            }, period);
+        });
+
+        return Promise.all([connectPromise, timeoutPromise])
+            .then(() => true)
+            .catch((e) => {
+                throw e;
             });
     },
 

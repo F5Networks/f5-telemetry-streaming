@@ -55,6 +55,12 @@
             "title": "Pattern to filter data",
             "description": "",
             "type": "string"
+        },
+        "enableHostReachableCheck": {
+            "$comment": "This property can be used to enable/disable the host reachable check in configurations where this is in effect",
+            "title": "Host",
+            "description": "" ,
+            "type": "boolean"
         }
     },
     "properties": {
