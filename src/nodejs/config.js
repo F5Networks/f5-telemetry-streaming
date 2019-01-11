@@ -181,14 +181,20 @@ ConfigWorker.prototype.loadState = function () {
 ConfigWorker.prototype.compileSchema = function () {
     const schemas = {
         base: baseSchema,
-        contorls: controlsSchema,
+        controls: controlsSchema,
         systemPoller: systemPollerSchema,
         listener: listenerSchema,
         consumer: consumerSchema
     };
     const keywords = customKeywords;
 
-    const ajv = setupAsync(new Ajv({ useDefaults: true, coerceTypes: true, async: true }));
+    const ajvOptions = {
+        useDefaults: true,
+        coerceTypes: true,
+        async: true,
+        extendRefs: true
+    };
+    const ajv = setupAsync(new Ajv(ajvOptions));
     // add schemas
     Object.keys(schemas).forEach((k) => {
         // ignore base, that will be added later

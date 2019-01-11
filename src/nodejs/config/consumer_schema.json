@@ -7,8 +7,9 @@
     "type": "object",
     "definitions": {
         "host": {
+            "$comment": "Required for certain consumers: standard property",
             "title": "Host",
-            "description": "" ,
+            "description": "FQDN or IP address" ,
             "type": "string",
             "anyOf": [
                 { "format": "ipv4" },
@@ -18,12 +19,14 @@
             "hostNetworkCheck": true         
         },
         "protocol": {
+            "$comment": "Required for certain consumers: standard property",
             "title": "Protocol",
             "description": "" ,
             "type": "string",
             "enum": [ "http", "https" ]
         },
         "port": {
+            "$comment": "Required for certain consumers: standard property",
             "title": "Port",
             "description": "" ,
             "type": "integer",
@@ -31,6 +34,7 @@
             "maximum": 65535
         },
         "format": {
+            "$comment": "Required for certain consumers: standard property",
             "title": "Format (informs consumer additional formatting may be required)",
             "description": "",
             "type": "string",
@@ -40,36 +44,43 @@
             ]
         },
         "username": {
+            "$comment": "Required for certain consumers: standard property",
             "title": "Username",
             "description": "" ,
             "type": "string"
         },
         "region": {
+            "$comment": "Required for certain consumers: AWS_CloudWatch, AWS_S3",
             "title": "Region",
             "description": "" ,
             "type": "string"
         },
         "bucket": {
+            "$comment": "Required for certain consumers: AWS_S3",
             "title": "Bucket",
             "description": "" ,
             "type": "string"
         },
         "logGroup": {
+            "$comment": "Required for certain consumers: AWS_CloudWatch",
             "title": "Log Group",
             "description": "" ,
             "type": "string"
         },
         "logStream": {
+            "$comment": "Required for certain consumers: AWS_CloudWatch",
             "title": "Log Stream",
             "description": "" ,
             "type": "string"
         },
         "workspaceId": {
+            "$comment": "Required for certain consumers: Azure_Log_Analytics",
             "title": "Workspace ID",
             "description": "" ,
             "type": "string"
         },
         "topic": {
+            "$comment": "Required for certain consumers: Kafka",
             "title": "Topic",
             "description": "" ,
             "type": "string"
