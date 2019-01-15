@@ -856,7 +856,9 @@ Each config object has 'tracer' property. Possible values are:
         }
     },
     "telemetryServiceInfo": {
-        "pollingInterval": 300
+        "pollingInterval": 300,
+        "cycleStart": "Tue, 15 Jan 2019 18:47:00 GMT",
+        "cycleEnd": "Tue, 15 Jan 2019 18:47:01 GMT"
     },
     "telemetryEventCategory": "systemInfo"
 }

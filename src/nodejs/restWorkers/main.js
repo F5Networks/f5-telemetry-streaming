@@ -68,7 +68,7 @@ SimpleRouter.prototype.processRestOperation = function (restOperation) {
 SimpleRouter.prototype._processRestOperation = function (restOperation) {
     const urlPath = restOperation.getUri().href;
     const method = restOperation.getMethod().toUpperCase();
-    logger.debug(`'${method}' operation ${urlPath}`);
+    logger.info(`'${method}' operation ${urlPath}`);
 
     // Somehow we need to respond to such requests.
     // When Content-Type === application/json then getBody() tries to
@@ -148,7 +148,7 @@ RestWorker.prototype.onStartCompleted = function (success, failure, state, errMs
 // eslint-disable-next-line no-unused-vars
 RestWorker.prototype._initializeApplication = function (success, failure) {
     // first load state from rest storage
-    logger.info(`Node version ${process.version}`);
+    logger.debug(`Node version ${process.version}`);
     // register REST endpoints
     this.router = new SimpleRouter();
 

@@ -524,7 +524,6 @@ SystemStats.prototype._computePropertiesData = function (propertiesData) {
  * @param {String}  [options.username]        - username for host
  * @param {String}  [options.passphrase]      - password for host
  * @param {Object}  [options.tags]            - tags to add to the data (each key)
- * @param {Object}  [options.addtlProperties] - additional properties to add to the top-level data
  *
  * @returns {Object} Promise which is resolved with a map of stats
  */
@@ -549,14 +548,9 @@ SystemStats.prototype.collect = function (host, options) {
             });
             return Promise.resolve(orderedData);
         })
-        .then((data) => {
-            // inject service data
-            const serviceProps = {};
-            if (options.addtlProperties) {
-                Object.assign(serviceProps, options.addtlProperties);
-            }
-            data.telemetryServiceInfo = serviceProps;
-            return Promise.resolve(data);
+        .catch((err) => {
+            logger.error(`Error: SystemStats.collect: ${err}`);
+            return Promise.reject(err);
         });
 };
 

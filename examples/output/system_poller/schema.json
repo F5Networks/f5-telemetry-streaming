@@ -105,7 +105,19 @@
             "type": "object"
         },
         "telemetryServiceInfo": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "pollingInterval": {
+                    "type": "integer"
+                },
+                "cycleStart": {
+                    "type": "string"
+                },
+                "cycleEnd": {
+                    "type": "string"
+                }
+            },
+            "required": [ "pollingInterval", "cycleStart", "cycleEnd" ]
         },
         "telemetryEventCategory": {
             "type": "string",
