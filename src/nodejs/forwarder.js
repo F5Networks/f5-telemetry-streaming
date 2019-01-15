@@ -40,7 +40,7 @@ function forwardData(dataCtx) {
             try {
                 consumer.consumer(context);
             } catch (err) {
-                logger.exception(`Error forwarding data: ${err}`);
+                logger.exception(`Error forwarding data: ${err}`, err);
             } finally {
                 resolve();
             }

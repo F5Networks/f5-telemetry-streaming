@@ -1,0 +1,12 @@
+{
+    "class": "Telemetry",
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "ElasticSearch",
+        "host": "10.145.92.42",
+        "index": "testindex",
+        "port": 9200,
+        "protocol": "http",
+        "dataType": "f5.telemetry"
+    }
+}

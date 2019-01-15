@@ -240,6 +240,49 @@ Note: More information about installing Kafka can be found [here](https://kafka.
 }
 ```
 
+### ElasticSearch
+
+Website: [https://www.elastic.co/](https://www.elastic.co/).
+
+Required information:
+
+- Host: The address of the ElasticSearch system.
+- Index: The index where data should go within the ElasticSearch system.
+
+Optional parameters:
+- Port: The port of the ElasticSearch system. Default is ```9200```.
+- Protocol: The protocol of the ElasticSearch system. Options: ```http``` or ```https```. Default is ```http```.
+- Allow Self Signed Cert: allow TS to skip Cert validation. Options: ```true``` or ```false```. Default is ```false```.
+- Path: The path to use when sending data to the ElasticSearch system.
+- Data Type: The type of data posted to the ElasticSearch system. Default is ```f5.telemetry```
+- API Version: The API version of the ElasticSearch system.
+- Username: The username to use when sending data to the ElasticSearch system.
+- Passphrase: The secret/password to use when sending data to the ElasticSearch system.
+
+Note: More information about installing ElasticSearch can be found [here](https://www.elastic.co/guide/index.html).
+
+```json
+{
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "ElasticSearch",
+        "host": "192.0.2.1",
+        "port": "9200",
+        "protocol": "http",
+        "allowSelfSignedCert": false,
+        "path": "/path/to/post/data",
+        "index": "f5telemetry",
+        "dataType": "f5telemetry",
+        "apiVersion": "6.5",
+        "username": "username",
+        "passphrase": {
+            "cipherText": "secretkey"
+        }
+
+    }
+}
+```
+
 ### 2 Consumers
 
 ```json

@@ -140,7 +140,7 @@ Logger.prototype.debug = function (msg) {
 };
 Logger.prototype.exception = function (msg, err) {
     if (ERROR >= currentLogLevel) {
-        this.logger.severe(prepareMsg(this.prefix, `${msg}\nTraceback:\n${err.stack || 'no traceback available'}`));
+        this.logger.severe(prepareMsg(this.prefix, `${msg}\nTraceback:\n${(err && err.stack) || 'no traceback available'}`));
     }
 };
 
@@ -196,7 +196,7 @@ mainLogger.setLogLevel = function (newLevel) {
     }
     // allow user to see this log message to help us understand what happened with logLevel
     currentLogLevel = INFO;
-    mainLogger.info(`Global logLevel was set to '${levelName}'`);
+    mainLogger.info(`Global logLevel set to '${levelName}'`);
     currentLogLevel = level;
 };
 mainLogger.setLogLevel(INFO);
