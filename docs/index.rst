@@ -15,6 +15,7 @@ Telemetry Streaming (TS) is an iControl LX Extension delivered as a TMOS-indepen
 -  AWS S3
 -  Graphite
 
+For a list of supported consumers and their example configurations, see :doc:`setting-up-consumer`.
 
 Use the following links, the navigation on the left, and/or the Next and
 Previous buttons to explore the documentation.
