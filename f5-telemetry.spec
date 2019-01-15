@@ -12,8 +12,6 @@ Telemetry Streaming for BIG-IP
 
 %define IAPP_INSTALL_DIR /var/config/rest/iapps/%{name}
 
-%define _binaries_in_noarch_packages_terminate_build 0
-
 %prep
 cp -r %{main}/src/ %{_builddir}/src/
 if [ -d "%{main}/node_modules" ] ; then cp -r %{main}/node_modules %{_builddir}/src/ ; fi
