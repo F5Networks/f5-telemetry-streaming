@@ -148,7 +148,7 @@
                         "title": "Type",
                         "description": "" ,
                         "type": "string",
-                        "enum": [ "default", "Splunk", "Azure_Log_Analytics", "AWS_CloudWatch", "AWS_S3", "Graphite", "Kafka", "ElasticSearch" ]
+                        "enum": [ "default", "Splunk", "Azure_Log_Analytics", "AWS_CloudWatch", "AWS_S3", "Graphite", "Kafka", "ElasticSearch", "Sumo_Logic" ]
                     },
                     "enableHostReachableCheck": { "$ref": "base_schema.json#/definitions/enableHostReachableCheck" }
                 },
@@ -277,6 +277,23 @@
                                 "apiVersion": { "$ref": "#/definitions/apiVersion"},
                                 "index": { "$ref": "#/definitions/index" },
                                 "dataType": { "$ref": "#/definitions/dataType", "default": "f5.telemetry" }
+                            }
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "Sumo_Logic" } } },
+                        "then": {
+                            "required": [
+                                "host",
+                                "passphrase"
+                            ],
+                            "properties": {
+                                "host": { "$ref": "#/definitions/host" },
+                                "protocol": { "$ref": "#/definitions/protocol", "default": "https" },
+                                "port": { "$ref": "#/definitions/port", "default": 443 },
+                                "path": { "$ref": "#/definitions/path", "default": "/receiver/v1/http/" },
+                                "passphrase": { "$ref": "base_schema.json#/definitions/secret" }
                             }
                         },
                         "else": {}
