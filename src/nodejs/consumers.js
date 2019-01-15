@@ -72,7 +72,7 @@ function loadConsumers(config) {
             // prepend it manually
             const consumerDir = './'.concat(path.join(CONSUMERS_DIR, consumerType));
 
-            logger.info(`Loading consumer ${consumerType} plug-in from ${consumerDir}`);
+            logger.debug(`Loading consumer ${consumerType} plug-in from ${consumerDir}`);
             const consumerModule = loadModule(consumerDir);
             if (consumerModule === null) {
                 resolve(undefined);

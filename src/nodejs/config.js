@@ -119,7 +119,7 @@ ConfigWorker.prototype._saveState = function () {
  */
 ConfigWorker.prototype.saveState = function () {
     return this._saveState()
-        .then(() => logger.info('application state saved'))
+        .then(() => logger.debug('Application state saved'))
         .catch((err) => {
             logger.exception('Unexpected error on attempt to save application state', err);
         });

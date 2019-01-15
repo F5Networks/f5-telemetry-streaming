@@ -32,6 +32,9 @@ function process(args) {
     const config = args.config;
     const tracer = args.tracer;
 
+    const startTimestamp = new Date().toUTCString();
+    logger.debug('System poller cycle started');
+
     return new SystemStats().collect(
         config.host,
         {
@@ -46,6 +49,16 @@ function process(args) {
         }
     )
         .then((data) => {
+            const endTimeStamp = new Date().toUTCString();
+            // inject service data
+            const telemetryServiceInfo = {
+                pollingInterval: config.interval,
+                cycleStart: startTimestamp,
+                cycleEnd: endTimeStamp
+            };
+            data.telemetryServiceInfo = telemetryServiceInfo;
+            // end inject service data
+
             if (tracer) {
                 tracer.write(JSON.stringify(data, null, 4));
             }
@@ -56,7 +69,7 @@ function process(args) {
                 // call out to pipeline
                 dataPipeline.process(data, 'systemInfo');
             }
-            logger.debug('systemPoller.process() success');
+            logger.debug('System poller cycle finished');
             return ret;
         })
         .catch((e) => {
