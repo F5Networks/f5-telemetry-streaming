@@ -10,6 +10,8 @@ Telemetry Streaming is an iControl LX extension to stream telemetry from BIG-IP(
 - AWS S3
 - Graphite
 - Kafka
+- Elastic Search
+- Sumo Logic
 
 ## Contents
 
@@ -250,6 +252,7 @@ Required information:
 - Index: The index where data should go within the ElasticSearch system.
 
 Optional parameters:
+
 - Port: The port of the ElasticSearch system. Default is ```9200```.
 - Protocol: The protocol of the ElasticSearch system. Options: ```http``` or ```https```. Default is ```http```.
 - Allow Self Signed Cert: allow TS to skip Cert validation. Options: ```true``` or ```false```. Default is ```false```.
@@ -279,6 +282,36 @@ Note: More information about installing ElasticSearch can be found [here](https:
             "cipherText": "secretkey"
         }
 
+    }
+}
+```
+
+### Sumo Logic
+
+Website: [https://www.sumologic.com/](https://www.sumologic.com/).
+
+Required information:
+
+- Host: The address of the Sumo Logic collector.
+- Protocol: The protocol of the Sumo Logic collector.
+- Port: The port of the Sumo Logic collector.
+- Path: The HTTP path of the Sumo Logic collector (without the secret).
+- Secret: The protected portion of the HTTP path (the final portion of the path, sometimes called a system tenant).
+
+Note: Typically the required information can be found by navigating to the HTTP collector created within Sumo Logic and selecting 'Show URL'.  For example: ```https://endpoint.collection.sumologic.com/receiver/v1/http/secret``` would be broken up into the required information.
+
+```json
+{
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Sumo_Logic",
+        "host": "192.0.2.1",
+        "protocol": "https",
+        "port": "443",
+        "path": "/receiver/v1/http/",
+        "passphrase": {
+            "cipherText": "secret"
+        }
     }
 }
 ```
