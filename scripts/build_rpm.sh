@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 RELEASE=$(($(ls -v dist/*.rpm|tail -1|sed -rn 's/.*-([0-9]+).noarch.rpm/\1/p') + 1))
 MAINDIR=$(pwd)
 

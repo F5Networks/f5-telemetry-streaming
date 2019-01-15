@@ -13,7 +13,7 @@ build package:
   script:
     - echo 'CI BUILD'
     # install packages first
-    - npm install --production
+    - npm install --production --no-optional
     - bash ./scripts/build_rpm.sh
   tags:
     - cm-official-docker-executor
