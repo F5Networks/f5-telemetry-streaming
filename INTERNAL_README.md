@@ -448,8 +448,8 @@ Output:
 
 ### Declare configuration
 
-**<base_endpoint>/declare** - endpoint to declare configuration.
-Allowed HTTP method - **POST**.
+**<base_endpoint>/declare** - endpoint to declare/retrieve configuration.
+Allowed HTTP method - **POST**, **GET**.
 Request body - valid JSON object. For example see [Configuration Example](#configuration-example).
 
 ### System poller
