@@ -154,7 +154,116 @@ Required Information:
     }
 
 
+Kafka
+~~~~~
+|Kafka_img|
 
+Required Information:
+ - Host: The address of the Kafka system.
+ - Port: The port of the Kafka system.
+ - Topic: The topic where data should go within the Kafka system
+
+ .. NOTE:: To see more information about installing Kafka, see |Installing Kafka|.
+
+.. code-block:: json
+   :linenos:
+
+    {
+        "My_Consumer": {
+            "class": "Telemetry_Consumer",
+            "type": "Kafka",
+            "host": "192.0.2.1",
+            "port": "9092"
+            "topic": "f5-telemetry",
+            
+        }
+    }
+
+
+ElasticSearch
+~~~~~~~~~~~~~
+|ElasticSearch_img|
+
+Required Information:
+ - Host: The address of the Kafka system.
+ - Index: The index where data should go within the ElasticSearch system.
+
+Optional Parameters:
+ - Port: The port of the ElasticSearch system. Default is 9200.
+ - Protocol: The protocol of the ElasticSearch system. Options: http or https. Default is http.
+ - Allow Self Signed Cert: allow TS to skip Cert validation. Options: true or false. Default is false.
+ - Path: The path to use when sending data to the ElasticSearch system.
+ - Data Type: The type of data posted to the ElasticSearch system. Default is f5.telemetry
+ - API Version: The API version of the ElasticSearch system.
+ - Username: The username to use when sending data to the ElasticSearch system.
+ - Passphrase: The secret/password to use when sending data to the ElasticSearch system.
+
+ .. NOTE:: To see more information about installing ElasticSearch, see |Installing ElasticSearch|.
+
+.. code-block:: json
+   :linenos:
+
+    {
+        "My_Consumer": {
+            "class": "Telemetry_Consumer",
+            "type": "ElasticSearch",
+            "host": "192.0.2.1",
+            "port": "9200",
+            "protocol": "http",
+            "allowSelfSignedCert": false,
+            "path": "/path/to/post/data",
+            "index": "f5telemetry",
+            "dataType": "f5telemetry",
+            "apiVersion": "6.5",
+            "username": "username",
+            "passphrase": {
+                "cipherText": "secretkey"
+            }
+        }
+
+    }
+
+
+Sumo Logic
+~~~~~~~~~~
+|Sumo_img|
+
+Required Information:
+ - Host: The address of the Sumo Logic collector.
+ - Protocol: The protocol of the Sumo Logic collector.
+ - Port: The port of the Sumo Logic collector.
+ - Path: The HTTP path of the Sumo Logic collector (without the secret).
+ - Secret: The protected portion of the HTTP path (the final portion of the path, sometimes called a system tenant).
+
+ .. NOTE:: To see more information about installing Sumo Logic, see |Installing Sumo Logic|.
+
+.. code-block:: json
+   :linenos:
+
+    {
+        "My_Consumer": {
+            "class": "Telemetry_Consumer",
+            "type": "Sumo_Logic",
+            "host": "192.0.2.1",
+            "protocol": "https",
+            "port": "443",
+            "path": "/receiver/v1/http/",
+            "passphrase": {
+                "cipherText": "secret"
+            }
+        }
+    }
+
+
+.. |splunk_img| image:: /images/splunk_logo.png
+   :target: https://www.splunk.com
+   :alt: Splunk
+
+.. |azure_img| image:: /images/azure_logo.png
+   :target: https://docs.microsoft.com/en-us/azure/azure-monitor/log-query/log-query-overview
+   :alt: Microsoft Azure
+
+.. |azure_log_analytics_dashboard| image:: /images/azure_log_analytics_dashboard.png
 
 .. |aws_img| image:: /images/aws_logo.png
    :target: https://aws.amazon.com/cloudwatch/
@@ -168,21 +277,19 @@ Required Information:
    :target: https://graphiteapp.org/
    :alt: Graphite
 
-.. |azure_img| image:: /images/azure_logo.png
-   :target: https://docs.microsoft.com/en-us/azure/azure-monitor/log-query/log-query-overview
-   :alt: Microsoft Azure
-
-.. |azure_log_analytics_dashboard| image:: /images/azure_log_analytics_dashboard.png
-
 .. |grafana_img| image:: /images/grafana-logo.png
    :target: grafana_index.html
    :alt: Grafana
 
-.. |kafka_img| image:: /images/kafka-logo-wide.png
-   :target: kafka_index.html
+.. |Kafka_img| image:: /images/kafka-logo-wide.png
+   :target: https://kafka.apache.org/
    :alt: Kafka
 
-.. |splunk_img| image:: /images/splunk_logo.png
+.. |ElasticSearch_img| image:: /images/kafka-logo-wide.png
+   :target: https://www.elastic.co/
+   :alt: Kafka
+
+.. |Sumo_img| image:: /images/splunk_logo.png
    :target: https://www.splunk.com
    :alt: Splunk
 
@@ -218,3 +325,15 @@ Required Information:
 .. |Graphite Events| raw:: html
 
    <a href="https://graphite.readthedocs.io/en/latest/events.html" target="_blank">Graphite Events documentation</a>
+
+.. |Installing Kafka| raw:: html
+
+   <a href="https://kafka.apache.org/quickstart" target="_blank">Installing Kafka documentation</a>
+
+.. |Installing ElasticSearch| raw:: html
+
+   <a href="https://www.elastic.co/guide/index.html" target="_blank">Installing ElasticSearch documentation</a>
+
+.. |Installing Sumo Logic| raw:: html
+
+   <a href="https://help.sumologic.com/01Start-Here/Quick-Start-Tutorials" target="_blank">Installing Sumo Logic documentation</a>
