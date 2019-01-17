@@ -18,7 +18,6 @@ Telemetry Streaming is an iControl LX extension to stream telemetry from BIG-IP(
 - [Overview](#overview)
 - [Configuration Examples](#configuration-examples)
 - [REST API Endpoints](#rest-api-endpoints)
-- [Data tracer](#data-tracer)
 - [Output Example](#output-example)
 - [Container](#container)
 
@@ -74,9 +73,36 @@ Definition: Accepts information from disparate systems and provides the tools to
 }
 ```
 
+### Controls
+
 There is a fixed class called "Controls", which contains a number of properties:
 
 - logLevel - logging level, possible values are **debug**, **info**, **error**. Default value is **info**
+
+```json
+{
+    "controls": {
+        "class": "Controls",
+        "logLevel": "info"
+    }
+}
+```
+
+### Additional properties
+
+The schema has some additional properties which might not be covered elesewhere, defined below.
+
+- trace
+  - Definition: Useful during debug of TS because it dumps intermediate data to file.
+  - Values:
+    - *false* - tracer disabled
+    - *true* - tracer enabled, file name will be **DEFAULT_LOCATION/OBJ_TYPE.OBJ_NAME** - Default location for files is **/var/tmp/telemetry**
+    - *string* - custom path to file
+  - Note: Applies to the Telemetry_System_Poller, Telemetry_Listener and Telemetry_Consumer class(es)
+- match
+  - Definition: Provide a string or pattern (regex) which will result in events being dropped that do not match the value of a defined set of keys in the event.  Defined keys: ```virtual_name, policy_name, Access_Profile, context_name```
+  - Values: String or pattern (regex)
+  - Note: Applies to the Telemetry_Listener class
 
 ### Splunk
 
@@ -433,16 +459,6 @@ Allowed HTTP method - **GET**.
 Useful for demo or to check if poller was able to connect to device.
 **pollerName** should match the name of one of configured pollers.
 Otherwise *HTTP 404* will be returned. For output example see [System Info](#system-info).
-
-## Data tracer
-
-Tracer is useful for debug because it dumps intermediate data to file.
-Default location for files is **/var/tmp/telemetry**
-Each config object has 'tracer' property. Possible values are:
-
-- *false* - tracer disabled
-- *true* - tracer enabled, file name will be **DEFAULT_LOCATION/OBJ_TYPE.OBJ_NAME**
-- *string* - custom path to file to steam data to
 
 ## Output Example
 

@@ -20,18 +20,8 @@
                         "type": "string",
                         "enum": [ "Telemetry_System_Poller" ]
                     },
-                    "enable": {
-                        "title": "Enable",
-                        "description": "" ,
-                        "type": "boolean",
-                        "default": true
-                    },
-                    "trace": {
-                        "title": "Trace",
-                        "description": "Enables data dumping to file. Value could be string - path to file to dump data to." ,
-                        "type": ["boolean", "string"],
-                        "default": false
-                    },
+                    "enable": { "$ref": "base_schema.json#/definitions/enable", "default": true },
+                    "trace": { "$ref": "base_schema.json#/definitions/trace", "default": false },
                     "interval": {
                         "title": "Collection interval (in seconds)",
                         "description": "" ,
@@ -52,7 +42,7 @@
                         "default": "localhost",
                         "hostNetworkCheck": true
                     },
-                    "enableHostReachableCheck": { "$ref": "base_schema.json#/definitions/enableHostReachableCheck" },
+                    "enableHostConnectivityCheck": { "$ref": "base_schema.json#/definitions/enableHostConnectivityCheck" },
                     "port": {
                         "title": "Port",
                         "description": "" ,

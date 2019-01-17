@@ -53,7 +53,7 @@
             "type": "string",
             "enum": [
                 "default",
-                "f5dashboard"
+                "legacy"
             ]
         },
         "username": {
@@ -126,33 +126,51 @@
                     "type"
                 ],
                 "properties": {
-                   "class": {
-                       "title": "Class",
-                       "description": "Telemetry streaming consumer class",
-                       "type": "string",
-                       "enum": [ "Telemetry_Consumer" ]
-                   },
-                   "enable": {
-                        "title": "Enable",
-                        "description": "" ,
-                        "type": "boolean",
-                        "default": true
+                    "class": {
+                        "title": "Class",
+                        "description": "Telemetry streaming consumer class",
+                        "type": "string",
+                        "enum": [ "Telemetry_Consumer" ]
                     },
-                    "trace": {
-                        "title": "Trace",
-                        "description": "Enables data dumping to file. Value could be string - path to file to dump data to." ,
-                        "type": ["boolean", "string"],
-                        "default": false
-                    },
+                    "enable": { "$ref": "base_schema.json#/definitions/enable", "default": true },
+                    "trace": { "$ref": "base_schema.json#/definitions/trace", "default": false },
                     "type": {
                         "title": "Type",
                         "description": "" ,
                         "type": "string",
                         "enum": [ "default", "Splunk", "Azure_Log_Analytics", "AWS_CloudWatch", "AWS_S3", "Graphite", "Kafka", "ElasticSearch", "Sumo_Logic" ]
                     },
-                    "enableHostReachableCheck": { "$ref": "base_schema.json#/definitions/enableHostReachableCheck" }
+                    "enableHostConnectivityCheck": { "$ref": "base_schema.json#/definitions/enableHostConnectivityCheck" }
                 },
                 "allOf": [
+                    {
+                        "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a seperate block",
+                        "properties": {
+                            "class": {},
+                            "enable": {},
+                            "trace": {},
+                            "type": {},
+                            "enableHostConnectivityCheck": {},
+                            "host": {},
+                            "protocol": {},
+                            "port": {},
+                            "path": {},
+                            "allowSelfSignedCert": {},
+                            "username": {},
+                            "passphrase": {},
+                            "format": {},
+                            "workspaceId": {},
+                            "region": {},
+                            "logGroup": {},
+                            "logStream": {},
+                            "bucket": {},
+                            "topic": {},
+                            "apiVersion": {},
+                            "index": {},
+                            "dataType": {}
+                        },
+                        "additionalProperties": false
+                    },
                     {
                         "if": { "properties": { "type": { "const": "default" } } },
                         "then": {

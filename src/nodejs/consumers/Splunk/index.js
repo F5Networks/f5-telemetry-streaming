@@ -87,7 +87,7 @@ function defaultDataFormat(ctx) {
 * @returns {Object} Promise resolved with transformed data
 */
 function transformData(globalCtx) {
-    if (globalCtx.config.format !== 'f5dashboard') {
+    if (globalCtx.config.format !== 'legacy') {
         return defaultDataFormat(globalCtx);
     }
 
