@@ -104,6 +104,12 @@
         "httpProfileStats": {
             "type": "object"
         },
+        "clientSSLProfileStats": {
+            "type": "object"
+        },
+        "serverSSLProfileStats": {
+            "type": "object"
+        },
         "tlsCerts": {
             "type": "object"
         },
