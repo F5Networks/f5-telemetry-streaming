@@ -61,6 +61,23 @@ describe('Normalize', () => {
         assert.deepEqual(result, expectedResult);
     });
 
+    it('should normalize event and rename key(s)', () => {
+        const event = 'key1="value"';
+        const expectedResult = {
+            key2: 'value'
+        };
+        const options = {
+            renameKeysByPattern: {
+                patterns: {
+                    key1: { constant: 'key2' }
+                }
+            }
+        };
+
+        const result = normalize.event(event, options);
+        assert.deepEqual(result, expectedResult);
+    });
+
     it('should normalize data (no change)', () => {
         const data = {
             key1: 'value',
@@ -113,15 +130,36 @@ describe('Normalize', () => {
     it('should rename key by pattern', () => {
         const options = {
             renameKeysByPattern: {
-                'sys/version': {
-                    pattern: 'sys/version(.*)',
-                    group: 1
+                patterns: {
+                    'sys/version': {
+                        pattern: 'sys/version(.*)',
+                        group: 1
+                    }
                 }
             }
         };
 
         const result = normalize.data(exampleData, options);
         assert.notStrictEqual(result['/0'], undefined);
+    });
+
+    it('should not rename key by pattern', () => {
+        const options = {
+            renameKeysByPattern: {
+                patterns: {
+                    'sys/version': {
+                        pattern: 'sys/version(.*)',
+                        group: 1
+                    }
+                },
+                options: {
+                    exactMatch: true
+                }
+            }
+        };
+
+        const result = normalize.data(exampleData, options);
+        assert.strictEqual(result['/0'], undefined);
     });
 
     it('should convert array to map', () => {

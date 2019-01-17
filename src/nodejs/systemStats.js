@@ -402,7 +402,7 @@ SystemStats.prototype._processData = function (property, data) {
     const options = {
         key: this._splitKey(property.key).childKey,
         filterByKeys: property.filterKeys,
-        renameKeysByPattern: property.renameKeys,
+        renameKeysByPattern: property.renameKeys ? [property.renameKeys, global.renameKeys] : [global.renameKeys],
         convertArrayToMap: property.convertArrayToMap,
         includeFirstEntry: property.includeFirstEntry,
         runCustomFunction: property.runFunction,

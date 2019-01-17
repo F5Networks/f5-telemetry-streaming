@@ -96,7 +96,7 @@ deploy_bigip:
 test package:
     stage: test
     script:
-        - npm install
+        - npm install --no-optional
         - npm run lint
         - npm run test
     tags:
@@ -106,7 +106,8 @@ test functional:
     stage: test
     script:
         - export TEST_HARNESS_FILE=${CI_PROJECT_DIR}/harness_facts_flat.json
-        - npm install
+        # really only need dev dependencies
+        - npm install --no-optional
         - ls ./dist -ls
         - npm run test-functional
     tags:

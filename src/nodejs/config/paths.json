@@ -69,6 +69,10 @@
             "name": "diskLatencyRef",
             "endpoint": "/mgmt/tm/util/bash",
             "body": "{ \"command\": \"run\", \"utilCmdArgs\": \"-c \\\"/usr/bin/iostat -x -d | /usr/bin/tail -n +3 | /usr/bin/tr -s ' ' ','\\\"\" }"
+        },
+        {
+            "name": "httpProfile",
+            "endpoint": "/mgmt/tm/ltm/profile/http/stats"
         }
     ]
 }

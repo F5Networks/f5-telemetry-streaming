@@ -101,6 +101,9 @@
         "ltmPolicyStats": {
             "type": "object"
         },
+        "httpProfileStats": {
+            "type": "object"
+        },
         "tlsCerts": {
             "type": "object"
         },

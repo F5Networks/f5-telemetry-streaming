@@ -706,8 +706,8 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
             "clientside.bitsOut": 297731408,
             "clientside.curConns": 0,
             "destination": "/Common/10.0.2.101:80",
-            "status.availabilityState": "available",
-            "status.enabledState": "enabled",
+            "availabilityState": "available",
+            "enabledState": "enabled",
             "name": "/Common/app.app/app_vs",
             "tenant": "Common",
             "application": "app.app"
@@ -717,8 +717,8 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
             "clientside.bitsOut": 0,
             "clientside.curConns": 0,
             "destination": "/Sample_02/192.0.2.11:443",
-            "status.availabilityState": "offline",
-            "status.enabledState": "enabled",
+            "availabilityState": "offline",
+            "enabledState": "enabled",
             "name": "/Sample_02/A1/serviceMain",
             "tenant": "Sample_02",
             "application": "A1"
@@ -728,8 +728,8 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
             "clientside.bitsOut": 0,
             "clientside.curConns": 0,
             "destination": "/Sample_02/192.0.2.11:80",
-            "status.availabilityState": "unknown",
-            "status.enabledState": "enabled",
+            "availabilityState": "unknown",
+            "enabledState": "enabled",
             "name": "/Sample_02/A1/serviceMain-Redirect",
             "tenant": "Sample_02",
             "application": "A1"
@@ -740,8 +740,8 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
             "serverside.bitsIn": 39075976,
             "serverside.bitsOut": 299502400,
             "serverside.curConns": 0,
-            "status.availabilityState": "available",
-            "status.enabledState": "enabled",
+            "availabilityState": "available",
+            "enabledState": "enabled",
             "status.statusReason": "The pool is available",
             "members": {
                 "/Common/10.0.3.5:80": {
@@ -751,8 +751,8 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
                     "serverside.bitsOut": 299502400,
                     "serverside.curConns": 0,
                     "sessionStatus": "enabled",
-                    "status.availabilityState": "available",
-                    "status.enabledState": "enabled",
+                    "availabilityState": "available",
+                    "enabledState": "enabled",
                     "status.statusReason": "Pool member is available"
                 }
             },
@@ -764,8 +764,8 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
             "serverside.bitsIn": 14780176,
             "serverside.bitsOut": 3354112,
             "serverside.curConns": 1,
-            "status.availabilityState": "available",
-            "status.enabledState": "enabled",
+            "availabilityState": "available",
+            "enabledState": "enabled",
             "status.statusReason": "The pool is available",
             "members": {
                 "/Common/10.0.1.100:6514": {
@@ -775,8 +775,8 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
                     "serverside.bitsOut": 3354112,
                     "serverside.curConns": 1,
                     "sessionStatus": "enabled",
-                    "status.availabilityState": "available",
-                    "status.enabledState": "enabled",
+                    "availabilityState": "available",
+                    "enabledState": "enabled",
                     "status.statusReason": "Pool member is available"
                 }
             },
@@ -788,8 +788,8 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
             "serverside.bitsIn": 0,
             "serverside.bitsOut": 0,
             "serverside.curConns": 0,
-            "status.availabilityState": "offline",
-            "status.enabledState": "enabled",
+            "availabilityState": "offline",
+            "enabledState": "enabled",
             "status.statusReason": "The children pool member(s) are down",
             "members": {
                 "/Sample_02/192.0.2.12:80": {
@@ -799,8 +799,8 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
                     "serverside.bitsOut": 0,
                     "serverside.curConns": 0,
                     "sessionStatus": "enabled",
-                    "status.availabilityState": "offline",
-                    "status.enabledState": "enabled",
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
                     "status.statusReason": "/Common/http: No successful responses received before deadline. @2018/12/17 21:07:54. "
                 },
                 "/Sample_02/192.0.2.13:80": {
@@ -810,8 +810,8 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
                     "serverside.bitsOut": 0,
                     "serverside.curConns": 0,
                     "sessionStatus": "enabled",
-                    "status.availabilityState": "offline",
-                    "status.enabledState": "enabled",
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
                     "status.statusReason": "/Common/http: No successful responses received before deadline. @2018/12/17 21:07:54. "
                 }
             },
@@ -821,15 +821,24 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
         }
     },
     "ltmPolicyStats": {
-        "/Common/example_policy": {
+        "/Common/app.app/app_policy": {
+            "invoked": 15034,
+            "succeeded": 15034,
+            "actions": {
+                "default:1": {
+                    "invoked": 15034,
+                    "succeeded": 15034
+                }
+            },
+            "name": "/Common/app.app/app_policy",
+            "tenant": "Common",
+            "application": "app.app"
+        },
+        "/Common/telemetry": {
             "invoked": 0,
             "succeeded": 0,
             "actions": {
                 "default:0": {
-                    "invoked": 0,
-                    "succeeded": 0
-                },
-                "rule_1:0": {
                     "invoked": 0,
                     "succeeded": 0
                 }
@@ -837,6 +846,123 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
             "name": "/Common/telemetry",
             "tenant": "Common",
             "application": ""
+        }
+    },
+    "httpProfileStats": {
+        "/Common/app.app/app_http": {
+            "cookiePersistInserts": 17289,
+            "getReqs": 8135,
+            "maxKeepaliveReq": 336,
+            "numberReqs": 17397,
+            "postReqs": 9166,
+            "proxyReqs": 0,
+            "2xxResp": 1340,
+            "3xxResp": 39,
+            "4xxResp": 15995,
+            "5xxResp": 0,
+            "respLessThan2m": 0,
+            "respGreaterThan2m": 0,
+            "v10Reqs": 351,
+            "v10Resp": 48,
+            "v11Reqs": 17036,
+            "v11Resp": 17326,
+            "v9Reqs": 10,
+            "v9Resp": 0,
+            "name": "/Common/app.app/app_http",
+            "tenant": "Common",
+            "application": "app.app"
+        },
+        "/Common/http": {
+            "cookiePersistInserts": 0,
+            "getReqs": 0,
+            "maxKeepaliveReq": 0,
+            "numberReqs": 0,
+            "postReqs": 0,
+            "proxyReqs": 0,
+            "2xxResp": 0,
+            "3xxResp": 0,
+            "4xxResp": 0,
+            "5xxResp": 0,
+            "respLessThan2m": 0,
+            "respGreaterThan2m": 0,
+            "v10Reqs": 0,
+            "v10Resp": 0,
+            "v11Reqs": 0,
+            "v11Resp": 0,
+            "v9Reqs": 0,
+            "v9Resp": 0,
+            "name": "/Common/http",
+            "tenant": "Common",
+            "application": ""
+        },
+        "/Common/http-explicit": {
+            "cookiePersistInserts": 0,
+            "getReqs": 0,
+            "maxKeepaliveReq": 0,
+            "numberReqs": 0,
+            "postReqs": 0,
+            "proxyReqs": 0,
+            "2xxResp": 0,
+            "3xxResp": 0,
+            "4xxResp": 0,
+            "5xxResp": 0,
+            "respLessThan2m": 0,
+            "respGreaterThan2m": 0,
+            "v10Reqs": 0,
+            "v10Resp": 0,
+            "v11Reqs": 0,
+            "v11Resp": 0,
+            "v9Reqs": 0,
+            "v9Resp": 0,
+            "name": "/Common/http-explicit",
+            "tenant": "Common",
+            "application": ""
+        },
+        "/Common/http-transparent": {
+            "cookiePersistInserts": 0,
+            "getReqs": 0,
+            "maxKeepaliveReq": 0,
+            "numberReqs": 0,
+            "postReqs": 0,
+            "proxyReqs": 0,
+            "2xxResp": 0,
+            "3xxResp": 0,
+            "4xxResp": 0,
+            "5xxResp": 0,
+            "respLessThan2m": 0,
+            "respGreaterThan2m": 0,
+            "v10Reqs": 0,
+            "v10Resp": 0,
+            "v11Reqs": 0,
+            "v11Resp": 0,
+            "v9Reqs": 0,
+            "v9Resp": 0,
+            "name": "/Common/http-transparent",
+            "tenant": "Common",
+            "application": ""
+        },
+        "/Sample_02/A1/custom_http_profile": {
+            "cookiePersistInserts": 0,
+            "getReqs": 0,
+            "maxKeepaliveReq": 0,
+            "numberReqs": 0,
+            "postReqs": 0,
+            "proxyReqs": 0,
+            "2xxResp": 0,
+            "3xxResp": 0,
+            "4xxResp": 0,
+            "5xxResp": 0,
+            "respLessThan2m": 0,
+            "respGreaterThan2m": 0,
+            "v10Reqs": 0,
+            "v10Resp": 0,
+            "v11Reqs": 0,
+            "v11Resp": 0,
+            "v9Reqs": 0,
+            "v9Resp": 0,
+            "name": "/Sample_02/A1/custom_http_profile",
+            "tenant": "Sample_02",
+            "application": "A1"
         }
     },
     "tlsCerts": {
