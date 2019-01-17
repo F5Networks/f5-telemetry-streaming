@@ -32,7 +32,7 @@ function SimpleRouter() {
  * Register request habdler.
  *
  * @public
- * @param {String} method             - HTTP method (POST, GET, etc.)
+ * @param {String | String[]} method  - HTTP method (POST, GET, etc.), could be array
  * @param {String} endpointURI        - URI path, string should be alphanumeric only
  * @param {Function(Object)} callback - request handler
  */
@@ -40,7 +40,13 @@ SimpleRouter.prototype.register = function (method, endpointURI, callback) {
     if (this.routes[endpointURI] === undefined) {
         this.routes[endpointURI] = {};
     }
-    this.routes[endpointURI][method] = callback;
+    if (Array.isArray(method)) {
+        method.forEach((methodItem) => {
+            this.routes[endpointURI][methodItem] = callback;
+        });
+    } else {
+        this.routes[endpointURI][method] = callback;
+    }
 };
 
 /**
@@ -155,7 +161,7 @@ RestWorker.prototype._initializeApplication = function (success, failure) {
     this.router.register('GET', 'info',
         restOperation => this.processInfoRequest(restOperation));
 
-    this.router.register('POST', 'declare',
+    this.router.register(['GET', 'POST'], 'declare',
         restOperation => configWorker.processClientRequest(restOperation));
 
     this.router.register('GET', 'systempoller',

@@ -259,7 +259,7 @@ ConfigWorker.prototype.validateAndApply = function (data) {
             validatedConfig = config;
             // no need for raw config
             const configToSave = {
-                raw: null,
+                raw: JSON.parse(JSON.stringify(validatedConfig)),
                 parsed: util.formatConfig(config)
             };
             logger.debug(`Configuration to save: ${util.stringify(configToSave)}`); // helpful debug, for now
@@ -286,12 +286,23 @@ ConfigWorker.prototype.validateAndApply = function (data) {
  * @returns {void}
  */
 ConfigWorker.prototype.processClientRequest = function (restOperation) {
-    // try to validate new config
-    return this.validateAndApply(restOperation.getBody())
-        .then((config) => {
-            util.restOperationResponder(restOperation, 200,
-                { message: 'success', declaration: config });
-        })
+    const method = restOperation.getMethod().toUpperCase();
+    let actionName;
+    let promise;
+
+    if (method === 'POST') {
+        // try to validate new config
+        actionName = 'validateAndApply';
+        promise = this.validateAndApply(restOperation.getBody());
+    } else {
+        actionName = 'getDeclaration';
+        promise = Promise.resolve((this._state && this._state.config && this._state.config.raw) || {});
+    }
+
+    return promise.then((config) => {
+        util.restOperationResponder(restOperation, 200,
+            { message: 'success', declaration: config });
+    })
         .catch((err) => {
             const errObj = {};
             if (err.code === 'ValidationError') {
@@ -303,7 +314,7 @@ ConfigWorker.prototype.processClientRequest = function (restOperation) {
                 errObj.message = 'Internal Server Error';
                 errObj.error = `${err.message ? err.message : err}`;
             }
-            logger.exception(`validateAndApply error: ${err}`, err);
+            logger.exception(`${actionName} error: ${err}`, err);
             util.restOperationResponder(restOperation, errObj.code, errObj);
         });
 };
