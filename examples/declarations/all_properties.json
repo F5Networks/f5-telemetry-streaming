@@ -35,6 +35,6 @@
         "passphrase": {
             "cipherText": "apikey"
         },
-        "enableHostReachableCheck": false
+        "enableHostConnectivityCheck": false
     }
 }

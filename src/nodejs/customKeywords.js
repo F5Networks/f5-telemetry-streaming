@@ -98,8 +98,8 @@ const keywords = {
                 const pData = parentData || {};
                 const ajvErrors = [];
 
-                // enable host reachable check with this property - return otherwise
-                if (pData.enableHostReachableCheck !== true) return Promise.resolve(true);
+                // enable host connectivity check with this property - return otherwise
+                if (pData.enableHostConnectivityCheck !== true) return Promise.resolve(true);
 
                 // port required - schema should validate this
                 if (!pData.port) return Promise.resolve(true);

@@ -19,18 +19,8 @@
                         "type": "string",
                         "enum": [ "Telemetry_Listener" ]
                     },
-                    "enable": {
-                        "title": "Enable",
-                        "description": "" ,
-                        "type": "boolean",
-                        "default": true
-                    },
-                    "trace": {
-                        "title": "Trace",
-                        "description": "Enables data dumping to file. Value could be string - path to file to dump data to." ,
-                        "type": ["boolean", "string"],
-                        "default": false
-                    },
+                    "enable": { "$ref": "base_schema.json#/definitions/enable", "default": true },
+                    "trace": { "$ref": "base_schema.json#/definitions/trace", "default": false },
                     "port": {
                         "title": "Port",
                         "description": "" ,

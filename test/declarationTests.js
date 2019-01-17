@@ -120,7 +120,7 @@ describe('Declarations', () => {
                 class: 'Telemetry_Consumer',
                 type: 'Graphite',
                 host: '192.0.2.1',
-                enableHostReachableCheck: true
+                enableHostConnectivityCheck: true
             }
         };
 
@@ -140,7 +140,7 @@ describe('Declarations', () => {
                 class: 'Telemetry_Consumer',
                 type: 'Graphite',
                 host: '192.0.2.1',
-                enableHostReachableCheck: true
+                enableHostConnectivityCheck: true
             }
         };
 
