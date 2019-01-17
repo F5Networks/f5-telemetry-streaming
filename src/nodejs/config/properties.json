@@ -164,8 +164,20 @@
         },
         "httpProfileStats": {
             "key": "httpProfile",
-            "filterKeys": [ "ltm/profile/http/", "getReqs", "postReqs", "numberReqs", "maxKeepaliveReq", "v9Reqs", "v10Reqs", "v11Reqs", "v9Resp", "v10Resp", "v11Resp", "resp_2xxCnt", "resp_3xxCnt", "resp_4xxCnt", "resp_5xxCnt", "respBucket_2m", "respBucketLarge", "cookiePersistInserts", "proxyReqs" ],
-            "renameKeys": { "patterns": [ { "ltm/profile/http/": { "pattern": "http\/(.*)\/", "group": 1 } } ] },
+            "filterKeys": [ "ltm/profile/", "getReqs", "postReqs", "numberReqs", "maxKeepaliveReq", "v9Reqs", "v10Reqs", "v11Reqs", "v9Resp", "v10Resp", "v11Resp", "resp_2xxCnt", "resp_3xxCnt", "resp_4xxCnt", "resp_5xxCnt", "respBucket_2m", "respBucketLarge", "cookiePersistInserts", "proxyReqs" ],
+            "renameKeys": { "patterns": { "ltm/profile/http/": { "pattern": "http\/(.*)\/", "group": 1 } } },
+            "addKeysByTag": true
+        },
+        "clientSSLProfileStats": {
+            "key": "clientSSLProfile",
+            "filterKeys": [ "ltm/profile/", "common.encryptedBytesIn", "common.encryptedBytesOut", "common.decryptedBytesIn", "common.decryptedBytesOut", "common.recordsIn", "common.recordsOut", "common.curConns", "common.curNativeConns", "common.curCompatConns", "common.currentActiveHandshakes", "common.fatalAlerts", "common.handshakeFailures", "common.protocolUses.dtlsv1", "common.protocolUses.sslv2", "common.protocolUses.sslv3", "common.protocolUses.tlsv1", "common.protocolUses.tlsv1_1", "common.protocolUses.tlsv1_2", "common.protocolUses.tlsv1_3", "common.peercertValid", "common.peercertInvalid", "common.peercertNone" ],
+            "renameKeys": { "patterns": { "ltm/profile/client-ssl/": { "pattern": "client-ssl\/(.*)\/", "group": 1 }, "common.": { "pattern": "common.(.*)", "group": 1 } } },
+            "addKeysByTag": true
+        },
+        "serverSSLProfileStats": {
+            "key": "serverSSLProfile",
+            "filterKeys": [ "ltm/profile/", "common.encryptedBytesIn", "common.encryptedBytesOut", "common.decryptedBytesIn", "common.decryptedBytesOut", "common.recordsIn", "common.recordsOut", "common.curConns", "common.curNativeConns", "common.curCompatConns",  "common.curConns", "common.curNativeConns", "common.curCompatConns", "common.currentActiveHandshakes", "common.fatalAlerts", "common.handshakeFailures", "common.protocolUses.dtlsv1", "common.protocolUses.sslv2", "common.protocolUses.sslv3", "common.protocolUses.tlsv1", "common.protocolUses.tlsv1_1", "common.protocolUses.tlsv1_2", "common.protocolUses.tlsv1_3", "common.peercertValid", "common.peercertInvalid", "common.peercertNone" ],
+            "renameKeys": { "patterns": { "ltm/profile/server-ssl/": { "pattern": "server-ssl\/(.*)\/", "group": 1 }, "common.": { "pattern": "common.(.*)", "group": 1 } } },
             "addKeysByTag": true
         },
         "tlsCerts": {
@@ -200,7 +212,10 @@
                 "resp_4xxCnt": { "constant": "4xxResp" },
                 "resp_5xxCnt": { "constant": "5xxResp" },
                 "respBucket_2m": { "constant": "respLessThan2m" },
-                "respBucketLarge": { "constant": "respGreaterThan2m" }
+                "respBucketLarge": { "constant": "respGreaterThan2m" },
+                "curConns": { "constant": "currentConnections" },
+                "curNativeConns": { "constant": "currentNativeConnections" },
+                "curCompatConns": { "constant": "currentCompatibleConnections" }
             },
             "options": {
                 "exactMatch": true
