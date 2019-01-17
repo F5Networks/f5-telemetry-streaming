@@ -20,6 +20,7 @@ const properties = require('./config/properties.json');
 const tracers = require('./util.js').tracer;
 const stringify = require('./util.js').stringify;
 
+const global = properties.global;
 const events = properties.events;
 const definitions = properties.definitions;
 
@@ -97,7 +98,7 @@ EventListener.prototype._start = function () {
             // normalize and send to data pipeline
             // note: addKeysByTag uses regex for default tags parsing (tenant/app)
             const nOptions = {
-                renameKeysByPattern: events.renameKeys,
+                renameKeysByPattern: global.renameKeys,
                 addKeysByTag: {
                     tags: this.tags,
                     definitions,

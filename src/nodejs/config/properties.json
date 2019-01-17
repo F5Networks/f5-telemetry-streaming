@@ -117,7 +117,7 @@
         "tmmTraffic": {
             "key": "/mgmt/tm/sys/tmm-traffic",
             "filterKeys": [ "/tmm-traffic", "clientSideTraffic.bitsIn", "clientSideTraffic.bitsOut" ],
-            "renameKeys": { "sys/tmm-traffic": { "pattern": "([0-9]\\.[0-9])" } },
+            "renameKeys": { "patterns": { "sys/tmm-traffic": { "pattern": "([0-9]\\.[0-9])" } } },
             "runFunction": { "name": "getSum", "args": {} },
             "comment": "bits, but over what time period?"
         },
@@ -132,19 +132,19 @@
         "networkInterfaces": {
             "key": "/mgmt/tm/net/interface/stats",
             "filterKeys": [ "/stats", "counters.bitsIn", "counters.bitsOut", "status" ],
-            "renameKeys": { "net/interface": { "pattern": "([0-9]\\.[0-9]|(?!\/)mgmt(?=\/))" } }
+            "renameKeys": { "patterns": { "net/interface": { "pattern": "([0-9]\\.[0-9]|(?!\/)mgmt(?=\/))" } } }
         },
         "provisionState": {
             "key": "/mgmt/tm/sys/provision::items",
             "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" },
             "filterKeys": [ "name/", "level" ],
-            "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 } }
+            "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 } } }
         },
         "virtualServerStats": {
             "key": "/mgmt/tm/ltm/virtual::items",
             "convertArrayToMap": { "keyName": "fullPath", "keyNamePrefix": "name/" },
             "filterKeys": [ "name/", "/stats", "clientside.bitsIn", "clientside.bitsOut", "clientside.curConns", "availabilityState", "enabledState", "destination" ],
-            "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/virtual": { "pattern": "virtual\/(.*)\/", "group": 1 }, "~": { "replaceCharacter": "/" } },
+            "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/virtual": { "pattern": "virtual\/(.*)\/", "group": 1 } } },
             "includeFirstEntry": { "pattern": "/stats" },
             "addKeysByTag": true
         },
@@ -152,25 +152,30 @@
             "key": "/mgmt/tm/ltm/pool::items",
             "convertArrayToMap": { "keyName": "selfLink", "keyNamePrefix": "name/" },
             "filterKeys": [ "name/", "/stats", "membersReference", "addr", "port", "serverside.bitsIn", "serverside.bitsOut", "serverside.curConns", "availabilityState", "statusReason", "enabledState", "sessionStatus" ],
-            "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/pool/": { "pattern": "pool\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members", "~": { "replaceCharacter": "/" } },
+            "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/pool/": { "pattern": "pool\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members" } },
             "includeFirstEntry": { "pattern": "/stats", "excludePattern": "/members/" },
             "addKeysByTag": true
         },
         "ltmPolicyStats": {
             "key": "/mgmt/tm/ltm/policy/stats",
             "filterKeys": [ "ltm/policy", "invoked", "succeeded" ],
-            "renameKeys": [ { "ltm/policy/": { "pattern": "policy\/(.*)\/", "group": 1 }, "/actions/": { "pattern": "actions\/(.*)", "group": 1 }, "~": { "replaceCharacter": "/" } }, { "/actions": { "constant": "actions" } } ],
+            "renameKeys": { "patterns": [ { "ltm/policy/": { "pattern": "policy\/(.*)\/", "group": 1 }, "/actions/": { "pattern": "actions\/(.*)", "group": 1 } }, { "/actions": { "constant": "actions" } } ] },
+            "addKeysByTag": true
+        },
+        "httpProfileStats": {
+            "key": "httpProfile",
+            "filterKeys": [ "ltm/profile/http/", "getReqs", "postReqs", "numberReqs", "maxKeepaliveReq", "v9Reqs", "v10Reqs", "v11Reqs", "v9Resp", "v10Resp", "v11Resp", "resp_2xxCnt", "resp_3xxCnt", "resp_4xxCnt", "resp_5xxCnt", "respBucket_2m", "respBucketLarge", "cookiePersistInserts", "proxyReqs" ],
+            "renameKeys": { "patterns": [ { "ltm/profile/http/": { "pattern": "http\/(.*)\/", "group": 1 } } ] },
             "addKeysByTag": true
         },
         "tlsCerts": {
             "key": "/mgmt/tm/sys/file/ssl-cert::items",
             "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" },
             "filterKeys": [ "name/", "expirationDate", "expirationString", "subject", "issuer", "email" ],
-            "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 } }
+            "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 } } }
         }
     },
     "events": {
-        "renameKeys": { "ASM:unit_hostname": { "constant": "hostname" }, "BIGIP_HOSTNAME": { "constant": "hostname" } },
         "classifyByKeys": [ "virtual_name", "policy_name", "Access_Profile", "context_name" ]
     },
     "context": {
@@ -182,7 +187,25 @@
         }
     },
     "global": {
-        "addKeysByTag": { "skip": [ "actions", "members" ] }
+        "addKeysByTag": { "skip": [ "actions", "members" ] },
+        "renameKeys": {
+            "patterns": {
+                "~": { "replaceCharacter": "/", "exactMatch": false },
+                "ASM:unit_hostname": { "constant": "hostname", "exactMatch": false },
+                "BIGIP_HOSTNAME": { "constant": "hostname" },
+                "status.availabilityState": { "constant": "availabilityState" },
+                "status.enabledState": { "constant": "enabledState" },
+                "resp_2xxCnt": { "constant": "2xxResp" },
+                "resp_3xxCnt": { "constant": "3xxResp" },
+                "resp_4xxCnt": { "constant": "4xxResp" },
+                "resp_5xxCnt": { "constant": "5xxResp" },
+                "respBucket_2m": { "constant": "respLessThan2m" },
+                "respBucketLarge": { "constant": "respGreaterThan2m" }
+            },
+            "options": {
+                "exactMatch": true
+            }
+        }
     },
     "definitions": {
         "`T`": { "pattern": "\/(.*?)\/", "group": 1 },

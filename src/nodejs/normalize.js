@@ -114,34 +114,43 @@ module.exports = {
     /**
      * Rename keys in object using regex or constant
      *
-     * @param {Object} data     - data
-     * @param {Object} patterns - map of patterns
+     * @param {Object} data                  - data
+     * @param {Object} patterns              - map or array of patterns
+     * @param {Object} options               - options
+     * @param {Boolean} [options.exactMatch] - key must match base pattern exactly
      *
-     * @returns {Object} Returns renamed data
+     * @returns {Object} Returns data with keys renamed (as needed)
      */
-    _renameKeysInData(data, patterns) {
+    _renameKeys(data, patterns, options) {
         patterns = patterns || {};
+        options = options || {};
         let ret = Array.isArray(data) ? [] : {};
 
         const rename = (key, childPatterns) => {
             let retKey = key;
             Object.keys(childPatterns).forEach((pK) => {
+                const childPattern = childPatterns[pK];
                 // first check if key contains base match pattern
-                if (key.includes(pK)) {
+                // exactMatch can be specified at the global or pattern level
+                // if specified at the pattern level it should override the global
+                const exactMatch = (options.exactMatch === true && childPattern.exactMatch !== false)
+                    || childPattern.exactMatch === true;
+                const keyMatch = exactMatch ? key === pK : key.includes(pK);
+                if (keyMatch) {
                     // support constant keyword
-                    if (childPatterns[pK].constant) {
-                        retKey = childPatterns[pK].constant;
-                    } else if (childPatterns[pK].replaceCharacter) {
+                    if (childPattern.constant) {
+                        retKey = childPattern.constant;
+                    } else if (childPattern.replaceCharacter) {
                         // support replaceCharacter keyword
-                        retKey = retKey.replace(new RegExp(pK, 'g'), childPatterns[pK].replaceCharacter);
+                        retKey = retKey.replace(new RegExp(pK, 'g'), childPattern.replaceCharacter);
                     } else {
                         // assume a pattern, either in .pattern or as the value
-                        const match = this._checkForMatch(
+                        const patternMatch = this._checkForMatch(
                             retKey,
-                            childPatterns[pK].pattern || childPatterns[pK],
-                            childPatterns[pK].group
+                            childPattern.pattern || childPattern,
+                            childPattern.group
                         );
-                        if (match) retKey = match;
+                        if (patternMatch) retKey = patternMatch;
                     }
                 }
             });
@@ -161,7 +170,7 @@ module.exports = {
                 } else {
                     renamedKey = rename(renamedKey, patterns);
                 }
-                ret[renamedKey] = this._renameKeysInData(data[k], patterns);
+                ret[renamedKey] = this._renameKeys(data[k], patterns, options);
             });
             return ret;
         }
@@ -309,7 +318,8 @@ module.exports = {
      * @param {Object} data - data to normalize
      *
      * @param {Object} options                       - options
-     * @param {Object} [options.renameKeysByPattern] - map of keys to rename
+     * @param {Object} [options.renameKeysByPattern] - contains map or array of keys to rename by pattern
+     *                                                 object example: { patterns: {}, options: {}}
      * @param {Array} [options.addKeysByTag]         - add key to data based on tag(s)
      *
      * @returns {Object} Returns normalized event
@@ -318,7 +328,7 @@ module.exports = {
         options = options || {};
 
         let ret = this._formatAsJson(data);
-        ret = this._renameKeysInData(ret, options.renameKeysByPattern);
+        ret = options.renameKeysByPattern ? this._renameKeys(ret, options.renameKeysByPattern.patterns) : ret;
         if (options.addKeysByTag) {
             ret = this._addKeysByTag(
                 ret,
@@ -337,7 +347,8 @@ module.exports = {
      * @param {Object} options                       - options
      * @param {String} [options.key]                 - key to drill down into data, using a defined notation
      * @param {Array} [options.filterByKeys]         - list of keys to filter data further
-     * @param {Object} [options.renameKeysByPattern] - map of keys to rename by pattern
+     * @param {Array} [options.renameKeysByPattern]  - array containing 1+ map(s) of keys to rename by pattern
+     *                                                 object example: [{ patterns: {}, options: {}}]
      * @param {Object} [options.convertArrayToMap]   - convert array to map using defined key name
      * @param {Object} [options.includeFirstEntry]   - include first item in 'entries' at the top level
      * @param {Object} [options.runCustomFunction]   - run custom function on data
@@ -348,7 +359,7 @@ module.exports = {
     data(data, options) {
         options = options || {};
 
-        // standard reduce first
+        // standard reduce data first
         const reduceDataOptions = {
             convertArrayToMap: options.convertArrayToMap,
             includeFirstEntry: options.includeFirstEntry
@@ -356,9 +367,20 @@ module.exports = {
         let ret = this._reduceData(data, reduceDataOptions);
 
         // additional normalization may be required - the order here matters
+
+        // get data by key
         ret = options.key ? this._getDataByKey(ret, options.key) : ret;
+        // filter data by keys
         ret = options.filterByKeys ? util.filterDataByKeys(ret, options.filterByKeys) : ret;
-        ret = options.renameKeysByPattern ? this._renameKeysInData(ret, options.renameKeysByPattern) : ret;
+        // rename keys by pattern - 1+ calls
+        let rKBP = options.renameKeysByPattern;
+        if (rKBP) {
+            rKBP = Array.isArray(rKBP) ? rKBP : [rKBP];
+            rKBP.forEach((item) => {
+                ret = this._renameKeys(ret, item.patterns, item.options);
+            });
+        }
+        // run custom function
         if (options.runCustomFunction) {
             const rCFOptions = {
                 func: options.runCustomFunction.name,
