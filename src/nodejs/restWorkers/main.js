@@ -14,7 +14,7 @@ const path = require('path');
 const logger = require('../logger.js');
 const util = require('../util.js');
 
-const baseSchema = require('../config/base_schema.json');
+const baseSchema = require('../schema/base_schema.json');
 const configWorker = require('../config.js');
 const eventListener = require('../eventListener.js'); // eslint-disable-line no-unused-vars
 const consumers = require('../consumers.js'); // eslint-disable-line no-unused-vars

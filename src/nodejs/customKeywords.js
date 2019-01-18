@@ -83,7 +83,7 @@ const keywords = {
             };
         }
     },
-    hostNetworkCheck: {
+    hostConnectivityCheck: {
         type: 'string',
         errors: true,
         modifying: true,
@@ -107,7 +107,7 @@ const keywords = {
                 return util.networkCheck(data, pData.port)
                     .then(() => true)
                     .catch((e) => {
-                        ajvErrors.push({ keyword: 'hostNetworkCheck', message: e.message, params: {} });
+                        ajvErrors.push({ keyword: 'hostConnectivityCheck', message: e.message, params: {} });
                         throw new Ajv.ValidationError(ajvErrors);
                     });
             };
