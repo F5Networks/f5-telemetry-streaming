@@ -138,7 +138,7 @@ Required Information:
  - Protocol: Check Graphite documentation for configuration.
  - Port: Check Graphite documentation for configuration.
 
- .. NOTE:: To see more information about installing Graphite, see |Installing Graphite|. To see more information about Graphite events, see |Graphite Events|.
+.. NOTE:: To see more information about installing Graphite, see |Installing Graphite|. To see more information about Graphite events, see |Graphite Events|.
 
 .. code-block:: json
    :linenos:
@@ -163,7 +163,7 @@ Required Information:
  - Port: The port of the Kafka system.
  - Topic: The topic where data should go within the Kafka system
 
- .. NOTE:: To see more information about installing Kafka, see |Installing Kafka|.
+.. NOTE:: To see more information about installing Kafka, see |Installing Kafka|.
 
 .. code-block:: json
    :linenos:
@@ -198,7 +198,7 @@ Optional Parameters:
  - Username: The username to use when sending data to the ElasticSearch system.
  - Passphrase: The secret/password to use when sending data to the ElasticSearch system.
 
- .. NOTE:: To see more information about installing ElasticSearch, see |Installing ElasticSearch|.
+.. NOTE:: To see more information about installing ElasticSearch, see |Installing ElasticSearch|.
 
 .. code-block:: json
    :linenos:
@@ -235,7 +235,7 @@ Required Information:
  - Path: The HTTP path of the Sumo Logic collector (without the secret).
  - Secret: The protected portion of the HTTP path (the final portion of the path, sometimes called a system tenant).
 
- .. NOTE:: To see more information about installing Sumo Logic, see |Installing Sumo Logic|.
+.. NOTE:: To see more information about installing Sumo Logic, see |Installing Sumo Logic|.
 
 .. code-block:: json
    :linenos:

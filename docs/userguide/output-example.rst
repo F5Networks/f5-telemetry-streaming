@@ -405,7 +405,7 @@ System Information
 
 LTM Request Log
 ---------------
-
+.. NOTE:: Log streams from LTM, AFM, ASM, and APM are not configured by Telemetry Streaming, they must be configured with AS3 or another method.
 
 .. code-block:: json
    :linenos:
@@ -425,6 +425,7 @@ LTM Request Log
 
 AFM Request Log
 ---------------
+.. NOTE:: Log streams from LTM, AFM, ASM, and APM are not configured by Telemetry Streaming, they must be configured with AS3 or another method.
 
 .. code-block:: json
    :linenos:
@@ -478,6 +479,7 @@ AFM Request Log
 
 ASM Request Log
 ---------------
+.. NOTE:: Log streams from LTM, AFM, ASM, and APM are not configured by Telemetry Streaming, they must be configured with AS3 or another method.
 
 .. code-block:: json
    :linenos:
@@ -534,6 +536,7 @@ ASM Request Log
 
 APM Request Log
 ---------------
+.. NOTE:: Log streams from LTM, AFM, ASM, and APM are not configured by Telemetry Streaming, they must be configured with AS3 or another method.
 
 .. code-block:: json
    :linenos:

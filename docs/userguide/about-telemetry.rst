@@ -1,11 +1,42 @@
 About Telemetry Streaming
 =========================
 
-Telemetry Streaming is an iControl LX extension that aggregates, normalizes, and forwards statistics and events from the BIG-IP to a consumer application.
-
 Telemetry Streaming is a way for you to forward events and statistics from the BIG-IP system to your preferred data consumer and visualization application. You can do all of this by POSTing a single JSON declaration to a declarative REST API endpoint.
 
 .. image:: /images/TSdiagram.png
+
+A basic declaration is shown here with descriptions of the components below:
+
+.. code-block:: json
+   :linenos:
+
+    {
+        "class": "Telemetry",
+        "controls": {
+            "class": "Controls",
+            "logLevel": "info"
+        },
+        "My_Poller": {
+            "class": "Telemetry_System_Poller",
+            "interval": 60
+        },
+        "My_Listener": {
+            "class": "Telemetry_Listener",
+            "port": 6514
+        },
+        "My_Consumer": {
+            "class": "Telemetry_Consumer",
+            "type": "Splunk",
+            "host": "192.0.2.1",
+            "protocol": "http",
+            "port": "8088",
+            "passphrase": {
+                "cipherText": "apikey"
+            }
+        }
+    }
+
+
 
 Components
 ----------
