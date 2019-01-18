@@ -61,7 +61,7 @@ pages:
         paths:
             - public
     only:
-        - docs-vanessa@cloudsolutions/f5-telemetry
+        - /^docs-.*$/
 
 Publish docs to staging:
   image: ${CONTAINTHEDOCS_IMAGE}
