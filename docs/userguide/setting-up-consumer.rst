@@ -156,7 +156,7 @@ Required Information:
 
 Kafka
 ~~~~~
-|Kafka_img|
+|Kafka|
 
 Required Information:
  - Host: The address of the Kafka system.
@@ -182,7 +182,7 @@ Required Information:
 
 ElasticSearch
 ~~~~~~~~~~~~~
-|ElasticSearch_img|
+|ElasticSearch|
 
 Required Information:
  - Host: The address of the Kafka system.
@@ -226,7 +226,7 @@ Optional Parameters:
 
 Sumo Logic
 ~~~~~~~~~~
-|Sumo_img|
+|Sumo Logic|
 
 Required Information:
  - Host: The address of the Sumo Logic collector.
@@ -281,16 +281,16 @@ Required Information:
    :target: grafana_index.html
    :alt: Grafana
 
-.. |Kafka_img| image:: /images/kafka-logo-wide.png
+.. |Kafka| image:: /images/kafka-logo-wide.png
    :target: https://kafka.apache.org/
    :alt: Kafka
 
-.. |ElasticSearch_img| image:: /images/kafka-logo-wide.png
+.. |ElasticSearch| image:: /images/ElasticSearch_img.png
    :target: https://www.elastic.co/
    :alt: Kafka
 
-.. |Sumo_img| image:: /images/splunk_logo.png
-   :target: https://www.splunk.com
+.. |Sumo Logic| image:: /images/Sumo_img.png
+   :target: https://www.sumologic.com/
    :alt: Splunk
 
 
