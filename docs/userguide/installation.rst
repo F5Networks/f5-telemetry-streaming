@@ -85,7 +85,7 @@ If for any reason you want to revert to a previous version of Telemetry Streamin
 
 .. |github| raw:: html
 
-   <a href="https://github.com/F5Networks/f5-telemetry-streaming" target="_blank">F5 Telemetry site on GitHub</a>
+   <a href="https://github.com/F5DevCentral/f5-telemetry-streaming" target="_blank">F5 Telemetry site on GitHub</a>
 
 |
 
