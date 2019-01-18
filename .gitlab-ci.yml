@@ -92,6 +92,7 @@ docs to production:
   # Currently will only deploy to clouddocs.f5.com on commits to doc-publish
   # fill in desired release branch name and uncomment to add deployment from a branch
   - master@cloudsolutions/f5-telemetry
+  - docs-publish@cloudsolutions/f5-telemetry
   tags:
   - cm-official-docker-executor
   dependencies:
