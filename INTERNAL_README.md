@@ -1051,14 +1051,29 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
 
 **Note**: all 'keys' should be in lower case to enable classification (tenant/application).
 
-Configuration:
+Configuration
 
 - Create Pool (just the pool, no destination/publisher): [Log Publisher Configuration](#log-publisher-configuration)
 - Create LTM Request Log Profile
-  - TMSH: ```create ltm profile request-log telemetry-test request-log-pool telemetry-local request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\" request-logging enabled```
+  - TMSH: ```create ltm profile request-log telemetry request-log-pool telemetry-local request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\" request-logging enabled```
   - F5 Application Services Extension: [using-a-traffic-log-profile-in-a-declaration](https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/latest/declarations/profiles.html#using-a-traffic-log-profile-in-a-declaration)
   - Note: If creating the profile from the GUI, the ```\``` are not required.
 - Attach profile to the virtual server
+  - F5 Application Services Extension (snippet) - Note: Requires v3.8.0 or greater
+    ```json
+        {
+            "serviceMain": {
+                "class": "Service_HTTP",
+                "virtualAddresses": ["192.0.2.1"],
+                "virtualPort": 80,
+                "profileTrafficLog": {
+                    "bigip": "/Common/telemetry"
+                }
+            }
+        }
+    ```
+
+Output
 
 ```json
 {
@@ -1077,12 +1092,29 @@ Configuration:
 
 #### AFM Log
 
-Configuration:
+Configuration
 
 - Create Log Publisher (and related objects): [Log Publisher Configuration](#log-publisher-configuration)
 - Create Security Log Profile:
   - TMSH: ```create security log profile telemetry network replace-all-with { telemetry { filter { log-acl-match-drop enabled log-acl-match-reject enabled } publisher telemetry-publisher } }```
 - Attach profile to the virtual server
+  - F5 Application Services Extension (snippet)
+    ```json
+        {
+            "serviceMain": {
+                "class": "Service_HTTP",
+                "virtualAddresses": ["192.0.2.1"],
+                "virtualPort": 80,
+                "securityLogProfiles": [
+                    {
+                        "bigip": "/Common/telemetry"
+                    }
+                ]
+            }
+        }
+    ```
+
+Output
 
 ```json
 {
@@ -1135,11 +1167,28 @@ Configuration:
 
 #### ASM Log
 
-Configuration:
+Configuration
 
 - Create Security Log Profile:
   - TMSH: ```create security log profile telemetry application replace-all-with { telemetry { filter replace-all-with { request-type { values replace-all-with { all } } } logger-type remote remote-storage splunk servers replace-all-with { 192.0.2.1:6514 {} } } }```
 - Attach profile to the virtual server
+  - F5 Application Services Extension (snippet)
+    ```json
+        {
+            "serviceMain": {
+                "class": "Service_HTTP",
+                "virtualAddresses": ["192.0.2.1"],
+                "virtualPort": 80,
+                "securityLogProfiles": [
+                    {
+                        "bigip": "/Common/telemetry"
+                    }
+                ]
+            }
+        }
+    ```
+
+Output
 
 ```json
 {
@@ -1195,11 +1244,13 @@ Configuration:
 
 #### APM Log
 
-Create APM Log Profile:
+Configuration
 
 - Create Log Publisher (and related objects): [Log Publisher Configuration](#log-publisher-configuration)
 - Create Profile (tmsh): ```create apm log-setting telemetry access replace-all-with { access { publisher telemetry-publisher } }```
 - Attach profile to the APM policy
+
+Output
 
 ```json
 {
