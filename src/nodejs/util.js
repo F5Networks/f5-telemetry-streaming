@@ -542,6 +542,40 @@ module.exports = {
     },
 
     /**
+     * Compare version strings
+     *
+     * @param {String} version1   - version to compare
+     * @param {String} comparator - comparison operator
+     * @param {String} version2   - version to compare
+     *
+     * @returns {boolean} true or false
+     */
+    compareVersionStrings(version1, comparator, version2) {
+        comparator = comparator === '=' ? '==' : comparator;
+        if (['==', '===', '<', '<=', '>', '>=', '!=', '!=='].indexOf(comparator) === -1) {
+            throw new Error(`Invalid comparator '${comparator}'`);
+        }
+        const v1parts = version1.split('.');
+        const v2parts = version2.split('.');
+        const maxLen = Math.max(v1parts.length, v2parts.length);
+        let part1;
+        let part2;
+        let cmp = 0;
+        // eslint-disable-next-line no-plusplus
+        for (let i = 0; i < maxLen && !cmp; i++) {
+            part1 = parseInt(v1parts[i], 10) || 0;
+            part2 = parseInt(v2parts[i], 10) || 0;
+            if (part1 < part2) {
+                cmp = 1;
+            } else if (part1 > part2) {
+                cmp = -1;
+            }
+        }
+        // eslint-disable-next-line no-eval
+        return eval(`0${comparator}${cmp}`);
+    },
+
+    /**
      * Performs a check of the local environment and returns device type
      *
      * @returns {Promise} A promise which is resolved with the device type.
@@ -561,6 +595,32 @@ module.exports = {
                 }
             });
         });
+    },
+
+    /**
+     * Returns installed software version
+     *
+     * @param {String} host    - HTTP host
+     * @param {Object} options - function options, see 'makeRequest'
+     *
+     * @returns {Promise} A promise which is resolved with response
+     *
+     */
+    getDeviceVersion(host, options) {
+        const uri = '/mgmt/tm/sys/version';
+        return this.makeRequest(host, uri, options)
+            .then((res) => {
+                const entries = res.entries[Object.keys(res.entries)[0]].nestedStats.entries;
+                const result = {};
+                Object.keys(entries).forEach((prop) => {
+                    result[prop[0].toLowerCase() + prop.slice(1)] = entries[prop].description;
+                });
+                return result;
+            })
+            .catch((err) => {
+                const msg = `getDeviceVersion: ${err}`;
+                throw new Error(msg);
+            });
     },
 
     /**
@@ -734,13 +794,40 @@ module.exports = {
     },
 
     /**
+     * Execute shell command(s) via REST API on BIG-IP.
+     * Command should have escaped quotes.
+     * If host is not localhost then auth token should be passed along with headers.
+     *
+     * @param {String} host                     - HTTP host
+     * @param {String} command                  - shell command
+     * @param {Object} options                  - function options, see 'makeRequest'
+     *
+     * @returns {Object} Returns promise resolved with response
+     */
+    executeShellCommandOnDevice(host, command, options) {
+        const uri = '/mgmt/tm/util/bash';
+        options = options ? JSON.parse(JSON.stringify(options)) : {};
+        options.method = 'POST';
+        options.body = {
+            command: 'run',
+            utilCmdArgs: `-c "${command}"`
+        };
+        return this.makeRequest(host, uri, options)
+            .then(res => res.commandResult || '')
+            .catch((err) => {
+                const msg = `executeShellCommandOnDevice: ${err}`;
+                throw new Error(msg);
+            });
+    },
+
+    /**
      * Get auth token
      *
      * @param {String} host                - HTTP host
      * @param {String} username            - device username
      * @param {String} password            - device password
      * @param {Object} options             - function options
-     * @param {String} [options.protocol] - HTTP protocol
+     * @param {String} [options.protocol]  - HTTP protocol
      * @param {Integer} [options.port]     - HTTP port
      *
      * @returns {Object} Returns promise resolved with auth token: { token: 'token' }
@@ -823,10 +910,26 @@ module.exports = {
                 }
                 // update text field with Secure Vault cryptogram - should we base64 encode?
                 encryptedData = res.secret;
-
-                // delete radius object
-                return this.makeRequest(constants.LOCAL_HOST, `${uri}/${radiusObjectName}`, httpDeleteOptions);
+                return this.getDeviceVersion(constants.LOCAL_HOST);
             })
+            .then((deviceVersion) => {
+                let promise;
+                if (this.compareVersionStrings(deviceVersion.version, '>=', '14.1')) {
+                    // TMOS 14.1.x fix for 745423
+                    const tmshCmd = `tmsh -a list auth radius-server ${radiusObjectName} secret`;
+                    promise = this.executeShellCommandOnDevice(constants.LOCAL_HOST, tmshCmd)
+                        .then((res) => {
+                            /**
+                             * auth radius-server telemetry_delete_me {
+                             *   secret <secret-data>
+                             * }
+                             */
+                            encryptedData = res.split('\n')[1].trim().split(' ', 2)[1];
+                        });
+                }
+                return promise || Promise.resolve();
+            })
+            .then(() => this.makeRequest(constants.LOCAL_HOST, `${uri}/${radiusObjectName}`, httpDeleteOptions))
             .then(() => encryptedData)
             .catch((e) => {
                 // best effort to delete radius object - we don't know where we failed

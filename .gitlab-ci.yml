@@ -98,7 +98,11 @@ test package:
     script:
         - npm install --no-optional
         - npm run lint
-        - npm run test
+        - npm run test && npm run report
+    artifacts:
+        name: ${CI_COMMIT_REF_NAME}_unittests_coverage
+        paths:
+            - coverage
     tags:
         - cm-official-docker-executor
 

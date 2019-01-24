@@ -19,9 +19,12 @@ describe('Util', () => {
     let childProcess;
     let request;
 
-    const setupRequestMock = (res, body) => {
+    const setupRequestMock = (res, body, mockOpts) => {
+        mockOpts = mockOpts || {};
         ['get', 'post', 'delete'].forEach((method) => {
-            request[method] = (opts, cb) => { cb(null, res, JSON.stringify(body)); };
+            request[method] = (opts, cb) => {
+                cb(mockOpts.err, res, mockOpts.toJSON === false ? body : JSON.stringify(body));
+            };
         });
     };
 
@@ -83,6 +86,21 @@ describe('Util', () => {
         assert.deepEqual(actualMap, expectedMap);
     });
 
+    it('should fail to convert array to map', () => {
+        assert.throws(
+            () => {
+                util.convertArrayToMap({}, 'name');
+            },
+            (err) => {
+                if ((err instanceof Error) && /array required/.test(err)) {
+                    return true;
+                }
+                return false;
+            },
+            'unexpected error'
+        );
+    });
+
     it('should filter data by keys', () => {
         const obj = {
             'name/foo': {
@@ -97,6 +115,12 @@ describe('Util', () => {
         };
         const actualObj = util.filterDataByKeys(obj, ['name']);
         assert.deepEqual(actualObj, expectedObj);
+    });
+
+    it('should filter array', () => {
+        const obj = [1, 2, 3];
+        const actualObj = util.filterDataByKeys(obj, ['name']);
+        assert.deepEqual(actualObj, obj);
     });
 
     it('should stringify object', () => {
@@ -177,12 +201,42 @@ describe('Util', () => {
         setupRequestMock(mockRes, mockBody);
 
         return util.makeRequest('example.com', '/', {})
-            .then(() => Promise.reject(new Error('failure expected')))
+            .then(() => {
+                assert.fail('Should throw an error');
+            })
             .catch((err) => {
-                err = err.message || err;
-                assert.notStrictEqual(err.indexOf('Bad status code'), -1);
-                return Promise.resolve();
+                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
+                assert.strictEqual(/Bad status code/.test(err), true);
+                return Promise.resolve(); // resolve, expected an error
             });
+    });
+
+    it('should fail request with error', () => {
+        const mockRes = { statusCode: 404, statusMessage: 'message' };
+        const mockBody = { key: 'value' };
+        setupRequestMock(mockRes, mockBody, { err: new Error('test error') });
+
+        return util.makeRequest('example.com', '/', {})
+            .then(() => {
+                assert.fail('Should throw an error');
+            })
+            .catch((err) => {
+                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
+                assert.strictEqual(/HTTP error/.test(err), true);
+                return Promise.resolve(); // resolve, expected an error
+            });
+    });
+
+    it('should return non-JSON body', () => {
+        const mockRes = { statusCode: 200, statusMessage: 'message' };
+        const mockBody = '{someInvalidJSONData';
+        setupRequestMock(mockRes, mockBody, { toJSON: false });
+
+        return util.makeRequest('example.com', '/', {})
+            .then((body) => {
+                assert.strictEqual(body, mockBody);
+            })
+            .catch(err => Promise.reject(err));
     });
 
     it('should continue on error code for request', () => {
@@ -209,6 +263,23 @@ describe('Util', () => {
             .catch(err => Promise.reject(err));
     });
 
+    it('should fail to get an auth token', () => {
+        const token = 'atoken';
+        const mockRes = { statusCode: 404, statusMessage: 'message' };
+        const mockBody = { token: { token } };
+        setupRequestMock(mockRes, mockBody);
+
+        return util.getAuthToken('example.com', 'admin', 'password')
+            .then(() => {
+                assert.fail('Should throw an error');
+            })
+            .catch((err) => {
+                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
+                assert.strictEqual(/getAuthToken:/.test(err), true);
+                return Promise.resolve(); // resolve, expected an error
+            });
+    });
+
     it('should base64 decode', () => {
         const string = 'f5string';
         const encString = Buffer.from(string, 'ascii').toString('base64');
@@ -227,10 +298,102 @@ describe('Util', () => {
         }
     });
 
+    it('should return device version', () => {
+        const mockRes = { statusCode: 200, statusMessage: 'message' };
+        const mockBody = {
+            entries: {
+                someKey: {
+                    nestedStats: {
+                        entries: {
+                            version: {
+                                description: '14.1.0'
+                            },
+                            BuildInfo: {
+                                description: '0.0.1'
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        const expected = {
+            version: '14.1.0',
+            buildInfo: '0.0.1'
+        };
+        setupRequestMock(mockRes, mockBody);
+        return util.getDeviceVersion()
+            .then((data) => {
+                assert.deepEqual(data, expected);
+                return Promise.resolve();
+            })
+            .catch(err => Promise.reject(err));
+    });
+
+    it('should fail on return device version', () => {
+        const mockRes = { statusCode: 400, statusMessage: 'error' };
+        const mockBody = {};
+        setupRequestMock(mockRes, mockBody);
+
+        return util.getDeviceVersion()
+            .then(() => {
+                assert.fail('Should throw an error');
+            })
+            .catch((err) => {
+                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
+                assert.strictEqual(/getDeviceVersion:/.test(err), true);
+                return Promise.resolve(); // resolve, expected an error
+            });
+    });
+
+    it('should execute shell command', () => {
+        const mockRes = { statusCode: 200, statusMessage: 'message' };
+        const mockBody = { commandResult: 'somestring' };
+        setupRequestMock(mockRes, mockBody);
+
+        return util.executeShellCommandOnDevice(null, 'echo somestring')
+            .then((data) => {
+                assert.strictEqual(data, mockBody.commandResult);
+                return Promise.resolve();
+            })
+            .catch(err => Promise.reject(err));
+    });
+
+    it('should fail on execute shell command', () => {
+        const mockRes = { statusCode: 404, statusMessage: 'message' };
+        const mockBody = { commandResult: 'somestring' };
+        setupRequestMock(mockRes, mockBody);
+
+        return util.executeShellCommandOnDevice(null, 'echo somestring')
+            .then(() => {
+                assert.fail('Should throw an error');
+            })
+            .catch((err) => {
+                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
+                assert.strictEqual(/executeShellCommandOnDevice:/.test(err), true);
+                return Promise.resolve(); // resolve, expected an error
+            });
+    });
+
     it('should encrypt secret', () => {
         const secret = 'asecret';
         const mockRes = { statusCode: 200, statusMessage: 'message' };
-        const mockBody = { secret };
+        const mockBody = {
+            secret,
+            entries: {
+                someKey: {
+                    nestedStats: {
+                        entries: {
+                            version: {
+                                description: '14.0.0'
+                            },
+                            BuildInfo: {
+                                description: '0.0.1'
+                            }
+                        }
+                    }
+                }
+            }
+        };
         setupRequestMock(mockRes, mockBody);
 
         return util.encryptSecret('foo')
@@ -349,6 +512,31 @@ describe('Util', () => {
                 if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
                 return Promise.resolve(); // resolve, expected an error
             });
+    });
+
+    it('should compare version strings', () => {
+        assert.throws(
+            () => {
+                util.compareVersionStrings('14.0', '<>', '14.0');
+            },
+            (err) => {
+                if ((err instanceof Error) && /Invalid comparator/.test(err)) {
+                    return true;
+                }
+                return false;
+            },
+            'unexpected error'
+        );
+        assert.strictEqual(util.compareVersionStrings('14.0', '==', '14.0'), true);
+        assert.strictEqual(util.compareVersionStrings('14.0', '===', '14.0'), true);
+        assert.strictEqual(util.compareVersionStrings('14.0', '<', '14.0'), false);
+        assert.strictEqual(util.compareVersionStrings('14.0', '<=', '14.0'), true);
+        assert.strictEqual(util.compareVersionStrings('14.0', '>', '14.0'), false);
+        assert.strictEqual(util.compareVersionStrings('14.0', '>=', '14.0'), true);
+        assert.strictEqual(util.compareVersionStrings('14.0', '!=', '14.0'), false);
+        assert.strictEqual(util.compareVersionStrings('14.0', '!==', '14.0'), false);
+        assert.strictEqual(util.compareVersionStrings('14.0', '==', '15.0'), false);
+        assert.strictEqual(util.compareVersionStrings('15.0', '==', '14.0'), false);
     });
 });
 
