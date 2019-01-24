@@ -38,8 +38,8 @@ A basic declaration is shown here with descriptions of the components below:
 
 
 
-Components of this declaration
-------------------------------
+Components of the declaration
+-----------------------------
 In this section, we break down the example into each class so you can understand the options when composing your declaration. The tables below the examples contain descriptions and options for the parameters included in the example only.  
 
 If there is a default value, it is shown in bold in the Options column.
@@ -81,7 +81,7 @@ The next lines of the declaration sets the System Poller, which Polls a system, 
 
 .. code-block:: javascript
    :linenos:
-   :lineno-start: 6
+   :lineno-start: 7
 
 
     "My_Poller": {
@@ -111,7 +111,7 @@ Event Format: ``key1="value",key2="value"``
 
 .. code-block:: javascript
    :linenos:
-   :lineno-start: 6
+   :lineno-start: 11
 
 
     "My_Listener": {
@@ -141,7 +141,7 @@ The next lines of the declaration sets the Consumer, which accepts information f
 
 .. code-block:: javascript
    :linenos:
-   :lineno-start: 6
+   :lineno-start: 15
 
 
     "My_Consumer": {
