@@ -30,14 +30,23 @@ info
 
 debug
 `````
+
 .. code-block:: bash
-    Thu, 24 Jan 2019 02:18:56 GMT - info: [telemetry] Global logLevel set to 'debug'
-    Thu, 24 Jan 2019 02:18:56 GMT - finest: [telemetry] configWorker change event in consumers
-    Thu, 24 Jan 2019 02:18:56 GMT - info: [telemetry] Loading consumer specific plug-ins from ./consumers
-    Thu, 24 Jan 2019 02:18:56 GMT - finest: [telemetry] configWorker change event in eventListener
-    Thu, 24 Jan 2019 02:18:56 GMT - finest: [telemetry] 0 event listener(s) listening
-    Thu, 24 Jan 2019 02:18:56 GMT - finest: [telemetry] configWorker change event in systemPoller
-    Thu, 24 Jan 2019 02:18:56 GMT - info: [telemetry] 0 consumer plug-in(s) loaded
+
+  Mon, 25 Dec 2017 08:55:00 GMT - fine: [f5-appsvcs] {"message":"script completed","data":{"kind":"tm:cli:script:runstate","command":"run","name":"f5-appsvcs"}}
+  Mon, 25 Dec 2017 08:55:00 GMT - severe: [f5-appsvcs] {"message":"declaration failed","data":"01020036:3: The requested node (/appsvcs_test_basic_ltm/1.0.113.10) was not found."}
+
+
+
+
+.. code-block:: bash
+   Thu, 24 Jan 2019 02:18:56 GMT - info: [telemetry] Global logLevel set to 'debug'
+   Thu, 24 Jan 2019 02:18:56 GMT - finest: [telemetry] configWorker change event in consumers
+   Thu, 24 Jan 2019 02:18:56 GMT - info: [telemetry] Loading consumer specific plug-ins from ./consumers
+   Thu, 24 Jan 2019 02:18:56 GMT - finest: [telemetry] configWorker change event in eventListener
+   Thu, 24 Jan 2019 02:18:56 GMT - finest: [telemetry] 0 event listener(s) listening
+   Thu, 24 Jan 2019 02:18:56 GMT - finest: [telemetry] configWorker change event in systemPoller
+   Thu, 24 Jan 2019 02:18:56 GMT - info: [telemetry] 0 consumer plug-in(s) loaded
 
 
 error
