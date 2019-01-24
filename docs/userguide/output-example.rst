@@ -8,11 +8,11 @@ System Information
    :linenos:
 
     {
-        "hostname": "hostname",
+        "hostname": "telemetry.bigip.com",
         "version": "14.0.0.1",
         "versionBuild": "0.0.2",
         "location": "Seattle",
-        "description": "My BIG-IP description",
+        "description": "Telemetry BIG-IP",
         "marketingName": "BIG-IP Virtual Edition",
         "platformId": "Z100",
         "chassisId": "9c3abad5-513a-1c43-5bc2be62e957",
@@ -244,12 +244,12 @@ System Information
         },
         "virtualServerStats": {
             "/Common/app.app/app_vs": {
-                "clientside.bitsIn": 5474952,
-                "clientside.bitsOut": 66039264,
+                "clientside.bitsIn": 31417200,
+                "clientside.bitsOut": 297731408,
                 "clientside.curConns": 0,
-                "destination": "10.0.2.101:80",
-                "status.availabilityState": "available",
-                "status.enabledState": "enabled",
+                "destination": "/Common/10.0.2.101:80",
+                "availabilityState": "available",
+                "enabledState": "enabled",
                 "name": "/Common/app.app/app_vs",
                 "tenant": "Common",
                 "application": "app.app"
@@ -258,9 +258,9 @@ System Information
                 "clientside.bitsIn": 0,
                 "clientside.bitsOut": 0,
                 "clientside.curConns": 0,
-                "destination": "192.0.2.11:443",
-                "status.availabilityState": "offline",
-                "status.enabledState": "enabled",
+                "destination": "/Sample_02/192.0.2.11:443",
+                "availabilityState": "offline",
+                "enabledState": "enabled",
                 "name": "/Sample_02/A1/serviceMain",
                 "tenant": "Sample_02",
                 "application": "A1"
@@ -269,9 +269,9 @@ System Information
                 "clientside.bitsIn": 0,
                 "clientside.bitsOut": 0,
                 "clientside.curConns": 0,
-                "destination": "192.0.2.11:80",
-                "status.availabilityState": "unknown",
-                "status.enabledState": "enabled",
+                "destination": "/Sample_02/192.0.2.11:80",
+                "availabilityState": "unknown",
+                "enabledState": "enabled",
                 "name": "/Sample_02/A1/serviceMain-Redirect",
                 "tenant": "Sample_02",
                 "application": "A1"
@@ -279,16 +279,22 @@ System Information
         },
         "poolStats": {
             "/Common/app.app/app_pool": {
+                "serverside.bitsIn": 39075976,
+                "serverside.bitsOut": 299502400,
+                "serverside.curConns": 0,
+                "availabilityState": "available",
+                "enabledState": "enabled",
+                "status.statusReason": "The pool is available",
                 "members": {
                     "/Common/10.0.3.5:80": {
                         "addr": "10.0.3.5",
                         "port": 80,
-                        "serverside.bitsIn": 7392800,
-                        "serverside.bitsOut": 67086632,
+                        "serverside.bitsIn": 39075976,
+                        "serverside.bitsOut": 299502400,
                         "serverside.curConns": 0,
                         "sessionStatus": "enabled",
-                        "status.availabilityState": "available",
-                        "status.enabledState": "enabled",
+                        "availabilityState": "available",
+                        "enabledState": "enabled",
                         "status.statusReason": "Pool member is available"
                     }
                 },
@@ -297,16 +303,22 @@ System Information
                 "application": "app.app"
             },
             "/Common/telemetry-local": {
+                "serverside.bitsIn": 14780176,
+                "serverside.bitsOut": 3354112,
+                "serverside.curConns": 1,
+                "availabilityState": "available",
+                "enabledState": "enabled",
+                "status.statusReason": "The pool is available",
                 "members": {
                     "/Common/10.0.1.100:6514": {
                         "addr": "10.0.1.100",
                         "port": 6514,
-                        "serverside.bitsIn": 2881560,
-                        "serverside.bitsOut": 615872,
-                        "serverside.curConns": 0,
+                        "serverside.bitsIn": 14780176,
+                        "serverside.bitsOut": 3354112,
+                        "serverside.curConns": 1,
                         "sessionStatus": "enabled",
-                        "status.availabilityState": "available",
-                        "status.enabledState": "enabled",
+                        "availabilityState": "available",
+                        "enabledState": "enabled",
                         "status.statusReason": "Pool member is available"
                     }
                 },
@@ -315,6 +327,12 @@ System Information
                 "application": ""
             },
             "/Sample_02/A1/web_pool": {
+                "serverside.bitsIn": 0,
+                "serverside.bitsOut": 0,
+                "serverside.curConns": 0,
+                "availabilityState": "offline",
+                "enabledState": "enabled",
+                "status.statusReason": "The children pool member(s) are down",
                 "members": {
                     "/Sample_02/192.0.2.12:80": {
                         "addr": "192.0.2.12",
@@ -323,9 +341,9 @@ System Information
                         "serverside.bitsOut": 0,
                         "serverside.curConns": 0,
                         "sessionStatus": "enabled",
-                        "status.availabilityState": "offline",
-                        "status.enabledState": "enabled",
-                        "status.statusReason": "Pool member has been marked down by a monitor"
+                        "availabilityState": "offline",
+                        "enabledState": "enabled",
+                        "status.statusReason": "/Common/http: No successful responses received before deadline. @2018/12/17 21:07:54. "
                     },
                     "/Sample_02/192.0.2.13:80": {
                         "addr": "192.0.2.13",
@@ -334,9 +352,9 @@ System Information
                         "serverside.bitsOut": 0,
                         "serverside.curConns": 0,
                         "sessionStatus": "enabled",
-                        "status.availabilityState": "offline",
-                        "status.enabledState": "enabled",
-                        "status.statusReason": "Pool member has been marked down by a monitor"
+                        "availabilityState": "offline",
+                        "enabledState": "enabled",
+                        "status.statusReason": "/Common/http: No successful responses received before deadline. @2018/12/17 21:07:54. "
                     }
                 },
                 "name": "/Sample_02/A1/web_pool",
@@ -345,20 +363,185 @@ System Information
             }
         },
         "ltmPolicyStats": {
-            "/Common/example_policy": {
+            "/Common/app.app/app_policy": {
+                "invoked": 15034,
+                "succeeded": 15034,
+                "actions": {
+                    "default:1": {
+                        "invoked": 15034,
+                        "succeeded": 15034
+                    }
+                },
+                "name": "/Common/app.app/app_policy",
+                "tenant": "Common",
+                "application": "app.app"
+            },
+            "/Common/telemetry": {
                 "invoked": 0,
                 "succeeded": 0,
                 "actions": {
                     "default:0": {
                         "invoked": 0,
                         "succeeded": 0
-                    },
-                    "rule_1:0": {
-                        "invoked": 0,
-                        "succeeded": 0
                     }
                 },
                 "name": "/Common/telemetry",
+                "tenant": "Common",
+                "application": ""
+            }
+        },
+        "httpProfileStats": {
+            "/Common/app.app/app_http": {
+                "cookiePersistInserts": 17289,
+                "getReqs": 8135,
+                "maxKeepaliveReq": 336,
+                "numberReqs": 17397,
+                "postReqs": 9166,
+                "proxyReqs": 0,
+                "2xxResp": 1340,
+                "3xxResp": 39,
+                "4xxResp": 15995,
+                "5xxResp": 0,
+                "respLessThan2m": 0,
+                "respGreaterThan2m": 0,
+                "v10Reqs": 351,
+                "v10Resp": 48,
+                "v11Reqs": 17036,
+                "v11Resp": 17326,
+                "v9Reqs": 10,
+                "v9Resp": 0,
+                "name": "/Common/app.app/app_http",
+                "tenant": "Common",
+                "application": "app.app"
+            },
+            "/Common/http": {
+                "cookiePersistInserts": 0,
+                "getReqs": 0,
+                "maxKeepaliveReq": 0,
+                "numberReqs": 0,
+                "postReqs": 0,
+                "proxyReqs": 0,
+                "2xxResp": 0,
+                "3xxResp": 0,
+                "4xxResp": 0,
+                "5xxResp": 0,
+                "respLessThan2m": 0,
+                "respGreaterThan2m": 0,
+                "v10Reqs": 0,
+                "v10Resp": 0,
+                "v11Reqs": 0,
+                "v11Resp": 0,
+                "v9Reqs": 0,
+                "v9Resp": 0,
+                "name": "/Common/http",
+                "tenant": "Common",
+                "application": ""
+            },
+            "/Sample_02/A1/custom_http_profile": {
+                "cookiePersistInserts": 0,
+                "getReqs": 0,
+                "maxKeepaliveReq": 0,
+                "numberReqs": 0,
+                "postReqs": 0,
+                "proxyReqs": 0,
+                "2xxResp": 0,
+                "3xxResp": 0,
+                "4xxResp": 0,
+                "5xxResp": 0,
+                "respLessThan2m": 0,
+                "respGreaterThan2m": 0,
+                "v10Reqs": 0,
+                "v10Resp": 0,
+                "v11Reqs": 0,
+                "v11Resp": 0,
+                "v9Reqs": 0,
+                "v9Resp": 0,
+                "name": "/Sample_02/A1/custom_http_profile",
+                "tenant": "Sample_02",
+                "application": "A1"
+            }
+        },
+        "clientSSLProfileStats": {
+            "/Common/clientssl": {
+                "currentCompatibleConnections": 0,
+                "currentConnections": 0,
+                "currentNativeConnections": 0,
+                "currentActiveHandshakes": 0,
+                "decryptedBytesIn": 0,
+                "decryptedBytesOut": 0,
+                "encryptedBytesIn": 0,
+                "encryptedBytesOut": 0,
+                "fatalAlerts": 0,
+                "handshakeFailures": 0,
+                "peercertInvalid": 0,
+                "peercertNone": 0,
+                "peercertValid": 0,
+                "protocolUses.dtlsv1": 0,
+                "protocolUses.sslv2": 0,
+                "protocolUses.sslv3": 0,
+                "protocolUses.tlsv1": 0,
+                "protocolUses.tlsv1_1": 0,
+                "protocolUses.tlsv1_2": 0,
+                "protocolUses.tlsv1_3": 0,
+                "recordsIn": 0,
+                "recordsOut": 0,
+                "name": "/Common/clientssl",
+                "tenant": "Common",
+                "application": ""
+            },
+            "/Sample_02/A1/webtls": {
+                "currentCompatibleConnections": 0,
+                "currentConnections": 0,
+                "currentNativeConnections": 0,
+                "currentActiveHandshakes": 0,
+                "decryptedBytesIn": 0,
+                "decryptedBytesOut": 0,
+                "encryptedBytesIn": 0,
+                "encryptedBytesOut": 0,
+                "fatalAlerts": 0,
+                "handshakeFailures": 0,
+                "peercertInvalid": 0,
+                "peercertNone": 0,
+                "peercertValid": 0,
+                "protocolUses.dtlsv1": 0,
+                "protocolUses.sslv2": 0,
+                "protocolUses.sslv3": 0,
+                "protocolUses.tlsv1": 0,
+                "protocolUses.tlsv1_1": 0,
+                "protocolUses.tlsv1_2": 0,
+                "protocolUses.tlsv1_3": 0,
+                "recordsIn": 0,
+                "recordsOut": 0,
+                "name": "/Sample_02/A1/webtls",
+                "tenant": "Sample_02",
+                "application": "A1"
+            }
+        },
+        "serverSSLProfileStats": {
+            "/Common/serverssl": {
+                "currentCompatibleConnections": 0,
+                "currentConnections": 0,
+                "currentNativeConnections": 0,
+                "currentActiveHandshakes": 0,
+                "decryptedBytesIn": 0,
+                "decryptedBytesOut": 0,
+                "encryptedBytesIn": 0,
+                "encryptedBytesOut": 0,
+                "fatalAlerts": 0,
+                "handshakeFailures": 0,
+                "peercertInvalid": 0,
+                "peercertNone": 0,
+                "peercertValid": 0,
+                "protocolUses.dtlsv1": 0,
+                "protocolUses.sslv2": 0,
+                "protocolUses.sslv3": 0,
+                "protocolUses.tlsv1": 0,
+                "protocolUses.tlsv1_1": 0,
+                "protocolUses.tlsv1_2": 0,
+                "protocolUses.tlsv1_3": 0,
+                "recordsIn": 0,
+                "recordsOut": 0,
+                "name": "/Common/serverssl",
                 "tenant": "Common",
                 "application": ""
             }
@@ -396,10 +579,13 @@ System Information
             }
         },
         "telemetryServiceInfo": {
-            "pollingInterval": 300
+            "pollingInterval": 300,
+            "cycleStart": "Tue, 15 Jan 2019 18:47:00 GMT",
+            "cycleEnd": "Tue, 15 Jan 2019 18:47:01 GMT"
         },
         "telemetryEventCategory": "systemInfo"
     }
+
 
 
 

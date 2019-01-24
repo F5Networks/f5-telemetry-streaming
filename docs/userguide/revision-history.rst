@@ -13,8 +13,13 @@ Document Revision History
         
       
       * - 1.0.0
-        - Initial release of AS3 documentation
-        - 01-30-19
+        - Initial release of AS3 documentation. This release contains the following changes: |br| 
+        * Added support for the collection of pool statistics in addition to individual pool members statistics. |br|
+        * Added poller support for client-ssl and server-ssl stats |br|
+        * Added support for ElasticSearch |br|
+        * Added support for Kafka |br|
+        * Added support for Sumo Logic |br|
+        - 02-05-19
 
 
       * - 0.9.0
