@@ -559,39 +559,6 @@ SystemStats.prototype.collect = function (host, options) {
  */
 
 /**
- * Compare version strings
- *
- * @param {String} version1   - version to compare
- * @param {String} comparator - comparison operator
- * @param {String} version2   - version to compare
- *
- * @returns {boolean} true or false
- */
-function compareVersionStrings(version1, comparator, version2) {
-    comparator = comparator === '=' ? '==' : comparator;
-    if (['==', '===', '<', '<=', '>', '>=', '!=', '!=='].indexOf(comparator) === -1) {
-        throw new Error(`Invalid comparator '${comparator}'`);
-    }
-    const v1parts = version1.split('.');
-    const v2parts = version2.split('.');
-    const maxLen = Math.max(v1parts.length, v2parts.length);
-    let part1;
-    let part2;
-    let cmp = 0;
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < maxLen && !cmp; i++) {
-        part1 = parseInt(v1parts[i], 10) || 0;
-        part2 = parseInt(v2parts[i], 10) || 0;
-        if (part1 < part2) {
-            cmp = 1;
-        } else if (part1 > part2) {
-            cmp = -1;
-        }
-    }
-    // eslint-disable-next-line no-eval
-    return eval(`0${comparator}${cmp}`);
-}
-/**
  * Compare device versions
  *
  * @param {Object} contextData               - context data
@@ -605,7 +572,7 @@ function deviceVersionGreaterOrEqual(contextData, versionToCompare) {
     if (deviceVersion === undefined) {
         throw new Error('deviceVersionGreaterOrEqual: context has no property \'deviceVersion\'');
     }
-    return compareVersionStrings(deviceVersion, '>=', versionToCompare);
+    return util.compareVersionStrings(deviceVersion, '>=', versionToCompare);
 }
 
 
