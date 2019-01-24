@@ -16,7 +16,7 @@
                 { "format": "ipv6" },
                 { "format": "hostname" }
             ],
-            "hostNetworkCheck": true         
+            "hostConnectivityCheck": true         
         },
         "protocol": {
             "$comment": "Required for certain consumers: standard property",

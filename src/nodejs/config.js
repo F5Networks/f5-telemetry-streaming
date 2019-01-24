@@ -15,11 +15,11 @@ const EventEmitter = require('events');
 const logger = require('./logger.js');
 const util = require('./util.js');
 
-const baseSchema = require('./config/base_schema.json');
-const controlsSchema = require('./config/controls_schema.json');
-const systemPollerSchema = require('./config/system_poller_schema.json');
-const listenerSchema = require('./config/listener_schema.json');
-const consumerSchema = require('./config/consumer_schema.json');
+const baseSchema = require('./schema/base_schema.json');
+const controlsSchema = require('./schema/controls_schema.json');
+const systemPollerSchema = require('./schema/system_poller_schema.json');
+const listenerSchema = require('./schema/listener_schema.json');
+const consumerSchema = require('./schema/consumer_schema.json');
 const customKeywords = require('./customKeywords.js');
 const CONTROLS_CLASS_NAME = require('./constants.js').CONTROLS_CLASS_NAME;
 const CONTROLS_PROPERTY_NAME = require('./constants.js').CONTROLS_PROPERTY_NAME;

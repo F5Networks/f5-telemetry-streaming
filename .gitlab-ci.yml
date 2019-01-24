@@ -13,7 +13,7 @@ build package:
   script:
     - echo 'CI BUILD'
     # install packages first
-    - npm install --production --no-optional
+    - npm run install-production
     - bash ./scripts/build_rpm.sh
   tags:
     - cm-official-docker-executor
@@ -96,7 +96,7 @@ deploy_bigip:
 test package:
     stage: test
     script:
-        - npm install --no-optional
+        - npm run install-test
         - npm run lint
         - npm run test && npm run report
     artifacts:
@@ -111,7 +111,7 @@ test functional:
     script:
         - export TEST_HARNESS_FILE=${CI_PROJECT_DIR}/harness_facts_flat.json
         # really only need dev dependencies
-        - npm install --no-optional
+        - npm run install-test
         - ls ./dist -ls
         - npm run test-functional
     tags:

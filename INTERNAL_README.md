@@ -1047,14 +1047,33 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
 
 ### Events (Logs)
 
-**Note**: all 'keys' inside of events should be in lower case to enable classification (tenant/application).
-
 #### LTM Request Log
 
-Create LTM Request Log Profile:
+**Note**: all 'keys' should be in lower case to enable classification (tenant/application).
 
-- Create Pool (tmsh): ```create ltm pool telemetry-local monitor tcp members replace-all-with { 192.0.2.1:6514 }``` - Note: Replace example address with valid listener address, for example the mgmt IP.
-- Create Profile (tmsh): ```create ltm profile request-log telemetry-test request-log-pool telemetry-local request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\" request-logging enabled``` - Note: If creating from the GUI the ```\``` are not required.
+Configuration
+
+- Create Pool (just the pool, no destination/publisher): [Log Publisher Configuration](#log-publisher-configuration)
+- Create LTM Request Log Profile
+  - TMSH: ```create ltm profile request-log telemetry request-log-pool telemetry-local request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\" request-logging enabled```
+  - F5 Application Services Extension: [using-a-traffic-log-profile-in-a-declaration](https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/latest/declarations/profiles.html#using-a-traffic-log-profile-in-a-declaration)
+  - Note: If creating the profile from the GUI, the ```\``` are not required.
+- Attach profile to the virtual server
+  - F5 Application Services Extension (snippet) - Note: Requires v3.8.0 or greater
+    ```json
+        {
+            "serviceMain": {
+                "class": "Service_HTTP",
+                "virtualAddresses": ["192.0.2.1"],
+                "virtualPort": 80,
+                "profileTrafficLog": {
+                    "bigip": "/Common/telemetry"
+                }
+            }
+        }
+    ```
+
+Output
 
 ```json
 {
@@ -1073,9 +1092,29 @@ Create LTM Request Log Profile:
 
 #### AFM Log
 
-Create Security Log Profile:
+Configuration
 
-TBD
+- Create Log Publisher (and related objects): [Log Publisher Configuration](#log-publisher-configuration)
+- Create Security Log Profile:
+  - TMSH: ```create security log profile telemetry network replace-all-with { telemetry { filter { log-acl-match-drop enabled log-acl-match-reject enabled } publisher telemetry-publisher } }```
+- Attach profile to the virtual server
+  - F5 Application Services Extension (snippet)
+    ```json
+        {
+            "serviceMain": {
+                "class": "Service_HTTP",
+                "virtualAddresses": ["192.0.2.1"],
+                "virtualPort": 80,
+                "securityLogProfiles": [
+                    {
+                        "bigip": "/Common/telemetry"
+                    }
+                ]
+            }
+        }
+    ```
+
+Output
 
 ```json
 {
@@ -1128,9 +1167,28 @@ TBD
 
 #### ASM Log
 
-Create Security Log Profile:
+Configuration
 
-TBD
+- Create Security Log Profile:
+  - TMSH: ```create security log profile telemetry application replace-all-with { telemetry { filter replace-all-with { request-type { values replace-all-with { all } } } logger-type remote remote-storage splunk servers replace-all-with { 192.0.2.1:6514 {} } } }```
+- Attach profile to the virtual server
+  - F5 Application Services Extension (snippet)
+    ```json
+        {
+            "serviceMain": {
+                "class": "Service_HTTP",
+                "virtualAddresses": ["192.0.2.1"],
+                "virtualPort": 80,
+                "securityLogProfiles": [
+                    {
+                        "bigip": "/Common/telemetry"
+                    }
+                ]
+            }
+        }
+    ```
+
+Output
 
 ```json
 {
@@ -1186,21 +1244,13 @@ TBD
 
 #### APM Log
 
-Create APM Log Profile:
+Configuration
 
-- Create Pool (tmsh): ```create ltm pool telemetry-local monitor tcp members replace-all-with { 192.0.2.1:6514 }``` - Note: Replace example address with valid listener address, for example the mgmt IP.
-- Create Log Destination: System -> Logs -> Configuration -> Log Destinations
-  - Name: telemetry-hsl (or similar)
-  - Type: Remote HSL
-  - Protocol: TCP
-  - Pool: telemetry-local
-- Create Log Destination (format): System -> Logs -> Configuration -> Log Destinations
-  - Name: telemetry-formatted (or similar)
-  - Forward To: telemetry-hsl
-- Create Log Publisher: System -> Logs -> Configuration -> Log Publishers
-  - Name: telemetry-publisher (or similar)
-  - Destinations: telemetry-formatted
+- Create Log Publisher (and related objects): [Log Publisher Configuration](#log-publisher-configuration)
 - Create Profile (tmsh): ```create apm log-setting telemetry access replace-all-with { access { publisher telemetry-publisher } }```
+- Attach profile to the APM policy
+
+Output
 
 ```json
 {
@@ -1218,6 +1268,29 @@ Create APM Log Profile:
 }
 
 ```
+
+#### Log Publisher Configuration
+
+- Create Pool
+  - TMSH: ```create ltm pool telemetry-local monitor tcp members replace-all-with { 192.0.2.1:6514 }```
+  - Note: Replace example address with valid TS listener address, for example the mgmt IP.
+- Create Log Destination (Remote HSL)
+  - GUI: System -> Logs -> Configuration -> Log Destinations
+    - Name: telemetry-hsl
+    - Type: Remote HSL
+    - Protocol: TCP
+    - Pool: telemetry-local
+  - TMSH: ```create sys log-config destination remote-high-speed-log telemetry-hsl protocol tcp pool-name telemetry-local```
+- Create Log Destination (Format)
+  - GUI: System -> Logs -> Configuration -> Log Destinations
+    - Name: telemetry-formatted
+    - Forward To: telemetry-hsl
+  - TMSH: ```create sys log-config destination splunk telemetry-formatted forward-to telemetry-hsl```
+- Create Log Publisher
+  - GUI: System -> Logs -> Configuration -> Log Publishers
+    - Name: telemetry-publisher
+    - Destinations: telemetry-formatted
+  - TMSH: ```create sys log-config publisher telemetry-publisher destinations replace-all-with { telemetry-formatted }```
 
 ## Container
 

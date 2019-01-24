@@ -1,7 +1,15 @@
 {
     "name": "f5-telemetry",
     "version": "0.9.0",
+    "author": "F5 Networks",
+    "license": "Apache-2.0",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/F5Networks/f5-telemetry-streaming.git"
+    },
     "scripts": {
+        "install-production": "npm install --production --no-optional",
+        "install-test": "npm install --no-optional",
         "lint": "eslint src test",
         "test": "nyc --check-coverage --lines 80 --functions 80 --branches 70 mocha --recursive \"./test/*.js\"",
         "report": "nyc report --reporter=html",

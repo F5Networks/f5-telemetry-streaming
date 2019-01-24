@@ -40,7 +40,7 @@
                             { "format": "hostname" }
                         ],
                         "default": "localhost",
-                        "hostNetworkCheck": true
+                        "hostConnectivityCheck": true
                     },
                     "enableHostConnectivityCheck": { "$ref": "base_schema.json#/definitions/enableHostConnectivityCheck" },
                     "port": {
