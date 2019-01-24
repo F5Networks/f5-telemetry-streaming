@@ -12,6 +12,7 @@
         "install-test": "npm install --no-optional",
         "lint": "eslint src test",
         "test": "nyc --check-coverage --lines 80 --functions 80 --branches 70 mocha --recursive \"./test/*.js\"",
+        "report": "nyc report --reporter=html",
         "test-functional": "mocha --recursive \"./test/functional/*.js\""
     },
     "dependencies": {

@@ -98,7 +98,11 @@ test package:
     script:
         - npm run install-test
         - npm run lint
-        - npm run test
+        - npm run test && npm run report
+    artifacts:
+        name: ${CI_COMMIT_REF_NAME}_unittests_coverage
+        paths:
+            - coverage
     tags:
         - cm-official-docker-executor
 
@@ -148,7 +152,7 @@ docs to pages:
         paths:
             - public
     only:
-        - docs-vanessa@cloudsolutions/f5-telemetry
+        - /^docs-.*$/
 
 # Publish docs to clouddocs.f5networks.net
 docs to staging:
@@ -179,6 +183,7 @@ docs to production:
   only:
   # fill in desired release branch name to add deployment from a branch: currently *master*
   - master@cloudsolutions/f5-telemetry
+  - docs-publish@cloudsolutions/f5-telemetry
   tags:
   - cm-official-docker-executor
   dependencies:
