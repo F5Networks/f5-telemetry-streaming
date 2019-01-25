@@ -109,7 +109,7 @@ The next lines of the declaration sets the System Poller, which Polls a system, 
 Event Listener
 ``````````````
 The next lines of the declaration sets the Event Listener, which provides a listener, currently TCP, that can accept events in a specific format and process them. Currently, the TS Listener sends all logging telemetry data.
-To see the type of information that the event listener processes, see :ref:`output-example`.
+To see the type of information that the event listener processes, see :ref:`output-example <Consumer>`.
 Event Format: ``key1="value",key2="value"``
 
 .. code-block:: javascript
@@ -140,7 +140,7 @@ Event Format: ``key1="value",key2="value"``
 
 Consumer class
 ``````````````
-The next lines of the declaration sets the Consumer, which accepts all telemetry information whatever systems you configure it to. The consumer provides the tools to process that information. To see examples of configurations for consumers like Splunk, Azure Log Analytics, AWS CloudWatch, AWS S3, Graphite, and others, see the :ref:`setting-up-consumer` section of this guide.
+The next lines of the declaration sets the Consumer, which accepts all telemetry information whatever systems you configure it to. The consumer provides the tools to process that information. To see examples of configurations for consumers like Splunk, Azure Log Analytics, AWS CloudWatch, AWS S3, Graphite, and others, see the :ref:`Consumer <setting-up-consumer>` section of this guide.
 
 .. code-block:: javascript
    :linenos:
