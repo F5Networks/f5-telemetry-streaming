@@ -3,6 +3,8 @@ About Telemetry Streaming
 
 Telemetry Streaming is a way for you to forward events and statistics from the BIG-IP system to your preferred data consumer and visualization application. You can do all of this by POSTing a single JSON declaration to a declarative REST API endpoint.
 
+Telemetry Streaming uses a declarative model, meaning you provide a JSON declaration rather than a set of imperative commands.
+
 .. image:: /images/TSdiagram.png
 
 A basic declaration is shown here with descriptions of the components below:
@@ -40,7 +42,7 @@ A basic declaration is shown here with descriptions of the components below:
 
 Components of the declaration
 -----------------------------
-In this section, we break down the example into each class so you can understand the options when composing your declaration. The tables below the examples contain descriptions and options for the parameters included in the example only.  
+In this section, we break down the example into each class so you can understand the options when composing your declaration. The tables below the examples contain descriptions and options for the parameters included in this example only.  
 
 If there is a default value, it is shown in bold in the Options column.
 
@@ -77,7 +79,7 @@ The first few lines of your declaration are a part of the base components and de
 
 System Poller
 `````````````
-The next lines of the declaration sets the System Poller, which Polls a system, such as BIG-IP on a configurable interval for information such as device statistics, virtual server statistics, pool statistics, individual pool member statistics, and more.
+The next lines of the declaration sets the System Poller, which Polls a system, such as BIG-IP, on a configurable interval for information such as device statistics, virtual server statistics, pool statistics, individual pool member statistics, and more.
 
 .. code-block:: javascript
    :linenos:
@@ -176,5 +178,12 @@ The next lines of the declaration sets the Consumer, which accepts information f
 | passphrase         | ...                            |   No       |  Hostname you want to set for this BIG-IP device. The default hostname on a new BIG-IP is **bigip1**.                              |
 +--------------------+--------------------------------+------------+------------------------------------------------------------------------------------------------------------------------------------+
 
+.. toctree::
+   :maxdepth: 2
+   :includehidden:
+   :glob:
+
+   prereqs
+   faq
 
 

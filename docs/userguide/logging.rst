@@ -16,8 +16,8 @@ The logging level is set in the "controls" class with possible values of "debug"
 
 
 
-Example log entries
--------------------
+Example log entries for different levels
+----------------------------------------
 
 info
 ````
