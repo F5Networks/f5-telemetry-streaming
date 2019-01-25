@@ -109,7 +109,7 @@ The next lines of the declaration sets the System Poller, which Polls a system, 
 Event Listener
 ``````````````
 The next lines of the declaration sets the Event Listener, which provides a listener, currently TCP, that can accept events in a specific format and process them. Currently, the TS Listener sends all logging telemetry data.
-To see the type of information that the event listener processes, see :ref:`output-example <Consumer>`.
+To see the type of information that the event listener processes, see :ref:`output-example.rst <Consumer>`.
 Event Format: ``key1="value",key2="value"``
 
 .. code-block:: javascript

@@ -33,6 +33,7 @@ Example 1: Base Declaration
 
 Example 2: Two Consumers
 ------------------------
+Note: This example shows only the Consumer class of the declaration and needs to be included with the rest of the base declaration.
 .. code-block:: json
    :linenos:
 
@@ -62,6 +63,7 @@ Example 2: Two Consumers
 
 Example 3: External System (BIG-IP)
 -----------------------------------
+This example shows a case where Telemetry Streaming on one BIG-IP can pull statistics from an additional BIG-IP.
 .. code-block:: json
    :linenos:
 

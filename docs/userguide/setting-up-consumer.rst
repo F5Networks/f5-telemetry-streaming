@@ -1,7 +1,7 @@
 Consumers
 =========
 
-Use this section to find example declarations and notes for supported consumers.
+Use this section to find example declarations and notes for supported consumers. Note: each example below shows only the Consumer class of the declaration and needs to be included with the rest of the base declaration.
 
 
 Splunk
