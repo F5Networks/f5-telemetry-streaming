@@ -1,27 +1,27 @@
 image: node:8
 
 stages:
-- build
-- deploy
-- test
-- teardown
-- review
+    - build
+    - deploy
+    - test
+    - teardown
+    - publish
 
 build package:
-  image: f5devcentral/containthedocs:rpmbuild
-  stage: build
-  script:
-    - echo 'CI BUILD'
-    # install packages first
-    - npm run install-production
-    - bash ./scripts/build_rpm.sh
-  tags:
-    - cm-official-docker-executor
-  artifacts:
-    name: f5-telemetry-$CI_BUILD_REF
-    paths:
-        - dist
-    expire_in: 1 month
+    image: f5devcentral/containthedocs:rpmbuild
+    stage: build
+    script:
+        - echo 'CI BUILD'
+        # install packages first
+        - npm run install-production
+        - bash ./scripts/build_rpm.sh
+    tags:
+        - cm-official-docker-executor
+    artifacts:
+        name: f5-telemetry-$CI_BUILD_REF
+        paths:
+            - dist
+        expire_in: 1 month
 
 build docs:
     image: ${CONTAINTHEDOCS_IMAGE}
@@ -29,7 +29,7 @@ build docs:
     script:
         - make html
         - vale --glob='*.{md,rst}' .
-      #  - make linkcheck
+        #  - make linkcheck
     tags:
         - docker-executor
     artifacts:
@@ -53,17 +53,16 @@ build docs:
 # versions of BIG-IP
 trigger_deploy_job:
     stage: deploy
-    image: node:8
     tags:
-    - docker-executor
+        - docker-executor
     script:
-    - curl -k -X POST -F token=${CICD_PIPELINE_TRIGGER_FOR_DEPLOY}
-      -F ref=${CI_COMMIT_REF_NAME}
-      -F "variables[REQ_DEVICE_PIPELINE]=true"
-      -F "variables[REQ_PROJECT_NAME]=ts_cicd_bigip_14.0.0.2"
-      -F "variables[REQ_BIGIP_VERSION]=14.0.0.2"
-      -F "variables[REQ_BIGIP_BUILD]=0.0.2"
-      ${CICD_PIPLINE_TRIGGER_URL}
+        - curl -k -X POST -F token=${CICD_PIPELINE_TRIGGER_FOR_DEPLOY}
+            -F ref=${CI_COMMIT_REF_NAME}
+            -F "variables[REQ_DEVICE_PIPELINE]=true"
+            -F "variables[REQ_PROJECT_NAME]=ts_cicd_bigip_14.0.0.2"
+            -F "variables[REQ_BIGIP_VERSION]=14.0.0.2"
+            -F "variables[REQ_BIGIP_BUILD]=0.0.2"
+            ${CICD_PIPLINE_TRIGGER_URL}
     only:
         # run if scheduled
         - schedules
@@ -86,12 +85,12 @@ deploy_bigip:
         when: on_success
     only:
         variables:
-        - $REQ_DEVICE_PIPELINE == "true"
+            - $REQ_DEVICE_PIPELINE == "true"
     script:
-    - cd /root/cicd-bigip-deploy && make configure &&
-      make printvars && cat ${PROJECT_DIR}/project-vars &&
-      make setup && ls -als ${PROJECT_DIR} &&
-      cp ${PROJECT_DIR}/harness_facts_flat.json ${CI_PROJECT_DIR}/harness_facts_flat.json
+        - cd /root/cicd-bigip-deploy && make configure &&
+            make printvars && cat ${PROJECT_DIR}/project-vars &&
+            make setup && ls -als ${PROJECT_DIR} &&
+            cp ${PROJECT_DIR}/harness_facts_flat.json ${CI_PROJECT_DIR}/harness_facts_flat.json
 
 test package:
     stage: test
@@ -118,33 +117,53 @@ test functional:
         - cm-official-docker-executor
     only:
         variables:
-        - $REQ_DEVICE_PIPELINE == "true"
+            - $REQ_DEVICE_PIPELINE == "true"
 
 teardown_bigip:
     stage: teardown
     tags:
-    - cm-official-docker-executor
+        - cm-official-docker-executor
     image: ${CICD_CONTAINER_DEPLOY}
     variables:
         PROJECT_NAME: ${REQ_PROJECT_NAME}
         PROJECT_DIR: /root/deploy-projects/${REQ_PROJECT_NAME}
     script:
-    - cd /root/cicd-bigip-deploy && make configure && make teardown
+        - cd /root/cicd-bigip-deploy && make configure && make teardown
     when: always
     only:
         variables:
-        - $REQ_DEVICE_PIPELINE == "true"
+            - $REQ_DEVICE_PIPELINE == "true"
 
-docs to pages:
+# Publish to internal artifactory
+# Note: Will publish when new tags are pushed and use the current build in dist directory
+# with the assumption being the rpm has been updated. However even if it hasn't the upload
+# will simply update the existing rpm version/release in artifactory
+publish rpm to artifactory:
+    stage: publish
+    only:
+        - tags
+    tags:
+        - docker-executor
+    script:
+        # we do not want the new build (dist/new_build/*.rpm), we want the checked in build
+        - RPM_FILE=$(ls dist/*.rpm)
+        - RPM_NAME=$(basename $RPM_FILE)
+        - URL=${ARTIFACTORY_BASE_URL}/f5-telemetry-streaming-rpm/${RPM_NAME}
+        - echo ${URL}
+        - >-
+          UPLOAD_RESULT=$(curl -H "Authorization: Bearer ${ARTIFACTORY_TOKEN}" -X PUT --data-binary @${RPM_FILE} ${URL})
+        - if [[ $? -eq 0 ]] && [[ "$UPLOAD_RESULT" == *created* ]]; then echo "Upload complete"; else echo "Upload failed"; exit 1; fi
+        - echo $UPLOAD_RESULT
+
+# Publish docs to internal pages
+publish docs to pages:
     image: ${CONTAINTHEDOCS_IMAGE}
-    stage: review
+    stage: publish
     environment:
         name: staging
         url: https://${CI_PROJECT_NAMESPACE}.${PAGES_DOMAIN}/${CI_PROJECT_NAME}
     tags:
         - cm-official-docker-executor
-    dependencies:
-        - build docs
     script:
         - mkdir -p ./public
         - cp -R docs/_build/html/* ./public
@@ -155,42 +174,38 @@ docs to pages:
         - /^docs-.*$/
 
 # Publish docs to clouddocs.f5networks.net
-docs to staging:
-  image: ${CONTAINTHEDOCS_IMAGE}
-  stage: review
-  environment: 
-    name: staging
-    url: https://clouddocs.f5networks.net/products/extensions/f5-telemetry-streaming/latest
-  tags:
-    - cm-official-docker-executor
-  only:
-    - develop@cloudsolutions/f5-telemetry
-  dependencies:
-    - build docs
-  script:
-    - aws s3 sync docs/_build/html s3://clouddocs.f5networks.net/products/extensions/f5-telemetry-streaming/latest
-    # - aws s3 cp versions.json s3://clouddocs.f5networks.net/products/extensions/f5-telemetry-streaming/versions.json
-    # create invalidation to clear cloudfront cache
-    - aws cloudfront create-invalidation --distribution-id $AWS_DIST --paths /products/extensions/f5-telemetry-streaming/latest
+publish docs to staging:
+    image: ${CONTAINTHEDOCS_IMAGE}
+    stage: publish
+    environment: 
+        name: staging
+        url: https://clouddocs.f5networks.net/products/extensions/f5-telemetry-streaming/latest
+    tags:
+        - cm-official-docker-executor
+    only:
+        - develop@cloudsolutions/f5-telemetry
+    script:
+        - aws s3 sync docs/_build/html s3://clouddocs.f5networks.net/products/extensions/f5-telemetry-streaming/latest
+        # - aws s3 cp versions.json s3://clouddocs.f5networks.net/products/extensions/f5-telemetry-streaming/versions.json
+        # create invalidation to clear cloudfront cache
+        - aws cloudfront create-invalidation --distribution-id $AWS_DIST --paths /products/extensions/f5-telemetry-streaming/latest
 
 # Publish docs to clouddocs.f5.com
-docs to production:
-  image: ${CONTAINTHEDOCS_IMAGE}
-  stage: review
-  environment:
-    name: production
-    url: https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest
-  only:
-  # fill in desired release branch name to add deployment from a branch: currently *master*
-  - master@cloudsolutions/f5-telemetry
-  - docs-publish@cloudsolutions/f5-telemetry
-  tags:
-  - cm-official-docker-executor
-  dependencies:
-  - build docs
-  script:
-  # Uncomment and set to create desired version format
-    - aws s3 sync docs/_build/html s3://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest
-    # - aws s3 cp versions.json s3://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/versions.json
-    # create invalidation to clear cloudfront cache
-    - aws cloudfront create-invalidation --distribution-id $AWS_DIST --paths /products/extensions/f5-telemetry-streaming/latest
+publish docs to production:
+    image: ${CONTAINTHEDOCS_IMAGE}
+    stage: publish
+    environment:
+        name: production
+        url: https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest
+    only:
+        # fill in desired release branch name to add deployment from a branch: currently *master*
+        - master@cloudsolutions/f5-telemetry
+        - docs-publish@cloudsolutions/f5-telemetry
+    tags:
+        - cm-official-docker-executor
+    script:
+        # Uncomment and set to create desired version format
+        - aws s3 sync docs/_build/html s3://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest
+        # - aws s3 cp versions.json s3://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/versions.json
+        # create invalidation to clear cloudfront cache
+        - aws cloudfront create-invalidation --distribution-id $AWS_DIST --paths /products/extensions/f5-telemetry-streaming/latest

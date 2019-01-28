@@ -44,7 +44,11 @@ describe('Basic', function () {
     const pollerName = 'My_Poller';
     const consumerName = 'My_Consumer';
 
-    const distDir = `${__dirname}/../../dist`;
+    // default to new build directory if it exists, otherwise use dist directory
+    const existingBuildDir = `${__dirname}/../../dist`;
+    const newBuildDir = `${existingBuildDir}/new_build`;
+    const distDir = fs.existsSync(newBuildDir) ? newBuildDir : existingBuildDir;
+
     const distFiles = fs.readdirSync(distDir);
     const packageFiles = distFiles.filter(f => f.includes('.rpm') && !f.includes('.sha256'));
 

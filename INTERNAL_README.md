@@ -1247,8 +1247,23 @@ Output
 Configuration
 
 - Create Log Publisher (and related objects): [Log Publisher Configuration](#log-publisher-configuration)
-- Create Profile (tmsh): ```create apm log-setting telemetry access replace-all-with { access { publisher telemetry-publisher } }```
+- Create APM Log Profile
+  - TMSH: ```create apm log-setting telemetry access replace-all-with { access { publisher telemetry-publisher } }```
 - Attach profile to the APM policy
+- Attach APM policy to the virtual server
+  - F5 Application Services Extension (snippet)
+    ```json
+        {
+            "serviceMain": {
+                "class": "Service_HTTP",
+                "virtualAddresses": ["192.0.2.1"],
+                "virtualPort": 80,
+                "policyIAM": {
+                    "bigip": "/Common/my_apm_policy"
+                }
+            }
+        }
+    ```
 
 Output
 
