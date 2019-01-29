@@ -1,4 +1,5 @@
 Using Telemetry Streaming
+=========================
 
 
 
@@ -7,5 +8,5 @@ Using Telemetry Streaming
    :includehidden:
    :glob:
 
-   logging
-   http-methods
+   logging.rst
+   http-methods.rst

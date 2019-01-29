@@ -9,11 +9,10 @@ User Guide
    about-telemetry.rst
    prereqs.rst
    quick-start.rst
-   installation.rst
+   installing-ts.rst
    setting-up-consumer.rst
-   declarations.rst
    using-ts.rst
-   logging.rst
+   declarations.rst
    output-example.rst
    troubleshooting.rst
    revision-history.rst

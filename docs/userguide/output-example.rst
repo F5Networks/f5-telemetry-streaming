@@ -1,6 +1,8 @@
 Example Output
 ==============
 
+Use this page to see the type of information that Telemetry Streaming collects.
+
 System Information
 ------------------
 
