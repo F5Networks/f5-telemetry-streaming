@@ -11,6 +11,10 @@ Example 1: Base Declaration
 
     {
         "class": "Telemetry",
+        "controls": {
+            "class": "Controls",
+            "logLevel": "info"
+        },
         "My_Poller": {
             "class": "Telemetry_System_Poller",
             "interval": 60

@@ -6,7 +6,7 @@ POST
 ~~~~
 To send your declaration to Telemetry Streaming, use the POST method to the URI
 ``https://<BIG-IP>/mgmt/telemetry/declare`` and put your declaration in the
-body of the post (after :doc:`authentication <authentication>`).  If successful, you see a success message, and the system
+body of the post.  If successful, you see a success message, and the system
 echoes your declaration back to you.  In addition to deploying a declaration,
 POST supports more actions, like reporting a previous declaration (useful with
 remote targets since GET may only have localhost credentials) or returning the
