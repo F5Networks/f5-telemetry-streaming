@@ -22,7 +22,8 @@ module.exports = function (context) {
 
     const protocol = context.config.protocol || 'http';
     const port = context.config.port ? `:${context.config.port}` : '';
-    const url = `${protocol}://${context.config.host}${port}/events`;
+    const uri = context.config.path || '/events/';
+    const url = `${protocol}://${context.config.host}${port}${uri}`;
     const httpHeaders = {
         'content-type': 'application/json'
     };
