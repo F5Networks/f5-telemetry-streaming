@@ -139,7 +139,8 @@ function getDefaultRequestOpts(consumer) {
         url: baseURL,
         headers: {
             Authorization: `Splunk ${consumer.passphrase.text}`
-        }
+        },
+        strictSSL: !consumer.allowSelfSignedCert
     };
     // easier for debug to turn it off
     if (consumer.gzip !== undefined ? consumer.gzip : GZIP_DATA) {

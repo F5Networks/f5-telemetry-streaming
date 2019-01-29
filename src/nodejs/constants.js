@@ -17,7 +17,7 @@ module.exports = {
     LOCAL_HOST: 'localhost',
     DEFAULT_PROTOCOL: 'http',
     DEFAULT_PORT: 8100,
-    STRICT_TLS_REQUIRED: false, // for now, default to false
+    STRICT_TLS_REQUIRED: true,
     DEFAULT_EVENT_LISTENER_PORT: 6514,
     USER_AGENT: `f5-telemetry/${VERSION}`,
     SYSTEM_POLLER_CLASS_NAME: 'Telemetry_System_Poller',

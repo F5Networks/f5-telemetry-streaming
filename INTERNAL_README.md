@@ -39,6 +39,11 @@ Event Format: ```key1="value",key2="value"```
 
 Definition: Accepts information from disparate systems and provides the tools to process that information.  In the context of Telemetry Streaming this simply means providing a mechanism by which to integrate with existing analytics products.
 
+### Connection verification
+
+Both Consumers and System Poller has property `allowSelfSignedCert` which allows to establish connection which are secured by self-signed certificates.
+Global restriction is disallowing connections secured by self-signed certificates but by setting this property to `true` you allowing TS to connect to such hosts.
+
 ## Configuration examples
 
 ### Basic

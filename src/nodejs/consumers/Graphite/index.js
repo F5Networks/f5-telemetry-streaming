@@ -29,7 +29,8 @@ module.exports = function (context) {
     const requestOptions = {
         url,
         headers: httpHeaders,
-        body: httpBody
+        body: httpBody,
+        strictSSL: !context.config.allowSelfSignedCert
     };
     if (context.tracer) {
         context.tracer.write(JSON.stringify({ url, headers: httpHeaders, body: JSON.parse(httpBody) }, null, 4));
