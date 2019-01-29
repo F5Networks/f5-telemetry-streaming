@@ -45,6 +45,10 @@ up and running with Telemetry Streaming.
 
     {
         "class": "Telemetry",
+        "controls": {
+            "class": "Controls",
+            "logLevel": "info"
+        },
         "My_Poller": {
             "class": "Telemetry_System_Poller",
             "interval": 60

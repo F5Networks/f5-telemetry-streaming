@@ -8,5 +8,7 @@ Using Telemetry Streaming
    :includehidden:
    :glob:
 
+   setting-up-consumer.rst
+   event-listener.rst
    logging.rst
    http-methods.rst
