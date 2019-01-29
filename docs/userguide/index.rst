@@ -10,7 +10,6 @@ User Guide
    prereqs.rst
    quick-start.rst
    installing-ts.rst
-   setting-up-consumer.rst
    using-ts.rst
    declarations.rst
    output-example.rst

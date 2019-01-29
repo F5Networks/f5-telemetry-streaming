@@ -14,7 +14,7 @@ Required information:
  - Port: Default is 8088, this can be configured within the Global Settings section of the Splunk HEC.
  - API Key: An API key must be created and provided in the passphrase object of the declaration, refer to Splunk documentation for the correct way to create an HEC token.
 
-.. NOTE:: To see more information about using the HEC, see |HEC|.
+.. NOTE:: There is an additional property that applies to all consumers but is only useful for Splunk. The ``format`` property can be set to ``legacy`` for users who wish to convert the stats output similar to the |splunk app|. To see more information, see |Analytics|. To see more information about using the HEC, see |HEC|.
 
 Example Declaration:
 
@@ -313,6 +313,14 @@ Required Information:
 .. |HEC| raw:: html
 
    <a href="http://docs.splunk.com/Documentation/Splunk/latest/Data/UsetheHTTPEventCollector" target="_blank">Splunk HTTP Event Collector documentation</a>
+
+.. |Analytics| raw:: html
+
+   <a href="https://www.f5.com/pdf/deployment-guides/f5-analytics-dg.pdf" target="blank">F5 Analytics iApp Template documentation</a>
+
+.. |splunk app| raw:: html
+
+   <a href="https://splunkbase.splunk.com/app/3161/" target="blank">F5 Analytics App for Splunk</a>
 
 .. |HTTP Data Collector API| raw:: html
 

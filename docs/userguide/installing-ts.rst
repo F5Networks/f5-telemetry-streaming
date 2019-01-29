@@ -10,4 +10,5 @@ Installing Telemetry Streaming
 
    prereqs.rst
    installation.rst
+   setting-up-consumer.rst
    

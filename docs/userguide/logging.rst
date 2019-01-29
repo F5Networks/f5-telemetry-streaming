@@ -21,6 +21,7 @@ Example log entries for different levels
 
 info
 ````
+The info value will log information and errors.
 
 .. code-block:: bash
 
@@ -31,6 +32,7 @@ info
 
 debug
 `````
+The debug value will log everything.
 
 .. code-block:: bash
 
@@ -45,6 +47,8 @@ debug
 
 error
 `````
+The error value will log only errors.
+
 .. code-block:: bash
 
    Thu, 24 Jan 2019 02:22:03 GMT - info: [telemetry] Global logLevel set to 'error'
