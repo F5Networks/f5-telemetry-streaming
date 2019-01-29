@@ -741,15 +741,17 @@ module.exports = {
     /**
      * Perform HTTP request
      *
-     * @param {String} host                          - HTTP host
-     * @param {String} uri                           - HTTP uri
-     * @param {Object} options                       - function options
-     * @param {String} [options.protocol]            - HTTP protocol
-     * @param {Integer} [options.port]               - HTTP port
-     * @param {String} [options.method]              - HTTP method
-     * @param {String} [options.body]                - HTTP body
-     * @param {Object} [options.headers]             - HTTP headers
-     * @param {Object} [options.continueOnErrorCode] - resolve promise even on non-successful response code
+     * @param {String} host                           - HTTP host
+     * @param {String} uri                            - HTTP uri
+     * @param {Object} options                        - function options
+     * @param {String} [options.protocol]             - HTTP protocol
+     * @param {Integer} [options.port]                - HTTP port
+     * @param {String} [options.method]               - HTTP method
+     * @param {String} [options.body]                 - HTTP body
+     * @param {Object} [options.headers]              - HTTP headers
+     * @param {Object} [options.continueOnErrorCode]  - resolve promise even on non-successful response code
+     * @param {Boolean} [options.allowSelfSignedCert] - false - requires SSL certificates be valid,
+     *      true - allows self-signed certs
      *
      * @returns {Object} Returns promise resolved with response
      */
@@ -768,7 +770,8 @@ module.exports = {
             method,
             body: options.body ? this.stringify(options.body) : undefined,
             headers: options.headers || defaultHeaders,
-            strictSSL: constants.STRICT_TLS_REQUIRED
+            strictSSL: options.allowSelfSignedCert === undefined
+                ? constants.STRICT_TLS_REQUIRED : !options.allowSelfSignedCert
         };
 
         return new Promise((resolve, reject) => {
@@ -823,12 +826,14 @@ module.exports = {
     /**
      * Get auth token
      *
-     * @param {String} host                - HTTP host
-     * @param {String} username            - device username
-     * @param {String} password            - device password
-     * @param {Object} options             - function options
-     * @param {String} [options.protocol]  - HTTP protocol
-     * @param {Integer} [options.port]     - HTTP port
+     * @param {String} host                           - HTTP host
+     * @param {String} username                       - device username
+     * @param {String} password                       - device password
+     * @param {Object} options                        - function options
+     * @param {String} [options.protocol]             - HTTP protocol
+     * @param {Integer} [options.port]                - HTTP port
+     * @param {Boolean} [options.allowSelfSignedCert] - false - requires SSL certificates be valid,
+     *      true - allows self-signed certs
      *
      * @returns {Object} Returns promise resolved with auth token: { token: 'token' }
      */
@@ -844,6 +849,7 @@ module.exports = {
             method: 'POST',
             protocol: options.protocol,
             port: options.port,
+            allowSelfSignedCert: options.allowSelfSignedCert,
             body
         };
 

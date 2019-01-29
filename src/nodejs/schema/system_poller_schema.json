@@ -22,6 +22,7 @@
                     },
                     "enable": { "$ref": "base_schema.json#/definitions/enable", "default": true },
                     "trace": { "$ref": "base_schema.json#/definitions/trace", "default": false },
+                    "allowSelfSignedCert": { "$ref": "base_schema.json#/definitions/allowSelfSignedCert", "default": false },
                     "interval": {
                         "title": "Collection interval (in seconds)",
                         "description": "" ,

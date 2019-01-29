@@ -77,12 +77,15 @@ function loadConsumers(config) {
             if (consumerModule === null) {
                 resolve(undefined);
             } else {
-                // copy consumer's data
-                resolve({
+                const consumer = {
                     config: JSON.parse(JSON.stringify(consumerConfig.config)),
                     consumer: consumerModule,
                     tracer: tracers.createFromConfig(CLASS_NAME, consumerConfig.name, consumerConfig.config)
-                });
+                };
+                consumer.config.allowSelfSignedCert = consumer.config.allowSelfSignedCert === undefined
+                    ? !constants.STRICT_TLS_REQUIRED : consumer.config.allowSelfSignedCert;
+                // copy consumer's data
+                resolve(consumer);
             }
         });
     }))

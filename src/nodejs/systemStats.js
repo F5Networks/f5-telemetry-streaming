@@ -29,12 +29,14 @@ const CONDITIONAL_FUNCS = {
 /**
  * Endpoint Loader class
  *
- * @param {Object}  options              - initialization options
- * @param {String}  [options.host]       - host to connect to, will override default host
- * @param {String} [options.protocol]    - host protocol to use, will override default protocol
- * @param {Integer} [options.port]       - host's port to connect to, will override default port
- * @param {String}  [options.username]   - username for auth, will override default username
- * @param {String}  [options.passphrase] - passphrase for auth, will override default passphrase
+ * @param {Object}  options                       - initialization options
+ * @param {String}  [options.host]                - host to connect to, will override default host
+ * @param {String}  [options.protocol]            - host protocol to use, will override default protocol
+ * @param {Integer} [options.port]                - host's port to connect to, will override default port
+ * @param {String}  [options.username]            - username for auth, will override default username
+ * @param {String}  [options.passphrase]          - passphrase for auth, will override default passphrase
+ * @param {String}  [options.allowSelfSignedCert] - false - requires SSL certificates be valid,
+ *      true - allows self-signed certs
  */
 function EndpointLoader(options) {
     this.host = options.host || constants.LOCAL_HOST;
@@ -42,6 +44,7 @@ function EndpointLoader(options) {
     this.passphrase = options.passphrase || '';
     this.protocol = options.protocol || constants.DEFAULT_PROTOCOL;
     this.port = options.port || constants.DEFAULT_PORT;
+    this.allowSelfSignedCert = options.allowSelfSignedCert;
     this.token = null;
     this.endpoints = null;
     this.cachedResponse = {};
@@ -73,7 +76,11 @@ EndpointLoader.prototype.auth = function () {
         if (!this.username || !this.passphrase) {
             throw new Error('Username and passphrase required');
         }
-        const options = { protocol: this.protocol, port: this.port };
+        const options = {
+            protocol: this.protocol,
+            port: this.port,
+            allowSelfSignedCert: this.allowSelfSignedCert
+        };
         promise = util.getAuthToken(this.host, this.username, this.passphrase, options);
     }
     return promise.then((token) => {
@@ -171,7 +178,8 @@ EndpointLoader.prototype.loadEndpoint = function (endpoint, cb) {
 EndpointLoader.prototype._getData = function (uri, options) {
     const httpOptions = {
         protocol: this.protocol,
-        port: this.port
+        port: this.port,
+        allowSelfSignedCert: this.allowSelfSignedCert
     };
     if (this.token) {
         httpOptions.headers = {
@@ -517,13 +525,15 @@ SystemStats.prototype._computePropertiesData = function (propertiesData) {
 /**
  * Collect info based on object provided in properties
  *
- * @param {String}  host                      - host
- * @param {Object}  options                   - options
- * @param {String} [options.protocol]         - protocol for host
- * @param {Integer} [options.port]            - port for host
- * @param {String}  [options.username]        - username for host
- * @param {String}  [options.passphrase]      - password for host
- * @param {Object}  [options.tags]            - tags to add to the data (each key)
+ * @param {String}  host                          - host
+ * @param {Object}  options                       - options
+ * @param {String}  [options.protocol]             - protocol for host
+ * @param {Integer} [options.port]                - port for host
+ * @param {String}  [options.username]            - username for host
+ * @param {String}  [options.passphrase]          - password for host
+ * @param {Object}  [options.tags]                - tags to add to the data (each key)
+ * @param {Boolean} [options.allowSelfSignedCert] - false - requires SSL certificates be valid,
+ *      true - allows self-signed certs
  *
  * @returns {Object} Promise which is resolved with a map of stats
  */
@@ -532,6 +542,7 @@ SystemStats.prototype.collect = function (host, options) {
 
     this.loader = new EndpointLoader({
         host,
+        allowSelfSignedCert: options.allowSelfSignedCert,
         protocol: options.protocol,
         port: options.port,
         username: options.username,

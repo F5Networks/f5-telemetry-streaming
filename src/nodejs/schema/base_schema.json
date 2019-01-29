@@ -71,6 +71,12 @@
             "title": "Host",
             "description": "" ,
             "type": "boolean"
+        },
+        "allowSelfSignedCert": {
+            "$comment": "This property can be used by consumers, system pollers to enable/disable SSL Cert check",
+            "title": "Allow Self-Signed Certificate",
+            "description": "" ,
+            "type": "boolean"
         }
     },
     "properties": {

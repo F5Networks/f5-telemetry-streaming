@@ -38,6 +38,7 @@ function process(args) {
     return new SystemStats().collect(
         config.host,
         {
+            allowSelfSignedCert: config.allowSelfSignedCert,
             protocol: config.protocol,
             port: config.port,
             username: config.username,

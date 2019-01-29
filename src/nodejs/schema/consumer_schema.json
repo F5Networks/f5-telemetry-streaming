@@ -39,13 +39,6 @@
             "description": "Path to post data to" ,
             "type": "string"
         },
-        "allowSelfSignedCert": {
-            "$comment": "Required for certain consumers: standard property",
-            "title": "Allow Self-Signed Certificate",
-            "description": "" ,
-            "type": "boolean",
-            "default": false
-        },
         "format": {
             "$comment": "Required for certain consumers: standard property",
             "title": "Format (informs consumer additional formatting may be required)",
@@ -140,7 +133,8 @@
                         "type": "string",
                         "enum": [ "default", "Splunk", "Azure_Log_Analytics", "AWS_CloudWatch", "AWS_S3", "Graphite", "Kafka", "ElasticSearch", "Sumo_Logic" ]
                     },
-                    "enableHostConnectivityCheck": { "$ref": "base_schema.json#/definitions/enableHostConnectivityCheck" }
+                    "enableHostConnectivityCheck": { "$ref": "base_schema.json#/definitions/enableHostConnectivityCheck" },
+                    "allowSelfSignedCert": { "$ref": "base_schema.json#/definitions/allowSelfSignedCert" }
                 },
                 "allOf": [
                     {
@@ -289,7 +283,6 @@
                                 "path": { "$ref": "#/definitions/path" },
                                 "port": { "$ref": "#/definitions/port", "default": 9200 },
                                 "protocol": { "$ref": "#/definitions/protocol", "default": "http" },
-                                "allowSelfSignedCert": { "$ref": "#/definitions/allowSelfSignedCert" },
                                 "username": { "$ref": "#/definitions/username" },
                                 "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
                                 "apiVersion": { "$ref": "#/definitions/apiVersion"},
