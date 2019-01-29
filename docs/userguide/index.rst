@@ -13,6 +13,5 @@ User Guide
    using-ts.rst
    declarations.rst
    output-example.rst
-   advanced-options.rst
    troubleshooting.rst
    revision-history.rst

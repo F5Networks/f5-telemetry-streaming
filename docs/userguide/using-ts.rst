@@ -12,3 +12,4 @@ Using Telemetry Streaming
    event-listener.rst
    logging.rst
    http-methods.rst
+   advanced-options.rst
