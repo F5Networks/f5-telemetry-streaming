@@ -8,3 +8,4 @@ Using Telemetry Streaming
    :glob:
 
    logging
+   http-methods
