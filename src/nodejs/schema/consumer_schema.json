@@ -251,7 +251,8 @@
                             "properties": {
                                 "host": { "$ref": "#/definitions/host" },
                                 "protocol": { "$ref": "#/definitions/protocol", "default": "http" },
-                                "port": { "$ref": "#/definitions/port", "default": 80 }
+                                "port": { "$ref": "#/definitions/port", "default": 80 },
+                                "path": { "$ref": "#/definitions/path", "default": "/events/" }
                             }
                         },
                         "else": {}
@@ -280,9 +281,9 @@
                             ],
                             "properties": {
                                 "host": { "$ref": "#/definitions/host" },
-                                "path": { "$ref": "#/definitions/path" },
-                                "port": { "$ref": "#/definitions/port", "default": 9200 },
                                 "protocol": { "$ref": "#/definitions/protocol", "default": "http" },
+                                "port": { "$ref": "#/definitions/port", "default": 9200 },
+                                "path": { "$ref": "#/definitions/path" },
                                 "username": { "$ref": "#/definitions/username" },
                                 "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
                                 "apiVersion": { "$ref": "#/definitions/apiVersion"},
