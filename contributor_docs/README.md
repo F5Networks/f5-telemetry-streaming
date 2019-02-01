@@ -4,7 +4,7 @@ This is the top-level documentation which provides notes and information about c
 
 ## System Poller
 
-### Adding Info (stats)
+### Adding Stats
 
 1. Collect the raw data from the device by adding a new endpoint to [Paths.json](../src/nodejs/config/paths.json), which resides under the */config* directory.
     * Example (basic):
@@ -41,15 +41,19 @@ This is the top-level documentation which provides notes and information about c
             "normalize": false, // This can override normalization, can be useful when adding new info/stat
             "disabled": true, // This alerts the engine to ignore specific info/stat
             "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" }, // Converts an array to a map using the value of a standard key such as 'name' in each object in the array.  Optionally add a prefix to that value (useful if filterKeys is also used)
-            "filterKeys": [ "name/", "hostname" ], // Filter all keys in object using provided list
+            "filterKeys": { "exclude": [ "removeMe"] }, // Filter all keys in object using either an inclusio or exclusion list - include also supported, not an exact match
             "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "~": { "replaceCharacter": "/" },  }, // Rename keys, useful if key contains unneccesary prefix/suffix or needs a specific character replaced.  Note: This can also be an array with 1+ rename key objects inside it to guarantee order.
             "includeFirstEntry": { "pattern": "/stats", "excludePattern": "/members/" }, // This is useful if aggregating data from /endpoint and /endpoint/stats typically.  Allows a complex object to by merged instead of nesting down into entries, instead the values in the first entry of 'entries' will be copied to the top level object and then discarded.  There may be multiple 'entries', of which only some should follow this property, that is supported with an optional pattern and excludePattern.
             "runFunction": { "name": "getPercentFromKeys", "args": { "totalKey": "memoryTotal", "partialKey": "memoryUsed" } }, // Run custom function, nail meet hammer.  This is to be used for one-offs where creating a standard macro does not make sense, keeping in mind each custom function could be used multiple times.  The function should already exist inside of normalizeUtil.js.
             "addKeysByTag": true || { "skip": [ "members" ] }, // Add keys by tag(s) defined in the configuration, default value to use should be 'true'.  The global property 'addKeysByTag' contains the default behavior regarding keys to skip, etc.
-            "comment": "some comment", // Simple means to provide a comment in properties.json about a particular info/stat for other contributors
+            "comment": "some comment", // Simple means to provide a comment in properties.json about a particular stat for other contributors
             "if": { "deviceVersionGreaterOrEqual": "13.0" }, // Simple conditional block. Every key inside "if" is predefined function to test which returns 'true' or 'false'. If several key are encountered then logical AND will be used to compute final result. More information about available function below. By default result is true for empty block.
             "then": { "pkey": "pvalue" }, // Optional block. When condition(s) inside "if" is True, the data inside "then" will be used. It is allowed to have nested "if...then...else" block.
-            "else": { "pkey1": "plvalue1" } // Optional block. When condition(s) inside "if" is False, the data inside "else" will be used. It is allowed to have nested "if...then...else" block.
+            "else": { "pkey1": "plvalue1" }, // Optional block. When condition(s) inside "if" is False, the data inside "else" will be used. It is allowed to have nested "if...then...else" block.
+            "structure": { "parentKey": "system" }, // any stat can be gently placed inside another parent key as needed, this defines how to specify that and reference the parent key
+            "system": { "structure": { "folder": true } } // a top level key can be defined and filled in with other stats, this should be the properties of that key
+        },
+        },,
         }
         ```
 
@@ -98,3 +102,9 @@ This is the top-level documentation which provides notes and information about c
                 "deviceVersionGreaterOrEqual": "13.0"
             }
             ```
+
+## Consumers
+
+Adding a new consumer involves two simple steps: 1) Add a new plugin to ../src/nodejs/consumers and 2) add any new configuration properties to the consumer [schema](../src/nodejs/schema/consumer_schema.json)
+
+Additional information about adding a new consumer plugin can be found in the consumer [readme](../src/nodejs/consumers/README.md)

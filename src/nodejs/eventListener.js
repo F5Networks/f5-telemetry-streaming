@@ -119,7 +119,7 @@ EventListener.prototype._start = function () {
                 }
                 // keep filtering as part of event listener for now
                 if (!this.filterFunc || this.filterFunc(normalizedData)) {
-                    dataPipeline.process(normalizedData, 'event');
+                    dataPipeline.process(normalizedData, constants.EVENT_TYPES.EVENT_LISTENER);
                 }
             });
         });

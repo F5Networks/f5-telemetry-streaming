@@ -113,13 +113,17 @@ describe('Util', () => {
                 name: 'foo'
             }
         };
-        const actualObj = util.filterDataByKeys(obj, ['name']);
+        // include
+        let actualObj = util.filterDataByKeys(obj, { include: ['name'] });
+        assert.deepEqual(actualObj, expectedObj);
+        // exclude
+        actualObj = util.filterDataByKeys(obj, { exclude: ['removeMe'] });
         assert.deepEqual(actualObj, expectedObj);
     });
 
-    it('should filter array', () => {
+    it('should not filter array', () => {
         const obj = [1, 2, 3];
-        const actualObj = util.filterDataByKeys(obj, ['name']);
+        const actualObj = util.filterDataByKeys(obj, { include: ['name'] });
         assert.deepEqual(actualObj, obj);
     });
 

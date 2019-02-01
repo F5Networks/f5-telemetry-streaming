@@ -29,5 +29,9 @@ module.exports = {
     BIG_IP_DEVICE_TYPE: 'BIG-IP',
     CONTAINER_DEVICE_TYPE: 'Container',
     PASSPHRASE_ENVIRONMENT_VAR: 'environmentVar',
-    PASSPHRASE_CIPHER_TEXT: 'cipherText'
+    PASSPHRASE_CIPHER_TEXT: 'cipherText',
+    EVENT_TYPES: {
+        SYSTEM_POLLER: 'systemInfo',
+        EVENT_LISTENER: 'event'
+    }
 };

@@ -60,7 +60,7 @@ function loadConsumers(config) {
         return Promise.resolve([]);
     }
 
-    logger.info(`Loading consumer specific plug-ins from ${CONSUMERS_DIR}`);
+    logger.debug(`Loading consumer specific plug-ins from ${CONSUMERS_DIR}`);
     // eslint-disable-next-line
     return Promise.all(config.map((consumerConfig) => {
         if (consumerConfig.config.enable === false) {

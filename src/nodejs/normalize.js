@@ -346,9 +346,10 @@ module.exports = {
      * @param {Object} data                          - data to normalize
      * @param {Object} options                       - options
      * @param {String} [options.key]                 - key to drill down into data, using a defined notation
-     * @param {Array} [options.filterByKeys]         - list of keys to filter data further
+     * @param {Object} [options.filterByKeys]        - map of keys to filter data further
+     *                                                 example: { exclude: [], include: []}
      * @param {Array} [options.renameKeysByPattern]  - array containing 1+ map(s) of keys to rename by pattern
-     *                                                 object example: [{ patterns: {}, options: {}}]
+     *                                                 example: [{ patterns: {}, options: {}}]
      * @param {Object} [options.convertArrayToMap]   - convert array to map using defined key name
      * @param {Object} [options.includeFirstEntry]   - include first item in 'entries' at the top level
      * @param {Object} [options.runCustomFunction]   - run custom function on data

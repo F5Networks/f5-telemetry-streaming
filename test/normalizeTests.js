@@ -116,7 +116,7 @@ describe('Normalize', () => {
     it('should filter by key', () => {
         const options = {
             key: 'sys/version/0',
-            filterByKeys: ['Version', 'Product']
+            filterByKeys: { include: ['Version', 'Product'] }
         };
         const expectedResult = {
             Product: 'Product',

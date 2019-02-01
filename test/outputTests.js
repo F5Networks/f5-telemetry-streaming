@@ -26,13 +26,21 @@ describe('Example Output', () => {
         const schemaFile = `${baseDir}/${dir}/schema.json`;
         const outputFile = `${baseDir}/${dir}/output.json`;
         it(`should validate output in ${dir}`, () => {
-            const schema = JSON.parse(fs.readFileSync(schemaFile));
+            let schema = JSON.parse(fs.readFileSync(schemaFile));
             const data = JSON.parse(fs.readFileSync(outputFile));
 
-            // add all keys in 'properties' to the 'required' key array
-            Object.keys(schema.properties).forEach((k) => {
-                schema.required.push(k);
-            });
+            // add all keys in 'properties' to the 'required' key array - including nested properties
+            const addProperties = (localSchema) => {
+                const properties = localSchema.properties;
+                Object.keys(properties).forEach((k) => {
+                    localSchema.required.push(k);
+                    if (properties[k].type === 'object' && properties[k].properties) {
+                        properties[k] = addProperties(properties[k]);
+                    }
+                });
+                return localSchema;
+            };
+            schema = addProperties(schema);
 
             const ajv = new Ajv({ useDefaults: true });
             const validator = ajv.compile(schema);
