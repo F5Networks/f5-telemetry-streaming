@@ -262,10 +262,10 @@ ConfigWorker.prototype.validateAndApply = function (data) {
                 raw: JSON.parse(JSON.stringify(validatedConfig)),
                 parsed: util.formatConfig(config)
             };
+            logger.debug('Configuration successfully validated');
             logger.debug(`Configuration to save: ${util.stringify(configToSave)}`); // helpful debug, for now
 
             // do not fire event until state saved
-            logger.info('Configuration successfully validated');
             this.setConfig(configToSave, false);
             return this.saveState();
         })

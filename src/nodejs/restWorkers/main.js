@@ -11,6 +11,7 @@
 const fs = require('fs');
 const path = require('path');
 
+const constants = require('../constants.js');
 const logger = require('../logger.js');
 const util = require('../util.js');
 
@@ -153,8 +154,10 @@ RestWorker.prototype.onStartCompleted = function (success, failure, state, errMs
  */
 // eslint-disable-next-line no-unused-vars
 RestWorker.prototype._initializeApplication = function (success, failure) {
-    // first load state from rest storage
-    logger.debug(`Node version ${process.version}`);
+    // Log system info on service start
+    logger.info(`Application version: ${constants.VERSION}`);
+    logger.debug(`Node version: ${process.version}`);
+
     // register REST endpoints
     this.router = new SimpleRouter();
 

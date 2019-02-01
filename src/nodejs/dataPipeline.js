@@ -8,7 +8,8 @@
 
 'use strict';
 
-const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
+const constants = require('./constants.js');
+const logger = require('./logger.js');
 const util = require('./util.js');
 const forwarder = require('./forwarder.js');
 
@@ -16,17 +17,17 @@ const forwarder = require('./forwarder.js');
 * Pipeline to process data
 *
 * @param {Object} data - data to process
-* @param {Object} type - type of data, such as systemInfo|event
+* @param {Object} type - type of data: systemInfo|event
 *
 * @returns {Void}
 */
 function process(data, type) {
     // add telemetryEventCategory to data, fairly verbose name to avoid conflicts
-    // TODO: also add a telemetryEventType which would have a value like LTM Request Log/ASM Log/etc.
-    data.telemetryEventCategory = type;
+    if (data.telemetryEventCategory === undefined) data.telemetryEventCategory = type;
+    // TODO: could also add a telemetryEventType which would have a value like LTM Request Log/ASM Log/etc.
 
     // log events, for now
-    if (type === 'event') { logger.debug(`Event: ${util.stringify(data)}`); }
+    if (type === constants.EVENT_TYPES.EVENT_LISTENER) { logger.debug(`Event: ${util.stringify(data)}`); }
     // no translator, for now
     return forwarder.forward({ type, data })
         .then(() => {

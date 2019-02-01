@@ -5,112 +5,119 @@
     "description": "",
     "type": "object",
     "properties": {
-        "hostname": {
-            "type": "string"
+        "system": {
+            "type": "object",
+            "properties": {
+                "hostname": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                },
+                "versionBuild": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "marketingName": {
+                    "type": "string"
+                },
+                "platformId": {
+                    "type": "string"
+                },
+                "chassisId": {
+                    "type": "string"
+                },
+                "baseMac": {
+                    "type": "string"
+                },
+                "callBackUrl": {
+                    "type": "string"
+                },
+                "configReady": {
+                    "type": "string"
+                },
+                "licenseReady": {
+                    "type": "string"
+                },
+                "provisionReady": {
+                    "type": "string"
+                },
+                "syncMode": {
+                    "type": "string"
+                },
+                "syncColor": {
+                    "type": "string"
+                },
+                "syncStatus": {
+                    "type": "string"
+                },
+                "syncSummary": {
+                    "type": "string"
+                },
+                "failoverStatus": {
+                    "type": "string"
+                },
+                "failoverColor": {
+                    "type": "string"
+                },
+                "systemTimestamp": {
+                    "type": "string"
+                },
+                "cpu": {
+                    "type": "integer"
+                },
+                "memory": {
+                    "type": "integer"
+                },
+                "tmmCpu": {
+                    "type": "integer"
+                },
+                "tmmMemory": {
+                    "type": "integer"
+                },
+                "tmmTraffic": {
+                    "type": "object"
+                },
+                "diskStorage": {
+                    "type": "object"
+                },
+                "diskLatency": {
+                    "type": "object"
+                },
+                "networkInterfaces": {
+                    "type": "object"
+                },
+                "provisioning": {
+                    "type": "object"
+                }
+            },
+            "additionalProperties": false,
+            "required": []
         },
-        "version": {
-            "type": "string"
-        },
-        "versionBuild": {
-            "type": "string"
-        },
-        "location": {
-            "type": "string"
-        },
-        "description": {
-            "type": "string"
-        },
-        "marketingName": {
-            "type": "string"
-        },
-        "platformId": {
-            "type": "string"
-        },
-        "chassisId": {
-            "type": "string"
-        },
-        "baseMac": {
-            "type": "string"
-        },
-        "callBackUrl": {
-            "type": "string"
-        },
-        "configReady": {
-            "type": "string"
-        },
-        "licenseReady": {
-            "type": "string"
-        },
-        "provisionReady": {
-            "type": "string"
-        },
-        "syncMode": {
-            "type": "string"
-        },
-        "syncColor": {
-            "type": "string"
-        },
-        "syncStatus": {
-            "type": "string"
-        },
-        "syncSummary": {
-            "type": "string"
-        },
-        "failoverStatus": {
-            "type": "string"
-        },
-        "failoverColor": {
-            "type": "string"
-        },
-        "deviceTimestamp": {
-            "type": "string"
-        },
-        "cpu": {
-            "type": "integer"
-        },
-        "memory": {
-            "type": "integer"
-        },
-        "tmmCpu": {
-            "type": "integer"
-        },
-        "tmmMemory": {
-            "type": "integer"
-        },
-        "tmmTraffic": {
+        "virtualServers": {
             "type": "object"
         },
-        "diskStorage": {
+        "pools": {
             "type": "object"
         },
-        "diskLatency": {
+        "ltmPolicies": {
             "type": "object"
         },
-        "networkInterfaces": {
+        "httpProfiles": {
             "type": "object"
         },
-        "provisionState": {
+        "clientSslProfiles": {
             "type": "object"
         },
-        "virtualServerStats": {
+        "serverSslProfiles": {
             "type": "object"
         },
-        "poolStats": {
-            "type": "object"
-        },
-        "ltmPolicyStats": {
-            "type": "object"
-        },
-        "httpProfileStats": {
-            "type": "object"
-        },
-        "clientSSLProfileStats": {
-            "type": "object"
-        },
-        "serverSSLProfileStats": {
-            "type": "object"
-        },
-        "tlsCerts": {
+        "sslCerts": {
             "type": "object"
         },
         "telemetryServiceInfo": {
@@ -126,7 +133,8 @@
                     "type": "string"
                 }
             },
-            "required": [ "pollingInterval", "cycleStart", "cycleEnd" ]
+            "additionalProperties": false,
+            "required": []
         },
         "telemetryEventCategory": {
             "type": "string",
@@ -134,6 +142,6 @@
         }
     },
     "additionalProperties": false,
-    "$comment": "The 'required' keyword will be enumerated with all 'properties' keys at validation runtime",
+    "$comment": "The 'required' keyword will be enumerated with all 'properties' keys at validation runtime, including nested properties",
     "required": []
 }

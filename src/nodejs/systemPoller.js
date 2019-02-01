@@ -58,6 +58,7 @@ function process(args) {
                 cycleEnd: endTimeStamp
             };
             data.telemetryServiceInfo = telemetryServiceInfo;
+            data.telemetryEventCategory = constants.EVENT_TYPES.SYSTEM_POLLER;
             // end inject service data
 
             if (tracer) {
@@ -68,7 +69,7 @@ function process(args) {
                 ret = Promise.resolve(data);
             } else {
                 // call out to pipeline
-                dataPipeline.process(data, 'systemInfo');
+                dataPipeline.process(data, constants.EVENT_TYPES.SYSTEM_POLLER);
             }
             logger.debug('System poller cycle finished');
             return ret;

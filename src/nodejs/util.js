@@ -103,7 +103,7 @@ Tracer.prototype._setClosed = function () {
  * Mark tracer as closing
  */
 Tracer.prototype._setClosing = function () {
-    logger.info(`Closing tracer '${this.name}' stream to file '${this.path}'`);
+    logger.debug(`Closing tracer '${this.name}' stream to file '${this.path}'`);
     if (this.stream) {
         this.stream.end();
         this.stream = undefined;
@@ -233,7 +233,7 @@ Tracer.prototype._open = function () {
     if (!this.isNew()) {
         return Promise.resolve();
     }
-    logger.info(`Creating new tracer '${this.name}' stream to file '${this.path}'`);
+    logger.debug(`Creating new tracer '${this.name}' stream to file '${this.path}'`);
     // prohibit to open many stream from single instance
     this._setState(Tracer.STATE.INIT);
 
@@ -419,11 +419,11 @@ Tracer.instances = {};
 Tracer.get = function (name, tracerPath) {
     let tracer = Tracer.instances[name];
     if (!tracer) {
-        logger.info(`Creating new tracer instance - '${name}' file '${tracerPath}'`);
+        logger.debug(`Creating new tracer instance - '${name}' file '${tracerPath}'`);
         tracer = new Tracer(name, tracerPath);
         Tracer.instances[name] = tracer;
     } else {
-        logger.info(`Updating tracer instance - '${name}' file '${tracerPath}'`);
+        logger.debug(`Updating tracer instance - '${name}' file '${tracerPath}'`);
         tracer.path = tracerPath;
         tracer.touch();
         // force tracer to check if we need to
@@ -649,39 +649,43 @@ module.exports = {
     },
 
     /**
-     * Filter data based on a list of keys
+     * Filter data based on a list of keys - include and exclude are mutually exclusive
      *
-     * @param {Object} data - data
-     * @param {Array} keys  - list of keys to use to filter data
+     * @param {Object} data             - data
+     * @param {Object} options          - function options
+     * @param {Array} [options.include] - include matching keys
+     * @param {Array} [options.exclude] - exclude matching keys
      *
      * @returns {Object} Filtered data
      */
-    filterDataByKeys(data, keys) {
-        const ret = data;
+    filterDataByKeys(data, options) {
+        options = options || {};
 
-        if (typeof data === 'object') {
-            // for now just ignore arrays
-            if (Array.isArray(data)) {
-                return ret;
+        if (options.include && options.exclude) throw new Error('include and exclude both provided');
+
+        if (typeof data !== 'object') return data;
+        if (Array.isArray(data)) return data; // ignore arrays
+
+        const keys = options.include || options.exclude || [];
+        Object.keys(data).forEach((k) => {
+            let deleteKey = false;
+            if (options.include) {
+                deleteKey = true; // default to true
+                keys.forEach((i) => {
+                    if (k.includes(i)) deleteKey = false; // no exact match
+                });
+            } else if (options.exclude) {
+                if (keys.indexOf(k) !== -1) deleteKey = true; // exact match
             }
 
-            Object.keys(data).forEach((k) => {
-                let deleteKey = true;
-                keys.forEach((i) => {
-                    // simple includes for now - no exact match
-                    if (k.includes(i)) {
-                        deleteKey = false;
-                    }
-                });
-                if (deleteKey) {
-                    delete ret[k];
-                } else {
-                    ret[k] = this.filterDataByKeys(ret[k], keys);
-                }
-            });
-        }
+            if (deleteKey) {
+                delete data[k];
+            } else {
+                data[k] = this.filterDataByKeys(data[k], options);
+            }
+        });
 
-        return ret;
+        return data;
     },
 
     /**

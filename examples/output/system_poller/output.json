@@ -1,366 +1,394 @@
 {
-    "hostname": "telemetry.bigip.com",
-    "version": "14.0.0.1",
-    "versionBuild": "0.0.2",
-    "location": "Seattle",
-    "description": "Telemetry BIG-IP",
-    "marketingName": "BIG-IP Virtual Edition",
-    "platformId": "Z100",
-    "chassisId": "9c3abad5-513a-1c43-5bc2be62e957",
-    "baseMac": "00:0d:3a:30:34:51",
-    "callBackUrl": "https://192.0.2.1",
-    "configReady": "yes",
-    "licenseReady": "yes",
-    "provisionReady": "yes",
-    "syncMode": "standalone",
-    "syncColor": "green",
-    "syncStatus": "Standalone",
-    "syncSummary": " ",
-    "failoverStatus": "ACTIVE",
-    "failoverColor": "green",
-    "deviceTimestamp": "2018-12-13T20:24:20Z",
-    "cpu": 1,
-    "memory": 15,
-    "tmmCpu": 1,
-    "tmmMemory": 4,
-    "tmmTraffic": {
-        "clientSideTraffic.bitsIn": 5682858224,
-        "clientSideTraffic.bitsOut": 18756943624
-    },
-    "diskStorage": {
-        "/": {
-            "1024-blocks": "436342",
-            "Capacity": "55%",
-            "name": "/"
+    "system": {
+        "hostname": "telemetry.bigip.com",
+        "version": "14.0.0.1",
+        "versionBuild": "0.0.2",
+        "location": "Seattle",
+        "description": "Telemetry BIG-IP",
+        "marketingName": "BIG-IP Virtual Edition",
+        "platformId": "Z100",
+        "chassisId": "9c3abad5-513a-1c43-5bc2be62e957",
+        "baseMac": "00:0d:3a:30:34:51",
+        "callBackUrl": "https://10.0.1.100",
+        "configReady": "yes",
+        "licenseReady": "yes",
+        "provisionReady": "yes",
+        "syncMode": "standalone",
+        "syncColor": "green",
+        "syncStatus": "Standalone",
+        "syncSummary": " ",
+        "failoverStatus": "ACTIVE",
+        "failoverColor": "green",
+        "systemTimestamp": "2019-02-01T17:23:15Z",
+        "cpu": 3,
+        "memory": 55,
+        "tmmCpu": 1,
+        "tmmMemory": 11,
+        "tmmTraffic": {
+            "clientSideTraffic.bitsIn": 30749965632,
+            "clientSideTraffic.bitsOut": 91027281336,
+            "serverSideTraffic.bitsIn": 26698867512,
+            "serverSideTraffic.bitsOut": 90836218144
         },
-        "/dev/shm": {
-            "1024-blocks": "7181064",
-            "Capacity": "1%",
-            "name": "/dev/shm"
+        "diskStorage": {
+            "/": {
+                "1024-blocks": "436342",
+                "Capacity": "55%",
+                "name": "/"
+            },
+            "/dev/shm": {
+                "1024-blocks": "7181064",
+                "Capacity": "9%",
+                "name": "/dev/shm"
+            },
+            "/config": {
+                "1024-blocks": "3269592",
+                "Capacity": "11%",
+                "name": "/config"
+            },
+            "/usr": {
+                "1024-blocks": "4136432",
+                "Capacity": "83%",
+                "name": "/usr"
+            },
+            "/var": {
+                "1024-blocks": "3096336",
+                "Capacity": "37%",
+                "name": "/var"
+            },
+            "/shared": {
+                "1024-blocks": "20642428",
+                "Capacity": "3%",
+                "name": "/shared"
+            },
+            "/var/log": {
+                "1024-blocks": "3023760",
+                "Capacity": "7%",
+                "name": "/var/log"
+            },
+            "/appdata": {
+                "1024-blocks": "51607740",
+                "Capacity": "3%",
+                "name": "/appdata"
+            },
+            "/shared/rrd.1.2": {
+                "1024-blocks": "7181064",
+                "Capacity": "1%",
+                "name": "/shared/rrd.1.2"
+            },
+            "/var/run": {
+                "1024-blocks": "7181064",
+                "Capacity": "1%",
+                "name": "/var/run"
+            },
+            "/var/tmstat": {
+                "1024-blocks": "7181064",
+                "Capacity": "1%",
+                "name": "/var/tmstat"
+            },
+            "/var/prompt": {
+                "1024-blocks": "4096",
+                "Capacity": "1%",
+                "name": "/var/prompt"
+            },
+            "/var/apm/mount/apmclients-7170.2018.627.21-3.0.iso": {
+                "1024-blocks": "298004",
+                "Capacity": "100%",
+                "name": "/var/apm/mount/apmclients-7170.2018.627.21-3.0.iso"
+            },
+            "/var/loipc": {
+                "1024-blocks": "7181064",
+                "Capacity": "0%",
+                "name": "/var/loipc"
+            },
+            "/mnt/sshplugin_tempfs": {
+                "1024-blocks": "7181064",
+                "Capacity": "0%",
+                "name": "/mnt/sshplugin_tempfs"
+            }
         },
-        "/config": {
-            "1024-blocks": "3269592",
-            "Capacity": "3%",
-            "name": "/config"
+        "diskLatency": {
+            "sda": {
+                "rsec/s": "10.49",
+                "wsec/s": "232.03",
+                "name": "sda"
+            },
+            "sdb": {
+                "rsec/s": "1.04",
+                "wsec/s": "0.00",
+                "name": "sdb"
+            },
+            "dm-0": {
+                "rsec/s": "0.02",
+                "wsec/s": "0.00",
+                "name": "dm-0"
+            },
+            "dm-1": {
+                "rsec/s": "0.17",
+                "wsec/s": "112.02",
+                "name": "dm-1"
+            },
+            "dm-2": {
+                "rsec/s": "0.47",
+                "wsec/s": "37.00",
+                "name": "dm-2"
+            },
+            "dm-3": {
+                "rsec/s": "0.85",
+                "wsec/s": "31.45",
+                "name": "dm-3"
+            },
+            "dm-4": {
+                "rsec/s": "0.05",
+                "wsec/s": "0.22",
+                "name": "dm-4"
+            },
+            "dm-5": {
+                "rsec/s": "0.39",
+                "wsec/s": "3.34",
+                "name": "dm-5"
+            },
+            "dm-6": {
+                "rsec/s": "5.82",
+                "wsec/s": "0.00",
+                "name": "dm-6"
+            },
+            "dm-7": {
+                "rsec/s": "0.22",
+                "wsec/s": "0.90",
+                "name": "dm-7"
+            },
+            "dm-8": {
+                "rsec/s": "1.41",
+                "wsec/s": "47.10",
+                "name": "dm-8"
+            }
         },
-        "/usr": {
-            "1024-blocks": "4136432",
-            "Capacity": "83%",
-            "name": "/usr"
+        "networkInterfaces": {
+            "1.1": {
+                "counters.bitsIn": 88594112512,
+                "counters.bitsOut": 28164141760,
+                "status": "up",
+                "name": "1.1"
+            },
+            "1.2": {
+                "counters.bitsIn": 7703269352,
+                "counters.bitsOut": 413753256,
+                "status": "up",
+                "name": "1.2"
+            },
+            "mgmt": {
+                "counters.bitsIn": 10280239984,
+                "counters.bitsOut": 4504546456,
+                "status": "up",
+                "name": "mgmt"
+            }
         },
-        "/var": {
-            "1024-blocks": "3096336",
-            "Capacity": "28%",
-            "name": "/var"
-        },
-        "/shared": {
-            "1024-blocks": "20642428",
-            "Capacity": "2%",
-            "name": "/shared"
-        },
-        "/var/log": {
-            "1024-blocks": "3023760",
-            "Capacity": "5%",
-            "name": "/var/log"
-        },
-        "/appdata": {
-            "1024-blocks": "25717852",
-            "Capacity": "1%",
-            "name": "/appdata"
-        },
-        "/shared/rrd.1.2": {
-            "1024-blocks": "7181064",
-            "Capacity": "1%",
-            "name": "/shared/rrd.1.2"
-        },
-        "/var/run": {
-            "1024-blocks": "7181064",
-            "Capacity": "1%",
-            "name": "/var/run"
-        },
-        "/var/tmstat": {
-            "1024-blocks": "7181064",
-            "Capacity": "1%",
-            "name": "/var/tmstat"
-        },
-        "/var/prompt": {
-            "1024-blocks": "4096",
-            "Capacity": "1%",
-            "name": "/var/prompt"
-        },
-        "/var/loipc": {
-            "1024-blocks": "7181064",
-            "Capacity": "0%",
-            "name": "/var/loipc"
+        "provisioning": {
+            "afm": {
+                "name": "afm",
+                "level": "nominal"
+            },
+            "am": {
+                "name": "am",
+                "level": "none"
+            },
+            "apm": {
+                "name": "apm",
+                "level": "nominal"
+            },
+            "asm": {
+                "name": "asm",
+                "level": "nominal"
+            },
+            "avr": {
+                "name": "avr",
+                "level": "nominal"
+            },
+            "dos": {
+                "name": "dos",
+                "level": "none"
+            },
+            "fps": {
+                "name": "fps",
+                "level": "none"
+            },
+            "gtm": {
+                "name": "gtm",
+                "level": "none"
+            },
+            "ilx": {
+                "name": "ilx",
+                "level": "none"
+            },
+            "lc": {
+                "name": "lc",
+                "level": "none"
+            },
+            "ltm": {
+                "name": "ltm",
+                "level": "nominal"
+            },
+            "pem": {
+                "name": "pem",
+                "level": "none"
+            },
+            "sslo": {
+                "name": "sslo",
+                "level": "none"
+            },
+            "swg": {
+                "name": "swg",
+                "level": "none"
+            },
+            "urldb": {
+                "name": "urldb",
+                "level": "none"
+            }
         }
     },
-    "diskLatency": {
-        "sda": {
-            "rsec/s": "356.44",
-            "wsec/s": "109.09",
-            "name": "sda"
-        },
-        "sdb": {
-            "rsec/s": "1.03",
-            "wsec/s": "0.00",
-            "name": "sdb"
-        },
-        "dm-0": {
-            "rsec/s": "0.02",
-            "wsec/s": "0.00",
-            "name": "dm-0"
-        },
-        "dm-1": {
-            "rsec/s": "1.16",
-            "wsec/s": "64.68",
-            "name": "dm-1"
-        },
-        "dm-2": {
-            "rsec/s": "0.02",
-            "wsec/s": "0.00",
-            "name": "dm-2"
-        },
-        "dm-3": {
-            "rsec/s": "0.83",
-            "wsec/s": "26.54",
-            "name": "dm-3"
-        },
-        "dm-4": {
-            "rsec/s": "1.16",
-            "wsec/s": "5.80",
-            "name": "dm-4"
-        },
-        "dm-5": {
-            "rsec/s": "19.59",
-            "wsec/s": "2.23",
-            "name": "dm-5"
-        },
-        "dm-6": {
-            "rsec/s": "327.64",
-            "wsec/s": "0.00",
-            "name": "dm-6"
-        },
-        "dm-7": {
-            "rsec/s": "0.62",
-            "wsec/s": "0.80",
-            "name": "dm-7"
-        },
-        "dm-8": {
-            "rsec/s": "4.28",
-            "wsec/s": "9.04",
-            "name": "dm-8"
-        }
-    },
-    "networkInterfaces": {
-        "1.1": {
-            "counters.bitsIn": 18226797032,
-            "counters.bitsOut": 5242940808,
-            "status": "up",
-            "name": "1.1"
-        },
-        "1.2": {
-            "counters.bitsIn": 1534110872,
-            "counters.bitsOut": 84389728,
-            "status": "up",
-            "name": "1.2"
-        },
-        "mgmt": {
-            "counters.bitsIn": 2242676328,
-            "counters.bitsOut": 1143046952,
-            "status": "up",
-            "name": "mgmt"
-        }
-    },
-    "provisionState": {
-        "afm": {
-            "level": "none",
-            "name": "afm"
-        },
-        "am": {
-            "level": "none",
-            "name": "am"
-        },
-        "apm": {
-            "level": "none",
-            "name": "apm"
-        },
-        "asm": {
-            "level": "none",
-            "name": "asm"
-        },
-        "avr": {
-            "level": "none",
-            "name": "avr"
-        },
-        "dos": {
-            "level": "none",
-            "name": "dos"
-        },
-        "fps": {
-            "level": "none",
-            "name": "fps"
-        },
-        "gtm": {
-            "level": "none",
-            "name": "gtm"
-        },
-        "ilx": {
-            "level": "none",
-            "name": "ilx"
-        },
-        "lc": {
-            "level": "none",
-            "name": "lc"
-        },
-        "ltm": {
-            "level": "nominal",
-            "name": "ltm"
-        },
-        "pem": {
-            "level": "none",
-            "name": "pem"
-        },
-        "sslo": {
-            "level": "none",
-            "name": "sslo"
-        },
-        "swg": {
-            "level": "none",
-            "name": "swg"
-        },
-        "urldb": {
-            "level": "none",
-            "name": "urldb"
-        }
-    },
-    "virtualServerStats": {
+    "virtualServers": {
         "/Common/app.app/app_vs": {
-            "clientside.bitsIn": 31417200,
-            "clientside.bitsOut": 297731408,
+            "clientside.bitsIn": 19599288,
+            "clientside.bitsOut": 119172032,
             "clientside.curConns": 0,
-            "destination": "/Common/10.0.2.101:80",
+            "destination": "10.0.2.101:80",
             "availabilityState": "available",
             "enabledState": "enabled",
             "name": "/Common/app.app/app_vs",
             "tenant": "Common",
             "application": "app.app"
         },
-        "/Sample_02/A1/serviceMain": {
+        "/Example_Tenant/A1/serviceMain": {
             "clientside.bitsIn": 0,
             "clientside.bitsOut": 0,
             "clientside.curConns": 0,
-            "destination": "/Sample_02/192.0.2.11:443",
+            "destination": "192.0.2.11:443",
             "availabilityState": "offline",
             "enabledState": "enabled",
-            "name": "/Sample_02/A1/serviceMain",
-            "tenant": "Sample_02",
+            "name": "/Example_Tenant/A1/serviceMain",
+            "tenant": "Example_Tenant",
             "application": "A1"
         },
-        "/Sample_02/A1/serviceMain-Redirect": {
+        "/Example_Tenant/A1/serviceMain-Redirect": {
             "clientside.bitsIn": 0,
             "clientside.bitsOut": 0,
             "clientside.curConns": 0,
-            "destination": "/Sample_02/192.0.2.11:80",
+            "destination": "192.0.2.11:80",
             "availabilityState": "unknown",
             "enabledState": "enabled",
-            "name": "/Sample_02/A1/serviceMain-Redirect",
-            "tenant": "Sample_02",
+            "name": "/Example_Tenant/A1/serviceMain-Redirect",
+            "tenant": "Example_Tenant",
             "application": "A1"
         }
     },
-    "poolStats": {
+    "pools": {
         "/Common/app.app/app_pool": {
-            "serverside.bitsIn": 39075976,
-            "serverside.bitsOut": 299502400,
+            "activeMemberCnt": 1,
+            "serverside.bitsIn": 25825768,
+            "serverside.bitsOut": 114425928,
             "serverside.curConns": 0,
             "availabilityState": "available",
             "enabledState": "enabled",
-            "status.statusReason": "The pool is available",
+            "name": "/Common/app.app/app_pool",
             "members": {
                 "/Common/10.0.3.5:80": {
                     "addr": "10.0.3.5",
                     "port": 80,
-                    "serverside.bitsIn": 39075976,
-                    "serverside.bitsOut": 299502400,
+                    "serverside.bitsIn": 25825768,
+                    "serverside.bitsOut": 114425928,
                     "serverside.curConns": 0,
-                    "sessionStatus": "enabled",
                     "availabilityState": "available",
-                    "enabledState": "enabled",
-                    "status.statusReason": "Pool member is available"
+                    "enabledState": "enabled"
                 }
             },
-            "name": "/Common/app.app/app_pool",
             "tenant": "Common",
             "application": "app.app"
         },
         "/Common/telemetry-local": {
-            "serverside.bitsIn": 14780176,
-            "serverside.bitsOut": 3354112,
-            "serverside.curConns": 1,
+            "activeMemberCnt": 1,
+            "serverside.bitsIn": 8908592,
+            "serverside.bitsOut": 1955808,
+            "serverside.curConns": 0,
             "availabilityState": "available",
             "enabledState": "enabled",
-            "status.statusReason": "The pool is available",
+            "name": "/Common/telemetry-local",
             "members": {
                 "/Common/10.0.1.100:6514": {
                     "addr": "10.0.1.100",
                     "port": 6514,
-                    "serverside.bitsIn": 14780176,
-                    "serverside.bitsOut": 3354112,
-                    "serverside.curConns": 1,
-                    "sessionStatus": "enabled",
+                    "serverside.bitsIn": 8908592,
+                    "serverside.bitsOut": 1955808,
+                    "serverside.curConns": 0,
                     "availabilityState": "available",
-                    "enabledState": "enabled",
-                    "status.statusReason": "Pool member is available"
+                    "enabledState": "enabled"
                 }
             },
-            "name": "/Common/telemetry-local",
             "tenant": "Common",
             "application": ""
         },
-        "/Sample_02/A1/web_pool": {
+        "/Example_Tenant/A1/hsl_pool": {
+            "activeMemberCnt": 0,
             "serverside.bitsIn": 0,
             "serverside.bitsOut": 0,
             "serverside.curConns": 0,
             "availabilityState": "offline",
             "enabledState": "enabled",
-            "status.statusReason": "The children pool member(s) are down",
+            "name": "/Example_Tenant/A1/hsl_pool",
             "members": {
-                "/Sample_02/192.0.2.12:80": {
+                "/Example_Tenant/192.168.120.6:514": {
+                    "addr": "192.168.120.6",
+                    "port": 514,
+                    "serverside.bitsIn": 0,
+                    "serverside.bitsOut": 0,
+                    "serverside.curConns": 0,
+                    "availabilityState": "offline",
+                    "enabledState": "enabled"
+                }
+            },
+            "tenant": "Example_Tenant",
+            "application": "A1"
+        },
+        "/Example_Tenant/A1/web_pool": {
+            "activeMemberCnt": 0,
+            "serverside.bitsIn": 0,
+            "serverside.bitsOut": 0,
+            "serverside.curConns": 0,
+            "availabilityState": "offline",
+            "enabledState": "enabled",
+            "name": "/Example_Tenant/A1/web_pool",
+            "members": {
+                "/Example_Tenant/192.0.2.12:80": {
                     "addr": "192.0.2.12",
                     "port": 80,
                     "serverside.bitsIn": 0,
                     "serverside.bitsOut": 0,
                     "serverside.curConns": 0,
-                    "sessionStatus": "enabled",
                     "availabilityState": "offline",
-                    "enabledState": "enabled",
-                    "status.statusReason": "/Common/http: No successful responses received before deadline. @2018/12/17 21:07:54. "
+                    "enabledState": "enabled"
                 },
-                "/Sample_02/192.0.2.13:80": {
+                "/Example_Tenant/192.0.2.13:80": {
                     "addr": "192.0.2.13",
                     "port": 80,
                     "serverside.bitsIn": 0,
                     "serverside.bitsOut": 0,
                     "serverside.curConns": 0,
-                    "sessionStatus": "enabled",
                     "availabilityState": "offline",
-                    "enabledState": "enabled",
-                    "status.statusReason": "/Common/http: No successful responses received before deadline. @2018/12/17 21:07:54. "
+                    "enabledState": "enabled"
                 }
             },
-            "name": "/Sample_02/A1/web_pool",
-            "tenant": "Sample_02",
+            "tenant": "Example_Tenant",
             "application": "A1"
         }
     },
-    "ltmPolicyStats": {
+    "ltmPolicies": {
         "/Common/app.app/app_policy": {
-            "invoked": 15034,
-            "succeeded": 15034,
+            "invoked": 5413,
+            "succeeded": 5413,
             "actions": {
                 "default:1": {
-                    "invoked": 15034,
-                    "succeeded": 15034
+                    "invoked": 5413,
+                    "succeeded": 5413
                 }
             },
             "name": "/Common/app.app/app_policy",
@@ -381,25 +409,24 @@
             "application": ""
         }
     },
-    "httpProfileStats": {
+    "httpProfiles": {
         "/Common/app.app/app_http": {
-            "cookiePersistInserts": 17289,
-            "getReqs": 8135,
-            "maxKeepaliveReq": 336,
-            "numberReqs": 17397,
-            "postReqs": 9166,
-            "proxyReqs": 0,
-            "2xxResp": 1340,
-            "3xxResp": 39,
-            "4xxResp": 15995,
+            "cookiePersistInserts": 5409,
+            "getReqs": 2395,
+            "maxKeepaliveReq": 350,
+            "numberReqs": 5413,
+            "postReqs": 2989,
+            "2xxResp": 289,
+            "3xxResp": 0,
+            "4xxResp": 5124,
             "5xxResp": 0,
             "respLessThan2m": 0,
             "respGreaterThan2m": 0,
-            "v10Reqs": 351,
-            "v10Resp": 48,
-            "v11Reqs": 17036,
-            "v11Resp": 17326,
-            "v9Reqs": 10,
+            "v10Reqs": 30,
+            "v10Resp": 0,
+            "v11Reqs": 5379,
+            "v11Resp": 5413,
+            "v9Reqs": 4,
             "v9Resp": 0,
             "name": "/Common/app.app/app_http",
             "tenant": "Common",
@@ -411,7 +438,6 @@
             "maxKeepaliveReq": 0,
             "numberReqs": 0,
             "postReqs": 0,
-            "proxyReqs": 0,
             "2xxResp": 0,
             "3xxResp": 0,
             "4xxResp": 0,
@@ -428,13 +454,12 @@
             "tenant": "Common",
             "application": ""
         },
-        "/Sample_02/A1/custom_http_profile": {
+        "/Example_Tenant/A1/custom_http_profile": {
             "cookiePersistInserts": 0,
             "getReqs": 0,
             "maxKeepaliveReq": 0,
             "numberReqs": 0,
             "postReqs": 0,
-            "proxyReqs": 0,
             "2xxResp": 0,
             "3xxResp": 0,
             "4xxResp": 0,
@@ -447,12 +472,12 @@
             "v11Resp": 0,
             "v9Reqs": 0,
             "v9Resp": 0,
-            "name": "/Sample_02/A1/custom_http_profile",
-            "tenant": "Sample_02",
+            "name": "/Example_Tenant/A1/custom_http_profile",
+            "tenant": "Example_Tenant",
             "application": "A1"
         }
     },
-    "clientSSLProfileStats": {
+    "clientSslProfiles": {
         "/Common/clientssl": {
             "currentCompatibleConnections": 0,
             "currentConnections": 0,
@@ -476,11 +501,12 @@
             "protocolUses.tlsv1_3": 0,
             "recordsIn": 0,
             "recordsOut": 0,
+            "sniRejects": 0,
             "name": "/Common/clientssl",
             "tenant": "Common",
             "application": ""
         },
-        "/Sample_02/A1/webtls": {
+        "/Example_Tenant/A1/webtls": {
             "currentCompatibleConnections": 0,
             "currentConnections": 0,
             "currentNativeConnections": 0,
@@ -503,12 +529,13 @@
             "protocolUses.tlsv1_3": 0,
             "recordsIn": 0,
             "recordsOut": 0,
-            "name": "/Sample_02/A1/webtls",
-            "tenant": "Sample_02",
+            "sniRejects": 0,
+            "name": "/Example_Tenant/A1/webtls",
+            "tenant": "Example_Tenant",
             "application": "A1"
         }
     },
-    "serverSSLProfileStats": {
+    "serverSslProfiles": {
         "/Common/serverssl": {
             "currentCompatibleConnections": 0,
             "currentConnections": 0,
@@ -537,7 +564,7 @@
             "application": ""
         }
     },
-    "tlsCerts": {
+    "sslCerts": {
         "ca-bundle.crt": {
             "expirationDate": 1893455999,
             "expirationString": "Dec 31 23:59:59 2029 GMT",
@@ -571,8 +598,8 @@
     },
     "telemetryServiceInfo": {
         "pollingInterval": 300,
-        "cycleStart": "Tue, 15 Jan 2019 18:47:00 GMT",
-        "cycleEnd": "Tue, 15 Jan 2019 18:47:01 GMT"
+        "cycleStart": "Fri, 01 Feb 2019 17:23:14 GMT",
+        "cycleEnd": "Fri, 01 Feb 2019 17:23:15 GMT"
     },
     "telemetryEventCategory": "systemInfo"
 }

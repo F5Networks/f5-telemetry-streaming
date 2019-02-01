@@ -34,52 +34,59 @@
             "endpoint": "/mgmt/tm/sys/management-ip"
         },
         {
+            "name": "provisioning",
             "endpoint": "/mgmt/tm/sys/provision"
         },
         {
+            "name": "networkInterfaces",
             "endpoint": "/mgmt/tm/net/interface/stats"
         },
         {
+            "name": "tmmInfo",
             "endpoint": "/mgmt/tm/sys/tmm-info"
         },
         {
+            "name": "tmmTraffic",
             "endpoint": "/mgmt/tm/sys/tmm-traffic"
         },
         {
-            "endpoint": "/mgmt/tm/ltm/virtual",
-            "includeStats": true
+            "name": "virtualServers",
+            "endpoint": "/mgmt/tm/ltm/virtual/stats"
         },
         {
+            "name": "pools",
             "endpoint": "/mgmt/tm/ltm/pool",
             "includeStats": true,
             "expandReferences": { "membersReference": { "endpointSuffix": "/stats" } }
         },
         {
+            "name": "ltmPolicies",
             "endpoint": "/mgmt/tm/ltm/policy/stats"
         },
         {
+            "name": "sslCerts",
             "endpoint": "/mgmt/tm/sys/file/ssl-cert"
         },
         {
-            "name": "diskStorageRef",
+            "name": "diskStorage",
             "endpoint": "/mgmt/tm/util/bash",
             "body": "{ \"command\": \"run\", \"utilCmdArgs\": \"-c \\\"/bin/df -P | /usr/bin/tr -s ' ' ','\\\"\" }"
         },
         {
-            "name": "diskLatencyRef",
+            "name": "diskLatency",
             "endpoint": "/mgmt/tm/util/bash",
             "body": "{ \"command\": \"run\", \"utilCmdArgs\": \"-c \\\"/usr/bin/iostat -x -d | /usr/bin/tail -n +3 | /usr/bin/tr -s ' ' ','\\\"\" }"
         },
         {
-            "name": "httpProfile",
+            "name": "httpProfiles",
             "endpoint": "/mgmt/tm/ltm/profile/http/stats"
         },
         {
-            "name": "clientSSLProfile",
+            "name": "clientSslProfiles",
             "endpoint": "/mgmt/tm/ltm/profile/client-ssl/stats"
         },
         {
-            "name": "serverSSLProfile",
+            "name": "serverSslProfiles",
             "endpoint": "/mgmt/tm/ltm/profile/server-ssl/stats"
         }
     ]

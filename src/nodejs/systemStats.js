@@ -359,7 +359,7 @@ SystemStats.prototype._preprocessProperty = function (property) {
         // 'else' or 'then' were not defined.
         while (property) {
             // copy all non-conditional data on same level to new object
-            // eslint-disable-next-line
+            // eslint-disable-next-line no-loop-func
             Object.keys(property).forEach((key) => {
                 if (!(key === 'if' || key === 'then' || key === 'else')) {
                     newObj[key] = property[key];
@@ -425,8 +425,8 @@ SystemStats.prototype._processData = function (property, data) {
 /**
  * Load data for property
  *
- * @param {Object} property     - property object
- * @param {String} property.key - key to identify endpoint to load data from
+ * @param {Object} property       - property object
+ * @param {String} [property.key] - key to identify endpoint to load data from
  * @returns {Object} Promise resolved with fetched data object
  */
 SystemStats.prototype._loadData = function (property) {
@@ -459,6 +459,13 @@ SystemStats.prototype._processProperty = function (key, property) {
     if (property.disabled) {
         return Promise.resolve();
     }
+
+    // support property simply being a folder - add as empty object
+    if (property.structure && property.structure.folder === true) {
+        this.collectedData[key] = {};
+        return Promise.resolve();
+    }
+
     return this._loadData(property)
         .then((data) => {
             this.collectedData[key] = this._processData(property, data);
@@ -472,8 +479,8 @@ SystemStats.prototype._processProperty = function (key, property) {
  * Process context object
  *
  * @param {Object} contextData         - context object to load
- * @param {String} contextData.<key>   - key to store loaded data
- * @param {Object} contextData.<value> - property object to use to load data
+ * @param {String} [contextData.key]   - key to store loaded data
+ * @param {Object} [contextData.value] - property object to use to load data
  *
  * @returns {Object} Promise resolved when all context's properties were loaded
  */
@@ -527,7 +534,7 @@ SystemStats.prototype._computePropertiesData = function (propertiesData) {
  *
  * @param {String}  host                          - host
  * @param {Object}  options                       - options
- * @param {String}  [options.protocol]             - protocol for host
+ * @param {String}  [options.protocol]            - protocol for host
  * @param {Integer} [options.port]                - port for host
  * @param {String}  [options.username]            - username for host
  * @param {String}  [options.passphrase]          - password for host
@@ -553,11 +560,21 @@ SystemStats.prototype.collect = function (host, options) {
         .then(() => this._computeContextData(context))
         .then(() => this._computePropertiesData(stats))
         .then(() => {
-            const orderedData = {};
+            // order data according to properties file
+            const data = {};
             Object.keys(stats).forEach((key) => {
-                orderedData[key] = this.collectedData[key];
+                data[key] = this.collectedData[key];
             });
-            return Promise.resolve(orderedData);
+            // certain stats require a more complex structure - process those
+            Object.keys(data).forEach((key) => {
+                const stat = stats[key] || {};
+                if (stat.structure && !stat.structure.folder) {
+                    const parentKey = stat.structure.parentKey;
+                    data[parentKey][key] = data[key];
+                    delete data[key];
+                }
+            });
+            return Promise.resolve(data);
         })
         .catch((err) => {
             logger.error(`Error: SystemStats.collect: ${err}`);
