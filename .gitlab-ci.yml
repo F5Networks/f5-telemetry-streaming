@@ -51,7 +51,7 @@ build docs:
 # job triggers CI/CD trigger to initiate seperate pipeline for deployment
 # this allows to parameterize pipeline to test packages against different
 # versions of BIG-IP
-trigger_deploy_job:
+trigger_deploy_job_14_1:
     stage: deploy
     tags:
         - docker-executor
@@ -59,9 +59,25 @@ trigger_deploy_job:
         - curl -k -X POST -F token=${CICD_PIPELINE_TRIGGER_FOR_DEPLOY}
             -F ref=${CI_COMMIT_REF_NAME}
             -F "variables[REQ_DEVICE_PIPELINE]=true"
-            -F "variables[REQ_PROJECT_NAME]=ts_cicd_bigip_14.0.0.2"
-            -F "variables[REQ_BIGIP_VERSION]=14.0.0.2"
-            -F "variables[REQ_BIGIP_BUILD]=0.0.2"
+            -F "variables[REQ_PROJECT_NAME]=ts_cicd_bigip_14_1"
+            -F "variables[REQ_BIGIP_VERSION]=14.1.0.1"
+            -F "variables[REQ_BIGIP_BUILD]=0.0.7"
+            ${CICD_PIPLINE_TRIGGER_URL}
+    only:
+        # run if scheduled
+        - schedules
+
+trigger_deploy_job_13_1:
+    stage: deploy
+    tags:
+        - docker-executor
+    script:
+        - curl -k -X POST -F token=${CICD_PIPELINE_TRIGGER_FOR_DEPLOY}
+            -F ref=${CI_COMMIT_REF_NAME}
+            -F "variables[REQ_DEVICE_PIPELINE]=true"
+            -F "variables[REQ_PROJECT_NAME]=ts_cicd_bigip_13_1"
+            -F "variables[REQ_BIGIP_VERSION]=13.1.1.4"
+            -F "variables[REQ_BIGIP_BUILD]=0.0.4"
             ${CICD_PIPLINE_TRIGGER_URL}
     only:
         # run if scheduled
@@ -95,8 +111,19 @@ deploy_bigip:
 test package:
     stage: test
     script:
+        # install jq
+        - apt-get update
+        - apt-get install -y jq
+        # install node modules
         - npm run install-test
+        # npm audit - install includes audit, but perform specific check and fail if needed
+        - audit_report=$(npm audit --json)
+        - echo $audit_report
+        - actions=$(echo $audit_report | jq .actions | jq length)
+        - if [ $actions -ne 0 ]; then echo 'ERROR! vulnerabilities exist'; exit 1; fi
+        # linter
         - npm run lint
+        # unit tests
         - npm run test && npm run report
     artifacts:
         name: ${CI_COMMIT_REF_NAME}_unittests_coverage

@@ -346,7 +346,7 @@ module.exports = {
      * @param {Object} data                          - data to normalize
      * @param {Object} options                       - options
      * @param {String} [options.key]                 - key to drill down into data, using a defined notation
-     * @param {Object} [options.filterByKeys]        - map of keys to filter data further
+     * @param {Array} [options.filterByKeys]         - array containg map of keys to filter data further
      *                                                 example: { exclude: [], include: []}
      * @param {Array} [options.renameKeysByPattern]  - array containing 1+ map(s) of keys to rename by pattern
      *                                                 example: [{ patterns: {}, options: {}}]
@@ -371,8 +371,14 @@ module.exports = {
 
         // get data by key
         ret = options.key ? this._getDataByKey(ret, options.key) : ret;
-        // filter data by keys
-        ret = options.filterByKeys ? util.filterDataByKeys(ret, options.filterByKeys) : ret;
+        // filter data by keys - 1+ calls
+        let fBK = options.filterByKeys;
+        if (fBK) {
+            fBK = Array.isArray(fBK) ? fBK : [fBK];
+            fBK.forEach((item) => {
+                ret = util.filterDataByKeys(ret, item);
+            });
+        }
         // rename keys by pattern - 1+ calls
         let rKBP = options.renameKeysByPattern;
         if (rKBP) {
