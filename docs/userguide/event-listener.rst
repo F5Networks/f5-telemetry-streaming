@@ -151,7 +151,6 @@ ASM Log
 2. Attach the profile to the virtual server, for example:
 
 .. code-block:: json
-   :linenos:
 
     {
         "serviceMain": {

@@ -69,7 +69,7 @@ The first few lines of your declaration are a part of the base components and de
 +--------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
 | Parameter          | Options                        | Description/Notes                                                                                                                 |
 +====================+================================+===================================================================================================================================+
-| class              | Controls                       | Indicates this JSON document is a Device declaration.                                                                             |
+| class              | Controls                       | Indicates this JSON document is a Device declaration                                                                              |
 +--------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
 | logLevel           | **info**, debug, error         | This value determines how much information you want Telemetry Streaming to log. See the logging section for more information.     |
 +--------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
@@ -101,7 +101,7 @@ The next lines of the declaration sets the System Poller, which polls a system, 
 +====================+================================+============================================================================================================================================+
 | class              | Telemetry_System_Poller        |  The class for system poller must always be Telemetry_System_Poller, do not change this value.                                             |
 +--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
-| interval           | **60**                         |  This value determines the polling period in seconds. By default, Telemetry Streaming collects statistics every 60 seconds                 |
+| interval           | **60**                         |  This value determines the polling period in seconds. By default, Telemetry Streaming collects statistics every 60 seconds.                |
 +--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 
 
@@ -133,7 +133,7 @@ Event Format: ``key1="value",key2="value"``
 +====================+================================+====================================================================================================================================+
 | class              | Telemetry_Listener             |  The class for listener must always be Telemetry_Listener, do not change this value.                                               |
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
-| port               | 6514                           |  Specifies the port of the listener, currently TCP.                                                                                |
+| port               | 6514                           |  Specifies the port of the listener, currently TCP                                                                                 |
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
 
 
@@ -172,7 +172,7 @@ The next lines of the declaration sets the Consumer, which accepts all telemetry
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
 | type               | Splunk, AWS_S3, etc.           |  Specifies the consumer type you would like to send Telemetry information to. See the Consumer section for more information.       |
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
-| host               | 192.0.2.1                      |  The address of the instance that runs the HTTP event collector.                                                                   |
+| host               | 192.0.2.1                      |  The address of the instance that runs the HTTP event collector                                                                    |
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
 | protocol           | **http**, https                |  The protocol of the consumer                                                                                                      |
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
