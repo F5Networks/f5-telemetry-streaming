@@ -15,7 +15,7 @@ const util = require('./util.js');
 
 let hosts;
 
-if (process.env.TEST_HARNESS_FILE !== 'undefined') {
+if (process.env.TEST_HARNESS_FILE !== undefined) {
     // eslint-disable-next-line
     hosts = require(process.env.TEST_HARNESS_FILE);
 } else {
@@ -105,7 +105,8 @@ describe('Basic', function () {
                 .then((data) => {
                     data = data || {};
                     assert.notStrictEqual(data.version, undefined);
-                });
+                })
+                .catch(err => Promise.reject(err));
         });
 
         it('should accept configuration', () => {
@@ -130,7 +131,8 @@ describe('Basic', function () {
                     // check that the declaration returned contains encrypted text
                     // note: this only applies to TS running on BIG-IP (which is all we are testing for now)
                     assert.strictEqual(encrypted.startsWith('$M'), true);
-                });
+                })
+                .catch(err => Promise.reject(err));
         });
 
         it('should get systempoller info', () => {
@@ -139,8 +141,9 @@ describe('Basic', function () {
             return util.makeRequest(host, uri, options)
                 .then((data) => {
                     data = data || {};
-                    assert.notStrictEqual(data.hostname, undefined);
-                });
+                    assert.notStrictEqual(data.system.hostname, undefined);
+                })
+                .catch(err => Promise.reject(err));
         });
 
         it('should ensure event listener is up', () => {

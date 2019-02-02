@@ -31,7 +31,7 @@ function forwardData(dataCtx) {
         return new Promise((resolve) => {
             // standard context
             const context = {
-                event: dataCtx,
+                event: JSON.parse(JSON.stringify(dataCtx)), // deep copy to avoid others modifying
                 config: consumer.config,
                 tracer: consumer.tracer,
                 logger: logger.getChild(consumer.config.type)

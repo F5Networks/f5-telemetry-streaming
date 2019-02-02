@@ -409,7 +409,7 @@ SystemStats.prototype._processData = function (property, data) {
     // standard options for normalize, these are driven primarily by the properties file
     const options = {
         key: this._splitKey(property.key).childKey,
-        filterByKeys: property.filterKeys,
+        filterByKeys: property.filterKeys ? [property.filterKeys, global.filterKeys] : [global.filterKeys],
         renameKeysByPattern: property.renameKeys ? [property.renameKeys, global.renameKeys] : [global.renameKeys],
         convertArrayToMap: property.convertArrayToMap,
         includeFirstEntry: property.includeFirstEntry,

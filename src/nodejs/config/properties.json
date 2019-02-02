@@ -249,7 +249,8 @@
             "options": {
                 "exactMatch": true
             }
-        }
+        },
+        "filterKeys": { "exclude": [ "kind", "selfLink" ] }
     },
     "definitions": {
         "`T`": { "pattern": "\/(.*?)\/", "group": 1 },

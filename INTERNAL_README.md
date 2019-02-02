@@ -417,7 +417,7 @@ curl -v -u admin:<admin_password> -X GET http://localhost:8100/mgmt/shared/telem
 Output:
 
 ```json
-{"nodeVersion":"v4.6.0","version":"0.9.0","release":"2","schemaCurrent":"0.9.0","schemaMinimum":"0.9.0"}
+{"nodeVersion":"v4.6.0","version":"1.0.0","release":"2","schemaCurrent":"1.0.0","schemaMinimum":"1.0.0"}
 ```
 
 #### Response
@@ -444,10 +444,10 @@ Output:
 ```json
 {
     "nodeVersion": "v4.6.0",
-    "version": "0.9.0",
+    "version": "1.0.0",
     "release": "2",
-    "schemaCurrent": "0.9.0",
-    "schemaMinimum": "0.9.0"
+    "schemaCurrent": "1.0.0",
+    "schemaMinimum": "1.0.0"
 }
 ```
 
