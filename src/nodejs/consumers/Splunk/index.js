@@ -100,7 +100,7 @@ function transformData(globalCtx) {
             translatedData: []
         },
         cache: {
-            dataTimestamp: Date.parse(globalCtx.event.data.deviceTimestamp)
+            dataTimestamp: Date.parse(globalCtx.event.data.system.systemTimestamp)
         }
     };
     if (globalCtx.config.dumpUndefinedValues) {
