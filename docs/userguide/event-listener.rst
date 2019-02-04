@@ -24,10 +24,9 @@ Replace the example address with a valid Telemetry Streaming listener address, f
 
 ``create ltm profile request-log telemetry request-log-pool telemetry-local request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\" request-logging enabled``
 
-3. Attach the profile to the virtual server.
+3. Attach the profile to the virtual server, for example:
 
 .. code-block:: json
-   :linenos:
 
     {
       "serviceMain": {
@@ -72,7 +71,6 @@ APM Request Log profile
 3. Attach the profile to the virtual server, for example:
 
 .. code-block:: json
-   :linenos:
 
     {
         "serviceMain": {
