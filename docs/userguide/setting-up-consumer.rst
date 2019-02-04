@@ -1,3 +1,5 @@
+.. _settingupconsumer-ref:
+
 Consumers
 =========
 

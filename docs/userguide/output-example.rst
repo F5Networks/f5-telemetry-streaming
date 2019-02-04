@@ -1,3 +1,5 @@
+.. _outputexample-ref:
+
 Example Output
 ==============
 
