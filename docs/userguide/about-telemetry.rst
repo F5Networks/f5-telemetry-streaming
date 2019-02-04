@@ -69,7 +69,7 @@ The first few lines of your declaration are a part of the base components and de
 +--------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
 | Parameter          | Options                        | Description/Notes                                                                                                                 |
 +====================+================================+===================================================================================================================================+
-| class              | Controls                       | Indicates this JSON document is a Device declaration                                                                              |
+| class              | Controls                       | Describes top-level Telemetry Streaming options. The class for controls must always be Controls, do not change this value.        |
 +--------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
 | logLevel           | **info**, debug, error         | This value determines how much information you want Telemetry Streaming to log. See the logging section for more information.     |
 +--------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
@@ -101,7 +101,7 @@ The next lines of the declaration sets the System Poller, which polls a system, 
 +====================+================================+============================================================================================================================================+
 | class              | Telemetry_System_Poller        |  The class for system poller must always be Telemetry_System_Poller, do not change this value.                                             |
 +--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
-| interval           | **60**                         |  This value determines the polling period in seconds. By default, Telemetry Streaming collects statistics every 60 seconds.                |
+| interval           | 60 - 6000 **300**              |  This value determines the polling period in seconds. By default, Telemetry Streaming collects statistics every 300 seconds.               |
 +--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 
 
