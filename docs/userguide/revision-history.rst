@@ -13,8 +13,8 @@ Document Revision History
         
       
       * - 1.0.0
-        - Initial release of AS3 documentation
-        - 01-30-19
+        - Initial release of AS3 documentation.
+        - 02-05-19
 
 
       * - 0.9.0

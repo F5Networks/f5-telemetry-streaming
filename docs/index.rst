@@ -14,7 +14,11 @@ Telemetry Streaming (TS) is an iControl LX Extension delivered as a TMOS-indepen
 -  AWS CloudWatch
 -  AWS S3
 -  Graphite
+-  Kafka
+-  ElasticSearch
+-  Sumo Logic
 
+|video|
 
 Use the following links, the navigation on the left, and/or the Next and
 Previous buttons to explore the documentation.
@@ -25,6 +29,12 @@ Previous buttons to explore the documentation.
    :maxdepth: 3
 
    userguide/index
+
+.. |video| raw:: html
+
+
+   
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/YeEAovBvUkY" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 
 
