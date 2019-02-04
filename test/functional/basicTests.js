@@ -159,15 +159,33 @@ describe('Basic', function () {
 
             const uri = '/mgmt/tm/security/firewall/management-ip-rules/rules';
             const ruleName = 'telemetry';
+            let passOnError = false;
 
-            const deleteOptions = {
-                method: 'DELETE',
-                headers: options.headers
-            };
+            return util.makeRequest(host, uri, options)
+                .catch((error) => {
+                    // older versions of BIG-IP do not have security enabled by default
+                    const errMsg = error.message;
+                    if (errMsg.includes('must be licensed')) passOnError = true;
+                    return Promise.reject(error);
+                })
+                .then(() => util.makeRequest(host, uri, options))
+                .then((data) => {
+                    let match = false;
+                    data.items.forEach((item) => {
+                        if (item.name === ruleName) match = true;
+                    });
 
-            // attempt to delete the rule first, just in case it exists
-            return util.makeRequest(host, `${uri}/${ruleName}`, deleteOptions)
-                .catch(() => {})
+                    // check if rule already exists
+                    if (match === true) {
+                        // exists, delete the rule
+                        const deleteOptions = {
+                            method: 'DELETE',
+                            headers: options.headers
+                        };
+                        return util.makeRequest(host, `${uri}/${ruleName}`, deleteOptions);
+                    }
+                    return Promise.resolve();
+                })
                 .then(() => {
                     // create rule
                     const body = JSON.stringify({
@@ -191,7 +209,12 @@ describe('Basic', function () {
                     };
                     return util.makeRequest(host, uri, postOptions);
                 })
-                .catch(err => Promise.reject(err));
+                .catch((err) => {
+                    if (passOnError === true) {
+                        return Promise.resolve();
+                    }
+                    return Promise.reject(err);
+                });
         });
 
         it('should ensure event listener is up', function () {

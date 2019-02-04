@@ -68,7 +68,7 @@ module.exports = {
                         resolve(body);
                     }
                 } else {
-                    const msg = `Bad status code: ${res.statusCode} ${res.statusMessage} for ${uri}`;
+                    const msg = `Bad status code: ${res.statusCode} ${res.statusMessage} ${res.body} for ${uri}`;
                     reject(new Error(msg));
                 }
             });
