@@ -101,7 +101,7 @@ The next lines of the declaration sets the System Poller, which polls a system, 
 +====================+================================+============================================================================================================================================+
 | class              | Telemetry_System_Poller        |  The class for system poller must always be Telemetry_System_Poller, do not change this value.                                             |
 +--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
-| interval           | 60 - 6000 **300**              |  This value determines the polling period in seconds. By default, Telemetry Streaming collects statistics every 300 seconds.               |
+| interval           | 60 - 6000, **300**              |  This value determines the polling period in seconds. By default, Telemetry Streaming collects statistics every 300 seconds.               |
 +--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 
 

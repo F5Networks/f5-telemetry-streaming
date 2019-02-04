@@ -5,6 +5,63 @@ Telemetry Streaming collects event logs from all BIG-IP sources, including LTM, 
 
 The Request Logging profile gives you the ability to configure data within a log file for HTTP requests and responses, in accordance with specified parameters.
 
+
+.. _configurelogpub-ref:
+
+Configure the Log Publisher
+```````````````````````````
+
+1. Create a pool in tmsh, replacing the example address with a valid TS listener address, for example, the mgmt IP:
+
+.. code-block:: python
+
+    create ltm pool telemetry-local monitor tcp members replace-all-with { 192.0.2.1:6514 }
+
+
+2. Create a log destination (Remote HSL):
+
+User interface: :menuselection:`System --> Logs --> Configuration --> Log Destinations`
+
+- Name: telemetry-hsl
+- Type: Remote HSL
+- Protocol: TCP
+- Pool: telemetry-local
+
+TMSH: 
+
+.. code-block:: python
+
+    create sys log-config destination remote-high-speed-log telemetry-hsl protocol tcp pool-name telemetry-local
+
+
+3. Create a log destination (Format):
+
+User interface: :menuselection:`System --> Logs --> Configuration --> Log Destinations`
+
+- Name: telemetry-formatted
+- Forward To: telemetry-hsl
+
+TMSH:
+
+.. code-block:: python
+
+    create sys log-config destination splunk telemetry-formatted forward-to telemetry-hsl
+
+
+4. Create Log Publisher
+
+User interface: :menuselection:`System --> Logs --> Configuration --> Log Destinations`
+
+- Name: telemetry-publisher
+- Destinations: telemetry-formatted
+
+.. code-block:: python
+
+    create sys log-config publisher telemetry-publisher destinations replace-all-with { telemetry-formatted }
+
+
+
+
 LTM Request Log profile
 ```````````````````````
 
@@ -16,17 +73,22 @@ To configure an LTM request profile, use these tmsh commands:
 
 1. Create a pool in tmsh: 
 
-``create ltm pool telemetry-local monitor tcp members replace-all-with { 192.0.2.1:6514 }``. 
+.. code-block:: python
+
+    create ltm pool telemetry-local monitor tcp members replace-all-with { 192.0.2.1:6514 }
 
 Replace the example address with a valid Telemetry Streaming listener address, for example the mgmt IP.
 
 2. Create an LTM Request Log Profile: 
 
-``create ltm profile request-log telemetry request-log-pool telemetry-local request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\" request-logging enabled``
+.. code-block:: python
+
+    create ltm profile request-log telemetry request-log-pool telemetry-local request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\" request-logging enabled
 
 3. Attach the profile to the virtual server, for example:
 
-.. code-block:: json
+.. code-block:: python
+   :linenos:
 
     {
       "serviceMain": {
@@ -59,18 +121,21 @@ Example Output:
     }
 
 
-APM Request Log profile
+AFM Request Log profile
 ```````````````````````
 
-1. Create a Log Publisher
+1. Create and :ref:`configurelogpub-ref`.
 
 2. Create a Security Log Profile in TMSH:
 
-``create security log profile telemetry network replace-all-with { telemetry { filter { log-acl-match-drop enabled log-acl-match-reject enabled } publisher telemetry-publisher } }``
+.. code-block:: python
+   
+   create security log profile telemetry network replace-all-with { telemetry { filter { log-acl-match-drop enabled log-acl-match-reject enabled } publisher telemetry-publisher } }
 
 3. Attach the profile to the virtual server, for example:
 
-.. code-block:: json
+.. code-block:: python
+   :linenos:
 
     {
         "serviceMain": {
@@ -144,7 +209,9 @@ ASM Log
 
 1. Create a Security Log Profile using TMSH:
 
-``create security log profile telemetry application replace-all-with { telemetry { filter replace-all-with { request-type { values replace-all-with { all } } } logger-type remote remote-storage splunk servers replace-all-with { 192.0.2.1:6514 {} } } }``
+.. code-block:: python
+   
+   create security log profile telemetry application replace-all-with { telemetry { filter replace-all-with { request-type { values replace-all-with { all } } } logger-type remote remote-storage splunk servers replace-all-with { 192.0.2.1:6514 {} } } }
 
 2. Attach the profile to the virtual server, for example:
 
@@ -217,6 +284,55 @@ Example output:
         "tenant":"Common",
         "application":"app.app",
         "telemetryEventCategory": "event"
+    }
+
+
+APM Log
+```````
+
+1. Create and :ref:`configurelogpub-ref`.
+
+2. Create an APM Log Profile. For example:
+
+.. code-block:: python
+   
+   create apm log-setting telemetry access replace-all-with { access { publisher telemetry-publisher } }
+
+3. Attach the profile to the APM policy.
+
+4. Attach the APM policy to the virtual server. For example:
+
+.. code-block:: python
+   :linenos:
+
+       {
+        "serviceMain": {
+            "class": "Service_HTTP",
+            "virtualAddresses": ["192.0.2.1"],
+            "virtualPort": 80,
+            "policyIAM": {
+                "bigip": "/Common/my_apm_policy"
+            }
+        }
+    }
+
+Example output:
+
+.. code-block:: json
+   :linenos:
+
+    {
+        "hostname":"telemetry.bigip.com",
+        "errdefs_msgno":"01490102:5:",
+        "partition_name":"Common",
+        "session_id":"ec7fd55d",
+        "Access_Profile":"/Common/access_app",
+        "Partition":"Common",
+        "Session_Id":"ec7fd55d",
+        "Access_Policy_Result":"Logon_Deny",
+        "tenant":"Common",
+        "application":"",
+        "telemetryEventCategory":"event"
     }
 
 
