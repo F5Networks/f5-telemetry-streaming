@@ -1,0 +1,222 @@
+Event Listener
+--------------
+
+Telemetry Streaming collects event logs from all BIG-IP sources, including LTM, ASM, AFM, and APM.
+
+The Request Logging profile gives you the ability to configure data within a log file for HTTP requests and responses, in accordance with specified parameters.
+
+LTM Request Log profile
+```````````````````````
+
+To configure an LTM request profile, use these tmsh commands:
+
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Note:
+
+  All keys should be in lower case to enable classication (tenant/application).
+
+1. Create a pool in tmsh: 
+
+``create ltm pool telemetry-local monitor tcp members replace-all-with { 192.0.2.1:6514 }``. 
+
+Replace the example address with a valid Telemetry Streaming listener address, for example the mgmt IP.
+
+2. Create an LTM Request Log Profile: 
+
+``create ltm profile request-log telemetry request-log-pool telemetry-local request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\" request-logging enabled``
+
+3. Attach the profile to the virtual server, for example:
+
+.. code-block:: json
+
+    {
+      "serviceMain": {
+        "class": "Service_HTTP",
+        "virtualAddresses": ["192.0.2.1"],
+        "virtualPort": 80,
+        "profileTrafficLog": {
+          "bigip": "/Common/telemetry"
+        }
+      }
+    }
+
+
+Example Output:
+
+.. code-block:: json
+   :linenos:
+
+    {
+        "event_source":"request_logging",
+        "hostname":"hostname",
+        "client_ip":"177.47.192.42",
+        "server_ip":"",
+        "http_method":"GET",
+        "http_uri":"/",
+        "virtual_name":"/Common/app.app/app_vs",
+        "tenant":"Common",
+        "application":"app.app",
+        "telemetryEventCategory": "event"
+    }
+
+
+APM Request Log profile
+```````````````````````
+
+1. Create a Log Publisher
+
+2. Create a Security Log Profile in TMSH:
+
+``create security log profile telemetry network replace-all-with { telemetry { filter { log-acl-match-drop enabled log-acl-match-reject enabled } publisher telemetry-publisher } }``
+
+3. Attach the profile to the virtual server, for example:
+
+.. code-block:: json
+
+    {
+        "serviceMain": {
+            "class": "Service_HTTP",
+            "virtualAddresses": ["192.0.2.1"],
+            "virtualPort": 80,
+            "securityLogProfiles": [
+                {
+                    "bigip": "/Common/telemetry"
+                }
+            ]
+        }
+    }
+
+
+Example output:
+
+.. code-block:: json
+   :linenos:
+
+    {
+        "acl_policy_name":"/Common/app",
+        "acl_policy_type":"Enforced",
+        "acl_rule_name":"ping",
+        "action":"Reject",
+        "hostname":"telemetry.bigip.com",
+        "bigip_mgmt_ip":"10.0.1.100",
+        "context_name":"/Common/app.app/app_vs",
+        "context_type":"Virtual Server",
+        "date_time":"Dec 17 2018 22:46:04",
+        "dest_fqdn":"unknown",
+        "dest_ip":"10.0.2.101",
+        "dst_geo":"Unknown",
+        "dest_port":"80",
+        "device_product":"Advanced Firewall Module",
+        "device_vendor":"F5",
+        "device_version":"14.0.0.1.0.0.2",
+        "drop_reason":"Policy",
+        "errdefs_msgno":"23003137",
+        "errdefs_msg_name":"Network Event",
+        "flow_id":"0000000000000000",
+        "ip_protocol":"TCP",
+        "severity":"8",
+        "partition_name":"Common",
+        "route_domain":"0",
+        "sa_translation_pool":"",
+        "sa_translation_type":"",
+        "source_fqdn":"unknown",
+        "source_ip":"50.206.82.144",
+        "src_geo":"US/Washington",
+        "source_port":"62204",
+        "source_user":"unknown",
+        "source_user_group":"unknown",
+        "translated_dest_ip":"",
+        "translated_dest_port":"",
+        "translated_ip_protocol":"",
+        "translated_route_domain":"",
+        "translated_source_ip":"",
+        "translated_source_port":"",
+        "translated_vlan":"",
+        "vlan":"/Common/external",
+        "send_to_vs":"",
+        "tenant":"Common",
+        "application":"app.app",
+        "telemetryEventCategory":"event"
+    }
+
+
+ASM Log
+```````
+
+1. Create a Security Log Profile using TMSH:
+
+``create security log profile telemetry application replace-all-with { telemetry { filter replace-all-with { request-type { values replace-all-with { all } } } logger-type remote remote-storage splunk servers replace-all-with { 192.0.2.1:6514 {} } } }``
+
+2. Attach the profile to the virtual server, for example:
+
+.. code-block:: json
+
+    {
+        "serviceMain": {
+            "class": "Service_HTTP",
+            "virtualAddresses": ["192.0.2.1"],
+            "virtualPort": 80,
+            "securityLogProfiles": [
+                {
+                    "bigip": "/Common/telemetry"
+                }
+            ]
+        }
+    }
+
+
+Example output:
+
+.. code-block:: json
+   :linenos:
+
+    {
+        "hostname":"hostname",
+        "management_ip_address":"10.0.1.4",
+        "management_ip_address_2":"",
+        "http_class_name":"/Common/app.app/app_policy",
+        "web_application_name":"/Common/app.app/app_policy",
+        "policy_name":"/Common/app.app/app_policy",
+        "policy_apply_date":"2018-11-19 22:17:57",
+        "violations":"Evasion technique detected",
+        "support_id":"1730614276869062795",
+        "request_status":"blocked",
+        "response_code":"0",
+        "ip_client":"50.206.82.144",
+        "route_domain":"0",
+        "method":"GET",
+        "protocol":"HTTP",
+        "query_string":"",
+        "x_forwarded_for_header_value":"50.206.82.144",
+        "sig_ids":"",
+        "sig_names":"",
+        "date_time":"2018-11-19 22:34:40",
+        "severity":"Critical",
+        "attack_type":"Detection Evasion,Path Traversal",
+        "geo_location":"US",
+        "ip_address_intelligence":"N/A",
+        "username":"N/A",
+        "session_id":"f609d8a924419638",
+        "src_port":"49804",
+        "dest_port":"80",
+        "dest_ip":"10.0.2.10",
+        "sub_violations":"Evasion technique detected:Directory traversals",
+        "virus_name":"N/A",
+        "violation_rating":"3",
+        "websocket_direction":"N/A",
+        "websocket_message_type":"N/A",
+        "device_id":"N/A",
+        "staged_sig_ids":"",
+        "staged_sig_names":"",
+        "threat_campaign_names":"",
+        "staged_threat_campaign_names":"",
+        "blocking_exception_reason":"N/A",
+        "captcha_result":"not_received",
+        "uri":"/directory/file",
+        "fragment":"",
+        "request":"GET /admin/..%2F..%2F..%2Fdirectory/file HTTP/1.0\\r\\nHost: host.westus.cloudapp.azure.com\\r\\nConnection: keep-alive\\r\\nCache-Control: max-age",
+        "tenant":"Common",
+        "application":"app.app",
+        "telemetryEventCategory": "event"
+    }
+
+
