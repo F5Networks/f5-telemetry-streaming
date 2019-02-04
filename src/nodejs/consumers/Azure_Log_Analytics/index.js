@@ -11,47 +11,83 @@
 const request = require('request');
 const crypto = require('crypto');
 
+function makeRequest(requestOptions) {
+    return new Promise((resolve, reject) => {
+        request.post(requestOptions, (error, response, body) => {
+            if (error) {
+                reject(error);
+            } else if (response.statusCode === 200) {
+                resolve();
+            } else {
+                reject(new Error(`response: ${response.statusCode} ${response.statusMessage} ${body}`));
+            }
+        });
+    });
+}
+
 /**
  * See {@link ../README.md#context} for documentation
  */
 module.exports = function (context) {
-    const workspaceId = context.config.workspaceId || context.config.host; // fallback to host
+    const workspaceId = context.config.workspaceId;
     const sharedKey = context.config.passphrase.text;
-
-    const apiVersion = '2016-04-01';
+    const logType = context.config.logType || 'F5Telemetry';
     const date = new Date().toUTCString();
-    const httpBody = JSON.stringify(context.event.data);
 
-    const contentLength = Buffer.byteLength(httpBody, 'utf8');
-    const stringToSign = `POST\n${contentLength}\napplication/json\nx-ms-date:${date}\n/api/logs`;
-    const signature = crypto.createHmac('sha256', new Buffer(sharedKey, 'base64')).update(stringToSign, 'utf-8').digest('base64');
-    const authorization = `SharedKey ${workspaceId}:${signature}`;
-
-    // simply ignore context.config.protocol as log analytics only supports https anyways
-    const url = `https://${workspaceId}.ods.opinsights.azure.com/api/logs?api-version=${apiVersion}`;
-    const httpHeaders = {
-        'content-type': 'application/json',
-        Authorization: authorization,
-        'Log-Type': context.config.logType || 'F5Telemetry',
-        'x-ms-date': date
-    };
-    const requestOptions = {
-        url,
-        headers: httpHeaders,
-        body: httpBody
-    };
-    if (context.tracer) {
-        context.tracer.write(JSON.stringify({ url, headers: httpHeaders, body: JSON.parse(httpBody) }, null, 4));
+    // for event types other than systemInfo, let's not chunk
+    // so simply format according to what the chunking code expects
+    if (context.event.type !== 'systemInfo') {
+        const copyData = JSON.parse(JSON.stringify(context.event.data));
+        context.event.data = {};
+        context.event.data[context.event.type] = copyData;
     }
 
-    // eslint-disable-next-line no-unused-vars
-    request.post(requestOptions, (error, response, body) => {
-        if (error) {
-            context.logger.error(`error: ${error.message ? error.message : error}`);
-        } else if (response.statusCode === 200) {
-            context.logger.debug('success');
-        } else {
-            context.logger.info(`response: ${response.statusCode} ${response.statusMessage}`);
+    const promises = [];
+    const tracerMsg = [];
+    const defaultHttpHeaders = {
+        'content-type': 'application/json',
+        'x-ms-date': date
+    };
+    Object.keys(context.event.data).forEach((type) => {
+        let data = context.event.data[type];
+        if (typeof data !== 'object') {
+            data = { value: data }; // make data an object
         }
+        const body = JSON.stringify(data);
+        const contentLength = Buffer.byteLength(body, 'utf8');
+        const stringToSign = `POST\n${contentLength}\napplication/json\nx-ms-date:${date}\n/api/logs`;
+        const signature = crypto.createHmac('sha256', new Buffer(sharedKey, 'base64')).update(stringToSign, 'utf-8').digest('base64');
+        const authorization = `SharedKey ${workspaceId}:${signature}`;
+
+        const requestOptions = {
+            url: `https://${workspaceId}.ods.opinsights.azure.com/api/logs?api-version=2016-04-01`,
+            headers: Object.assign(defaultHttpHeaders, {
+                'Log-Type': `${logType}_${type}`,
+                Authorization: authorization
+            }),
+            body,
+            strictSSL: !context.config.allowSelfSignedCert
+        };
+
+        if (context.tracer) {
+            // deep copy and parse body, otherwise it will be stringified again
+            const requestOptionsCopy = JSON.parse(JSON.stringify(requestOptions));
+            requestOptionsCopy.body = JSON.parse(requestOptionsCopy.body);
+            tracerMsg.push(requestOptionsCopy);
+        }
+
+        promises.push(makeRequest(requestOptions));
     });
+
+    if (context.tracer) {
+        context.tracer.write(JSON.stringify(tracerMsg, null, 4));
+    }
+
+    return Promise.all(promises)
+        .then(() => {
+            context.logger.debug('success');
+        })
+        .catch((error) => {
+            context.logger.error(`error: ${error.message || error}`);
+        });
 };

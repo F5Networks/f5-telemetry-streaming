@@ -22,14 +22,16 @@ module.exports = function (context) {
 
     const protocol = context.config.protocol || 'http';
     const port = context.config.port ? `:${context.config.port}` : '';
-    const url = `${protocol}://${context.config.host}${port}/events`;
+    const uri = context.config.path || '/events/';
+    const url = `${protocol}://${context.config.host}${port}${uri}`;
     const httpHeaders = {
         'content-type': 'application/json'
     };
     const requestOptions = {
         url,
         headers: httpHeaders,
-        body: httpBody
+        body: httpBody,
+        strictSSL: !context.config.allowSelfSignedCert
     };
     if (context.tracer) {
         context.tracer.write(JSON.stringify({ url, headers: httpHeaders, body: JSON.parse(httpBody) }, null, 4));

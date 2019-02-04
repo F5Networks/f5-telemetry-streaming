@@ -11,10 +11,11 @@
 const fs = require('fs');
 const path = require('path');
 
+const constants = require('../constants.js');
 const logger = require('../logger.js');
 const util = require('../util.js');
 
-const baseSchema = require('../config/base_schema.json');
+const baseSchema = require('../schema/base_schema.json');
 const configWorker = require('../config.js');
 const eventListener = require('../eventListener.js'); // eslint-disable-line no-unused-vars
 const consumers = require('../consumers.js'); // eslint-disable-line no-unused-vars
@@ -32,7 +33,7 @@ function SimpleRouter() {
  * Register request habdler.
  *
  * @public
- * @param {String} method             - HTTP method (POST, GET, etc.)
+ * @param {String | String[]} method  - HTTP method (POST, GET, etc.), could be array
  * @param {String} endpointURI        - URI path, string should be alphanumeric only
  * @param {Function(Object)} callback - request handler
  */
@@ -40,7 +41,13 @@ SimpleRouter.prototype.register = function (method, endpointURI, callback) {
     if (this.routes[endpointURI] === undefined) {
         this.routes[endpointURI] = {};
     }
-    this.routes[endpointURI][method] = callback;
+    if (Array.isArray(method)) {
+        method.forEach((methodItem) => {
+            this.routes[endpointURI][methodItem] = callback;
+        });
+    } else {
+        this.routes[endpointURI][method] = callback;
+    }
 };
 
 /**
@@ -68,7 +75,7 @@ SimpleRouter.prototype.processRestOperation = function (restOperation) {
 SimpleRouter.prototype._processRestOperation = function (restOperation) {
     const urlPath = restOperation.getUri().href;
     const method = restOperation.getMethod().toUpperCase();
-    logger.debug(`'${method}' operation ${urlPath}`);
+    logger.info(`'${method}' operation ${urlPath}`);
 
     // Somehow we need to respond to such requests.
     // When Content-Type === application/json then getBody() tries to
@@ -147,15 +154,17 @@ RestWorker.prototype.onStartCompleted = function (success, failure, state, errMs
  */
 // eslint-disable-next-line no-unused-vars
 RestWorker.prototype._initializeApplication = function (success, failure) {
-    // first load state from rest storage
-    logger.info(`Node version ${process.version}`);
+    // Log system info on service start
+    logger.info(`Application version: ${constants.VERSION}`);
+    logger.debug(`Node version: ${process.version}`);
+
     // register REST endpoints
     this.router = new SimpleRouter();
 
     this.router.register('GET', 'info',
         restOperation => this.processInfoRequest(restOperation));
 
-    this.router.register('POST', 'declare',
+    this.router.register(['GET', 'POST'], 'declare',
         restOperation => configWorker.processClientRequest(restOperation));
 
     this.router.register('GET', 'systempoller',

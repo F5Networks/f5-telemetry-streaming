@@ -60,7 +60,7 @@ function loadConsumers(config) {
         return Promise.resolve([]);
     }
 
-    logger.info(`Loading consumer specific plug-ins from ${CONSUMERS_DIR}`);
+    logger.debug(`Loading consumer specific plug-ins from ${CONSUMERS_DIR}`);
     // eslint-disable-next-line
     return Promise.all(config.map((consumerConfig) => {
         if (consumerConfig.config.enable === false) {
@@ -72,17 +72,20 @@ function loadConsumers(config) {
             // prepend it manually
             const consumerDir = './'.concat(path.join(CONSUMERS_DIR, consumerType));
 
-            logger.info(`Loading consumer ${consumerType} plug-in from ${consumerDir}`);
+            logger.debug(`Loading consumer ${consumerType} plug-in from ${consumerDir}`);
             const consumerModule = loadModule(consumerDir);
             if (consumerModule === null) {
                 resolve(undefined);
             } else {
-                // copy consumer's data
-                resolve({
+                const consumer = {
                     config: JSON.parse(JSON.stringify(consumerConfig.config)),
                     consumer: consumerModule,
                     tracer: tracers.createFromConfig(CLASS_NAME, consumerConfig.name, consumerConfig.config)
-                });
+                };
+                consumer.config.allowSelfSignedCert = consumer.config.allowSelfSignedCert === undefined
+                    ? !constants.STRICT_TLS_REQUIRED : consumer.config.allowSelfSignedCert;
+                // copy consumer's data
+                resolve(consumer);
             }
         });
     }))

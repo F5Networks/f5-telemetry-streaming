@@ -87,7 +87,7 @@ function defaultDataFormat(ctx) {
 * @returns {Object} Promise resolved with transformed data
 */
 function transformData(globalCtx) {
-    if (globalCtx.config.format !== 'f5dashboard') {
+    if (globalCtx.config.format !== 'legacy') {
         return defaultDataFormat(globalCtx);
     }
 
@@ -100,7 +100,7 @@ function transformData(globalCtx) {
             translatedData: []
         },
         cache: {
-            dataTimestamp: Date.parse(globalCtx.event.data.deviceTimestamp)
+            dataTimestamp: Date.parse(globalCtx.event.data.system.systemTimestamp)
         }
     };
     if (globalCtx.config.dumpUndefinedValues) {
@@ -139,7 +139,8 @@ function getDefaultRequestOpts(consumer) {
         url: baseURL,
         headers: {
             Authorization: `Splunk ${consumer.passphrase.text}`
-        }
+        },
+        strictSSL: !consumer.allowSelfSignedCert
     };
     // easier for debug to turn it off
     if (consumer.gzip !== undefined ? consumer.gzip : GZIP_DATA) {

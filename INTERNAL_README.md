@@ -9,13 +9,15 @@ Telemetry Streaming is an iControl LX extension to stream telemetry from BIG-IP(
 - AWS CloudWatch
 - AWS S3
 - Graphite
+- Kafka
+- Elastic Search
+- Sumo Logic
 
 ## Contents
 
 - [Overview](#overview)
 - [Configuration Examples](#configuration-examples)
 - [REST API Endpoints](#rest-api-endpoints)
-- [Data tracer](#data-tracer)
 - [Output Example](#output-example)
 - [Container](#container)
 
@@ -37,6 +39,11 @@ Event Format: ```key1="value",key2="value"```
 
 Definition: Accepts information from disparate systems and provides the tools to process that information.  In the context of Telemetry Streaming this simply means providing a mechanism by which to integrate with existing analytics products.
 
+### Connection verification
+
+Both Consumers and System Poller has property `allowSelfSignedCert` which allows to establish connection which are secured by self-signed certificates.
+Global restriction is disallowing connections secured by self-signed certificates but by setting this property to `true` you allowing TS to connect to such hosts.
+
 ## Configuration examples
 
 ### Basic
@@ -46,6 +53,10 @@ Definition: Accepts information from disparate systems and provides the tools to
 ```json
 {
     "class": "Telemetry",
+    "controls": {
+        "class": "Controls",
+        "logLevel": "info"
+    },
     "My_Poller": {
         "class": "Telemetry_System_Poller",
         "interval": 60
@@ -66,6 +77,37 @@ Definition: Accepts information from disparate systems and provides the tools to
     }
 }
 ```
+
+### Controls
+
+There is a fixed class called "Controls", which contains a number of properties:
+
+- logLevel - logging level, possible values are **debug**, **info**, **error**. Default value is **info**
+
+```json
+{
+    "controls": {
+        "class": "Controls",
+        "logLevel": "info"
+    }
+}
+```
+
+### Additional properties
+
+The schema has some additional properties which might not be covered elesewhere, defined below.
+
+- trace
+  - Definition: Useful during debug of TS because it dumps intermediate data to file.
+  - Values:
+    - *false* - tracer disabled
+    - *true* - tracer enabled, file name will be **DEFAULT_LOCATION/OBJ_TYPE.OBJ_NAME** - Default location for files is **/var/tmp/telemetry**
+    - *string* - custom path to file
+  - Note: Applies to the Telemetry_System_Poller, Telemetry_Listener and Telemetry_Consumer class(es)
+- match
+  - Definition: Provide a string or pattern (regex) which will result in events being dropped that do not match the value of a defined set of keys in the event.  Defined keys: ```virtual_name, policy_name, Access_Profile, context_name```
+  - Values: String or pattern (regex)
+  - Note: Applies to the Telemetry_Listener class
 
 ### Splunk
 
@@ -207,6 +249,104 @@ Note: More information about Graphite events can be found [here](https://graphit
 }
 ```
 
+### Kafka
+
+Website: [https://kafka.apache.org/](https://kafka.apache.org/).
+
+Required information:
+
+- Host: The address of the Kafka system.
+- Port: The port of the Kafka system.
+- Topic: The topic where data should go within the Kafka system.
+
+Note: More information about installing Kafka can be found [here](https://kafka.apache.org/quickstart).
+
+```json
+{
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Kafka",
+        "host": "192.0.2.1",
+        "port": "9092",
+        "topic": "f5-telemetry"
+    }
+}
+```
+
+### ElasticSearch
+
+Website: [https://www.elastic.co/](https://www.elastic.co/).
+
+Required information:
+
+- Host: The address of the ElasticSearch system.
+- Index: The index where data should go within the ElasticSearch system.
+
+Optional parameters:
+
+- Port: The port of the ElasticSearch system. Default is ```9200```.
+- Protocol: The protocol of the ElasticSearch system. Options: ```http``` or ```https```. Default is ```http```.
+- Allow Self Signed Cert: allow TS to skip Cert validation. Options: ```true``` or ```false```. Default is ```false```.
+- Path: The path to use when sending data to the ElasticSearch system.
+- Data Type: The type of data posted to the ElasticSearch system. Default is ```f5.telemetry```
+- API Version: The API version of the ElasticSearch system.
+- Username: The username to use when sending data to the ElasticSearch system.
+- Passphrase: The secret/password to use when sending data to the ElasticSearch system.
+
+Note: More information about installing ElasticSearch can be found [here](https://www.elastic.co/guide/index.html).
+
+```json
+{
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "ElasticSearch",
+        "host": "192.0.2.1",
+        "port": "9200",
+        "protocol": "http",
+        "allowSelfSignedCert": false,
+        "path": "/path/to/post/data",
+        "index": "f5telemetry",
+        "dataType": "f5telemetry",
+        "apiVersion": "6.5",
+        "username": "username",
+        "passphrase": {
+            "cipherText": "secretkey"
+        }
+
+    }
+}
+```
+
+### Sumo Logic
+
+Website: [https://www.sumologic.com/](https://www.sumologic.com/).
+
+Required information:
+
+- Host: The address of the Sumo Logic collector.
+- Protocol: The protocol of the Sumo Logic collector.
+- Port: The port of the Sumo Logic collector.
+- Path: The HTTP path of the Sumo Logic collector (without the secret).
+- Secret: The protected portion of the HTTP path (the final portion of the path, sometimes called a system tenant).
+
+Note: Typically the required information can be found by navigating to the HTTP collector created within Sumo Logic and selecting 'Show URL'.  For example: ```https://endpoint.collection.sumologic.com/receiver/v1/http/secret``` would be broken up into the required information.
+
+```json
+{
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Sumo_Logic",
+        "host": "192.0.2.1",
+        "protocol": "https",
+        "port": "443",
+        "path": "/receiver/v1/http/",
+        "passphrase": {
+            "cipherText": "secret"
+        }
+    }
+}
+```
+
 ### 2 Consumers
 
 ```json
@@ -277,7 +417,7 @@ curl -v -u admin:<admin_password> -X GET http://localhost:8100/mgmt/shared/telem
 Output:
 
 ```json
-{"nodeVersion":"v4.6.0","version":"0.9.0","release":"2","schemaCurrent":"0.9.0","schemaMinimum":"0.9.0"}
+{"nodeVersion":"v4.6.0","version":"1.0.0","release":"2","schemaCurrent":"1.0.0","schemaMinimum":"1.0.0"}
 ```
 
 #### Response
@@ -304,17 +444,17 @@ Output:
 ```json
 {
     "nodeVersion": "v4.6.0",
-    "version": "0.9.0",
+    "version": "1.0.0",
     "release": "2",
-    "schemaCurrent": "0.9.0",
-    "schemaMinimum": "0.9.0"
+    "schemaCurrent": "1.0.0",
+    "schemaMinimum": "1.0.0"
 }
 ```
 
 ### Declare configuration
 
-**<base_endpoint>/declare** - endpoint to declare configuration.
-Allowed HTTP method - **POST**.
+**<base_endpoint>/declare** - endpoint to declare/retrieve configuration.
+Allowed HTTP method - **POST**, **GET**.
 Request body - valid JSON object. For example see [Configuration Example](#configuration-example).
 
 ### System poller
@@ -325,368 +465,413 @@ Useful for demo or to check if poller was able to connect to device.
 **pollerName** should match the name of one of configured pollers.
 Otherwise *HTTP 404* will be returned. For output example see [System Info](#system-info).
 
-## Data tracer
-
-Tracer is useful for debug because it dumps intermediate data to file.
-Default location for files is **/var/tmp/telemetry**
-Each config object has 'tracer' property. Possible values are:
-
-- *false* - tracer disabled
-- *true* - tracer enabled, file name will be **DEFAULT_LOCATION/OBJ_TYPE.OBJ_NAME**
-- *string* - custom path to file to steam data to
-
 ## Output Example
 
 ### System Info
 
 ```json
 {
-    "hostname": "telemetry.bigip.com",
-    "version": "14.0.0.1",
-    "versionBuild": "0.0.2",
-    "location": "Seattle",
-    "description": "Telemetry BIG-IP",
-    "marketingName": "BIG-IP Virtual Edition",
-    "platformId": "Z100",
-    "chassisId": "9c3abad5-513a-1c43-5bc2be62e957",
-    "baseMac": "00:0d:3a:30:34:51",
-    "callBackUrl": "https://192.0.2.1",
-    "configReady": "yes",
-    "licenseReady": "yes",
-    "provisionReady": "yes",
-    "syncMode": "standalone",
-    "syncColor": "green",
-    "syncStatus": "Standalone",
-    "syncSummary": " ",
-    "failoverStatus": "ACTIVE",
-    "failoverColor": "green",
-    "deviceTimestamp": "2018-12-13T20:24:20Z",
-    "cpu": 1,
-    "memory": 15,
-    "tmmCpu": 1,
-    "tmmMemory": 4,
-    "tmmTraffic": {
-        "clientSideTraffic.bitsIn": 5682858224,
-        "clientSideTraffic.bitsOut": 18756943624
-    },
-    "diskStorage": {
-        "/": {
-            "1024-blocks": "436342",
-            "Capacity": "55%",
-            "name": "/"
+    "system": {
+        "hostname": "telemetry.bigip.com",
+        "version": "14.0.0.1",
+        "versionBuild": "0.0.2",
+        "location": "Seattle",
+        "description": "Telemetry BIG-IP",
+        "marketingName": "BIG-IP Virtual Edition",
+        "platformId": "Z100",
+        "chassisId": "9c3abad5-513a-1c43-5bc2be62e957",
+        "baseMac": "00:0d:3a:30:34:51",
+        "callBackUrl": "https://10.0.1.100",
+        "configReady": "yes",
+        "licenseReady": "yes",
+        "provisionReady": "yes",
+        "syncMode": "standalone",
+        "syncColor": "green",
+        "syncStatus": "Standalone",
+        "syncSummary": " ",
+        "failoverStatus": "ACTIVE",
+        "failoverColor": "green",
+        "systemTimestamp": "2019-02-01T17:23:15Z",
+        "cpu": 3,
+        "memory": 55,
+        "tmmCpu": 1,
+        "tmmMemory": 11,
+        "tmmTraffic": {
+            "clientSideTraffic.bitsIn": 30749965632,
+            "clientSideTraffic.bitsOut": 91027281336,
+            "serverSideTraffic.bitsIn": 26698867512,
+            "serverSideTraffic.bitsOut": 90836218144
         },
-        "/dev/shm": {
-            "1024-blocks": "7181064",
-            "Capacity": "1%",
-            "name": "/dev/shm"
+        "diskStorage": {
+            "/": {
+                "1024-blocks": "436342",
+                "Capacity": "55%",
+                "name": "/"
+            },
+            "/dev/shm": {
+                "1024-blocks": "7181064",
+                "Capacity": "9%",
+                "name": "/dev/shm"
+            },
+            "/config": {
+                "1024-blocks": "3269592",
+                "Capacity": "11%",
+                "name": "/config"
+            },
+            "/usr": {
+                "1024-blocks": "4136432",
+                "Capacity": "83%",
+                "name": "/usr"
+            },
+            "/var": {
+                "1024-blocks": "3096336",
+                "Capacity": "37%",
+                "name": "/var"
+            },
+            "/shared": {
+                "1024-blocks": "20642428",
+                "Capacity": "3%",
+                "name": "/shared"
+            },
+            "/var/log": {
+                "1024-blocks": "3023760",
+                "Capacity": "7%",
+                "name": "/var/log"
+            },
+            "/appdata": {
+                "1024-blocks": "51607740",
+                "Capacity": "3%",
+                "name": "/appdata"
+            },
+            "/shared/rrd.1.2": {
+                "1024-blocks": "7181064",
+                "Capacity": "1%",
+                "name": "/shared/rrd.1.2"
+            },
+            "/var/run": {
+                "1024-blocks": "7181064",
+                "Capacity": "1%",
+                "name": "/var/run"
+            },
+            "/var/tmstat": {
+                "1024-blocks": "7181064",
+                "Capacity": "1%",
+                "name": "/var/tmstat"
+            },
+            "/var/prompt": {
+                "1024-blocks": "4096",
+                "Capacity": "1%",
+                "name": "/var/prompt"
+            },
+            "/var/apm/mount/apmclients-7170.2018.627.21-3.0.iso": {
+                "1024-blocks": "298004",
+                "Capacity": "100%",
+                "name": "/var/apm/mount/apmclients-7170.2018.627.21-3.0.iso"
+            },
+            "/var/loipc": {
+                "1024-blocks": "7181064",
+                "Capacity": "0%",
+                "name": "/var/loipc"
+            },
+            "/mnt/sshplugin_tempfs": {
+                "1024-blocks": "7181064",
+                "Capacity": "0%",
+                "name": "/mnt/sshplugin_tempfs"
+            }
         },
-        "/config": {
-            "1024-blocks": "3269592",
-            "Capacity": "3%",
-            "name": "/config"
+        "diskLatency": {
+            "sda": {
+                "rsec/s": "10.49",
+                "wsec/s": "232.03",
+                "name": "sda"
+            },
+            "sdb": {
+                "rsec/s": "1.04",
+                "wsec/s": "0.00",
+                "name": "sdb"
+            },
+            "dm-0": {
+                "rsec/s": "0.02",
+                "wsec/s": "0.00",
+                "name": "dm-0"
+            },
+            "dm-1": {
+                "rsec/s": "0.17",
+                "wsec/s": "112.02",
+                "name": "dm-1"
+            },
+            "dm-2": {
+                "rsec/s": "0.47",
+                "wsec/s": "37.00",
+                "name": "dm-2"
+            },
+            "dm-3": {
+                "rsec/s": "0.85",
+                "wsec/s": "31.45",
+                "name": "dm-3"
+            },
+            "dm-4": {
+                "rsec/s": "0.05",
+                "wsec/s": "0.22",
+                "name": "dm-4"
+            },
+            "dm-5": {
+                "rsec/s": "0.39",
+                "wsec/s": "3.34",
+                "name": "dm-5"
+            },
+            "dm-6": {
+                "rsec/s": "5.82",
+                "wsec/s": "0.00",
+                "name": "dm-6"
+            },
+            "dm-7": {
+                "rsec/s": "0.22",
+                "wsec/s": "0.90",
+                "name": "dm-7"
+            },
+            "dm-8": {
+                "rsec/s": "1.41",
+                "wsec/s": "47.10",
+                "name": "dm-8"
+            }
         },
-        "/usr": {
-            "1024-blocks": "4136432",
-            "Capacity": "83%",
-            "name": "/usr"
+        "networkInterfaces": {
+            "1.1": {
+                "counters.bitsIn": 88594112512,
+                "counters.bitsOut": 28164141760,
+                "status": "up",
+                "name": "1.1"
+            },
+            "1.2": {
+                "counters.bitsIn": 7703269352,
+                "counters.bitsOut": 413753256,
+                "status": "up",
+                "name": "1.2"
+            },
+            "mgmt": {
+                "counters.bitsIn": 10280239984,
+                "counters.bitsOut": 4504546456,
+                "status": "up",
+                "name": "mgmt"
+            }
         },
-        "/var": {
-            "1024-blocks": "3096336",
-            "Capacity": "28%",
-            "name": "/var"
-        },
-        "/shared": {
-            "1024-blocks": "20642428",
-            "Capacity": "2%",
-            "name": "/shared"
-        },
-        "/var/log": {
-            "1024-blocks": "3023760",
-            "Capacity": "5%",
-            "name": "/var/log"
-        },
-        "/appdata": {
-            "1024-blocks": "25717852",
-            "Capacity": "1%",
-            "name": "/appdata"
-        },
-        "/shared/rrd.1.2": {
-            "1024-blocks": "7181064",
-            "Capacity": "1%",
-            "name": "/shared/rrd.1.2"
-        },
-        "/var/run": {
-            "1024-blocks": "7181064",
-            "Capacity": "1%",
-            "name": "/var/run"
-        },
-        "/var/tmstat": {
-            "1024-blocks": "7181064",
-            "Capacity": "1%",
-            "name": "/var/tmstat"
-        },
-        "/var/prompt": {
-            "1024-blocks": "4096",
-            "Capacity": "1%",
-            "name": "/var/prompt"
-        },
-        "/var/loipc": {
-            "1024-blocks": "7181064",
-            "Capacity": "0%",
-            "name": "/var/loipc"
+        "provisioning": {
+            "afm": {
+                "name": "afm",
+                "level": "nominal"
+            },
+            "am": {
+                "name": "am",
+                "level": "none"
+            },
+            "apm": {
+                "name": "apm",
+                "level": "nominal"
+            },
+            "asm": {
+                "name": "asm",
+                "level": "nominal"
+            },
+            "avr": {
+                "name": "avr",
+                "level": "nominal"
+            },
+            "dos": {
+                "name": "dos",
+                "level": "none"
+            },
+            "fps": {
+                "name": "fps",
+                "level": "none"
+            },
+            "gtm": {
+                "name": "gtm",
+                "level": "none"
+            },
+            "ilx": {
+                "name": "ilx",
+                "level": "none"
+            },
+            "lc": {
+                "name": "lc",
+                "level": "none"
+            },
+            "ltm": {
+                "name": "ltm",
+                "level": "nominal"
+            },
+            "pem": {
+                "name": "pem",
+                "level": "none"
+            },
+            "sslo": {
+                "name": "sslo",
+                "level": "none"
+            },
+            "swg": {
+                "name": "swg",
+                "level": "none"
+            },
+            "urldb": {
+                "name": "urldb",
+                "level": "none"
+            }
         }
     },
-    "diskLatency": {
-        "sda": {
-            "rsec/s": "356.44",
-            "wsec/s": "109.09",
-            "name": "sda"
-        },
-        "sdb": {
-            "rsec/s": "1.03",
-            "wsec/s": "0.00",
-            "name": "sdb"
-        },
-        "dm-0": {
-            "rsec/s": "0.02",
-            "wsec/s": "0.00",
-            "name": "dm-0"
-        },
-        "dm-1": {
-            "rsec/s": "1.16",
-            "wsec/s": "64.68",
-            "name": "dm-1"
-        },
-        "dm-2": {
-            "rsec/s": "0.02",
-            "wsec/s": "0.00",
-            "name": "dm-2"
-        },
-        "dm-3": {
-            "rsec/s": "0.83",
-            "wsec/s": "26.54",
-            "name": "dm-3"
-        },
-        "dm-4": {
-            "rsec/s": "1.16",
-            "wsec/s": "5.80",
-            "name": "dm-4"
-        },
-        "dm-5": {
-            "rsec/s": "19.59",
-            "wsec/s": "2.23",
-            "name": "dm-5"
-        },
-        "dm-6": {
-            "rsec/s": "327.64",
-            "wsec/s": "0.00",
-            "name": "dm-6"
-        },
-        "dm-7": {
-            "rsec/s": "0.62",
-            "wsec/s": "0.80",
-            "name": "dm-7"
-        },
-        "dm-8": {
-            "rsec/s": "4.28",
-            "wsec/s": "9.04",
-            "name": "dm-8"
-        }
-    },
-    "networkInterfaces": {
-        "1.1": {
-            "counters.bitsIn": 18226797032,
-            "counters.bitsOut": 5242940808,
-            "status": "up",
-            "name": "1.1"
-        },
-        "1.2": {
-            "counters.bitsIn": 1534110872,
-            "counters.bitsOut": 84389728,
-            "status": "up",
-            "name": "1.2"
-        },
-        "mgmt": {
-            "counters.bitsIn": 2242676328,
-            "counters.bitsOut": 1143046952,
-            "status": "up",
-            "name": "mgmt"
-        }
-    },
-    "provisionState": {
-        "afm": {
-            "level": "none",
-            "name": "afm"
-        },
-        "am": {
-            "level": "none",
-            "name": "am"
-        },
-        "apm": {
-            "level": "none",
-            "name": "apm"
-        },
-        "asm": {
-            "level": "none",
-            "name": "asm"
-        },
-        "avr": {
-            "level": "none",
-            "name": "avr"
-        },
-        "dos": {
-            "level": "none",
-            "name": "dos"
-        },
-        "fps": {
-            "level": "none",
-            "name": "fps"
-        },
-        "gtm": {
-            "level": "none",
-            "name": "gtm"
-        },
-        "ilx": {
-            "level": "none",
-            "name": "ilx"
-        },
-        "lc": {
-            "level": "none",
-            "name": "lc"
-        },
-        "ltm": {
-            "level": "nominal",
-            "name": "ltm"
-        },
-        "pem": {
-            "level": "none",
-            "name": "pem"
-        },
-        "sslo": {
-            "level": "none",
-            "name": "sslo"
-        },
-        "swg": {
-            "level": "none",
-            "name": "swg"
-        },
-        "urldb": {
-            "level": "none",
-            "name": "urldb"
-        }
-    },
-    "virtualServerStats": {
+    "virtualServers": {
         "/Common/app.app/app_vs": {
-            "clientside.bitsIn": 5474952,
-            "clientside.bitsOut": 66039264,
+            "clientside.bitsIn": 19599288,
+            "clientside.bitsOut": 119172032,
             "clientside.curConns": 0,
             "destination": "10.0.2.101:80",
-            "status.availabilityState": "available",
-            "status.enabledState": "enabled",
+            "availabilityState": "available",
+            "enabledState": "enabled",
             "name": "/Common/app.app/app_vs",
             "tenant": "Common",
             "application": "app.app"
         },
-        "/Sample_02/A1/serviceMain": {
+        "/Example_Tenant/A1/serviceMain": {
             "clientside.bitsIn": 0,
             "clientside.bitsOut": 0,
             "clientside.curConns": 0,
             "destination": "192.0.2.11:443",
-            "status.availabilityState": "offline",
-            "status.enabledState": "enabled",
-            "name": "/Sample_02/A1/serviceMain",
-            "tenant": "Sample_02",
+            "availabilityState": "offline",
+            "enabledState": "enabled",
+            "name": "/Example_Tenant/A1/serviceMain",
+            "tenant": "Example_Tenant",
             "application": "A1"
         },
-        "/Sample_02/A1/serviceMain-Redirect": {
+        "/Example_Tenant/A1/serviceMain-Redirect": {
             "clientside.bitsIn": 0,
             "clientside.bitsOut": 0,
             "clientside.curConns": 0,
             "destination": "192.0.2.11:80",
-            "status.availabilityState": "unknown",
-            "status.enabledState": "enabled",
-            "name": "/Sample_02/A1/serviceMain-Redirect",
-            "tenant": "Sample_02",
+            "availabilityState": "unknown",
+            "enabledState": "enabled",
+            "name": "/Example_Tenant/A1/serviceMain-Redirect",
+            "tenant": "Example_Tenant",
             "application": "A1"
         }
     },
-    "poolStats": {
+    "pools": {
         "/Common/app.app/app_pool": {
+            "activeMemberCnt": 1,
+            "serverside.bitsIn": 25825768,
+            "serverside.bitsOut": 114425928,
+            "serverside.curConns": 0,
+            "availabilityState": "available",
+            "enabledState": "enabled",
+            "name": "/Common/app.app/app_pool",
             "members": {
                 "/Common/10.0.3.5:80": {
                     "addr": "10.0.3.5",
                     "port": 80,
-                    "serverside.bitsIn": 7392800,
-                    "serverside.bitsOut": 67086632,
+                    "serverside.bitsIn": 25825768,
+                    "serverside.bitsOut": 114425928,
                     "serverside.curConns": 0,
-                    "sessionStatus": "enabled",
-                    "status.availabilityState": "available",
-                    "status.enabledState": "enabled",
-                    "status.statusReason": "Pool member is available"
+                    "availabilityState": "available",
+                    "enabledState": "enabled"
                 }
             },
-            "name": "/Common/app.app/app_pool",
             "tenant": "Common",
             "application": "app.app"
         },
         "/Common/telemetry-local": {
+            "activeMemberCnt": 1,
+            "serverside.bitsIn": 8908592,
+            "serverside.bitsOut": 1955808,
+            "serverside.curConns": 0,
+            "availabilityState": "available",
+            "enabledState": "enabled",
+            "name": "/Common/telemetry-local",
             "members": {
                 "/Common/10.0.1.100:6514": {
                     "addr": "10.0.1.100",
                     "port": 6514,
-                    "serverside.bitsIn": 2881560,
-                    "serverside.bitsOut": 615872,
+                    "serverside.bitsIn": 8908592,
+                    "serverside.bitsOut": 1955808,
                     "serverside.curConns": 0,
-                    "sessionStatus": "enabled",
-                    "status.availabilityState": "available",
-                    "status.enabledState": "enabled",
-                    "status.statusReason": "Pool member is available"
+                    "availabilityState": "available",
+                    "enabledState": "enabled"
                 }
             },
-            "name": "/Common/telemetry-local",
             "tenant": "Common",
             "application": ""
         },
-        "/Sample_02/A1/web_pool": {
+        "/Example_Tenant/A1/hsl_pool": {
+            "activeMemberCnt": 0,
+            "serverside.bitsIn": 0,
+            "serverside.bitsOut": 0,
+            "serverside.curConns": 0,
+            "availabilityState": "offline",
+            "enabledState": "enabled",
+            "name": "/Example_Tenant/A1/hsl_pool",
             "members": {
-                "/Sample_02/192.0.2.12:80": {
+                "/Example_Tenant/192.168.120.6:514": {
+                    "addr": "192.168.120.6",
+                    "port": 514,
+                    "serverside.bitsIn": 0,
+                    "serverside.bitsOut": 0,
+                    "serverside.curConns": 0,
+                    "availabilityState": "offline",
+                    "enabledState": "enabled"
+                }
+            },
+            "tenant": "Example_Tenant",
+            "application": "A1"
+        },
+        "/Example_Tenant/A1/web_pool": {
+            "activeMemberCnt": 0,
+            "serverside.bitsIn": 0,
+            "serverside.bitsOut": 0,
+            "serverside.curConns": 0,
+            "availabilityState": "offline",
+            "enabledState": "enabled",
+            "name": "/Example_Tenant/A1/web_pool",
+            "members": {
+                "/Example_Tenant/192.0.2.12:80": {
                     "addr": "192.0.2.12",
                     "port": 80,
                     "serverside.bitsIn": 0,
                     "serverside.bitsOut": 0,
                     "serverside.curConns": 0,
-                    "sessionStatus": "enabled",
-                    "status.availabilityState": "offline",
-                    "status.enabledState": "enabled",
-                    "status.statusReason": "Pool member has been marked down by a monitor"
+                    "availabilityState": "offline",
+                    "enabledState": "enabled"
                 },
-                "/Sample_02/192.0.2.13:80": {
+                "/Example_Tenant/192.0.2.13:80": {
                     "addr": "192.0.2.13",
                     "port": 80,
                     "serverside.bitsIn": 0,
                     "serverside.bitsOut": 0,
                     "serverside.curConns": 0,
-                    "sessionStatus": "enabled",
-                    "status.availabilityState": "offline",
-                    "status.enabledState": "enabled",
-                    "status.statusReason": "Pool member has been marked down by a monitor"
+                    "availabilityState": "offline",
+                    "enabledState": "enabled"
                 }
             },
-            "name": "/Sample_02/A1/web_pool",
-            "tenant": "Sample_02",
+            "tenant": "Example_Tenant",
             "application": "A1"
         }
     },
-    "ltmPolicyStats": {
-        "/Common/example_policy": {
+    "ltmPolicies": {
+        "/Common/app.app/app_policy": {
+            "invoked": 5413,
+            "succeeded": 5413,
+            "actions": {
+                "default:1": {
+                    "invoked": 5413,
+                    "succeeded": 5413
+                }
+            },
+            "name": "/Common/app.app/app_policy",
+            "tenant": "Common",
+            "application": "app.app"
+        },
+        "/Common/telemetry": {
             "invoked": 0,
             "succeeded": 0,
             "actions": {
                 "default:0": {
-                    "invoked": 0,
-                    "succeeded": 0
-                },
-                "rule_1:0": {
                     "invoked": 0,
                     "succeeded": 0
                 }
@@ -696,7 +881,162 @@ Each config object has 'tracer' property. Possible values are:
             "application": ""
         }
     },
-    "tlsCerts": {
+    "httpProfiles": {
+        "/Common/app.app/app_http": {
+            "cookiePersistInserts": 5409,
+            "getReqs": 2395,
+            "maxKeepaliveReq": 350,
+            "numberReqs": 5413,
+            "postReqs": 2989,
+            "2xxResp": 289,
+            "3xxResp": 0,
+            "4xxResp": 5124,
+            "5xxResp": 0,
+            "respLessThan2m": 0,
+            "respGreaterThan2m": 0,
+            "v10Reqs": 30,
+            "v10Resp": 0,
+            "v11Reqs": 5379,
+            "v11Resp": 5413,
+            "v9Reqs": 4,
+            "v9Resp": 0,
+            "name": "/Common/app.app/app_http",
+            "tenant": "Common",
+            "application": "app.app"
+        },
+        "/Common/http": {
+            "cookiePersistInserts": 0,
+            "getReqs": 0,
+            "maxKeepaliveReq": 0,
+            "numberReqs": 0,
+            "postReqs": 0,
+            "2xxResp": 0,
+            "3xxResp": 0,
+            "4xxResp": 0,
+            "5xxResp": 0,
+            "respLessThan2m": 0,
+            "respGreaterThan2m": 0,
+            "v10Reqs": 0,
+            "v10Resp": 0,
+            "v11Reqs": 0,
+            "v11Resp": 0,
+            "v9Reqs": 0,
+            "v9Resp": 0,
+            "name": "/Common/http",
+            "tenant": "Common",
+            "application": ""
+        },
+        "/Example_Tenant/A1/custom_http_profile": {
+            "cookiePersistInserts": 0,
+            "getReqs": 0,
+            "maxKeepaliveReq": 0,
+            "numberReqs": 0,
+            "postReqs": 0,
+            "2xxResp": 0,
+            "3xxResp": 0,
+            "4xxResp": 0,
+            "5xxResp": 0,
+            "respLessThan2m": 0,
+            "respGreaterThan2m": 0,
+            "v10Reqs": 0,
+            "v10Resp": 0,
+            "v11Reqs": 0,
+            "v11Resp": 0,
+            "v9Reqs": 0,
+            "v9Resp": 0,
+            "name": "/Example_Tenant/A1/custom_http_profile",
+            "tenant": "Example_Tenant",
+            "application": "A1"
+        }
+    },
+    "clientSslProfiles": {
+        "/Common/clientssl": {
+            "currentCompatibleConnections": 0,
+            "currentConnections": 0,
+            "currentNativeConnections": 0,
+            "currentActiveHandshakes": 0,
+            "decryptedBytesIn": 0,
+            "decryptedBytesOut": 0,
+            "encryptedBytesIn": 0,
+            "encryptedBytesOut": 0,
+            "fatalAlerts": 0,
+            "handshakeFailures": 0,
+            "peercertInvalid": 0,
+            "peercertNone": 0,
+            "peercertValid": 0,
+            "protocolUses.dtlsv1": 0,
+            "protocolUses.sslv2": 0,
+            "protocolUses.sslv3": 0,
+            "protocolUses.tlsv1": 0,
+            "protocolUses.tlsv1_1": 0,
+            "protocolUses.tlsv1_2": 0,
+            "protocolUses.tlsv1_3": 0,
+            "recordsIn": 0,
+            "recordsOut": 0,
+            "sniRejects": 0,
+            "name": "/Common/clientssl",
+            "tenant": "Common",
+            "application": ""
+        },
+        "/Example_Tenant/A1/webtls": {
+            "currentCompatibleConnections": 0,
+            "currentConnections": 0,
+            "currentNativeConnections": 0,
+            "currentActiveHandshakes": 0,
+            "decryptedBytesIn": 0,
+            "decryptedBytesOut": 0,
+            "encryptedBytesIn": 0,
+            "encryptedBytesOut": 0,
+            "fatalAlerts": 0,
+            "handshakeFailures": 0,
+            "peercertInvalid": 0,
+            "peercertNone": 0,
+            "peercertValid": 0,
+            "protocolUses.dtlsv1": 0,
+            "protocolUses.sslv2": 0,
+            "protocolUses.sslv3": 0,
+            "protocolUses.tlsv1": 0,
+            "protocolUses.tlsv1_1": 0,
+            "protocolUses.tlsv1_2": 0,
+            "protocolUses.tlsv1_3": 0,
+            "recordsIn": 0,
+            "recordsOut": 0,
+            "sniRejects": 0,
+            "name": "/Example_Tenant/A1/webtls",
+            "tenant": "Example_Tenant",
+            "application": "A1"
+        }
+    },
+    "serverSslProfiles": {
+        "/Common/serverssl": {
+            "currentCompatibleConnections": 0,
+            "currentConnections": 0,
+            "currentNativeConnections": 0,
+            "currentActiveHandshakes": 0,
+            "decryptedBytesIn": 0,
+            "decryptedBytesOut": 0,
+            "encryptedBytesIn": 0,
+            "encryptedBytesOut": 0,
+            "fatalAlerts": 0,
+            "handshakeFailures": 0,
+            "peercertInvalid": 0,
+            "peercertNone": 0,
+            "peercertValid": 0,
+            "protocolUses.dtlsv1": 0,
+            "protocolUses.sslv2": 0,
+            "protocolUses.sslv3": 0,
+            "protocolUses.tlsv1": 0,
+            "protocolUses.tlsv1_1": 0,
+            "protocolUses.tlsv1_2": 0,
+            "protocolUses.tlsv1_3": 0,
+            "recordsIn": 0,
+            "recordsOut": 0,
+            "name": "/Common/serverssl",
+            "tenant": "Common",
+            "application": ""
+        }
+    },
+    "sslCerts": {
         "ca-bundle.crt": {
             "expirationDate": 1893455999,
             "expirationString": "Dec 31 23:59:59 2029 GMT",
@@ -729,7 +1069,9 @@ Each config object has 'tracer' property. Possible values are:
         }
     },
     "telemetryServiceInfo": {
-        "pollingInterval": 300
+        "pollingInterval": 300,
+        "cycleStart": "Fri, 01 Feb 2019 17:23:14 GMT",
+        "cycleEnd": "Fri, 01 Feb 2019 17:23:15 GMT"
     },
     "telemetryEventCategory": "systemInfo"
 }
@@ -737,14 +1079,33 @@ Each config object has 'tracer' property. Possible values are:
 
 ### Events (Logs)
 
-**Note**: all 'keys' inside of events should be in lower case to enable classification (tenant/application).
-
 #### LTM Request Log
 
-Create LTM Request Log Profile:
+**Note**: all 'keys' should be in lower case to enable classification (tenant/application).
 
-- Create Pool (tmsh): ```create ltm pool telemetry-local monitor tcp members replace-all-with { 192.0.2.1:6514 }``` - Note: Replace example address with valid listener address, for example the mgmt IP.
-- Create Profile (tmsh): ```create ltm profile request-log telemetry-test request-log-pool telemetry-local request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\" request-logging enabled``` - Note: If creating from the GUI the ```\``` are not required.
+Configuration
+
+- Create Pool (just the pool, no destination/publisher): [Log Publisher Configuration](#log-publisher-configuration)
+- Create LTM Request Log Profile
+  - TMSH: ```create ltm profile request-log telemetry request-log-pool telemetry-local request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\" request-logging enabled```
+  - F5 Application Services Extension: [using-a-traffic-log-profile-in-a-declaration](https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/latest/declarations/profiles.html#using-a-traffic-log-profile-in-a-declaration)
+  - Note: If creating the profile from the GUI, the ```\``` are not required.
+- Attach profile to the virtual server
+  - F5 Application Services Extension (snippet) - Note: Requires v3.8.0 or greater
+    ```json
+        {
+            "serviceMain": {
+                "class": "Service_HTTP",
+                "virtualAddresses": ["192.0.2.1"],
+                "virtualPort": 80,
+                "profileTrafficLog": {
+                    "bigip": "/Common/telemetry"
+                }
+            }
+        }
+    ```
+
+Output
 
 ```json
 {
@@ -763,9 +1124,29 @@ Create LTM Request Log Profile:
 
 #### AFM Log
 
-Create Security Log Profile:
+Configuration
 
-TBD
+- Create Log Publisher (and related objects): [Log Publisher Configuration](#log-publisher-configuration)
+- Create Security Log Profile:
+  - TMSH: ```create security log profile telemetry network replace-all-with { telemetry { filter { log-acl-match-drop enabled log-acl-match-reject enabled } publisher telemetry-publisher } }```
+- Attach profile to the virtual server
+  - F5 Application Services Extension (snippet)
+    ```json
+        {
+            "serviceMain": {
+                "class": "Service_HTTP",
+                "virtualAddresses": ["192.0.2.1"],
+                "virtualPort": 80,
+                "securityLogProfiles": [
+                    {
+                        "bigip": "/Common/telemetry"
+                    }
+                ]
+            }
+        }
+    ```
+
+Output
 
 ```json
 {
@@ -818,9 +1199,28 @@ TBD
 
 #### ASM Log
 
-Create Security Log Profile:
+Configuration
 
-TBD
+- Create Security Log Profile:
+  - TMSH: ```create security log profile telemetry application replace-all-with { telemetry { filter replace-all-with { request-type { values replace-all-with { all } } } logger-type remote remote-storage splunk servers replace-all-with { 192.0.2.1:6514 {} } } }```
+- Attach profile to the virtual server
+  - F5 Application Services Extension (snippet)
+    ```json
+        {
+            "serviceMain": {
+                "class": "Service_HTTP",
+                "virtualAddresses": ["192.0.2.1"],
+                "virtualPort": 80,
+                "securityLogProfiles": [
+                    {
+                        "bigip": "/Common/telemetry"
+                    }
+                ]
+            }
+        }
+    ```
+
+Output
 
 ```json
 {
@@ -876,21 +1276,28 @@ TBD
 
 #### APM Log
 
-Create APM Log Profile:
+Configuration
 
-- Create Pool (tmsh): ```create ltm pool telemetry-local monitor tcp members replace-all-with { 192.0.2.1:6514 }``` - Note: Replace example address with valid listener address, for example the mgmt IP.
-- Create Log Destination: System -> Logs -> Configuration -> Log Destinations
-  - Name: telemetry-hsl (or similar)
-  - Type: Remote HSL
-  - Protocol: TCP
-  - Pool: telemetry-local
-- Create Log Destination (format): System -> Logs -> Configuration -> Log Destinations
-  - Name: telemetry-formatted (or similar)
-  - Forward To: telemetry-hsl
-- Create Log Publisher: System -> Logs -> Configuration -> Log Publishers
-  - Name: telemetry-publisher (or similar)
-  - Destinations: telemetry-formatted
-- Create Profile (tmsh): ```create apm log-setting telemetry access replace-all-with { access { publisher telemetry-publisher } }```
+- Create Log Publisher (and related objects): [Log Publisher Configuration](#log-publisher-configuration)
+- Create APM Log Profile
+  - TMSH: ```create apm log-setting telemetry access replace-all-with { access { publisher telemetry-publisher } }```
+- Attach profile to the APM policy
+- Attach APM policy to the virtual server
+  - F5 Application Services Extension (snippet)
+    ```json
+        {
+            "serviceMain": {
+                "class": "Service_HTTP",
+                "virtualAddresses": ["192.0.2.1"],
+                "virtualPort": 80,
+                "policyIAM": {
+                    "bigip": "/Common/my_apm_policy"
+                }
+            }
+        }
+    ```
+
+Output
 
 ```json
 {
@@ -908,6 +1315,29 @@ Create APM Log Profile:
 }
 
 ```
+
+#### Log Publisher Configuration
+
+- Create Pool
+  - TMSH: ```create ltm pool telemetry-local monitor tcp members replace-all-with { 192.0.2.1:6514 }```
+  - Note: Replace example address with valid TS listener address, for example the mgmt IP.
+- Create Log Destination (Remote HSL)
+  - GUI: System -> Logs -> Configuration -> Log Destinations
+    - Name: telemetry-hsl
+    - Type: Remote HSL
+    - Protocol: TCP
+    - Pool: telemetry-local
+  - TMSH: ```create sys log-config destination remote-high-speed-log telemetry-hsl protocol tcp pool-name telemetry-local```
+- Create Log Destination (Format)
+  - GUI: System -> Logs -> Configuration -> Log Destinations
+    - Name: telemetry-formatted
+    - Forward To: telemetry-hsl
+  - TMSH: ```create sys log-config destination splunk telemetry-formatted forward-to telemetry-hsl```
+- Create Log Publisher
+  - GUI: System -> Logs -> Configuration -> Log Publishers
+    - Name: telemetry-publisher
+    - Destinations: telemetry-formatted
+  - TMSH: ```create sys log-config publisher telemetry-publisher destinations replace-all-with { telemetry-formatted }```
 
 ## Container
 

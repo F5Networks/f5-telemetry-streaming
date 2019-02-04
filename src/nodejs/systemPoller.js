@@ -32,12 +32,17 @@ function process(args) {
     const config = args.config;
     const tracer = args.tracer;
 
+    const startTimestamp = new Date().toUTCString();
+    logger.debug('System poller cycle started');
+
     return new SystemStats().collect(
         config.host,
-        config.port,
-        config.username,
-        config.passphrase ? config.passphrase.text : undefined,
         {
+            allowSelfSignedCert: config.allowSelfSignedCert,
+            protocol: config.protocol,
+            port: config.port,
+            username: config.username,
+            passphrase: config.passphrase ? config.passphrase.text : undefined,
             tags: config.tag,
             addtlProperties: {
                 pollingInterval: config.interval
@@ -45,6 +50,17 @@ function process(args) {
         }
     )
         .then((data) => {
+            const endTimeStamp = new Date().toUTCString();
+            // inject service data
+            const telemetryServiceInfo = {
+                pollingInterval: config.interval,
+                cycleStart: startTimestamp,
+                cycleEnd: endTimeStamp
+            };
+            data.telemetryServiceInfo = telemetryServiceInfo;
+            data.telemetryEventCategory = constants.EVENT_TYPES.SYSTEM_POLLER;
+            // end inject service data
+
             if (tracer) {
                 tracer.write(JSON.stringify(data, null, 4));
             }
@@ -53,9 +69,9 @@ function process(args) {
                 ret = Promise.resolve(data);
             } else {
                 // call out to pipeline
-                dataPipeline.process(data, 'systemInfo');
+                dataPipeline.process(data, constants.EVENT_TYPES.SYSTEM_POLLER);
             }
-            logger.debug('systemPoller.process() success');
+            logger.debug('System poller cycle finished');
             return ret;
         })
         .catch((e) => {
