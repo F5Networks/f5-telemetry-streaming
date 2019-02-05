@@ -28,7 +28,7 @@ Example Declaration:
             "class": "Telemetry_Consumer",
             "type": "Splunk",
             "host": "192.0.2.1",
-            "protocol": "http",
+            "protocol": "https",
             "port": "8088",
             "passphrase": {
                 "cipherText": "apikey"
@@ -150,8 +150,8 @@ Required Information:
             "class": "Telemetry_Consumer",
             "type": "Graphite",
             "host": "192.0.2.1",
-            "protocol": "http",
-            "port": "80"
+            "protocol": "https",
+            "port": "443"
         }
     }
 
@@ -211,7 +211,7 @@ Optional Parameters:
             "type": "ElasticSearch",
             "host": "192.0.2.1",
             "port": "9200",
-            "protocol": "http",
+            "protocol": "https",
             "allowSelfSignedCert": false,
             "path": "/path/to/post/data",
             "index": "f5telemetry",

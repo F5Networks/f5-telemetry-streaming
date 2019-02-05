@@ -30,7 +30,7 @@ A basic declaration is shown here with descriptions of the components below:
             "class": "Telemetry_Consumer",
             "type": "Splunk",
             "host": "192.0.2.1",
-            "protocol": "http",
+            "protocol": "https",
             "port": "8088",
             "passphrase": {
                 "cipherText": "apikey"
@@ -153,7 +153,7 @@ The next lines of the declaration sets the Consumer, which accepts all telemetry
         "class": "Telemetry_Consumer",
         "type": "Splunk",
         "host": "192.0.2.1",
-        "protocol": "http",
+        "protocol": "https",
         "port": "8088",
         "passphrase": {
             "cipherText": "apikey"
@@ -174,7 +174,7 @@ The next lines of the declaration sets the Consumer, which accepts all telemetry
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
 | host               | 192.0.2.1                      |  The address of the instance that runs the HTTP event collector                                                                    |
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
-| protocol           | **http**, https                |  The protocol of the consumer                                                                                                      |
+| protocol           | **https**, http                |  The protocol of the consumer                                                                                                      |
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
 | port               | 8088                           |  The port of the consumer system                                                                                                   |
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
