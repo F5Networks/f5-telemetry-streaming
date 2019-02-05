@@ -12,25 +12,45 @@ const constants = require('../src/nodejs/constants.js');
 
 /* eslint-disable global-require */
 
-// purpose: validate config
+function MockRestOperation(opts) {
+    this.method = opts.method || 'GET';
+    this.body = opts.body;
+    this.statusCode = null;
+}
+MockRestOperation.prototype.getMethod = function () { return this.method; };
+MockRestOperation.prototype.setMethod = function (method) { this.method = method; };
+MockRestOperation.prototype.getBody = function () { return this.body; };
+MockRestOperation.prototype.setBody = function (body) { this.body = body; };
+MockRestOperation.prototype.getStatusCode = function () { return this.statusCode; };
+MockRestOperation.prototype.setStatusCode = function (code) { this.statusCode = code; };
+MockRestOperation.prototype.complete = function () { };
+
+
 describe('Config', () => {
     let config;
     let util;
 
     let configValidator;
+    let formatConfig;
 
     before(() => {
         config = require('../src/nodejs/config.js');
+        util = require('../src/nodejs/util.js');
         config.restWorker = {
             loadState: (cb) => { cb(null, {}); },
             saveState: (first, state, cb) => { cb(null); }
         };
+        config._loadState = () => Promise.resolve({});
         configValidator = config.validator;
 
-        util = require('../src/nodejs/util.js');
+        formatConfig = util.formatConfig;
+    });
+    beforeEach(() => {
+        config._state = {};
     });
     afterEach(() => {
         config.validator = configValidator;
+        util.formatConfig = formatConfig;
     });
     after(() => {
         Object.keys(require.cache).forEach((key) => {
@@ -51,8 +71,13 @@ describe('Config', () => {
         };
         config.validator = null;
         return config.validate(obj)
-            .then(() => Promise.reject(new Error('should fail')))
-            .catch(() => Promise.resolve());
+            .then(() => {
+                assert.fail('Should throw an error');
+            })
+            .catch((err) => {
+                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
+                return Promise.resolve(); // resolve, expected an error
+            });
     });
 
     it('should compile schema', () => {
@@ -76,12 +101,22 @@ describe('Config', () => {
             .catch(err => Promise.reject(err));
     });
 
-    it('should process client request', () => {
-        let restOperationStatusCode;
-        let restOperationBody;
-        const obj = {
+    it('should load state', () => {
+        util.decryptAllSecrets = () => Promise.resolve({});
+
+        return config.loadState()
+            .then((data) => {
+                assert.deepEqual(data, {});
+            })
+            .catch(err => Promise.reject(err));
+    });
+
+    it('should process client POST request', () => {
+        const mockRestOperation = new MockRestOperation({ method: 'POST' });
+        mockRestOperation.setBody({
             class: 'Telemetry'
-        };
+        });
+
         const actualResponseBody = {
             message: 'success',
             declaration: {
@@ -89,63 +124,81 @@ describe('Config', () => {
                 schemaVersion: constants.VERSION
             }
         };
-        const mockRestOperation = {
-            getBody() { return obj; },
-            setStatusCode(code) { restOperationStatusCode = code; },
-            setBody(body) { restOperationBody = body; },
-            complete() {}
+        return config.processClientRequest(mockRestOperation)
+            .then(() => {
+                assert.strictEqual(mockRestOperation.statusCode, 200);
+                assert.deepEqual(mockRestOperation.body, actualResponseBody);
+                return Promise.resolve();
+            })
+            .catch(err => Promise.reject(err));
+    });
+
+    it('should process client GET request - no configuration', () => {
+        const actualResponseBody = {
+            message: 'success',
+            declaration: {}
         };
+
+        const mockRestOperation = new MockRestOperation({ method: 'GET' });
+        mockRestOperation.setBody({});
 
         return config.processClientRequest(mockRestOperation)
             .then(() => {
-                assert.strictEqual(restOperationStatusCode, 200);
-                assert.deepEqual(restOperationBody, actualResponseBody);
+                assert.strictEqual(mockRestOperation.statusCode, 200);
+                assert.deepEqual(mockRestOperation.body, actualResponseBody);
+                return Promise.resolve();
+            })
+            .catch(err => Promise.reject(err));
+    });
+
+    it('should process client GET request - existing config', () => {
+        const mockRestOperationPOST = new MockRestOperation({ method: 'POST' });
+        mockRestOperationPOST.setBody({
+            class: 'Telemetry'
+        });
+
+        const mockRestOperationGET = new MockRestOperation({ method: 'GET' });
+        mockRestOperationGET.setBody({});
+
+        return config.processClientRequest(mockRestOperationPOST)
+            .then(() => {
+                assert.strictEqual(mockRestOperationPOST.statusCode, 200);
+                return config.processClientRequest(mockRestOperationGET);
+            })
+            .then(() => {
+                assert.strictEqual(mockRestOperationGET.statusCode, 200);
+                assert.deepEqual(mockRestOperationGET.body, mockRestOperationPOST.body);
                 return Promise.resolve();
             })
             .catch(err => Promise.reject(err));
     });
 
     it('should fail to validate client request', () => {
-        let restOperationStatusCode;
-        let restOperationBody;
-        const obj = {
+        const mockRestOperation = new MockRestOperation({ method: 'POST' });
+        mockRestOperation.setBody({
             class: 'foo'
-        };
-        const mockRestOperation = {
-            getBody() { return obj; },
-            setStatusCode(code) { restOperationStatusCode = code; },
-            setBody(body) { restOperationBody = body; },
-            complete() {}
-        };
-
+        });
         return config.processClientRequest(mockRestOperation)
             .then(() => {
-                assert.strictEqual(restOperationStatusCode, 422);
-                assert.strictEqual(restOperationBody.message, 'Unprocessable entity');
+                assert.strictEqual(mockRestOperation.statusCode, 422);
+                assert.strictEqual(mockRestOperation.body.message, 'Unprocessable entity');
                 return Promise.resolve();
             })
             .catch(err => Promise.reject(err));
     });
 
     it('should fail to process client request', () => {
-        let restOperationStatusCode;
-        let restOperationBody;
-        const obj = {
+        const mockRestOperation = new MockRestOperation({ method: 'POST' });
+        mockRestOperation.setBody({
             class: 'Telemetry'
-        };
-        const mockRestOperation = {
-            getBody() { return obj; },
-            setStatusCode(code) { restOperationStatusCode = code; },
-            setBody(body) { restOperationBody = body; },
-            complete() {}
-        };
+        });
 
         util.formatConfig = () => { throw new Error('foo'); };
 
         return config.processClientRequest(mockRestOperation)
             .then(() => {
-                assert.strictEqual(restOperationStatusCode, 500);
-                assert.strictEqual(restOperationBody.message, 'Internal Server Error');
+                assert.strictEqual(mockRestOperation.statusCode, 500);
+                assert.strictEqual(mockRestOperation.body.message, 'Internal Server Error');
                 return Promise.resolve();
             })
             .catch(err => Promise.reject(err));

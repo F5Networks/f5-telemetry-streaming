@@ -1,0 +1,40 @@
+{
+    "class": "Telemetry",
+    "My_Poller": {
+        "class": "Telemetry_System_Poller",
+        "enable": true,
+        "trace": false,
+        "interval": 60,
+        "host": "192.0.2.1",
+        "protocol": "https",
+        "port": 443,
+        "tag": {
+            "tenant": "`T`",
+            "application": "`A`"
+        }
+    },
+    "My_Listener": {
+        "class": "Telemetry_Listener",
+        "enable": true,
+        "trace": false,
+        "port": 6514,
+        "tag": {
+            "tenant": "`T`",
+            "application": "`A`"
+        },
+        "match": ""
+    },
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "enable": true,
+        "trace": true,
+        "type": "Splunk",
+        "host": "192.0.2.1",
+        "protocol": "https",
+        "port": "8088",
+        "passphrase": {
+            "cipherText": "apikey"
+        },
+        "enableHostConnectivityCheck": false
+    }
+}

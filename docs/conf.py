@@ -21,9 +21,6 @@ import sys
 sys.path.insert(0, os.path.abspath('.'))
 
 import f5_sphinx_theme
-import recommonmark
-import CommonMark
-from recommonmark.parser import CommonMarkParser
 
 
 # -- General configuration ------------------------------------------------
@@ -42,7 +39,9 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinxjp.themes.basicstrap',
     'cloud_sptheme.ext.table_styling',
-    'sphinx.ext.extlinks'
+    'sphinx.ext.extlinks',
+    'recommonmark',
+    'sphinx_copybutton',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -52,11 +51,14 @@ templates_path = ['_templates']
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = ['.rst', '.md']
 
-source_parsers = {
-    '.md': CommonMarkParser,
+source_suffix = {
+  '.rst': 'restructuredtext',
+  '.txt': 'markdown',
+  '.md': 'markdown',
 }
+
+
 
 # The encoding of source files.
 #
@@ -75,7 +77,7 @@ author = u'F5 Networks'
 # built documents.
 #
 # The short X.Y version.
-version = u'0.9'
+version = u'1.0.0'
 # The full version, including alpha/beta/rc tags.
 #release = u'0.1.0'
 

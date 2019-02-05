@@ -9,6 +9,7 @@
 'use strict';
 
 const fs = require('fs');
+const net = require('net');
 const path = require('path');
 const request = require('request');
 const childProcess = require('child_process');
@@ -102,7 +103,7 @@ Tracer.prototype._setClosed = function () {
  * Mark tracer as closing
  */
 Tracer.prototype._setClosing = function () {
-    logger.info(`Closing tracer '${this.name}' stream to file '${this.path}'`);
+    logger.debug(`Closing tracer '${this.name}' stream to file '${this.path}'`);
     if (this.stream) {
         this.stream.end();
         this.stream = undefined;
@@ -232,7 +233,7 @@ Tracer.prototype._open = function () {
     if (!this.isNew()) {
         return Promise.resolve();
     }
-    logger.info(`Creating new tracer '${this.name}' stream to file '${this.path}'`);
+    logger.debug(`Creating new tracer '${this.name}' stream to file '${this.path}'`);
     // prohibit to open many stream from single instance
     this._setState(Tracer.STATE.INIT);
 
@@ -418,11 +419,11 @@ Tracer.instances = {};
 Tracer.get = function (name, tracerPath) {
     let tracer = Tracer.instances[name];
     if (!tracer) {
-        logger.info(`Creating new tracer instance - '${name}' file '${tracerPath}'`);
+        logger.debug(`Creating new tracer instance - '${name}' file '${tracerPath}'`);
         tracer = new Tracer(name, tracerPath);
         Tracer.instances[name] = tracer;
     } else {
-        logger.info(`Updating tracer instance - '${name}' file '${tracerPath}'`);
+        logger.debug(`Updating tracer instance - '${name}' file '${tracerPath}'`);
         tracer.path = tracerPath;
         tracer.touch();
         // force tracer to check if we need to
@@ -541,6 +542,40 @@ module.exports = {
     },
 
     /**
+     * Compare version strings
+     *
+     * @param {String} version1   - version to compare
+     * @param {String} comparator - comparison operator
+     * @param {String} version2   - version to compare
+     *
+     * @returns {boolean} true or false
+     */
+    compareVersionStrings(version1, comparator, version2) {
+        comparator = comparator === '=' ? '==' : comparator;
+        if (['==', '===', '<', '<=', '>', '>=', '!=', '!=='].indexOf(comparator) === -1) {
+            throw new Error(`Invalid comparator '${comparator}'`);
+        }
+        const v1parts = version1.split('.');
+        const v2parts = version2.split('.');
+        const maxLen = Math.max(v1parts.length, v2parts.length);
+        let part1;
+        let part2;
+        let cmp = 0;
+        // eslint-disable-next-line no-plusplus
+        for (let i = 0; i < maxLen && !cmp; i++) {
+            part1 = parseInt(v1parts[i], 10) || 0;
+            part2 = parseInt(v2parts[i], 10) || 0;
+            if (part1 < part2) {
+                cmp = 1;
+            } else if (part1 > part2) {
+                cmp = -1;
+            }
+        }
+        // eslint-disable-next-line no-eval
+        return eval(`0${comparator}${cmp}`);
+    },
+
+    /**
      * Performs a check of the local environment and returns device type
      *
      * @returns {Promise} A promise which is resolved with the device type.
@@ -560,6 +595,32 @@ module.exports = {
                 }
             });
         });
+    },
+
+    /**
+     * Returns installed software version
+     *
+     * @param {String} host    - HTTP host
+     * @param {Object} options - function options, see 'makeRequest'
+     *
+     * @returns {Promise} A promise which is resolved with response
+     *
+     */
+    getDeviceVersion(host, options) {
+        const uri = '/mgmt/tm/sys/version';
+        return this.makeRequest(host, uri, options)
+            .then((res) => {
+                const entries = res.entries[Object.keys(res.entries)[0]].nestedStats.entries;
+                const result = {};
+                Object.keys(entries).forEach((prop) => {
+                    result[prop[0].toLowerCase() + prop.slice(1)] = entries[prop].description;
+                });
+                return result;
+            })
+            .catch((err) => {
+                const msg = `getDeviceVersion: ${err}`;
+                throw new Error(msg);
+            });
     },
 
     /**
@@ -588,39 +649,43 @@ module.exports = {
     },
 
     /**
-     * Filter data based on a list of keys
+     * Filter data based on a list of keys - include and exclude are mutually exclusive
      *
-     * @param {Object} data - data
-     * @param {Array} keys  - list of keys to use to filter data
+     * @param {Object} data             - data
+     * @param {Object} options          - function options
+     * @param {Array} [options.include] - include matching keys
+     * @param {Array} [options.exclude] - exclude matching keys
      *
      * @returns {Object} Filtered data
      */
-    filterDataByKeys(data, keys) {
-        const ret = data;
+    filterDataByKeys(data, options) {
+        options = options || {};
 
-        if (typeof data === 'object') {
-            // for now just ignore arrays
-            if (Array.isArray(data)) {
-                return ret;
+        if (options.include && options.exclude) throw new Error('include and exclude both provided');
+
+        if (typeof data !== 'object') return data;
+        if (Array.isArray(data)) return data; // ignore arrays
+
+        const keys = options.include || options.exclude || [];
+        Object.keys(data).forEach((k) => {
+            let deleteKey = false;
+            if (options.include) {
+                deleteKey = true; // default to true
+                keys.forEach((i) => {
+                    if (k.includes(i)) deleteKey = false; // no exact match
+                });
+            } else if (options.exclude) {
+                if (keys.indexOf(k) !== -1) deleteKey = true; // exact match
             }
 
-            Object.keys(data).forEach((k) => {
-                let deleteKey = true;
-                keys.forEach((i) => {
-                    // simple includes for now - no exact match
-                    if (k.includes(i)) {
-                        deleteKey = false;
-                    }
-                });
-                if (deleteKey) {
-                    delete ret[k];
-                } else {
-                    ret[k] = this.filterDataByKeys(ret[k], keys);
-                }
-            });
-        }
+            if (deleteKey) {
+                delete data[k];
+            } else {
+                data[k] = this.filterDataByKeys(data[k], options);
+            }
+        });
 
-        return ret;
+        return data;
     },
 
     /**
@@ -680,14 +745,17 @@ module.exports = {
     /**
      * Perform HTTP request
      *
-     * @param {String} host                          - HTTP host
-     * @param {String} uri                           - HTTP uri
-     * @param {Object} options                       - function options
-     * @param {Integer} [options.port]               - HTTP port
-     * @param {String} [options.method]              - HTTP method
-     * @param {String} [options.body]                - HTTP body
-     * @param {Object} [options.headers]             - HTTP headers
-     * @param {Object} [options.continueOnErrorCode] - resolve promise even on non-successful response code
+     * @param {String} host                           - HTTP host
+     * @param {String} uri                            - HTTP uri
+     * @param {Object} options                        - function options
+     * @param {String} [options.protocol]             - HTTP protocol
+     * @param {Integer} [options.port]                - HTTP port
+     * @param {String} [options.method]               - HTTP method
+     * @param {String} [options.body]                 - HTTP body
+     * @param {Object} [options.headers]              - HTTP headers
+     * @param {Object} [options.continueOnErrorCode]  - resolve promise even on non-successful response code
+     * @param {Boolean} [options.allowSelfSignedCert] - false - requires SSL certificates be valid,
+     *      true - allows self-signed certs
      *
      * @returns {Object} Returns promise resolved with response
      */
@@ -698,17 +766,16 @@ module.exports = {
             'User-Agent': constants.USER_AGENT
         };
 
-        // well, should be more sophisticated than this
-        // default to https, unless in defined list of http ports
-        let fullUri = [80, 8080, 8100].indexOf(options.port) !== -1 ? `http://${host}` : `https://${host}`;
-        fullUri = options.port ? `${fullUri}:${options.port}${uri}` : `${fullUri}:${constants.DEFAULT_PORT}${uri}`;
+        const protocol = options.protocol || constants.DEFAULT_PROTOCOL;
+        const fullUri = `${protocol}://${host}:${options.port || constants.DEFAULT_PORT}${uri}`;
         const method = options.method || 'GET';
         const requestOptions = {
             uri: fullUri,
             method,
             body: options.body ? this.stringify(options.body) : undefined,
             headers: options.headers || defaultHeaders,
-            strictSSL: constants.STRICT_TLS_REQUIRED
+            strictSSL: options.allowSelfSignedCert === undefined
+                ? constants.STRICT_TLS_REQUIRED : !options.allowSelfSignedCert
         };
 
         return new Promise((resolve, reject) => {
@@ -734,13 +801,43 @@ module.exports = {
     },
 
     /**
+     * Execute shell command(s) via REST API on BIG-IP.
+     * Command should have escaped quotes.
+     * If host is not localhost then auth token should be passed along with headers.
+     *
+     * @param {String} host                     - HTTP host
+     * @param {String} command                  - shell command
+     * @param {Object} options                  - function options, see 'makeRequest'
+     *
+     * @returns {Object} Returns promise resolved with response
+     */
+    executeShellCommandOnDevice(host, command, options) {
+        const uri = '/mgmt/tm/util/bash';
+        options = options ? JSON.parse(JSON.stringify(options)) : {};
+        options.method = 'POST';
+        options.body = {
+            command: 'run',
+            utilCmdArgs: `-c "${command}"`
+        };
+        return this.makeRequest(host, uri, options)
+            .then(res => res.commandResult || '')
+            .catch((err) => {
+                const msg = `executeShellCommandOnDevice: ${err}`;
+                throw new Error(msg);
+            });
+    },
+
+    /**
      * Get auth token
      *
-     * @param {String} host            - HTTP host
-     * @param {String} username        - device username
-     * @param {String} password        - device password
-     * @param {Object} options         - function options
-     * @param {Integer} [options.port] - HTTP port
+     * @param {String} host                           - HTTP host
+     * @param {String} username                       - device username
+     * @param {String} password                       - device password
+     * @param {Object} options                        - function options
+     * @param {String} [options.protocol]             - HTTP protocol
+     * @param {Integer} [options.port]                - HTTP port
+     * @param {Boolean} [options.allowSelfSignedCert] - false - requires SSL certificates be valid,
+     *      true - allows self-signed certs
      *
      * @returns {Object} Returns promise resolved with auth token: { token: 'token' }
      */
@@ -754,7 +851,9 @@ module.exports = {
         });
         const postOptions = {
             method: 'POST',
+            protocol: options.protocol,
             port: options.port,
+            allowSelfSignedCert: options.allowSelfSignedCert,
             body
         };
 
@@ -769,20 +868,20 @@ module.exports = {
     /**
      * Base64 helper
      *
-     * @param {String} type - decode|encode
+     * @param {String} action - decode|encode
      * @param {String} data - data to process
      *
      * @returns {String} Returns processed data as a string
      */
-    base64(type, data) {
+    base64(action, data) {
         // just decode for now
-        if (type === 'decode') {
+        if (action === 'decode') {
             if ((typeof Buffer.from === 'function') && (Buffer.from !== Uint8Array.from)) {
                 return Buffer.from(data, 'base64').toString().trim();
             }
             return new Buffer(data, 'base64').toString().trim();
         }
-        throw new Error('type requires: decode');
+        throw new Error('Unsupported action, try one of these: decode');
     },
 
     /**
@@ -802,7 +901,6 @@ module.exports = {
         const uri = '/mgmt/tm/ltm/auth/radius-server';
         const httpPostOptions = {
             method: 'POST',
-            port: constants.DEFAULT_PORT,
             body: {
                 name: radiusObjectName,
                 secret: data,
@@ -811,7 +909,6 @@ module.exports = {
         };
         const httpDeleteOptions = {
             method: 'DELETE',
-            port: constants.DEFAULT_PORT,
             continueOnErrorCode: true
         };
 
@@ -823,10 +920,26 @@ module.exports = {
                 }
                 // update text field with Secure Vault cryptogram - should we base64 encode?
                 encryptedData = res.secret;
-
-                // delete radius object
-                return this.makeRequest(constants.LOCAL_HOST, `${uri}/${radiusObjectName}`, httpDeleteOptions);
+                return this.getDeviceVersion(constants.LOCAL_HOST);
             })
+            .then((deviceVersion) => {
+                let promise;
+                if (this.compareVersionStrings(deviceVersion.version, '>=', '14.1')) {
+                    // TMOS 14.1.x fix for 745423
+                    const tmshCmd = `tmsh -a list auth radius-server ${radiusObjectName} secret`;
+                    promise = this.executeShellCommandOnDevice(constants.LOCAL_HOST, tmshCmd)
+                        .then((res) => {
+                            /**
+                             * auth radius-server telemetry_delete_me {
+                             *   secret <secret-data>
+                             * }
+                             */
+                            encryptedData = res.split('\n')[1].trim().split(' ', 2)[1];
+                        });
+                }
+                return promise || Promise.resolve();
+            })
+            .then(() => this.makeRequest(constants.LOCAL_HOST, `${uri}/${radiusObjectName}`, httpDeleteOptions))
             .then(() => encryptedData)
             .catch((e) => {
                 // best effort to delete radius object - we don't know where we failed
@@ -929,6 +1042,60 @@ module.exports = {
                 });
                 // return (modified) data
                 return data;
+            })
+            .catch((e) => {
+                throw e;
+            });
+    },
+
+    /**
+     * Network check - with max timeout interval (5 seconds)
+     *
+     * @param {String} host  - host address
+     * @param {Integer} port - host port
+     *
+     * @returns {Promise} Returns promise resolved on successful check
+     */
+    networkCheck(host, port) {
+        let done = false;
+        const connectPromise = new Promise((resolve, reject) => {
+            const client = net.createConnection({ host, port })
+                .on('connect', () => {
+                    client.end();
+                })
+                .on('end', () => {
+                    done = true;
+                    resolve();
+                })
+                .on('error', (err) => {
+                    done = 'error';
+                    reject(err);
+                });
+        });
+
+        // 100 ms period with 50 max tries = 5 sec
+        const period = 100; const maxTries = 50; let currentTry = 1;
+        const timeoutPromise = new Promise((resolve, reject) => {
+            const interval = setInterval(() => {
+                const fail = () => {
+                    clearInterval(interval);
+                    reject(new Error(`unable to connect: ${host}:${port}`)); // max timeout, reject
+                };
+
+                if (done === true) {
+                    clearInterval(interval);
+                    resolve(); // connection success, resolve
+                } else if (done === 'error') fail();
+                else if (currentTry < maxTries) ; // try again
+                else fail();
+                currentTry += 1;
+            }, period);
+        });
+
+        return Promise.all([connectPromise, timeoutPromise])
+            .then(() => true)
+            .catch((e) => {
+                throw e;
             });
     },
 

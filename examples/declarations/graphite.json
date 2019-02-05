@@ -4,7 +4,7 @@
         "class": "Telemetry_Consumer",
         "type": "Graphite",
         "host": "192.0.2.1",
-        "protocol": "http",
-        "port": "80"
+        "protocol": "https",
+        "port": "443"
     }
 }

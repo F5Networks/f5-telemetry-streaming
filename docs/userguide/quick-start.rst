@@ -45,6 +45,10 @@ up and running with Telemetry Streaming.
 
     {
         "class": "Telemetry",
+        "controls": {
+            "class": "Controls",
+            "logLevel": "info"
+        },
         "My_Poller": {
             "class": "Telemetry_System_Poller",
             "interval": 60
@@ -57,7 +61,7 @@ up and running with Telemetry Streaming.
             "class": "Telemetry_Consumer",
             "type": "Splunk",
             "host": "192.0.2.1",
-            "protocol": "http",
+            "protocol": "https",
             "port": "8088",
             "passphrase": {
                 "cipherText": "apikey"

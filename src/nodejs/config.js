@@ -15,11 +15,14 @@ const EventEmitter = require('events');
 const logger = require('./logger.js');
 const util = require('./util.js');
 
-const baseSchema = require('./config/base_schema.json');
-const systemPollerSchema = require('./config/system_poller_schema.json');
-const listenerSchema = require('./config/listener_schema.json');
-const consumerSchema = require('./config/consumer_schema.json');
+const baseSchema = require('./schema/base_schema.json');
+const controlsSchema = require('./schema/controls_schema.json');
+const systemPollerSchema = require('./schema/system_poller_schema.json');
+const listenerSchema = require('./schema/listener_schema.json');
+const consumerSchema = require('./schema/consumer_schema.json');
 const customKeywords = require('./customKeywords.js');
+const CONTROLS_CLASS_NAME = require('./constants.js').CONTROLS_CLASS_NAME;
+const CONTROLS_PROPERTY_NAME = require('./constants.js').CONTROLS_PROPERTY_NAME;
 
 /**
  * ConfigWorker class
@@ -57,13 +60,14 @@ Object.defineProperty(ConfigWorker.prototype, 'config', {
  *
  * @public
  * @param {Object} newConfig - new config
- * @param {bool} fire - fire 'change' event or not
+ * @param {Boolean} fire     - fire 'change' event or not
  */
 ConfigWorker.prototype.setConfig = function (newConfig, fire) {
     this._state.config = newConfig;
-    if (fire === undefined || fire) {
-        this._notifyConfigChange();
+    if (fire !== false) {
+        return this._notifyConfigChange();
     }
+    return Promise.resolve();
 };
 
 /**
@@ -74,7 +78,7 @@ ConfigWorker.prototype.setConfig = function (newConfig, fire) {
  */
 ConfigWorker.prototype._notifyConfigChange = function () {
     // handle passphrases first - decrypt, download, etc.
-    util.decryptAllSecrets(this._state.config)
+    return util.decryptAllSecrets(this._state.config)
         .then((config) => {
             // copy config to avoid changes from listeners
             this.emit('change', JSON.parse(JSON.stringify(config)));
@@ -115,9 +119,9 @@ ConfigWorker.prototype._saveState = function () {
  */
 ConfigWorker.prototype.saveState = function () {
     return this._saveState()
-        .then(() => logger.info('state saved'))
+        .then(() => logger.debug('Application state saved'))
         .catch((err) => {
-            logger.exception('Unexpected error on attempt to save state', err);
+            logger.exception('Unexpected error on attempt to save application state', err);
         });
 };
 
@@ -158,13 +162,13 @@ ConfigWorker.prototype._loadState = function () {
 ConfigWorker.prototype.loadState = function () {
     return this._loadState()
         .then((state) => {
-            logger.info('state loaded');
+            logger.info('application state loaded');
             this._state = state;
             this._notifyConfigChange();
             return Promise.resolve(state);
         })
         .catch((err) => {
-            logger.exception('Unexpected error on attempt to load state', err);
+            logger.exception('Unexpected error on attempt to load application state', err);
         });
 };
 
@@ -177,13 +181,20 @@ ConfigWorker.prototype.loadState = function () {
 ConfigWorker.prototype.compileSchema = function () {
     const schemas = {
         base: baseSchema,
+        controls: controlsSchema,
         systemPoller: systemPollerSchema,
         listener: listenerSchema,
         consumer: consumerSchema
     };
     const keywords = customKeywords;
 
-    const ajv = setupAsync(new Ajv({ useDefaults: true, coerceTypes: true, async: true }));
+    const ajvOptions = {
+        useDefaults: true,
+        coerceTypes: true,
+        async: true,
+        extendRefs: true
+    };
+    const ajv = setupAsync(new Ajv(ajvOptions));
     // add schemas
     Object.keys(schemas).forEach((k) => {
         // ignore base, that will be added later
@@ -209,7 +220,26 @@ ConfigWorker.prototype.compileSchema = function () {
  */
 ConfigWorker.prototype.validate = function (data) {
     if (this.validator) {
-        return this.validator(data).then(() => data);
+        return this.validator(data)
+            .then(() => data)
+            .catch((err) => {
+                if (err instanceof Ajv.ValidationError) {
+                    // eslint-disable-next-line arrow-body-style
+                    const errorMap = err.errors.map((errItem) => {
+                        return {
+                            keyword: errItem.keyword,
+                            dataPath: errItem.dataPath,
+                            schemaPath: errItem.schemaPath,
+                            params: errItem.params,
+                            message: errItem.message
+                        };
+                    });
+                    const customError = new Error(util.stringify(errorMap));
+                    customError.code = 'ValidationError';
+                    return Promise.reject(customError);
+                }
+                return Promise.reject(err);
+            });
     }
     return Promise.reject(new Error('Validator is not available'));
 };
@@ -229,19 +259,19 @@ ConfigWorker.prototype.validateAndApply = function (data) {
             validatedConfig = config;
             // no need for raw config
             const configToSave = {
-                raw: null,
+                raw: JSON.parse(JSON.stringify(validatedConfig)),
                 parsed: util.formatConfig(config)
             };
+            logger.debug('Configuration successfully validated');
             logger.debug(`Configuration to save: ${util.stringify(configToSave)}`); // helpful debug, for now
 
             // do not fire event until state saved
-            logger.info('Configuration successfully validated');
             this.setConfig(configToSave, false);
             return this.saveState();
         })
         .then(() => {
             // propagate config change
-            this.setConfig(this.config);
+            this.setConfig(this.config, true);
             return validatedConfig;
         })
         .catch(error => Promise.reject(error));
@@ -256,39 +286,56 @@ ConfigWorker.prototype.validateAndApply = function (data) {
  * @returns {void}
  */
 ConfigWorker.prototype.processClientRequest = function (restOperation) {
-    // try to validate new config
-    return this.validateAndApply(restOperation.getBody())
-        .then((config) => {
-            util.restOperationResponder(restOperation, 200,
-                { message: 'success', declaration: config });
-        })
+    const method = restOperation.getMethod().toUpperCase();
+    let actionName;
+    let promise;
+
+    if (method === 'POST') {
+        // try to validate new config
+        actionName = 'validateAndApply';
+        promise = this.validateAndApply(restOperation.getBody());
+    } else {
+        actionName = 'getDeclaration';
+        promise = Promise.resolve((this._state && this._state.config && this._state.config.raw) || {});
+    }
+
+    return promise.then((config) => {
+        util.restOperationResponder(restOperation, 200,
+            { message: 'success', declaration: config });
+    })
         .catch((err) => {
             const errObj = {};
-            if (err instanceof Ajv.ValidationError) {
+            if (err.code === 'ValidationError') {
                 errObj.code = 422;
                 errObj.message = 'Unprocessable entity';
-                // eslint-disable-next-line
-                errObj.error = err.errors.map((errItem) => {
-                    return {
-                        keyword: errItem.keyword,
-                        dataPath: errItem.dataPath,
-                        schemaPath: errItem.schemaPath,
-                        params: errItem.params,
-                        message: errItem.message
-                    };
-                });
+                errObj.error = err.message;
             } else {
                 errObj.code = 500;
                 errObj.message = 'Internal Server Error';
                 errObj.error = `${err.message ? err.message : err}`;
             }
-            logger.exception(`validateAndApply error: ${err}`, err);
+            logger.exception(`${actionName} error: ${err}`, err);
             util.restOperationResponder(restOperation, errObj.code, errObj);
         });
 };
 
 // initialize singleton
 const configWorker = new ConfigWorker();
+
+// config worker change event, should be first in the handlers chain
+configWorker.on('change', (config) => {
+    let settings;
+    if (config.parsed
+            && config.parsed[CONTROLS_CLASS_NAME]
+            && config.parsed[CONTROLS_CLASS_NAME][CONTROLS_PROPERTY_NAME]) {
+        settings = config.parsed[CONTROLS_CLASS_NAME][CONTROLS_PROPERTY_NAME];
+    }
+    if (!settings) {
+        return;
+    }
+    // default value should be 'info'
+    logger.setLogLevel(settings.logLevel);
+});
 
 // handle EventEmitter errors to avoid NodeJS crashing
 configWorker.on('error', (err) => {

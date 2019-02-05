@@ -1,7 +1,11 @@
 {
     "stats": {
+        "system": {
+            "structure": { "folder": true }
+        },
         "hostname": {
             "key": "/mgmt/tm/sys/global-settings::hostname",
+            "structure": { "parentKey": "system" },
             "normalize": null,
             "convertArrayToMap": null,
             "filterKeys": null,
@@ -10,40 +14,50 @@
             "addKeysByTag": null
         },
         "version": {
+            "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/sys/version::sys/version/0::Version"
         },
         "versionBuild": {
+            "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/sys/version::sys/version/0::Build"
         },
         "location": {
+            "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::location",
             "convertArrayToMap": { "keyName": "name" }
         },
         "description": {
+            "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::description",
             "convertArrayToMap": { "keyName": "name" }
         },
         "marketingName": {
+            "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::marketingName",
             "convertArrayToMap": { "keyName": "name" }
         },
         "platformId": {
+            "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::platformId",
             "convertArrayToMap": { "keyName": "name" }
         },
         "chassisId": {
+            "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::chassisId",
             "convertArrayToMap": { "keyName": "name" }
         },
         "baseMac": {
+            "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/sys/hardware::sys/hardware/platform::sys/hardware/platform/0::baseMac"
         },
         "callBackUrl": {
+            "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/sys/management-ip::items",
             "convertArrayToMap": { "keyName": "name" },
             "runFunction": { "name": "getFirstKey", "args": { "splitOnValue": "/", "keyPrefix": "https://" } }
         },
         "configReady": {
+            "structure": { "parentKey": "system" },
             "if": {
                 "deviceVersionGreaterOrEqual": "13.1"
             },
@@ -55,6 +69,7 @@
             }
         },
         "licenseReady": {
+            "structure": { "parentKey": "system" },
             "if": {
                 "deviceVersionGreaterOrEqual": "13.1"
             },
@@ -66,6 +81,7 @@
             }
         },
         "provisionReady": {
+            "structure": { "parentKey": "system" },
             "if": {
                 "deviceVersionGreaterOrEqual": "13.1"
             },
@@ -77,97 +93,130 @@
             }
         },
         "syncMode": {
+            "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/cm/sync-status::cm/sync-status/0::mode"
         },
         "syncColor": {
+            "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/cm/sync-status::cm/sync-status/0::color"
         },
         "syncStatus": {
+            "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/cm/sync-status::cm/sync-status/0::status"
         },
         "syncSummary": {
+            "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/cm/sync-status::cm/sync-status/0::summary"
         },
         "failoverStatus": {
+            "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/cm/failover-status::cm/failover-status/0::status"
         },
         "failoverColor": {
+            "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/cm/failover-status::cm/failover-status/0::color"
         },
-        "deviceTimestamp": {
+        "systemTimestamp": {
+            "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/sys/clock::sys/clock/0::fullDate"
         },
         "cpu": {
+            "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/sys/host-info::sys/host-info/0::sys/hostInfo/0/cpuInfo",
             "runFunction": { "name": "getAverage", "args": { "keyWithValue": "oneMinAvgSystem" } },
             "comment": "also oneMinAvgUser, need to determine how that should be factored in"
         },
         "memory": {
+            "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/sys/memory::sys/memory/memory-host::sys/memory/memory-host/0",
             "runFunction": { "name": "getPercentFromKeys", "args": { "totalKey": "memoryTotal", "partialKey": "memoryUsed" } }
         },
         "tmmCpu": {
-            "key": "/mgmt/tm/sys/tmm-info",
+            "structure": { "parentKey": "system" },
+            "key": "tmmInfo",
             "runFunction": { "name": "getAverage", "args": { "keyWithValue": "oneMinAvgUsageRatio" } }
         },
         "tmmMemory": {
+            "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/sys/memory::sys/memory/memory-host::sys/memory/memory-host/0",
             "runFunction": { "name": "getPercentFromKeys", "args": { "totalKey": "tmmMemoryTotal", "partialKey": "tmmMemoryUsed" } }
         },
         "tmmTraffic": {
-            "key": "/mgmt/tm/sys/tmm-traffic",
-            "filterKeys": [ "/tmm-traffic", "clientSideTraffic.bitsIn", "clientSideTraffic.bitsOut" ],
-            "renameKeys": { "sys/tmm-traffic": { "pattern": "([0-9]\\.[0-9])" } },
-            "runFunction": { "name": "getSum", "args": { "allKeys": true } },
-            "comment": "bits, but over what time period?"
+            "structure": { "parentKey": "system" },
+            "key": "tmmTraffic",
+            "filterKeys": { "exclude": [ "clientSideTraffic.pktsIn", "clientSideTraffic.pktsOut", "serverSideTraffic.pktsIn", "serverSideTraffic.pktsOut", "clientSideTraffic.curConns", "clientSideTraffic.evictedConns", "clientSideTraffic.maxConns", "clientSideTraffic.slowKilled", "clientSideTraffic.totConns", "cmpConnRedirected", "connectionMemoryErrors", "droppedPackets", "httpRequests", "incomingPacketErrors", "licenseDeny", "maintenanceModeDeny", "maxConnVirtualAddressDeny", "maxConnVirtualPathDeny", "noHandlerDeny", "noStagedHandlerDeny", "outgoingPacketErrors", "serverSideTraffic.curConns","serverSideTraffic.evictedConns", "serverSideTraffic.maxConns", "serverSideTraffic.slowKilled", "serverSideTraffic.totConns", "tmmId", "virtualServerNonSynDeny"] },
+            "renameKeys": { "patterns": { "sys/tmm-traffic": { "pattern": "([0-9]\\.[0-9])" } } },
+            "runFunction": { "name": "getSum", "args": {} }
         },
         "diskStorage": {
-            "key": "diskStorageRef::commandResult",
-            "runFunction": { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Mounted", "filterKeys": [ "/", "Capacity", "1024-blocks" ] } }
+            "structure": { "parentKey": "system" },
+            "key": "diskStorage::commandResult",
+            "runFunction": { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Mounted", "filterKeys": { "include": [ "/", "Capacity", "1024-blocks" ] } } }
         },
         "diskLatency": {
-            "key": "diskLatencyRef::commandResult",
-            "runFunction": { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Device:", "filterKeys": [ "sd", "dm", "rsec/s", "wsec/s" ] } }
+            "structure": { "parentKey": "system" },
+            "key": "diskLatency::commandResult",
+            "runFunction": { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Device:", "filterKeys": { "include": [ "sd", "dm", "rsec/s", "wsec/s" ] } } }
         },
         "networkInterfaces": {
-            "key": "/mgmt/tm/net/interface/stats",
-            "filterKeys": [ "/stats", "counters.bitsIn", "counters.bitsOut", "status" ],
-            "renameKeys": { "net/interface": { "pattern": "([0-9]\\.[0-9]|(?!\/)mgmt(?=\/))" } }
+            "structure": { "parentKey": "system" },
+            "key": "networkInterfaces",
+            "filterKeys": { "exclude": [ "counters.errorsAll", "counters.dropsAll", "counters.pktsIn", "counters.pktsOut", "mediaActive", "tmName" ] },
+            "renameKeys": { "patterns": { "net/interface": { "pattern": "([0-9]\\.[0-9]|(?!\/)mgmt(?=\/))" } } }
         },
-        "provisionState": {
-            "key": "/mgmt/tm/sys/provision::items",
+        "provisioning": {
+            "structure": { "parentKey": "system" },
+            "key": "provisioning::items",
             "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" },
-            "filterKeys": [ "name/", "level" ],
-            "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 } }
+            "filterKeys": { "exclude": [ "kind", "fullPath", "generation", "selfLink", "cpuRatio", "memoryRatio", "diskRatio" ] },
+            "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 } } }
         },
-        "virtualServerStats": {
-            "key": "/mgmt/tm/ltm/virtual/stats",
-            "filterKeys": [ "/stats", "clientside.bitsIn", "clientside.bitsOut", "clientside.curConns", "availabilityState", "enabledState", "destination" ],
-            "renameKeys": { "ltm/virtual": { "pattern": "virtual\/(.*)\/", "group": 1 }, "~": { "replaceCharacter": "/" } },
+        "virtualServers": {
+            "key": "virtualServers",
+            "filterKeys": { "exclude": [ "tmName", "status.statusReason", "cmpEnabled", "cmpEnableMode", "csMaxConnDur", "csMeanConnDur", "csMinConnDur", "totRequests", "oneMinAvgUsageRatio", "clientside.pktsIn", "clientside.pktsOut", "clientside.evictedConns", "clientside.slowKilled", "clientside.maxConns", "clientside.totConns", "ephemeral.bitsIn", "ephemeral.bitsOut", "ephemeral.curConns", "ephemeral.evictedConns", "ephemeral.maxConns", "ephemeral.pktsIn", "ephemeral.pktsOut", "ephemeral.slowKilled", "ephemeral.totConns", "fiveSecAvgUsageRatio", "fiveMinAvgUsageRatio", "syncookieStatus", "syncookie.accepts", "syncookie.hwAccepts", "syncookie.hwSyncookies", "syncookie.rejects", "syncookie.hwsyncookieInstance", "syncookie.swsyncookieInstance", "syncookie.syncacheCurr", "syncookie.syncacheOver", "syncookie.syncookies", "syncookie.syncacheOver" ] },
+            "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/virtual": { "pattern": "virtual\/(.*)\/", "group": 1 } } },
             "addKeysByTag": true
         },
-        "poolStats": {
-            "key": "poolMembersRef::items",
+        "pools": {
+            "key": "pools::items",
             "convertArrayToMap": { "keyName": "selfLink", "keyNamePrefix": "name/" },
-            "filterKeys": [ "name/", "/stats", "membersReference", "addr", "port", "serverside.bitsIn", "serverside.bitsOut", "serverside.curConns", "availabilityState", "statusReason", "enabledState", "sessionStatus" ],
-            "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/pool/": { "pattern": "pool\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members", "~": { "replaceCharacter": "/" } },
+            "filterKeys": { "exclude": [ "tmName", "availableMemberCnt", "sessionStatus", "status.statusReason", "connqAll.ageEdm", "connqAll.ageEma", "connqAll.ageHead", "connqAll.ageMax", "connqAll.depth", "connqAll.serviced", "connq.ageEdm", "connq.ageEma", "connq.ageHead", "connq.ageMax", "connq.depth", "connq.serviced", "curSessions", "memberCnt", "minActiveMembers", "monitorRule", "serverside.pktsIn", "serverside.pktsOut", "serverside.maxConns", "serverside.totConns", "totRequests", "ipTosToServer", "minUpMembersAction", "appService", "appServiceReference", "minUpMembersChecking", "kind","ignorePersistedWeight", "fullPath", "partition", "linkQosToClient", "linkQosToServer", "ipTosToClient", "generation", "serviceDownAction", "queueDepthLimit", "queueTimeLimit", "allowNat", "reselectTries", "minUpMembers", "monitorStatus", "nodeName", "poolName", "allowSnat", "monitor", "selfLink", "subPath", "queueOnConnectionLimit", "loadBalancingMode", "slowRampTime" ] },
+            "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/pool/": { "pattern": "pool\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members" } },
+            "includeFirstEntry": { "pattern": "/stats", "excludePattern": "/members/" },
             "addKeysByTag": true
         },
-        "ltmPolicyStats": {
-            "key": "/mgmt/tm/ltm/policy/stats",
-            "filterKeys": [ "ltm/policy", "invoked", "succeeded" ],
-            "renameKeys": [ { "ltm/policy/": { "pattern": "policy\/(.*)\/", "group": 1 }, "/actions/": { "pattern": "actions\/(.*)", "group": 1 }, "~": { "replaceCharacter": "/" } }, { "/actions": { "constant": "actions" } } ],
+        "ltmPolicies": {
+            "key": "ltmPolicies",
+            "filterKeys": { "exclude": [ "policyName", "vsName", "action", "actionId", "ruleName", "tmTarget" ] },
+            "renameKeys": { "patterns": [ { "ltm/policy/": { "pattern": "policy\/(.*)\/", "group": 1 }, "/actions/": { "pattern": "actions\/(.*)", "group": 1 } }, { "/actions": { "constant": "actions" } } ] },
             "addKeysByTag": true
         },
-        "tlsCerts": {
-            "key": "/mgmt/tm/sys/file/ssl-cert::items",
+        "httpProfiles": {
+            "key": "httpProfiles",
+            "filterKeys": { "exclude": [ "tmName", "passthroughConnect", "passthroughExcessClientHeaders", "passthroughExcessServerHeaders", "passthroughHeaders", "passthroughIrule", "passthroughOversizeClientHeaders", "passthroughOversizeServerHeaders", "passthroughPipeline", "passthroughUnknownMethod", "passthroughWebSockets", "proxyConnReqs", "proxyReqs", "respBucket_128k", "respBucket_16k", "respBucket_1k", "respBucket_32k", "respBucket_4k", "respBucket_512k", "respBucket_64k", "typeId","vsName" ] },
+            "renameKeys": { "patterns": { "ltm/profile/http/": { "pattern": "http\/(.*)\/", "group": 1 } } },
+            "addKeysByTag": true
+        },
+        "clientSslProfiles": {
+            "key": "clientSslProfiles",
+            "filterKeys": { "exclude": [ "common.aggregateRenegotiationsRejected", "common.badRecords", "common.c3dUses.conns", "common.cipherUses.adhKeyxchg", "common.cipherUses.aesBulk", "common.cipherUses.aesGcmBulk", "common.cipherUses.camelliaBulk", "common.cipherUses.desBulk", "common.cipherUses.dhRsaKeyxchg", "common.cipherUses.dheDssKeyxchg", "common.cipherUses.ecdhEcdsaKeyxchg", "common.cipherUses.ecdhRsaKeyxchg", "common.cipherUses.ecdheEcdsaKeyxchg", "common.cipherUses.ecdheRsaKeyxchg", "common.cipherUses.edhRsaKeyxchg", "common.cipherUses.ideaBulk", "common.cipherUses.md5Digest", "common.cipherUses.nullBulk", "common.cipherUses.nullDigest", "common.cipherUses.rc2Bulk", "common.cipherUses.rc4Bulk", "common.cipherUses.rsaKeyxchg", "common.cipherUses.shaDigest", "common.connectionMirroring.haCtxRecv", "common.connectionMirroring.haCtxSent", "common.connectionMirroring.haFailure", "common.connectionMirroring.haHsSuccess", "common.connectionMirroring.haPeerReady", "common.connectionMirroring.haTimeout", "common.dtlsTxPushbacks", "common.extendedMasterSecrets", "common.fullyHwAcceleratedConns", "common.fwdpUses.alertBypasses", "common.fwdpUses.cachedCerts", "common.fwdpUses.clicertFailBypasses", "common.fwdpUses.conns", "common.fwdpUses.dipBypasses", "common.fwdpUses.enforceResumeFailures", "common.fwdpUses.hnBypasses", "common.fwdpUses.sipBypasses", "common.fwdpUses.transparentResumeCnt", "common.fwdpUses.verifiedHsCnt", "common.insecureHandshakeAccepts", "common.insecureHandshakeRejects", "common.insecureRenegotiationRejects", "common.maxCompatConns", "common.maxConns", "common.maxNativeConns", "common.midstreamRenegotiations", "common.nonHwAcceleratedConns", "common.ocspFwdpClientssl.cachedResp", "common.ocspFwdpClientssl.certStatusReq", "common.ocspFwdpClientssl.invalidCertResp", "common.ocspFwdpClientssl.respstatusErrResp", "common.ocspFwdpClientssl.revokedResp", "common.ocspFwdpClientssl.stapledResp", "common.ocspFwdpClientssl.unknownResp", "common.partiallyHwAcceleratedConns", "common.prematureDisconnects", "common.renegotiationsRejected", "common.secureHandshakes", "common.sessCacheCurEntries", "common.sessCacheHits", "common.sessCacheInvalidations", "common.sessCacheLookups", "common.sessCacheOverflows", "common.sessionMirroring.failure", "common.sessionMirroring.success", "common.sesstickUses.reuseFailed", "common.sesstickUses.reused", "common.totCompatConns", "common.totNativeConns", "dynamicRecord.x1", "dynamicRecord.x10", "dynamicRecord.x11", "dynamicRecord.x12", "dynamicRecord.x13", "dynamicRecord.x14", "dynamicRecord.x15", "dynamicRecord.x16", "dynamicRecord.x2", "dynamicRecord.x3", "dynamicRecord.x4", "dynamicRecord.x5", "dynamicRecord.x6", "dynamicRecord.x7", "dynamicRecord.x8", "dynamicRecord.x9", "activeHandshakeRejected", "tmName", "total", "typeId", "vsName" ] },
+            "renameKeys": { "patterns": { "ltm/profile/client-ssl/": { "pattern": "client-ssl\/(.*)\/", "group": 1 }, "common.": { "pattern": "common.(.*)", "group": 1 } } },
+            "addKeysByTag": true
+        },
+        "serverSslProfiles": {
+            "key": "serverSslProfiles",
+            "filterKeys": { "exclude": [ "common.badRecords", "common.c3dUses.conns", "common.cipherUses.adhKeyxchg", "common.cipherUses.aesBulk", "common.cipherUses.aesGcmBulk", "common.cipherUses.camelliaBulk", "common.cipherUses.desBulk", "common.cipherUses.dhRsaKeyxchg", "common.cipherUses.dheDssKeyxchg", "common.cipherUses.ecdhEcdsaKeyxchg", "common.cipherUses.ecdhRsaKeyxchg", "common.cipherUses.ecdheEcdsaKeyxchg", "common.cipherUses.ecdheRsaKeyxchg", "common.cipherUses.edhRsaKeyxchg", "common.cipherUses.ideaBulk", "common.cipherUses.md5Digest", "common.cipherUses.nullBulk", "common.cipherUses.nullDigest", "common.cipherUses.rc2Bulk", "common.cipherUses.rc4Bulk", "common.cipherUses.rsaKeyxchg", "common.cipherUses.shaDigest", "common.connectionMirroring.haCtxRecv", "common.connectionMirroring.haCtxSent", "common.connectionMirroring.haFailure", "common.connectionMirroring.haHsSuccess", "common.connectionMirroring.haPeerReady", "common.connectionMirroring.haTimeout",  "common.dtlsTxPushbacks", "common.extendedMasterSecrets", "common.fullyHwAcceleratedConns", "common.fwdpUses.conns", "common.fwdpUses.enforceResumeFailures", "common.fwdpUses.transparentResumeCnt", "common.insecureHandshakeAccepts", "common.insecureHandshakeRejects", "common.insecureRenegotiationRejects", "common.maxCompatConns", "common.maxConns", "common.maxNativeConns", "common.midstreamRenegotiations", "common.nonHwAcceleratedConns", "common.ocspServerssl.cachedResp", "common.ocspServerssl.certStatusRevoked", "common.ocspServerssl.certStatusUnknown", "common.ocspServerssl.responderQueries", "common.ocspServerssl.responseErrors", "common.ocspServerssl.stapledResp", "common.partiallyHwAcceleratedConns", "common.prematureDisconnects", "common.secureHandshakes", "common.sessCacheCurEntries", "common.sessCacheHits", "common.sessCacheInvalidations", "common.sessCacheLookups", "common.sessCacheOverflows", "common.sessionMirroring.failure", "common.sessionMirroring.success", "common.sesstickUses.reuseFailed", "common.sesstickUses.reused", "common.totCompatConns", "common.totNativeConns", "activeHandshakeRejected", "tmName", "typeId", "vsName" ] },
+            "renameKeys": { "patterns": { "ltm/profile/server-ssl/": { "pattern": "server-ssl\/(.*)\/", "group": 1 }, "common.": { "pattern": "common.(.*)", "group": 1 } } },
+            "addKeysByTag": true
+        },
+        "sslCerts": {
+            "key": "sslCerts::items",
             "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" },
-            "filterKeys": [ "name/", "expirationDate", "expirationString", "subject", "issuer", "email" ],
-            "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 } }
+            "filterKeys": { "exclude": [ "kind", "name", "partition", "fullPath", "generation", "selfLink", "certificateKeyCurveName", "certificateKeySize", "checksum", "createTime", "createdBy", "fingerprint", "isBundle", "lastUpdateTime", "mode", "revision", "size", "systemPath", "updatedBy", "version", "bundleCertificatesReference", "certValidatorsReference", "keyType", "serialNumber", "sourcePath", "subPath", "serialNumber" ] },
+            "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 } } }
         }
     },
     "events": {
-        "renameKeys": { "ASM:unit_hostname": { "constant": "hostname" }, "BIGIP_HOSTNAME": { "constant": "hostname" } },
         "classifyByKeys": [ "virtual_name", "policy_name", "Access_Profile", "context_name" ]
     },
     "context": {
@@ -179,7 +228,29 @@
         }
     },
     "global": {
-        "addKeysByTag": { "skip": [ "actions", "members" ] }
+        "addKeysByTag": { "skip": [ "actions", "members" ] },
+        "renameKeys": {
+            "patterns": {
+                "~": { "replaceCharacter": "/", "exactMatch": false },
+                "ASM:unit_hostname": { "constant": "hostname", "exactMatch": false },
+                "BIGIP_HOSTNAME": { "constant": "hostname" },
+                "status.availabilityState": { "constant": "availabilityState" },
+                "status.enabledState": { "constant": "enabledState" },
+                "resp_2xxCnt": { "constant": "2xxResp" },
+                "resp_3xxCnt": { "constant": "3xxResp" },
+                "resp_4xxCnt": { "constant": "4xxResp" },
+                "resp_5xxCnt": { "constant": "5xxResp" },
+                "respBucket_2m": { "constant": "respLessThan2m" },
+                "respBucketLarge": { "constant": "respGreaterThan2m" },
+                "curConns": { "constant": "currentConnections" },
+                "curNativeConns": { "constant": "currentNativeConnections" },
+                "curCompatConns": { "constant": "currentCompatibleConnections" }
+            },
+            "options": {
+                "exactMatch": true
+            }
+        },
+        "filterKeys": { "exclude": [ "kind", "selfLink" ] }
     },
     "definitions": {
         "`T`": { "pattern": "\/(.*?)\/", "group": 1 },

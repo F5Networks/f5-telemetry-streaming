@@ -29,17 +29,22 @@ const CONDITIONAL_FUNCS = {
 /**
  * Endpoint Loader class
  *
- * @param {Object}  options              - initialization options
- * @param {String}  [options.host]       - host to connect to, will override default host
- * @param {Integer} [options.port]       - host's port to connect to, will override default port
- * @param {String}  [options.username]   - username for auth, will override default username
- * @param {String}  [options.passphrase] - passphrase for auth, will override default passphrase
+ * @param {Object}  options                       - initialization options
+ * @param {String}  [options.host]                - host to connect to, will override default host
+ * @param {String}  [options.protocol]            - host protocol to use, will override default protocol
+ * @param {Integer} [options.port]                - host's port to connect to, will override default port
+ * @param {String}  [options.username]            - username for auth, will override default username
+ * @param {String}  [options.passphrase]          - passphrase for auth, will override default passphrase
+ * @param {String}  [options.allowSelfSignedCert] - false - requires SSL certificates be valid,
+ *      true - allows self-signed certs
  */
 function EndpointLoader(options) {
     this.host = options.host || constants.LOCAL_HOST;
     this.username = options.username || '';
     this.passphrase = options.passphrase || '';
+    this.protocol = options.protocol || constants.DEFAULT_PROTOCOL;
     this.port = options.port || constants.DEFAULT_PORT;
+    this.allowSelfSignedCert = options.allowSelfSignedCert;
     this.token = null;
     this.endpoints = null;
     this.cachedResponse = {};
@@ -71,7 +76,12 @@ EndpointLoader.prototype.auth = function () {
         if (!this.username || !this.passphrase) {
             throw new Error('Username and passphrase required');
         }
-        promise = util.getAuthToken(this.host, this.username, this.passphrase, { port: this.port });
+        const options = {
+            protocol: this.protocol,
+            port: this.port,
+            allowSelfSignedCert: this.allowSelfSignedCert
+        };
+        promise = util.getAuthToken(this.host, this.username, this.passphrase, options);
     }
     return promise.then((token) => {
         this.token = token.token;
@@ -167,7 +177,9 @@ EndpointLoader.prototype.loadEndpoint = function (endpoint, cb) {
  */
 EndpointLoader.prototype._getData = function (uri, options) {
     const httpOptions = {
-        port: this.port
+        protocol: this.protocol,
+        port: this.port,
+        allowSelfSignedCert: this.allowSelfSignedCert
     };
     if (this.token) {
         httpOptions.headers = {
@@ -200,32 +212,58 @@ EndpointLoader.prototype._getData = function (uri, options) {
  */
 EndpointLoader.prototype._getAndExpandData = function (endpointProperties) {
     const p = endpointProperties;
-    let rawData;
+    let completeData;
     let referenceKey;
-    const childItemKey = 'items';
+    const childItemKey = 'items'; // assume we are looking inside of 'items'
+
+    // remote protocol, host and query params
+    const fixEndpoint = i => i.replace('https://localhost', '').split('?')[0];
+
+    const substituteData = (data, childKey, assign) => {
+        // this tells us we need to modify the data
+        if (completeData) {
+            data.forEach((i) => {
+                try {
+                    let dataToSubstitute;
+                    if (assign === true) {
+                        dataToSubstitute = Object.assign(i.data, completeData.data[childItemKey][i.name]);
+                    } else {
+                        dataToSubstitute = i.data;
+                    }
+
+                    if (childKey) {
+                        completeData.data[childItemKey][i.name][childKey] = dataToSubstitute;
+                    } else {
+                        completeData.data[childItemKey][i.name] = dataToSubstitute;
+                    }
+                } catch (e) {
+                    // just continue
+                }
+            });
+            return Promise.resolve(completeData); // return substituted data
+        }
+        return Promise.resolve(data); // return data
+    };
 
     return Promise.resolve(this._getData(p.endpoint, { name: p.name, body: p.body }))
         .then((data) => {
             // data: { name: foo, data: bar }
-            // check if expandReferences is requested
+
+            // check if expandReferences property was specified
             if (p.expandReferences) {
-                rawData = data; // retain for later
+                completeData = data;
                 const actualData = data.data;
-                // for now let's just support a single reference
-                referenceKey = Object.keys(p.expandReferences)[0];
+                referenceKey = Object.keys(p.expandReferences)[0]; // for now let's just support a single reference
                 const referenceObj = p.expandReferences[Object.keys(p.expandReferences)[0]];
 
                 const promises = [];
-                // assumes we are looking inside of 'items', might need to extend this to 'entries', etc.
                 if (typeof actualData === 'object' && Array.isArray(actualData[childItemKey])) {
                     for (let i = 0; i < actualData[childItemKey].length; i += 1) {
                         const item = actualData[childItemKey][i];
                         // first check for reference and then link property
                         if (item[referenceKey] && item[referenceKey].link) {
-                            // remove protocol/host from self link
-                            let referenceEndpoint = item[referenceKey].link.replace('https://localhost', '');
+                            let referenceEndpoint = fixEndpoint(item[referenceKey].link);
                             if (referenceObj.endpointSuffix) {
-                                referenceEndpoint = referenceEndpoint.split('?')[0]; // simple avoidance of query params
                                 referenceEndpoint = `${referenceEndpoint}${referenceObj.endpointSuffix}`;
                             }
                             promises.push(this._getData(referenceEndpoint, { name: i }));
@@ -234,24 +272,30 @@ EndpointLoader.prototype._getAndExpandData = function (endpointProperties) {
                 }
                 return Promise.all(promises);
             }
-            // default is to just return the data
-            return Promise.resolve(data);
+            return Promise.resolve(data); // just return the data
         })
+        .then(data => substituteData(data, referenceKey, false))
         .then((data) => {
-            // this tells us we need to modify the raw data, or at least attempt to do so
-            if (rawData) {
-                data.forEach((i) => {
-                    try {
-                        rawData.data[childItemKey][i.name][referenceKey] = i.data;
-                    } catch (e) {
-                        // just continue
+            // check if includeStats property was specified
+            if (p.includeStats) {
+                completeData = data;
+                const actualData = data.data;
+
+                const promises = [];
+                if (typeof actualData === 'object' && Array.isArray(actualData[childItemKey])) {
+                    for (let i = 0; i < actualData[childItemKey].length; i += 1) {
+                        const item = actualData[childItemKey][i];
+                        // check for selfLink property
+                        if (item.selfLink) {
+                            promises.push(this._getData(`${fixEndpoint(item.selfLink)}/stats`, { name: i }));
+                        }
                     }
-                });
-                return Promise.resolve(rawData);
+                }
+                return Promise.all(promises);
             }
-            // again default is to just return the data
-            return Promise.resolve(data);
+            return Promise.resolve(data); // just return the data
         })
+        .then(data => substituteData(data, null, true))
         .catch((err) => {
             throw err;
         });
@@ -315,7 +359,7 @@ SystemStats.prototype._preprocessProperty = function (property) {
         // 'else' or 'then' were not defined.
         while (property) {
             // copy all non-conditional data on same level to new object
-            // eslint-disable-next-line
+            // eslint-disable-next-line no-loop-func
             Object.keys(property).forEach((key) => {
                 if (!(key === 'if' || key === 'then' || key === 'else')) {
                     newObj[key] = property[key];
@@ -365,9 +409,10 @@ SystemStats.prototype._processData = function (property, data) {
     // standard options for normalize, these are driven primarily by the properties file
     const options = {
         key: this._splitKey(property.key).childKey,
-        filterByKeys: property.filterKeys,
-        renameKeysByPattern: property.renameKeys,
+        filterByKeys: property.filterKeys ? [property.filterKeys, global.filterKeys] : [global.filterKeys],
+        renameKeysByPattern: property.renameKeys ? [property.renameKeys, global.renameKeys] : [global.renameKeys],
         convertArrayToMap: property.convertArrayToMap,
+        includeFirstEntry: property.includeFirstEntry,
         runCustomFunction: property.runFunction,
         addKeysByTag: { // add 'name' + any user configured tags if specified by prop
             tags: property.addKeysByTag ? Object.assign(defaultTags, this.tags) : defaultTags,
@@ -380,8 +425,8 @@ SystemStats.prototype._processData = function (property, data) {
 /**
  * Load data for property
  *
- * @param {Object} property     - property object
- * @param {String} property.key - key to identify endpoint to load data from
+ * @param {Object} property       - property object
+ * @param {String} [property.key] - key to identify endpoint to load data from
  * @returns {Object} Promise resolved with fetched data object
  */
 SystemStats.prototype._loadData = function (property) {
@@ -414,6 +459,13 @@ SystemStats.prototype._processProperty = function (key, property) {
     if (property.disabled) {
         return Promise.resolve();
     }
+
+    // support property simply being a folder - add as empty object
+    if (property.structure && property.structure.folder === true) {
+        this.collectedData[key] = {};
+        return Promise.resolve();
+    }
+
     return this._loadData(property)
         .then((data) => {
             this.collectedData[key] = this._processData(property, data);
@@ -427,8 +479,8 @@ SystemStats.prototype._processProperty = function (key, property) {
  * Process context object
  *
  * @param {Object} contextData         - context object to load
- * @param {String} contextData.<key>   - key to store loaded data
- * @param {Object} contextData.<value> - property object to use to load data
+ * @param {String} [contextData.key]   - key to store loaded data
+ * @param {Object} [contextData.value] - property object to use to load data
  *
  * @returns {Object} Promise resolved when all context's properties were loaded
  */
@@ -480,41 +532,53 @@ SystemStats.prototype._computePropertiesData = function (propertiesData) {
 /**
  * Collect info based on object provided in properties
  *
- * @param {String}  host                      - host
- * @param {Integer} port                      - port
- * @param {String}  username                  - username for host
- * @param {String}  passphrase                - password for host
- * @param {Object}  options                   - options
- * @param {Object}  [options.tags]            - tags to add to the data (each key)
- * @param {Object}  [options.addtlProperties] - additional properties to add to the top-level data
+ * @param {String}  host                          - host
+ * @param {Object}  options                       - options
+ * @param {String}  [options.protocol]            - protocol for host
+ * @param {Integer} [options.port]                - port for host
+ * @param {String}  [options.username]            - username for host
+ * @param {String}  [options.passphrase]          - password for host
+ * @param {Object}  [options.tags]                - tags to add to the data (each key)
+ * @param {Boolean} [options.allowSelfSignedCert] - false - requires SSL certificates be valid,
+ *      true - allows self-signed certs
  *
  * @returns {Object} Promise which is resolved with a map of stats
  */
-SystemStats.prototype.collect = function (host, port, username, passphrase, options) {
+SystemStats.prototype.collect = function (host, options) {
     if (options.tags) this.tags = options.tags;
 
     this.loader = new EndpointLoader({
-        host, port, username, passphrase
+        host,
+        allowSelfSignedCert: options.allowSelfSignedCert,
+        protocol: options.protocol,
+        port: options.port,
+        username: options.username,
+        passphrase: options.passphrase
     });
     this.loader.setEndpoints(paths.endpoints);
     return this.loader.auth()
         .then(() => this._computeContextData(context))
         .then(() => this._computePropertiesData(stats))
         .then(() => {
-            const orderedData = {};
+            // order data according to properties file
+            const data = {};
             Object.keys(stats).forEach((key) => {
-                orderedData[key] = this.collectedData[key];
+                data[key] = this.collectedData[key];
             });
-            return Promise.resolve(orderedData);
-        })
-        .then((data) => {
-            // inject service data
-            const serviceProps = {};
-            if (options.addtlProperties) {
-                Object.assign(serviceProps, options.addtlProperties);
-            }
-            data.telemetryServiceInfo = serviceProps;
+            // certain stats require a more complex structure - process those
+            Object.keys(data).forEach((key) => {
+                const stat = stats[key] || {};
+                if (stat.structure && !stat.structure.folder) {
+                    const parentKey = stat.structure.parentKey;
+                    data[parentKey][key] = data[key];
+                    delete data[key];
+                }
+            });
             return Promise.resolve(data);
+        })
+        .catch((err) => {
+            logger.error(`Error: SystemStats.collect: ${err}`);
+            return Promise.reject(err);
         });
 };
 
@@ -522,39 +586,6 @@ SystemStats.prototype.collect = function (host, port, username, passphrase, opti
  * Comparison functions
  */
 
-/**
- * Compare version strings
- *
- * @param {String} version1   - version to compare
- * @param {String} comparator - comparison operator
- * @param {String} version2   - version to compare
- *
- * @returns {boolean} true or false
- */
-function compareVersionStrings(version1, comparator, version2) {
-    comparator = comparator === '=' ? '==' : comparator;
-    if (['==', '===', '<', '<=', '>', '>=', '!=', '!=='].indexOf(comparator) === -1) {
-        throw new Error(`Invalid comparator '${comparator}'`);
-    }
-    const v1parts = version1.split('.');
-    const v2parts = version2.split('.');
-    const maxLen = Math.max(v1parts.length, v2parts.length);
-    let part1;
-    let part2;
-    let cmp = 0;
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < maxLen && !cmp; i++) {
-        part1 = parseInt(v1parts[i], 10) || 0;
-        part2 = parseInt(v2parts[i], 10) || 0;
-        if (part1 < part2) {
-            cmp = 1;
-        } else if (part1 > part2) {
-            cmp = -1;
-        }
-    }
-    // eslint-disable-next-line no-eval
-    return eval(`0${comparator}${cmp}`);
-}
 /**
  * Compare device versions
  *
@@ -569,7 +600,7 @@ function deviceVersionGreaterOrEqual(contextData, versionToCompare) {
     if (deviceVersion === undefined) {
         throw new Error('deviceVersionGreaterOrEqual: context has no property \'deviceVersion\'');
     }
-    return compareVersionStrings(deviceVersion, '>=', versionToCompare);
+    return util.compareVersionStrings(deviceVersion, '>=', versionToCompare);
 }
 
 

@@ -1,5 +1,6 @@
 node_modules/
 rpmbuild/
+dist/new_build/
 .vscode/
 _build/
 docs/_build/

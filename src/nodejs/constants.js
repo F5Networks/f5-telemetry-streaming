@@ -8,23 +8,30 @@
 
 'use strict';
 
-const VERSION = '0.9.0';
+const VERSION = '1.0.0';
 
 module.exports = {
     VERSION,
     STATS_KEY_SEP: '::',
     CONSUMERS_DIR: './consumers',
     LOCAL_HOST: 'localhost',
+    DEFAULT_PROTOCOL: 'http',
     DEFAULT_PORT: 8100,
-    STRICT_TLS_REQUIRED: false, // for now, default to false
+    STRICT_TLS_REQUIRED: true,
     DEFAULT_EVENT_LISTENER_PORT: 6514,
     USER_AGENT: `f5-telemetry/${VERSION}`,
     SYSTEM_POLLER_CLASS_NAME: 'Telemetry_System_Poller',
     EVENT_LISTENER_CLASS_NAME: 'Telemetry_Listener',
+    CONTROLS_CLASS_NAME: 'Controls',
+    CONTROLS_PROPERTY_NAME: 'controls',
     CONSUMERS_CLASS_NAME: 'Telemetry_Consumer',
     TRACER_DIR: '/var/tmp/telemetry',
     BIG_IP_DEVICE_TYPE: 'BIG-IP',
     CONTAINER_DEVICE_TYPE: 'Container',
     PASSPHRASE_ENVIRONMENT_VAR: 'environmentVar',
-    PASSPHRASE_CIPHER_TEXT: 'cipherText'
+    PASSPHRASE_CIPHER_TEXT: 'cipherText',
+    EVENT_TYPES: {
+        SYSTEM_POLLER: 'systemInfo',
+        EVENT_LISTENER: 'event'
+    }
 };
