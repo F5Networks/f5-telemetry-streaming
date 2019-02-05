@@ -13,7 +13,7 @@ Configure the Log Publisher
 
 1. Create a pool in tmsh, replacing the example address with a valid TS listener address, for example, the mgmt IP:
 
-.. code-block:: python
+.. code-block:: json
 
     create ltm pool telemetry-local monitor tcp members replace-all-with { 192.0.2.1:6514 }
 
