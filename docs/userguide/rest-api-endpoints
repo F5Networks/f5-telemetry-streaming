@@ -1,0 +1,17 @@
+REST API Endpoints
+------------------
+
+Telemetry Streaming's base URI is **mgmt/shared/telemetry. 
+
+Request example:
+
+.. code-block:: json
+   :linenos:
+
+   curl -v -u admin:<admin_password> -X GET http://localhost:8100/mgmt/shared/telemetry/info
+
+
+.. code-block:: json
+   :linenos:
+
+   {"nodeVersion":"v4.6.0","version":"1.0.0","release":"2","schemaCurrent":"1.0.0","schemaMinimum":"1.0.0"}

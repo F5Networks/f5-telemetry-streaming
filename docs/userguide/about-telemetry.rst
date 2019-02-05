@@ -69,7 +69,7 @@ The first few lines of your declaration are a part of the base components and de
 +--------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
 | Parameter          | Options                        | Description/Notes                                                                                                                 |
 +====================+================================+===================================================================================================================================+
-| class              | Controls                       | Indicates this JSON document is a Device declaration                                                                              |
+| class              | Controls                       | Describes top-level Telemetry Streaming options. The class for controls must always be Controls, do not change this value.        |
 +--------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
 | logLevel           | **info**, debug, error         | This value determines how much information you want Telemetry Streaming to log. See the logging section for more information.     |
 +--------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
@@ -101,7 +101,7 @@ The next lines of the declaration sets the System Poller, which polls a system, 
 +====================+================================+============================================================================================================================================+
 | class              | Telemetry_System_Poller        |  The class for system poller must always be Telemetry_System_Poller, do not change this value.                                             |
 +--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
-| interval           | **60**                         |  This value determines the polling period in seconds. By default, Telemetry Streaming collects statistics every 60 seconds.                |
+| interval           | 60 - 6000, **300**             |  This value determines the polling period in seconds. By default, Telemetry Streaming collects statistics every 300 seconds.               |
 +--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 
 
@@ -111,7 +111,7 @@ The next lines of the declaration sets the System Poller, which polls a system, 
 Event Listener
 ``````````````
 The next lines of the declaration sets the Event Listener, which provides a listener, currently TCP, that can accept events in a specific format and process them. Currently, the TS Listener sends all logging telemetry data.
-To see the type of information that the event listener processes, see :ref:`output-example.rst <Consumer>`.
+To see the type of information that the event listener processes, see :ref:`outputexample-ref`.
 Event Format: ``key1="value",key2="value"``
 
 .. code-block:: javascript
@@ -142,7 +142,7 @@ Event Format: ``key1="value",key2="value"``
 
 Consumer class
 ``````````````
-The next lines of the declaration sets the Consumer, which accepts all telemetry information whatever systems you configure it to. The consumer provides the tools to process that information. To see examples of configurations for consumers like Splunk, Azure Log Analytics, AWS CloudWatch, AWS S3, Graphite, and others, see the :ref:`Consumer <setting-up-consumer>` section of this guide.
+The next lines of the declaration sets the Consumer, which accepts all telemetry information whatever systems you configure it to. The consumer provides the tools to process that information. To see examples of configurations for consumers like Splunk, Azure Log Analytics, AWS CloudWatch, AWS S3, Graphite, and others, see the :ref:`settingupconsumer-ref` section of this guide.
 
 .. code-block:: javascript
    :linenos:
@@ -176,7 +176,7 @@ The next lines of the declaration sets the Consumer, which accepts all telemetry
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
 | protocol           | **http**, https                |  The protocol of the consumer                                                                                                      |
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
-| port               | **8088**                       |  The port of the consumer system                                                                                                   |
+| port               | 8088                           |  The port of the consumer system                                                                                                   |
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
 | passphrase         | xxxxx                          |  The secret password to use when sending data to the consumer system                                                               |
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
