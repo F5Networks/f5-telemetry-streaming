@@ -87,6 +87,8 @@ Replace the example address with a valid Telemetry Streaming listener address, f
 
 3. Attach the profile to the virtual server, for example:
 
+.. NOTE:: The example below shows a snippet of an AS3 declaration.
+
 .. code-block:: python
    :linenos:
 
