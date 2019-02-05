@@ -69,7 +69,7 @@ Global restriction is disallowing connections secured by self-signed certificate
         "class": "Telemetry_Consumer",
         "type": "Splunk",
         "host": "192.0.2.1",
-        "protocol": "http",
+        "protocol": "https",
         "port": "8088",
         "passphrase": {
             "cipherText": "apikey"
@@ -128,7 +128,7 @@ Note: More information about using the HEC can be found on the Splunk website [h
         "class": "Telemetry_Consumer",
         "type": "Splunk",
         "host": "192.0.2.1",
-        "protocol": "http",
+        "protocol": "https",
         "port": "8088",
         "passphrase": {
             "cipherText": "apikey"
@@ -243,8 +243,8 @@ Note: More information about Graphite events can be found [here](https://graphit
         "class": "Telemetry_Consumer",
         "type": "Graphite",
         "host": "192.0.2.1",
-        "protocol": "http",
-        "port": "80"
+        "protocol": "https",
+        "port": "443"
     }
 }
 ```
@@ -302,7 +302,7 @@ Note: More information about installing ElasticSearch can be found [here](https:
         "type": "ElasticSearch",
         "host": "192.0.2.1",
         "port": "9200",
-        "protocol": "http",
+        "protocol": "https",
         "allowSelfSignedCert": false,
         "path": "/path/to/post/data",
         "index": "f5telemetry",
@@ -364,7 +364,7 @@ Note: Typically the required information can be found by navigating to the HTTP 
         "class": "Telemetry_Consumer",
         "type": "Splunk",
         "host": "192.0.2.1",
-        "protocol": "http",
+        "protocol": "https",
         "port": "8088",
         "passphrase": {
             "cipherText": "apikey"
