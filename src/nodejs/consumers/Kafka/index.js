@@ -19,11 +19,11 @@ module.exports = function (context) {
     const clientOptions = {
         kafkaHost: `${config.host}:${config.port || 9092}`, // format: 'kafka-host1:9092'
         connectTimeout: 3 * 1000, // shorten timeout
-        requestTimeout: 5 * 1000, // shorten timeout
-        sslOptions: {
-            rejectUnauthorized: config.allowSelfSignedCert
-        }
+        requestTimeout: 5 * 1000 // shorten timeout
     };
+    // TODO: add support for ssl option - keep in mind sslOptions being added
+    // to client options at all is the signal to invoke TLS - not a great API
+
     const client = new kafka.KafkaClient(clientOptions);
     const producer = new kafka.Producer(client);
     const payload = [
