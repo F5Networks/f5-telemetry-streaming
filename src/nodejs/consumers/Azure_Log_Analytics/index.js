@@ -32,7 +32,6 @@ module.exports = function (context) {
     const workspaceId = context.config.workspaceId;
     const sharedKey = context.config.passphrase.text;
     const logType = context.config.logType || 'F5Telemetry';
-    const date = new Date().toUTCString();
 
     // for event types other than systemInfo, let's not chunk
     // so simply format according to what the chunking code expects
@@ -44,28 +43,27 @@ module.exports = function (context) {
 
     const promises = [];
     const tracerMsg = [];
-    const defaultHttpHeaders = {
-        'content-type': 'application/json',
-        'x-ms-date': date
-    };
     Object.keys(context.event.data).forEach((type) => {
         let data = context.event.data[type];
         if (typeof data !== 'object') {
             data = { value: data }; // make data an object
         }
-        const body = JSON.stringify(data);
-        const contentLength = Buffer.byteLength(body, 'utf8');
+        const date = new Date().toUTCString();
+        const httpBody = JSON.stringify(data);
+        const contentLength = Buffer.byteLength(httpBody, 'utf8');
         const stringToSign = `POST\n${contentLength}\napplication/json\nx-ms-date:${date}\n/api/logs`;
         const signature = crypto.createHmac('sha256', new Buffer(sharedKey, 'base64')).update(stringToSign, 'utf-8').digest('base64');
         const authorization = `SharedKey ${workspaceId}:${signature}`;
 
         const requestOptions = {
             url: `https://${workspaceId}.ods.opinsights.azure.com/api/logs?api-version=2016-04-01`,
-            headers: Object.assign(defaultHttpHeaders, {
+            headers: {
+                'content-type': 'application/json',
+                'x-ms-date': date,
                 'Log-Type': `${logType}_${type}`,
                 Authorization: authorization
-            }),
-            body,
+            },
+            body: httpBody,
             strictSSL: !context.config.allowSelfSignedCert
         };
 

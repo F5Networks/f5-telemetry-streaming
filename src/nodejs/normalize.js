@@ -23,16 +23,24 @@ module.exports = {
      * @returns {Object} Returns data as JSON
      */
     _formatAsJson(data) {
+        const defaultKey = 'data';
         const ret = {};
         // place in try/catch in case this event is malformed
         try {
             const dataToFormat = data.trim(); // remove new line char or whitespace from end of line
             const baseSplit = dataToFormat.split('",'); // don't split on just comma, that may appear inside a specific key
-            baseSplit.forEach((i) => {
-                const keySplit = i.split('=');
-                const keyValue = keySplit[1].replace(/"/g, '');
-                ret[keySplit[0]] = keyValue;
-            });
+
+            // some events cannot be parsed as multiple key value pairs, but those can still be processed
+            // if no delimiters exist just place the whole string inside a single key
+            if (baseSplit.length === 1) {
+                ret[defaultKey] = baseSplit[0];
+            } else {
+                baseSplit.forEach((i) => {
+                    const keySplit = i.split('=');
+                    const keyValue = keySplit[1].replace(/"/g, '');
+                    ret[keySplit[0]] = keyValue;
+                });
+            }
         } catch (e) {
             logger.error(`formatAsJson error: ${e}`);
         }

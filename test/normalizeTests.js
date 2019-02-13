@@ -61,15 +61,26 @@ describe('Normalize', () => {
         assert.deepEqual(result, expectedResult);
     });
 
-    it('should normalize event and rename key(s)', () => {
-        const event = 'key1="value"';
+    it('should normalize event with single key', () => {
+        const event = '<100> some syslog event: host=x.x.x.x';
         const expectedResult = {
-            key2: 'value'
+            data: event
+        };
+
+        const result = normalize.event(event);
+        assert.deepEqual(result, expectedResult);
+    });
+
+    it('should normalize event and rename key(s)', () => {
+        const event = 'key1="value","key2"="value"';
+        const expectedResult = {
+            key1: 'value',
+            key3: 'value'
         };
         const options = {
             renameKeysByPattern: {
                 patterns: {
-                    key1: { constant: 'key2' }
+                    key2: { constant: 'key3' }
                 }
             }
         };
