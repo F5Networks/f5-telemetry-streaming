@@ -27,7 +27,9 @@ function process(data, type) {
     // TODO: could also add a telemetryEventType which would have a value like LTM Request Log/ASM Log/etc.
 
     // log events, for now
-    if (type === constants.EVENT_TYPES.EVENT_LISTENER) { logger.debug(`Event: ${util.stringify(data)}`); }
+    if (type === constants.EVENT_TYPES.EVENT_LISTENER) {
+        logger.debug(`Event: ${util.stringify(data)}`);
+    }
     // no translator, for now
     return forwarder.forward({ type, data })
         .then(() => {

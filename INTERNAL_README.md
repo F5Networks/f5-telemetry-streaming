@@ -31,7 +31,7 @@ Definition: Polls a system on a defined interval for information such as device 
 
 ### Event Listener
 
-Definition: Provides a listener, currently TCP, that can accept events in a specic format and process them.
+Definition: Provides a listener, on both TCP and UDP protocols, that can accept events in a specific format and process them.
 
 Event Format: ```key1="value",key2="value"```
 
@@ -1314,6 +1314,26 @@ Output
     "telemetryEventCategory":"event"
 }
 
+```
+
+#### System Log
+
+Configuration
+
+- Modify System syslog configuration (add destination)
+  - TMSH: ```modify sys syslog remote-servers replace-all-with { server { host 10.0.1.100 remote-port 6515 } }```
+  - GUI: System -> Logs -> Configuration -> Remote Logging
+- Modify System logging configuration (update what gets logged)
+  - TMSH: ```modify sys daemon-log-settings mcpd audit enabled`` Note: Other daemon-log-settings exist
+  - GUI: System -> Logs -> Configuration -> Options
+
+Output
+
+```json
+{
+    "data":"<85>Feb 12 21:39:43 telemetry notice sshd[22277]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=218.92.1.148  user=root",
+    "telemetryEventCategory":"event"
+}
 ```
 
 #### Log Publisher Configuration
