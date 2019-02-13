@@ -91,6 +91,13 @@
             "description": "" ,
             "type": "string"
         },
+        "binaryProtocol": {
+            "$comment": "Required for certain consumers: Kafka",
+            "title": "Custom Protocol (binary)",
+            "description": "" ,
+            "type": "string",
+            "enum": [ "binaryTcp", "binaryTcpTls" ]
+        },
         "index": {
             "$comment": "Required for certain consumers: ElasticSearch",
             "title": "Index Name",
@@ -266,6 +273,7 @@
                             ],
                             "properties": {
                                 "host": { "$ref": "#/definitions/host" },
+                                "protocol": { "$ref": "#/definitions/binaryProtocol", "default": "binaryTcpTls" },
                                 "port": { "$ref": "#/definitions/port", "default": 9092 },
                                 "topic": { "$ref": "#/definitions/topic" } 
                             }
