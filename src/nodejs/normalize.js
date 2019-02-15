@@ -10,7 +10,6 @@
 
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 const constants = require('./constants.js');
-const util = require('./util.js');
 const normalizeUtil = require('./normalizeUtil.js');
 
 module.exports = {
@@ -98,96 +97,6 @@ module.exports = {
     },
 
     /**
-     * Check for a match
-     *
-     * @param {String} data    - data
-     * @param {String} pattern - pattern to match on
-     * @param {Integer} group  - group to choose from match
-     * @param {String} excludePattern - even if 'pattern' has a match, optionally check for exclude pattern
-     *
-     * @returns {String} Returns matched key
-     */
-    _checkForMatch(data, pattern, group, excludePattern) {
-        let ret;
-        const g = group || 0;
-        let match = data.match(pattern);
-        if (match && match[g]) ret = match[g];
-        if (excludePattern) {
-            match = data.match(excludePattern);
-            if (match) ret = false;
-        }
-        return ret;
-    },
-
-    /**
-     * Rename keys in object using regex or constant
-     *
-     * @param {Object} data                  - data
-     * @param {Object} patterns              - map or array of patterns
-     * @param {Object} options               - options
-     * @param {Boolean} [options.exactMatch] - key must match base pattern exactly
-     *
-     * @returns {Object} Returns data with keys renamed (as needed)
-     */
-    _renameKeys(data, patterns, options) {
-        patterns = patterns || {};
-        options = options || {};
-        let ret = Array.isArray(data) ? [] : {};
-
-        const rename = (key, childPatterns) => {
-            let retKey = key;
-            Object.keys(childPatterns).forEach((pK) => {
-                const childPattern = childPatterns[pK];
-                // first check if key contains base match pattern
-                // exactMatch can be specified at the global or pattern level
-                // if specified at the pattern level it should override the global
-                const exactMatch = (options.exactMatch === true && childPattern.exactMatch !== false)
-                    || childPattern.exactMatch === true;
-                const keyMatch = exactMatch ? key === pK : key.includes(pK);
-                if (keyMatch) {
-                    // support constant keyword
-                    if (childPattern.constant) {
-                        retKey = childPattern.constant;
-                    } else if (childPattern.replaceCharacter) {
-                        // support replaceCharacter keyword
-                        retKey = retKey.replace(new RegExp(pK, 'g'), childPattern.replaceCharacter);
-                    } else {
-                        // assume a pattern, either in .pattern or as the value
-                        const patternMatch = this._checkForMatch(
-                            retKey,
-                            childPattern.pattern || childPattern,
-                            childPattern.group
-                        );
-                        if (patternMatch) retKey = patternMatch;
-                    }
-                }
-            });
-            return retKey;
-        };
-
-        // only process non array objects
-        if (typeof data === 'object' && !Array.isArray(data)) {
-            Object.keys(data).forEach((k) => {
-                let renamedKey = k;
-                // if patterns is an array assume it contains 1+ maps to process
-                // this provides a means to guarantee order
-                if (Array.isArray(patterns)) {
-                    patterns.forEach((i) => {
-                        renamedKey = rename(renamedKey, i);
-                    });
-                } else {
-                    renamedKey = rename(renamedKey, patterns);
-                }
-                ret[renamedKey] = this._renameKeys(data[k], patterns, options);
-            });
-            return ret;
-        }
-
-        ret = data;
-        return ret;
-    },
-
-    /**
      * Standardize and reduce complexity of provided data
      *
      * @param {Object} data                        - data to reduce
@@ -214,7 +123,7 @@ module.exports = {
 
             const iFE = options.includeFirstEntry;
             const entryKey = Object.keys(data[entries])[0];
-            if (iFE && this._checkForMatch(entryKey, iFE.pattern, iFE.group, iFE.excludePattern)) {
+            if (iFE && normalizeUtil._checkForMatch(entryKey, iFE.pattern, iFE.group, iFE.excludePattern)) {
                 data = Object.assign(data[entries][entryKey], data);
                 delete data[entries]; // delete entries key after merge
                 Object.keys(data).forEach((k) => {
@@ -235,7 +144,7 @@ module.exports = {
                 // convert array to map if required, otherwise just include
                 const catm = options.convertArrayToMap;
                 if (catm && catm.keyName) {
-                    ret = util.convertArrayToMap(data, catm.keyName, { keyPrefix: catm.keyNamePrefix });
+                    ret = normalizeUtil._convertArrayToMap(data, catm.keyName, { keyPrefix: catm.keyNamePrefix });
                     ret = this._reduceData(ret, options);
                 } else {
                     data.forEach((i) => {
@@ -286,7 +195,7 @@ module.exports = {
                 if (tagValue in def) tagValue = def[tagValue]; // overwrite with def value
 
                 if (tagValue.pattern) {
-                    const match = this._checkForMatch(key, tagValue.pattern, tagValue.group);
+                    const match = normalizeUtil._checkForMatch(key, tagValue.pattern, tagValue.group);
                     if (match) val = match;
                 } else {
                     val = tagValue;
@@ -336,7 +245,7 @@ module.exports = {
         options = options || {};
 
         let ret = this._formatAsJson(data);
-        ret = options.renameKeysByPattern ? this._renameKeys(ret, options.renameKeysByPattern.patterns) : ret;
+        ret = options.renameKeysByPattern ? normalizeUtil._renameKeys(ret, options.renameKeysByPattern.patterns) : ret;
         if (options.addKeysByTag) {
             ret = this._addKeysByTag(
                 ret,
@@ -384,7 +293,7 @@ module.exports = {
         if (fBK) {
             fBK = Array.isArray(fBK) ? fBK : [fBK];
             fBK.forEach((item) => {
-                ret = util.filterDataByKeys(ret, item);
+                ret = normalizeUtil._filterDataByKeys(ret, item);
             });
         }
         // rename keys by pattern - 1+ calls
@@ -392,7 +301,7 @@ module.exports = {
         if (rKBP) {
             rKBP = Array.isArray(rKBP) ? rKBP : [rKBP];
             rKBP.forEach((item) => {
-                ret = this._renameKeys(ret, item.patterns, item.options);
+                ret = normalizeUtil._renameKeys(ret, item.patterns, item.options);
             });
         }
         // run custom function

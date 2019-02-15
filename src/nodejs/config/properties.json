@@ -156,7 +156,8 @@
         "diskLatency": {
             "structure": { "parentKey": "system" },
             "key": "diskLatency::commandResult",
-            "runFunction": { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Device:", "filterKeys": { "include": [ "sd", "dm", "rsec/s", "wsec/s" ] } } }
+            "runFunction": { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Device:", "filterKeys": { "exclude": [ "Device:", "await", "r_await", "w_await", "svctm", "avgrq-sz", "avgqu-sz", "rkB/s", "wkB/s", "rsec/s", "wsec/s", "rrqm/s", "wrqm/s" ] }, "renameKeys": { "patterns": { "rsec/s": { "constant": "rkB/s" }, "wsec/s": { "constant": "wkB/s" } } } } },
+            "comment": "14.1+ uses wkB/s instead of wsec/s, equivalent for read.  Ignore both for now."
         },
         "networkInterfaces": {
             "structure": { "parentKey": "system" },

@@ -15,6 +15,160 @@ const util = require('./util.js');
 module.exports = {
 
     /**
+     * Convert array to map using provided options
+     *
+     * @param {Object} data                - data
+     * @param {String} key                 - key in array containing value to use as key in map
+     * @param {Object} options             - optional arguments
+     * @param {String} [options.keyPrefix] - prefix for key
+     *
+     * @returns {Object} Converted data
+     */
+    _convertArrayToMap(data, key, options) {
+        const ret = {};
+        options = options || {};
+
+        if (!Array.isArray(data)) {
+            throw new Error(`convertArrayToMap() array required: ${util.stringify(data)}`);
+        }
+
+        data.forEach((i) => {
+            const keyName = options.keyPrefix ? `${options.keyPrefix}${i[key]}` : i[key];
+            ret[keyName] = i;
+        });
+        return ret;
+    },
+
+    /**
+     * Check for a match
+     *
+     * @param {String} data    - data
+     * @param {String} pattern - pattern to match on
+     * @param {Integer} group  - group to choose from match
+     * @param {String} excludePattern - even if 'pattern' has a match, optionally check for exclude pattern
+     *
+     * @returns {String} Returns matched key
+     */
+    _checkForMatch(data, pattern, group, excludePattern) {
+        let ret;
+        const g = group || 0;
+        let match = data.match(pattern);
+        if (match && match[g]) ret = match[g];
+        if (excludePattern) {
+            match = data.match(excludePattern);
+            if (match) ret = false;
+        }
+        return ret;
+    },
+
+    /**
+     * Rename keys in object using regex or constant
+     *
+     * @param {Object} data                  - data
+     * @param {Object} patterns              - map or array of patterns
+     * @param {Object} options               - options
+     * @param {Boolean} [options.exactMatch] - key must match base pattern exactly
+     *
+     * @returns {Object} Returns data with keys renamed (as needed)
+     */
+    _renameKeys(data, patterns, options) {
+        patterns = patterns || {};
+        options = options || {};
+        const ret = Array.isArray(data) ? [] : {};
+
+        const rename = (key, childPatterns) => {
+            let retKey = key;
+            Object.keys(childPatterns).forEach((pK) => {
+                const childPattern = childPatterns[pK];
+                // first check if key contains base match pattern
+                // exactMatch can be specified at the global or pattern level
+                // if specified at the pattern level it should override the global
+                const exactMatch = (options.exactMatch === true && childPattern.exactMatch !== false)
+                    || childPattern.exactMatch === true;
+                const keyMatch = exactMatch ? key === pK : key.includes(pK);
+                if (keyMatch) {
+                    // support constant keyword
+                    if (childPattern.constant) {
+                        retKey = childPattern.constant;
+                    } else if (childPattern.replaceCharacter) {
+                        // support replaceCharacter keyword
+                        retKey = retKey.replace(new RegExp(pK, 'g'), childPattern.replaceCharacter);
+                    } else {
+                        // assume a pattern, either in .pattern or as the value
+                        const patternMatch = this._checkForMatch(
+                            retKey,
+                            childPattern.pattern || childPattern,
+                            childPattern.group
+                        );
+                        if (patternMatch) retKey = patternMatch;
+                    }
+                }
+            });
+            return retKey;
+        };
+
+        // only process non array objects
+        if (typeof data === 'object' && !Array.isArray(data)) {
+            Object.keys(data).forEach((k) => {
+                let renamedKey = k;
+                // if patterns is an array assume it contains 1+ maps to process
+                // this provides a means to guarantee order
+                if (Array.isArray(patterns)) {
+                    patterns.forEach((i) => {
+                        renamedKey = rename(renamedKey, i);
+                    });
+                } else {
+                    renamedKey = rename(renamedKey, patterns);
+                }
+                ret[renamedKey] = this._renameKeys(data[k], patterns, options);
+            });
+            return ret;
+        }
+        return data; // just return data
+    },
+
+
+    /**
+     * Filter data based on a list of keys - include and exclude are mutually exclusive
+     *
+     * @param {Object} data             - data
+     * @param {Object} options          - function options
+     * @param {Array} [options.include] - include matching keys
+     * @param {Array} [options.exclude] - exclude matching keys
+     *
+     * @returns {Object} Filtered data
+     */
+    _filterDataByKeys(data, options) {
+        options = options || {};
+
+        if (options.include && options.exclude) throw new Error('include and exclude both provided');
+
+        if (typeof data !== 'object') return data;
+        if (Array.isArray(data)) return data; // ignore arrays
+
+        const keys = options.include || options.exclude || [];
+        Object.keys(data).forEach((k) => {
+            let deleteKey = false;
+            if (options.include) {
+                deleteKey = true; // default to true
+                keys.forEach((i) => {
+                    if (k.includes(i)) deleteKey = false; // no exact match
+                });
+            } else if (options.exclude) {
+                if (keys.indexOf(k) !== -1) deleteKey = true; // exact match
+            }
+
+            if (deleteKey) {
+                delete data[k];
+            } else {
+                data[k] = this._filterDataByKeys(data[k], options);
+            }
+        });
+
+        return data;
+    },
+
+    /**
      * Average values
      *
      * @param {Object} args                - args object
@@ -119,7 +273,8 @@ module.exports = {
      * @param {Object} [args.data]       - data to process (always included)
      * @param {String} [args.type]       - type, such as csv
      * @param {String} [args.mapKey]     - key to use during convertArrayToMap
-     * @param {Array} [args.filterKeys]  - filter keys according to array
+     * @param {Object} [args.renameKeys] - rename keys - see this._renameKeys for format
+     * @param {Object} [args.filterKeys] - filter keys - see this._filterDataByKeys for format
      *
      * @returns {Object} Returns formatted data
      */
@@ -146,9 +301,11 @@ module.exports = {
                 }
             });
             // now convert to map
-            ret = util.convertArrayToMap(ret, args.mapKey, {});
-            // finally filter keys - if required
-            ret = args.filterKeys ? util.filterDataByKeys(ret, args.filterKeys) : ret;
+            ret = this._convertArrayToMap(ret, args.mapKey, {});
+            // filter keys - if required
+            ret = args.filterKeys ? this._filterDataByKeys(ret, args.filterKeys) : ret;
+            // rename keys - if required
+            ret = args.renameKeys ? this._renameKeys(ret, args.renameKeys.patterns, args.renameKeys.options) : ret;
         } else {
             throw new Error(`Unsupported type: ${args.type}`);
         }
