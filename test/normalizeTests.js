@@ -326,6 +326,63 @@ describe('Normalize Util', () => {
         });
     });
 
+    it('should convert array to map', () => {
+        const array = [
+            {
+                name: 'foo'
+            }
+        ];
+        const expectedMap = {
+            foo: {
+                name: 'foo'
+            }
+        };
+        const actualMap = normalizeUtil._convertArrayToMap(array, 'name');
+        assert.deepEqual(actualMap, expectedMap);
+    });
+
+    it('should fail to convert array to map', () => {
+        assert.throws(
+            () => {
+                normalizeUtil._convertArrayToMap({}, 'name');
+            },
+            (err) => {
+                if ((err instanceof Error) && /array required/.test(err)) {
+                    return true;
+                }
+                return false;
+            },
+            'unexpected error'
+        );
+    });
+
+    it('should filter data by keys', () => {
+        const obj = {
+            'name/foo': {
+                name: 'foo',
+                removeMe: 'foo'
+            }
+        };
+        const expectedObj = {
+            'name/foo': {
+                name: 'foo'
+            }
+        };
+        // include
+        let actualObj = normalizeUtil._filterDataByKeys(obj, { include: ['name'] });
+        assert.deepEqual(actualObj, expectedObj);
+        // exclude
+        actualObj = normalizeUtil._filterDataByKeys(obj, { exclude: ['removeMe'] });
+        assert.deepEqual(actualObj, expectedObj);
+    });
+
+    it('should not filter array', () => {
+        const obj = [1, 2, 3];
+        const actualObj = normalizeUtil._filterDataByKeys(obj, { include: ['name'] });
+        assert.deepEqual(actualObj, obj);
+    });
+
+
     it('should get average', () => {
         const data = {
             tmm0: {
@@ -414,6 +471,26 @@ describe('Normalize Util', () => {
         };
 
         const result = normalizeUtil.formatAsJson({ data, type: 'csv', mapKey: 'named_key' });
+        assert.deepEqual(result, expectedResult);
+    });
+
+    it('should format as json and filter/rename', () => {
+        const data = 'named_key,key1,key2,key3\nname,value,value,value';
+        const expectedResult = {
+            name: {
+                named_key: 'name',
+                key1: 'value',
+                renamedKey: 'value'
+            }
+        };
+
+        const result = normalizeUtil.formatAsJson({
+            data,
+            type: 'csv',
+            mapKey: 'named_key',
+            filterKeys: { exclude: ['key2'] },
+            renameKeys: { patterns: { key3: { constant: 'renamedKey' } } }
+        });
         assert.deepEqual(result, expectedResult);
     });
 

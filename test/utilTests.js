@@ -71,62 +71,6 @@ describe('Util', () => {
             .catch(err => Promise.reject(err));
     });
 
-    it('should convert array to map', () => {
-        const array = [
-            {
-                name: 'foo'
-            }
-        ];
-        const expectedMap = {
-            foo: {
-                name: 'foo'
-            }
-        };
-        const actualMap = util.convertArrayToMap(array, 'name');
-        assert.deepEqual(actualMap, expectedMap);
-    });
-
-    it('should fail to convert array to map', () => {
-        assert.throws(
-            () => {
-                util.convertArrayToMap({}, 'name');
-            },
-            (err) => {
-                if ((err instanceof Error) && /array required/.test(err)) {
-                    return true;
-                }
-                return false;
-            },
-            'unexpected error'
-        );
-    });
-
-    it('should filter data by keys', () => {
-        const obj = {
-            'name/foo': {
-                name: 'foo',
-                removeMe: 'foo'
-            }
-        };
-        const expectedObj = {
-            'name/foo': {
-                name: 'foo'
-            }
-        };
-        // include
-        let actualObj = util.filterDataByKeys(obj, { include: ['name'] });
-        assert.deepEqual(actualObj, expectedObj);
-        // exclude
-        actualObj = util.filterDataByKeys(obj, { exclude: ['removeMe'] });
-        assert.deepEqual(actualObj, expectedObj);
-    });
-
-    it('should not filter array', () => {
-        const obj = [1, 2, 3];
-        const actualObj = util.filterDataByKeys(obj, { include: ['name'] });
-        assert.deepEqual(actualObj, obj);
-    });
-
     it('should stringify object', () => {
         const obj = {
             name: 'foo'
