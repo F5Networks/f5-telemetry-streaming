@@ -33,7 +33,6 @@ if (process.env.TEST_HARNESS_FILE !== undefined) {
     // end environment variables
 }
 
-
 const baseILXUri = '/mgmt/shared/telemetry';
 
 // purpose: basic functional test
@@ -81,11 +80,22 @@ describe('Basic', function () {
         });
     });
 
+    function checkPassphraseObject(data) {
+        const passphrase = data.declaration[consumerName].passphrase;
+        // check that the declaration returned contains encrypted text
+        // note: this only applies to TS running on BIG-IP (which is all we are testing for now)
+        assert.strictEqual(passphrase.cipherText.startsWith('$M'), true);
+        // check that the declaration does not return decrypted text
+        assert.strictEqual(passphrase.text, undefined);
+    }
+
     // run tests for each host
     hosts.forEach(function (hostObj) {
         const host = hostObj.admin_ip;
         const user = hostObj.admin_username;
         const password = hostObj.admin_password;
+
+        let postResponse;
 
         it(`--- Running tests against host: ${host} ---`, () => {}); // keeps in sync
 
@@ -115,7 +125,7 @@ describe('Basic', function () {
                 .catch(err => Promise.reject(err));
         });
 
-        it('should accept configuration', function () {
+        it('should post configuration', function () {
             const uri = `${baseILXUri}/declare`;
 
             const postOptions = {
@@ -126,17 +136,37 @@ describe('Basic', function () {
 
             return util.makeRequest(host, uri, postOptions)
                 .then((data) => {
-                    data = data || {};
                     assert.strictEqual(data.message, 'success');
-                    let encrypted;
-                    try {
-                        encrypted = data.declaration[consumerName].passphrase.cipherText;
-                    } catch (e) {
-                        throw e;
-                    }
-                    // check that the declaration returned contains encrypted text
-                    // note: this only applies to TS running on BIG-IP (which is all we are testing for now)
-                    assert.strictEqual(encrypted.startsWith('$M'), true);
+
+                    checkPassphraseObject(data);
+                })
+                .catch(err => Promise.reject(err));
+        });
+
+        it('should post configuration (again)', function () {
+            const uri = `${baseILXUri}/declare`;
+
+            const postOptions = {
+                method: 'POST',
+                headers: options.headers,
+                body: basicConfig
+            };
+
+            return util.makeRequest(host, uri, postOptions)
+                .then((data) => {
+                    postResponse = data; // used later
+                })
+                .catch(err => Promise.reject(err));
+        });
+
+        it('should get configuration', function () {
+            const uri = `${baseILXUri}/declare`;
+
+            return util.makeRequest(host, uri, options)
+                .then((data) => {
+                    assert.strictEqual(JSON.stringify(data.declaration), JSON.stringify(postResponse.declaration));
+
+                    checkPassphraseObject(data);
                 })
                 .catch(err => Promise.reject(err));
         });
