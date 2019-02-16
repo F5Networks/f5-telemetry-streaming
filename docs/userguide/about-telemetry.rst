@@ -81,7 +81,7 @@ The first few lines of your declaration are a part of the base components and de
 
 System Poller
 `````````````
-The next lines of the declaration sets the System Poller, which polls a system, such as BIG-IP, on a configurable interval for information such as device statistics, virtual server statistics, pool statistics, individual pool member statistics, and more.
+The next lines of the declaration sets the System Poller, which collects and normalizes statistics from a system, such as BIG-IP, on a configurable interval for information such as device statistics, virtual server statistics, pool statistics, individual pool member statistics, and more.
 
 .. code-block:: javascript
    :linenos:
