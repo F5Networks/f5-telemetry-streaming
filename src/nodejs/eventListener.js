@@ -262,8 +262,8 @@ configWorker.on('change', (config) => {
     logger.debug('configWorker change event in eventListener'); // helpful debug
 
     let eventListeners;
-    if (config.parsed && config.parsed[CLASS_NAME]) {
-        eventListeners = config.parsed[CLASS_NAME];
+    if (config && config[CLASS_NAME]) {
+        eventListeners = config[CLASS_NAME];
     }
     // in case when no listeners were declared
     eventListeners = eventListeners || {};
