@@ -172,10 +172,15 @@ RestWorker.prototype._initializeApplication = function (success, failure) {
 
     // try to load pre-existing configuration
     configWorker.restWorker = this;
-    configWorker.loadState().then((loadedState) => {
-        logger.debug(`loaded state ${util.stringify(loadedState)}`);
-        success();
-    });
+    configWorker.loadState()
+        .then((loadedState) => {
+            logger.debug(`loaded state ${util.stringify(loadedState)}`);
+            success();
+        })
+        .catch((err) => {
+            logger.exception('Startup Failed', err);
+            failure();
+        });
 };
 
 /**

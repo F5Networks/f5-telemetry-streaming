@@ -24,6 +24,13 @@ const customKeywords = require('./customKeywords.js');
 const CONTROLS_CLASS_NAME = require('./constants.js').CONTROLS_CLASS_NAME;
 const CONTROLS_PROPERTY_NAME = require('./constants.js').CONTROLS_PROPERTY_NAME;
 
+const baseState = {
+    config: {
+        raw: {},
+        parsed: {}
+    }
+};
+
 /**
  * ConfigWorker class
  *
@@ -33,12 +40,7 @@ const CONTROLS_PROPERTY_NAME = require('./constants.js').CONTROLS_PROPERTY_NAME;
  * @event change - config was validated and can be propogated
  */
 function ConfigWorker() {
-    this._state = {
-        config: {
-            raw: {},
-            parsed: {}
-        }
-    };
+    this._state = {};
     this.restWorker = null;
     this.validator = this.compileSchema();
 }
@@ -87,7 +89,7 @@ ConfigWorker.prototype._notifyConfigChange = function () {
     if (this._state && this._state.config && this._state.config.parsed) {
         parsedConfig = JSON.parse(JSON.stringify(this._state.config.parsed));
     } else {
-        throw new Error('_notifyConfigChange() Missing parsed config.');
+        return Promise.reject(new Error('_notifyConfigChange() Missing parsed config.'));
     }
     // handle passphrases first - decrypt, download, etc.
     return util.decryptAllSecrets(parsedConfig)
@@ -150,9 +152,6 @@ ConfigWorker.prototype._loadState = function () {
         return Promise.reject(new Error(err));
     }
     const _this = this;
-    const baseState = {
-        config: {}
-    };
     return new Promise((resolve, reject) => {
         _this.restWorker.loadState(null, (err, state) => {
             if (err) {
