@@ -175,11 +175,12 @@ Required Information:
             "class": "Telemetry_Consumer",
             "type": "Kafka",
             "host": "192.0.2.1",
-            "port": "9092"
-            "topic": "f5-telemetry",
-            
+            "protocol": "binaryTcpTls",
+            "port": "9092",
+            "topic": "f5-telemetry"
         }
     }
+
 
 
 ElasticSearch
