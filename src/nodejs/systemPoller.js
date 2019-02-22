@@ -140,8 +140,8 @@ function processClientRequest(restOperation) {
 configWorker.on('change', (config) => {
     logger.debug('configWorker change event in systemPoller'); // helpful debug
     let systemPollers;
-    if (config.parsed && config.parsed[CLASS_NAME]) {
-        systemPollers = config.parsed[CLASS_NAME];
+    if (config && config[CLASS_NAME]) {
+        systemPollers = config[CLASS_NAME];
     }
 
     // timestamp to filed out-dated tracers

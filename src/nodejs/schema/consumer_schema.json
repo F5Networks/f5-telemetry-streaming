@@ -91,6 +91,13 @@
             "description": "" ,
             "type": "string"
         },
+        "binaryProtocol": {
+            "$comment": "Required for certain consumers: Kafka",
+            "title": "Custom Protocol (binary)",
+            "description": "" ,
+            "type": "string",
+            "enum": [ "binaryTcp", "binaryTcpTls" ]
+        },
         "index": {
             "$comment": "Required for certain consumers: ElasticSearch",
             "title": "Index Name",
@@ -182,7 +189,7 @@
                             ],
                             "properties": {
                                 "host": { "$ref": "#/definitions/host" },
-                                "protocol": { "$ref": "#/definitions/protocol", "default": "http" },
+                                "protocol": { "$ref": "#/definitions/protocol", "default": "https" },
                                 "port": { "$ref": "#/definitions/port", "default": 8088 },
                                 "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
                                 "format": { "$ref": "#/definitions/format", "default": "default"  }
@@ -250,8 +257,8 @@
                             ],
                             "properties": {
                                 "host": { "$ref": "#/definitions/host" },
-                                "protocol": { "$ref": "#/definitions/protocol", "default": "http" },
-                                "port": { "$ref": "#/definitions/port", "default": 80 },
+                                "protocol": { "$ref": "#/definitions/protocol", "default": "https" },
+                                "port": { "$ref": "#/definitions/port", "default": 443 },
                                 "path": { "$ref": "#/definitions/path", "default": "/events/" }
                             }
                         },
@@ -266,6 +273,7 @@
                             ],
                             "properties": {
                                 "host": { "$ref": "#/definitions/host" },
+                                "protocol": { "$ref": "#/definitions/binaryProtocol", "default": "binaryTcpTls" },
                                 "port": { "$ref": "#/definitions/port", "default": 9092 },
                                 "topic": { "$ref": "#/definitions/topic" } 
                             }
@@ -281,7 +289,7 @@
                             ],
                             "properties": {
                                 "host": { "$ref": "#/definitions/host" },
-                                "protocol": { "$ref": "#/definitions/protocol", "default": "http" },
+                                "protocol": { "$ref": "#/definitions/protocol", "default": "https" },
                                 "port": { "$ref": "#/definitions/port", "default": 9200 },
                                 "path": { "$ref": "#/definitions/path" },
                                 "username": { "$ref": "#/definitions/username" },

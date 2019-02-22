@@ -33,20 +33,27 @@ describe('Config', () => {
     let configValidator;
     let formatConfig;
 
+    const baseState = {
+        config: {
+            raw: {},
+            parsed: {}
+        }
+    };
+
     before(() => {
         config = require('../src/nodejs/config.js');
         util = require('../src/nodejs/util.js');
         config.restWorker = {
-            loadState: (cb) => { cb(null, {}); },
+            loadState: (cb) => { cb(null, baseState); },
             saveState: (first, state, cb) => { cb(null); }
         };
-        config._loadState = () => Promise.resolve({});
+        config._loadState = () => Promise.resolve(baseState);
         configValidator = config.validator;
 
         formatConfig = util.formatConfig;
     });
     beforeEach(() => {
-        config._state = {};
+        config._state = JSON.parse(JSON.stringify(baseState));
     });
     afterEach(() => {
         config.validator = configValidator;
@@ -106,7 +113,7 @@ describe('Config', () => {
 
         return config.loadState()
             .then((data) => {
-                assert.deepEqual(data, {});
+                assert.deepEqual(data, baseState);
             })
             .catch(err => Promise.reject(err));
     });

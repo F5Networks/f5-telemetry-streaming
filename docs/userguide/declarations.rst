@@ -27,7 +27,7 @@ Example 1: Base Declaration
             "class": "Telemetry_Consumer",
             "type": "Splunk",
             "host": "192.0.2.1",
-            "protocol": "http",
+            "protocol": "https",
             "port": "8088",
             "passphrase": {
                 "cipherText": "apikey"
@@ -57,7 +57,7 @@ Note: This example shows only the Consumer class of the declaration and needs to
             "class": "Telemetry_Consumer",
             "type": "Splunk",
             "host": "192.0.2.1",
-            "protocol": "http",
+            "protocol": "https",
             "port": "8088",
             "passphrase": {
                 "cipherText": "apikey"

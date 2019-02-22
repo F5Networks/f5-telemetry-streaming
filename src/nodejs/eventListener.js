@@ -9,6 +9,7 @@
 'use strict';
 
 const net = require('net');
+const dgram = require('dgram');
 
 const logger = require('./logger.js');
 const constants = require('./constants.js');
@@ -27,6 +28,7 @@ const definitions = properties.definitions;
 const DEFAULT_PORT = constants.DEFAULT_EVENT_LISTENER_PORT;
 const CLASS_NAME = constants.EVENT_LISTENER_CLASS_NAME;
 const listeners = {};
+const protocols = ['tcp', 'udp'];
 
 // LTM request log (example)
 // eslint-disable-next-line max-len
@@ -39,6 +41,7 @@ const listeners = {};
  * @param {String} port                 - port to listen on
  * @param {Object} opts                 - additional configuration options
  * @param {Object} [opts.tags]          - tags to add to the event data
+ * @param {String} [opts.protocol]      - protocol to listen on: tcp or udp
  * @param {Function} [opts.tracer]      - tracer
  * @param {Function} [opts.filterFunc]  - function to filter events
  *
@@ -47,10 +50,11 @@ const listeners = {};
 function EventListener(name, port, opts) {
     this.name = name;
     this.port = port;
+    this.protocol = opts.protocol || 'tcp';
     this.tracer = opts.tracer;
     this.tags = opts.tags || {};
     this.filterFunc = opts.filterFunc;
-    this.logger = logger.getChild(`${this.name}:${this.port}`);
+    this.logger = logger.getChild(`${this.name}:${this.port}:${this.protocol}`);
 
     this._server = null;
     this._clientConnMap = {};
@@ -63,20 +67,34 @@ function EventListener(name, port, opts) {
  * @returns {Object} listening options
  */
 EventListener.prototype.getServerOptions = function () {
-    return {
-        port: this.port
-    };
+    if (this.protocol === 'tcp') {
+        return {
+            port: this.port
+        };
+    }
+    return {};
 };
 
 /**
  * Start Event listener
  */
 EventListener.prototype.start = function () {
-    this.logger.debug(`Configuring server to listen on port ${this.port}`);
+    this.logger.debug('Starting event listener');
     try {
         this._start();
     } catch (err) {
         this.logger.exception(`Unable to start: ${err}`, err);
+    }
+};
+
+/**
+ * Start listening
+ */
+EventListener.prototype._listen = function () {
+    if (this.protocol === 'tcp') {
+        this._server.listen(this.getServerOptions());
+    } else if (this.protocol === 'udp') {
+        this._server.bind(this.port);
     }
 };
 
@@ -86,49 +104,34 @@ EventListener.prototype.start = function () {
  * @private
  */
 EventListener.prototype._start = function () {
-    // TODO: investigate constraining listener when running on local BIG-IP
-    // For now cannot until a valid address is found - loopback address not allowed for LTM objects
-    this._server = net.createServer((conn) => {
-        const connKey = this._lastConnKey;
-        this._lastConnKey += 1;
-        this._clientConnMap[connKey] = conn;
+    // TODO: investigate constraining listener when running on local BIG-IP, however
+    // for now cannot until a valid address is found - loopback address not allowed for LTM objects
 
-        // event on client data
-        conn.on('data', (data) => {
-            // normalize and send to data pipeline
-            // note: addKeysByTag uses regex for default tags parsing (tenant/app)
-            const nOptions = {
-                renameKeysByPattern: global.renameKeys,
-                addKeysByTag: {
-                    tags: this.tags,
-                    definitions,
-                    opts: {
-                        classifyByKeys: events.classifyByKeys
-                    }
-                }
-            };
-            data = String(data).trim();
-            // note: data may contain multiple events seperated by newline
-            // however newline chars may also show up inside a given event
-            // so split only on newline with preceeding double quote
-            data = data.split('"\n');
-            data.forEach((i) => {
-                const normalizedData = normalize.event(i, nOptions);
-                if (this.tracer) {
-                    this.tracer.write(JSON.stringify(normalizedData, null, 4));
-                }
-                // keep filtering as part of event listener for now
-                if (!this.filterFunc || this.filterFunc(normalizedData)) {
-                    dataPipeline.process(normalizedData, constants.EVENT_TYPES.EVENT_LISTENER);
-                }
+    if (protocols.indexOf(this.protocol) === -1) throw new Error(`Procotol unexpected: ${this.protocol}`);
+
+    if (this.protocol === 'tcp') {
+        this._server = net.createServer((conn) => {
+            const connKey = this._lastConnKey;
+            this._lastConnKey += 1;
+            this._clientConnMap[connKey] = conn;
+
+            // event on client data
+            conn.on('data', (data) => {
+                this.processEvent(data);
+            });
+            // event on client connection close
+            conn.on('end', () => {
+                delete this._clientConnMap[connKey];
             });
         });
-        // event on client connection close
-        conn.on('end', () => {
-            // this.logger.debug(`Client disconnected: ${c.remoteAddress}`);
-            delete this._clientConnMap[connKey];
+    } else if (this.protocol === 'udp') {
+        this._server = dgram.createSocket('udp4');
+
+        // eslint-disable-next-line no-unused-vars
+        this._server.on('message', (data, remoteInfo) => {
+            this.processEvent(data);
         });
-    });
+    }
 
     // catch any errors
     this._server.on('error', (err) => {
@@ -136,19 +139,22 @@ EventListener.prototype._start = function () {
         this.restart();
     });
 
+    // message on listening event
     this._server.on('listening', () => {
-        this.logger.debug(`Started listening on port ${this.port}`);
+        this.logger.debug('Event listener started');
     });
 
+    // message on close event
     this._server.on('close', (err) => {
         if (err) {
             this.logger.exception(`Unexpected error on attempt to stop: ${err}`, err);
         } else {
-            this.logger.debug('Event listener was stopped');
+            this.logger.debug('Event listener stopped');
         }
     });
-    // start listening on configured port
-    this._server.listen(this.getServerOptions());
+
+    // start listening on port/protocol
+    this._listen();
 };
 
 /**
@@ -157,12 +163,10 @@ EventListener.prototype._start = function () {
 EventListener.prototype.restart = function () {
     if (this._server) {
         // probably need to increase restart timeout
-        this.logger.debug('Restarting in 5 sec.');
+        this.logger.debug('Restarting in 5 seconds');
         setTimeout(() => {
-            if (this._server) {
-                this._server.close();
-                this._server.listen(this.getServerOptions());
-            }
+            this._server.close();
+            this._listen();
         }, 5000);
     }
 };
@@ -181,9 +185,49 @@ EventListener.prototype._closeAllConnections = function () {
  */
 EventListener.prototype.stop = function () {
     this.logger.debug('Stopping event listener');
-    this._closeAllConnections();
+    if (this.protocol === 'tcp') {
+        this._closeAllConnections();
+    }
     this._server.close();
     this._server = null;
+};
+
+/**
+ * Process event
+ *
+ * @param {String} data - data
+ *
+ * @returns {Void}
+ */
+EventListener.prototype.processEvent = function (data) {
+    // normalize and send to data pipeline
+    // note: addKeysByTag uses regex for default tags parsing (tenant/app)
+    const options = {
+        renameKeysByPattern: global.renameKeys,
+        addKeysByTag: {
+            tags: this.tags,
+            definitions,
+            opts: {
+                classifyByKeys: events.classifyByKeys
+            }
+        }
+    };
+    data = String(data).trim();
+
+    // note: data may contain multiple events seperated by newline
+    // however newline chars may also show up inside a given event
+    // so split only on newline with preceeding double quote
+    data = data.split('"\n');
+    data.forEach((i) => {
+        const normalizedData = normalize.event(i, options);
+        if (this.tracer) {
+            this.tracer.write(JSON.stringify(normalizedData, null, 4));
+        }
+        // keep filtering as part of event listener for now
+        if (!this.filterFunc || this.filterFunc(normalizedData)) {
+            dataPipeline.process(normalizedData, constants.EVENT_TYPES.EVENT_LISTENER);
+        }
+    });
 };
 
 /**
@@ -218,8 +262,8 @@ configWorker.on('change', (config) => {
     logger.debug('configWorker change event in eventListener'); // helpful debug
 
     let eventListeners;
-    if (config.parsed && config.parsed[CLASS_NAME]) {
-        eventListeners = config.parsed[CLASS_NAME];
+    if (config && config[CLASS_NAME]) {
+        eventListeners = config[CLASS_NAME];
     }
     // in case when no listeners were declared
     eventListeners = eventListeners || {};
@@ -227,16 +271,21 @@ configWorker.on('change', (config) => {
     const keys = new Set(Object.keys(eventListeners));
     Object.keys(listeners).forEach(key => keys.add(key));
 
-    // timestamp to filed out-dated tracers
+    // timestamp to find out-dated tracers
     const tracersTimestamp = new Date().getTime();
 
     keys.forEach((lKey) => {
         const lConfig = eventListeners[lKey];
-        let listener = listeners[lKey];
+        const listener = listeners[lKey];
         // no listener's config or it was disabled - remove it
         if (!lConfig || lConfig.enable === false) {
             if (listener) {
-                listener.stop();
+                protocols.forEach((protocol) => {
+                    const protocolListener = listener[protocol];
+                    if (protocolListener) {
+                        protocolListener.stop();
+                    }
+                });
                 delete listeners[lKey];
             }
             return;
@@ -246,21 +295,33 @@ configWorker.on('change', (config) => {
         const tags = lConfig.tag;
         const tracer = tracers.createFromConfig(CLASS_NAME, lKey, lConfig);
         const filterFunc = buildFilterFunc(lConfig);
-        // when port is the same - no sense to restart listener and drop connections
-        if (listener && listener.port === port) {
-            logger.debug(`Updating event listener '${lKey}'`);
-            listener.tags = tags;
-            listener.tracer = tracer;
-            listener.filterFunc = filterFunc;
-        } else {
-            // stop existing listener to free the port
-            if (listener) {
-                listener.stop();
+
+        protocols.forEach((protocol) => {
+            let protocolListener = listener ? listener[protocol] : undefined;
+            // when port is the same - no sense to restart listener and drop connections
+            if (protocolListener && protocolListener.port === port) {
+                logger.debug(`Updating event listener '${lKey}' protocol '${protocol}'`);
+                protocolListener.tags = tags;
+                protocolListener.tracer = tracer;
+                protocolListener.filterFunc = filterFunc;
+            } else {
+                // stop existing listener to free the port
+                if (protocolListener) {
+                    protocolListener.stop();
+                }
+
+                protocolListener = new EventListener(lKey, port, {
+                    protocol,
+                    tags,
+                    tracer,
+                    filterFunc
+                });
+
+                protocolListener.start();
+                listeners[lKey] = listeners[lKey] || {};
+                listeners[lKey][protocol] = protocolListener;
             }
-            listener = new EventListener(lKey, port, { tags, tracer, filterFunc });
-            listener.start();
-            listeners[lKey] = listener;
-        }
+        });
     });
 
     logger.debug(`${Object.keys(listeners).length} event listener(s) listening`);

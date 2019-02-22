@@ -6,7 +6,7 @@
         "host": "10.145.92.42",
         "index": "testindex",
         "port": 9200,
-        "protocol": "http",
+        "protocol": "https",
         "dataType": "f5.telemetry"
     }
 }

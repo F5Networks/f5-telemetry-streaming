@@ -27,10 +27,8 @@ describe('Consumers', () => {
     });
 
     it('should get valid consumers', () => {
-        const exampleConfig = {
-            parsed: {}
-        };
-        exampleConfig.parsed[constants.CONSUMERS_CLASS_NAME] = {
+        const exampleConfig = {};
+        exampleConfig[constants.CONSUMERS_CLASS_NAME] = {
             My_Consumer: {
                 class: 'Consumer',
                 type: 'default'

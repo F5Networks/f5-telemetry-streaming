@@ -31,7 +31,7 @@ Definition: Polls a system on a defined interval for information such as device 
 
 ### Event Listener
 
-Definition: Provides a listener, currently TCP, that can accept events in a specic format and process them.
+Definition: Provides a listener, on both TCP and UDP protocols, that can accept events in a specific format and process them.
 
 Event Format: ```key1="value",key2="value"```
 
@@ -69,7 +69,7 @@ Global restriction is disallowing connections secured by self-signed certificate
         "class": "Telemetry_Consumer",
         "type": "Splunk",
         "host": "192.0.2.1",
-        "protocol": "http",
+        "protocol": "https",
         "port": "8088",
         "passphrase": {
             "cipherText": "apikey"
@@ -128,7 +128,7 @@ Note: More information about using the HEC can be found on the Splunk website [h
         "class": "Telemetry_Consumer",
         "type": "Splunk",
         "host": "192.0.2.1",
-        "protocol": "http",
+        "protocol": "https",
         "port": "8088",
         "passphrase": {
             "cipherText": "apikey"
@@ -243,8 +243,8 @@ Note: More information about Graphite events can be found [here](https://graphit
         "class": "Telemetry_Consumer",
         "type": "Graphite",
         "host": "192.0.2.1",
-        "protocol": "http",
-        "port": "80"
+        "protocol": "https",
+        "port": "443"
     }
 }
 ```
@@ -256,6 +256,7 @@ Website: [https://kafka.apache.org/](https://kafka.apache.org/).
 Required information:
 
 - Host: The address of the Kafka system.
+- Protocol: The port of the Kafka system. Values: binaryTcpTls, binaryTcp
 - Port: The port of the Kafka system.
 - Topic: The topic where data should go within the Kafka system.
 
@@ -267,6 +268,7 @@ Note: More information about installing Kafka can be found [here](https://kafka.
         "class": "Telemetry_Consumer",
         "type": "Kafka",
         "host": "192.0.2.1",
+        "protocol": "binaryTcpTls",
         "port": "9092",
         "topic": "f5-telemetry"
     }
@@ -302,7 +304,7 @@ Note: More information about installing ElasticSearch can be found [here](https:
         "type": "ElasticSearch",
         "host": "192.0.2.1",
         "port": "9200",
-        "protocol": "http",
+        "protocol": "https",
         "allowSelfSignedCert": false,
         "path": "/path/to/post/data",
         "index": "f5telemetry",
@@ -364,7 +366,7 @@ Note: Typically the required information can be found by navigating to the HTTP 
         "class": "Telemetry_Consumer",
         "type": "Splunk",
         "host": "192.0.2.1",
-        "protocol": "http",
+        "protocol": "https",
         "port": "8088",
         "passphrase": {
             "cipherText": "apikey"
@@ -581,58 +583,69 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
         },
         "diskLatency": {
             "sda": {
-                "rsec/s": "10.49",
-                "wsec/s": "232.03",
+                "r/s": "1.15",
+                "w/s": "9.26",
+                "%util": "0.14",
                 "name": "sda"
             },
             "sdb": {
-                "rsec/s": "1.04",
-                "wsec/s": "0.00",
+                "r/s": "1.00",
+                "w/s": "0.00",
+                "%util": "0.00",
                 "name": "sdb"
             },
             "dm-0": {
-                "rsec/s": "0.02",
-                "wsec/s": "0.00",
+                "r/s": "0.00",
+                "w/s": "0.00",
+                "%util": "0.00",
                 "name": "dm-0"
             },
             "dm-1": {
-                "rsec/s": "0.17",
-                "wsec/s": "112.02",
+                "r/s": "0.00",
+                "w/s": "12.41",
+                "%util": "0.01",
                 "name": "dm-1"
             },
             "dm-2": {
-                "rsec/s": "0.47",
-                "wsec/s": "37.00",
+                "r/s": "0.02",
+                "w/s": "4.50",
+                "%util": "0.01",
                 "name": "dm-2"
             },
             "dm-3": {
-                "rsec/s": "0.85",
-                "wsec/s": "31.45",
+                "r/s": "0.01",
+                "w/s": "4.23",
+                "%util": "0.01",
                 "name": "dm-3"
             },
             "dm-4": {
-                "rsec/s": "0.05",
-                "wsec/s": "0.22",
+                "r/s": "0.02",
+                "w/s": "0.05",
+                "%util": "0.00",
                 "name": "dm-4"
             },
             "dm-5": {
-                "rsec/s": "0.39",
-                "wsec/s": "3.34",
+                "r/s": "0.01",
+                "w/s": "1.58",
+                "%util": "0.00",
                 "name": "dm-5"
             },
             "dm-6": {
-                "rsec/s": "5.82",
-                "wsec/s": "0.00",
+                "r/s": "0.07",
+                "w/s": "0.00",
+                "%util": "0.00",
                 "name": "dm-6"
             },
             "dm-7": {
-                "rsec/s": "0.22",
-                "wsec/s": "0.90",
+                "r/s": "0.00",
+                "w/s": "0.06",
+                "%util": "0.00",
                 "name": "dm-7"
             },
             "dm-8": {
-                "rsec/s": "1.41",
-                "wsec/s": "47.10",
+                "r/s": "0.03",
+                "w/s": "4.97",
+                "%util": "0.01",
                 "name": "dm-8"
             }
         },
@@ -1314,6 +1327,26 @@ Output
     "telemetryEventCategory":"event"
 }
 
+```
+
+#### System Log
+
+Configuration
+
+- Modify System syslog configuration (add destination)
+  - TMSH: ```modify sys syslog remote-servers replace-all-with { server { host 10.0.1.100 remote-port 6515 } }```
+  - GUI: System -> Logs -> Configuration -> Remote Logging
+- Modify System logging configuration (update what gets logged)
+  - TMSH: ```modify sys daemon-log-settings mcpd audit enabled`` Note: Other daemon-log-settings exist
+  - GUI: System -> Logs -> Configuration -> Options
+
+Output
+
+```json
+{
+    "data":"<85>Feb 12 21:39:43 telemetry notice sshd[22277]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=218.92.1.148  user=root",
+    "telemetryEventCategory":"event"
+}
 ```
 
 #### Log Publisher Configuration

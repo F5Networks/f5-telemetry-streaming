@@ -24,6 +24,13 @@ const customKeywords = require('./customKeywords.js');
 const CONTROLS_CLASS_NAME = require('./constants.js').CONTROLS_CLASS_NAME;
 const CONTROLS_PROPERTY_NAME = require('./constants.js').CONTROLS_PROPERTY_NAME;
 
+const baseState = {
+    config: {
+        raw: {},
+        parsed: {}
+    }
+};
+
 /**
  * ConfigWorker class
  *
@@ -77,8 +84,15 @@ ConfigWorker.prototype.setConfig = function (newConfig, fire) {
  * @emits ConfigWorker#change
  */
 ConfigWorker.prototype._notifyConfigChange = function () {
+    // deep copy parsed config
+    let parsedConfig;
+    if (this._state && this._state.config && this._state.config.parsed) {
+        parsedConfig = JSON.parse(JSON.stringify(this._state.config.parsed));
+    } else {
+        return Promise.reject(new Error('_notifyConfigChange() Missing parsed config.'));
+    }
     // handle passphrases first - decrypt, download, etc.
-    return util.decryptAllSecrets(this._state.config)
+    return util.decryptAllSecrets(parsedConfig)
         .then((config) => {
             // copy config to avoid changes from listeners
             this.emit('change', JSON.parse(JSON.stringify(config)));
@@ -122,6 +136,7 @@ ConfigWorker.prototype.saveState = function () {
         .then(() => logger.debug('Application state saved'))
         .catch((err) => {
             logger.exception('Unexpected error on attempt to save application state', err);
+            return Promise.reject(err);
         });
 };
 
@@ -137,9 +152,6 @@ ConfigWorker.prototype._loadState = function () {
         return Promise.reject(new Error(err));
     }
     const _this = this;
-    const baseState = {
-        config: {}
-    };
     return new Promise((resolve, reject) => {
         _this.restWorker.loadState(null, (err, state) => {
             if (err) {
@@ -162,13 +174,14 @@ ConfigWorker.prototype._loadState = function () {
 ConfigWorker.prototype.loadState = function () {
     return this._loadState()
         .then((state) => {
-            logger.info('application state loaded');
+            logger.info('Application state loaded');
             this._state = state;
             this._notifyConfigChange();
             return Promise.resolve(state);
         })
         .catch((err) => {
             logger.exception('Unexpected error on attempt to load application state', err);
+            return Promise.reject(err);
         });
 };
 
@@ -325,10 +338,8 @@ const configWorker = new ConfigWorker();
 // config worker change event, should be first in the handlers chain
 configWorker.on('change', (config) => {
     let settings;
-    if (config.parsed
-            && config.parsed[CONTROLS_CLASS_NAME]
-            && config.parsed[CONTROLS_CLASS_NAME][CONTROLS_PROPERTY_NAME]) {
-        settings = config.parsed[CONTROLS_CLASS_NAME][CONTROLS_PROPERTY_NAME];
+    if (config && config[CONTROLS_CLASS_NAME] && config[CONTROLS_CLASS_NAME][CONTROLS_PROPERTY_NAME]) {
+        settings = config[CONTROLS_CLASS_NAME][CONTROLS_PROPERTY_NAME];
     }
     if (!settings) {
         return;

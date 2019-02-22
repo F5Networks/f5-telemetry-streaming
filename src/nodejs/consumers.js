@@ -134,8 +134,8 @@ function unloadUnusedModules(before) {
 configWorker.on('change', (config) => {
     logger.debug('configWorker change event in consumers'); // helpful debug
     let consumersConfig;
-    if (config.parsed && config.parsed[CLASS_NAME]) {
-        consumersConfig = config.parsed[CLASS_NAME];
+    if (config && config[CLASS_NAME]) {
+        consumersConfig = config[CLASS_NAME];
     }
 
     // timestamp to filed out-dated tracers
