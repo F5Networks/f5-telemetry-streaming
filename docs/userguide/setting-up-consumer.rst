@@ -66,6 +66,8 @@ Example Declaration:
 
 Example Dashboard:
 
+Below is an example of the Azure dashboard with Telemetry Streaming data. To create a similar dashboard, see |azure_dashboard|. To create custom views using View Designer, see |Azure_custom_views|.
+
 |azure_log_analytics_dashboard|
 
 AWS Cloud Watch
@@ -328,6 +330,14 @@ Required Information:
 .. |HTTP Data Collector API| raw:: html
 
    <a href="https://docs.microsoft.com/en-us/azure/azure-monitor/platform/data-collector-api" target="_blank">HTTP Data Collector API documentation</a>
+
+.. |azure_dashboard| raw:: html
+
+    <a href="https://github.com/f5devcentral/f5-telemetry-streaming/blob/master/examples/consumers/azure_log_analytics/telemetry_dashboard.omsview" target="blank">Azure dashboard</a>
+
+.. |Azure_custom_views| raw:: html
+
+    <a href="https://docs.microsoft.com/en-us/azure/azure-monitor/platform/view-designer" target="blank">Microsoft documentation</a>
 
 .. |Installing Graphite| raw:: html
 

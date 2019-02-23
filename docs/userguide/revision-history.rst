@@ -10,7 +10,10 @@ Document Revision History
       * - Revision
         - Description
         - Date
-        
+
+      * - 1.1.0
+        - Updated the documentation for Telemetry Streaming v1.1.0. This release contains the following changes: |br| * Added reference links for importing the example Azure dashboard to the :ref:`settingupconsumer-ref` section. |br| * 
+        - 03-05-19  
       
       * - 1.0.0
         - Initial release of AS3 documentation.

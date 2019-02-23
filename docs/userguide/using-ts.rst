@@ -10,6 +10,7 @@ Using Telemetry Streaming
 
    setting-up-consumer.rst
    event-listener.rst
+   validate.rst
    logging.rst
    http-methods.rst
    advanced-options.rst

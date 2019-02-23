@@ -110,7 +110,7 @@ The next lines of the declaration sets the System Poller, which collects and nor
 
 Event Listener
 ``````````````
-The next lines of the declaration sets the Event Listener, which provides a listener, currently TCP, that can accept events in a specific format and process them. Currently, the TS Listener sends all logging telemetry data.
+The next lines of the declaration sets the Event Listener, which listens for both TCP and UDP  that can accept events in a specific format and process them. Currently, the TS Listener sends all logging telemetry data.
 To see the type of information that the event listener processes, see :ref:`outputexample-ref`.
 Event Format: ``key1="value",key2="value"``
 
@@ -133,7 +133,7 @@ Event Format: ``key1="value",key2="value"``
 +====================+================================+====================================================================================================================================+
 | class              | Telemetry_Listener             |  The class for listener must always be Telemetry_Listener, do not change this value.                                               |
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
-| port               | 6514                           |  Specifies the port of the listener, currently TCP                                                                                 |
+| port               | 6514                           |  Specifies the port of the TCP and UDP listener                                                                                    |
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
 
 
