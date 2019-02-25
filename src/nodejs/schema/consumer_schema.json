@@ -23,7 +23,7 @@
             "title": "Protocol",
             "description": "" ,
             "type": "string",
-            "enum": [ "http", "https" ]
+            "enum": [ "http", "https", "tcp", "udp", "binaryTcp", "binaryTcpTls" ]
         },
         "port": {
             "$comment": "Required for certain consumers: standard property",
@@ -91,13 +91,6 @@
             "description": "" ,
             "type": "string"
         },
-        "binaryProtocol": {
-            "$comment": "Required for certain consumers: Kafka",
-            "title": "Custom Protocol (binary)",
-            "description": "" ,
-            "type": "string",
-            "enum": [ "binaryTcp", "binaryTcpTls" ]
-        },
         "index": {
             "$comment": "Required for certain consumers: ElasticSearch",
             "title": "Index Name",
@@ -138,7 +131,7 @@
                         "title": "Type",
                         "description": "" ,
                         "type": "string",
-                        "enum": [ "default", "Splunk", "Azure_Log_Analytics", "AWS_CloudWatch", "AWS_S3", "Graphite", "Kafka", "ElasticSearch", "Sumo_Logic" ]
+                        "enum": [ "default", "Splunk", "Azure_Log_Analytics", "AWS_CloudWatch", "AWS_S3", "Graphite", "Kafka", "ElasticSearch", "Sumo_Logic", "Statsd" ]
                     },
                     "enableHostConnectivityCheck": { "$ref": "base_schema.json#/definitions/enableHostConnectivityCheck" },
                     "allowSelfSignedCert": { "$ref": "base_schema.json#/definitions/allowSelfSignedCert" }
@@ -273,7 +266,7 @@
                             ],
                             "properties": {
                                 "host": { "$ref": "#/definitions/host" },
-                                "protocol": { "$ref": "#/definitions/binaryProtocol", "default": "binaryTcpTls" },
+                                "protocol": { "$ref": "#/definitions/protocol", "default": "binaryTcpTls" },
                                 "port": { "$ref": "#/definitions/port", "default": 9092 },
                                 "topic": { "$ref": "#/definitions/topic" } 
                             }
@@ -314,6 +307,20 @@
                                 "port": { "$ref": "#/definitions/port", "default": 443 },
                                 "path": { "$ref": "#/definitions/path", "default": "/receiver/v1/http/" },
                                 "passphrase": { "$ref": "base_schema.json#/definitions/secret" }
+                            }
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "Statsd" } } },
+                        "then": {
+                            "required": [
+                                "host"
+                            ],
+                            "properties": {
+                                "host": { "$ref": "#/definitions/host" },
+                                "protocol": { "$ref": "#/definitions/protocol", "default": "udp" },
+                                "port": { "$ref": "#/definitions/port", "default": 8125 }
                             }
                         },
                         "else": {}

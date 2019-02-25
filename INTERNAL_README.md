@@ -256,7 +256,7 @@ Website: [https://kafka.apache.org/](https://kafka.apache.org/).
 Required information:
 
 - Host: The address of the Kafka system.
-- Protocol: The port of the Kafka system. Values: binaryTcpTls, binaryTcp
+- Protocol: The port of the Kafka system. Options: ```binaryTcp``` or ```binaryTcpTls```. Default is ```binaryTcpTls```.
 - Port: The port of the Kafka system.
 - Topic: The topic where data should go within the Kafka system.
 
@@ -345,6 +345,34 @@ Note: Typically the required information can be found by navigating to the HTTP 
         "passphrase": {
             "cipherText": "secret"
         }
+    }
+}
+```
+
+
+### Statsd
+
+Website: [https://github.com/statsd/statsd/wiki](https://github.com/statsd/statsd/wiki).
+
+Required information:
+
+- Host: The address of the statsd instance.
+- Protocol: The protocol of the statsd instance Default is ```udp```. - Only supported option
+- Port: The port of the statsd instance.
+
+Note: Statsd is designed primarily to support integers and floating point numbers.  Because of that this consumer will only process a system info event.
+Note: Official container which contains graphite and statsd: https://hub.docker.com/r/graphiteapp/docker-graphite-statsd
+Note: All metrics are stored as gauges in statsd, those can be seen within graphite by navigating to stats -> gauges.
+
+```json
+{
+    "class": "Telemetry",
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Statsd",
+        "host": "192.0.2.1",
+        "protocol": "udp",
+        "port": "8125"
     }
 }
 ```
