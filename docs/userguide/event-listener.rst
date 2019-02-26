@@ -1,3 +1,5 @@
+.. _eventlistener-ref:
+
 Event Listener
 --------------
 
