@@ -166,6 +166,7 @@ Required Information:
  - Host: The address of the Kafka system.
  - Port: The port of the Kafka system.
  - Topic: The topic where data should go within the Kafka system
+ - Protocol: The port of the Kafka system. Options: binaryTcp or binaryTcpTls. Default is binaryTcpTls
 
 .. NOTE:: To see more information about installing Kafka, see |Installing Kafka|.
 
