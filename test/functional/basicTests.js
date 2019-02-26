@@ -40,8 +40,9 @@ describe('Basic', function () {
     // set timeouts/retries for functional test suite
     this.timeout(1000 * 60 * 5); // 5 minutes - timeout for each test
     this.slow(1000 * 60 * 3); // 3 minutes - increase limit before test is marked as "slow"
-    this.retries(10); // retry up to 10 times on failure
+    this.retries(20); // retry up to 20 times on failure
 
+    // read in example config
     const basicExample = `${__dirname}/basic.json`;
     const basicConfig = fs.readFileSync(basicExample).toString();
     const pollerName = 'My_Poller';
@@ -63,7 +64,13 @@ describe('Basic', function () {
         if (fStats.birthtimeMs >= latest.time) latest.file = f; latest.time = fStats.birthtimeMs;
     });
     const packageFile = latest.file;
-    console.log(`Package File: ${packageFile}`); // eslint-disable-line no-console
+    util.log(`Package File: ${packageFile}`);
+
+    // create logs directory - used later
+    const logsDir = `${__dirname}/logs`;
+    if (!fs.existsSync(logsDir)) {
+        fs.mkdirSync(logsDir);
+    }
 
     let authToken = null;
     let options = {};
@@ -116,6 +123,8 @@ describe('Basic', function () {
 
         it('should verify installation', function () {
             const uri = `${baseILXUri}/info`;
+
+            util.log('Verifying installation');
             return new Promise(resolve => setTimeout(resolve, 5000))
                 .then(() => util.makeRequest(host, uri, options))
                 .then((data) => {
@@ -261,6 +270,30 @@ describe('Basic', function () {
                     reject(err);
                 });
             });
+        });
+
+        it('should get restnoded log', function () {
+            // grab restnoded log - useful during test failures
+            // ignore certain lines, for example: "<Date> - finest: socket 1 closed"
+            const uri = '/mgmt/tm/util/bash';
+
+            const postOptions = {
+                method: 'POST',
+                headers: options.headers,
+                body: JSON.stringify({
+                    command: 'run',
+                    utilCmdArgs: '-c "cat /var/log/restnoded/restnoded.log | grep -v socket"'
+                })
+            };
+
+            return util.makeRequest(host, uri, postOptions)
+                .then((data) => {
+                    const file = `${logsDir}/restnoded.log`;
+
+                    util.log(`Saving restnoded log to ${file}`);
+                    fs.writeFileSync(file, data.commandResult);
+                })
+                .catch(err => Promise.reject(err));
         });
 
         it('should uninstall package', function () {

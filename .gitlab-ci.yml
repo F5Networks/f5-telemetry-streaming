@@ -7,7 +7,7 @@ stages:
     - teardown
     - publish
 
-build package:
+build_package:
     image: f5devcentral/containthedocs:rpmbuild
     stage: build
     script:
@@ -23,7 +23,7 @@ build package:
             - dist
         expire_in: 1 month
 
-build docs:
+build_docs:
     image: ${CONTAINTHEDOCS_IMAGE}
     stage: build
     script:
@@ -108,7 +108,7 @@ deploy_bigip:
             make setup && ls -als ${PROJECT_DIR} &&
             cp ${PROJECT_DIR}/harness_facts_flat.json ${CI_PROJECT_DIR}/harness_facts_flat.json
 
-test package:
+test_package:
     stage: test
     script:
         # install jq
@@ -132,7 +132,7 @@ test package:
     tags:
         - cm-official-docker-executor
 
-test functional:
+test_functional:
     stage: test
     script:
         - export TEST_HARNESS_FILE=${CI_PROJECT_DIR}/harness_facts_flat.json
@@ -140,6 +140,14 @@ test functional:
         - npm run install-test
         - ls ./dist -ls
         - npm run test-functional
+    # troubleshooting functional test failures typically requires looking at logs, one of which is
+    # the restnoded log that is captured by the functional tests.  This saves off the folder
+    # containing that log as an artifact to speed up the troubleshooting process
+    artifacts:
+        name: ${CI_COMMIT_REF_NAME}_functests_logs
+        paths:
+            - test/functional/logs
+        when: always
     tags:
         - cm-official-docker-executor
     only:
@@ -165,7 +173,7 @@ teardown_bigip:
 # Note: Will publish when new tags are pushed and use the current build in dist directory
 # with the assumption being the rpm has been updated. However even if it hasn't the upload
 # will simply update the existing rpm version/release in artifactory
-publish rpm to artifactory:
+publish_rpm_to_artifactory:
     stage: publish
     only:
         - tags
@@ -183,7 +191,7 @@ publish rpm to artifactory:
         - echo $UPLOAD_RESULT
 
 # Publish docs to internal pages
-publish docs to pages:
+publish_docs_to_pages:
     image: ${CONTAINTHEDOCS_IMAGE}
     stage: publish
     environment:
@@ -201,7 +209,7 @@ publish docs to pages:
         - /^docs-.*$/
 
 # Publish docs to clouddocs.f5networks.net
-publish docs to staging:
+publish_docs_to_staging:
     image: ${CONTAINTHEDOCS_IMAGE}
     stage: publish
     environment: 
@@ -218,7 +226,7 @@ publish docs to staging:
         - aws cloudfront create-invalidation --distribution-id $AWS_DIST --paths /products/extensions/f5-telemetry-streaming/latest
 
 # Publish docs to clouddocs.f5.com
-publish docs to production:
+publish_docs_to_production:
     image: ${CONTAINTHEDOCS_IMAGE}
     stage: publish
     environment:
