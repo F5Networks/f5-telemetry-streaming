@@ -12,7 +12,7 @@ Document Revision History
         - Date
 
       * - 1.1.0
-        - Updated the documentation for Telemetry Streaming v1.1.0. This release contains the following changes: |br| * Added reference links for importing the example Azure dashboard to the :ref:`settingupconsumer-ref` section. |br| * 
+        - Updated the documentation for Telemetry Streaming v1.1.0. This release contains the following changes: |br| * Added reference links for importing the example Azure dashboard to the :ref:`settingupconsumer-ref` section. |br| * Added a section for :ref:`validate`.  |br| * Upadated the Kafka example declaration to include binaryTcp as an alternate protocol option. |br| * Added UDP as a protocol for the event listener  |br| * Added StatsD as a Consumer. See the :ref:`settingupconsumer-ref` section for a declaration example
         - 03-05-19  
       
       * - 1.0.0

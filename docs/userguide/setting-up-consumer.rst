@@ -260,6 +260,34 @@ Required Information:
         }
     }
 
+StatsD
+~~~~~~
+|StatsD|
+
+Required Information:
+ - Host: The address of the StatsD instance.
+ - Protocol: The protocol of the StatsD instance. The default is UDP.
+ - Port: The port of the Statsd instance
+
+.. NOTE:: To see more information about installing StatsD, see |StatsDWiki|.
+
+.. code-block:: json
+   :linenos:
+
+    {
+        "class": "Telemetry",
+        "My_Consumer": {
+            "class": "Telemetry_Consumer",
+            "type": "Statsd",
+            "host": "192.0.2.1",
+            "protocol": "udp",
+            "port": "8125"
+        }
+    }
+
+
+
+
 
 .. |splunk_img| image:: /images/splunk_logo.png
    :target: https://www.splunk.com
@@ -293,11 +321,15 @@ Required Information:
 
 .. |ElasticSearch| image:: /images/ElasticSearch_img.png
    :target: https://www.elastic.co/
-   :alt: Kafka
+   :alt: Elastic Search
 
 .. |Sumo Logic| image:: /images/Sumo_img.png
    :target: https://www.sumologic.com/
-   :alt: Splunk
+   :alt: Sumo Logic
+
+.. |StatsD| image:: /images/statsd_logo.png
+   :target: https://www.sumologic.com/
+   :alt: StatsD
 
 
 
@@ -359,3 +391,7 @@ Required Information:
 .. |Installing Sumo Logic| raw:: html
 
    <a href="https://help.sumologic.com/01Start-Here/Quick-Start-Tutorials" target="_blank">Installing Sumo Logic documentation</a>
+
+.. |StatsDWiki| raw:: html
+
+   <a href="https://github.com/statsd/statsd/blob/master/docs/graphite.md" target="_blank">StatsD documentation on GitHub</a>
