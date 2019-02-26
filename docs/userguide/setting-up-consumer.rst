@@ -328,7 +328,7 @@ Required Information:
    :alt: Sumo Logic
 
 .. |StatsD| image:: /images/statsd_logo.png
-   :target: https://www.sumologic.com/
+   :target: https://github.com/statsd/statsd/blob/master/docs/graphite.md
    :alt: StatsD
 
 

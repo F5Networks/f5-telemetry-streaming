@@ -17,6 +17,7 @@ Telemetry Streaming (TS) is an iControl LX Extension delivered as a TMOS-indepen
 -  Kafka
 -  ElasticSearch
 -  Sumo Logic
+-  StatsD
 
 |video|
 
