@@ -148,6 +148,8 @@ Required information:
 
 Note: More information about using the data collector API can be found [here](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/data-collector-api).
 
+Note: Certain keys are reserved when streaming to this consumer, specifically 'tenant'.  Those will have the prefix 'f5' added, for example 'f5tenant'.
+
 ```json
 {
     "My_Consumer": {
@@ -161,7 +163,7 @@ Note: More information about using the data collector API can be found [here](ht
 }
 ```
 
-Example Dashboard
+Example Dashboard - dashboard export in [examples/consumers](examples/consumers)
 
 ![image](images/azure_la_dashboard_example.png)
 

@@ -7,11 +7,22 @@
  */
 
 const request = require('request');
-const icrdk = require('icrdk');
+const icrdk = require('icrdk'); // eslint-disable-line import/no-extraneous-dependencies
 
 const DEFAULT_PORT = 443;
 
 module.exports = {
+
+    /**
+     * Log a message (simply using console.log)
+     *
+     * @param {Object|String} msg - message to log
+     *
+     * @returns {Void}
+     */
+    log(msg) {
+        console.log(`${new Date().toISOString()} ${this.stringify(msg)}`); // eslint-disable-line no-console
+    },
 
     /**
      * Stringify a message

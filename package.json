@@ -19,6 +19,7 @@
         "ajv": "^6.5.4",
         "ajv-async": "^1.0.1",
         "aws-sdk": "^2.369.0",
+        "commander": "^2.19.0",
         "deep-diff": "^1.0.2",
         "elasticsearch": "^15.3.0",
         "kafka-node": "^2.6.1",

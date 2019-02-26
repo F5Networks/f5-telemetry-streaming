@@ -3,5 +3,5 @@ rpmbuild/
 dist/new_build/
 .vscode/
 _build/
-docs/_build/
+test/functional/logs/
 .nyc_output/
