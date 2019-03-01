@@ -286,6 +286,88 @@ Required Information:
     }
 
 
+Generic HTTP
+~~~~~~~~~~~~
+
+Required Information:
+ - Host: The address of the system.
+ - Protocol: The protocol of the system. Options: ``https`` or ``http``. Default is ``http``.
+ - Port: The protocol of the system. Default is ``443``.
+ - Path: The path of the system. Default is ``/``.
+ - Method: The method of the system. Options: ``POST``, ``PUT``, ``GET``. Default is ``POST``.
+ - Headers: The headers of the system.
+ - Passphrase: The secret to use when sending data to the system, for example an API key to be used in an HTTP header.
+
+.. NOTE:: Since this consumer is designed to be generic and flexible, how authentication is performed is left up to the web service. To ensure the secrets are encrypted within Telemetry Streaming please note the use of JSON pointers. The secret to protect should be stored inside ``passphrase`` and referenced in the desired destination property, such as an API token in a header as shown in this example.
+
+.. code-block:: json
+   :linenos:
+
+    {
+        "class": "Telemetry",
+        "My_Consumer": {
+            "class": "Telemetry_Consumer",
+            "type": "Generic_HTTP",
+            "host": "192.0.2.1",
+            "protocol": "https",
+            "port": "443",
+            "path": "/",
+            "method": "POST",
+            "headers": [
+                {
+                    "name": "content-type",
+                    "value": "application/json"
+                },
+                {
+                    "name": "x-api-key",
+                    "value": "`>@/passphrase`"
+                }
+            ],
+            "passphrase": {
+                "cipherText": "apikey"
+            }
+        }
+    }
+
+.. NOTE::  If multiple secrets are required, defining an additional secret within ``Shared`` and referencing it using pointers is supported. For more details about pointers see the section on pointer syntax.
+
+Example with multiple passphrases:
+
+.. code-block:: json
+   :linenos:
+
+    {
+        "class": "Telemetry",
+        "Shared": {
+            "class": "Shared",
+            "secretPath": {
+                "class": "Secret",
+                "cipherText": "/?token=secret"
+            }
+        },
+        "My_Consumer": {
+            "class": "Telemetry_Consumer",
+            "type": "Generic_HTTP",
+            "host": "192.0.2.1",
+            "protocol": "https",
+            "port": "443",
+            "path": "`>/Shared/secretPath`",
+            "method": "POST",
+            "headers": [
+                {
+                    "name": "content-type",
+                    "value": "application/json"
+                },
+                {
+                    "name": "x-api-key",
+                    "value": "`>@/passphrase`"
+                }
+            ],
+            "passphrase": {
+                "cipherText": "apikey"
+            }
+        }
+    }
 
 
 
