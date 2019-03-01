@@ -134,9 +134,9 @@ When you upgrade your BIG-IP system, you simply install Telemetry Streaming on t
 
 .. |github| raw:: html
 
-   <a href="https://github.com/f5devcentral/f5-telemetry-streaming" target="_blank">GitHub</a>
+   <a href="https://github.com/F5Networks/f5-telemetry-streaming" target="_blank">GitHub</a>
 
 
 .. |issues| raw:: html
 
-   <a href="https://github.com/f5devcentral/f5-telemetry-streaming/issues" target="_blank">GitHub Issues</a>
+   <a href="https://github.com/F5Networks/f5-telemetry-streaming/issues" target="_blank">GitHub Issues</a>

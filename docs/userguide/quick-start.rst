@@ -17,7 +17,7 @@ up and running with Telemetry Streaming.
    - For complete instructions see :ref:`installgui-ref` or
      :ref:`installcurl-ref`.
 
-#. Be sure to see the known issues on GitHub (https://github.com/f5devcentral/f5-telemetry-streaming/issues) to review any known issues and other important information before you attempt to use Telemetry Streaming.
+#. Be sure to see the known issues on GitHub (https://github.com/F5Networks/f5-telemetry-streaming/issues) to review any known issues and other important information before you attempt to use Telemetry Streaming.
 
 #. Provide authorization (basic auth) to the BIG-IP system:  
 
@@ -73,5 +73,5 @@ up and running with Telemetry Streaming.
     
 .. |github| raw:: html
 
-   <a href="https://github.com/f5devcentral/f5-telemetry-streaming" target="_blank">F5 Telemetry Streaming site on GitHub</a>
+   <a href="https://github.com/F5Networks/f5-telemetry-streaming" target="_blank">F5 Telemetry Streaming site on GitHub</a>
 

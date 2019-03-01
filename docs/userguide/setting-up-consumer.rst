@@ -366,7 +366,7 @@ Required Information:
 
 .. |azure_dashboard| raw:: html
 
-    <a href="https://github.com/f5devcentral/f5-telemetry-streaming/blob/master/examples/consumers/azure_log_analytics/telemetry_dashboard.omsview" target="blank">Azure dashboard</a>
+    <a href="https://github.com/F5Networks/f5-telemetry-streaming/blob/master/examples/consumers/azure_log_analytics/telemetry_dashboard.omsview" target="blank">Azure dashboard</a>
 
 .. |Azure_custom_views| raw:: html
 
