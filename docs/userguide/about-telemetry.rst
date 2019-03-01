@@ -42,7 +42,7 @@ A basic declaration is shown here with descriptions of the components below:
 
 Components of the declaration
 -----------------------------
-In this section, we break down the example into each class so you can understand the options when composing your declaration. The tables below the examples contain descriptions and options for the parameters included in this example only.  
+In this section, we break down the example declaration into each class so you can understand the options when composing your declaration. The tables below the examples contain descriptions and options for the parameters included in this example only.  
 
 If there is a default value, it is shown in bold in the Options column.
 
@@ -81,7 +81,7 @@ The first few lines of your declaration are a part of the base components and de
 
 System Poller
 `````````````
-The next lines of the declaration sets the System Poller, which polls a system, such as BIG-IP, on a configurable interval for information such as device statistics, virtual server statistics, pool statistics, individual pool member statistics, and more.
+The next lines of the declaration sets the System Poller, which collects and normalizes statistics from a system, such as BIG-IP, on a configurable interval for information such as device statistics, virtual server statistics, pool statistics, individual pool member statistics, and more.
 
 .. code-block:: javascript
    :linenos:
@@ -110,7 +110,7 @@ The next lines of the declaration sets the System Poller, which polls a system, 
 
 Event Listener
 ``````````````
-The next lines of the declaration sets the Event Listener, which provides a listener, currently TCP, that can accept events in a specific format and process them. Currently, the TS Listener sends all logging telemetry data.
+The next lines of the declaration sets the Event Listener, on both TCP and UDP protocols, that can accept events in a specific format and process them. Currently, the TS Listener sends all logging telemetry data.
 To see the type of information that the event listener processes, see :ref:`outputexample-ref`.
 Event Format: ``key1="value",key2="value"``
 
@@ -133,7 +133,7 @@ Event Format: ``key1="value",key2="value"``
 +====================+================================+====================================================================================================================================+
 | class              | Telemetry_Listener             |  The class for listener must always be Telemetry_Listener, do not change this value.                                               |
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
-| port               | 6514                           |  Specifies the port of the listener, currently TCP                                                                                 |
+| port               | 6514                           |  Specifies the port of the TCP and UDP listener                                                                                    |
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
 
 
@@ -142,7 +142,7 @@ Event Format: ``key1="value",key2="value"``
 
 Consumer class
 ``````````````
-The next lines of the declaration sets the Consumer, which accepts all telemetry information whatever systems you configure it to. The consumer provides the tools to process that information. To see examples of configurations for consumers like Splunk, Azure Log Analytics, AWS CloudWatch, AWS S3, Graphite, and others, see the :ref:`settingupconsumer-ref` section of this guide.
+The next lines of the declaration sets the Consumer, which accepts all telemetry information from whatever systems you configure it to. The consumer provides the tools to process that information. To see examples of configurations for consumers like Splunk, Azure Log Analytics, AWS CloudWatch, AWS S3, Graphite, and others, see the :ref:`settingupconsumer-ref` section of this guide.
 
 .. code-block:: javascript
    :linenos:
@@ -165,21 +165,21 @@ The next lines of the declaration sets the Consumer, which accepts all telemetry
 |
 
 
-+--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
-| Parameter          | Options                        |  Description/Notes                                                                                                                 |
-+====================+================================+====================================================================================================================================+
-| class              | Telemetry_Consumer             |  The class for consumer must always be Telemetry_Consumer, do not change this value.                                               |
-+--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
-| type               | Splunk, AWS_S3, etc.           |  Specifies the consumer type you would like to send Telemetry information to. See the Consumer section for more information.       |
-+--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
-| host               | 192.0.2.1                      |  The address of the instance that runs the HTTP event collector                                                                    |
-+--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
-| protocol           | **https**, http                |  The protocol of the consumer                                                                                                      |
-+--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
-| port               | 8088                           |  The port of the consumer system                                                                                                   |
-+--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
-| passphrase         | xxxxx                          |  The secret password to use when sending data to the consumer system                                                               |
-+--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
++--------------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+| Parameter          | Options                        |  Description/Notes                                                                                                                                 |
++====================+================================+====================================================================================================================================================+
+| class              | Telemetry_Consumer             |  The class for consumer must always be Telemetry_Consumer, do not change this value.                                                               |
++--------------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+| type               | Splunk, AWS_S3, etc.           |  Specifies the consumer type you would like to send Telemetry information to. See the :ref:`settingupconsumer-ref` section for more information.   |
++--------------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+| host               | 192.0.2.1                      |  The address of the instance that runs the HTTP event collector                                                                                    |
++--------------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+| protocol           | **http**, https                |  The protocol of the consumer                                                                                                                      |
++--------------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+| port               | 8088                           |  The port of the consumer system                                                                                                                   |
++--------------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+| passphrase         | xxxxx                          |  The secret password to use when sending data to the consumer system                                                                               |
++--------------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 
 .. toctree::
    :maxdepth: 2

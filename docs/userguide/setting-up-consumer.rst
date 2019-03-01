@@ -66,6 +66,8 @@ Example Declaration:
 
 Example Dashboard:
 
+Below is an example of the Azure dashboard with Telemetry Streaming data. To create a similar dashboard, see |azure_dashboard|. To create custom views using View Designer, see |Azure_custom_views|.
+
 |azure_log_analytics_dashboard|
 
 AWS Cloud Watch
@@ -164,6 +166,7 @@ Required Information:
  - Host: The address of the Kafka system.
  - Port: The port of the Kafka system.
  - Topic: The topic where data should go within the Kafka system
+ - Protocol: The port of the Kafka system. Options: binaryTcp or binaryTcpTls. Default is binaryTcpTls
 
 .. NOTE:: To see more information about installing Kafka, see |Installing Kafka|.
 
@@ -175,11 +178,12 @@ Required Information:
             "class": "Telemetry_Consumer",
             "type": "Kafka",
             "host": "192.0.2.1",
-            "port": "9092"
-            "topic": "f5-telemetry",
-            
+            "protocol": "binaryTcpTls",
+            "port": "9092",
+            "topic": "f5-telemetry"
         }
     }
+
 
 
 ElasticSearch
@@ -256,6 +260,116 @@ Required Information:
         }
     }
 
+StatsD
+~~~~~~
+|StatsD|
+
+Required Information:
+ - Host: The address of the StatsD instance.
+ - Protocol: The protocol of the StatsD instance. The default is UDP.
+ - Port: The port of the Statsd instance
+
+.. NOTE:: To see more information about installing StatsD, see |StatsDWiki|.
+
+.. code-block:: json
+   :linenos:
+
+    {
+        "class": "Telemetry",
+        "My_Consumer": {
+            "class": "Telemetry_Consumer",
+            "type": "Statsd",
+            "host": "192.0.2.1",
+            "protocol": "udp",
+            "port": "8125"
+        }
+    }
+
+
+Generic HTTP
+~~~~~~~~~~~~
+
+Required Information:
+ - Host: The address of the system.
+ - Protocol: The protocol of the system. Options: ``https`` or ``http``. Default is ``http``.
+ - Port: The protocol of the system. Default is ``443``.
+ - Path: The path of the system. Default is ``/``.
+ - Method: The method of the system. Options: ``POST``, ``PUT``, ``GET``. Default is ``POST``.
+ - Headers: The headers of the system.
+ - Passphrase: The secret to use when sending data to the system, for example an API key to be used in an HTTP header.
+
+.. NOTE:: Since this consumer is designed to be generic and flexible, how authentication is performed is left up to the web service. To ensure the secrets are encrypted within Telemetry Streaming please note the use of JSON pointers. The secret to protect should be stored inside ``passphrase`` and referenced in the desired destination property, such as an API token in a header as shown in this example.
+
+.. code-block:: json
+   :linenos:
+
+    {
+        "class": "Telemetry",
+        "My_Consumer": {
+            "class": "Telemetry_Consumer",
+            "type": "Generic_HTTP",
+            "host": "192.0.2.1",
+            "protocol": "https",
+            "port": "443",
+            "path": "/",
+            "method": "POST",
+            "headers": [
+                {
+                    "name": "content-type",
+                    "value": "application/json"
+                },
+                {
+                    "name": "x-api-key",
+                    "value": "`>@/passphrase`"
+                }
+            ],
+            "passphrase": {
+                "cipherText": "apikey"
+            }
+        }
+    }
+
+.. NOTE::  If multiple secrets are required, defining an additional secret within ``Shared`` and referencing it using pointers is supported. For more details about pointers see the section on pointer syntax.
+
+Example with multiple passphrases:
+
+.. code-block:: json
+   :linenos:
+
+    {
+        "class": "Telemetry",
+        "Shared": {
+            "class": "Shared",
+            "secretPath": {
+                "class": "Secret",
+                "cipherText": "/?token=secret"
+            }
+        },
+        "My_Consumer": {
+            "class": "Telemetry_Consumer",
+            "type": "Generic_HTTP",
+            "host": "192.0.2.1",
+            "protocol": "https",
+            "port": "443",
+            "path": "`>/Shared/secretPath`",
+            "method": "POST",
+            "headers": [
+                {
+                    "name": "content-type",
+                    "value": "application/json"
+                },
+                {
+                    "name": "x-api-key",
+                    "value": "`>@/passphrase`"
+                }
+            ],
+            "passphrase": {
+                "cipherText": "apikey"
+            }
+        }
+    }
+
+
 
 .. |splunk_img| image:: /images/splunk_logo.png
    :target: https://www.splunk.com
@@ -289,11 +403,15 @@ Required Information:
 
 .. |ElasticSearch| image:: /images/ElasticSearch_img.png
    :target: https://www.elastic.co/
-   :alt: Kafka
+   :alt: Elastic Search
 
 .. |Sumo Logic| image:: /images/Sumo_img.png
    :target: https://www.sumologic.com/
-   :alt: Splunk
+   :alt: Sumo Logic
+
+.. |StatsD| image:: /images/statsd_logo.png
+   :target: https://github.com/statsd/statsd/blob/master/docs/graphite.md
+   :alt: StatsD
 
 
 
@@ -328,6 +446,14 @@ Required Information:
 
    <a href="https://docs.microsoft.com/en-us/azure/azure-monitor/platform/data-collector-api" target="_blank">HTTP Data Collector API documentation</a>
 
+.. |azure_dashboard| raw:: html
+
+    <a href="https://github.com/F5Networks/f5-telemetry-streaming/blob/master/examples/consumers/azure_log_analytics/telemetry_dashboard.omsview" target="blank">Azure dashboard</a>
+
+.. |Azure_custom_views| raw:: html
+
+    <a href="https://docs.microsoft.com/en-us/azure/azure-monitor/platform/view-designer" target="blank">Microsoft documentation</a>
+
 .. |Installing Graphite| raw:: html
 
    <a href="https://graphite.readthedocs.io/en/latest/install.html" target="_blank">Installing Graphite documentation</a>
@@ -347,3 +473,7 @@ Required Information:
 .. |Installing Sumo Logic| raw:: html
 
    <a href="https://help.sumologic.com/01Start-Here/Quick-Start-Tutorials" target="_blank">Installing Sumo Logic documentation</a>
+
+.. |StatsDWiki| raw:: html
+
+   <a href="https://github.com/statsd/statsd/blob/master/docs/graphite.md" target="_blank">StatsD documentation on GitHub</a>

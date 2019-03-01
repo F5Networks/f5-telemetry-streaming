@@ -1,3 +1,5 @@
+.. _eventlistener-ref:
+
 Event Listener
 --------------
 
@@ -337,4 +339,37 @@ Example output:
         "telemetryEventCategory":"event"
     }
 
+
+System Log
+``````````
+
+1. Modify the system syslog configuration by adding a destination:
+
+Using TMSH:
+
+.. code-block:: json
+
+    modify sys syslog remote-servers replace-all-with { server { host 10.0.1.100 remote-port 6515 } }
+
+User interface: :menuselection:`System --> Logs --> Configuration --> Remote Logging`
+
+2. Modify system logging configuration to update what gets logged:
+
+Using TMSH: 
+
+.. code-block:: json
+
+    modify sys daemon-log-settings mcpd audit enabled
+
+User interface: :menuselection:`System --> Logs --> Configuration --> Options`
+
+Example output:
+
+.. code-block:: json
+   :linenos:
+
+    {
+    "data":"<85>Feb 12 21:39:43 telemetry notice sshd[22277]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=218.92.1.148  user=root",
+    "telemetryEventCategory":"event"
+    }
 
