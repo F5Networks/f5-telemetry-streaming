@@ -190,8 +190,8 @@ publish_rpm_to_artifactory:
         - if [[ $? -eq 0 ]] && [[ "$UPLOAD_RESULT" == *created* ]]; then echo "Upload complete"; else echo "Upload failed"; exit 1; fi
         - echo $UPLOAD_RESULT
 
-# Publish docs to internal pages
-publish_docs_to_pages:
+# Publish docs to internal pages - note: this job name MUST be 'pages'
+pages:
     image: ${CONTAINTHEDOCS_IMAGE}
     stage: publish
     environment:
