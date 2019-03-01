@@ -17,6 +17,7 @@ Telemetry Streaming is an iControl LX extension to stream telemetry from BIG-IP(
 
 - [Overview](#overview)
 - [Configuration Examples](#configuration-examples)
+- [Pointer Syntax](#pointer-syntax)
 - [REST API Endpoints](#rest-api-endpoints)
 - [Output Example](#output-example)
 - [Container](#container)
@@ -237,7 +238,7 @@ Required information:
 - Headers: The headers of the system.
 - Passphrase: The secret to use when sending data to the system, for example an API key to be used in an HTTP header.
 
-Note: Since this consumer is designed to be generic and flexible, how authentication is performed is left up to the web service.  To ensure the secrets are encrypted within Telemetry Streaming please note the use of JSON pointers.  The secret to protect should be stored inside `passphrase` and referenced in the destination property.
+Note: Since this consumer is designed to be generic and flexible, how authentication is performed is left up to the web service.  To ensure the secrets are encrypted within Telemetry Streaming please note the use of JSON pointers.  The secret to protect should be stored inside `passphrase` and referenced in the desired destination property, such as an API token in a header as show in this example.
 
 ```json
 {
@@ -267,7 +268,7 @@ Note: Since this consumer is designed to be generic and flexible, how authentica
 }
 ```
 
-Note: If multiple secrets are required, defining an additional secret within `Shared` and referencing it using pointers is supported.
+Note: If multiple secrets are required, defining an additional secret within `Shared` and referencing it using pointers is supported. For more details about pointers see the section on [pointer syntax](#pointer-syntax).
 
 Example with multiple passphrases:
 
@@ -512,6 +513,20 @@ Note: All metrics are stored as gauges in statsd, those can be seen within graph
     }
 }
 ```
+
+## Pointer Syntax
+
+Configuration of TS is typically straightforward, however the need to reference objects in other parts of the configuration may be necessary for certain use cases, such as the generic http consumer with secrets.  TS uses JSON pointers to accomplish this, with syntax derived primarily from one of the other tool chain components Application Services 3.
+
+- RFC 6901 compliant, with some enhacements to account for scenarios not outlined in the RFC
+- Pointer types
+  - Absolute pointer: \`=/Shared/secretPath\`
+  - Relative pointer: \`=passphrase\`
+  - Relative (nearest class) pointer: \`=@/passphrase\`
+- Pointer formats (determined by leading character)
+  - Resolve value: =
+  - Resolve value and base64 decode: +
+  - Resolve value and replace property with object (no stringify): >
 
 ## REST API Endpoints
 
