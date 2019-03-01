@@ -153,4 +153,252 @@ describe('Declarations', () => {
                 return Promise.resolve(); // resolve, expected an error
             });
     });
+
+    it('should expand pointer (absolute)', () => {
+        const expectedValue = '/foo';
+        const data = {
+            class: 'Telemetry',
+            Shared: {
+                class: 'Shared',
+                constants: {
+                    class: 'Constants',
+                    path: expectedValue
+                }
+            },
+            My_Consumer: {
+                class: 'Telemetry_Consumer',
+                type: 'Generic_HTTP',
+                host: '192.0.2.1',
+                path: '`=/Shared/constants/path`'
+            },
+            scratch: {
+                expand: true
+            }
+        };
+
+        return config.validate(data)
+            .then((validated) => {
+                assert.strictEqual(validated.My_Consumer.path, expectedValue);
+            })
+            .catch(err => Promise.reject(err));
+    });
+
+    it('should expand pointer (relative)', () => {
+        const expectedValue = '192.0.2.1';
+        const data = {
+            class: 'Telemetry',
+            My_Consumer: {
+                class: 'Telemetry_Consumer',
+                type: 'Generic_HTTP',
+                host: expectedValue,
+                path: '`=host`'
+            },
+            scratch: {
+                expand: true
+            }
+        };
+
+        return config.validate(data)
+            .then((validated) => {
+                assert.strictEqual(validated.My_Consumer.path, expectedValue);
+            })
+            .catch(err => Promise.reject(err));
+    });
+
+    it('should expand pointer (relative to class)', () => {
+        const expectedValue = '192.0.2.1';
+        const data = {
+            class: 'Telemetry',
+            My_Consumer: {
+                class: 'Telemetry_Consumer',
+                type: 'Generic_HTTP',
+                host: expectedValue,
+                path: '/',
+                headers: [
+                    {
+                        name: 'foo',
+                        value: '`=@/host`'
+                    }
+                ]
+            },
+            scratch: {
+                expand: true
+            }
+        };
+
+        return config.validate(data)
+            .then((validated) => {
+                assert.strictEqual(validated.My_Consumer.headers[0].value, expectedValue);
+            })
+            .catch(err => Promise.reject(err));
+    });
+
+    it('should expand pointer (multiple pointers in string)', () => {
+        const expectedValue = '/foo/bar/baz';
+        const data = {
+            class: 'Telemetry',
+            Shared: {
+                class: 'Shared',
+                constants: {
+                    class: 'Constants',
+                    path: 'foo',
+                    path2: 'baz'
+                }
+            },
+            My_Consumer: {
+                class: 'Telemetry_Consumer',
+                type: 'Generic_HTTP',
+                host: '192.0.2.1',
+                path: '/`=/Shared/constants/path`/bar/`=/Shared/constants/path2`'
+            },
+            scratch: {
+                expand: true
+            }
+        };
+
+        return config.validate(data)
+            .then((validated) => {
+                assert.strictEqual(validated.My_Consumer.path, expectedValue);
+            })
+            .catch(err => Promise.reject(err));
+    });
+
+    it('should expand pointer (base64 decode)', () => {
+        const expectedValue = 'foo';
+        const data = {
+            class: 'Telemetry',
+            Shared: {
+                class: 'Shared',
+                constants: {
+                    class: 'Constants',
+                    path: 'Zm9v' // base64 'foo'
+                }
+            },
+            My_Consumer: {
+                class: 'Telemetry_Consumer',
+                type: 'Generic_HTTP',
+                host: '192.0.2.1',
+                path: '`+/Shared/constants/path`'
+            },
+            scratch: {
+                expand: true
+            }
+        };
+
+        return config.validate(data)
+            .then((validated) => {
+                assert.strictEqual(validated.My_Consumer.path, expectedValue);
+            })
+            .catch(err => Promise.reject(err));
+    });
+
+    it('should expand pointer (object)', () => {
+        const resolvedSecret = 'bar';
+        util.encryptSecret = () => Promise.resolve(resolvedSecret);
+
+        const expectedValue = {
+            class: 'Secret',
+            cipherText: resolvedSecret,
+            protected: 'SecureVault'
+        };
+        const data = {
+            class: 'Telemetry',
+            Shared: {
+                class: 'Shared',
+                secret: {
+                    class: 'Secret',
+                    cipherText: 'foo'
+                }
+            },
+            My_Consumer: {
+                class: 'Telemetry_Consumer',
+                type: 'Generic_HTTP',
+                host: '192.0.2.1',
+                path: '`>/Shared/secret`',
+                headers: [
+                    {
+                        name: 'foo',
+                        value: '`>@/passphrase`'
+                    }
+                ],
+                passphrase: {
+                    class: 'Secret',
+                    cipherText: 'foo'
+                }
+            },
+            scratch: {
+                expand: true
+            }
+        };
+
+        return config.validate(data)
+            .then((validated) => {
+                assert.deepEqual(validated.My_Consumer.path, expectedValue);
+                assert.deepEqual(validated.My_Consumer.headers[0].value, expectedValue);
+                return config.validate(validated);
+            })
+            .then(() => {
+                // we want to ensure config is still valid once 'path|headers'
+                // is an object containing a 'secret
+                assert.ok('expanded object valid');
+            })
+            .catch(err => Promise.reject(err));
+    });
+
+    it('should fail pointer (object) with additional chars', () => {
+        util.encryptSecret = secret => Promise.resolve(secret);
+
+        const data = {
+            class: 'Telemetry',
+            My_Consumer: {
+                class: 'Telemetry_Consumer',
+                type: 'Generic_HTTP',
+                host: '192.0.2.1',
+                path: '`>passphrase`foo',
+                passphrase: {
+                    cipherText: 'foo'
+                }
+            },
+            scratch: {
+                expand: true
+            }
+        };
+
+        return config.validate(data)
+            .then(() => {
+                assert.fail('Should throw an error');
+            })
+            .catch((err) => {
+                if (err.message.indexOf('syntax requires single pointer') !== -1) {
+                    return Promise.resolve(); // resolve, expected this error
+                }
+                return Promise.reject(err);
+            });
+    });
+
+    it('should fail pointer (absolute) outside \'Shared\'', () => {
+        const data = {
+            class: 'Telemetry',
+            My_Consumer: {
+                class: 'Telemetry_Consumer',
+                type: 'Generic_HTTP',
+                host: '192.0.2.1',
+                path: '`=/class`'
+            },
+            scratch: {
+                expand: true
+            }
+        };
+
+        return config.validate(data)
+            .then(() => {
+                assert.fail('Should throw an error');
+            })
+            .catch((err) => {
+                if (err.message.indexOf('requires pointers root to be \'Shared\'') !== -1) {
+                    return Promise.resolve(); // resolve, expected this error
+                }
+                return Promise.reject(err);
+            });
+    });
 });

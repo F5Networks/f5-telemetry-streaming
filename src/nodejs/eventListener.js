@@ -210,7 +210,8 @@ EventListener.prototype.processEvent = function (data) {
             opts: {
                 classifyByKeys: events.classifyByKeys
             }
-        }
+        },
+        formatTimestamps: global.formatTimestamps.keys
     };
     data = String(data).trim();
 

@@ -21,12 +21,19 @@
             "description": "" ,
             "type": "object",
             "properties": {
+                "class": {
+                    "title": "Class",
+                    "description": "Telemetry streaming secret class",
+                    "type": "string",
+                    "enum": [ "Secret" ],
+                    "default": "Secret"
+               },
                 "cipherText": {
                     "title": "Cipher Text: this contains a secret to encrypt",
                     "type": "string"
                 },
                 "environmentVar": {
-                    "title": "Environment Variable: this will contain the named env var where the secret resides",
+                    "title": "Environment Variable: this contains the named env var where the secret resides",
                     "type": "string"
                 },
                 "protected": {
@@ -42,6 +49,35 @@
                 { "required": [ "environmentVar" ] }
             ],
             "f5secret": true
+        },
+        "stringOrSecret": {
+            "$async": true,
+            "allOf": [
+                {
+                    "if": { "type": "string" },
+                    "then": {},
+                    "else": {}
+                },
+                {
+                    "if": { "type": "object" },
+                    "then": { "$ref": "base_schema.json#/definitions/secret" },
+                    "else": {}
+                }
+            ]
+        },
+        "constants": {
+            "title": "Constants",
+            "description": "" ,
+            "type": "object",
+            "properties": {
+                "class": {
+                    "title": "Class",
+                    "description": "Telemetry streaming constants class",
+                    "type": "string",
+                    "enum": [ "Constants" ]
+               }
+            },
+            "additionalProperties": true
         },
         "tag": {
             "$comment": "Defaults do not get applied for $ref objects, so place defaults alongside instead.",
@@ -98,6 +134,17 @@
             "title": "Schema",
             "description": "",
             "type": "string"
+        },
+        "scratch": {
+            "title": "Scratch",
+            "description": "Holds some system data during declaration processing",
+            "type": "object",
+            "properties": {
+                "expand": {
+                    "title": "Expand",
+                    "type": "boolean"
+                }
+            }
         }
     },
     "additionalProperties": {
@@ -110,7 +157,8 @@
                     "Telemetry_System_Poller",
                     "Telemetry_Listener",
                     "Telemetry_Consumer",
-                    "Controls"
+                    "Controls",
+                    "Shared"
                 ]
             }
         },    
@@ -126,6 +174,9 @@
             },
             {
                 "$ref": "controls_schema.json#"
+            },
+            {
+                "$ref": "shared_schema.json#"
             }
         ]
     },

@@ -32,7 +32,7 @@ function process(args) {
     const config = args.config;
     const tracer = args.tracer;
 
-    const startTimestamp = new Date().toUTCString();
+    const startTimestamp = new Date().toISOString();
     logger.debug('System poller cycle started');
 
     return new SystemStats().collect(
@@ -42,7 +42,7 @@ function process(args) {
             protocol: config.protocol,
             port: config.port,
             username: config.username,
-            passphrase: config.passphrase ? config.passphrase.text : undefined,
+            passphrase: config.passphrase ? config.passphrase : undefined,
             tags: config.tag,
             addtlProperties: {
                 pollingInterval: config.interval
@@ -50,7 +50,7 @@ function process(args) {
         }
     )
         .then((data) => {
-            const endTimeStamp = new Date().toUTCString();
+            const endTimeStamp = new Date().toISOString();
             // inject service data
             const telemetryServiceInfo = {
                 pollingInterval: config.interval,

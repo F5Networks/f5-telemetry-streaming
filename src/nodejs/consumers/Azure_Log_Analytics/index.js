@@ -30,7 +30,7 @@ function makeRequest(requestOptions) {
  */
 module.exports = function (context) {
     const workspaceId = context.config.workspaceId;
-    const sharedKey = context.config.passphrase.text;
+    const sharedKey = context.config.passphrase;
     const logType = context.config.logType || 'F5Telemetry';
 
     // for event types other than systemInfo, let's not chunk

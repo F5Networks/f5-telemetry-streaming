@@ -138,7 +138,7 @@ function getDefaultRequestOpts(consumer) {
     const defaults = {
         url: baseURL,
         headers: {
-            Authorization: `Splunk ${consumer.passphrase.text}`
+            Authorization: `Splunk ${consumer.passphrase}`
         },
         strictSSL: !consumer.allowSelfSignedCert
     };

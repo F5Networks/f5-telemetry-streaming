@@ -251,7 +251,8 @@
                 "exactMatch": true
             }
         },
-        "filterKeys": { "exclude": [ "kind", "selfLink" ] }
+        "filterKeys": { "exclude": [ "kind", "selfLink" ] },
+        "formatTimestamps": { "keys": [ "systemTimestamp", "expirationString", "date_time" ] }
     },
     "definitions": {
         "`T`": { "pattern": "\/(.*?)\/", "group": 1 },

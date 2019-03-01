@@ -17,6 +17,7 @@ const util = require('./util.js');
 
 const baseSchema = require('./schema/base_schema.json');
 const controlsSchema = require('./schema/controls_schema.json');
+const sharedSchema = require('./schema/shared_schema.json');
 const systemPollerSchema = require('./schema/system_poller_schema.json');
 const listenerSchema = require('./schema/listener_schema.json');
 const consumerSchema = require('./schema/consumer_schema.json');
@@ -195,6 +196,7 @@ ConfigWorker.prototype.compileSchema = function () {
     const schemas = {
         base: baseSchema,
         controls: controlsSchema,
+        shared: sharedSchema,
         systemPoller: systemPollerSchema,
         listener: listenerSchema,
         consumer: consumerSchema
@@ -205,7 +207,8 @@ ConfigWorker.prototype.compileSchema = function () {
         useDefaults: true,
         coerceTypes: true,
         async: true,
-        extendRefs: true
+        extendRefs: true,
+        jsonPointers: true
     };
     const ajv = setupAsync(new Ajv(ajvOptions));
     // add schemas
@@ -266,18 +269,31 @@ ConfigWorker.prototype.validate = function (data) {
  * @returns {Object} Promise with validate config resolved on success
  */
 ConfigWorker.prototype.validateAndApply = function (data) {
+    data = data || {};
     let validatedConfig = {};
+    const configToSave = {
+        raw: {},
+        parsed: {}
+    };
+
+    // validate declaration, then run it back through validator with scratch
+    // property set for additional processing required prior to internal consumption
+    // note: ?show=expanded could return config to user with this processing done (later)
     return this.validate(data)
         .then((config) => {
             validatedConfig = config;
-            // no need for raw config
-            const configToSave = {
-                raw: JSON.parse(JSON.stringify(validatedConfig)),
-                parsed: util.formatConfig(config)
-            };
-            logger.debug('Configuration successfully validated');
-            logger.debug(`Configuration to save: ${util.stringify(configToSave)}`); // helpful debug, for now
+            configToSave.raw = JSON.parse(JSON.stringify(validatedConfig));
 
+            logger.debug('Expanding configuration');
+            data.scratch = { expand: true }; // set flag for additional decl processing
+            return this.validate(data);
+        })
+        .then((expandedConfig) => {
+            if (expandedConfig.scratch) delete expandedConfig.scratch; // cleanup
+            configToSave.parsed = util.formatConfig(expandedConfig);
+
+            logger.debug('Configuration successfully validated');
+            logger.debug(`Configuration to save: ${util.stringify(configToSave)}`);
             // do not fire event until state saved
             this.setConfig(configToSave, false);
             return this.saveState();

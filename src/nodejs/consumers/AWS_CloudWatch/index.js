@@ -24,7 +24,7 @@ module.exports = function (context) {
         region,
         credentials: new AWS.Credentials({
             accessKeyId: context.config.username,
-            secretAccessKey: context.config.passphrase.text
+            secretAccessKey: context.config.passphrase
         })
     });
     const cloudWatchLogs = new AWS.CloudWatchLogs({ apiVersion: '2014-03-28' });

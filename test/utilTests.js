@@ -387,56 +387,59 @@ describe('Util', () => {
             My_Consumer: {
                 class: 'Consumer',
                 passphrase: {
+                    class: 'Secret',
                     cipherText: 'foo'
                 }
             },
             My_Consumer2: {
                 class: 'Consumer',
                 passphrase: {
+                    class: 'Secret',
                     environmentVar: 'MY_SECRET_TEST_VAR'
                 }
             },
             My_Consumer3: {
                 class: 'Consumer',
                 passphrase: {
+                    class: 'Secret',
                     environmentVar: 'VAR_THAT_DOES_NOT_EXIST'
                 }
             },
             My_Consumer4: {
                 class: 'Consumer',
                 passphrase: {
+                    class: 'Secret',
                     someUnknownKey: 'foo'
+                }
+            },
+            My_Consumer5: {
+                class: 'Consumer',
+                otherkey: {
+                    class: 'Secret',
+                    cipherText: 'foo'
                 }
             }
         };
         const decryptedObj = {
             My_Consumer: {
                 class: 'Consumer',
-                passphrase: {
-                    cipherText: 'foo',
-                    text: secret
-                }
+                passphrase: secret
             },
             My_Consumer2: {
                 class: 'Consumer',
-                passphrase: {
-                    environmentVar: 'MY_SECRET_TEST_VAR',
-                    text: secret
-                }
+                passphrase: secret
             },
             My_Consumer3: {
                 class: 'Consumer',
-                passphrase: {
-                    environmentVar: 'VAR_THAT_DOES_NOT_EXIST',
-                    text: null
-                }
+                passphrase: null
             },
             My_Consumer4: {
                 class: 'Consumer',
-                passphrase: {
-                    someUnknownKey: 'foo',
-                    text: null
-                }
+                passphrase: null
+            },
+            My_Consumer5: {
+                class: 'Consumer',
+                otherkey: secret
             }
         };
 
