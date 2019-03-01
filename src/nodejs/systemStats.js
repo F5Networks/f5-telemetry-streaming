@@ -413,6 +413,7 @@ SystemStats.prototype._processData = function (property, data) {
         renameKeysByPattern: property.renameKeys ? [property.renameKeys, global.renameKeys] : [global.renameKeys],
         convertArrayToMap: property.convertArrayToMap,
         includeFirstEntry: property.includeFirstEntry,
+        formatTimestamps: global.formatTimestamps.keys,
         runCustomFunction: property.runFunction,
         addKeysByTag: { // add 'name' + any user configured tags if specified by prop
             tags: property.addKeysByTag ? Object.assign(defaultTags, this.tags) : defaultTags,

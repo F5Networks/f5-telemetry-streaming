@@ -92,8 +92,6 @@ describe('Basic', function () {
         // check that the declaration returned contains encrypted text
         // note: this only applies to TS running on BIG-IP (which is all we are testing for now)
         assert.strictEqual(passphrase.cipherText.startsWith('$M'), true);
-        // check that the declaration does not return decrypted text
-        assert.strictEqual(passphrase.text, undefined);
     }
 
     // run tests for each host

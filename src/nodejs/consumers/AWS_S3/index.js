@@ -30,7 +30,7 @@ module.exports = function (context) {
         region,
         credentials: new AWS.Credentials({
             accessKeyId: context.config.username,
-            secretAccessKey: context.config.passphrase.text
+            secretAccessKey: context.config.passphrase
         })
     });
     const s3 = new AWS.S3({ apiVersion: '2006-03-01' });

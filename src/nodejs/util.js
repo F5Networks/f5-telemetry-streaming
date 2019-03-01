@@ -914,14 +914,25 @@ module.exports = {
     decryptAllSecrets(data) {
         // helper functions strictly for this function
         const removePassphrase = (iData) => {
-            if (iData && typeof iData === 'object' && !Array.isArray(iData)) {
-                const keys = Object.keys(iData);
-                if (keys.indexOf('passphrase') !== -1) {
-                    delete iData.passphrase;
+            if (iData && typeof iData === 'object') {
+                if (Array.isArray(iData)) {
+                    iData.forEach((i) => {
+                        removePassphrase(i);
+                    });
                 } else {
-                    // recurse child objects
+                    const keys = Object.keys(iData);
+
+                    // check for value containing an object with 'class': 'Secret'
+                    // this applies to named key 'passphrase' as well as unknown key names
                     keys.forEach((k) => {
-                        iData[k] = removePassphrase(iData[k]);
+                        if (typeof iData[k] === 'object' && iData[k].class === 'Secret') {
+                            delete iData[k];
+                        }
+                    });
+
+                    // finally recurse child objects
+                    keys.forEach((k) => {
+                        removePassphrase(iData[k]);
                     });
                 }
             }
@@ -969,10 +980,12 @@ module.exports = {
             .then((res) => {
                 let idx = 0;
                 passphrases.forEach((i) => {
-                    // navigate to passphrase in data object and update
-                    // place decrypted value in 'text' key as this is more flexible
-                    const passphrase = getPassphrase(data, i.path);
-                    passphrase.text = res[idx];
+                    // navigate to passphrase in data object and replace whole object with
+                    // decrypted value - this allows consumers to reference any key name containing
+                    // a secret (object) and get decrypted value (string) - not just 'passphrase'
+                    const parentKey = i.path[i.path.length - 1];
+                    const passphrase = getPassphrase(data, i.path.slice(0, -1));
+                    passphrase[parentKey] = res[idx];
                     idx += 1;
                 });
                 // return (modified) data
