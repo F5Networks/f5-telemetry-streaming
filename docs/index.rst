@@ -23,7 +23,9 @@ You can use Microsoft Visual STudio Code to validate your declarations, see :ref
 
 This guide contains information on downloading, installing, and using the Telemetry Streaming Extension.
 
+
 |video|
+
 
 Use the following links, the navigation on the left, and/or the Next and
 Previous buttons to explore the documentation.
@@ -34,6 +36,7 @@ Previous buttons to explore the documentation.
    :maxdepth: 3
 
    userguide/index
+
 
 .. |video| raw:: html
 

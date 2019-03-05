@@ -13,3 +13,24 @@ This section describes additional options that you may want to configure once yo
 +-----------------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | enableHostConnectivityCheck | true, **false**                |  This value applies to the Telemetry_Consumer and Telmetry_System_Poller class. If set to true, Telemetry Streaming will check if it can reach the host and return a fail if it cannot reach the host.                                                                                                                                                                                                                            |
 +-----------------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+
+.. _pointersyntax:
+
+Pointer Syntax
+~~~~~~~~~~~~~~
+
+In certain use cases, such as configuring the generic http consumer with secrets, you may need to reference objects in other parts of the configuration. To reference other objects, Telemetry Streaming uses JSON pointers with syntax derived primarily from Application Services 3.
+
+- RFC 6901 compliant, with some enhacements to account for scenarios not outlined in the RFC
+- Pointer types:
+
+  - Absolute pointer: `=/Shared/secretPath`
+  - Relative pointer: `=passphrase`
+  - Relative (nearest class) pointer: `=@/passphrase`
+
+- Pointer formats (determined by leading character):
+
+  - Resolve value: =
+  - Resolve value and base64 decode: +
+  - Resolve value and replace property with object (no stringify): >
