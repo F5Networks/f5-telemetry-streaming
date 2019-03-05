@@ -7,6 +7,7 @@ Telemetry Streaming uses a declarative model, meaning you provide a JSON declara
 
 .. image:: /images/telemetry-streaming.png
 
+
 A basic declaration is shown here with descriptions of the components below:
 
 .. code-block:: json

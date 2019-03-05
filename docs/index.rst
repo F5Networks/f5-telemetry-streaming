@@ -19,6 +19,10 @@ Telemetry Streaming (TS) is an iControl LX Extension delivered as a TMOS-indepen
 -  Sumo Logic
 -  StatsD
 
+You can use Microsoft Visual STudio Code to validate your declarations, see :ref:`validate` for information.
+
+This guide contains information on downloading, installing, and using the Telemetry Streaming Extension.
+
 |video|
 
 Use the following links, the navigation on the left, and/or the Next and

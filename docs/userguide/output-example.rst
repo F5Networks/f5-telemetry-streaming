@@ -32,16 +32,16 @@ System Information
             "syncSummary": " ",
             "failoverStatus": "ACTIVE",
             "failoverColor": "green",
-            "systemTimestamp": "2019-02-01T17:23:15Z",
-            "cpu": 3,
-            "memory": 55,
-            "tmmCpu": 1,
-            "tmmMemory": 11,
+            "systemTimestamp": "2019-01-01T01:01:01Z",
+            "cpu": 0,
+            "memory": 0,
+            "tmmCpu": 0,
+            "tmmMemory": 0,
             "tmmTraffic": {
-                "clientSideTraffic.bitsIn": 30749965632,
-                "clientSideTraffic.bitsOut": 91027281336,
-                "serverSideTraffic.bitsIn": 26698867512,
-                "serverSideTraffic.bitsOut": 90836218144
+                "clientSideTraffic.bitsIn": 0,
+                "clientSideTraffic.bitsOut": 0,
+                "serverSideTraffic.bitsIn": 0,
+                "serverSideTraffic.bitsOut": 0
             },
             "diskStorage": {
                 "/": {
@@ -76,7 +76,7 @@ System Information
                 },
                 "/var/log": {
                     "1024-blocks": "3023760",
-                    "Capacity": "7%",
+                    "Capacity": "8%",
                     "name": "/var/log"
                 },
                 "/appdata": {
@@ -122,15 +122,15 @@ System Information
             },
             "diskLatency": {
                 "sda": {
-                    "r/s": "1.15",
-                    "w/s": "9.26",
-                    "%util": "0.14",
+                    "r/s": "1.46",
+                    "w/s": "8.25",
+                    "%util": "0.09",
                     "name": "sda"
                 },
                 "sdb": {
                     "r/s": "1.00",
                     "w/s": "0.00",
-                    "%util": "0.00",
+                    "%util": "0.04",
                     "name": "sdb"
                 },
                 "dm-0": {
@@ -140,70 +140,70 @@ System Information
                     "name": "dm-0"
                 },
                 "dm-1": {
-                    "r/s": "0.00",
-                    "w/s": "12.41",
+                    "r/s": "0.01",
+                    "w/s": "11.01",
                     "%util": "0.01",
                     "name": "dm-1"
                 },
                 "dm-2": {
-                    "r/s": "0.02",
-                    "w/s": "4.50",
-                    "%util": "0.01",
+                    "r/s": "0.14",
+                    "w/s": "2.56",
+                    "%util": "0.00",
                     "name": "dm-2"
                 },
                 "dm-3": {
                     "r/s": "0.01",
-                    "w/s": "4.23",
+                    "w/s": "4.28",
                     "%util": "0.01",
                     "name": "dm-3"
                 },
                 "dm-4": {
-                    "r/s": "0.02",
-                    "w/s": "0.05",
+                    "r/s": "0.00",
+                    "w/s": "0.00",
                     "%util": "0.00",
                     "name": "dm-4"
                 },
                 "dm-5": {
-                    "r/s": "0.01",
-                    "w/s": "1.58",
+                    "r/s": "0.04",
+                    "w/s": "1.52",
                     "%util": "0.00",
                     "name": "dm-5"
                 },
                 "dm-6": {
-                    "r/s": "0.07",
+                    "r/s": "0.13",
                     "w/s": "0.00",
                     "%util": "0.00",
                     "name": "dm-6"
                 },
                 "dm-7": {
                     "r/s": "0.00",
-                    "w/s": "0.06",
+                    "w/s": "0.05",
                     "%util": "0.00",
                     "name": "dm-7"
                 },
                 "dm-8": {
-                    "r/s": "0.03",
-                    "w/s": "4.97",
+                    "r/s": "0.11",
+                    "w/s": "4.72",
                     "%util": "0.01",
                     "name": "dm-8"
                 }
             },
             "networkInterfaces": {
                 "1.1": {
-                    "counters.bitsIn": 88594112512,
-                    "counters.bitsOut": 28164141760,
+                    "counters.bitsIn": 0,
+                    "counters.bitsOut": 0,
                     "status": "up",
                     "name": "1.1"
                 },
                 "1.2": {
-                    "counters.bitsIn": 7703269352,
-                    "counters.bitsOut": 413753256,
+                    "counters.bitsIn": 0,
+                    "counters.bitsOut": 0,
                     "status": "up",
                     "name": "1.2"
                 },
                 "mgmt": {
-                    "counters.bitsIn": 10280239984,
-                    "counters.bitsOut": 4504546456,
+                    "counters.bitsIn": 0,
+                    "counters.bitsOut": 0,
                     "status": "up",
                     "name": "mgmt"
                 }
@@ -273,8 +273,8 @@ System Information
         },
         "virtualServers": {
             "/Common/app.app/app_vs": {
-                "clientside.bitsIn": 19599288,
-                "clientside.bitsOut": 119172032,
+                "clientside.bitsIn": 0,
+                "clientside.bitsOut": 0,
                 "clientside.curConns": 0,
                 "destination": "10.0.2.101:80",
                 "availabilityState": "available",
@@ -308,9 +308,9 @@ System Information
         },
         "pools": {
             "/Common/app.app/app_pool": {
-                "activeMemberCnt": 1,
-                "serverside.bitsIn": 25825768,
-                "serverside.bitsOut": 114425928,
+                "activeMemberCnt": 0,
+                "serverside.bitsIn": 0,
+                "serverside.bitsOut": 0,
                 "serverside.curConns": 0,
                 "availabilityState": "available",
                 "enabledState": "enabled",
@@ -318,9 +318,9 @@ System Information
                 "members": {
                     "/Common/10.0.3.5:80": {
                         "addr": "10.0.3.5",
-                        "port": 80,
-                        "serverside.bitsIn": 25825768,
-                        "serverside.bitsOut": 114425928,
+                        "port": 0,
+                        "serverside.bitsIn": 0,
+                        "serverside.bitsOut": 0,
                         "serverside.curConns": 0,
                         "availabilityState": "available",
                         "enabledState": "enabled"
@@ -330,9 +330,9 @@ System Information
                 "application": "app.app"
             },
             "/Common/telemetry-local": {
-                "activeMemberCnt": 1,
-                "serverside.bitsIn": 8908592,
-                "serverside.bitsOut": 1955808,
+                "activeMemberCnt": 0,
+                "serverside.bitsIn": 0,
+                "serverside.bitsOut": 0,
                 "serverside.curConns": 0,
                 "availabilityState": "available",
                 "enabledState": "enabled",
@@ -340,9 +340,9 @@ System Information
                 "members": {
                     "/Common/10.0.1.100:6514": {
                         "addr": "10.0.1.100",
-                        "port": 6514,
-                        "serverside.bitsIn": 8908592,
-                        "serverside.bitsOut": 1955808,
+                        "port": 0,
+                        "serverside.bitsIn": 0,
+                        "serverside.bitsOut": 0,
                         "serverside.curConns": 0,
                         "availabilityState": "available",
                         "enabledState": "enabled"
@@ -362,7 +362,7 @@ System Information
                 "members": {
                     "/Example_Tenant/192.168.120.6:514": {
                         "addr": "192.168.120.6",
-                        "port": 514,
+                        "port": 0,
                         "serverside.bitsIn": 0,
                         "serverside.bitsOut": 0,
                         "serverside.curConns": 0,
@@ -384,7 +384,7 @@ System Information
                 "members": {
                     "/Example_Tenant/192.0.2.12:80": {
                         "addr": "192.0.2.12",
-                        "port": 80,
+                        "port": 0,
                         "serverside.bitsIn": 0,
                         "serverside.bitsOut": 0,
                         "serverside.curConns": 0,
@@ -393,7 +393,7 @@ System Information
                     },
                     "/Example_Tenant/192.0.2.13:80": {
                         "addr": "192.0.2.13",
-                        "port": 80,
+                        "port": 0,
                         "serverside.bitsIn": 0,
                         "serverside.bitsOut": 0,
                         "serverside.curConns": 0,
@@ -407,12 +407,12 @@ System Information
         },
         "ltmPolicies": {
             "/Common/app.app/app_policy": {
-                "invoked": 5413,
-                "succeeded": 5413,
+                "invoked": 0,
+                "succeeded": 0,
                 "actions": {
                     "default:1": {
-                        "invoked": 5413,
-                        "succeeded": 5413
+                        "invoked": 0,
+                        "succeeded": 0
                     }
                 },
                 "name": "/Common/app.app/app_policy",
@@ -435,22 +435,22 @@ System Information
         },
         "httpProfiles": {
             "/Common/app.app/app_http": {
-                "cookiePersistInserts": 5409,
-                "getReqs": 2395,
-                "maxKeepaliveReq": 350,
-                "numberReqs": 5413,
-                "postReqs": 2989,
-                "2xxResp": 289,
+                "cookiePersistInserts": 0,
+                "getReqs": 0,
+                "maxKeepaliveReq": 0,
+                "numberReqs": 0,
+                "postReqs": 0,
+                "2xxResp": 0,
                 "3xxResp": 0,
-                "4xxResp": 5124,
+                "4xxResp": 0,
                 "5xxResp": 0,
                 "respLessThan2m": 0,
                 "respGreaterThan2m": 0,
-                "v10Reqs": 30,
+                "v10Reqs": 0,
                 "v10Resp": 0,
-                "v11Reqs": 5379,
-                "v11Resp": 5413,
-                "v9Reqs": 4,
+                "v11Reqs": 0,
+                "v11Resp": 0,
+                "v9Reqs": 0,
                 "v9Resp": 0,
                 "name": "/Common/app.app/app_http",
                 "tenant": "Common",
@@ -503,6 +503,7 @@ System Information
         },
         "clientSslProfiles": {
             "/Common/clientssl": {
+                "activeHandshakeRejected": 0,
                 "currentCompatibleConnections": 0,
                 "currentConnections": 0,
                 "currentNativeConnections": 0,
@@ -531,6 +532,7 @@ System Information
                 "application": ""
             },
             "/Example_Tenant/A1/webtls": {
+                "activeHandshakeRejected": 0,
                 "currentCompatibleConnections": 0,
                 "currentConnections": 0,
                 "currentNativeConnections": 0,
@@ -561,6 +563,7 @@ System Information
         },
         "serverSslProfiles": {
             "/Common/serverssl": {
+                "activeHandshakeRejected": 0,
                 "currentCompatibleConnections": 0,
                 "currentConnections": 0,
                 "currentNativeConnections": 0,
@@ -590,43 +593,44 @@ System Information
         },
         "sslCerts": {
             "ca-bundle.crt": {
-                "expirationDate": 1893455999,
-                "expirationString": "Dec 31 23:59:59 2029 GMT",
+                "expirationDate": 0,
+                "expirationString": "2019-01-01T01:01:01Z",
                 "issuer": "CN=Starfield Services Root Certificate Authority,OU=http://certificates.starfieldtech.com/repository/,O=Starfield Technologies, Inc.,L=Scottsdale,ST=Arizona,C=US",
                 "subject": "CN=Starfield Services Root Certificate Authority,OU=http://certificates.starfieldtech.com/repository/,O=Starfield Technologies, Inc.,L=Scottsdale,ST=Arizona,C=US",
                 "name": "ca-bundle.crt"
             },
             "default.crt": {
                 "email": "root@localhost.localdomain",
-                "expirationDate": 1859497229,
-                "expirationString": "Dec  3 23:00:29 2028 GMT",
+                "expirationDate": 0,
+                "expirationString": "2019-01-01T01:01:01Z",
                 "issuer": "emailAddress=root@localhost.localdomain,CN=localhost.localdomain,OU=IT,O=MyCompany,L=Seattle,ST=WA,C=US",
                 "subject": "emailAddress=root@localhost.localdomain,CN=localhost.localdomain,OU=IT,O=MyCompany,L=Seattle,ST=WA,C=US",
                 "name": "default.crt"
             },
             "f5-ca-bundle.crt": {
-                "expirationDate": 1922896554,
-                "expirationString": "Dec  7 17:55:54 2030 GMT",
+                "expirationDate": 0,
+                "expirationString": "2019-01-01T01:01:01Z",
                 "issuer": "CN=Entrust Root Certification Authority - G2,OU=(c) 2009 Entrust, Inc. - for authorized use only,OU=See www.entrust.net/legal-terms,O=Entrust, Inc.,C=US",
                 "subject": "CN=Entrust Root Certification Authority - G2,OU=(c) 2009 Entrust, Inc. - for authorized use only,OU=See www.entrust.net/legal-terms,O=Entrust, Inc.,C=US",
                 "name": "f5-ca-bundle.crt"
             },
             "f5-irule.crt": {
                 "email": "support@f5.com",
-                "expirationDate": 1815944413,
-                "expirationString": "Jul 18 21:00:13 2027 GMT",
+                "expirationDate": 0,
+                "expirationString": "2019-01-01T01:01:01Z",
                 "issuer": "emailAddress=support@f5.com,CN=support.f5.com,OU=Product Development,O=F5 Networks,L=Seattle,ST=Washington,C=US",
                 "subject": "emailAddress=support@f5.com,CN=support.f5.com,OU=Product Development,O=F5 Networks,L=Seattle,ST=Washington,C=US",
                 "name": "f5-irule.crt"
             }
         },
         "telemetryServiceInfo": {
-            "pollingInterval": 300,
-            "cycleStart": "Fri, 01 Feb 2019 17:23:14 GMT",
-            "cycleEnd": "Fri, 01 Feb 2019 17:23:15 GMT"
+            "pollingInterval": 0,
+            "cycleStart": "2019-01-01T01:01:01Z",
+            "cycleEnd": "2019-01-01T01:01:01Z"
         },
         "telemetryEventCategory": "systemInfo"
     }
+
 
 
 
