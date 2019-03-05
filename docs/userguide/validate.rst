@@ -18,7 +18,7 @@ Use the following procedure to validate a declaration.
     .. code-block:: json
 
         {
-            "$schema": "https://github.com/F5Networks/f5-telemetry-streaming/blob/master/src/nodejs/schema/base_schema.json",
+            "$schema": "https://raw.githubusercontent.com/F5Networks/f5-telemetry-streaming/master/src/nodejs/schema/base_schema.json",
         
 
 4. Begin to type your declaration (if validating an existing declaration, see step 5)
