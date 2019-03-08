@@ -136,6 +136,9 @@
             "additionalProperties": false,
             "required": []
         },
+        "networkTunnels": {
+            "type": "object"
+        },
         "telemetryEventCategory": {
             "type": "string",
             "enum": [ "systemInfo" ]

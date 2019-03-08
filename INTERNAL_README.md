@@ -1210,6 +1210,44 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
             "name": "f5-irule.crt"
         }
     },
+    "networkTunnels": {
+        "/Common/http-tunnel": {
+            "hcInBroadcastPkts": 0,
+            "hcInMulticastPkts": 0,
+            "hcInOctets": 0,
+            "hcInUcastPkts": 0,
+            "hcOutBroadcastPkts": 0,
+            "hcOutMulticastPkts": 0,
+            "hcOutOctets": 0,
+            "hcOutUcastPkts": 0,
+            "inDiscards": 0,
+            "inErrors": 0,
+            "inUnknownProtos": 0,
+            "outDiscards": 0,
+            "outErrors": 0,
+            "name": "/Common/http-tunnel",
+            "tenant": "Common",
+            "application": ""
+        },
+        "/Common/socks-tunnel": {
+            "hcInBroadcastPkts": 0,
+            "hcInMulticastPkts": 0,
+            "hcInOctets": 0,
+            "hcInUcastPkts": 0,
+            "hcOutBroadcastPkts": 0,
+            "hcOutMulticastPkts": 0,
+            "hcOutOctets": 0,
+            "hcOutUcastPkts": 0,
+            "inDiscards": 0,
+            "inErrors": 0,
+            "inUnknownProtos": 0,
+            "outDiscards": 0,
+            "outErrors": 0,
+            "name": "/Common/socks-tunnel",
+            "tenant": "Common",
+            "application": ""
+        }
+    },
     "telemetryServiceInfo": {
         "pollingInterval": 0,
         "cycleStart": "2019-01-01T01:01:01Z",
@@ -1230,8 +1268,8 @@ Configuration
 - Create Pool (just the pool, no destination/publisher): [Log Publisher Configuration](#log-publisher-configuration)
 - Create LTM Request Log Profile
   - TMSH: ```create ltm profile request-log telemetry request-log-pool telemetry-local request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\" request-logging enabled```
-  - F5 Application Services Extension: [using-a-traffic-log-profile-in-a-declaration](https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/latest/declarations/profiles.html#using-a-traffic-log-profile-in-a-declaration)
-  - Note: If creating the profile from the GUI, the ```\``` are not required.
+    - Note: If creating the profile from the GUI, the ```\``` are not required.
+  - F5 Application Services 3.0: [Log Profile Creation Using AS3](#log-profile-creation-using-as3)
 - Attach profile to the virtual server
   - F5 Application Services Extension (snippet) - Note: Requires v3.8.0 or greater
     ```json
@@ -1271,6 +1309,7 @@ Configuration
 - Create Log Publisher (and related objects): [Log Publisher Configuration](#log-publisher-configuration)
 - Create Security Log Profile:
   - TMSH: ```create security log profile telemetry network replace-all-with { telemetry { filter { log-acl-match-drop enabled log-acl-match-reject enabled } publisher telemetry-publisher } }```
+  - F5 Application Services 3.0: [Log Profile Creation Using AS3](#log-profile-creation-using-as3)
 - Attach profile to the virtual server
   - F5 Application Services Extension (snippet)
     ```json
@@ -1345,6 +1384,7 @@ Configuration
 
 - Create Security Log Profile:
   - TMSH: ```create security log profile telemetry application replace-all-with { telemetry { filter replace-all-with { request-type { values replace-all-with { all } } } logger-type remote remote-storage splunk servers replace-all-with { 192.0.2.1:6514 {} } } }```
+  - F5 Application Services 3.0: [Log Profile Creation Using AS3](#log-profile-creation-using-as3)
 - Attach profile to the virtual server
   - F5 Application Services Extension (snippet)
     ```json
@@ -1500,6 +1540,103 @@ Output
     - Name: telemetry-publisher
     - Destinations: telemetry-formatted
   - TMSH: ```create sys log-config publisher telemetry-publisher destinations replace-all-with { telemetry-formatted }```
+
+#### Log Profile Creation Using AS3
+
+Note: AS3 version 3.10.0 or greater required.
+
+```json
+{
+    "class": "ADC",
+    "schemaVersion": "3.10.0",
+    "remark": "Example depicting creation of BIG-IP module log profiles",
+    "Common": {
+        "Shared": {
+            "class": "Application",
+            "template": "shared",
+            "telemetry_local": {
+                "class": "Pool",
+                "members": [
+                    {
+                        "serverAddresses": [
+                            "192.0.2.10"
+                        ],
+                        "enable": true,
+                        "servicePort": 6514
+                    }
+                ],
+                "monitors": [
+                    {
+                        "bigip": "/Common/tcp"
+                    }
+                ]
+            },
+            "telemetry_hsl": {
+                "class": "Log_Destination",
+                "type": "remote-high-speed-log",
+                "protocol": "tcp",
+                "pool": {
+                    "use": "telemetry_local"
+                }
+            },
+            "telemetry_formatted": {
+                "class": "Log_Destination",
+                "type": "splunk",
+                "forwardTo": {
+                    "use": "telemetry_hsl"
+                }
+            },
+            "telemetry_publisher": {
+                "class": "Log_Publisher",
+                "destinations": [
+                    {
+                        "use": "telemetry_formatted"
+                    }
+                ]
+            },
+            "telemetry_traffic_log_profile": {
+                "class": "Traffic_Log_Profile",
+                "requestSettings": {
+                    "requestEnabled": true,
+                    "requestProtocol": "mds-tcp",
+                    "requestPool": {
+                        "use": "telemetry_local"
+                    },
+                    "requestTemplate": "event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\""
+                }
+            },
+            "telemetry_security_log_profile": {
+                "class": "Security_Log_Profile",
+                "application": {
+                    "localStorage": false,
+                    "remoteStorage": "splunk",
+                    "protocol": "tcp",
+                    "servers": [
+                        {
+                            "address": "192.0.2.10",
+                            "port": "6514"
+                        }
+                    ],
+                    "storageFilter": {
+                        "requestType": "illegal-including-staged-signatures"
+                    }
+                },
+                "network": {
+                    "publisher": {
+                        "use": "telemetry_publisher"
+                    },
+                    "logRuleMatchAccepts": false,
+                    "logRuleMatchRejects": true,
+                    "logRuleMatchDrops": true,
+                    "logIpErrors": true,
+                    "logTcpErrors": true,
+                    "logTcpEvents": true
+                }
+            }
+        }
+    }
+}
+```
 
 ## Container
 
