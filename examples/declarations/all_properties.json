@@ -31,7 +31,7 @@
         "type": "Splunk",
         "host": "192.0.2.1",
         "protocol": "https",
-        "port": "8088",
+        "port": 8088,
         "passphrase": {
             "cipherText": "apikey"
         },
