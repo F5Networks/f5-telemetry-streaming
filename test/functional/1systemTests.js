@@ -6,8 +6,7 @@
  * the software product on devcentral.f5.com.
  */
 
-// the this object does not get passed with arrow functions, which is needed during
-// functional testing to increase timeout
+// this object not passed with lambdas, which mocha uses
 /* eslint-disable prefer-arrow-callback */
 
 /* eslint-disable global-require */
@@ -15,32 +14,17 @@
 const assert = require('assert');
 const fs = require('fs');
 const net = require('net');
-const util = require('./util.js');
-
-let hosts;
-
-if (process.env.TEST_HARNESS_FILE !== undefined) {
-    // eslint-disable-next-line
-    hosts = require(process.env.TEST_HARNESS_FILE);
-} else {
-    // environment variables should exist when run (whether via pipeline or manually)
-    // it could be 1+: x.x.x.x,x.x.x.y
-    hosts = process.env.VIO_HOSTS.split(',').map(host => ({
-        admin_ip: host,
-        admin_username: process.env.VIO_HOST_USER,
-        admin_password: process.env.VIO_HOST_PWD
-    }));
-    // end environment variables
-}
+const util = require('../shared/util.js');
 
 const baseILXUri = '/mgmt/shared/telemetry';
+const hosts = util.getHosts('TEST_HARNESS_FILE');
 
-// purpose: basic functional test
-describe('Basic', function () {
-    // set timeouts/retries for functional test suite
-    this.timeout(1000 * 60 * 5); // 5 minutes - timeout for each test
-    this.slow(1000 * 60 * 3); // 3 minutes - increase limit before test is marked as "slow"
-    this.retries(20); // retry up to 20 times on failure
+// purpose: system tests
+describe('System', function () {
+    // set timeouts/retries for test suite
+    this.timeout(1000 * 60 * 5); // timeout for each test
+    this.slow(1000 * 60 * 3); // increase limit before test is marked as "slow"
+    this.retries(20);
 
     // read in example config
     const basicExample = `${__dirname}/basic.json`;
@@ -95,14 +79,14 @@ describe('Basic', function () {
     }
 
     // run tests for each host
-    hosts.forEach(function (hostObj) {
-        const host = hostObj.admin_ip;
-        const user = hostObj.admin_username;
-        const password = hostObj.admin_password;
+    hosts.forEach(function (item) {
+        const host = item.ip;
+        const user = item.username;
+        const password = item.password;
 
         let postResponse;
 
-        it(`--- Running tests against host: ${host} ---`, () => {}); // keeps in sync
+        it(`--- Running tests against host: ${host} ---`, () => {}); // keeps message in sync
 
         it('should get auth token', function () {
             return util.getAuthToken(host, user, password)
@@ -208,8 +192,8 @@ describe('Basic', function () {
                 .then(() => util.makeRequest(host, uri, options))
                 .then((data) => {
                     let match = false;
-                    data.items.forEach((item) => {
-                        if (item.name === ruleName) match = true;
+                    data.items.forEach((i) => {
+                        if (i.name === ruleName) match = true;
                     });
 
                     // check if rule already exists

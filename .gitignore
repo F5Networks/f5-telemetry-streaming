@@ -3,5 +3,6 @@ rpmbuild/
 dist/new_build/
 .vscode/
 _build/
-test/functional/logs/
 .nyc_output/
+test/functional/logs/
+test/functional/*_harness_file.json

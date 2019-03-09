@@ -86,18 +86,17 @@ trigger_deploy_job_13_1:
 deploy_bigip:
     stage: deploy
     tags:
-    - cm-official-docker-executor
+        - cm-official-docker-executor
     image: ${CICD_CONTAINER_DEPLOY}
     variables:
         PROJECT_NAME: ${REQ_PROJECT_NAME}
         PROJECT_DIR: /root/deploy-projects/${REQ_PROJECT_NAME}
         BIGIP_VERSION: ${REQ_BIGIP_VERSION}
         BIGIP_BUILD: ${REQ_BIGIP_BUILD}
-        BIGIP_BRANCH: ${REQ_BIGIP_BRANCH}
     artifacts:
-        name: ${CI_COMMIT_REF_NAME}_bigip_${BIGIP_BRANCH}.${BIGIP_VERSION}.${BIGIP_BUILD}_harness_info
+        name: ${CI_COMMIT_REF_NAME}_bigip.${BIGIP_VERSION}.${BIGIP_BUILD}_harness_info
         paths:
-        - ${CI_PROJECT_DIR}/harness_facts_flat.json
+            - ${CI_PROJECT_DIR}/harness_facts_flat.json
         when: on_success
     only:
         variables:
