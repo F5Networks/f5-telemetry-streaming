@@ -200,7 +200,7 @@ describe('System', function () {
                         destination: {
                             ports: [
                                 {
-                                    name: '6514'
+                                    name: String(constants.EVENT_LISTENER_PORT)
                                 }
                             ]
                         }
@@ -222,7 +222,7 @@ describe('System', function () {
         });
 
         it('should ensure event listener is up', function () {
-            const port = 6514;
+            const port = constants.EVENT_LISTENER_PORT;
 
             return new Promise((resolve, reject) => {
                 const client = net.createConnection({ host, port }, () => {

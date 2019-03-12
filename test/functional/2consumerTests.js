@@ -12,6 +12,7 @@
 /* eslint-disable global-require */
 
 const assert = require('assert');
+const net = require('net');
 const fs = require('fs');
 const util = require('../shared/util.js');
 const constants = require('../shared/constants.js');
@@ -35,7 +36,7 @@ describe('Consumer', function () {
     // read in example config
     const decl = JSON.parse(fs.readFileSync(constants.DECL.BASIC_EXAMPLE));
 
-    // for now this is a placeholder
+    // for now this is just a placeholder
     describe('Setup Host', function () {
         util.log(`Consumer Host: ${cAddr}`);
 
@@ -58,8 +59,59 @@ describe('Consumer', function () {
         const basicAuthHeader = `Basic ${Buffer.from(`${splunkUsername}:${splunkPassword}`).toString('base64')}`;
 
         const containerName = 'ts_splunk_consumer';
+        const testType = 'Splunk_Consumer_Test';
 
         let apiToken;
+
+        // helper function to query splunk for data
+        const query = (searchString) => {
+            const baseUri = '/services/search/jobs';
+            const outputMode = 'output_mode=json';
+
+            let uri = `${baseUri}?${outputMode}`;
+            const options = {
+                port: 8089,
+                headers: {
+                    Authorization: basicAuthHeader
+                }
+            };
+
+            let sid;
+
+            return util.makeRequest(cAddr, uri,
+                Object.assign(util.deepCopy(options), { method: 'POST', body: `search=${searchString}` }))
+                .then((data) => {
+                    sid = data.sid;
+                    assert.notStrictEqual(sid, undefined);
+
+                    // wait until job search is complete using dispatchState:'DONE'
+                    return new Promise((resolve, reject) => {
+                        const waitUntilDone = () => {
+                            uri = `${baseUri}/${sid}?${outputMode}`;
+                            return new Promise(resolveTimer => setTimeout(resolveTimer, 100))
+                                .then(() => util.makeRequest(cAddr, uri, options))
+                                .then((status) => {
+                                    const dispatchState = status.entry[0].content.dispatchState;
+                                    if (dispatchState === 'DONE') {
+                                        resolve(status);
+                                        return Promise.resolve(status);
+                                    }
+                                    return waitUntilDone();
+                                })
+                                .catch((e) => {
+                                    reject(e);
+                                });
+                        };
+                        waitUntilDone(); // start
+                    });
+                })
+                .then(() => {
+                    uri = `${baseUri}/${sid}/results/?${outputMode}`;
+                    return util.makeRequest(cAddr, uri, options);
+                })
+                .catch(err => Promise.reject(err));
+        };
+        // end helper function
 
         it('should pull container image', function () {
             // no need to check if image is already installed - if it is installed
@@ -185,78 +237,55 @@ describe('Consumer', function () {
         });
 
         it('should check for system poller data', function () {
-            const baseUri = '/services/search/jobs';
-            const outputMode = 'output_mode=json';
-
-            let uri = `${baseUri}?${outputMode}`;
-            const options = {
-                port: 8089,
-                headers: {
-                    Authorization: basicAuthHeader
-                }
-            };
-
-            let sid;
-
             // system poller is on an interval, so space out the retries
-            // TODO: determine mechanism to shorten the minimum interval for a
-            // system poller cycle to reduce the test time here
+            // NOTE: need to determine mechanism to shorten the minimum interval
+            // for a system poller cycle to reduce the test time here
             return new Promise(resolve => setTimeout(resolve, 5000))
-                .then(() => util.makeRequest(cAddr, uri,
-                    Object.assign(util.deepCopy(options), { method: 'POST', body: 'search=search source=f5.telemetry | head 1' })))
+                .then(() => query('search source=f5.telemetry | search "system.hostname"="*" | head 1'))
                 .then((data) => {
-                    sid = data.sid;
-                    assert.notStrictEqual(sid, undefined);
-
-                    // wait until job search is complete using dispatchState:'DONE'
-                    return new Promise((resolve, reject) => {
-                        const waitUntilDone = () => {
-                            uri = `${baseUri}/${sid}?${outputMode}`;
-                            return new Promise(resolveTimer => setTimeout(resolveTimer, 100))
-                                .then(() => util.makeRequest(cAddr, uri, options))
-                                .then((status) => {
-                                    const dispatchState = status.entry[0].content.dispatchState;
-                                    if (dispatchState === 'DONE') {
-                                        resolve(status);
-                                        return Promise.resolve(status);
-                                    }
-                                    return waitUntilDone();
-                                })
-                                .catch((e) => {
-                                    reject(e);
-                                });
-                        };
-                        waitUntilDone(); // start
-                    });
-                })
-                .then(() => {
-                    uri = `${baseUri}/${sid}/results/?${outputMode}`;
-                    return util.makeRequest(cAddr, uri, options);
-                })
-                .then((data) => {
-                    // check we have an event
+                    // check we have results
                     const results = data.results;
-                    assert.strictEqual(results.length > 0, true);
+                    assert.strictEqual(results.length > 0, true, 'No results');
 
                     // check that the event is what we expect
-                    // TODO: this should expand to use a shared lib to evalute event
+                    // NOTE: this could expand to use a shared lib to evalute event
                     // across all consumers, possibly using json schema validation
                     const result = JSON.parse(results[0]._raw);
-                    assert.notStrictEqual(result.system.hostname, undefined);
+                    assert.notStrictEqual(result.system.hostname, undefined, 'Data not correct');
                 })
                 .catch(err => Promise.reject(err));
         });
 
-        xit('should send event to TS event listener', function () {
-            return new Promise((resolve) => {
-                resolve();
+        it('should send event to TS event listener', function () {
+            const port = constants.EVENT_LISTENER_PORT;
+
+            return new Promise((resolve, reject) => {
+                const client = net.createConnection({ host: pAddr, port }, () => {
+                    client.write(`test="true",testType="${testType}"`);
+                    client.end();
+                });
+                client.on('end', () => {
+                    resolve();
+                });
+                client.on('error', (err) => {
+                    util.log(err);
+                    reject(err);
+                });
             });
         });
 
-        xit('should check for event listener data', function () {
-            return new Promise((resolve) => {
-                resolve();
-            });
+        it('should check for event listener data', function () {
+            return query(`search source=f5.telemetry | spath testType | search testType=${testType} | head 1`)
+                .then((data) => {
+                    // check we have results
+                    const results = data.results;
+                    assert.strictEqual(results.length > 0, true, 'No results');
+
+                    // check that the event is what we expect
+                    const result = JSON.parse(results[0]._raw);
+                    assert.strictEqual(result.testType, testType);
+                })
+                .catch(err => Promise.reject(err));
         });
 
         it('should remove container', function () {

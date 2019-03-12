@@ -11,9 +11,19 @@
 // Canonical format
 function defaultFormat(globalCtx) {
     const data = globalCtx.event.data;
+
+    // certain events may not have system object
+    let time = Date.parse(new Date()); let host = 'host.bigip.com';
+    try {
+        time = Date.parse(data.system.systemTimestamp);
+        host = data.system.hostname;
+    } catch (e) {
+        // continue
+    }
+
     return {
-        time: Date.parse(data.system.systemTimestamp),
-        host: data.system.hostname,
+        time,
+        host,
         source: 'f5.telemetry',
         sourcetype: 'f5:telemetry:json',
         event: data

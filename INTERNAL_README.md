@@ -12,6 +12,7 @@ Telemetry Streaming is an iControl LX extension to stream telemetry from BIG-IP(
 - Kafka
 - Elastic Search
 - Sumo Logic
+- Statsd
 
 ## Contents
 

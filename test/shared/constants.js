@@ -27,5 +27,6 @@ module.exports = {
             USER: 'CONSUMER_HOSTS_USER',
             PWD: 'CONSUMER_HOSTS_PWD'
         }
-    }
+    },
+    EVENT_LISTENER_PORT: 6514
 };
