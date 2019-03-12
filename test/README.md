@@ -29,7 +29,7 @@ Best Practices:
 
 ### Environment
 
-It is somewhat implied that running the functional tests requires a runtime (BIG-IP, consumer, etc.) to deploy the iLX extension, typically a BIG-IP.  The current methodology is to deploy and subsequently teardown the runtime every time functional tests are run, with the understanding that functional tests will be run less frequently than unit tests.
+It is somewhat implied that running the functional tests requires a runtime (BIG-IP, container, etc.) to deploy the iLX extension, consumers, etc.  The current methodology is to deploy and subsequently teardown the runtime every time functional tests are run, with the understanding that functional tests will be run less frequently than unit tests.
 
 The deploy/teardown instance steps are handled using an internal tool (cicd-bigip-deploy) initially created for an unrelated project by one of the developers of this project, see the **trigger_deploy_job** in the ```.gitlab-ci.yml``` file for additional comments.  Essentially the flow looks like the following in the pipeline:
 
