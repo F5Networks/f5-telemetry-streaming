@@ -3,7 +3,7 @@
 Event Listener
 --------------
 
-Telemetry Streaming collects event logs from all BIG-IP sources, including LTM, ASM, AFM, and APM.
+The Telemetry Streaming Event Listener collects event logs from all BIG-IP sources, including LTM, ASM, AFM, and APM.
 
 The Request Logging profile gives you the ability to configure data within a log file for HTTP requests and responses, in accordance with specified parameters.
 
