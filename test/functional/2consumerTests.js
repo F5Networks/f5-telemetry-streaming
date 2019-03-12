@@ -17,16 +17,12 @@ const util = require('../shared/util.js');
 const constants = require('../shared/constants.js');
 
 const baseILXUri = '/mgmt/shared/telemetry'; // eslint-disable-line
-const packageHost = util.getHosts('TEST_HARNESS_FILE')[0]; // only *need* one
-const consumerHost = util.getHosts('CONSUMER_HARNESS_FILE')[0]; // only expect one
+
+const packageHost = util.getHosts('BIGIP')[0]; // only *need* one
+const consumerHost = util.getHosts('CONSUMER')[0]; // only expect one
 
 // purpose: consumer tests
 describe('Consumer', function () {
-    // set timeouts/retries for test suite
-    this.timeout(1000 * 60 * 5); // timeout for each test
-    this.slow(1000 * 60 * 3); // increase limit before test is marked as "slow"
-    this.retries(20);
-
     const pAddr = packageHost.ip;
     const pUsername = packageHost.username;
     const pPassword = packageHost.password;
@@ -41,6 +37,8 @@ describe('Consumer', function () {
 
     // for now this is a placeholder
     describe('Setup Host', function () {
+        util.log(`Consumer Host: ${cAddr}`);
+
         it('should set root password', function () {
             return new Promise((resolve) => {
                 resolve();
@@ -56,7 +54,7 @@ describe('Consumer', function () {
 
     describe('Consumer: Splunk', function () {
         const splunkUsername = 'admin';
-        const splunkPassword = cPassword; // TODO: should generate one instead
+        const splunkPassword = cPassword; // might want to generate one instead
         const basicAuthHeader = `Basic ${Buffer.from(`${splunkUsername}:${splunkPassword}`).toString('base64')}`;
 
         const containerName = 'ts_splunk_consumer';
@@ -210,8 +208,26 @@ describe('Consumer', function () {
                     sid = data.sid;
                     assert.notStrictEqual(sid, undefined);
 
-                    // TODO: check search job status here instead
-                    return new Promise(resolve => setTimeout(resolve, 3000));
+                    // wait until job search is complete using dispatchState:'DONE'
+                    return new Promise((resolve, reject) => {
+                        const waitUntilDone = () => {
+                            uri = `${baseUri}/${sid}?${outputMode}`;
+                            return new Promise(resolveTimer => setTimeout(resolveTimer, 100))
+                                .then(() => util.makeRequest(cAddr, uri, options))
+                                .then((status) => {
+                                    const dispatchState = status.entry[0].content.dispatchState;
+                                    if (dispatchState === 'DONE') {
+                                        resolve(status);
+                                        return Promise.resolve(status);
+                                    }
+                                    return waitUntilDone();
+                                })
+                                .catch((e) => {
+                                    reject(e);
+                                });
+                        };
+                        waitUntilDone(); // start
+                    });
                 })
                 .then(() => {
                     uri = `${baseUri}/${sid}/results/?${outputMode}`;
@@ -223,7 +239,7 @@ describe('Consumer', function () {
                     assert.strictEqual(results.length > 0, true);
 
                     // check that the event is what we expect
-                    // note: this could expand to use a shared lib to evalute event
+                    // TODO: this should expand to use a shared lib to evalute event
                     // across all consumers, possibly using json schema validation
                     const result = JSON.parse(results[0]._raw);
                     assert.notStrictEqual(result.system.hostname, undefined);

@@ -13,15 +13,10 @@
 
 const util = require('../shared/util.js');
 
-const hosts = util.getHosts('TEST_HARNESS_FILE');
+const hosts = util.getHosts('BIGIP');
 
 // purpose: system tests
 describe('Cleanup', function () {
-    // set timeouts/retries for test suite
-    this.timeout(1000 * 60 * 5); // timeout for each test
-    this.slow(1000 * 60 * 3); // increase limit before test is marked as "slow"
-    this.retries(20);
-
     // get package details
     const packageDetails = util.getPackageDetails();
     const packageFile = packageDetails.name;

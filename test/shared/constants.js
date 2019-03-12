@@ -13,5 +13,19 @@ module.exports = {
         BASIC_EXAMPLE: `${__dirname}/basic.json`,
         CONSUMER_NAME: 'My_Consumer',
         POLLER_NAME: 'My_Poller'
+    },
+    ENV_VARS: {
+        TEST_HARNESS: {
+            FILE: 'TEST_HARNESS_FILE',
+            IP: 'TEST_HOSTS',
+            USER: 'TEST_HOSTS_USER',
+            PWD: 'TEST_HOSTS_PWD'
+        },
+        CONSUMER_HARNESS: {
+            FILE: 'CONSUMER_HARNESS_FILE',
+            IP: 'CONSUMER_HOSTS',
+            USER: 'CONSUMER_HOSTS_USER',
+            PWD: 'CONSUMER_HOSTS_PWD'
+        }
     }
 };

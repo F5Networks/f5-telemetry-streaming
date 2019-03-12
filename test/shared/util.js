@@ -10,6 +10,7 @@ const fs = require('fs');
 const request = require('request');
 const SshClient = require('ssh2').Client; // eslint-disable-line import/no-extraneous-dependencies
 const icrdk = require('icrdk'); // eslint-disable-line import/no-extraneous-dependencies
+const constants = require('./constants.js');
 
 const DEFAULT_PORT = 443;
 
@@ -270,18 +271,25 @@ module.exports = {
     },
 
     /**
-     * Get host(s) - provided via two options
-     * - *harnessFileEnv* - path to file: [ { admin_ip: x.x.x.x, admin_username: admin, admin_password: admin } ]
-     * - VIO_HOSTS (1+) + VIO_HOST_USER + VIO_HOST_PWD
+     * Get host(s) - info provided in one of two ways
+     * - *Harness File* - file: [ { admin_ip: x.x.x.x, admin_username: admin, admin_password: admin } ]
+     * - *Environment Vars* - constants contains var for IP (1+), USER, PWD
      *
-     * @param {String} harnessFileEnv - Name of the environment variable containing the file
+     * @param {String} harnessType - type of harness to query for: BIGIP|CONSUMER
      *
      * @returns {Object} Returns [ { ip: x.x.x.x, username: admin, password: admin } ]
      */
-    getHosts(harnessFileEnv) {
+    getHosts(harnessType) {
         let hosts;
+        let envVars;
 
-        const testHarnessFile = process.env[harnessFileEnv];
+        if (harnessType === 'BIGIP') {
+            envVars = constants.ENV_VARS.TEST_HARNESS;
+        } else if (harnessType === 'CONSUMER') {
+            envVars = constants.ENV_VARS.CONSUMER_HARNESS;
+        }
+
+        const testHarnessFile = envVars.FILE ? process.env[envVars.FILE] : null;
         if (testHarnessFile && fs.existsSync(testHarnessFile)) {
             // eslint-disable-next-line import/no-dynamic-require, global-require
             hosts = require(testHarnessFile).map(item => ({
@@ -289,12 +297,12 @@ module.exports = {
                 username: item.admin_username,
                 password: item.admin_password
             }));
-        } else if (process.env.VIO_HOSTS) {
+        } else if (envVars && envVars.IP && process.env[envVars.IP]) {
             // straight up environment variables - could be 1+ hosts: x.x.x.x,x.x.x.y
-            hosts = process.env.VIO_HOSTS.split(',').map(host => ({
+            hosts = process.env[envVars.IP].split(',').map(host => ({
                 ip: host,
-                username: process.env.VIO_HOST_USER,
-                password: process.env.VIO_HOST_PWD
+                username: process.env[envVars.USER],
+                password: process.env[envVars.PWD]
             }));
             // end environment variables
         } else {
