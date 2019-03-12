@@ -15,6 +15,7 @@ const assert = require('assert');
 const fs = require('fs');
 const net = require('net');
 const util = require('../shared/util.js');
+const constants = require('../shared/constants.js');
 
 const baseILXUri = '/mgmt/shared/telemetry';
 const hosts = util.getHosts('TEST_HARNESS_FILE');
@@ -27,27 +28,14 @@ describe('System', function () {
     this.retries(20);
 
     // read in example config
-    const basicExample = `${__dirname}/basic.json`;
-    const basicConfig = fs.readFileSync(basicExample).toString();
-    const pollerName = 'My_Poller';
-    const consumerName = 'My_Consumer';
+    const decl = fs.readFileSync(constants.DECL.BASIC_EXAMPLE).toString();
+    const pollerName = constants.DECL.POLLER_NAME;
+    const consumerName = constants.DECL.CONSUMER_NAME;
 
-    // default to new build directory if it exists, otherwise use dist directory
-    const existingBuildDir = `${__dirname}/../../dist`;
-    const newBuildDir = `${existingBuildDir}/new_build`;
-    const distDir = fs.existsSync(newBuildDir) ? newBuildDir : existingBuildDir;
-
-    const distFiles = fs.readdirSync(distDir);
-    const packageFiles = distFiles.filter(f => f.includes('.rpm') && !f.includes('.sha256'));
-
-    // get latest rpm file (by timestamp since epoch)
-    // note: this might not work if the artifact resets the timestamps
-    const latest = { file: null, time: 0 };
-    packageFiles.forEach((f) => {
-        const fStats = fs.lstatSync(`${distDir}/${f}`);
-        if (fStats.birthtimeMs >= latest.time) latest.file = f; latest.time = fStats.birthtimeMs;
-    });
-    const packageFile = latest.file;
+    // get package details
+    const packageDetails = util.getPackageDetails();
+    const packageFile = packageDetails.name;
+    const packagePath = packageDetails.path;
     util.log(`Package File: ${packageFile}`);
 
     // create logs directory - used later
@@ -78,7 +66,7 @@ describe('System', function () {
         assert.strictEqual(passphrase.cipherText.startsWith('$M'), true);
     }
 
-    // run tests for each host
+    // account for 1+ hosts
     hosts.forEach(function (item) {
         const host = item.ip;
         const user = item.username;
@@ -97,7 +85,7 @@ describe('System', function () {
         });
 
         it('should install package', function () {
-            const fullPath = `${distDir}/${packageFile}`;
+            const fullPath = `${packagePath}/${packageFile}`;
             return util.installPackage(host, authToken, fullPath)
                 .then(() => {})
                 .catch(err => Promise.reject(err));
@@ -122,7 +110,7 @@ describe('System', function () {
             const postOptions = {
                 method: 'POST',
                 headers: options.headers,
-                body: basicConfig
+                body: decl
             };
 
             return util.makeRequest(host, uri, postOptions)
@@ -140,7 +128,7 @@ describe('System', function () {
             const postOptions = {
                 method: 'POST',
                 headers: options.headers,
-                body: basicConfig
+                body: decl
             };
 
             return util.makeRequest(host, uri, postOptions)
@@ -275,15 +263,6 @@ describe('System', function () {
                     util.log(`Saving restnoded log to ${file}`);
                     fs.writeFileSync(file, data.commandResult);
                 })
-                .catch(err => Promise.reject(err));
-        });
-
-        it('should uninstall package', function () {
-            // package name should be the file name without the .rpm at the end
-            const installedPackage = `${packageFile.replace('.rpm', '')}`;
-
-            return util.uninstallPackage(host, authToken, installedPackage)
-                .then(() => {})
                 .catch(err => Promise.reject(err));
         });
     });

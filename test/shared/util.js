@@ -45,6 +45,43 @@ module.exports = {
     },
 
     /**
+     * Deep copy
+     *
+     * @param {Object} obj - data to deep copy
+     *
+     * @returns {Object} Copied object
+     */
+    deepCopy(obj) {
+        return JSON.parse(JSON.stringify(obj));
+    },
+
+    /**
+     * Get package details
+     *
+     * @returns {Object} { name: 'foo.rpm', path: '/tmp/foo.rpm' }
+     */
+    getPackageDetails() {
+        // default to new build directory if it exists, otherwise use dist directory
+        const existingBuildDir = `${__dirname}/../../dist`;
+        const newBuildDir = `${existingBuildDir}/new_build`;
+        const dir = fs.existsSync(newBuildDir) ? newBuildDir : existingBuildDir;
+
+        const distFiles = fs.readdirSync(dir);
+        const packageFiles = distFiles.filter(f => f.includes('.rpm') && !f.includes('.sha256'));
+
+        // get latest rpm file (by timestamp since epoch)
+        // note: this might not work if the artifact resets the timestamps
+        const latest = { file: null, time: 0 };
+        packageFiles.forEach((f) => {
+            const fStats = fs.lstatSync(`${dir}/${f}`);
+            if (fStats.birthtimeMs >= latest.time) latest.file = f; latest.time = fStats.birthtimeMs;
+        });
+        const packageFile = latest.file;
+
+        return { name: packageFile, path: dir };
+    },
+
+    /**
      * Perform HTTP request
      *
      * @param {String} host              - HTTP host
@@ -60,7 +97,7 @@ module.exports = {
     makeRequest(host, uri, options) {
         options = options || {};
 
-        // handle query string values, if any, according to lib
+        // handle query string values - should probably use url.parse here
         const checkForQS = uri.split('?');
         const qs = {};
         if (checkForQS.length > 1) {
@@ -86,7 +123,7 @@ module.exports = {
             request(requestOptions, (err, res, body) => {
                 if (err) {
                     reject(new Error(`HTTP error: ${err}`));
-                } else if (res.statusCode === 200) {
+                } else if (res.statusCode >= 200 && res.statusCode <= 299) {
                     try {
                         resolve(JSON.parse(body));
                     } catch (e) {
