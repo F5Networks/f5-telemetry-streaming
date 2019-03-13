@@ -2,7 +2,7 @@
     "$id": "consumer_schema.json",
     "$async": true,
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Telemetry streaming consumer schema",
+    "title": "Telemetry Streaming Consumer schema",
     "description": "",
     "type": "object",
     "definitions": {
@@ -173,7 +173,7 @@
                 "properties": {
                     "class": {
                         "title": "Class",
-                        "description": "Telemetry streaming consumer class",
+                        "description": "Telemetry Streaming Consumer class",
                         "type": "string",
                         "enum": [ "Telemetry_Consumer" ]
                     },

@@ -27,33 +27,42 @@ MockRestOperation.prototype.complete = function () { };
 
 
 describe('Config', () => {
+    let persistentStorage;
     let config;
     let util;
+    let deviceUtil;
 
     let configValidator;
     let formatConfig;
 
     const baseState = {
-        config: {
-            raw: {},
-            parsed: {}
+        _data_: {
+            config: {
+                raw: {},
+                parsed: {}
+            }
         }
     };
 
     before(() => {
+        const psModule = require('../src/nodejs/persistentStorage.js');
         config = require('../src/nodejs/config.js');
         util = require('../src/nodejs/util.js');
-        config.restWorker = {
+        deviceUtil = require('../src/nodejs/deviceUtil.js');
+
+        const restWorker = {
             loadState: (cb) => { cb(null, baseState); },
             saveState: (first, state, cb) => { cb(null); }
         };
-        config._loadState = () => Promise.resolve(baseState);
+        persistentStorage = psModule.persistentStorage;
+        persistentStorage.storage = new psModule.RestStorage(restWorker);
+
         configValidator = config.validator;
 
         formatConfig = util.formatConfig;
     });
     beforeEach(() => {
-        config._state = JSON.parse(JSON.stringify(baseState));
+        persistentStorage.storage._cache = JSON.parse(JSON.stringify(baseState));
     });
     afterEach(() => {
         config.validator = configValidator;
@@ -83,7 +92,10 @@ describe('Config', () => {
             })
             .catch((err) => {
                 if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
-                return Promise.resolve(); // resolve, expected an error
+                if (/Validator is not available/.test(err)) return Promise.resolve();
+
+                assert.fail(err);
+                return Promise.reject(err);
             });
     });
 
@@ -109,11 +121,11 @@ describe('Config', () => {
     });
 
     it('should load state', () => {
-        util.decryptAllSecrets = () => Promise.resolve({});
+        deviceUtil.decryptAllSecrets = () => Promise.resolve({});
 
-        return config.loadState()
+        return config.loadConfig()
             .then((data) => {
-                assert.deepEqual(data, baseState);
+                assert.deepEqual(data, baseState._data_.config);
             })
             .catch(err => Promise.reject(err));
     });
@@ -209,5 +221,69 @@ describe('Config', () => {
                 return Promise.resolve();
             })
             .catch(err => Promise.reject(err));
+    });
+
+    it('should fail to save config', () => {
+        const errMsg = 'saveStateError';
+        persistentStorage.set = () => Promise.reject(new Error(errMsg));
+
+        return config.saveConfig()
+            .then(() => {
+                assert.fail('Should throw an error');
+            })
+            .catch((err) => {
+                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
+                if (RegExp(errMsg).test(err)) return Promise.resolve();
+                assert.fail(err);
+                return Promise.reject(err);
+            });
+    });
+
+    it('should fail to load config', () => {
+        const errMsg = 'loadStateError';
+        persistentStorage.get = () => Promise.reject(new Error(errMsg));
+
+        return config.loadConfig()
+            .then(() => {
+                assert.fail('Should throw an error');
+            })
+            .catch((err) => {
+                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
+                if (RegExp(errMsg).test(err)) return Promise.resolve();
+                assert.fail(err);
+                return Promise.reject(err);
+            });
+    });
+
+    it('should fail to set config when invalid config provided', () => config.setConfig({})
+        .then(() => {
+            assert.fail('Should throw an error');
+        })
+        .catch((err) => {
+            if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
+            if (/Missing parsed config/.test(err)) return Promise.resolve();
+            assert.fail(err);
+            return Promise.reject(err);
+        }));
+
+    it('should able to get declaration by name', () => {
+        const obj = {
+            class: 'Telemetry',
+            My_System: {
+                class: 'Telemetry_System',
+                systemPoller: 'My_Poller'
+            },
+            My_Poller: {
+                class: 'Telemetry_System_Poller'
+            }
+        };
+        return config.validate(obj)
+            .then((validated) => {
+                validated = util.formatConfig(validated);
+                const poller = util.getDeclarationByName(
+                    validated, constants.SYSTEM_POLLER_CLASS_NAME, 'My_Poller'
+                );
+                assert.strictEqual(poller.class, constants.SYSTEM_POLLER_CLASS_NAME);
+            });
     });
 });

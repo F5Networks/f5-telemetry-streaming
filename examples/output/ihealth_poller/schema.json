@@ -1,0 +1,107 @@
+{
+    "$id": "schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "",
+    "description": "",
+    "type": "object",
+    "properties": {
+        "system": {
+            "type": "object",
+            "properties": {
+                "hostname": {
+                    "type": "string"
+                },
+                "ihealthLink": {
+                    "type": "string"
+                },
+                "qkviewNumber": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false,
+            "required": []
+        },
+        "diagnostics": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "importance": {
+                        "type": "string"
+                    },
+                    "action": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "cveIds": {
+                        "type": ["array", "null"]
+                    },
+                    "header": {
+                        "type": "string"
+                    },
+                    "summary": {
+                        "type": "string"
+                    },
+                    "solution" : {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "id": {
+                                    "type": "string"
+                                },
+                                "summary": {
+                                    "value": "string"
+                                }
+                            }
+                        }
+                    },
+                    "version": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "major": {
+                                    "type": "integer"
+                                },
+                                "minor": {
+                                    "type": "integer"
+                                },
+                                "maintenance": {
+                                    "type": "integer"
+                                },
+                                "point": {
+                                    "type": "integer"
+                                },
+                                "fix": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "telemetryServiceInfo": {
+            "type": "object",
+            "properties": {
+                "cycleStart": {
+                    "type": "string"
+                },
+                "cycleEnd": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false,
+            "required": []
+        },
+        "telemetryEventCategory": {
+            "type": "string",
+            "enum": [ "ihealthInfo" ]
+        }
+    },
+    "additionalProperties": false,
+    "$comment": "The 'required' keyword will be enumerated with all 'properties' keys at validation runtime, including nested properties",
+    "required": []
+}

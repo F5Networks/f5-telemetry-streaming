@@ -226,6 +226,22 @@
     "events": {
         "classifyByKeys": [ "virtual_name", "policy_name", "Access_Profile", "context_name" ]
     },
+    "ihealth": {
+        "filterKeys": { "exclude": [ "name", "output", "match" ] },
+        "renameKeys": {
+            "patterns": {
+                "h_importance": { "constant": "importance" },
+                "h_action": { "constant": "action" },
+                "h_name": { "constant": "name" },
+                "h_cve_ids": { "constant": "cveIds" },
+                "h_header": { "constant": "header" },
+                "h_summary": { "constant": "summary" }
+            },
+            "options": {
+                "exactMatch": true
+            }
+        }
+    },
     "context": {
         "HOSTNAME": {
             "key": "/mgmt/tm/sys/global-settings::hostname"

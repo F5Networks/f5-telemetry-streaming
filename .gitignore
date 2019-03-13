@@ -5,3 +5,4 @@ dist/new_build/
 _build/
 test/functional/logs/
 .nyc_output/
+**/.DS_Store
