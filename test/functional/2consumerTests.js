@@ -259,6 +259,7 @@ describe('Consumer', function () {
         it('should send event to TS event listener', function () {
             const port = constants.EVENT_LISTENER_PORT;
 
+            // TODO: make this a util function to be used across consumers
             return new Promise((resolve, reject) => {
                 const client = net.createConnection({ host: pAddr, port }, () => {
                     client.write(`test="true",testType="${testType}"`);

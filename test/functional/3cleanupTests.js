@@ -15,7 +15,7 @@ const util = require('../shared/util.js');
 
 const hosts = util.getHosts('BIGIP');
 
-// purpose: system tests
+// purpose: cleanup tests
 describe('Cleanup', function () {
     // get package details
     const packageDetails = util.getPackageDetails();
