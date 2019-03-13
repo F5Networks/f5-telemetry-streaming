@@ -16,26 +16,40 @@ const logger = require('../logger.js');
 const util = require('../util.js');
 
 const baseSchema = require('../schema/base_schema.json');
+const persistentStorage = require('../persistentStorage.js');
 const configWorker = require('../config.js');
 const eventListener = require('../eventListener.js'); // eslint-disable-line no-unused-vars
 const consumers = require('../consumers.js'); // eslint-disable-line no-unused-vars
 const systemPoller = require('../systemPoller.js');
+const iHealthPoller = require('../ihealth.js'); // eslint-disable-line no-unused-vars
 
+/** @module restWorkers */
 
 /**
  * Simple router to route incomming requests to REST API.
+ *
+ * @class
+ *
+ * @property {Object} routes - mapping /path/to/resource to handler
  */
 function SimpleRouter() {
     this.routes = {};
 }
 
 /**
+ * This callback is displayed as part of the Requester class.
+ *
+ * @callback SimpleRouter~requestCallback
+ * @param {Object} restOperation - request object
+ */
+
+/**
  * Register request habdler.
  *
  * @public
- * @param {String | String[]} method  - HTTP method (POST, GET, etc.), could be array
- * @param {String} endpointURI        - URI path, string should be alphanumeric only
- * @param {Function(Object)} callback - request handler
+ * @param {String | String[]} method              - HTTP method (POST, GET, etc.), could be array
+ * @param {String} endpointURI                    - URI path, string should be alphanumeric only
+ * @param {SimpleRouter~requestCallback} callback - request handler
  */
 SimpleRouter.prototype.register = function (method, endpointURI, callback) {
     if (this.routes[endpointURI] === undefined) {
@@ -48,6 +62,13 @@ SimpleRouter.prototype.register = function (method, endpointURI, callback) {
     } else {
         this.routes[endpointURI][method] = callback;
     }
+};
+
+/**
+ * Remove all registered handlers
+ */
+SimpleRouter.prototype.removeAllHandlers = function () {
+    this.routes = {};
 };
 
 /**
@@ -100,6 +121,12 @@ SimpleRouter.prototype._processRestOperation = function (restOperation) {
 };
 
 
+/**
+ * Rest Worker class processes user's requests and responsible for
+ * application state/stop. See more details on F5 DevCentral.
+ *
+ * @class
+ */
 function RestWorker() {
     this.WORKER_URI_PATH = 'shared/telemetry';
     this.isPassThrough = true;
@@ -160,23 +187,21 @@ RestWorker.prototype._initializeApplication = function (success, failure) {
 
     // register REST endpoints
     this.router = new SimpleRouter();
+    this.registerRestEndpoints(false);
 
-    this.router.register('GET', 'info',
-        restOperation => this.processInfoRequest(restOperation));
-
-    this.router.register(['GET', 'POST'], 'declare',
-        restOperation => configWorker.processClientRequest(restOperation));
-
-    this.router.register('GET', 'systempoller',
-        restOperation => systemPoller.processClientRequest(restOperation));
+    // config worker change event
+    configWorker.on('change', config => this.configChangeHandler(config));
 
     // try to load pre-existing configuration
-    configWorker.restWorker = this;
-    configWorker.loadState()
+    const ps = persistentStorage.persistentStorage;
+    // only RestStorage is supported for now
+    ps.storage = new persistentStorage.RestStorage(this);
+    ps.load()
         .then((loadedState) => {
-            logger.debug(`loaded state ${util.stringify(loadedState)}`);
-            success();
+            logger.debug(`Loaded state ${util.stringify(loadedState)}`);
         })
+        .then(() => configWorker.loadConfig())
+        .then(() => success())
         .catch((err) => {
             logger.exception('Startup Failed', err);
             failure();
@@ -235,6 +260,41 @@ RestWorker.prototype.processInfoRequest = function (restOperation) {
         schemaCurrent: baseSchema.properties.schemaVersion.enum[0],
         schemaMinimum: baseSchema.properties.schemaVersion.enum.reverse()[0]
     });
+};
+
+/**
+ * Register REST API endpoint handlers
+ */
+RestWorker.prototype.registerRestEndpoints = function (enableDebug) {
+    this.router.register('GET', 'info',
+        restOperation => this.processInfoRequest(restOperation));
+
+    this.router.register(['GET', 'POST'], 'declare',
+        restOperation => configWorker.processClientRequest(restOperation));
+
+    if (enableDebug) {
+        this.router.register('GET', 'systempoller',
+            restOperation => systemPoller.processClientRequest(restOperation));
+
+        this.router.register('GET', 'ihealthpoller',
+            restOperation => iHealthPoller.processClientRequest(restOperation));
+    }
+};
+
+/**
+ * Handle for config changes
+ */
+RestWorker.prototype.configChangeHandler = function (config) {
+    logger.debug('configWorker change event in restWorker'); // helpful debug
+
+    const settings = util.getDeclarationByName(
+        config, constants.CONTROLS_CLASS_NAME, constants.CONTROLS_PROPERTY_NAME
+    );
+    if (util.isObjectEmpty(settings)) {
+        return;
+    }
+    this.router.removeAllHandlers();
+    this.registerRestEndpoints(settings.debug);
 };
 
 module.exports = RestWorker;

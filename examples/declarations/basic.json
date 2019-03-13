@@ -1,12 +1,13 @@
 {
     "class": "Telemetry",
+    "My_System": {
+        "class": "Telemetry_System"
+    },
     "My_Poller": {
-        "class": "Telemetry_System_Poller",
-        "interval": 60
+        "class": "Telemetry_System_Poller"
     },
     "My_Listener": {
-        "class": "Telemetry_Listener",
-        "port": 6514
+        "class": "Telemetry_Listener"
     },
     "My_Consumer": {
         "class": "Telemetry_Consumer",
@@ -16,6 +17,19 @@
         "port": "8088",
         "passphrase": {
             "cipherText": "apikey"
+        }
+    },
+    "My_iHealth": {
+        "class": "Telemetry_iHealth_Poller",
+        "username": "username",
+        "passphrase": {
+            "cipherText": "passphrase"
+        },
+        "interval": {
+            "timeWindow": {
+                "start": "00:00",
+                "end": "06:00"
+            }
         }
     }
 }

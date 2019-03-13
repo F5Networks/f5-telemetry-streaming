@@ -9,8 +9,10 @@
 'use strict';
 
 const Ajv = require('ajv');
+const fs = require('fs');
 const constants = require('./constants.js');
 const util = require('./util.js');
+const deviceUtil = require('./deviceUtil.js');
 
 const textNamedKey = 'plainText';
 const base64NamedKey = 'plainBase64';
@@ -211,14 +213,14 @@ const keywords = {
                         data.protected = textNamedKey;
                     }
 
-                    return util.getDeviceType()
+                    return deviceUtil.getDeviceType()
                         .then((deviceType) => {
                             // check if on a BIG-IP and fail validation if not
                             if (deviceType !== constants.BIG_IP_DEVICE_TYPE) {
                                 throw new Error(`Specifying '${constants.PASSPHRASE_CIPHER_TEXT}' requires running on ${constants.BIG_IP_DEVICE_TYPE}`);
                             }
                             // encrypt secret
-                            return util.encryptSecret(data[constants.PASSPHRASE_CIPHER_TEXT]);
+                            return deviceUtil.encryptSecret(data[constants.PASSPHRASE_CIPHER_TEXT]);
                         })
                         .then((secret) => {
                             // update text field with secret - should we base64 encode?
@@ -269,6 +271,110 @@ const keywords = {
                         throw new Ajv.ValidationError(ajvErrors);
                     });
             };
+        }
+    },
+    timeWindowMinSize: {
+        type: 'object',
+        errors: true,
+        modifying: true,
+        async: true,
+        metaSchema: {
+            type: 'integer',
+            minimum: 1,
+            maximum: 1439,
+            description: 'Time window size in minutes. From 1m to 23h 59m.'
+        },
+        // eslint-disable-next-line no-unused-vars
+        compile(schema, parentSchema) {
+            // eslint-disable-next-line no-unused-vars
+            return function (data, dataPath, parentData, propertyName, rootData) {
+                // start/end required - schema should validate this
+                if (!(data.start && data.end)) return Promise.resolve(true);
+
+                function timeStrToMinutes(timeStr) {
+                    const parts = timeStr.split(':');
+                    const hour = parts[0];
+                    const minute = parts[1];
+                    return parseInt(hour, 10) * 60 + parseInt(minute, 10);
+                }
+
+                const minWindowSize = schema;
+                // at that point we rely on schema validation - strings should be valid
+                const timeStart = timeStrToMinutes(data.start);
+                let timeEnd = timeStrToMinutes(data.end);
+                // if timeEnd < timeStart that move clock forward for 1 day - 1440 minutes.
+                timeEnd = timeStart > timeEnd ? timeEnd + 1440 : timeEnd;
+
+                if (timeStart === timeEnd || (timeEnd - timeStart < minWindowSize)) {
+                    return Promise.reject(new Ajv.ValidationError([{
+                        keyword: 'time',
+                        message: `specify window with size of a ${minWindowSize} minutes or more`,
+                        params: {}
+                    }]));
+                }
+                return Promise.resolve(true);
+            };
+        }
+    },
+    declarationClass: {
+        type: 'string',
+        errors: true,
+        modifying: true,
+        async: true,
+        metaSchema: {
+            type: 'string',
+            description: 'Check if declaration with provided name and class exists'
+        },
+        // eslint-disable-next-line no-unused-vars
+        compile(schema, parentSchema) {
+            // eslint-disable-next-line no-unused-vars
+            return function (data, dataPath, parentData, propertyName, rootData) {
+                const ajvErrors = [];
+                // string passed
+                if (typeof data === 'string') {
+                    const declarationClass = schema;
+                    if (!(rootData[data] && rootData[data].class === declarationClass)) {
+                        ajvErrors.push({
+                            keyword: 'ihealth',
+                            message: `declaration with name "${data}" and class "${declarationClass}" doesn't exist`,
+                            params: {}
+                        });
+                    }
+                }
+                if (ajvErrors.length) {
+                    return Promise.reject(new Ajv.ValidationError(ajvErrors));
+                }
+                return Promise.resolve(true);
+            };
+        }
+    },
+    pathExists: {
+        type: 'string',
+        errors: true,
+        modifying: true,
+        async: true,
+        metaSchema: {
+            type: 'boolean',
+            description: 'Check that path exists'
+        },
+        // eslint-disable-next-line no-unused-vars
+        validate(schema, data, parentSchema, dataPath, parentData, propertyName, rootData) {
+            // looks like instance is configured as default
+            if (data) {
+                return new Promise((resolve, reject) => {
+                    fs.access(data, (fs.constants || fs).R_OK, (accessErr) => {
+                        if (accessErr) {
+                            reject(accessErr);
+                        } else {
+                            resolve(true);
+                        }
+                    });
+                })
+                    .catch(err => Promise.reject(new Ajv.ValidationError([
+                        { keyword: propertyName, message: `Unable to access path "${data}": ${err}`, params: {} }
+                    ])));
+            }
+            return Promise.resolve(true);
         }
     },
     f5expand: {

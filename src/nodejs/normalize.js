@@ -121,7 +121,7 @@ module.exports = {
         let ret = data;
 
         keys.forEach((i) => {
-            if (typeof ret === 'object' && i in ret) {
+            if (ret && typeof ret === 'object' && i in ret) {
                 ret = ret[i];
             } else {
                 // do not throw error as some keys do not exist if not configured with a value on BIG-IP
@@ -152,7 +152,7 @@ module.exports = {
 
         // .entries evaluates to true if data is an array
         const entries = 'entries';
-        if (data[entries] && !Array.isArray(data)) {
+        if (data && data[entries] && !Array.isArray(data)) {
             // entry keys may look like https://localhost/mgmt/tm/sys/tmm-info/0.0/stats, we should simplify this somewhat
             const simplifyKey = key => key.replace('https://localhost/', '').replace('mgmt/tm/', '');
 
@@ -174,7 +174,7 @@ module.exports = {
         }
 
         // simply include and then recurse
-        if (typeof data === 'object') {
+        if (data && typeof data === 'object') {
             if (Array.isArray(data)) {
                 // convert array to map if required, otherwise just include
                 const catm = options.convertArrayToMap;
@@ -240,7 +240,7 @@ module.exports = {
             return thisData;
         };
 
-        if (typeof data === 'object' && !Array.isArray(data)) {
+        if (data && typeof data === 'object' && !Array.isArray(data)) {
             // if we are classifying by keys (already defined) assume we are processing a flat
             // data structure
             if (options.classifyByKeys) {
@@ -254,7 +254,7 @@ module.exports = {
                 Object.keys(data).forEach((k) => {
                     if (skip.length && skip.indexOf(k) !== -1) return; // skip
                     if (tagKeys.length && k.indexOf(tagKeys) !== -1) return; // already exists, skip
-                    if (typeof data[k] === 'object') {
+                    if (data[k] && typeof data[k] === 'object') {
                         data[k] = processTags(data[k], k);
                         data[k] = this._addKeysByTag(data[k], tags, def, options); // may require further introspection
                     }
@@ -296,6 +296,51 @@ module.exports = {
             ret = this._formatTimestamps(ret, nT);
         }
         return ret;
+    },
+
+    /**
+     * Normalize iHealth data
+     *
+     * @param {Object} data - data to normalize
+     *
+     * @param {Object} options                       - options
+     * @param {Object} [options.renameKeysByPattern] - contains map or array of keys to rename by pattern
+     *                                                 object example: { patterns: {}, options: {}}
+     * @param {Array}  [options.filterByKeys]        - array containg map of keys to filter data further
+     *                                                 example: { exclude: [], include: []}
+     *
+     * @returns {Object} Returns normalized event
+     */
+    ihealth(data, options) {
+        options = options || {};
+
+        const normalized = {
+            system: {
+                hostname: data.system_information.hostname
+            },
+            diagnostics: []
+        };
+        const diagnostics = ((data.diagnostics || {}).diagnostic || []);
+
+        diagnostics.forEach((diagnostic) => {
+            let ret = options.filterByKeys ? normalizeUtil._filterDataByKeys(diagnostic, options.filterByKeys)
+                : diagnostic;
+
+            ret = options.renameKeys
+                ? normalizeUtil._renameKeys(ret, options.renameKeys.patterns, options.renameKeys.options) : ret;
+
+            const reduced = {};
+            Object.assign(reduced, ret.run_data);
+            Object.assign(reduced, ret.results);
+            Object.assign(reduced, ret.fixedInVersions);
+
+            if (reduced.version && reduced.version.length === 0) {
+                delete reduced.version;
+            }
+            normalized.diagnostics.push(reduced);
+        });
+
+        return normalized;
     },
 
     /**
