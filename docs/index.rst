@@ -7,17 +7,18 @@ To provide feedback on this documentation, you can file a GitHub Issue, or email
 Introduction
 ------------
 
-Telemetry Streaming (TS) is an iControl LX Extension delivered as a TMOS-independent RPM file. Installing the TS Extension on BIG-IP enables you to declaratively aggregate, normalize, and forward statistics and events from the BIG-IP to a consumer application by POSTing a single TS JSON declaration to TS’s declarative REST API endpoint. The supported third-party consumers include:
+Telemetry Streaming (TS) is an iControl LX Extension delivered as a TMOS-independent RPM file. Installing the TS Extension on BIG-IP enables you to declaratively aggregate, normalize, and forward statistics and events from the BIG-IP to a consumer application by POSTing a single TS JSON declaration to TS’s declarative REST API endpoint. Click on the links below to jump to the supported third-party consumer example declaration:
 
--  Splunk
--  Azure Log Analytics
--  AWS CloudWatch
--  AWS S3
--  Graphite
--  Kafka
--  ElasticSearch
--  Sumo Logic
--  StatsD
+-  :ref:`splunk-ref`
+-  :ref:`azure-ref`
+-  :ref:`awscloud-ref`
+-  :ref:`awss3-ref`
+-  :ref:`graphite-ref`
+-  :ref:`kafka-ref`
+-  :ref:`elasticsearch-ref`
+-  :ref:`sumologic-ref`
+-  :ref:`statsd-ref`
+-  :ref:`http-ref`
 
 You can use Microsoft Visual STudio Code to validate your declarations, see :ref:`validate` for information.
 

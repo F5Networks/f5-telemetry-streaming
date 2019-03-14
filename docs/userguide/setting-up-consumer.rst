@@ -3,8 +3,13 @@
 Consumers
 =========
 
-Use this section to find example declarations and notes for supported consumers. Note: each example below shows only the Consumer class of the declaration and needs to be included with the rest of the base declaration.
+Use this section to find example declarations and notes for supported consumers. 
 
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Note:
+
+   Each example below shows only the Consumer class of the declaration and needs to be included with the rest of the base declaration.
+
+.. _splunk-ref:
 
 Splunk
 ~~~~~~
@@ -36,6 +41,8 @@ Example Declaration:
         }
     }
 
+
+.. _azure-ref:
 
 Microsoft Azure Log Analytics
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -70,6 +77,9 @@ Below is an example of the Azure dashboard with Telemetry Streaming data. To cre
 
 |azure_log_analytics_dashboard|
 
+
+.. _awscloud-ref:
+
 AWS Cloud Watch
 ~~~~~~~~~~~~~~~
 |aws_img|   
@@ -102,6 +112,9 @@ Example Declaration:
         }
     }
 
+
+.. _awss3-ref:
+
 AWS S3
 ~~~~~~
 |aws_s3|
@@ -133,6 +146,8 @@ Example Declaration:
     }
 
 
+.. _graphite-ref:
+
 Graphite
 ~~~~~~~~
 |graphite|
@@ -157,6 +172,8 @@ Required Information:
         }
     }
 
+
+.. _kafka-ref:
 
 Kafka
 ~~~~~
@@ -185,6 +202,7 @@ Required Information:
     }
 
 
+.. _elasticsearch-ref:
 
 ElasticSearch
 ~~~~~~~~~~~~~
@@ -230,6 +248,8 @@ Optional Parameters:
     }
 
 
+.. _sumologic-ref:
+
 Sumo Logic
 ~~~~~~~~~~
 |Sumo Logic|
@@ -260,6 +280,10 @@ Required Information:
         }
     }
 
+
+
+.. _statsd-ref:
+
 StatsD
 ~~~~~~
 |StatsD|
@@ -285,6 +309,8 @@ Required Information:
         }
     }
 
+
+.. _http-ref:
 
 Generic HTTP
 ~~~~~~~~~~~~
