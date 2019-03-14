@@ -186,10 +186,12 @@ describe('PersistentStorage', () => {
 
     it('should load pre-existing old-version state (restStorage)', () => {
         const baseState = {
-            somekey: 'somedata'
+            config: {
+                key: 'somedata'
+            }
         };
 
-        restWorker.loadState = (first, cb) => { cb(null, baseState); };
+        restWorker.loadState = (first, cb) => { cb(null, JSON.parse(JSON.stringify(baseState))); };
         return persistentStorage.load()
             .then((state) => {
                 assert.deepEqual(state, baseState);

@@ -9,7 +9,6 @@
 'use strict';
 
 const logger = require('./logger.js');
-const deepCopy = require('./util.js').deepCopy;
 
 /** @module persistentStorage */
 
@@ -134,6 +133,7 @@ function RestStorage(restWorker) {
     this._cache = null;
 
     this._savePromise = null;
+    this._inSaveProcess = false;
     this._loadPromise = null;
 }
 
@@ -235,9 +235,9 @@ RestStorage.prototype._save = function () {
 
         savePromise = this._loadPromise ? this._loadPromise : Promise.resolve();
         savePromise = savePromise.then(() => {
-            this._savePromise = null;
+            this._inSaveProcess = true;
             try {
-                copiedData = deepCopy(this._cache);
+                copiedData = this._prepareToSave(this._cache);
             } catch (err) {
                 return Promise.reject(err);
             }
@@ -256,9 +256,16 @@ RestStorage.prototype._save = function () {
             .catch((err) => {
                 savePromise.saveError = err;
                 logger.exception('RestStorage.save:', err);
+            })
+            .then(() => {
+                this._savePromise = null;
+                this._inSaveProcess = false;
             });
 
         this._savePromise = savePromise;
+    } else if (this._inSaveProcess) {
+        // try again to save later, because we are too late at that time
+        savePromise.then(() => this._save());
     }
 
     return new Promise((resolve, reject) => {
@@ -342,12 +349,37 @@ RestStorage.prototype._getBaseState = function () {
  */
 RestStorage.prototype._validateLoadedState = function (state) {
     // looks like it is old versions
-    if (state._data_ === undefined) {
-        const newState = this._getBaseState();
-        newState._data_ = state;
-        state = newState;
+    if (state._data_ !== undefined) {
+        if (typeof state._data_ === 'string') {
+            state._data_ = JSON.parse(state._data_);
+        }
+    } else {
+        state._data_ = {};
+        if (state.config !== undefined) {
+            state._data_.config = state.config;
+            delete state.config;
+        }
     }
     return state;
+};
+
+/**
+ * Prepare data to be saved
+ *
+ * @private
+ *
+ * @param {Object} state - current state
+ *
+ * @returns {Object} object ready to be saved
+ */
+RestStorage.prototype._prepareToSave = function (state) {
+    state = state || {};
+    state._data_ = state._data_ || {};
+
+    const newState = Object.assign({}, state);
+    newState._data_ = JSON.stringify(state._data_);
+
+    return newState;
 };
 
 
