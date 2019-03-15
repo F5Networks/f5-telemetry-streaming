@@ -1,7 +1,7 @@
 .. _settingupconsumer-ref:
 
-Consumers
-=========
+Consumer class
+==============
 
 Use this section to find example declarations and notes for supported consumers. 
 

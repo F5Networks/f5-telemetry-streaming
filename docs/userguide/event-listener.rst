@@ -1,7 +1,7 @@
 .. _eventlistener-ref:
 
-Event Listener
---------------
+Event Listener class
+--------------------
 
 The Telemetry Streaming Event Listener collects event logs from all BIG-IP sources, including LTM, ASM, AFM, and APM.
 
