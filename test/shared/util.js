@@ -6,6 +6,7 @@
  * the software product on devcentral.f5.com.
  */
 
+const net = require('net');
 const fs = require('fs');
 const request = require('request');
 const SshClient = require('ssh2').Client; // eslint-disable-line import/no-extraneous-dependencies
@@ -311,5 +312,30 @@ module.exports = {
             throw new Error(msg);
         }
         return hosts;
+    },
+
+    /**
+     * Send event - send msg using tcp
+     *
+     * @param {String} host - host where event should be sent
+     * @param {String} msg  - msg to send
+     *
+     * @returns {Promise} Returns promise resolved on sent message
+     */
+    sendEvent(host, msg) {
+        const port = constants.EVENT_LISTENER_PORT;
+
+        return new Promise((resolve, reject) => {
+            const client = net.createConnection({ host, port }, () => {
+                client.write(msg);
+                client.end();
+            });
+            client.on('end', () => {
+                resolve();
+            });
+            client.on('error', (err) => {
+                reject(err);
+            });
+        });
     }
 };

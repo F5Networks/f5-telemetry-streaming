@@ -12,7 +12,6 @@
 /* eslint-disable global-require */
 
 const assert = require('assert');
-const net = require('net');
 const fs = require('fs');
 const util = require('../shared/util.js');
 const constants = require('../shared/constants.js');
@@ -257,22 +256,10 @@ describe('Consumer', function () {
         });
 
         it('should send event to TS event listener', function () {
-            const port = constants.EVENT_LISTENER_PORT;
+            const msg = `test="true",testType="${testType}"`;
 
-            // TODO: make this a util function to be used across consumers
-            return new Promise((resolve, reject) => {
-                const client = net.createConnection({ host: pAddr, port }, () => {
-                    client.write(`test="true",testType="${testType}"`);
-                    client.end();
-                });
-                client.on('end', () => {
-                    resolve();
-                });
-                client.on('error', (err) => {
-                    util.log(err);
-                    reject(err);
-                });
-            });
+            return util.sendEvent(pAddr, msg)
+                .catch(err => Promise.reject(err));
         });
 
         it('should check for event listener data', function () {
