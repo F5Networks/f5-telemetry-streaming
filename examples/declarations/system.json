@@ -1,36 +1,6 @@
 {
     "class": "Telemetry",
-    "My_System_1": {
-        "class": "Telemetry_System",
-        "enable": true,
-        "trace": false,
-        "host": "localhost",
-        "port": 8100,
-        "protocol": "http",
-        "allowSelfSignedCert": false,
-        "enableHostConnectivityCheck": false,
-        "username": "admin",
-        "passphrase": {
-            "cipherText": "passphrase"
-        }
-    },
-    "My_System_2": {
-        "class": "Telemetry_System",
-        "enable": true,
-        "trace": false,
-        "host": "localhost",
-        "port": 8100,
-        "protocol": "http",
-        "allowSelfSignedCert": false,
-        "enableHostConnectivityCheck": false,
-        "username": "admin",
-        "passphrase": {
-            "cipherText": "passphrase"
-        },
-        "systemPoller": "My_Poller",
-        "iHealthPoller": "My_iHealth"
-    },
-    "My_System_3": {
+    "My_System_Inline_Pollers": {
         "class": "Telemetry_System",
         "enable": true,
         "trace": false,
@@ -73,6 +43,22 @@
                 "day": "5"
             }
         }
+    },
+    "My_System_Referenced_Pollers": {
+        "class": "Telemetry_System",
+        "enable": true,
+        "trace": false,
+        "host": "localhost",
+        "port": 8100,
+        "protocol": "http",
+        "allowSelfSignedCert": false,
+        "enableHostConnectivityCheck": false,
+        "username": "admin",
+        "passphrase": {
+            "cipherText": "passphrase"
+        },
+        "systemPoller": "My_Poller",
+        "iHealthPoller": "My_iHealth"
     },
     "My_Poller": {
         "class": "Telemetry_System_Poller",

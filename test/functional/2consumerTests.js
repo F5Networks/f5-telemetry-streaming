@@ -35,7 +35,7 @@ describe('Consumer', function () {
     // read in example config
     const decl = JSON.parse(fs.readFileSync(constants.DECL.BASIC_EXAMPLE));
 
-    // for now this is just a placeholder
+    // for now this is just a placeholder as host is not transient
     describe('Setup Host', function () {
         util.log(`Consumer Host: ${cAddr}`);
 
@@ -247,10 +247,13 @@ describe('Consumer', function () {
                     assert.strictEqual(results.length > 0, true, 'No results');
 
                     // check that the event is what we expect
-                    // NOTE: this could expand to use a shared lib to evalute event
-                    // across all consumers, possibly using json schema validation
                     const result = JSON.parse(results[0]._raw);
-                    assert.notStrictEqual(result.system.hostname, undefined, 'Data not correct');
+
+                    const schema = JSON.parse(fs.readFileSync(constants.DECL.SYSTEM_POLLER_SCHEMA));
+                    const valid = util.validateAgainstSchema(result, schema);
+                    if (valid !== true) {
+                        assert.fail(`output is not valid: ${JSON.stringify(valid.errors)}`);
+                    }
                 })
                 .catch(err => Promise.reject(err));
         });
@@ -280,6 +283,18 @@ describe('Consumer', function () {
             const cmd = `docker container rm -f ${containerName}`;
 
             return util.performRemoteCmd(cAddr, cUsername, cmd, { password: cPassword })
+                .catch(err => Promise.reject(err));
+        });
+    });
+
+    // cleanup host
+    describe('Cleanup Host', function () {
+        it('should cleanup docker artifacts', function () {
+            const systemCmd = 'docker system prune -f';
+            const volumeCmd = 'docker volume prune -f';
+
+            return util.performRemoteCmd(cAddr, cUsername, systemCmd, { password: cPassword })
+                .then(() => util.performRemoteCmd(cAddr, cUsername, volumeCmd, { password: cPassword }))
                 .catch(err => Promise.reject(err));
         });
     });

@@ -8,11 +8,14 @@
 
 'use strict';
 
+const fs = require('fs');
+
 module.exports = {
     DECL: {
         BASIC_EXAMPLE: `${__dirname}/basic.json`,
         CONSUMER_NAME: 'My_Consumer',
-        POLLER_NAME: 'My_Poller'
+        SYSTEM_NAME: 'My_System',
+        SYSTEM_POLLER_SCHEMA: fs.realpathSync(`${__dirname}/../../shared/output_schemas/system_poller_schema.json`)
     },
     ENV_VARS: {
         TEST_HARNESS: {

@@ -9,6 +9,7 @@
 const net = require('net');
 const fs = require('fs');
 const request = require('request');
+const Ajv = require('ajv');
 const SshClient = require('ssh2').Client; // eslint-disable-line import/no-extraneous-dependencies
 const icrdk = require('icrdk'); // eslint-disable-line import/no-extraneous-dependencies
 const constants = require('./constants.js');
@@ -307,7 +308,7 @@ module.exports = {
             }));
             // end environment variables
         } else {
-            const msg = 'Error: Please provide appropriate environment variables';
+            const msg = 'Error: Please provide appropriate test harness environment variables';
             this.log(msg);
             throw new Error(msg);
         }
@@ -337,5 +338,38 @@ module.exports = {
                 reject(err);
             });
         });
+    },
+
+    /**
+     * Validate data against JSON schema
+     *
+     * @param {String} data   - data to validate
+     * @param {String} schema - JSON schema to use during validation
+     *
+     * @returns {Boolean|Object} Returns true on successful validation or object with errors
+     */
+    validateAgainstSchema(data, schema) {
+        schema = this.deepCopy(schema);
+
+        // add all keys in 'properties' to the 'required' key array - including nested properties
+        const addProperties = (localSchema) => {
+            const properties = localSchema.properties;
+            Object.keys(properties).forEach((k) => {
+                localSchema.required.push(k);
+                if (properties[k].type === 'object' && properties[k].properties) {
+                    properties[k] = addProperties(properties[k]);
+                }
+            });
+            return localSchema;
+        };
+        schema = addProperties(schema);
+
+        const ajv = new Ajv({ useDefaults: true });
+        const validator = ajv.compile(schema);
+        const valid = validator(data);
+        if (!valid) {
+            return { errors: validator.errors };
+        }
+        return true;
     }
 };

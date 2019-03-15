@@ -13,7 +13,7 @@ function defaultFormat(globalCtx) {
     const data = globalCtx.event.data;
 
     // certain events may not have system object
-    let time = Date.parse(new Date()); let host = 'host.bigip.com';
+    let time = Date.parse(new Date()); let host = 'null';
     try {
         time = Date.parse(data.system.systemTimestamp);
         host = data.system.hostname;

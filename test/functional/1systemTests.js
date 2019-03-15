@@ -24,7 +24,7 @@ const hosts = util.getHosts('BIGIP');
 describe('System', function () {
     // read in example config
     const decl = fs.readFileSync(constants.DECL.BASIC_EXAMPLE).toString();
-    const pollerName = constants.DECL.POLLER_NAME;
+    const pollerName = constants.DECL.SYSTEM_NAME;
     const consumerName = constants.DECL.CONSUMER_NAME;
 
     // get package details

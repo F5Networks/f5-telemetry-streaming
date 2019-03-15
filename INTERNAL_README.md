@@ -80,18 +80,11 @@ Examples: [Declaration examples](examples/declarations)
 ```json
 {
     "class": "Telemetry",
-    "controls": {
-        "class": "Controls",
-        "logLevel": "info"
-    },
     "My_System": {
         "class": "Telemetry_System",
-        "systemPoller": "My_Poller",
-        "iHealthPoller": "My_iHealth"
-    },
-    "My_Poller": {
-        "class": "Telemetry_System_Poller",
-        "interval": 60
+        "systemPoller": {
+            "interval": 60
+        }
     },
     "My_Listener": {
         "class": "Telemetry_Listener",
@@ -105,19 +98,6 @@ Examples: [Declaration examples](examples/declarations)
         "port": "8088",
         "passphrase": {
             "cipherText": "apikey"
-        }
-    },
-    "My_iHealth": {
-        "class": "Telemetry_iHealth_Poller",
-        "username": "username",
-        "passphrase": {
-            "cipherText": "passphrase"
-        },
-        "interval": {
-            "timeWindow": {
-                "start": "00:15",
-                "end":   "02:15"
-            }
         }
     }
 }
@@ -508,6 +488,45 @@ Note: All metrics are stored as gauges in statsd, those can be seen within graph
         "host": "192.0.2.1",
         "protocol": "udp",
         "port": "8125"
+    }
+}
+```
+
+### IHealth Polling
+
+```json
+{
+    "class": "Telemetry",
+    "My_System": {
+        "class": "Telemetry_System",
+        "systemPoller": {
+            "interval": 60
+        },
+        "iHealthPoller": {
+            "username": "username",
+            "passphrase": {
+                "cipherText": "passphrase"
+            },
+            "proxy": {
+                "host": "127.0.0.1",
+                "protocol": "http",
+                "port": 80,
+                "enableHostConnectivityCheck": false,
+                "allowSelfSignedCert": false,
+                "username": "username",
+                "passphrase": {
+                    "cipherText": "passphrase"
+                }
+            },
+            "interval": {
+                "timeWindow": {
+                    "start": "23:15",
+                    "end":   "02:15"
+                },
+                "frequency": "monthly",
+                "day": "5"
+            }
+        }
     }
 }
 ```

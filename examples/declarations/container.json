@@ -8,12 +8,9 @@
         "passphrase": {
             "environmentVar": "MY_SYSTEM_ENV_VAR"
         },
-        "systemPoller": "My_Poller",
-        "iHealthPoller": "My_iHealth"
-    },
-    "My_Poller": {
-        "class": "Telemetry_System_Poller",
-        "interval": 60
+        "systemPoller": {
+            "interval": 60
+        }
     },
     "My_Listener": {
         "class": "Telemetry_Listener",
@@ -25,19 +22,6 @@
         "workspaceId": "myworkspaceid",
         "passphrase": {
             "environmentVar": "MY_CONSUMER_ENV_VAR"
-        }
-    },
-    "My_iHealth": {
-        "class": "Telemetry_iHealth_Poller",
-        "username": "username",
-        "passphrase": {
-            "environmentVar": "MY_IHEALTH_ENV_VAR"
-        },
-        "interval": {
-            "timeWindow": {
-                "start": "00:00",
-                "end": "05:00"
-            }
         }
     }
  }

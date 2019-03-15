@@ -1,5 +1,33 @@
 {
     "class": "Telemetry",
+    "My_System_With_IHealth_Poller": {
+        "class": "Telemetry_System",
+        "iHealthPoller": {
+            "username": "username",
+            "passphrase": {
+                "cipherText": "passphrase"
+            },
+            "proxy": {
+                "host": "127.0.0.1",
+                "protocol": "http",
+                "port": 80,
+                "enableHostConnectivityCheck": false,
+                "allowSelfSignedCert": false,
+                "username": "username",
+                "passphrase": {
+                    "cipherText": "passphrase"
+                }
+            },
+            "interval": {
+                "timeWindow": {
+                    "start": "23:15",
+                    "end":   "02:15"
+                },
+                "frequency": "monthly",
+                "day": "5"
+            }
+        }
+    },
     "iHealth_Default_Declaration": {
         "class": "Telemetry_iHealth_Poller",
         "username": "username",

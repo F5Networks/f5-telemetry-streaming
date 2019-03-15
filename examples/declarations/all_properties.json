@@ -1,36 +1,11 @@
 {
     "class": "Telemetry",
-    "My_System_1": {
-        "class": "Telemetry_System",
-        "enable": true,
-        "trace": false,
-        "host": "localhost",
-        "port": 8100,
-        "protocol": "http",
-        "allowSelfSignedCert": false,
-        "enableHostConnectivityCheck": false,
-        "username": "admin",
-        "passphrase": {
-            "cipherText": "passphrase"
-        }
+    "controls": {
+        "class": "Controls",
+        "logLevel": "info",
+        "debug": false
     },
-    "My_System_2": {
-        "class": "Telemetry_System",
-        "enable": true,
-        "trace": false,
-        "host": "localhost",
-        "port": 8100,
-        "protocol": "http",
-        "allowSelfSignedCert": false,
-        "enableHostConnectivityCheck": false,
-        "username": "admin",
-        "passphrase": {
-            "cipherText": "passphrase"
-        },
-        "systemPoller": "My_Poller",
-        "iHealthPoller": "My_iHealth"
-    },
-    "My_System_3": {
+    "My_System": {
         "class": "Telemetry_System",
         "enable": true,
         "trace": false,
@@ -74,12 +49,6 @@
             }
         }
     },
-    "My_Poller": {
-        "class": "Telemetry_System_Poller",
-        "enable": true,
-        "trace": false,
-        "interval": 60
-    },
     "My_Listener": {
         "class": "Telemetry_Listener",
         "enable": true,
@@ -104,31 +73,5 @@
         },
         "enableHostConnectivityCheck": false,
         "allowSelfSignedCert": false
-    },
-    "My_iHealth": {
-        "class": "Telemetry_iHealth_Poller",
-        "username": "username",
-        "passphrase": {
-            "cipherText": "passphrase"
-        },
-        "proxy": {
-            "host": "127.0.0.1",
-            "protocol": "http",
-            "port": 80,
-            "enableHostConnectivityCheck": false,
-            "allowSelfSignedCert": false,
-            "username": "username",
-            "passphrase": {
-                "cipherText": "passphrase"
-            }
-        },
-        "interval": {
-            "timeWindow": {
-                "start": "01:15",
-                "end":   "04:15"
-            },
-            "frequency": "monthly",
-            "day": "5"
-        }
     }
 }
