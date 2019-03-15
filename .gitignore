@@ -4,5 +4,6 @@ dist/new_build/
 .vscode/
 _build/
 .nyc_output/
+**/.DS_Store
 test/functional/logs/
 test/functional/*_harness_file.json

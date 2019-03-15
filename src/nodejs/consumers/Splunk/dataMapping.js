@@ -40,7 +40,8 @@ const SOURCE_2_TYPES = {
     'bigip.tmsh.virtual_status': 'f5:bigip:config:iapp:json',
     'bigip.tmsh.pool_member_status': 'f5:bigip:config:iapp:json',
     'bigip.objectmodel.cert': 'f5:bigip:config:iapp:json',
-    'bigip.objectmodel.profile': 'f5:bigip:config:iapp:json'
+    'bigip.objectmodel.profile': 'f5:bigip:config:iapp:json',
+    'bigip.ihealth.diagnostics': 'f5:bigip:ihealth:iapp:json'
 };
 
 function getTemplate(sourceName, data, cache) {
@@ -80,6 +81,38 @@ function overall(request) {
         bytes_transfered: request.results.dataLength
     });
     return template;
+}
+
+function ihealth(request) {
+    const data = request.globalCtx.event.data;
+    const diagnostics = getData(request, 'diagnostics');
+    const system = getData(request, 'system');
+    const template = getTemplate('bigip.ihealth.diagnostics', data, request.cache);
+    const output = [];
+
+    diagnostics.forEach((diagnostic) => {
+        const newData = Object.assign({}, template);
+        const solutions = diagnostic.solution || [];
+        const versions = diagnostic.version || [];
+
+        const verStr = verObj => `${verObj.major}.${verObj.minor}.${verObj.maintenance}.${verObj.point}`;
+
+        newData.event = {
+            Category: diagnostic.importance,
+            Heuristic: diagnostic.name,
+            Internal: 'no',
+            Title: diagnostic.header,
+            Description: diagnostic.summary,
+            Solutions: solutions.map(s => s.id).join(' '),
+            'Solution Hyperlinks': solutions.map(s => s.value).join(' '),
+            version: versions.map(verStr).join(' '),
+            hostname: system.hostname,
+            ihealth_link: system.ihealthLink,
+            qkview_number: system.qkviewNumber
+        };
+        output.push(newData);
+    });
+    return output;
 }
 
 
@@ -223,5 +256,6 @@ const stats = [
 module.exports = {
     overall,
     stats,
+    ihealth,
     defaultFormat
 };

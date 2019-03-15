@@ -42,6 +42,10 @@
             "endpoint": "/mgmt/tm/net/interface/stats"
         },
         {
+            "name": "networkTunnels",
+            "endpoint": "/mgmt/tm/net/tunnels/tunnel/stats"
+        },
+        {
             "name": "tmmInfo",
             "endpoint": "/mgmt/tm/sys/tmm-info"
         },

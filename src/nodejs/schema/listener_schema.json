@@ -2,7 +2,7 @@
     "$id": "listener_schema.json",
     "$async": true,
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Telemetry streaming event listener schema",
+    "title": "Telemetry Streaming event listener schema",
     "description": "",
     "type": "object",
     "allOf": [
@@ -15,27 +15,51 @@
                 "properties": {
                     "class": {
                         "title": "Class",
-                        "description": "Telemetry streaming event listener class",
+                        "description": "Telemetry Streaming Event Listener class",
                         "type": "string",
                         "enum": [ "Telemetry_Listener" ]
                     },
-                    "enable": { "$ref": "base_schema.json#/definitions/enable", "default": true },
-                    "trace": { "$ref": "base_schema.json#/definitions/trace", "default": false },
+                    "enable": {
+                        "default": true,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/enable"
+                            }
+                        ]
+                    },
+                    "trace": {
+                        "default": false,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/trace"
+                            }
+                        ]
+                    },
                     "port": {
-                        "title": "Port",
-                        "description": "" ,
-                        "type": "integer",
                         "minimum": 1024,
                         "maximum": 65535,
-                        "default": 6514
+                        "default": 6514,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/port"
+                            }
+                        ]
                     },
                     "tag": {
                         "default": { "tenant": "`T`", "application": "`A`"},
-                        "$ref": "base_schema.json#/definitions/tag"
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/tag"
+                            }
+                        ]
                     },
                     "match": {
-                        "$ref": "base_schema.json#/definitions/match",
-                        "default": ""
+                        "default": "",
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/match"
+                            }
+                        ]
                     }
                 },
                 "additionalProperties": false

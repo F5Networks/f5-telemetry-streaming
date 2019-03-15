@@ -52,7 +52,9 @@ describe('Data Pipeline', () => {
             })
             .catch((err) => {
                 if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
-                return Promise.resolve(); // resolve, expected an error
+                if (/some message/.test(err)) return Promise.resolve();
+                assert.fail(err);
+                return Promise.reject(err);
             });
     });
 });

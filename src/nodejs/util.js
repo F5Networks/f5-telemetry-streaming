@@ -12,20 +12,23 @@ const fs = require('fs');
 const net = require('net');
 const path = require('path');
 const request = require('request');
-const childProcess = require('child_process');
-const crypto = require('crypto');
-const diff = require('deep-diff');
 
 const constants = require('./constants.js');
 const logger = require('./logger.js');
 
+/** @module util */
+
+/** Note: no 'class' usage to support v12.x, prototype only */
 /**
  * Tracer class - useful for debug to dump streams of data.
  *
- * Note: no 'class' usage to support v12.x
+ * @class
  *
- * @param {string} name       - tracer name
+ * @param {string} name       - tracer's name
  * @param {string} tracerPath - path to file
+ *
+ * @property {String} name    - tracer's name
+ * @property {String} path    - path to file
  */
 function Tracer(name, tracerPath) {
     this.name = name;
@@ -38,24 +41,41 @@ function Tracer(name, tracerPath) {
     this.touch();
 }
 
-// check every 15 sec. if file exists or not
+/**
+ * Interval to check if file needs to be reopened
+ *
+ * @member {Integer}
+ */
 Tracer.REOPEN_INTERVAL = 15000;
+
 /**
  * Tracer states
+ *
+ * @private
  */
 Tracer.STATE = Object.freeze({
+    /** @private */
     NEW: 'NEW',
+    /** @private */
     INIT: 'INIT',
+    /** @private */
     CREATED: 'CREATED',
+    /** @private */
     READY: 'READY',
+    /** @private */
     CLOSING: 'CLOSING',
+    /** @private */
     CLOSED: 'CLOSED',
+    /** @private */
     REOPEN: 'REOPEN',
+    /** @private */
     STOP: 'STOP'
 });
 
 /**
  * Remove schedule 'reopen' function
+ *
+ * @private
  */
 Tracer.prototype.removeScheduledReopen = function () {
     if (this.timeoutID) {
@@ -67,6 +87,7 @@ Tracer.prototype.removeScheduledReopen = function () {
 /**
  * Set state
  *
+ * @private
  * @param {string} newState - tracer's new state
  */
 Tracer.prototype._setState = function (newState) {
@@ -81,6 +102,8 @@ Tracer.prototype._setState = function (newState) {
 
 /**
  * Mark tracer as ready
+ *
+ * @private
  */
 Tracer.prototype._setReady = function () {
     this._updateInode();
@@ -90,6 +113,8 @@ Tracer.prototype._setReady = function () {
 
 /**
  * Mark tracer as closed
+ *
+ * @private
  */
 Tracer.prototype._setClosed = function () {
     this.removeScheduledReopen();
@@ -101,6 +126,8 @@ Tracer.prototype._setClosed = function () {
 
 /**
  * Mark tracer as closing
+ *
+ * @private
  */
 Tracer.prototype._setClosing = function () {
     logger.debug(`Closing tracer '${this.name}' stream to file '${this.path}'`);
@@ -113,6 +140,8 @@ Tracer.prototype._setClosing = function () {
 
 /**
  * Update file's inode to handle situations when file was recreated outside.
+ *
+ * @private
  */
 Tracer.prototype._updateInode = function () {
     fs.stat(this.path, (err, stats) => {
@@ -129,46 +158,49 @@ Tracer.prototype._updateInode = function () {
 /**
  * Re-open tracer if destination file doesn't exists
  *
- * @returns {Object} Promise
+ * @async
+ * @private
+ * @returns {Promise} Promise resolved when destination file re-opene or opened already
  */
 Tracer.prototype._reopenIfNeeded = function () {
     // if stream is not ready then skip check
     if (!this.isReady()) {
         return Promise.resolve();
     }
+    const self = this;
     // eslint-disable-next-line no-unused-vars
     return new Promise((resolve) => {
         // Resolve with true when stream still writing to same file
-        fs.stat(this.path, (err, stats) => {
+        fs.stat(self.path, (err, stats) => {
             let exists = false;
             if (err) {
-                logger.error(`Unable to get stats for tracer '${this.name}' file '${this.path}': ${err}`);
+                logger.error(`Unable to get stats for tracer '${self.name}' file '${self.path}': ${err}`);
             } else {
-                exists = stats.ino === this.inode;
+                exists = stats.ino === self.inode;
             }
             resolve(exists);
         });
     })
         .then((exists) => {
-            if (exists || !this.isReady()) {
+            if (exists || !self.isReady()) {
                 return Promise.resolve(false);
             }
-            return this._mkdir().then(() => Promise.resolve(true));
+            return self._mkdir().then(() => Promise.resolve(true));
         })
         .then((needReopen) => {
-            if (!(needReopen && this.isReady())) {
+            if (!(needReopen && self.isReady())) {
                 return Promise.resolve(undefined);
             }
             // if file doesn't exists then we need
             // to re-open file and safely redirect stream to new FD
             return new Promise((resolve) => {
-                this._setState(Tracer.STATE.REOPEN);
+                self._setState(Tracer.STATE.REOPEN);
                 // first step - open new file and assign new FD to stream
                 // second step - close old file descriptor
-                fs.open(this.path, 'w', (openErr, fd) => {
+                fs.open(self.path, 'w', (openErr, fd) => {
                     if (openErr) {
-                        logger.error(`Unable to re-open tracer '${this.name}' file '${this.path}': ${openErr}`);
-                        this.close();
+                        logger.error(`Unable to re-open tracer '${self.name}' file '${self.path}': ${openErr}`);
+                        self.close();
                     }
                     resolve(fd);
                 });
@@ -179,14 +211,14 @@ Tracer.prototype._reopenIfNeeded = function () {
                 return;
             }
             // re-assign stream.fd
-            const oldFD = this.stream.fd;
-            this.stream.fd = newFD;
+            const oldFD = self.stream.fd;
+            self.stream.fd = newFD;
             // update state
-            this._setReady();
+            self._setReady();
             // try close old FD
             fs.close(oldFD, (closeErr) => {
                 if (closeErr) {
-                    logger.error(`Unable to close tracer '${this.name}' previous fd=${oldFD}: ${closeErr}`);
+                    logger.error(`Unable to close tracer '${self.name}' previous fd=${oldFD}: ${closeErr}`);
                 }
             });
         })
@@ -196,12 +228,15 @@ Tracer.prototype._reopenIfNeeded = function () {
 /**
  * Create destination directory if needed
  *
- * @returns {Object} Promise resolved when tracer is ready to continue
+ * @async
+ * @private
+ * @returns {Promise} Promise resolved when tracer is ready to continue
  */
 Tracer.prototype._mkdir = function () {
     const baseDir = path.dirname(this.path);
+    const self = this;
     return new Promise((resolve) => {
-        fs.access(baseDir, fs.F_OK, (accessErr) => {
+        fs.access(baseDir, (fs.constants || fs).R_OK, (accessErr) => {
             let exists = true;
             if (accessErr) {
                 logger.error(`tracer._mkdir unable to access '${baseDir}': ${accessErr}`);
@@ -215,7 +250,7 @@ Tracer.prototype._mkdir = function () {
                 return Promise.resolve();
             }
             return new Promise((resolve, reject) => {
-                logger.info(`Creating dir '${baseDir}' for tracer '${this.name}'`);
+                logger.info(`Creating dir '${baseDir}' for tracer '${self.name}'`);
                 fs.mkdir(baseDir, { recursive: true }, (mkdirErr) => {
                     if (mkdirErr) reject(mkdirErr);
                     else resolve();
@@ -227,7 +262,9 @@ Tracer.prototype._mkdir = function () {
 /**
  * Open tracer's stream
  *
- * @returns {Object} Promise resolved when new stream created or exists already
+ * @async
+ * @private
+ * @returns {Promise} Promise resolved when new stream created or exists already
  */
 Tracer.prototype._open = function () {
     if (!this.isNew()) {
@@ -263,31 +300,35 @@ Tracer.prototype._open = function () {
 /**
  * Truncate destination file if needed
  *
- * @returns {Object} Promise resolved when file was truncated else rejected
+ * @async
+ * @private
+ * @returns {Promise} Promise resolved when file was truncated else rejected
  */
 Tracer.prototype._truncate = function () {
+    const self = this;
     return new Promise((resolve, reject) => {
-        if (!this.isReady() || this.isTruncated) {
+        if (!self.isReady() || self.isTruncated) {
             resolve();
         } else {
             /**
-            * marking file as truncated to avoid sequential calls.
-            * Ideally, stream will be flushed after every tick,
-            * so lets mark file as not truncated after every tick.
-            * Btw, side effect - despite on 'w' at stream creation,
-            * file will be truncated twice in any case.
-            */
-            this.isTruncated = true;
-            fs.ftruncate(this.stream.fd, 0, (err) => {
+             * marking file as truncated to avoid sequential calls.
+             * Ideally, stream will be flushed after every tick,
+             * so lets mark file as not truncated after every tick.
+             * Btw, side effect - despite on 'w' at stream creation,
+             * file will be truncated twice in any case.
+             * @ignore
+             */
+            self.isTruncated = true;
+            fs.ftruncate(self.stream.fd, 0, (err) => {
                 if (err) {
                     reject(err);
-                    this.isTruncated = false;
+                    self.isTruncated = false;
                 } else {
                     process.nextTick(() => {
-                        this.isTruncated = false;
+                        self.isTruncated = false;
                     });
                     // update stream's position
-                    this.stream.pos = 0;
+                    self.stream.pos = 0;
                     resolve();
                 }
             });
@@ -299,17 +340,21 @@ Tracer.prototype._truncate = function () {
  * Write data to stream. If tracer is not available then
  * no data will be written to stream.
  *
+ * @async
+ * @private
+ *
  * @param {string} data - data to write to stream
  *
- * @returns {Object} Promise resolved when data was written
+ * @returns {Promise} Promise resolved when data was written
  */
 Tracer.prototype._write = function (data) {
+    const self = this;
     return new Promise((resolve, reject) => {
         // data will be buffered even if file in CREATED state
-        if (!this.isAvailable()) {
+        if (!self.isAvailable()) {
             resolve();
         } else {
-            this.stream.write(data, (err) => {
+            self.stream.write(data, (err) => {
                 if (err) reject(err);
                 else resolve();
             });
@@ -391,6 +436,7 @@ Tracer.prototype.stop = function () {
 /**
  * Write data to tracer
  *
+ * @async
  * @param {string} data - data to write to tracer
  */
 Tracer.prototype.write = function (data) {
@@ -405,16 +451,19 @@ Tracer.prototype.write = function (data) {
 };
 
 /**
- * instances cache
+ * Instances cache.
+ *
+ * @member {Object.<string, Tracer>}
  */
 Tracer.instances = {};
+
 /**
  * Get Tracer instance or create new one
  *
  * @param {string} name       - tracer name
  * @param {string} tracerPath - destination path
  *
- * @returns {Object} Tracer instance
+ * @returns {Tracer} Tracer instance
  */
 Tracer.get = function (name, tracerPath) {
     let tracer = Tracer.instances[name];
@@ -438,7 +487,7 @@ Tracer.get = function (name, tracerPath) {
  * Create tracer from config
  *
  * @param {string} className - object's class name
- * @param {string} objName  - object's name
+ * @param {string} objName   - object's name
  * @param {Object} config    - object's config
  *
  * @returns {Tracer} Tracer object
@@ -459,7 +508,7 @@ Tracer.createFromConfig = function (className, objName, config) {
 /**
  * Remove registered tracer
  *
- * @param {Object} tracer - tracer instance to remove
+ * @param {Tracer} tracer - tracer instance to remove
  */
 Tracer.removeTracer = function (tracer) {
     if (tracer) {
@@ -471,10 +520,17 @@ Tracer.removeTracer = function (tracer) {
 };
 
 /**
+ * Filter callback
+ *
+ * @callback Tracer~filterCallback
+ * @param {Tracer} tracer - tracer object
+ */
+
+/**
  * Remove Tracer instance
  *
- * @param {string | Object} toRemove - tracer or tracer's name to remove
- * @param {function(tracer)} filter  - filter function
+ * @param {string | Tracer} toRemove - tracer or tracer's name to remove
+ * @param {Tracer~filterCallback} filter  - filter function
  */
 Tracer.remove = function (toRemove, filter) {
     if (toRemove) {
@@ -492,12 +548,34 @@ Tracer.remove = function (toRemove, filter) {
         });
     }
 };
-/**
-* Tracer class definition ends here
-*/
 
 
 module.exports = {
+    /**
+     * Check if object has any data or not
+     *
+     * @param {any} obj - object to test
+     *
+     * @returns {Boolean} 'true' if empty else 'false'
+     */
+    isObjectEmpty(obj) {
+        if (obj === undefined || obj === null) return true;
+        if (Array.isArray(obj) || typeof obj === 'string') return obj.length === 0;
+        /* eslint-disable no-restricted-syntax */
+        for (const key in obj) if (Object.prototype.hasOwnProperty.call(obj, key)) return false;
+        return true;
+    },
+    /**
+     * Deep copy
+     *
+     * @param {any} obj - object to copy
+     *
+     * @returns {any} deep copy of source object
+     */
+    deepCopy(obj) {
+        return JSON.parse(JSON.stringify(obj));
+    },
+
     /**
      * Start function
      *
@@ -532,8 +610,6 @@ module.exports = {
      * @param {Object} restOperation  - restOperation to complete
      * @param {String} status         - HTTP status
      * @param {String} body           - HTTP body
-     *
-     * @returns {void}
      */
     restOperationResponder(restOperation, status, body) {
         restOperation.setStatusCode(status);
@@ -573,54 +649,6 @@ module.exports = {
         }
         // eslint-disable-next-line no-eval
         return eval(`0${comparator}${cmp}`);
-    },
-
-    /**
-     * Performs a check of the local environment and returns device type
-     *
-     * @returns {Promise} A promise which is resolved with the device type.
-     *
-     */
-    getDeviceType() {
-        // eslint-disable-next-line no-unused-vars
-        return new Promise((resolve, reject) => {
-            // eslint-disable-next-line no-unused-vars
-            childProcess.exec('/usr/bin/tmsh -a show sys version', (error, stdout, stderr) => {
-                if (error) {
-                    // don't reject, just assume we are running on a container
-                    resolve(constants.CONTAINER_DEVICE_TYPE);
-                } else {
-                    // command did not error so we must be a BIG-IP
-                    resolve(constants.BIG_IP_DEVICE_TYPE);
-                }
-            });
-        });
-    },
-
-    /**
-     * Returns installed software version
-     *
-     * @param {String} host    - HTTP host
-     * @param {Object} options - function options, see 'makeRequest'
-     *
-     * @returns {Promise} A promise which is resolved with response
-     *
-     */
-    getDeviceVersion(host, options) {
-        const uri = '/mgmt/tm/sys/version';
-        return this.makeRequest(host, uri, options)
-            .then((res) => {
-                const entries = res.entries[Object.keys(res.entries)[0]].nestedStats.entries;
-                const result = {};
-                Object.keys(entries).forEach((prop) => {
-                    result[prop[0].toLowerCase() + prop.slice(1)] = entries[prop].description;
-                });
-                return result;
-            })
-            .catch((err) => {
-                const msg = `getDeviceVersion: ${err}`;
-                throw new Error(msg);
-            });
     },
 
     /**
@@ -678,126 +706,122 @@ module.exports = {
     },
 
     /**
+     * Get declaration from the parsed and formatted config by name
+     *
+     * @param {Object} config - parsed and formatted config
+     * @param {String} dClass - declaration class
+     * @param {String} dName  - declaration name
+     *
+     * @returns {Object} Returns the declaration
+     */
+    getDeclarationByName(config, dClass, dName) {
+        return (config[dClass] || {})[dName];
+    },
+
+    /**
      * Perform HTTP request
      *
-     * @param {String} host                           - HTTP host
-     * @param {String} uri                            - HTTP uri
-     * @param {Object} options                        - function options
-     * @param {String} [options.protocol]             - HTTP protocol
-     * @param {Integer} [options.port]                - HTTP port
-     * @param {String} [options.method]               - HTTP method
-     * @param {String} [options.body]                 - HTTP body
-     * @param {Object} [options.headers]              - HTTP headers
-     * @param {Object} [options.continueOnErrorCode]  - resolve promise even on non-successful response code
-     * @param {Boolean} [options.allowSelfSignedCert] - false - requires SSL certificates be valid,
-     *      true - allows self-signed certs
+     * @param {String}  [host]                         - HTTP host
+     * @param {String}  [uri]                          - HTTP uri
+     * @param {Object}  [options]                      - function options. Copy it before pass to function.
+     * @param {String}  [options.fullURI]              - full HTTP URI
+     * @param {String}  [options.protocol]             - HTTP protocol
+     * @param {Integer} [options.port]                 - HTTP port
+     * @param {String}  [options.method]               - HTTP method
+     * @param {String}  [options.body]                 - HTTP body
+     * @param {Object}  [options.headers]              - HTTP headers
+     * @param {Object}  [options.continueOnErrorCode]  - resolve promise even on non-successful response code
+     * @param {Boolean} [options.allowSelfSignedCert]  - false - requires SSL certificates be valid,
+     *                                                  true  - allows self-signed certs
+     * @param {Object}  [options.rawResponseBody]      - true - Buffer object with binary data will be returned as body
+     * @param {Integer} [options.expectedResponseCode] - expected response code
+     * @param {Boolean} [options.includeResponseObject] - false - only body object/string will be returned
+     *                                                    true  - array with [body, responseObject] will be returned
      *
-     * @returns {Object} Returns promise resolved with response
+     * @returns {Promise.<?any>} Returns promise resolved with response
      */
-    makeRequest(host, uri, options) {
-        options = options || {};
-        const defaultHeaders = {
-            Authorization: `Basic ${new Buffer('admin:').toString('base64')}`,
-            'User-Agent': constants.USER_AGENT
-        };
+    makeRequest() {
+        // rest params syntax supported only fron node 6+
+        /* eslint-disable prefer-rest-params */
+        let host;
+        let uri;
+        let options;
 
-        const protocol = options.protocol || constants.DEFAULT_PROTOCOL;
-        const fullUri = `${protocol}://${host}:${options.port || constants.DEFAULT_PORT}${uri}`;
-        const method = options.method || 'GET';
-        const requestOptions = {
-            uri: fullUri,
-            method,
-            body: options.body ? this.stringify(options.body) : undefined,
-            headers: options.headers || defaultHeaders,
-            strictSSL: options.allowSelfSignedCert === undefined
-                ? constants.STRICT_TLS_REQUIRED : !options.allowSelfSignedCert
-        };
+        if (typeof arguments[0] === 'object') {
+            options = arguments[0];
+        } else if (typeof arguments[1] === 'object') {
+            host = arguments[0];
+            options = arguments[1];
+        } else {
+            host = arguments[0];
+            uri = arguments[1];
+            options = arguments[2];
+        }
+
+        options = options || {};
+        options.method = options.method || 'GET';
+        options.protocol = options.protocol || constants.REQUEST_DEFAULT_PROTOCOL;
+        options.port = options.port || constants.REQUEST_DEFAULT_PORT;
+        options.body = options.body ? this.stringify(options.body) : undefined;
+        options.strictSSL = options.allowSelfSignedCert === undefined
+            ? constants.STRICT_TLS_REQUIRED : !options.allowSelfSignedCert;
+
+        options.headers = options.headers || {};
+        options.headers['User-Agent'] = options.headers['User-Agent'] || constants.USER_AGENT;
+
+        if (options.rawResponseBody) {
+            options.encoding = null;
+        }
+
+        if (host) {
+            options.uri = `${options.protocol}://${host}:${options.port}${uri || ''}`;
+        } else {
+            options.uri = options.fullURI;
+        }
+
+        if (!options.uri) {
+            throw new Error('makeRequest: No fullURI or host provided');
+        }
+
+        const rawResponseBody = options.rawResponseBody;
+        const continueOnErrorCode = options.continueOnErrorCode;
+        const includeResponseObject = options.includeResponseObject;
+        let expectedResponseCode = options.expectedResponseCode || [200];
+        expectedResponseCode = Array.isArray(expectedResponseCode) ? expectedResponseCode
+            : [expectedResponseCode];
+
+        // cleanup options. Update tests when adding new value
+        ['rawResponseBody', 'continueOnErrorCode', 'expectedResponseCode', 'includeResponseObject',
+            'port', 'protocol', 'fullURI', 'allowSelfSignedCert'
+        ].forEach((key) => {
+            delete options[key];
+        });
 
         return new Promise((resolve, reject) => {
             // using request.get, request.post, etc. - useful during unit test mocking
-            request[method.toLowerCase()](requestOptions, (err, res, body) => {
+            request[options.method.toLowerCase()](options, (err, res, body) => {
                 if (err) {
                     reject(new Error(`HTTP error: ${err}`));
-                } else if (res.statusCode === 200) {
-                    try {
-                        resolve(JSON.parse(body));
-                    } catch (e) {
-                        resolve(body);
-                    }
-                } else if (options.continueOnErrorCode === true) {
-                    // hope caller knows what they are doing...
-                    resolve(body);
                 } else {
-                    const msg = `Bad status code: ${res.statusCode} ${res.statusMessage} for ${uri}`;
-                    reject(new Error(msg));
+                    if (!rawResponseBody) {
+                        try {
+                            body = JSON.parse(body);
+                        } catch (parseErr) {
+                            // do nothing
+                        }
+                    }
+                    if (includeResponseObject === true) {
+                        body = [body, res];
+                    }
+                    if (expectedResponseCode.indexOf(res.statusCode) !== -1 || continueOnErrorCode === true) {
+                        resolve(body);
+                    } else {
+                        const msg = `Bad status code: ${res.statusCode} ${res.statusMessage} for ${uri}`;
+                        reject(new Error(msg));
+                    }
                 }
             });
         });
-    },
-
-    /**
-     * Execute shell command(s) via REST API on BIG-IP.
-     * Command should have escaped quotes.
-     * If host is not localhost then auth token should be passed along with headers.
-     *
-     * @param {String} host                     - HTTP host
-     * @param {String} command                  - shell command
-     * @param {Object} options                  - function options, see 'makeRequest'
-     *
-     * @returns {Object} Returns promise resolved with response
-     */
-    executeShellCommandOnDevice(host, command, options) {
-        const uri = '/mgmt/tm/util/bash';
-        options = options ? JSON.parse(JSON.stringify(options)) : {};
-        options.method = 'POST';
-        options.body = {
-            command: 'run',
-            utilCmdArgs: `-c "${command}"`
-        };
-        return this.makeRequest(host, uri, options)
-            .then(res => res.commandResult || '')
-            .catch((err) => {
-                const msg = `executeShellCommandOnDevice: ${err}`;
-                throw new Error(msg);
-            });
-    },
-
-    /**
-     * Get auth token
-     *
-     * @param {String} host                           - HTTP host
-     * @param {String} username                       - device username
-     * @param {String} password                       - device password
-     * @param {Object} options                        - function options
-     * @param {String} [options.protocol]             - HTTP protocol
-     * @param {Integer} [options.port]                - HTTP port
-     * @param {Boolean} [options.allowSelfSignedCert] - false - requires SSL certificates be valid,
-     *      true - allows self-signed certs
-     *
-     * @returns {Object} Returns promise resolved with auth token: { token: 'token' }
-     */
-    getAuthToken(host, username, password, options) {
-        options = options || {};
-        const uri = '/mgmt/shared/authn/login';
-        const body = JSON.stringify({
-            username,
-            password,
-            loginProviderName: 'tmos'
-        });
-        const postOptions = {
-            method: 'POST',
-            protocol: options.protocol,
-            port: options.port,
-            allowSelfSignedCert: options.allowSelfSignedCert,
-            body
-        };
-
-        return this.makeRequest(host, uri, postOptions)
-            .then(data => ({ token: data.token.token }))
-            .catch((err) => {
-                const msg = `getAuthToken: ${err}`;
-                throw new Error(msg);
-            });
     },
 
     /**
@@ -817,183 +841,6 @@ module.exports = {
             return new Buffer(data, 'base64').toString().trim();
         }
         throw new Error('Unsupported action, try one of these: decode');
-    },
-
-    /**
-     * Encrypt secret
-     *
-     * @param {String} data - data to encrypt
-     *
-     * @returns {Object} Returns promise resolved with encrypted secret
-     */
-    encryptSecret(data) {
-        let encryptedData = null;
-        // can't have a + or / in the radius object name, so replace those if they exist
-        const radiusObjectName = `telemetry_delete_me_${crypto.randomBytes(6)
-            .toString('base64')
-            .replace(/[+]/g, '-')
-            .replace(/\x2f/g, '_')}`;
-        const uri = '/mgmt/tm/ltm/auth/radius-server';
-        const httpPostOptions = {
-            method: 'POST',
-            body: {
-                name: radiusObjectName,
-                secret: data,
-                server: 'foo'
-            }
-        };
-        const httpDeleteOptions = {
-            method: 'DELETE',
-            continueOnErrorCode: true
-        };
-
-        return this.makeRequest(constants.LOCAL_HOST, uri, httpPostOptions)
-            .then((res) => {
-                if (typeof res.secret !== 'string') {
-                    // well this can't be good
-                    logger.error(`Secret could not be retrieved: ${this.stringify(res)}`);
-                }
-                // update text field with Secure Vault cryptogram - should we base64 encode?
-                encryptedData = res.secret;
-                return this.getDeviceVersion(constants.LOCAL_HOST);
-            })
-            .then((deviceVersion) => {
-                let promise;
-                if (this.compareVersionStrings(deviceVersion.version, '>=', '14.1')) {
-                    // TMOS 14.1.x fix for 745423
-                    const tmshCmd = `tmsh -a list auth radius-server ${radiusObjectName} secret`;
-                    promise = this.executeShellCommandOnDevice(constants.LOCAL_HOST, tmshCmd)
-                        .then((res) => {
-                            /**
-                             * auth radius-server telemetry_delete_me {
-                             *   secret <secret-data>
-                             * }
-                             */
-                            encryptedData = res.split('\n')[1].trim().split(' ', 2)[1];
-                        });
-                }
-                return promise || Promise.resolve();
-            })
-            .then(() => this.makeRequest(constants.LOCAL_HOST, `${uri}/${radiusObjectName}`, httpDeleteOptions))
-            .then(() => encryptedData)
-            .catch((e) => {
-                // best effort to delete radius object - we don't know where we failed
-                this.makeRequest(constants.LOCAL_HOST, `${uri}/${radiusObjectName}`, httpDeleteOptions);
-
-                throw e;
-            });
-    },
-
-    /**
-     * Decrypt secret
-     *
-     * @param {String} data - data to decrypt
-     *
-     * @returns {Object} Returns promise resolved with decrypted secret
-     */
-    decryptSecret(data) {
-        return new Promise((resolve, reject) => {
-            childProcess.exec(`/usr/bin/php ${__dirname}/scripts/decryptConfValue.php '${data}'`, (error, stdout, stderr) => {
-                if (error) {
-                    reject(new Error(`decryptSecret exec error: ${error} ${stderr}`));
-                } else {
-                    // stdout should simply contain decrypted secret
-                    resolve(stdout);
-                }
-            });
-        });
-    },
-
-    /**
-     * Decrypt all secrets in config
-     *
-     * @param {Object} data - data (config)
-     *
-     * @returns {Object} Returns promise resolved with config containing decrypted secrets
-     */
-    decryptAllSecrets(data) {
-        // helper functions strictly for this function
-        const removePassphrase = (iData) => {
-            if (iData && typeof iData === 'object') {
-                if (Array.isArray(iData)) {
-                    iData.forEach((i) => {
-                        removePassphrase(i);
-                    });
-                } else {
-                    const keys = Object.keys(iData);
-
-                    // check for value containing an object with 'class': 'Secret'
-                    // this applies to named key 'passphrase' as well as unknown key names
-                    keys.forEach((k) => {
-                        if (typeof iData[k] === 'object' && iData[k].class === 'Secret') {
-                            delete iData[k];
-                        }
-                    });
-
-                    // finally recurse child objects
-                    keys.forEach((k) => {
-                        removePassphrase(iData[k]);
-                    });
-                }
-            }
-            return iData;
-        };
-        const getPassphrase = (iData, iPath) => {
-            // assume diff returned valid path, so let's start at root and then
-            // navigate down to object
-            let passphrase = iData;
-            iPath.forEach((i) => {
-                passphrase = passphrase[i];
-            });
-            return passphrase;
-        };
-        // end helper functions
-
-        // deep copy of the data, then remove passphrases and get a diff using deep-diff module
-        // telling us where exactly in the config each passphrase is and how many there are
-        const dataCopy = JSON.parse(JSON.stringify(data));
-        const passphrases = diff(removePassphrase(dataCopy), data) || [];
-
-        // now for each passphrase determine if decryption (or download, etc.) is required
-        const promises = [];
-        passphrases.forEach((i) => {
-            const passphrase = getPassphrase(data, i.path);
-
-            if (passphrase[constants.PASSPHRASE_CIPHER_TEXT] !== undefined) {
-                // constants.PASSPHRASE_CIPHER_TEXT means local decryption is required
-                promises.push(this.decryptSecret(passphrase[constants.PASSPHRASE_CIPHER_TEXT]));
-            } else if (passphrase[constants.PASSPHRASE_ENVIRONMENT_VAR] !== undefined) {
-                // constants.PASSPHRASE_ENVIRONMENT_VAR means secret resides in an environment variable
-                let envValue = process.env[passphrase[constants.PASSPHRASE_ENVIRONMENT_VAR]];
-                if (envValue === undefined) {
-                    envValue = null;
-                    logger.error(`Environment variable does not exist: ${passphrase[constants.PASSPHRASE_ENVIRONMENT_VAR]}`);
-                }
-                promises.push(envValue);
-            } else {
-                // always push a promise to keep index in sync
-                promises.push(null);
-            }
-        });
-
-        return Promise.all(promises)
-            .then((res) => {
-                let idx = 0;
-                passphrases.forEach((i) => {
-                    // navigate to passphrase in data object and replace whole object with
-                    // decrypted value - this allows consumers to reference any key name containing
-                    // a secret (object) and get decrypted value (string) - not just 'passphrase'
-                    const parentKey = i.path[i.path.length - 1];
-                    const passphrase = getPassphrase(data, i.path.slice(0, -1));
-                    passphrase[parentKey] = res[idx];
-                    idx += 1;
-                });
-                // return (modified) data
-                return data;
-            })
-            .catch((e) => {
-                throw e;
-            });
     },
 
     /**
@@ -1043,9 +890,187 @@ module.exports = {
         return Promise.all([connectPromise, timeoutPromise])
             .then(() => true)
             .catch((e) => {
-                throw e;
+                throw new Error(`networkCheck: ${e}`);
             });
     },
 
+    /**
+     * Get the last day of month for provided date
+     *
+     * @param {Date} date - date object
+     *
+     * @returns {Integer} last day of month
+     */
+    getLastDayOfMonth(date) {
+        // lets calculate the last day of provided month
+        const endOfMonth = new Date(date);
+        // reset date, to avoid situations like 3/31 + 1 month = 5/1
+        endOfMonth.setDate(1);
+        // set next month
+        endOfMonth.setMonth(endOfMonth.getMonth() + 1);
+        // if 0 is provided for dayValue, the date will be set to the last day of the previous month
+        endOfMonth.setDate(0);
+        return endOfMonth.getDate();
+    },
+
+    /**
+     * Get random number from range
+     *
+     * @param {Number} min - left boundary
+     * @param {Number} max - right boundary
+     *
+     * @returns {Number} random number from range
+     */
+    getRandomArbitrary(min, max) {
+        return Math.random() * (max - min) + min;
+    },
+
+    /**
+     * Parse HH:MM string to tuple(integer, integer)
+     *
+     * @param {string} timeStr - time string in HH:MM format
+     *
+     * @returns {Array} array with parsed data
+     */
+    timeStrToTuple(timeStr) {
+        const timeTuple = timeStr.split(':');
+        if (timeTuple.length !== 2) {
+            throw new Error('String should be in format HH:MM');
+        }
+
+        for (let i = 0; i < timeTuple.length; i += 1) {
+            timeTuple[i] = parseInt(timeTuple[i], 10);
+        }
+        if (!(timeTuple[0] >= 0 && timeTuple[0] < 24 && timeTuple[1] >= 0 && timeTuple[1] < 60)) {
+            throw new Error('Time should be between 00:00 and 23:59');
+        }
+        return timeTuple;
+    },
+
+    /**
+     * @typedef Schedule
+     *
+     * @property {String}           frequency    - event frequency, allowed values - daily, weekly, monthly
+     * @property {Object}           time         - time object
+     * @property {String}           time.start   - start time in format HH:MM
+     * @property {String}           time.end     - end time in format HH:MM
+     * @property {Integer}          [dayOfMonth] - day of month, required for 'monthly'
+     * @property {String | Integer} [dayOfWeek]  - day of week, could be name (e.g. Monday) or
+     *                                             number from 0-7, where 0 and 7 are Sunday. Required for
+     */
+    /**
+     * Get next execution date for provided schedule
+     *
+     * @param {module:ihealthUtil~Schedule} schedule - schedule object
+     * @param {Date}     [fromDate]                  - data to count next execution from, by default current date
+     * @param {Boolean}  [allowNow]                  - e.g. fromDate is 3am and schedule time is 23pm - 4am,
+     *                                                 frequency is daily. If allowNow === true then nextExecution
+     *                                                 date will be between 3am and 4am same day, otherwise nextExection
+     *                                                 date wiil be same day between 23pm and 4am next day.
+     *
+     * @returns {Date} next execution date
+     */
+    getNextFireDate(schedule, fromDate, allowNow) {
+        const self = this;
+
+        // setup defaults
+        allowNow = allowNow === undefined ? true : allowNow;
+        fromDate = fromDate || new Date();
+        // adjustment function
+        let adjustment;
+        // check if date fits schedule or not
+        let isOnSchedule;
+
+        if (schedule.frequency === 'daily') {
+            // move time forward for a day
+            adjustment = (date) => {
+                date.setDate(date.getDate() + 1);
+                return date;
+            };
+            // for daily basic simply return true
+            isOnSchedule = () => true;
+        } else if (schedule.frequency === 'weekly') {
+            let dayOfWeek = schedule.day;
+            // if it is number -> convert it to string representation
+            // to handle 0 and 7 in single place
+            if (typeof dayOfWeek !== 'string') {
+                dayOfWeek = constants.WEEKDAY_TO_DAY_NAME[dayOfWeek];
+            }
+            dayOfWeek = constants.DAY_NAME_TO_WEEKDAY[dayOfWeek.toLowerCase()];
+            // just in case something strange happened - e.g. unknown week day name
+            if (dayOfWeek === undefined) {
+                const msg = `getNextExecutionDate: Unknown weekday value - ${JSON.stringify(schedule)}`;
+                throw new Error(msg);
+            }
+            // move time forward for a week
+            adjustment = (date) => {
+                const delta = dayOfWeek - date.getDay();
+                date.setDate(date.getDate() + delta + (delta > 0 ? 0 : 7));
+                return date;
+            };
+            // simply check if day is desired week day
+            isOnSchedule = date => date.getDay() === dayOfWeek;
+        } else {
+            // monthly schedule, day of month
+            const dayOfMonth = schedule.day;
+            // move date to desired dayOfMonth and to next month if needed
+            adjustment = function (date) {
+                let lastDayOfMonth = self.getLastDayOfMonth(date);
+                if (date.getDate() >= (dayOfMonth > lastDayOfMonth ? lastDayOfMonth : dayOfMonth)) {
+                    date.setDate(1);
+                    date.setMonth(date.getMonth() + 1);
+                    lastDayOfMonth = self.getLastDayOfMonth(date);
+                }
+                date.setDate(dayOfMonth > lastDayOfMonth ? lastDayOfMonth : dayOfMonth);
+                return date;
+            };
+            // simply check current date against desired
+            isOnSchedule = function (date) {
+                const lastDayOfMonth = self.getLastDayOfMonth(date);
+                return date.getDate() === (dayOfMonth > lastDayOfMonth ? lastDayOfMonth : dayOfMonth);
+            };
+        }
+        // time start and end are expected to be in HH:MM format.
+        const startTimeTuple = self.timeStrToTuple(schedule.timeWindow.start);
+        const endTimeTuple = self.timeStrToTuple(schedule.timeWindow.end);
+
+        let startExecDate = new Date(fromDate);
+        startExecDate.setHours(startTimeTuple[0]);
+        startExecDate.setMinutes(startTimeTuple[1]);
+        startExecDate.setSeconds(0);
+        startExecDate.setMilliseconds(0);
+
+        // simply moving clock for 1 day back if we a going to try fit current time
+        if (allowNow) {
+            startExecDate.setDate(startExecDate.getDate() - 1);
+        }
+
+        let endExecDate = new Date(startExecDate);
+        endExecDate.setHours(endTimeTuple[0]);
+        endExecDate.setMinutes(endTimeTuple[1]);
+
+        // handle situations like start 23pm and end 4am
+        if (startExecDate > endExecDate) {
+            endExecDate.setDate(endExecDate.getDate() + 1);
+        }
+        let windowSize = endExecDate.getTime() - startExecDate.getTime();
+
+        while (!(isOnSchedule(startExecDate) && ((allowNow && startExecDate <= fromDate && fromDate < endExecDate)
+                || startExecDate > fromDate))) {
+            startExecDate = adjustment(startExecDate);
+            endExecDate = new Date(startExecDate);
+            endExecDate.setTime(endExecDate.getTime() + windowSize);
+        }
+
+        if (startExecDate <= fromDate && fromDate < endExecDate) {
+            startExecDate = fromDate;
+            windowSize = endExecDate.getTime() - startExecDate.getTime();
+        }
+        // finally set random time
+        startExecDate.setTime(startExecDate.getTime() + Math.floor(self.getRandomArbitrary(0, windowSize)));
+        return startExecDate;
+    },
+
+    /** @see Tracer */
     tracer: Tracer
 };
