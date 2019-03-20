@@ -100,6 +100,8 @@ deploy_bigip:
         variables:
             - $REQ_DEVICE_PIPELINE == "true"
     script:
+        - pwd
+        - ls
         - cd /root/cicd-bigip-deploy && make configure &&
             make printvars && cat ${PROJECT_DIR}/project-vars &&
             make setup && ls -als ${PROJECT_DIR} &&
