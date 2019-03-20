@@ -101,9 +101,11 @@ deploy_bigip:
             - $REQ_DEVICE_PIPELINE == "true"
     script:
         - pwd
-        - ls
+        - ls test
+        - ls test/deployment
+        - ls ${PROJECT_DECLARATION}
         - cd /root/cicd-bigip-deploy && make configure &&
-            make printvars && cat ${PROJECT_DIR}/project-vars &&
+            make printvars &&
             make setup && ls -als ${PROJECT_DIR} &&
             cp ${PROJECT_DIR}/harness_facts_flat.json ${CI_PROJECT_DIR}/harness_facts_flat.json
 
