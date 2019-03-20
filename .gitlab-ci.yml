@@ -88,7 +88,7 @@ deploy_bigip:
     image: ${CICD_CONTAINER_DEPLOY}
     variables:
         PROJECT_NAME: ${REQ_PROJECT_NAME}
-        PROJECT_DECLARATION: ./test/deployment/${REQ_TEST_DECLARATION}
+        PROJECT_DECLARATION: $(pwd)/test/deployment/${REQ_TEST_DECLARATION}
         PROJECT_DIR: /root/deploy-projects/${REQ_PROJECT_NAME}
         CUSTOM_DECLARATION: "yes"
     artifacts:
