@@ -73,7 +73,7 @@ trigger_deploy_job_13_1:
         - curl -k -X POST -F token=${CICD_PIPELINE_TRIGGER_FOR_DEPLOY}
             -F ref=${CI_COMMIT_REF_NAME}
             -F "variables[REQ_PROJECT_NAME]=ts_cicd_bigip_13_1"
-            -F "variables[REQ_TEST_DECLARATION]=declaration13.1.yml"
+            -F "variables[REQ_TEST_DECLARATION]=declaration13.1.yml"
             ${CICD_PIPLINE_TRIGGER_URL}
     only:
         # run if scheduled
@@ -88,7 +88,7 @@ deploy_bigip:
         PROJECT_NAME: ${REQ_PROJECT_NAME}
         PROJECT_DECLARATION: ./test/deployment/${REQ_TEST_DECLARATION}
         PROJECT_DIR: /root/deploy-projects/${REQ_PROJECT_NAME}
-        CUSTOM_DECLARATION: yes
+        CUSTOM_DECLARATION: "yes"
     artifacts:
         name: ${CI_COMMIT_REF_NAME}_bigip.${REQ_TEST_DECLARATION}_harness_info
         paths:
@@ -158,7 +158,7 @@ teardown_bigip:
         PROJECT_NAME: ${REQ_PROJECT_NAME}
         PROJECT_DECLARATION: ./test/deployment/${REQ_TEST_DECLARATION}
         PROJECT_DIR: /root/deploy-projects/${REQ_PROJECT_NAME}
-        CUSTOM_DECLARATION: yes
+        CUSTOM_DECLARATION: "yes"
     script:
         - cd /root/cicd-bigip-deploy && make configure && make teardown
     when: always
