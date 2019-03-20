@@ -1,0 +1,38 @@
+request:
+  project:
+    folder: /root/deploy-projects/ts_test_14_1
+    name: ts_test_14_1
+
+  configuration:
+    bigip:
+      doLicensing: true
+      doProvisioning: true
+
+  declaration:
+    instance:
+
+    - harness:
+        _copy: request/hypervisor
+      name: ubuntu
+      image: Ubuntu18.04LTS-pristine
+
+    - configuration:
+        _copy: request/configuration/bigip
+      harness:
+        _copy: request/hypervisor
+      name: bigip
+      software:
+        _copy: request/software/bigip
+      type: bigip
+
+  hypervisor: VIO
+  software:
+    bigip:
+      default:
+        force: false
+        image: BIGIP-13.0.0.0.0.1650
+      desired:
+        branch: ''
+        build: 0.0.7
+        iso_file: ''
+        version: 14.1.0.1
