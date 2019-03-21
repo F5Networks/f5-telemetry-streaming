@@ -47,7 +47,6 @@ build_docs:
 # CICD_AUTH_OS_PROJECT - VIO project
 # also one more variable should be defined
 # CICD_PIPELINE_TRIGGER_FOR_DEPLOY - CI/CD trigger ID
-#
 deploy_bigip:
     stage: deploy
     tags:
@@ -96,44 +95,44 @@ deploy_bigip:
 #     tags:
 #         - cm-official-docker-executor
 
-# test_functional:
-#     stage: test
-#     script:
-#         - export TEST_HARNESS_FILE=${CI_PROJECT_DIR}/harness_facts_flat.json
-#         # really only need dev dependencies
-#         - npm run install-test
-#         - ls ./dist -ls
-#         - npm run test-functional
-#     # troubleshooting functional test failures typically requires looking at logs, one of which is
-#     # the restnoded log that is captured by the functional tests.  This saves off the folder
-#     # containing that log as an artifact to speed up the troubleshooting process
-#     artifacts:
-#         name: ${CI_COMMIT_REF_NAME}_functests_logs
-#         paths:
-#             - test/functional/logs
-#         when: always
-#     tags:
-#         - cm-official-docker-executor
-#     only:
-#         variables:
-#             - $REQ_DEVICE_PIPELINE == "true"
-
-teardown_bigip:
-    stage: teardown
+test_functional:
+    stage: test
+    script:
+        - export TEST_HARNESS_FILE=${CI_PROJECT_DIR}/harness_facts_flat.json
+        # really only need dev dependencies
+        - npm run install-test
+        - ls ./dist -ls
+        - npm run test-functional
+    # troubleshooting functional test failures typically requires looking at logs, one of which is
+    # the restnoded log that is captured by the functional tests.  This saves off the folder
+    # containing that log as an artifact to speed up the troubleshooting process
+    artifacts:
+        name: ${CI_COMMIT_REF_NAME}_functests_logs
+        paths:
+            - test/functional/logs
+        when: always
     tags:
         - cm-official-docker-executor
-    image: ${CICD_CONTAINER_DEPLOY}
-    variables:
-        PROJECT_NAME: test_functional_harness
-        PROJECT_DECLARATION: ${CI_PROJECT_DIR}/test/deployment/declaration.yml
-        PROJECT_DIR: /root/deploy-projects/test_functional_harness
-        CUSTOM_DECLARATION: "yes"
-    script:
-        - cd /root/cicd-bigip-deploy && make configure && make teardown
-    when: always
     only:
         variables:
             - $REQ_DEVICE_PIPELINE == "true"
+
+# teardown_bigip:
+#     stage: teardown
+#     tags:
+#         - cm-official-docker-executor
+#     image: ${CICD_CONTAINER_DEPLOY}
+#     variables:
+#         PROJECT_NAME: test_functional_harness
+#         PROJECT_DECLARATION: ${CI_PROJECT_DIR}/test/deployment/declaration.yml
+#         PROJECT_DIR: /root/deploy-projects/test_functional_harness
+#         CUSTOM_DECLARATION: "yes"
+#     script:
+#         - cd /root/cicd-bigip-deploy && make configure && make teardown
+#     when: always
+#     only:
+#         variables:
+#             - $REQ_DEVICE_PIPELINE == "true"
 
 # Publish to internal artifactory
 # Note: Will publish when new tags are pushed and use the current build in dist directory

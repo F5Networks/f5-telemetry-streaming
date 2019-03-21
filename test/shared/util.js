@@ -274,7 +274,7 @@ module.exports = {
 
     /**
      * Get host(s) - info provided in one of two ways
-     * - *Harness File* - file: [ { admin_ip: x.x.x.x, admin_username: admin, admin_password: admin } ]
+     * - *Harness File* - file: look for example test/deployment/example_harness_facts.json
      * - *Environment Vars* - constants contains var for IP (1+), USER, PWD
      *
      * @param {String} harnessType - type of harness to query for: BIGIP|CONSUMER
@@ -293,12 +293,27 @@ module.exports = {
 
         const testHarnessFile = envVars.FILE ? process.env[envVars.FILE] : null;
         if (testHarnessFile && fs.existsSync(testHarnessFile)) {
+            let filter;
+            if (harnessType === 'BIGIP') {
+                filter = item => item.is_f5_device && item.type === 'bigip';
+            } else {
+                filter = item => !item.is_f5_device;
+            }
             // eslint-disable-next-line import/no-dynamic-require, global-require
-            hosts = require(testHarnessFile).map(item => ({
-                ip: item.admin_ip,
-                username: item.admin_username,
-                password: item.admin_password
-            }));
+            hosts = require(testHarnessFile).filter(filter).map((item) => {
+                if (item.is_f5_device) {
+                    return {
+                        ip: item.admin_ip,
+                        username: item.f5_rest_user.username,
+                        password: item.f5_rest_user.password
+                    };
+                }
+                return {
+                    ip: item.admin_ip,
+                    username: item.ssh_user.username,
+                    password: item.ssh_user.password
+                };
+            });
         } else if (envVars && envVars.IP && process.env[envVars.IP]) {
             // straight up environment variables - could be 1+ hosts: x.x.x.x,x.x.x.y
             hosts = process.env[envVars.IP].split(',').map(host => ({
