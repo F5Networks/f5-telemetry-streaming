@@ -89,7 +89,6 @@ deploy_bigip:
     variables:
         PROJECT_NAME: ${REQ_PROJECT_NAME}
         PROJECT_DECLARATION: ${CI_PROJECT_DIR}/test/deployment/${REQ_TEST_DECLARATION}
-        PROJECTS_DIR: /root/deploy-projects
         PROJECT_DIR: /root/deploy-projects/${REQ_PROJECT_NAME}
         CUSTOM_DECLARATION: "yes"
     artifacts:

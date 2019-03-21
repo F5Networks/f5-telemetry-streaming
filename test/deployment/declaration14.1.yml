@@ -1,6 +1,6 @@
 request:
   project:
-    folder: /root/deploy-projects/ts_test_14_1
+    folder: /root/deploy-projects/ts_cicd_bigip_13_1
     name: ts_test_14_1
 
   configuration:
