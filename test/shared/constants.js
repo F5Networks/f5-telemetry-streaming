@@ -25,7 +25,7 @@ module.exports = {
             PWD: 'TEST_HOSTS_PWD'
         },
         CONSUMER_HARNESS: {
-            FILE: 'CONSUMER_HARNESS_FILE',
+            FILE: 'TEST_HARNESS_FILE',
             IP: 'CONSUMER_HOSTS',
             USER: 'CONSUMER_HOSTS_USER',
             PWD: 'CONSUMER_HOSTS_PWD'

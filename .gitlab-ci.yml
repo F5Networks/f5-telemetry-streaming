@@ -47,54 +47,18 @@ build_docs:
 # CICD_AUTH_OS_PROJECT - VIO project
 # also one more variable should be defined
 # CICD_PIPELINE_TRIGGER_FOR_DEPLOY - CI/CD trigger ID
-#
-# job triggers CI/CD trigger to initiate seperate pipeline for deployment
-# this allows to parameterize pipeline to test packages against different
-# versions of BIG-IP
-trigger_deploy_job_14_1:
-    stage: deploy
-    tags:
-        - docker-executor
-    script:
-        - curl -k -X POST -F token=${CICD_PIPELINE_TRIGGER_FOR_DEPLOY}
-            -F ref=${CI_COMMIT_REF_NAME}
-            -F "variables[REQ_DEVICE_PIPELINE]=true"
-            -F "variables[REQ_PROJECT_NAME]=ts_cicd_bigip_14_1"
-            -F "variables[REQ_BIGIP_VERSION]=14.1.0.1"
-            -F "variables[REQ_BIGIP_BUILD]=0.0.7"
-            ${CICD_PIPLINE_TRIGGER_URL}
-    only:
-        # run if scheduled
-        - schedules
-
-trigger_deploy_job_13_1:
-    stage: deploy
-    tags:
-        - docker-executor
-    script:
-        - curl -k -X POST -F token=${CICD_PIPELINE_TRIGGER_FOR_DEPLOY}
-            -F ref=${CI_COMMIT_REF_NAME}
-            -F "variables[REQ_DEVICE_PIPELINE]=true"
-            -F "variables[REQ_PROJECT_NAME]=ts_cicd_bigip_13_1"
-            -F "variables[REQ_BIGIP_VERSION]=13.1.1.4"
-            -F "variables[REQ_BIGIP_BUILD]=0.0.4"
-            ${CICD_PIPLINE_TRIGGER_URL}
-    only:
-        # run if scheduled
-        - schedules
-
 deploy_bigip:
     stage: deploy
     tags:
         - cm-official-docker-executor
     image: ${CICD_CONTAINER_DEPLOY}
     variables:
-        PROJECT_NAME: ${REQ_PROJECT_NAME}
-        PROJECT_DIR: /root/deploy-projects/${REQ_PROJECT_NAME}
-        BIGIP_VERSION: ${REQ_BIGIP_VERSION}
-        BIGIP_BUILD: ${REQ_BIGIP_BUILD}
+        PROJECT_NAME: test_functional_harness
+        PROJECT_DECLARATION: ${CI_PROJECT_DIR}/test/deployment/declaration.yml
+        PROJECT_DIR: /root/deploy-projects/test_functional_harness
+        CUSTOM_DECLARATION: "yes"
     artifacts:
-        name: ${CI_COMMIT_REF_NAME}_bigip.${BIGIP_VERSION}.${BIGIP_BUILD}_harness_info
+        name: ${CI_COMMIT_REF_NAME}_bigip.test_functional_harness_info
         paths:
             - ${CI_PROJECT_DIR}/harness_facts_flat.json
         when: on_success
@@ -103,7 +67,7 @@ deploy_bigip:
             - $REQ_DEVICE_PIPELINE == "true"
     script:
         - cd /root/cicd-bigip-deploy && make configure &&
-            make printvars && cat ${PROJECT_DIR}/project-vars &&
+            make printvars &&
             make setup && ls -als ${PROJECT_DIR} &&
             cp ${PROJECT_DIR}/harness_facts_flat.json ${CI_PROJECT_DIR}/harness_facts_flat.json
 
@@ -159,8 +123,10 @@ teardown_bigip:
         - cm-official-docker-executor
     image: ${CICD_CONTAINER_DEPLOY}
     variables:
-        PROJECT_NAME: ${REQ_PROJECT_NAME}
-        PROJECT_DIR: /root/deploy-projects/${REQ_PROJECT_NAME}
+        PROJECT_NAME: test_functional_harness
+        PROJECT_DECLARATION: ${CI_PROJECT_DIR}/test/deployment/declaration.yml
+        PROJECT_DIR: /root/deploy-projects/test_functional_harness
+        CUSTOM_DECLARATION: "yes"
     script:
         - cd /root/cicd-bigip-deploy && make configure && make teardown
     when: always
