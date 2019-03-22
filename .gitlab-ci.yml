@@ -12,7 +12,10 @@ build_package:
     stage: build
     script:
         - echo 'CI BUILD'
-        # install packages first
+        # install packages: jq
+        - apt-get update
+        - apt-get install -y jq
+        # install node modules
         - npm run install-production
         - bash ./scripts/build_rpm.sh
     tags:
