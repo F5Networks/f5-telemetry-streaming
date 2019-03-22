@@ -561,14 +561,18 @@ Note: All metrics are stored as gauges in statsd, those can be seen within graph
 
 ```json
 {
-    "My_Poller": {
-        "class": "Telemetry_System_Poller",
-        "interval": 60,
+    "My_System": {
+        "class": "Telemetry_System",
         "host": "192.0.2.1",
+        "protocol": "https",
         "port": 443,
+        "allowSelfSignedCert": false,
         "username": "myuser",
         "passphrase": {
             "cipherText": "mypassphrase"
+        },
+        "systemPoller": {
+            "interval": 60
         }
     }
 }
@@ -579,7 +583,7 @@ Note: All metrics are stored as gauges in statsd, those can be seen within graph
 ```json
 {
     "passphrase": {
-        "environmentVar": "MY_SECRET_ENV_VAR"
+        "environmentVar": "TS_SYSTEM_SECRET"
     }
 }
 ```
@@ -1750,6 +1754,29 @@ Note: AS3 version 3.10.0 or greater required.
 }
 ```
 
+#### Single NIC Log Configuration
+
+When deploying the BIG-IP with a single NIC it does not allow the `telemetry_local` pool to target the management address.  The following depicts alternative option(s) to use.
+
+- Virtual Server + iRule
+    - Solution: Instead of the `telemetry_local` pool member targeting the BIG-IP it can be configured to point at an internal virtual server.
+    - Configuration
+        - Pool: Previously documented `telemetry_local` pool member would be `255.255.255.254:6514`
+        - Virtual Server
+            - Name: telemetry_redirect
+            - Destination: 255.255.255.254:6514
+            - Protocol: tcp
+            - Pool: None
+            - iRule: telemetry_redirect
+        - iRule
+            - Name: telemetry_redirect
+            - Definition:
+            ```
+                when CLIENT_ACCEPTED {
+                    node 127.0.0.1 6514
+                }
+            ```
+
 ## Container
 
 This project builds a container, here are the current steps to build and run that container. Note: Additional steps TBD around pushing to docker hub, etc.
@@ -1758,6 +1785,6 @@ Note: Currently this is building from local node_modules, src, etc.  This should
 
 Build: ```docker build . -t f5-telemetry``` Note: From root folder of this project
 
-Run: ```docker run --rm -d -p 443:443/tcp -p 6514:6514/tcp -e MY_SECRET_ENV_VAR='mysecret' f5-telemetry:latest```
+Run: ```docker run --rm -d -p 443:443/tcp -p 6514:6514/tcp -e TS_SYSTEM_SECRET='secret' -e TS_CONSUMER_SECRET='secret' f5-telemetry:latest```
 
 Attach Shell: ```docker exec -it <running container name> /bin/sh```
