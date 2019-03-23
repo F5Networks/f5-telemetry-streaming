@@ -6,14 +6,30 @@
         "Shared": {
             "class": "Application",
             "template": "shared",
+            "telemetry_local_rule": {
+                "remark": "Only required when TS is a local listener",
+                "class": "iRule",
+                "iRule": "when CLIENT_ACCEPTED {\n  node 127.0.0.1 6514\n}"
+            },
             "telemetry_local": {
+                "remark": "Only required when TS is a local listener",
+                "class": "Service_TCP",
+                "virtualAddresses": [
+                    "255.255.255.254"
+                ],
+                "virtualPort": 6514,
+                "iRules": [
+                    "telemetry_local_rule"
+                ]
+            },
+            "telemetry": {
                 "class": "Pool",
                 "members": [
                     {
-                        "serverAddresses": [
-                            "192.0.2.10"
-                        ],
                         "enable": true,
+                        "serverAddresses": [
+                            "255.255.255.254"
+                        ],
                         "servicePort": 6514
                     }
                 ],
@@ -28,7 +44,7 @@
                 "type": "remote-high-speed-log",
                 "protocol": "tcp",
                 "pool": {
-                    "use": "telemetry_local"
+                    "use": "telemetry"
                 }
             },
             "telemetry_formatted": {
@@ -52,7 +68,7 @@
                     "requestEnabled": true,
                     "requestProtocol": "mds-tcp",
                     "requestPool": {
-                        "use": "telemetry_local"
+                        "use": "telemetry"
                     },
                     "requestTemplate": "event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\""
                 }
@@ -65,7 +81,7 @@
                     "protocol": "tcp",
                     "servers": [
                         {
-                            "address": "192.0.2.10",
+                            "address": "255.255.255.254",
                             "port": "6514"
                         }
                     ],

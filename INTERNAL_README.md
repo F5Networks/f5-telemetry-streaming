@@ -1381,9 +1381,10 @@ Response:
 
 Configuration
 
-- Create Pool (just the pool, no destination/publisher): [Log Publisher Configuration](#log-publisher-configuration)
+- Create Pool: [Log Publisher Configuration](#log-publisher-configuration)
+  - Note: (destination/publisher objects not required)
 - Create LTM Request Log Profile
-  - TMSH: ```create ltm profile request-log telemetry request-log-pool telemetry-local request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\" request-logging enabled```
+  - TMSH: ```create ltm profile request-log telemetry request-log-pool telemetry request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\" request-logging enabled```
     - Note: If creating the profile from the GUI, the ```\``` are not required.
   - F5 Application Services 3.0: [Log Profile Creation Using AS3](#log-profile-creation-using-as3)
 - Attach profile to the virtual server
@@ -1424,7 +1425,7 @@ Configuration
 
 - Create Log Publisher (and related objects): [Log Publisher Configuration](#log-publisher-configuration)
 - Create Security Log Profile:
-  - TMSH: ```create security log profile telemetry network replace-all-with { telemetry { filter { log-acl-match-drop enabled log-acl-match-reject enabled } publisher telemetry-publisher } }```
+  - TMSH: ```create security log profile telemetry network replace-all-with { telemetry { filter { log-acl-match-drop enabled log-acl-match-reject enabled } publisher telemetry_publisher } }```
   - F5 Application Services 3.0: [Log Profile Creation Using AS3](#log-profile-creation-using-as3)
 - Attach profile to the virtual server
   - F5 Application Services Extension (snippet)
@@ -1499,7 +1500,8 @@ Output
 Configuration
 
 - Create Security Log Profile:
-  - TMSH: ```create security log profile telemetry application replace-all-with { telemetry { filter replace-all-with { request-type { values replace-all-with { all } } } logger-type remote remote-storage splunk servers replace-all-with { 192.0.2.1:6514 {} } } }```
+  - *Note*: When TS is not a local listener the servers property should be the listener's remote address.  
+  - TMSH: ```create security log profile telemetry application replace-all-with { telemetry { filter replace-all-with { request-type { values replace-all-with { all } } } logger-type remote remote-storage splunk servers replace-all-with { 255.255.255.254:6514 {} } } }```
   - F5 Application Services 3.0: [Log Profile Creation Using AS3](#log-profile-creation-using-as3)
 - Attach profile to the virtual server
   - F5 Application Services Extension (snippet)
@@ -1578,7 +1580,7 @@ Configuration
 
 - Create Log Publisher (and related objects): [Log Publisher Configuration](#log-publisher-configuration)
 - Create APM Log Profile
-  - TMSH: ```create apm log-setting telemetry access replace-all-with { access { publisher telemetry-publisher } }```
+  - TMSH: ```create apm log-setting telemetry access replace-all-with { access { publisher telemetry_publisher } }```
 - Attach profile to the APM policy
 - Attach APM policy to the virtual server
   - F5 Application Services Extension (snippet)
@@ -1619,7 +1621,7 @@ Output
 Configuration
 
 - Modify System syslog configuration (add destination)
-  - TMSH: ```modify sys syslog remote-servers replace-all-with { server { host 10.0.1.100 remote-port 6515 } }```
+  - TMSH: ```modify sys syslog remote-servers replace-all-with { server { host 127.0.0.1 remote-port 6514 } }```
   - GUI: System -> Logs -> Configuration -> Remote Logging
 - Modify System logging configuration (update what gets logged)
   - TMSH: ```modify sys daemon-log-settings mcpd audit enabled`` Note: Other daemon-log-settings exist
@@ -1636,26 +1638,46 @@ Output
 
 #### Log Publisher Configuration
 
+Configuration Notes
+
+  - Note: Examples assume TS listener is using port 6514.
+  - Note: BIG-IP configuration pointing to a local on-box listener requires additional objects, configuration of those are included below.
+  - Note: Per-app Virtual Edition BIG-IP limits the number of virtual servers available, to avoid creating the virtual server in the following configuration it is possible to point the pool directly at the TMM link-local IPv6 address. Example: `ip addr` -> tmm (interface) -> inet6 (entry) = fe80::298:76ff:fe54:3210
+
+Configuration
+
+- Create iRule (localhost forwarder)
+    - *Note*: Only required when TS is a local listener
+    - Definition:
+        ```
+        when CLIENT_ACCEPTED {
+            node 127.0.0.1 6514
+        }
+        ```
+    - TMSH: ```create ltm rule telemetry_local_rule``` (include definition and save)
+- Create Virtual Server
+    - *Note*: Only required when TS is a local listener
+    - TMSH: ```create ltm virtual telemetry_local destination 255.255.255.254:6514 rules { telemetry_local_rule }```
 - Create Pool
-  - TMSH: ```create ltm pool telemetry-local monitor tcp members replace-all-with { 192.0.2.1:6514 }```
-  - Note: Replace example address with valid TS listener address, for example the mgmt IP.
+    - *Note*: When TS is not a local listener the member should be the listener's remote address.
+    - TMSH: ```create ltm pool telemetry monitor tcp members replace-all-with { 255.255.255.254:6514 }```
 - Create Log Destination (Remote HSL)
   - GUI: System -> Logs -> Configuration -> Log Destinations
-    - Name: telemetry-hsl
+    - Name: telemetry_hsl
     - Type: Remote HSL
     - Protocol: TCP
-    - Pool: telemetry-local
-  - TMSH: ```create sys log-config destination remote-high-speed-log telemetry-hsl protocol tcp pool-name telemetry-local```
+    - Pool: telemetry
+  - TMSH: ```create sys log-config destination remote-high-speed-log telemetry_hsl protocol tcp pool-name telemetry```
 - Create Log Destination (Format)
   - GUI: System -> Logs -> Configuration -> Log Destinations
-    - Name: telemetry-formatted
-    - Forward To: telemetry-hsl
-  - TMSH: ```create sys log-config destination splunk telemetry-formatted forward-to telemetry-hsl```
+    - Name: telemetry_formatted
+    - Forward To: telemetry_hsl
+  - TMSH: ```create sys log-config destination splunk telemetry_formatted forward-to telemetry_hsl```
 - Create Log Publisher
   - GUI: System -> Logs -> Configuration -> Log Publishers
-    - Name: telemetry-publisher
-    - Destinations: telemetry-formatted
-  - TMSH: ```create sys log-config publisher telemetry-publisher destinations replace-all-with { telemetry-formatted }```
+    - Name: telemetry_publisher
+    - Destinations: telemetry_formatted
+  - TMSH: ```create sys log-config publisher telemetry_publisher destinations replace-all-with { telemetry_formatted }```
 
 #### Log Profile Creation Using AS3
 
@@ -1670,14 +1692,30 @@ Note: AS3 version 3.10.0 or greater required.
         "Shared": {
             "class": "Application",
             "template": "shared",
+            "telemetry_local_rule": {
+                "remark": "Only required when TS is a local listener",
+                "class": "iRule",
+                "iRule": "when CLIENT_ACCEPTED {\n  node 127.0.0.1 6514\n}"
+            },
             "telemetry_local": {
+                "remark": "Only required when TS is a local listener",
+                "class": "Service_TCP",
+                "virtualAddresses": [
+                    "255.255.255.254"
+                ],
+                "virtualPort": 6514,
+                "iRules": [
+                    "telemetry_local_rule"
+                ]
+            },
+            "telemetry": {
                 "class": "Pool",
                 "members": [
                     {
-                        "serverAddresses": [
-                            "192.0.2.10"
-                        ],
                         "enable": true,
+                        "serverAddresses": [
+                            "255.255.255.254"
+                        ],
                         "servicePort": 6514
                     }
                 ],
@@ -1692,7 +1730,7 @@ Note: AS3 version 3.10.0 or greater required.
                 "type": "remote-high-speed-log",
                 "protocol": "tcp",
                 "pool": {
-                    "use": "telemetry_local"
+                    "use": "telemetry"
                 }
             },
             "telemetry_formatted": {
@@ -1716,7 +1754,7 @@ Note: AS3 version 3.10.0 or greater required.
                     "requestEnabled": true,
                     "requestProtocol": "mds-tcp",
                     "requestPool": {
-                        "use": "telemetry_local"
+                        "use": "telemetry"
                     },
                     "requestTemplate": "event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\""
                 }
@@ -1729,7 +1767,7 @@ Note: AS3 version 3.10.0 or greater required.
                     "protocol": "tcp",
                     "servers": [
                         {
-                            "address": "192.0.2.10",
+                            "address": "255.255.255.254",
                             "port": "6514"
                         }
                     ],
