@@ -1792,29 +1792,6 @@ Note: AS3 version 3.10.0 or greater required.
 }
 ```
 
-#### Single NIC Log Configuration
-
-When deploying the BIG-IP with a single NIC it does not allow the `telemetry_local` pool to target the management address.  The following depicts alternative option(s) to use.
-
-- Virtual Server + iRule
-    - Solution: Instead of the `telemetry_local` pool member targeting the BIG-IP it can be configured to point at an internal virtual server.
-    - Configuration
-        - Pool: Previously documented `telemetry_local` pool member would be `255.255.255.254:6514`
-        - Virtual Server
-            - Name: telemetry_redirect
-            - Destination: 255.255.255.254:6514
-            - Protocol: tcp
-            - Pool: None
-            - iRule: telemetry_redirect
-        - iRule
-            - Name: telemetry_redirect
-            - Definition:
-            ```
-                when CLIENT_ACCEPTED {
-                    node 127.0.0.1 6514
-                }
-            ```
-
 ## Container
 
 This project builds a container, here are the current steps to build and run that container. Note: Additional steps TBD around pushing to docker hub, etc.
