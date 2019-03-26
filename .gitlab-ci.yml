@@ -51,10 +51,10 @@ build_docs:
 # Also, variable to *enable* device pipeline should exist
 # REQ_DEVICE_PIPELINE - boolean
 deploy_env:
+    image: ${CICD_CONTAINER_DEPLOY}
     stage: deploy
     tags:
         - cm-official-docker-executor
-    image: ${CICD_CONTAINER_DEPLOY}
     variables:
         PROJECT_NAME: test_functional_harness
         PROJECT_DECLARATION: ${CI_PROJECT_DIR}/test/deployment/declaration.yml
@@ -124,10 +124,10 @@ test_functional:
             - $RUN_FUNCTIONAL_TESTS == "true"
 
 teardown_env:
+    image: ${CICD_CONTAINER_DEPLOY}
     stage: teardown
     tags:
         - cm-official-docker-executor
-    image: ${CICD_CONTAINER_DEPLOY}
     variables:
         PROJECT_NAME: test_functional_harness
         PROJECT_DECLARATION: ${CI_PROJECT_DIR}/test/deployment/declaration.yml

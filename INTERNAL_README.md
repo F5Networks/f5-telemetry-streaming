@@ -1642,7 +1642,7 @@ Configuration Notes
 
   - Note: Examples assume TS listener is using port 6514.
   - Note: BIG-IP configuration pointing to a local on-box listener requires additional objects, configuration of those are included below.
-  - Note: Per-app Virtual Edition BIG-IP limits the number of virtual servers available, to avoid creating the virtual server in the following configuration it is possible to point the pool directly at the TMM link-local IPv6 address. Example: `ip addr` -> tmm (interface) -> inet6 (entry) = fe80::298:76ff:fe54:3210
+  - Note: Per-app Virtual Edition BIG-IP limits the number of virtual servers available, to avoid creating the virtual server in the following configuration it is possible to point the pool directly at the TMM link-local IPv6 address (configuration note: remove any pool monitor). Example: `ip addr` -> tmm (interface) -> inet6 (entry) = fe80::298:76ff:fe54:3210
 
 Configuration
 
