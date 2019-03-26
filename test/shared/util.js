@@ -292,6 +292,7 @@ module.exports = {
         }
 
         const testHarnessFile = envVars.FILE ? process.env[envVars.FILE] : null;
+        this.log(`Test Harness File: ${testHarnessFile}`); // helpful debug
         if (testHarnessFile && fs.existsSync(testHarnessFile)) {
             let filter;
             if (harnessType === 'BIGIP') {

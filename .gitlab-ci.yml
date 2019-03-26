@@ -48,8 +48,8 @@ build_docs:
 # or
 # CICD_AUTH_OS_TOKEN - VIO auth token
 # CICD_AUTH_OS_PROJECT - VIO project
-# also one more variable should be defined
-# CICD_PIPELINE_TRIGGER_FOR_DEPLOY - CI/CD trigger ID
+# Also, variable to *enable* device pipeline should exist
+# REQ_DEVICE_PIPELINE - boolean
 deploy_env:
     stage: deploy
     tags:
@@ -120,7 +120,8 @@ test_functional:
         - cm-official-docker-executor
     only:
         variables:
-            - $REQ_DEVICE_PIPELINE == "true"
+            # enable this job
+            - $RUN_FUNCTIONAL_TESTS == "true"
 
 teardown_env:
     stage: teardown
