@@ -2,21 +2,17 @@ request:
   project:
     folder: /root/deploy-projects/test_functional_harness
     name: test_functional_harness
-
   configuration:
     bigip:
       doLicensing: true
       doProvisioning: true
-
   declaration:
     instance:
-
     - harness:
         _copy: request/hypervisor
       name: ubuntu
       image: Ubuntu18.04LTS-pristine
       flavor: m1.large
-
     - configuration:
         _copy: request/configuration/bigip
       harness:
@@ -26,7 +22,6 @@ request:
         _copy: request/software/bigip_13_1
       type: bigip
       flavor: F5-BIGIP-small
-
     - configuration:
         _copy: request/configuration/bigip
       harness:
@@ -36,10 +31,8 @@ request:
         _copy: request/software/bigip_14_1
       type: bigip
       flavor: F5-BIGIP-small
-
   hypervisor: VIO
   software:
-
     bigip_13_1:
       default:
         force: false
@@ -49,7 +42,6 @@ request:
         build: 0.0.4
         iso_file: ''
         version: 13.1.1.4
-
     bigip_14_1:
       default:
         force: false

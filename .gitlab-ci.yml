@@ -50,7 +50,7 @@ build_docs:
 # CICD_AUTH_OS_PROJECT - VIO project
 # also one more variable should be defined
 # CICD_PIPELINE_TRIGGER_FOR_DEPLOY - CI/CD trigger ID
-deploy_bigip:
+deploy_env:
     stage: deploy
     tags:
         - cm-official-docker-executor
@@ -122,7 +122,7 @@ test_functional:
         variables:
             - $REQ_DEVICE_PIPELINE == "true"
 
-teardown_bigip:
+teardown_env:
     stage: teardown
     tags:
         - cm-official-docker-executor

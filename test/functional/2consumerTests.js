@@ -39,22 +39,24 @@ describe('Consumer', function () {
     describe('Setup Host', function () {
         util.log(`Consumer Host: ${cAddr}`);
 
-        it('should set root password', function () {
-            return new Promise((resolve) => {
-                resolve();
-            });
-        });
-
         it('should install docker', function () {
-            return new Promise((resolve) => {
-                resolve();
-            });
+            // install docker - assume it does not exist
+            const checkCmd = 'if [[ -e $(which docker) ]]; then echo exists; fi';
+            const installCmd = 'curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh';
+            return util.performRemoteCmd(cAddr, cUsername, checkCmd, { password: cPassword })
+                .then((response) => {
+                    if (response.indexOf('exists') !== -1) {
+                        return Promise.resolve(); // exists, continue
+                    }
+                    return util.performRemoteCmd(cAddr, cUsername, installCmd, { password: cPassword });
+                })
+                .catch(err => Promise.reject(err));
         });
     });
 
     describe('Consumer: Splunk', function () {
         const splunkUsername = 'admin';
-        const splunkPassword = cPassword; // might want to generate one instead
+        const splunkPassword = `${cPassword}splunk!`; // might want to generate one instead
         const basicAuthHeader = `Basic ${Buffer.from(`${splunkUsername}:${splunkPassword}`).toString('base64')}`;
 
         const containerName = 'ts_splunk_consumer';
