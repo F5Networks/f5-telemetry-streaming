@@ -3,11 +3,11 @@
       "admin_ip": "10.144.130.132",
       "ssh_user": {
           "username": "root",
-          "password": "f5site02"
+          "password": "default"
       },
       "f5_rest_user": {
           "username": "admin",
-          "password": "f5site02"
+          "password": "admin"
       },
       "f5_rest_api_port": 443,
       "f5_validate_certs": false,
