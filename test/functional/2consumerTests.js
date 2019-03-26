@@ -37,7 +37,7 @@ describe('Consumer', function () {
 
     // for now this is just a placeholder as host is not transient
     describe('Setup Host', function () {
-        util.log(`Consumer Host: ${cAddr}`);
+        it(`--- Running tests against consumer host: ${cAddr} ---`, () => {}); // keeps message in sync
 
         it('should install docker', function () {
             // install docker - assume it does not exist
