@@ -35,7 +35,7 @@ The deploy/teardown environment steps are handled using an internal tool (cicd-b
 
 1. Pipeline triggered - with `REQ_DEVICE_PIPELINE` and `RUN_FUNCTIONAL_TESTS` set to true
 2. **deploy_env/teardown_env** steps will run, ***only*** if the variable `REQ_DEVICE_PIPELINE` is set to true
-4. The **functional test** step will run, ***only*** if the variable `RUN_FUNCTIONAL_TESTS` is set to true
+3. The **functional test** step will run, ***only*** if the variable `RUN_FUNCTIONAL_TESTS` is set to true
 
 Internal tool notes:
 
