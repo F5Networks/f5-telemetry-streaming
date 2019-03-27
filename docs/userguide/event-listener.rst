@@ -1,66 +1,11 @@
 .. _eventlistener-ref:
 
-Event Listener
---------------
+Event Listener class
+--------------------
 
-Telemetry Streaming collects event logs from all BIG-IP sources, including LTM, ASM, AFM, and APM.
+The Telemetry Streaming Event Listener collects event logs from all BIG-IP sources, including LTM, ASM, AFM, and APM.
 
 The Request Logging profile gives you the ability to configure data within a log file for HTTP requests and responses, in accordance with specified parameters.
-
-
-.. _configurelogpub-ref:
-
-Configure the Log Publisher
-```````````````````````````
-
-1. Create a pool in tmsh, replacing the example address with a valid TS listener address, for example, the mgmt IP:
-
-.. code-block:: json
-
-    create ltm pool telemetry-local monitor tcp members replace-all-with { 192.0.2.1:6514 }
-
-
-2. Create a log destination (Remote HSL):
-
-User interface: :menuselection:`System --> Logs --> Configuration --> Log Destinations`
-
-- Name: telemetry-hsl
-- Type: Remote HSL
-- Protocol: TCP
-- Pool: telemetry-local
-
-TMSH: 
-
-.. code-block:: python
-
-    create sys log-config destination remote-high-speed-log telemetry-hsl protocol tcp pool-name telemetry-local
-
-
-3. Create a log destination (Format):
-
-User interface: :menuselection:`System --> Logs --> Configuration --> Log Destinations`
-
-- Name: telemetry-formatted
-- Forward To: telemetry-hsl
-
-TMSH:
-
-.. code-block:: python
-
-    create sys log-config destination splunk telemetry-formatted forward-to telemetry-hsl
-
-
-4. Create Log Publisher
-
-User interface: :menuselection:`System --> Logs --> Configuration --> Log Destinations`
-
-- Name: telemetry-publisher
-- Destinations: telemetry-formatted
-
-.. code-block:: python
-
-    create sys log-config publisher telemetry-publisher destinations replace-all-with { telemetry-formatted }
-
 
 
 
@@ -130,7 +75,7 @@ AFM Request Log profile
 
 1. Create and :ref:`configurelogpub-ref`.
 
-2. Create a Security Log Profile in TMSH:
+2. Create a Security Log Profile in TMSH or AS3:
 
 .. code-block:: python
    
@@ -211,7 +156,7 @@ Example output:
 ASM Log
 ```````
 
-1. Create a Security Log Profile using TMSH:
+1. Create a Security Log Profile using either TMSH or AS3:
 
 .. code-block:: python
    
@@ -294,7 +239,7 @@ Example output:
 APM Log
 ```````
 
-1. Create and :ref:`configurelogpub-ref`.
+1. Create and :ref:`configurelogpub-ref` or :ref:`configurelogpubas3-ref`.
 
 2. Create an APM Log Profile. For example:
 
@@ -304,7 +249,7 @@ APM Log
 
 3. Attach the profile to the APM policy.
 
-4. Attach the APM policy to the virtual server. For example:
+4. Attach the APM policy to the virtual server. The example below shows an AS3 snippet:
 
 .. code-block:: python
    :linenos:
@@ -347,7 +292,7 @@ System Log
 
 Using TMSH:
 
-.. code-block:: json
+.. code-block:: python
 
     modify sys syslog remote-servers replace-all-with { server { host 10.0.1.100 remote-port 6515 } }
 
@@ -357,7 +302,7 @@ User interface: :menuselection:`System --> Logs --> Configuration --> Remote Log
 
 Using TMSH: 
 
-.. code-block:: json
+.. code-block:: python
 
     modify sys daemon-log-settings mcpd audit enabled
 
@@ -371,5 +316,163 @@ Example output:
     {
     "data":"<85>Feb 12 21:39:43 telemetry notice sshd[22277]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=218.92.1.148  user=root",
     "telemetryEventCategory":"event"
+    }
+
+
+
+.. _configurelogpub-ref:
+
+Configure the Log Publisher using TMSH
+``````````````````````````````````````
+
+1. Create a pool in tmsh, replacing the example address with a valid TS listener address, for example, the mgmt IP:
+
+.. code-block:: python
+
+    create ltm pool telemetry-local monitor tcp members replace-all-with { 192.0.2.1:6514 }
+
+
+2. Create a log destination (Remote HSL):
+
+User interface: :menuselection:`System --> Logs --> Configuration --> Log Destinations`
+
+- Name: telemetry-hsl
+- Type: Remote HSL
+- Protocol: TCP
+- Pool: telemetry-local
+
+TMSH: 
+
+.. code-block:: python
+
+    create sys log-config destination remote-high-speed-log telemetry-hsl protocol tcp pool-name telemetry-local
+
+
+3. Create a log destination (Format):
+
+User interface: :menuselection:`System --> Logs --> Configuration --> Log Destinations`
+
+- Name: telemetry-formatted
+- Forward To: telemetry-hsl
+
+TMSH:
+
+.. code-block:: python
+
+    create sys log-config destination splunk telemetry-formatted forward-to telemetry-hsl
+
+
+4. Create Log Publisher
+
+User interface: :menuselection:`System --> Logs --> Configuration --> Log Destinations`
+
+- Name: telemetry-publisher
+- Destinations: telemetry-formatted
+
+.. code-block:: python
+
+    create sys log-config publisher telemetry-publisher destinations replace-all-with { telemetry-formatted }
+
+
+
+.. _configurelogpubas3-ref:
+
+Configure the Log Publisher using AS3
+`````````````````````````````````````
+
+Use Application Services Extension 3.10.0 or greater
+
+.. code-block:: json
+   :linenos:
+
+   {
+        "class": "ADC",
+        "schemaVersion": "3.10.0",
+        "remark": "Example depicting creation of BIG-IP module log profiles",
+        "Common": {
+            "Shared": {
+                "class": "Application",
+                "template": "shared",
+                "telemetry_local": {
+                    "class": "Pool",
+                    "members": [
+                        {
+                            "serverAddresses": [
+                                "192.0.2.10"
+                            ],
+                            "enable": true,
+                            "servicePort": 6514
+                        }
+                    ],
+                    "monitors": [
+                        {
+                            "bigip": "/Common/tcp"
+                        }
+                    ]
+                },
+                "telemetry_hsl": {
+                    "class": "Log_Destination",
+                    "type": "remote-high-speed-log",
+                    "protocol": "tcp",
+                    "pool": {
+                        "use": "telemetry_local"
+                    }
+                },
+                "telemetry_formatted": {
+                    "class": "Log_Destination",
+                    "type": "splunk",
+                    "forwardTo": {
+                        "use": "telemetry_hsl"
+                    }
+                },
+                "telemetry_publisher": {
+                    "class": "Log_Publisher",
+                    "destinations": [
+                        {
+                            "use": "telemetry_formatted"
+                        }
+                    ]
+                },
+                "telemetry_traffic_log_profile": {
+                    "class": "Traffic_Log_Profile",
+                    "requestSettings": {
+                        "requestEnabled": true,
+                        "requestProtocol": "mds-tcp",
+                        "requestPool": {
+                            "use": "telemetry_local"
+                        },
+                        "requestTemplate": "event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\""
+                    }
+                },
+                "telemetry_security_log_profile": {
+                    "class": "Security_Log_Profile",
+                    "application": {
+                        "localStorage": false,
+                        "remoteStorage": "splunk",
+                        "protocol": "tcp",
+                        "servers": [
+                            {
+                                "address": "192.0.2.10",
+                                "port": "6514"
+                            }
+                        ],
+                        "storageFilter": {
+                            "requestType": "illegal-including-staged-signatures"
+                        }
+                    },
+                    "network": {
+                        "publisher": {
+                            "use": "telemetry_publisher"
+                        },
+                        "logRuleMatchAccepts": false,
+                        "logRuleMatchRejects": true,
+                        "logRuleMatchDrops": true,
+                        "logIpErrors": true,
+                        "logTcpErrors": true,
+                        "logTcpEvents": true
+                    }
+                }
+            }
+        }
     }
 
