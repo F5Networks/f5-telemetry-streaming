@@ -274,7 +274,7 @@
             }
         },
         "filterKeys": { "exclude": [ "kind", "selfLink" ] },
-        "formatTimestamps": { "keys": [ "systemTimestamp", "expirationString", "date_time" ] }
+        "formatTimestamps": { "keys": [ "timestamp", "event_timestamp", "date_time", "systemTimestamp", "expirationString" ] }
     },
     "definitions": {
         "`T`": { "pattern": "\/(.*?)\/", "group": 1 },

@@ -5,7 +5,7 @@
         "type": "Generic_HTTP",
         "host": "192.0.2.1",
         "protocol": "https",
-        "port": "443",
+        "port": 443,
         "path": "/",
         "method": "POST",
         "headers": [
