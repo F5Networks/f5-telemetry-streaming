@@ -15,9 +15,11 @@ Example 1: Base Declaration
             "class": "Controls",
             "logLevel": "info"
         },
-        "My_Poller": {
-            "class": "Telemetry_System_Poller",
-            "interval": 60
+        "My_System": {
+            "class": "Telemetry_System",
+            "systemPoller": {
+                "interval": 60
+            }
         },
         "My_Listener": {
             "class": "Telemetry_Listener",
@@ -34,6 +36,7 @@ Example 1: Base Declaration
             }
         }
     }
+
 
 
 Example 2: Two Consumers
@@ -86,3 +89,45 @@ This example shows a case where Telemetry Streaming on one BIG-IP can pull stati
         }
     }
 
+
+Example 4: iHealth Poller
+-------------------------
+This example shows a case where Telemetry Streaming on one BIG-IP can pull statistics from an additional BIG-IP.
+
+.. code-block:: json
+   :linenos:
+
+   {
+        "class": "Telemetry",
+        "My_System": {
+            "class": "Telemetry_System",
+            "systemPoller": {
+                "interval": 60
+            },
+            "iHealthPoller": {
+                "username": "username",
+                "passphrase": {
+                    "cipherText": "passphrase"
+                },
+                "proxy": {
+                    "host": "127.0.0.1",
+                    "protocol": "http",
+                    "port": 80,
+                    "enableHostConnectivityCheck": false,
+                    "allowSelfSignedCert": false,
+                    "username": "username",
+                    "passphrase": {
+                        "cipherText": "passphrase"
+                    }
+                },
+                "interval": {
+                    "timeWindow": {
+                        "start": "23:15",
+                        "end":   "02:15"
+                    },
+                    "frequency": "monthly",
+                    "day": "5"
+                }
+            }
+        }
+    }
