@@ -215,10 +215,32 @@
             "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" },
             "filterKeys": { "exclude": [ "kind", "name", "partition", "fullPath", "generation", "selfLink", "certificateKeyCurveName", "certificateKeySize", "checksum", "createTime", "createdBy", "fingerprint", "isBundle", "lastUpdateTime", "mode", "revision", "size", "systemPath", "updatedBy", "version", "bundleCertificatesReference", "certValidatorsReference", "keyType", "serialNumber", "sourcePath", "subPath", "serialNumber" ] },
             "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 } } }
+        },
+        "networkTunnels": {
+            "key": "networkTunnels",
+            "filterKeys": { "exclude": [ "tmName", "typeId" ] },
+            "renameKeys": { "patterns": { "net/tunnels": { "pattern": "tunnel\/(.*)\/stats", "group": 1 } } },
+            "addKeysByTag": true
         }
     },
     "events": {
         "classifyByKeys": [ "virtual_name", "policy_name", "Access_Profile", "context_name" ]
+    },
+    "ihealth": {
+        "filterKeys": { "exclude": [ "name", "output", "match" ] },
+        "renameKeys": {
+            "patterns": {
+                "h_importance": { "constant": "importance" },
+                "h_action": { "constant": "action" },
+                "h_name": { "constant": "name" },
+                "h_cve_ids": { "constant": "cveIds" },
+                "h_header": { "constant": "header" },
+                "h_summary": { "constant": "summary" }
+            },
+            "options": {
+                "exactMatch": true
+            }
+        }
     },
     "context": {
         "HOSTNAME": {
@@ -251,7 +273,8 @@
                 "exactMatch": true
             }
         },
-        "filterKeys": { "exclude": [ "kind", "selfLink" ] }
+        "filterKeys": { "exclude": [ "kind", "selfLink" ] },
+        "formatTimestamps": { "keys": [ "timestamp", "event_timestamp", "date_time", "systemTimestamp", "expirationString" ] }
     },
     "definitions": {
         "`T`": { "pattern": "\/(.*?)\/", "group": 1 },

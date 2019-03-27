@@ -12,6 +12,7 @@ const mustache = require('mustache');
 
 const constants = require('./constants.js');
 const util = require('./util.js');
+const deviceUtil = require('./deviceUtil.js');
 const normalize = require('./normalize.js');
 const properties = require('./config/properties.json');
 const paths = require('./config/paths.json');
@@ -29,23 +30,27 @@ const CONDITIONAL_FUNCS = {
 /**
  * Endpoint Loader class
  *
- * @param {Object}  options                       - initialization options
- * @param {String}  [options.host]                - host to connect to, will override default host
- * @param {String}  [options.protocol]            - host protocol to use, will override default protocol
- * @param {Integer} [options.port]                - host's port to connect to, will override default port
- * @param {String}  [options.username]            - username for auth, will override default username
- * @param {String}  [options.passphrase]          - passphrase for auth, will override default passphrase
- * @param {String}  [options.allowSelfSignedCert] - false - requires SSL certificates be valid,
- *      true - allows self-signed certs
+ * @param {String}  host                                     - host
+ * @param {Object}  [options]                                - options
+ * @param {Object}  [options.tags]                           - tags to add to the data (each key)
+ * @param {String}  [options.credentials.username]           - username for host
+ * @param {String}  [options.credentials.passphrase]         - password for host
+ * @param {String}  [options.connection.protocol]            - protocol for host
+ * @param {Integer} [options.connection.port]                - port for host
+ * @param {Boolean} [options.connection.allowSelfSignedCert] - false - requires SSL certificates be valid,
+ *                                                             true - allows self-signed certs
  */
-function EndpointLoader(options) {
-    this.host = options.host || constants.LOCAL_HOST;
-    this.username = options.username || '';
-    this.passphrase = options.passphrase || '';
-    this.protocol = options.protocol || constants.DEFAULT_PROTOCOL;
-    this.port = options.port || constants.DEFAULT_PORT;
-    this.allowSelfSignedCert = options.allowSelfSignedCert;
-    this.token = null;
+function EndpointLoader() {
+    /* eslint-disable prefer-rest-params */
+    this.host = typeof arguments[0] === 'string' ? arguments[0] : null;
+    this.host = this.host || constants.LOCAL_HOST;
+
+    this.options = typeof arguments[0] === 'object' ? arguments[0] : arguments[1];
+    this.options = this.options || {};
+    // rely on makeDeviceRequest
+    this.options.credentials = this.options.credentials || {};
+    this.options.connection = this.options.connection || {};
+
     this.endpoints = null;
     this.cachedResponse = {};
 }
@@ -68,24 +73,17 @@ EndpointLoader.prototype.setEndpoints = function (newEndpoints) {
  * @returns {Object} Promise which is resolved when successfully authenticated
  */
 EndpointLoader.prototype.auth = function () {
-    let promise;
-    // if host is localhost we do not need an auth token
-    if (this.host === constants.LOCAL_HOST) {
-        promise = Promise.resolve({ token: null });
-    } else {
-        if (!this.username || !this.passphrase) {
-            throw new Error('Username and passphrase required');
-        }
-        const options = {
-            protocol: this.protocol,
-            port: this.port,
-            allowSelfSignedCert: this.allowSelfSignedCert
-        };
-        promise = util.getAuthToken(this.host, this.username, this.passphrase, options);
+    if (this.options.credentials.token) {
+        return Promise.resolve();
     }
-    return promise.then((token) => {
-        this.token = token.token;
-    })
+    // in case of optimization, replace with Object.assign
+    const options = util.deepCopy(this.options.connection);
+    return deviceUtil.getAuthToken(
+        this.host, this.options.credentials.username, this.options.credentials.passphrase, options
+    )
+        .then((token) => {
+            this.options.credentials.token = token.token;
+        })
         .catch((err) => {
             throw err;
         });
@@ -176,23 +174,18 @@ EndpointLoader.prototype.loadEndpoint = function (endpoint, cb) {
  * @returns {Object} Promise which is resolved with data
  */
 EndpointLoader.prototype._getData = function (uri, options) {
-    const httpOptions = {
-        protocol: this.protocol,
-        port: this.port,
-        allowSelfSignedCert: this.allowSelfSignedCert
+    // remove parse-stringify in case of optimizations
+    const httpOptions = Object.assign({}, util.deepCopy(this.options.connection));
+    httpOptions.credentials = {
+        username: this.options.credentials.username,
+        token: this.options.credentials.token
     };
-    if (this.token) {
-        httpOptions.headers = {
-            'x-f5-auth-token': this.token,
-            'User-Agent': constants.USER_AGENT
-        };
-    }
     if (options.body) {
         httpOptions.method = 'POST';
         httpOptions.body = options.body;
     }
 
-    return Promise.resolve(util.makeRequest(this.host, uri, httpOptions))
+    return Promise.resolve(deviceUtil.makeDeviceRequest(this.host, uri, httpOptions))
         .then((data) => {
             // use uri unless name is explicitly provided
             const nameToUse = options.name !== undefined ? options.name : uri;
@@ -377,7 +370,7 @@ SystemStats.prototype._preprocessProperty = function (property) {
         property = newObj;
     }
     // deep copy
-    return JSON.parse(JSON.stringify(property));
+    return util.deepCopy(property);
 };
 /**
  * Render key using mustache template system
@@ -413,6 +406,7 @@ SystemStats.prototype._processData = function (property, data) {
         renameKeysByPattern: property.renameKeys ? [property.renameKeys, global.renameKeys] : [global.renameKeys],
         convertArrayToMap: property.convertArrayToMap,
         includeFirstEntry: property.includeFirstEntry,
+        formatTimestamps: global.formatTimestamps.keys,
         runCustomFunction: property.runFunction,
         addKeysByTag: { // add 'name' + any user configured tags if specified by prop
             tags: property.addKeysByTag ? Object.assign(defaultTags, this.tags) : defaultTags,
@@ -532,30 +526,24 @@ SystemStats.prototype._computePropertiesData = function (propertiesData) {
 /**
  * Collect info based on object provided in properties
  *
- * @param {String}  host                          - host
- * @param {Object}  options                       - options
- * @param {String}  [options.protocol]            - protocol for host
- * @param {Integer} [options.port]                - port for host
- * @param {String}  [options.username]            - username for host
- * @param {String}  [options.passphrase]          - password for host
- * @param {Object}  [options.tags]                - tags to add to the data (each key)
- * @param {Boolean} [options.allowSelfSignedCert] - false - requires SSL certificates be valid,
- *      true - allows self-signed certs
+ * @param {String}  host                                     - host
+ * @param {Object}  [options]                                - options
+ * @param {Object}  [options.tags]                           - tags to add to the data (each key)
+ * @param {String}  [options.credentials.username]           - username for host
+ * @param {String}  [options.credentials.passphrase]         - password for host
+ * @param {String}  [options.connection.protocol]            - protocol for host
+ * @param {Integer} [options.connection.port]                - port for host
+ * @param {Boolean} [options.connection.allowSelfSignedCert] - false - requires SSL certificates be valid,
+ *                                                             true - allows self-signed certs
  *
  * @returns {Object} Promise which is resolved with a map of stats
  */
 SystemStats.prototype.collect = function (host, options) {
     if (options.tags) this.tags = options.tags;
 
-    this.loader = new EndpointLoader({
-        host,
-        allowSelfSignedCert: options.allowSelfSignedCert,
-        protocol: options.protocol,
-        port: options.port,
-        username: options.username,
-        passphrase: options.passphrase
-    });
+    this.loader = new EndpointLoader(host, options);
     this.loader.setEndpoints(paths.endpoints);
+
     return this.loader.auth()
         .then(() => this._computeContextData(context))
         .then(() => this._computePropertiesData(stats))

@@ -12,11 +12,13 @@ Telemetry Streaming is an iControl LX extension to stream telemetry from BIG-IP(
 - Kafka
 - Elastic Search
 - Sumo Logic
+- Statsd
 
 ## Contents
 
 - [Overview](#overview)
 - [Configuration Examples](#configuration-examples)
+- [Pointer Syntax](#pointer-syntax)
 - [REST API Endpoints](#rest-api-endpoints)
 - [Output Example](#output-example)
 - [Container](#container)
@@ -25,9 +27,28 @@ Telemetry Streaming is an iControl LX extension to stream telemetry from BIG-IP(
 
 The telemetry streaming design accounts for a number of key components, including ***System Poller***, ***Event Listener*** and ***Consumer***.  Those are described in more detail below.
 
+### System
+
+Definition: Target system to use for stats polling, iHealth polling.
+
+Examples: [System declaration](examples/declarations/all_properties.json)
+
 ### System Poller
 
 Definition: Polls a system on a defined interval for information such as device statistics, virtual server statistics, pool statistics and much more.
+
+Examples: [System Poller declaration](examples/declarations/all_properties.json)
+
+### iHealth Poller
+
+Definition: Creates system's Qkview file, uploads it to F5 iHealth Service and polls diagnostics from it on a defined schedule.
+
+Examples: [iHealth Poller declaration](examples/declarations/all_properties.json)
+
+iHealth Poller **interval** (`object`):
+- **frequency** - `daily`, `weekly` or `monthly`. `weekly`.
+- **day** -  when `frequency=daily` then user SHOULD NOT specify this option. When `frequency=weekly` then `day` could be a `number` from *0* to *7* (Sunday - 0 and 7) or `string` e.g. *Monday*, *friday* and etc. (capitalized or not). When `frequency=monthly` then `day` is a `number` from *1* to *31*.
+- **timeWindow** - `object` with properties `start` and `end` which defines the time window in `HH:MM` format (minimum 2 hours) when TS can poll Qkview from the target system and send it to F5 iHealth Service.
 
 ### Event Listener
 
@@ -35,16 +56,22 @@ Definition: Provides a listener, on both TCP and UDP protocols, that can accept 
 
 Event Format: ```key1="value",key2="value"```
 
+Examples: [Event Listener declaration](examples/declarations/all_properties.json)
+
 ### Consumer
 
 Definition: Accepts information from disparate systems and provides the tools to process that information.  In the context of Telemetry Streaming this simply means providing a mechanism by which to integrate with existing analytics products.
 
+Examples: [Consumer declaration](examples/declarations/all_properties.json)
+
 ### Connection verification
 
-Both Consumers and System Poller has property `allowSelfSignedCert` which allows to establish connection which are secured by self-signed certificates.
-Global restriction is disallowing connections secured by self-signed certificates but by setting this property to `true` you allowing TS to connect to such hosts.
+Both System and Consumers have property `allowSelfSignedCert` which allows to establish connection which are secured by self-signed certificates.
+Global restriction is disallowing connections secured by self-signed certificates but by setting this property to `true` users allows TS to connect to such hosts.
 
 ## Configuration examples
+
+Examples: [Declaration examples](examples/declarations)
 
 ### Basic
 
@@ -53,13 +80,11 @@ Global restriction is disallowing connections secured by self-signed certificate
 ```json
 {
     "class": "Telemetry",
-    "controls": {
-        "class": "Controls",
-        "logLevel": "info"
-    },
-    "My_Poller": {
-        "class": "Telemetry_System_Poller",
-        "interval": 60
+    "My_System": {
+        "class": "Telemetry_System",
+        "systemPoller": {
+            "interval": 60
+        }
     },
     "My_Listener": {
         "class": "Telemetry_Listener",
@@ -70,7 +95,7 @@ Global restriction is disallowing connections secured by self-signed certificate
         "type": "Splunk",
         "host": "192.0.2.1",
         "protocol": "https",
-        "port": "8088",
+        "port": 8088,
         "passphrase": {
             "cipherText": "apikey"
         }
@@ -83,12 +108,14 @@ Global restriction is disallowing connections secured by self-signed certificate
 There is a fixed class called "Controls", which contains a number of properties:
 
 - logLevel - logging level, possible values are **debug**, **info**, **error**. Default value is **info**
+- debug - enable debug mode. Boolean, default value is `false`
 
 ```json
 {
     "controls": {
         "class": "Controls",
-        "logLevel": "info"
+        "logLevel": "info",
+        "debug": false
     }
 }
 ```
@@ -97,12 +124,17 @@ There is a fixed class called "Controls", which contains a number of properties:
 
 The schema has some additional properties which might not be covered elesewhere, defined below.
 
+- enable
+  - Definition: Useful to disable any object in declaration
+  - Type: boolean
+  - Default: true - always enabled
 - trace
   - Definition: Useful during debug of TS because it dumps intermediate data to file.
   - Values:
     - *false* - tracer disabled
     - *true* - tracer enabled, file name will be **DEFAULT_LOCATION/OBJ_TYPE.OBJ_NAME** - Default location for files is **/var/tmp/telemetry**
     - *string* - custom path to file
+  Default: false - always disabled
   - Note: Applies to the Telemetry_System_Poller, Telemetry_Listener and Telemetry_Consumer class(es)
 - match
   - Definition: Provide a string or pattern (regex) which will result in events being dropped that do not match the value of a defined set of keys in the event.  Defined keys: ```virtual_name, policy_name, Access_Profile, context_name```
@@ -129,7 +161,7 @@ Note: More information about using the HEC can be found on the Splunk website [h
         "type": "Splunk",
         "host": "192.0.2.1",
         "protocol": "https",
-        "port": "8088",
+        "port": 8088,
         "passphrase": {
             "cipherText": "apikey"
         }
@@ -148,6 +180,8 @@ Required information:
 
 Note: More information about using the data collector API can be found [here](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/data-collector-api).
 
+Note: Certain keys are reserved when streaming to this consumer, specifically 'tenant'.  Those will have the prefix 'f5' added, for example 'f5tenant'.
+
 ```json
 {
     "My_Consumer": {
@@ -161,7 +195,7 @@ Note: More information about using the data collector API can be found [here](ht
 }
 ```
 
-Example Dashboard
+Example Dashboard - dashboard export in [examples/consumers](examples/consumers)
 
 ![image](images/azure_la_dashboard_example.png)
 
@@ -223,6 +257,87 @@ Note: More information about creating and using IAM roles can be found [here](ht
 }
 ```
 
+### Generic HTTP
+
+Required information:
+
+- Host: The address of the system.
+- Protocol: The protocol of the system. Options: ```https``` or ```http```. Default is ```http```.
+- Port: The protocol of the system. Default is ```443```.
+- Path: The path of the system. Default is ```/```.
+- Method: The method of the system. Options: ```POST```, ```PUT```, ```GET```. Default is ```POST```.
+- Headers: The headers of the system.
+- Passphrase: The secret to use when sending data to the system, for example an API key to be used in an HTTP header.
+
+Note: Since this consumer is designed to be generic and flexible, how authentication is performed is left up to the web service.  To ensure the secrets are encrypted within Telemetry Streaming please note the use of JSON pointers.  The secret to protect should be stored inside `passphrase` and referenced in the desired destination property, such as an API token in a header as show in this example.
+
+```json
+{
+    "class": "Telemetry",
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Generic_HTTP",
+        "host": "192.0.2.1",
+        "protocol": "https",
+        "port": 443,
+        "path": "/",
+        "method": "POST",
+        "headers": [
+            {
+                "name": "content-type",
+                "value": "application/json"
+            },
+            {
+                "name": "x-api-key",
+                "value": "`>@/passphrase`"
+            }
+        ],
+        "passphrase": {
+            "cipherText": "apikey"
+        }
+    }
+}
+```
+
+Note: If multiple secrets are required, defining an additional secret within `Shared` and referencing it using pointers is supported. For more details about pointers see the section on [pointer syntax](#pointer-syntax).
+
+Example with multiple passphrases:
+
+```json
+{
+    "class": "Telemetry",
+    "Shared": {
+        "class": "Shared",
+        "secretPath": {
+            "class": "Secret",
+            "cipherText": "/?token=secret"
+        }
+    },
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Generic_HTTP",
+        "host": "192.0.2.1",
+        "protocol": "https",
+        "port": 443,
+        "path": "`>/Shared/secretPath`",
+        "method": "POST",
+        "headers": [
+            {
+                "name": "content-type",
+                "value": "application/json"
+            },
+            {
+                "name": "x-api-key",
+                "value": "`>@/passphrase`"
+            }
+        ],
+        "passphrase": {
+            "cipherText": "apikey"
+        }
+    }
+}
+```
+
 ### Graphite
 
 Website: [https://graphiteapp.org](https://graphiteapp.org).
@@ -244,7 +359,7 @@ Note: More information about Graphite events can be found [here](https://graphit
         "type": "Graphite",
         "host": "192.0.2.1",
         "protocol": "https",
-        "port": "443"
+        "port": 443
     }
 }
 ```
@@ -256,7 +371,7 @@ Website: [https://kafka.apache.org/](https://kafka.apache.org/).
 Required information:
 
 - Host: The address of the Kafka system.
-- Protocol: The port of the Kafka system. Values: binaryTcpTls, binaryTcp
+- Protocol: The port of the Kafka system. Options: ```binaryTcp``` or ```binaryTcpTls```. Default is ```binaryTcpTls```.
 - Port: The port of the Kafka system.
 - Topic: The topic where data should go within the Kafka system.
 
@@ -269,7 +384,7 @@ Note: More information about installing Kafka can be found [here](https://kafka.
         "type": "Kafka",
         "host": "192.0.2.1",
         "protocol": "binaryTcpTls",
-        "port": "9092",
+        "port": 9092,
         "topic": "f5-telemetry"
     }
 }
@@ -303,7 +418,7 @@ Note: More information about installing ElasticSearch can be found [here](https:
         "class": "Telemetry_Consumer",
         "type": "ElasticSearch",
         "host": "192.0.2.1",
-        "port": "9200",
+        "port": 9200,
         "protocol": "https",
         "allowSelfSignedCert": false,
         "path": "/path/to/post/data",
@@ -340,10 +455,77 @@ Note: Typically the required information can be found by navigating to the HTTP 
         "type": "Sumo_Logic",
         "host": "192.0.2.1",
         "protocol": "https",
-        "port": "443",
+        "port": 443,
         "path": "/receiver/v1/http/",
         "passphrase": {
             "cipherText": "secret"
+        }
+    }
+}
+```
+
+
+### Statsd
+
+Website: [https://github.com/statsd/statsd/wiki](https://github.com/statsd/statsd/wiki).
+
+Required information:
+
+- Host: The address of the statsd instance.
+- Protocol: The protocol of the statsd instance Default is ```udp```. - Only supported option
+- Port: The port of the statsd instance.
+
+Note: Statsd is designed primarily to support integers and floating point numbers.  Because of that this consumer will only process a system info event.
+Note: Official container which contains graphite and statsd: https://hub.docker.com/r/graphiteapp/docker-graphite-statsd
+Note: All metrics are stored as gauges in statsd, those can be seen within graphite by navigating to stats -> gauges.
+
+```json
+{
+    "class": "Telemetry",
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Statsd",
+        "host": "192.0.2.1",
+        "protocol": "udp",
+        "port": 8125
+    }
+}
+```
+
+### IHealth Polling
+
+```json
+{
+    "class": "Telemetry",
+    "My_System": {
+        "class": "Telemetry_System",
+        "systemPoller": {
+            "interval": 60
+        },
+        "iHealthPoller": {
+            "username": "username",
+            "passphrase": {
+                "cipherText": "passphrase"
+            },
+            "proxy": {
+                "host": "127.0.0.1",
+                "protocol": "http",
+                "port": 80,
+                "enableHostConnectivityCheck": false,
+                "allowSelfSignedCert": false,
+                "username": "username",
+                "passphrase": {
+                    "cipherText": "passphrase"
+                }
+            },
+            "interval": {
+                "timeWindow": {
+                    "start": "23:15",
+                    "end":   "02:15"
+                },
+                "frequency": "monthly",
+                "day": "5"
+            }
         }
     }
 }
@@ -367,7 +549,7 @@ Note: Typically the required information can be found by navigating to the HTTP 
         "type": "Splunk",
         "host": "192.0.2.1",
         "protocol": "https",
-        "port": "8088",
+        "port": 8088,
         "passphrase": {
             "cipherText": "apikey"
         }
@@ -379,14 +561,18 @@ Note: Typically the required information can be found by navigating to the HTTP 
 
 ```json
 {
-    "My_Poller": {
-        "class": "Telemetry_System_Poller",
-        "interval": 60,
+    "My_System": {
+        "class": "Telemetry_System",
         "host": "192.0.2.1",
+        "protocol": "https",
         "port": 443,
+        "allowSelfSignedCert": false,
         "username": "myuser",
         "passphrase": {
             "cipherText": "mypassphrase"
+        },
+        "systemPoller": {
+            "interval": 60
         }
     }
 }
@@ -397,10 +583,24 @@ Note: Typically the required information can be found by navigating to the HTTP 
 ```json
 {
     "passphrase": {
-        "environmentVar": "MY_SECRET_ENV_VAR"
+        "environmentVar": "TS_SYSTEM_SECRET"
     }
 }
 ```
+
+## Pointer Syntax
+
+Configuration of TS is typically straightforward, however the need to reference objects in other parts of the configuration may be necessary for certain use cases, such as the generic http consumer with secrets.  TS uses JSON pointers to accomplish this, with syntax derived primarily from one of the other tool chain components Application Services 3.
+
+- RFC 6901 compliant, with some enhacements to account for scenarios not outlined in the RFC
+- Pointer types
+  - Absolute pointer: \`=/Shared/secretPath\`
+  - Relative pointer: \`=passphrase\`
+  - Relative (nearest class) pointer: \`=@/passphrase\`
+- Pointer formats (determined by leading character)
+  - Resolve value: =
+  - Resolve value and base64 decode: +
+  - Resolve value and replace property with object (no stringify): >
 
 ## REST API Endpoints
 
@@ -461,11 +661,34 @@ Request body - valid JSON object. For example see [Configuration Example](#confi
 
 ### System poller
 
-**<base_endpoint>/systempoller/<pollerName>** - endpoint to retrieve data from configured poller.
+Allowed URIs:
+- **<base_endpoint>/systempoller/<pollerName>** - endpoint to retrieve data from configured poller.
+- **<base_endpoint>/systempoller/<systemName>** - endpoint to retrieve data from configured system.
+- **<base_endpoint>/systempoller/<systemName>/<pollerName>** - endpoint to retrieve data from configured system using specific poller.
+
 Allowed HTTP method - **GET**.
 Useful for demo or to check if poller was able to connect to device.
-**pollerName** should match the name of one of configured pollers.
+**systemName** and **pollerName** should match the name of one of configured Systems or System Pollers.
 Otherwise *HTTP 404* will be returned. For output example see [System Info](#system-info).
+
+Note: availble only when `debug` is turned on.
+
+
+### iHealth poller
+
+**<base_endpoint>/ihealthpoller/<pollerName>/<ihealthName>** - endpoint to retrieve data from configured poller.
+Allowed HTTP method - **GET**.
+Useful for demo or to check if poller was able to connect to device.
+- **pollerName**  - optional, should match the name of one of configured System pollers.
+- **ihealthName**  - optional, should match the name of one of configured iHealth pollers.
+
+When no **pollerName** and **ihealthName** specified then current status for running pollers will be returned.
+When **pollerName** specified then iHealth poller will be stared with System Poller's configuration.
+When **ihealthName** specified then iHealth poller will be stared with System Poller's configuration and matched iHealth Poller's configuration. 
+
+Otherwise *HTTP 404* will be returned. For output example see [iHealth Info](#ihealth-info).
+
+Note: availble only when `debug` is turned on.
 
 ## Output Example
 
@@ -493,16 +716,16 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
         "syncSummary": " ",
         "failoverStatus": "ACTIVE",
         "failoverColor": "green",
-        "systemTimestamp": "2019-02-01T17:23:15Z",
-        "cpu": 3,
-        "memory": 55,
-        "tmmCpu": 1,
-        "tmmMemory": 11,
+        "systemTimestamp": "2019-01-01T01:01:01Z",
+        "cpu": 0,
+        "memory": 0,
+        "tmmCpu": 0,
+        "tmmMemory": 0,
         "tmmTraffic": {
-            "clientSideTraffic.bitsIn": 30749965632,
-            "clientSideTraffic.bitsOut": 91027281336,
-            "serverSideTraffic.bitsIn": 26698867512,
-            "serverSideTraffic.bitsOut": 90836218144
+            "clientSideTraffic.bitsIn": 0,
+            "clientSideTraffic.bitsOut": 0,
+            "serverSideTraffic.bitsIn": 0,
+            "serverSideTraffic.bitsOut": 0
         },
         "diskStorage": {
             "/": {
@@ -537,7 +760,7 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
             },
             "/var/log": {
                 "1024-blocks": "3023760",
-                "Capacity": "7%",
+                "Capacity": "8%",
                 "name": "/var/log"
             },
             "/appdata": {
@@ -583,15 +806,15 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
         },
         "diskLatency": {
             "sda": {
-                "r/s": "1.15",
-                "w/s": "9.26",
-                "%util": "0.14",
+                "r/s": "1.46",
+                "w/s": "8.25",
+                "%util": "0.09",
                 "name": "sda"
             },
             "sdb": {
                 "r/s": "1.00",
                 "w/s": "0.00",
-                "%util": "0.00",
+                "%util": "0.04",
                 "name": "sdb"
             },
             "dm-0": {
@@ -601,70 +824,70 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
                 "name": "dm-0"
             },
             "dm-1": {
-                "r/s": "0.00",
-                "w/s": "12.41",
+                "r/s": "0.01",
+                "w/s": "11.01",
                 "%util": "0.01",
                 "name": "dm-1"
             },
             "dm-2": {
-                "r/s": "0.02",
-                "w/s": "4.50",
-                "%util": "0.01",
+                "r/s": "0.14",
+                "w/s": "2.56",
+                "%util": "0.00",
                 "name": "dm-2"
             },
             "dm-3": {
                 "r/s": "0.01",
-                "w/s": "4.23",
+                "w/s": "4.28",
                 "%util": "0.01",
                 "name": "dm-3"
             },
             "dm-4": {
-                "r/s": "0.02",
-                "w/s": "0.05",
+                "r/s": "0.00",
+                "w/s": "0.00",
                 "%util": "0.00",
                 "name": "dm-4"
             },
             "dm-5": {
-                "r/s": "0.01",
-                "w/s": "1.58",
+                "r/s": "0.04",
+                "w/s": "1.52",
                 "%util": "0.00",
                 "name": "dm-5"
             },
             "dm-6": {
-                "r/s": "0.07",
+                "r/s": "0.13",
                 "w/s": "0.00",
                 "%util": "0.00",
                 "name": "dm-6"
             },
             "dm-7": {
                 "r/s": "0.00",
-                "w/s": "0.06",
+                "w/s": "0.05",
                 "%util": "0.00",
                 "name": "dm-7"
             },
             "dm-8": {
-                "r/s": "0.03",
-                "w/s": "4.97",
+                "r/s": "0.11",
+                "w/s": "4.72",
                 "%util": "0.01",
                 "name": "dm-8"
             }
         },
         "networkInterfaces": {
             "1.1": {
-                "counters.bitsIn": 88594112512,
-                "counters.bitsOut": 28164141760,
+                "counters.bitsIn": 0,
+                "counters.bitsOut": 0,
                 "status": "up",
                 "name": "1.1"
             },
             "1.2": {
-                "counters.bitsIn": 7703269352,
-                "counters.bitsOut": 413753256,
+                "counters.bitsIn": 0,
+                "counters.bitsOut": 0,
                 "status": "up",
                 "name": "1.2"
             },
             "mgmt": {
-                "counters.bitsIn": 10280239984,
-                "counters.bitsOut": 4504546456,
+                "counters.bitsIn": 0,
+                "counters.bitsOut": 0,
                 "status": "up",
                 "name": "mgmt"
             }
@@ -734,8 +957,8 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
     },
     "virtualServers": {
         "/Common/app.app/app_vs": {
-            "clientside.bitsIn": 19599288,
-            "clientside.bitsOut": 119172032,
+            "clientside.bitsIn": 0,
+            "clientside.bitsOut": 0,
             "clientside.curConns": 0,
             "destination": "10.0.2.101:80",
             "availabilityState": "available",
@@ -769,9 +992,9 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
     },
     "pools": {
         "/Common/app.app/app_pool": {
-            "activeMemberCnt": 1,
-            "serverside.bitsIn": 25825768,
-            "serverside.bitsOut": 114425928,
+            "activeMemberCnt": 0,
+            "serverside.bitsIn": 0,
+            "serverside.bitsOut": 0,
             "serverside.curConns": 0,
             "availabilityState": "available",
             "enabledState": "enabled",
@@ -779,9 +1002,9 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
             "members": {
                 "/Common/10.0.3.5:80": {
                     "addr": "10.0.3.5",
-                    "port": 80,
-                    "serverside.bitsIn": 25825768,
-                    "serverside.bitsOut": 114425928,
+                    "port": 0,
+                    "serverside.bitsIn": 0,
+                    "serverside.bitsOut": 0,
                     "serverside.curConns": 0,
                     "availabilityState": "available",
                     "enabledState": "enabled"
@@ -791,9 +1014,9 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
             "application": "app.app"
         },
         "/Common/telemetry-local": {
-            "activeMemberCnt": 1,
-            "serverside.bitsIn": 8908592,
-            "serverside.bitsOut": 1955808,
+            "activeMemberCnt": 0,
+            "serverside.bitsIn": 0,
+            "serverside.bitsOut": 0,
             "serverside.curConns": 0,
             "availabilityState": "available",
             "enabledState": "enabled",
@@ -801,9 +1024,9 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
             "members": {
                 "/Common/10.0.1.100:6514": {
                     "addr": "10.0.1.100",
-                    "port": 6514,
-                    "serverside.bitsIn": 8908592,
-                    "serverside.bitsOut": 1955808,
+                    "port": 0,
+                    "serverside.bitsIn": 0,
+                    "serverside.bitsOut": 0,
                     "serverside.curConns": 0,
                     "availabilityState": "available",
                     "enabledState": "enabled"
@@ -823,7 +1046,7 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
             "members": {
                 "/Example_Tenant/192.168.120.6:514": {
                     "addr": "192.168.120.6",
-                    "port": 514,
+                    "port": 0,
                     "serverside.bitsIn": 0,
                     "serverside.bitsOut": 0,
                     "serverside.curConns": 0,
@@ -845,7 +1068,7 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
             "members": {
                 "/Example_Tenant/192.0.2.12:80": {
                     "addr": "192.0.2.12",
-                    "port": 80,
+                    "port": 0,
                     "serverside.bitsIn": 0,
                     "serverside.bitsOut": 0,
                     "serverside.curConns": 0,
@@ -854,7 +1077,7 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
                 },
                 "/Example_Tenant/192.0.2.13:80": {
                     "addr": "192.0.2.13",
-                    "port": 80,
+                    "port": 0,
                     "serverside.bitsIn": 0,
                     "serverside.bitsOut": 0,
                     "serverside.curConns": 0,
@@ -868,12 +1091,12 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
     },
     "ltmPolicies": {
         "/Common/app.app/app_policy": {
-            "invoked": 5413,
-            "succeeded": 5413,
+            "invoked": 0,
+            "succeeded": 0,
             "actions": {
                 "default:1": {
-                    "invoked": 5413,
-                    "succeeded": 5413
+                    "invoked": 0,
+                    "succeeded": 0
                 }
             },
             "name": "/Common/app.app/app_policy",
@@ -896,22 +1119,22 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
     },
     "httpProfiles": {
         "/Common/app.app/app_http": {
-            "cookiePersistInserts": 5409,
-            "getReqs": 2395,
-            "maxKeepaliveReq": 350,
-            "numberReqs": 5413,
-            "postReqs": 2989,
-            "2xxResp": 289,
+            "cookiePersistInserts": 0,
+            "getReqs": 0,
+            "maxKeepaliveReq": 0,
+            "numberReqs": 0,
+            "postReqs": 0,
+            "2xxResp": 0,
             "3xxResp": 0,
-            "4xxResp": 5124,
+            "4xxResp": 0,
             "5xxResp": 0,
             "respLessThan2m": 0,
             "respGreaterThan2m": 0,
-            "v10Reqs": 30,
+            "v10Reqs": 0,
             "v10Resp": 0,
-            "v11Reqs": 5379,
-            "v11Resp": 5413,
-            "v9Reqs": 4,
+            "v11Reqs": 0,
+            "v11Resp": 0,
+            "v9Reqs": 0,
             "v9Resp": 0,
             "name": "/Common/app.app/app_http",
             "tenant": "Common",
@@ -964,6 +1187,7 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
     },
     "clientSslProfiles": {
         "/Common/clientssl": {
+            "activeHandshakeRejected": 0,
             "currentCompatibleConnections": 0,
             "currentConnections": 0,
             "currentNativeConnections": 0,
@@ -992,6 +1216,7 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
             "application": ""
         },
         "/Example_Tenant/A1/webtls": {
+            "activeHandshakeRejected": 0,
             "currentCompatibleConnections": 0,
             "currentConnections": 0,
             "currentNativeConnections": 0,
@@ -1022,6 +1247,7 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
     },
     "serverSslProfiles": {
         "/Common/serverssl": {
+            "activeHandshakeRejected": 0,
             "currentCompatibleConnections": 0,
             "currentConnections": 0,
             "currentNativeConnections": 0,
@@ -1051,42 +1277,99 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
     },
     "sslCerts": {
         "ca-bundle.crt": {
-            "expirationDate": 1893455999,
-            "expirationString": "Dec 31 23:59:59 2029 GMT",
+            "expirationDate": 0,
+            "expirationString": "2019-01-01T01:01:01Z",
             "issuer": "CN=Starfield Services Root Certificate Authority,OU=http://certificates.starfieldtech.com/repository/,O=Starfield Technologies, Inc.,L=Scottsdale,ST=Arizona,C=US",
             "subject": "CN=Starfield Services Root Certificate Authority,OU=http://certificates.starfieldtech.com/repository/,O=Starfield Technologies, Inc.,L=Scottsdale,ST=Arizona,C=US",
             "name": "ca-bundle.crt"
         },
         "default.crt": {
             "email": "root@localhost.localdomain",
-            "expirationDate": 1859497229,
-            "expirationString": "Dec  3 23:00:29 2028 GMT",
+            "expirationDate": 0,
+            "expirationString": "2019-01-01T01:01:01Z",
             "issuer": "emailAddress=root@localhost.localdomain,CN=localhost.localdomain,OU=IT,O=MyCompany,L=Seattle,ST=WA,C=US",
             "subject": "emailAddress=root@localhost.localdomain,CN=localhost.localdomain,OU=IT,O=MyCompany,L=Seattle,ST=WA,C=US",
             "name": "default.crt"
         },
         "f5-ca-bundle.crt": {
-            "expirationDate": 1922896554,
-            "expirationString": "Dec  7 17:55:54 2030 GMT",
+            "expirationDate": 0,
+            "expirationString": "2019-01-01T01:01:01Z",
             "issuer": "CN=Entrust Root Certification Authority - G2,OU=(c) 2009 Entrust, Inc. - for authorized use only,OU=See www.entrust.net/legal-terms,O=Entrust, Inc.,C=US",
             "subject": "CN=Entrust Root Certification Authority - G2,OU=(c) 2009 Entrust, Inc. - for authorized use only,OU=See www.entrust.net/legal-terms,O=Entrust, Inc.,C=US",
             "name": "f5-ca-bundle.crt"
         },
         "f5-irule.crt": {
             "email": "support@f5.com",
-            "expirationDate": 1815944413,
-            "expirationString": "Jul 18 21:00:13 2027 GMT",
+            "expirationDate": 0,
+            "expirationString": "2019-01-01T01:01:01Z",
             "issuer": "emailAddress=support@f5.com,CN=support.f5.com,OU=Product Development,O=F5 Networks,L=Seattle,ST=Washington,C=US",
             "subject": "emailAddress=support@f5.com,CN=support.f5.com,OU=Product Development,O=F5 Networks,L=Seattle,ST=Washington,C=US",
             "name": "f5-irule.crt"
         }
     },
+    "networkTunnels": {
+        "/Common/http-tunnel": {
+            "hcInBroadcastPkts": 0,
+            "hcInMulticastPkts": 0,
+            "hcInOctets": 0,
+            "hcInUcastPkts": 0,
+            "hcOutBroadcastPkts": 0,
+            "hcOutMulticastPkts": 0,
+            "hcOutOctets": 0,
+            "hcOutUcastPkts": 0,
+            "inDiscards": 0,
+            "inErrors": 0,
+            "inUnknownProtos": 0,
+            "outDiscards": 0,
+            "outErrors": 0,
+            "name": "/Common/http-tunnel",
+            "tenant": "Common",
+            "application": ""
+        },
+        "/Common/socks-tunnel": {
+            "hcInBroadcastPkts": 0,
+            "hcInMulticastPkts": 0,
+            "hcInOctets": 0,
+            "hcInUcastPkts": 0,
+            "hcOutBroadcastPkts": 0,
+            "hcOutMulticastPkts": 0,
+            "hcOutOctets": 0,
+            "hcOutUcastPkts": 0,
+            "inDiscards": 0,
+            "inErrors": 0,
+            "inUnknownProtos": 0,
+            "outDiscards": 0,
+            "outErrors": 0,
+            "name": "/Common/socks-tunnel",
+            "tenant": "Common",
+            "application": ""
+        }
+    },
     "telemetryServiceInfo": {
-        "pollingInterval": 300,
-        "cycleStart": "Fri, 01 Feb 2019 17:23:14 GMT",
-        "cycleEnd": "Fri, 01 Feb 2019 17:23:15 GMT"
+        "pollingInterval": 0,
+        "cycleStart": "2019-01-01T01:01:01Z",
+        "cycleEnd": "2019-01-01T01:01:01Z"
     },
     "telemetryEventCategory": "systemInfo"
+}
+```
+
+### iHealth Info
+
+Request: GET <base_endpoint>/ihealthpoller/
+Response:
+```json
+{
+    "code": 200,
+    "message": [
+        {
+            "systemPollerDeclName": "My_Poller",
+            "ihealthDeclName": "My_iHealth",
+            "state": "IHEALTH_POLL_RETRY",
+            "nextFireDate": "2019-03-11T07:35:19.828Z",
+            "timeBeforeNextFire": 381089490
+        }
+    ]
 }
 ```
 
@@ -1098,11 +1381,12 @@ Otherwise *HTTP 404* will be returned. For output example see [System Info](#sys
 
 Configuration
 
-- Create Pool (just the pool, no destination/publisher): [Log Publisher Configuration](#log-publisher-configuration)
+- Create Pool: [Log Publisher Configuration](#log-publisher-configuration)
+  - Note: (destination/publisher objects not required)
 - Create LTM Request Log Profile
-  - TMSH: ```create ltm profile request-log telemetry request-log-pool telemetry-local request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\" request-logging enabled```
-  - F5 Application Services Extension: [using-a-traffic-log-profile-in-a-declaration](https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/latest/declarations/profiles.html#using-a-traffic-log-profile-in-a-declaration)
-  - Note: If creating the profile from the GUI, the ```\``` are not required.
+  - TMSH: ```create ltm profile request-log telemetry request-log-pool telemetry request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\",event_timestamp=\"$DATE_HTTP\" request-logging enabled```
+    - Note: If creating the profile from the GUI, the ```\``` are not required.
+  - F5 Application Services 3.0: [Log Profile Creation Using AS3](#log-profile-creation-using-as3)
 - Attach profile to the virtual server
   - F5 Application Services Extension (snippet) - Note: Requires v3.8.0 or greater
     ```json
@@ -1123,6 +1407,7 @@ Output
 ```json
 {
     "event_source":"request_logging",
+    "event_timestamp":"2019-01-01:01:01.000Z",
     "hostname":"hostname",
     "client_ip":"177.47.192.42",
     "server_ip":"",
@@ -1141,7 +1426,8 @@ Configuration
 
 - Create Log Publisher (and related objects): [Log Publisher Configuration](#log-publisher-configuration)
 - Create Security Log Profile:
-  - TMSH: ```create security log profile telemetry network replace-all-with { telemetry { filter { log-acl-match-drop enabled log-acl-match-reject enabled } publisher telemetry-publisher } }```
+  - TMSH: ```create security log profile telemetry network replace-all-with { telemetry { filter { log-acl-match-drop enabled log-acl-match-reject enabled } publisher telemetry_publisher } }```
+  - F5 Application Services 3.0: [Log Profile Creation Using AS3](#log-profile-creation-using-as3)
 - Attach profile to the virtual server
   - F5 Application Services Extension (snippet)
     ```json
@@ -1171,7 +1457,7 @@ Output
     "bigip_mgmt_ip":"10.0.1.100",
     "context_name":"/Common/app.app/app_vs",
     "context_type":"Virtual Server",
-    "date_time":"Dec 17 2018 22:46:04",
+    "date_time":"2019-01-01T01:01:01Z",
     "dest_fqdn":"unknown",
     "dest_ip":"10.0.2.101",
     "dst_geo":"Unknown",
@@ -1215,7 +1501,9 @@ Output
 Configuration
 
 - Create Security Log Profile:
-  - TMSH: ```create security log profile telemetry application replace-all-with { telemetry { filter replace-all-with { request-type { values replace-all-with { all } } } logger-type remote remote-storage splunk servers replace-all-with { 192.0.2.1:6514 {} } } }```
+  - *Note*: When TS is not a local listener the servers property should be the listener's remote address.  
+  - TMSH: ```create security log profile telemetry application replace-all-with { telemetry { filter replace-all-with { request-type { values replace-all-with { all } } } logger-type remote remote-storage splunk servers replace-all-with { 255.255.255.254:6514 {} } } }```
+  - F5 Application Services 3.0: [Log Profile Creation Using AS3](#log-profile-creation-using-as3)
 - Attach profile to the virtual server
   - F5 Application Services Extension (snippet)
     ```json
@@ -1293,7 +1581,7 @@ Configuration
 
 - Create Log Publisher (and related objects): [Log Publisher Configuration](#log-publisher-configuration)
 - Create APM Log Profile
-  - TMSH: ```create apm log-setting telemetry access replace-all-with { access { publisher telemetry-publisher } }```
+  - TMSH: ```create apm log-setting telemetry access replace-all-with { access { publisher telemetry_publisher } }```
 - Attach profile to the APM policy
 - Attach APM policy to the virtual server
   - F5 Application Services Extension (snippet)
@@ -1334,7 +1622,7 @@ Output
 Configuration
 
 - Modify System syslog configuration (add destination)
-  - TMSH: ```modify sys syslog remote-servers replace-all-with { server { host 10.0.1.100 remote-port 6515 } }```
+  - TMSH: ```modify sys syslog remote-servers replace-all-with { server { host 127.0.0.1 remote-port 6514 } }```
   - GUI: System -> Logs -> Configuration -> Remote Logging
 - Modify System logging configuration (update what gets logged)
   - TMSH: ```modify sys daemon-log-settings mcpd audit enabled`` Note: Other daemon-log-settings exist
@@ -1351,26 +1639,159 @@ Output
 
 #### Log Publisher Configuration
 
+Configuration Notes
+
+  - Note: Examples assume TS listener is using port 6514.
+  - Note: BIG-IP configuration pointing to a local on-box listener requires additional objects, configuration of those are included below.
+  - Note: Per-app Virtual Edition BIG-IP limits the number of virtual servers available, to avoid creating the virtual server in the following configuration it is possible to point the pool directly at the TMM link-local IPv6 address (configuration note: remove any pool monitor). Example: `ip addr` -> tmm (interface) -> inet6 (entry) = fe80::298:76ff:fe54:3210
+
+Configuration
+
+- Create iRule (localhost forwarder)
+    - *Note*: Only required when TS is a local listener
+    - Definition:
+        ```
+        when CLIENT_ACCEPTED {
+            node 127.0.0.1 6514
+        }
+        ```
+    - TMSH: ```create ltm rule telemetry_local_rule``` (include definition and save)
+- Create Virtual Server
+    - *Note*: Only required when TS is a local listener
+    - TMSH: ```create ltm virtual telemetry_local destination 255.255.255.254:6514 rules { telemetry_local_rule }```
 - Create Pool
-  - TMSH: ```create ltm pool telemetry-local monitor tcp members replace-all-with { 192.0.2.1:6514 }```
-  - Note: Replace example address with valid TS listener address, for example the mgmt IP.
+    - *Note*: When TS is not a local listener the member should be the listener's remote address.
+    - TMSH: ```create ltm pool telemetry monitor tcp members replace-all-with { 255.255.255.254:6514 }```
 - Create Log Destination (Remote HSL)
   - GUI: System -> Logs -> Configuration -> Log Destinations
-    - Name: telemetry-hsl
+    - Name: telemetry_hsl
     - Type: Remote HSL
     - Protocol: TCP
-    - Pool: telemetry-local
-  - TMSH: ```create sys log-config destination remote-high-speed-log telemetry-hsl protocol tcp pool-name telemetry-local```
+    - Pool: telemetry
+  - TMSH: ```create sys log-config destination remote-high-speed-log telemetry_hsl protocol tcp pool-name telemetry```
 - Create Log Destination (Format)
   - GUI: System -> Logs -> Configuration -> Log Destinations
-    - Name: telemetry-formatted
-    - Forward To: telemetry-hsl
-  - TMSH: ```create sys log-config destination splunk telemetry-formatted forward-to telemetry-hsl```
+    - Name: telemetry_formatted
+    - Forward To: telemetry_hsl
+  - TMSH: ```create sys log-config destination splunk telemetry_formatted forward-to telemetry_hsl```
 - Create Log Publisher
   - GUI: System -> Logs -> Configuration -> Log Publishers
-    - Name: telemetry-publisher
-    - Destinations: telemetry-formatted
-  - TMSH: ```create sys log-config publisher telemetry-publisher destinations replace-all-with { telemetry-formatted }```
+    - Name: telemetry_publisher
+    - Destinations: telemetry_formatted
+  - TMSH: ```create sys log-config publisher telemetry_publisher destinations replace-all-with { telemetry_formatted }```
+
+#### Log Profile Creation Using AS3
+
+Note: AS3 version 3.10.0 or greater required.
+
+```json
+{
+    "class": "ADC",
+    "schemaVersion": "3.10.0",
+    "remark": "Example depicting creation of BIG-IP module log profiles",
+    "Common": {
+        "Shared": {
+            "class": "Application",
+            "template": "shared",
+            "telemetry_local_rule": {
+                "remark": "Only required when TS is a local listener",
+                "class": "iRule",
+                "iRule": "when CLIENT_ACCEPTED {\n  node 127.0.0.1 6514\n}"
+            },
+            "telemetry_local": {
+                "remark": "Only required when TS is a local listener",
+                "class": "Service_TCP",
+                "virtualAddresses": [
+                    "255.255.255.254"
+                ],
+                "virtualPort": 6514,
+                "iRules": [
+                    "telemetry_local_rule"
+                ]
+            },
+            "telemetry": {
+                "class": "Pool",
+                "members": [
+                    {
+                        "enable": true,
+                        "serverAddresses": [
+                            "255.255.255.254"
+                        ],
+                        "servicePort": 6514
+                    }
+                ],
+                "monitors": [
+                    {
+                        "bigip": "/Common/tcp"
+                    }
+                ]
+            },
+            "telemetry_hsl": {
+                "class": "Log_Destination",
+                "type": "remote-high-speed-log",
+                "protocol": "tcp",
+                "pool": {
+                    "use": "telemetry"
+                }
+            },
+            "telemetry_formatted": {
+                "class": "Log_Destination",
+                "type": "splunk",
+                "forwardTo": {
+                    "use": "telemetry_hsl"
+                }
+            },
+            "telemetry_publisher": {
+                "class": "Log_Publisher",
+                "destinations": [
+                    {
+                        "use": "telemetry_formatted"
+                    }
+                ]
+            },
+            "telemetry_traffic_log_profile": {
+                "class": "Traffic_Log_Profile",
+                "requestSettings": {
+                    "requestEnabled": true,
+                    "requestProtocol": "mds-tcp",
+                    "requestPool": {
+                        "use": "telemetry"
+                    },
+                    "requestTemplate": "event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\",event_timestamp=\"$DATE_HTTP\""
+                }
+            },
+            "telemetry_security_log_profile": {
+                "class": "Security_Log_Profile",
+                "application": {
+                    "localStorage": false,
+                    "remoteStorage": "splunk",
+                    "protocol": "tcp",
+                    "servers": [
+                        {
+                            "address": "255.255.255.254",
+                            "port": "6514"
+                        }
+                    ],
+                    "storageFilter": {
+                        "requestType": "illegal-including-staged-signatures"
+                    }
+                },
+                "network": {
+                    "publisher": {
+                        "use": "telemetry_publisher"
+                    },
+                    "logRuleMatchAccepts": false,
+                    "logRuleMatchRejects": true,
+                    "logRuleMatchDrops": true,
+                    "logIpErrors": true,
+                    "logTcpErrors": true,
+                    "logTcpEvents": true
+                }
+            }
+        }
+    }
+}
+```
 
 ## Container
 
@@ -1380,6 +1801,6 @@ Note: Currently this is building from local node_modules, src, etc.  This should
 
 Build: ```docker build . -t f5-telemetry``` Note: From root folder of this project
 
-Run: ```docker run --rm -d -p 443:443/tcp -p 6514:6514/tcp -e MY_SECRET_ENV_VAR='mysecret' f5-telemetry:latest```
+Run: ```docker run --rm -d -p 443:443/tcp -p 6514:6514/tcp -e TS_SYSTEM_SECRET='secret' -e TS_CONSUMER_SECRET='secret' f5-telemetry:latest```
 
 Attach Shell: ```docker exec -it <running container name> /bin/sh```

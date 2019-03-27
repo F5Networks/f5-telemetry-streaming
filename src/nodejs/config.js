@@ -12,128 +12,108 @@ const nodeUtil = require('util');
 const Ajv = require('ajv');
 const setupAsync = require('ajv-async');
 const EventEmitter = require('events');
+
 const logger = require('./logger.js');
 const util = require('./util.js');
+const deviceUtil = require('./deviceUtil.js');
+const persistentStorage = require('./persistentStorage.js').persistentStorage;
 
 const baseSchema = require('./schema/base_schema.json');
 const controlsSchema = require('./schema/controls_schema.json');
+const systemSchema = require('./schema/system_schema.json');
+const sharedSchema = require('./schema/shared_schema.json');
 const systemPollerSchema = require('./schema/system_poller_schema.json');
 const listenerSchema = require('./schema/listener_schema.json');
 const consumerSchema = require('./schema/consumer_schema.json');
+const iHealthPollerSchema = require('./schema/ihealth_poller_schema.json');
+
 const customKeywords = require('./customKeywords.js');
 const CONTROLS_CLASS_NAME = require('./constants.js').CONTROLS_CLASS_NAME;
 const CONTROLS_PROPERTY_NAME = require('./constants.js').CONTROLS_PROPERTY_NAME;
 
-const baseState = {
-    config: {
-        raw: {},
-        parsed: {}
-    }
+const PERSISTENT_STORAGE_KEY = 'config';
+const BASE_CONFIG = {
+    raw: {},
+    parsed: {}
 };
 
 /**
  * ConfigWorker class
  *
- * @property {Object} state - current state
- * @property {Object} state.config - current config object
+ * @property {Object} validator - JSON schema validator
  *
  * @event change - config was validated and can be propogated
  */
 function ConfigWorker() {
-    this._state = {};
-    this.restWorker = null;
     this.validator = this.compileSchema();
 }
 
 nodeUtil.inherits(ConfigWorker, EventEmitter);
 
 /**
- * Define 'config' property
- */
-Object.defineProperty(ConfigWorker.prototype, 'config', {
-    /**
-     * Getter
-     *
-     * @returns {Object} current config
-     */
-    // eslint-disable-next-line object-shorthand
-    get: function () {
-        return this._state.config;
-    }
-});
-
-/**
  * Setter for config
  *
  * @public
  * @param {Object} newConfig - new config
- * @param {Boolean} fire     - fire 'change' event or not
  */
-ConfigWorker.prototype.setConfig = function (newConfig, fire) {
-    this._state.config = newConfig;
-    if (fire !== false) {
-        return this._notifyConfigChange();
-    }
-    return Promise.resolve();
+ConfigWorker.prototype.setConfig = function (newConfig) {
+    return this._notifyConfigChange(newConfig);
 };
 
 /**
  * Notify listeners about config change
  *
  * @private
+ * @param {Object} newConfig - new config
+ *
  * @emits ConfigWorker#change
  */
-ConfigWorker.prototype._notifyConfigChange = function () {
+ConfigWorker.prototype._notifyConfigChange = function (newConfig) {
     // deep copy parsed config
     let parsedConfig;
-    if (this._state && this._state.config && this._state.config.parsed) {
-        parsedConfig = JSON.parse(JSON.stringify(this._state.config.parsed));
+    if (newConfig && newConfig.parsed) {
+        parsedConfig = util.deepCopy(newConfig.parsed);
     } else {
         return Promise.reject(new Error('_notifyConfigChange() Missing parsed config.'));
     }
     // handle passphrases first - decrypt, download, etc.
-    return util.decryptAllSecrets(parsedConfig)
+    return deviceUtil.decryptAllSecrets(parsedConfig)
         .then((config) => {
             // copy config to avoid changes from listeners
-            this.emit('change', JSON.parse(JSON.stringify(config)));
+            this.emit('change', util.deepCopy(config));
         })
         .catch((err) => {
             logger.error(`notifyConfigChange error: ${err}`);
         });
 };
-
 /**
- * Private method to save state to rest storage
- *
- * @private
- * @returns {Object} Promise which is resolved once state is saved
- */
-ConfigWorker.prototype._saveState = function () {
-    if (!this.restWorker) {
-        const err = 'restWorker is not specified';
-        return Promise.reject(new Error(err));
-    }
-    const _this = this;
-    return new Promise((resolve, reject) => {
-        _this.restWorker.saveState(null, _this._state, (err) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve();
-            }
-        });
-    });
-};
-
-/**
- * Save state
+ * Load config
  *
  * @public
  * @returns {Object} Promise which is resolved once state is saved
  */
-ConfigWorker.prototype.saveState = function () {
-    return this._saveState()
-        .then(() => logger.debug('Application state saved'))
+ConfigWorker.prototype.loadConfig = function () {
+    return this.getConfig()
+        .then((config) => {
+            logger.info('Application config loaded');
+            this.setConfig(config);
+            return Promise.resolve(config);
+        })
+        .catch((err) => {
+            logger.exception('Unexpected error on attempt to load application state', err);
+            return Promise.reject(err);
+        });
+};
+
+/**
+ * Save config
+ *
+ * @public
+ * @returns {Object} Promise which is resolved once state is saved
+ */
+ConfigWorker.prototype.saveConfig = function (config) {
+    return persistentStorage.set(PERSISTENT_STORAGE_KEY, config)
+        .then(() => logger.debug('Application config saved'))
         .catch((err) => {
             logger.exception('Unexpected error on attempt to save application state', err);
             return Promise.reject(err);
@@ -141,48 +121,13 @@ ConfigWorker.prototype.saveState = function () {
 };
 
 /**
- * Private method to load state from rest storage
- *
- * @private
- * @returns {Object} Promise which is resolved with the loaded state
- */
-ConfigWorker.prototype._loadState = function () {
-    if (!this.restWorker) {
-        const err = 'restWorker is not specified';
-        return Promise.reject(new Error(err));
-    }
-    const _this = this;
-    return new Promise((resolve, reject) => {
-        _this.restWorker.loadState(null, (err, state) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(state || baseState);
-            }
-        });
-    });
-};
-
-/**
- * Load state
+ * Get config
  *
  * @public
- * @emits ConfigWorker#loadState
- *
- * @returns {Object} Promise which is resolved with the loaded state
+ * @returns {Promise} Promise resolved with config
  */
-ConfigWorker.prototype.loadState = function () {
-    return this._loadState()
-        .then((state) => {
-            logger.info('Application state loaded');
-            this._state = state;
-            this._notifyConfigChange();
-            return Promise.resolve(state);
-        })
-        .catch((err) => {
-            logger.exception('Unexpected error on attempt to load application state', err);
-            return Promise.reject(err);
-        });
+ConfigWorker.prototype.getConfig = function () {
+    return persistentStorage.get(PERSISTENT_STORAGE_KEY) || BASE_CONFIG;
 };
 
 /**
@@ -195,9 +140,12 @@ ConfigWorker.prototype.compileSchema = function () {
     const schemas = {
         base: baseSchema,
         controls: controlsSchema,
+        system: systemSchema,
+        shared: sharedSchema,
         systemPoller: systemPollerSchema,
         listener: listenerSchema,
-        consumer: consumerSchema
+        consumer: consumerSchema,
+        iHealthPoller: iHealthPollerSchema
     };
     const keywords = customKeywords;
 
@@ -205,7 +153,8 @@ ConfigWorker.prototype.compileSchema = function () {
         useDefaults: true,
         coerceTypes: true,
         async: true,
-        extendRefs: true
+        extendRefs: true,
+        jsonPointers: true
     };
     const ajv = setupAsync(new Ajv(ajvOptions));
     // add schemas
@@ -266,25 +215,38 @@ ConfigWorker.prototype.validate = function (data) {
  * @returns {Object} Promise with validate config resolved on success
  */
 ConfigWorker.prototype.validateAndApply = function (data) {
+    data = data || {};
     let validatedConfig = {};
+    const configToSave = {
+        raw: {},
+        parsed: {}
+    };
+
+    // validate declaration, then run it back through validator with scratch
+    // property set for additional processing required prior to internal consumption
+    // note: ?show=expanded could return config to user with this processing done (later)
     return this.validate(data)
         .then((config) => {
             validatedConfig = config;
-            // no need for raw config
-            const configToSave = {
-                raw: JSON.parse(JSON.stringify(validatedConfig)),
-                parsed: util.formatConfig(config)
-            };
-            logger.debug('Configuration successfully validated');
-            logger.debug(`Configuration to save: ${util.stringify(configToSave)}`); // helpful debug, for now
+            configToSave.raw = JSON.parse(JSON.stringify(validatedConfig));
 
-            // do not fire event until state saved
-            this.setConfig(configToSave, false);
-            return this.saveState();
+            logger.debug('Expanding configuration');
+            data.scratch = { expand: true }; // set flag for additional decl processing
+            return this.validate(data);
         })
-        .then(() => {
+        .then((expandedConfig) => {
+            if (expandedConfig.scratch) delete expandedConfig.scratch; // cleanup
+            configToSave.parsed = util.formatConfig(expandedConfig);
+
+            logger.debug('Configuration successfully validated');
+            logger.debug(`Configuration to save: ${util.stringify(configToSave)}`);
+
+            return this.saveConfig(configToSave);
+        })
+        .then(() => this.getConfig())
+        .then((config) => {
             // propagate config change
-            this.setConfig(this.config, true);
+            this.setConfig(config);
             return validatedConfig;
         })
         .catch(error => Promise.reject(error));
@@ -309,7 +271,7 @@ ConfigWorker.prototype.processClientRequest = function (restOperation) {
         promise = this.validateAndApply(restOperation.getBody());
     } else {
         actionName = 'getDeclaration';
-        promise = Promise.resolve((this._state && this._state.config && this._state.config.raw) || {});
+        promise = this.getConfig().then(config => Promise.resolve((config && config.raw) || {}));
     }
 
     return promise.then((config) => {
@@ -333,15 +295,19 @@ ConfigWorker.prototype.processClientRequest = function (restOperation) {
 };
 
 // initialize singleton
-const configWorker = new ConfigWorker();
+let configWorker;
+try {
+    configWorker = new ConfigWorker();
+} catch (err) {
+    logger.exception('Unable to create new Config Worker', err);
+    throw err;
+}
+
 
 // config worker change event, should be first in the handlers chain
 configWorker.on('change', (config) => {
-    let settings;
-    if (config && config[CONTROLS_CLASS_NAME] && config[CONTROLS_CLASS_NAME][CONTROLS_PROPERTY_NAME]) {
-        settings = config[CONTROLS_CLASS_NAME][CONTROLS_PROPERTY_NAME];
-    }
-    if (!settings) {
+    const settings = util.getDeclarationByName(config, CONTROLS_CLASS_NAME, CONTROLS_PROPERTY_NAME);
+    if (util.isObjectEmpty(settings)) {
         return;
     }
     // default value should be 'info'

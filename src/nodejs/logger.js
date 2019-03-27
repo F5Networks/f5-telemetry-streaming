@@ -66,6 +66,14 @@ function maskSecrets(msg) {
         passphrase: {
             replace: /(?:"passphrase":{)(.*?)(?:})/g,
             with: '"passphrase":{*********}'
+        },
+        '"passphrase"': {
+            replace: /(?:"passphrase":")(.*?)(?:")/g,
+            with: '"passphrase":"*********"'
+        },
+        cipherText: {
+            replace: /(?:"cipherText":")(.*?)(?:")/g,
+            with: '"cipherText":"*********"'
         }
     };
     // place in try/catch

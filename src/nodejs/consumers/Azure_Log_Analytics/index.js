@@ -30,7 +30,7 @@ function makeRequest(requestOptions) {
  */
 module.exports = function (context) {
     const workspaceId = context.config.workspaceId;
-    const sharedKey = context.config.passphrase.text;
+    const sharedKey = context.config.passphrase;
     const logType = context.config.logType || 'F5Telemetry';
 
     // for event types other than systemInfo, let's not chunk
@@ -48,7 +48,19 @@ module.exports = function (context) {
         if (typeof data !== 'object') {
             data = { value: data }; // make data an object
         }
+        // rename/prefix certain reserved keywords, this is necessary because Azure LA
+        // will accept messages and then silently drop them in post-processing if
+        // they contain certain top-level keys such as 'tenant'
+        const reserved = ['tenant'];
+        reserved.forEach((item) => {
+            if (Object.keys(data).indexOf(item) !== -1) {
+                data[`f5${item}`] = data[item];
+                delete data[item];
+            }
+        });
+
         const date = new Date().toUTCString();
+        data = [data]; // place in array per API spec
         const httpBody = JSON.stringify(data);
         const contentLength = Buffer.byteLength(httpBody, 'utf8');
         const stringToSign = `POST\n${contentLength}\napplication/json\nx-ms-date:${date}\n/api/logs`;
@@ -58,7 +70,7 @@ module.exports = function (context) {
         const requestOptions = {
             url: `https://${workspaceId}.ods.opinsights.azure.com/api/logs?api-version=2016-04-01`,
             headers: {
-                'content-type': 'application/json',
+                'Content-Type': 'application/json',
                 'x-ms-date': date,
                 'Log-Type': `${logType}_${type}`,
                 Authorization: authorization

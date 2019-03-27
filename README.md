@@ -1,8 +1,8 @@
 # f5-telemetry-streaming
 
 [![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
-[![Releases](https://img.shields.io/github/release/f5devcentral/f5-telemetry-streaming.svg)](https://github.com/f5devcentral/f5-telemetry-streaming/releases)
-[![Issues](https://img.shields.io/github/issues/f5devcentral/f5-telemetry-streaming.svg)](https://github.com/f5devcentral/f5-telemetry-streaming/issues)
+[![Releases](https://img.shields.io/github/release/f5networks/f5-telemetry-streaming.svg)](https://github.com/f5networks/f5-telemetry-streaming/releases)
+[![Issues](https://img.shields.io/github/issues/f5networks/f5-telemetry-streaming.svg)](https://github.com/f5networks/f5-telemetry-streaming/issues)
 
 ## Introduction
 
@@ -18,7 +18,7 @@ The Telemetry Streaming documentation contains a variety of example declarations
 
 ## Filing Issues and Getting Help
 
-If you come across a bug or other issue when using Telemetry Streaming, use [GitHub Issues](https://github.com/f5devcentral/f5-telemetry-streaming/issues) to submit an issue for our team.  You can also see the current known issues on that page, which are tagged with a purple Known Issue label.  
+If you come across a bug or other issue when using Telemetry Streaming, use [GitHub Issues](https://github.com/f5networks/f5-telemetry-streaming/issues) to submit an issue for our team.  You can also see the current known issues on that page, which are tagged with a purple Known Issue label.  
 
 Be sure to see the [Support page](SUPPORT.md) in this repo for more details and supported versions of Telemetry Streaming.
 

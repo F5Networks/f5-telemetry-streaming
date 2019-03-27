@@ -101,6 +101,7 @@ function transformData(globalCtx) {
         },
         cache: {
             dataTimestamp: Date.parse(globalCtx.event.data.system.systemTimestamp)
+                           || (new Date()).getTime()
         }
     };
     if (globalCtx.config.dumpUndefinedValues) {
@@ -111,14 +112,15 @@ function transformData(globalCtx) {
     let p = null;
     if (globalCtx.event.type === 'systemInfo') {
         p = Promise.all(dataMapping.stats.map(func => safeDataTransform(func, requestCtx)));
+        p.then(() => safeDataTransform(dataMapping.overall, requestCtx));
+    } else if (globalCtx.event.type === 'ihealthInfo') {
+        p = safeDataTransform(dataMapping.ihealth, requestCtx);
     }
 
     if (!p) {
         return Promise.resolve([]);
     }
-    return p
-        .then(() => safeDataTransform(dataMapping.overall, requestCtx))
-        .then(() => Promise.resolve(requestCtx.results.translatedData));
+    return p.then(() => Promise.resolve(requestCtx.results.translatedData));
 }
 /**
 * Create default options for request
@@ -138,7 +140,7 @@ function getDefaultRequestOpts(consumer) {
     const defaults = {
         url: baseURL,
         headers: {
-            Authorization: `Splunk ${consumer.passphrase.text}`
+            Authorization: `Splunk ${consumer.passphrase}`
         },
         strictSSL: !consumer.allowSelfSignedCert
     };

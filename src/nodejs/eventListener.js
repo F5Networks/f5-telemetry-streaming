@@ -119,13 +119,22 @@ EventListener.prototype._start = function () {
             conn.on('data', (data) => {
                 this.processEvent(data);
             });
+            // event on client connection error
+            conn.on('error', () => {
+                conn.destroy();
+            });
             // event on client connection close
-            conn.on('end', () => {
+            conn.on('close', () => {
                 delete this._clientConnMap[connKey];
+            });
+            // the other end of the socket sends a FIN packet
+            conn.on('end', () => {
+                // allowHalfOpen is false by default
+                // so, don't need to call 'end' explicitly
             });
         });
     } else if (this.protocol === 'udp') {
-        this._server = dgram.createSocket('udp4');
+        this._server = dgram.createSocket({ type: 'udp6', ipv6Only: false });
 
         // eslint-disable-next-line no-unused-vars
         this._server.on('message', (data, remoteInfo) => {
@@ -210,7 +219,8 @@ EventListener.prototype.processEvent = function (data) {
             opts: {
                 classifyByKeys: events.classifyByKeys
             }
-        }
+        },
+        formatTimestamps: global.formatTimestamps.keys
     };
     data = String(data).trim();
 

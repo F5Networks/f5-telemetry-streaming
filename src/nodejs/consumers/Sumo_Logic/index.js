@@ -15,7 +15,7 @@ const request = require('request');
  */
 module.exports = function (context) {
     const config = context.config;
-    const secret = config.passphrase.text || '';
+    const secret = config.passphrase || '';
 
     const httpBody = JSON.stringify(context.event.data);
 

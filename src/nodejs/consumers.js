@@ -10,6 +10,7 @@
 
 const path = require('path');
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
+const deepCopy = require('./util.js').deepCopy;
 const tracers = require('./util.js').tracer;
 const constants = require('./constants.js');
 const configWorker = require('./config.js');
@@ -78,7 +79,7 @@ function loadConsumers(config) {
                 resolve(undefined);
             } else {
                 const consumer = {
-                    config: JSON.parse(JSON.stringify(consumerConfig.config)),
+                    config: deepCopy(consumerConfig.config),
                     consumer: consumerModule,
                     tracer: tracers.createFromConfig(CLASS_NAME, consumerConfig.name, consumerConfig.config)
                 };

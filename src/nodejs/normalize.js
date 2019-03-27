@@ -47,6 +47,41 @@ module.exports = {
     },
 
     /**
+     * Format timestamps - to ISO string like 2019-01-01T01:01:01Z
+     *
+     * @param {Object} data       - data
+     * @param {Object} timestamps - explicit array of timestamp keys
+     *
+     * @returns {Object} Returns data with formatted timestamps
+     */
+    _formatTimestamps(data, timestamps) {
+        timestamps = timestamps || [];
+
+        // check for timestamp keys, recurse until no longer an object
+        if (typeof data === 'object') {
+            if (Array.isArray(data)) {
+                data.forEach((i) => {
+                    this._formatTimestamps(i, timestamps);
+                });
+            } else {
+                Object.keys(data).forEach((k) => {
+                    if (timestamps.indexOf(k) !== -1) {
+                        // assume value can be parsed by Date(), it is pretty greedy
+                        // but still... try/catch
+                        try {
+                            data[k] = new Date(data[k]).toISOString();
+                        } catch (error) {
+                            // well, we tried
+                        }
+                    }
+                    this._formatTimestamps(data[k], timestamps);
+                });
+            }
+        }
+        return data;
+    },
+
+    /**
      * Run custom function
      *
      * @param {Object} data             - data
@@ -86,7 +121,7 @@ module.exports = {
         let ret = data;
 
         keys.forEach((i) => {
-            if (typeof ret === 'object' && i in ret) {
+            if (ret && typeof ret === 'object' && i in ret) {
                 ret = ret[i];
             } else {
                 // do not throw error as some keys do not exist if not configured with a value on BIG-IP
@@ -117,7 +152,7 @@ module.exports = {
 
         // .entries evaluates to true if data is an array
         const entries = 'entries';
-        if (data[entries] && !Array.isArray(data)) {
+        if (data && data[entries] && !Array.isArray(data)) {
             // entry keys may look like https://localhost/mgmt/tm/sys/tmm-info/0.0/stats, we should simplify this somewhat
             const simplifyKey = key => key.replace('https://localhost/', '').replace('mgmt/tm/', '');
 
@@ -139,7 +174,7 @@ module.exports = {
         }
 
         // simply include and then recurse
-        if (typeof data === 'object') {
+        if (data && typeof data === 'object') {
             if (Array.isArray(data)) {
                 // convert array to map if required, otherwise just include
                 const catm = options.convertArrayToMap;
@@ -205,7 +240,7 @@ module.exports = {
             return thisData;
         };
 
-        if (typeof data === 'object' && !Array.isArray(data)) {
+        if (data && typeof data === 'object' && !Array.isArray(data)) {
             // if we are classifying by keys (already defined) assume we are processing a flat
             // data structure
             if (options.classifyByKeys) {
@@ -219,7 +254,7 @@ module.exports = {
                 Object.keys(data).forEach((k) => {
                     if (skip.length && skip.indexOf(k) !== -1) return; // skip
                     if (tagKeys.length && k.indexOf(tagKeys) !== -1) return; // already exists, skip
-                    if (typeof data[k] === 'object') {
+                    if (data[k] && typeof data[k] === 'object') {
                         data[k] = processTags(data[k], k);
                         data[k] = this._addKeysByTag(data[k], tags, def, options); // may require further introspection
                     }
@@ -238,6 +273,7 @@ module.exports = {
      * @param {Object} [options.renameKeysByPattern] - contains map or array of keys to rename by pattern
      *                                                 object example: { patterns: {}, options: {}}
      * @param {Array} [options.addKeysByTag]         - add key to data based on tag(s)
+     * @param {Array} [options.formatTimestamps]     - array containing timestamp keys to format/normalize
      *
      * @returns {Object} Returns normalized event
      */
@@ -254,23 +290,74 @@ module.exports = {
                 options.addKeysByTag.opts
             );
         }
+        // format timestamps
+        const nT = options.formatTimestamps;
+        if (nT) {
+            ret = this._formatTimestamps(ret, nT);
+        }
         return ret;
+    },
+
+    /**
+     * Normalize iHealth data
+     *
+     * @param {Object} data - data to normalize
+     *
+     * @param {Object} options                       - options
+     * @param {Object} [options.renameKeysByPattern] - contains map or array of keys to rename by pattern
+     *                                                 object example: { patterns: {}, options: {}}
+     * @param {Array}  [options.filterByKeys]        - array containg map of keys to filter data further
+     *                                                 example: { exclude: [], include: []}
+     *
+     * @returns {Object} Returns normalized event
+     */
+    ihealth(data, options) {
+        options = options || {};
+
+        const normalized = {
+            system: {
+                hostname: data.system_information.hostname
+            },
+            diagnostics: []
+        };
+        const diagnostics = ((data.diagnostics || {}).diagnostic || []);
+
+        diagnostics.forEach((diagnostic) => {
+            let ret = options.filterByKeys ? normalizeUtil._filterDataByKeys(diagnostic, options.filterByKeys)
+                : diagnostic;
+
+            ret = options.renameKeys
+                ? normalizeUtil._renameKeys(ret, options.renameKeys.patterns, options.renameKeys.options) : ret;
+
+            const reduced = {};
+            Object.assign(reduced, ret.run_data);
+            Object.assign(reduced, ret.results);
+            Object.assign(reduced, ret.fixedInVersions);
+
+            if (reduced.version && reduced.version.length === 0) {
+                delete reduced.version;
+            }
+            normalized.diagnostics.push(reduced);
+        });
+
+        return normalized;
     },
 
     /**
      * Normalize data - standardize and reduce complexity
      *
-     * @param {Object} data                          - data to normalize
-     * @param {Object} options                       - options
-     * @param {String} [options.key]                 - key to drill down into data, using a defined notation
-     * @param {Array} [options.filterByKeys]         - array containg map of keys to filter data further
-     *                                                 example: { exclude: [], include: []}
-     * @param {Array} [options.renameKeysByPattern]  - array containing 1+ map(s) of keys to rename by pattern
-     *                                                 example: [{ patterns: {}, options: {}}]
-     * @param {Object} [options.convertArrayToMap]   - convert array to map using defined key name
-     * @param {Object} [options.includeFirstEntry]   - include first item in 'entries' at the top level
-     * @param {Object} [options.runCustomFunction]   - run custom function on data
-     * @param {Object} [options.addKeysByTag]        - add key to data based on tag(s)
+     * @param {Object} data                         - data to normalize
+     * @param {Object} options                      - options
+     * @param {String} [options.key]                - key to drill down into data, using a defined notation
+     * @param {Array} [options.filterByKeys]        - array containg map of keys to filter data further
+     *                                                example: { exclude: [], include: []}
+     * @param {Array} [options.renameKeysByPattern] - array containing 1+ map(s) of keys to rename by pattern
+     *                                                example: [{ patterns: {}, options: {}}]
+     * @param {Object} [options.convertArrayToMap]  - convert array to map using defined key name
+     * @param {Object} [options.includeFirstEntry]  - include first item in 'entries' at the top level
+     * @param {Array} [options.formatTimestamps]    - array containing timestamp keys to format/normalize
+     * @param {Object} [options.runCustomFunction]  - run custom function on data
+     * @param {Object} [options.addKeysByTag]       - add key to data based on tag(s)
      *
      * @returns {Object} Returns normalized data
      */
@@ -303,6 +390,11 @@ module.exports = {
             rKBP.forEach((item) => {
                 ret = normalizeUtil._renameKeys(ret, item.patterns, item.options);
             });
+        }
+        // format timestamps
+        const nT = options.formatTimestamps;
+        if (nT) {
+            ret = this._formatTimestamps(ret, nT);
         }
         // run custom function
         if (options.runCustomFunction) {

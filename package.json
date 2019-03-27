@@ -1,6 +1,6 @@
 {
     "name": "f5-telemetry",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "author": "F5 Networks",
     "license": "Apache-2.0",
     "repository": {
@@ -13,24 +13,27 @@
         "lint": "eslint src test scripts",
         "test": "nyc --check-coverage --lines 80 --functions 80 --branches 70 mocha --recursive \"./test/*.js\"",
         "report": "nyc report --reporter=html",
-        "test-functional": "mocha --recursive \"./test/functional/*.js\""
+        "test-functional": "mocha --recursive \"./test/functional/*.js\" --config $(realpath \"./test/functional/.mocharc.js\")"
     },
     "dependencies": {
         "ajv": "^6.5.4",
         "ajv-async": "^1.0.1",
-        "request": "^2.88.0",
-        "mustache": "^3.0.0",
-        "deep-diff": "^1.0.2",
         "aws-sdk": "^2.369.0",
+        "commander": "^2.19.0",
+        "deep-diff": "^1.0.2",
+        "elasticsearch": "^15.3.0",
         "kafka-node": "^2.6.1",
-        "elasticsearch": "^15.3.0"
+        "mustache": "^3.0.0",
+        "node-statsd": "0.1.1",
+        "request": "^2.88.0"
     },
     "devDependencies": {
-        "eslint": "^4.19.1",
+        "eslint": "^5.15.3",
         "eslint-config-airbnb-base": "^13.1.0",
-        "eslint-plugin-import": "^2.14.0",
-        "mocha": "^5.2.0",
+        "eslint-plugin-import": "^2.16.0",
+        "icrdk": "git://github.com/f5devcentral/f5-icontrollx-dev-kit#master",
+        "mocha": "^6.0.2",
         "nyc": "^13.3.0",
-        "icrdk": "git://github.com/f5devcentral/f5-icontrollx-dev-kit#master"
+        "ssh2": "^0.8.2"
     }
 }

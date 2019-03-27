@@ -11,20 +11,24 @@
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 const constants = require('./constants.js');
 const util = require('./util.js');
+const deviceUtil = require('./deviceUtil.js');
 const configWorker = require('./config.js');
 const SystemStats = require('./systemStats.js');
 const dataPipeline = require('./dataPipeline.js');
 
-const CLASS_NAME = constants.SYSTEM_POLLER_CLASS_NAME;
+const SYSTEM_CLASS_NAME = constants.SYSTEM_CLASS_NAME;
+const SYSTEM_POLLER_CLASS_NAME = constants.SYSTEM_POLLER_CLASS_NAME;
 const pollerIDs = {};
+
+/** @module systemPoller */
 
 /**
  * Process system(s) stats
  *
- * @param {Object}   args           - args object
- * @param {Object}   args.config    - system config
- * @param {Boolean}  [args.process] - determine whether to process through pipeline
- * @param {Function} [args.tracer]  - tracer to write to disk
+ * @param {Object}   args                     - args object
+ * @param {Object}   args.config              - system config
+ * @param {Boolean}  [args.process]           - determine whether to process through pipeline
+ * @param {module:util~Tracer} [args.tracer]  - tracer to write to disk
  *
  * @returns {Promise} Promise which is resolved with data sent
  */
@@ -32,28 +36,15 @@ function process(args) {
     const config = args.config;
     const tracer = args.tracer;
 
-    const startTimestamp = new Date().toUTCString();
+    const startTimestamp = new Date().toISOString();
     logger.debug('System poller cycle started');
 
-    return new SystemStats().collect(
-        config.host,
-        {
-            allowSelfSignedCert: config.allowSelfSignedCert,
-            protocol: config.protocol,
-            port: config.port,
-            username: config.username,
-            passphrase: config.passphrase ? config.passphrase.text : undefined,
-            tags: config.tag,
-            addtlProperties: {
-                pollingInterval: config.interval
-            }
-        }
-    )
+    return new SystemStats().collect(config.host, config.options)
         .then((data) => {
-            const endTimeStamp = new Date().toUTCString();
+            const endTimeStamp = new Date().toISOString();
             // inject service data
             const telemetryServiceInfo = {
-                pollingInterval: config.interval,
+                pollingInterval: args.interval,
                 cycleStart: startTimestamp,
                 cycleEnd: endTimeStamp
             };
@@ -80,20 +71,23 @@ function process(args) {
 }
 
 /**
- * Safe process - start process safely
+ * Safe process - start process system(s) stats safely
  *
- * @returns {Promise} Promise which is resolved with data sent
+ * @async
+ * @see module:systemPoller~process
+ *
+ * @returns {Promise.<Object>} Promise resolved with data from System Poller
  */
 function safeProcess() {
     try {
         // eslint-disable-next-line
-        process.apply(null, arguments)
-            .then()
+        return process.apply(null, arguments)
             .catch((err) => {
-                logger.exception('safeProcess unhandled exception in promise-chain', err);
+                logger.exception('systemPoller:safeProcess unhandled exception in promise-chain', err);
             });
     } catch (err) {
-        logger.exception('safeProcess unhandled exception', err);
+        logger.exception('systemPoller:safeProcess unhandled exception', err);
+        return Promise.reject(new Error(`systemPoller:safeProcess unhandled exception: ${err}`));
     }
 }
 
@@ -103,85 +97,226 @@ function safeProcess() {
  * @param {Object} restOperation - request object
  */
 function processClientRequest(restOperation) {
-    // shared/telemetry/poller/pollerName
-    const pollerName = restOperation.getUri().pathname.split('/')[4];
-    if (!pollerName) {
+    // allowed URIs:
+    // - shared/telemetry/systempoller/systemName
+    // - shared/telemetry/systempoller/systemPollerName
+    // - shared/telemetry/systempoller/systemName/systemPollerName
+    const parts = restOperation.getUri().pathname.split('/');
+    const objName = parts[4];
+    const subObjName = parts[5];
+
+    if (!objName) {
         util.restOperationResponder(restOperation, 400,
-            { code: 400, message: 'Bad Request. Poller\'s name not specified.' });
+            { code: 400, message: 'Bad Request. System\'s or System Poller\'s name not specified.' });
         return;
     }
+    configWorker.getConfig()
+        .then((config) => {
+            config = config.parsed;
+            const systems = config[SYSTEM_CLASS_NAME] || {};
+            const systemPollers = config[SYSTEM_POLLER_CLASS_NAME] || {};
 
-    let systemPollers;
-    if (configWorker.config.parsed && configWorker.config.parsed[constants.SYSTEM_POLLER_CLASS_NAME]) {
-        systemPollers = configWorker.config.parsed[constants.SYSTEM_POLLER_CLASS_NAME];
-    } else {
-        systemPollers = {};
-    }
+            let system;
+            let systemPoller;
 
-    if (!systemPollers[pollerName]) {
-        util.restOperationResponder(restOperation, 404,
-            { code: 404, message: 'Poller with such name not found.' });
-        return;
-    }
-
-    process({ config: systemPollers[pollerName], process: false })
-        .then((data) => {
-            util.restOperationResponder(restOperation, 200, data);
+            if (objName && subObjName) {
+                system = systems[objName];
+                systemPoller = systemPollers[subObjName];
+            } else if (!util.isObjectEmpty(systemPollers[objName])) {
+                systemPoller = systemPollers[objName];
+                system = systemPoller;
+            } else if (!util.isObjectEmpty(systems[objName])) {
+                system = systems[objName];
+                if (typeof system.systemPoller === 'string') {
+                    systemPoller = systemPollers[system.systemPoller];
+                } else if (system.systemPoller) {
+                    systemPoller = system.systemPoller;
+                }
+            }
+            if (!(system && systemPoller)) {
+                const error = new Error('System Poller declaration not found.');
+                error.responseCode = 404;
+                return Promise.reject(error);
+            }
+            return Promise.resolve([system, systemPoller]);
         })
-        .catch((err) => {
-            logger.error(`poller request ended up with error: ${err}`);
-            util.restOperationResponder(restOperation, 500,
-                { code: 500, message: `systemPoller.process error: ${err}` });
+        .then((configs) => {
+            const system = configs[0];
+            const systemPoller = configs[1];
+
+            if (system.class === SYSTEM_POLLER_CLASS_NAME) {
+                return Promise.all([
+                    deviceUtil.decryptAllSecrets(system),
+                    Promise.resolve(systemPoller)
+                ]);
+            }
+            return Promise.all([
+                deviceUtil.decryptAllSecrets(system),
+                deviceUtil.decryptAllSecrets(systemPoller)
+            ]);
+        })
+        .then((configs) => {
+            const config = mergeConfigs(configs[0], configs[1]);
+            config.process = false;
+            return safeProcess(config);
+        })
+        .then(data => util.restOperationResponder(restOperation, 200, data))
+        .catch((error) => {
+            let message;
+            let code;
+
+            if (error.responseCode !== undefined) {
+                code = error.responseCode;
+                message = `${error}`;
+            } else {
+                logger.error(`poller request ended up with error: ${error}`);
+                code = 500;
+                message = `systemPoller.process error: ${error}`;
+            }
+            util.restOperationResponder(restOperation, code, { code, message });
         });
+}
+
+/**
+ * Merge configs
+ *
+ * @private
+ *
+ * @param {Object} system - System declaration
+ * @param {Object} systemPoller - System Poller declaration
+ *
+ * @returns {Object} config
+ */
+function mergeConfigs(system, systemPoller) {
+    return {
+        enable: Boolean(system.enable && systemPoller.enable),
+        trace: Boolean(system.trace && systemPoller.trace),
+        interval: systemPoller.interval,
+        config: {
+            host: system.host,
+            options: {
+                connection: {
+                    port: system.port,
+                    protocol: system.protocol,
+                    allowSelfSignedCert: system.allowSelfSignedCert
+                },
+                credentials: {
+                    username: system.username,
+                    passphrase: system.passphrase
+                },
+                tags: systemPoller.tag
+            }
+        }
+    };
+}
+
+/**
+ * Build config for provided key
+ *
+ * @private
+ *
+ * @param {Object} systems       - System declarations
+ * @param {Object} systemPollers - System Poller declarations
+ * @param {String} key           - key to build config for
+ *
+ * @returns {Object} config
+ */
+function buildConfig(systems, systemPollers, key) {
+    let systemPoller;
+    let name = key;
+    let system = systems[key];
+
+    if (!util.isObjectEmpty(system)) {
+        if (typeof system.systemPoller === 'string') {
+            name = `${name}_${system.systemPoller}`;
+            systemPoller = systemPollers[system.systemPoller];
+        } else {
+            name = `${name}_System_Poller`;
+            systemPoller = system.systemPoller;
+        }
+    } else {
+        systemPoller = systemPollers[key];
+        system = systemPoller;
+    }
+    if (!(system && systemPoller)) {
+        // somehow it happen
+        return null;
+    }
+    const config = mergeConfigs(system, systemPoller);
+    config.name = name;
+    return config;
 }
 
 
 // config worker change event
 configWorker.on('change', (config) => {
     logger.debug('configWorker change event in systemPoller'); // helpful debug
-    let systemPollers;
-    if (config && config[CLASS_NAME]) {
-        systemPollers = config[CLASS_NAME];
-    }
 
-    // timestamp to filed out-dated tracers
+    config = config || {};
+    const systems = config[SYSTEM_CLASS_NAME] || {};
+    const systemPollers = config[SYSTEM_POLLER_CLASS_NAME] || {};
+    const validPollerIDs = [];
+    const objectsToIter = {};
+    const usedSystemPollers = [];
+
+    Object.keys(systems).forEach((sysKey) => {
+        const system = systems[sysKey];
+        objectsToIter[sysKey] = system;
+
+        if (typeof system.systemPoller === 'string') {
+            usedSystemPollers.push(system.systemPoller);
+        }
+    });
+    Object.keys(systemPollers).forEach((sysKey) => {
+        objectsToIter[sysKey] = systemPollers[sysKey];
+    });
+
+    // timestamp to find out-dated tracers
     const tracersTimestamp = new Date().getTime();
 
-    // now check for system pollers and start/stop/update accordingly
-    if (!systemPollers) {
-        if (pollerIDs) {
-            logger.info('Stopping all running system poller(s)');
-            Object.keys(pollerIDs).forEach((k) => {
-                util.stop(pollerIDs[k]);
-                delete pollerIDs[k];
-            });
+    Object.keys(objectsToIter).forEach((key) => {
+        // silently skip System Pollers
+        // that are in use by System already
+        if (usedSystemPollers.indexOf(key) !== -1) {
+            return;
         }
-    } else {
-        // we have pollers to process, now determine if we need to start or update
-        Object.keys(systemPollers).forEach((k) => {
-            const args = { config: systemPollers[k] };
-            const baseMsg = `system poller ${k} interval: ${args.config.interval} secs`;
-            // check for enable=false first
-            if (args.config.enable === false) {
-                // if already running, disable
-                if (pollerIDs[k]) {
-                    logger.info(`Disabling ${baseMsg}`);
-                    util.stop(pollerIDs[k]);
-                    delete pollerIDs[k];
-                }
-            } else if (pollerIDs[k]) {
-                logger.info(`Updating ${baseMsg}`);
-                args.tracer = util.tracer.createFromConfig(CLASS_NAME, k, args.config);
-                pollerIDs[k] = util.update(pollerIDs[k], safeProcess, args, args.config.interval);
-            } else {
-                logger.info(`Starting ${baseMsg}`);
-                args.tracer = util.tracer.createFromConfig(CLASS_NAME, k, args.config);
-                pollerIDs[k] = util.start(safeProcess, args, args.config.interval);
-            }
-        });
-    }
-    util.tracer.remove(null, tracer => tracer.name.startsWith(CLASS_NAME)
+
+        const spConfig = buildConfig(systems, systemPollers, key);
+        if (util.isObjectEmpty(spConfig) || !spConfig.enable) {
+            return;
+        }
+
+        validPollerIDs.push(spConfig.name);
+        spConfig.tracer = util.tracer.createFromConfig(
+            SYSTEM_POLLER_CLASS_NAME, spConfig.name, spConfig
+        );
+
+        const baseMsg = `system poller ${spConfig.name}. Interval = ${spConfig.interval} sec.`;
+        if (pollerIDs[spConfig.name]) {
+            logger.info(`Updating ${baseMsg}`);
+            pollerIDs[spConfig.name] = util.update(
+                pollerIDs[spConfig.name], safeProcess, spConfig, spConfig.interval
+            );
+        } else {
+            logger.info(`Starting ${baseMsg}`);
+            pollerIDs[spConfig.name] = util.start(
+                safeProcess, spConfig, spConfig.interval
+            );
+        }
+    });
+
+    Object.keys(pollerIDs).forEach((key) => {
+        if (validPollerIDs.indexOf(key) === -1) {
+            logger.info(`Disabling system poller ${key}`);
+            util.stop(pollerIDs[key]);
+            delete pollerIDs[key];
+        }
+    });
+
+    util.tracer.remove(null, tracer => tracer.name.startsWith(SYSTEM_POLLER_CLASS_NAME)
                                        && tracer.lastGetTouch < tracersTimestamp);
+
+    logger.debug(`${Object.keys(pollerIDs).length} system poller(s) running`);
 });
 
 

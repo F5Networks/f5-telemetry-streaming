@@ -72,7 +72,7 @@ describe('Normalize', () => {
     });
 
     it('should normalize event and rename key(s)', () => {
-        const event = 'key1="value","key2"="value"';
+        const event = 'key1="value",key2="value"';
         const expectedResult = {
             key1: 'value',
             key3: 'value'
@@ -83,6 +83,20 @@ describe('Normalize', () => {
                     key2: { constant: 'key3' }
                 }
             }
+        };
+
+        const result = normalize.event(event, options);
+        assert.deepEqual(result, expectedResult);
+    });
+
+    it('should normalize event and format timestamps', () => {
+        const event = 'key1="value",date_time="January 01, 2019 01:00:00 UTC"';
+        const expectedResult = {
+            key1: 'value',
+            date_time: '2019-01-01T01:00:00.000Z'
+        };
+        const options = {
+            formatTimestamps: ['date_time']
         };
 
         const result = normalize.event(event, options);
@@ -312,6 +326,31 @@ describe('Normalize', () => {
                     classifyByKeys: ['vs']
                 }
             }
+        };
+
+        const result = normalize.data(data, options);
+        assert.deepEqual(result, expectedResult);
+    });
+
+    it('should format timestamps', () => {
+        const data = {
+            sslCerts: {
+                cert: {
+                    expirationString: 'January 01, 2019 01:00:00 UTC',
+                    shouldNotFormat: 'January 01, 2019 01:00:00 UTC'
+                }
+            }
+        };
+        const expectedResult = {
+            sslCerts: {
+                cert: {
+                    expirationString: '2019-01-01T01:00:00.000Z', // ISO string
+                    shouldNotFormat: 'January 01, 2019 01:00:00 UTC'
+                }
+            }
+        };
+        const options = {
+            formatTimestamps: ['expirationString']
         };
 
         const result = normalize.data(data, options);
