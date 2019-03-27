@@ -95,7 +95,7 @@ Examples: [Declaration examples](examples/declarations)
         "type": "Splunk",
         "host": "192.0.2.1",
         "protocol": "https",
-        "port": "8088",
+        "port": 8088,
         "passphrase": {
             "cipherText": "apikey"
         }
@@ -161,7 +161,7 @@ Note: More information about using the HEC can be found on the Splunk website [h
         "type": "Splunk",
         "host": "192.0.2.1",
         "protocol": "https",
-        "port": "8088",
+        "port": 8088,
         "passphrase": {
             "cipherText": "apikey"
         }
@@ -279,7 +279,7 @@ Note: Since this consumer is designed to be generic and flexible, how authentica
         "type": "Generic_HTTP",
         "host": "192.0.2.1",
         "protocol": "https",
-        "port": "443",
+        "port": 443,
         "path": "/",
         "method": "POST",
         "headers": [
@@ -318,7 +318,7 @@ Example with multiple passphrases:
         "type": "Generic_HTTP",
         "host": "192.0.2.1",
         "protocol": "https",
-        "port": "443",
+        "port": 443,
         "path": "`>/Shared/secretPath`",
         "method": "POST",
         "headers": [
@@ -359,7 +359,7 @@ Note: More information about Graphite events can be found [here](https://graphit
         "type": "Graphite",
         "host": "192.0.2.1",
         "protocol": "https",
-        "port": "443"
+        "port": 443
     }
 }
 ```
@@ -384,7 +384,7 @@ Note: More information about installing Kafka can be found [here](https://kafka.
         "type": "Kafka",
         "host": "192.0.2.1",
         "protocol": "binaryTcpTls",
-        "port": "9092",
+        "port": 9092,
         "topic": "f5-telemetry"
     }
 }
@@ -418,7 +418,7 @@ Note: More information about installing ElasticSearch can be found [here](https:
         "class": "Telemetry_Consumer",
         "type": "ElasticSearch",
         "host": "192.0.2.1",
-        "port": "9200",
+        "port": 9200,
         "protocol": "https",
         "allowSelfSignedCert": false,
         "path": "/path/to/post/data",
@@ -455,7 +455,7 @@ Note: Typically the required information can be found by navigating to the HTTP 
         "type": "Sumo_Logic",
         "host": "192.0.2.1",
         "protocol": "https",
-        "port": "443",
+        "port": 443,
         "path": "/receiver/v1/http/",
         "passphrase": {
             "cipherText": "secret"
@@ -487,7 +487,7 @@ Note: All metrics are stored as gauges in statsd, those can be seen within graph
         "type": "Statsd",
         "host": "192.0.2.1",
         "protocol": "udp",
-        "port": "8125"
+        "port": 8125
     }
 }
 ```
@@ -549,7 +549,7 @@ Note: All metrics are stored as gauges in statsd, those can be seen within graph
         "type": "Splunk",
         "host": "192.0.2.1",
         "protocol": "https",
-        "port": "8088",
+        "port": 8088,
         "passphrase": {
             "cipherText": "apikey"
         }
@@ -1384,7 +1384,7 @@ Configuration
 - Create Pool: [Log Publisher Configuration](#log-publisher-configuration)
   - Note: (destination/publisher objects not required)
 - Create LTM Request Log Profile
-  - TMSH: ```create ltm profile request-log telemetry request-log-pool telemetry request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\" request-logging enabled```
+  - TMSH: ```create ltm profile request-log telemetry request-log-pool telemetry request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\",event_timestamp=\"$DATE_HTTP\" request-logging enabled```
     - Note: If creating the profile from the GUI, the ```\``` are not required.
   - F5 Application Services 3.0: [Log Profile Creation Using AS3](#log-profile-creation-using-as3)
 - Attach profile to the virtual server
@@ -1407,6 +1407,7 @@ Output
 ```json
 {
     "event_source":"request_logging",
+    "event_timestamp":"2019-01-01:01:01.000Z",
     "hostname":"hostname",
     "client_ip":"177.47.192.42",
     "server_ip":"",
@@ -1756,7 +1757,7 @@ Note: AS3 version 3.10.0 or greater required.
                     "requestPool": {
                         "use": "telemetry"
                     },
-                    "requestTemplate": "event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\""
+                    "requestTemplate": "event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\",event_timestamp=\"$DATE_HTTP\""
                 }
             },
             "telemetry_security_log_profile": {
