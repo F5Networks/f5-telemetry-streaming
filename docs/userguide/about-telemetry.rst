@@ -19,9 +19,11 @@ A basic declaration is shown here with descriptions of the components below:
             "class": "Controls",
             "logLevel": "info"
         },
-        "My_Poller": {
-            "class": "Telemetry_System_Poller",
-            "interval": 60
+        "My_System": {
+            "class": "Telemetry_System",
+            "systemPoller": {
+                "interval": 60
+            }
         },
         "My_Listener": {
             "class": "Telemetry_Listener",
@@ -38,6 +40,7 @@ A basic declaration is shown here with descriptions of the components below:
             }
         }
     }
+
 
 
 
@@ -63,6 +66,7 @@ The first few lines of your declaration are a part of the base components and de
             "class": "Controls",
             "logLevel": "info"
         },
+
         
              
 |
@@ -80,8 +84,8 @@ The first few lines of your declaration are a part of the base components and de
 
 .. _system-poller-class:
 
-System Poller
-`````````````
+Telemetry System
+````````````````
 The next lines of the declaration sets the System Poller, which collects and normalizes statistics from a system, such as BIG-IP, on a configurable interval for information such as device statistics, virtual server statistics, pool statistics, individual pool member statistics, and more.
 
 .. code-block:: javascript
@@ -89,9 +93,11 @@ The next lines of the declaration sets the System Poller, which collects and nor
    :lineno-start: 7
 
 
-    "My_Poller": {
-        "class": "Telemetry_System_Poller",
-        "interval": 60
+    "My_System": {
+        "class": "Telemetry_System",
+        "systemPoller": {
+            "interval": 60
+        }
     },
 
 |
@@ -109,15 +115,15 @@ The next lines of the declaration sets the System Poller, which collects and nor
 
 .. _event-listener-class:
 
-Event Listener
-``````````````
+Telemetry Listener
+``````````````````
 The next lines of the declaration sets the Event Listener, on both TCP and UDP protocols, that can accept events in a specific format and process them. Currently, the TS Listener sends all logging telemetry data.
 To see the type of information that the event listener processes, see :ref:`outputexample-ref`.
 Event Format: ``key1="value",key2="value"``
 
 .. code-block:: javascript
    :linenos:
-   :lineno-start: 11
+   :lineno-start: 13
 
 
     "My_Listener": {
@@ -141,13 +147,13 @@ Event Format: ``key1="value",key2="value"``
 
 .. _consumer-class:
 
-Consumer class
-``````````````
+Telemetry Consumer
+``````````````````
 The next lines of the declaration sets the Consumer, which accepts all telemetry information from whatever systems you configure it to. The consumer provides the tools to process that information. To see examples of configurations for consumers like Splunk, Azure Log Analytics, AWS CloudWatch, AWS S3, Graphite, and others, see the :ref:`settingupconsumer-ref` section of this guide.
 
 .. code-block:: javascript
    :linenos:
-   :lineno-start: 15
+   :lineno-start: 17
 
 
     "My_Consumer": {
