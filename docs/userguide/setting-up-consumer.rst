@@ -27,7 +27,7 @@ Example Declaration:
 
 .. code-block:: json
    :linenos:
-   :lineno-start: 14
+   :lineno-start: 17
 
     {
         "My_Consumer": {
