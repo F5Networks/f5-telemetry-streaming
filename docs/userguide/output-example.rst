@@ -670,6 +670,26 @@ System Information
     }
 
 
+iHealth Information Request
+---------------------------
+
+.. code-block:: json
+   :linenos:
+
+   {
+        "code": 200,
+        "message": [
+            {
+                "systemPollerDeclName": "My_Poller",
+                "ihealthDeclName": "My_iHealth",
+                "state": "IHEALTH_POLL_RETRY",
+                "nextFireDate": "2019-03-11T07:35:19.828Z",
+                "timeBeforeNextFire": 381089490
+            }
+        ]
+    }
+
+
 
 
 
