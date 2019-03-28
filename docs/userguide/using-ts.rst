@@ -8,6 +8,7 @@ Using Telemetry Streaming
    :includehidden:
    :glob:
 
+   telemetry-system.rst
    setting-up-consumer.rst
    event-listener.rst
    validate.rst
