@@ -86,7 +86,7 @@ The first few lines of your declaration are a part of the base components and de
 
 Telemetry System class
 ``````````````````````
-The next lines of the declaration sets the System Poller, which collects and normalizes statistics from a system, such as BIG-IP, on a configurable interval for information such as device statistics, virtual server statistics, pool statistics, individual pool member statistics, and more. For more information, including the optional iHealth 
+The next lines of the declaration sets the System Poller, which collects and normalizes statistics from a system, such as BIG-IP, on a configurable interval for information such as device statistics, virtual server statistics, pool statistics, individual pool member statistics, and more. For more information, including an optional iHealth poller, see :ref:`tssystem-ref`. 
 
 .. code-block:: javascript
    :linenos:
