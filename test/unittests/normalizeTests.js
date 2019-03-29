@@ -6,11 +6,13 @@
  * the software product on devcentral.f5.com.
  */
 
-const assert = require('assert');
-const normalize = require('../src/nodejs/normalize.js');
-const normalizeUtil = require('../src/nodejs/normalizeUtil.js');
+'use strict';
 
-const properties = require('../src/nodejs/config/properties.json');
+const assert = require('assert');
+const normalize = require('../../src/nodejs/normalize.js');
+const normalizeUtil = require('../../src/nodejs/normalizeUtil.js');
+
+const properties = require('../../src/nodejs/config/properties.json');
 
 describe('Normalize', () => {
     after(() => {

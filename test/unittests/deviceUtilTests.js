@@ -6,16 +6,23 @@
  * the software product on devcentral.f5.com.
  */
 
+'use strict';
+
 const assert = require('assert');
 const os = require('os');
 const fs = require('fs');
 const urllib = require('url');
 
-const constants = require('../src/nodejs/constants.js');
+const constants = require('../../src/nodejs/constants.js');
 
 /* eslint-disable global-require */
 
-/* eslint-disable global-require */
+let parseURL;
+if (process.versions.node.startsWith('4.')) {
+    parseURL = urllib.parse;
+} else {
+    parseURL = url => new urllib.URL(url);
+}
 
 describe('Device Util', () => {
     let deviceUtil;
@@ -32,7 +39,7 @@ describe('Device Util', () => {
     };
 
     before(() => {
-        deviceUtil = require('../src/nodejs/deviceUtil.js');
+        deviceUtil = require('../../src/nodejs/deviceUtil.js');
         childProcess = require('child_process');
         request = require('request');
     });
@@ -295,7 +302,7 @@ describe('Device Util', () => {
         const authToken = 'token';
 
         request.get = (opts, cb) => {
-            const parsedURL = new urllib.URL(opts.uri);
+            const parsedURL = parseURL(opts.uri);
 
             assert.strictEqual(parsedURL.pathname, uri);
             assert.strictEqual(parsedURL.protocol.slice(0, -1), constants.DEVICE_DEFAULT_PROTOCOL);
@@ -537,7 +544,7 @@ describe('Device Util', () => {
             }
         };
         const requestHandler = (opts, cb) => {
-            const parsedURL = new urllib.URL(opts.uri);
+            const parsedURL = parseURL(opts.uri);
 
             let body = mockBody;
             if (parsedURL.pathname === '/mgmt/tm/util/bash') {
@@ -665,7 +672,7 @@ describe('Device Util (DeviceAsyncCLI)', () => {
     let request;
 
     before(() => {
-        deviceUtil = require('../src/nodejs/deviceUtil.js');
+        deviceUtil = require('../../src/nodejs/deviceUtil.js');
         request = require('request');
     });
     after(() => {
@@ -1062,7 +1069,7 @@ describe('Device Util (DeviceAsyncCLI)', () => {
 
         return function (opts, cb) {
             const method = opts.method;
-            const pathname = (new urllib.URL(opts.uri)).pathname;
+            const pathname = parseURL(opts.uri).pathname;
             const counters = options.counters;
             const expectedErrors = options.expectedErrors;
 

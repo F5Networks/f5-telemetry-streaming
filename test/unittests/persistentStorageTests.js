@@ -6,6 +6,8 @@
  * the software product on devcentral.f5.com.
  */
 
+'use strict';
+
 const assert = require('assert');
 
 /* eslint-disable global-require */
@@ -17,7 +19,7 @@ describe('PersistentStorage', () => {
     let restWorker;
 
     beforeEach(() => {
-        psModule = require('../src/nodejs/persistentStorage.js');
+        psModule = require('../../src/nodejs/persistentStorage.js');
         persistentStorage = psModule.persistentStorage;
         restWorker = {
             loadState: (first, cb) => { cb(null, {}); },

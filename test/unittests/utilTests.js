@@ -6,13 +6,14 @@
  * the software product on devcentral.f5.com.
  */
 
+'use strict';
+
 const assert = require('assert');
 const os = require('os');
 const fs = require('fs');
 const path = require('path');
 
-const constants = require('../src/nodejs/constants.js');
-
+const constants = require('../../src/nodejs/constants.js');
 
 /* eslint-disable global-require */
 
@@ -30,7 +31,7 @@ describe('Util', () => {
     };
 
     before(() => {
-        util = require('../src/nodejs/util.js');
+        util = require('../../src/nodejs/util.js');
         request = require('request');
     });
     after(() => {
@@ -622,7 +623,7 @@ describe('Util (Tracer)', () => {
     const tracerFile = `${os.tmpdir()}/telemetry`; // os.tmpdir for windows + linux
 
     before(() => {
-        util = require('../src/nodejs/util.js');
+        util = require('../../src/nodejs/util.js');
     });
     beforeEach(() => {
         config = {

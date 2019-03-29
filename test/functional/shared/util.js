@@ -6,6 +6,8 @@
  * the software product on devcentral.f5.com.
  */
 
+'use strict';
+
 const net = require('net');
 const fs = require('fs');
 const request = require('request');

@@ -6,10 +6,12 @@
  * the software product on devcentral.f5.com.
  */
 
+'use strict';
+
 const assert = require('assert');
 const fs = require('fs');
 
-const constants = require('../src/nodejs/constants.js');
+const constants = require('../../src/nodejs/constants.js');
 
 /* eslint-disable global-require */
 
@@ -19,9 +21,9 @@ describe('Declarations', () => {
     let config;
 
     before(() => {
-        util = require('../src/nodejs/util.js');
-        deviceUtil = require('../src/nodejs/deviceUtil.js');
-        config = require('../src/nodejs/config.js');
+        util = require('../../src/nodejs/util.js');
+        deviceUtil = require('../../src/nodejs/deviceUtil.js');
+        config = require('../../src/nodejs/config.js');
     });
     beforeEach(() => {
         // mocks required for ajv custom keywords, among others
@@ -35,7 +37,7 @@ describe('Declarations', () => {
     });
 
     // first let's validate all example declarations
-    const baseDir = `${__dirname}/../examples/declarations`;
+    const baseDir = `${__dirname}/../../examples/declarations`;
     const files = fs.readdirSync(baseDir);
     files.forEach((file) => {
         it(`should validate example: ${file}`, () => {

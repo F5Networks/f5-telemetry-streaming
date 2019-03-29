@@ -6,6 +6,8 @@
  * the software product on devcentral.f5.com.
  */
 
+'use strict';
+
 const assert = require('assert');
 
 /* eslint-disable global-require */
@@ -15,8 +17,8 @@ describe('Data Pipeline', () => {
     let forwarder;
 
     before(() => {
-        dataPipeline = require('../src/nodejs/dataPipeline.js');
-        forwarder = require('../src/nodejs/forwarder.js');
+        dataPipeline = require('../../src/nodejs/dataPipeline.js');
+        forwarder = require('../../src/nodejs/forwarder.js');
     });
     after(() => {
         Object.keys(require.cache).forEach((key) => {

@@ -11,9 +11,9 @@
         "install-production": "npm install --production --no-optional",
         "install-test": "npm install --no-optional",
         "lint": "eslint src test scripts",
-        "test": "nyc --check-coverage --lines 80 --functions 80 --branches 70 mocha --recursive \"./test/*.js\"",
-        "report": "nyc report --reporter=html",
-        "test-functional": "mocha --recursive \"./test/functional/*.js\" --config $(realpath \"./test/functional/.mocharc.js\")"
+        "test-functional": "mocha --recursive \"./test/functional/*.js\" --config $(realpath \"./test/functional/.mocharc.js\")",
+        "test-only": "mocha --recursive \"./test/unittests/*.js\" --opts ./test/unittests/.mocha.opts",
+        "test": "nyc --reporter html --reporter text --check-coverage --lines 80 --functions 80 --branches 70 npm run test-only"
     },
     "dependencies": {
         "ajv": "^6.5.4",
@@ -28,11 +28,11 @@
         "request": "^2.88.0"
     },
     "devDependencies": {
-        "eslint": "^5.15.3",
+        "eslint": "^5.4.0",
         "eslint-config-airbnb-base": "^13.1.0",
         "eslint-plugin-import": "^2.16.0",
         "icrdk": "git://github.com/f5devcentral/f5-icontrollx-dev-kit#master",
-        "mocha": "^6.0.2",
+        "mocha": "^5.2.0",
         "nyc": "^13.3.0",
         "ssh2": "^0.8.2"
     }

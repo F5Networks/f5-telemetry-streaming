@@ -6,6 +6,8 @@
  * the software product on devcentral.f5.com.
  */
 
+'use strict';
+
 const assert = require('assert');
 
 /* eslint-disable global-require */
@@ -15,7 +17,7 @@ describe('Consumers plugins', () => {
     let context;
 
     before(() => {
-        cDefault = require('../src/nodejs/consumers/default');
+        cDefault = require('../../src/nodejs/consumers/default');
     });
     beforeEach(() => {
         const tracerMock = {

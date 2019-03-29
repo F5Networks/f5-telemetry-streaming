@@ -9,7 +9,7 @@
         "no-control-regex": "off",
         "indent": ["error", 4],
         "no-param-reassign": "off",
-        "prefer-destructuring": "off",
+        "prefer-destructuring": ["error", { "array": false, "object": false }],
         "no-use-before-define": ["error", { "functions": false, "classes": true }],
         "comma-dangle": ["error", "never"],
         "no-bitwise": ["error", { "int32Hint": true }],
@@ -24,6 +24,7 @@
             "ignoreRegExpLiterals": true,
             "ignoreStrings": true,
             "ignoreTemplateLiterals": true
-        }]
+        }],
+        "prefer-rest-params": "off"
     }
 }

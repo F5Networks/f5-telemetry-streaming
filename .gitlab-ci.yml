@@ -1,11 +1,83 @@
 image: node:8
 
 stages:
+    - lint
+    - test
     - build
     - deploy
-    - test
+    - functional test
     - teardown
     - publish
+
+lint:
+    image: node:8
+    stage: lint
+    tags:
+        - docker-executor
+    script:
+        - npm ci
+        - npm run lint
+
+test_node4:
+    image: node:4
+    stage: test
+    tags:
+        - docker-executor
+    script:
+        - npm install --global npm@5.10.0
+        - npm install
+        - npm install mocha@5.2.0
+        - npm run test-only
+
+test_node6:
+    image: node:6
+    stage: test
+    tags:
+        - docker-executor
+    script:
+        - npm install
+        - npm run test-only
+
+test_node8:
+    stage: test
+    tags:
+        - docker-executor
+    script:
+        - npm ci
+        - npm run test-only
+
+test_node_latest:
+    image: node:latest
+    stage: test
+    tags:
+        - docker-executor
+    script:
+        - npm ci
+        - npm run test-only
+
+test_package:
+    stage: test
+    script:
+        # install jq
+        - apt-get update
+        - apt-get install -y jq
+        # install node modules
+        - npm run install-test
+        # npm audit - install includes audit, but perform specific check and fail if needed
+        ######## TEMP DISABLE!!! (ideally need mocha 6.0.3) ########
+        # audit_report=$(npm audit --json)
+        # echo $audit_report
+        # actions=$(echo $audit_report | jq .actions | jq length)
+        # if [ $actions -ne 0 ]; then echo 'ERROR! vulnerabilities exist'; exit 1; fi
+        ######## END TEMP DISABLE!!! ########
+        # unit tests
+        - npm run test
+    artifacts:
+        name: ${CI_COMMIT_REF_NAME}_unittests_coverage
+        paths:
+            - coverage
+    tags:
+        - cm-official-docker-executor
 
 build_package:
     image: f5devcentral/containthedocs:rpmbuild
@@ -74,34 +146,8 @@ deploy_env:
             make setup && ls -als ${PROJECT_DIR} &&
             cp ${PROJECT_DIR}/harness_facts_flat.json ${CI_PROJECT_DIR}/harness_facts_flat.json
 
-test_package:
-    stage: test
-    script:
-        # install jq
-        - apt-get update
-        - apt-get install -y jq
-        # install node modules
-        - npm run install-test
-        # npm audit - install includes audit, but perform specific check and fail if needed
-        ######## TEMP DISABLE!!! (ideally need mocha 6.0.3) ########
-        # audit_report=$(npm audit --json)
-        # echo $audit_report
-        # actions=$(echo $audit_report | jq .actions | jq length)
-        # if [ $actions -ne 0 ]; then echo 'ERROR! vulnerabilities exist'; exit 1; fi
-        ######## END TEMP DISABLE!!! ########
-        # linter
-        - npm run lint
-        # unit tests
-        - npm run test && npm run report
-    artifacts:
-        name: ${CI_COMMIT_REF_NAME}_unittests_coverage
-        paths:
-            - coverage
-    tags:
-        - cm-official-docker-executor
-
 test_functional:
-    stage: test
+    stage: functional test
     script:
         - export TEST_HARNESS_FILE=${CI_PROJECT_DIR}/harness_facts_flat.json
         # really only need dev dependencies
