@@ -14,8 +14,8 @@
 const assert = require('assert');
 const fs = require('fs');
 const net = require('net');
-const util = require('../shared/util.js');
-const constants = require('../shared/constants.js');
+const util = require('./shared/util.js');
+const constants = require('./shared/constants.js');
 
 const baseILXUri = '/mgmt/shared/telemetry';
 const hosts = util.getHosts('BIGIP');
