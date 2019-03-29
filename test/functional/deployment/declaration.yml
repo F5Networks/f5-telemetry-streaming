@@ -48,6 +48,6 @@ request:
         image: BIGIP-13.0.0.0.0.1650
       desired:
         branch: ''
-        build: 0.0.7
+        build: 0.0.116
         iso_file: ''
-        version: 14.1.0.1
+        version: 14.1.0

@@ -18,6 +18,7 @@ lint:
         - npm run install-test
         - npm run lint
 
+# BIG-IP 13.x and BIG-IP 14.0, unittests only (without coverage check)
 test_node4:
     image: node:4
     stage: test
@@ -29,6 +30,7 @@ test_node4:
         - npm install mocha@5.2.0
         - npm run test-only
 
+# just in case, unittests only (without coverage check)
 test_node6:
     image: node:6
     stage: test
@@ -38,6 +40,7 @@ test_node6:
         - npm run install-test
         - npm run test-only
 
+# BIG-IP 14.1+, unittests only (without coverage check)
 test_node8:
     stage: test
     tags:
@@ -46,6 +49,7 @@ test_node8:
         - npm run install-test
         - npm run test-only
 
+# mostly for containers, unittests only (without coverage check)
 test_node_latest:
     image: node:latest
     stage: test
@@ -55,6 +59,7 @@ test_node_latest:
         - npm run install-test
         - npm run test-only
 
+# run tests and check code coverage
 test_package:
     stage: test
     script:
@@ -129,7 +134,7 @@ deploy_env:
         - cm-official-docker-executor
     variables:
         PROJECT_NAME: test_functional_harness
-        PROJECT_DECLARATION: ${CI_PROJECT_DIR}/test/deployment/declaration.yml
+        PROJECT_DECLARATION: ${CI_PROJECT_DIR}/test/functional/deployment/declaration.yml
         PROJECT_DIR: /root/deploy-projects/test_functional_harness
         CUSTOM_DECLARATION: "yes"
     artifacts:
@@ -176,7 +181,7 @@ teardown_env:
         - cm-official-docker-executor
     variables:
         PROJECT_NAME: test_functional_harness
-        PROJECT_DECLARATION: ${CI_PROJECT_DIR}/test/deployment/declaration.yml
+        PROJECT_DECLARATION: ${CI_PROJECT_DIR}/test/functional/deployment/declaration.yml
         PROJECT_DIR: /root/deploy-projects/test_functional_harness
         CUSTOM_DECLARATION: "yes"
     script:
