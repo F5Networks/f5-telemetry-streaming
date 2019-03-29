@@ -13,7 +13,6 @@ const assert = require('assert');
 const constants = require('../../src/nodejs/constants.js');
 
 /* eslint-disable global-require */
-Object.values({});
 
 function MockRestOperation(opts) {
     this.method = opts.method || 'GET';
