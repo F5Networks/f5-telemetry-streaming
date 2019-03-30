@@ -15,7 +15,7 @@ module.exports = {
         BASIC_EXAMPLE: `${__dirname}/basic.json`,
         CONSUMER_NAME: 'My_Consumer',
         SYSTEM_NAME: 'My_System',
-        SYSTEM_POLLER_SCHEMA: fs.realpathSync(`${__dirname}/../../shared/output_schemas/system_poller_schema.json`)
+        SYSTEM_POLLER_SCHEMA: fs.realpathSync(`${__dirname}/../../../shared/output_schemas/system_poller_schema.json`)
     },
     ENV_VARS: {
         TEST_HARNESS: {
