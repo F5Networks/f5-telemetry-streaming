@@ -26,11 +26,11 @@ To configure an LTM request profile, use these tmsh commands:
 
 Replace the example address with a valid Telemetry Streaming listener address, for example the mgmt IP.
 
-2. Create an LTM Request Log Profile: 
+2. Create an LTM Request Log Profile using the following TMSH command. Note: If you are creating the profile in the user interface, the ``\`` are not required. 
 
 .. code-block:: python
 
-    create ltm profile request-log telemetry request-log-pool telemetry-local request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\" request-logging enabled
+    create ltm profile request-log telemetry request-log-pool telemetry request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\",event_timestamp=\"$DATE_HTTP\" request-logging enabled
 
 3. Attach the profile to the virtual server, for example:
 
@@ -75,11 +75,12 @@ AFM Request Log profile
 
 1. Create and :ref:`configurelogpub-ref`.
 
-2. Create a Security Log Profile in TMSH or AS3:
+2. Create a Security Log Profile using TMSH or :ref:`configurelogpubas3-ref`:
 
 .. code-block:: python
    
-   create security log profile telemetry network replace-all-with { telemetry { filter { log-acl-match-drop enabled log-acl-match-reject enabled } publisher telemetry-publisher } }
+   create security log profile telemetry network replace-all-with { telemetry { filter { log-acl-match-drop enabled log-acl-match-reject enabled } publisher telemetry_publisher } }
+
 
 3. Attach the profile to the virtual server, for example:
 
@@ -114,7 +115,7 @@ Example output:
         "bigip_mgmt_ip":"10.0.1.100",
         "context_name":"/Common/app.app/app_vs",
         "context_type":"Virtual Server",
-        "date_time":"Dec 17 2018 22:46:04",
+        "date_time":"2019-01-01T01:01:01Z",
         "dest_fqdn":"unknown",
         "dest_ip":"10.0.2.101",
         "dst_geo":"Unknown",
@@ -153,14 +154,15 @@ Example output:
     }
 
 
+
 ASM Log
 ```````
 
-1. Create a Security Log Profile using either TMSH or AS3:
+1. Create a Security Log Profile using either TMSH or :ref:`configurelogpubas3-ref`:
 
 .. code-block:: python
    
-   create security log profile telemetry application replace-all-with { telemetry { filter replace-all-with { request-type { values replace-all-with { all } } } logger-type remote remote-storage splunk servers replace-all-with { 192.0.2.1:6514 {} } } }
+   create security log profile telemetry application replace-all-with { telemetry { filter replace-all-with { request-type { values replace-all-with { all } } } logger-type remote remote-storage splunk servers replace-all-with { 255.255.255.254:6514 {} } } }
 
 2. Attach the profile to the virtual server, for example:
 
@@ -294,7 +296,7 @@ Using TMSH:
 
 .. code-block:: python
 
-    modify sys syslog remote-servers replace-all-with { server { host 10.0.1.100 remote-port 6515 } }
+    modify sys syslog remote-servers replace-all-with { server { host 127.0.0.1 remote-port 6514 } }
 
 User interface: :menuselection:`System --> Logs --> Configuration --> Remote Logging`
 
@@ -324,6 +326,8 @@ Example output:
 
 Configure the Log Publisher using TMSH
 ``````````````````````````````````````
+
+.. NOTE:: The examples assume the TS listener is using port 
 
 1. Create a pool in tmsh, replacing the example address with a valid TS listener address, for example, the mgmt IP:
 
