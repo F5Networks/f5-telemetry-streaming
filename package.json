@@ -11,7 +11,7 @@
         "install-production": "npm install --production --no-optional",
         "install-test": "npm install --no-optional",
         "lint": "eslint src test scripts",
-        "test-functional": "mocha --recursive \"./test/functional/*.js\" --config $(realpath \"./test/functional/.mocharc.js\")",
+        "test-functional": "mocha --recursive \"./test/functional/*.js\" --opts ./test/functional/.mocha.opts",
         "test-only": "mocha --recursive \"./test/unittests/*.js\" --opts ./test/unittests/.mocha.opts",
         "test": "nyc --reporter html --reporter text --check-coverage --lines 80 --functions 80 --branches 70 npm run test-only"
     },
