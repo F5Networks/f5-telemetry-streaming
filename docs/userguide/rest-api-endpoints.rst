@@ -57,20 +57,3 @@ Declare configuration
 The endpoint to declare/retrieve the configuration is **<base_endpoint>/declare**. The allowed HTTP methods are **POST** and **GET**
 
 
-System Poller
-`````````````
-
-Allowed URIs:
- - **<base_endpoint>/systempoller/** - endpoint to retrieve data from configured poller.
- - **<base_endpoint>/systempoller/** - endpoint to retrieve data from configured system.
- - **<base_endpoint>/systempoller//** - endpoint to retrieve data from configured system using specific poller.
-
-
-iHealth Poller
-``````````````
-
-The endpoint to retrieve data from the configured poller is **<base_endpoint>/ihealthpoller//**. The allowed HTTP method is **GET**.
- - **pollerName** - this value is optional and should match the name of one of the configured System pollers.
- - **ihealthName** - this value is optional and should match the name of one of the configured iHealth pollers.
-
- When neither **pollerName** or **ihealthName** is specified, then the current status for running pollers will be returned. When **pollerName** is specified then the iHealth poller will be started with System Poller's configuration. 
