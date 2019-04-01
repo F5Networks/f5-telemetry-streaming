@@ -6,9 +6,11 @@
  * the software product on devcentral.f5.com.
  */
 
+'use strict';
+
 const assert = require('assert');
 
-const constants = require('../src/nodejs/constants.js');
+const constants = require('../../src/nodejs/constants.js');
 
 /* eslint-disable global-require */
 
@@ -45,10 +47,10 @@ describe('Config', () => {
     };
 
     before(() => {
-        const psModule = require('../src/nodejs/persistentStorage.js');
-        config = require('../src/nodejs/config.js');
-        util = require('../src/nodejs/util.js');
-        deviceUtil = require('../src/nodejs/deviceUtil.js');
+        const psModule = require('../../src/nodejs/persistentStorage.js');
+        config = require('../../src/nodejs/config.js');
+        util = require('../../src/nodejs/util.js');
+        deviceUtil = require('../../src/nodejs/deviceUtil.js');
 
         const restWorker = {
             loadState: (cb) => { cb(null, baseState); },

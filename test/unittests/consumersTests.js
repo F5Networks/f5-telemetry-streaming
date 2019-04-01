@@ -6,9 +6,11 @@
  * the software product on devcentral.f5.com.
  */
 
+'use strict';
+
 const assert = require('assert');
 
-const constants = require('../src/nodejs/constants.js');
+const constants = require('../../src/nodejs/constants.js');
 
 /* eslint-disable global-require */
 
@@ -17,8 +19,8 @@ describe('Consumers', () => {
     let consumers;
 
     before(() => {
-        config = require('../src/nodejs/config.js');
-        consumers = require('../src/nodejs/consumers.js');
+        config = require('../../src/nodejs/config.js');
+        consumers = require('../../src/nodejs/consumers.js');
     });
     after(() => {
         Object.keys(require.cache).forEach((key) => {

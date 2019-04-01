@@ -6,6 +6,8 @@
  * the software product on devcentral.f5.com.
  */
 
+'use strict';
+
 const net = require('net');
 const fs = require('fs');
 const request = require('request');
@@ -65,7 +67,7 @@ module.exports = {
      */
     getPackageDetails() {
         // default to new build directory if it exists, otherwise use dist directory
-        const existingBuildDir = `${__dirname}/../../dist`;
+        const existingBuildDir = `${__dirname}/../../../dist`;
         const newBuildDir = `${existingBuildDir}/new_build`;
         const dir = fs.existsSync(newBuildDir) ? newBuildDir : existingBuildDir;
 

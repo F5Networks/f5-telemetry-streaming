@@ -11,7 +11,7 @@
 
 /* eslint-disable global-require */
 
-const util = require('../shared/util.js');
+const util = require('./shared/util.js');
 
 const hosts = util.getHosts('BIGIP');
 

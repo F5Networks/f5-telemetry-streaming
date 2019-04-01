@@ -6,8 +6,10 @@
  * the software product on devcentral.f5.com.
  */
 
+'use strict';
+
 const assert = require('assert');
-const logger = require('../src/nodejs/logger.js');
+const logger = require('../../src/nodejs/logger.js');
 
 const logLevels = [
     'notset',
