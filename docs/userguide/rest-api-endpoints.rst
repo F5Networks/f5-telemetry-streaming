@@ -54,6 +54,6 @@ Output:
 Declare configuration
 `````````````````````
 
-The endpoint to declare/retrieve the configuration is **<base_endpoint>/declare**. The allowed HTTP methods are **POST** and **GET**
+The endpoint to declare/retrieve the configuration is **<base_endpoint>/declare**. The allowed HTTP methods are **POST** and **GET**.
 
 

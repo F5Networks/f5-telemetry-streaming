@@ -18,24 +18,14 @@ The system poller collects and normalizes statistics from a system, such as BIG-
    "My_System_Minimal": {
         "class": "Telemetry_System",
         "systemPoller": {
-            "interval": 150,
-            "tag": {
-                "tenant": "`T`",
-                "application": "`A`"
-            }
+            "interval": 60
         }
     }
 
 +--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 | Parameter          | Options                        |  Description/Notes                                                                                                                         |
 +====================+================================+============================================================================================================================================+
-| class              | Telemetry_System               |  The class for Telemetry System must always be Telemetry_System, do not change this value.                                                 |
-+--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
-| interval           | 60 - 6000, **300**             |  This value determines the polling period in seconds. By default, Telemetry Streaming collects statistics every 300 seconds.               |
-+--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
-| enable             | 60 - 6000, **300**             |  This value determines the polling period in seconds. By default, Telemetry Streaming collects statistics every 300 seconds.               |
-+--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
-| trace              | 60 - 6000, **300**             |  This value determines the polling period in seconds. By default, Telemetry Streaming collects statistics every 300 seconds.               |
+| interval           | 60 - 6000, **60**             |  This value determines the polling period in seconds. By default, Telemetry Streaming collects statistics every 300 seconds.                |
 +--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 
 
@@ -49,16 +39,18 @@ iHealth Poller minimal declaration:
    :linenos:
    :lineno-start: 7
 
-   "iHealth_Poller_Minimal": {
-        "class": "Telemetry_iHealth_Poller",
-        "username": "IHEALTH_ACCOUNT_USERNAME",
-        "passphrase": {
-            "cipherText": "IHEALTH_ACCOUNT_PASSPHRASE"
-        },
-        "interval": {
-            "timeWindow": {
-                "start": "23:15",
-                "end":   "02:15"
+    "My_System_Minimal": {
+        "class": "Telemetry_System",
+        "iHealthPoller": {
+            "username": "IHEALTH_ACCOUNT_USERNAME",
+            "passphrase": {
+                "cipherText": "IHEALTH_ACCOUNT_PASSPHRASE"
+            },
+            "interval": {
+                "timeWindow": {
+                    "start": "23:15",
+                    "end":   "02:15"
+                }
             }
         }
     }
@@ -69,30 +61,32 @@ iHealth Poller full declaration:
    :linenos:
    :lineno-start: 7
 
-   "iHealth_Poller_Full": {
-        "class": "Telemetry_iHealth_Poller",
-        "username": "IHEALTH_ACCOUNT_USERNAME",
-        "passphrase": {
-            "cipherText": "IHEALTH_ACCOUNT_PASSPHRASE"
-        },
-        "proxy": {
-            "host": "127.0.0.1",
-            "protocol": "http",
-            "port": 80,
-            "username": "username",
+   "My_System_Minimal": {
+        "class": "Telemetry_System",
+        "iHealthPoller": {
+            "username": "IHEALTH_ACCOUNT_USERNAME",
             "passphrase": {
-                "cipherText": "passphrase"
-            }
-        },
-        "interval": {
-            "timeWindow": {
-                "start": "23:15",
-                "end":   "06:15"
+                "cipherText": "IHEALTH_ACCOUNT_PASSPHRASE"
             },
-            "frequency": "monthly",
-            "day": "5"
+            "proxy": {
+                "host": "127.0.0.1",
+                "protocol": "http",
+                "port": 80,
+                "username": "username",
+                "passphrase": {
+                    "cipherText": "passphrase"
+                }
+            },
+            "interval": {
+                "timeWindow": {
+                    "start": "23:15",
+                    "end":   "06:15"
+                },
+                "frequency": "monthly",
+                "day": "5"
+            }
         }
-    }
+   }
 
 
 +----------------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+

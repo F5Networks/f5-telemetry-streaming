@@ -3,7 +3,111 @@
 Event Listener class
 --------------------
 
-The Telemetry Streaming Event Listener collects event logs from all BIG-IP sources, including LTM, ASM, AFM, and APM.
+The Telemetry Streaming Event Listener collects event logs from all BIG-IP sources, including LTM, ASM, AFM, and APM. You can configure all of these by POSTing a single AS3 declaration or you can use TMSH or the GUI to configure individual modules. Below you will find an example AS3 declaration as well as instructions for configuring each module.
+
+
+.. _configurelogpubas3-ref:
+
+Configure the Log Publisher using AS3
+`````````````````````````````````````
+
+Use Application Services Extension 3.10.0 or greater. For more information, see |as3docs|.
+
+.. code-block:: json
+   :linenos:
+
+   {
+        "class": "ADC",
+        "schemaVersion": "3.10.0",
+        "remark": "Example depicting creation of BIG-IP module log profiles",
+        "Common": {
+            "Shared": {
+                "class": "Application",
+                "template": "shared",
+                "telemetry_local": {
+                    "class": "Pool",
+                    "members": [
+                        {
+                            "serverAddresses": [
+                                "192.0.2.10"
+                            ],
+                            "enable": true,
+                            "servicePort": 6514
+                        }
+                    ],
+                    "monitors": [
+                        {
+                            "bigip": "/Common/tcp"
+                        }
+                    ]
+                },
+                "telemetry_hsl": {
+                    "class": "Log_Destination",
+                    "type": "remote-high-speed-log",
+                    "protocol": "tcp",
+                    "pool": {
+                        "use": "telemetry_local"
+                    }
+                },
+                "telemetry_formatted": {
+                    "class": "Log_Destination",
+                    "type": "splunk",
+                    "forwardTo": {
+                        "use": "telemetry_hsl"
+                    }
+                },
+                "telemetry_publisher": {
+                    "class": "Log_Publisher",
+                    "destinations": [
+                        {
+                            "use": "telemetry_formatted"
+                        }
+                    ]
+                },
+                "telemetry_traffic_log_profile": {
+                    "class": "Traffic_Log_Profile",
+                    "requestSettings": {
+                        "requestEnabled": true,
+                        "requestProtocol": "mds-tcp",
+                        "requestPool": {
+                            "use": "telemetry_local"
+                        },
+                        "requestTemplate": "event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\""
+                    }
+                },
+                "telemetry_security_log_profile": {
+                    "class": "Security_Log_Profile",
+                    "application": {
+                        "localStorage": false,
+                        "remoteStorage": "splunk",
+                        "protocol": "tcp",
+                        "servers": [
+                            {
+                                "address": "192.0.2.10",
+                                "port": "6514"
+                            }
+                        ],
+                        "storageFilter": {
+                            "requestType": "illegal-including-staged-signatures"
+                        }
+                    },
+                    "network": {
+                        "publisher": {
+                            "use": "telemetry_publisher"
+                        },
+                        "logRuleMatchAccepts": false,
+                        "logRuleMatchRejects": true,
+                        "logRuleMatchDrops": true,
+                        "logIpErrors": true,
+                        "logTcpErrors": true,
+                        "logTcpEvents": true
+                    }
+                }
+            }
+        }
+    }
+
+
 
 The Request Logging profile gives you the ability to configure data within a log file for HTTP requests and responses, in accordance with specified parameters.
 
@@ -58,6 +162,7 @@ Example Output:
 
     {
         "event_source":"request_logging",
+        "event_timestamp":"2019-01-01:01:01.000Z",
         "hostname":"hostname",
         "client_ip":"177.47.192.42",
         "server_ip":"",
@@ -379,104 +484,6 @@ User interface: :menuselection:`System --> Logs --> Configuration --> Log Destin
 
 
 
-.. _configurelogpubas3-ref:
+.. |as3docs| raw:: html
 
-Configure the Log Publisher using AS3
-`````````````````````````````````````
-
-Use Application Services Extension 3.10.0 or greater
-
-.. code-block:: json
-   :linenos:
-
-   {
-        "class": "ADC",
-        "schemaVersion": "3.10.0",
-        "remark": "Example depicting creation of BIG-IP module log profiles",
-        "Common": {
-            "Shared": {
-                "class": "Application",
-                "template": "shared",
-                "telemetry_local": {
-                    "class": "Pool",
-                    "members": [
-                        {
-                            "serverAddresses": [
-                                "192.0.2.10"
-                            ],
-                            "enable": true,
-                            "servicePort": 6514
-                        }
-                    ],
-                    "monitors": [
-                        {
-                            "bigip": "/Common/tcp"
-                        }
-                    ]
-                },
-                "telemetry_hsl": {
-                    "class": "Log_Destination",
-                    "type": "remote-high-speed-log",
-                    "protocol": "tcp",
-                    "pool": {
-                        "use": "telemetry_local"
-                    }
-                },
-                "telemetry_formatted": {
-                    "class": "Log_Destination",
-                    "type": "splunk",
-                    "forwardTo": {
-                        "use": "telemetry_hsl"
-                    }
-                },
-                "telemetry_publisher": {
-                    "class": "Log_Publisher",
-                    "destinations": [
-                        {
-                            "use": "telemetry_formatted"
-                        }
-                    ]
-                },
-                "telemetry_traffic_log_profile": {
-                    "class": "Traffic_Log_Profile",
-                    "requestSettings": {
-                        "requestEnabled": true,
-                        "requestProtocol": "mds-tcp",
-                        "requestPool": {
-                            "use": "telemetry_local"
-                        },
-                        "requestTemplate": "event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\""
-                    }
-                },
-                "telemetry_security_log_profile": {
-                    "class": "Security_Log_Profile",
-                    "application": {
-                        "localStorage": false,
-                        "remoteStorage": "splunk",
-                        "protocol": "tcp",
-                        "servers": [
-                            {
-                                "address": "192.0.2.10",
-                                "port": "6514"
-                            }
-                        ],
-                        "storageFilter": {
-                            "requestType": "illegal-including-staged-signatures"
-                        }
-                    },
-                    "network": {
-                        "publisher": {
-                            "use": "telemetry_publisher"
-                        },
-                        "logRuleMatchAccepts": false,
-                        "logRuleMatchRejects": true,
-                        "logRuleMatchDrops": true,
-                        "logIpErrors": true,
-                        "logTcpErrors": true,
-                        "logTcpEvents": true
-                    }
-                }
-            }
-        }
-    }
-
+   <a href="https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/latest/" target="_blank">AS3 documentation</a>
