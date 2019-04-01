@@ -54,19 +54,6 @@ Output:
 Declare configuration
 `````````````````````
 
-The endpoint to declare/retrieve the configuration is **<base_endpoint>/declare**. The allowed HTTP methods are **POST** and **GET**
+The endpoint to declare/retrieve the configuration is **<base_endpoint>/declare**. The allowed HTTP methods are **POST** and **GET**.
 
 
-System Poller
-`````````````
-
-Allowed URIs:
-- **<base_endpoint>/systempoller/** - endpoint to retrieve data from configured poller.
-- **<base_endpoint>/systempoller/** - endpoint to retrieve data from configured system.
-- **<base_endpoint>/systempoller//** - endpoint to retrieve data from configured system using specific poller.
-
-
-iHealth Poller
-``````````````
-
-The endpoint to retrieve data from the configured poller is **<base_endpoint>/ihealthpoller//**. The allowed HTTP method is **GET**.

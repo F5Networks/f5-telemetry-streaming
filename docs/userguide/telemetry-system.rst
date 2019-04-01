@@ -3,7 +3,7 @@
 Telemetry System class
 ----------------------
 
-The Telemetry System class sets up the system poller and optionally, the iHealth poller.
+The Telemetry System class sets up the system poller and optionally, the iHealth poller. Users have the option of either defining both pollers inside of the Telemetry_System class or defining them outside of the class and referencing them by name. 
 
 The minimal declaration defines ``My_System_Minimal`` targeted to ``localhost`` on port ``8100``, using the ``http`` protocol, and the user is ``admin``.
 
@@ -18,30 +18,20 @@ The system poller collects and normalizes statistics from a system, such as BIG-
    "My_System_Minimal": {
         "class": "Telemetry_System",
         "systemPoller": {
-            "interval": 150,
-            "tag": {
-                "tenant": "`T`",
-                "application": "`A`"
-            }
+            "interval": 60
         }
     }
 
 +--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 | Parameter          | Options                        |  Description/Notes                                                                                                                         |
 +====================+================================+============================================================================================================================================+
-| class              | Telemetry_System               |  The class for Telemetry System must always be Telemetry_System, do not change this value.                                                 |
-+--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 | interval           | 60 - 6000, **300**             |  This value determines the polling period in seconds. By default, Telemetry Streaming collects statistics every 300 seconds.               |
-+--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
-| enable             | 60 - 6000, **300**             |  This value determines the polling period in seconds. By default, Telemetry Streaming collects statistics every 300 seconds.               |
-+--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
-| trace              | 60 - 6000, **300**             |  This value determines the polling period in seconds. By default, Telemetry Streaming collects statistics every 300 seconds.               |
 +--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 
 
 iHealth poller
 ``````````````
-The iHealth poller creates a QKView on the target system, downloads it to the host on which Telemetry Streaming is running, uploads QKView to F5 iHealth Service from the host on which TS is running, and fetches the F5 iHealth Service QKView analysis. For more information on iHealth see the documentation on |ihealth|.
+The iHealth poller creates a QKView on the target system, downloads it to the host on which Telemetry Streaming is running, uploads QKView to F5 iHealth Service from the host on which TS is running, and fetches the F5 iHealth Service QKView analysis. For more information on iHealth see the documentation on |ihealth|. To see an example of a declaration with referenced pollers instead of inline, see :ref:`referencedpollers`.
 
 iHealth Poller minimal declaration:
 
@@ -49,16 +39,18 @@ iHealth Poller minimal declaration:
    :linenos:
    :lineno-start: 7
 
-   "iHealth_Poller_Minimal": {
-        "class": "Telemetry_iHealth_Poller",
-        "username": "IHEALTH_ACCOUNT_USERNAME",
-        "passphrase": {
-            "cipherText": "IHEALTH_ACCOUNT_PASSPHRASE"
-        },
-        "interval": {
-            "timeWindow": {
-                "start": "23:15",
-                "end":   "02:15"
+    "My_System_Minimal": {
+        "class": "Telemetry_System",
+        "iHealthPoller": {
+            "username": "IHEALTH_ACCOUNT_USERNAME",
+            "passphrase": {
+                "cipherText": "IHEALTH_ACCOUNT_PASSPHRASE"
+            },
+            "interval": {
+                "timeWindow": {
+                    "start": "23:15",
+                    "end":   "02:15"
+                }
             }
         }
     }
@@ -69,30 +61,32 @@ iHealth Poller full declaration:
    :linenos:
    :lineno-start: 7
 
-   "iHealth_Poller_Full": {
-        "class": "Telemetry_iHealth_Poller",
-        "username": "IHEALTH_ACCOUNT_USERNAME",
-        "passphrase": {
-            "cipherText": "IHEALTH_ACCOUNT_PASSPHRASE"
-        },
-        "proxy": {
-            "host": "127.0.0.1",
-            "protocol": "http",
-            "port": 80,
-            "username": "username",
+   "My_System_Minimal": {
+        "class": "Telemetry_System",
+        "iHealthPoller": {
+            "username": "IHEALTH_ACCOUNT_USERNAME",
             "passphrase": {
-                "cipherText": "passphrase"
-            }
-        },
-        "interval": {
-            "timeWindow": {
-                "start": "23:15",
-                "end":   "06:15"
+                "cipherText": "IHEALTH_ACCOUNT_PASSPHRASE"
             },
-            "frequency": "monthly",
-            "day": "5"
+            "proxy": {
+                "host": "127.0.0.1",
+                "protocol": "http",
+                "port": 80,
+                "username": "username",
+                "passphrase": {
+                    "cipherText": "passphrase"
+                }
+            },
+            "interval": {
+                "timeWindow": {
+                    "start": "23:15",
+                    "end":   "06:15"
+                },
+                "frequency": "monthly",
+                "day": "5"
+            }
         }
-    }
+   }
 
 
 +----------------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
