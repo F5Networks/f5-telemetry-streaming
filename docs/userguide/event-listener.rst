@@ -451,7 +451,7 @@ Configure the Log Publisher using TMSH
 
 Please note the following:
  - Examples assume the TS listener is using port 6514.
- - BIG-IP configuration 
+ - Additional objects are required for BIG-IP configurations pointing to a local on-box listener. Notes on configuring those are noted below.
  - Per-app Virtual Edition BIG-IP limits the number of virtual servers available. To avoid creating the virtual server creating the virtual server in the following configuration, it is possible to point the pool directly at the TMM link-local IPv6 address. 
 
 1. Create an iRule (localhost forwarder). This is only required when TS is a local listener.

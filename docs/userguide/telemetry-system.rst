@@ -31,7 +31,7 @@ The system poller collects and normalizes statistics from a system, such as BIG-
 
 iHealth poller
 ``````````````
-The iHealth poller creates a QKView on the target system, downloads it to the host on which Telemetry Streaming is running, uploads QKView to F5 iHealth Service from the host on which TS is running, and fetches the F5 iHealth Service QKView analysis. For more information on iHealth see the documentation on |ihealth|. To see an example of a declaration with referenced pollers instead of inline, see :ref:`referencedpollers`
+The iHealth poller creates a QKView on the target system, downloads it to the host on which Telemetry Streaming is running, uploads QKView to F5 iHealth Service from the host on which TS is running, and fetches the F5 iHealth Service QKView analysis. For more information on iHealth see the documentation on |ihealth|. To see an example of a declaration with referenced pollers instead of inline, see :ref:`referencedpollers`.
 
 iHealth Poller minimal declaration:
 
