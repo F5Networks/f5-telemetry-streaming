@@ -1,15 +1,15 @@
 .. _eventlistener-ref:
 
 Event Listener class
---------------------
+====================
 
 The Telemetry Streaming Event Listener collects event logs from all BIG-IP sources, including LTM, ASM, AFM, and APM. You can configure all of these by POSTing a single AS3 declaration or you can use TMSH or the GUI to configure individual modules. Below you will find an example AS3 declaration as well as instructions for configuring each module.
 
 
 .. _configurelogpubas3-ref:
 
-Configure the Log Publisher using AS3
-`````````````````````````````````````
+Configure Logging using AS3
+---------------------------
 
 Use Application Services Extension 3.10.0 or greater. For more information, see |as3docs|.
 
@@ -128,6 +128,9 @@ Use Application Services Extension 3.10.0 or greater. For more information, see 
 
 The Request Logging profile gives you the ability to configure data within a log file for HTTP requests and responses, in accordance with specified parameters.
 
+
+Configure Logging Using tmsh
+----------------------------
 
 
 LTM Request Log profile
