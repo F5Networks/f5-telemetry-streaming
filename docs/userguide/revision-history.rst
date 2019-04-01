@@ -12,7 +12,7 @@ Document Revision History
         - Date
 
       * - 1.2.0
-        - Updated the documentation for Telemetry Streaming v1.2.0. This release contains the following changes: |br| * Changed the System Poller class to the Telemetry System class |br| * Added support for iHealth polling. |br| * Added support for IPsec Tunnel statistics. |br| * Added Event Listener log profile configuration example using a single AS3 declaration |br| Updated the Event Listener log profile configuration examples to use non mgmt IP based endpoints.
+        - Updated the documentation for Telemetry Streaming v1.2.0. This release contains the following changes: |br| * Changed the System Poller class to the Telemetry System class |br| * Added support for iHealth polling. |br| * Added support for IPsec Tunnel statistics. |br| * Added Event Listener log profile configuration example using a single AS3 declaration |br| Updated the Event Listener log profile configuration examples to use non mgmt IP based endpoints. |br| * Updated example output.
         - 04-02-19
 
       * - 1.1.0

@@ -3,7 +3,7 @@
 Telemetry System class
 ----------------------
 
-The Telemetry System class sets up the system poller and optionally, the iHealth poller.
+The Telemetry System class sets up the system poller and optionally, the iHealth poller. Users have the option of either defining both pollers inside of the Telemetry_System class or defining them outside of the class and referencing them by name. 
 
 The minimal declaration defines ``My_System_Minimal`` targeted to ``localhost`` on port ``8100``, using the ``http`` protocol, and the user is ``admin``.
 
