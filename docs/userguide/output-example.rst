@@ -702,6 +702,7 @@ LTM Request Log
 
     {
         "event_source":"request_logging",
+        "event_timestamp":"2019-01-01:01:01.000Z",
         "hostname":"hostname",
         "client_ip":"177.47.192.42",
         "server_ip":"",
@@ -712,6 +713,7 @@ LTM Request Log
         "application":"app.app",
         "telemetryEventCategory": "event"
     }
+
 
 AFM Request Log
 ---------------
