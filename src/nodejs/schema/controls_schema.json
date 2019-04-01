@@ -2,7 +2,7 @@
     "$id": "controls_schema.json",
     "$async": true,
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Telemetry streaming Controls schema",
+    "title": "Telemetry Streaming Controls schema",
     "description": "",
     "type": "object",
     "allOf": [
@@ -15,12 +15,13 @@
                 "properties": {
                     "class": {
                         "title": "Class",
-                        "description": "Telemetry streaming Controls class",
+                        "description": "Telemetry Streaming Controls class",
                         "type": "string",
                         "enum": [ "Controls" ]
                     },
                     "logLevel": {
                         "title": "Logging Level",
+                        "description": "",
                         "type": "string",
                         "default": "info",
                         "enum": [ 
@@ -28,6 +29,12 @@
                             "info",
                             "error"
                         ] 
+                    },
+                    "debug": {
+                        "title": "Enable debug mode",
+                        "description": "",
+                        "type": "boolean",
+                        "default": false
                     }
                 },
                 "additionalProperties": false

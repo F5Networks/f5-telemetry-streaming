@@ -1,13 +1,17 @@
 {
     "class": "Telemetry",
-    "My_Poller": {
-        "class": "Telemetry_System_Poller",
-        "interval": 60,
+    "My_System": {
+        "class": "Telemetry_System",
         "host": "192.0.2.1",
+        "protocol": "https",
         "port": 443,
+        "allowSelfSignedCert": false,
         "username": "myuser",
         "passphrase": {
-            "environmentVar": "MY_ENV_VAR"
+            "environmentVar": "TS_SYSTEM_SECRET"
+        },
+        "systemPoller": {
+            "interval": 60
         }
     },
     "My_Listener": {
@@ -19,7 +23,7 @@
         "type": "Azure_Log_Analytics",
         "workspaceId": "myworkspaceid",
         "passphrase": {
-            "environmentVar": "MY_CONSUMER_ENV_VAR"
+            "environmentVar": "TS_CONSUMER_SECRET"
         }
     }
  }

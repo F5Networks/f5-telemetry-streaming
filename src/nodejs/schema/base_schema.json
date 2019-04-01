@@ -50,6 +50,11 @@
             ],
             "f5secret": true
         },
+        "username": {
+            "$comment": "Common field for username to use everywhere in scheme",
+            "title": "Username",
+            "type": "string"
+        },
         "stringOrSecret": {
             "$async": true,
             "allOf": [
@@ -113,6 +118,75 @@
             "title": "Allow Self-Signed Certificate",
             "description": "" ,
             "type": "boolean"
+        },
+        "host": {
+            "$comment": "This property can be used by consumers, system pollers",
+            "title": "Host",
+            "description": "" ,
+            "type": "string",
+            "anyOf": [
+                { "format": "ipv4" },
+                { "format": "ipv6" },
+                { "format": "hostname" }
+            ],
+            "hostConnectivityCheck": true
+        },
+        "port": {
+            "title": "Port",
+            "description": "" ,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+        },
+        "protocol": {
+            "title": "Protocol",
+            "description": "" ,
+            "type": "string",
+            "enum": [ "http", "https" ]
+        },
+        "proxy": {
+            "title": "Proxy Configuration",
+            "description": "",
+            "type": "object",
+            "$async": true,
+            "dependencies": {
+                "passphrase": [ "username" ]
+            },
+            "required": [ "host" ],
+            "properties": {
+                "host": {
+                    "$ref": "#/definitions/host"
+                },
+                "port": {
+                    "default": 80,
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/port"
+                        }
+                    ]
+                },
+                "protocol": {
+                    "default": "http",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/protocol"
+                        }
+                    ]
+                },
+                "enableHostConnectivityCheck": {
+                    "$ref": "#/definitions/enableHostConnectivityCheck"
+                },
+                "allowSelfSignedCert": {
+                    "$ref": "#/definitions/allowSelfSignedCert"
+                },
+                "username": {
+                    "$ref": "#/definitions/username"
+                },
+                "passphrase": {
+                    "$ref": "#/definitions/secret"
+                }
+            },
+            "additionalProperties": false
         }
     },
     "properties": {
@@ -127,8 +201,8 @@
             "description": "Version of ADC Declaration schema this declaration uses",
             "type": "string",
             "$comment": "IMPORTANT: In enum array, please put current schema version first, oldest-supported version last.  Keep enum array sorted most-recent-first.",
-            "enum": [ "1.1.0", "1.0.0", "0.9.0" ],
-            "default": "1.1.0"
+            "enum": [ "1.2.0", "1.1.0", "1.0.0", "0.9.0" ],
+            "default": "1.2.0"
        },
        "$schema": {
             "title": "Schema",
@@ -154,15 +228,20 @@
                 "title": "Class",
                 "type": "string",
                 "enum": [
+                    "Telemetry_System",
                     "Telemetry_System_Poller",
                     "Telemetry_Listener",
                     "Telemetry_Consumer",
+                    "Telemetry_iHealth_Poller",
                     "Controls",
                     "Shared"
                 ]
             }
         },    
         "allOf": [
+            {
+                "$ref": "system_schema.json#"
+            },
             {
                 "$ref": "system_poller_schema.json#"
             },
@@ -171,6 +250,9 @@
             },
             {
                 "$ref": "consumer_schema.json#"
+            },
+            {
+                "$ref": "ihealth_poller_schema.json#"
             },
             {
                 "$ref": "controls_schema.json#"

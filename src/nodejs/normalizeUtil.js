@@ -108,7 +108,7 @@ module.exports = {
         };
 
         // only process non array objects
-        if (typeof data === 'object' && !Array.isArray(data)) {
+        if (data && typeof data === 'object' && !Array.isArray(data)) {
             Object.keys(data).forEach((k) => {
                 let renamedKey = k;
                 // if patterns is an array assume it contains 1+ maps to process
@@ -143,7 +143,7 @@ module.exports = {
 
         if (options.include && options.exclude) throw new Error('include and exclude both provided');
 
-        if (typeof data !== 'object') return data;
+        if (typeof data !== 'object' || !data) return data;
         if (Array.isArray(data)) return data; // ignore arrays
 
         const keys = options.include || options.exclude || [];
@@ -206,9 +206,9 @@ module.exports = {
         const values = {};
 
         // assume we are processing an object which also has a child object containing the keys interested in
-        if (typeof data === 'object') {
+        if (data && typeof data === 'object') {
             Object.keys(data).forEach((k) => {
-                if (typeof data[k] === 'object') {
+                if (data[k] && typeof data[k] === 'object') {
                     Object.keys(data[k]).forEach((cK) => {
                         if (values[cK] === undefined) {
                             values[cK] = data[k][cK];
@@ -237,7 +237,7 @@ module.exports = {
         // standard value returned if object is empty
         let ret = 'null';
 
-        const objKeys = typeof data === 'object' ? Object.keys(data) : [];
+        const objKeys = (data && typeof data === 'object') ? Object.keys(data) : [];
         if (objKeys.length) {
             ret = objKeys[0];
             ret = args.splitOnValue ? ret.split(args.splitOnValue)[0] : ret;

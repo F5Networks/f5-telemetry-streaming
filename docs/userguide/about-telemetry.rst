@@ -19,9 +19,11 @@ A basic declaration is shown here with descriptions of the components below:
             "class": "Controls",
             "logLevel": "info"
         },
-        "My_Poller": {
-            "class": "Telemetry_System_Poller",
-            "interval": 60
+        "My_System": {
+            "class": "Telemetry_System",
+            "systemPoller": {
+                "interval": 60
+            }
         },
         "My_Listener": {
             "class": "Telemetry_Listener",
@@ -38,6 +40,7 @@ A basic declaration is shown here with descriptions of the components below:
             }
         }
     }
+
 
 
 
@@ -63,61 +66,64 @@ The first few lines of your declaration are a part of the base components and de
             "class": "Controls",
             "logLevel": "info"
         },
+
         
              
 |
 
-+--------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
-| Parameter          | Options                        | Description/Notes                                                                                                                 |
-+====================+================================+===================================================================================================================================+
-| class              | Controls                       | Describes top-level Telemetry Streaming options. The class for controls must always be Controls, do not change this value.        |
-+--------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
-| logLevel           | **info**, debug, error         | This value determines how much information you want Telemetry Streaming to log. See the logging section for more information.     |
-+--------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------+
++--------------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------+
+| Parameter          | Options                        | Description/Notes                                                                                                                            |
++====================+================================+==============================================================================================================================================+
+| class              | Controls                       | Describes top-level Telemetry Streaming options. The class for controls must always be Controls, do not change this value.                   |
++--------------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------+
+| logLevel           | **info**, debug, error         | This value determines how much information you want Telemetry Streaming to log. See the :ref:`logging-ref` section for more information.     |
++--------------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------+
 
 
 
 
 .. _system-poller-class:
 
-System Poller
-`````````````
-The next lines of the declaration sets the System Poller, which collects and normalizes statistics from a system, such as BIG-IP, on a configurable interval for information such as device statistics, virtual server statistics, pool statistics, individual pool member statistics, and more.
+Telemetry System class
+``````````````````````
+The next lines of the declaration define the target system. You can define and configure the system poller inside of the System declaration to collect and normalize statistics. These statistics include device statistics, virtual server statistics, pool statistics, individual pool member statistics, and more. For more information, including an optional iHealth poller, see :ref:`tssystem-ref`. 
 
 .. code-block:: javascript
    :linenos:
    :lineno-start: 7
 
 
-    "My_Poller": {
-        "class": "Telemetry_System_Poller",
-        "interval": 60
+    "My_System": {
+        "class": "Telemetry_System",
+        "systemPoller": {
+            "interval": 60
+        }
     },
 
 |
 
 
-+--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
-| Parameter          | Options                        |  Description/Notes                                                                                                                         |
-+====================+================================+============================================================================================================================================+
-| class              | Telemetry_System_Poller        |  The class for system poller must always be Telemetry_System_Poller, do not change this value.                                             |
-+--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
-| interval           | 60 - 6000, **300**             |  This value determines the polling period in seconds. By default, Telemetry Streaming collects statistics every 300 seconds.               |
-+--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
++--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Parameter          | Options                        |  Description/Notes                                                                                                                                               |
++====================+================================+==================================================================================================================================================================+
+| class              | Telemetry_System               |  The class for Telemetry System must always be Telemetry_System, do not change this value.                                                                       |
++--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| systemPoller       | systemPoller                   |  This value Polls a system on a defined interval for information such as device statistics, virtual server statistics, pool statistics and much more.            |
++--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
 
 .. _event-listener-class:
 
-Event Listener
-``````````````
+Telemetry Listener class
+````````````````````````
 The next lines of the declaration sets the Event Listener, on both TCP and UDP protocols, that can accept events in a specific format and process them. Currently, the TS Listener sends all logging telemetry data.
 To see the type of information that the event listener processes, see :ref:`outputexample-ref`.
 Event Format: ``key1="value",key2="value"``
 
 .. code-block:: javascript
    :linenos:
-   :lineno-start: 11
+   :lineno-start: 13
 
 
     "My_Listener": {
@@ -141,13 +147,13 @@ Event Format: ``key1="value",key2="value"``
 
 .. _consumer-class:
 
-Consumer class
-``````````````
+Telemetry Consumer class
+````````````````````````
 The next lines of the declaration sets the Consumer, which accepts all telemetry information from whatever systems you configure it to. The consumer provides the tools to process that information. To see examples of configurations for consumers like Splunk, Azure Log Analytics, AWS CloudWatch, AWS S3, Graphite, and others, see the :ref:`settingupconsumer-ref` section of this guide.
 
 .. code-block:: javascript
    :linenos:
-   :lineno-start: 15
+   :lineno-start: 17
 
 
     "My_Consumer": {

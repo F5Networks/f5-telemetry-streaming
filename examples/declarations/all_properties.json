@@ -1,16 +1,52 @@
 {
     "class": "Telemetry",
-    "My_Poller": {
-        "class": "Telemetry_System_Poller",
+    "controls": {
+        "class": "Controls",
+        "logLevel": "info",
+        "debug": false
+    },
+    "My_System": {
+        "class": "Telemetry_System",
         "enable": true,
         "trace": false,
-        "interval": 60,
-        "host": "192.0.2.1",
-        "protocol": "https",
-        "port": 443,
-        "tag": {
-            "tenant": "`T`",
-            "application": "`A`"
+        "host": "localhost",
+        "port": 8100,
+        "protocol": "http",
+        "allowSelfSignedCert": false,
+        "enableHostConnectivityCheck": false,
+        "username": "admin",
+        "passphrase": {
+            "cipherText": "passphrase"
+        },
+        "systemPoller": {
+            "enable": true,
+            "trace": false,
+            "interval": 60
+        },
+        "iHealthPoller": {
+            "username": "username",
+            "passphrase": {
+                "cipherText": "passphrase"
+            },
+            "proxy": {
+                "host": "127.0.0.1",
+                "protocol": "http",
+                "port": 80,
+                "enableHostConnectivityCheck": false,
+                "allowSelfSignedCert": false,
+                "username": "username",
+                "passphrase": {
+                    "cipherText": "passphrase"
+                }
+            },
+            "interval": {
+                "timeWindow": {
+                    "start": "23:15",
+                    "end":   "02:15"
+                },
+                "frequency": "monthly",
+                "day": "5"
+            }
         }
     },
     "My_Listener": {
@@ -31,10 +67,11 @@
         "type": "Splunk",
         "host": "192.0.2.1",
         "protocol": "https",
-        "port": "8088",
+        "port": 8088,
         "passphrase": {
             "cipherText": "apikey"
         },
-        "enableHostConnectivityCheck": false
+        "enableHostConnectivityCheck": false,
+        "allowSelfSignedCert": false
     }
 }
