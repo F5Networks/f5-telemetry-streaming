@@ -86,7 +86,7 @@ The first few lines of your declaration are a part of the base components and de
 
 Telemetry System class
 ``````````````````````
-The next lines of the declaration sets the System Poller, which collects and normalizes statistics from a system, such as BIG-IP, on a configurable interval for information such as device statistics, virtual server statistics, pool statistics, individual pool member statistics, and more. For more information, including an optional iHealth poller, see :ref:`tssystem-ref`. 
+The next lines of the declaration define the target system. You can define and configure the system poller inside of the System declaration to collect and normalize statistics. These statistics include device statistics, virtual server statistics, pool statistics, individual pool member statistics, and more. For more information, including an optional iHealth poller, see :ref:`tssystem-ref`. 
 
 .. code-block:: javascript
    :linenos:
@@ -106,7 +106,7 @@ The next lines of the declaration sets the System Poller, which collects and nor
 +--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 | Parameter          | Options                        |  Description/Notes                                                                                                                         |
 +====================+================================+============================================================================================================================================+
-| class              | Telemetry_System               |  The class for system poller must always be Telemetry_System, do not change this value.                                                    |
+| class              | Telemetry_System               |  The class for Telemetry System must always be Telemetry_System, do not change this value.                                                 |
 +--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 | interval           | 60 - 6000, **300**             |  This value determines the polling period in seconds. By default, Telemetry Streaming collects statistics every 300 seconds.               |
 +--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+

@@ -14,4 +14,5 @@ Using Telemetry Streaming
    validate.rst
    logging.rst
    http-methods.rst
+   rest-api-endpoints.rst
    advanced-options.rst
