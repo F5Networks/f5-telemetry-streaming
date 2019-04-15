@@ -12,6 +12,25 @@ const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 const constants = require('./constants.js');
 const normalizeUtil = require('./normalizeUtil.js');
 
+/**
+ * RegExp for syslog message detection.
+ */
+const SYSLOG_REGEX = new RegExp([
+    /(<[0-9]+>)?/, // priority (optional)
+    /([a-z]{3})\s+/, // month
+    /([0-9]{1,2})\s+/, // date
+    /([0-9]{2}):/, // hours
+    /([0-9]{2}):/, // minutes
+    /([0-9]{2})/, // seconds
+    /(\s+[\w.-]+)?\s+/, // host
+    /([\w\-().0-9/]+)/, // process
+    /(?:\[([a-z0-9-.]+)\])?:/, // pid
+    /(.+)/ // message
+].map(regex => regex.source).join(''), 'i');
+
+const AVR_MESSAGE_PREFIX = 'BigIP:';
+
+
 module.exports = {
 
     /**
@@ -267,7 +286,7 @@ module.exports = {
     /**
      * Normalize event
      *
-     * @param {Object} data - data to normalize
+     * @param {Object} originData                    - data to normalize
      *
      * @param {Object} options                       - options
      * @param {Object} [options.renameKeysByPattern] - contains map or array of keys to rename by pattern
@@ -277,10 +296,27 @@ module.exports = {
      *
      * @returns {Object} Returns normalized event
      */
-    event(data, options) {
+    event(originData, options) {
         options = options || {};
 
+        let data = originData;
+        const parts = SYSLOG_REGEX.exec(originData);
+        // it could be either AVR data or syslog message
+        if (parts) {
+            data = parts[10];
+            // strip useless prefix if exists in case regexp didn't handle it
+            if (data.startsWith(AVR_MESSAGE_PREFIX)) {
+                data = data.slice(AVR_MESSAGE_PREFIX.length);
+            }
+        }
         let ret = this._formatAsJson(data);
+        // in case if incoming data is simply syslog message.
+        // This approach isn't ideal, because even simple syslog
+        // message can contain delimiter '='.
+        const retKeys = Object.keys(ret);
+        if (retKeys.length === 1 && retKeys[0] === 'data') {
+            ret.data = originData;
+        }
         ret = options.renameKeysByPattern ? normalizeUtil._renameKeys(ret, options.renameKeysByPattern.patterns) : ret;
         if (options.addKeysByTag) {
             ret = this._addKeysByTag(
