@@ -1,9 +1,16 @@
+# node modules
 node_modules/
+# rpm build
 rpmbuild/
 dist/new_build/
-.vscode/
+# docs build
 _build/
+# coverage
+coverage/
 .nyc_output/
-**/.DS_Store
+# local test directory/files
 test/functional/logs/
 test/functional/*_harness_file.json
+# misc
+.vscode/
+**/.DS_Store
