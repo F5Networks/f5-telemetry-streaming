@@ -220,13 +220,24 @@ pages:
     tags:
         - cm-official-docker-executor
     script:
-        - mkdir -p ./public
-        - cp -R docs/_build/html/* ./public
+        - PUBLIC_DIR='./public'
+        - mkdir -p ${PUBLIC_DIR}
+        # place index.html in public dir
+        - cp docs/index.html ${PUBLIC_DIR}/index.html
+        # place public facing docs under: /public-docs
+        - PUBLIC_DOCS=${PUBLIC_DIR}/public-docs
+        - mkdir -p ${PUBLIC_DOCS}
+        - cp -R docs/_build/html/* ${PUBLIC_DOCS}
+        # place code coverage docs under: /coverage-docs
+        - COVERAGE_DOCS=${PUBLIC_DIR}/coverage-docs
+        - mkdir -p ${COVERAGE_DOCS}
+        - cp -R coverage/* ${COVERAGE_DOCS}
     artifacts:
         paths:
             - public
     only:
-        - /^docs-.*$/
+        # only update on designated, stable branch
+        - develop
 
 # Publish docs to clouddocs.f5networks.net
 publish_docs_to_staging:
