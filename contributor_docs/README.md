@@ -1,16 +1,152 @@
 # Introduction
 
-This is the top-level documentation which provides notes and information about contributing to this project.
+This is the top-level documentation which provides notes and information about contributing to this project.  It is broken down into a couple of key sections, listed below.
+
+- [Overview](#overview)
+- [Contributing](#contributing)
 
 ---
+## Overview
 
-## System Poller
+The telemetry streaming system includes a number of key components, listed below.
 
-Explanation of system poller.
+*System*: Target system (BIG-IP) to use for stats polling, iHealth polling.
+
+*System Poller*: Polls a system on a defined interval for information such as device statistics, virtual server statistics, pool statistics and much more.
+
+*iHealth Poller*: Creates system's Qkview file, uploads it to F5 iHealth Service and polls diagnostics from it on a defined schedule.
+
+*Event Listener*: Provides a listener, on both TCP and UDP protocols, that can accept events in a specific format and process them.
+
+*Consumer*: Accepts information from disparate systems and provides the tools to process that information.  In the context of Telemetry Streaming this simply means providing a mechanism by which to integrate with existing analytics products.
 
 ---
+### Diagram
 
-### Adding Stats - Paths.json
+<img src="images/TSdiagram.png">
+
+---
+### Anatomy of a Request
+
+How does the project handle a typical `POST` request?
+
+`POST /mgmt/shared/telemetry/declare`
+
+```json
+{
+    "class": "Telemetry",
+    "My_System": {
+        "class": "Telemetry_System",
+        "systemPoller": {
+            "interval": 60
+        }
+    },
+    "My_Listener": {
+        "class": "Telemetry_Listener",
+        "port": 6514
+    },
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Splunk",
+        "host": "192.0.2.1",
+        "protocol": "https",
+        "port": 8088,
+        "passphrase": {
+            "cipherText": "apikey"
+        }
+    }
+}
+```
+
+*Response*:
+
+```javascript
+{
+    "message": "success",
+    "declaration": {
+        "class": "Telemetry",
+        "My_System": {
+            "class": "Telemetry_System",
+            "systemPoller": {
+                "interval": 60,
+                "enable": true,
+                "trace": false,
+                "tag": {
+                    "tenant": "`T`",
+                    "application": "`A`"
+                }
+            },
+            "enable": true,
+            "trace": false,
+            "host": "localhost",
+            "port": 8100,
+            "protocol": "http"
+        },
+        "My_Listener": {
+            "class": "Telemetry_Listener",
+            "port": 6514,
+            "enable": true,
+            "trace": false,
+            "tag": {
+                "tenant": "`T`",
+                "application": "`A`"
+            },
+            "match": ""
+        },
+        "My_Consumer": {
+            "class": "Telemetry_Consumer",
+            "type": "Splunk",
+            "host": "192.0.2.1",
+            "protocol": "https",
+            "port": 8088,
+            "passphrase": {
+                "cipherText": "$M$Q7$xYs5xGCgf6Hlxsjd5AScwQ==",
+                "class": "Secret",
+                "protected": "SecureVault"
+            },
+            "enable": true,
+            "trace": false,
+            "format": "default"
+        },
+        "schemaVersion": "1.2.0"
+    }
+}
+```
+
+---
+#### Anatomy of a Request (cont.)
+
+What happens in the system internals between request and response?
+
+- LX worker receives request which validates URI, etc.
+    - ref: [restWorkers/main.js](../src/nodejs/restWorkers/main.js)
+- Request is validated using JSON schema and AJV, config event fires
+    - ref: [config.js](../src/nodejs/config.js)
+- System poller, event listener, etc. configures system resources
+    - ref: [systemPoller.js](../src/nodejs/systemPoller.js), [eventListener.js](../src/nodejs/eventListener.js), etc.
+- Client response sent with validated config
+    - ref: [config.js](../src/nodejs/config.js)
+    ```javascript
+        return promise.then((config) => {
+        util.restOperationResponder(restOperation, 200,
+            { message: 'success', declaration: config });
+    })
+    ```
+
+---
+## Contributing
+
+Ok, overview done!  Now let's dive into the major areas to be aware of as a developer.
+
+- [Adding System Poller Stats](#adding-system-poller-stats)
+- [Adding a New Consumer](#adding-a-new-consumer)
+
+---
+### Adding System Poller Stats
+
+Adding stats to the system poller is a frequent activity, below describes the configuration based approach to making an addition.
+
+#### Adding System Poller Stats - Paths.json
 
 Collect the raw data from the device by adding a new endpoint to the paths configuration file.
 
@@ -37,8 +173,7 @@ Collect the raw data from the device by adding a new endpoint to the paths confi
 ```
 
 ---
-
-### Adding Stats - Properties.json
+#### Adding System Poller Stats - Properties.json
 
 Enable and define how the data should look by adding a new key under *stats* in the properties configuration file.
 
@@ -79,7 +214,6 @@ Enable and define how the data should look by adding a new key under *stats* in 
 ```
 
 ---
-
 #### Context Data
 
 Certain properties require dynamic data to be pulled from the system prior to *stats* processing.
@@ -126,9 +260,8 @@ This context data is defined on the same level as *stats* in the properties conf
 ```
 
 ---
-
 #### Conditional blocks
-Some stats may only be available in certain conditions, for example on BIG-IP v13+.  This is the the list of functions available inside the `"if"` block.  These functions should exist inside [systemStats.js](../src/nodejs/systemStats.js).
+Some stats may only be available in certain conditions, for example on BIG-IP v13+.  This is the list of functions available inside the `"if"` block.  These functions should exist inside [systemStats.js](../src/nodejs/systemStats.js).
 
 *deviceVersionGreaterOrEqual:* Function to compare current device's version against provided one.
 ```javascript
@@ -140,8 +273,7 @@ Some stats may only be available in certain conditions, for example on BIG-IP v1
 ```
 
 ---
-
-## Consumers
+## Adding a New Consumer
 
 Adding a new consumer involves two simple steps: 1) Add a new plugin to ../src/nodejs/consumers and 2) add any new configuration properties to the consumer [schema](../src/nodejs/schema/consumer_schema.json)
 
