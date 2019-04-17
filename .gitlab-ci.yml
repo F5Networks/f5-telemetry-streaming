@@ -235,7 +235,7 @@ pages:
         ## place code contribution docs (includes presentation) under: /contribute-docs ##
         - CONTRIBUTE_DOCS=${PUBLIC_DIR}/contribute-docs
         # install presentation site dependencies
-        - cd contributing/presentation/ && npm install && cd ../..
+        - cd contributing && npm install && cd ..
         - mkdir -p ${CONTRIBUTE_DOCS}
         - cp -R contributing/* ${CONTRIBUTE_DOCS}
     artifacts:
