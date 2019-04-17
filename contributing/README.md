@@ -23,7 +23,7 @@ The telemetry streaming system includes a number of key components, listed below
 ---
 ### Diagram
 
-<img src="images/TSdiagram.png">
+![diagram](images/TSdiagram.png)
 
 ---
 ### Anatomy of a Request
@@ -138,8 +138,32 @@ What happens in the system internals between request and response?
 
 Ok, overview done!  Now let's dive into the major areas to be aware of as a developer.
 
+- [Core Modules](#core-modules)
 - [Adding System Poller Stats](#adding-system-poller-stats)
 - [Adding a New Consumer](#adding-a-new-consumer)
+- [Testing methodology](#testing-methodology)
+- [Release methodology](#release-methodology)
+
+---
+### Core modules
+
+All core modules are included inside `../src/nodejs/`
+
+- [restWorkers/main.js](../src/nodejs/restWorkers/main.js)
+    - Purpose: Hook for incoming HTTP requests
+- [config.js](../src/nodejs/config.js)
+    - Purpose: Handle configuration actions... such as validation, persistent storage, etc.
+- [systemPoller.js](../src/nodejs/systemPoller.js)
+    - Purpose: Handles CRUD-like actions for any system pollers required based on client configuration
+    - Related: See [iHealthPoller.js](../src/nodejs/iHealthPoller.js)
+- [eventListener.js](../src/nodejs/eventListener.js)
+    - Purpose: Handles CRUD-like actions for any event listeners required based on client configuration.
+- [systemStats.js](../src/nodejs/systemStats.js)
+    - Purpose: Called by system poller to create stats object based on the static JSON configuration files available in `config/` directory such as [properties.json](../src/nodejs/config/properties.json)
+- [consumers.js](../src/nodejs/consumers.js)
+    - Purpose: Handles load/unload actions for any consumers required based on client configuration. Consumers must exist in `consumers` directory, see [Adding a New Consumer](#adding-a-new-consumer)
+- [forwarder.js](../src/nodejs/forwarder.js)
+    - Purpose: Handles calling each loaded consumer when an event is ready for forwarding (system poller event, event listener event, etc.)
 
 ---
 ### Adding System Poller Stats
@@ -160,7 +184,7 @@ Collect the raw data from the device by adding a new endpoint to the paths confi
 }
 ```
 
-*Advanced Macros:* These macros signal the system to retrieve the data in additional, specific ways.
+*Advanced Macros:* These macros signal the system to retrieve the data in specific, additional ways.
 
 ```javascript
 {
@@ -189,7 +213,7 @@ Enable and define how the data should look by adding a new key under *stats* in 
 }
 ```
 
-*Advanced Macros:* These macros can manipulate the data in some additional, specific ways.  The following block describes the complete list:
+*Advanced Macros:* These macros can manipulate the data in some specific, additional ways.  The following block describes the complete list:
 
 ```javascript
 {
@@ -273,8 +297,35 @@ Some stats may only be available in certain conditions, for example on BIG-IP v1
 ```
 
 ---
-## Adding a New Consumer
+### Adding a New Consumer
 
-Adding a new consumer involves two simple steps: 1) Add a new plugin to ../src/nodejs/consumers and 2) add any new configuration properties to the consumer [schema](../src/nodejs/schema/consumer_schema.json)
+Adding a new consumer involves two "simple" steps:
 
-Additional information about adding a new consumer plugin can be found in the consumer [readme](../src/nodejs/consumers/README.md)
+- Add a new plugin to ../src/nodejs/consumers
+- Add any new configuration properties to the consumer [schema](../src/nodejs/schema/consumer_schema.json)
+
+Additional information about adding a new consumer plugin can be found in the [consumer readme](../src/nodejs/consumers/README.md)
+
+---
+### Testing methodology
+
+Additional information about the testing methodology can be found in the [test readme](../test/README.md)
+
+---
+### Release methodology
+
+Build/publish makes heavy use of GitLab and [.gitlab-ci.yml](../.gitlab-ci.yml).  Check out CI file and GitLab documentation for more details.
+
+- Add *new* RPM to `dist/` directory (from build artifact on mainline developement branch)
+- Publish to artifactory (automated on new tags)
+- Push to GitLab (mainline release branch)
+- Push to GitHub (mainline release branch)
+
+*Local development build process*: Various strategies exist here, see the following for an inexhaustive list.
+
+- Build locally using `build_rpm.sh` or similar, copy RPM to BIG-IP
+- VS Code `tasks.json` to copy `src/` files to BIG-IP and run `restart restnoded`
+- Matthe Zinke's ICRDK [development kit](https://github.com/f5devcentral/f5-icontrollx-dev-kit/blob/master/README.md)
+- Vim on BIG-IP (enough said, you know who you are)
+
+Note: See Release Checklist on Confluence for complete details.
