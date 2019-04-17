@@ -143,6 +143,7 @@ Ok, overview done!  Now let's dive into the major areas to be aware of as a deve
 - [Adding a New Consumer](#adding-a-new-consumer)
 - [Testing methodology](#testing-methodology)
 - [Release methodology](#release-methodology)
+- [Public documentation methodology](#public-documentation-methodology)
 
 ---
 ### Core modules
@@ -238,7 +239,7 @@ Enable and define how the data should look by adding a new key under *stats* in 
 ```
 
 ---
-#### Context Data
+#### Adding System Poller Stats - Context Data
 
 Certain properties require dynamic data to be pulled from the system prior to *stats* processing.
 
@@ -284,7 +285,7 @@ This context data is defined on the same level as *stats* in the properties conf
 ```
 
 ---
-#### Conditional blocks
+#### Adding System Poller Stats - Conditional blocks
 Some stats may only be available in certain conditions, for example on BIG-IP v13+.  This is the list of functions available inside the `"if"` block.  These functions should exist inside [systemStats.js](../src/nodejs/systemStats.js).
 
 *deviceVersionGreaterOrEqual:* Function to compare current device's version against provided one.
@@ -329,3 +330,14 @@ Build/publish makes heavy use of GitLab and [.gitlab-ci.yml](../.gitlab-ci.yml).
 - Vim on BIG-IP (enough said, you know who you are)
 
 Note: See Release Checklist on Confluence for complete details.
+
+---
+### Public documentation methodology
+
+In general, see the documentation team for more details... however there is a process.
+
+The current process involves adding a `doc` label to an issue to note it requires public documentation.  This will cause the issue to show up in a documentation board in GitLab, the developer responsible for the feature is also responsible for generating the artifacts required by the documentation team member.
+
+See the [examples](../examples/declarations) directory for curated artifacts such as declaration examples, output examples, AS3 declaration example, etc.
+
+See the [INTERNAL_README.md](../INTERNAL_README.md) for an internal explanation of most features.
