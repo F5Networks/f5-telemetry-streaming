@@ -224,26 +224,34 @@ pages:
         - mkdir -p ${PUBLIC_DIR}
         # place index.html in public dir 
         - cp docs/index.html ${PUBLIC_DIR}/index.html
-        ## place public facing docs under: /public-docs ##
+        #### place public facing docs under: /public-docs ####
         - PUBLIC_DOCS=${PUBLIC_DIR}/public-docs
         - mkdir -p ${PUBLIC_DOCS}
         - cp -R docs/_build/html/* ${PUBLIC_DOCS}
-        ## place code coverage docs under: /coverage-docs ##
+        #### place code coverage docs under: /coverage-docs ####
         - COVERAGE_DOCS=${PUBLIC_DIR}/coverage-docs
         - mkdir -p ${COVERAGE_DOCS}
         - cp -R coverage/* ${COVERAGE_DOCS}
-        ## place code contribution docs (includes presentation) under: /contribute-docs ##
+        #### place code contribution docs (includes presentation) under: /contribute-docs ####
         - CONTRIBUTE_DOCS=${PUBLIC_DIR}/contribute-docs
         # install presentation site dependencies
         - cd contributing && npm install && cd ..
         - mkdir -p ${CONTRIBUTE_DOCS}
         - cp -R contributing/* ${CONTRIBUTE_DOCS}
+        # make relative links absolute for presentation (this could be better...)
+        # ![diagram](images/diagram.png) -> ![diagram](https://base.url/images/diagram.png)
+        - BASE_URL_FOR_LINKS=${BASE_REPO_URL}/tree/${CI_COMMIT_REF_NAME}
+        - README=${CONTRIBUTE_DOCS}/README.md
+        - sed -i -E '/http/! s/\[.*\]\(/&SED_TEMP/' ${README} | sed -i "s|SED_TEMP|$BASE_URL_FOR_LINKS|" ${README}
+
     artifacts:
         paths:
             - public
     only:
         # only update on designated, stable branch
         - develop
+        # temp
+        - presentation_edits
 
 # Publish docs to clouddocs.f5networks.net
 publish_docs_to_staging:
