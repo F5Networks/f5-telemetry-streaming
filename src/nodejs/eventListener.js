@@ -30,6 +30,28 @@ const CLASS_NAME = constants.EVENT_LISTENER_CLASS_NAME;
 const listeners = {};
 const protocols = ['tcp', 'udp'];
 
+/**
+ * RegExp for syslog message detection.
+ */
+const SYSLOG_REGEX = new RegExp([
+    /(<[0-9]+>)?/, // priority
+    /([a-z]{3})\s+/, // month
+    /([0-9]{1,2})\s+/, // date
+    /([0-9]{2}):/, // hours
+    /([0-9]{2}):/, // minutes
+    /([0-9]{2})/, // seconds
+    /\s+([\w.-]+)?/, // host
+    /\s+(?:(\S+)\s+)?/, // severity
+    /([\w\-().0-9/]+)/, // process
+    /(?:\[([a-z0-9-.]+)\])?:/, // pid
+    /(.+)/ // message
+].map(regex => regex.source).join(''), 'i');
+
+const SYSLOG_HOSTNAME_IDX = 7;
+const SYSLOG_MSG_IDX = 11;
+
+const AVR_MESSAGE_PREFIX = 'BigIP:';
+
 // LTM request log (example)
 // eslint-disable-next-line max-len
 // [telemetry] Client: ::ffff:10.0.2.4 sent data: EVENT_SOURCE="request_logging",BIGIP_HOSTNAME="hostname.test.com",CLIENT_IP="x.x.x.x",SERVER_IP="",HTTP_METHOD="GET",HTTP_URI="/",VIRTUAL_NAME="/Common/app.app/app_vs"
@@ -227,17 +249,90 @@ EventListener.prototype.processEvent = function (data) {
     // note: data may contain multiple events seperated by newline
     // however newline chars may also show up inside a given event
     // so split only on newline with preceeding double quote
-    data = data.split('"\n');
-    data.forEach((i) => {
-        const normalizedData = normalize.event(i, options);
+    data.split('"\n').forEach((line) => {
+        let hostname;
+        let isSyslogMsg = false;
+        let isRawData = false;
+        const originLine = line;
+
+        const parts = SYSLOG_REGEX.exec(line);
+        if (parts) {
+            isSyslogMsg = true;
+            // in case if data doesn't provide such info
+            hostname = parts[SYSLOG_HOSTNAME_IDX];
+            // log message
+            line = parts[SYSLOG_MSG_IDX] || '';
+            // remove AVR prefix if exists
+            if (line.startsWith(AVR_MESSAGE_PREFIX)) {
+                isSyslogMsg = false;
+                line = line.slice(AVR_MESSAGE_PREFIX.length);
+            }
+        }
+        // lets normalize the data
+        const normalizedData = normalize.event(line, options);
+
+        // in case if incoming data is simply syslog message.
+        // This approach isn't ideal, because even simple syslog
+        // message can contain delimiter '"='.
+        const ndKeys = Object.keys(normalizedData);
+
+        // in case if data doesn't cotains delimiter
+        if (ndKeys.length === 1 && ndKeys[0] === 'data') {
+            isRawData = true;
+            normalizedData.data = originLine;
+        } else {
+            // data was parsed correctly
+            isSyslogMsg = false;
+        }
+        // separate hostname field allows to identify source of the data
+        if (!normalizedData.hostname && hostname) {
+            normalizedData.hostname = hostname;
+        }
+        // assign proper event type
+        normalizedData.telemetryEventCategory = this.getEventType(normalizedData, { isSyslogMsg, isRawData });
+
         if (this.tracer) {
             this.tracer.write(JSON.stringify(normalizedData, null, 4));
         }
         // keep filtering as part of event listener for now
         if (!this.filterFunc || this.filterFunc(normalizedData)) {
-            dataPipeline.process(normalizedData, constants.EVENT_TYPES.EVENT_LISTENER);
+            dataPipeline.process(normalizedData, normalizedData.telemetryEventCategory);
         }
     });
+};
+
+/**
+ * Get Event Type
+ * @param {Object} data                   - data
+ * @param {Object} options                - options
+ * @param {Boolean} [options.isSyslogMsg] - whether syslog message or not
+ * @param {Boolean} [options.isRawData]   - whether raw data or not
+ *
+ * @returns {String} Event data type
+ */
+EventListener.prototype.getEventType = function (data, options) {
+    if (data.AggrInterval !== undefined && data.EOCTimestamp !== undefined) {
+        return constants.EVENT_TYPES.AVR_EVENT;
+    }
+    if (data.Access_Profile !== undefined) {
+        return constants.EVENT_TYPES.APM_EVENT;
+    }
+    if (data.policy_name !== undefined && (data.policy_apply_date !== undefined
+        || data.request_status !== undefined)) {
+        return constants.EVENT_TYPES.ASM_EVENT;
+    }
+    if (data.acl_policy_name !== undefined && (data.acl_policy_type !== undefined
+        || data.acl_rule_name !== undefined)) {
+        return constants.EVENT_TYPES.AFM_EVENT;
+    }
+    if (options.isSyslogMsg) {
+        return constants.EVENT_TYPES.SYSLOG_EVENT;
+    }
+    if (options.isRawData) {
+        return constants.EVENT_TYPES.EVENT_LISTENER;
+    }
+    // only LTM has custom template for now
+    return constants.EVENT_TYPES.LTM_EVENT;
 };
 
 /**

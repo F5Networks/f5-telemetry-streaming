@@ -224,7 +224,7 @@
         }
     },
     "events": {
-        "classifyByKeys": [ "virtual_name", "policy_name", "Access_Profile", "context_name" ]
+        "classifyByKeys": [ "virtual_name", "policy_name", "Access_Profile", "context_name", "vip", "pool_name" ]
     },
     "ihealth": {
         "filterKeys": { "exclude": [ "name", "output", "match" ] },
