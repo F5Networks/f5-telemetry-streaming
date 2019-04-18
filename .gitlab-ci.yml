@@ -251,8 +251,6 @@ pages:
     only:
         # only update on designated, stable branch
         - develop
-        # temp
-        - presentation_edits
 
 # Publish docs to clouddocs.f5networks.net
 publish_docs_to_staging:
