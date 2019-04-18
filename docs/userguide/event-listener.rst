@@ -191,7 +191,7 @@ Example Output:
         "virtual_name":"/Common/app.app/app_vs",
         "tenant":"Common",
         "application":"app.app",
-        "telemetryEventCategory": "event"
+        "telemetryEventCategory": "LTM"
     }
 
 
@@ -275,7 +275,7 @@ Example output:
         "send_to_vs":"",
         "tenant":"Common",
         "application":"app.app",
-        "telemetryEventCategory":"event"
+        "telemetryEventCategory":"AFM"
     }
 
 
@@ -359,7 +359,7 @@ Example output:
         "request":"GET /admin/..%2F..%2F..%2Fdirectory/file HTTP/1.0\\r\\nHost: host.westus.cloudapp.azure.com\\r\\nConnection: keep-alive\\r\\nCache-Control: max-age",
         "tenant":"Common",
         "application":"app.app",
-        "telemetryEventCategory": "event"
+        "telemetryEventCategory": "ASM"
     }
 
 
@@ -408,7 +408,7 @@ Example output:
         "Access_Policy_Result":"Logon_Deny",
         "tenant":"Common",
         "application":"",
-        "telemetryEventCategory":"event"
+        "telemetryEventCategory":"APM"
     }
 
 
@@ -442,7 +442,7 @@ Example output:
 
     {
     "data":"<85>Feb 12 21:39:43 telemetry notice sshd[22277]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=218.92.1.148  user=root",
-    "telemetryEventCategory":"event"
+    "telemetryEventCategory":"syslog"
     }
 
 

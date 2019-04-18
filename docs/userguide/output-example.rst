@@ -711,7 +711,7 @@ LTM Request Log
         "virtual_name":"/Common/app.app/app_vs",
         "tenant":"Common",
         "application":"app.app",
-        "telemetryEventCategory": "event"
+        "telemetryEventCategory": "LTM"
     }
 
 
@@ -766,7 +766,7 @@ AFM Request Log
         "send_to_vs":"",
         "tenant":"Common",
         "application":"app.app",
-        "telemetryEventCategory":"event"
+        "telemetryEventCategory":"AFM"
     }
 
 ASM Request Log
@@ -823,7 +823,7 @@ ASM Request Log
         "request":"GET /admin/..%2F..%2F..%2Fdirectory/file HTTP/1.0\\r\\nHost: host.westus.cloudapp.azure.com\\r\\nConnection: keep-alive\\r\\nCache-Control: max-age",
         "tenant":"Common",
         "application":"app.app",
-        "telemetryEventCategory": "event"
+        "telemetryEventCategory": "ASM"
     }
 
 APM Request Log
@@ -844,5 +844,5 @@ APM Request Log
         "Access_Policy_Result":"Logon_Deny",
         "tenant":"Common",
         "application":"",
-        "telemetryEventCategory":"event"
+        "telemetryEventCategory":"APM"
     }
