@@ -244,7 +244,7 @@ pages:
         - BASE_URL_FOR_LINKS=${BASE_REPO_URL}/tree/${CI_COMMIT_REF_NAME}/${CONTRIBUTE_DIR}/
         - README=${CONTRIBUTE_DOCS}/README.md
         # make absolute URL(s) for relative URL(s) outside current directory '../'
-        - sed -i -E 's/\[.*\]\(\.\./&SED_TEMP/' ${README} && sed -i "s|SED_TEMP|${BASE_URL_FOR_LINKS}..|" ${README}
+        - sed -i -E 's/\[.*\]\(\.\./&SED_TEMP/' ${README} && sed -i "s|..SED_TEMP|${BASE_URL_FOR_LINKS}..|" ${README}
     artifacts:
         paths:
             - public
