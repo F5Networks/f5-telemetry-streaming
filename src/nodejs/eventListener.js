@@ -40,7 +40,7 @@ const SYSLOG_REGEX = new RegExp([
     /([0-9]{2}):/, // hours
     /([0-9]{2}):/, // minutes
     /([0-9]{2})/, // seconds
-    /\s+([\w.-]+)?/, // host
+    /\s+([\w\-.0-9]+)?/, // host
     /\s+(?:(\S+)\s+)?/, // severity
     /([\w\-().0-9/]+)/, // process
     /(?:\[([a-z0-9-.]+)\])?:/, // pid
@@ -249,7 +249,7 @@ EventListener.prototype.processEvent = function (data) {
     // note: data may contain multiple events seperated by newline
     // however newline chars may also show up inside a given event
     // so split only on newline with preceeding double quote
-    data.split('"\n').forEach((line) => {
+    data.split(/"\r?\n/).forEach((line) => {
         let hostname;
         let isSyslogMsg = false;
         let isRawData = false;
