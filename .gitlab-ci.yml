@@ -242,7 +242,7 @@ pages:
         # ![diagram](images/diagram.png) -> ![diagram](https://base.url/images/diagram.png)
         - BASE_URL_FOR_LINKS=${BASE_REPO_URL}/tree/${CI_COMMIT_REF_NAME}/public/contributing/
         - README=${CONTRIBUTE_DOCS}/README.md
-        - sed -i -E '/http/! s/\[.*\]\(/&SED_TEMP/' ${README} | sed -i "s|SED_TEMP|$BASE_URL_FOR_LINKS|" ${README}
+        - sed -i -E '/http/! s/\[.*\]\(/&SED_TEMP/' ${README} && sed -i "s|SED_TEMP|$BASE_URL_FOR_LINKS|" ${README}
 
     artifacts:
         paths:
