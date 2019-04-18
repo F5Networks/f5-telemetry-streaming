@@ -240,7 +240,7 @@ pages:
         - mkdir -p ${CONTRIBUTE_DOCS}
         - cp -R ${CONTRIBUTE_DIR}/* ${CONTRIBUTE_DOCS}
         # make relative links absolute - this could be better...
-        # ![diagram](images/diagram.png) -> ![diagram](https://base.url/images/diagram.png)
+        # ![diagram](../test/README.md) -> ![diagram](https://base.url/../test/README.md)
         - BASE_URL_FOR_LINKS=${BASE_REPO_URL}/tree/${CI_COMMIT_REF_NAME}/${CONTRIBUTE_DIR}/
         - README=${CONTRIBUTE_DOCS}/README.md
         # make absolute URL(s) for relative URL(s) outside current directory '../'
