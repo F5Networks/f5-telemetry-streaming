@@ -44,7 +44,7 @@
         "eslint-plugin-import": "^2.16.0",
         "icrdk": "git://github.com/f5devcentral/f5-icontrollx-dev-kit#master",
         "mocha": "^5.2.0",
-        "nyc": "^13.3.0",
+        "nyc": "^14.0.0",
         "ssh2": "^0.8.2"
     }
 }
