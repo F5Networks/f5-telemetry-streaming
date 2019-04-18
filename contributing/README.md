@@ -23,7 +23,7 @@ The telemetry streaming system includes a number of key components, listed below
 ---
 ### Diagram
 
-![diagram](images/TSdiagram.png)
+![diagram](images/diagram.png)
 
 ---
 ### Anatomy of a Request
