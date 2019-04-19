@@ -51,7 +51,7 @@ module.exports = {
                 for (let i = 1; i < len; i += 1) {
                     // leading '"' removed by initial split already
                     const item = baseSplit[i];
-                    if (i === len) {
+                    if (i === len - 1) {
                         // last item is value
                         val = item;
                         // remove trailing '"'
