@@ -255,7 +255,7 @@
         "renameKeys": {
             "patterns": {
                 "~": { "replaceCharacter": "/", "exactMatch": false },
-                "ASM:unit_hostname": { "constant": "hostname", "exactMatch": false },
+                "unit_hostname": { "constant": "hostname" },
                 "Hostname": { "constant": "hostname" },
                 "BIGIP_HOSTNAME": { "constant": "hostname" },
                 "status.availabilityState": { "constant": "availabilityState" },
