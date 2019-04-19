@@ -256,6 +256,7 @@
             "patterns": {
                 "~": { "replaceCharacter": "/", "exactMatch": false },
                 "unit_hostname": { "constant": "hostname" },
+                "EOCtimestamp": { "constant": "EOCTimestamp" },
                 "Hostname": { "constant": "hostname" },
                 "BIGIP_HOSTNAME": { "constant": "hostname" },
                 "status.availabilityState": { "constant": "availabilityState" },
