@@ -28,18 +28,50 @@ module.exports = {
         // place in try/catch in case this event is malformed
         try {
             const dataToFormat = data.trim(); // remove new line char or whitespace from end of line
-            const baseSplit = dataToFormat.split('",'); // don't split on just comma, that may appear inside a specific key
+            /**
+             * - split data on '="' is more reliable, because '"' should be never
+             *   escaped (like '\"') right after '=' otherwise it is part of value.
+             * - split data on '",' is less reliable, because it could be part of
+             *   value (e.g. '"' can be escaped)
+             */
+            const baseSplit = dataToFormat.split('="');
 
             // some events cannot be parsed as multiple key value pairs, but those can still be processed
             // if no delimiters exist just place the whole string inside a single key
             if (baseSplit.length === 1) {
-                ret[defaultKey] = baseSplit[0];
+                ret[defaultKey] = dataToFormat;
             } else {
-                baseSplit.forEach((i) => {
-                    const keySplit = i.split('=');
-                    const keyValue = keySplit[1].replace(/"/g, '');
-                    ret[keySplit[0]] = keyValue;
-                });
+                let val;
+                let nextKey;
+                let key = baseSplit[0];
+                const len = baseSplit.length;
+                // value-key separator
+                const sep = '",';
+
+                for (let i = 1; i < len; i += 1) {
+                    // leading '"' removed by initial split already
+                    const item = baseSplit[i];
+                    if (i === len) {
+                        // last item is value
+                        val = item;
+                        // remove trailing '"'
+                        if (val.endsWith('"')) {
+                            val = val.slice(0, val.length - 1);
+                        }
+                    } else {
+                        const idx = item.lastIndexOf(sep);
+                        if (idx === -1) {
+                            // that's weird, data malformed
+                            val = item;
+                            nextKey = key;
+                        } else {
+                            val = item.slice(0, idx);
+                            nextKey = item.slice(idx + sep.length);
+                        }
+                    }
+                    ret[key] = val;
+                    key = nextKey;
+                }
             }
         } catch (e) {
             logger.error(`formatAsJson error: ${e}`);
