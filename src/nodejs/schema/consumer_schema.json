@@ -160,6 +160,17 @@
             "description": "" ,
             "type": "string",
             "f5expand": true
+        },
+        "authenticationProtocol": {
+            "$comment": "Required for certain consumers: Kafka",
+            "title": "Authentication Protocol",
+            "description": "" ,
+            "type": "string",
+            "f5expand": true,
+            "enum": [
+                "SASL-PLAIN",
+                "None"
+            ]
         }
     },
     "allOf": [
@@ -215,7 +226,8 @@
                             "topic": {},
                             "apiVersion": {},
                             "index": {},
-                            "dataType": {}
+                            "dataType": {},
+                            "authenticationProtocol": {}
                         },
                         "additionalProperties": false
                     },
@@ -337,11 +349,29 @@
                                 "topic"
                             ],
                             "properties": {
+                                "authenticationProtocol": { "$ref": "#/definitions/authenticationProtocol", "default": "None" },
                                 "host": { "$ref": "#/definitions/host" },
                                 "protocol": { "$ref": "#/definitions/protocols", "default": "binaryTcpTls" },
                                 "port": { "$ref": "#/definitions/port", "default": 9092 },
                                 "topic": { "$ref": "#/definitions/topic" } 
-                            }
+                            },
+                            "allOf": [
+                                {
+                                    "if": { "properties": { "authenticationProtocol": { "const": "SASL-PLAIN" } } },
+                                    "then": {
+                                        "required": [
+                                            "username"
+                                        ],
+                                        "properties": {
+                                            "username": { "$ref": "#/definitions/username" },
+                                            "passphrase": { "$ref": "base_schema.json#/definitions/secret" }
+                                        },
+                                        "dependencies": {
+                                            "passphrase": [ "username" ]
+                                        }
+                                    }
+                                }
+                            ]
                         },
                         "else": {}
                     },

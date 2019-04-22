@@ -374,6 +374,9 @@ Required information:
 - Protocol: The port of the Kafka system. Options: ```binaryTcp``` or ```binaryTcpTls```. Default is ```binaryTcpTls```.
 - Port: The port of the Kafka system.
 - Topic: The topic where data should go within the Kafka system.
+- Authentication Protocol: The protocol to use for authentication. Options: ```SASL-PLAIN``` or ```None```. Default is ```None```.
+- Username: The username for authentication.
+- Passphrase: The passphrase for authentication.
 
 Note: More information about installing Kafka can be found [here](https://kafka.apache.org/quickstart).
 
@@ -385,7 +388,13 @@ Note: More information about installing Kafka can be found [here](https://kafka.
         "host": "192.0.2.1",
         "protocol": "binaryTcpTls",
         "port": 9092,
-        "topic": "f5-telemetry"
+        "topic": "f5-telemetry",
+        "authenticationProtocol": "SASL-PLAIN",
+        "username": "username",
+        "passphrase": {
+        	"cipherText": "secretkey"
+        }
+    }
     }
 }
 ```

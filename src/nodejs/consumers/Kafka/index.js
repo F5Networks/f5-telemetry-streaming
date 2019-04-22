@@ -23,11 +23,22 @@ module.exports = function (context) {
             rejectUnauthorized: !config.allowSelfSignedCert
         };
     }
+    // SASL auth options
+    let saslOptions = null;
+    if (config.authenticationProtocol === 'SASL-PLAIN') {
+        saslOptions = {
+            mechanism: 'plain',
+            username: config.username,
+            password: config.passphrase
+        };
+    }
+
     const clientOptions = {
         kafkaHost: `${config.host}:${config.port || 9092}`, // format: 'kafka-host1:9092'
         connectTimeout: 3 * 1000, // shorten timeout
         requestTimeout: 5 * 1000, // shorten timeout
-        sslOptions: tlsOptions
+        sslOptions: tlsOptions,
+        sasl: saslOptions
     };
 
     const client = new kafka.KafkaClient(clientOptions);
