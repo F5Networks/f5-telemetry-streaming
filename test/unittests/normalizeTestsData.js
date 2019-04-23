@@ -10,6 +10,8 @@
 
 const EVENT_TYPES = require('../../src/nodejs/constants.js').EVENT_TYPES;
 
+/* eslint-disable no-useless-escape */
+
 module.exports = {
     normalizeEventData: [
         {
