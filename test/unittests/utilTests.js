@@ -347,6 +347,20 @@ describe('Util', () => {
         assert.strictEqual(util.isObjectEmpty({ 1: 1, 2: 2 }), false, 'object');
         assert.strictEqual(util.isObjectEmpty([1, 2, 3]), false, 'array');
     });
+});
+
+// purpose: validate util (schedule/time functions)
+describe('Util (schedule/time functions)', () => {
+    let util;
+
+    before(() => {
+        util = require('../../src/nodejs/util.js');
+    });
+    after(() => {
+        Object.keys(require.cache).forEach((key) => {
+            delete require.cache[key];
+        });
+    });
 
     it('should get last day of the month', () => {
         // Dates for 2019 year
@@ -401,20 +415,6 @@ describe('Util', () => {
         }
     });
 
-    const _MS_PER_DAY = 1000 * 60 * 60 * 24;
-    const TEST_SETS = [
-        { schedule: { frequency: 'daily', timeWindow: { start: '04:20', end: '6:00' } } },
-        { schedule: { frequency: 'daily', timeWindow: { start: '23:20', end: '3:00' } } },
-        { schedule: { frequency: 'weekly', day: 'Monday', timeWindow: { start: '04:20', end: '6:00' } } },
-        { schedule: { frequency: 'weekly', day: 'Monday', timeWindow: { start: '23:20', end: '3:00' } } },
-        { schedule: { frequency: 'weekly', day: 'Sunday', timeWindow: { start: '04:20', end: '6:00' } } },
-        { schedule: { frequency: 'weekly', day: 'Sunday', timeWindow: { start: '23:20', end: '3:00' } } },
-        { schedule: { frequency: 'monthly', day: 31, timeWindow: { start: '4:20', end: '6:00' } } },
-        { schedule: { frequency: 'monthly', day: 31, timeWindow: { start: '23:20', end: '3:00' } } },
-        { schedule: { frequency: 'monthly', day: 15, timeWindow: { start: '4:20', end: '6:00' } } },
-        { schedule: { frequency: 'monthly', day: 15, timeWindow: { start: '23:20', end: '3:00' } } }
-    ];
-
     it('should fail to calculate next execution date when provided invalid day', () => {
         const invalidDayOfWeek = ['Sunday1', -1, 8];
         function getInvalidSchedule(i) {
@@ -433,10 +433,171 @@ describe('Util', () => {
         }
     });
 
-    it('should calculate next execution date with allowNow === true correctly according to schedule', () => {
-        for (let i = 0; i < TEST_SETS.length; i += 1) {
-            const testSet = TEST_SETS[i];
+    const _MS_PER_DAY = 1000 * 60 * 60 * 24;
+    const SCHEDULE_TEST_SETS = [
+        { schedule: { frequency: 'daily', timeWindow: { start: '04:20', end: '6:00' } } },
+        { schedule: { frequency: 'daily', timeWindow: { start: '23:20', end: '3:00' } } },
+        { schedule: { frequency: 'weekly', day: 'Monday', timeWindow: { start: '04:20', end: '6:00' } } },
+        { schedule: { frequency: 'weekly', day: 'Monday', timeWindow: { start: '23:20', end: '3:00' } } },
+        { schedule: { frequency: 'weekly', day: 'Sunday', timeWindow: { start: '04:20', end: '6:00' } } },
+        { schedule: { frequency: 'weekly', day: 'Sunday', timeWindow: { start: '23:20', end: '3:00' } } },
+        { schedule: { frequency: 'monthly', day: 31, timeWindow: { start: '4:20', end: '6:00' } } },
+        { schedule: { frequency: 'monthly', day: 31, timeWindow: { start: '23:20', end: '3:00' } } },
+        { schedule: { frequency: 'monthly', day: 15, timeWindow: { start: '4:20', end: '6:00' } } },
+        { schedule: { frequency: 'monthly', day: 15, timeWindow: { start: '23:20', end: '3:00' } } }
+    ];
 
+    function scheduleToStr(schedule) {
+        let ret = `frequency=${schedule.frequency}`;
+        if (schedule.day !== undefined) {
+            ret = `${ret} day=${schedule.day}`;
+        }
+        ret = `${ret} start=${schedule.timeWindow.start} end=${schedule.timeWindow.end}`;
+        return ret;
+    }
+
+    function getStartEndTimeFromSchedule(schedule) {
+        return [
+            util.timeStrToTuple(schedule.timeWindow.start),
+            util.timeStrToTuple(schedule.timeWindow.end)
+        ];
+    }
+
+    function getEndDate(date, schedule) {
+        const endTime = util.timeStrToTuple(schedule.timeWindow.end);
+        const dateEnd = new Date(date);
+        dateEnd.setHours(endTime[0]);
+        dateEnd.setMinutes(endTime[1]);
+        dateEnd.setSeconds(0);
+        dateEnd.setMilliseconds(0);
+
+        // in case startTime > endTime
+        if (date > dateEnd) {
+            dateEnd.setDate(dateEnd.getDate() + 1);
+        }
+        return dateEnd;
+    }
+
+    function isTimeInRange(date, timeRange) {
+        const time = date.getHours() * 60 + date.getMinutes();
+        const start = timeRange[0][0] * 60 + timeRange[0][1];
+        const end = timeRange[1][0] * 60 + timeRange[1][1];
+
+        return (start < end && start <= time && time <= end)
+            || (start > end && (start <= time || time <= end));
+    }
+
+    function standardCheck(first, second) {
+        // check that second start not earlier first ends
+        if (second <= first) {
+            const errMsg = `Date ${second.toLocaleString()} should be > ${first.toLocaleString()}`;
+            throw new Error(errMsg);
+        }
+    }
+
+    function checkTimeRanges(dates, schedule) {
+        const timeRange = getStartEndTimeFromSchedule(schedule);
+        for (let i = 0; i < dates.length; i += 1) {
+            if (!isTimeInRange(dates[i], timeRange)) {
+                const errMsg = `Date ${dates[i].toLocaleString()} not in time range ${JSON.stringify(timeRange)}`;
+                throw new Error(errMsg);
+            }
+        }
+    }
+
+    function checkDayOfWeek(dates, schedule) {
+        // schedule.dayOfWeek - only string (other options verified above)
+        const dayOfWeek = constants.DAY_NAME_TO_WEEKDAY[schedule.day.toLowerCase()];
+        const startTime = util.timeStrToTuple(schedule.timeWindow.start);
+        const endTime = util.timeStrToTuple(schedule.timeWindow.end);
+
+        let nextDay = dayOfWeek + (startTime[0] > endTime[0] ? 1 : 0);
+        // Sunday is 0, not 7
+        nextDay = nextDay === 7 ? 0 : nextDay;
+
+        for (let i = 0; i < dates.length; i += 1) {
+            const dateWeekDay = dates[i].getDay();
+            if (dateWeekDay !== dayOfWeek && dateWeekDay !== nextDay) {
+                const errMsg = `Date ${dates[i].toLocaleString()}, week day is not ${dayOfWeek}`;
+                throw new Error(errMsg);
+            }
+        }
+    }
+
+    function checkDayOfMonth(dates, schedule) {
+        const startTime = util.timeStrToTuple(schedule.timeWindow.start);
+        const endTime = util.timeStrToTuple(schedule.timeWindow.end);
+        const nextDayAdd = startTime[0] > endTime[0] ? 1 : 0;
+
+        for (let i = 0; i < dates.length; i += 1) {
+            const date = dates[i].getDate();
+            const lastDay = util.getLastDayOfMonth(dates[i]);
+            const dayOfMonth = schedule.day > lastDay ? lastDay : schedule.day;
+            let nextDay = dayOfMonth + nextDayAdd;
+            nextDay = nextDay > lastDay ? 1 : nextDay;
+
+            if (date !== dayOfMonth && date !== nextDay) {
+                const errMsg = `Date ${dates[i].toLocaleString()}, month day should be in range ${dayOfMonth}:${nextDay}`;
+                throw new Error(errMsg);
+            }
+        }
+    }
+
+    function checkDaily(schedule, first, second) {
+        // dates are in time range already
+        const firstEnd = getEndDate(first, schedule);
+        const secondEnd = getEndDate(second, schedule);
+
+        standardCheck(first, firstEnd);
+        standardCheck(firstEnd, second);
+        standardCheck(second, secondEnd);
+
+        const distance = (secondEnd - firstEnd) / _MS_PER_DAY;
+        const maxDistance = 1;
+
+        if (distance !== maxDistance) {
+            const errMsg = `Dates ${first.toLocaleString()} and ${second.toLocaleString()} has `
+                + `distance ${distance} more than ${maxDistance}`;
+            throw new Error(errMsg);
+        }
+    }
+
+    function checkWeekly(schedule, first, second) {
+        checkDayOfWeek([first, second], schedule);
+        // since day of week passed then we don't need precision here
+        const minDistance = 6;
+        const maxDistance = 8;
+
+        const distance = (second - first) / _MS_PER_DAY;
+        if (!(minDistance <= distance && distance <= maxDistance)) {
+            const errMsg = `Dates ${first.toLocaleString()} and ${second.toLocaleString()} has `
+                + `invalid distance (should be in range ${minDistance}:${maxDistance}, actual ${distance})`;
+            throw new Error(errMsg);
+        }
+    }
+
+    function checkMonthly(schedule, first, second) {
+        checkDayOfMonth([first, second], schedule);
+        // since day of month passed then we don't need precision here
+        const minDistance = 26;
+        const maxDistance = 32;
+
+        const actualDistance = (second - first) / _MS_PER_DAY;
+        if (!(minDistance <= actualDistance && actualDistance <= maxDistance)) {
+            const errMsg = `Dates ${first.toLocaleString()} and ${second.toLocaleString()} has `
+                + `invalid distance (should be in range ${minDistance}:${maxDistance}, actual ${actualDistance})`;
+            throw new Error(errMsg);
+        }
+    }
+
+    const scheduleValidators = {
+        daily: checkDaily,
+        weekly: checkWeekly,
+        monthly: checkMonthly
+    };
+
+    SCHEDULE_TEST_SETS.forEach((testSet) => {
+        it(`should calculate next execution date with allowNow === true correctly according to schedule - ${scheduleToStr(testSet.schedule)}`, () => {
             const firstDate = util.getNextFireDate(testSet.schedule, null, false);
             const secondDate = util.getNextFireDate(testSet.schedule, firstDate, true);
 
@@ -453,166 +614,30 @@ describe('Util', () => {
                     + `should be less than ${firstEnd.toLocaleString()}`;
                 throw new Error(errMsg);
             }
-        }
-    });
+        });
 
-    it('should caculate next execution date correctly according to schedule', () => {
-        function getStartEndTimeFromSchedule(schedule) {
-            return [
-                util.timeStrToTuple(schedule.timeWindow.start),
-                util.timeStrToTuple(schedule.timeWindow.end)
-            ];
-        }
+        it(`should caculate next execution date correctly according to schedule - ${scheduleToStr(testSet.schedule)}`, () => {
+            const validator = scheduleValidators[testSet.schedule.frequency];
+            const dates = [util.getNextFireDate(testSet.schedule, null, false)];
+            let firstDate = dates[0];
 
-        function getEndDate(date, schedule) {
-            const endTime = util.timeStrToTuple(schedule.timeWindow.end);
-            const dateEnd = new Date(date);
-            dateEnd.setHours(endTime[0]);
-            dateEnd.setMinutes(endTime[1]);
-            dateEnd.setSeconds(0);
-            dateEnd.setMilliseconds(0);
-
-            // in case startTime > endTime
-            if (date > dateEnd) {
-                dateEnd.setDate(dateEnd.getDate() + 1);
-            }
-            return dateEnd;
-        }
-
-        function isTimeInRange(date, timeRange) {
-            const time = date.getHours() * 60 + date.getMinutes();
-            const start = timeRange[0][0] * 60 + timeRange[0][1];
-            const end = timeRange[1][0] * 60 + timeRange[1][1];
-
-            return (start < end && start <= time && time <= end)
-                || (start > end && (start <= time || time <= end));
-        }
-
-        function standardCheck(first, second) {
-            // check that second start not earlier first ends
-            if (second <= first) {
-                const errMsg = `Date ${second.toLocaleString()} should be > ${first.toLocaleString()}`;
-                throw new Error(errMsg);
-            }
-        }
-
-        function checkTimeRanges(dates, schedule) {
-            const timeRange = getStartEndTimeFromSchedule(schedule);
-            for (let i = 0; i < dates.length; i += 1) {
-                if (!isTimeInRange(dates[i], timeRange)) {
-                    const errMsg = `Date ${dates[i].toLocaleString()} not in time range ${JSON.stringify(timeRange)}`;
-                    throw new Error(errMsg);
-                }
-            }
-        }
-
-        function checkDayOfWeek(dates, schedule) {
-            // schedule.dayOfWeek - only string (other options verified above)
-            const dayOfWeek = constants.DAY_NAME_TO_WEEKDAY[schedule.day.toLowerCase()];
-            const startTime = util.timeStrToTuple(schedule.timeWindow.start);
-            const endTime = util.timeStrToTuple(schedule.timeWindow.end);
-
-            let nextDay = dayOfWeek + (startTime[0] > endTime[0] ? 1 : 0);
-            // Sunday is 0, not 7
-            nextDay = nextDay === 7 ? 0 : nextDay;
-
-            for (let i = 0; i < dates.length; i += 1) {
-                const dateWeekDay = dates[i].getDay();
-                if (dateWeekDay !== dayOfWeek && dateWeekDay !== nextDay) {
-                    const errMsg = `Date ${dates[i].toLocaleString()}, week day is not ${dayOfWeek}`;
-                    throw new Error(errMsg);
-                }
-            }
-        }
-
-        function checkDayOfMonth(dates, schedule) {
-            const startTime = util.timeStrToTuple(schedule.timeWindow.start);
-            const endTime = util.timeStrToTuple(schedule.timeWindow.end);
-            const nextDayAdd = startTime[0] > endTime[0] ? 1 : 0;
-
-            for (let i = 0; i < dates.length; i += 1) {
-                const date = dates[i].getDate();
-                const lastDay = util.getLastDayOfMonth(dates[i]);
-                const dayOfMonth = schedule.day > lastDay ? lastDay : schedule.day;
-                let nextDay = dayOfMonth + nextDayAdd;
-                nextDay = nextDay > lastDay ? 1 : nextDay;
-
-                if (date !== dayOfMonth && date !== nextDay) {
-                    const errMsg = `Date ${dates[i].toLocaleString()}, month day should be in range ${dayOfMonth}:${nextDay}`;
-                    throw new Error(errMsg);
-                }
-            }
-        }
-
-        function checkDaily(schedule, first, second) {
-            // dates are in time range already
-            const firstEnd = getEndDate(first, schedule);
-            const secondEnd = getEndDate(second, schedule);
-
-            standardCheck(first, firstEnd);
-            standardCheck(firstEnd, second);
-            standardCheck(second, secondEnd);
-
-            const distance = (secondEnd - firstEnd) / _MS_PER_DAY;
-            const maxDistance = 1;
-
-            if (distance !== maxDistance) {
-                const errMsg = `Dates ${first.toLocaleString()} and ${second.toLocaleString()} has `
-                    + `distance ${distance} more than ${maxDistance}`;
-                throw new Error(errMsg);
-            }
-        }
-
-        function checkWeekly(schedule, first, second) {
-            checkDayOfWeek([first, second], schedule);
-            // since day of week passed then we don't need precision here
-            const minDistance = 6;
-            const maxDistance = 8;
-
-            const distance = (second - first) / _MS_PER_DAY;
-            if (!(minDistance <= distance && distance <= maxDistance)) {
-                const errMsg = `Dates ${first.toLocaleString()} and ${second.toLocaleString()} has `
-                    + `invalid distance (should be in range ${minDistance}:${maxDistance}, actual ${distance})`;
-                throw new Error(errMsg);
-            }
-        }
-
-        function checkMonthly(schedule, first, second) {
-            checkDayOfMonth([first, second], schedule);
-            // since day of month passed then we don't need precision here
-            const minDistance = 26;
-            const maxDistance = 32;
-
-            const actualDistance = (second - first) / _MS_PER_DAY;
-            if (!(minDistance <= actualDistance && actualDistance <= maxDistance)) {
-                const errMsg = `Dates ${first.toLocaleString()} and ${second.toLocaleString()} has `
-                    + `invalid distance (should be in range ${minDistance}:${maxDistance}, actual ${actualDistance})`;
-                throw new Error(errMsg);
-            }
-        }
-
-        const validators = {
-            daily: checkDaily,
-            weekly: checkWeekly,
-            monthly: checkMonthly
-        };
-
-        for (let i = 0; i < TEST_SETS.length; i += 1) {
-            const testSet = TEST_SETS[i];
-            const validator = validators[testSet.schedule.frequency];
-
-            let firstDate = util.getNextFireDate(testSet.schedule, null, false);
             for (let j = 0; j < 100; j += 1) {
                 const secondDate = util.getNextFireDate(testSet.schedule, firstDate, false);
+                dates.push(secondDate);
 
-                standardCheck(firstDate, secondDate);
-                checkTimeRanges([firstDate, secondDate], testSet.schedule);
-                // frequency specific vlidations
-                validator(testSet.schedule, new Date(firstDate), new Date(secondDate));
+                try {
+                    standardCheck(firstDate, secondDate);
+                    checkTimeRanges([firstDate, secondDate], testSet.schedule);
+                    // frequency specific vlidations
+                    validator(testSet.schedule, new Date(firstDate), new Date(secondDate));
+                } catch (err) {
+                    console.log(dates.reverse());
+                    throw err;
+                }
 
                 firstDate = secondDate;
             }
-        }
+        });
     });
 });
 
