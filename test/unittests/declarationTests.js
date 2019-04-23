@@ -39,6 +39,20 @@ describe('Declarations', () => {
     // first let's validate all example declarations
     const baseDir = `${__dirname}/../../examples/declarations`;
     const files = fs.readdirSync(baseDir);
+
+    // fs access modification to skip folder check
+    const originFsAccess = fs.access;
+    fs.access = function () {
+        const path = arguments[0];
+        const callback = arguments[arguments.length - 1];
+        if (path === 'example_download_folder') {
+            callback();
+        } else {
+            /* eslint-disable prefer-spread */
+            originFsAccess.apply(null, arguments);
+        }
+    };
+
     files.forEach((file) => {
         it(`should validate example: ${file}`, () => {
             // skip network check
