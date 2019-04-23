@@ -13,6 +13,9 @@ const normalize = require('../../src/nodejs/normalize.js');
 const normalizeUtil = require('../../src/nodejs/normalizeUtil.js');
 
 const properties = require('../../src/nodejs/config/properties.json');
+const dataExamples = require('./normalizeTestsData.js');
+const EVENT_TYPES = require('../../src/nodejs/constants.js').EVENT_TYPES;
+
 
 describe('Normalize', () => {
     after(() => {
@@ -52,21 +55,36 @@ describe('Normalize', () => {
         }
     };
 
-    it('should normalize event', () => {
-        const event = 'key1="value",key2="value"';
-        const expectedResult = {
-            key1: 'value',
-            key2: 'value'
-        };
+    const eventNormalizeOptions = {
+        renameKeysByPattern: properties.global.renameKeys,
+        addKeysByTag: {
+            definitions: properties.definitions,
+            tags: {},
+            opts: {
+                classifyByKeys: properties.events.classifyByKeys
+            }
+        },
+        formatTimestamps: properties.global.formatTimestamps.keys,
+        classifyEventByKeys: properties.events.classifyCategoryByKeys
+    };
 
-        const result = normalize.event(event);
-        assert.deepEqual(result, expectedResult);
+    dataExamples.normalizeEventData.forEach((eventDataExample) => {
+        it(`should normalize event - ${eventDataExample.name}`, () => {
+            const result = normalize.event(eventDataExample.data, eventNormalizeOptions);
+            if (eventDataExample.category !== undefined) {
+                assert.strictEqual(result.telemetryEventCategory, eventDataExample.category);
+            }
+            if (eventDataExample.expectedData !== undefined) {
+                assert.deepEqual(result, eventDataExample.expectedData);
+            }
+        });
     });
 
     it('should normalize event with single key', () => {
         const event = '<100> some syslog event: host=x.x.x.x';
         const expectedResult = {
-            data: event
+            data: event,
+            telemetryEventCategory: EVENT_TYPES.EVENT_LISTENER
         };
 
         const result = normalize.event(event);
@@ -77,7 +95,8 @@ describe('Normalize', () => {
         const event = 'key1="value",key2="value"';
         const expectedResult = {
             key1: 'value',
-            key3: 'value'
+            key3: 'value',
+            telemetryEventCategory: EVENT_TYPES.LTM_EVENT
         };
         const options = {
             renameKeysByPattern: {
@@ -95,7 +114,8 @@ describe('Normalize', () => {
         const event = 'key1="value",date_time="January 01, 2019 01:00:00 UTC"';
         const expectedResult = {
             key1: 'value',
-            date_time: '2019-01-01T01:00:00.000Z'
+            date_time: '2019-01-01T01:00:00.000Z',
+            telemetryEventCategory: EVENT_TYPES.LTM_EVENT
         };
         const options = {
             formatTimestamps: ['date_time']
