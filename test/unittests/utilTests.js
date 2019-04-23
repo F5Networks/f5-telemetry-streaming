@@ -776,6 +776,8 @@ describe('Util (Tracer)', () => {
 
     it('should recreate file and dir when deleted', () => {
         const fileName = `${os.tmpdir()}/telemetryTmpDir/telemetry`; // os.tmpdir for windows + linux
+        const dirName = path.dirname(fileName);
+
         const tracerConfig = {
             trace: fileName
         };
@@ -785,22 +787,30 @@ describe('Util (Tracer)', () => {
 
         util.tracer.REOPEN_INTERVAL = 500;
 
+        function removeTmpTestDirectory() {
+            if (fs.existsSync(dirName)) {
+                fs.readdirSync(dirName).forEach((item) => {
+                    item = path.join(dirName, item);
+                    fs.unlinkSync(item);
+                });
+                fs.rmdirSync(dirName);
+            }
+        }
+
         return tracer.write(expectedData)
             .then(() => {
                 const contents = fs.readFileSync(fileName, 'utf8');
                 assert.strictEqual(contents, expectedData);
-                // remove file
-                fs.unlinkSync(fileName);
+                // remove file and directory
+                removeTmpTestDirectory();
                 if (fs.existsSync(fileName)) {
                     assert.fail('Should remove file');
                 }
-                const dirName = path.dirname(fileName);
-                fs.rmdirSync(dirName);
                 if (fs.existsSync(dirName)) {
                     assert.fail('Should remove directory');
                 }
             })
-            // re-open should schedule in next 1sec
+            // re-open should be scheduled in next 1sec
             .then(() => new Promise((resolve) => {
                 function check() {
                     fs.exists(fileName, (exists) => {
@@ -823,6 +833,9 @@ describe('Util (Tracer)', () => {
             })
             .then(() => {
                 util.tracer.remove(tracer); // cleanup, otherwise will not exit
+                // remove file and directory
+                removeTmpTestDirectory();
+
                 if (error) {
                     return Promise.reject(error);
                 }
