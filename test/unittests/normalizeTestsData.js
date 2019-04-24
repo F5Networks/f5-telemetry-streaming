@@ -35,6 +35,16 @@ module.exports = {
             category: EVENT_TYPES.APM_EVENT
         },
         {
+            name: 'invalid APM event',
+            data: 'Access_Profile1="APM_ACCESS_PROFILE",key1="value",key2="value2"',
+            category: EVENT_TYPES.LTM_EVENT
+        },
+        {
+            name: 'incomplete AFM event',
+            data: 'acl_policy_name="AFM_PROFILE_NAME",key1="value",key2="value2"',
+            category: EVENT_TYPES.AFM_EVENT
+        },
+        {
             name: 'valid AFM event (1)',
             data: 'acl_policy_name="AFM_PROFILE_NAME",acl_policy_type="AFM_POLICY_TYPE",key1="value",key2="value2"',
             category: EVENT_TYPES.AFM_EVENT
@@ -45,6 +55,11 @@ module.exports = {
             category: EVENT_TYPES.AFM_EVENT
         },
         {
+            name: 'incomplete ASM event',
+            data: 'policy_name="ASM_PROFILE_NAME",key1="value",key2="value2"',
+            category: EVENT_TYPES.ASM_EVENT
+        },
+        {
             name: 'valid ASM event (1)',
             data: 'policy_name="ASM_PROFILE_NAME",policy_apply_date="ASM_APPLY_DATE",key1="value",key2="value2"',
             category: EVENT_TYPES.ASM_EVENT
@@ -53,6 +68,11 @@ module.exports = {
             name: 'valid ASM event (2)',
             data: 'policy_name="ASM_PROFILE_NAME",request_status="REQUEST_STATUS",key1="value",key2="value2"',
             category: EVENT_TYPES.ASM_EVENT
+        },
+        {
+            name: 'incomplete AVR event',
+            data: 'EOCTimestamp="1231232",key1="value",key2="value2"',
+            category: EVENT_TYPES.AVR_EVENT
         },
         {
             name: 'valid AVR event (1)',
