@@ -20,6 +20,7 @@ const properties = require('./config/properties.json');
 
 const tracers = require('./util.js').tracer;
 const stringify = require('./util.js').stringify;
+const isObjectEmpty = require('./util.js').isObjectEmpty;
 
 const global = properties.global;
 const events = properties.events;
@@ -27,6 +28,11 @@ const definitions = properties.definitions;
 
 const DEFAULT_PORT = constants.DEFAULT_EVENT_LISTENER_PORT;
 const CLASS_NAME = constants.EVENT_LISTENER_CLASS_NAME;
+
+const MAX_BUFFER_SIZE = 16 * 1024; // 16k chars
+const MAX_BUFFER_TIMEOUTS = 5;
+const MAX_BUFFER_TIMEOUT = 1 * 1000; // 1 sec
+
 const listeners = {};
 const protocols = ['tcp', 'udp'];
 
@@ -59,6 +65,7 @@ function EventListener(name, port, opts) {
     this._server = null;
     this._clientConnMap = {};
     this._lastConnKey = 0;
+    this._connDataBuffers = {};
 }
 
 /**
@@ -117,7 +124,10 @@ EventListener.prototype._start = function () {
 
             // event on client data
             conn.on('data', (data) => {
-                this.processEvent(data);
+                this.processRawData(String(data), {
+                    address: conn.remoteAddress,
+                    port: conn.remotePort
+                });
             });
             // event on client connection error
             conn.on('error', () => {
@@ -138,7 +148,7 @@ EventListener.prototype._start = function () {
 
         // eslint-disable-next-line no-unused-vars
         this._server.on('message', (data, remoteInfo) => {
-            this.processEvent(data);
+            this.processRawData(String(data), remoteInfo);
         });
     }
 
@@ -164,6 +174,83 @@ EventListener.prototype._start = function () {
 
     // start listening on port/protocol
     this._listen();
+};
+
+/**
+ * Process raw data
+ *
+ * @param {String}  data             - raw data
+ * @param {Object}  connInfo         - remote info
+ * @param {String}  connInfo.address - remote address
+ * @param {Integer} connInfo.port    - remote port
+ */
+EventListener.prototype.processRawData = function (data, connInfo) {
+    const key = `${connInfo.address}-${connInfo.port}`;
+    let bufferInfo = this._connDataBuffers[key];
+    let incompleteData;
+
+    if (bufferInfo) {
+        data = bufferInfo.data + data;
+        // cleanup timeout to avoid dups
+        if (bufferInfo.timeoutID) {
+            clearTimeout(bufferInfo.timeoutID);
+        }
+    }
+    // TS assumes message to have trailing '\n'.
+    if (!data.endsWith('\n')) {
+        const idx = data.lastIndexOf('\n');
+        incompleteData = data;
+
+        /**
+         * String.slice / String.substring keeps reference to original string,
+         * it means GC is unable to remove original string until all references
+         * to it will be removed.
+         * So, let's use some strategy like if valid data takes less then 70%
+         * of string then keep it as incompleted and wait for more data.
+         * In any case max lifetime is about 5-7 sec.
+         */
+        if (idx === -1 || idx / data.length < 0.7) {
+            data = null;
+        } else {
+            // string deep copy to release origin string after processing
+            incompleteData = data.slice(idx + 1).split('').join('');
+            data = data.slice(0, idx + 1);
+        }
+    }
+    // in case if all data is like incomplete message
+    if (!data && ((!isObjectEmpty(bufferInfo) && bufferInfo.timeoutNo >= MAX_BUFFER_TIMEOUTS)
+        || (incompleteData && incompleteData.length >= MAX_BUFFER_SIZE))) {
+        // if limits exceeded - flush all data
+        data = incompleteData;
+        incompleteData = null;
+    }
+
+    if (data) {
+        if (bufferInfo) {
+            // reset counter due we have valid data to process now
+            bufferInfo.timeoutNo = 0;
+        }
+        try {
+            this.processEvent(data);
+        } catch (err) {
+            this.logger.error(`processEvent: ${err}`);
+        }
+    }
+    // if we have incomplete data to buffer
+    if (incompleteData) {
+        if (!bufferInfo) {
+            bufferInfo = { timeoutNo: 0 };
+            this._connDataBuffers[key] = bufferInfo;
+        }
+        bufferInfo.data = incompleteData;
+        bufferInfo.timeoutNo += 1;
+        bufferInfo.timeoutID = setTimeout(() => {
+            delete this._connDataBuffers[key];
+            this.processEvent(bufferInfo.data);
+        }, MAX_BUFFER_TIMEOUT);
+    } else {
+        delete this._connDataBuffers[key];
+    }
 };
 
 /**
@@ -220,22 +307,23 @@ EventListener.prototype.processEvent = function (data) {
                 classifyByKeys: events.classifyByKeys
             }
         },
-        formatTimestamps: global.formatTimestamps.keys
+        formatTimestamps: global.formatTimestamps.keys,
+        classifyEventByKeys: events.classifyCategoryByKeys
     };
     data = String(data).trim();
 
     // note: data may contain multiple events seperated by newline
     // however newline chars may also show up inside a given event
     // so split only on newline with preceeding double quote
-    data = data.split('"\n');
-    data.forEach((i) => {
-        const normalizedData = normalize.event(i, options);
+    data.split(/"\n|\r\n/).forEach((line) => {
+        // lets normalize the data
+        const normalizedData = normalize.event(line, options);
         if (this.tracer) {
             this.tracer.write(JSON.stringify(normalizedData, null, 4));
         }
         // keep filtering as part of event listener for now
         if (!this.filterFunc || this.filterFunc(normalizedData)) {
-            dataPipeline.process(normalizedData, constants.EVENT_TYPES.EVENT_LISTENER);
+            dataPipeline.process(normalizedData, normalizedData.telemetryEventCategory);
         }
     });
 };

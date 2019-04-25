@@ -127,6 +127,23 @@ module.exports = {
         return data; // just return data
     },
 
+    /**
+     * Check if data has keys
+     *
+     * @param {Object}  data          - data
+     * @param {Array}   keys          - keys to check
+     * @param {Object}  [options]     - options
+     * @param {Boolean} [options.all] - all keys are required
+     */
+    _checkDataHasKeys(data, keys, options) {
+        options = options || {};
+        const func = key => data[key] !== undefined;
+
+        if (options.all) {
+            return keys.every(func);
+        }
+        return keys.some(func);
+    },
 
     /**
      * Filter data based on a list of keys - include and exclude are mutually exclusive
