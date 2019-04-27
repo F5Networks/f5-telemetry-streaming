@@ -3,7 +3,7 @@
 Event Listener class
 ====================
 
-The Telemetry Streaming Event Listener collects event logs from all BIG-IP sources, including LTM, ASM, AFM, and APM. You can configure all of these by POSTing a single AS3 declaration or you can use TMSH or the GUI to configure individual modules. Below you will find an example AS3 declaration as well as instructions for configuring each module.
+The Telemetry Streaming Event Listener collects event logs from all BIG-IP sources, including LTM, ASM, AFM, APM, and AVR. You can configure all of these by POSTing a single AS3 declaration or you can use TMSH or the GUI to configure individual modules. Below you will find an example AS3 declaration as well as instructions for configuring each module.
 
 
 .. _configurelogpubas3-ref:
@@ -410,6 +410,58 @@ Example output:
         "application":"",
         "telemetryEventCategory":"APM"
     }
+
+
+AVR Log
+```````
+
+Modify system logging configuration to update what gets logged:
+
+Using TMSH for BIG-IP version 13.X: 
+
+.. code-block:: python
+
+    modify analytics global-settings { ecm-address 127.0.0.1 ecm-port 6514 use-ecm enabled use-offbox enabled }
+
+Using TMSH for BIG-IP version 14.X: 
+
+.. code-block:: python
+
+    modify analytics global-settings { offbox-protocol tcp offbox-tcp-addresses add { 127.0.0.1 } offbox-tcp-port 6514 use-offbox enabled }
+
+
+
+Example output:
+
+.. code-block:: json
+   :linenos:
+
+    {
+        "hostname": "telemetry-bigip-14-0.localhost",
+        "errdefs_msgno": "22282286",
+        "Entity": "SystemMonitor",
+        "AggrInterval": "30",
+        "EOCTimestamp": "1555572150",
+        "HitCount": "1",
+        "SlotId": "0",
+        "CpuHealth": "54",
+        "AvgCpu": "5487",
+        "AvgCpuDataPlane": "0",
+        "AvgCpuControlPlane": "0",
+        "AvgCpuAnalysisPlane": "0",
+        "MaxCpu": "5487",
+        "MemoryHealth": "53",
+        "AvgMemory": "5343",
+        "ThroughputHealth": "0",
+        "TotalBytes": "0",
+        "AvgThroughput": "0",
+        "ConcurrentConnectionsHealth": "0",
+        "AvgConcurrentConnections": "0",
+        "MaxConcurrentConnections": "0",
+        "telemetryEventCategory": "AVR"
+    }
+
+
 
 
 System Log

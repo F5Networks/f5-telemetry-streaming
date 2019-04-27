@@ -17,6 +17,21 @@ This section describes additional options that you may want to configure once yo
 +-----------------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
+.. _tagproperty:
+
+Tag property
+~~~~~~~~~~~~
+The tag property provides a way to add additional properties (key:value) to the output. If not provided, the property will default to:
+
+.. code-block:: json
+
+    {
+        "tenant": "`T`",
+        "application": "`A`"
+    }
+ 
+
+
 .. _pointersyntax:
 
 Pointer Syntax
