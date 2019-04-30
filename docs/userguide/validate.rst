@@ -65,4 +65,4 @@ Use the following procedure to validate a declaration.
 
 .. |json| raw:: html
 
-   <a href="https://code.visualstudio.com/docs/languages/json" target="_blank">Microsoft document</a>
+   <a href="https://code.visualstudio.com/docs/languages/json" target="_blank">Microsoft documentation</a>

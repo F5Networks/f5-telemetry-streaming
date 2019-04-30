@@ -412,55 +412,11 @@ Example output:
     }
 
 
+.. _avrbasic-ref:
+
 AVR Log
 ```````
-
-Modify system logging configuration to update what gets logged:
-
-Using TMSH for BIG-IP version 13.X: 
-
-.. code-block:: python
-
-    modify analytics global-settings { ecm-address 127.0.0.1 ecm-port 6514 use-ecm enabled use-offbox enabled }
-
-Using TMSH for BIG-IP version 14.X: 
-
-.. code-block:: python
-
-    modify analytics global-settings { offbox-protocol tcp offbox-tcp-addresses add { 127.0.0.1 } offbox-tcp-port 6514 use-offbox enabled }
-
-
-
-Example output:
-
-.. code-block:: json
-   :linenos:
-
-    {
-        "hostname": "telemetry-bigip-14-0.localhost",
-        "errdefs_msgno": "22282286",
-        "Entity": "SystemMonitor",
-        "AggrInterval": "30",
-        "EOCTimestamp": "1555572150",
-        "HitCount": "1",
-        "SlotId": "0",
-        "CpuHealth": "54",
-        "AvgCpu": "5487",
-        "AvgCpuDataPlane": "0",
-        "AvgCpuControlPlane": "0",
-        "AvgCpuAnalysisPlane": "0",
-        "MaxCpu": "5487",
-        "MemoryHealth": "53",
-        "AvgMemory": "5343",
-        "ThroughputHealth": "0",
-        "TotalBytes": "0",
-        "AvgThroughput": "0",
-        "ConcurrentConnectionsHealth": "0",
-        "AvgConcurrentConnections": "0",
-        "MaxConcurrentConnections": "0",
-        "telemetryEventCategory": "AVR"
-    }
-
+For more information, see :ref:`avr-ref`. 
 
 
 
@@ -550,7 +506,7 @@ User interface: :menuselection:`System --> Logs --> Configuration --> Log Destin
  - Protocol: TCP
  - Pool: telemetry
 
- TMSH:
+TMSH:
 
  .. code-block:: python
 
@@ -588,3 +544,8 @@ TMSH:
 .. |as3docs| raw:: html
 
    <a href="https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/latest/" target="_blank">AS3 documentation</a>
+
+.. |analytics| raw:: html
+
+   <a href="https://support.f5.com/kb/en-us/products/big-ip_analytics/manuals/product/analytics-implementations-13-1-0.html" target="_blank">BIG-IP Analytics Implementations guide</a>
+
