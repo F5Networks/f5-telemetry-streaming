@@ -11,7 +11,6 @@ Using Telemetry Streaming
    telemetry-system.rst
    setting-up-consumer.rst
    event-listener.rst
-   avr.rst
    validate.rst
    logging.rst
    http-methods.rst
