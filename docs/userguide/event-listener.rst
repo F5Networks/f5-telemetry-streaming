@@ -416,16 +416,7 @@ Example output:
 
 AVR Log
 ```````
-
-As of TS version 1.3.0, you can now export AVR data. The TS declaration will be the same but the Event Listener needs to be configured to allow TS to receive AVR data from the BIG-IP system. At a high level the prerequisites include:
- 
- - AVR module should be provisioned 
- - TS should have the Event Listener configured
- - AVR should be configured to send data to TS
- - The Analytics profile for HTTP or TCP should be configured and assigned to the virtual server
-
-.. NOTE:: To see more information on AVR, see the |analytics|.
-
+For more information, see :ref:`avr-ref`. 
 
 
 Modify system logging configuration to update what gets logged buy running the following commands in TMSH:
