@@ -374,6 +374,9 @@ Required information:
 - Protocol: The port of the Kafka system. Options: ```binaryTcp``` or ```binaryTcpTls```. Default is ```binaryTcpTls```.
 - Port: The port of the Kafka system.
 - Topic: The topic where data should go within the Kafka system.
+- Authentication Protocol: The protocol to use for authentication. Options: ```SASL-PLAIN``` or ```None```. Default is ```None```.
+- Username: The username for authentication.
+- Passphrase: The passphrase for authentication.
 
 Note: More information about installing Kafka can be found [here](https://kafka.apache.org/quickstart).
 
@@ -385,7 +388,13 @@ Note: More information about installing Kafka can be found [here](https://kafka.
         "host": "192.0.2.1",
         "protocol": "binaryTcpTls",
         "port": 9092,
-        "topic": "f5-telemetry"
+        "topic": "f5-telemetry",
+        "authenticationProtocol": "SASL-PLAIN",
+        "username": "username",
+        "passphrase": {
+        	"cipherText": "secretkey"
+        }
+    }
     }
 }
 ```
@@ -1416,7 +1425,7 @@ Output
     "virtual_name":"/Common/app.app/app_vs",
     "tenant":"Common",
     "application":"app.app",
-    "telemetryEventCategory": "event"
+    "telemetryEventCategory": "LTM"
 }
 ```
 
@@ -1492,7 +1501,7 @@ Output
     "send_to_vs":"",
     "tenant":"Common",
     "application":"app.app",
-    "telemetryEventCategory":"event"
+    "telemetryEventCategory":"AFM"
 }
 ```
 
@@ -1571,7 +1580,7 @@ Output
     "request":"GET /admin/..%2F..%2F..%2Fdirectory/file HTTP/1.0\\r\\nHost: host.westus.cloudapp.azure.com\\r\\nConnection: keep-alive\\r\\nCache-Control: max-age",
     "tenant":"Common",
     "application":"app.app",
-    "telemetryEventCategory": "event"
+    "telemetryEventCategory": "ASM"
 }
 ```
 
@@ -1612,10 +1621,50 @@ Output
     "Access_Policy_Result":"Logon_Deny",
     "tenant":"Common",
     "application":"",
-    "telemetryEventCategory":"event"
+    "telemetryEventCategory":"APM"
 }
 
 ```
+
+#### AVR log
+
+Configuration
+
+- Modify AVR streaming configuration
+  - BIG-IP 13.x:
+    - TMSH: ```modify analytics global-settings { ecm-address 127.0.0.1 ecm-port 6514 use-ecm enabled use-offbox enabled }```
+  - BIG-IP 14.x:
+    - TMSH: ```modify analytics global-settings { offbox-protocol tcp offbox-tcp-addresses add { 127.0.0.1 } offbox-tcp-port 6514 use-offbox enabled }```
+Output
+
+```json
+{
+    "hostname": "telemetry-bigip-14-0.localhost",
+    "errdefs_msgno": "22282286",
+    "Entity": "SystemMonitor",
+    "AggrInterval": "30",
+    "EOCTimestamp": "1555572150",
+    "HitCount": "1",
+    "SlotId": "0",
+    "CpuHealth": "54",
+    "AvgCpu": "5487",
+    "AvgCpuDataPlane": "0",
+    "AvgCpuControlPlane": "0",
+    "AvgCpuAnalysisPlane": "0",
+    "MaxCpu": "5487",
+    "MemoryHealth": "53",
+    "AvgMemory": "5343",
+    "ThroughputHealth": "0",
+    "TotalBytes": "0",
+    "AvgThroughput": "0",
+    "ConcurrentConnectionsHealth": "0",
+    "AvgConcurrentConnections": "0",
+    "MaxConcurrentConnections": "0",
+    "telemetryEventCategory": "AVR"
+}
+```
+
+Note: AVR data is different for each 'Entity'. For more info look for AVR documentation.
 
 #### System Log
 
@@ -1633,7 +1682,7 @@ Output
 ```json
 {
     "data":"<85>Feb 12 21:39:43 telemetry notice sshd[22277]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=218.92.1.148  user=root",
-    "telemetryEventCategory":"event"
+    "telemetryEventCategory":"syslog"
 }
 ```
 

@@ -8,7 +8,7 @@
 
 'use strict';
 
-const VERSION = '1.2.0';
+const VERSION = '1.3.0';
 
 
 /**
@@ -67,6 +67,13 @@ module.exports = {
     DEFAULT_EVENT_LISTENER_PORT: 6514,
     EVENT_LISTENER_CLASS_NAME: 'Telemetry_Listener',
     EVENT_TYPES: {
+        DEFAULT: 'event',
+        AVR_EVENT: 'AVR',
+        APM_EVENT: 'APM',
+        ASM_EVENT: 'ASM',
+        AFM_EVENT: 'AFM',
+        LTM_EVENT: 'LTM',
+        SYSLOG_EVENT: 'syslog',
         EVENT_LISTENER: 'event',
         SYSTEM_POLLER: 'systemInfo',
         IHEALTH_POLLER: 'ihealthInfo'

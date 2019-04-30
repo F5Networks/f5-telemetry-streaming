@@ -1,11 +1,86 @@
 image: node:8
 
 stages:
+    - lint
+    - test
     - build
     - deploy
-    - test
+    - functional test
     - teardown
     - publish
+
+lint:
+    image: node:8
+    stage: lint
+    tags:
+        - docker-executor
+    script:
+        - npm run install-test
+        - npm run lint
+
+# BIG-IP 13.x and BIG-IP 14.0, unittests only (without coverage check)
+test_node4:
+    image: node:4
+    stage: test
+    tags:
+        - docker-executor
+    script:
+        - npm install --global npm@5.10.0
+        - npm run install-test
+        - npm install mocha@5.2.0
+        - npm run test-only
+
+# just in case, unittests only (without coverage check)
+test_node6:
+    image: node:6
+    stage: test
+    tags:
+        - docker-executor
+    script:
+        - npm run install-test
+        - npm run test-only
+
+# BIG-IP 14.1+, unittests only (without coverage check)
+test_node8:
+    stage: test
+    tags:
+        - docker-executor
+    script:
+        - npm run install-test
+        - npm run test-only
+
+# mostly for containers, unittests only (without coverage check)
+test_node_latest:
+    image: node:latest
+    stage: test
+    tags:
+        - docker-executor
+    script:
+        - npm run install-test
+        - npm run test-only
+
+# run tests and check code coverage
+test_package:
+    stage: test
+    script:
+        # install jq
+        - apt-get update
+        - apt-get install -y jq
+        # install node modules
+        - npm run install-test
+        # npm audit - install includes audit, but perform specific check and fail if needed
+        - audit_report=$(npm audit --json)
+        - echo $audit_report
+        - actions=$(echo $audit_report | jq .actions | jq length)
+        - if [ $actions -ne 0 ]; then echo 'ERROR! vulnerabilities exist'; exit 1; fi
+        # unit tests
+        - npm test
+    artifacts:
+        name: ${CI_COMMIT_REF_NAME}_unittests_coverage
+        paths:
+            - coverage
+    tags:
+        - cm-official-docker-executor
 
 build_package:
     image: f5devcentral/containthedocs:rpmbuild
@@ -57,7 +132,7 @@ deploy_env:
         - cm-official-docker-executor
     variables:
         PROJECT_NAME: test_functional_harness
-        PROJECT_DECLARATION: ${CI_PROJECT_DIR}/test/deployment/declaration.yml
+        PROJECT_DECLARATION: ${CI_PROJECT_DIR}/test/functional/deployment/declaration.yml
         PROJECT_DIR: /root/deploy-projects/test_functional_harness
         CUSTOM_DECLARATION: "yes"
     artifacts:
@@ -74,34 +149,8 @@ deploy_env:
             make setup && ls -als ${PROJECT_DIR} &&
             cp ${PROJECT_DIR}/harness_facts_flat.json ${CI_PROJECT_DIR}/harness_facts_flat.json
 
-test_package:
-    stage: test
-    script:
-        # install jq
-        - apt-get update
-        - apt-get install -y jq
-        # install node modules
-        - npm run install-test
-        # npm audit - install includes audit, but perform specific check and fail if needed
-        ######## TEMP DISABLE!!! (ideally need mocha 6.0.3) ########
-        # audit_report=$(npm audit --json)
-        # echo $audit_report
-        # actions=$(echo $audit_report | jq .actions | jq length)
-        # if [ $actions -ne 0 ]; then echo 'ERROR! vulnerabilities exist'; exit 1; fi
-        ######## END TEMP DISABLE!!! ########
-        # linter
-        - npm run lint
-        # unit tests
-        - npm run test && npm run report
-    artifacts:
-        name: ${CI_COMMIT_REF_NAME}_unittests_coverage
-        paths:
-            - coverage
-    tags:
-        - cm-official-docker-executor
-
 test_functional:
-    stage: test
+    stage: functional test
     script:
         - export TEST_HARNESS_FILE=${CI_PROJECT_DIR}/harness_facts_flat.json
         # really only need dev dependencies
@@ -130,7 +179,7 @@ teardown_env:
         - cm-official-docker-executor
     variables:
         PROJECT_NAME: test_functional_harness
-        PROJECT_DECLARATION: ${CI_PROJECT_DIR}/test/deployment/declaration.yml
+        PROJECT_DECLARATION: ${CI_PROJECT_DIR}/test/functional/deployment/declaration.yml
         PROJECT_DIR: /root/deploy-projects/test_functional_harness
         CUSTOM_DECLARATION: "yes"
     script:
@@ -171,13 +220,37 @@ pages:
     tags:
         - cm-official-docker-executor
     script:
-        - mkdir -p ./public
-        - cp -R docs/_build/html/* ./public
+        - PUBLIC_DIR='./public'
+        - mkdir -p ${PUBLIC_DIR}
+        # place index.html in public dir 
+        - cp docs/index.html ${PUBLIC_DIR}/index.html
+        #### place public facing docs under: /public-docs ####
+        - PUBLIC_DOCS=${PUBLIC_DIR}/public-docs
+        - mkdir -p ${PUBLIC_DOCS}
+        - cp -R docs/_build/html/* ${PUBLIC_DOCS}
+        #### place code coverage docs under: /coverage-docs ####
+        - COVERAGE_DOCS=${PUBLIC_DIR}/coverage-docs
+        - mkdir -p ${COVERAGE_DOCS}
+        - cp -R coverage/* ${COVERAGE_DOCS}
+        #### place code contribution docs (mainly for presentation) under: /contribute-docs ####
+        - CONTRIBUTE_DOCS=${PUBLIC_DIR}/contribute-docs
+        - CONTRIBUTE_DIR=contributing
+        # install presentation site dependencies
+        - cd ${CONTRIBUTE_DIR} && npm install && cd ..
+        - mkdir -p ${CONTRIBUTE_DOCS}
+        - cp -R ${CONTRIBUTE_DIR}/* ${CONTRIBUTE_DOCS}
+        # make relative links absolute - this could be better...
+        # ![diagram](../test/README.md) -> ![diagram](https://base.url/../test/README.md)
+        - BASE_URL_FOR_LINKS=${CI_PROJECT_URL}/tree/${CI_COMMIT_REF_NAME}/${CONTRIBUTE_DIR}/
+        - README=${CONTRIBUTE_DOCS}/README.md
+        # make absolute URL(s) for relative URL(s) outside current directory '../'
+        - sed -i -E 's/\[.*\]\(\.\./&SED_TEMP/' ${README} && sed -i "s|..SED_TEMP|${BASE_URL_FOR_LINKS}..|" ${README}
     artifacts:
         paths:
             - public
     only:
-        - /^docs-.*$/
+        # only update on designated, stable branch
+        - develop
 
 # Publish docs to clouddocs.f5networks.net
 publish_docs_to_staging:

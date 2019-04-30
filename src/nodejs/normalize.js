@@ -12,6 +12,30 @@ const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 const constants = require('./constants.js');
 const normalizeUtil = require('./normalizeUtil.js');
 
+
+/**
+ * RegExp for syslog message detection.
+ */
+const SYSLOG_REGEX = new RegExp([
+    /^(<[0-9]+>)?/, // priority
+    /([a-z]{3})\s+/, // month
+    /([0-9]{1,2})\s+/, // date
+    /([0-9]{2}):/, // hours
+    /([0-9]{2}):/, // minutes
+    /([0-9]{2})/, // seconds
+    /\s+([\w\-.0-9]+)?/, // host
+    /\s+(?:([\w\-().0-9/]+)\s+)?/, // severity
+    /([\w\-().0-9/]+)/, // process
+    /(?:\[([a-z0-9-.]+)\])?:/, // pid
+    /(.+)/ // message
+].map(regex => regex.source).join(''), 'i');
+
+const SYSLOG_HOSTNAME_IDX = 7;
+const SYSLOG_MSG_IDX = 11;
+
+const USELESS_MESSAGE_PREFIX = /^((?:BigIP|ASM):)/;
+
+
 module.exports = {
 
     /**
@@ -27,18 +51,50 @@ module.exports = {
         // place in try/catch in case this event is malformed
         try {
             const dataToFormat = data.trim(); // remove new line char or whitespace from end of line
-            const baseSplit = dataToFormat.split('",'); // don't split on just comma, that may appear inside a specific key
+            /**
+             * - split data on '="' is more reliable, because '"' should be never
+             *   escaped (like '\"') right after '=' otherwise it is part of value.
+             * - split data on '",' is less reliable, because it could be part of
+             *   value (e.g. '"' can be escaped)
+             */
+            const baseSplit = dataToFormat.split('="');
 
             // some events cannot be parsed as multiple key value pairs, but those can still be processed
             // if no delimiters exist just place the whole string inside a single key
             if (baseSplit.length === 1) {
-                ret[defaultKey] = baseSplit[0];
+                ret[defaultKey] = dataToFormat;
             } else {
-                baseSplit.forEach((i) => {
-                    const keySplit = i.split('=');
-                    const keyValue = keySplit[1].replace(/"/g, '');
-                    ret[keySplit[0]] = keyValue;
-                });
+                let val;
+                let nextKey;
+                let key = baseSplit[0];
+                const len = baseSplit.length;
+                // value-key separator
+                const sep = '",';
+
+                for (let i = 1; i < len; i += 1) {
+                    // leading '"' removed by initial split already
+                    const item = baseSplit[i];
+                    if (i === len - 1) {
+                        // last item is value
+                        val = item;
+                        // remove trailing '"'
+                        if (val.endsWith('"')) {
+                            val = val.slice(0, val.length - 1);
+                        }
+                    } else {
+                        const idx = item.lastIndexOf(sep);
+                        if (idx === -1) {
+                            // that's weird, data malformed
+                            val = item;
+                            nextKey = key;
+                        } else {
+                            val = item.slice(0, idx);
+                            nextKey = item.slice(idx + sep.length);
+                        }
+                    }
+                    ret[key] = val;
+                    key = nextKey;
+                }
             }
         } catch (e) {
             logger.error(`formatAsJson error: ${e}`);
@@ -265,22 +321,72 @@ module.exports = {
     },
 
     /**
+     * Classify event by specific keys
+     *
+     * @param {Object} data           - data to classify
+     * @param {Object} classifyByKeys - classify by specific keys (used by events)
+     *
+     * @returns {String | Null} Returns event name if matches else null
+     */
+    _classifyEventCategory(data, classifyByKeys) {
+        let category = null;
+
+        // Array.prototype.every will stop when false returned
+        Object.keys(classifyByKeys).every((evtName) => {
+            classifyByKeys[evtName].keys.every((options) => {
+                if (normalizeUtil._checkDataHasKeys(data, options.required, { all: true })
+                    && normalizeUtil._checkDataHasKeys(data, options.required, { all: false })) {
+                    // required and optional keys matched
+                    category = evtName;
+                }
+                return category === null;
+            });
+            return category === null;
+        });
+        return category;
+    },
+
+    /**
      * Normalize event
      *
-     * @param {Object} data - data to normalize
+     * @param {String} data                          - data to normalize
      *
      * @param {Object} options                       - options
      * @param {Object} [options.renameKeysByPattern] - contains map or array of keys to rename by pattern
      *                                                 object example: { patterns: {}, options: {}}
-     * @param {Array} [options.addKeysByTag]         - add key to data based on tag(s)
-     * @param {Array} [options.formatTimestamps]     - array containing timestamp keys to format/normalize
+     * @param {Array}  [options.addKeysByTag]        - add key to data based on tag(s)
+     * @param {Array}  [options.formatTimestamps]    - array containing timestamp keys to format/normalize
+     * @param {Object} [options.classifyEventByKeys] - classify event by keys
      *
      * @returns {Object} Returns normalized event
      */
     event(data, options) {
         options = options || {};
+        let hostname;
+        let isSyslogMsg = false;
+        let isRawData = false;
+        const originData = data;
+        const parts = SYSLOG_REGEX.exec(data);
+        if (parts) {
+            isSyslogMsg = true;
+            // in case if data doesn't provide such info
+            hostname = parts[SYSLOG_HOSTNAME_IDX];
+            // log message
+            data = parts[SYSLOG_MSG_IDX] || '';
+            // remove useless prefix if exists
+            data = data.replace(USELESS_MESSAGE_PREFIX, '');
+        }
 
         let ret = this._formatAsJson(data);
+        const retKeys = Object.keys(ret);
+        // in case data doesn't cotains delimiter
+        if (retKeys.length === 1 && retKeys[0] === 'data') {
+            isRawData = true;
+            ret.data = originData;
+        } else {
+            isSyslogMsg = false;
+        }
+
         ret = options.renameKeysByPattern ? normalizeUtil._renameKeys(ret, options.renameKeysByPattern.patterns) : ret;
         if (options.addKeysByTag) {
             ret = this._addKeysByTag(
@@ -290,10 +396,30 @@ module.exports = {
                 options.addKeysByTag.opts
             );
         }
+        if (options.classifyEventByKeys) {
+            ret.telemetryEventCategory = this._classifyEventCategory(ret, options.classifyEventByKeys);
+        }
+        if (!ret.telemetryEventCategory) {
+            // if data has non-default keys - probably LTM event
+            if (!isRawData) {
+                ret.telemetryEventCategory = constants.EVENT_TYPES.LTM_EVENT;
+            } else if (isSyslogMsg) {
+                ret.telemetryEventCategory = constants.EVENT_TYPES.SYSLOG_EVENT;
+            } else {
+                ret.telemetryEventCategory = constants.EVENT_TYPES.EVENT_LISTENER;
+            }
+        }
         // format timestamps
         const nT = options.formatTimestamps;
         if (nT) {
             ret = this._formatTimestamps(ret, nT);
+        }
+        /**
+         * Data probably has 'hostname' after renaming otherwise
+         * try to assign hostname if exists.
+         */
+        if (!ret.hostname && hostname) {
+            ret.hostname = hostname;
         }
         return ret;
     },

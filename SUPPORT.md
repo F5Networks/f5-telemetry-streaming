@@ -21,7 +21,8 @@ Currently supported versions:
 |------------------|---------------|---------------------|-----------------|
 | TS 1.1.0         | Feature       |  05-Mar-2019        | 05-Jun-2019     |
 | TS 1.2.0         | Feature       |  02-Apr-2019        | 02-Jul-2019     |
+| TS 1.3.0         | Feature       |  30-Apr-2019        | 30-Jul-2019     |
 
 
 
-See the [Release notes](https://github.com/F5Networks/f5-telemetry-streaming/releases) and [Telemetry Streaming documentation](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/userguide/revision-history.html) for new features and issues resolved for each release. 
+See the [Release notes](https://github.com/F5Networks/f5-telemetry-streaming/releases) and [Telemetry Streaming documentation](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/userguide/revision-history.html) for new features and issues resolved for each release.
