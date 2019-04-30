@@ -423,6 +423,9 @@ Using TMSH for BIG-IP version 13.X:
 
     modify analytics global-settings { ecm-address 127.0.0.1 ecm-port 6514 use-ecm enabled use-offbox enabled }
 
+.. NOTE:: You may need to run the command ``bigstart restart avrd``s.
+
+
 Using TMSH for BIG-IP version 14.X: 
 
 .. code-block:: python
