@@ -13,6 +13,54 @@ As of TS version 1.3.0, you can now export AVR data. The TS declaration will be 
 .. NOTE:: To see more information on AVR, see the |analytics|.
 
 
+Modify system logging configuration to update what gets logged buy running the following commands in TMSH:
+
+For BIG-IP version 13.X: 
+
+.. code-block:: python
+
+    modify analytics global-settings { ecm-address 127.0.0.1 ecm-port 6514 use-ecm enabled use-offbox enabled }
+
+.. NOTE:: You may need to run the command ``bigstart restart avrds`` after running this command on BIG-IP version 13.X.
+
+
+For BIG-IP version 14.X: 
+
+.. code-block:: python
+
+    modify analytics global-settings { offbox-protocol tcp offbox-tcp-addresses add { 127.0.0.1 } offbox-tcp-port 6514 use-offbox enabled }
+
+
+Example output of AVR basic data:
+
+.. code-block:: json
+   :linenos:
+
+    {
+        "hostname": "telemetry-bigip-14-0.localhost",
+        "errdefs_msgno": "22282286",
+        "Entity": "SystemMonitor",
+        "AggrInterval": "30",
+        "EOCTimestamp": "1555572150",
+        "HitCount": "1",
+        "SlotId": "0",
+        "CpuHealth": "54",
+        "AvgCpu": "5487",
+        "AvgCpuDataPlane": "0",
+        "AvgCpuControlPlane": "0",
+        "AvgCpuAnalysisPlane": "0",
+        "MaxCpu": "5487",
+        "MemoryHealth": "53",
+        "AvgMemory": "5343",
+        "ThroughputHealth": "0",
+        "TotalBytes": "0",
+        "AvgThroughput": "0",
+        "ConcurrentConnectionsHealth": "0",
+        "AvgConcurrentConnections": "0",
+        "MaxConcurrentConnections": "0",
+        "telemetryEventCategory": "AVR"
+    }
+
 
 
 Collect HTTP data
@@ -117,6 +165,7 @@ Example AVR output for HTTP Analytics profile:
         "telemetryEventCategory":"AVR"
     }
 
+
 Collect TCP data
 ````````````````
 
@@ -139,6 +188,9 @@ Using TMSH:
 
 
 Example AVR output for TCP analytics:
+
+.. code-block:: json
+   :linenos:
 
     {  
         "hostname":"bigip.example.com",
@@ -201,6 +253,7 @@ Using TMSH:
 Example AVR output for DNS analytics profile:
 
 .. code-block:: json
+   :linenos:
 
     {  
         "hostname":"hostname.hostname",
@@ -243,6 +296,7 @@ User interface: :menuselection:`Local Traffic --> Virtual Servers --> VIRTUAL_SE
 Example AVR output for ASM:
 
 .. code-block:: json
+   :linenos:
 
     {  
         "hostname":"hostname.hostname",
@@ -292,6 +346,7 @@ User interface: :menuselection:`Local Traffic --> Virtual Servers --> VIRTUAL_SE
 Example AVR output for AFM:
 
 .. code-block:: json
+   :linenos:
 
     {  
         "hostname":"hostname.hostname",
