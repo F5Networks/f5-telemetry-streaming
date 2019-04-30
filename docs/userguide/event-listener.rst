@@ -418,6 +418,7 @@ AVR Log
 ```````
 
 As of TS version 1.3.0, you can now export AVR data. The TS declaration will be the same but the Event Listener needs to be configured to allow TS to receive AVR data from the BIG-IP system. At a high level the prerequisites include:
+ 
  - AVR module should be provisioned 
  - TS should have the Event Listener configured
  - AVR should be configured to send data to TS
@@ -426,41 +427,82 @@ As of TS version 1.3.0, you can now export AVR data. The TS declaration will be 
 .. NOTE:: To see more information on AVR, see the |analytics|.
 
 
-Modify system logging configuration to update what gets logged:
 
-Using TMSH for BIG-IP version 13.X: 
+Modify system logging configuration to update what gets logged buy running the following commands in TMSH:
+
+For BIG-IP version 13.X: 
 
 .. code-block:: python
 
     modify analytics global-settings { ecm-address 127.0.0.1 ecm-port 6514 use-ecm enabled use-offbox enabled }
 
-.. NOTE:: You may need to run the command ``bigstart restart avrd``s.
+.. NOTE:: You may need to run the command ``bigstart restart avrds`` after running this command on BIG-IP version 13.X.
 
 
-Using TMSH for BIG-IP version 14.X: 
+For BIG-IP version 14.X: 
 
 .. code-block:: python
 
     modify analytics global-settings { offbox-protocol tcp offbox-tcp-addresses add { 127.0.0.1 } offbox-tcp-port 6514 use-offbox enabled }
 
 
+Example output of AVR basic data:
+
+.. code-block:: json
+   :linenos:
+
+    {
+        "hostname": "telemetry-bigip-14-0.localhost",
+        "errdefs_msgno": "22282286",
+        "Entity": "SystemMonitor",
+        "AggrInterval": "30",
+        "EOCTimestamp": "1555572150",
+        "HitCount": "1",
+        "SlotId": "0",
+        "CpuHealth": "54",
+        "AvgCpu": "5487",
+        "AvgCpuDataPlane": "0",
+        "AvgCpuControlPlane": "0",
+        "AvgCpuAnalysisPlane": "0",
+        "MaxCpu": "5487",
+        "MemoryHealth": "53",
+        "AvgMemory": "5343",
+        "ThroughputHealth": "0",
+        "TotalBytes": "0",
+        "AvgThroughput": "0",
+        "ConcurrentConnectionsHealth": "0",
+        "AvgConcurrentConnections": "0",
+        "MaxConcurrentConnections": "0",
+        "telemetryEventCategory": "AVR"
+    }
 
 
-1. Collect HTTP data by running the following TMSH command:
+Collect HTTP data
+`````````````````
+
+1. Collect HTTP data:
+
+Using TMSH:
 
 .. code-block:: json
 
     create ltm profile analytics telemetry-http-analytics { collect-geo enabled collect-http-timing-metrics enabled collect-ip enabled collect-max-tps-and-throughput enabled collect-methods enabled collect-page-load-time enabled collect-response-codes enabled collect-subnets enabled collect-url enabled collect-user-agent enabled collect-user-sessions enabled publish-irule-statistics enabled }
 
-2. Assign the analytics profile to a virtual server by funning the following TMSH command:
+User interface: :menuselection:`Local Traffic --> Profiles --> Analytics --> HTTP analytics`
+
+
+2. Assign the analytics profile to a virtual server:
+
+Using TMSH:
 
 .. code-block:: json
 
     modify ltm virtual <VIRTUAL_SERVER_NAME> profiles add { telemetry-http-analytics { context all } }
 
+User interface: :menuselection:`Local Traffic --> Profiles --> Analytics --> HTTP analytics`
 
 
-Example AVR output:
+Example AVR output for HTTP Analytics Profile:
 
 .. code-block:: json
    :linenos:
@@ -537,36 +579,101 @@ Example AVR output:
         "telemetryEventCategory":"AVR"
     }
 
+Collect TCP data
+````````````````
 
-Example output:
+TMSH command:
 
-.. code-block:: json
-   :linenos:
+create ltm profile tcp-analytics telemetry-tcp-analytics { collect-city enabled collect-continent enabled collect-country enabled collect-nexthop enabled collect-post-code enabled collect-region enabled collect-remote-host-ip enabled collect-remote-host-subnet enabled collected-by-server-side enabled }
 
-    {
-        "hostname": "telemetry-bigip-14-0.localhost",
-        "errdefs_msgno": "22282286",
-        "Entity": "SystemMonitor",
-        "AggrInterval": "30",
-        "EOCTimestamp": "1555572150",
-        "HitCount": "1",
-        "SlotId": "0",
-        "CpuHealth": "54",
-        "AvgCpu": "5487",
-        "AvgCpuDataPlane": "0",
-        "AvgCpuControlPlane": "0",
-        "AvgCpuAnalysisPlane": "0",
-        "MaxCpu": "5487",
-        "MemoryHealth": "53",
-        "AvgMemory": "5343",
-        "ThroughputHealth": "0",
-        "TotalBytes": "0",
-        "AvgThroughput": "0",
-        "ConcurrentConnectionsHealth": "0",
-        "AvgConcurrentConnections": "0",
-        "MaxConcurrentConnections": "0",
-        "telemetryEventCategory": "AVR"
+Assign this analytics profile to virtual server.
+TMSH command:
+
+modify ltm virtual <VIRTUAL_SERVER_NAME> profiles add { telemetry-tcp-analytics { context all } }
+
+
+Example AVR output for TCP:
+
+    {  
+        "hostname":"bigip.example.com",
+        "SlotId":"0",
+        "errdefs_msgno":"22323211",
+        "STAT_SRC":"TMSTAT",
+        "Entity":"TcpStat",
+        "EOCTimestamp":"1556589630",
+        "AggrInterval":"30",
+        "HitCount":"3",
+        "tcp_prof":"/Common/tcp",
+        "vip":"/Common/VIRTUAL_SERVER_NAME",
+        "globalBigiqConf":"N/A",
+        "ObjectTagsList":"N/A",
+        "active_conns":"0",
+        "max_active_conns":"0",
+        "accepts":"0",
+        "accept_fails":"0",
+        "new_conns":"0",
+        "failed_conns":"0",
+        "expired_conns":"0",
+        "abandoned_conns":"0",
+        "rxrst":"0",
+        "rxbadsum":"0",
+        "rxbadseg":"0",
+        "rxooseg":"0",
+        "rxcookie":"0",
+        "rxbad_cookie":"0",
+        "hw_cookie_valid":"0",
+        "syncacheover":"0",
+        "txrexmits":"0",
+        "sndpack":"0",
+        "tenant":"Common",
+        "application":"",
+        "telemetryEventCategory":"AVR"
     }
+
+
+Collect DNS data
+````````````````
+TMSH command:
+
+create ltm profile dns telemetry-dns { avr-dnsstat-sample-rate 1 }
+
+Assign this analytics profile to GTM listener
+TMSH command:
+
+modify gtm  listener <GTM_LISTENER_NAME> { profiles replace-all-with { telemetry-dns { } } }
+
+
+Example AVR output:
+
+    {  
+        "hostname":"hostname.hostname",
+        "SlotId":"0",
+        "errdefs_msgno":"22282300",
+        "Entity":"DNS_Offbox_All",
+        "ObjectTagsList":"N/A",
+        "AggrInterval":"30",
+        "EOCTimestamp":"1556578980",
+        "HitCount":"4",
+        "ApplicationName":"<Unassigned>",
+        "VSName":"/Common/GTM_LISTENER_NAME",
+        "DosProfileName":"<no-profile>",
+        "AttackId":"0",
+        "QueryType":"A",
+        "QueryName":"example.com",
+        "SourceIP":"X.X.X.X",
+        "SourceIpRouteDomain":"0",
+        "CountryCode":"N/A",
+        "TransactionOutcome":"Valid",
+        "AttackVectorName":"Not attacked",
+        "AttackTriggerName":"Not attacked",
+        "AttackMitigationName":"Not attacked",
+        "IsInternalActivity":"0",
+        "IsAttackingIp":"0",
+        "telemetryEventCategory":"AVR"
+    }
+
+
+
 
 
 
