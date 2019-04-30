@@ -13,7 +13,7 @@ As of TS version 1.3.0, you can now export AVR data. The TS declaration will be 
 .. NOTE:: To see more information on AVR, see the |analytics|.
 
 
-Modify system logging configuration to update what gets logged buy running the following commands in TMSH:
+Modify system logging configuration to update what gets logged by running the following commands in TMSH:
 
 For BIG-IP version 13.X: 
 
@@ -193,7 +193,7 @@ Example AVR output for TCP analytics:
    :linenos:
 
     {  
-        "hostname":"bigip.example.com",
+        "hostname":"hostname.hostname",
         "SlotId":"0",
         "errdefs_msgno":"22323211",
         "STAT_SRC":"TMSTAT",
