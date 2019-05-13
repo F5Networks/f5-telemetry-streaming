@@ -1,0 +1,226 @@
+/*
+ * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
+ * may copy and modify this software product for its internal business purposes.
+ * Further, Licensee may upload, publish and distribute the modified version of
+ * the software product on devcentral.f5.com.
+ */
+
+// this object not passed with lambdas, which mocha uses
+/* eslint-disable prefer-arrow-callback */
+
+/* eslint-disable global-require */
+
+const assert = require('assert');
+const fs = require('fs');
+const deepDiff = require('deep-diff');
+const util = require('../shared/util.js');
+const constants = require('../shared/constants.js');
+const dutUtils = require('../dutTests.js').utils;
+
+const DUTS = util.getHosts('BIGIP');
+const CONSUMER_HOST = util.getHosts('CONSUMER')[0]; // only expect one
+const STATSD_IMAGE_NAME = 'graphiteapp/graphite-statsd:latest';
+const STATSD_CONTAINER_NAME = 'ts_statsd_consumer';
+const STATSD_HTTP_PROTO = 'http';
+const STATSD_HTTP_PORT = 80;
+const STATSD_DATA_PORT = 8125;
+const STATSD_CONSUMER_NAME = 'Consumer_Splunk';
+
+// read in example config
+const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC_EXAMPLE));
+
+
+function runRemoteCmd(cmd) {
+    return util.performRemoteCmd(CONSUMER_HOST.ip, CONSUMER_HOST.username, cmd, { password: CONSUMER_HOST.password });
+}
+
+function setup() {
+    describe('Consumer Setup: Statsd - pull docker image', function () {
+        it('should pull container image', function () {
+            // no need to check if image is already installed - if it is installed
+            // docker will simply check for updates and exit normally
+            return runRemoteCmd(`docker pull ${STATSD_IMAGE_NAME}`);
+        });
+    });
+}
+
+function test() {
+    describe('Consumer Test: Statsd - Configure Service', function () {
+        it('should start container', function () {
+            const portArgs = `-p ${STATSD_HTTP_PORT}:${STATSD_HTTP_PORT} -p ${STATSD_DATA_PORT}:${STATSD_DATA_PORT}/udp`;
+            const cmd = `docker run -d --restart=always --name ${STATSD_CONTAINER_NAME} ${portArgs} ${STATSD_IMAGE_NAME}`;
+
+            // simple check to see if container already exists
+            return runRemoteCmd(`docker ps | grep ${STATSD_CONTAINER_NAME}`)
+                .then((data) => {
+                    if (data) {
+                        return Promise.resolve(); // exists, contine
+                    }
+                    return runRemoteCmd(cmd);
+                });
+        });
+
+        it('should check service is up', function () {
+            const uri = '/render?someUnknownKey&format=json';
+            const options = {
+                port: STATSD_HTTP_PORT,
+                protocol: STATSD_HTTP_PROTO
+
+            };
+
+            // splunk container takes about 30 seconds to come up
+            return new Promise(resolve => setTimeout(resolve, 3000))
+                .then(() => util.makeRequest(CONSUMER_HOST.ip, uri, options))
+                .then((data) => {
+                    assert.strictEqual(Array.isArray(data), true);
+                    assert.strictEqual(data.length, 0);
+                });
+        });
+    });
+
+    describe('Consumer Test: Statsd - Configure TS', () => {
+        it('should configure TS', function () {
+            const consumerDeclaration = util.deepCopy(DECLARATION);
+            consumerDeclaration[STATSD_CONSUMER_NAME] = {
+                class: 'Telemetry_Consumer',
+                type: 'Statsd',
+                host: CONSUMER_HOST.ip,
+                protocol: 'udp',
+                port: STATSD_DATA_PORT
+            };
+            return dutUtils.postDeclarationToDUTs(() => consumerDeclaration);
+        });
+    });
+
+    describe('Consumer Test: Statsd - Test', function () {
+        /**
+         * Note: statsd/graphire stores only counters, no strings.
+         * Verification is simple - just check that at least one metric is not empty
+         */
+        // helper function to query statsd for data
+        const query = (searchString) => {
+            const uri = `/render?target=stats.gauges.${searchString}&format=json&from=-3minutes`;
+            const options = {
+                port: STATSD_HTTP_PORT,
+                protocol: STATSD_HTTP_PROTO
+            };
+
+            return util.makeRequest(CONSUMER_HOST.ip, uri, options)
+                .then(data => Promise.resolve([searchString, data]));
+        };
+
+        const stripMetrics = (data) => {
+            Object.keys(data).forEach((item) => {
+                if (Number.isInteger(data[item])) {
+                    delete data[item];
+                } else if (typeof data[item] === 'object') {
+                    stripMetrics(data[item]);
+                }
+            });
+        };
+
+        const getMerticsName = (data) => {
+            const copyData = JSON.parse(JSON.stringify(data));
+            stripMetrics(copyData);
+            const diff = deepDiff(copyData, data) || [];
+
+            // add prefixes to support multiple BIG-IP(s) in a single statsd instance
+            const basePrefix = 'f5telemetry';
+            let hostnamePrefix = 'base.bigip.com';
+            try {
+                // if this consumer processes other events besides system info
+                // in the future, this will always fail
+                hostnamePrefix = data.system.hostname;
+            } catch (error) {
+                // leave it as is
+            }
+            // account for item in path having '.' or '/'
+            return diff.map(item => [
+                basePrefix,
+                hostnamePrefix
+            ].concat(item.path).map(i => i.replace(/\.|\/|:/g, '-')).join('.'));
+        };
+
+        const verifyMetrics = (metrics) => {
+            let idx = 0;
+            let hasIndexed = false;
+
+            const getNextMetrics = () => {
+                const promises = [];
+
+                for (let i = 0; i < 4 && idx < metrics.length; i += 1) {
+                    promises.push(query(metrics[idx]));
+                    idx += 1;
+                }
+                return Promise.all(promises)
+                    .then((data) => {
+                        data.forEach((item) => {
+                            /**
+                             * item = [metricName, data]
+                             * data is array of objects like { targets: {}, tags: {}, datapoints: []}
+                             */
+                            if (Array.isArray(item[1]) && item[1].length > 0
+                                && item[1][0].datapoints && item[1][0].datapoints.length > 0) {
+                                hasIndexed = true;
+                            }
+                        });
+                        if (hasIndexed) {
+                            return Promise.resolve();
+                        }
+                        if (idx < metrics.length) {
+                            return getNextMetrics();
+                        }
+                        /**
+                         * Reasons for retry:
+                         * - indexing is strill in process
+                         * - system poller not sent data yet
+                         * Sleep for 15 second(s) and return Promise.reject to allow retry
+                         */
+                        util.log('Waiting for data indexing...');
+                        return new Promise(resolveTimer => setTimeout(resolveTimer, 15000))
+                            .then(() => Promise.reject(new Error('Metrics are empty / not indexed')));
+                    });
+            };
+            return getNextMetrics();
+        };
+
+        // end helper function
+
+        const sysPollerMetricsData = {};
+
+        it('should fetch system poller data via debug endpoint from DUTs', function () {
+            return dutUtils.getSystemPollerData((hostObj, data) => {
+                sysPollerMetricsData[hostObj.hostname] = getMerticsName(data);
+            });
+        });
+
+        DUTS.forEach((dut) => {
+            // at first we need to retrieve list of metrics to poll
+
+            it(`should check for system poller data from - ${dut.hostname}`, function () {
+                const metrics = sysPollerMetricsData[dut.hostname];
+                if (!metrics) {
+                    throw new Error(`No System Poller Metrics data for ${dut.hostname} !`);
+                }
+
+                // all metrics should be non-empty array - it means they were added to index
+                return verifyMetrics(metrics);
+            });
+        });
+    });
+}
+
+function teardown() {
+    describe('Consumer Test: Statsd - teardown', function () {
+        it('should remove container', function () {
+            return runRemoteCmd(`docker container rm -f ${STATSD_CONTAINER_NAME}`);
+        });
+    });
+}
+
+module.exports = {
+    setup,
+    test,
+    teardown
+};

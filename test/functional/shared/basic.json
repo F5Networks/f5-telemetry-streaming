@@ -1,10 +1,10 @@
 {
+    "class": "Telemetry",
     "controls": {
         "class": "Controls",
         "logLevel": "debug",
         "debug": true
     },
-    "class": "Telemetry",
     "My_System": {
         "class": "Telemetry_System",
         "systemPoller": {

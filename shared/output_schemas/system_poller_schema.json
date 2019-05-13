@@ -97,7 +97,48 @@
                 }
             },
             "additionalProperties": false,
-            "required": []
+            "required": [
+                "hostname",
+                "version",
+                "versionBuild",
+                "location",
+                "description",
+                "marketingName",
+                "platformId",
+                "chassisId",
+                "baseMac",
+                "callBackUrl",
+                "syncMode",
+                "syncColor",
+                "syncStatus",
+                "syncSummary",
+                "failoverStatus",
+                "failoverColor",
+                "systemTimestamp",
+                "cpu",
+                "memory",
+                "tmmCpu",
+                "tmmMemory",
+                "tmmTraffic",
+                "diskStorage",
+                "diskLatency",
+                "networkInterfaces",
+                "provisioning"
+            ],
+            "allOf": [
+                {
+                    "if": {
+                        "properties": { "version": { "pattern": "^1[4-9]" } }
+                    },
+                    "then": {
+                        "required": [
+                            "configReady",
+                            "licenseReady",
+                            "provisionReady"
+                        ]
+                    }
+                }
+            ]
         },
         "virtualServers": {
             "type": "object"
@@ -134,7 +175,11 @@
                 }
             },
             "additionalProperties": false,
-            "required": []
+            "required": [
+                "pollingInterval",
+                "cycleStart",
+                "cycleEnd"
+            ]
         },
         "networkTunnels": {
             "type": "object"
@@ -145,6 +190,17 @@
         }
     },
     "additionalProperties": false,
-    "$comment": "The 'required' keyword will be enumerated with all 'properties' keys at validation runtime, including nested properties",
-    "required": []
+    "required": [
+        "system",
+        "virtualServers",
+        "pools",
+        "ltmPolicies",
+        "httpProfiles",
+        "clientSslProfiles",
+        "serverSslProfiles",
+        "sslCerts",
+        "telemetryServiceInfo",
+        "networkTunnels",
+        "telemetryEventCategory"
+    ]
 }

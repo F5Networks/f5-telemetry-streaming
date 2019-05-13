@@ -31,5 +31,10 @@ module.exports = {
             PWD: 'CONSUMER_HOSTS_PWD'
         }
     },
-    EVENT_LISTENER_PORT: 6514
+    EVENT_LISTENER_PORT: 6514,
+    REQUEST: {
+        PORT: 443,
+        PROTOCOL: 'https'
+    },
+    CONSUMERS_DIR: 'consumersTests'
 };

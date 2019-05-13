@@ -26,6 +26,8 @@ Best Practices:
 
 - Clean up after yourself - although it is a fairly safe assumption to make that this is a fresh environment consider if it were multi-use when writing tests
 - Consider carefully before testing things in functional test that should or could be tested via unit test - those are run more frequently
+- All consumer related tests should be added to test/functional/consumersTests
+- All TS package related tests should be added to test/function/dutTests.js
 
 ### Environment
 
