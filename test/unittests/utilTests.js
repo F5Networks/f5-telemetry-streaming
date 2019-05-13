@@ -631,6 +631,7 @@ describe('Util (schedule/time functions)', () => {
                     // frequency specific vlidations
                     validator(testSet.schedule, new Date(firstDate), new Date(secondDate));
                 } catch (err) {
+                    // eslint-disable-next-line no-console
                     console.log(dates.reverse());
                     throw err;
                 }

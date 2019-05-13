@@ -8,15 +8,15 @@
 
 'use strict';
 
-const net = require('net');
-const fs = require('fs');
-const request = require('request');
 const Ajv = require('ajv');
-const SshClient = require('ssh2').Client; // eslint-disable-line import/no-extraneous-dependencies
+const fs = require('fs');
 const icrdk = require('icrdk'); // eslint-disable-line import/no-extraneous-dependencies
+const net = require('net');
+const request = require('request');
+const SSHClient = require('ssh2').Client; // eslint-disable-line import/no-extraneous-dependencies
+
 const constants = require('./constants.js');
 
-const DEFAULT_PORT = 443;
 
 module.exports = {
 
@@ -28,7 +28,7 @@ module.exports = {
      * @returns {Void}
      */
     log(msg) {
-        console.log(`${new Date().toISOString()} ${this.stringify(msg)}`); // eslint-disable-line no-console
+        console.log(`${new Date().toISOString()}: ${this.stringify(msg)}`); // eslint-disable-line no-console
     },
 
     /**
@@ -72,14 +72,17 @@ module.exports = {
         const dir = fs.existsSync(newBuildDir) ? newBuildDir : existingBuildDir;
 
         const distFiles = fs.readdirSync(dir);
-        const packageFiles = distFiles.filter(f => f.includes('.rpm') && !f.includes('.sha256'));
+        const packageFiles = distFiles.filter(f => f.endsWith('.rpm'));
 
         // get latest rpm file (by timestamp since epoch)
         // note: this might not work if the artifact resets the timestamps
         const latest = { file: null, time: 0 };
         packageFiles.forEach((f) => {
             const fStats = fs.lstatSync(`${dir}/${f}`);
-            if (fStats.birthtimeMs >= latest.time) latest.file = f; latest.time = fStats.birthtimeMs;
+            if (fStats.birthtimeMs >= latest.time) {
+                latest.file = f;
+                latest.time = fStats.birthtimeMs;
+            }
         });
         const packageFile = latest.file;
 
@@ -89,35 +92,29 @@ module.exports = {
     /**
      * Perform HTTP request
      *
-     * @param {String} host              - HTTP host
-     * @param {String} uri               - HTTP uri
-     * @param {Object} options           - function options
-     * @param {Integer} [options.port]   - HTTP port
-     * @param {String} [options.method]  - HTTP method
-     * @param {String} [options.body]    - HTTP body
-     * @param {Object} [options.headers] - HTTP headers
+     * @param {String}  host               - HTTP host
+     * @param {String}  uri                - HTTP uri
+     * @param {Object}  options            - function options
+     * @param {Integer} [options.port]     - HTTP port, default is 443
+     * @param {String}  [options.protocol] - HTTP protocol, default is https
+     * @param {String}  [options.method]   - HTTP method, default is GET
+     * @param {String}  [options.body]     - HTTP body
+     * @param {Object}  [options.headers]  - HTTP headers
      *
      * @returns {Object} Returns promise resolved with response
      */
     makeRequest(host, uri, options) {
         options = options || {};
+        const port = options.port === undefined ? constants.REQUEST.PORT : options.port;
+        const protocol = options.protocol === undefined ? constants.REQUEST.PROTOCOL : options.protocol;
 
-        // handle query string values - should probably use url.parse here
-        const checkForQS = uri.split('?');
-        const qs = {};
-        if (checkForQS.length > 1) {
-            uri = checkForQS[0];
-            checkForQS[1].split('&').forEach((i) => {
-                const kV = i.split('=');
-                qs[kV[0]] = kV[1];
-            });
-        }
+        host = host.endsWith('/') ? host.slice(0, host.length - 1) : host;
+        uri = uri || '';
+        uri = uri.startsWith('/') ? uri : `/${uri}`;
 
-        let fullUri = `https://${host}`;
-        fullUri = options.port ? `${fullUri}:${options.port}${uri}` : `${fullUri}:${DEFAULT_PORT}${uri}`;
+        const fullUri = `${protocol}://${host}:${port}${uri}`;
         const requestOptions = {
             uri: fullUri,
-            qs,
             method: options.method || 'GET',
             body: options.body ? this.stringify(options.body) : undefined,
             headers: options.headers || {},
@@ -127,7 +124,7 @@ module.exports = {
         return new Promise((resolve, reject) => {
             request(requestOptions, (err, res, body) => {
                 if (err) {
-                    reject(new Error(`HTTP error: ${err}`));
+                    reject(new Error(`HTTP error for '${fullUri}' : ${err}`));
                 } else if (res.statusCode >= 200 && res.statusCode <= 299) {
                     try {
                         resolve(JSON.parse(body));
@@ -135,7 +132,7 @@ module.exports = {
                         resolve(body);
                     }
                 } else {
-                    const msg = `Bad status code: ${res.statusCode} ${res.statusMessage} ${res.body} for ${uri}`;
+                    const msg = `Bad status code: ${res.statusCode} ${res.statusMessage} ${res.body} for '${fullUri}'`;
                     reject(new Error(msg));
                 }
             });
@@ -242,7 +239,7 @@ module.exports = {
     performRemoteCmd(host, username, command, options) {
         options = options || {};
 
-        const conn = new SshClient();
+        const conn = new SSHClient();
         return new Promise((resolve, reject) => {
             let response = '';
             conn.on('ready', () => {
@@ -304,17 +301,20 @@ module.exports = {
             // eslint-disable-next-line import/no-dynamic-require, global-require
             hosts = require(testHarnessFile).filter(filter).map((item) => {
                 if (item.is_f5_device) {
-                    return {
+                    item = {
                         ip: item.admin_ip,
                         username: item.f5_rest_user.username,
-                        password: item.f5_rest_user.password
+                        password: item.f5_rest_user.password,
+                        hostname: item.f5_hostname
+                    };
+                } else {
+                    item = {
+                        ip: item.admin_ip,
+                        username: item.ssh_user.username,
+                        password: item.ssh_user.password
                     };
                 }
-                return {
-                    ip: item.admin_ip,
-                    username: item.ssh_user.username,
-                    password: item.ssh_user.password
-                };
+                return item;
             });
         } else if (envVars && envVars.IP && process.env[envVars.IP]) {
             // straight up environment variables - could be 1+ hosts: x.x.x.x,x.x.x.y
@@ -366,21 +366,6 @@ module.exports = {
      * @returns {Boolean|Object} Returns true on successful validation or object with errors
      */
     validateAgainstSchema(data, schema) {
-        schema = this.deepCopy(schema);
-
-        // add all keys in 'properties' to the 'required' key array - including nested properties
-        const addProperties = (localSchema) => {
-            const properties = localSchema.properties;
-            Object.keys(properties).forEach((k) => {
-                localSchema.required.push(k);
-                if (properties[k].type === 'object' && properties[k].properties) {
-                    properties[k] = addProperties(properties[k]);
-                }
-            });
-            return localSchema;
-        };
-        schema = addProperties(schema);
-
         const ajv = new Ajv({ useDefaults: true });
         const validator = ajv.compile(schema);
         const valid = validator(data);

@@ -15,21 +15,6 @@ const Ajv = require('ajv');
 /* eslint-disable global-require */
 
 function validateAgainstSchema(data, schema) {
-    schema = JSON.parse(JSON.stringify(schema));
-
-    // add all keys in 'properties' to the 'required' key array - including nested properties
-    const addProperties = (localSchema) => {
-        const properties = localSchema.properties;
-        Object.keys(properties).forEach((k) => {
-            localSchema.required.push(k);
-            if (properties[k].type === 'object' && properties[k].properties) {
-                properties[k] = addProperties(properties[k]);
-            }
-        });
-        return localSchema;
-    };
-    schema = addProperties(schema);
-
     const ajv = new Ajv({ useDefaults: true });
     const validator = ajv.compile(schema);
     const valid = validator(data);
