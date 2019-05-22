@@ -223,7 +223,7 @@ ElasticSearch
 |ElasticSearch|
 
 Required Information:
- - Host: The address of the Kafka system.
+ - Host: The address of the ElasticSearch system.
  - Index: The index where data should go within the ElasticSearch system.
 
 Optional Parameters:
