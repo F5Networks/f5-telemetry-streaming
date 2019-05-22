@@ -7,7 +7,7 @@ up and running with Telemetry Streaming.
 
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-   In BIG-IP versions prior to 14.0.0, the Package Management LX tab will not show up in the user interface unless you have previously used the command line to create a file called "enable" in the directory /var/config/rest/iApps.
+   In BIG-IP versions prior to 14.0.0, the Package Management LX tab will not show up in the user interface unless you run the following command from the BIG-IP CLI: ``touch /var/config/rest/iapps/enable``.
 
 #. Download the latest RPM package from |github| in the **dist** directory.
 #. Upload and install the RPM package on the using the BIG-IP GUI:
@@ -24,8 +24,7 @@ up and running with Telemetry Streaming.
    - If using a RESTful API client like Postman, in the :guilabel:`Authorization` tab, type the user name and password for a BIG-IP user account with Administrator permissions.
    - If using cURL, see :ref:`installcurl-ref`.
 
-#. Using a RESTful API client like Postman, GET an open and
-   closed bracket (**{}**) to the URI
+#. Using a RESTful API client like Postman, send a GET request to the URI
    ``https://{{host}}/mgmt/shared/telemetry/info`` to ensure Telemetry Streaming is running
    properly.
 
@@ -40,36 +39,11 @@ up and running with Telemetry Streaming.
 
 **Quick Start Example**
 
-.. code-block:: json
-   :linenos:
+.. literalinclude:: examples/quick-start.json
+    :language: json
+    :linenos:
 
-    {
-        "class": "Telemetry",
-        "controls": {
-            "class": "Controls",
-            "logLevel": "info"
-        },
-        "My_System": {
-            "class": "Telemetry_System",
-            "systemPoller": {
-                "interval": 60
-            }
-        },
-        "My_Listener": {
-            "class": "Telemetry_Listener",
-            "port": 6514
-        },
-        "My_Consumer": {
-            "class": "Telemetry_Consumer",
-            "type": "Splunk",
-            "host": "192.0.2.1",
-            "protocol": "https",
-            "port": "8088",
-            "passphrase": {
-                "cipherText": "apikey"
-            }
-        }
-    }
+    
 
 
     
