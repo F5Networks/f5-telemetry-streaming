@@ -28,7 +28,8 @@ module.exports = {
             FILE: 'TEST_HARNESS_FILE',
             IP: 'CONSUMER_HOSTS',
             USER: 'CONSUMER_HOSTS_USER',
-            PWD: 'CONSUMER_HOSTS_PWD'
+            PWD: 'CONSUMER_HOSTS_PWD',
+            TYPE_REGEX: 'CONSUMER_TYPE_REGEX'
         }
     },
     EVENT_LISTENER_PORT: 6514,
