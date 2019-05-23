@@ -17,9 +17,37 @@ const SSHClient = require('ssh2').Client; // eslint-disable-line import/no-extra
 
 const constants = require('./constants.js');
 
+/**
+ * Allows calling makeRequest with retryOptions
+ *
+ * @param {Function} makeRequest - function call to makeRequest
+ * @param {Number} interval - time in ms between retries
+ * @param {Number} maxRetries - maximum number of retry attempts
+ * @returns {Promise}
+ */
+
+const makeRequestWithRetry = function (makeRequest, interval, maxRetries) {
+    return new Promise((resolve, reject) => {
+        makeRequest()
+            .then(resolve)
+            .catch((error) => {
+                setTimeout(() => {
+                    if (maxRetries <= 1) {
+                        error.message = `Maximum retries reached. Last error: ${error.message}`;
+                        reject(error);
+                        return;
+                    }
+                    makeRequestWithRetry(makeRequest, interval, maxRetries - 1)
+                        .then(resolve, reject);
+                }, interval);
+            });
+    });
+};
+
 
 module.exports = {
 
+    makeRequestWithRetry,
     /**
      * Log a message (simply using console.log)
      *

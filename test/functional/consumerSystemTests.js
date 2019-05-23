@@ -17,12 +17,7 @@ const constants = require('./shared/constants.js');
 const util = require('./shared/util.js');
 
 const consumerHost = util.getHosts('CONSUMER')[0]; // only expect one
-const checkDocerCmd = 'if [[ -e $(which docker) ]]; then echo exists; fi';
-
-// load consumers modules
-const consumerDir = `${__dirname}/${constants.CONSUMERS_DIR}`;
-const consumers = fs.readdirSync(consumerDir)
-    .map(fName => require(`${consumerDir}/${fName}`)); // eslint-disable-line
+const checkDockerCmd = 'if [[ -e $(which docker) ]]; then echo exists; fi';
 
 
 function setup() {
@@ -35,7 +30,7 @@ function setup() {
         it('should install docker', function () {
             // install docker - assume it does not exist
             const installCmd = 'curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh';
-            return util.performRemoteCmd(cAddr, cUsername, checkDocerCmd, { password: cPassword })
+            return util.performRemoteCmd(cAddr, cUsername, checkDockerCmd, { password: cPassword })
                 .then((response) => {
                     if (response.indexOf('exists') !== -1) {
                         return Promise.resolve(); // exists, continue
@@ -47,8 +42,15 @@ function setup() {
 }
 
 function test() {
+    // env var to run only specific consumer type(s) (e.g. 'elast')
+    const consumerFilter = process.env[constants.ENV_VARS.CONSUMER_HARNESS.TYPE_REGEX];
+    const consumerDir = `${__dirname}/${constants.CONSUMERS_DIR}`;
+    let consumers = fs.readdirSync(consumerDir);
+    consumers = consumerFilter ? consumers.filter(fName => fName.match(new RegExp(consumerFilter, 'i')) !== null) : consumers;
     describe('Consumer Tests', () => {
         consumers.forEach((consumer) => {
+            // load consumers modules
+            consumer = require(`${consumerDir}/${consumer}`); //eslint-disable-line
             consumer.setup();
             consumer.test();
             consumer.teardown();
@@ -69,7 +71,7 @@ function teardown() {
 
         let dockerExists = false;
 
-        it('should ensure docker installed', () => runRemoteCmd(checkDocerCmd)
+        it('should ensure docker installed', () => runRemoteCmd(checkDockerCmd)
             .then((response) => {
                 dockerExists = response.indexOf('exists') !== -1;
             }));
