@@ -18,6 +18,9 @@ const util = require('../shared/util.js');
 const constants = require('../shared/constants.js');
 const dutUtils = require('../dutTests.js').utils;
 
+// module requirements
+const MODULE_REQUIREMENTS = { DOCKER: true };
+
 const DUTS = util.getHosts('BIGIP');
 const CONSUMER_HOST = util.getHosts('CONSUMER')[0]; // only expect one
 const STATSD_IMAGE_NAME = 'graphiteapp/graphite-statsd:latest';
@@ -220,6 +223,7 @@ function teardown() {
 }
 
 module.exports = {
+    MODULE_REQUIREMENTS,
     setup,
     test,
     teardown

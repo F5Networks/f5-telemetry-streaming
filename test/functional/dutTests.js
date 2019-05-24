@@ -14,6 +14,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const net = require('net');
+const readline = require('readline');
 const util = require('./shared/util.js');
 const constants = require('./shared/constants.js');
 
@@ -127,12 +128,34 @@ function setup() {
             const password = item.password;
 
             let authToken = null;
+            let options = {};
 
-            it('should get auth token', function () {
+            before(function () {
                 return util.getAuthToken(host, user, password)
                     .then((data) => {
                         authToken = data.token;
                     });
+            });
+
+            beforeEach(function () {
+                options = {
+                    headers: {
+                        'x-f5-auth-token': authToken
+                    }
+                };
+            });
+
+            it('should erase restnoded log', function () {
+                const uri = '/mgmt/tm/util/bash';
+                const postOptions = {
+                    method: 'POST',
+                    headers: options.headers,
+                    body: JSON.stringify({
+                        command: 'run',
+                        utilCmdArgs: '-c "> /var/log/restnoded/restnoded.log"'
+                    })
+                };
+                return util.makeRequest(host, uri, postOptions);
             });
 
             it('should install package', function () {
@@ -166,19 +189,19 @@ function test() {
             let authToken = null;
             let options = {};
 
+            before(function () {
+                return util.getAuthToken(host, user, password)
+                    .then((data) => {
+                        authToken = data.token;
+                    });
+            });
+
             beforeEach(function () {
                 options = {
                     headers: {
                         'x-f5-auth-token': authToken
                     }
                 };
-            });
-
-            it('should get auth token', function () {
-                return util.getAuthToken(host, user, password)
-                    .then((data) => {
-                        authToken = data.token;
-                    });
             });
 
             it('should verify installation', function () {
@@ -332,29 +355,6 @@ function test() {
                     });
                 });
             });
-
-            it('should get restnoded log', function () {
-                // grab restnoded log - useful during test failures
-                // ignore certain lines, for example: "<Date> - finest: socket 1 closed"
-                const uri = '/mgmt/tm/util/bash';
-
-                const postOptions = {
-                    method: 'POST',
-                    headers: options.headers,
-                    body: JSON.stringify({
-                        command: 'run',
-                        utilCmdArgs: '-c "cat /var/log/restnoded/restnoded.log | grep -v socket"'
-                    })
-                };
-
-                return util.makeRequest(host, uri, postOptions)
-                    .then((data) => {
-                        const file = `${LOGS_DIR}/restnoded_${host}.log`;
-
-                        util.log(`Saving restnoded log to ${file}`);
-                        fs.writeFileSync(file, data.commandResult);
-                    });
-            });
         });
     });
 }
@@ -371,11 +371,64 @@ function teardown() {
             const password = item.password;
 
             let authToken = null;
+            let logFile = null;
+            let options = {};
 
-            it('should get auth token', function () {
+            before(function () {
                 return util.getAuthToken(host, user, password)
                     .then((data) => {
                         authToken = data.token;
+                    });
+            });
+
+            beforeEach(function () {
+                options = {
+                    headers: {
+                        'x-f5-auth-token': authToken
+                    }
+                };
+            });
+
+            it('should get restnoded log', function () {
+                // grab restnoded log - useful during test failures
+                // interested only in lines with 'telemetry'
+                const uri = '/mgmt/tm/util/bash';
+                const postOptions = {
+                    method: 'POST',
+                    headers: options.headers,
+                    body: JSON.stringify({
+                        command: 'run',
+                        utilCmdArgs: '-c "cat /var/log/restnoded/restnoded.log | grep telemetry"'
+                    })
+                };
+                return util.makeRequest(host, uri, postOptions)
+                    .then((data) => {
+                        logFile = `${LOGS_DIR}/restnoded_${host}.log`;
+                        util.log(`Saving restnoded log to ${logFile}`);
+                        fs.writeFileSync(logFile, data.commandResult);
+                    });
+            });
+
+            it('should check restnoded log for errors', function () {
+                let errCounter = 0;
+                const regexp = new RegExp('error', 'i');
+
+                const rl = readline.createInterface({
+                    input: fs.createReadStream(logFile)
+                });
+                rl.on('line', (line) => {
+                    if (regexp.test(line)) {
+                        errCounter += 1;
+                    }
+                });
+                return new Promise((resolve) => {
+                    rl.on('close', resolve);
+                })
+                    .then(() => {
+                        if (errCounter) {
+                            return Promise.reject(new Error(`${errCounter} error messages were found in ${logFile}`));
+                        }
+                        return Promise.resolve();
                     });
             });
 

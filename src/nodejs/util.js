@@ -550,6 +550,50 @@ Tracer.remove = function (toRemove, filter) {
 };
 
 
+/**
+ * Function that will attempt the promise over and over again
+ *
+ * @param {Function} fn              - function which returns Promise as the result of execution
+ * @param {Object}   [opts]          - options object
+ * @param {Array}    [opts.args]     - array of arguments to apply to the function. By default 'null'.
+ * @param {Object}   [opts.context]  - context to apply to the function (.apply). By default 'null'.
+ * @param {Number}   [opts.maxTries] - max number of re-try attempts. By default '1'.
+ * @param {Function} [opts.callback] - callback(err) to execute when function failed.
+ *      Should return 'true' to continue 'retry' process. By default 'null'.
+ * @param {Number}   [opts.delay]    - a delay to apply between attempts. By default 0.
+ * @param {Number}   [opts.backoff]  - a backoff factor to apply between attempts after the second try
+ *      (most errors are resolved immediately by a second try without a delay). By default 0.
+ *
+ * @returns Promise resolved when 'fn' succeed
+ */
+function retryPromise(fn, opts) {
+    opts = opts || {};
+    opts.tries = opts.tries || 0;
+    opts.maxTries = opts.maxTries || 1;
+
+    return fn.apply(opts.context || null, opts.args || null)
+        .catch((err) => {
+            if (opts.tries < opts.maxTries && (!opts.callback || opts.callback(err))) {
+                opts.tries += 1;
+                let delay = opts.delay || 0;
+
+                // applying backof after the second try only
+                if (opts.backoff && opts.tries > 1) {
+                    /* eslint-disable no-restricted-properties */
+                    delay += opts.backoff * Math.pow(2, opts.tries - 1);
+                }
+                if (delay) {
+                    return new Promise((resolve) => {
+                        setTimeout(() => resolve(retryPromise(fn, opts)), delay);
+                    });
+                }
+                return retryPromise(fn, opts);
+            }
+            return Promise.reject(err);
+        });
+}
+
+
 module.exports = {
     /**
      * Check if object has any data or not
@@ -1072,5 +1116,7 @@ module.exports = {
     },
 
     /** @see Tracer */
-    tracer: Tracer
+    tracer: Tracer,
+
+    retryPromise
 };

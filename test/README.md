@@ -39,6 +39,11 @@ The deploy/teardown environment steps are handled using an internal tool (cicd-b
 2. **deploy_env/teardown_env** steps will run, ***only*** if the variable `REQ_DEVICE_PIPELINE` is set to true
 3. The **functional test** step will run, ***only*** if the variable `RUN_FUNCTIONAL_TESTS` is set to true
 
+Following variables can be used to control testing process:
+- `CONSUMER_TYPE_REGEX` - to specify RegEx to filter Consumers by name
+- `SKIP_DUT_TESTS` - can be set to `1` to skip package tests against BIG-IP
+- `SKIP_CONSUMER_TESTS` - can be set to `1` to skip package tests against Consumers
+
 Internal tool notes:
 
 - It is packaged as a container made available via an internal docker repository, a project variable contains the url for the container.

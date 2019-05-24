@@ -30,6 +30,10 @@ module.exports = {
             USER: 'CONSUMER_HOSTS_USER',
             PWD: 'CONSUMER_HOSTS_PWD',
             TYPE_REGEX: 'CONSUMER_TYPE_REGEX'
+        },
+        TEST_CONTROLS: {
+            SKIP_DUT_TESTS: 'SKIP_DUT_TESTS',
+            SKIP_CONSUMER_TESTS: 'SKIP_CONSUMER_TESTS'
         }
     },
     EVENT_LISTENER_PORT: 6514,

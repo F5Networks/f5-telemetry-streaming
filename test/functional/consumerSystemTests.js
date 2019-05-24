@@ -19,41 +19,159 @@ const util = require('./shared/util.js');
 const consumerHost = util.getHosts('CONSUMER')[0]; // only expect one
 const checkDockerCmd = 'if [[ -e $(which docker) ]]; then echo exists; fi';
 
+// string -> object (consumer module)
+let consumersMap = {};
+// string -> array of any
+let consumerRequirements = {};
+// string -> boolean
+const systemRequirements = {};
+
+/**
+ * Execute command over SSH on CS
+ *
+ * @param {String} cmd - command to execute on CS
+ *
+ * @returns Promise resolved when command was executed on CS
+ */
+function runRemoteCmdOnCS(cmd) {
+    return util.performRemoteCmd(consumerHost.ip, consumerHost.username, cmd, { password: consumerHost.password });
+}
+
+/**
+ * Load Consumers Tests modules
+ *
+ * @returns mapping consumer name -> consumer module
+ */
+function loadConsumers() {
+    // env var to run only specific consumer type(s) (e.g. 'elast')
+    const consumerFilter = process.env[constants.ENV_VARS.CONSUMER_HARNESS.TYPE_REGEX];
+    const consumerDir = `${__dirname}/${constants.CONSUMERS_DIR}`;
+    let consumers = fs.readdirSync(consumerDir);
+    // filter consumers by module name if needed
+    if (consumerFilter) {
+        util.log(`Using filter '${consumerFilter}' to filter modules from '${consumerDir}'`);
+        consumers = consumers.filter(fName => fName.match(new RegExp(consumerFilter, 'i')) !== null);
+    }
+
+    const mapping = {};
+    consumers.forEach((consumer) => {
+        const cpath = `${consumerDir}/${consumer}`;
+        mapping[consumer] = require(cpath); //eslint-disable-line
+        util.log(`Consumer Tests from '${cpath}' loaded`);
+    });
+    return mapping;
+}
+
+/**
+ * Load Consumers Tests requirements
+ *
+ * @returns mapping consumer requirement name -> array
+ */
+function loadConsumersRequirements() {
+    const requirements = {};
+    Object.keys(consumersMap).forEach((key) => {
+        const consumer = consumersMap[key];
+        if (consumer.MODULE_REQUIREMENTS) {
+            const moduleReq = consumer.MODULE_REQUIREMENTS;
+            Object.keys(moduleReq).forEach((req) => {
+                if (requirements[req] === undefined) {
+                    requirements[req] = [];
+                }
+                requirements[req].push(moduleReq[req]);
+            });
+        }
+    });
+    return requirements;
+}
+
+/**
+ * Check if CS meets Consumer's requirements
+ *
+ * @param {Object} consumer - consumer module
+ *
+ * @returns true when CS meets Consumer's requirements
+ */
+function hasMeetRequirements(consumer) {
+    let meet = true;
+    if (consumer.MODULE_REQUIREMENTS) {
+        Object.keys(consumer.MODULE_REQUIREMENTS).forEach((key) => {
+            meet = meet && (systemRequirements[key] === undefined ? false : systemRequirements[key]);
+        });
+    }
+    return meet;
+}
+
 
 function setup() {
-    // purpose: consumer tests
-    describe(`Consumer host setup - ${consumerHost.ip}`, function () {
-        const cAddr = consumerHost.ip;
-        const cUsername = consumerHost.username;
-        const cPassword = consumerHost.password;
+    describe('Load modules with tests for consumers', function () {
+        // should be loaded at the beginning of process
+        consumersMap = loadConsumers();
+        consumerRequirements = loadConsumersRequirements();
+    });
 
-        it('should install docker', function () {
-            // install docker - assume it does not exist
-            const installCmd = 'curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh';
-            return util.performRemoteCmd(cAddr, cUsername, checkDockerCmd, { password: cPassword })
-                .then((response) => {
-                    if (response.indexOf('exists') !== -1) {
-                        return Promise.resolve(); // exists, continue
-                    }
-                    return util.performRemoteCmd(cAddr, cUsername, installCmd, { password: cPassword });
-                });
+    // purpose: consumer tests
+    describe(`Consumer System setup - ${consumerHost.ip}`, function () {
+        describe('Docker installation', function () {
+            before(function () {
+                const needDocker = consumerRequirements.DOCKER && consumerRequirements.DOCKER.indexOf(true) !== -1;
+                if (!needDocker) {
+                    util.log('Docker is not required for testing. Skip it...');
+                    this.skip();
+                }
+            });
+
+            it('should install docker', function () {
+                // install docker - assume it does not exist
+                const installCmd = 'curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh';
+                return runRemoteCmdOnCS(checkDockerCmd)
+                    .then((response) => {
+                        if (response.includes('exists')) {
+                            return Promise.resolve(); // exists, continue
+                        }
+                        return runRemoteCmdOnCS(installCmd);
+                    })
+                    .then(() => {
+                        systemRequirements.DOCKER = true;
+                    })
+                    .catch((err) => {
+                        util.log(`ERROR: Unable to install 'docker': ${err}`);
+                    });
+            });
         });
     });
 }
 
 function test() {
-    // env var to run only specific consumer type(s) (e.g. 'elast')
-    const consumerFilter = process.env[constants.ENV_VARS.CONSUMER_HARNESS.TYPE_REGEX];
-    const consumerDir = `${__dirname}/${constants.CONSUMERS_DIR}`;
-    let consumers = fs.readdirSync(consumerDir);
-    consumers = consumerFilter ? consumers.filter(fName => fName.match(new RegExp(consumerFilter, 'i')) !== null) : consumers;
+    const methodsToCall = ['setup', 'test', 'teardown'];
+
     describe('Consumer Tests', () => {
-        consumers.forEach((consumer) => {
-            // load consumers modules
-            consumer = require(`${consumerDir}/${consumer}`); //eslint-disable-line
-            consumer.setup();
-            consumer.test();
-            consumer.teardown();
+        // consumers tests should be loaded already
+        Object.keys(consumersMap).forEach((consumer) => {
+            describe(consumer, () => {
+                const consumerModule = consumersMap[consumer];
+                let skipTests = false;
+
+                before(function () {
+                    skipTests = !hasMeetRequirements(consumerModule);
+                    if (skipTests) {
+                        util.log(`CS for Consumer Tests '${consumer}' doesn't meet requirements - skip all tests`);
+                    }
+                });
+                beforeEach(function () {
+                    // skip each test if needed. 'before all' hook doesn't work well for nested describe/it
+                    if (skipTests) {
+                        this.skip();
+                    }
+                });
+
+                methodsToCall.forEach((method) => {
+                    if (consumerModule[method]) {
+                        consumerModule[method].apply(consumerModule);
+                    } else {
+                        util.log(`WARN: ConsumerTest "${consumer}" has no '${method}' method to call`);
+                    }
+                });
+            });
         });
     });
 }
@@ -61,59 +179,41 @@ function test() {
 function teardown() {
     // purpose: consumer tests
     describe(`Consumer host teardown - ${consumerHost.ip}`, function () {
-        const cAddr = consumerHost.ip;
-        const cUsername = consumerHost.username;
-        const cPassword = consumerHost.password;
+        describe('Docker containers and images cleanup', function () {
+            before(function () {
+                // skip docker cleanup if docker was not installed
+                if (!systemRequirements.DOCKER) {
+                    this.skip();
+                }
+            });
 
-        function runRemoteCmd(cmd) {
-            return util.performRemoteCmd(cAddr, cUsername, cmd, { password: cPassword });
-        }
-
-        let dockerExists = false;
-
-        it('should ensure docker installed', () => runRemoteCmd(checkDockerCmd)
-            .then((response) => {
-                dockerExists = response.indexOf('exists') !== -1;
-            }));
-
-        it('should remove all docker "container"', () => {
-            if (dockerExists) {
-                return runRemoteCmd('docker ps -a -q')
+            it('should remove all docker "container"', function () {
+                return runRemoteCmdOnCS('docker ps -a -q')
                     .then((response) => {
                         if (response) {
-                            return runRemoteCmd(`docker rm -f ${response}`);
+                            return runRemoteCmdOnCS(`docker rm -f ${response}`);
                         }
                         return Promise.resolve();
                     });
-            }
-            return Promise.resolve();
-        });
+            });
 
-        it('should remove all docker "image"', () => {
-            if (dockerExists) {
-                return runRemoteCmd('docker images -q')
+            it('should remove all docker "image"', function () {
+                return runRemoteCmdOnCS('docker images -q')
                     .then((response) => {
                         if (response) {
-                            return runRemoteCmd(`docker rmi -f ${response}`);
+                            return runRemoteCmdOnCS(`docker rmi -f ${response}`);
                         }
                         return Promise.resolve();
                     });
-            }
-            return Promise.resolve();
-        });
+            });
 
-        it('should prune all docker "system"', () => {
-            if (dockerExists) {
-                return runRemoteCmd('docker system prune -f');
-            }
-            return Promise.resolve();
-        });
+            it('should prune all docker "system"', function () {
+                return runRemoteCmdOnCS('docker system prune -f');
+            });
 
-        it('should prune all docker "volume"', () => {
-            if (dockerExists) {
-                return runRemoteCmd('docker volume prune -f');
-            }
-            return Promise.resolve();
+            it('should prune all docker "volume"', function () {
+                return runRemoteCmdOnCS('docker volume prune -f');
+            });
         });
     });
 }

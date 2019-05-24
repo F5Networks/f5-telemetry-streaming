@@ -347,6 +347,150 @@ describe('Util', () => {
         assert.strictEqual(util.isObjectEmpty({ 1: 1, 2: 2 }), false, 'object');
         assert.strictEqual(util.isObjectEmpty([1, 2, 3]), false, 'array');
     });
+
+    it('should retry at least once', () => {
+        let tries = 0;
+        // first call + re-try = 2
+        const expectedTries = 2;
+
+        const promiseFunc = () => {
+            tries += 1;
+            return Promise.reject(new Error('expected error'));
+        };
+
+        return util.retryPromise(promiseFunc)
+            .catch((err) => {
+                // in total should be 2 tries - 1 call + 1 re-try
+                assert.strictEqual(tries, expectedTries);
+                assert.ok(/expected error/.test(err));
+            });
+    });
+
+    it('should retry rejected promise', () => {
+        let tries = 0;
+        const maxTries = 3;
+        const expectedTries = maxTries + 1;
+
+        const promiseFunc = () => {
+            tries += 1;
+            return Promise.reject(new Error('expected error'));
+        };
+
+        return util.retryPromise(promiseFunc, { maxTries })
+            .catch((err) => {
+                // in total should be 4 tries - 1 call + 3 re-try
+                assert.strictEqual(tries, expectedTries);
+                assert.ok(/expected error/.test(err));
+            });
+    });
+
+    it('should call callback on retry', () => {
+        let callbackFlag = false;
+        let callbackErrFlag = false;
+        let tries = 0;
+        let cbTries = 0;
+        const maxTries = 3;
+        const expectedTries = maxTries + 1;
+
+        const callback = (err) => {
+            cbTries += 1;
+            callbackErrFlag = /expected error/.test(err);
+            callbackFlag = true;
+            return true;
+        };
+        const promiseFunc = () => {
+            tries += 1;
+            return Promise.reject(new Error('expected error'));
+        };
+
+        return util.retryPromise(promiseFunc, { maxTries, callback })
+            .catch((err) => {
+                // in total should be 4 tries - 1 call + 3 re-try
+                assert.strictEqual(tries, expectedTries);
+                assert.strictEqual(cbTries, maxTries);
+                assert.ok(/expected error/.test(err));
+                assert.ok(callbackErrFlag);
+                assert.ok(callbackFlag);
+            });
+    });
+
+    it('should stop retry on success', () => {
+        let tries = 0;
+        const maxTries = 3;
+        const expectedTries = 2;
+
+        const promiseFunc = () => {
+            tries += 1;
+            if (tries === expectedTries) {
+                return Promise.resolve('success');
+            }
+            return Promise.reject(new Error('expected error'));
+        };
+
+        return util.retryPromise(promiseFunc, { maxTries })
+            .then((data) => {
+                assert.strictEqual(tries, expectedTries);
+                assert.strictEqual(data, 'success');
+            });
+    });
+
+    it('should retry with delay', () => {
+        const timestamps = [];
+        const maxTries = 3;
+        const expectedTries = maxTries + 1;
+        const delay = 200;
+
+        const promiseFunc = () => {
+            timestamps.push(Date.now());
+            return Promise.reject(new Error('expected error'));
+        };
+
+        return util.retryPromise(promiseFunc, { maxTries, delay })
+            .catch((err) => {
+                assert.ok(/expected error/.test(err));
+                assert.ok(timestamps.length === expectedTries,
+                    `Expected ${expectedTries} timestamps, got ${timestamps.length}`);
+
+                for (let i = 1; i < timestamps.length; i += 1) {
+                    const actualDelay = timestamps[i] - timestamps[i - 1];
+                    // sometimes it is less than expected
+                    assert.ok(actualDelay >= delay * 0.9,
+                        `Actual delay (${actualDelay}) is less than expected (${delay})`);
+                }
+            });
+    }).timeout(2000);
+
+    it('should retry first time without backoff', () => {
+        const timestamps = [];
+        const maxTries = 3;
+        const expectedTries = maxTries + 1;
+        const delay = 200;
+        const backoff = 100;
+
+        const promiseFunc = () => {
+            timestamps.push(Date.now());
+            return Promise.reject(new Error('expected error'));
+        };
+
+        return util.retryPromise(promiseFunc, { maxTries, delay, backoff })
+            .catch((err) => {
+                assert.ok(/expected error/.test(err));
+                assert.ok(timestamps.length === expectedTries,
+                    `Expected ${expectedTries} timestamps, got ${timestamps.length}`);
+
+                for (let i = 1; i < timestamps.length; i += 1) {
+                    const actualDelay = timestamps[i] - timestamps[i - 1];
+                    let expectedDelay = delay;
+                    // first attempt should be without backoff factor
+                    if (i > 1) {
+                        /* eslint-disable no-restricted-properties */
+                        expectedDelay += backoff * Math.pow(2, i - 1);
+                    }
+                    assert.ok(actualDelay >= expectedDelay * 0.9,
+                        `Actual delay (${actualDelay}) is less than expected (${expectedDelay})`);
+                }
+            });
+    }).timeout(10000);
 });
 
 // purpose: validate util (schedule/time functions)

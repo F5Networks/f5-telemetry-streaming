@@ -184,7 +184,12 @@ EndpointLoader.prototype._getData = function (uri, options) {
         httpOptions.method = 'POST';
         httpOptions.body = options.body;
     }
-    return Promise.resolve(deviceUtil.makeDeviceRequest(this.host, uri, httpOptions))
+    const retryOpts = {
+        maxTries: 3,
+        backoff: 100
+    };
+
+    return util.retryPromise(() => deviceUtil.makeDeviceRequest(this.host, uri, httpOptions), retryOpts)
         .then((data) => {
             // use uri unless name is explicitly provided
             const nameToUse = options.name !== undefined ? options.name : uri;
