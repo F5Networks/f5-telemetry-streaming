@@ -163,6 +163,18 @@ function setup() {
                 return util.installPackage(host, authToken, fullPath)
                     .then(() => {});
             });
+
+            it('should verify installation', function () {
+                const uri = `${baseILXUri}/info`;
+
+                util.log('Verifying installation');
+                return new Promise(resolve => setTimeout(resolve, 5000))
+                    .then(() => util.makeRequest(host, uri, options))
+                    .then((data) => {
+                        data = data || {};
+                        assert.notStrictEqual(data.version, undefined);
+                    });
+            });
         });
     });
 }
@@ -202,18 +214,6 @@ function test() {
                         'x-f5-auth-token': authToken
                     }
                 };
-            });
-
-            it('should verify installation', function () {
-                const uri = `${baseILXUri}/info`;
-
-                util.log('Verifying installation');
-                return new Promise(resolve => setTimeout(resolve, 5000))
-                    .then(() => util.makeRequest(host, uri, options))
-                    .then((data) => {
-                        data = data || {};
-                        assert.notStrictEqual(data.version, undefined);
-                    });
             });
 
             it('should post configuration', function () {
@@ -409,9 +409,9 @@ function teardown() {
                     });
             });
 
-            it('should check restnoded log for errors', function () {
+            it('should check restnoded log for errors in [telemetry] messages', function () {
                 let errCounter = 0;
-                const regexp = new RegExp('error', 'i');
+                const regexp = new RegExp(/\[telemetry][\S\s]*error/, 'i');
 
                 const rl = readline.createInterface({
                     input: fs.createReadStream(logFile)
