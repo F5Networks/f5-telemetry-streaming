@@ -39,7 +39,7 @@ up and running with Telemetry Streaming.
 
 **Quick Start Example**
 
-.. literalinclude:: examples/quick-start.json
+.. literalinclude:: ../../examples/declarations/basic.json
     :language: json
     :linenos:
 
