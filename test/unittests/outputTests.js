@@ -14,6 +14,9 @@ const Ajv = require('ajv');
 
 /* eslint-disable global-require */
 
+const DISABLED_FOLDERS = ['request_logs'];
+
+
 function validateAgainstSchema(data, schema) {
     const ajv = new Ajv({ useDefaults: true });
     const validator = ajv.compile(schema);
@@ -37,6 +40,10 @@ describe('Example Output', () => {
     const schemaDir = `${__dirname}/../../shared/output_schemas`;
     const dirs = fs.readdirSync(baseDir);
     dirs.forEach((dir) => {
+        if (DISABLED_FOLDERS.indexOf(dir) !== -1) {
+            return;
+        }
+
         const schemaFile = `${schemaDir}/${dir}_schema.json`; // example directory name + _schema.json
         const outputFile = `${baseDir}/${dir}/output.json`;
         it(`should validate output in ${dir}`, () => {
