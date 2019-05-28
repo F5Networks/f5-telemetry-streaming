@@ -112,7 +112,7 @@ function test() {
                     consumer.on('message', function (message) {
                         consumer.removeAllListeners();
                         consumer.close();
-                        assert.notStrictEqual(message.value.system, undefined);
+                        assert.notStrictEqual(message.value.system, undefined, `Did not receive expected TS message. Instead received: ${JSON.stringify(message)}`);
                         done();
                     });
                 });
