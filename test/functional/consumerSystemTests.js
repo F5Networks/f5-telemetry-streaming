@@ -135,6 +135,7 @@ function setup() {
                     })
                     .catch((err) => {
                         util.log(`ERROR: Unable to install 'docker': ${err}`);
+                        return Promise.reject(err);
                     });
             });
         });
