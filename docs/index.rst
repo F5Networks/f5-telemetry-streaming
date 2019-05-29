@@ -20,7 +20,7 @@ Telemetry Streaming (TS) is an iControl LX Extension delivered as a TMOS-indepen
 -  :ref:`statsd-ref`
 -  :ref:`http-ref`
 
-You can use Microsoft Visual STudio Code to validate your declarations, see :ref:`validate` for information.
+You can use Microsoft Visual Studio Code to validate your declarations, see :ref:`validate` for information.
 
 This guide contains information on downloading, installing, and using the Telemetry Streaming Extension.
 
@@ -36,7 +36,15 @@ Previous buttons to explore the documentation.
    :glob:
    :maxdepth: 3
 
-   userguide/index
+   about-telemetry
+   prereqs
+   quick-start
+   installing-ts
+   using-ts
+   declarations
+   output-example
+   troubleshooting
+   revision-history
 
 
 .. |video| raw:: html
