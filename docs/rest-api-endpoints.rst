@@ -8,7 +8,7 @@ Telemetry Streaming's base URI is **mgmt/shared/telemetry**. The allowed **Conte
 
 Request example:
 
-.. code-block:: json
+.. code-block:: bash
 
    curl -v -u admin:<admin_password> -X GET http://localhost:8100/mgmt/shared/telemetry/info
 

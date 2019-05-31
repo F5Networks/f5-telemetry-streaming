@@ -83,9 +83,6 @@ Reverting to a previous version of Telemetry Streaming
 ``````````````````````````````````````````````````````
 If for any reason you want to revert to a previous version of Telemetry Streaming, you must first remove the version of Telemetry Streaming on your BIG-IP system (:guilabel:`iApps > Package Management LX > f5-telemetry > Uninstall`).  After you uninstall, you can import the RPM for the version of Telemetry Streaming you want to use.
 
-.. |github| raw:: html
-
-   <a href="https://github.com/F5Networks/f5-telemetry-streaming" target="_blank">F5 Telemetry site on GitHub</a>
 
 |
 
@@ -102,3 +99,8 @@ Linux: ``sha256sum <path_to_template>``
 Windows using CertUtil: ``CertUtil –hashfile <path_to_template> SHA256``
 
 You can compare the checksum produced by that command against the **.sha256** file in the **dist** directory (https://github.com/F5Networks/f5-telemetry-streaming/tree/master/dist).
+
+
+.. |github| raw:: html
+
+   <a href="https://github.com/F5Networks/f5-telemetry-streaming" target="_blank">F5 Telemetry site on GitHub</a>

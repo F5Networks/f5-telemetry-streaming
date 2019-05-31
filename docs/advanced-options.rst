@@ -1,7 +1,7 @@
 Advanced Options
 ----------------
 
-This section describes additional options that you may want to configure once you are used to using Telemetry Streaming.
+This section describes additional options that you may want to configure once you comfortable to using Telemetry Streaming.
 
 
 +-----------------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -39,7 +39,7 @@ Pointer Syntax
 
 In certain use cases, such as configuring the generic http consumer with secrets, you may need to reference objects in other parts of the configuration. To reference other objects, Telemetry Streaming uses JSON pointers with syntax derived primarily from Application Services 3.
 
-- RFC 6901 compliant, with some enhacements to account for scenarios not outlined in the RFC
+- RFC 6901 compliant, with some enhancements to account for scenarios not outlined in the RFC
 - Pointer types:
 
   - Absolute pointer: `=/Shared/secretPath`

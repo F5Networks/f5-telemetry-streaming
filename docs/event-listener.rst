@@ -136,13 +136,13 @@ Configure Logging Using tmsh
 LTM Request Log profile
 ```````````````````````
 
-To configure an LTM request profile, use these tmsh commands:
+To configure an LTM request profile, use these TMSH commands:
 
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Note:
 
   All keys should be in lower case to enable classication (tenant/application).
 
-1. Create a pool in tmsh: 
+1. Create a pool in TMSH: 
 
 .. code-block:: python
 
@@ -152,7 +152,7 @@ Replace the example address with a valid Telemetry Streaming listener address, f
 
 2. Create an LTM Request Log Profile using the following TMSH command. Note: If you are creating the profile in the user interface, the ``\`` are not required. 
 
-.. code-block:: python
+.. code-block:: bash
 
     create ltm profile request-log telemetry request-log-pool telemetry-local request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\",event_timestamp=\"$DATE_HTTP\" request-logging enabled
 
@@ -160,7 +160,7 @@ Replace the example address with a valid Telemetry Streaming listener address, f
 
 .. NOTE:: The example below shows a snippet of an AS3 declaration.
 
-.. code-block:: python
+.. code-block:: json
    :linenos:
 
     {
@@ -202,14 +202,14 @@ AFM Request Log profile
 
 2. Create a Security Log Profile using TMSH or :ref:`configurelogpubas3-ref`:
 
-.. code-block:: python
-   
-   create security log profile telemetry network replace-all-with { telemetry { filter { log-acl-match-drop enabled log-acl-match-reject enabled } publisher telemetry_publisher } }
+    .. code-block:: bash
+    
+    create security log profile telemetry network replace-all-with { telemetry { filter { log-acl-match-drop enabled log-acl-match-reject enabled } publisher telemetry_publisher } }
 
 
 3. Attach the profile to the virtual server, for example:
 
-.. code-block:: python
+.. code-block:: json
    :linenos:
 
     {
@@ -370,15 +370,15 @@ APM Log
 
 2. Create an APM Log Profile. For example:
 
-.. code-block:: python
-   
-   create apm log-setting telemetry access replace-all-with { access { publisher telemetry-publisher } }
+    .. code-block:: bash
+    
+        create apm log-setting telemetry access replace-all-with { access { publisher telemetry-publisher } }
 
 3. Attach the profile to the APM policy.
 
 4. Attach the APM policy to the virtual server. The example below shows an AS3 snippet:
 
-.. code-block:: python
+.. code-block:: json
    :linenos:
 
        {
@@ -460,14 +460,14 @@ Example output:
 Configure the Log Publisher using TMSH
 ``````````````````````````````````````
 
-Please note the following:
- - Examples assume the TS listener is using port 6514.
- - Additional objects are required for BIG-IP configurations pointing to a local on-box listener. Notes on configuring those are noted below.
- - Per-app Virtual Edition BIG-IP limits the number of virtual servers available. To avoid creating the virtual server creating the virtual server in the following configuration, it is possible to point the pool directly at the TMM link-local IPv6 address. 
+Note the following:
+- Examples assume the TS listener is using port 6514.
+- Additional objects are required for BIG-IP configurations pointing to a local on-box listener. Notes on configuring those are noted below.
+- Per-app Virtual Edition BIG-IP limits the number of virtual servers available. To avoid creating the virtual server creating the virtual server in the following configuration, it is possible to point the pool directly at the TMM link-local IPv6 address. 
 
 1. Create an iRule (localhost forwarder). This is only required when TS is a local listener.
 
-.. code-block:: python
+.. code-block:: bash
     
     when CLIENT_ACCEPTED {
         node 127.0.0.1 6514
@@ -475,7 +475,7 @@ Please note the following:
 
 TMSH: 
 
-.. code-block:: python
+.. code-block:: bash
 
     create ltm rule telemetry_local_rule
 
