@@ -37,6 +37,8 @@ The deploy/teardown environment steps are handled using an internal tool (cicd-b
 
 1. Pipeline triggered - with `REQ_DEVICE_PIPELINE` and `RUN_FUNCTIONAL_TESTS` set to true
 2. **deploy_env/teardown_env** steps will run, ***only*** if the variable `REQ_DEVICE_PIPELINE` is set to true
+2.1 `CICD_PROJECT_NAME` - specify project's name to deploy harness with unique name otherwise default name will be used. Do not forget to run teardown at the end of development process!
+2.2 **teardown_env** can be skipped when variable `REQ_SKIP_DEVICE_TEARDOWN` is not empty (any value)
 3. The **functional test** step will run, ***only*** if the variable `RUN_FUNCTIONAL_TESTS` is set to true
 
 Following variables can be used to control testing process:

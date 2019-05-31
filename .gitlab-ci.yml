@@ -131,12 +131,10 @@ deploy_env:
     tags:
         - cm-official-docker-executor
     variables:
-        PROJECT_NAME: test_functional_harness
         PROJECT_DECLARATION: ${CI_PROJECT_DIR}/test/functional/deployment/declaration.yml
-        PROJECT_DIR: /root/deploy-projects/test_functional_harness
         CUSTOM_DECLARATION: "yes"
     artifacts:
-        name: ${CI_COMMIT_REF_NAME}_bigip.test_functional_harness_info
+        name: ${CI_COMMIT_REF_NAME}_bigip.harness_info
         paths:
             - ${CI_PROJECT_DIR}/harness_facts_flat.json
         when: on_success
@@ -144,6 +142,11 @@ deploy_env:
         variables:
             - $REQ_DEVICE_PIPELINE == "true"
     script:
+        - export PROJECT_NAME=$([ "${CICD_PROJECT_NAME}" == "" ] && echo "test_functional_harness" || echo "${CICD_PROJECT_NAME}")
+        - export PROJECT_DIR="/root/deploy-projects/${PROJECT_NAME}"
+        - declaration=$(sed "s/_DEPLOYMENT_NAME_/${PROJECT_NAME}/g" "${PROJECT_DECLARATION}")
+        - echo "$declaration" > "${PROJECT_DECLARATION}"
+        - cat "${PROJECT_DECLARATION}"
         - cd /root/cicd-bigip-deploy && make configure &&
             make printvars &&
             make setup && ls -als ${PROJECT_DIR} &&
@@ -178,12 +181,18 @@ teardown_env:
     tags:
         - cm-official-docker-executor
     variables:
-        PROJECT_NAME: test_functional_harness
         PROJECT_DECLARATION: ${CI_PROJECT_DIR}/test/functional/deployment/declaration.yml
-        PROJECT_DIR: /root/deploy-projects/test_functional_harness
         CUSTOM_DECLARATION: "yes"
     script:
-        - cd /root/cicd-bigip-deploy && make configure && make teardown
+        - test -n "${REQ_SKIP_DEVICE_TEARDOWN}" && echo "skip teardown process" && exit 0 || echo "continue teardown process"
+        - export PROJECT_NAME=$([ "${CICD_PROJECT_NAME}" == "" ] && echo "test_functional_harness" || echo "${CICD_PROJECT_NAME}")
+        - export PROJECT_DIR="/root/deploy-projects/${PROJECT_NAME}"
+        - declaration=$(sed "s/_DEPLOYMENT_NAME_/${PROJECT_NAME}/g" "${PROJECT_DECLARATION}")
+        - echo "$declaration" > "${PROJECT_DECLARATION}"
+        - cat "${PROJECT_DECLARATION}"
+        - cd /root/cicd-bigip-deploy && make configure &&
+            make printvars &&
+            make teardown
     when: always
     only:
         variables:
