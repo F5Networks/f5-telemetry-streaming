@@ -138,6 +138,34 @@ function setup() {
                         return Promise.reject(err);
                     });
             });
+
+            it('should remove all docker "container"', function () {
+                return runRemoteCmdOnCS('docker ps -a -q')
+                    .then((response) => {
+                        if (response) {
+                            return runRemoteCmdOnCS(`docker rm -f ${response}`);
+                        }
+                        return Promise.resolve();
+                    });
+            });
+
+            it('should remove all docker "image"', function () {
+                return runRemoteCmdOnCS('docker images -q')
+                    .then((response) => {
+                        if (response) {
+                            return runRemoteCmdOnCS(`docker rmi -f ${response}`);
+                        }
+                        return Promise.resolve();
+                    });
+            });
+
+            it('should prune all docker "system"', function () {
+                return runRemoteCmdOnCS('docker system prune -f');
+            });
+
+            it('should prune all docker "volume"', function () {
+                return runRemoteCmdOnCS('docker volume prune -f');
+            });
         });
     });
 }
