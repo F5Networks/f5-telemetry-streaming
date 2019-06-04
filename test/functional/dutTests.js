@@ -102,12 +102,47 @@ function getSystemPollerData(callback) {
     return Promise.all(promises);
 }
 
+/**
+ * Uninstall all TS packages
+ *
+ * @param {String} host      - host
+ * @param {String} authToken - auth token
+ * @param {Object} options   - request options
+ *
+ * @returns Promise resolved once TS packages removed from F5 device
+ */
+function uninstallAllTSpackages(host, authToken, options) {
+    const uri = `${baseILXUri}/info`;
+    let error;
+    let data;
+
+    return util.getInstalledPackages(host, authToken)
+        .then(installedPackages => Promise.all(installedPackages
+            .filter(pkg => pkg.packageName.includes('f5-telemetry'))
+            .map(pkg => util.uninstallPackage(host, authToken, pkg.packageName))))
+        .then(() => util.makeRequest(host, uri, options))
+        .then((resp) => {
+            data = resp;
+        })
+        .catch((err) => {
+            error = err;
+        })
+        .then(() => {
+            if (data) {
+                throw new Error(`Unexpected response from ${uri}: ${JSON.stringify(data)}`);
+            }
+            if (error && error.statusCode !== 404) {
+                throw new Error(`Expected HTTP 404 Not Found. Actual error ${error}`);
+            }
+        });
+}
+
 
 function setup() {
     // get package details
     const packageFile = packageDetails.name;
     const packagePath = packageDetails.path;
-    util.log(`Package File to install on DUT: ${packageFile}`);
+    util.log(`Package File to install on DUT: ${packageFile} [${packagePath}]`);
 
     // create logs directory - used later
     if (!fs.existsSync(LOGS_DIR)) {
@@ -145,6 +180,10 @@ function setup() {
                 };
             });
 
+            it('should remove pre-existing TS packages', function () {
+                return uninstallAllTSpackages(host, authToken, options);
+            });
+
             it('should erase restnoded log', function () {
                 const uri = '/mgmt/tm/util/bash';
                 const postOptions = {
@@ -167,11 +206,11 @@ function setup() {
             it('should verify installation', function () {
                 const uri = `${baseILXUri}/info`;
 
-                util.log('Verifying installation');
                 return new Promise(resolve => setTimeout(resolve, 5000))
                     .then(() => util.makeRequest(host, uri, options))
                     .then((data) => {
                         data = data || {};
+                        util.log(`${uri} response: ${JSON.stringify(data)}`);
                         assert.notStrictEqual(data.version, undefined);
                     });
             });
@@ -362,8 +401,6 @@ function test() {
 function teardown() {
     // purpose: cleanup tests
     // account for 1+ DUTs
-    const packageFile = packageDetails.name;
-
     duts.forEach(function (item) {
         describe(`Cleanup DUT - ${item.hostname}`, function () {
             const host = item.ip;
@@ -432,11 +469,8 @@ function teardown() {
                     });
             });
 
-            it('should uninstall package', function () {
-                // package name should be the file name without the .rpm at the end
-                const installedPackage = `${packageFile.replace('.rpm', '')}`;
-
-                return util.uninstallPackage(host, authToken, installedPackage);
+            it('should remove existing TS packages', function () {
+                return uninstallAllTSpackages(host, authToken, options);
             });
         });
     });

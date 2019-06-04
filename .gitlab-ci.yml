@@ -175,6 +175,7 @@ test_functional:
             # enable this job
             - $RUN_FUNCTIONAL_TESTS == "true"
 
+# should be executed manually to remove the harness
 teardown_env:
     image: ${CICD_CONTAINER_DEPLOY}
     stage: teardown
@@ -184,7 +185,6 @@ teardown_env:
         PROJECT_DECLARATION: ${CI_PROJECT_DIR}/test/functional/deployment/declaration.yml
         CUSTOM_DECLARATION: "yes"
     script:
-        - test -n "${REQ_SKIP_DEVICE_TEARDOWN}" && echo "skip teardown process" && exit 0 || echo "continue teardown process"
         - export PROJECT_NAME=$([ "${CICD_PROJECT_NAME}" == "" ] && echo "test_functional_harness" || echo "${CICD_PROJECT_NAME}")
         - export PROJECT_DIR="/root/deploy-projects/${PROJECT_NAME}"
         - declaration=$(sed "s/_DEPLOYMENT_NAME_/${PROJECT_NAME}/g" "${PROJECT_DECLARATION}")
@@ -193,7 +193,7 @@ teardown_env:
         - cd /root/cicd-bigip-deploy && make configure &&
             make printvars &&
             make teardown
-    when: always
+    when: manual
     only:
         variables:
             - $REQ_DEVICE_PIPELINE == "true"
