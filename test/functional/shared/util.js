@@ -161,7 +161,10 @@ module.exports = {
                     }
                 } else {
                     const msg = `Bad status code: ${res.statusCode} ${res.statusMessage} ${res.body} for '${fullUri}'`;
-                    reject(new Error(msg));
+                    err = new Error(msg);
+                    err.statusCode = res.statusCode;
+                    err.statusMessage = res.statusMessage;
+                    reject(err);
                 }
             });
         });
@@ -216,10 +219,56 @@ module.exports = {
                 if (err) {
                     // resolve if error is because the package is already installed
                     // in that case error is of type 'string' - instead of in .message
-                    if (typeof err === 'string' && err.includes('already installed')) resolve();
-                    else reject(err);
+                    if (process.env[constants.ENV_VARS.TEST_CONTROLS.REUSE_INSTALLED_PACKAGE] !== undefined
+                            && /already installed/.test(err)) {
+                        resolve();
+                    } else {
+                        reject(err);
+                    }
                 } else {
                     resolve();
+                }
+            });
+        });
+    },
+
+    /**
+     * Get list of installed ILX packages
+     * @param {String} host      - host
+     * @param {String} authToken - auth token
+     *
+     * @returns {Promise} Returns promise resolved upon completion
+     */
+    getInstalledPackages(host, authToken) {
+        // icrdk bug - should pass headers and should send additional requests
+        const opts = {
+            HOST: host,
+            headers: {
+                'x-f5-auth-token': authToken
+            }
+        };
+        const self = this;
+
+        return new Promise((resolve, reject) => {
+            function checkDataAndRetry(data) {
+                if (data.queryResponse) {
+                    resolve(data.queryResponse);
+                } else if (data.selfLink) {
+                    const uri = data.selfLink.replace('https://localhost', '');
+                    setTimeout(() => {
+                        self.makeRequest(host, uri, { headers: opts.headers })
+                            .then(checkDataAndRetry);
+                    }, 300);
+                } else {
+                    reject(new Error(`Unable to fetch data. Unexpected response: ${JSON.stringify(data)}`));
+                }
+            }
+
+            icrdk.queryInstalledPackages(opts, (err, queryResults) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    checkDataAndRetry(queryResults);
                 }
             });
         });
