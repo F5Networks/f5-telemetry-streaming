@@ -15,7 +15,7 @@ index of saved declarations.
 GET
 ~~~
 You can use the GET method to retrieve the declarations you previously sent to
-Telemetry STreaming. Use the GET method to the URI
+Telemetry Streaming. Use the GET method to the URI
 ``https://<BIG-IP>/mgmt/telemetry/declare``. Only declarations you create
 in Telemetry Streaming return, GET does not return anything that was not created by Telemetry Streaming.
 

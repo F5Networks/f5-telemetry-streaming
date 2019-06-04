@@ -42,7 +42,7 @@ Telemetry Streaming is available on |github| and is community-supported.
 
 **Which TMOS versions does Telemetry Streaming support?**
 
-Telemetry Streaming supports TMOS 13.x and up.
+Telemetry Streaming supports TMOS 13.x and later.
 
 |
 

@@ -2,71 +2,29 @@
 
 Example Declarations
 ====================
+This section contains example Telemetry Streaming declarations.  Use the index on the left to go directly to a specific declaration.
+
 
 Example 1: Base Declaration
 ---------------------------
 
-.. code-block:: json
-   :linenos:
+.. literalinclude:: ../examples/declarations/basic.json
+    :language: json
 
-    {
-        "class": "Telemetry",
-        "controls": {
-            "class": "Controls",
-            "logLevel": "info"
-        },
-        "My_System": {
-            "class": "Telemetry_System",
-            "systemPoller": {
-                "interval": 60
-            }
-        },
-        "My_Listener": {
-            "class": "Telemetry_Listener",
-            "port": 6514
-        },
-        "My_Consumer": {
-            "class": "Telemetry_Consumer",
-            "type": "Splunk",
-            "host": "192.0.2.1",
-            "protocol": "https",
-            "port": "8088",
-            "passphrase": {
-                "cipherText": "apikey"
-            }
-        }
-    }
+:ref:`Back to top<examples>`
 
-
+|
 
 Example 2: Two Consumers
 ------------------------
 Note: This example shows only the Consumer class of the declaration and needs to be included with the rest of the base declaration.
 
-.. code-block:: json
-   :linenos:
+.. literalinclude:: ../examples/declarations/multiple_consumers.json
+    :language: json
 
-    {
-        "class": "Telemetry",
-        "My_Consumer": {
-            "class": "Telemetry_Consumer",
-            "type": "Azure_Log_Analytics",
-            "host": "workspaceid",
-            "passphrase": {
-                "cipherText": "sharedkey"
-            }
-        },
-        "My_Second_Consumer": {
-            "class": "Telemetry_Consumer",
-            "type": "Splunk",
-            "host": "192.0.2.1",
-            "protocol": "https",
-            "port": "8088",
-            "passphrase": {
-                "cipherText": "apikey"
-            }
-        }
-    }
+:ref:`Back to top<examples>`
+
+|
 
 
 Example 3: External System (BIG-IP)
@@ -89,48 +47,20 @@ This example shows a case where Telemetry Streaming on one BIG-IP can pull stati
         }
     }
 
+:ref:`Back to top<examples>`
+
+|
 
 Example 4: iHealth Poller
 -------------------------
 This example shows a case where Telemetry Streaming on one BIG-IP can pull statistics from an additional BIG-IP.
 
-.. code-block:: json
-   :linenos:
+.. literalinclude:: ../examples/declarations/ihealth_basic.json
+    :language: json
 
-   {
-        "class": "Telemetry",
-        "My_System": {
-            "class": "Telemetry_System",
-            "systemPoller": {
-                "interval": 60
-            },
-            "iHealthPoller": {
-                "username": "username",
-                "passphrase": {
-                    "cipherText": "passphrase"
-                },
-                "proxy": {
-                    "host": "127.0.0.1",
-                    "protocol": "http",
-                    "port": 80,
-                    "enableHostConnectivityCheck": false,
-                    "allowSelfSignedCert": false,
-                    "username": "username",
-                    "passphrase": {
-                        "cipherText": "passphrase"
-                    }
-                },
-                "interval": {
-                    "timeWindow": {
-                        "start": "23:15",
-                        "end":   "02:15"
-                    },
-                    "frequency": "monthly",
-                    "day": "5"
-                }
-            }
-        }
-    }
+:ref:`Back to top<examples>`
+
+|
 
 
 .. _referencedpollers:
@@ -236,3 +166,8 @@ Example 5: Referenced Pollers
             }
         }
     }
+
+    
+:ref:`Back to top<examples>`
+
+|

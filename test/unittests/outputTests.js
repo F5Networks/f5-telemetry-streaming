@@ -14,7 +14,7 @@ const Ajv = require('ajv');
 
 /* eslint-disable global-require */
 
-const DISABLED_FOLDERS = ['request_logs'];
+const DISABLED_FOLDERS = ['request_logs','avr'];
 
 
 function validateAgainstSchema(data, schema) {

@@ -75,7 +75,7 @@ Example Declaration:
 
 Example Dashboard:
 
-Below is an example of the Azure dashboard with Telemetry Streaming data. To create a similar dashboard, see |azure_dashboard|. To create custom views using View Designer, see |Azure_custom_views|.
+The following is an example of the Azure dashboard with Telemetry Streaming data. To create a similar dashboard, see |azure_dashboard|. To create custom views using View Designer, see |Azure_custom_views|.
 
 |azure_log_analytics_dashboard|
 

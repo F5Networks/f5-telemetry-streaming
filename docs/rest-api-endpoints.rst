@@ -8,7 +8,7 @@ Telemetry Streaming's base URI is **mgmt/shared/telemetry**. The allowed **Conte
 
 Request example:
 
-.. code-block:: json
+.. code-block:: bash
 
    curl -v -u admin:<admin_password> -X GET http://localhost:8100/mgmt/shared/telemetry/info
 
@@ -26,7 +26,7 @@ Response is valid JSON data. When the response is HTTP 200
 
 When the response code is other than 2xx, then the response body in general will look like the following object:
 
-.. code-block:: json
+.. code-block:: bash
 
     {
         "code": ERROR_CODE, // number
