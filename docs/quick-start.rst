@@ -76,12 +76,12 @@ The first few lines of your declaration are a part of the base components and de
              
 |
 
-+--------------------+--------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Parameter          | Options                        | Description/Notes                                                                                                                                                   |
++--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Parameter          | Options                        | Description/Notes                                                                                                                                                            |
 +====================+================================+==============================================================================================================================================================================+
 | class              | Controls                       | Describes top-level Telemetry Streaming options. The optional class for controls must always be Controls, do not change this value. Controls are for logging and debugging.  |
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| logLevel           | **info**, debug, error         | This value determines how much information you want Telemetry Streaming to log. See the :ref:`logging-ref` section for more information.                            |
+| logLevel           | **info**, debug, error         | This value determines how much information you want Telemetry Streaming to log. See the :ref:`logging-ref` section for more information.                                     |
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
