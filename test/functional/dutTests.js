@@ -68,7 +68,14 @@ function postDeclarationToDUTs(callback) {
  */
 function sendDataToDUTsEventListener(callback) {
     // account for 1+ DUTs
-    return Promise.all(duts.map(item => util.sendEvent(item.ip, callback(item))));
+    return Promise.all(duts.map(item => util.sendEvent(item.ip, callback(item))))
+        .catch((err) => {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    reject(err);
+                }, 1000);
+            })
+        });
 }
 
 /**
@@ -180,6 +187,36 @@ function setup() {
                 };
             });
 
+            it('should remove pre-existing TS declaration', function () {
+                const uri = `${baseILXUri}/declare`;
+                const postOptions = {
+                    method: 'POST',
+                    headers: options.headers,
+                    body: {
+                        class: "Telemetry"
+                    }
+                };
+                let data;
+                let error;
+
+                return util.makeRequest(host, uri, postOptions)
+                    .then((resp) => {
+                        data = resp;  
+                    })
+                    .catch((err) => {
+                        error = err;
+                    })
+                    .then(() => {
+                        // silently skip error - probably no TS package installed
+                        if (error) {
+                            return Promise.resolve();
+                        }
+                        assert.strictEqual(data.message, 'success');
+                        // wait for 5 secs while declaration will be saved to storage
+                        return new Promise(resolve => setTimeout(resolve, 5000));
+                    });
+            });
+
             it('should remove pre-existing TS packages', function () {
                 return uninstallAllTSpackages(host, authToken, options);
             });
@@ -212,6 +249,71 @@ function setup() {
                         data = data || {};
                         util.log(`${uri} response: ${JSON.stringify(data)}`);
                         assert.notStrictEqual(data.version, undefined);
+                    });
+            });
+
+            it('should configure firewall rules', function () {
+                // BIGIP 14.1+ only:
+                // to reach listener via mgmt IP might require allowing through host fw
+                // using below command (or similar):
+                // tmsh modify security firewall management-ip-rules rules replace-all-with { telemetry
+                // { place-before first ip-protocol tcp destination {
+                // ports replace-all-with { 6514 } } action accept } }
+                const uri = '/mgmt/tm/security/firewall/management-ip-rules/rules';
+                const ruleName = 'telemetry';
+                let passOnError = false;
+
+                return util.makeRequest(host, uri, options)
+                    .catch((error) => {
+                        // older versions of BIG-IP do not have security enabled by default
+                        const errMsg = error.message;
+                        // just info the user that something unexpected happened but still trying to proceed
+                        if (!errMsg.includes('must be licensed')) {
+                            util.log(`Unable to configure management-ip rules, continue with current config. Error message: ${error.message}`);
+                        }
+                        passOnError = true;
+                        return Promise.reject(error);
+                    })
+                    .then(() => util.makeRequest(host, uri, options))
+                    .then((data) => {
+                        // check if rule already exists
+                        if (data.items.some(i => i.name === ruleName) === true) {
+                            // exists, delete the rule
+                            const deleteOptions = {
+                                method: 'DELETE',
+                                headers: options.headers
+                            };
+                            return util.makeRequest(host, `${uri}/${ruleName}`, deleteOptions);
+                        }
+                        return Promise.resolve();
+                    })
+                    .then(() => {
+                        // create rule
+                        const body = JSON.stringify({
+                            name: ruleName,
+                            'place-before': 'first',
+                            action: 'accept',
+                            ipProtocol: 'tcp',
+                            destination: {
+                                ports: [
+                                    {
+                                        name: String(constants.EVENT_LISTENER_PORT)
+                                    }
+                                ]
+                            }
+                        });
+                        const postOptions = {
+                            method: 'POST',
+                            headers: options.headers,
+                            body
+                        };
+                        return util.makeRequest(host, uri, postOptions);
+                    })
+                    .catch((err) => {
+                        if (passOnError === true) {
+                            return Promise.resolve();
+                        }
+                        return Promise.reject(err);
                     });
             });
         });
@@ -309,73 +411,6 @@ function test() {
                         if (valid !== true) {
                             assert.fail(`output is not valid: ${JSON.stringify(valid.errors)}`);
                         }
-                    });
-            });
-
-            it('should ensure event listener can be reached', function () {
-                // BIGIP 14.1+ only:
-                // to reach listener via mgmt IP might require allowing through host fw
-                // using below command (or similar):
-                // tmsh modify security firewall management-ip-rules rules replace-all-with { telemetry
-                // { place-before first ip-protocol tcp destination {
-                // ports replace-all-with { 6514 } } action accept } }
-
-                const uri = '/mgmt/tm/security/firewall/management-ip-rules/rules';
-                const ruleName = 'telemetry';
-                let passOnError = false;
-
-                return util.makeRequest(host, uri, options)
-                    .catch((error) => {
-                        // older versions of BIG-IP do not have security enabled by default
-                        const errMsg = error.message;
-                        // just info the user that something unexpected happened but still trying to proceed
-                        if (!errMsg.includes('must be licensed')) {
-                            util.log(`Unable to configure management-ip rules, continue with current config. Error message: ${error.message}`);
-                        }
-                        passOnError = true;
-                        return Promise.reject(error);
-                    })
-                    .then(() => util.makeRequest(host, uri, options))
-                    .then((data) => {
-                        // check if rule already exists
-                        if (data.items.some(i => i.name === ruleName) === true) {
-                            // exists, delete the rule
-                            const deleteOptions = {
-                                method: 'DELETE',
-                                headers: options.headers
-                            };
-                            return util.makeRequest(host, `${uri}/${ruleName}`, deleteOptions);
-                        }
-                        return Promise.resolve();
-                    })
-                    .then(() => {
-                        // create rule
-                        const body = JSON.stringify({
-                            name: ruleName,
-                            'place-before': 'first',
-                            action: 'accept',
-                            ipProtocol: 'tcp',
-                            destination: {
-                                ports: [
-                                    {
-                                        name: String(constants.EVENT_LISTENER_PORT)
-                                    }
-                                ]
-                            }
-                        });
-
-                        const postOptions = {
-                            method: 'POST',
-                            headers: options.headers,
-                            body
-                        };
-                        return util.makeRequest(host, uri, postOptions);
-                    })
-                    .catch((err) => {
-                        if (passOnError === true) {
-                            return Promise.resolve();
-                        }
-                        return Promise.reject(err);
                     });
             });
 

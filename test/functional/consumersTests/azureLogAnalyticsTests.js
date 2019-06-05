@@ -108,7 +108,7 @@ function test() {
                     `where hostname_s == "${dut.hostname}"`,
                     'where TimeGenerated > ago(5m)'
                 ].join(' | ');
-                return new Promise(resolve => setTimeout(resolve, 5000))
+                return new Promise(resolve => setTimeout(resolve, 10000))
                     .then(() => queryAzure(queryString))
                     .then((results) => {
                         assert(results.tables[0], 'Log Analytics query returned no results');
@@ -123,7 +123,7 @@ function test() {
                     `where hostname_s == "${dut.hostname}"`,
                     `where timestamp_s == "${dataTimestamp}"`
                 ].join(' | ');
-                return new Promise(resolve => setTimeout(resolve, 5000))
+                return new Promise(resolve => setTimeout(resolve, 10000))
                     .then(() => queryAzure(queryString))
                     .then((results) => {
                         assert(results.tables[0], 'Log Analytics query returned no results');
