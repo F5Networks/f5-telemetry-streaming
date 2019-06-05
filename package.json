@@ -13,7 +13,8 @@
         "lint": "eslint src test scripts",
         "test-functional": "mocha \"./test/functional/testRunner.js\" --opts ./test/functional/.mocha.opts",
         "test-only": "mocha --recursive \"./test/unittests/*.js\" --opts ./test/unittests/.mocha.opts",
-        "test": "nyc npm run test-only"
+        "test": "nyc npm run test-only",
+        "build": "./scripts/build_rpm.sh"
     },
     "nyc": {
         "check-coverage": true,
