@@ -69,13 +69,11 @@ function postDeclarationToDUTs(callback) {
 function sendDataToDUTsEventListener(callback) {
     // account for 1+ DUTs
     return Promise.all(duts.map(item => util.sendEvent(item.ip, callback(item))))
-        .catch((err) => {
-            return new Promise((resolve, reject) => {
-                setTimeout(() => {
-                    reject(err);
-                }, 1000);
-            })
-        });
+        .catch(err => new Promise((resolve, reject) => {
+            setTimeout(() => {
+                reject(err);
+            }, 1000);
+        }));
 }
 
 /**
@@ -193,7 +191,7 @@ function setup() {
                     method: 'POST',
                     headers: options.headers,
                     body: {
-                        class: "Telemetry"
+                        class: 'Telemetry'
                     }
                 };
                 let data;
@@ -201,7 +199,7 @@ function setup() {
 
                 return util.makeRequest(host, uri, postOptions)
                     .then((resp) => {
-                        data = resp;  
+                        data = resp;
                     })
                     .catch((err) => {
                         error = err;
