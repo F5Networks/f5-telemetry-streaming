@@ -32,4 +32,36 @@ If you are receiving this error, it means either you did not install Telemetry S
 If you receive this error, see :doc:`installation` to install or re-install Telemetry Streaming.
 
 
+*I'm receiving a limit of total fields exceeded error when Telementry Streaming forwards statistics to ElasticSearch*
 
+If you are receiving this error, it means that Telemetry Streaming is exceeding the maximum allowed number of fields in the ElasticSearch index that it's fowarding to. The error contains the following message:
+
+.. code-block:: bash
+
+    Tue, 04 Jun 2019 22:22:37 GMT - severe: [telemetry.ElasticSearch] error: [illegal_argument_exception] Limit of total fields [1000] in index [f5telemetry] has been exceeded
+
+
+If you receive this error, increase the ``index.mapping.total_fields.limit`` setting of the failing index to a larger value to compensate for the amount of data that Telemetry Streaming is sending. This can be done with a **PUT** method to the URI **http(s)://<ElasticSearch>/<index_name>/_settings** with the following JSON body:
+
+.. code-block:: json
+
+    {
+        "index.mapping.total_fields.limit": 2000
+    }
+
+An alternative option is to create the ElasticSearch index with an increased ``index.mapping.total_fields.limit`` value before Telemetry Streaming begins sending data to it. This can be done with a **PUT** method to the URI **http(s)://<ElasticSearch>/<index_name>** with the following JSON body:
+
+.. code-block:: json
+
+    {
+        "settings": {
+            "index.mapping.total_fields.limit": 2000
+        }
+    }
+
+.. NOTE:: To see more information about mapping in ElasticSearch, see |ElasticSearch Mapping|.
+
+
+.. |ElasticSearch Mapping| raw:: html
+
+   <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html" target="_blank">ElasticSearch mapping documentation</a>
