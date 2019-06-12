@@ -7,9 +7,8 @@
  */
 
 // this object not passed with lambdas, which mocha uses
-/* eslint-disable prefer-arrow-callback */
 
-/* eslint-disable global-require */
+'use strict';
 
 const assert = require('assert');
 const fs = require('fs');
@@ -30,8 +29,8 @@ let oauthToken = null;
 
 
 function setup() {
-    describe('Consumer Setup: Azure Log Analytics - OAuth token', function () {
-        it('should get OAuth token', function () {
+    describe('Consumer Setup: Azure Log Analytics - OAuth token', () => {
+        it('should get OAuth token', () => {
             const options = {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -60,7 +59,7 @@ function test() {
     const dataTimestamp = (new Date()).getTime();
 
     describe('Consumer Test: Azure Log Analytics - Configure TS and generate data', () => {
-        it('should configure TS', function () {
+        it('should configure TS', () => {
             const consumerDeclaration = util.deepCopy(DECLARATION);
             consumerDeclaration.My_Consumer = {
                 class: 'Telemetry_Consumer',
@@ -73,13 +72,13 @@ function test() {
             return dutUtils.postDeclarationToDUTs(() => consumerDeclaration);
         });
 
-        it('should send event to TS Event Listener', function () {
+        it('should send event to TS Event Listener', () => {
             const msg = `timestamp="${dataTimestamp}",test="true",testType="${testType}"`;
             return dutUtils.sendDataToDUTsEventListener(hostObj => `hostname="${hostObj.hostname}",${msg}`);
         });
     });
 
-    describe('Consumer Test: Azure Log Analytics - Test', function () {
+    describe('Consumer Test: Azure Log Analytics - Test', () => {
         // helper function to query Azure for data
         const queryAzure = (queryString) => {
             const options = {
@@ -99,7 +98,7 @@ function test() {
         };
 
         DUTS.forEach((dut) => {
-            it(`should check for system poller data from - ${dut.hostname}`, function () {
+            it(`should check for system poller data from - ${dut.hostname}`, () => {
                 // system poller is on an interval, so space out the retries
                 // NOTE: need to determine mechanism to shorten the minimum interval
                 // for a system poller cycle to reduce the test time here
@@ -117,7 +116,7 @@ function test() {
                     });
             });
 
-            it(`should check for event listener data from - ${dut.hostname}`, function () {
+            it(`should check for event listener data from - ${dut.hostname}`, () => {
                 const queryString = [
                     'F5Telemetry_LTM_CL',
                     `where hostname_s == "${dut.hostname}"`,

@@ -7,9 +7,8 @@
  */
 
 // this object not passed with lambdas, which mocha uses
-/* eslint-disable prefer-arrow-callback */
 
-/* eslint-disable global-require */
+'use strict';
 
 const assert = require('assert');
 const fs = require('fs');
@@ -40,12 +39,8 @@ function runRemoteCmd(cmd) {
 }
 
 function setup() {
-    describe('Consumer Setup: Splunk - pull docker image', function () {
-        it('should pull container image', function () {
-            // no need to check if image is already installed - if it is installed
-            // docker will simply check for updates and exit normally
-            return runRemoteCmd(`docker pull ${SPLUNK_IMAGE_NAME}`);
-        });
+    describe('Consumer Setup: Splunk - pull docker image', () => {
+        it('should pull container image', () => runRemoteCmd(`docker pull ${SPLUNK_IMAGE_NAME}`));
     });
 }
 
@@ -54,8 +49,8 @@ function test() {
     const dataTimestamp = (new Date()).getTime();
     let splunkHecToken;
 
-    describe('Consumer Test: Splunk - Configure Service', function () {
-        it('should start container', function () {
+    describe('Consumer Test: Splunk - Configure Service', () => {
+        it('should start container', () => {
             const portArgs = `-p ${SPLUNK_HTTP_PORT}:${SPLUNK_HTTP_PORT} -p ${SPLUNK_SVC_PORT}:${SPLUNK_SVC_PORT} -p ${SPLUNK_HEC_PORT}:${SPLUNK_HEC_PORT}`;
             const eArgs = `-e 'SPLUNK_START_ARGS=--accept-license' -e 'SPLUNK_PASSWORD=${SPLUNK_PASSWORD}'`;
             const cmd = `docker run -d --name ${SPLUNK_CONTAINER_NAME} ${portArgs} ${eArgs} ${SPLUNK_IMAGE_NAME}`;
@@ -70,7 +65,7 @@ function test() {
                 });
         });
 
-        it('should check service is up', function () {
+        it('should check service is up', () => {
             const uri = '/services/server/control?output_mode=json';
             const options = {
                 port: SPLUNK_SVC_PORT,
@@ -87,7 +82,7 @@ function test() {
                 });
         });
 
-        it('should configure HTTP data collector', function () {
+        it('should configure HTTP data collector', () => {
             const baseUri = '/services/data/inputs/http';
             const outputMode = 'output_mode=json';
             const tokenName = 'token';
@@ -129,7 +124,7 @@ function test() {
     });
 
     describe('Consumer Test: Splunk - Configure TS and generate data', () => {
-        it('should configure TS', function () {
+        it('should configure TS', () => {
             const consumerDeclaration = util.deepCopy(DECLARATION);
             consumerDeclaration.Consumer_Splunk = {
                 class: 'Telemetry_Consumer',
@@ -145,13 +140,13 @@ function test() {
             return dutUtils.postDeclarationToDUTs(() => consumerDeclaration);
         });
 
-        it('should send event to TS Event Listener', function () {
+        it('should send event to TS Event Listener', () => {
             const msg = `timestamp="${dataTimestamp}",test="true",testType="${testType}"`;
             return dutUtils.sendDataToDUTsEventListener(hostObj => `hostname="${hostObj.hostname}",${msg}`);
         });
     });
 
-    describe('Consumer Test: Splunk - Test', function () {
+    describe('Consumer Test: Splunk - Test', () => {
         // helper function to query splunk for data
         const query = (searchString) => {
             const baseUri = '/services/search/jobs';
@@ -205,49 +200,40 @@ function test() {
             const searchQueryEL = `search source=f5.telemetry | spath testType | search testType=${testType} | search hostname="${dut.hostname}" | search timestamp="${dataTimestamp}" | head 1`;
             util.log(`Splunk search query for event listener data: ${searchQueryEL}`);
 
-            it(`should check for system poller data from - ${dut.hostname}`, function () {
-                // system poller is on an interval, so space out the retries
-                // NOTE: need to determine mechanism to shorten the minimum interval
-                // for a system poller cycle to reduce the test time here
-                return new Promise(resolve => setTimeout(resolve, 5000))
-                    .then(() => query(searchQuerySP))
-                    .then((data) => {
-                        // check we have results
-                        const results = data.results;
-                        assert.strictEqual(results.length > 0, true, 'No results');
+            it(`should check for system poller data from - ${dut.hostname}`, () => new Promise(resolve => setTimeout(resolve, 5000))
+                .then(() => query(searchQuerySP))
+                .then((data) => {
+                    // check we have results
+                    const results = data.results;
+                    assert.strictEqual(results.length > 0, true, 'No results');
 
-                        // check that the event is what we expect
-                        const result = JSON.parse(results[0]._raw);
+                    // check that the event is what we expect
+                    const result = JSON.parse(results[0]._raw);
 
-                        const schema = JSON.parse(fs.readFileSync(constants.DECL.SYSTEM_POLLER_SCHEMA));
-                        const valid = util.validateAgainstSchema(result, schema);
-                        if (valid !== true) {
-                            assert.fail(`output is not valid: ${JSON.stringify(valid.errors)}`);
-                        }
-                    });
-            });
+                    const schema = JSON.parse(fs.readFileSync(constants.DECL.SYSTEM_POLLER_SCHEMA));
+                    const valid = util.validateAgainstSchema(result, schema);
+                    if (valid !== true) {
+                        assert.fail(`output is not valid: ${JSON.stringify(valid.errors)}`);
+                    }
+                }));
 
-            it(`should check for event listener data from - ${dut.hostname}`, function () {
-                return query(searchQueryEL)
-                    .then((data) => {
-                        // check we have results
-                        const results = data.results;
-                        assert.strictEqual(results.length > 0, true, 'No results');
+            it(`should check for event listener data from - ${dut.hostname}`, () => query(searchQueryEL)
+                .then((data) => {
+                    // check we have results
+                    const results = data.results;
+                    assert.strictEqual(results.length > 0, true, 'No results');
 
-                        // check that the event is what we expect
-                        const result = JSON.parse(results[0]._raw);
-                        assert.strictEqual(result.testType, testType);
-                    });
-            });
+                    // check that the event is what we expect
+                    const result = JSON.parse(results[0]._raw);
+                    assert.strictEqual(result.testType, testType);
+                }));
         });
     });
 }
 
 function teardown() {
-    describe('Consumer Test: Splunk - teardown', function () {
-        it('should remove container', function () {
-            return runRemoteCmd(`docker container rm -f ${SPLUNK_CONTAINER_NAME}`);
-        });
+    describe('Consumer Test: Splunk - teardown', () => {
+        it('should remove container', () => runRemoteCmd(`docker container rm -f ${SPLUNK_CONTAINER_NAME}`));
     });
 }
 
