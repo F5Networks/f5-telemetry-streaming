@@ -255,7 +255,14 @@
             "urldb": {
                 "name": "urldb",
                 "level": "none"
-            }
+            },
+            "asmState": "Policies Consistent",
+            "lastAsmChange": "2019-06-19T20:15:28.000Z",
+            "apmState": "Policies Consistent",
+            "afmState": "quiescent",
+            "lastAfmDeploy": "2019-06-17T21:24:29.000Z",
+            "ltmConfigTime": "2019-06-19T21:13:40.000Z",
+            "gtmConfigTime": "2019-06-07T18:11:53.000Z"
         }
     },
     "virtualServers": {
@@ -651,6 +658,24 @@
             "name": "/Common/socks-tunnel",
             "tenant": "Common",
             "application": ""
+        }
+    },
+    "deviceGroups": {
+        "/Common/device_trust_group": {
+            "commitIdTime": "2019-06-10T17:23:02.000Z",
+            "lssTime": "-",
+            "timeSinceLastSync": "-",
+            "type": "sync-only",
+            "name": "/Common/device_trust_group",
+            "tenant": "Common"
+        },
+        "/Common/example_device_group": {
+            "commitIdTime": "2019-05-31T01:11:48.000Z",
+            "lssTime": "2019-05-31T01:11:48.000Z",
+            "timeSinceLastSync": "1221553",
+            "type": "sync-failover",
+            "name": "/Common/example_device_group",
+            "tenant": "Common"
         }
     },
     "telemetryServiceInfo": {

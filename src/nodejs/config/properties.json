@@ -223,6 +223,112 @@
             "filterKeys": { "exclude": [ "tmName", "typeId" ] },
             "renameKeys": { "patterns": { "net/tunnels": { "pattern": "tunnel\/(.*)\/stats", "group": 1 } } },
             "addKeysByTag": true
+        },
+        "deviceGroups": {
+            "key": "deviceGroups::items",
+            "convertArrayToMap": { "keyName": "selfLink", "keyNamePrefix": "name/" },
+            "filterKeys": { "exclude": [ "commitIdOriginator", "device", "devicegroup", "lastSyncType", "lssOriginator", "generation", "partition", "fullPath", "asmSync", "autoSync", "fullLoadOnSync", "incrementalConfigSyncSizeMax", "networkFailover", "saveOnAutoSync", "devicesReference" ] },
+            "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "cm/device-group/": { "pattern": "device-group\/(.*)\\?", "group": 1 } } },
+            "includeFirstEntry": { "pattern": "/stats" },
+            "addKeysByTag": true
+        },
+        "asmState": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "asm"
+            },
+            "then": {
+                "key": "asmQuery::commandResult",
+                "runFunctions": [
+                    { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "asm_state" } },
+                    { "name": "getFirstKey" }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "lastAsmChange": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "asm"
+            },
+            "then": {
+                "key": "asmQuery::commandResult",
+                "runFunctions": [
+                    { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "last_asm_change", "renameKeys": { "patterns": { "NULL": { "constant": "" } } } } },
+                    { "name": "getFirstKey" }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "apmState": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "apm"
+            },
+            "then": {
+                "key": "apmState::commandResult",
+                "runFunctions": [
+                    { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "apm_state", "renameKeys": { "patterns": { "NULL": { "constant": "" } } } } },
+                    { "name": "getFirstKey" }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "afmState": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "afm"
+            },
+            "then": {
+                "key": "firewallCurrentState::pccdStatus",
+                "includeFirstEntry": { "pattern": "/stats" }
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "lastAfmDeploy": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "afm"
+            },
+            "then": {
+                "key": "firewallCurrentState::ruleDeployEndTimeFmt",
+                "includeFirstEntry": { "pattern": "/stats" }
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "ltmConfigTime": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "ltm"
+            },
+            "then": {
+                "key": "ltmConfigTime::value"
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "gtmConfigTime": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "gtm"
+            },
+            "then": {
+                "key": "gtmConfigTime::value"
+            },
+            "else": {
+                "disabled": true
+            }
         }
     },
     "events": {
@@ -291,7 +397,7 @@
             }
         },
         "filterKeys": { "exclude": [ "kind", "selfLink" ] },
-        "formatTimestamps": { "keys": [ "timestamp", "event_timestamp", "date_time", "systemTimestamp", "expirationString" ] }
+        "formatTimestamps": { "keys": [ "timestamp", "event_timestamp", "date_time", "systemTimestamp", "expirationString", "commitIdTime", "lssTime", "lastAsmChange", "lastAfmDeploy", "ltmConfigTime", "gtmConfigTime" ] }
     },
     "definitions": {
         "`T`": { "pattern": "\/(.*?)\/", "group": 1 },

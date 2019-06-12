@@ -88,7 +88,7 @@ module.exports = {
                 const keyMatch = exactMatch ? key === pK : key.includes(pK);
                 if (keyMatch) {
                     // support constant keyword
-                    if (childPattern.constant) {
+                    if (typeof childPattern.constant === 'string') {
                         retKey = childPattern.constant;
                     } else if (childPattern.replaceCharacter) {
                         // support replaceCharacter keyword
