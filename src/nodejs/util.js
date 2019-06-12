@@ -168,7 +168,6 @@ Tracer.prototype._reopenIfNeeded = function () {
         return Promise.resolve();
     }
     const self = this;
-    // eslint-disable-next-line no-unused-vars
     return new Promise((resolve) => {
         // Resolve with true when stream still writing to same file
         fs.stat(self.path, (err, stats) => {
@@ -681,8 +680,7 @@ module.exports = {
         let part1;
         let part2;
         let cmp = 0;
-        // eslint-disable-next-line no-plusplus
-        for (let i = 0; i < maxLen && !cmp; i++) {
+        for (let i = 0; i < maxLen && !cmp; i += 1) {
             part1 = parseInt(v1parts[i], 10) || 0;
             part2 = parseInt(v2parts[i], 10) || 0;
             if (part1 < part2) {
@@ -786,7 +784,6 @@ module.exports = {
      */
     makeRequest() {
         // rest params syntax supported only fron node 6+
-        /* eslint-disable prefer-rest-params */
         let host;
         let uri;
         let options;
@@ -879,10 +876,7 @@ module.exports = {
     base64(action, data) {
         // just decode for now
         if (action === 'decode') {
-            if ((typeof Buffer.from === 'function') && (Buffer.from !== Uint8Array.from)) {
-                return Buffer.from(data, 'base64').toString().trim();
-            }
-            return new Buffer(data, 'base64').toString().trim();
+            return Buffer.from(data, 'base64').toString().trim();
         }
         throw new Error('Unsupported action, try one of these: decode');
     },

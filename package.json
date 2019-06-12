@@ -40,12 +40,19 @@
         "request": "^2.88.0"
     },
     "devDependencies": {
+        "@f5devcentral/eslint-config-f5-atg": "latest",
         "eslint": "^5.16.0",
         "eslint-config-airbnb-base": "^13.1.0",
-        "eslint-plugin-import": "^2.16.0",
+        "eslint-plugin-import": "^2.17.3",
         "icrdk": "git://github.com/f5devcentral/f5-icontrollx-dev-kit#master",
         "mocha": "^5.2.0",
         "nyc": "^14.0.0",
         "ssh2": "^0.8.2"
+    },
+    "eslintConfig": {
+        "extends": "@f5devcentral/eslint-config-f5-atg",
+        "rules": {
+            "func-names": "off"
+        }
     }
 }

@@ -7,12 +7,12 @@
  */
 
 // this object not passed with lambdas, which mocha uses
-/* eslint-disable prefer-arrow-callback */
 
-/* eslint-disable global-require */
+'use strict';
 
 const assert = require('assert');
 const fs = require('fs');
+const kafka = require('kafka-node');
 const util = require('../shared/util.js');
 const constants = require('../shared/constants.js');
 const dutUtils = require('../dutTests.js').utils;
@@ -41,14 +41,10 @@ function runRemoteCmd(cmd) {
 }
 
 function setup() {
-    describe('Consumer Setup: Kafka', function () {
-        it('should pull bitnami docker image', function () {
-            // no need to check if image is already installed - if it is installed
-            // docker will simply check for updates and exit normally
-            return runRemoteCmd(`docker pull ${KAFKA_IMAGE_NAME}`);
-        });
+    describe('Consumer Setup: Kafka', () => {
+        it('should pull bitnami docker image', () => runRemoteCmd(`docker pull ${KAFKA_IMAGE_NAME}`));
 
-        it('should start Zookeeper and Kafka docker containers', function () {
+        it('should start Zookeeper and Kafka docker containers', () => {
             const zookeeperParams = '-e ALLOW_ANONYMOUS_LOGIN=yes -e ZOOKEEPER_CLIENT_PORT:2181 -p 2181:2181';
             const cmdZookeeper = `docker run -d ${zookeeperParams} --name ${ZOOKEEPER_NAME} bitnami/zookeeper:latest`;
             const kafkaParams = `-e ALLOW_PLAINTEXT_LISTENER=yes -e KAFKA_ZOOKEEPER_CONNECT=${KAFKA_HOST}:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://${KAFKA_HOST}:${KAFKA_PORT} -p ${KAFKA_PORT}:${KAFKA_PORT}`;
@@ -62,7 +58,7 @@ function setup() {
                     }
                     return runRemoteCmd(cmdZookeeper);
                 })
-                .then(function () { return runRemoteCmd(`docker ps | grep ${KAFKA_NAME}`); })
+                .then(() => runRemoteCmd(`docker ps | grep ${KAFKA_NAME}`))
                 .then((data) => {
                     if (data) {
                         return Promise.resolve(); // exists, contine
@@ -77,8 +73,8 @@ function test() {
     // const testType = 'Kafka_Consumer_Test';
     // const dataTimestamp = (new Date()).getTime();
 
-    describe('Consumer Test: Kafka', function () {
-        it('should configure TS', function () {
+    describe('Consumer Test: Kafka', () => {
+        it('should configure TS', () => {
             const consumerDeclaration = util.deepCopy(DECLARATION);
             consumerDeclaration[KAFKA_CONSUMER_NAME] = {
                 class: 'Telemetry_Consumer',
@@ -95,11 +91,10 @@ function test() {
         it('should receive message on Kafka consumer', function (done) {
             this.retries(0);
             this.timeout('120s');
-            const kafka = require('kafka-node');
             const client = new kafka.KafkaClient(
                 { kafkaHost: `${KAFKA_HOST}:${KAFKA_PORT}` }
             );
-            client.createTopics([KAFKA_TOPIC], function () {
+            client.createTopics([KAFKA_TOPIC], () => {
                 const Consumer = kafka.Consumer;
                 const consumer = new Consumer(
                     client,
@@ -108,8 +103,8 @@ function test() {
                     ],
                     { autoCommit: false }
                 );
-                consumer.addTopics([KAFKA_TOPIC], function () {
-                    consumer.on('message', function (message) {
+                consumer.addTopics([KAFKA_TOPIC], () => {
+                    consumer.on('message', (message) => {
                         consumer.removeAllListeners();
                         consumer.close();
                         const parsedMessage = JSON.parse(message.value);
@@ -123,13 +118,9 @@ function test() {
 }
 
 function teardown() {
-    describe('Consumer Teardown: Kafka', function () {
-        it('should remove containers', function () {
-            return runRemoteCmd(`docker container rm -f ${ZOOKEEPER_NAME}`)
-                .then(function () {
-                    return runRemoteCmd(`docker container rm -f ${KAFKA_NAME}`);
-                });
-        });
+    describe('Consumer Teardown: Kafka', () => {
+        it('should remove containers', () => runRemoteCmd(`docker container rm -f ${ZOOKEEPER_NAME}`)
+            .then(() => runRemoteCmd(`docker container rm -f ${KAFKA_NAME}`)));
     });
 }
 

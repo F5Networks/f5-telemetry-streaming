@@ -6,6 +6,8 @@
  * the software product on devcentral.f5.com.
  */
 
+'use strict';
+
 const constants = require('./shared/constants.js');
 const util = require('./shared/util.js');
 

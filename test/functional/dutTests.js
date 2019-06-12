@@ -7,9 +7,8 @@
  */
 
 // this object not passed with lambdas, which mocha uses
-/* eslint-disable prefer-arrow-callback */
 
-/* eslint-disable global-require */
+'use strict';
 
 const assert = require('assert');
 const fs = require('fs');
@@ -161,8 +160,8 @@ function setup() {
     }
 
     // account for 1+ DUTs
-    duts.forEach(function (item) {
-        describe(`DUT setup - ${item.hostname}`, function () {
+    duts.forEach((item) => {
+        describe(`DUT setup - ${item.hostname}`, () => {
             const host = item.ip;
             const user = item.username;
             const password = item.password;
@@ -170,14 +169,12 @@ function setup() {
             let authToken = null;
             let options = {};
 
-            before(function () {
-                return util.getAuthToken(host, user, password)
-                    .then((data) => {
-                        authToken = data.token;
-                    });
-            });
+            before(() => util.getAuthToken(host, user, password)
+                .then((data) => {
+                    authToken = data.token;
+                }));
 
-            beforeEach(function () {
+            beforeEach(() => {
                 options = {
                     headers: {
                         'x-f5-auth-token': authToken
@@ -185,7 +182,7 @@ function setup() {
                 };
             });
 
-            it('should remove pre-existing TS declaration', function () {
+            it('should remove pre-existing TS declaration', () => {
                 const uri = `${baseILXUri}/declare`;
                 const postOptions = {
                     method: 'POST',
@@ -215,11 +212,9 @@ function setup() {
                     });
             });
 
-            it('should remove pre-existing TS packages', function () {
-                return uninstallAllTSpackages(host, authToken, options);
-            });
+            it('should remove pre-existing TS packages', () => uninstallAllTSpackages(host, authToken, options));
 
-            it('should erase restnoded log', function () {
+            it('should erase restnoded log', () => {
                 const uri = '/mgmt/tm/util/bash';
                 const postOptions = {
                     method: 'POST',
@@ -232,13 +227,13 @@ function setup() {
                 return util.makeRequest(host, uri, postOptions);
             });
 
-            it('should install package', function () {
+            it('should install package', () => {
                 const fullPath = `${packagePath}/${packageFile}`;
                 return util.installPackage(host, authToken, fullPath)
                     .then(() => {});
             });
 
-            it('should verify installation', function () {
+            it('should verify installation', () => {
                 const uri = `${baseILXUri}/info`;
 
                 return new Promise(resolve => setTimeout(resolve, 5000))
@@ -250,7 +245,7 @@ function setup() {
                     });
             });
 
-            it('should configure firewall rules', function () {
+            it('should configure firewall rules', () => {
                 // BIGIP 14.1+ only:
                 // to reach listener via mgmt IP might require allowing through host fw
                 // using below command (or similar):
@@ -330,8 +325,8 @@ function test() {
     }
 
     // account for 1+ DUTs
-    duts.forEach(function (item) {
-        describe(`DUT test - ${item.hostname}`, function () {
+    duts.forEach((item) => {
+        describe(`DUT test - ${item.hostname}`, () => {
             const host = item.ip;
             const user = item.username;
             const password = item.password;
@@ -340,14 +335,12 @@ function test() {
             let authToken = null;
             let options = {};
 
-            before(function () {
-                return util.getAuthToken(host, user, password)
-                    .then((data) => {
-                        authToken = data.token;
-                    });
-            });
+            before(() => util.getAuthToken(host, user, password)
+                .then((data) => {
+                    authToken = data.token;
+                }));
 
-            beforeEach(function () {
+            beforeEach(() => {
                 options = {
                     headers: {
                         'x-f5-auth-token': authToken
@@ -355,7 +348,7 @@ function test() {
                 };
             });
 
-            it('should post configuration', function () {
+            it('should post configuration', () => {
                 const uri = `${baseILXUri}/declare`;
 
                 const postOptions = {
@@ -372,7 +365,7 @@ function test() {
                     });
             });
 
-            it('should post configuration (again)', function () {
+            it('should post configuration (again)', () => {
                 const uri = `${baseILXUri}/declare`;
 
                 const postOptions = {
@@ -387,7 +380,7 @@ function test() {
                     });
             });
 
-            it('should get configuration', function () {
+            it('should get configuration', () => {
                 const uri = `${baseILXUri}/declare`;
 
                 return util.makeRequest(host, uri, options)
@@ -398,7 +391,7 @@ function test() {
                     });
             });
 
-            it('should get systempoller info', function () {
+            it('should get systempoller info', () => {
                 const uri = `${baseILXUri}/systempoller/${constants.DECL.SYSTEM_NAME}`;
 
                 return util.makeRequest(host, uri, options)
@@ -412,7 +405,7 @@ function test() {
                     });
             });
 
-            it('should ensure event listener is up', function () {
+            it('should ensure event listener is up', () => {
                 const port = constants.EVENT_LISTENER_PORT;
 
                 return new Promise((resolve, reject) => {
@@ -434,8 +427,8 @@ function test() {
 function teardown() {
     // purpose: cleanup tests
     // account for 1+ DUTs
-    duts.forEach(function (item) {
-        describe(`Cleanup DUT - ${item.hostname}`, function () {
+    duts.forEach((item) => {
+        describe(`Cleanup DUT - ${item.hostname}`, () => {
             const host = item.ip;
             const user = item.username;
             const password = item.password;
@@ -444,14 +437,12 @@ function teardown() {
             let logFile = null;
             let options = {};
 
-            before(function () {
-                return util.getAuthToken(host, user, password)
-                    .then((data) => {
-                        authToken = data.token;
-                    });
-            });
+            before(() => util.getAuthToken(host, user, password)
+                .then((data) => {
+                    authToken = data.token;
+                }));
 
-            beforeEach(function () {
+            beforeEach(() => {
                 options = {
                     headers: {
                         'x-f5-auth-token': authToken
@@ -459,7 +450,7 @@ function teardown() {
                 };
             });
 
-            it('should get restnoded log', function () {
+            it('should get restnoded log', () => {
                 // grab restnoded log - useful during test failures
                 // interested only in lines with 'telemetry'
                 const uri = '/mgmt/tm/util/bash';
@@ -479,7 +470,7 @@ function teardown() {
                     });
             });
 
-            it('should check restnoded log for errors in [telemetry] messages', function () {
+            it('should check restnoded log for errors in [telemetry] messages', () => {
                 let errCounter = 0;
                 const regexp = new RegExp(/\[telemetry][\S\s]*error/, 'i');
 
@@ -502,9 +493,7 @@ function teardown() {
                     });
             });
 
-            it('should remove existing TS packages', function () {
-                return uninstallAllTSpackages(host, authToken, options);
-            });
+            it('should remove existing TS packages', () => uninstallAllTSpackages(host, authToken, options));
         });
     });
 }

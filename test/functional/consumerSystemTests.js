@@ -7,9 +7,8 @@
  */
 
 // this object not passed with lambdas, which mocha uses
-/* eslint-disable prefer-arrow-callback */
 
-/* eslint-disable global-require */
+'use strict';
 
 const fs = require('fs');
 
@@ -103,15 +102,15 @@ function hasMeetRequirements(consumer) {
 
 
 function setup() {
-    describe('Load modules with tests for consumers', function () {
+    describe('Load modules with tests for consumers', () => {
         // should be loaded at the beginning of process
         consumersMap = loadConsumers();
         consumerRequirements = loadConsumersRequirements();
     });
 
     // purpose: consumer tests
-    describe(`Consumer System setup - ${consumerHost.ip}`, function () {
-        describe('Docker installation', function () {
+    describe(`Consumer System setup - ${consumerHost.ip}`, () => {
+        describe('Docker installation', () => {
             before(function () {
                 const needDocker = consumerRequirements.DOCKER && consumerRequirements.DOCKER.indexOf(true) !== -1;
                 if (!needDocker) {
@@ -120,7 +119,7 @@ function setup() {
                 }
             });
 
-            it('should install docker', function () {
+            it('should install docker', () => {
                 // install docker - assume it does not exist
                 const installCmd = 'curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh';
                 return runRemoteCmdOnCS(checkDockerCmd)
@@ -139,33 +138,25 @@ function setup() {
                     });
             });
 
-            it('should remove all docker "container"', function () {
-                return runRemoteCmdOnCS('docker ps -a -q')
-                    .then((response) => {
-                        if (response) {
-                            return runRemoteCmdOnCS(`docker rm -f ${response}`);
-                        }
-                        return Promise.resolve();
-                    });
-            });
+            it('should remove all docker "container"', () => runRemoteCmdOnCS('docker ps -a -q')
+                .then((response) => {
+                    if (response) {
+                        return runRemoteCmdOnCS(`docker rm -f ${response}`);
+                    }
+                    return Promise.resolve();
+                }));
 
-            it('should remove all docker "image"', function () {
-                return runRemoteCmdOnCS('docker images -q')
-                    .then((response) => {
-                        if (response) {
-                            return runRemoteCmdOnCS(`docker rmi -f ${response}`);
-                        }
-                        return Promise.resolve();
-                    });
-            });
+            it('should remove all docker "image"', () => runRemoteCmdOnCS('docker images -q')
+                .then((response) => {
+                    if (response) {
+                        return runRemoteCmdOnCS(`docker rmi -f ${response}`);
+                    }
+                    return Promise.resolve();
+                }));
 
-            it('should prune all docker "system"', function () {
-                return runRemoteCmdOnCS('docker system prune -f');
-            });
+            it('should prune all docker "system"', () => runRemoteCmdOnCS('docker system prune -f'));
 
-            it('should prune all docker "volume"', function () {
-                return runRemoteCmdOnCS('docker volume prune -f');
-            });
+            it('should prune all docker "volume"', () => runRemoteCmdOnCS('docker volume prune -f'));
         });
     });
 }
@@ -180,7 +171,7 @@ function test() {
                 const consumerModule = consumersMap[consumer];
                 let skipTests = false;
 
-                before(function () {
+                before(() => {
                     skipTests = !hasMeetRequirements(consumerModule);
                     if (skipTests) {
                         util.log(`CS for Consumer Tests '${consumer}' doesn't meet requirements - skip all tests`);
@@ -207,8 +198,8 @@ function test() {
 
 function teardown() {
     // purpose: consumer tests
-    describe(`Consumer host teardown - ${consumerHost.ip}`, function () {
-        describe('Docker containers and images cleanup', function () {
+    describe(`Consumer host teardown - ${consumerHost.ip}`, () => {
+        describe('Docker containers and images cleanup', () => {
             before(function () {
                 // skip docker cleanup if docker was not installed
                 if (!systemRequirements.DOCKER) {
@@ -216,33 +207,25 @@ function teardown() {
                 }
             });
 
-            it('should remove all docker "container"', function () {
-                return runRemoteCmdOnCS('docker ps -a -q')
-                    .then((response) => {
-                        if (response) {
-                            return runRemoteCmdOnCS(`docker rm -f ${response}`);
-                        }
-                        return Promise.resolve();
-                    });
-            });
+            it('should remove all docker "container"', () => runRemoteCmdOnCS('docker ps -a -q')
+                .then((response) => {
+                    if (response) {
+                        return runRemoteCmdOnCS(`docker rm -f ${response}`);
+                    }
+                    return Promise.resolve();
+                }));
 
-            it('should remove all docker "image"', function () {
-                return runRemoteCmdOnCS('docker images -q')
-                    .then((response) => {
-                        if (response) {
-                            return runRemoteCmdOnCS(`docker rmi -f ${response}`);
-                        }
-                        return Promise.resolve();
-                    });
-            });
+            it('should remove all docker "image"', () => runRemoteCmdOnCS('docker images -q')
+                .then((response) => {
+                    if (response) {
+                        return runRemoteCmdOnCS(`docker rmi -f ${response}`);
+                    }
+                    return Promise.resolve();
+                }));
 
-            it('should prune all docker "system"', function () {
-                return runRemoteCmdOnCS('docker system prune -f');
-            });
+            it('should prune all docker "system"', () => runRemoteCmdOnCS('docker system prune -f'));
 
-            it('should prune all docker "volume"', function () {
-                return runRemoteCmdOnCS('docker volume prune -f');
-            });
+            it('should prune all docker "volume"', () => runRemoteCmdOnCS('docker volume prune -f'));
         });
     });
 }

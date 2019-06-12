@@ -7,9 +7,8 @@
  */
 
 // this object not passed with lambdas, which mocha uses
-/* eslint-disable prefer-arrow-callback */
 
-/* eslint-disable global-require */
+'use strict';
 
 const assert = require('assert');
 const fs = require('fs');
@@ -39,18 +38,14 @@ function runRemoteCmd(cmd) {
 }
 
 function setup() {
-    describe('Consumer Setup: Statsd - pull docker image', function () {
-        it('should pull container image', function () {
-            // no need to check if image is already installed - if it is installed
-            // docker will simply check for updates and exit normally
-            return runRemoteCmd(`docker pull ${STATSD_IMAGE_NAME}`);
-        });
+    describe('Consumer Setup: Statsd - pull docker image', () => {
+        it('should pull container image', () => runRemoteCmd(`docker pull ${STATSD_IMAGE_NAME}`));
     });
 }
 
 function test() {
-    describe('Consumer Test: Statsd - Configure Service', function () {
-        it('should start container', function () {
+    describe('Consumer Test: Statsd - Configure Service', () => {
+        it('should start container', () => {
             const portArgs = `-p ${STATSD_HTTP_PORT}:${STATSD_HTTP_PORT} -p ${STATSD_DATA_PORT}:${STATSD_DATA_PORT}/udp`;
             const cmd = `docker run -d --restart=always --name ${STATSD_CONTAINER_NAME} ${portArgs} ${STATSD_IMAGE_NAME}`;
 
@@ -64,7 +59,7 @@ function test() {
                 });
         });
 
-        it('should check service is up', function () {
+        it('should check service is up', () => {
             const uri = '/render?someUnknownKey&format=json';
             const options = {
                 port: STATSD_HTTP_PORT,
@@ -83,7 +78,7 @@ function test() {
     });
 
     describe('Consumer Test: Statsd - Configure TS', () => {
-        it('should configure TS', function () {
+        it('should configure TS', () => {
             const consumerDeclaration = util.deepCopy(DECLARATION);
             consumerDeclaration[STATSD_CONSUMER_NAME] = {
                 class: 'Telemetry_Consumer',
@@ -96,7 +91,7 @@ function test() {
         });
     });
 
-    describe('Consumer Test: Statsd - Test', function () {
+    describe('Consumer Test: Statsd - Test', () => {
         /**
          * Note: statsd/graphire stores only counters, no strings.
          * Verification is simple - just check that at least one metric is not empty
@@ -192,16 +187,14 @@ function test() {
 
         const sysPollerMetricsData = {};
 
-        it('should fetch system poller data via debug endpoint from DUTs', function () {
-            return dutUtils.getSystemPollerData((hostObj, data) => {
-                sysPollerMetricsData[hostObj.hostname] = getMerticsName(data);
-            });
-        });
+        it('should fetch system poller data via debug endpoint from DUTs', () => dutUtils.getSystemPollerData((hostObj, data) => {
+            sysPollerMetricsData[hostObj.hostname] = getMerticsName(data);
+        }));
 
         DUTS.forEach((dut) => {
             // at first we need to retrieve list of metrics to poll
 
-            it(`should check for system poller data from - ${dut.hostname}`, function () {
+            it(`should check for system poller data from - ${dut.hostname}`, () => {
                 const metrics = sysPollerMetricsData[dut.hostname];
                 if (!metrics) {
                     throw new Error(`No System Poller Metrics data for ${dut.hostname} !`);
@@ -215,10 +208,8 @@ function test() {
 }
 
 function teardown() {
-    describe('Consumer Test: Statsd - teardown', function () {
-        it('should remove container', function () {
-            return runRemoteCmd(`docker container rm -f ${STATSD_CONTAINER_NAME}`);
-        });
+    describe('Consumer Test: Statsd - teardown', () => {
+        it('should remove container', () => runRemoteCmd(`docker container rm -f ${STATSD_CONTAINER_NAME}`));
     });
 }
 

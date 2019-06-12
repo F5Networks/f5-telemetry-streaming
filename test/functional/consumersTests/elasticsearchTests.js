@@ -7,9 +7,8 @@
  */
 
 // this object not passed with lambdas, which mocha uses
-/* eslint-disable prefer-arrow-callback */
 
-/* eslint-disable global-require */
+'use strict';
 
 const assert = require('assert');
 const fs = require('fs');
@@ -38,17 +37,15 @@ function runRemoteCmd(cmd) {
 }
 
 function setup() {
-    describe('Consumer Setup: Elastic Search - pull docker image', function () {
-        it(`should pull container image ${ES_DOCKER_TAG}`, function () {
-            return runRemoteCmd(`docker pull ${ES_IMAGE_NAME}`);
-        });
+    describe('Consumer Setup: Elastic Search - pull docker image', () => {
+        it(`should pull container image ${ES_DOCKER_TAG}`, () => runRemoteCmd(`docker pull ${ES_IMAGE_NAME}`));
     });
 }
 
 function test() {
     const timeStamp = (new Date()).getTime();
-    describe('Consumer Test: ElasticSearch - Configure Service', function () {
-        it('should start container', function () {
+    describe('Consumer Test: ElasticSearch - Configure Service', () => {
+        it('should start container', () => {
             const portArgs = `-p ${ES_HTTP_PORT}:${ES_HTTP_PORT} -p ${ES_TRANSPORT_PORT}:${ES_TRANSPORT_PORT} -e "discovery.type=single-node"`;
             const cmd = `docker run -d --restart=always --name ${ES_CONTAINER_NAME} ${portArgs} ${ES_IMAGE_NAME}`;
 
@@ -61,7 +58,7 @@ function test() {
                 });
         });
 
-        it('should check service is up', function () {
+        it('should check service is up', () => {
             const uri = '/_nodes';
             const options = {
                 protocol: ES_PROTOCOL,
@@ -79,7 +76,7 @@ function test() {
     });
 
     describe('Consumer Test: ElasticSearch - Configure TS', () => {
-        it('should configure TS', function () {
+        it('should configure TS', () => {
             const consumerDeclaration = util.deepCopy(DECLARATION);
             consumerDeclaration[ES_CONSUMER_NAME] = {
                 class: 'Telemetry_Consumer',
@@ -93,13 +90,13 @@ function test() {
             return dutUtils.postDeclarationToDUTs(() => consumerDeclaration);
         });
 
-        it('should send event to TS Event Listener', function () {
+        it('should send event to TS Event Listener', () => {
             const msg = `timestamp="${timeStamp}",test="true",testType="${ES_CONSUMER_NAME}"`;
             return dutUtils.sendDataToDUTsEventListener(hostObj => `hostname="${hostObj.hostname}",${msg}`);
         });
     });
 
-    describe('Consumer Test: ElasticSearch - Test', function () {
+    describe('Consumer Test: ElasticSearch - Test', () => {
         const systemPollerData = {};
         const query = (searchString) => {
             const uri = `/${ES_CONTAINER_NAME}/_search?${searchString}`;
@@ -110,60 +107,50 @@ function test() {
 
             return new Promise(resolve => setTimeout(resolve, 15000))
                 .then(() => util.makeRequestWithRetry(
-                    function () {
-                        return util.makeRequest(CONSUMER_HOST.ip, uri, options);
-                    },
+                    () => util.makeRequest(CONSUMER_HOST.ip, uri, options),
                     30000,
                     5
                 ));
         };
 
-        before(function () {
-            return new Promise(resolve => setTimeout(resolve, 30000))
-                .then(() => dutUtils.getSystemPollerData((hostObj, data) => {
-                    systemPollerData[hostObj.hostname] = data;
-                }));
-        });
+        before(() => new Promise(resolve => setTimeout(resolve, 30000))
+            .then(() => dutUtils.getSystemPollerData((hostObj, data) => {
+                systemPollerData[hostObj.hostname] = data;
+            })));
 
         DUTS.forEach((dut) => {
-            it(`should have system poller config for - ${dut.hostname}`, function () {
+            it(`should have system poller config for - ${dut.hostname}`, () => {
                 const hostname = systemPollerData[dut.hostname];
                 assert.notStrictEqual(hostname, undefined);
             });
 
-            it(`should check for event listener data for - ${dut.hostname}`, function () {
-                return query(`size=1&q=testType:${ES_CONSUMER_NAME}`)
-                    .then((data) => {
-                        const esData = data.hits.hits;
-                        assert.notStrictEqual(esData.length, 0);
-                        assert.strictEqual(esData[0]._source.timestamp, timeStamp.toString());
-                    });
-            });
+            it(`should check for event listener data for - ${dut.hostname}`, () => query(`size=1&q=testType:${ES_CONSUMER_NAME}`)
+                .then((data) => {
+                    const esData = data.hits.hits;
+                    assert.notStrictEqual(esData.length, 0);
+                    assert.strictEqual(esData[0]._source.timestamp, timeStamp.toString());
+                }));
 
-            it(`should have consumer data posted for - ${dut.hostname}`, function () {
-                return query(`size=1&q=system.hostname:${dut.hostname}`)
-                    .then((data) => {
-                        const esData = data.hits.hits;
-                        assert.notStrictEqual(esData.length, 0);
-                        assert.strictEqual(esData[0]._source.system.hostname, dut.hostname);
+            it(`should have consumer data posted for - ${dut.hostname}`, () => query(`size=1&q=system.hostname:${dut.hostname}`)
+                .then((data) => {
+                    const esData = data.hits.hits;
+                    assert.notStrictEqual(esData.length, 0);
+                    assert.strictEqual(esData[0]._source.system.hostname, dut.hostname);
 
 
-                        const schema = JSON.parse(fs.readFileSync(constants.DECL.SYSTEM_POLLER_SCHEMA));
-                        const valid = util.validateAgainstSchema(esData[0]._source, schema);
-                        if (valid !== true) {
-                            assert.fail(`output is not valid: ${JSON.stringify(valid.errors)}`);
-                        }
-                    });
-            });
+                    const schema = JSON.parse(fs.readFileSync(constants.DECL.SYSTEM_POLLER_SCHEMA));
+                    const valid = util.validateAgainstSchema(esData[0]._source, schema);
+                    if (valid !== true) {
+                        assert.fail(`output is not valid: ${JSON.stringify(valid.errors)}`);
+                    }
+                }));
         });
     });
 }
 
 function teardown() {
-    describe('Consumer Test: ElasticSearch - teardown', function () {
-        it('should remove container', function () {
-            return runRemoteCmd(`docker container rm -f ${ES_CONTAINER_NAME}`);
-        });
+    describe('Consumer Test: ElasticSearch - teardown', () => {
+        it('should remove container', () => runRemoteCmd(`docker container rm -f ${ES_CONTAINER_NAME}`));
     });
 }
 
