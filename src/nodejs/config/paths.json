@@ -55,7 +55,9 @@
         },
         {
             "name": "virtualServers",
-            "endpoint": "/mgmt/tm/ltm/virtual/stats"
+            "endpoint": "/mgmt/tm/ltm/virtual",
+            "includeStats": true,
+            "endpointFields": [ "name", "fullPath", "selfLink", "appService", "ipProtocol", "mask" ]
         },
         {
             "name": "pools",

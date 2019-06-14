@@ -166,10 +166,11 @@ EndpointLoader.prototype.loadEndpoint = function (endpoint, cb) {
 /**
  * Get data for specific endpoint
  *
- * @param {String} uri             - uri where data resides
- * @param {Object} options         - function options
- * @param {String} [options.name]  - name of key to store as, will override default of uri
- * @param {String} [options.body]  - body to send, sent via POST request
+ * @param {String}   uri                      - uri where data resides
+ * @param {Object}   options                  - function options
+ * @param {String}   [options.name]           - name of key to store as, will override default of uri
+ * @param {String}   [options.body]           - body to send, sent via POST request
+ * @param {String[]} [options.endpointFields] - restrict collection to these fields
  *
  * @returns {Object} Promise which is resolved with data
  */
@@ -189,7 +190,12 @@ EndpointLoader.prototype._getData = function (uri, options) {
         backoff: 100
     };
 
-    return util.retryPromise(() => deviceUtil.makeDeviceRequest(this.host, uri, httpOptions), retryOpts)
+    let fullUri = uri;
+    if (options.endpointFields) {
+        fullUri = `${fullUri}?$select=${options.endpointFields.join(',')}`;
+    }
+
+    return util.retryPromise(() => deviceUtil.makeDeviceRequest(this.host, fullUri, httpOptions), retryOpts)
         .then((data) => {
             // use uri unless name is explicitly provided
             const nameToUse = options.name !== undefined ? options.name : uri;
@@ -242,7 +248,7 @@ EndpointLoader.prototype._getAndExpandData = function (endpointProperties) {
         return Promise.resolve(data); // return data
     };
 
-    return Promise.resolve(this._getData(p.endpoint, { name: p.name, body: p.body }))
+    return Promise.resolve(this._getData(p.endpoint, { name: p.name, body: p.body, endpointFields: p.endpointFields }))
         .then((data) => {
             // data: { name: foo, data: bar }
 

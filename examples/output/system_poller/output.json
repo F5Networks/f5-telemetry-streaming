@@ -263,12 +263,15 @@
             "clientside.bitsIn": 0,
             "clientside.bitsOut": 0,
             "clientside.curConns": 0,
-            "destination": "10.0.2.101:80",
-            "availabilityState": "available",
+            "destination": "10.5.6.7:80",
+            "availabilityState": "offline",
             "enabledState": "enabled",
-            "name": "/Common/app.app/app_vs",
+            "mask": "255.255.255.255",
+            "name": "/Common/foofoo.app/foofoo_vs",
+            "appService": "/Common/foofoo.app/foofoo",
+            "ipProtocol": "tcp",
             "tenant": "Common",
-            "application": "app.app"
+            "application": "foofoo.app"
         },
         "/Example_Tenant/A1/serviceMain": {
             "clientside.bitsIn": 0,
@@ -277,7 +280,9 @@
             "destination": "192.0.2.11:443",
             "availabilityState": "offline",
             "enabledState": "enabled",
+            "mask": "255.255.255.0",
             "name": "/Example_Tenant/A1/serviceMain",
+            "ipProtocol": "tcp",
             "tenant": "Example_Tenant",
             "application": "A1"
         },
