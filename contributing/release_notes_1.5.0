@@ -1,2 +1,5 @@
 # New Features
 * Collect mask and ipProtocol for virtual servers
+
+# Bug Fixes
+* Elastic Search Unable to parse and index some messages with previously used keys

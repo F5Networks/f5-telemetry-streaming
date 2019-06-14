@@ -1,0 +1,10 @@
+{
+    "index": "f5telemetry",
+    "type": "f5.telemetry",
+    "body": {
+        "data": {
+            ... event data ...
+        },
+        "telemetryEventCategory": "event"
+    }
+}
