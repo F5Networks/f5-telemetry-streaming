@@ -192,6 +192,7 @@ Collect the raw data from the device by adding a new endpoint to the paths confi
     "endpoint": "/mgmt/tm/sys/someEndpoint", // REST endpoint
     "includeStats": true, // Certain data is only available via /mgmt/tm/sys/someEndpoint as opposed to /mgmt/tm/sys/someEndpoint/stats, this property accomodates for this by making call to /stats (for each item) and adding that data to the original object
     "expandReferences": { "membersReference": { "endpointSuffix": "/stats" } }, // Certain data requires getting a list of objects and then in each object expanding/following references to a child object.  'membersReference' is the name of that key (currently looking under 'items' in the data returned) and will result in self link data being retrived and 'membersReference' key being replaced with that data.  'endpointSuffix' defines adding a suffix for each self link prior to retrieval.
+    "endpointFields": [ "name", "fullPath", "selfLink", "ipProtocol", "mask" ], // Will collect only these fields from the endoint. Useful when using includeStats and the same property exists in both endpoints. Also can be used instead of a large exclude/include statement in properties.json
     "body": "{ \"command\": \"run\", \"utilCmdArgs\": \"-c \\\"/bin/df -P | /usr/bin/tr -s ' ' ','\\\"\" }", // Certain information may require using POST instead of GET and require an HTTP body, if body is defined that gets used along with a POST
     "name": "someStatRef" // Alternate name to reference in properties.json, default is to use the endpoint
 }
@@ -277,7 +278,7 @@ This context data is defined on the same level as *stats* in the properties conf
         },
         {
             "someCtxKey2": {
-                "key": "/mgmt/tm/sys/global-settings::{{someCtxKey1}}" // other Macros properties are available too. Context data is available now! 
+                "key": "/mgmt/tm/sys/global-settings::{{someCtxKey1}}" // other Macros properties are available too. Context data is available now!
             }
         }
     ]
@@ -294,7 +295,7 @@ Some stats may only be available in certain conditions, for example on BIG-IP v1
    "if": {
         "deviceVersionGreaterOrEqual": "13.0"
    }
-} 
+}
 ```
 
 ---

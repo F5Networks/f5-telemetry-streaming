@@ -38,6 +38,7 @@ const SOURCE_2_TYPES = {
     'bigip.tmsh.disk_usage': 'f5:bigip:status:iapp:json',
     'bigip.tmsh.disk_latency': 'f5:bigip:status:iapp:json',
     'bigip.tmsh.virtual_status': 'f5:bigip:config:iapp:json',
+    'bigip.tmsh.virtual': 'f5:bigip:config:iapp:json',
     'bigip.tmsh.pool_member_status': 'f5:bigip:config:iapp:json',
     'bigip.objectmodel.cert': 'f5:bigip:config:iapp:json',
     'bigip.objectmodel.profile': 'f5:bigip:config:iapp:json',
@@ -219,6 +220,28 @@ const stats = [
             newData.event.availability_state = vsStat.availabilityState;
             newData.event.enabled_state = vsStat.enabledState;
             newData.event.status_reason = '';
+            return newData;
+        });
+    },
+
+    function (request) {
+        const vsStats = getData(request, 'virtualServers');
+        if (vsStats === undefined) return undefined;
+
+        const template = getTemplate('bigip.tmsh.virtual', request.globalCtx.event.data, request.cache);
+        return Object.keys(vsStats).map((key) => {
+            const vsStat = vsStats[key];
+            const newData = Object.assign({}, template);
+            newData.event = Object.assign({}, template.event);
+            newData.event.virtual_name = key;
+            newData.event.app = vsStat.application;
+            newData.event.appComponent = '';
+            newData.event.tenant = vsStat.tenant;
+            newData.event.iapp_name = vsStat.application;
+            newData.event.ip = vsStat.destination;
+            newData.event.mask = vsStat.mask;
+            newData.event.port = vsStat.destination;
+            newData.event.protocol = vsStat.ipProtocol;
             return newData;
         });
     },
