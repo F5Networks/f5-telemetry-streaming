@@ -10,7 +10,7 @@
             "convertArrayToMap": null,
             "filterKeys": null,
             "renameKeys": null,
-            "runFunction": null,
+            "runFunctions": null,
             "addKeysByTag": null
         },
         "version": {
@@ -54,7 +54,7 @@
             "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/sys/management-ip::items",
             "convertArrayToMap": { "keyName": "name" },
-            "runFunction": { "name": "getFirstKey", "args": { "splitOnValue": "/", "keyPrefix": "https://" } }
+            "runFunctions": [{ "name": "getFirstKey", "args": { "splitOnValue": "/", "keyPrefix": "https://" } }]
         },
         "configReady": {
             "structure": { "parentKey": "system" },
@@ -123,40 +123,40 @@
         "cpu": {
             "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/sys/host-info::sys/host-info/0::sys/hostInfo/0/cpuInfo",
-            "runFunction": { "name": "getAverage", "args": { "keyWithValue": "oneMinAvgSystem" } },
+            "runFunctions": [{ "name": "getAverage", "args": { "keyWithValue": "oneMinAvgSystem" } }],
             "comment": "also oneMinAvgUser, need to determine how that should be factored in"
         },
         "memory": {
             "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/sys/memory::sys/memory/memory-host::sys/memory/memory-host/0",
-            "runFunction": { "name": "getPercentFromKeys", "args": { "totalKey": "memoryTotal", "partialKey": "memoryUsed" } }
+            "runFunctions": [{ "name": "getPercentFromKeys", "args": { "totalKey": "memoryTotal", "partialKey": "memoryUsed" } }]
         },
         "tmmCpu": {
             "structure": { "parentKey": "system" },
             "key": "tmmInfo",
-            "runFunction": { "name": "getAverage", "args": { "keyWithValue": "oneMinAvgUsageRatio" } }
+            "runFunctions": [{ "name": "getAverage", "args": { "keyWithValue": "oneMinAvgUsageRatio" } }]
         },
         "tmmMemory": {
             "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/sys/memory::sys/memory/memory-host::sys/memory/memory-host/0",
-            "runFunction": { "name": "getPercentFromKeys", "args": { "totalKey": "tmmMemoryTotal", "partialKey": "tmmMemoryUsed" } }
+            "runFunctions": [{ "name": "getPercentFromKeys", "args": { "totalKey": "tmmMemoryTotal", "partialKey": "tmmMemoryUsed" } }]
         },
         "tmmTraffic": {
             "structure": { "parentKey": "system" },
             "key": "tmmTraffic",
             "filterKeys": { "exclude": [ "clientSideTraffic.pktsIn", "clientSideTraffic.pktsOut", "serverSideTraffic.pktsIn", "serverSideTraffic.pktsOut", "clientSideTraffic.curConns", "clientSideTraffic.evictedConns", "clientSideTraffic.maxConns", "clientSideTraffic.slowKilled", "clientSideTraffic.totConns", "cmpConnRedirected", "connectionMemoryErrors", "droppedPackets", "httpRequests", "incomingPacketErrors", "licenseDeny", "maintenanceModeDeny", "maxConnVirtualAddressDeny", "maxConnVirtualPathDeny", "noHandlerDeny", "noStagedHandlerDeny", "outgoingPacketErrors", "serverSideTraffic.curConns","serverSideTraffic.evictedConns", "serverSideTraffic.maxConns", "serverSideTraffic.slowKilled", "serverSideTraffic.totConns", "tmmId", "virtualServerNonSynDeny"] },
             "renameKeys": { "patterns": { "sys/tmm-traffic": { "pattern": "([0-9]\\.[0-9])" } } },
-            "runFunction": { "name": "getSum", "args": {} }
+            "runFunctions": [{ "name": "getSum", "args": {} }]
         },
         "diskStorage": {
             "structure": { "parentKey": "system" },
             "key": "diskStorage::commandResult",
-            "runFunction": { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Mounted", "filterKeys": { "include": [ "/", "Capacity", "1024-blocks" ] } } }
+            "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Mounted", "filterKeys": { "include": [ "/", "Capacity", "1024-blocks" ] } } }]
         },
         "diskLatency": {
             "structure": { "parentKey": "system" },
             "key": "diskLatency::commandResult",
-            "runFunction": { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Device:", "filterKeys": { "exclude": [ "Device:", "await", "r_await", "w_await", "svctm", "avgrq-sz", "avgqu-sz", "rkB/s", "wkB/s", "rsec/s", "wsec/s", "rrqm/s", "wrqm/s" ] }, "renameKeys": { "patterns": { "rsec/s": { "constant": "rkB/s" }, "wsec/s": { "constant": "wkB/s" } } } } },
+            "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Device:", "filterKeys": { "exclude": [ "Device:", "await", "r_await", "w_await", "svctm", "avgrq-sz", "avgqu-sz", "rkB/s", "wkB/s", "rsec/s", "wsec/s", "rrqm/s", "wrqm/s" ] }, "renameKeys": { "patterns": { "rsec/s": { "constant": "rkB/s" }, "wsec/s": { "constant": "wkB/s" } } } } }],
             "comment": "14.1+ uses wkB/s instead of wsec/s, equivalent for read.  Ignore both for now."
         },
         "networkInterfaces": {

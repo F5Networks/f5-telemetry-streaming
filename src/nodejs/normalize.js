@@ -472,18 +472,18 @@ module.exports = {
     /**
      * Normalize data - standardize and reduce complexity
      *
-     * @param {Object} data                         - data to normalize
-     * @param {Object} options                      - options
-     * @param {String} [options.key]                - key to drill down into data, using a defined notation
-     * @param {Array} [options.filterByKeys]        - array containg map of keys to filter data further
-     *                                                example: { exclude: [], include: []}
-     * @param {Array} [options.renameKeysByPattern] - array containing 1+ map(s) of keys to rename by pattern
-     *                                                example: [{ patterns: {}, options: {}}]
-     * @param {Object} [options.convertArrayToMap]  - convert array to map using defined key name
-     * @param {Object} [options.includeFirstEntry]  - include first item in 'entries' at the top level
-     * @param {Array} [options.formatTimestamps]    - array containing timestamp keys to format/normalize
-     * @param {Object} [options.runCustomFunction]  - run custom function on data
-     * @param {Object} [options.addKeysByTag]       - add key to data based on tag(s)
+     * @param {Object} data                           - data to normalize
+     * @param {Object} options                        - options
+     * @param {String} [options.key]                  - key to drill down into data, using a defined notation
+     * @param {Array} [options.filterByKeys]          - array containg map of keys to filter data further
+     *                                                  example: { exclude: [], include: []}
+     * @param {Array} [options.renameKeysByPattern]   - array containing 1+ map(s) of keys to rename by pattern
+     *                                                  example: [{ patterns: {}, options: {}}]
+     * @param {Object} [options.convertArrayToMap]    - convert array to map using defined key name
+     * @param {Object} [options.includeFirstEntry]    - include first item in 'entries' at the top level
+     * @param {Array} [options.formatTimestamps]      - array containing timestamp keys to format/normalize
+     * @param {Object[]} [options.runCustomFunctions] - run custom function on data
+     * @param {Object} [options.addKeysByTag]         - add key to data based on tag(s)
      *
      * @returns {Object} Returns normalized data
      */
@@ -522,15 +522,17 @@ module.exports = {
         if (nT) {
             ret = this._formatTimestamps(ret, nT);
         }
-        // run custom function
-        if (options.runCustomFunction) {
-            const rCFOptions = {
-                func: options.runCustomFunction.name,
-                args: options.runCustomFunction.args
-            };
-            ret = this._runCustomFunction(ret, rCFOptions);
+        // run custom functions
+        if (options.runCustomFunctions) {
+            options.runCustomFunctions.forEach((customFunction) => {
+                const rCFOptions = {
+                    func: customFunction.name,
+                    args: customFunction.args
+                };
+                ret = this._runCustomFunction(ret, rCFOptions);
+            });
         }
-        // add keys by tag - after custom function runs
+        // add keys by tag - after custom functions run
         if (options.addKeysByTag) {
             ret = this._addKeysByTag(
                 ret,

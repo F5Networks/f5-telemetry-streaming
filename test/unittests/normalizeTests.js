@@ -275,22 +275,22 @@ describe('Normalize', () => {
         assert.deepEqual(result, expectedResult);
     });
 
-    it('should run custom function', () => {
+    it('should run custom functions', () => {
         const options = {
-            runCustomFunction: {
-                name: 'formatAsJson',
-                args: {
-                    type: 'csv',
-                    mapKey: 'named_key'
+            runCustomFunctions: [
+                {
+                    name: 'formatAsJson',
+                    args: {
+                        type: 'csv',
+                        mapKey: 'named_key'
+                    }
+                },
+                {
+                    name: 'getFirstKey'
                 }
-            }
+            ]
         };
-        const expectedResult = {
-            name: {
-                named_key: 'name',
-                key1: 'value'
-            }
-        };
+        const expectedResult = 'name';
 
         const result = normalize.data('named_key,key1\nname,value', options);
         assert.deepEqual(result, expectedResult);

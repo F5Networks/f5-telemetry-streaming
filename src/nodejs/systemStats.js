@@ -419,7 +419,7 @@ SystemStats.prototype._processData = function (property, data) {
         convertArrayToMap: property.convertArrayToMap,
         includeFirstEntry: property.includeFirstEntry,
         formatTimestamps: global.formatTimestamps.keys,
-        runCustomFunction: property.runFunction,
+        runCustomFunctions: property.runFunctions,
         addKeysByTag: { // add 'name' + any user configured tags if specified by prop
             tags: property.addKeysByTag ? Object.assign(defaultTags, this.tags) : defaultTags,
             definitions,
