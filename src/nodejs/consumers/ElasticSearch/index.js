@@ -62,9 +62,23 @@ module.exports = function (context) {
     }
     const payload = {
         index: config.index,
-        type: config.dataType,
-        body: context.event.data
+        type: config.dataType
     };
+    if (context.event.data.telemetryEventCategory === 'systemInfo'
+        || context.event.data.telemetryEventCategory === 'ihealthInfo') {
+        payload.body = context.event.data;
+    } else {
+        payload.body = {
+            data: {}
+        };
+        Object.keys(context.event.data).forEach((key) => {
+            if (key === 'telemetryEventCategory') {
+                payload.body[key] = context.event.data[key];
+            } else {
+                payload.body.data[key] = context.event.data[key];
+            }
+        });
+    }
     if (context.tracer) {
         context.tracer.write(JSON.stringify(payload, null, 4));
     }
