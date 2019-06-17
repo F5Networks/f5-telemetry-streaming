@@ -298,6 +298,15 @@ Some stats may only be available in certain conditions, for example on BIG-IP v1
 }
 ```
 
+*isModuleProvisioned:* Function to compare current device's provisioned modules against provided one.
+```javascript
+{
+   "if": {
+        "isModuleProvisioned": "asm"
+   }
+}
+```
+
 ---
 ### Adding a New Consumer
 

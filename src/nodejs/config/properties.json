@@ -256,6 +256,13 @@
         },
         "deviceVersion": {
             "key": "/mgmt/tm/sys/version::sys/version/0::Version"
+        },
+        "provisioning": {
+            "structure": { "parentKey": "system" },
+            "key": "provisioning::items",
+            "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" },
+            "filterKeys": { "include": [ "name", "level" ] },
+            "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 } } }
         }
     },
     "global": {

@@ -24,7 +24,8 @@ const definitions = properties.definitions;
 const global = properties.global;
 
 const CONDITIONAL_FUNCS = {
-    deviceVersionGreaterOrEqual
+    deviceVersionGreaterOrEqual,
+    isModuleProvisioned
 };
 
 /**
@@ -606,5 +607,21 @@ function deviceVersionGreaterOrEqual(contextData, versionToCompare) {
     return util.compareVersionStrings(deviceVersion, '>=', versionToCompare);
 }
 
+/**
+ * Compare provisioned modules
+ *
+ * @param {Object} contextData               - context data
+ * @param {Object} contextData.provisioning  - provision state of modules to compare
+ * @param {String} moduletoCompare           - module to compare against
+ *
+ * @returns {boolean} true when device's module is provisioned
+ */
+function isModuleProvisioned(contextData, moduleToCompare) {
+    const provisioning = contextData.provisioning;
+    if (provisioning === undefined) {
+        throw new Error('isModuleProvisioned: context has no property \'provisioning\'');
+    }
+    return ((provisioning[moduleToCompare] || {}).level || 'none') !== 'none';
+}
 
 module.exports = SystemStats;
