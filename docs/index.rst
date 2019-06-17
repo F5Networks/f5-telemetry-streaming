@@ -34,13 +34,12 @@ Previous buttons to explore the documentation.
 .. toctree::
    :caption: Telemetry Streaming:
    :glob:
-   :maxdepth: 3
+   :maxdepth: 1
 
-   about-telemetry
    prereqs
    faq
    quick-start
-   installing-ts
+   installation
    using-ts
    declarations
    output-example

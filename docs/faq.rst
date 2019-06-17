@@ -1,5 +1,5 @@
-Telemetry Streaming Frequently Asked Questions (FAQ)
-----------------------------------------------------
+Frequently Asked Questions (FAQ)
+--------------------------------
 
 
 **What is Telemetry Streaming?**
