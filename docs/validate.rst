@@ -36,7 +36,7 @@ Use the following procedure to validate a declaration.
 
 6. Begin to type your declaration (if validating an existing declaration, see step 7)
 
-   - As you begin to type the :ref:`properties of your declaration<composing>`, the validation process suggests valid options.
+   - As you begin to type the properties of your declaration, the validation process suggests valid options.
 
    .. image:: /images/validate-1.png
     
