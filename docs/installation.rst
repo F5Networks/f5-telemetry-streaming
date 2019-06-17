@@ -1,15 +1,16 @@
 .. _installation:
 
-Downloading and installing the Telemetry Streaming package
-----------------------------------------------------------
+Downloading and installing Telemetry Streaming
+==============================================
+
 The Telemetry Streaming package is an RPM file you download, and then upload to the BIG-IP system using the iControl/iApp LX framework. Alternatively, you can see our :doc:`quick-start`.
 
 Downloading the RPM file
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 The first task is to download the latest RPM file.  Go to the |github|, and download the latest (highest numbered) RPM file.
 
 Uploading and installing the Telemetry Streaming file on the BIG-IP
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------------------------------------
 After you download the RPM, you must upload and then install it on your BIG-IP system. You can use the BIG-IP Configuration utility or cURL (you can alternatively use SCP to upload the file to **/var/config/rest/downloads**, but you would still have to use cURL command to install the package).  Use only one of the following procedures.
 
 .. _installgui-ref:
@@ -75,12 +76,12 @@ Copy the following commands to install the package.
 |
 
 Updating Telemetry Streaming
-````````````````````````````
+----------------------------
 When F5 releases a new version of Telemetry Streaming, use the same procedure you used to initially install the RPM. For example, if you used the Configuration utility, when you click Import and then select the new RPM, the system recognizes you are upgrading Telemetry:
 
 
 Reverting to a previous version of Telemetry Streaming
-``````````````````````````````````````````````````````
+------------------------------------------------------
 If for any reason you want to revert to a previous version of Telemetry Streaming, you must first remove the version of Telemetry Streaming on your BIG-IP system (:guilabel:`iApps > Package Management LX > f5-telemetry > Uninstall`).  After you uninstall, you can import the RPM for the version of Telemetry Streaming you want to use.
 
 
@@ -89,7 +90,7 @@ If for any reason you want to revert to a previous version of Telemetry Streamin
 .. _hash-ref:
 
 Verifying the integrity of the Telemetry RPM package
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------------------
 F5 Networks provides a checksum for each of our Telemetry Streaming releases so you can confirm the integrity of the RPM package.
 
 You can get a checksum for a particular template by running one of the following commands, depending on your operating system:

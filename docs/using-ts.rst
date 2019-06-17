@@ -10,12 +10,13 @@ Using Telemetry Streaming Index
    :includehidden:
    :glob:
 
-   telemetry-system.rst
-   setting-up-consumer.rst
-   event-listener.rst
-   avr.rst
-   validate.rst
-   logging.rst
-   http-methods.rst
-   rest-api-endpoints.rst
-   advanced-options.rst
+   telemetry-system
+   setting-up-consumer
+   event-listener
+   avr
+   validate
+   logging
+   http-methods
+   rest-api-endpoints
+   advanced-options
+   validate
