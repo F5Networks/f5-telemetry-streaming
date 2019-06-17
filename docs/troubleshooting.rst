@@ -35,6 +35,8 @@ If you receive this error, see :doc:`installation` to install or re-install Tele
 
 |
 
+.. _elkerror:
+
 **I'm receiving a limit of total fields exceeded error when Telemetry Streaming forwards statistics to ElasticSearch**
 
 If you are receiving this error, it means that Telemetry Streaming is exceeding the maximum allowed number of fields in the ElasticSearch index to which it is forwarding. The error contains the following message: |br|

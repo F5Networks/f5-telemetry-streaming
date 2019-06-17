@@ -42,6 +42,7 @@ extensions = [
     'sphinx.ext.extlinks',
     'recommonmark',
     'sphinx_copybutton',
+    'sphinxprettysearchresults'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
