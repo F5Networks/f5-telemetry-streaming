@@ -24,12 +24,12 @@ Document Revision History
         - 03-05-19  
       
       * - 1.0.0
-        - Initial release of AS3 documentation.
+        - Initial release of Telemetry Streaming documentation.
         - 02-05-19
 
 
       * - 0.9.0
-        - Initial internal release of AS3 documentation.
+        - Initial internal release of Telemetry Streaming documentation.
         - 12-27-18
 
     
