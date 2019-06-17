@@ -11,6 +11,10 @@ Document Revision History
         - Description
         - Date
 
+      * - 1.4.0
+        - Updated the documentation for Telemetry Streaming v1.4.0. This release contains the following changes: |br| * Added a new troubleshooting entry for an error that can occur with the ElasticSearch consumer (see :ref:`Troubleshooting <elkerror>`). |br| * Added the |schemalink| from previous releases to the GitHub repository  |br| * Updated :doc:`validate` to clarify the schema URL to use |br| * Updated the documentation theme and indexes. 
+        - 06-18-19
+      
       * - 1.3.0
         - Updated the documentation for Telemetry Streaming v1.3.0. This release contains the following changes: |br| * TS now exports AVR data. See the :ref:`avr-ref` section for configuration notes. |br| * Added documentation for the tag property. |br| * Added support for Kafka SASL-PLAIN authentication.
         - 04-30-19
@@ -43,6 +47,10 @@ Document Revision History
 .. |hub| raw:: html
 
    <a href="https://github.com/F5Networks/f5-telemetry-streaming/issues" target="_blank">GitHub Issues</a>
+
+.. |schemalink| raw:: html
+
+   <a href="https://github.com/F5Networks/f5-telemetry-streaming/tree/master/src/nodejs/schema" target="_blank">schema files</a>
 
 
 
