@@ -41,7 +41,7 @@
       "platform": "vm",
       "hypervisor": "VIO",
       "type": "bigip",
-      "is_f5_device": "True",
+      "is_f5_device": true,
       "network": {
             "mgmt": {
                 "ip": "10.144.130.132",
@@ -64,7 +64,7 @@
       "platform": "vm",
       "hypervisor": "VIO",
       "type": "other",
-      "is_f5_device": "False",
+      "is_f5_device": false,
       "network": {
             "mgmt": {
                 "ip": "10.144.130.27",

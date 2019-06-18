@@ -674,7 +674,7 @@ module.exports = {
                 headers['x-f5-auth-token'] = credentials.token;
             } else if (!headers.Authorization) {
                 const username = credentials.username || constants.DEVICE_DEFAULT_USER;
-                headers.Authorization = `Basic ${new Buffer(`${username}:`).toString('base64')}`;
+                headers.Authorization = `Basic ${Buffer.from(`${username}:`).toString('base64')}`;
             }
         } // else - should we delete 'Authorization' header?
 

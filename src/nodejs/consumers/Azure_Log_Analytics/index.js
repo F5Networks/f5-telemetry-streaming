@@ -64,7 +64,7 @@ module.exports = function (context) {
         const httpBody = JSON.stringify(data);
         const contentLength = Buffer.byteLength(httpBody, 'utf8');
         const stringToSign = `POST\n${contentLength}\napplication/json\nx-ms-date:${date}\n/api/logs`;
-        const signature = crypto.createHmac('sha256', new Buffer(sharedKey, 'base64')).update(stringToSign, 'utf-8').digest('base64');
+        const signature = crypto.createHmac('sha256', Buffer.from(sharedKey, 'base64')).update(stringToSign, 'utf-8').digest('base64');
         const authorization = `SharedKey ${workspaceId}:${signature}`;
 
         const requestOptions = {

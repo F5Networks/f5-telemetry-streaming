@@ -70,6 +70,9 @@ module.exports = function (context) {
         const metricName = path.join('.');
         const metricValue = item.rhs;
         promises.push(new Promise((resolve, reject) => {
+            if (context.tracer) {
+                context.tracer.write(`${metricName}: ${metricValue}\n`);
+            }
             // eslint-disable-next-line no-unused-vars
             client.gauge(metricName, metricValue, (error, bytes) => {
                 if (error) {

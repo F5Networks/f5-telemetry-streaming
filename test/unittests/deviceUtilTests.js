@@ -358,7 +358,7 @@ describe('Device Util', () => {
 
     it('should corretly encode username for auth header', () => {
         const username = 'username';
-        const valid = `Basic ${new Buffer(`${username}:`).toString('base64')}`;
+        const valid = `Basic ${Buffer.from(`${username}:`).toString('base64')}`;
 
         request.get = (opts, cb) => {
             assert.strictEqual(opts.headers.Authorization, valid);

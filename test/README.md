@@ -26,16 +26,24 @@ Best Practices:
 
 - Clean up after yourself - although it is a fairly safe assumption to make that this is a fresh environment consider if it were multi-use when writing tests
 - Consider carefully before testing things in functional test that should or could be tested via unit test - those are run more frequently
+- All consumer related tests should be added to test/functional/consumersTests
+- All TS package related tests should be added to test/function/dutTests.js
 
 ### Environment
 
-It is somewhat implied that running the functional tests requires a runtime (BIG-IP, container, etc.) to deploy the iLX extension, consumers, etc.  The current methodology is to deploy and subsequently teardown the runtime every time functional tests are run, with the understanding that functional tests will be run less frequently than unit tests.
+It is somewhat implied that running the functional tests requires a runtime (BIG-IP, container, etc.) to deploy the iLX extension, consumers, etc.  The current methodology is to deploy and re-use the runtime every time functional tests are run, with the understanding that functional tests will be run less frequently than unit tests.
 
 The deploy/teardown environment steps are handled using an internal tool (cicd-bigip-deploy) initially created for an unrelated project by one of the developers of this project, see the **deploy_env** job in the ```.gitlab-ci.yml``` file for additional comments.  Essentially the flow looks like the following in the pipeline:
 
 1. Pipeline triggered - with `REQ_DEVICE_PIPELINE` and `RUN_FUNCTIONAL_TESTS` set to true
-2. **deploy_env/teardown_env** steps will run, ***only*** if the variable `REQ_DEVICE_PIPELINE` is set to true
+2. **deploy_env** step will run, ***only*** if the variable `REQ_DEVICE_PIPELINE` is set to true
+2.1 `CICD_PROJECT_NAME` - specify project's name to deploy harness with unique name otherwise default name will be used. Do not forget to run **teardown_env** at the end of development process manually!
 3. The **functional test** step will run, ***only*** if the variable `RUN_FUNCTIONAL_TESTS` is set to true
+
+Following variables can be used to control testing process:
+- `CONSUMER_TYPE_REGEX` - to specify RegEx to filter Consumers by name
+- `SKIP_DUT_TESTS` - can be set to `1` to skip package tests against BIG-IP
+- `SKIP_CONSUMER_TESTS` - can be set to `1` to skip package tests against Consumers
 
 Internal tool notes:
 
