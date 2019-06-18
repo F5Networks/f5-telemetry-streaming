@@ -25,7 +25,6 @@ test_node4:
     tags:
         - docker-executor
     script:
-        - npm install --global npm@5.10.0
         - npm run install-test
         - npm install mocha@5.2.0
         - npm run test-only
@@ -91,6 +90,7 @@ build_package:
         - apt-get update
         - apt-get install -y jq
           # build RPM
+        - npm install --global npm@5.10.0
         - npm run build
     tags:
         - cm-official-docker-executor
