@@ -17,7 +17,14 @@
         "tag": {
             "tenant": "`T`",
             "application": "`A`",
-            "foo": "bar"
+            "staticTag": "bar",
+            "regexTag": {
+                "pattern": "pattern_or_regex"
+            },
+            "regexTagGroup": {
+                "pattern": "pattern_or_regex",
+                "group": 1
+            }
         }
     }
 }
