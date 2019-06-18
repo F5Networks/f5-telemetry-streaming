@@ -1,5 +1,5 @@
 Summary: F5 Telemetry Streaming
-Version: 1.3.0
+Version: 1.4.0
 Name: %{_name}
 Release: %{_release}
 BuildArch: noarch
@@ -14,7 +14,8 @@ Telemetry Streaming for BIG-IP
 
 %prep
 cp -r %{main}/src/ %{_builddir}/src/
-if [ -d "%{main}/node_modules" ] ; then cp -r %{main}/node_modules %{_builddir}/src/ ; fi
+cp %{main}/package*.json %{_builddir}/src/nodejs
+npm install --only=prod --prefix %{_builddir}/src/nodejs --no-optional
 echo -n %{version}-%{release} > %{_builddir}/src/version
 
 %install

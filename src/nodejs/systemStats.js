@@ -184,8 +184,12 @@ EndpointLoader.prototype._getData = function (uri, options) {
         httpOptions.method = 'POST';
         httpOptions.body = options.body;
     }
+    const retryOpts = {
+        maxTries: 3,
+        backoff: 100
+    };
 
-    return Promise.resolve(deviceUtil.makeDeviceRequest(this.host, uri, httpOptions))
+    return util.retryPromise(() => deviceUtil.makeDeviceRequest(this.host, uri, httpOptions), retryOpts)
         .then((data) => {
             // use uri unless name is explicitly provided
             const nameToUse = options.name !== undefined ? options.name : uri;
@@ -246,7 +250,10 @@ EndpointLoader.prototype._getAndExpandData = function (endpointProperties) {
             if (p.expandReferences) {
                 completeData = data;
                 const actualData = data.data;
-                referenceKey = Object.keys(p.expandReferences)[0]; // for now let's just support a single reference
+                // set default value if not exists
+                actualData[childItemKey] = actualData[childItemKey] === undefined ? [] : actualData[childItemKey];
+                // for now let's just support a single reference
+                referenceKey = Object.keys(p.expandReferences)[0];
                 const referenceObj = p.expandReferences[Object.keys(p.expandReferences)[0]];
 
                 const promises = [];

@@ -1,8 +1,10 @@
 // Example: lambda depicting receiving an HTTP event and placing the body in AWS S3
 // the lambda may be fronted by an API gateway using token auth via x-api-key
 
+'use strict';
+
 // Load the AWS SDK for Node.js
-const AWS = require('aws-sdk'); // eslint-disable-line import/no-unresolved, import/no-extraneous-dependencies
+const AWS = require('aws-sdk');
 
 AWS.config.update({ region: 'us-west-2' }); // set region
 
