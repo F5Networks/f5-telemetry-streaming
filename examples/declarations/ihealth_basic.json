@@ -11,9 +11,9 @@
                 "cipherText": "passphrase"
             },
             "proxy": {
-                "host": "127.0.0.1",
-                "protocol": "http",
-                "port": 80,
+                "host": "192.0.2.1",
+                "protocol": "https",
+                "port": 443,
                 "enableHostConnectivityCheck": false,
                 "allowSelfSignedCert": false,
                 "username": "username",
