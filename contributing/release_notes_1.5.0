@@ -3,3 +3,4 @@
 
 # Bug Fixes
 * Elastic Search Unable to parse and index some messages with previously used keys
+* Elastic Search event data objects containing consecutive periods will be replaced with a single period.

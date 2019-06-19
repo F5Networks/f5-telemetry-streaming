@@ -1109,6 +1109,26 @@ module.exports = {
         return startExecDate;
     },
 
+    /**
+     * Rename keys in an object at any level of depth if it passes the given regular expression test.
+     *
+     * @param {Object}                target         - object to be modified
+     * @param {Regular Expression}    match          - regular expression to test
+     * @param {String}                replacement    - regular expression match replacement
+     */
+    renameKeys(target, match, replacement) {
+        if (target !== null && typeof target === 'object') {
+            Object.keys(target).forEach((member) => {
+                this.renameKeys(target[member], match, replacement);
+                if (match.test(member)) {
+                    const newMember = member.replace(match, replacement);
+                    target[newMember] = target[member];
+                    delete target[member];
+                }
+            });
+        }
+    },
+
     /** @see Tracer */
     tracer: Tracer,
 

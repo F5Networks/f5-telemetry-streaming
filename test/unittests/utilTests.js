@@ -493,6 +493,105 @@ describe('Util', () => {
     }).timeout(10000);
 });
 
+describe('validate renameKeys function', () => {
+    let util;
+
+    before(() => {
+        util = require('../../src/nodejs/util.js');
+    });
+
+    it('should rename using regex literal', () => {
+        const target = {
+            brightredtomato: {
+                a: 1,
+                redcar: {
+                    b: 2,
+                    paintitred: {
+                        c: 3
+                    }
+                }
+            }
+        };
+        util.renameKeys(target, /red/, 'green');
+
+        assert.strictEqual(Object.keys(target).length, 1);
+        assert.strictEqual(Object.keys(target.brightgreentomato).length, 2);
+        assert.strictEqual(target.brightgreentomato.a, 1);
+        assert.strictEqual(Object.keys(target.brightgreentomato.greencar).length, 2);
+        assert.strictEqual(target.brightgreentomato.greencar.b, 2);
+        assert.strictEqual(Object.keys(target.brightgreentomato.greencar.paintitgreen).length, 1);
+        assert.strictEqual(target.brightgreentomato.greencar.paintitgreen.c, 3);
+    });
+
+    it('regex flag - first instance only', () => {
+        const target = {
+            brightredredredtomato: { a: 1 }
+        };
+        util.renameKeys(target, /red/, 'green');
+
+        assert.strictEqual(Object.keys(target).length, 1);
+        assert.strictEqual(target.brightgreenredredtomato.a, 1);
+    });
+
+    it('first instance only, case insensitive', () => {
+        const target = {
+            brightRedTomato: { a: 1 }
+        };
+        util.renameKeys(target, /red/i, 'green');
+
+        assert.strictEqual(Object.keys(target).length, 1);
+        assert.strictEqual(target.brightgreenTomato.a, 1);
+    });
+
+    it('globally', () => {
+        const target = {
+            brightredredtomato: { a: 1 }
+        };
+        util.renameKeys(target, /red/g, 'green');
+
+        assert.strictEqual(Object.keys(target).length, 1);
+        assert.strictEqual(target.brightgreengreentomato.a, 1);
+    });
+
+    it('globally and case insensitive', () => {
+        const target = {
+            brightRedrEdreDtomato: { a: 1 }
+        };
+        util.renameKeys(target, /red/ig, 'green');
+
+        assert.strictEqual(Object.keys(target).length, 1);
+        assert.strictEqual(target.brightgreengreengreentomato.a, 1);
+    });
+
+    it('character group', () => {
+        const target = {
+            bearclaw: { a: 1 },
+            teardrop: { b: 2 },
+            dearjohn: { c: 3 }
+        };
+        util.renameKeys(target, /[bt]ear/, 'jelly');
+
+        assert.strictEqual(Object.keys(target).length, 3);
+        assert.strictEqual(target.jellyclaw.a, 1);
+        assert.strictEqual(target.jellydrop.b, 2);
+        assert.strictEqual(target.dearjohn.c, 3);
+    });
+
+    it('negated character group', () => {
+        const target = {
+            bearclaw: { a: 1 },
+            teardrop: { b: 2 },
+            dearjohn: { c: 3 }
+        };
+        util.renameKeys(target, /[^bt]ear/, 'jelly');
+
+        assert.strictEqual(Object.keys(target).length, 3);
+        assert.strictEqual(target.bearclaw.a, 1);
+        assert.strictEqual(target.teardrop.b, 2);
+        assert.strictEqual(target.jellyjohn.c, 3);
+    });
+});
+
 // purpose: validate util (schedule/time functions)
 describe('Util (schedule/time functions)', () => {
     let util;
