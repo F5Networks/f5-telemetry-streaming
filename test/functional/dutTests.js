@@ -21,7 +21,6 @@ const baseILXUri = '/mgmt/shared/telemetry';
 const duts = util.getHosts('BIGIP');
 const packageDetails = util.getPackageDetails();
 
-const LOGS_DIR = `${__dirname}/logs`;
 
 /**
  * Post declaration to TS on DUTs
@@ -149,15 +148,7 @@ function setup() {
     util.log(`Package File to install on DUT: ${packageFile} [${packagePath}]`);
 
     // create logs directory - used later
-    if (!fs.existsSync(LOGS_DIR)) {
-        try {
-            fs.mkdirSync(LOGS_DIR);
-        } catch (err) {
-            if (err.code !== 'EEXIST') {
-                throw err;
-            }
-        }
-    }
+    util.createDir(constants.ARTIFACTS_DIR);
 
     // account for 1+ DUTs
     duts.forEach((item) => {
@@ -397,6 +388,11 @@ function test() {
                 return util.makeRequest(host, uri, options)
                     .then((data) => {
                         data = data || {};
+                        // save data to artifcats dir
+                        const outFile = `${constants.ARTIFACTS_DIR}/systempoller_${host}`;
+                        util.log(`Saving system poller output to ${outFile}`);
+                        fs.writeFileSync(outFile, JSON.stringify(data, null, 4));
+                        // read schema and validate data
                         const schema = JSON.parse(fs.readFileSync(constants.DECL.SYSTEM_POLLER_SCHEMA));
                         const valid = util.validateAgainstSchema(data, schema);
                         if (valid !== true) {
@@ -464,7 +460,7 @@ function teardown() {
                 };
                 return util.makeRequest(host, uri, postOptions)
                     .then((data) => {
-                        logFile = `${LOGS_DIR}/restnoded_${host}.log`;
+                        logFile = `${constants.ARTIFACTS_DIR}/restnoded_${host}.log`;
                         util.log(`Saving restnoded log to ${logFile}`);
                         fs.writeFileSync(logFile, data.commandResult);
                     });

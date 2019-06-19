@@ -163,9 +163,9 @@ test_functional:
     # the restnoded log that is captured by the functional tests.  This saves off the folder
     # containing that log as an artifact to speed up the troubleshooting process
     artifacts:
-        name: ${CI_COMMIT_REF_NAME}_functests_logs
+        name: ${CI_COMMIT_REF_NAME}_functests_artifacts
         paths:
-            - test/functional/logs
+            - test/functional/artifacts
         when: always
     tags:
         - cm-official-docker-executor

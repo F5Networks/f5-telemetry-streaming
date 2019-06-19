@@ -44,7 +44,7 @@ function runRemoteCmdOnCS(cmd) {
 function loadConsumers() {
     // env var to run only specific consumer type(s) (e.g. 'elast')
     const consumerFilter = process.env[constants.ENV_VARS.CONSUMER_HARNESS.TYPE_REGEX];
-    const consumerDir = `${__dirname}/${constants.CONSUMERS_DIR}`;
+    const consumerDir = constants.CONSUMERS_DIR;
     let consumers = fs.readdirSync(consumerDir);
     // filter consumers by module name if needed
     if (consumerFilter) {

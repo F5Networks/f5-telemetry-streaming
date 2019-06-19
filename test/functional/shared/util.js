@@ -59,6 +59,22 @@ module.exports = {
         console.log(`${new Date().toISOString()}: ${this.stringify(msg)}`); // eslint-disable-line no-console
     },
 
+    /** Create folder (sync method)
+     *
+     * @param {String} fpath - path to folder
+     */
+    createDir(fpath) {
+        if (!fs.existsSync(fpath)) {
+            try {
+                fs.mkdirSync(fpath);
+            } catch (err) {
+                if (err.code !== 'EEXIST') {
+                    throw err;
+                }
+            }
+        }
+    },
+
     /**
      * Stringify a message
      *
