@@ -9,6 +9,7 @@
 'use strict';
 
 const ESClient = require('elasticsearch').Client;
+const util = require('../../../nodejs/util.js');
 
 
 function elasticLogger(logger, tracer) {
@@ -60,6 +61,7 @@ module.exports = function (context) {
     if (config.apiVersion) {
         clientConfig.apiVersion = config.apiVersion;
     }
+    util.renameKeys(context.event.data, /([.])+\1/g, '.'); // remove consecutive periods from TMOS names
     const payload = {
         index: config.index,
         type: config.dataType
