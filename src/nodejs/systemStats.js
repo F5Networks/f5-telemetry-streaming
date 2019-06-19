@@ -248,10 +248,9 @@ EndpointLoader.prototype._getAndExpandData = function (endpointProperties) {
         return Promise.resolve(data); // return data
     };
 
-    return Promise.resolve(this._getData(p.endpoint, { name: p.name, body: p.body, endpointFields: p.endpointFields }))
+    return this._getData(p.endpoint, { name: p.name, body: p.body, endpointFields: p.endpointFields })
         .then((data) => {
             // data: { name: foo, data: bar }
-
             // check if expandReferences property was specified
             if (p.expandReferences) {
                 completeData = data;
@@ -442,9 +441,12 @@ SystemStats.prototype._loadData = function (property) {
         this.loader.loadEndpoint(endpoint, (data, err) => {
             if (err) {
                 reject(err);
-            } else {
-                resolve(data.data);
+                return;
             }
+            if (!data.data.items) {
+                data.data.items = [];
+            }
+            resolve(data.data);
         });
     });
 };
