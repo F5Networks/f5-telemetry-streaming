@@ -378,6 +378,18 @@ describe('Normalize', () => {
         const result = normalize.data(data, options);
         assert.deepEqual(result, expectedResult);
     });
+
+    it('should format timestamps when matching property key', () => {
+        const data = '1560975328';
+        const expectedResult = '2019-06-19T20:15:28.000Z';
+        const options = {
+            formatTimestamps: ['ltmConfigTime'],
+            propertyKey: 'ltmConfigTime'
+        };
+
+        const result = normalize.data(data, options);
+        assert.deepEqual(result, expectedResult);
+    });
 });
 
 describe('Normalize Util', () => {

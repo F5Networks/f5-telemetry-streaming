@@ -405,10 +405,11 @@ SystemStats.prototype._renderProperty = function (property) {
  *
  * @param {Object} property - property object
  * @param {Object} data     - data object
+ * @param {string} key      - property key associated with data
  *
  * @returns {Object} normalized data (if needed)
  */
-SystemStats.prototype._processData = function (property, data) {
+SystemStats.prototype._processData = function (property, data, key) {
     const defaultTags = { name: { pattern: '(.*)', group: 1 } };
     const addKeysByTagIsObject = property.addKeysByTag && typeof property.addKeysByTag === 'object';
 
@@ -425,7 +426,8 @@ SystemStats.prototype._processData = function (property, data) {
             tags: property.addKeysByTag ? Object.assign(defaultTags, this.tags) : defaultTags,
             definitions,
             opts: addKeysByTagIsObject ? property.addKeysByTag : global.addKeysByTag
-        }
+        },
+        propertyKey: key
     };
     return property.normalize === false ? data : normalize.data(data, options);
 };
@@ -478,7 +480,7 @@ SystemStats.prototype._processProperty = function (key, property) {
 
     return this._loadData(property)
         .then((data) => {
-            this.collectedData[key] = this._processData(property, data);
+            this.collectedData[key] = this._processData(property, data, key);
         })
         .catch((err) => {
             logger.error(`Error: SystemStats._processProperty: ${key} (${property.key}): ${err}`);
