@@ -24,7 +24,8 @@ const definitions = properties.definitions;
 const global = properties.global;
 
 const CONDITIONAL_FUNCS = {
-    deviceVersionGreaterOrEqual
+    deviceVersionGreaterOrEqual,
+    isModuleProvisioned
 };
 
 /**
@@ -404,10 +405,11 @@ SystemStats.prototype._renderProperty = function (property) {
  *
  * @param {Object} property - property object
  * @param {Object} data     - data object
+ * @param {string} key      - property key associated with data
  *
  * @returns {Object} normalized data (if needed)
  */
-SystemStats.prototype._processData = function (property, data) {
+SystemStats.prototype._processData = function (property, data, key) {
     const defaultTags = { name: { pattern: '(.*)', group: 1 } };
     const addKeysByTagIsObject = property.addKeysByTag && typeof property.addKeysByTag === 'object';
 
@@ -419,12 +421,13 @@ SystemStats.prototype._processData = function (property, data) {
         convertArrayToMap: property.convertArrayToMap,
         includeFirstEntry: property.includeFirstEntry,
         formatTimestamps: global.formatTimestamps.keys,
-        runCustomFunction: property.runFunction,
+        runCustomFunctions: property.runFunctions,
         addKeysByTag: { // add 'name' + any user configured tags if specified by prop
             tags: property.addKeysByTag ? Object.assign(defaultTags, this.tags) : defaultTags,
             definitions,
             opts: addKeysByTagIsObject ? property.addKeysByTag : global.addKeysByTag
-        }
+        },
+        propertyKey: key
     };
     return property.normalize === false ? data : normalize.data(data, options);
 };
@@ -477,7 +480,7 @@ SystemStats.prototype._processProperty = function (key, property) {
 
     return this._loadData(property)
         .then((data) => {
-            this.collectedData[key] = this._processData(property, data);
+            this.collectedData[key] = this._processData(property, data, key);
         })
         .catch((err) => {
             logger.error(`Error: SystemStats._processProperty: ${key} (${property.key}): ${err}`);
@@ -606,5 +609,21 @@ function deviceVersionGreaterOrEqual(contextData, versionToCompare) {
     return util.compareVersionStrings(deviceVersion, '>=', versionToCompare);
 }
 
+/**
+ * Compare provisioned modules
+ *
+ * @param {Object} contextData               - context data
+ * @param {Object} contextData.provisioning  - provision state of modules to compare
+ * @param {String} moduletoCompare           - module to compare against
+ *
+ * @returns {boolean} true when device's module is provisioned
+ */
+function isModuleProvisioned(contextData, moduleToCompare) {
+    const provisioning = contextData.provisioning;
+    if (provisioning === undefined) {
+        throw new Error('isModuleProvisioned: context has no property \'provisioning\'');
+    }
+    return ((provisioning[moduleToCompare] || {}).level || 'none') !== 'none';
+}
 
 module.exports = SystemStats;

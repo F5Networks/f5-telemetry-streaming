@@ -46,6 +46,9 @@ const SOURCE_2_TYPES = {
 };
 
 function getTemplate(sourceName, data, cache) {
+    let deviceGroup = Object.keys(data.deviceGroups).find(dgKey => data.deviceGroups[dgKey].type === 'sync-failover');
+    deviceGroup = (deviceGroup || '').split('/').pop();
+
     return {
         time: cache.dataTimestamp,
         host: data.system.hostname,
@@ -54,7 +57,7 @@ function getTemplate(sourceName, data, cache) {
         event: {
             aggr_period: data.telemetryServiceInfo.pollingInterval,
             device_base_mac: data.system.baseMac,
-            devicegroup: data.system.deviceGroup || '',
+            devicegroup: deviceGroup || data.system.hostname,
             facility: data.system.facility || ''
         }
     };
@@ -136,13 +139,13 @@ const stats = [
             'sync-status': data.syncStatus,
             'sync-summary': data.syncSummary,
             'sync-color': data.syncColor,
-            asm_state: data.asmState,
-            last_asm_change: data.lastAsmChange,
-            apm_state: data.apmState,
-            afm_state: data.afmState,
-            last_afm_deploy: data.lastAfmDeploy,
-            ltm_config_time: data.ltmConfigTime,
-            gtm_config_time: data.gtmConfigTime
+            asm_state: data.asmState || '',
+            last_asm_change: data.lastAsmChange || '',
+            apm_state: data.apmState || '',
+            afm_state: data.afmState || '',
+            last_afm_deploy: data.lastAfmDeploy || '',
+            ltm_config_time: data.ltmConfigTime || '2147483647', // default max int if unable to retrieve
+            gtm_config_time: data.gtmConfigTime || '2147483647' // default max int if unable to retrieve
         });
         return template;
     },

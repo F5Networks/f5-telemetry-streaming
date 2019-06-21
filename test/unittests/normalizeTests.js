@@ -275,22 +275,22 @@ describe('Normalize', () => {
         assert.deepEqual(result, expectedResult);
     });
 
-    it('should run custom function', () => {
+    it('should run custom functions', () => {
         const options = {
-            runCustomFunction: {
-                name: 'formatAsJson',
-                args: {
-                    type: 'csv',
-                    mapKey: 'named_key'
+            runCustomFunctions: [
+                {
+                    name: 'formatAsJson',
+                    args: {
+                        type: 'csv',
+                        mapKey: 'named_key'
+                    }
+                },
+                {
+                    name: 'getFirstKey'
                 }
-            }
+            ]
         };
-        const expectedResult = {
-            name: {
-                named_key: 'name',
-                key1: 'value'
-            }
-        };
+        const expectedResult = 'name';
 
         const result = normalize.data('named_key,key1\nname,value', options);
         assert.deepEqual(result, expectedResult);
@@ -373,6 +373,18 @@ describe('Normalize', () => {
         };
         const options = {
             formatTimestamps: ['expirationString']
+        };
+
+        const result = normalize.data(data, options);
+        assert.deepEqual(result, expectedResult);
+    });
+
+    it('should format timestamps when matching property key', () => {
+        const data = '1560975328';
+        const expectedResult = '2019-06-19T20:15:28.000Z';
+        const options = {
+            formatTimestamps: ['ltmConfigTime'],
+            propertyKey: 'ltmConfigTime'
         };
 
         const result = normalize.data(data, options);

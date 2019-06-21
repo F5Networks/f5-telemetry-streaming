@@ -1,5 +1,6 @@
 # New Features
 * Collect mask and ipProtocol for virtual servers
+* Collect device groups, ASM state, last ASM change, APM state, AFM state, LTM config time, and GTM config time
 
 # Bug Fixes
 * Elastic Search Unable to parse and index some messages with previously used keys
