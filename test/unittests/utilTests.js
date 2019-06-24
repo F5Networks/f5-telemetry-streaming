@@ -14,6 +14,7 @@ const fs = require('fs');
 const path = require('path');
 
 const constants = require('../../src/nodejs/constants.js');
+const fileLogger = require('../winstonLogger.js').logger;
 
 /* eslint-disable global-require */
 
@@ -875,7 +876,7 @@ describe('Util (schedule/time functions)', () => {
                     validator(testSet.schedule, new Date(firstDate), new Date(secondDate));
                 } catch (err) {
                     // eslint-disable-next-line no-console
-                    console.log(dates.reverse());
+                    fileLogger.debug('List of dates', dates.reverse());
                     throw err;
                 }
 

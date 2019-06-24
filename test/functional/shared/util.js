@@ -16,6 +16,7 @@ const request = require('request');
 const SSHClient = require('ssh2').Client; // eslint-disable-line import/no-extraneous-dependencies
 
 const constants = require('./constants.js');
+const logger = require('../../winstonLogger.js').logger;
 
 /**
  * Allows calling makeRequest with retryOptions
@@ -48,16 +49,7 @@ const makeRequestWithRetry = function (makeRequest, interval, maxRetries) {
 module.exports = {
 
     makeRequestWithRetry,
-    /**
-     * Log a message (simply using console.log)
-     *
-     * @param {Object|String} msg - message to log
-     *
-     * @returns {Void}
-     */
-    log(msg) {
-        console.log(`${new Date().toISOString()}: ${this.stringify(msg)}`); // eslint-disable-line no-console
-    },
+    logger,
 
     /** Create folder (sync method)
      *

@@ -71,6 +71,7 @@ function test() {
             return new Promise(resolve => setTimeout(resolve, 3000))
                 .then(() => util.makeRequest(CONSUMER_HOST.ip, uri, options))
                 .then((data) => {
+                    util.logger.info('Statsd response:', data);
                     assert.strictEqual(Array.isArray(data), true);
                     assert.strictEqual(data.length, 0);
                 });
@@ -160,6 +161,7 @@ function test() {
                              */
                             if (Array.isArray(item[1]) && item[1].length > 0
                                 && item[1][0].datapoints && item[1][0].datapoints.length > 0) {
+                                util.logger.info(`Metic ${item[0]}: `, item[1]);
                                 hasIndexed = true;
                             }
                         });
@@ -175,7 +177,7 @@ function test() {
                          * - system poller not sent data yet
                          * Sleep for 15 second(s) and return Promise.reject to allow retry
                          */
-                        util.log('Waiting for data indexing...');
+                        util.logger.info('Waiting for data to be indexed...');
                         return new Promise(resolveTimer => setTimeout(resolveTimer, 15000))
                             .then(() => Promise.reject(new Error('Metrics are empty / not indexed')));
                     });
@@ -193,13 +195,11 @@ function test() {
 
         DUTS.forEach((dut) => {
             // at first we need to retrieve list of metrics to poll
-
             it(`should check for system poller data from - ${dut.hostname}`, () => {
                 const metrics = sysPollerMetricsData[dut.hostname];
                 if (!metrics) {
                     throw new Error(`No System Poller Metrics data for ${dut.hostname} !`);
                 }
-
                 // all metrics should be non-empty array - it means they were added to index
                 return verifyMetrics(metrics);
             });

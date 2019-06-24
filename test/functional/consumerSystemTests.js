@@ -48,7 +48,7 @@ function loadConsumers() {
     let consumers = fs.readdirSync(consumerDir);
     // filter consumers by module name if needed
     if (consumerFilter) {
-        util.log(`Using filter '${consumerFilter}' to filter modules from '${consumerDir}'`);
+        util.logger.info(`Using filter '${consumerFilter}' to filter modules from '${consumerDir}'`);
         consumers = consumers.filter(fName => fName.match(new RegExp(consumerFilter, 'i')) !== null);
     }
 
@@ -56,7 +56,7 @@ function loadConsumers() {
     consumers.forEach((consumer) => {
         const cpath = `${consumerDir}/${consumer}`;
         mapping[consumer] = require(cpath); //eslint-disable-line
-        util.log(`Consumer Tests from '${cpath}' loaded`);
+        util.logger.info(`Consumer Tests from '${cpath}' loaded`);
     });
     return mapping;
 }
@@ -114,7 +114,7 @@ function setup() {
             before(function () {
                 const needDocker = consumerRequirements.DOCKER && consumerRequirements.DOCKER.indexOf(true) !== -1;
                 if (!needDocker) {
-                    util.log('Docker is not required for testing. Skip it...');
+                    util.logger.info('Docker is not required for testing. Skip CS setup...');
                     this.skip();
                 }
             });
@@ -133,7 +133,7 @@ function setup() {
                         systemRequirements.DOCKER = true;
                     })
                     .catch((err) => {
-                        util.log(`ERROR: Unable to install 'docker': ${err}`);
+                        util.logger.error(`Unable to install 'docker': ${err}`);
                         return Promise.reject(err);
                     });
             });
@@ -174,7 +174,7 @@ function test() {
                 before(() => {
                     skipTests = !hasMeetRequirements(consumerModule);
                     if (skipTests) {
-                        util.log(`CS for Consumer Tests '${consumer}' doesn't meet requirements - skip all tests`);
+                        util.logger.warn(`CS for Consumer Tests '${consumer}' doesn't meet requirements - skip all tests`);
                     }
                 });
                 beforeEach(function () {
@@ -188,7 +188,7 @@ function test() {
                     if (consumerModule[method]) {
                         consumerModule[method].apply(consumerModule);
                     } else {
-                        util.log(`WARN: ConsumerTest "${consumer}" has no '${method}' method to call`);
+                        util.logger.console.warn(`WARN: ConsumerTest "${consumer}" has no '${method}' method to call`);
                     }
                 });
             });
@@ -203,6 +203,7 @@ function teardown() {
             before(function () {
                 // skip docker cleanup if docker was not installed
                 if (!systemRequirements.DOCKER) {
+                    util.logger.info('Docker is not required for testing. Skip CS teardown...');
                     this.skip();
                 }
             });

@@ -145,7 +145,7 @@ function setup() {
     // get package details
     const packageFile = packageDetails.name;
     const packagePath = packageDetails.path;
-    util.log(`Package File to install on DUT: ${packageFile} [${packagePath}]`);
+    util.logger.info(`Package File to install on DUT: ${packageFile} [${packagePath}]`);
 
     // create logs directory - used later
     util.createDir(constants.ARTIFACTS_DIR);
@@ -188,6 +188,7 @@ function setup() {
                 return util.makeRequest(host, uri, postOptions)
                     .then((resp) => {
                         data = resp;
+                        util.logger.info('Existing declaration:', { host, data });
                     })
                     .catch((err) => {
                         error = err;
@@ -231,7 +232,7 @@ function setup() {
                     .then(() => util.makeRequest(host, uri, options))
                     .then((data) => {
                         data = data || {};
-                        util.log(`${uri} response: ${JSON.stringify(data)}`);
+                        util.logger.info(`${uri} response`, { host, data });
                         assert.notStrictEqual(data.version, undefined);
                     });
             });
@@ -253,7 +254,10 @@ function setup() {
                         const errMsg = error.message;
                         // just info the user that something unexpected happened but still trying to proceed
                         if (!errMsg.includes('must be licensed')) {
-                            util.log(`Unable to configure management-ip rules, continue with current config. Error message: ${error.message}`);
+                            util.logger.error(
+                                `Unable to configure management-ip rules, continue with current config. Error message: ${error.message}`,
+                                { host }
+                            );
                         }
                         passOnError = true;
                         return Promise.reject(error);
@@ -350,8 +354,8 @@ function test() {
 
                 return util.makeRequest(host, uri, postOptions)
                     .then((data) => {
+                        util.logger.info('Declaration response:', { host, data });
                         assert.strictEqual(data.message, 'success');
-
                         checkPassphraseObject(data);
                     });
             });
@@ -367,6 +371,7 @@ function test() {
 
                 return util.makeRequest(host, uri, postOptions)
                     .then((data) => {
+                        util.logger.info('Declaration response:', { host, data });
                         postResponse = data; // used later
                     });
             });
@@ -376,8 +381,8 @@ function test() {
 
                 return util.makeRequest(host, uri, options)
                     .then((data) => {
+                        util.logger.info('Declaration response:', { host, data });
                         assert.strictEqual(JSON.stringify(data.declaration), JSON.stringify(postResponse.declaration));
-
                         checkPassphraseObject(data);
                     });
             });
@@ -388,10 +393,7 @@ function test() {
                 return util.makeRequest(host, uri, options)
                     .then((data) => {
                         data = data || {};
-                        // save data to artifcats dir
-                        const outFile = `${constants.ARTIFACTS_DIR}/systempoller_${host}`;
-                        util.log(`Saving system poller output to ${outFile}`);
-                        fs.writeFileSync(outFile, JSON.stringify(data, null, 4));
+                        util.logger.info(`SystemPoller response (${uri}):`, { host, data });
                         // read schema and validate data
                         const schema = JSON.parse(fs.readFileSync(constants.DECL.SYSTEM_POLLER_SCHEMA));
                         const valid = util.validateAgainstSchema(data, schema);
@@ -461,7 +463,7 @@ function teardown() {
                 return util.makeRequest(host, uri, postOptions)
                     .then((data) => {
                         logFile = `${constants.ARTIFACTS_DIR}/restnoded_${host}.log`;
-                        util.log(`Saving restnoded log to ${logFile}`);
+                        util.logger.info(`Saving restnoded log to ${logFile}`);
                         fs.writeFileSync(logFile, data.commandResult);
                     });
             });

@@ -49,6 +49,10 @@ function setup() {
             )
                 .then((data) => {
                     oauthToken = data.access_token;
+                })
+                .catch((err) => {
+                    util.logger.error(`Unable to get OAuth token: ${err}`);
+                    return Promise.reject(err);
                 });
         });
     });
@@ -107,9 +111,10 @@ function test() {
                     `where hostname_s == "${dut.hostname}"`,
                     'where TimeGenerated > ago(5m)'
                 ].join(' | ');
-                return new Promise(resolve => setTimeout(resolve, 10000))
+                return new Promise(resolve => setTimeout(resolve, 30000))
                     .then(() => queryAzure(queryString))
                     .then((results) => {
+                        util.logger.info('Response from Log Analytics:', { hostname: dut.hostname, results });
                         assert(results.tables[0], 'Log Analytics query returned no results');
                         assert(results.tables[0].rows, 'Log Analytics query returned no rows');
                         assert(results.tables[0].rows[0], 'Log Analytics query returned no rows');
@@ -125,6 +130,7 @@ function test() {
                 return new Promise(resolve => setTimeout(resolve, 10000))
                     .then(() => queryAzure(queryString))
                     .then((results) => {
+                        util.logger.info('Response from Log Analytics:', { hostname: dut.hostname, results });
                         assert(results.tables[0], 'Log Analytics query returned no results');
                         assert(results.tables[0].rows, 'Log Analytics query returned no rows');
                         assert(results.tables[0].rows[0], 'Log Analytics query returned no rows');

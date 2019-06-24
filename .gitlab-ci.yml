@@ -28,6 +28,12 @@ test_node4:
         - npm run install-test
         - npm install mocha@5.2.0
         - npm run test-only
+    artifacts:
+        name: ${CI_COMMIT_REF_NAME}_unittests_artifacts
+        paths:
+            - test/artifacts
+        when: on_failure
+        expire_in: 3 days
 
 # just in case, unittests only (without coverage check)
 test_node6:
@@ -38,6 +44,12 @@ test_node6:
     script:
         - npm run install-test
         - npm run test-only
+    artifacts:
+        name: ${CI_COMMIT_REF_NAME}_unittests_artifacts
+        paths:
+            - test/artifacts
+        when: on_failure
+        expire_in: 3 days
 
 # BIG-IP 14.1+, unittests only (without coverage check)
 test_node8:
@@ -47,6 +59,12 @@ test_node8:
     script:
         - npm run install-test
         - npm run test-only
+    artifacts:
+        name: ${CI_COMMIT_REF_NAME}_unittests_artifacts
+        paths:
+            - test/artifacts
+        when: on_failure
+        expire_in: 3 days
 
 # mostly for containers, unittests only (without coverage check)
 test_node_latest:
@@ -57,6 +75,12 @@ test_node_latest:
     script:
         - npm run install-test
         - npm run test-only
+    artifacts:
+        name: ${CI_COMMIT_REF_NAME}_unittests_artifacts
+        paths:
+            - test/artifacts
+        when: on_failure
+        expire_in: 3 days
 
 # run tests and check code coverage
 test_package:
@@ -165,8 +189,9 @@ test_functional:
     artifacts:
         name: ${CI_COMMIT_REF_NAME}_functests_artifacts
         paths:
-            - test/functional/artifacts
+            - test/artifacts
         when: always
+        expire_in: 4 days
     tags:
         - cm-official-docker-executor
     only:
