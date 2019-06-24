@@ -124,15 +124,20 @@ function test() {
                 assert.notStrictEqual(hostname, undefined);
             });
 
-            it(`should check for event listener data for - ${dut.hostname}`, () => query(`size=1&q=testType:${ES_CONSUMER_NAME}`)
+            it(`should check for event listener data for - ${dut.hostname}`, () => query(`size=1&q=data.testType:${ES_CONSUMER_NAME}&q=data.hostname:${dut.hostname}`)
                 .then((data) => {
+                    util.logger.info('ElasticSearch response:', data);
                     const esData = data.hits.hits;
                     assert.notStrictEqual(esData.length, 0);
-                    assert.strictEqual(esData[0]._source.timestamp, timeStamp.toString());
+
+                    const eventData = esData[0]._source.data;
+                    assert.strictEqual(eventData.timestamp, timeStamp.toString());
+                    assert.strictEqual(eventData.hostname, dut.hostname);
                 }));
 
             it(`should have consumer data posted for - ${dut.hostname}`, () => query(`size=1&q=system.hostname:${dut.hostname}`)
                 .then((data) => {
+                    util.logger.info('ElasticSearch response:', data);
                     const esData = data.hits.hits;
                     assert.notStrictEqual(esData.length, 0);
                     assert.strictEqual(esData[0]._source.system.hostname, dut.hostname);

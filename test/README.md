@@ -2,6 +2,11 @@
 
 This directory contains all of the tests for this project.  This documentation is designed to make clear things that would otherwise be unclear.
 
+## Logging
+
+- keep output to console clean as much as possible. Use `console` to log information about tests only (e.g. test skip). Of course you can still use `console` during development process.
+- use `logger` from `winstonLogger.js` to log all information from tests which can be useful for debugging. All logs (from `console` too) will be written to `test/artifacts/testoutput.log`
+
 ## Unit
 
 All unit tests are written using the [mocha](https://mochajs.org) framework, and run using ```npm run test``` during automated or manual test.
