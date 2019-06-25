@@ -43,7 +43,7 @@ function setup() {
 }
 
 function test() {
-    const timeStamp = Date.now();
+    const testDataTimestamp = Date.now();
     describe('Consumer Test: ElasticSearch - Configure Service', () => {
         it('should start container', () => {
             const portArgs = `-p ${ES_HTTP_PORT}:${ES_HTTP_PORT} -p ${ES_TRANSPORT_PORT}:${ES_TRANSPORT_PORT} -e "discovery.type=single-node"`;
@@ -109,7 +109,7 @@ function test() {
         });
 
         it('should send event to TS Event Listener', () => {
-            const msg = `timestamp="${timeStamp}",test="true",testType="${ES_CONSUMER_NAME}"`;
+            const msg = `testDataTimestamp="${testDataTimestamp}",test="true",testType="${ES_CONSUMER_NAME}"`;
             return dutUtils.sendDataToDUTsEventListener(hostObj => `hostname="${hostObj.hostname}",${msg}`);
         });
     });
@@ -154,7 +154,7 @@ function test() {
                     esData.forEach((hit) => {
                         const eventData = hit._source.data;
                         if (eventData && eventData.hostname === dut.hostname) {
-                            assert.strictEqual(eventData.timestamp, timeStamp.toString());
+                            assert.strictEqual(eventData.testDataTimestamp, testDataTimestamp.toString());
                             found = true;
                         }
                     });

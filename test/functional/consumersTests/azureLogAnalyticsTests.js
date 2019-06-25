@@ -77,7 +77,7 @@ function test() {
         });
 
         it('should send event to TS Event Listener', () => {
-            const msg = `timestamp="${dataTimestamp}",test="true",testType="${testType}"`;
+            const msg = `timestamp="${dataTimestamp}",test="${dataTimestamp}",testType="${testType}"`;
             return dutUtils.sendDataToDUTsEventListener(hostObj => `hostname="${hostObj.hostname}",${msg}`);
         });
     });
@@ -125,7 +125,7 @@ function test() {
                 const queryString = [
                     'F5Telemetry_LTM_CL',
                     `where hostname_s == "${dut.hostname}"`,
-                    `where timestamp_s == "${dataTimestamp}"`
+                    `where test_s == "${dataTimestamp}"`
                 ].join(' | ');
                 return new Promise(resolve => setTimeout(resolve, 10000))
                     .then(() => queryAzure(queryString))

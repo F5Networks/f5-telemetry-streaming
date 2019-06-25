@@ -46,7 +46,7 @@ function setup() {
 
 function test() {
     const testType = 'Splunk_Consumer_Test';
-    const dataTimestamp = (new Date()).getTime();
+    const testDataTimestamp = (new Date()).getTime();
     let splunkHecToken;
 
     describe('Consumer Test: Splunk - Configure Service', () => {
@@ -142,7 +142,7 @@ function test() {
         });
 
         it('should send event to TS Event Listener', () => {
-            const msg = `timestamp="${dataTimestamp}",test="true",testType="${testType}"`;
+            const msg = `testDataTimestamp="${testDataTimestamp}",test="true",testType="${testType}"`;
             return dutUtils.sendDataToDUTsEventListener(hostObj => `hostname="${hostObj.hostname}",${msg}`);
         });
     });
@@ -196,7 +196,7 @@ function test() {
 
         DUTS.forEach((dut) => {
             const searchQuerySP = `search source=f5.telemetry | search "system.hostname"="${dut.hostname}" | head 1`;
-            const searchQueryEL = `search source=f5.telemetry | spath testType | search testType=${testType} | search hostname="${dut.hostname}" | search timestamp="${dataTimestamp}" | head 1`;
+            const searchQueryEL = `search source=f5.telemetry | spath testType | search testType=${testType} | search hostname="${dut.hostname}" | search testDataTimestamp="${testDataTimestamp}" | head 1`;
 
             it(`should check for system poller data from - ${dut.hostname}`, () => new Promise(resolve => setTimeout(resolve, 30000))
                 .then(() => {
@@ -236,9 +236,9 @@ function test() {
 }
 
 function teardown() {
-    // describe('Consumer Test: Splunk - teardown', () => {
-    //     it('should remove container', () => runRemoteCmd(`docker container rm -f ${SPLUNK_CONTAINER_NAME}`));
-    // });
+    describe('Consumer Test: Splunk - teardown', () => {
+        it('should remove container', () => runRemoteCmd(`docker container rm -f ${SPLUNK_CONTAINER_NAME}`));
+    });
 }
 
 module.exports = {
