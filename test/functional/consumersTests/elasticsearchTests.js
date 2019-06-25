@@ -159,8 +159,9 @@ function test() {
                         }
                     });
                     if (!found) {
-                        return Promise.reject('Event not found');
+                        return Promise.reject(new Error('Event not found'));
                     }
+                    return Promise.resolve();
                 }));
 
             it(`should have consumer data posted for - ${dut.hostname}`, () => new Promise(resolve => setTimeout(resolve, 30000))
@@ -183,8 +184,9 @@ function test() {
                         }
                     });
                     if (!found) {
-                        return Promise.reject('System Poller data not found');
+                        return Promise.reject(new Error('System Poller data not found'));
                     }
+                    return Promise.resolve();
                 }));
         });
     });
