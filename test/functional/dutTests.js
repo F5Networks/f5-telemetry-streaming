@@ -78,7 +78,7 @@ function sendDataToDUTsEventListener(callback, numOfMsgs, delay) {
                     resolve();
                     return;
                 }
-                new Promise(resolve => setTimeout(resolve, delay))
+                new Promise(timeoutResolve => setTimeout(timeoutResolve, delay))
                     .then(() => util.sendEvent(item.ip, callback(item)))
                     .then(() => sendData(i + 1))
                     .catch(reject);
