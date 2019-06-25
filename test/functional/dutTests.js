@@ -61,12 +61,31 @@ function postDeclarationToDUTs(callback) {
  * Send data to TS Event Listener on DUTs
  *
  * @param {Function} callback - callback, should return data
+ * @param {Number} [numOfMsgs]  - number of messages to send, by default 15
+ * @param {Number} [delay]      - delay (in ms) before sending next message, by default 4000ms
  *
  * @returns {Object} Promise resolved when all requests succeed
  */
-function sendDataToDUTsEventListener(callback) {
+function sendDataToDUTsEventListener(callback, numOfMsgs, delay) {
+    numOfMsgs = numOfMsgs === undefined ? 15 : numOfMsgs;
+    delay = delay === undefined ? 4000 : delay;
     // account for 1+ DUTs
-    return Promise.all(duts.map(item => util.sendEvent(item.ip, callback(item))))
+    return Promise.all(duts.map((item) => {
+        util.logger.info(`Sending ${numOfMsgs} messages to Event Listener ${item.ip}`);
+        return new Promise((resolve, reject) => {
+            function sendData(i) {
+                if (i >= numOfMsgs) {
+                    resolve();
+                    return;
+                }
+                new Promise(resolve => setTimeout(resolve, delay))
+                    .then(() => util.sendEvent(item.ip, callback(item)))
+                    .then(() => sendData(i + 1))
+                    .catch(reject);
+            }
+            sendData(0);
+        });
+    }))
         .catch(err => new Promise((resolve, reject) => {
             setTimeout(() => {
                 reject(err);
