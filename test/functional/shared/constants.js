@@ -47,5 +47,5 @@ module.exports = {
         PROTOCOL: 'https'
     },
     CONSUMERS_DIR: `${__dirname}/../consumersTests`,
-    ARTIFACTS_DIR: `${__dirname}/../artifacts`
+    ARTIFACTS_DIR: `${__dirname}/../../artifacts`
 };

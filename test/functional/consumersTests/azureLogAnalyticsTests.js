@@ -60,7 +60,7 @@ function setup() {
 
 function test() {
     const testType = 'Azure_Consumer_Test';
-    const dataTimestamp = (new Date()).getTime();
+    const dataTimestamp = Date.now();
 
     describe('Consumer Test: Azure Log Analytics - Configure TS and generate data', () => {
         it('should configure TS', () => {

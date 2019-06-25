@@ -75,7 +75,7 @@ function test() {
             };
 
             // splunk container takes about 30 seconds to come up
-            return new Promise(resolve => setTimeout(resolve, 3000))
+            return new Promise(resolve => setTimeout(resolve, 10000))
                 .then(() => util.makeRequest(CONSUMER_HOST.ip, uri, options))
                 .then((data) => {
                     util.logger.info(`Splunk response ${uri}`, data);
@@ -198,7 +198,7 @@ function test() {
             const searchQuerySP = `search source=f5.telemetry | search "system.hostname"="${dut.hostname}" | head 1`;
             const searchQueryEL = `search source=f5.telemetry | spath testType | search testType=${testType} | search hostname="${dut.hostname}" | search timestamp="${dataTimestamp}" | head 1`;
 
-            it(`should check for system poller data from - ${dut.hostname}`, () => new Promise(resolve => setTimeout(resolve, 5000))
+            it(`should check for system poller data from - ${dut.hostname}`, () => new Promise(resolve => setTimeout(resolve, 30000))
                 .then(() => {
                     util.logger.info(`Splunk search query for system poller data: ${searchQuerySP}`);
                     return query(searchQuerySP);
@@ -217,27 +217,28 @@ function test() {
                     }
                 }));
 
-            it(`should check for event listener data from - ${dut.hostname}`, () => {
-                util.logger.info(`Splunk search query for event listener data: ${searchQueryEL}`);
-                return query(searchQueryEL)
-                    .then((data) => {
-                        util.logger.info('Splunk response:', data);
-                        // check we have results
-                        const results = data.results;
-                        assert.strictEqual(results.length > 0, true, 'No results');
-                        // check that the event is what we expect
-                        const result = JSON.parse(results[0]._raw);
-                        assert.strictEqual(result.testType, testType);
-                    });
-            });
+            it(`should check for event listener data from - ${dut.hostname}`, () => new Promise(resolve => setTimeout(resolve, 30000))
+                .then(() => {
+                    util.logger.info(`Splunk search query for event listener data: ${searchQueryEL}`);
+                    return query(searchQueryEL);
+                })
+                .then((data) => {
+                    util.logger.info('Splunk response:', data);
+                    // check we have results
+                    const results = data.results;
+                    assert.strictEqual(results.length > 0, true, 'No results');
+                    // check that the event is what we expect
+                    const result = JSON.parse(results[0]._raw);
+                    assert.strictEqual(result.testType, testType);
+                }));
         });
     });
 }
 
 function teardown() {
-    describe('Consumer Test: Splunk - teardown', () => {
-        it('should remove container', () => runRemoteCmd(`docker container rm -f ${SPLUNK_CONTAINER_NAME}`));
-    });
+    // describe('Consumer Test: Splunk - teardown', () => {
+    //     it('should remove container', () => runRemoteCmd(`docker container rm -f ${SPLUNK_CONTAINER_NAME}`));
+    // });
 }
 
 module.exports = {

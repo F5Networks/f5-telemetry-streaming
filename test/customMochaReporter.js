@@ -69,10 +69,8 @@ function CustomMochaReporter(runner, options) {
                 startTime: Date.now()
             };
         }
+        fileLogger.info(`${currentTest.attempts ? 'Retrying' : 'Starting'} test - ${currentTest.title}`);
         currentTest.attempts += 1;
-        if (currentTest.attempts > 1) {
-            fileLogger.info(`Retrying test '${currentTest.title}`);
-        }
     });
 
     runner.on('pass', (test) => {
