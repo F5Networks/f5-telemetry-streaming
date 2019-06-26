@@ -20,6 +20,13 @@
         "failoverStatus": "ACTIVE",
         "failoverColor": "green",
         "systemTimestamp": "2019-01-01T01:01:01Z",
+        "asmState": "Policies Consistent",
+        "lastAsmChange": "2019-06-19T20:15:28.000Z",
+        "apmState": "Policies Consistent",
+        "afmState": "quiescent",
+        "lastAfmDeploy": "2019-06-17T21:24:29.000Z",
+        "ltmConfigTime": "2019-06-19T21:13:40.000Z",
+        "gtmConfigTime": "2019-06-07T18:11:53.000Z",
         "cpu": 0,
         "memory": 0,
         "tmmCpu": 0,
@@ -255,14 +262,7 @@
             "urldb": {
                 "name": "urldb",
                 "level": "none"
-            },
-            "asmState": "Policies Consistent",
-            "lastAsmChange": "2019-06-19T20:15:28.000Z",
-            "apmState": "Policies Consistent",
-            "afmState": "quiescent",
-            "lastAfmDeploy": "2019-06-17T21:24:29.000Z",
-            "ltmConfigTime": "2019-06-19T21:13:40.000Z",
-            "gtmConfigTime": "2019-06-07T18:11:53.000Z"
+            }
         }
     },
     "virtualServers": {
