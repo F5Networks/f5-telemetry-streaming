@@ -329,6 +329,15 @@
             "else": {
                 "disabled": true
             }
+        },
+        "iRules": {
+            "key": "iRules",
+            "filterKeys": { "exclude": ["kind", "selfLink", "tmName"] },
+            "renameKeys": { "patterns": { "ltm/rule/": { "pattern": "rule\/(.*):", "group": 1 } } },
+            "addKeysByTag": { "skip": ["events"] },
+            "runFunctions": [
+                { "name": "restructureRules" }
+            ]
         }
     },
     "events": {

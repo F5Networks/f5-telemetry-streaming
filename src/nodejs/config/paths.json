@@ -121,6 +121,10 @@
         {
             "name": "gtmConfigTime",
             "endpoint": "/mgmt/tm/sys/db/gtm.configtime"
+        },
+        {
+            "name": "iRules",
+            "endpoint": "/mgmt/tm/ltm/rule/stats"
         }
     ]
 }

@@ -578,4 +578,61 @@ describe('Normalize Util', () => {
             assert.notStrictEqual(msg.indexOf('Unsupported type'), -1);
         }
     });
+
+    it('should restructure rules', () => {
+        const args = {
+            data: {
+                '/Common/_sys_APM_ExchangeSupport_OA_BasicAuth': {
+                    aborts: 0,
+                    avgCycles: 30660,
+                    eventType: 'RULE_INIT',
+                    failures: 0,
+                    maxCycles: 30660,
+                    minCycles: 23832,
+                    priority: 500,
+                    totalExecutions: 4
+                },
+                '/Common/_sys_APM_ExchangeSupport_OA_NtlmAuth': {
+                    aborts: 0,
+                    avgCycles: 26028,
+                    eventType: 'RULE_INIT',
+                    failures: 0,
+                    maxCycles: 26028,
+                    minCycles: 23876,
+                    priority: 500,
+                    totalExecutions: 4
+                }
+            }
+        };
+        const expected = {
+            '/Common/_sys_APM_ExchangeSupport_OA_BasicAuth': {
+                events: {
+                    RULE_INIT: {
+                        aborts: 0,
+                        avgCycles: 30660,
+                        failures: 0,
+                        maxCycles: 30660,
+                        minCycles: 23832,
+                        priority: 500,
+                        totalExecutions: 4
+                    }
+                }
+            },
+            '/Common/_sys_APM_ExchangeSupport_OA_NtlmAuth': {
+                events: {
+                    RULE_INIT: {
+                        aborts: 0,
+                        avgCycles: 26028,
+                        failures: 0,
+                        maxCycles: 26028,
+                        minCycles: 23876,
+                        priority: 500,
+                        totalExecutions: 4
+                    }
+                }
+            }
+        };
+        const result = normalizeUtil.restructureRules(args);
+        assert.deepStrictEqual(expected, result);
+    });
 });

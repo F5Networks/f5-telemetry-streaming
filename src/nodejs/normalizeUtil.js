@@ -327,5 +327,29 @@ module.exports = {
             throw new Error(`Unsupported type: ${args.type}`);
         }
         return ret;
+    },
+
+    /**
+     * restructureRules
+     *
+     * @param {Object} args              - args object
+     * @param {Object} [args.data]       - data to process (always included)
+     *
+     * @returns {Object} Returns formatted data
+     */
+    restructureRules(args) {
+        const newRules = {};
+
+        Object.keys(args.data).forEach((key) => {
+            newRules[key] = {};
+            newRules[key].events = {};
+            newRules[key].events[args.data[key].eventType] = {};
+            Object.keys(args.data[key]).forEach((k) => {
+                if (k !== 'eventType') {
+                    newRules[key].events[args.data[key].eventType][k] = args.data[key][k];
+                }
+            });
+        });
+        return newRules;
     }
 };

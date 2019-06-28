@@ -182,6 +182,9 @@
         "sslCerts": {
             "type": "object"
         },
+        "iRules": {
+            "type": "object"
+        },
         "telemetryServiceInfo": {
             "type": "object",
             "properties": {

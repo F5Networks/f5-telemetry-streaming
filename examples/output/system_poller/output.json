@@ -678,6 +678,40 @@
             "tenant": "Common"
         }
     },
+    "iRules": {
+        "/Common/_sys_APM_ExchangeSupport_OA_BasicAuth": {
+            "events": {
+                "RULE_INIT": {
+                    "aborts": 0,
+                    "avgCycles": 19014,
+                    "failures": 0,
+                    "maxCycles": 19014,
+                    "minCycles": 8804,
+                    "priority": 500,
+                    "totalExecutions": 4
+                }
+            },
+            "name": "/Common/_sys_APM_ExchangeSupport_OA_BasicAuth",
+            "tenant": "Common",
+            "application": ""
+        },
+        "/Common/_sys_APM_ExchangeSupport_OA_NtlmAuth": {
+            "events": {
+                "RULE_INIT": {
+                    "aborts": 0,
+                    "avgCycles": 28942,
+                    "failures": 0,
+                    "maxCycles": 28942,
+                    "minCycles": 20102,
+                    "priority": 500,
+                    "totalExecutions": 4
+                }
+            },
+            "name": "/Common/_sys_APM_ExchangeSupport_OA_NtlmAuth",
+            "tenant": "Common",
+            "application": ""
+        }
+    },
     "telemetryServiceInfo": {
         "pollingInterval": 0,
         "cycleStart": "2019-01-01T01:01:01Z",
