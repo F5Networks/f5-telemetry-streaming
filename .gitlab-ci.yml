@@ -295,7 +295,7 @@ pages:
 #     tags:
 #         - cm-official-docker-executor
 #     only:
-#         - develop@cloudsolutions/f5-telemetry
+#         - develop@automation-toolchain/f5-telemetry
 #    script:
 #         - aws s3 sync docs/_build/html s3://clouddocs.f5networks.net/products/extensions/f5-telemetry-streaming/latest
 #         # - aws s3 cp versions.json s3://clouddocs.f5networks.net/products/extensions/f5-telemetry-streaming/versions.json
@@ -311,8 +311,8 @@ publish_docs_to_production:
         url: https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest
     only:
         # fill in desired release branch name to add deployment from a branch: currently *master*
-        - master@cloudsolutions/f5-telemetry
-        - docs-publish@cloudsolutions/f5-telemetry
+        - master@automation-toolchain/f5-telemetry
+        - docs-publish@automation-toolchain/f5-telemetry
     tags:
         - cm-official-docker-executor
     script:
