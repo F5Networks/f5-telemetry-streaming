@@ -13,7 +13,7 @@ The system poller collects and normalizes statistics from a system, such as BIG-
 
 .. code-block:: javascript
    :linenos:
-   :lineno-start: 7
+
 
    "My_System_Minimal": {
         "class": "Telemetry_System",
@@ -37,7 +37,7 @@ iHealth Poller minimal declaration:
 
 .. code-block:: javascript
    :linenos:
-   :lineno-start: 7
+
 
     "My_System_Minimal": {
         "class": "Telemetry_System",
@@ -59,7 +59,6 @@ iHealth Poller full declaration:
 
 .. code-block:: javascript
    :linenos:
-   :lineno-start: 7
 
    "My_System_Minimal": {
         "class": "Telemetry_System",

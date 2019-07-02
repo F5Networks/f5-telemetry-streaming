@@ -5,9 +5,7 @@ Consumer class
 
 Use this section to find example declarations and notes for supported consumers. 
 
-.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Note:
-
-   Each example below shows only the Consumer class of the declaration and needs to be included with the rest of the base declaration.
+.. IMPORTANT:: Each of the following examples shows only the **Consumer** class of a declaration and must be included with the rest of the base declaration (see :ref:`components`).
 
 .. _splunk-ref:
 
@@ -25,22 +23,8 @@ Required information:
 
 Example Declaration:
 
-.. code-block:: json
-   :linenos:
-   :lineno-start: 17
-
-    {
-        "My_Consumer": {
-            "class": "Telemetry_Consumer",
-            "type": "Splunk",
-            "host": "192.0.2.1",
-            "protocol": "https",
-            "port": "8088",
-            "passphrase": {
-                "cipherText": "apikey"
-            }
-        }
-    }
+.. literalinclude:: ../examples/declarations/splunk.json
+    :language: json
 
 
 .. _azure-ref:
@@ -57,20 +41,8 @@ Required Information:
 
 Example Declaration:
 
-.. code-block:: json
-   :linenos:
-   :lineno-start: 17
-
-    {
-        "My_Consumer": {
-            "class": "Telemetry_Consumer",
-            "type": "Azure_Log_Analytics",
-            "workspaceId": "workspaceid",
-            "passphrase": {
-                "cipherText": "sharedkey"
-            }
-        }
-    }
+.. literalinclude:: ../examples/declarations/azure_log_analytics.json
+    :language: json
 
 
 Example Dashboard:
@@ -97,23 +69,8 @@ Required information:
 
 Example Declaration:
 
-.. code-block:: json
-   :linenos:
-   :lineno-start: 17
-
-    {
-        "My_Consumer": {
-            "class": "Telemetry_Consumer",
-            "type": "AWS_CloudWatch",
-            "region": "us-west-1",
-            "logGroup": "f5telemetry",
-            "logStream": "default",
-            "username": "accesskey",
-            "passphrase": {
-                "cipherText": "secretkey"
-            }
-        }
-    }
+.. literalinclude:: ../examples/declarations/aws_cloudwatch.json
+    :language: json
 
 
 .. _awss3-ref:
@@ -132,22 +89,8 @@ Required Information:
 
 Example Declaration:
 
-.. code-block:: json
-   :linenos:
-   :lineno-start: 17
-
-    {
-        "My_Consumer": {
-            "class": "Telemetry_Consumer",
-            "type": "AWS_S3",
-            "region": "us-west-1",
-            "bucket": "bucketname",
-            "username": "accesskey",
-            "passphrase": {
-                "cipherText": "secretkey"
-            }
-        }
-    }
+.. literalinclude:: ../examples/declarations/aws_s3.json
+    :language: json
 
 
 .. _graphite-ref:
@@ -163,19 +106,8 @@ Required Information:
 
 .. NOTE:: To see more information about installing Graphite, see |Installing Graphite|. To see more information about Graphite events, see |Graphite Events|.
 
-.. code-block:: json
-   :linenos:
-   :lineno-start: 17
-
-    {
-        "My_Consumer": {
-            "class": "Telemetry_Consumer",
-            "type": "Graphite",
-            "host": "192.0.2.1",
-            "protocol": "https",
-            "port": "443"
-        }
-    }
+.. literalinclude:: ../examples/declarations/graphite.json
+    :language: json
 
 
 .. _kafka-ref:
@@ -195,25 +127,8 @@ Required Information:
 
 .. NOTE:: To see more information about installing Kafka, see |Installing Kafka|.
 
-.. code-block:: json
-   :linenos:
-   :lineno-start: 17
-
-    {
-        "My_Consumer": {
-            "class": "Telemetry_Consumer",
-            "type": "Kafka",
-            "host": "192.0.2.1",
-            "protocol": "binaryTcpTls",
-            "port": "9092",
-            "topic": "f5-telemetry",
-            "authenticationProtocol": "SASL-PLAIN",
-            "username": "username",
-            "passphrase": {
-                "cipherText": "secretKey"
-            }
-        }
-    }
+.. literalinclude:: ../examples/declarations/kafka.json
+    :language: json
 
 
 .. _elasticsearch-ref:
@@ -238,29 +153,9 @@ Optional Parameters:
 
 .. NOTE:: To see more information about installing ElasticSearch, see |Installing ElasticSearch|.
 
-.. code-block:: json
-   :linenos:
-   :lineno-start: 17
+.. literalinclude:: ../examples/declarations/elasticsearch.json
+    :language: json
 
-    {
-        "My_Consumer": {
-            "class": "Telemetry_Consumer",
-            "type": "ElasticSearch",
-            "host": "192.0.2.1",
-            "port": "9200",
-            "protocol": "https",
-            "allowSelfSignedCert": false,
-            "path": "/path/to/post/data",
-            "index": "f5telemetry",
-            "dataType": "f5telemetry",
-            "apiVersion": "6.5",
-            "username": "username",
-            "passphrase": {
-                "cipherText": "secretkey"
-            }
-        }
-
-    }
 
 
 .. _sumologic-ref:
@@ -278,23 +173,8 @@ Required Information:
 
 .. NOTE:: To see more information about installing Sumo Logic, see |Installing Sumo Logic|.
 
-.. code-block:: json
-   :linenos:
-   :lineno-start: 17
-
-    {
-        "My_Consumer": {
-            "class": "Telemetry_Consumer",
-            "type": "Sumo_Logic",
-            "host": "192.0.2.1",
-            "protocol": "https",
-            "port": "443",
-            "path": "/receiver/v1/http/",
-            "passphrase": {
-                "cipherText": "secret"
-            }
-        }
-    }
+.. literalinclude:: ../examples/declarations/sumo_logic.json
+    :language: json
 
 
 
@@ -311,20 +191,9 @@ Required Information:
 
 .. NOTE:: To see more information about installing StatsD, see |StatsDWiki|.
 
-.. code-block:: json
-   :linenos:
-   :lineno-start: 17
+.. literalinclude:: ../examples/declarations/statsd.json
+    :language: json
 
-    {
-        "class": "Telemetry",
-        "My_Consumer": {
-            "class": "Telemetry_Consumer",
-            "type": "Statsd",
-            "host": "192.0.2.1",
-            "protocol": "udp",
-            "port": "8125"
-        }
-    }
 
 
 .. _http-ref:
@@ -343,75 +212,15 @@ Required Information:
 
 .. NOTE:: Since this consumer is designed to be generic and flexible, how authentication is performed is left up to the web service. To ensure the secrets are encrypted within Telemetry Streaming please note the use of JSON pointers. The secret to protect should be stored inside ``passphrase`` and referenced in the desired destination property, such as an API token in a header as shown in this example. 
 
-.. code-block:: json
-   :linenos:
-   :lineno-start: 17
-
-    {
-        "class": "Telemetry",
-        "My_Consumer": {
-            "class": "Telemetry_Consumer",
-            "type": "Generic_HTTP",
-            "host": "192.0.2.1",
-            "protocol": "https",
-            "port": "443",
-            "path": "/",
-            "method": "POST",
-            "headers": [
-                {
-                    "name": "content-type",
-                    "value": "application/json"
-                },
-                {
-                    "name": "x-api-key",
-                    "value": "`>@/passphrase`"
-                }
-            ],
-            "passphrase": {
-                "cipherText": "apikey"
-            }
-        }
-    }
+.. literalinclude:: ../examples/declarations/generic_http.json
+    :language: json
 
 .. NOTE::  If multiple secrets are required, defining an additional secret within ``Shared`` and referencing it using pointers is supported. For more details about pointers see the section on :ref:`pointersyntax`.
 
 Example with multiple passphrases:
 
-.. code-block:: json
-   :linenos:
-
-    {
-        "class": "Telemetry",
-        "Shared": {
-            "class": "Shared",
-            "secretPath": {
-                "class": "Secret",
-                "cipherText": "/?token=secret"
-            }
-        },
-        "My_Consumer": {
-            "class": "Telemetry_Consumer",
-            "type": "Generic_HTTP",
-            "host": "192.0.2.1",
-            "protocol": "https",
-            "port": "443",
-            "path": "`>/Shared/secretPath`",
-            "method": "POST",
-            "headers": [
-                {
-                    "name": "content-type",
-                    "value": "application/json"
-                },
-                {
-                    "name": "x-api-key",
-                    "value": "`>@/passphrase`"
-                }
-            ],
-            "passphrase": {
-                "cipherText": "apikey"
-            }
-        }
-    }
+.. literalinclude:: ../examples/declarations/multiple_passphrases.json
+    :language: json
 
 
 
@@ -425,7 +234,7 @@ Example with multiple passphrases:
 
 .. |azure_log_analytics_dashboard| image:: /images/azure_log_analytics_dashboard.png
 
-.. |aws_img| image:: /images/aws_logo.png
+.. |aws_img| image:: /images/aws_s3.png
    :target: https://aws.amazon.com/cloudwatch/
    :alt: Amazon Web Services
 
