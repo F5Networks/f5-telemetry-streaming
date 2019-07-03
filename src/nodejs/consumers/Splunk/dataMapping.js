@@ -46,7 +46,7 @@ const SOURCE_2_TYPES = {
 };
 
 function getTemplate(sourceName, data, cache) {
-    let deviceGroup = Object.keys(data.deviceGroups).find(dgKey => data.deviceGroups[dgKey].type === 'sync-failover');
+    let deviceGroup = Object.keys(data.deviceGroups || {}).find(dgKey => data.deviceGroups[dgKey].type === 'sync-failover');
     deviceGroup = (deviceGroup || '').split('/').pop();
 
     return {
