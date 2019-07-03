@@ -1,0 +1,10 @@
+{
+    "ip_protocol":"TCP",
+    "lsn_event":"LSN_DELETE",
+    "start":"1562105093001",
+    "cli":"192.168.0.0:53954",
+    "nat":"10.0.0.1:47501",
+    "duration":"5809",
+    "pem_subscriber_id":"No-lookup",
+    "telemetryEventCategory":"CGNAT"
+}

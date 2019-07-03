@@ -1700,6 +1700,35 @@ Output
 
 Note: AVR data is different for each 'Entity'. For more info look for AVR documentation.
 
+#### CGNAT Log
+
+Configuration
+
+- Create Log Publisher (and related objects): [Log Publisher Configuration](#log-publisher-configuration)
+- Modifications to the CGNAT LSN Pool:
+  - Attach the Log Publisher 'telemetry_publisher' to the LSN pool
+    - TMSH: ```modify ltm lsn-pool cgnat_lsn_pool log-publisher telemetry_publisher```
+    - GUI: "Carrier Grade NAT" -> "LSN Pools" -> "LSN Pools List"
+  - Create and attach your own CGNAT Logging Profile to the LSN pool. This determines what types of logs you wish to receive (optional):
+    - TMSH-create: ```create ltm lsn-log-profile telemetry_lsn_log_profile { start-inbound-session { action enabled } }```
+    - TMSH-attach: ```modify ltm lsn-pool cgnat_lsn_pool log-profile telemetry_lsn_log_profile```
+    - GUI: "Carrier Grade NAT" -> "Logging Profiles" -> LSN
+
+Output
+
+```json
+{
+    "ip_protocol":"TCP",
+    "lsn_event":"LSN_DELETE",
+    "start":"1562105093001",
+    "cli":"X.X.X.X",
+    "nat":"Y.Y.Y.Y",
+    "duration":"5809",
+    "pem_subscriber_id":"No-lookup",
+    "telemetryEventCategory":"CGNAT"
+}
+```
+
 #### System Log
 
 Configuration
