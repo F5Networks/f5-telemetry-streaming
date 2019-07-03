@@ -37,11 +37,11 @@ const SOURCE_2_TYPES = {
     'bigip.tmsh.interface_status': 'f5:bigip:status:iapp:json',
     'bigip.tmsh.disk_usage': 'f5:bigip:status:iapp:json',
     'bigip.tmsh.disk_latency': 'f5:bigip:status:iapp:json',
-    'bigip.tmsh.virtual_status': 'f5:bigip:config:iapp:json',
-    'bigip.tmsh.virtual': 'f5:bigip:config:iapp:json',
-    'bigip.tmsh.pool_member_status': 'f5:bigip:config:iapp:json',
+    'bigip.tmsh.virtual_status': 'f5:bigip:status:iapp:json',
+    'bigip.tmsh.pool_member_status': 'f5:bigip:status:iapp:json',
     'bigip.objectmodel.cert': 'f5:bigip:config:iapp:json',
     'bigip.objectmodel.profile': 'f5:bigip:config:iapp:json',
+    'bigip.objectmodel.virtual': 'f5:bigip:config:iapp:json',
     'bigip.ihealth.diagnostics': 'f5:bigip:ihealth:iapp:json'
 };
 
@@ -231,7 +231,7 @@ const stats = [
         const vsStats = getData(request, 'virtualServers');
         if (vsStats === undefined) return undefined;
 
-        const template = getTemplate('bigip.tmsh.virtual', request.globalCtx.event.data, request.cache);
+        const template = getTemplate('bigip.objectmodel.virtual', request.globalCtx.event.data, request.cache);
         return Object.keys(vsStats).map((key) => {
             const vsStat = vsStats[key];
             const newData = Object.assign({}, template);
