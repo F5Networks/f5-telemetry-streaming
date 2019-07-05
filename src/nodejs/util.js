@@ -1091,7 +1091,8 @@ module.exports = {
         if (startExecDate > endExecDate) {
             endExecDate.setDate(endExecDate.getDate() + 1);
         }
-        let windowSize = endExecDate.getTime() - startExecDate.getTime();
+        let windowSize = endExecDate.getTime() - startExecDate.getTime()
+        + ((startExecDate.getTimezoneOffset() - endExecDate.getTimezoneOffset()) * 60000);
 
         while (!(isOnSchedule(startExecDate) && ((allowNow && startExecDate <= fromDate && fromDate < endExecDate)
                 || startExecDate > fromDate))) {
