@@ -2,7 +2,7 @@
 
 Appendix A: Additional Example Declarations
 ===========================================
-This section contains more example Telemetry Streaming declarations (see :doc:`declarations` for the main examples page).  Use the index on the left to go directly to a specific declaration.
+This section contains more example Telemetry Streaming declarations (see :doc:`declarations` for the main examples page).  
 
 
 Example 1: Base Declaration
