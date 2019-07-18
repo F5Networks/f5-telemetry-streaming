@@ -9,3 +9,4 @@
 
 # Bug Fixes
 * Elastic Search Unable to parse and index some messages with previously used keys
+* Splunk Host property is null for TS events

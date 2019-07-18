@@ -13,12 +13,18 @@ function defaultFormat(globalCtx) {
     const data = globalCtx.event.data;
 
     // certain events may not have system object
-    let time = Date.parse(new Date()); let host = 'null';
-    try {
-        time = Date.parse(data.system.systemTimestamp);
-        host = data.system.hostname;
-    } catch (e) {
-        // continue
+    let time = Date.parse(new Date());
+    let host = 'null';
+
+    if (data.system) {
+        try {
+            time = Date.parse(data.system.systemTimestamp);
+            host = data.system.hostname;
+        } catch (e) {
+            // continue
+        }
+    } else if (data.hostname) {
+        host = data.hostname;
     }
 
     return {
