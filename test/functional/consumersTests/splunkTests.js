@@ -148,6 +148,9 @@ function test() {
     });
 
     describe('Consumer Test: Splunk - Test', () => {
+        const splunkSourceStr = 'f5.telemetry';
+        const splunkSourceTypeStr = 'f5:telemetry:json';
+
         // helper function to query splunk for data
         const query = (searchString) => {
             const baseUri = '/services/search/jobs';
@@ -209,12 +212,18 @@ function test() {
                     const results = data.results;
                     assert.strictEqual(results.length > 0, true, 'No results');
                     // check that the event is what we expect
-                    const result = JSON.parse(results[0]._raw);
+                    const result = results[0];
+                    const rawData = JSON.parse(result._raw);
+                    // validate raw data agains schema
                     const schema = JSON.parse(fs.readFileSync(constants.DECL.SYSTEM_POLLER_SCHEMA));
-                    const valid = util.validateAgainstSchema(result, schema);
+                    const valid = util.validateAgainstSchema(rawData, schema);
                     if (valid !== true) {
                         assert.fail(`output is not valid: ${JSON.stringify(valid.errors)}`);
                     }
+                    // validate data parsed by Splunk
+                    assert.strictEqual(result.host, dut.hostname);
+                    assert.strictEqual(result.source, splunkSourceStr);
+                    assert.strictEqual(result.sourcetype, splunkSourceTypeStr);
                 }));
 
             it(`should check for event listener data from - ${dut.hostname}`, () => new Promise(resolve => setTimeout(resolve, 30000))
@@ -228,8 +237,18 @@ function test() {
                     const results = data.results;
                     assert.strictEqual(results.length > 0, true, 'No results');
                     // check that the event is what we expect
-                    const result = JSON.parse(results[0]._raw);
+                    const result = results[0];
+                    const rawData = JSON.parse(result._raw);
+
+                    assert.strictEqual(rawData.testType, testType);
+                    assert.strictEqual(rawData.hostname, dut.hostname);
+                    // validate data parsed by Splunk
+                    assert.strictEqual(result.host, dut.hostname);
+                    assert.strictEqual(result.source, splunkSourceStr);
+                    assert.strictEqual(result.sourcetype, splunkSourceTypeStr);
+                    assert.strictEqual(result.hostname, dut.hostname);
                     assert.strictEqual(result.testType, testType);
+                    assert.strictEqual(result.testDataTimestamp, `${testDataTimestamp}`);
                 }));
         });
     });
