@@ -1,12 +1,10 @@
 # New Features
 * Collect mask and ipProtocol for virtual servers
 * Collect device groups, ASM state, last ASM change, APM state, AFM state, LTM config time, and GTM config time
+* Collect stats for iRules
+* Support for CGNAT events logs
 
 # Bug Fixes
 * Elastic Search Unable to parse and index some messages with previously used keys
 * Elastic Search event data objects containing consecutive periods will be replaced with a single period.
-* Add iRules support to system poller stats
-
-# Bug Fixes
-* Elastic Search Unable to parse and index some messages with previously used keys
 * Splunk Host property is null for TS events
