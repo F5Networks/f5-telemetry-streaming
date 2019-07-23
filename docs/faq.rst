@@ -61,7 +61,7 @@ See the :doc:`quick-start` to jump right into using TS.
 
 **What is the delivery cadence for Telemetry Streaming?**
 
-Telemetry Streaming is on a monthly delivery cadence, typically at beginning of every month.
+Telemetry Streaming releases are intended to be delivered on a 6-week basis.
 
 |
 

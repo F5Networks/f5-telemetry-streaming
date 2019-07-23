@@ -10,7 +10,7 @@ Telemetry Streaming (TS) is an iControl LX Extension delivered as a TMOS-indepen
 
 ## Documentation
 
-For the documentation on Telemetry Streaming, including download, installation, and usage instructions, see the Telemetry Streaming User guides at [http://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/](http://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/).
+For the documentation on Telemetry Streaming, including download, installation, and usage instructions, see the Telemetry Streaming User guide at [http://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/](http://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/).
 
 ### Example Telemetry Streaming declarations
 

@@ -14,6 +14,8 @@ Telemetry Streaming is an iControl LX extension to stream telemetry from BIG-IP(
 - Sumo Logic
 - Statsd
 
+For the complete Telemetry Streaming documentation, see [http://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/](http://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/)
+
 ## Contents
 
 - [Overview](#overview)
