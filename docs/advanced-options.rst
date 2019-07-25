@@ -52,6 +52,7 @@ As of Telemetry Streaming 1.5.0, tagging is now an actions array.  Inside this a
         ]
 
     
+|
 
 
 +-----------------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -59,77 +60,66 @@ As of Telemetry Streaming 1.5.0, tagging is now an actions array.  Inside this a
 +=============================+================================+=========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================+
 | enable                      | false, **true**                |  This value is used to enable an action.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 +-----------------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| setTag                      | array of objects               |  The setTag property is the tag(s) that will be applied (each additional property inside setTag is a tag tht will be applied).                                                                                                                                                                                                                                                                                                                                                                                                          |
+| setTag                      | array of objects               |  The setTag property is the tag(s) that will be applied (each additional property inside setTag is a tag that will be applied).                                                                                                                                                                                                                                                                                                                                                                                                         |
 +-----------------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | ifAllMatch                  | arrary of objects              |  This property contains conditions you specify for the tag.  If you use this property, Telemetry Streaming verifies the conditions inside ifAllMatch and checks against the data.  All conditions inside this property must match the data for tagging to be performed. If you do not use this property, then the system tags everything in the **locations** property.                                                                                                                                                                 |
 +-----------------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | locations                   | array of objects               |  This property is used to specify where the tags should be applied.  If you used ifAllMatch, and all of the conditions inside ifAllMatch pass, then the locations are where the tags are applied (or to default objects if no locations are provided). If you do not use this property, the following locations are used by default: virtualServers, pools, ltmPolicies, httpProfiles, clientSslProfiles, serverSslProfiles, networkTunnels, deviceGroups, and iRules. If you use this property with an empty array, no tagging occurs. |
 +-----------------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-  
-  
- 
+
 The following is an example declaration using the tagging action.  In this example:
 
 - Telemetry Streaming tags all **virtualServers** with the two tags in **setTag** if the conditions in **ifAllMatch** pass. 
-- For the conditions in **ifAllMatch** to match, all **virtualServers** that match the regular expression **.* **, must have the property that matches **serverside.bits.* **.
+- For the conditions in **ifAllMatch** to match, all **virtualServers** that match the regular expression **.\***, must have the property that matches **serverside.bits.\***.
 - If all the conditions pass, the two tags are applied. 
 
-  
-  
+
 .. code-block:: bash
    :linenos:  
     
-    
-    
-      {
-            "class": "Telemetry",
-            "My_System_Poller": {
-                "class": "Telemetry_System",
-                "systemPoller": {
-                "interval": 60,
-                "actions": [
-                    {
-                        "enable": true,
-                        "setTag": {
-                            "tag1": {
-                                "prop1": "hello",
-                                "prop2": "goodbye"
-                            },
-                            "tag2": "Another tag"
+    {
+        "class": "Telemetry",
+        "My_System_Poller": {
+            "class": "Telemetry_System",
+            "systemPoller": {
+            "interval": 60,
+            "actions": [
+                {
+                    "enable": true,
+                    "setTag": {
+                        "tag1": {
+                            "prop1": "hello",
+                            "prop2": "goodbye"
                         },
-                        "ifAllMatch": {
-                            "virtualServers": {
-                                ".*": {
-                                    "serverside.bits.*": true
-                                }
-                            }
-                        },
-                        "locations": {
-                            "virtualServers": {
-                                ".*": {}
+                        "tag2": "Another tag"
+                    },
+                    "ifAllMatch": {
+                        "virtualServers": {
+                            ".*": {
+                                "serverside.bits.*": true
                             }
                         }
+                    },
+                    "locations": {
+                        "virtualServers": {
+                            ".*": {}
+                        }
                     }
-                ]
                 }
+            ]
             }
         }
-    
+    }
+
+
+|
   
   
+Tag property for TS versions prior to 1.5.0
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-
-
-
-
-
-
-
-
-
-
-The tag property provides a way to add additional properties (key:value) to the output. If not provided, the property will default to:
+For Telemetry streaming versions 1.4.0 and earlier, the **tag** property provides a way to add additional properties (key:value) to the output. If not provided, the property will default to:
 
 .. code-block:: json
 
