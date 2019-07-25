@@ -64,8 +64,8 @@ Base components
 ```````````````
 The first few lines of your declaration are a part of the base components and define top-level options. When you POST a declaration, depending on the complexity of your declaration and the modules you are provisioning, it may take some time before the system returns a success message.  Note that the controls class is optional and used for logging and debugging (see :ref:`logging-ref`).
 
-.. code-block:: javascript
-   :linenos:
+    .. code-block:: javascript
+    :linenos:
 
 
     {
