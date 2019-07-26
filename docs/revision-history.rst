@@ -7,7 +7,7 @@ Document Revision History
       :widths: 15 100 15
       :header-rows: 1
 
-      * - Revision
+      * - Doc Rev
         - Description
         - Date
 
