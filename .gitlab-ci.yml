@@ -284,6 +284,7 @@ pages:
     only:
         # only update on designated, stable branch
         - develop
+        - v1.5.0-RC1
 
 # Publish docs to clouddocs.f5networks.net
 # publish_docs_to_staging:
