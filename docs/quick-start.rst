@@ -67,7 +67,6 @@ The first few lines of your declaration are a part of the base components and de
 .. code-block:: javascript
    :linenos:
 
-
     {
         "class": "Telemetry",
         "controls": {
@@ -75,7 +74,7 @@ The first few lines of your declaration are a part of the base components and de
             "logLevel": "info"
         },
 
-        
+   
              
 |
 
