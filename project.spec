@@ -1,5 +1,5 @@
 Summary: F5 Telemetry Streaming
-Version: 1.4.0
+Version: 1.5.0
 Name: %{_name}
 Release: %{_release}
 BuildArch: noarch
