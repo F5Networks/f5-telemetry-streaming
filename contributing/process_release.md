@@ -20,7 +20,7 @@
 - Update build number changes to:
   - [package.json](package.json)
   - [package-lock.json](package-lock.json)
-  - [project.spec](project.spec)
+  - [project.spec](project.spec) (not required starting from 1.5)
   - [src/nodejs/constants.js](src/nodejs/constants.js)
   - [src/nodejs/schema/base_schema.json](src/nodejs/schema/base_schema.json)
   - [contributing/README.md](contributing/README.md) (example of response, optional)

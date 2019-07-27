@@ -110,9 +110,6 @@ build_package:
     stage: build
     script:
         - echo 'CI BUILD'
-        # install packages: jq
-        - apt-get update
-        - apt-get install -y jq
           # build RPM
         - npm install --global npm@5.10.0
         - npm run build
