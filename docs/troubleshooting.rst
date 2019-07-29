@@ -77,9 +77,9 @@ If you receive this error, use **one** of the following methods to correct the i
 
 **I'm receiving a SELF_SIGNED_CERT_IN_CHAIN error**
 
-If you are receiving this error, you are using a self-signed certificate in a declaration.  In Telemetry Streaming 1.5.0 and later, you can use the **allowSelfSignedCert** parameter set to **true** to use self-signed certificates (see :doc:`advanced-options` for more information and usage).  
+If you are receiving this error, you are using a self-signed certificate in a declaration.  You can use the **allowSelfSignedCert** parameter set to **true** to use self-signed certificates (see :doc:`advanced-options` for more information and usage).  
 
-If you are using a version of TS prior to 1.5.0 and are experiencing this error, you can either upgrade to TS 1.5.0, or use a certificate that is not self-signed.
+
 
 
 
