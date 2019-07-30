@@ -21,7 +21,6 @@ const baseILXUri = '/mgmt/shared/telemetry';
 const duts = util.getHosts('BIGIP');
 const packageDetails = util.getPackageDetails();
 
-const LOGS_DIR = `${__dirname}/logs`;
 
 /**
  * Post declaration to TS on DUTs
@@ -62,12 +61,31 @@ function postDeclarationToDUTs(callback) {
  * Send data to TS Event Listener on DUTs
  *
  * @param {Function} callback - callback, should return data
+ * @param {Number} [numOfMsgs]  - number of messages to send, by default 15
+ * @param {Number} [delay]      - delay (in ms) before sending next message, by default 4000ms
  *
  * @returns {Object} Promise resolved when all requests succeed
  */
-function sendDataToDUTsEventListener(callback) {
+function sendDataToDUTsEventListener(callback, numOfMsgs, delay) {
+    numOfMsgs = numOfMsgs === undefined ? 15 : numOfMsgs;
+    delay = delay === undefined ? 4000 : delay;
     // account for 1+ DUTs
-    return Promise.all(duts.map(item => util.sendEvent(item.ip, callback(item))))
+    return Promise.all(duts.map((item) => {
+        util.logger.info(`Sending ${numOfMsgs} messages to Event Listener ${item.ip}`);
+        return new Promise((resolve, reject) => {
+            function sendData(i) {
+                if (i >= numOfMsgs) {
+                    resolve();
+                    return;
+                }
+                new Promise(timeoutResolve => setTimeout(timeoutResolve, delay))
+                    .then(() => util.sendEvent(item.ip, callback(item)))
+                    .then(() => sendData(i + 1))
+                    .catch(reject);
+            }
+            sendData(0);
+        });
+    }))
         .catch(err => new Promise((resolve, reject) => {
             setTimeout(() => {
                 reject(err);
@@ -146,18 +164,10 @@ function setup() {
     // get package details
     const packageFile = packageDetails.name;
     const packagePath = packageDetails.path;
-    util.log(`Package File to install on DUT: ${packageFile} [${packagePath}]`);
+    util.logger.info(`Package File to install on DUT: ${packageFile} [${packagePath}]`);
 
     // create logs directory - used later
-    if (!fs.existsSync(LOGS_DIR)) {
-        try {
-            fs.mkdirSync(LOGS_DIR);
-        } catch (err) {
-            if (err.code !== 'EEXIST') {
-                throw err;
-            }
-        }
-    }
+    util.createDir(constants.ARTIFACTS_DIR);
 
     // account for 1+ DUTs
     duts.forEach((item) => {
@@ -197,6 +207,7 @@ function setup() {
                 return util.makeRequest(host, uri, postOptions)
                     .then((resp) => {
                         data = resp;
+                        util.logger.info('Existing declaration:', { host, data });
                     })
                     .catch((err) => {
                         error = err;
@@ -240,7 +251,7 @@ function setup() {
                     .then(() => util.makeRequest(host, uri, options))
                     .then((data) => {
                         data = data || {};
-                        util.log(`${uri} response: ${JSON.stringify(data)}`);
+                        util.logger.info(`${uri} response`, { host, data });
                         assert.notStrictEqual(data.version, undefined);
                     });
             });
@@ -262,7 +273,10 @@ function setup() {
                         const errMsg = error.message;
                         // just info the user that something unexpected happened but still trying to proceed
                         if (!errMsg.includes('must be licensed')) {
-                            util.log(`Unable to configure management-ip rules, continue with current config. Error message: ${error.message}`);
+                            util.logger.error(
+                                `Unable to configure management-ip rules, continue with current config. Error message: ${error.message}`,
+                                { host }
+                            );
                         }
                         passOnError = true;
                         return Promise.reject(error);
@@ -359,8 +373,8 @@ function test() {
 
                 return util.makeRequest(host, uri, postOptions)
                     .then((data) => {
+                        util.logger.info('Declaration response:', { host, data });
                         assert.strictEqual(data.message, 'success');
-
                         checkPassphraseObject(data);
                     });
             });
@@ -376,6 +390,7 @@ function test() {
 
                 return util.makeRequest(host, uri, postOptions)
                     .then((data) => {
+                        util.logger.info('Declaration response:', { host, data });
                         postResponse = data; // used later
                     });
             });
@@ -385,8 +400,8 @@ function test() {
 
                 return util.makeRequest(host, uri, options)
                     .then((data) => {
+                        util.logger.info('Declaration response:', { host, data });
                         assert.strictEqual(JSON.stringify(data.declaration), JSON.stringify(postResponse.declaration));
-
                         checkPassphraseObject(data);
                     });
             });
@@ -397,6 +412,8 @@ function test() {
                 return util.makeRequest(host, uri, options)
                     .then((data) => {
                         data = data || {};
+                        util.logger.info(`SystemPoller response (${uri}):`, { host, data });
+                        // read schema and validate data
                         const schema = JSON.parse(fs.readFileSync(constants.DECL.SYSTEM_POLLER_SCHEMA));
                         const valid = util.validateAgainstSchema(data, schema);
                         if (valid !== true) {
@@ -464,8 +481,8 @@ function teardown() {
                 };
                 return util.makeRequest(host, uri, postOptions)
                     .then((data) => {
-                        logFile = `${LOGS_DIR}/restnoded_${host}.log`;
-                        util.log(`Saving restnoded log to ${logFile}`);
+                        logFile = `${constants.ARTIFACTS_DIR}/restnoded_${host}.log`;
+                        util.logger.info(`Saving restnoded log to ${logFile}`);
                         fs.writeFileSync(logFile, data.commandResult);
                     });
             });

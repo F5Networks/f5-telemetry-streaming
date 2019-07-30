@@ -8,7 +8,7 @@
 
 'use strict';
 
-const VERSION = '1.4.0';
+const VERSION = '1.5.0';
 
 
 /**
@@ -73,6 +73,7 @@ module.exports = {
         ASM_EVENT: 'ASM',
         AFM_EVENT: 'AFM',
         LTM_EVENT: 'LTM',
+        CGNAT_EVENT: 'CGNAT',
         SYSLOG_EVENT: 'syslog',
         EVENT_LISTENER: 'event',
         SYSTEM_POLLER: 'systemInfo',

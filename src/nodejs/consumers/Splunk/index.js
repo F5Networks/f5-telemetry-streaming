@@ -252,7 +252,7 @@ function forwardData(dataToSend, globalCtx) {
                     .then((res) => {
                         globalCtx.logger.debug(`Response status code: ${res}`);
                     }).catch((err) => {
-                        globalCtx.logger.error(`Unable to send data chuck: ${err}`);
+                        globalCtx.logger.error(`Unable to send data chunk: ${err}`);
                     });
 
                 if (i !== dataToSend.length) {

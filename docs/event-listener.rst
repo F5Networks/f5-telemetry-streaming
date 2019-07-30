@@ -34,9 +34,7 @@ LTM Request Log profile
 
 To configure an LTM request profile, use the following TMSH commands:
 
-.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Note:
-
-  All keys should be in lower case to enable classification (tenant/application).
+.. NOTE:: All keys should be in lower case to enable classification (tenant/application).
 
 1. Create a pool in TMSH: 
 
@@ -65,6 +63,46 @@ Example Output from Telemetry Streaming:
 
 .. literalinclude:: ../examples/output/request_logs/ltm_request_log.json
     :language: json
+
+
+.. _cgnat:
+
+Configuring CGNAT logging
+`````````````````````````
+To configure carrier-grade network address translation (CGNAT), use the following guidance.  For more information on CGNAT, see |cgnatdoc|. 
+
+.. NOTE:: You must have Carrier Grade NAT licensed and enabled to use CGNAT features.
+
+1. Create a basic Telemetry Streaming configuration (such as :ref:`configurelogpubas3-ref`).
+
+2. Configure the BIG-IP to send log messages about CGNAT processes.  For instructions, see the CGNAT Implementations guide chapter on logging for your BIG-IP version.  For example, for BIG-IP 14.0, see |cgnatdocs|.  Make sure of the following:
+
+   - The Large Scale NAT (LSN) Pool must use the Telemetry Streaming Log Publisher you created (**telemetry_publisher** if you used the AS3 example to configure TS logging).  |br| If you have an existing pool, update the pool to use the TS Log Publisher:
+
+      - TMSH: ``modify ltm lsn-pool cgnat_lsn_pool log-publisher telemetry_publisher``
+      - GUI: **Carrier Grade NAT > LSN Pools > LSN Pools List**  
+
+   - Create and attach a new CGNAT Logging Profile to the LSN pool.  This determines what types of logs you wish to receive (optional).
+
+     - TMSH-create: ``create ltm lsn-log-profile telemetry_lsn_log_profile { start-inbound-session { action enabled } }``
+     - TMSH-attach: ``modify ltm lsn-pool cgnat_lsn_pool log-profile telemetry_lsn_log_profile``
+     - GUI: **Carrier Grade NAT -> Logging Profiles -> LSN**
+
+Example output:
+
+.. code-block:: json
+
+   {
+        "ip_protocol":"TCP",
+        "lsn_event":"LSN_DELETE",
+        "start":"1562105093001",
+        "cli":"X.X.X.X",
+        "nat":"Y.Y.Y.Y",
+        "duration":"5809",
+        "pem_subscriber_id":"No-lookup",
+        "telemetryEventCategory":"CGNAT"
+   }
+
 
 |
 
@@ -258,4 +296,20 @@ Note the following:
 .. |analytics| raw:: html
 
    <a href="https://support.f5.com/kb/en-us/products/big-ip_analytics/manuals/product/analytics-implementations-13-1-0.html" target="_blank">BIG-IP Analytics Implementations guide</a>
+   
+.. |cgnatdoc| raw:: html
+
+   <a href="https://techdocs.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-cgnat-implementations-13-1-0/1.html" target="_blank">BIG-IP CGNAT: Implementations</a>
+
+.. |cgnatdocs| raw:: html
+
+   <a href="https://techdocs.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/big-ip-cgnat-implementations-14-0-0/08.html" target="_blank">BIG-IP CGNAT: Implementations - Using CGNAT Logging and Subscriber Traceability</a>
+
+.. |br| raw:: html
+   
+   <br />
+
+
+   
+
 
