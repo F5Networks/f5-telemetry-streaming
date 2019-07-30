@@ -13,12 +13,18 @@ function defaultFormat(globalCtx) {
     const data = globalCtx.event.data;
 
     // certain events may not have system object
-    let time = Date.parse(new Date()); let host = 'null';
-    try {
-        time = Date.parse(data.system.systemTimestamp);
-        host = data.system.hostname;
-    } catch (e) {
-        // continue
+    let time = Date.parse(new Date());
+    let host = 'null';
+
+    if (data.system) {
+        try {
+            time = Date.parse(data.system.systemTimestamp);
+            host = data.system.hostname;
+        } catch (e) {
+            // continue
+        }
+    } else if (data.hostname) {
+        host = data.hostname;
     }
 
     return {
@@ -37,14 +43,18 @@ const SOURCE_2_TYPES = {
     'bigip.tmsh.interface_status': 'f5:bigip:status:iapp:json',
     'bigip.tmsh.disk_usage': 'f5:bigip:status:iapp:json',
     'bigip.tmsh.disk_latency': 'f5:bigip:status:iapp:json',
-    'bigip.tmsh.virtual_status': 'f5:bigip:config:iapp:json',
-    'bigip.tmsh.pool_member_status': 'f5:bigip:config:iapp:json',
+    'bigip.tmsh.virtual_status': 'f5:bigip:status:iapp:json',
+    'bigip.tmsh.pool_member_status': 'f5:bigip:status:iapp:json',
     'bigip.objectmodel.cert': 'f5:bigip:config:iapp:json',
     'bigip.objectmodel.profile': 'f5:bigip:config:iapp:json',
+    'bigip.objectmodel.virtual': 'f5:bigip:config:iapp:json',
     'bigip.ihealth.diagnostics': 'f5:bigip:ihealth:iapp:json'
 };
 
 function getTemplate(sourceName, data, cache) {
+    let deviceGroup = Object.keys(data.deviceGroups || {}).find(dgKey => data.deviceGroups[dgKey].type === 'sync-failover');
+    deviceGroup = (deviceGroup || '').split('/').pop();
+
     return {
         time: cache.dataTimestamp,
         host: data.system.hostname,
@@ -53,7 +63,7 @@ function getTemplate(sourceName, data, cache) {
         event: {
             aggr_period: data.telemetryServiceInfo.pollingInterval,
             device_base_mac: data.system.baseMac,
-            devicegroup: data.system.deviceGroup || '',
+            devicegroup: deviceGroup || data.system.hostname,
             facility: data.system.facility || ''
         }
     };
@@ -135,13 +145,13 @@ const stats = [
             'sync-status': data.syncStatus,
             'sync-summary': data.syncSummary,
             'sync-color': data.syncColor,
-            asm_state: data.asmState,
-            last_asm_change: data.lastAsmChange,
-            apm_state: data.apmState,
-            afm_state: data.afmState,
-            last_afm_deploy: data.lastAfmDeploy,
-            ltm_config_time: data.ltmConfigTime,
-            gtm_config_time: data.gtmConfigTime
+            asm_state: data.asmState || '',
+            last_asm_change: data.lastAsmChange || '',
+            apm_state: data.apmState || '',
+            afm_state: data.afmState || '',
+            last_afm_deploy: data.lastAfmDeploy || '',
+            ltm_config_time: data.ltmConfigTime || '2147483647', // default max int if unable to retrieve
+            gtm_config_time: data.gtmConfigTime || '2147483647' // default max int if unable to retrieve
         });
         return template;
     },
@@ -219,6 +229,28 @@ const stats = [
             newData.event.availability_state = vsStat.availabilityState;
             newData.event.enabled_state = vsStat.enabledState;
             newData.event.status_reason = '';
+            return newData;
+        });
+    },
+
+    function (request) {
+        const vsStats = getData(request, 'virtualServers');
+        if (vsStats === undefined) return undefined;
+
+        const template = getTemplate('bigip.objectmodel.virtual', request.globalCtx.event.data, request.cache);
+        return Object.keys(vsStats).map((key) => {
+            const vsStat = vsStats[key];
+            const newData = Object.assign({}, template);
+            newData.event = Object.assign({}, template.event);
+            newData.event.virtual_name = key;
+            newData.event.app = vsStat.application;
+            newData.event.appComponent = '';
+            newData.event.tenant = vsStat.tenant;
+            newData.event.iapp_name = vsStat.application;
+            newData.event.ip = vsStat.destination;
+            newData.event.mask = vsStat.mask;
+            newData.event.port = vsStat.destination;
+            newData.event.protocol = vsStat.ipProtocol;
             return newData;
         });
     },

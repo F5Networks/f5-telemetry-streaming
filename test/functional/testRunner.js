@@ -8,9 +8,11 @@
 
 'use strict';
 
-const constants = require('./shared/constants.js');
-const util = require('./shared/util.js');
+/* eslint-disable no-console */
 
+// initliaze logger
+const util = require('./shared/util.js'); // eslint-disable-line
+const constants = require('./shared/constants.js');
 const dutTests = require('./dutTests.js');
 const consumerHostTests = require('./consumerSystemTests.js');
 
@@ -23,12 +25,12 @@ describe('Global: Test', () => {
     if (process.env[constants.ENV_VARS.TEST_CONTROLS.SKIP_DUT_TESTS] !== '1') {
         dutTests.test();
     } else {
-        util.log('WARN: skip DUT tests');
+        console.warn('WARN: skip DUT tests');
     }
     if (process.env[constants.ENV_VARS.TEST_CONTROLS.SKIP_CONSUMER_TESTS] !== '1') {
         consumerHostTests.test();
     } else {
-        util.log('WARN: skip Consumers tests');
+        console.warn('WARN: skip Consumers tests');
     }
 });
 

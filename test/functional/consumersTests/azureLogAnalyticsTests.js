@@ -49,6 +49,10 @@ function setup() {
             )
                 .then((data) => {
                     oauthToken = data.access_token;
+                })
+                .catch((err) => {
+                    util.logger.error(`Unable to get OAuth token: ${err}`);
+                    return Promise.reject(err);
                 });
         });
     });
@@ -56,7 +60,7 @@ function setup() {
 
 function test() {
     const testType = 'Azure_Consumer_Test';
-    const dataTimestamp = (new Date()).getTime();
+    const dataTimestamp = Date.now();
 
     describe('Consumer Test: Azure Log Analytics - Configure TS and generate data', () => {
         it('should configure TS', () => {
@@ -73,7 +77,7 @@ function test() {
         });
 
         it('should send event to TS Event Listener', () => {
-            const msg = `timestamp="${dataTimestamp}",test="true",testType="${testType}"`;
+            const msg = `timestamp="${dataTimestamp}",test="${dataTimestamp}",testType="${testType}"`;
             return dutUtils.sendDataToDUTsEventListener(hostObj => `hostname="${hostObj.hostname}",${msg}`);
         });
     });
@@ -107,9 +111,10 @@ function test() {
                     `where hostname_s == "${dut.hostname}"`,
                     'where TimeGenerated > ago(5m)'
                 ].join(' | ');
-                return new Promise(resolve => setTimeout(resolve, 10000))
+                return new Promise(resolve => setTimeout(resolve, 30000))
                     .then(() => queryAzure(queryString))
                     .then((results) => {
+                        util.logger.info('Response from Log Analytics:', { hostname: dut.hostname, results });
                         assert(results.tables[0], 'Log Analytics query returned no results');
                         assert(results.tables[0].rows, 'Log Analytics query returned no rows');
                         assert(results.tables[0].rows[0], 'Log Analytics query returned no rows');
@@ -120,11 +125,12 @@ function test() {
                 const queryString = [
                     'F5Telemetry_LTM_CL',
                     `where hostname_s == "${dut.hostname}"`,
-                    `where timestamp_s == "${dataTimestamp}"`
+                    `where test_s == "${dataTimestamp}"`
                 ].join(' | ');
                 return new Promise(resolve => setTimeout(resolve, 10000))
                     .then(() => queryAzure(queryString))
                     .then((results) => {
+                        util.logger.info('Response from Log Analytics:', { hostname: dut.hostname, results });
                         assert(results.tables[0], 'Log Analytics query returned no results');
                         assert(results.tables[0].rows, 'Log Analytics query returned no rows');
                         assert(results.tables[0].rows[0], 'Log Analytics query returned no rows');

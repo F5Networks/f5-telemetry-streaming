@@ -20,6 +20,13 @@
         "failoverStatus": "ACTIVE",
         "failoverColor": "green",
         "systemTimestamp": "2019-01-01T01:01:01Z",
+        "asmState": "Policies Consistent",
+        "lastAsmChange": "2019-06-19T20:15:28.000Z",
+        "apmState": "Policies Consistent",
+        "afmState": "quiescent",
+        "lastAfmDeploy": "2019-06-17T21:24:29.000Z",
+        "ltmConfigTime": "2019-06-19T21:13:40.000Z",
+        "gtmConfigTime": "2019-06-07T18:11:53.000Z",
         "cpu": 0,
         "memory": 0,
         "tmmCpu": 0,
@@ -263,12 +270,15 @@
             "clientside.bitsIn": 0,
             "clientside.bitsOut": 0,
             "clientside.curConns": 0,
-            "destination": "10.0.2.101:80",
-            "availabilityState": "available",
+            "destination": "10.5.6.7:80",
+            "availabilityState": "offline",
             "enabledState": "enabled",
-            "name": "/Common/app.app/app_vs",
+            "mask": "255.255.255.255",
+            "name": "/Common/foofoo.app/foofoo_vs",
+            "appService": "/Common/foofoo.app/foofoo",
+            "ipProtocol": "tcp",
             "tenant": "Common",
-            "application": "app.app"
+            "application": "foofoo.app"
         },
         "/Example_Tenant/A1/serviceMain": {
             "clientside.bitsIn": 0,
@@ -277,7 +287,9 @@
             "destination": "192.0.2.11:443",
             "availabilityState": "offline",
             "enabledState": "enabled",
+            "mask": "255.255.255.0",
             "name": "/Example_Tenant/A1/serviceMain",
+            "ipProtocol": "tcp",
             "tenant": "Example_Tenant",
             "application": "A1"
         },
@@ -644,6 +656,58 @@
             "outDiscards": 0,
             "outErrors": 0,
             "name": "/Common/socks-tunnel",
+            "tenant": "Common",
+            "application": ""
+        }
+    },
+    "deviceGroups": {
+        "/Common/device_trust_group": {
+            "commitIdTime": "2019-06-10T17:23:02.000Z",
+            "lssTime": "-",
+            "timeSinceLastSync": "-",
+            "type": "sync-only",
+            "name": "/Common/device_trust_group",
+            "tenant": "Common"
+        },
+        "/Common/example_device_group": {
+            "commitIdTime": "2019-05-31T01:11:48.000Z",
+            "lssTime": "2019-05-31T01:11:48.000Z",
+            "timeSinceLastSync": "1221553",
+            "type": "sync-failover",
+            "name": "/Common/example_device_group",
+            "tenant": "Common"
+        }
+    },
+    "iRules": {
+        "/Common/_sys_APM_ExchangeSupport_OA_BasicAuth": {
+            "events": {
+                "RULE_INIT": {
+                    "aborts": 0,
+                    "avgCycles": 19014,
+                    "failures": 0,
+                    "maxCycles": 19014,
+                    "minCycles": 8804,
+                    "priority": 500,
+                    "totalExecutions": 4
+                }
+            },
+            "name": "/Common/_sys_APM_ExchangeSupport_OA_BasicAuth",
+            "tenant": "Common",
+            "application": ""
+        },
+        "/Common/_sys_APM_ExchangeSupport_OA_NtlmAuth": {
+            "events": {
+                "RULE_INIT": {
+                    "aborts": 0,
+                    "avgCycles": 28942,
+                    "failures": 0,
+                    "maxCycles": 28942,
+                    "minCycles": 20102,
+                    "priority": 500,
+                    "totalExecutions": 4
+                }
+            },
+            "name": "/Common/_sys_APM_ExchangeSupport_OA_NtlmAuth",
             "tenant": "Common",
             "application": ""
         }

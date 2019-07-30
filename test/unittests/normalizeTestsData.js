@@ -116,6 +116,11 @@ module.exports = {
                 key2: 'value\",value',
                 telemetryEventCategory: EVENT_TYPES.LTM_EVENT
             }
+        },
+        {
+            name: 'valid CGNAT keys',
+            data: 'lsn_event="LSN_DELETE",start="1562092616047",cli="X.X.X.X",nat="Y.Y.Y.Y",duration="8080",pem_subscriber_id="No-lookup"',
+            category: EVENT_TYPES.CGNAT_EVENT
         }
     ]
 };

@@ -94,6 +94,27 @@
                 },
                 "provisioning": {
                     "type": "object"
+                },
+                "asmState": {
+                    "type": "string"
+                },
+                "lastAsmChange": {
+                    "type": "string"
+                },
+                "apmState": {
+                    "type": "string"
+                },
+                "afmState": {
+                    "type": "string"
+                },
+                "lastAfmDeploy": {
+                    "type": "string"
+                },
+                "ltmConfigTime": {
+                    "type": "string"
+                },
+                "gtmConfigTime": {
+                    "type": "string"
                 }
             },
             "additionalProperties": false,
@@ -161,6 +182,9 @@
         "sslCerts": {
             "type": "object"
         },
+        "iRules": {
+            "type": "object"
+        },
         "telemetryServiceInfo": {
             "type": "object",
             "properties": {
@@ -187,6 +211,9 @@
         "telemetryEventCategory": {
             "type": "string",
             "enum": [ "systemInfo" ]
+        },
+        "deviceGroups": {
+            "type": "object"
         }
     },
     "additionalProperties": false,

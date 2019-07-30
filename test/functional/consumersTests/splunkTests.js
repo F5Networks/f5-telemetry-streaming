@@ -46,7 +46,7 @@ function setup() {
 
 function test() {
     const testType = 'Splunk_Consumer_Test';
-    const dataTimestamp = (new Date()).getTime();
+    const testDataTimestamp = (new Date()).getTime();
     let splunkHecToken;
 
     describe('Consumer Test: Splunk - Configure Service', () => {
@@ -75,9 +75,10 @@ function test() {
             };
 
             // splunk container takes about 30 seconds to come up
-            return new Promise(resolve => setTimeout(resolve, 3000))
+            return new Promise(resolve => setTimeout(resolve, 10000))
                 .then(() => util.makeRequest(CONSUMER_HOST.ip, uri, options))
                 .then((data) => {
+                    util.logger.info(`Splunk response ${uri}`, data);
                     assert.strictEqual(data.links.restart, '/services/server/control/restart');
                 });
         });
@@ -141,12 +142,15 @@ function test() {
         });
 
         it('should send event to TS Event Listener', () => {
-            const msg = `timestamp="${dataTimestamp}",test="true",testType="${testType}"`;
+            const msg = `testDataTimestamp="${testDataTimestamp}",test="true",testType="${testType}"`;
             return dutUtils.sendDataToDUTsEventListener(hostObj => `hostname="${hostObj.hostname}",${msg}`);
         });
     });
 
     describe('Consumer Test: Splunk - Test', () => {
+        const splunkSourceStr = 'f5.telemetry';
+        const splunkSourceTypeStr = 'f5:telemetry:json';
+
         // helper function to query splunk for data
         const query = (searchString) => {
             const baseUri = '/services/search/jobs';
@@ -195,37 +199,56 @@ function test() {
 
         DUTS.forEach((dut) => {
             const searchQuerySP = `search source=f5.telemetry | search "system.hostname"="${dut.hostname}" | head 1`;
-            util.log(`Splunk search query for system poller data: ${searchQuerySP}`);
+            const searchQueryEL = `search source=f5.telemetry | spath testType | search testType=${testType} | search hostname="${dut.hostname}" | search testDataTimestamp="${testDataTimestamp}" | head 1`;
 
-            const searchQueryEL = `search source=f5.telemetry | spath testType | search testType=${testType} | search hostname="${dut.hostname}" | search timestamp="${dataTimestamp}" | head 1`;
-            util.log(`Splunk search query for event listener data: ${searchQueryEL}`);
-
-            it(`should check for system poller data from - ${dut.hostname}`, () => new Promise(resolve => setTimeout(resolve, 5000))
-                .then(() => query(searchQuerySP))
+            it(`should check for system poller data from - ${dut.hostname}`, () => new Promise(resolve => setTimeout(resolve, 30000))
+                .then(() => {
+                    util.logger.info(`Splunk search query for system poller data: ${searchQuerySP}`);
+                    return query(searchQuerySP);
+                })
                 .then((data) => {
+                    util.logger.info('Splunk response:', data);
                     // check we have results
                     const results = data.results;
                     assert.strictEqual(results.length > 0, true, 'No results');
-
                     // check that the event is what we expect
-                    const result = JSON.parse(results[0]._raw);
-
+                    const result = results[0];
+                    const rawData = JSON.parse(result._raw);
+                    // validate raw data agains schema
                     const schema = JSON.parse(fs.readFileSync(constants.DECL.SYSTEM_POLLER_SCHEMA));
-                    const valid = util.validateAgainstSchema(result, schema);
+                    const valid = util.validateAgainstSchema(rawData, schema);
                     if (valid !== true) {
                         assert.fail(`output is not valid: ${JSON.stringify(valid.errors)}`);
                     }
+                    // validate data parsed by Splunk
+                    assert.strictEqual(result.host, dut.hostname);
+                    assert.strictEqual(result.source, splunkSourceStr);
+                    assert.strictEqual(result.sourcetype, splunkSourceTypeStr);
                 }));
 
-            it(`should check for event listener data from - ${dut.hostname}`, () => query(searchQueryEL)
+            it(`should check for event listener data from - ${dut.hostname}`, () => new Promise(resolve => setTimeout(resolve, 30000))
+                .then(() => {
+                    util.logger.info(`Splunk search query for event listener data: ${searchQueryEL}`);
+                    return query(searchQueryEL);
+                })
                 .then((data) => {
+                    util.logger.info('Splunk response:', data);
                     // check we have results
                     const results = data.results;
                     assert.strictEqual(results.length > 0, true, 'No results');
-
                     // check that the event is what we expect
-                    const result = JSON.parse(results[0]._raw);
+                    const result = results[0];
+                    const rawData = JSON.parse(result._raw);
+
+                    assert.strictEqual(rawData.testType, testType);
+                    assert.strictEqual(rawData.hostname, dut.hostname);
+                    // validate data parsed by Splunk
+                    assert.strictEqual(result.host, dut.hostname);
+                    assert.strictEqual(result.source, splunkSourceStr);
+                    assert.strictEqual(result.sourcetype, splunkSourceTypeStr);
+                    assert.strictEqual(result.hostname, dut.hostname);
                     assert.strictEqual(result.testType, testType);
+                    assert.strictEqual(result.testDataTimestamp, `${testDataTimestamp}`);
                 }));
         });
     });

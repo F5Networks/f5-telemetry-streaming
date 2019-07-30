@@ -43,7 +43,7 @@ function setup() {
 }
 
 function test() {
-    const timeStamp = (new Date()).getTime();
+    const testDataTimestamp = Date.now();
     describe('Consumer Test: ElasticSearch - Configure Service', () => {
         it('should start container', () => {
             const portArgs = `-p ${ES_HTTP_PORT}:${ES_HTTP_PORT} -p ${ES_TRANSPORT_PORT}:${ES_TRANSPORT_PORT} -e "discovery.type=single-node"`;
@@ -73,6 +73,24 @@ function test() {
                     assert.strictEqual(nodeInfo.successful, 1);
                 });
         });
+
+        it('should configure index limits', () => {
+            const uri = `/${ES_CONTAINER_NAME}`;
+            const options = {
+                protocol: ES_PROTOCOL,
+                port: ES_HTTP_PORT,
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: {
+                    settings: {
+                        'index.mapping.total_fields.limit': 2000
+                    }
+                }
+            };
+            return util.makeRequest(CONSUMER_HOST.ip, uri, options);
+        });
     });
 
     describe('Consumer Test: ElasticSearch - Configure TS', () => {
@@ -91,7 +109,7 @@ function test() {
         });
 
         it('should send event to TS Event Listener', () => {
-            const msg = `timestamp="${timeStamp}",test="true",testType="${ES_CONSUMER_NAME}"`;
+            const msg = `testDataTimestamp="${testDataTimestamp}",test="true",testType="${ES_CONSUMER_NAME}"`;
             return dutUtils.sendDataToDUTsEventListener(hostObj => `hostname="${hostObj.hostname}",${msg}`);
         });
     });
@@ -105,6 +123,7 @@ function test() {
                 protocol: ES_PROTOCOL
             };
 
+            util.logger.info(`ElasicSearch search query - ${uri}`);
             return new Promise(resolve => setTimeout(resolve, 15000))
                 .then(() => util.makeRequestWithRetry(
                     () => util.makeRequest(CONSUMER_HOST.ip, uri, options),
@@ -124,25 +143,50 @@ function test() {
                 assert.notStrictEqual(hostname, undefined);
             });
 
-            it(`should check for event listener data for - ${dut.hostname}`, () => query(`size=1&q=testType:${ES_CONSUMER_NAME}`)
+            it(`should check for event listener data for - ${dut.hostname}`, () => new Promise(resolve => setTimeout(resolve, 10000))
+                .then(() => query(`q=data.testType:${ES_CONSUMER_NAME}`))
                 .then((data) => {
+                    util.logger.info('ElasticSearch response:', data);
                     const esData = data.hits.hits;
                     assert.notStrictEqual(esData.length, 0);
-                    assert.strictEqual(esData[0]._source.timestamp, timeStamp.toString());
+
+                    let found = false;
+                    esData.forEach((hit) => {
+                        const eventData = hit._source.data;
+                        if (eventData && eventData.hostname === dut.hostname) {
+                            assert.strictEqual(eventData.testDataTimestamp, testDataTimestamp.toString());
+                            found = true;
+                        }
+                    });
+                    if (!found) {
+                        return Promise.reject(new Error('Event not found'));
+                    }
+                    return Promise.resolve();
                 }));
 
-            it(`should have consumer data posted for - ${dut.hostname}`, () => query(`size=1&q=system.hostname:${dut.hostname}`)
+            it(`should have consumer data posted for - ${dut.hostname}`, () => new Promise(resolve => setTimeout(resolve, 30000))
+                .then(() => query(`q=system.hostname:${dut.hostname}`))
                 .then((data) => {
+                    util.logger.info('ElasticSearch response:', data);
                     const esData = data.hits.hits;
                     assert.notStrictEqual(esData.length, 0);
-                    assert.strictEqual(esData[0]._source.system.hostname, dut.hostname);
 
-
-                    const schema = JSON.parse(fs.readFileSync(constants.DECL.SYSTEM_POLLER_SCHEMA));
-                    const valid = util.validateAgainstSchema(esData[0]._source, schema);
-                    if (valid !== true) {
-                        assert.fail(`output is not valid: ${JSON.stringify(valid.errors)}`);
+                    let found = false;
+                    esData.forEach((hit) => {
+                        const sysData = hit._source;
+                        if (sysData && sysData.system && sysData.system.hostname === dut.hostname) {
+                            const schema = JSON.parse(fs.readFileSync(constants.DECL.SYSTEM_POLLER_SCHEMA));
+                            const valid = util.validateAgainstSchema(sysData, schema);
+                            if (valid !== true) {
+                                assert.fail(`output is not valid: ${JSON.stringify(valid.errors)}`);
+                            }
+                            found = true;
+                        }
+                    });
+                    if (!found) {
+                        return Promise.reject(new Error('System Poller data not found'));
                     }
+                    return Promise.resolve();
                 }));
         });
     });

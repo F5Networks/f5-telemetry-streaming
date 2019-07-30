@@ -48,6 +48,8 @@ Quick Start Example
 
 |
 
+.. _components:
+
 Components of the declaration
 -----------------------------
 This section provides more information about the options in the Quick Start example, and breaks down the example declaration into each class so you can understand the options when composing your declaration. The tables below the examples contain descriptions and options for the parameters included in this example only. 
@@ -65,7 +67,6 @@ The first few lines of your declaration are a part of the base components and de
 .. code-block:: javascript
    :linenos:
 
-
     {
         "class": "Telemetry",
         "controls": {
@@ -73,7 +74,7 @@ The first few lines of your declaration are a part of the base components and de
             "logLevel": "info"
         },
 
-        
+   
              
 |
 

@@ -108,7 +108,7 @@ How does the project handle a typical `POST` request?
             "trace": false,
             "format": "default"
         },
-        "schemaVersion": "1.4.0"
+        "schemaVersion": "1.5.0"
     }
 }
 ```
@@ -192,6 +192,7 @@ Collect the raw data from the device by adding a new endpoint to the paths confi
     "endpoint": "/mgmt/tm/sys/someEndpoint", // REST endpoint
     "includeStats": true, // Certain data is only available via /mgmt/tm/sys/someEndpoint as opposed to /mgmt/tm/sys/someEndpoint/stats, this property accomodates for this by making call to /stats (for each item) and adding that data to the original object
     "expandReferences": { "membersReference": { "endpointSuffix": "/stats" } }, // Certain data requires getting a list of objects and then in each object expanding/following references to a child object.  'membersReference' is the name of that key (currently looking under 'items' in the data returned) and will result in self link data being retrived and 'membersReference' key being replaced with that data.  'endpointSuffix' defines adding a suffix for each self link prior to retrieval.
+    "endpointFields": [ "name", "fullPath", "selfLink", "ipProtocol", "mask" ], // Will collect only these fields from the endoint. Useful when using includeStats and the same property exists in both endpoints. Also can be used instead of a large exclude/include statement in properties.json
     "body": "{ \"command\": \"run\", \"utilCmdArgs\": \"-c \\\"/bin/df -P | /usr/bin/tr -s ' ' ','\\\"\" }", // Certain information may require using POST instead of GET and require an HTTP body, if body is defined that gets used along with a POST
     "name": "someStatRef" // Alternate name to reference in properties.json, default is to use the endpoint
 }
@@ -226,7 +227,7 @@ Enable and define how the data should look by adding a new key under *stats* in 
         "filterKeys": { "exclude": [ "removeMe"] }, // Filter all keys in object using either an inclusio or exclusion list - include also supported, not an exact match
         "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "~": { "replaceCharacter": "/" },  }, // Rename keys, useful if key contains unneccesary prefix/suffix or needs a specific character replaced. This can also be an array with 1+ rename key objects inside it to guarantee order.
         "includeFirstEntry": { "pattern": "/stats", "excludePattern": "/members/" }, // This is useful if aggregating data from /endpoint and /endpoint/stats typically.  Allows a complex object to by merged instead of nesting down into entries, instead the values in the first entry of 'entries' will be copied to the top level object and then discarded.  There may be multiple 'entries', of which only some should follow this property, that is supported with an optional pattern and excludePattern.
-        "runFunction": { "name": "getPercentFromKeys", "args": { "totalKey": "memoryTotal", "partialKey": "memoryUsed" } }, // Run custom function, nail meet hammer.  This is to be used for one-offs where creating a standard macro does not make sense, keeping in mind each custom function could be used multiple times.  The function should already exist inside of normalizeUtil.js.
+        "runFunctions": [{ "name": "getPercentFromKeys", "args": { "totalKey": "memoryTotal", "partialKey": "memoryUsed" } }], // Run custom functions, nail meet hammer.  This is to be used for one-offs where creating a standard macro does not make sense, keeping in mind each custom function could be used multiple times.  The function should already exist inside of normalizeUtil.js.
         "addKeysByTag": true || { "skip": [ "members" ] }, // Add keys by tag(s) defined in the configuration, default value to use should be 'true'.  The global property 'addKeysByTag' contains the default behavior regarding keys to skip, etc.
         "comment": "some comment", // Simple means to provide a comment in properties.json about a particular stat for other contributors
         "if": { "deviceVersionGreaterOrEqual": "13.0" }, // Simple conditional block. Every key inside "if" is predefined function to test which returns 'true' or 'false'. If several key are encountered then logical AND will be used to compute final result. More information about available function below. By default result is true for empty block.
@@ -277,7 +278,7 @@ This context data is defined on the same level as *stats* in the properties conf
         },
         {
             "someCtxKey2": {
-                "key": "/mgmt/tm/sys/global-settings::{{someCtxKey1}}" // other Macros properties are available too. Context data is available now! 
+                "key": "/mgmt/tm/sys/global-settings::{{someCtxKey1}}" // other Macros properties are available too. Context data is available now!
             }
         }
     ]
@@ -294,7 +295,16 @@ Some stats may only be available in certain conditions, for example on BIG-IP v1
    "if": {
         "deviceVersionGreaterOrEqual": "13.0"
    }
-} 
+}
+```
+
+*isModuleProvisioned:* Function to compare current device's provisioned modules against provided one.
+```javascript
+{
+   "if": {
+        "isModuleProvisioned": "asm"
+   }
+}
 ```
 
 ---

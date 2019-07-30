@@ -1091,7 +1091,8 @@ module.exports = {
         if (startExecDate > endExecDate) {
             endExecDate.setDate(endExecDate.getDate() + 1);
         }
-        let windowSize = endExecDate.getTime() - startExecDate.getTime();
+        let windowSize = endExecDate.getTime() - startExecDate.getTime()
+        + ((startExecDate.getTimezoneOffset() - endExecDate.getTimezoneOffset()) * 60000);
 
         while (!(isOnSchedule(startExecDate) && ((allowNow && startExecDate <= fromDate && fromDate < endExecDate)
                 || startExecDate > fromDate))) {
@@ -1107,6 +1108,26 @@ module.exports = {
         // finally set random time
         startExecDate.setTime(startExecDate.getTime() + Math.floor(self.getRandomArbitrary(0, windowSize)));
         return startExecDate;
+    },
+
+    /**
+     * Rename keys in an object at any level of depth if it passes the given regular expression test.
+     *
+     * @param {Object}                target         - object to be modified
+     * @param {Regular Expression}    match          - regular expression to test
+     * @param {String}                replacement    - regular expression match replacement
+     */
+    renameKeys(target, match, replacement) {
+        if (target !== null && typeof target === 'object') {
+            Object.keys(target).forEach((member) => {
+                this.renameKeys(target[member], match, replacement);
+                if (match.test(member)) {
+                    const newMember = member.replace(match, replacement);
+                    target[newMember] = target[member];
+                    delete target[member];
+                }
+            });
+        }
     },
 
     /** @see Tracer */

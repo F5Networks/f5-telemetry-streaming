@@ -10,7 +10,7 @@
             "convertArrayToMap": null,
             "filterKeys": null,
             "renameKeys": null,
-            "runFunction": null,
+            "runFunctions": null,
             "addKeysByTag": null
         },
         "version": {
@@ -54,7 +54,7 @@
             "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/sys/management-ip::items",
             "convertArrayToMap": { "keyName": "name" },
-            "runFunction": { "name": "getFirstKey", "args": { "splitOnValue": "/", "keyPrefix": "https://" } }
+            "runFunctions": [{ "name": "getFirstKey", "args": { "splitOnValue": "/", "keyPrefix": "https://" } }]
         },
         "configReady": {
             "structure": { "parentKey": "system" },
@@ -123,40 +123,40 @@
         "cpu": {
             "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/sys/host-info::sys/host-info/0::sys/hostInfo/0/cpuInfo",
-            "runFunction": { "name": "getAverage", "args": { "keyWithValue": "oneMinAvgSystem" } },
+            "runFunctions": [{ "name": "getAverage", "args": { "keyWithValue": "oneMinAvgSystem" } }],
             "comment": "also oneMinAvgUser, need to determine how that should be factored in"
         },
         "memory": {
             "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/sys/memory::sys/memory/memory-host::sys/memory/memory-host/0",
-            "runFunction": { "name": "getPercentFromKeys", "args": { "totalKey": "memoryTotal", "partialKey": "memoryUsed" } }
+            "runFunctions": [{ "name": "getPercentFromKeys", "args": { "totalKey": "memoryTotal", "partialKey": "memoryUsed" } }]
         },
         "tmmCpu": {
             "structure": { "parentKey": "system" },
             "key": "tmmInfo",
-            "runFunction": { "name": "getAverage", "args": { "keyWithValue": "oneMinAvgUsageRatio" } }
+            "runFunctions": [{ "name": "getAverage", "args": { "keyWithValue": "oneMinAvgUsageRatio" } }]
         },
         "tmmMemory": {
             "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/sys/memory::sys/memory/memory-host::sys/memory/memory-host/0",
-            "runFunction": { "name": "getPercentFromKeys", "args": { "totalKey": "tmmMemoryTotal", "partialKey": "tmmMemoryUsed" } }
+            "runFunctions": [{ "name": "getPercentFromKeys", "args": { "totalKey": "tmmMemoryTotal", "partialKey": "tmmMemoryUsed" } }]
         },
         "tmmTraffic": {
             "structure": { "parentKey": "system" },
             "key": "tmmTraffic",
             "filterKeys": { "exclude": [ "clientSideTraffic.pktsIn", "clientSideTraffic.pktsOut", "serverSideTraffic.pktsIn", "serverSideTraffic.pktsOut", "clientSideTraffic.curConns", "clientSideTraffic.evictedConns", "clientSideTraffic.maxConns", "clientSideTraffic.slowKilled", "clientSideTraffic.totConns", "cmpConnRedirected", "connectionMemoryErrors", "droppedPackets", "httpRequests", "incomingPacketErrors", "licenseDeny", "maintenanceModeDeny", "maxConnVirtualAddressDeny", "maxConnVirtualPathDeny", "noHandlerDeny", "noStagedHandlerDeny", "outgoingPacketErrors", "serverSideTraffic.curConns","serverSideTraffic.evictedConns", "serverSideTraffic.maxConns", "serverSideTraffic.slowKilled", "serverSideTraffic.totConns", "tmmId", "virtualServerNonSynDeny"] },
             "renameKeys": { "patterns": { "sys/tmm-traffic": { "pattern": "([0-9]\\.[0-9])" } } },
-            "runFunction": { "name": "getSum", "args": {} }
+            "runFunctions": [{ "name": "getSum", "args": {} }]
         },
         "diskStorage": {
             "structure": { "parentKey": "system" },
             "key": "diskStorage::commandResult",
-            "runFunction": { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Mounted", "filterKeys": { "include": [ "/", "Capacity", "1024-blocks" ] } } }
+            "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Mounted", "filterKeys": { "include": [ "/", "Capacity", "1024-blocks" ] } } }]
         },
         "diskLatency": {
             "structure": { "parentKey": "system" },
             "key": "diskLatency::commandResult",
-            "runFunction": { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Device:", "filterKeys": { "exclude": [ "Device:", "await", "r_await", "w_await", "svctm", "avgrq-sz", "avgqu-sz", "rkB/s", "wkB/s", "rsec/s", "wsec/s", "rrqm/s", "wrqm/s" ] }, "renameKeys": { "patterns": { "rsec/s": { "constant": "rkB/s" }, "wsec/s": { "constant": "wkB/s" } } } } },
+            "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Device:", "filterKeys": { "exclude": [ "Device:", "await", "r_await", "w_await", "svctm", "avgrq-sz", "avgqu-sz", "rkB/s", "wkB/s", "rsec/s", "wsec/s", "rrqm/s", "wrqm/s" ] }, "renameKeys": { "patterns": { "rsec/s": { "constant": "rkB/s" }, "wsec/s": { "constant": "wkB/s" } } } } }],
             "comment": "14.1+ uses wkB/s instead of wsec/s, equivalent for read.  Ignore both for now."
         },
         "networkInterfaces": {
@@ -173,9 +173,11 @@
             "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 } } }
         },
         "virtualServers": {
-            "key": "virtualServers",
-            "filterKeys": { "exclude": [ "tmName", "status.statusReason", "cmpEnabled", "cmpEnableMode", "csMaxConnDur", "csMeanConnDur", "csMinConnDur", "totRequests", "oneMinAvgUsageRatio", "clientside.pktsIn", "clientside.pktsOut", "clientside.evictedConns", "clientside.slowKilled", "clientside.maxConns", "clientside.totConns", "ephemeral.bitsIn", "ephemeral.bitsOut", "ephemeral.curConns", "ephemeral.evictedConns", "ephemeral.maxConns", "ephemeral.pktsIn", "ephemeral.pktsOut", "ephemeral.slowKilled", "ephemeral.totConns", "fiveSecAvgUsageRatio", "fiveMinAvgUsageRatio", "syncookieStatus", "syncookie.accepts", "syncookie.hwAccepts", "syncookie.hwSyncookies", "syncookie.rejects", "syncookie.hwsyncookieInstance", "syncookie.swsyncookieInstance", "syncookie.syncacheCurr", "syncookie.syncacheOver", "syncookie.syncookies", "syncookie.syncacheOver" ] },
+            "key": "virtualServers::items",
+            "convertArrayToMap": { "keyName": "fullPath", "keyNamePrefix": "name/" },
+            "filterKeys": { "exclude": [ "fullPath", "generation", "appServiceReference", "tmName", "status.statusReason", "cmpEnabled", "cmpEnableMode", "csMaxConnDur", "csMeanConnDur", "csMinConnDur", "totRequests", "oneMinAvgUsageRatio", "clientside.pktsIn", "clientside.pktsOut", "clientside.evictedConns", "clientside.slowKilled", "clientside.maxConns", "clientside.totConns", "ephemeral.bitsIn", "ephemeral.bitsOut", "ephemeral.curConns", "ephemeral.evictedConns", "ephemeral.maxConns", "ephemeral.pktsIn", "ephemeral.pktsOut", "ephemeral.slowKilled", "ephemeral.totConns", "fiveSecAvgUsageRatio", "fiveMinAvgUsageRatio", "syncookieStatus", "syncookie.accepts", "syncookie.hwAccepts", "syncookie.hwSyncookies", "syncookie.rejects", "syncookie.hwsyncookieInstance", "syncookie.swsyncookieInstance", "syncookie.syncacheCurr", "syncookie.syncacheOver", "syncookie.syncookies", "syncookie.syncacheOver" ] },
             "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/virtual": { "pattern": "virtual\/(.*)\/", "group": 1 } } },
+            "includeFirstEntry": { "pattern": "/stats"},
             "addKeysByTag": true
         },
         "pools": {
@@ -221,6 +223,121 @@
             "filterKeys": { "exclude": [ "tmName", "typeId" ] },
             "renameKeys": { "patterns": { "net/tunnels": { "pattern": "tunnel\/(.*)\/stats", "group": 1 } } },
             "addKeysByTag": true
+        },
+        "deviceGroups": {
+            "key": "deviceGroups::items",
+            "convertArrayToMap": { "keyName": "selfLink", "keyNamePrefix": "name/" },
+            "filterKeys": { "exclude": [ "commitIdOriginator", "device", "devicegroup", "lastSyncType", "lssOriginator", "generation", "partition", "fullPath", "asmSync", "autoSync", "fullLoadOnSync", "incrementalConfigSyncSizeMax", "networkFailover", "saveOnAutoSync", "devicesReference" ] },
+            "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "cm/device-group/": { "pattern": "device-group\/(.*)\\?", "group": 1 } } },
+            "includeFirstEntry": { "pattern": "/stats" },
+            "addKeysByTag": true
+        },
+        "asmState": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "asm"
+            },
+            "then": {
+                "key": "asmQuery::commandResult",
+                "runFunctions": [
+                    { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "asm_state" } },
+                    { "name": "getFirstKey" }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "lastAsmChange": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "asm"
+            },
+            "then": {
+                "key": "asmQuery::commandResult",
+                "runFunctions": [
+                    { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "last_asm_change", "renameKeys": { "patterns": { "NULL": { "constant": "" } } } } },
+                    { "name": "getFirstKey" }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "apmState": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "apm"
+            },
+            "then": {
+                "key": "apmState::commandResult",
+                "runFunctions": [
+                    { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "apm_state", "renameKeys": { "patterns": { "NULL": { "constant": "" } } } } },
+                    { "name": "getFirstKey" }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "afmState": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "afm"
+            },
+            "then": {
+                "key": "firewallCurrentState::pccdStatus",
+                "includeFirstEntry": { "pattern": "/stats" }
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "lastAfmDeploy": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "afm"
+            },
+            "then": {
+                "key": "firewallCurrentState::ruleDeployEndTimeFmt",
+                "includeFirstEntry": { "pattern": "/stats" }
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "ltmConfigTime": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "ltm"
+            },
+            "then": {
+                "key": "ltmConfigTime::value"
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "gtmConfigTime": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "gtm"
+            },
+            "then": {
+                "key": "gtmConfigTime::value"
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "iRules": {
+            "key": "iRules",
+            "filterKeys": { "exclude": ["kind", "selfLink", "tmName"] },
+            "renameKeys": { "patterns": { "ltm/rule/": { "pattern": "rule\/(.*):", "group": 1 } } },
+            "addKeysByTag": { "skip": ["events"] },
+            "runFunctions": [
+                { "name": "restructureRules" }
+            ]
         }
     },
     "events": {
@@ -229,7 +346,8 @@
             "AVR": { "keys": [ { "required": [ "EOCTimestamp" ], "optional": [ "AggrInterval", "Microtimestamp", "STAT_SRC", "Entity", "errdefs_msgno" ] } ] },
             "ASM": { "keys": [ { "required": [ "policy_name" ], "optional": [ "policy_apply_date", "request_status" ] } ] },
             "APM": { "keys": [ { "required": [ "Access_Profile" ] } ] },
-            "AFM": { "keys": [ { "required": [ "acl_policy_name" ], "optional": [ "acl_policy_type", "acl_rule_name" ] } ] }
+            "AFM": { "keys": [ { "required": [ "acl_policy_name" ], "optional": [ "acl_policy_type", "acl_rule_name" ] } ] },
+            "CGNAT": { "keys": [ { "required": [ "lsn_event" ], "optional": [ "lsn_client", "lsn_pb", "start" ] } ] }
        }
     },
     "ihealth": {
@@ -254,6 +372,13 @@
         },
         "deviceVersion": {
             "key": "/mgmt/tm/sys/version::sys/version/0::Version"
+        },
+        "provisioning": {
+            "structure": { "parentKey": "system" },
+            "key": "provisioning::items",
+            "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" },
+            "filterKeys": { "include": [ "name", "level" ] },
+            "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 } } }
         }
     },
     "global": {
@@ -282,7 +407,7 @@
             }
         },
         "filterKeys": { "exclude": [ "kind", "selfLink" ] },
-        "formatTimestamps": { "keys": [ "timestamp", "event_timestamp", "date_time", "systemTimestamp", "expirationString" ] }
+        "formatTimestamps": { "keys": [ "timestamp", "event_timestamp", "date_time", "systemTimestamp", "expirationString", "commitIdTime", "lssTime", "lastAsmChange", "lastAfmDeploy", "ltmConfigTime", "gtmConfigTime" ] }
     },
     "definitions": {
         "`T`": { "pattern": "\/(.*?)\/", "group": 1 },

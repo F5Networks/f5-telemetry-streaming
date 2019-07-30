@@ -21,7 +21,7 @@ Telemetry Streaming (TS) is an iControl LX Extension delivered as a TMOS-indepen
 
 **Where can I download Telemetry Streaming?**
 
-Telemetry Streaming is available on |github| and is community-supported.
+Telemetry Streaming is available on |github| and is F5-supported.
 
 |
 
@@ -61,7 +61,7 @@ See the :doc:`quick-start` to jump right into using TS.
 
 **What is the delivery cadence for Telemetry Streaming?**
 
-Telemetry Streaming is on a monthly delivery cadence, typically at beginning of every month.
+Telemetry Streaming releases are intended to be delivered on a 6-week basis.
 
 |
 

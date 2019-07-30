@@ -105,6 +105,7 @@ function test() {
                 );
                 consumer.addTopics([KAFKA_TOPIC], () => {
                     consumer.on('message', (message) => {
+                        util.logger.info('Kafka message received:', message);
                         consumer.removeAllListeners();
                         consumer.close();
                         const parsedMessage = JSON.parse(message.value);

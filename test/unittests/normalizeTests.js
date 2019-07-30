@@ -275,22 +275,22 @@ describe('Normalize', () => {
         assert.deepEqual(result, expectedResult);
     });
 
-    it('should run custom function', () => {
+    it('should run custom functions', () => {
         const options = {
-            runCustomFunction: {
-                name: 'formatAsJson',
-                args: {
-                    type: 'csv',
-                    mapKey: 'named_key'
+            runCustomFunctions: [
+                {
+                    name: 'formatAsJson',
+                    args: {
+                        type: 'csv',
+                        mapKey: 'named_key'
+                    }
+                },
+                {
+                    name: 'getFirstKey'
                 }
-            }
+            ]
         };
-        const expectedResult = {
-            name: {
-                named_key: 'name',
-                key1: 'value'
-            }
-        };
+        const expectedResult = 'name';
 
         const result = normalize.data('named_key,key1\nname,value', options);
         assert.deepEqual(result, expectedResult);
@@ -373,6 +373,18 @@ describe('Normalize', () => {
         };
         const options = {
             formatTimestamps: ['expirationString']
+        };
+
+        const result = normalize.data(data, options);
+        assert.deepEqual(result, expectedResult);
+    });
+
+    it('should format timestamps when matching property key', () => {
+        const data = '1560975328';
+        const expectedResult = '2019-06-19T20:15:28.000Z';
+        const options = {
+            formatTimestamps: ['ltmConfigTime'],
+            propertyKey: 'ltmConfigTime'
         };
 
         const result = normalize.data(data, options);
@@ -565,5 +577,62 @@ describe('Normalize Util', () => {
             const msg = err.message || err;
             assert.notStrictEqual(msg.indexOf('Unsupported type'), -1);
         }
+    });
+
+    it('should restructure rules', () => {
+        const args = {
+            data: {
+                '/Common/_sys_APM_ExchangeSupport_OA_BasicAuth': {
+                    aborts: 0,
+                    avgCycles: 30660,
+                    eventType: 'RULE_INIT',
+                    failures: 0,
+                    maxCycles: 30660,
+                    minCycles: 23832,
+                    priority: 500,
+                    totalExecutions: 4
+                },
+                '/Common/_sys_APM_ExchangeSupport_OA_NtlmAuth': {
+                    aborts: 0,
+                    avgCycles: 26028,
+                    eventType: 'RULE_INIT',
+                    failures: 0,
+                    maxCycles: 26028,
+                    minCycles: 23876,
+                    priority: 500,
+                    totalExecutions: 4
+                }
+            }
+        };
+        const expected = {
+            '/Common/_sys_APM_ExchangeSupport_OA_BasicAuth': {
+                events: {
+                    RULE_INIT: {
+                        aborts: 0,
+                        avgCycles: 30660,
+                        failures: 0,
+                        maxCycles: 30660,
+                        minCycles: 23832,
+                        priority: 500,
+                        totalExecutions: 4
+                    }
+                }
+            },
+            '/Common/_sys_APM_ExchangeSupport_OA_NtlmAuth': {
+                events: {
+                    RULE_INIT: {
+                        aborts: 0,
+                        avgCycles: 26028,
+                        failures: 0,
+                        maxCycles: 26028,
+                        minCycles: 23876,
+                        priority: 500,
+                        totalExecutions: 4
+                    }
+                }
+            }
+        };
+        const result = normalizeUtil.restructureRules(args);
+        assert.deepStrictEqual(expected, result);
     });
 });

@@ -46,5 +46,6 @@ module.exports = {
         PORT: 443,
         PROTOCOL: 'https'
     },
-    CONSUMERS_DIR: 'consumersTests'
+    CONSUMERS_DIR: `${__dirname}/../consumersTests`,
+    ARTIFACTS_DIR: `${__dirname}/../../artifacts`
 };
