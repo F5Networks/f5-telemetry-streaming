@@ -1,0 +1,136 @@
+{
+    "$id": "system_poller_schema.json",
+    "$async": true,
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry Streaming system poller schema",
+    "description": "",
+    "type": "object",
+    "definitions": {
+        "systemPoller": {
+            "$comment": "system_schema.json should be updated when new property added",
+            "$async": true,
+            "title": "System Poller",
+            "description": "",
+            "type": "object",
+            "properties": {
+                "enable": {
+                    "default": true,
+                    "allOf": [
+                        {
+                            "$ref": "base_schema.json#/definitions/enable"
+                        }
+                    ]
+                },
+                "trace": {
+                    "default": false,
+                    "allOf": [
+                        {
+                            "$ref": "base_schema.json#/definitions/trace"
+                        }
+                    ]
+                },
+                "interval": {
+                    "title": "Collection interval (in seconds)",
+                    "description": "" ,
+                    "type": "integer",
+                    "minimum": 60,
+                    "maximum": 6000,
+                    "default": 300
+                },
+                "tag": {
+                    "default": { "tenant": "`T`", "application": "`A`"},
+                    "allOf": [
+                        {
+                            "$ref": "base_schema.json#/definitions/tag"
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "allOf": [
+        {
+            "if": { "properties": { "class": { "const": "Telemetry_System_Poller" } } },
+            "then": {
+                "required": [
+                    "class"
+                ],
+                "properties": {
+                    "class": {
+                        "title": "Class",
+                        "description": "Telemetry Streaming System Poller class",
+                        "type": "string",
+                        "enum": [ "Telemetry_System_Poller" ]
+                    },
+                    "host": {
+                        "$comment": "Deprecated! Use Telemetry_System to define target device",
+                        "default": "localhost",
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/host"
+                            }
+                        ]
+                    },
+                    "port": {
+                        "$comment": "Deprecated! Use Telemetry_System to define target device",
+                        "default": 8100,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/port"
+                            }
+                        ]
+                    },
+                    "protocol": {
+                        "$comment": "Deprecated! Use Telemetry_System to define target device",
+                        "default": "http",
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/protocol"
+                            }
+                        ]
+                    },
+                    "allowSelfSignedCert": {
+                        "$comment": "Deprecated! Use Telemetry_System to define target device",
+                        "$ref": "base_schema.json#/definitions/allowSelfSignedCert"
+                    },
+                    "enableHostConnectivityCheck": {
+                        "$comment": "Deprecated! Use Telemetry_System to define target device",
+                        "$ref": "base_schema.json#/definitions/enableHostConnectivityCheck"
+                    },
+                    "username": {
+                        "$comment": "Deprecated! Use Telemetry_System to define target device",
+                        "$ref": "base_schema.json#/definitions/username"
+                    },
+                    "passphrase": {
+                        "$comment": "Deprecated! Use Telemetry_System to define target device",
+                        "$ref": "base_schema.json#/definitions/secret"
+                    }
+                },
+                "allOf": [
+                    {
+                        "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a seperate block",
+                        "properties": {
+                            "class": {},
+                            "enable": {},
+                            "trace": {},
+                            "interval": {},
+                            "tag": {},
+                            "host": {},
+                            "port": {},
+                            "protocol": {},
+                            "allowSelfSignedCert": {},
+                            "enableHostConnectivityCheck": {},
+                            "username": {},
+                            "passphrase": {}
+                        },
+                        "additionalProperties": false
+                    },
+                    {
+                        "$ref": "#/definitions/systemPoller"
+                    }
+                ]
+            },
+            "else": {}
+        }
+    ]
+}

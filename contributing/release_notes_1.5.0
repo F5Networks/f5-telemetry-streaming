@@ -3,6 +3,10 @@
 * Collect device groups, ASM state, last ASM change, APM state, AFM state, LTM config time, and GTM config time
 * Collect stats for iRules
 * Support for CGNAT events logs
+<<<<<<< HEAD
+=======
+* Added "allowSelfSignedCert" to the documentation examples (closing https://github.com/F5Networks/f5-telemetry-streaming/issues/14), and added an associated troubleshooting entry in the documentation on clouddocs.f5.com
+>>>>>>> master
 
 # Bug Fixes
 * Elastic Search Unable to parse and index some messages with previously used keys
