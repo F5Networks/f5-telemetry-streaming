@@ -17,6 +17,7 @@ const normalize = require('./normalize.js');
 const dataPipeline = require('./dataPipeline.js');
 const configWorker = require('./config.js');
 const properties = require('./config/properties.json');
+const dataTagging = require('./dataTagging');
 
 const tracers = require('./util.js').tracer;
 const stringify = require('./util.js').stringify;
@@ -61,6 +62,7 @@ function EventListener(name, port, opts) {
     this.tags = opts.tags || {};
     this.filterFunc = opts.filterFunc;
     this.logger = logger.getChild(`${this.name}:${this.port}:${this.protocol}`);
+    this.actions = opts.actions;
 
     this._server = null;
     this._clientConnMap = {};
@@ -318,9 +320,15 @@ EventListener.prototype.processEvent = function (data) {
     data.split(/"\n|\r\n/).forEach((line) => {
         // lets normalize the data
         const normalizedData = normalize.event(line, options);
+
+        if (this.actions) {
+            dataTagging.handleActions(normalizedData, this.actions);
+        }
+
         if (this.tracer) {
             this.tracer.write(JSON.stringify(normalizedData, null, 4));
         }
+
         // keep filtering as part of event listener for now
         if (!this.filterFunc || this.filterFunc(normalizedData)) {
             dataPipeline.process(normalizedData, normalizedData.telemetryEventCategory);
@@ -391,6 +399,7 @@ configWorker.on('change', (config) => {
         // pre-create all variables
         const port = lConfig.port || DEFAULT_PORT;
         const tags = lConfig.tag;
+        const actions = lConfig.actions;
         const tracer = tracers.createFromConfig(CLASS_NAME, lKey, lConfig);
         const filterFunc = buildFilterFunc(lConfig);
 
@@ -411,6 +420,7 @@ configWorker.on('change', (config) => {
                 protocolListener = new EventListener(lKey, port, {
                     protocol,
                     tags,
+                    actions,
                     tracer,
                     filterFunc
                 });
