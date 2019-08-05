@@ -93,7 +93,8 @@
                                             "enable": {},
                                             "trace": {},
                                             "interval": {},
-                                            "tag": {}
+                                            "tag": {},
+                                            "actions": {}
                                         },
                                         "additionalProperties": false
                                     },

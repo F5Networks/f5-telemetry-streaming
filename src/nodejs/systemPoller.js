@@ -15,6 +15,7 @@ const deviceUtil = require('./deviceUtil.js');
 const configWorker = require('./config.js');
 const SystemStats = require('./systemStats.js');
 const dataPipeline = require('./dataPipeline.js');
+const dataTagging = require('./dataTagging');
 
 const SYSTEM_CLASS_NAME = constants.SYSTEM_CLASS_NAME;
 const SYSTEM_POLLER_CLASS_NAME = constants.SYSTEM_POLLER_CLASS_NAME;
@@ -51,6 +52,10 @@ function process(args) {
             data.telemetryServiceInfo = telemetryServiceInfo;
             data.telemetryEventCategory = constants.EVENT_TYPES.SYSTEM_POLLER;
             // end inject service data
+
+            if (config.options.actions) {
+                dataTagging.handleActions(data, config.options.actions);
+            }
 
             if (tracer) {
                 tracer.write(JSON.stringify(data, null, 4));
@@ -204,7 +209,8 @@ function mergeConfigs(system, systemPoller) {
                     username: system.username,
                     passphrase: system.passphrase
                 },
-                tags: systemPoller.tag
+                tags: systemPoller.tag,
+                actions: systemPoller.actions
             }
         }
     };
