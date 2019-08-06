@@ -211,6 +211,28 @@ describe('Data Tagging', () => {
             dataTagging.addTags(data, tags);
             assert.deepEqual(expected, data);
         });
+
+        it('should add facility tag to data.system', () => {
+            const data = {
+                system: {
+                    systemData: {}
+                }
+            };
+            const tags = {
+                facility: 'facilityValue'
+            };
+            const locations = {
+                system: true
+            };
+            const expected = {
+                system: {
+                    systemData: {},
+                    facility: 'facilityValue'
+                }
+            };
+            dataTagging.addTags(data, tags, locations);
+            assert.deepEqual(data, expected);
+        });
     });
 
     describe('handleActions', () => {
