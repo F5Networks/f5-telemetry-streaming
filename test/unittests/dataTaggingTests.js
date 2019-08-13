@@ -212,6 +212,23 @@ describe('Data Tagging', () => {
             assert.deepEqual(expected, data);
         });
 
+        it('should add no tags to event when data is string and tags are tenant and application', () => {
+            const data = {
+                data: 'Event data',
+                telemetryEventCategory: 'event'
+            };
+            const tags = {
+                tenant: '`T`',
+                application: '`A`'
+            };
+            const expected = {
+                data: 'Event data',
+                telemetryEventCategory: 'event'
+            };
+            dataTagging.addTags(data, tags);
+            assert.deepEqual(expected, data);
+        });
+
         it('should add facility tag to data.system', () => {
             const data = {
                 system: {
