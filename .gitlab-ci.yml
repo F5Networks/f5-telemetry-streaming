@@ -308,8 +308,7 @@ publish_docs_to_production:
         name: production
         url: https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest
     only:
-        # fill in desired release branch name to add deployment from a branch: currently *master*
-        - master@automation-toolchain/f5-telemetry
+        # fill in desired release branch name to add deployment from a branch: currently *doc-publish*
         - docs-publish@automation-toolchain/f5-telemetry
     tags:
         - cm-official-docker-executor
