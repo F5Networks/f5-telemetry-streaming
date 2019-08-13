@@ -131,7 +131,7 @@ function addTag(data, tag, tags, location, stat) {
             // Apply tag to system info default locations (when addKeysByTag is true)
             const stats = Object.keys(properties.stats).filter(key => properties.stats[key].addKeysByTag);
             stats.forEach((s) => {
-                if (data[s]) {
+                if (typeof data[s] !== 'undefined') {
                     Object.keys(data[s]).forEach((item) => {
                         const match = normalizeUtil._checkForMatch(item, def.pattern, def.group);
                         if (match) {
@@ -143,7 +143,7 @@ function addTag(data, tag, tags, location, stat) {
         } else {
             // Apply properties.definitions tags to events that have a key from classifyByKeys
             const matchingKeys = properties.events.classifyByKeys.filter(key => Object.keys(data).indexOf(key) > -1);
-            if (matchingKeys) {
+            if (matchingKeys.length) {
                 const match = normalizeUtil._checkForMatch(data[matchingKeys[0]], def.pattern, def.group);
                 if (match) {
                     data[tag] = match;

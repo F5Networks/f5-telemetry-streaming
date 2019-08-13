@@ -232,11 +232,7 @@ EventListener.prototype.processRawData = function (data, connInfo) {
             // reset counter due we have valid data to process now
             bufferInfo.timeoutNo = 0;
         }
-        try {
-            this.processEvent(data);
-        } catch (err) {
-            this.logger.error(`processEvent: ${err}`);
-        }
+        this.processEvent(data);
     }
     // if we have incomplete data to buffer
     if (incompleteData) {
@@ -298,6 +294,22 @@ EventListener.prototype.stop = function () {
  * @returns {Void}
  */
 EventListener.prototype.processEvent = function (data) {
+    try {
+        this._processEvent(data);
+    } catch (err) {
+        this.logger.exception('EventListener:processEvent unexpected error', err);
+    }
+};
+
+/**
+ * Process event
+ *
+ * @private
+ * @param {String} data - data
+ *
+ * @returns {Void}
+ */
+EventListener.prototype._processEvent = function (data) {
     // normalize and send to data pipeline
     // note: addKeysByTag uses regex for default tags parsing (tenant/app)
     const options = {
