@@ -252,8 +252,6 @@ pages:
         url: https://${CI_PROJECT_NAMESPACE}.${PAGES_DOMAIN}/${CI_PROJECT_NAME}
     tags:
         - cm-official-docker-executor
-    dependencies:
-        - coverage
     script:
         - PUBLIC_DIR='./public'
         - mkdir -p ${PUBLIC_DIR}
