@@ -23,7 +23,6 @@ For the complete Telemetry Streaming documentation, see [http://clouddocs.f5.com
 - [Pointer Syntax](#pointer-syntax)
 - [REST API Endpoints](#rest-api-endpoints)
 - [Output Example](#output-example)
-- [Container](#container)
 
 ## Overview
 
@@ -585,16 +584,6 @@ Note: All metrics are stored as gauges in statsd, those can be seen within graph
         "systemPoller": {
             "interval": 60
         }
-    }
-}
-```
-
-### Container passphrase handling
-
-```json
-{
-    "passphrase": {
-        "environmentVar": "TS_SYSTEM_SECRET"
     }
 }
 ```
@@ -1906,15 +1895,3 @@ Note: AS3 version 3.10.0 or greater required.
     }
 }
 ```
-
-## Container
-
-This project builds a container, here are the current steps to build and run that container. Note: Additional steps TBD around pushing to docker hub, etc.
-
-Note: Currently this is building from local node_modules, src, etc.  This should change to using the RPM package.
-
-Build: ```docker build . -t f5-telemetry``` Note: From root folder of this project
-
-Run: ```docker run --rm -d -p 443:443/tcp -p 6514:6514/tcp -e TS_SYSTEM_SECRET='secret' -e TS_CONSUMER_SECRET='secret' f5-telemetry:latest```
-
-Attach Shell: ```docker exec -it <running container name> /bin/sh```
