@@ -83,7 +83,7 @@ test_node_latest:
         expire_in: 3 days
 
 # run tests and check code coverage
-test_package:
+coverage:
     stage: test
     script:
         # install jq
@@ -312,7 +312,6 @@ publish_docs_to_production:
         url: https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest
     only:
         # fill in desired release branch name to add deployment from a branch: currently *master*
-        - master@automation-toolchain/f5-telemetry
         - docs-publish@automation-toolchain/f5-telemetry
     tags:
         - cm-official-docker-executor
