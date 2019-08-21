@@ -125,6 +125,11 @@
         {
             "name": "iRules",
             "endpoint": "/mgmt/tm/ltm/rule/stats"
+        },
+        {
+            "name": "tmctl",
+            "endpoint": "/mgmt/tm/util/bash",
+            "ignoreCached": true
         }
     ]
 }

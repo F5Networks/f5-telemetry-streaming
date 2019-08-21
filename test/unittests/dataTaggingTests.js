@@ -133,6 +133,16 @@ describe('Data Tagging', () => {
                     httpProfile1: {},
                     httpProfile2: {}
                 },
+                tmstats: {
+                    cpuInfoStat: [
+                        {},
+                        {}
+                    ],
+                    diskInfoStat: [
+                        {},
+                        {}
+                    ]
+                },
                 system: {}
             };
             const tags = {
@@ -144,6 +154,14 @@ describe('Data Tagging', () => {
                 },
                 httpProfiles: {
                     Profile2: true
+                },
+                tmstats: {
+                    cpuInfoStat: {
+                        '.*': true
+                    },
+                    diskInfoStat: {
+                        1: true
+                    }
                 }
             };
             const expected = {
@@ -157,6 +175,22 @@ describe('Data Tagging', () => {
                     httpProfile2: {
                         theTag: 'Tag to add'
                     }
+                },
+                tmstats: {
+                    cpuInfoStat: [
+                        {
+                            theTag: 'Tag to add'
+                        },
+                        {
+                            theTag: 'Tag to add'
+                        }
+                    ],
+                    diskInfoStat: [
+                        {},
+                        {
+                            theTag: 'Tag to add'
+                        }
+                    ]
                 },
                 system: {}
             };
