@@ -162,7 +162,7 @@ SystemStats.prototype._processData = function (property, data, key) {
 SystemStats.prototype._loadData = function (property) {
     return new Promise((resolve, reject) => {
         const endpoint = this._splitKey(property.key).rootKey;
-        this.loader.loadEndpoint(endpoint, (data, err) => {
+        this.loader.loadEndpoint(endpoint, property.keyArgs, (data, err) => {
             if (err) {
                 reject(err);
                 return;

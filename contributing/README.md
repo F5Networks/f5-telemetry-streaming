@@ -221,6 +221,9 @@ Enable and define how the data should look by adding a new key under *stats* in 
 {
     "someKey": {
         "key": "/mgmt/tm/sys/someUri::someChildKey", // /uri (or alt name in paths.json) + key(s) seperated by '::' to navigate into object and get a specific value
+        "keyArgs": { // Arguments that can be passed to the associated alt name endpoint in paths.json
+            "bodyOverride": { "command": "run", "utilCmdArgs": "-c 'echo Hello World'"} // Override default request body
+        }
         "normalize": false, // This can override normalization, can be useful when adding new info/stat
         "disabled": true, // This alerts the engine to ignore specific info/stat
         "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" }, // Converts an array to a map using the value of a standard key such as 'name' in each object in the array.  Optionally add a prefix to that value (useful if filterKeys is also used)

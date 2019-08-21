@@ -99,29 +99,40 @@ EndpointLoader.prototype._executeCallbacks = function (endpoint, data, err) {
 /**
  * Load data from endpoint
  *
- * @param {String} endpoint            - endpoint name/key to fetch data from
- * @param {Function(Object, Error)} cb - callback function
+ * @param {String} endpoint               - endpoint name/key to fetch data from
+ * @param {Object} [options]              - function options
+ * @param {Array}  [options.bodyOverride] - Overrides request body for endpoint to fetch data with
+ * @param {Function(Object, Error)} cb    - callback function
  */
-EndpointLoader.prototype.loadEndpoint = function (endpoint, cb) {
-    // eslint-disable-next-line no-unused-vars
-    const p = new Promise((resolve, reject) => {
+EndpointLoader.prototype.loadEndpoint = function (endpoint, options, cb) {
+    const opts = options || {};
+
+    new Promise((resolve, reject) => {
+        let error;
+
         if (this.endpoints[endpoint] === undefined) {
-            reject(new Error(`Endpoint not defined in file: ${endpoint}`));
-        } else {
-            let dataIsEmpty = false;
-            if (this.cachedResponse[endpoint] === undefined) {
-                // [loaded, callbacks, data]
-                this.cachedResponse[endpoint] = [false, [cb], null];
-                dataIsEmpty = true;
-            } else {
-                this.cachedResponse[endpoint][1].push(cb);
-            }
-            resolve(dataIsEmpty);
+            error = new Error(`Endpoint not defined in file: ${endpoint}`);
         }
+
+        let dataIsEmpty = false;
+        if (this.cachedResponse[endpoint] === undefined) {
+            // [loaded, callbacks, data]
+            this.cachedResponse[endpoint] = [false, [cb], null];
+            dataIsEmpty = true;
+        } else {
+            this.cachedResponse[endpoint][1].push(cb);
+        }
+
+        if (error) {
+            reject(error);
+            return;
+        }
+
+        resolve(dataIsEmpty);
     })
         .then((dataIsEmpty) => {
             if (dataIsEmpty) {
-                return this._getAndExpandData(this.endpoints[endpoint])
+                return this._getAndExpandData(this.endpoints[endpoint], { bodyOverride: opts.bodyOverride })
                     .then((response) => {
                         // cache results
                         this.cachedResponse[endpoint][2] = response;
@@ -133,7 +144,7 @@ EndpointLoader.prototype.loadEndpoint = function (endpoint, cb) {
         // 1) resolving nested promise with 'reject' to skip follwing 'then'
         // 2) catch HTTP error here to differentiate it from other errors
         .catch(err => this._executeCallbacks(endpoint, null, err)
-            .then(Promise.reject()))
+            .then(() => Promise.reject()))
 
         .then(() => {
             if (this.cachedResponse[endpoint][0]) {
@@ -195,11 +206,14 @@ EndpointLoader.prototype._getData = function (uri, options) {
 /**
  * Get data for specific endpoint (with some extra logic)
  *
- * @param {Object} endpointProperties - endpoint properties
+ * @param {Object} endpointProperties     - endpoint properties
+ * @param {Object} [options]              - function options
+ * @param {Array}  [options.bodyOverride] - replaces default request body of endpoint
  *
  * @returns {Object} Promise which is resolved with data
  */
-EndpointLoader.prototype._getAndExpandData = function (endpointProperties) {
+EndpointLoader.prototype._getAndExpandData = function (endpointProperties, options) {
+    const opts = options || {};
     const p = endpointProperties;
     let completeData;
     let referenceKey;
@@ -234,7 +248,10 @@ EndpointLoader.prototype._getAndExpandData = function (endpointProperties) {
         return Promise.resolve(data); // return data
     };
 
-    return this._getData(p.endpoint, { name: p.name, body: p.body, endpointFields: p.endpointFields })
+    return this._getData(
+        p.endpoint,
+        { name: p.name, body: opts.bodyOverride || p.body, endpointFields: p.endpointFields }
+    )
         .then((data) => {
             // data: { name: foo, data: bar }
             // check if expandReferences property was specified
