@@ -24,7 +24,8 @@
         "branches": 70,
         "reporter": [
             "html",
-            "text"
+            "text",
+            "json-summary"
         ]
     },
     "dependencies": {
