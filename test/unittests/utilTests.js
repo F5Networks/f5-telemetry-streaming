@@ -796,7 +796,7 @@ describe('Util (schedule/time functions)', () => {
         standardCheck(firstEnd, second);
         standardCheck(second, secondEnd);
 
-        const distance = (secondEnd - firstEnd) / _MS_PER_DAY;
+        const distance = Math.floor((secondEnd - firstEnd) / _MS_PER_DAY);
         const maxDistance = 1;
 
         if (distance !== maxDistance) {
