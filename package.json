@@ -13,7 +13,7 @@
         "lint": "eslint src test",
         "test-functional": "mocha \"./test/functional/testRunner.js\" --opts ./test/functional/.mocha.opts",
         "test-only": "mocha --recursive \"./test/unit/*.js\" --opts ./test/unit/.mocha.opts",
-        "test": "nyc npm run test-only",
+        "test": "nyc --all npm run test-only",
         "build": "./scripts/build/buildRpm.sh"
     },
     "nyc": {
@@ -26,6 +26,14 @@
             "html",
             "text",
             "json-summary"
+        ],
+        "exclude": [
+            "coverage/**",
+            "docs/**",
+            "test/**",
+            "scripts/**",
+            "examples/**",
+            "**/node_modules/**"
         ]
     },
     "dependencies": {
