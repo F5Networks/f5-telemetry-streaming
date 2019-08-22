@@ -194,7 +194,8 @@ Collect the raw data from the device by adding a new endpoint to the paths confi
     "expandReferences": { "membersReference": { "endpointSuffix": "/stats" } }, // Certain data requires getting a list of objects and then in each object expanding/following references to a child object.  'membersReference' is the name of that key (currently looking under 'items' in the data returned) and will result in self link data being retrived and 'membersReference' key being replaced with that data.  'endpointSuffix' defines adding a suffix for each self link prior to retrieval.
     "endpointFields": [ "name", "fullPath", "selfLink", "ipProtocol", "mask" ], // Will collect only these fields from the endoint. Useful when using includeStats and the same property exists in both endpoints. Also can be used instead of a large exclude/include statement in properties.json
     "body": "{ \"command\": \"run\", \"utilCmdArgs\": \"-c \\\"/bin/df -P | /usr/bin/tr -s ' ' ','\\\"\" }", // Certain information may require using POST instead of GET and require an HTTP body, if body is defined that gets used along with a POST
-    "name": "someStatRef" // Alternate name to reference in properties.json, default is to use the endpoint
+    "name": "someStatRef", // Alternate name to reference in properties.json, default is to use the endpoint
+    "ignoreCached": true // Invalidate cached response of previous request to endpoint
 }
 ```
 

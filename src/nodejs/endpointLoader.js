@@ -106,11 +106,12 @@ EndpointLoader.prototype._executeCallbacks = function (endpoint, data, err) {
  */
 EndpointLoader.prototype.loadEndpoint = function (endpoint, options, cb) {
     const opts = options || {};
+    const endpointObj = this.endpoints[endpoint];
 
     new Promise((resolve, reject) => {
         let error;
 
-        if (this.endpoints[endpoint] === undefined) {
+        if (endpointObj === undefined) {
             error = new Error(`Endpoint not defined in file: ${endpoint}`);
         }
 
@@ -123,6 +124,12 @@ EndpointLoader.prototype.loadEndpoint = function (endpoint, options, cb) {
             this.cachedResponse[endpoint][1].push(cb);
         }
 
+        if ((endpointObj || {}).ignoreCached && !dataIsEmpty) {
+            this.cachedResponse[endpoint][0] = false;
+            this.cachedResponse[endpoint][2] = null;
+            dataIsEmpty = true;
+        }
+
         if (error) {
             reject(error);
             return;
@@ -132,7 +139,7 @@ EndpointLoader.prototype.loadEndpoint = function (endpoint, options, cb) {
     })
         .then((dataIsEmpty) => {
             if (dataIsEmpty) {
-                return this._getAndExpandData(this.endpoints[endpoint], { bodyOverride: opts.bodyOverride })
+                return this._getAndExpandData(endpointObj, { bodyOverride: opts.bodyOverride })
                     .then((response) => {
                         // cache results
                         this.cachedResponse[endpoint][2] = response;
