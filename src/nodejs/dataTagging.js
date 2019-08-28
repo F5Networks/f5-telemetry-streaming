@@ -11,6 +11,7 @@
 const properties = require('./config/properties.json');
 const logger = require('./logger.js');
 const normalizeUtil = require('./normalizeUtil');
+const dataUtil = require('./dataUtil.js');
 
 /**
  * Performs actions on the data
@@ -40,7 +41,7 @@ function handleActions(data, actions) {
 function checkData(data, conditions, conditionMatches) {
     conditionMatches = conditionMatches || [];
     Object.keys(conditions).forEach((condition) => {
-        const matches = getMatches(data, condition);
+        const matches = dataUtil.getMatches(data, condition);
 
         if (typeof conditions[condition] !== 'object' && matches.length > 0) {
             // The condition to check is not an object and matches have been found in the data
@@ -91,26 +92,10 @@ function addTags(data, tags, locations) {
             });
         }
     } else {
-        // locations were provided and will be searched through
-        Object.keys(locations).forEach((location) => {
-            const matches = getMatches(data, location);
-
-            if (typeof locations[location] !== 'object' && matches.length > 0) {
-                // A specific location has been found (value of true) and matches in the data are found
-                matches.forEach((match) => {
-                    Object.keys(tags).forEach((tag) => {
-                        addTag(data, tag, tags, match);
-                    });
-                });
-            } else if (typeof locations[location] === 'object' && matches.length > 0) {
-                // The next locations is an object and matches in the data have been found
-                matches.forEach((match) => {
-                    addTags(data[match], tags, locations[location]);
-                });
-            } else {
-                // No matches for the location key were found in the data
-                logger.debug(`The data does not have anything that matches the location ${location}`);
-            }
+        dataUtil.getDeepMatches(data, locations).forEach((match) => {
+            Object.keys(tags).forEach((tag) => {
+                addTag(match.data, tag, tags, match.key);
+            });
         });
     }
 }
@@ -162,39 +147,9 @@ function addTag(data, tag, tags, location, stat) {
     }
 }
 
-/**
- * Check to see if a location can be found inside the data. Checks by using location as a literal string and
- * then checks as a regular expression if no results are found from the literal string search.
- *
- * @param {Object} data - The data to check for matches
- * @param {string} location - The location being searched for
- *
- * @returns {Array}
- */
-function getMatches(data, location) {
-    const matches = [];
-
-    Object.keys(data).forEach((key) => {
-        if (key === location) {
-            matches.push(key);
-        }
-    });
-
-    if (matches.length === 0) {
-        Object.keys(data).forEach((key) => {
-            if (key.match(location)) {
-                matches.push(key);
-            }
-        });
-    }
-
-    return matches;
-}
-
 module.exports = {
     handleActions,
     addTags,
     checkData,
-    getMatches,
     addTag
 };

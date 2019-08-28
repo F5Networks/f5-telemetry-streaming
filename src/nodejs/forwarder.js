@@ -10,7 +10,6 @@
 
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 const consumersHndlr = require('./consumers.js');
-const deepCopy = require('./util.js').deepCopy;
 
 /**
 * Forward data to consumer
@@ -32,7 +31,7 @@ function forwardData(dataCtx) {
         return new Promise((resolve) => {
             // standard context
             const context = {
-                event: deepCopy(dataCtx), // deep copy to avoid others modifying
+                event: consumer.filter.apply(dataCtx),
                 config: consumer.config,
                 tracer: consumer.tracer,
                 logger: logger.getChild(consumer.config.type)

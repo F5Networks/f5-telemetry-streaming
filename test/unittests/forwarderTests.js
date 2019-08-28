@@ -9,6 +9,7 @@
 'use strict';
 
 const assert = require('assert');
+const DataFilter = require('../../src/nodejs/dataFilter.js');
 
 /* eslint-disable global-require */
 
@@ -40,7 +41,8 @@ describe('Forwarder', () => {
                     actualContext = context;
                 },
                 config,
-                tracer: null
+                tracer: null,
+                filter: new DataFilter({})
             }
         ];
 
@@ -67,7 +69,8 @@ describe('Forwarder', () => {
                     throw new Error('foo');
                 },
                 config,
-                tracer: null
+                tracer: null,
+                filter: new DataFilter({})
             }
         ];
 
