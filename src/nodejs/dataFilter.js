@@ -67,7 +67,11 @@ DataFilter.prototype._applyBlacklist = function (data) {
     // Reindex any arrays that were modified
     matches.forEach((match) => {
         if (Array.isArray(match.data)) {
-            match.data = match.data.filter(item => typeof item !== 'undefined');
+            for (let i = match.data.length - 1; i >= 0; i -= 1) {
+                if (typeof match.data[i] === 'undefined') {
+                    match.data.splice(i, 1);
+                }
+            }
         }
     });
 };
