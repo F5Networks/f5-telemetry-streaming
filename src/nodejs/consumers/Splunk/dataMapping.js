@@ -293,7 +293,7 @@ const stats = [
 
         Object.keys(tmstats).forEach((key) => {
             // Convert table name from camel case to underscore
-            const tableName = key.replace(/[a-z][A-Z]/g, x => `${x[0]}_${x[1].toLowerCase()}`);
+            const tableName = key.replace(/[0-9a-z][A-Z]/g, x => `${x[0]}_${x[1].toLowerCase()}`);
 
             const newData = Object.assign({}, template);
             newData.source += `.${tableName}`;
