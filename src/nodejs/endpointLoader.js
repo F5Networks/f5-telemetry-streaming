@@ -99,10 +99,10 @@ EndpointLoader.prototype._executeCallbacks = function (endpoint, data, err) {
 /**
  * Load data from endpoint
  *
- * @param {String} endpoint               - endpoint name/key to fetch data from
- * @param {Object} [options]              - function options
- * @param {Array}  [options.bodyOverride] - Overrides request body for endpoint to fetch data with
- * @param {Function(Object, Error)} cb    - callback function
+ * @param {String} endpoint                 - endpoint name/key to fetch data from
+ * @param {Object} [options]                - function options
+ * @param {Object} [options.replaceStrings] - key/value pairs that replace matching strings in request body
+ * @param {Function(Object, Error)} cb      - callback function
  */
 EndpointLoader.prototype.loadEndpoint = function (endpoint, options, cb) {
     const opts = options || {};
@@ -139,7 +139,7 @@ EndpointLoader.prototype.loadEndpoint = function (endpoint, options, cb) {
     })
         .then((dataIsEmpty) => {
             if (dataIsEmpty) {
-                return this._getAndExpandData(endpointObj, { bodyOverride: opts.bodyOverride })
+                return this._getAndExpandData(endpointObj, { replaceStrings: opts.replaceStrings })
                     .then((response) => {
                         // cache results
                         this.cachedResponse[endpoint][2] = response;
@@ -213,9 +213,9 @@ EndpointLoader.prototype._getData = function (uri, options) {
 /**
  * Get data for specific endpoint (with some extra logic)
  *
- * @param {Object} endpointProperties     - endpoint properties
- * @param {Object} [options]              - function options
- * @param {Array}  [options.bodyOverride] - replaces default request body of endpoint
+ * @param {Object} endpointProperties       - endpoint properties
+ * @param {Object} [options]                - function options
+ * @param {Object} [options.replaceStrings] - key/value pairs that replace matching strings in request body
  *
  * @returns {Object} Promise which is resolved with data
  */
@@ -255,9 +255,21 @@ EndpointLoader.prototype._getAndExpandData = function (endpointProperties, optio
         return Promise.resolve(data); // return data
     };
 
+    const replaceBodyVars = (body, replaceStrings) => {
+        let bodyStr = JSON.stringify(body);
+
+        Object.keys(replaceStrings).forEach((key) => {
+            bodyStr = bodyStr.replace(new RegExp(key), replaceStrings[key]);
+        });
+
+        return JSON.parse(bodyStr);
+    };
+
+    const body = opts.replaceStrings ? replaceBodyVars(p.body, opts.replaceStrings) : p.body;
+
     return this._getData(
         p.endpoint,
-        { name: p.name, body: opts.bodyOverride || p.body, endpointFields: p.endpointFields }
+        { name: p.name, body, endpointFields: p.endpointFields }
     )
         .then((data) => {
             // data: { name: foo, data: bar }

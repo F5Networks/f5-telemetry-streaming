@@ -223,7 +223,7 @@ Enable and define how the data should look by adding a new key under *stats* in 
     "someKey": {
         "key": "/mgmt/tm/sys/someUri::someChildKey", // /uri (or alt name in paths.json) + key(s) seperated by '::' to navigate into object and get a specific value
         "keyArgs": { // Arguments that can be passed to the associated alt name endpoint in paths.json
-            "bodyOverride": { "command": "run", "utilCmdArgs": "-c 'echo Hello World'"} // Override default request body
+            "replaceStrings": { "\\$tmstatsTable": "cpu_info_stat" } // Key/value pairs that replace matching strings in request body. The key is treated as a regular expression
         }
         "normalize": false, // This can override normalization, can be useful when adding new info/stat
         "disabled": true, // This alerts the engine to ignore specific info/stat

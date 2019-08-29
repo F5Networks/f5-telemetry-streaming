@@ -345,12 +345,7 @@
         "cpuInfoStat": {
             "structure": { "parentKey": "tmstats" },
             "key": "tmctl::commandResult",
-            "keyArgs": {
-                "bodyOverride": {
-                    "command": "run",
-                    "utilCmdArgs": "-c '/bin/tmctl -c cpu_info_stat'"
-                }
-            },
+            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c cpu_info_stat" } },
             "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
         }
     },

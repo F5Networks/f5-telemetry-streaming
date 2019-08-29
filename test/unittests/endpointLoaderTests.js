@@ -32,11 +32,11 @@ describe('Endpoint Loader', () => {
             });
         });
 
-        it('should replace default endpoint body if bodyOverride option is provided', (done) => {
+        it('should replace strings in endpoint body if replaceStrings option is provided', (done) => {
             const eLoader = new EndpointLoader();
             const body = {
                 command: 'run',
-                utilCmdArgs: '-c "ls ."'
+                utilCmdArgs: '-c "echo Hello World"'
             };
 
             eLoader.endpoints = {
@@ -44,14 +44,14 @@ describe('Endpoint Loader', () => {
                     endpoint: '/mgmt/tm/util/bash',
                     body: {
                         command: 'run',
-                        utilCmdArgs: '-c "echo Hello World"'
+                        utilCmdArgs: '-c "echo $replaceMe"'
                     }
                 }
             };
 
             sinon.stub(eLoader, '_getData').resolvesArg(1);
 
-            eLoader.loadEndpoint('bash', { bodyOverride: body }, (data, err) => {
+            eLoader.loadEndpoint('bash', { replaceStrings: { '\\$replaceMe': 'Hello World' } }, (data, err) => {
                 if (err) {
                     done(err);
                     return;
