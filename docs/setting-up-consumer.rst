@@ -27,14 +27,15 @@ Example Declaration:
 
 Splunk Legacy format
 ^^^^^^^^^^^^^^^^^^^^
-There is an additional property that applies to all consumers but is only useful for Splunk. The **format** property can be set to **legacy** for users who wish to convert the stats output similar to the |splunk app|. To see more information, see |Analytics|. To see more information about using the HEC, see |HEC|.  See the following example.
+The **format** property can be set to **legacy** for Splunk users who wish to convert the stats output similar to the |splunk app|. To see more information, see |Analytics|. To see more information about using the HEC, see |HEC|.  See the following example.
 
-In Telemetry Streaming v1.6.0 and later, you can use the **facility** parameter with the legacy format to specify a Splunk facility in your declarations.  The logging facility is an identification of a syslog packet that allows a syslog deamon to send the syslog message to the correct log file (is this accurate/does it apply here???)
+In Telemetry Streaming v1.6.0 and later, you must use the **facility** parameter with the legacy format to specify a Splunk facility in your declarations.  The facility parameter is for identification of location/facility in which the BIG-IP is located (such as 'Main Data Center', 'AWS', or 'NYC'). 
 
 Required information for **facility**: 
   - The facility parameter must be inside of **actions** and then **setTag** as shown in the example.
   - The value for **facility** is arbitrary, but must be a string.
   - The **locations** property must include ``"system": true``, as that is where facility is expected.
+  - The value for facility is required when the format is legacy (required by the Splunk F5 Dashboard application; a declaration without it will still succeed)
   
 Example Declaration for Legacy (including facility):
 
