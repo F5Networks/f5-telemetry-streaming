@@ -52,6 +52,10 @@ const SOURCE_2_TYPES = {
     'bigip.tmstats': 'f5:bigip:stats:iapp.json'
 };
 
+const STAT_2_TMCTL_TABLE = {
+    cpuInfoStat: 'cpu_info_stat'
+};
+
 function getTemplate(sourceName, data, cache) {
     let deviceGroup = Object.keys(data.deviceGroups || {}).find(dgKey => data.deviceGroups[dgKey].type === 'sync-failover');
     deviceGroup = (deviceGroup || '').split('/').pop();
@@ -292,11 +296,8 @@ const stats = [
         const output = [];
 
         Object.keys(tmstats).forEach((key) => {
-            // Convert table name from camel case to underscore
-            const tableName = key.replace(/[0-9a-z][A-Z]/g, x => `${x[0]}_${x[1].toLowerCase()}`);
-
             const newData = Object.assign({}, template);
-            newData.source += `.${tableName}`;
+            newData.source += `.${STAT_2_TMCTL_TABLE[key]}`;
             newData.event = Object.assign({}, template.event);
             tmstats[key].forEach((entry) => {
                 newData.event = Object.assign(newData.event, entry);
