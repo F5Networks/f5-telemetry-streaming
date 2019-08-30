@@ -303,6 +303,7 @@ EndpointLoader.prototype._getAndExpandData = function (endpointProperties, optio
         })
         .then(data => substituteData(data, referenceKey, false))
         .then((data) => {
+            completeData = null;
             // check if includeStats property was specified
             if (p.includeStats) {
                 completeData = data;
