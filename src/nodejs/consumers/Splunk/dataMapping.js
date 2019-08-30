@@ -48,7 +48,12 @@ const SOURCE_2_TYPES = {
     'bigip.objectmodel.cert': 'f5:bigip:config:iapp:json',
     'bigip.objectmodel.profile': 'f5:bigip:config:iapp:json',
     'bigip.objectmodel.virtual': 'f5:bigip:config:iapp:json',
-    'bigip.ihealth.diagnostics': 'f5:bigip:ihealth:iapp:json'
+    'bigip.ihealth.diagnostics': 'f5:bigip:ihealth:iapp:json',
+    'bigip.tmstats': 'f5:bigip:stats:iapp.json'
+};
+
+const STAT_2_TMCTL_TABLE = {
+    cpuInfoStat: 'cpu_info_stat'
 };
 
 function getTemplate(sourceName, data, cache) {
@@ -277,6 +282,25 @@ const stats = [
                 newData.event.availability_state = poolMember.availabilityState;
                 newData.event.enabled_state = poolMember.enabledState;
                 newData.event.status_reason = poolMember.statusReason;
+                output.push(newData);
+            });
+        });
+        return output;
+    },
+
+    function (request) {
+        const tmstats = getData(request, 'tmstats');
+        if (tmstats === undefined) return undefined;
+
+        const template = getTemplate('bigip.tmstats', request.globalCtx.event.data, request.cache);
+        const output = [];
+
+        Object.keys(tmstats).forEach((key) => {
+            const newData = Object.assign({}, template);
+            newData.source += `.${STAT_2_TMCTL_TABLE[key]}`;
+            newData.event = Object.assign({}, template.event);
+            tmstats[key].forEach((entry) => {
+                newData.event = Object.assign(newData.event, entry);
                 output.push(newData);
             });
         });

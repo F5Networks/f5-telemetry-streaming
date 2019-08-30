@@ -42,12 +42,15 @@
     },
     "devDependencies": {
         "@f5devcentral/eslint-config-f5-atg": "latest",
+        "chai": "^4.2.0",
+        "chai-as-promised": "^7.1.1",
         "eslint": "^5.16.0",
         "eslint-config-airbnb-base": "^13.1.0",
         "eslint-plugin-import": "^2.17.3",
         "icrdk": "git://github.com/f5devcentral/f5-icontrollx-dev-kit#master",
         "mocha": "^5.2.0",
         "nyc": "^14.1.1",
+        "sinon": "^7.4.1",
         "ssh2": "^0.8.2",
         "winston": "^2.4.4"
     },

@@ -14,6 +14,7 @@ const deepCopy = require('./util.js').deepCopy;
 const tracers = require('./util.js').tracer;
 const constants = require('./constants.js');
 const configWorker = require('./config.js');
+const DataFilter = require('./dataFilter.js');
 
 const CONSUMERS_DIR = constants.CONSUMERS_DIR;
 const CLASS_NAME = constants.CONSUMERS_CLASS_NAME;
@@ -81,7 +82,8 @@ function loadConsumers(config) {
                 const consumer = {
                     config: deepCopy(consumerConfig.config),
                     consumer: consumerModule,
-                    tracer: tracers.createFromConfig(CLASS_NAME, consumerConfig.name, consumerConfig.config)
+                    tracer: tracers.createFromConfig(CLASS_NAME, consumerConfig.name, consumerConfig.config),
+                    filter: new DataFilter(consumerConfig)
                 };
                 consumer.config.allowSelfSignedCert = consumer.config.allowSelfSignedCert === undefined
                     ? !constants.STRICT_TLS_REQUIRED : consumer.config.allowSelfSignedCert;

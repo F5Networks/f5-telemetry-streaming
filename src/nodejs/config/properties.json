@@ -338,6 +338,15 @@
             "runFunctions": [
                 { "name": "restructureRules" }
             ]
+        },
+        "tmstats": {
+            "structure": { "folder": true }
+        },
+        "cpuInfoStat": {
+            "structure": { "parentKey": "tmstats" },
+            "key": "tmctl::commandResult",
+            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c cpu_info_stat" } },
+            "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
         }
     },
     "events": {

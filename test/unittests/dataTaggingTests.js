@@ -12,43 +12,6 @@ const assert = require('assert');
 const dataTagging = require('../../src/nodejs/dataTagging');
 
 describe('Data Tagging', () => {
-    describe('getMatches', () => {
-        it('should return what matches the location when it is a literal string', () => {
-            const data = {
-                system: {},
-                httpProfiles: {},
-                virtualServers: {}
-            };
-            const location = 'virtualServers';
-            const expected = ['virtualServers'];
-            const result = dataTagging.getMatches(data, location);
-            assert.deepEqual(expected, result);
-        });
-
-        it('should return what matches the location when a regex is used', () => {
-            const data = {
-                httpProfiles: {},
-                virtualServers: {},
-                httpProfiles2: {}
-            };
-            const location = 'http.*';
-            const expected = ['httpProfiles', 'httpProfiles2'];
-            const result = dataTagging.getMatches(data, location);
-            assert.deepEqual(expected, result);
-        });
-
-        it('should return no matches', () => {
-            const data = {
-                virtualServers: {},
-                httpProfiles: {}
-            };
-            const location = 'noReults';
-            const expected = [];
-            const result = dataTagging.getMatches(data, location);
-            assert.deepEqual(expected, result);
-        });
-    });
-
     describe('addTags', () => {
         it('should add tags to the default locations', () => {
             const data = {
@@ -133,6 +96,16 @@ describe('Data Tagging', () => {
                     httpProfile1: {},
                     httpProfile2: {}
                 },
+                tmstats: {
+                    cpuInfoStat: [
+                        {},
+                        {}
+                    ],
+                    diskInfoStat: [
+                        {},
+                        {}
+                    ]
+                },
                 system: {}
             };
             const tags = {
@@ -144,6 +117,14 @@ describe('Data Tagging', () => {
                 },
                 httpProfiles: {
                     Profile2: true
+                },
+                tmstats: {
+                    cpuInfoStat: {
+                        '.*': true
+                    },
+                    diskInfoStat: {
+                        1: true
+                    }
                 }
             };
             const expected = {
@@ -157,6 +138,22 @@ describe('Data Tagging', () => {
                     httpProfile2: {
                         theTag: 'Tag to add'
                     }
+                },
+                tmstats: {
+                    cpuInfoStat: [
+                        {
+                            theTag: 'Tag to add'
+                        },
+                        {
+                            theTag: 'Tag to add'
+                        }
+                    ],
+                    diskInfoStat: [
+                        {},
+                        {
+                            theTag: 'Tag to add'
+                        }
+                    ]
                 },
                 system: {}
             };
