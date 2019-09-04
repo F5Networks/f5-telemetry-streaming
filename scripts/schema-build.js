@@ -10,9 +10,9 @@
 
 const fs = require('fs');
 
-// const base = require('../src/nodejs/schema/base_schema.json');
+// const base = require('../src/schema/latest/base_schema.json');
 
-const SCHEMA_DIR = `${__dirname}/../src/nodejs/schema`;
+const SCHEMA_DIR = `${__dirname}/../src/schema/latest`;
 const outputFile = '../../../dist/ts.schema.json';
 
 const safeTraverse = (p, o) => p.reduce((xs, x) => (xs && xs[x] ? xs[x] : null), o);

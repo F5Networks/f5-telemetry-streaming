@@ -1,6 +1,6 @@
 {
     "name": "f5-telemetry",
-    "version": "1.5.0",
+    "version": "1.6.0",
     "author": "F5 Networks",
     "license": "Apache-2.0",
     "repository": {
@@ -12,9 +12,9 @@
         "install-test": "npm install --no-optional",
         "lint": "eslint src test",
         "test-functional": "mocha \"./test/functional/testRunner.js\" --opts ./test/functional/.mocha.opts",
-        "test-only": "mocha --recursive \"./test/unittests/*.js\" --opts ./test/unittests/.mocha.opts",
+        "test-only": "mocha --recursive \"./test/unit/*.js\" --opts ./test/unit/.mocha.opts",
         "test": "nyc npm run test-only",
-        "build": "./scripts/build_rpm.sh"
+        "build": "./scripts/build/buildRpm.sh"
     },
     "nyc": {
         "check-coverage": true,
