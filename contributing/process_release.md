@@ -20,18 +20,15 @@
   - [package.json](package.json)
   - [package-lock.json](package-lock.json)
   - [project.spec](project.spec) (not required starting from 1.5)
-  - [src/nodejs/constants.js](src/nodejs/constants.js)
-  - [src/nodejs/schema/base_schema.json](src/nodejs/schema/base_schema.json)
+  - [src/lib/constants.js](src/lib/constants.js)
+  - [src/schema/latest/base_schema.json](src/schema/latest/base_schema.json)
   - [contributing/README.md](contributing/README.md) (example of response, optional)
   - [docs/conf.py](docs/conf.py)
   - do simple `grep` in repository to ensure that no unexpected files with old version left
-- Update [src/nodejs/schema](src/nodejs/schema) directory
-  - `.json` and `.js` files in [src/nodejs/schema](src/nodejs/schema) should be copied into [src/nodejs/schema/latest](src/nodejs/schema/latest)
-  - A new directory should be added for the new release version (same files that are in [src/nodejs/schema/latest](src/nodejs/schema/latest) go here)
+  - A new directory should be added for the new release version (same files that are in [src/schema/latest](src/schema/latest) go here)
   - There should be exact same files across following directories:
-    - [src/nodejs/schema](src/nodejs/schema)
-    - [src/nodejs/schema/latest](src/nodejs/schema/latest)
-    - `src/nodejs/schema/X.Y.Z` - where X.Y.Z is release version
+    - [src/schema/latest](src/schema/latest)
+    - `src/schema/X.Y.Z` - where X.Y.Z is release version
 - Update [SUPPORT.md](SUPPORT.md) if not yet done (or at least check that everything looks valid):
   - add new version to the list of `Currently supported versions` with appropriate dates
   - remove no longer supported versions from `Currently supported versions` and add it to `Versions no longer supported`
