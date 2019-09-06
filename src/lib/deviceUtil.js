@@ -850,7 +850,7 @@ module.exports = {
      */
     decryptSecret(data) {
         return new Promise((resolve, reject) => {
-            childProcess.exec(`/usr/bin/php ${__dirname}/scripts/decryptConfValue.php '${data}'`, (error, stdout, stderr) => {
+            childProcess.exec(`/usr/bin/php ${__dirname}/decryptConfValue.php '${data}'`, (error, stdout, stderr) => {
                 if (error) {
                     reject(new Error(`decryptSecret exec error: ${error} ${stderr}`));
                 } else {
