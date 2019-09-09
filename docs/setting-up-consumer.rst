@@ -24,6 +24,7 @@ Example Declaration:
 .. literalinclude:: ../examples/declarations/splunk.json
     :language: json
 
+.. _splunk-legacy:
 
 Splunk Legacy format
 ^^^^^^^^^^^^^^^^^^^^
