@@ -46,7 +46,7 @@
                         ]
                     },
                     "tag": {
-                        "default": { "tenant": "`T`", "application": "`A`"},
+                        "$comment": "Deprecated! Use actions with a setTag action.",
                         "allOf": [
                             {
                                 "$ref": "base_schema.json#/definitions/tag"
@@ -58,6 +58,26 @@
                         "allOf": [
                             {
                                 "$ref": "base_schema.json#/definitions/match"
+                            }
+                        ]
+                    },
+                    "actions": {
+                        "title": "Actions",
+                        "description": "Actions to be performed on the listener.",
+                        "type": "array",
+                        "items": {
+                            "allOf": [
+                                {
+                                    "$ref": "base_schema.json#/definitions/action"
+                                }
+                            ]
+                        },
+                        "default": [
+                            {
+                                "setTag": {
+                                    "tenant": "`T`",
+                                    "application": "`A`"
+                                }
                             }
                         ]
                     }

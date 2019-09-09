@@ -809,7 +809,8 @@ module.exports = {
             })
             .then((deviceVersion) => {
                 let promise;
-                if (util.compareVersionStrings(deviceVersion.version, '>=', '14.1')) {
+                if (util.compareVersionStrings(deviceVersion.version, '>=', '14.1')
+                        && util.compareVersionStrings(deviceVersion.version, '<', '15.0')) {
                     // TMOS 14.1.x fix for 745423
                     const tmshCmd = `tmsh -a list auth radius-server ${radiusObjectName} secret`;
                     promise = this.executeShellCommandOnDevice(constants.LOCAL_HOST, tmshCmd)

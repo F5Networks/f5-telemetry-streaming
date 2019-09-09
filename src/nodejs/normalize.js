@@ -301,6 +301,7 @@ module.exports = {
             return thisData;
         };
 
+
         if (data && typeof data === 'object' && !Array.isArray(data)) {
             // if we are classifying by keys (already defined) assume we are processing a flat
             // data structure
@@ -322,6 +323,7 @@ module.exports = {
                 });
             }
         }
+
         return data;
     },
 
@@ -393,7 +395,7 @@ module.exports = {
         }
 
         ret = options.renameKeysByPattern ? normalizeUtil._renameKeys(ret, options.renameKeysByPattern.patterns) : ret;
-        if (options.addKeysByTag) {
+        if (options.addKeysByTag && options.addKeysByTag.tags) {
             ret = this._addKeysByTag(
                 ret,
                 options.addKeysByTag.tags,

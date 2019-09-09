@@ -19,13 +19,31 @@ Required information:
  - Port: Default is 8088, this can be configured within the Global Settings section of the Splunk HEC.
  - API Key: An API key must be created and provided in the passphrase object of the declaration, refer to Splunk documentation for the correct way to create an HEC token.
 
-.. NOTE:: There is an additional property that applies to all consumers but is only useful for Splunk. The ``format`` property can be set to ``legacy`` for users who wish to convert the stats output similar to the |splunk app|. To see more information, see |Analytics|. To see more information about using the HEC, see |HEC|.
-
 Example Declaration:
 
 .. literalinclude:: ../examples/declarations/splunk.json
     :language: json
 
+.. _splunk-legacy:
+
+Splunk Legacy format
+^^^^^^^^^^^^^^^^^^^^
+The **format** property can be set to **legacy** for Splunk users who wish to convert the stats output similar to the |splunk app|. To see more information, see |Analytics|. To see more information about using the HEC, see |HEC|.  See the following example.
+
+In Telemetry Streaming v1.6.0 and later, you must use the **facility** parameter with the legacy format to specify a Splunk facility in your declarations.  The facility parameter is for identification of location/facility in which the BIG-IP is located (such as 'Main Data Center', 'AWS', or 'NYC'). 
+
+Required information for **facility**: 
+  - The facility parameter must be inside of **actions** and then **setTag** as shown in the example.
+  - The value for **facility** is arbitrary, but must be a string.
+  - The **locations** property must include ``"system": true``, as that is where facility is expected.
+  - The value for facility is required when the format is legacy (required by the Splunk F5 Dashboard application; a declaration without it will still succeed)
+  
+Example Declaration for Legacy (including facility):
+
+.. literalinclude:: ../examples/declarations/splunk_legacy.json
+    :language: json
+
+|
 
 .. _azure-ref:
 

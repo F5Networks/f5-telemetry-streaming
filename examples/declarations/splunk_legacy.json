@@ -1,0 +1,30 @@
+{
+    "class": "Telemetry",
+      "My_System": {
+          "class": "Telemetry_System",
+          "systemPoller": {
+            "interval": 60,
+            "actions": [
+              {
+                "setTag": {
+                  "facility": "facilityValue"
+                },
+                "locations": {
+                  "system": true
+                }
+              }
+            ]
+          }
+      },
+      "My_Consumer": {
+          "class": "Telemetry_Consumer",
+          "type": "Splunk",
+          "host": "192.0.2.1",
+          "protocol": "https",
+          "port": 8088,
+          "passphrase": {
+              "cipherText": "apikey"
+          },
+                  "format": "legacy"
+      }
+  }

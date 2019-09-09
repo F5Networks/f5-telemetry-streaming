@@ -10,7 +10,7 @@
     "scripts": {
         "install-production": "npm install --production --no-optional",
         "install-test": "npm install --no-optional",
-        "lint": "eslint src test scripts",
+        "lint": "eslint src test",
         "test-functional": "mocha \"./test/functional/testRunner.js\" --opts ./test/functional/.mocha.opts",
         "test-only": "mocha --recursive \"./test/unittests/*.js\" --opts ./test/unittests/.mocha.opts",
         "test": "nyc npm run test-only",

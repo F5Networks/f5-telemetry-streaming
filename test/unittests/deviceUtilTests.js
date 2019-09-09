@@ -474,7 +474,7 @@ describe('Device Util', () => {
             return Promise.reject(err);
         }));
 
-    it('should encrypt secret', () => {
+    it('should encrypt secret and retrieve it via REST API when software version is 14.0.0', () => {
         const secret = 'asecret';
         const mockRes = { statusCode: 200, statusMessage: 'message' };
         const mockBody = {
@@ -485,6 +485,36 @@ describe('Device Util', () => {
                         entries: {
                             version: {
                                 description: '14.0.0'
+                            },
+                            BuildInfo: {
+                                description: '0.0.1'
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        setupRequestMock(mockRes, mockBody);
+
+        return deviceUtil.encryptSecret('foo')
+            .then((data) => {
+                assert.strictEqual(data, secret);
+                return Promise.resolve();
+            })
+            .catch(err => Promise.reject(err));
+    });
+
+    it('should encrypt secret and retrieve it via REST API when software version is 15.0.0', () => {
+        const secret = 'asecret';
+        const mockRes = { statusCode: 200, statusMessage: 'message' };
+        const mockBody = {
+            secret,
+            entries: {
+                someKey: {
+                    nestedStats: {
+                        entries: {
+                            version: {
+                                description: '15.0.0'
                             },
                             BuildInfo: {
                                 description: '0.0.1'
@@ -520,7 +550,7 @@ describe('Device Util', () => {
             });
     });
 
-    it('should encrypt secret and retreive it from device via TMSH', () => {
+    it('should encrypt secret and retreive it from device via TMSH when software version is 14.1.x', () => {
         const invalidSecret = { secret: 'invalidSecret' };
         const validSecret = 'secret';
         const tmshResp = { commandResult: `auth radius-server telemetry_delete_me {\n    secret ${validSecret}\n}` };
