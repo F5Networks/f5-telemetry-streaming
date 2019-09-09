@@ -318,7 +318,7 @@ module.exports = {
                 }
             });
             // now convert to map
-            ret = this._convertArrayToMap(ret, args.mapKey, {});
+            ret = args.mapKey ? this._convertArrayToMap(ret, args.mapKey, {}) : ret;
             // filter keys - if required
             ret = args.filterKeys ? this._filterDataByKeys(ret, args.filterKeys) : ret;
             // rename keys - if required

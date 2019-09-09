@@ -701,7 +701,9 @@ describe('Declarations', () => {
                 assert.strictEqual(poller.enable, true);
                 assert.strictEqual(poller.trace, false);
                 assert.strictEqual(poller.interval, 300);
-                assert.deepStrictEqual(poller.tag, { tenant: '`T`', application: '`A`' });
+                assert.deepStrictEqual(poller.actions, [{ enable: true, setTag: { tenant: '`T`', application: '`A`' } }]);
+                assert.strictEqual(poller.actions[0].ifAllMAtch, undefined);
+                assert.strictEqual(poller.actions[0].locations, undefined);
                 assert.strictEqual(poller.host, 'localhost');
                 assert.strictEqual(poller.port, 8100);
                 assert.strictEqual(poller.protocol, 'http');
@@ -732,7 +734,26 @@ describe('Declarations', () => {
                 username: 'username',
                 passphrase: {
                     cipherText: 'passphrase'
-                }
+                },
+                actions: [
+                    {
+                        enable: true,
+                        setTag: {
+                            tag1: 'tag1 value',
+                            tag2: {}
+                        },
+                        ifAllMatch: {
+                            system: {
+                                location: 'system_location'
+                            }
+                        },
+                        locations: {
+                            virtualServers: {
+                                '.*': true
+                            }
+                        }
+                    }
+                ]
             }
         };
         return config.validate(data)
@@ -751,6 +772,10 @@ describe('Declarations', () => {
                 assert.strictEqual(poller.enableHostConnectivityCheck, false);
                 assert.strictEqual(poller.username, 'username');
                 assert.strictEqual(poller.passphrase.cipherText, 'foo');
+                assert.strictEqual(poller.actions[0].enable, true);
+                assert.deepStrictEqual(poller.actions[0].setTag, { tag1: 'tag1 value', tag2: {} });
+                assert.deepStrictEqual(poller.actions[0].ifAllMatch, { system: { location: 'system_location' } });
+                assert.deepStrictEqual(poller.actions[0].locations, { virtualServers: { '.*': true } });
             });
     });
 
@@ -795,7 +820,7 @@ describe('Declarations', () => {
                 assert.strictEqual(listener.enable, true);
                 assert.strictEqual(listener.trace, false);
                 assert.strictEqual(listener.port, 6514);
-                assert.deepStrictEqual(listener.tag, { tenant: '`T`', application: '`A`' });
+                assert.deepStrictEqual(listener.actions, [{ enable: true, setTag: { tenant: '`T`', application: '`A`' } }]);
                 assert.deepStrictEqual(listener.match, '');
             });
     });
@@ -812,7 +837,26 @@ describe('Declarations', () => {
                     tenant: '`B`',
                     application: '`C`'
                 },
-                match: 'matchSomething'
+                match: 'matchSomething',
+                actions: [
+                    {
+                        enable: true,
+                        setTag: {
+                            tag1: 'tag1 value',
+                            tag2: {}
+                        },
+                        ifAllMatch: {
+                            system: {
+                                location: 'system_location'
+                            }
+                        },
+                        locations: {
+                            virtualServers: {
+                                '.*': true
+                            }
+                        }
+                    }
+                ]
             }
         };
         return config.validate(data)
@@ -825,6 +869,10 @@ describe('Declarations', () => {
                 assert.strictEqual(listener.port, 5000);
                 assert.deepStrictEqual(listener.tag, { tenant: '`B`', application: '`C`' });
                 assert.deepStrictEqual(listener.match, 'matchSomething');
+                assert.strictEqual(listener.actions[0].enable, true);
+                assert.deepStrictEqual(listener.actions[0].setTag, { tag1: 'tag1 value', tag2: {} });
+                assert.deepStrictEqual(listener.actions[0].ifAllMatch, { system: { location: 'system_location' } });
+                assert.deepStrictEqual(listener.actions[0].locations, { virtualServers: { '.*': true } });
             });
     });
 
@@ -1159,7 +1207,9 @@ describe('Declarations', () => {
                 assert.strictEqual(poller.enable, true);
                 assert.strictEqual(poller.trace, false);
                 assert.strictEqual(poller.interval, 300);
-                assert.deepStrictEqual(poller.tag, { tenant: '`T`', application: '`A`' });
+                assert.deepStrictEqual(poller.actions, [{ enable: true, setTag: { tenant: '`T`', application: '`A`' } }]);
+                assert.strictEqual(poller.actions[0].ifAllMAtch, undefined);
+                assert.strictEqual(poller.actions[0].locations, undefined);
                 assert.strictEqual(poller.host, undefined);
                 assert.strictEqual(poller.port, undefined);
                 assert.strictEqual(poller.protocol, undefined);
@@ -1182,7 +1232,26 @@ describe('Declarations', () => {
                     tag: {
                         tenant: '`B`',
                         application: '`C`'
-                    }
+                    },
+                    actions: [
+                        {
+                            enable: true,
+                            setTag: {
+                                tag1: 'tag1 value',
+                                tag2: {}
+                            },
+                            ifAllMatch: {
+                                system: {
+                                    location: 'system_location'
+                                }
+                            },
+                            locations: {
+                                virtualServers: {
+                                    '.*': true
+                                }
+                            }
+                        }
+                    ]
                 }
             }
         };
@@ -1194,6 +1263,10 @@ describe('Declarations', () => {
                 assert.strictEqual(poller.trace, true);
                 assert.strictEqual(poller.interval, 150);
                 assert.deepStrictEqual(poller.tag, { tenant: '`B`', application: '`C`' });
+                assert.strictEqual(poller.actions[0].enable, true);
+                assert.deepStrictEqual(poller.actions[0].setTag, { tag1: 'tag1 value', tag2: {} });
+                assert.deepStrictEqual(poller.actions[0].ifAllMatch, { system: { location: 'system_location' } });
+                assert.deepStrictEqual(poller.actions[0].locations, { virtualServers: { '.*': true } });
                 assert.strictEqual(poller.host, undefined);
                 assert.strictEqual(poller.port, undefined);
                 assert.strictEqual(poller.protocol, undefined);
@@ -1650,6 +1723,223 @@ describe('Declarations', () => {
                 if (err.message.indexOf('requires pointers root to be \'Shared\'') !== -1) {
                     return Promise.resolve(); // resolve, expected this error
                 }
+                return Promise.reject(err);
+            });
+    });
+
+    it('should pass with empty locatons', () => {
+        const data = {
+            class: 'Telemetry',
+            My_System: {
+                class: 'Telemetry_System',
+                systemPoller: {
+                    actions: [
+                        {
+                            setTag: {
+                                newTag: 'tag value'
+                            },
+                            locations: {}
+                        }
+                    ]
+                }
+            }
+        };
+        return config.validate(data)
+            .then((validConfig) => {
+                const actions = validConfig.My_System.systemPoller.actions;
+                assert.deepStrictEqual(actions[0].locations, {});
+            });
+    });
+
+    it('should pass with location type of boolean', () => {
+        const data = {
+            class: 'Telemetry',
+            My_System: {
+                class: 'Telemetry_System',
+                systemPoller: {
+                    actions: [
+                        {
+                            setTag: {
+                                newTag: 'tag value'
+                            },
+                            locations: {
+                                a: true
+                            }
+                        }
+                    ]
+                }
+            }
+        };
+        return config.validate(data)
+            .then((validConfig) => {
+                const actions = validConfig.My_System.systemPoller.actions;
+                assert.deepStrictEqual(actions[0].locations, { a: true });
+            });
+    });
+
+    it('should fail with location type boolean with value of false', () => {
+        const data = {
+            class: 'Telemetry',
+            My_System: {
+                class: 'Telemetry_System',
+                systemPoller: {
+                    actions: [
+                        {
+                            setTag: {
+                                newTag: 'tag value'
+                            },
+                            locations: {
+                                a: false
+                            }
+                        }
+                    ]
+                }
+            }
+        };
+        return config.validate(data)
+            .then(() => {
+                assert.fail('Should throw an error');
+            })
+            .catch((err) => {
+                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
+                if (/should match exactly one schema in oneOf/.test(err) && /locations/.test(err)) {
+                    return Promise.resolve();
+                }
+                assert.fail(err);
+                return Promise.reject(err);
+            });
+    });
+
+    it('should pass with object type location with single property', () => {
+        const data = {
+            class: 'Telemetry',
+            My_System: {
+                class: 'Telemetry_System',
+                systemPoller: {
+                    actions: [
+                        {
+                            setTag: {
+                                newTag: 'tag value'
+                            },
+                            locations: {
+                                a: {
+                                    b: true
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        };
+        return config.validate(data)
+            .then((validConfig) => {
+                const actions = validConfig.My_System.systemPoller.actions;
+                assert.deepStrictEqual(actions[0].locations, { a: { b: true } });
+            });
+    });
+    it('should pass with object type location with multiple properties', () => {
+        const data = {
+            class: 'Telemetry',
+            My_System: {
+                class: 'Telemetry_System',
+                systemPoller: {
+                    actions: [
+                        {
+                            setTag: {
+                                newTag: 'tag value'
+                            },
+                            locations: {
+                                a: {
+                                    b: true,
+                                    c: {
+                                        d: true
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        };
+        return config.validate(data)
+            .then((validConfig) => {
+                const actions = validConfig.My_System.systemPoller.actions;
+                assert.deepStrictEqual(actions[0].locations, { a: { b: true, c: { d: true } } });
+            });
+    });
+
+    it('should fail with object type location with multiple properties and one is false', () => {
+        const data = {
+            class: 'Telemetry',
+            My_System: {
+                class: 'Telemetry_System',
+                systemPoller: {
+                    actions: [
+                        {
+                            setTag: {
+                                newTag: 'tag value'
+                            },
+                            locations: {
+                                a: {
+                                    b: true,
+                                    c: {
+                                        d: false
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        };
+        return config.validate(data)
+            .then(() => {
+                assert.fail('Should throw an error');
+            })
+            .catch((err) => {
+                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
+                if (/should match exactly one schema in oneOf/.test(err) && /locations/.test(err)) {
+                    return Promise.resolve();
+                }
+                assert.fail(err);
+                return Promise.reject(err);
+            });
+    });
+
+    it('should fail with object type location with multiple properties and one is invalid type', () => {
+        const data = {
+            class: 'Telemetry',
+            My_System: {
+                class: 'Telemetry_System',
+                systemPoller: {
+                    actions: [
+                        {
+                            setTag: {
+                                newTag: 'tag value'
+                            },
+                            locations: {
+                                a: {
+                                    b: true,
+                                    c: {
+                                        d: []
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        };
+        return config.validate(data)
+            .then(() => {
+                assert.fail('Should throw an error');
+            })
+            .catch((err) => {
+                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
+                if (/should match exactly one schema in oneOf/.test(err) && /locations/.test(err)) {
+                    return Promise.resolve();
+                }
+                assert.fail(err);
                 return Promise.reject(err);
             });
     });

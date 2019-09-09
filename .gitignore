@@ -11,6 +11,10 @@ coverage/
 # local test directory/files
 test/functional/logs/
 test/functional/*_harness_file.json
+test/artifacts/
 # misc
 .vscode/
 **/.DS_Store
+# generated schema & docs
+dist/ts.schema.json
+docs/schema-reference.rst

@@ -214,6 +214,9 @@
         },
         "deviceGroups": {
             "type": "object"
+        },
+        "tmstats": {
+            "type": "object"
         }
     },
     "additionalProperties": false,

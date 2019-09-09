@@ -1,0 +1,3 @@
+# New Features
+* Add support for new tagging API
+* Collect tmstat's cpu_info_stat for Splunk Legacy

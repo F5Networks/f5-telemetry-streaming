@@ -567,6 +567,23 @@ describe('Normalize Util', () => {
         assert.deepEqual(result, expectedResult);
     });
 
+    it('should format as json array and skip mapping keys', () => {
+        const data = 'named_key,key1\nnameOne,valueOne\nnameTwo,valueTwo';
+        const expectedResult = [
+            {
+                named_key: 'nameOne',
+                key1: 'valueOne'
+            },
+            {
+                named_key: 'nameTwo',
+                key1: 'valueTwo'
+            }
+        ];
+
+        const result = normalizeUtil.formatAsJson({ data, type: 'csv' });
+        assert.deepEqual(result, expectedResult);
+    });
+
     it('should throw error about incorrect type', () => {
         const data = 'named_key,key1\nname,value';
 

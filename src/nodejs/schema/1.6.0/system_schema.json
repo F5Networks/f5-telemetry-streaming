@@ -1,0 +1,143 @@
+{
+    "$id": "system_schema.json",
+    "$async": true,
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry Streaming System schema",
+    "description": "",
+    "type": "object",
+    "allOf": [
+        {
+            "if": { "properties": { "class": { "const": "Telemetry_System" } } },
+            "then": {
+                "required": [
+                    "class"
+                ],
+                "properties": {
+                    "class": {
+                        "title": "Class",
+                        "description": "Telemetry Streaming System class",
+                        "type": "string",
+                        "enum": [ "Telemetry_System" ]
+                    },
+                    "enable": {
+                        "title": "Enable all pollers attached to device",
+                        "default": true,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/enable"
+                            }
+                        ]
+                    },
+                    "trace": {
+                        "title": "Enable all pollers' tracers attached to device",
+                        "default": false,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/trace"
+                            }
+                        ]
+                    },
+                    "host": {
+                        "title": "System connection address",
+                        "default": "localhost",
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/host"
+                            }
+                        ]
+                    },
+                    "port": {
+                        "title": "System connection port",
+                        "default": 8100,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/port"
+                            }
+                        ]
+                    },
+                    "protocol": {
+                        "title": "System connection protocol",
+                        "default": "http",
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/protocol"
+                            }
+                        ]
+                    },
+                    "allowSelfSignedCert": {
+                        "$ref": "base_schema.json#/definitions/allowSelfSignedCert"
+                    },
+                    "enableHostConnectivityCheck": {
+                        "$ref": "base_schema.json#/definitions/enableHostConnectivityCheck"
+                    },
+                    "username": {
+                        "title": "System Username",
+                        "$ref": "base_schema.json#/definitions/username"
+                    },
+                    "passphrase": {
+                        "title": "System Passphrase",
+                        "$ref": "base_schema.json#/definitions/secret"
+                    },
+                    "systemPoller": {
+                        "title": "System Poller declaration",
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "declarationClass": "Telemetry_System_Poller"
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a seperate block",
+                                        "properties": {
+                                            "enable": {},
+                                            "trace": {},
+                                            "interval": {},
+                                            "tag": {},
+                                            "actions": {}
+                                        },
+                                        "additionalProperties": false
+                                    },
+                                    {
+                                        "$ref": "system_poller_schema.json#/definitions/systemPoller"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "iHealthPoller": {
+                        "title": "iHealth Poller declaration",
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "declarationClass": "Telemetry_iHealth_Poller"
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a seperate block",
+                                        "properties": {
+                                            "enable": {},
+                                            "trace": {},
+                                            "interval": {},
+                                            "proxy": {},
+                                            "username": {},
+                                            "passphrase": {},
+                                            "downloadFolder": {}
+                                        },
+                                        "additionalProperties": false
+                                    },
+                                    {
+                                        "$ref": "ihealth_poller_schema.json#/definitions/iHealthPoller"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                "additionalProperties": false
+            },
+            "else": {}
+        }
+    ]
+}
