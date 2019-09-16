@@ -497,46 +497,27 @@ module.exports = {
      */
     data(data, options) {
         options = options || {};
-
-        // standard reduce data first
-        const reduceDataOptions = {
-            convertArrayToMap: options.convertArrayToMap,
-            includeFirstEntry: options.includeFirstEntry
-        };
-        let ret = this._reduceData(data, reduceDataOptions);
-
-        // additional normalization may be required - the order here matters
+        let ret;
+        let setReduced = false;
 
         // get data by key
+        ret = this._reduceData(data, {});
         ret = options.key ? this._getDataByKey(ret, options.key) : ret;
-        // filter data by keys - 1+ calls
-        let fBK = options.filterByKeys;
-        if (fBK) {
-            fBK = Array.isArray(fBK) ? fBK : [fBK];
-            fBK.forEach((item) => {
-                ret = normalizeUtil._filterDataByKeys(ret, item);
-            });
+
+        if (options.filterKeys) {
+            ret = this._handleFilterByKeys(ret, options.filterKeys);
         }
-        // rename keys by pattern - 1+ calls
-        let rKBP = options.renameKeysByPattern;
-        if (rKBP) {
-            rKBP = Array.isArray(rKBP) ? rKBP : [rKBP];
-            rKBP.forEach((item) => {
-                ret = normalizeUtil._renameKeys(ret, item.patterns, item.options);
-            });
+
+        if (options.renameKeys) {
+            ret = this._handleRenameKeys(ret, options.renameKeys);
         }
-        // run custom functions
-        if (options.runCustomFunctions) {
-            options.runCustomFunctions.forEach((customFunction) => {
-                const rCFOptions = {
-                    func: customFunction.name,
-                    args: customFunction.args
-                };
-                ret = this._runCustomFunction(ret, rCFOptions);
-            });
+
+        if (options.formatTimestamps) {
+            ret = this._handleTimestamps(ret, options.formatTimestamps, options);
         }
-        // add keys by tag - after custom functions run
+
         if (options.addKeysByTag) {
+            // add keys by tag - after custom functions run
             ret = this._addKeysByTag(
                 ret,
                 options.addKeysByTag.tags,
@@ -544,17 +525,107 @@ module.exports = {
                 options.addKeysByTag.opts
             );
         }
-        // format timestamps
-        const nT = options.formatTimestamps;
-        const propKey = options.propertyKey;
-        if (nT) {
-            if (typeof propKey === 'string') {
-                ret = this._formatTimestamps({ [propKey]: ret }, nT)[propKey];
-            } else {
-                ret = this._formatTimestamps(ret, nT);
-            }
+
+        if (options.normalization) {
+            options.normalization.forEach((norm) => {
+                if ((norm.convertArrayToMap || norm.includeFirstEntry) && !setReduced) {
+                    // standard reduce data first
+                    const reduceDataOptions = {
+                        convertArrayToMap: (options.normalization.find(n => n.convertArrayToMap)
+                            || {}).convertArrayToMap,
+                        includeFirstEntry: (options.normalization.find(n => n.includeFirstEntry)
+                            || {}).includeFirstEntry
+                    };
+                    ret = this._reduceData(data, reduceDataOptions);
+                    setReduced = true;
+
+                    // get data by key
+                    ret = options.key ? this._getDataByKey(ret, options.key) : ret;
+                }
+
+                if (norm.filterKeys) {
+                    ret = this._handleFilterByKeys(ret, norm.filterKeys);
+                }
+
+                if (norm.renameKeys) {
+                    ret = this._handleRenameKeys(ret, norm.renameKeys);
+                }
+
+                if (norm.runFunctions) {
+                    // run custom functions
+                    norm.runFunctions.forEach((customFunction) => {
+                        const rCFOptions = {
+                            func: customFunction.name,
+                            args: customFunction.args
+                        };
+                        ret = this._runCustomFunction(ret, rCFOptions);
+                    });
+                }
+
+                if (norm.addKeysByTag) {
+                    // add keys by tag - after custom functions run
+                    ret = this._addKeysByTag(
+                        ret,
+                        norm.addKeysByTag.tags,
+                        norm.addKeysByTag.definitions,
+                        norm.addKeysByTag.opts
+                    );
+                }
+
+                if (norm.formatTimestamps) {
+                    ret = this._handleTimestamps(ret, norm.formatTimestamps, options);
+                }
+            });
         }
 
+        return ret;
+    },
+
+    /**
+     * This handles the logic for handing off data for timestamp formatting
+     *
+     * @param {Object} ret - The normalized data that will be returned
+     * @param {Array} timestamps - The keys to be formatted
+     * @param {Object} options - options
+     */
+    _handleTimestamps(ret, timestamps, options) {
+        // format timestamps
+        const propKey = options.propertyKey;
+        if (typeof propKey === 'string') {
+            ret = this._formatTimestamps({ [propKey]: ret }, timestamps)[propKey];
+        } else {
+            ret = this._formatTimestamps(ret, timestamps);
+        }
+        return ret;
+    },
+
+    /**
+     * This handles checking filterByKeys and passing it along
+     *
+     * @param {Object} ret - The normalized data that will be returned
+     * @param {Object} filterByKeys - The keys to filter
+     */
+    _handleFilterByKeys(ret, filterByKeys) {
+        // filter data by keys - 1+ calls
+        const fBK = Array.isArray(filterByKeys) ? filterByKeys : [filterByKeys];
+        fBK.forEach((item) => {
+            ret = normalizeUtil._filterDataByKeys(ret, item);
+        });
+        return ret;
+    },
+
+    /**
+     * This handles checking renameKeys and passing it along
+     *
+     * @param {Object} ret - The normalized data that will be returned
+     * @param {Object} renameKeys - The keys to be renamed
+     */
+    _handleRenameKeys(ret, renameKeys) {
+        // rename keys by pattern - 1+ calls
+        const rKBP = Array.isArray(renameKeys) ? renameKeys : [renameKeys];
+        rKBP.forEach((item) => {
+            ret = normalizeUtil._renameKeys(ret, item.patterns, item.options);
+        });
         return ret;
     }
 };

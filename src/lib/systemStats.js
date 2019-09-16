@@ -132,24 +132,72 @@ SystemStats.prototype._renderProperty = function (property) {
  */
 SystemStats.prototype._processData = function (property, data, key) {
     const defaultTags = { name: { pattern: '(.*)', group: 1 } };
-    const addKeysByTagIsObject = property.addKeysByTag && typeof property.addKeysByTag === 'object';
-
-    // standard options for normalize, these are driven primarily by the properties file
+    const addKeysByTagIsObject = property.normalization
+        && property.normalization.find(n => n.addKeysByTag && typeof n.addKeysByTag === 'object');
     const options = {
         key: this._splitKey(property.key).childKey,
-        filterByKeys: property.filterKeys ? [property.filterKeys, global.filterKeys] : [global.filterKeys],
-        renameKeysByPattern: property.renameKeys ? [property.renameKeys, global.renameKeys] : [global.renameKeys],
-        convertArrayToMap: property.convertArrayToMap,
-        includeFirstEntry: property.includeFirstEntry,
-        formatTimestamps: global.formatTimestamps.keys,
-        runCustomFunctions: property.runFunctions,
-        addKeysByTag: { // add 'name' + any user configured tags if specified by prop
-            tags: property.addKeysByTag ? Object.assign(defaultTags, this.tags) : defaultTags,
-            definitions,
-            opts: addKeysByTagIsObject ? property.addKeysByTag : global.addKeysByTag
-        },
         propertyKey: key
     };
+
+    if (property.normalization) {
+        const filterKeysIndex = property.normalization.findIndex(i => i.filterKeys);
+        if (filterKeysIndex > -1) {
+            property.normalization[filterKeysIndex] = {
+                filterKeys: [
+                    property.normalization[filterKeysIndex].filterKeys,
+                    global.filterKeys
+                ]
+            };
+        } else {
+            options.filterKeys = [global.filterKeys];
+        }
+
+        const renameKeysIndex = property.normalization.findIndex(i => i.renameKeys);
+        if (renameKeysIndex > -1) {
+            property.normalization[renameKeysIndex] = {
+                renameKeys: [
+                    property.normalization[renameKeysIndex].renameKeys,
+                    global.renameKeys
+                ]
+            };
+        } else {
+            options.renameKeys = [global.renameKeys];
+        }
+
+        const addKeysByTagIndex = property.normalization.findIndex(i => i.addKeysByTag);
+        if (addKeysByTagIndex > -1) {
+            property.normalization[addKeysByTagIndex] = {
+                addKeysByTag: {
+                    tags: Object.assign(defaultTags, this.tags),
+                    definitions,
+                    opts: addKeysByTagIsObject ? property.normalization[addKeysByTagIndex]
+                        .addKeysByTag : global.addKeysByTag
+                }
+            };
+        } else {
+            property.normalization.push({
+                addKeysByTag: {
+                    tags: defaultTags,
+                    definitions,
+                    opts: global.addKeysByTag
+                }
+            });
+        }
+
+        property.normalization.push({ formatTimestamps: global.formatTimestamps.keys });
+    } else {
+        options.filterKeys = [global.filterKeys];
+        options.renameKeys = [global.renameKeys];
+        options.formatTimestamps = global.formatTimestamps.keys;
+        options.addKeysByTag = {
+            tags: defaultTags,
+            definitions,
+            opts: global.addKeysByTag
+        };
+    }
+
+    // standard options for normalize, these are driven primarily by the properties file
+    options.normalization = property.normalization;
     return property.normalize === false ? data : normalize.data(data, options);
 };
 /**

@@ -77,7 +77,8 @@ function addTags(data, tags, locations) {
         if (data.telemetryEventCategory === 'systemInfo') {
             // Apply tags to default locations (where addKeysByTag is true) for system info
             Object.keys(properties.stats).forEach((stat) => {
-                if (properties.stats[stat].addKeysByTag && data[stat] && typeof data[stat] === 'object') {
+                if (properties.stats[stat].normalization && properties.stats[stat].normalization
+                    .find(norm => norm.addKeysByTag) && data[stat] && typeof data[stat] === 'object') {
                     Object.keys(data[stat]).forEach((item) => {
                         Object.keys(tags).forEach((tag) => {
                             addTag(data, tag, tags, item, stat);
@@ -114,7 +115,8 @@ function addTag(data, tag, tags, location, stat) {
         const def = properties.definitions[tags[tag]];
         if (data.telemetryEventCategory === 'systemInfo') {
             // Apply tag to system info default locations (when addKeysByTag is true)
-            const stats = Object.keys(properties.stats).filter(key => properties.stats[key].addKeysByTag);
+            const stats = Object.keys(properties.stats).filter(key => properties.stats[key].normalization
+                && properties.stats[key].normalization.find(norm => norm.addKeysByTag));
             stats.forEach((s) => {
                 if (typeof data[s] !== 'undefined') {
                     Object.keys(data[s]).forEach((item) => {

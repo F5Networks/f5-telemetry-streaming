@@ -163,7 +163,11 @@ describe('Normalize', () => {
     it('should filter by key', () => {
         const options = {
             key: 'sys/version/0',
-            filterByKeys: { include: ['Version', 'Product'] }
+            normalization: [
+                {
+                    filterKeys: { include: ['Version', 'Product'] }
+                }
+            ]
         };
         const expectedResult = {
             Product: 'Product',
@@ -176,14 +180,18 @@ describe('Normalize', () => {
 
     it('should rename key by pattern', () => {
         const options = {
-            renameKeysByPattern: {
-                patterns: {
-                    'sys/version': {
-                        pattern: 'sys/version(.*)',
-                        group: 1
+            normalization: [
+                {
+                    renameKeys: {
+                        patterns: {
+                            'sys/version': {
+                                pattern: 'sys/version(.*)',
+                                group: 1
+                            }
+                        }
                     }
                 }
-            }
+            ]
         };
 
         const result = normalize.data(exampleData, options);
@@ -225,10 +233,14 @@ describe('Normalize', () => {
             }
         };
         const options = {
-            convertArrayToMap: {
-                keyName: 'name',
-                keyNamePrefix: 'name/'
-            }
+            normalization: [
+                {
+                    convertArrayToMap: {
+                        keyName: 'name',
+                        keyNamePrefix: 'name/'
+                    }
+                }
+            ]
         };
 
         const result = normalize.data(data, options);
@@ -265,10 +277,14 @@ describe('Normalize', () => {
             childKey: 'bar'
         };
         const options = {
-            includeFirstEntry: {
-                pattern: '/stats',
-                excludePattern: '/members/'
-            }
+            normalization: [
+                {
+                    includeFirstEntry: {
+                        pattern: '/stats',
+                        excludePattern: '/members/'
+                    }
+                }
+            ]
         };
 
         const result = normalize.data(data, options);
@@ -277,16 +293,20 @@ describe('Normalize', () => {
 
     it('should run custom functions', () => {
         const options = {
-            runCustomFunctions: [
+            normalization: [
                 {
-                    name: 'formatAsJson',
-                    args: {
-                        type: 'csv',
-                        mapKey: 'named_key'
-                    }
-                },
-                {
-                    name: 'getFirstKey'
+                    runFunctions: [
+                        {
+                            name: 'formatAsJson',
+                            args: {
+                                type: 'csv',
+                                mapKey: 'named_key'
+                            }
+                        },
+                        {
+                            name: 'getFirstKey'
+                        }
+                    ]
                 }
             ]
         };
@@ -311,17 +331,21 @@ describe('Normalize', () => {
             }
         };
         const options = {
-            addKeysByTag: {
-                tags: {
-                    tenant: '`T`',
-                    application: '`A`',
-                    foo: 'bar'
-                },
-                definitions: properties.definitions,
-                opts: {
-                    skip: ['somekey']
+            normalization: [
+                {
+                    addKeysByTag: {
+                        tags: {
+                            tenant: '`T`',
+                            application: '`A`',
+                            foo: 'bar'
+                        },
+                        definitions: properties.definitions,
+                        opts: {
+                            skip: ['somekey']
+                        }
+                    }
                 }
-            }
+            ]
         };
 
         const result = normalize.data(data, options);
@@ -338,16 +362,20 @@ describe('Normalize', () => {
             application: 'app.app'
         };
         const options = {
-            addKeysByTag: {
-                tags: {
-                    tenant: '`T`',
-                    application: '`A`'
-                },
-                definitions: properties.definitions,
-                opts: {
-                    classifyByKeys: ['vs']
+            normalization: [
+                {
+                    addKeysByTag: {
+                        tags: {
+                            tenant: '`T`',
+                            application: '`A`'
+                        },
+                        definitions: properties.definitions,
+                        opts: {
+                            classifyByKeys: ['vs']
+                        }
+                    }
                 }
-            }
+            ]
         };
 
         const result = normalize.data(data, options);
@@ -372,7 +400,11 @@ describe('Normalize', () => {
             }
         };
         const options = {
-            formatTimestamps: ['expirationString']
+            normalization: [
+                {
+                    formatTimestamps: ['expirationString']
+                }
+            ]
         };
 
         const result = normalize.data(data, options);
@@ -383,12 +415,85 @@ describe('Normalize', () => {
         const data = '1560975328';
         const expectedResult = '2019-06-19T20:15:28.000Z';
         const options = {
-            formatTimestamps: ['ltmConfigTime'],
+            normalization: [
+                {
+                    formatTimestamps: ['ltmConfigTime']
+                }
+            ],
             propertyKey: 'ltmConfigTime'
         };
 
         const result = normalize.data(data, options);
         assert.deepEqual(result, expectedResult);
+    });
+
+    describe('_handleFormatTimestamps', () => {
+        it('should format timestamps with propertyKey', () => {
+            const ret = {
+                ltmConfigTime: '1560975328'
+            };
+            const timestamps = ['ltmConfigTime'];
+            const options = {
+                propertyKey: 'ltmConfigTime'
+            };
+            const expected = {
+                ltmConfigTime: '2019-06-19T20:15:28.000Z'
+            };
+            const result = normalize._handleTimestamps(ret, timestamps, options);
+            assert.deepEqual(result, expected);
+        });
+
+        it('should format timestamps without propertyKey', () => {
+            const ret = {
+                formatMe: 'Septmeber 16, 2019 01:00:00 UTC'
+            };
+            const timestamps = ['formatMe'];
+            const expected = {
+                formatMe: '2019-09-16T01:00:00.000Z'
+            };
+            const result = normalize._handleTimestamps(ret, timestamps, {});
+            assert.deepEqual(result, expected);
+        });
+    });
+
+    describe('_handleFilterByKeys', () => {
+        it('should filter out keys', () => {
+            const ret = {
+                key1: 'keyValue',
+                key2: 'hello',
+                key3: 'data'
+            };
+            const filterByKeys = [
+                {
+                    exclude: ['key1', 'key3']
+                }
+            ];
+            const expected = {
+                key2: 'hello'
+            };
+            const result = normalize._handleFilterByKeys(ret, filterByKeys);
+            assert.deepEqual(result, expected);
+        });
+    });
+
+    describe('_handleRenameKeys', () => {
+        it('should rename keys', () => {
+            const ret = {
+                prop1: 'value1',
+                prop2: 'value2',
+                prop3: 'value3'
+            };
+            const renameKeys = [
+                { patterns: { prop1: { pattern: 'prop' }, prop2: { pattern: 'p' } } }
+            ];
+            const expected = {
+                prop: 'value1',
+                p: 'value2',
+                prop3: 'value3'
+            };
+            const result = normalize._handleRenameKeys(ret, renameKeys);
+            assert.deepEqual(result, expected);
+        });
     });
 });
 
