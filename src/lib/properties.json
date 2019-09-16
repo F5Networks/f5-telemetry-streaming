@@ -7,11 +7,23 @@
             "key": "/mgmt/tm/sys/global-settings::hostname",
             "structure": { "parentKey": "system" },
             "normalize": null,
-            "convertArrayToMap": null,
-            "filterKeys": null,
-            "renameKeys": null,
-            "runFunctions": null,
-            "addKeysByTag": null
+            "normalization": [
+                {
+                    "convertArrayToMap": null
+                },
+                {
+                    "filterKeys": null
+                },
+                {
+                    "renameKeys": null
+                },
+                {
+                    "runFunctions": null
+                },
+                {
+                    "addKeysByTag": null
+                }
+            ]
         },
         "version": {
             "structure": { "parentKey": "system" },
@@ -24,27 +36,47 @@
         "location": {
             "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::location",
-            "convertArrayToMap": { "keyName": "name" }
+            "normalization": [
+                {
+                    "convertArrayToMap": { "keyName": "name" }
+                }
+            ]
         },
         "description": {
             "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::description",
-            "convertArrayToMap": { "keyName": "name" }
+            "normalization": [
+                {
+                    "convertArrayToMap": { "keyName": "name" }
+                }
+            ]
         },
         "marketingName": {
             "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::marketingName",
-            "convertArrayToMap": { "keyName": "name" }
+            "normalization": [
+                {
+                    "convertArrayToMap": { "keyName": "name" }
+                }
+            ]
         },
         "platformId": {
             "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::platformId",
-            "convertArrayToMap": { "keyName": "name" }
+            "normalization": [
+                {
+                    "convertArrayToMap": { "keyName": "name" }
+                }
+            ]
         },
         "chassisId": {
             "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::chassisId",
-            "convertArrayToMap": { "keyName": "name" }
+            "normalization": [
+                {
+                    "convertArrayToMap": { "keyName": "name" }
+                }
+            ]
         },
         "baseMac": {
             "structure": { "parentKey": "system" },
@@ -53,8 +85,14 @@
         "callBackUrl": {
             "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/sys/management-ip::items",
-            "convertArrayToMap": { "keyName": "name" },
-            "runFunctions": [{ "name": "getFirstKey", "args": { "splitOnValue": "/", "keyPrefix": "https://" } }]
+            "normalization": [
+                {
+                    "convertArrayToMap": { "keyName": "name" }
+                },
+                {
+                    "runFunctions": [{ "name": "getFirstKey", "args": { "splitOnValue": "/", "keyPrefix": "https://" } }]
+                }
+            ]
         },
         "configReady": {
             "structure": { "parentKey": "system" },
@@ -123,114 +161,244 @@
         "cpu": {
             "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/sys/host-info::sys/host-info/0::sys/hostInfo/0/cpuInfo",
-            "runFunctions": [{ "name": "getAverage", "args": { "keyWithValue": "oneMinAvgSystem" } }],
+            "normalization": [
+                {
+                    "runFunctions": [{ "name": "getAverage", "args": { "keyWithValue": "oneMinAvgSystem" } }]
+                }
+            ],
             "comment": "also oneMinAvgUser, need to determine how that should be factored in"
         },
         "memory": {
             "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/sys/memory::sys/memory/memory-host::sys/memory/memory-host/0",
-            "runFunctions": [{ "name": "getPercentFromKeys", "args": { "totalKey": "memoryTotal", "partialKey": "memoryUsed" } }]
+            "normalization": [
+                {
+                    "runFunctions": [{ "name": "getPercentFromKeys", "args": { "totalKey": "memoryTotal", "partialKey": "memoryUsed" } }]
+                }
+            ]
         },
         "tmmCpu": {
             "structure": { "parentKey": "system" },
             "key": "tmmInfo",
-            "runFunctions": [{ "name": "getAverage", "args": { "keyWithValue": "oneMinAvgUsageRatio" } }]
+            "normalization": [
+                {
+                    "runFunctions": [{ "name": "getAverage", "args": { "keyWithValue": "oneMinAvgUsageRatio" } }]
+                }
+            ]
         },
         "tmmMemory": {
             "structure": { "parentKey": "system" },
             "key": "/mgmt/tm/sys/memory::sys/memory/memory-host::sys/memory/memory-host/0",
-            "runFunctions": [{ "name": "getPercentFromKeys", "args": { "totalKey": "tmmMemoryTotal", "partialKey": "tmmMemoryUsed" } }]
+            "normalization": [
+                {
+                    "runFunctions": [{ "name": "getPercentFromKeys", "args": { "totalKey": "tmmMemoryTotal", "partialKey": "tmmMemoryUsed" } }]
+                }
+            ]
         },
         "tmmTraffic": {
             "structure": { "parentKey": "system" },
             "key": "tmmTraffic",
-            "filterKeys": { "exclude": [ "clientSideTraffic.pktsIn", "clientSideTraffic.pktsOut", "serverSideTraffic.pktsIn", "serverSideTraffic.pktsOut", "clientSideTraffic.curConns", "clientSideTraffic.evictedConns", "clientSideTraffic.maxConns", "clientSideTraffic.slowKilled", "clientSideTraffic.totConns", "cmpConnRedirected", "connectionMemoryErrors", "droppedPackets", "httpRequests", "incomingPacketErrors", "licenseDeny", "maintenanceModeDeny", "maxConnVirtualAddressDeny", "maxConnVirtualPathDeny", "noHandlerDeny", "noStagedHandlerDeny", "outgoingPacketErrors", "serverSideTraffic.curConns","serverSideTraffic.evictedConns", "serverSideTraffic.maxConns", "serverSideTraffic.slowKilled", "serverSideTraffic.totConns", "tmmId", "virtualServerNonSynDeny"] },
-            "renameKeys": { "patterns": { "sys/tmm-traffic": { "pattern": "([0-9]\\.[0-9])" } } },
-            "runFunctions": [{ "name": "getSum", "args": {} }]
+            "normalization": [
+                {
+                    "filterKeys": { "exclude": [ "clientSideTraffic.pktsIn", "clientSideTraffic.pktsOut", "serverSideTraffic.pktsIn", "serverSideTraffic.pktsOut", "clientSideTraffic.curConns", "clientSideTraffic.evictedConns", "clientSideTraffic.maxConns", "clientSideTraffic.slowKilled", "clientSideTraffic.totConns", "cmpConnRedirected", "connectionMemoryErrors", "droppedPackets", "httpRequests", "incomingPacketErrors", "licenseDeny", "maintenanceModeDeny", "maxConnVirtualAddressDeny", "maxConnVirtualPathDeny", "noHandlerDeny", "noStagedHandlerDeny", "outgoingPacketErrors", "serverSideTraffic.curConns","serverSideTraffic.evictedConns", "serverSideTraffic.maxConns", "serverSideTraffic.slowKilled", "serverSideTraffic.totConns", "tmmId", "virtualServerNonSynDeny"] }
+                },
+                {
+                    "renameKeys": { "patterns": { "sys/tmm-traffic": { "pattern": "([0-9]\\.[0-9])" } } }
+                },
+                {
+                    "runFunctions": [{ "name": "getSum", "args": {} }]
+                }
+            ]
         },
         "diskStorage": {
             "structure": { "parentKey": "system" },
             "key": "diskStorage::commandResult",
-            "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Mounted", "filterKeys": { "include": [ "/", "Capacity", "1024-blocks" ] } } }]
+            "normalization": [
+                {
+                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Mounted", "filterKeys": { "include": [ "/", "Capacity", "1024-blocks" ] } } }]
+                }
+            ]
         },
         "diskLatency": {
             "structure": { "parentKey": "system" },
             "key": "diskLatency::commandResult",
-            "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Device:", "filterKeys": { "exclude": [ "Device:", "await", "r_await", "w_await", "svctm", "avgrq-sz", "avgqu-sz", "rkB/s", "wkB/s", "rsec/s", "wsec/s", "rrqm/s", "wrqm/s" ] }, "renameKeys": { "patterns": { "rsec/s": { "constant": "rkB/s" }, "wsec/s": { "constant": "wkB/s" } } } } }],
+            "normalization": [
+                {
+                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Device:", "filterKeys": { "exclude": [ "Device:", "await", "r_await", "w_await", "svctm", "avgrq-sz", "avgqu-sz", "rkB/s", "wkB/s", "rsec/s", "wsec/s", "rrqm/s", "wrqm/s" ] }, "renameKeys": { "patterns": { "rsec/s": { "constant": "rkB/s" }, "wsec/s": { "constant": "wkB/s" } } } } }]
+                }
+            ],
             "comment": "14.1+ uses wkB/s instead of wsec/s, equivalent for read.  Ignore both for now."
         },
         "networkInterfaces": {
             "structure": { "parentKey": "system" },
             "key": "networkInterfaces",
-            "filterKeys": { "exclude": [ "counters.errorsAll", "counters.dropsAll", "counters.pktsIn", "counters.pktsOut", "mediaActive", "tmName" ] },
-            "renameKeys": { "patterns": { "net/interface": { "pattern": "([0-9]\\.[0-9]|(?!\/)mgmt(?=\/))" } } }
+            "normalization": [
+                {
+                    "filterKeys": { "exclude": [ "counters.errorsAll", "counters.dropsAll", "counters.pktsIn", "counters.pktsOut", "mediaActive", "tmName" ] }
+                },
+                {
+                    "renameKeys": { "patterns": { "net/interface": { "pattern": "([0-9]\\.[0-9]|(?!\/)mgmt(?=\/))" } } }
+                }
+            ]
         },
         "provisioning": {
             "structure": { "parentKey": "system" },
             "key": "provisioning::items",
-            "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" },
-            "filterKeys": { "exclude": [ "kind", "fullPath", "generation", "selfLink", "cpuRatio", "memoryRatio", "diskRatio" ] },
-            "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 } } }
+            "normalization": [
+                {
+                    "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" }
+                },
+                {
+                    "filterKeys": { "exclude": [ "kind", "fullPath", "generation", "selfLink", "cpuRatio", "memoryRatio", "diskRatio" ] }
+                },
+                {
+                    "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 } } }
+                }
+            ]
         },
         "virtualServers": {
             "key": "virtualServers::items",
-            "convertArrayToMap": { "keyName": "fullPath", "keyNamePrefix": "name/" },
-            "filterKeys": { "exclude": [ "fullPath", "generation", "appServiceReference", "tmName", "status.statusReason", "cmpEnabled", "cmpEnableMode", "csMaxConnDur", "csMeanConnDur", "csMinConnDur", "totRequests", "oneMinAvgUsageRatio", "clientside.pktsIn", "clientside.pktsOut", "clientside.evictedConns", "clientside.slowKilled", "clientside.maxConns", "clientside.totConns", "ephemeral.bitsIn", "ephemeral.bitsOut", "ephemeral.curConns", "ephemeral.evictedConns", "ephemeral.maxConns", "ephemeral.pktsIn", "ephemeral.pktsOut", "ephemeral.slowKilled", "ephemeral.totConns", "fiveSecAvgUsageRatio", "fiveMinAvgUsageRatio", "syncookieStatus", "syncookie.accepts", "syncookie.hwAccepts", "syncookie.hwSyncookies", "syncookie.rejects", "syncookie.hwsyncookieInstance", "syncookie.swsyncookieInstance", "syncookie.syncacheCurr", "syncookie.syncacheOver", "syncookie.syncookies", "syncookie.syncacheOver" ] },
-            "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/virtual": { "pattern": "virtual\/(.*)\/", "group": 1 } } },
-            "includeFirstEntry": { "pattern": "/stats"},
-            "addKeysByTag": true
+            "normalization": [
+                {
+                    "convertArrayToMap": { "keyName": "fullPath", "keyNamePrefix": "name/" }
+                },
+                {
+                    "includeFirstEntry": { "pattern": "/stats"}
+                },
+                {
+                    "filterKeys": { "exclude": [ "fullPath", "generation", "appServiceReference", "tmName", "status.statusReason", "cmpEnabled", "cmpEnableMode", "csMaxConnDur", "csMeanConnDur", "csMinConnDur", "totRequests", "oneMinAvgUsageRatio", "clientside.pktsIn", "clientside.pktsOut", "clientside.evictedConns", "clientside.slowKilled", "clientside.maxConns", "clientside.totConns", "ephemeral.bitsIn", "ephemeral.bitsOut", "ephemeral.curConns", "ephemeral.evictedConns", "ephemeral.maxConns", "ephemeral.pktsIn", "ephemeral.pktsOut", "ephemeral.slowKilled", "ephemeral.totConns", "fiveSecAvgUsageRatio", "fiveMinAvgUsageRatio", "syncookieStatus", "syncookie.accepts", "syncookie.hwAccepts", "syncookie.hwSyncookies", "syncookie.rejects", "syncookie.hwsyncookieInstance", "syncookie.swsyncookieInstance", "syncookie.syncacheCurr", "syncookie.syncacheOver", "syncookie.syncookies", "syncookie.syncacheOver" ] }
+                },
+                {
+                    "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/virtual": { "pattern": "virtual\/(.*)\/", "group": 1 } } }
+                },
+                {
+                    "addKeysByTag": true
+                }
+            ]
         },
         "pools": {
             "key": "pools::items",
-            "convertArrayToMap": { "keyName": "selfLink", "keyNamePrefix": "name/" },
-            "filterKeys": { "exclude": [ "tmName", "availableMemberCnt", "sessionStatus", "status.statusReason", "connqAll.ageEdm", "connqAll.ageEma", "connqAll.ageHead", "connqAll.ageMax", "connqAll.depth", "connqAll.serviced", "connq.ageEdm", "connq.ageEma", "connq.ageHead", "connq.ageMax", "connq.depth", "connq.serviced", "curSessions", "memberCnt", "minActiveMembers", "monitorRule", "serverside.pktsIn", "serverside.pktsOut", "serverside.maxConns", "serverside.totConns", "totRequests", "ipTosToServer", "minUpMembersAction", "appService", "appServiceReference", "minUpMembersChecking", "kind","ignorePersistedWeight", "fullPath", "partition", "linkQosToClient", "linkQosToServer", "ipTosToClient", "generation", "serviceDownAction", "queueDepthLimit", "queueTimeLimit", "allowNat", "reselectTries", "minUpMembers", "monitorStatus", "nodeName", "poolName", "allowSnat", "monitor", "selfLink", "subPath", "queueOnConnectionLimit", "loadBalancingMode", "slowRampTime" ] },
-            "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/pool/": { "pattern": "pool\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members" } },
-            "includeFirstEntry": { "pattern": "/stats", "excludePattern": "/members/" },
-            "addKeysByTag": true
+            "normalization": [
+                {
+                    "convertArrayToMap": { "keyName": "selfLink", "keyNamePrefix": "name/" }
+                },
+                {
+                    "includeFirstEntry": { "pattern": "/stats", "excludePattern": "/members/" }
+                },
+                {
+                    "filterKeys": { "exclude": [ "tmName", "availableMemberCnt", "sessionStatus", "status.statusReason", "connqAll.ageEdm", "connqAll.ageEma", "connqAll.ageHead", "connqAll.ageMax", "connqAll.depth", "connqAll.serviced", "connq.ageEdm", "connq.ageEma", "connq.ageHead", "connq.ageMax", "connq.depth", "connq.serviced", "curSessions", "memberCnt", "minActiveMembers", "monitorRule", "serverside.pktsIn", "serverside.pktsOut", "serverside.maxConns", "serverside.totConns", "totRequests", "ipTosToServer", "minUpMembersAction", "appService", "appServiceReference", "minUpMembersChecking", "kind","ignorePersistedWeight", "fullPath", "partition", "linkQosToClient", "linkQosToServer", "ipTosToClient", "generation", "serviceDownAction", "queueDepthLimit", "queueTimeLimit", "allowNat", "reselectTries", "minUpMembers", "monitorStatus", "nodeName", "poolName", "allowSnat", "monitor", "selfLink", "subPath", "queueOnConnectionLimit", "loadBalancingMode", "slowRampTime" ] }
+                },
+                {
+                    "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/pool/": { "pattern": "pool\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members" } }
+                },
+                {
+                    "addKeysByTag": true
+                }
+            ]
         },
         "ltmPolicies": {
             "key": "ltmPolicies",
-            "filterKeys": { "exclude": [ "policyName", "vsName", "action", "actionId", "ruleName", "tmTarget" ] },
-            "renameKeys": { "patterns": [ { "ltm/policy/": { "pattern": "policy\/(.*)\/", "group": 1 }, "/actions/": { "pattern": "actions\/(.*)", "group": 1 } }, { "/actions": { "constant": "actions" } } ] },
-            "addKeysByTag": true
+            "normalization": [
+                {
+                    "filterKeys": { "exclude": [ "policyName", "vsName", "action", "actionId", "ruleName", "tmTarget" ] }
+                },
+                {
+                    "renameKeys": { "patterns": [ { "ltm/policy/": { "pattern": "policy\/(.*)\/", "group": 1 }, "/actions/": { "pattern": "actions\/(.*)", "group": 1 } }, { "/actions": { "constant": "actions" } } ] }
+                },
+                {
+                    "addKeysByTag": true
+                }
+            ]
         },
         "httpProfiles": {
             "key": "httpProfiles",
-            "filterKeys": { "exclude": [ "tmName", "passthroughConnect", "passthroughExcessClientHeaders", "passthroughExcessServerHeaders", "passthroughHeaders", "passthroughIrule", "passthroughOversizeClientHeaders", "passthroughOversizeServerHeaders", "passthroughPipeline", "passthroughUnknownMethod", "passthroughWebSockets", "proxyConnReqs", "proxyReqs", "respBucket_128k", "respBucket_16k", "respBucket_1k", "respBucket_32k", "respBucket_4k", "respBucket_512k", "respBucket_64k", "typeId","vsName" ] },
-            "renameKeys": { "patterns": { "ltm/profile/http/": { "pattern": "http\/(.*)\/", "group": 1 } } },
-            "addKeysByTag": true
+            "normalization": [
+                {
+                    "filterKeys": { "exclude": [ "tmName", "passthroughConnect", "passthroughExcessClientHeaders", "passthroughExcessServerHeaders", "passthroughHeaders", "passthroughIrule", "passthroughOversizeClientHeaders", "passthroughOversizeServerHeaders", "passthroughPipeline", "passthroughUnknownMethod", "passthroughWebSockets", "proxyConnReqs", "proxyReqs", "respBucket_128k", "respBucket_16k", "respBucket_1k", "respBucket_32k", "respBucket_4k", "respBucket_512k", "respBucket_64k", "typeId","vsName" ] }
+                },
+                {
+                    "renameKeys": { "patterns": { "ltm/profile/http/": { "pattern": "http\/(.*)\/", "group": 1 } } }
+                },
+                {
+                    "addKeysByTag": true
+                }
+            ]
         },
         "clientSslProfiles": {
             "key": "clientSslProfiles",
-            "filterKeys": { "exclude": [ "common.aggregateRenegotiationsRejected", "common.badRecords", "common.c3dUses.conns", "common.cipherUses.adhKeyxchg", "common.cipherUses.aesBulk", "common.cipherUses.aesGcmBulk", "common.cipherUses.camelliaBulk", "common.cipherUses.desBulk", "common.cipherUses.dhRsaKeyxchg", "common.cipherUses.dheDssKeyxchg", "common.cipherUses.ecdhEcdsaKeyxchg", "common.cipherUses.ecdhRsaKeyxchg", "common.cipherUses.ecdheEcdsaKeyxchg", "common.cipherUses.ecdheRsaKeyxchg", "common.cipherUses.edhRsaKeyxchg", "common.cipherUses.ideaBulk", "common.cipherUses.md5Digest", "common.cipherUses.nullBulk", "common.cipherUses.nullDigest", "common.cipherUses.rc2Bulk", "common.cipherUses.rc4Bulk", "common.cipherUses.rsaKeyxchg", "common.cipherUses.shaDigest", "common.connectionMirroring.haCtxRecv", "common.connectionMirroring.haCtxSent", "common.connectionMirroring.haFailure", "common.connectionMirroring.haHsSuccess", "common.connectionMirroring.haPeerReady", "common.connectionMirroring.haTimeout", "common.dtlsTxPushbacks", "common.extendedMasterSecrets", "common.fullyHwAcceleratedConns", "common.fwdpUses.alertBypasses", "common.fwdpUses.cachedCerts", "common.fwdpUses.clicertFailBypasses", "common.fwdpUses.conns", "common.fwdpUses.dipBypasses", "common.fwdpUses.enforceResumeFailures", "common.fwdpUses.hnBypasses", "common.fwdpUses.sipBypasses", "common.fwdpUses.transparentResumeCnt", "common.fwdpUses.verifiedHsCnt", "common.insecureHandshakeAccepts", "common.insecureHandshakeRejects", "common.insecureRenegotiationRejects", "common.maxCompatConns", "common.maxConns", "common.maxNativeConns", "common.midstreamRenegotiations", "common.nonHwAcceleratedConns", "common.ocspFwdpClientssl.cachedResp", "common.ocspFwdpClientssl.certStatusReq", "common.ocspFwdpClientssl.invalidCertResp", "common.ocspFwdpClientssl.respstatusErrResp", "common.ocspFwdpClientssl.revokedResp", "common.ocspFwdpClientssl.stapledResp", "common.ocspFwdpClientssl.unknownResp", "common.partiallyHwAcceleratedConns", "common.prematureDisconnects", "common.renegotiationsRejected", "common.secureHandshakes", "common.sessCacheCurEntries", "common.sessCacheHits", "common.sessCacheInvalidations", "common.sessCacheLookups", "common.sessCacheOverflows", "common.sessionMirroring.failure", "common.sessionMirroring.success", "common.sesstickUses.reuseFailed", "common.sesstickUses.reused", "common.totCompatConns", "common.totNativeConns", "dynamicRecord.x1", "dynamicRecord.x10", "dynamicRecord.x11", "dynamicRecord.x12", "dynamicRecord.x13", "dynamicRecord.x14", "dynamicRecord.x15", "dynamicRecord.x16", "dynamicRecord.x2", "dynamicRecord.x3", "dynamicRecord.x4", "dynamicRecord.x5", "dynamicRecord.x6", "dynamicRecord.x7", "dynamicRecord.x8", "dynamicRecord.x9", "activeHandshakeRejected", "tmName", "total", "typeId", "vsName" ] },
-            "renameKeys": { "patterns": { "ltm/profile/client-ssl/": { "pattern": "client-ssl\/(.*)\/", "group": 1 }, "common.": { "pattern": "common.(.*)", "group": 1 } } },
-            "addKeysByTag": true
+            "normalization": [
+                {
+                    "filterKeys": { "exclude": [ "common.aggregateRenegotiationsRejected", "common.badRecords", "common.c3dUses.conns", "common.cipherUses.adhKeyxchg", "common.cipherUses.aesBulk", "common.cipherUses.aesGcmBulk", "common.cipherUses.camelliaBulk", "common.cipherUses.desBulk", "common.cipherUses.dhRsaKeyxchg", "common.cipherUses.dheDssKeyxchg", "common.cipherUses.ecdhEcdsaKeyxchg", "common.cipherUses.ecdhRsaKeyxchg", "common.cipherUses.ecdheEcdsaKeyxchg", "common.cipherUses.ecdheRsaKeyxchg", "common.cipherUses.edhRsaKeyxchg", "common.cipherUses.ideaBulk", "common.cipherUses.md5Digest", "common.cipherUses.nullBulk", "common.cipherUses.nullDigest", "common.cipherUses.rc2Bulk", "common.cipherUses.rc4Bulk", "common.cipherUses.rsaKeyxchg", "common.cipherUses.shaDigest", "common.connectionMirroring.haCtxRecv", "common.connectionMirroring.haCtxSent", "common.connectionMirroring.haFailure", "common.connectionMirroring.haHsSuccess", "common.connectionMirroring.haPeerReady", "common.connectionMirroring.haTimeout", "common.dtlsTxPushbacks", "common.extendedMasterSecrets", "common.fullyHwAcceleratedConns", "common.fwdpUses.alertBypasses", "common.fwdpUses.cachedCerts", "common.fwdpUses.clicertFailBypasses", "common.fwdpUses.conns", "common.fwdpUses.dipBypasses", "common.fwdpUses.enforceResumeFailures", "common.fwdpUses.hnBypasses", "common.fwdpUses.sipBypasses", "common.fwdpUses.transparentResumeCnt", "common.fwdpUses.verifiedHsCnt", "common.insecureHandshakeAccepts", "common.insecureHandshakeRejects", "common.insecureRenegotiationRejects", "common.maxCompatConns", "common.maxConns", "common.maxNativeConns", "common.midstreamRenegotiations", "common.nonHwAcceleratedConns", "common.ocspFwdpClientssl.cachedResp", "common.ocspFwdpClientssl.certStatusReq", "common.ocspFwdpClientssl.invalidCertResp", "common.ocspFwdpClientssl.respstatusErrResp", "common.ocspFwdpClientssl.revokedResp", "common.ocspFwdpClientssl.stapledResp", "common.ocspFwdpClientssl.unknownResp", "common.partiallyHwAcceleratedConns", "common.prematureDisconnects", "common.renegotiationsRejected", "common.secureHandshakes", "common.sessCacheCurEntries", "common.sessCacheHits", "common.sessCacheInvalidations", "common.sessCacheLookups", "common.sessCacheOverflows", "common.sessionMirroring.failure", "common.sessionMirroring.success", "common.sesstickUses.reuseFailed", "common.sesstickUses.reused", "common.totCompatConns", "common.totNativeConns", "dynamicRecord.x1", "dynamicRecord.x10", "dynamicRecord.x11", "dynamicRecord.x12", "dynamicRecord.x13", "dynamicRecord.x14", "dynamicRecord.x15", "dynamicRecord.x16", "dynamicRecord.x2", "dynamicRecord.x3", "dynamicRecord.x4", "dynamicRecord.x5", "dynamicRecord.x6", "dynamicRecord.x7", "dynamicRecord.x8", "dynamicRecord.x9", "activeHandshakeRejected", "tmName", "total", "typeId", "vsName" ] }
+                },
+                {
+                    "renameKeys": { "patterns": { "ltm/profile/client-ssl/": { "pattern": "client-ssl\/(.*)\/", "group": 1 }, "common.": { "pattern": "common.(.*)", "group": 1 } } }
+                },
+                {
+                    "addKeysByTag": true
+                }
+            ]
         },
         "serverSslProfiles": {
             "key": "serverSslProfiles",
-            "filterKeys": { "exclude": [ "common.badRecords", "common.c3dUses.conns", "common.cipherUses.adhKeyxchg", "common.cipherUses.aesBulk", "common.cipherUses.aesGcmBulk", "common.cipherUses.camelliaBulk", "common.cipherUses.desBulk", "common.cipherUses.dhRsaKeyxchg", "common.cipherUses.dheDssKeyxchg", "common.cipherUses.ecdhEcdsaKeyxchg", "common.cipherUses.ecdhRsaKeyxchg", "common.cipherUses.ecdheEcdsaKeyxchg", "common.cipherUses.ecdheRsaKeyxchg", "common.cipherUses.edhRsaKeyxchg", "common.cipherUses.ideaBulk", "common.cipherUses.md5Digest", "common.cipherUses.nullBulk", "common.cipherUses.nullDigest", "common.cipherUses.rc2Bulk", "common.cipherUses.rc4Bulk", "common.cipherUses.rsaKeyxchg", "common.cipherUses.shaDigest", "common.connectionMirroring.haCtxRecv", "common.connectionMirroring.haCtxSent", "common.connectionMirroring.haFailure", "common.connectionMirroring.haHsSuccess", "common.connectionMirroring.haPeerReady", "common.connectionMirroring.haTimeout",  "common.dtlsTxPushbacks", "common.extendedMasterSecrets", "common.fullyHwAcceleratedConns", "common.fwdpUses.conns", "common.fwdpUses.enforceResumeFailures", "common.fwdpUses.transparentResumeCnt", "common.insecureHandshakeAccepts", "common.insecureHandshakeRejects", "common.insecureRenegotiationRejects", "common.maxCompatConns", "common.maxConns", "common.maxNativeConns", "common.midstreamRenegotiations", "common.nonHwAcceleratedConns", "common.ocspServerssl.cachedResp", "common.ocspServerssl.certStatusRevoked", "common.ocspServerssl.certStatusUnknown", "common.ocspServerssl.responderQueries", "common.ocspServerssl.responseErrors", "common.ocspServerssl.stapledResp", "common.partiallyHwAcceleratedConns", "common.prematureDisconnects", "common.secureHandshakes", "common.sessCacheCurEntries", "common.sessCacheHits", "common.sessCacheInvalidations", "common.sessCacheLookups", "common.sessCacheOverflows", "common.sessionMirroring.failure", "common.sessionMirroring.success", "common.sesstickUses.reuseFailed", "common.sesstickUses.reused", "common.totCompatConns", "common.totNativeConns", "activeHandshakeRejected", "tmName", "typeId", "vsName" ] },
-            "renameKeys": { "patterns": { "ltm/profile/server-ssl/": { "pattern": "server-ssl\/(.*)\/", "group": 1 }, "common.": { "pattern": "common.(.*)", "group": 1 } } },
-            "addKeysByTag": true
+            "normalization": [
+                {
+                    "filterKeys": { "exclude": [ "common.badRecords", "common.c3dUses.conns", "common.cipherUses.adhKeyxchg", "common.cipherUses.aesBulk", "common.cipherUses.aesGcmBulk", "common.cipherUses.camelliaBulk", "common.cipherUses.desBulk", "common.cipherUses.dhRsaKeyxchg", "common.cipherUses.dheDssKeyxchg", "common.cipherUses.ecdhEcdsaKeyxchg", "common.cipherUses.ecdhRsaKeyxchg", "common.cipherUses.ecdheEcdsaKeyxchg", "common.cipherUses.ecdheRsaKeyxchg", "common.cipherUses.edhRsaKeyxchg", "common.cipherUses.ideaBulk", "common.cipherUses.md5Digest", "common.cipherUses.nullBulk", "common.cipherUses.nullDigest", "common.cipherUses.rc2Bulk", "common.cipherUses.rc4Bulk", "common.cipherUses.rsaKeyxchg", "common.cipherUses.shaDigest", "common.connectionMirroring.haCtxRecv", "common.connectionMirroring.haCtxSent", "common.connectionMirroring.haFailure", "common.connectionMirroring.haHsSuccess", "common.connectionMirroring.haPeerReady", "common.connectionMirroring.haTimeout",  "common.dtlsTxPushbacks", "common.extendedMasterSecrets", "common.fullyHwAcceleratedConns", "common.fwdpUses.conns", "common.fwdpUses.enforceResumeFailures", "common.fwdpUses.transparentResumeCnt", "common.insecureHandshakeAccepts", "common.insecureHandshakeRejects", "common.insecureRenegotiationRejects", "common.maxCompatConns", "common.maxConns", "common.maxNativeConns", "common.midstreamRenegotiations", "common.nonHwAcceleratedConns", "common.ocspServerssl.cachedResp", "common.ocspServerssl.certStatusRevoked", "common.ocspServerssl.certStatusUnknown", "common.ocspServerssl.responderQueries", "common.ocspServerssl.responseErrors", "common.ocspServerssl.stapledResp", "common.partiallyHwAcceleratedConns", "common.prematureDisconnects", "common.secureHandshakes", "common.sessCacheCurEntries", "common.sessCacheHits", "common.sessCacheInvalidations", "common.sessCacheLookups", "common.sessCacheOverflows", "common.sessionMirroring.failure", "common.sessionMirroring.success", "common.sesstickUses.reuseFailed", "common.sesstickUses.reused", "common.totCompatConns", "common.totNativeConns", "activeHandshakeRejected", "tmName", "typeId", "vsName" ] }
+                },
+                {
+                    "renameKeys": { "patterns": { "ltm/profile/server-ssl/": { "pattern": "server-ssl\/(.*)\/", "group": 1 }, "common.": { "pattern": "common.(.*)", "group": 1 } } }
+                },
+                {
+                    "addKeysByTag": true
+                }
+            ]
         },
         "sslCerts": {
             "key": "sslCerts::items",
-            "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" },
-            "filterKeys": { "exclude": [ "kind", "name", "partition", "fullPath", "generation", "selfLink", "certificateKeyCurveName", "certificateKeySize", "checksum", "createTime", "createdBy", "fingerprint", "isBundle", "lastUpdateTime", "mode", "revision", "size", "systemPath", "updatedBy", "version", "bundleCertificatesReference", "certValidatorsReference", "keyType", "serialNumber", "sourcePath", "subPath", "serialNumber" ] },
-            "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 } } }
+            "normalization": [
+                {
+                    "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" }
+                },
+                {
+                    "filterKeys": { "exclude": [ "kind", "name", "partition", "fullPath", "generation", "selfLink", "certificateKeyCurveName", "certificateKeySize", "checksum", "createTime", "createdBy", "fingerprint", "isBundle", "lastUpdateTime", "mode", "revision", "size", "systemPath", "updatedBy", "version", "bundleCertificatesReference", "certValidatorsReference", "keyType", "serialNumber", "sourcePath", "subPath", "serialNumber" ] }
+                },
+                {
+                    "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 } } }
+                }
+            ]
         },
         "networkTunnels": {
             "key": "networkTunnels",
-            "filterKeys": { "exclude": [ "tmName", "typeId" ] },
-            "renameKeys": { "patterns": { "net/tunnels": { "pattern": "tunnel\/(.*)\/stats", "group": 1 } } },
-            "addKeysByTag": true
+            "normalization": [
+                {
+                    "filterKeys": { "exclude": [ "tmName", "typeId" ] }
+                },
+                {
+                    "renameKeys": { "patterns": { "net/tunnels": { "pattern": "tunnel\/(.*)\/stats", "group": 1 } } }
+                },
+                {
+                    "addKeysByTag": true
+                }
+            ]
         },
         "deviceGroups": {
             "key": "deviceGroups::items",
-            "convertArrayToMap": { "keyName": "selfLink", "keyNamePrefix": "name/" },
-            "filterKeys": { "exclude": [ "commitIdOriginator", "device", "devicegroup", "lastSyncType", "lssOriginator", "generation", "partition", "fullPath", "asmSync", "autoSync", "fullLoadOnSync", "incrementalConfigSyncSizeMax", "networkFailover", "saveOnAutoSync", "devicesReference" ] },
-            "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "cm/device-group/": { "pattern": "device-group\/(.*)\\?", "group": 1 } } },
-            "includeFirstEntry": { "pattern": "/stats" },
-            "addKeysByTag": true
+            "normalization": [
+                {
+                    "convertArrayToMap": { "keyName": "selfLink", "keyNamePrefix": "name/" }
+                },
+                {
+                    "includeFirstEntry": { "pattern": "/stats" }
+                },
+                {
+                    "filterKeys": { "exclude": [ "commitIdOriginator", "device", "devicegroup", "lastSyncType", "lssOriginator", "generation", "partition", "fullPath", "asmSync", "autoSync", "fullLoadOnSync", "incrementalConfigSyncSizeMax", "networkFailover", "saveOnAutoSync", "devicesReference" ] }
+                },
+                {
+                    "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "cm/device-group/": { "pattern": "device-group\/(.*)\\?", "group": 1 } } }
+                },
+                {
+                    "addKeysByTag": true
+                }
+            ]
         },
         "asmState": {
             "structure": { "parentKey": "system" },
@@ -239,9 +407,13 @@
             },
             "then": {
                 "key": "asmQuery::commandResult",
-                "runFunctions": [
-                    { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "asm_state" } },
-                    { "name": "getFirstKey" }
+                "normalization": [
+                    {
+                        "runFunctions": [
+                            { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "asm_state" } },
+                            { "name": "getFirstKey" }
+                        ]
+                    }
                 ]
             },
             "else": {
@@ -255,9 +427,13 @@
             },
             "then": {
                 "key": "asmQuery::commandResult",
-                "runFunctions": [
-                    { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "last_asm_change", "renameKeys": { "patterns": { "NULL": { "constant": "" } } } } },
-                    { "name": "getFirstKey" }
+                "normalization": [
+                    {
+                        "runFunctions": [
+                            { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "last_asm_change", "renameKeys": { "patterns": { "NULL": { "constant": "" } } } } },
+                            { "name": "getFirstKey" }
+                        ]
+                    }
                 ]
             },
             "else": {
@@ -271,9 +447,13 @@
             },
             "then": {
                 "key": "apmState::commandResult",
-                "runFunctions": [
-                    { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "apm_state", "renameKeys": { "patterns": { "NULL": { "constant": "" } } } } },
-                    { "name": "getFirstKey" }
+                "normalization": [
+                    {
+                        "runFunctions": [
+                            { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "apm_state", "renameKeys": { "patterns": { "NULL": { "constant": "" } } } } },
+                            { "name": "getFirstKey" }
+                        ]
+                    }
                 ]
             },
             "else": {
@@ -287,7 +467,11 @@
             },
             "then": {
                 "key": "firewallCurrentState::pccdStatus",
-                "includeFirstEntry": { "pattern": "/stats" }
+                "normalization": [
+                    {
+                        "includeFirstEntry": { "pattern": "/stats" }
+                    }
+                ]
             },
             "else": {
                 "disabled": true
@@ -300,7 +484,11 @@
             },
             "then": {
                 "key": "firewallCurrentState::ruleDeployEndTimeFmt",
-                "includeFirstEntry": { "pattern": "/stats" }
+                "normalization": [
+                    {
+                        "includeFirstEntry": { "pattern": "/stats" }
+                    }
+                ]
             },
             "else": {
                 "disabled": true
@@ -332,11 +520,21 @@
         },
         "iRules": {
             "key": "iRules",
-            "filterKeys": { "exclude": ["kind", "selfLink", "tmName"] },
-            "renameKeys": { "patterns": { "ltm/rule/": { "pattern": "rule\/(.*):", "group": 1 } } },
-            "addKeysByTag": { "skip": ["events"] },
-            "runFunctions": [
-                { "name": "restructureRules" }
+            "normalization": [
+                {
+                    "filterKeys": { "exclude": ["kind", "selfLink", "tmName"] }
+                },
+                {
+                    "renameKeys": { "patterns": { "ltm/rule/": { "pattern": "rule\/(.*):", "group": 1 } } }
+                },
+                {
+                    "runFunctions": [
+                        { "name": "restructureRules" }
+                    ]
+                },
+                {
+                    "addKeysByTag": { "skip": ["events"] }
+                }
             ]
         },
         "tmstats": {
@@ -346,7 +544,11 @@
             "structure": { "parentKey": "tmstats" },
             "key": "tmctl::commandResult",
             "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c cpu_info_stat" } },
-            "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+            "normalization": [
+                {
+                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                }
+            ]
         }
     },
     "events": {
@@ -385,9 +587,17 @@
         "provisioning": {
             "structure": { "parentKey": "system" },
             "key": "provisioning::items",
-            "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" },
-            "filterKeys": { "include": [ "name", "level" ] },
-            "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 } } }
+            "normalization": [
+                {
+                    "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" }
+                },
+                {
+                    "filterKeys": { "include": [ "name", "level" ] }
+                },
+                {
+                    "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 } } }
+                }
+            ]
         }
     },
     "global": {
