@@ -18,11 +18,6 @@ const paths = require('./paths.json');
 const logger = require('./logger.js');
 const EndpointLoader = require('./endpointLoader');
 
-const stats = properties.stats;
-const context = properties.context;
-const definitions = properties.definitions;
-const global = properties.global;
-
 const CONDITIONAL_FUNCS = {
     deviceVersionGreaterOrEqual,
     isModuleProvisioned
@@ -31,9 +26,29 @@ const CONDITIONAL_FUNCS = {
 
 /**
  * System Stats Class
+ * @param {String}  host                                     - host
+ * @param {Object}  [options]                                - options
+ * @param {Object}  [options.tags]                           - tags to add to the data (each key)
+ * @param {String}  [options.credentials.username]           - username for host
+ * @param {String}  [options.credentials.passphrase]         - password for host
+ * @param {String}  [options.connection.protocol]            - protocol for host
+ * @param {Integer} [options.connection.port]                - port for host
+ * @param {Boolean} [options.connection.allowSelfSignedCert] - false - requires SSL certificates be valid,
+ *                                                             true - allows self-signed certs
  */
-function SystemStats() {
-    this.loader = null;
+function SystemStats(host, options) {
+    if (options.tags) this.tags = options.tags;
+    const _paths = options.paths || paths;
+    const _properties = options.properties || properties;
+
+    this.loader = new EndpointLoader(host, options);
+    this.loader.setEndpoints(_paths.endpoints);
+
+    this.stats = _properties.stats;
+    this.context = _properties.context;
+    this.definitions = _properties.definitions;
+    this.global = _properties.global;
+
     this.contextData = {};
     this.collectedData = {};
     this.tags = {};
@@ -145,11 +160,11 @@ SystemStats.prototype._processData = function (property, data, key) {
             property.normalization[filterKeysIndex] = {
                 filterKeys: [
                     property.normalization[filterKeysIndex].filterKeys,
-                    global.filterKeys
+                    this.global.filterKeys
                 ]
             };
         } else {
-            options.filterKeys = [global.filterKeys];
+            options.filterKeys = [this.global.filterKeys];
         }
 
         const renameKeysIndex = property.normalization.findIndex(i => i.renameKeys);
@@ -157,11 +172,11 @@ SystemStats.prototype._processData = function (property, data, key) {
             property.normalization[renameKeysIndex] = {
                 renameKeys: [
                     property.normalization[renameKeysIndex].renameKeys,
-                    global.renameKeys
+                    this.global.renameKeys
                 ]
             };
         } else {
-            options.renameKeys = [global.renameKeys];
+            options.renameKeys = [this.global.renameKeys];
         }
 
         const addKeysByTagIndex = property.normalization.findIndex(i => i.addKeysByTag);
@@ -169,30 +184,30 @@ SystemStats.prototype._processData = function (property, data, key) {
             property.normalization[addKeysByTagIndex] = {
                 addKeysByTag: {
                     tags: Object.assign(defaultTags, this.tags),
-                    definitions,
+                    definitions: this.definitions,
                     opts: addKeysByTagIsObject ? property.normalization[addKeysByTagIndex]
-                        .addKeysByTag : global.addKeysByTag
+                        .addKeysByTag : this.global.addKeysByTag
                 }
             };
         } else {
             property.normalization.push({
                 addKeysByTag: {
                     tags: defaultTags,
-                    definitions,
-                    opts: global.addKeysByTag
+                    definitions: this.definitions,
+                    opts: this.global.addKeysByTag
                 }
             });
         }
 
-        property.normalization.push({ formatTimestamps: global.formatTimestamps.keys });
+        property.normalization.push({ formatTimestamps: this.global.formatTimestamps.keys });
     } else {
-        options.filterKeys = [global.filterKeys];
-        options.renameKeys = [global.renameKeys];
-        options.formatTimestamps = global.formatTimestamps.keys;
+        options.filterKeys = [this.global.filterKeys];
+        options.renameKeys = [this.global.renameKeys];
+        options.formatTimestamps = this.global.formatTimestamps.keys;
         options.addKeysByTag = {
             tags: defaultTags,
-            definitions,
-            opts: global.addKeysByTag
+            definitions: this.definitions,
+            opts: this.global.addKeysByTag
         };
     }
 
@@ -215,6 +230,7 @@ SystemStats.prototype._loadData = function (property) {
                 reject(err);
                 return;
             }
+
             if (!data.data.items) {
                 data.data.items = [];
             }
@@ -281,18 +297,18 @@ SystemStats.prototype._processContext = function (contextData) {
  *
  * @returns (Object) Promise resolved when contextual data were loaded
  */
-SystemStats.prototype._computeContextData = function (contextData) {
+SystemStats.prototype._computeContextData = function () {
     let promise;
 
-    if (Array.isArray(contextData)) {
-        if (contextData.length) {
-            promise = this._processContext(contextData[0]);
-            for (let i = 1; i < contextData.length; i += 1) {
-                promise.then(this._processContext(contextData[i]));
+    if (Array.isArray(this.context)) {
+        if (this.context.length) {
+            promise = this._processContext(this.context[0]);
+            for (let i = 1; i < this.context.length; i += 1) {
+                promise.then(this._processContext(this.context[i]));
             }
         }
-    } else if (contextData) {
-        promise = this._processContext(contextData);
+    } else if (this.context) {
+        promise = this._processContext(this.context);
     }
     if (!promise) {
         promise = Promise.resolve();
@@ -306,43 +322,28 @@ SystemStats.prototype._computeContextData = function (contextData) {
  *
  * @returns {Object} Promise resolved when all properties were loaded
  */
-SystemStats.prototype._computePropertiesData = function (propertiesData) {
-    return Promise.all(Object.keys(propertiesData)
-        .map(key => this._processProperty(key, propertiesData[key])));
+SystemStats.prototype._computePropertiesData = function () {
+    return Promise.all(Object.keys(this.stats)
+        .map(key => this._processProperty(key, this.stats[key])));
 };
 /**
  * Collect info based on object provided in properties
  *
- * @param {String}  host                                     - host
- * @param {Object}  [options]                                - options
- * @param {Object}  [options.tags]                           - tags to add to the data (each key)
- * @param {String}  [options.credentials.username]           - username for host
- * @param {String}  [options.credentials.passphrase]         - password for host
- * @param {String}  [options.connection.protocol]            - protocol for host
- * @param {Integer} [options.connection.port]                - port for host
- * @param {Boolean} [options.connection.allowSelfSignedCert] - false - requires SSL certificates be valid,
- *                                                             true - allows self-signed certs
- *
  * @returns {Object} Promise which is resolved with a map of stats
  */
-SystemStats.prototype.collect = function (host, options) {
-    if (options.tags) this.tags = options.tags;
-
-    this.loader = new EndpointLoader(host, options);
-    this.loader.setEndpoints(paths.endpoints);
-
+SystemStats.prototype.collect = function () {
     return this.loader.auth()
-        .then(() => this._computeContextData(context))
-        .then(() => this._computePropertiesData(stats))
+        .then(() => this._computeContextData())
+        .then(() => this._computePropertiesData())
         .then(() => {
             // order data according to properties file
             const data = {};
-            Object.keys(stats).forEach((key) => {
+            Object.keys(this.stats).forEach((key) => {
                 data[key] = this.collectedData[key];
             });
             // certain stats require a more complex structure - process those
             Object.keys(data).forEach((key) => {
-                const stat = stats[key] || {};
+                const stat = this.stats[key] || {};
                 if (stat.structure && !stat.structure.folder) {
                     const parentKey = stat.structure.parentKey;
                     data[parentKey][key] = data[key];
