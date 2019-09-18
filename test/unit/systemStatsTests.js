@@ -8,12 +8,20 @@
 
 'use strict';
 
-const assert = require('assert');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+const nock = require('nock');
+
 const SystemStats = require('../../src/lib/systemStats');
+const paths = require('../../src/lib/paths.json');
+const allProperties = require('../../src/lib/properties.json');
+
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
 describe('systemStats', () => {
     describe('.processData', () => {
-        const sysStats = new SystemStats();
+        const sysStats = new SystemStats({}, {});
 
         it('should skip normalization', () => {
             const property = {
@@ -121,5 +129,58 @@ describe('systemStats', () => {
             const result = sysStats._processData(property, data, key);
             assert.deepEqual(result, expected);
         });
+    });
+
+    describe('.collect()', () => {
+        function assertTmStat(statKey, tmctlKey) {
+            nock('http://localhost:8100')
+                .post(
+                    '/mgmt/tm/util/bash',
+                    {
+                        command: 'run',
+                        utilCmdArgs: `-c '/bin/tmctl -c ${tmctlKey}'`
+                    }
+                )
+                .reply(200, {
+                    commandResult: [
+                        'a,b,c',
+                        '0,0,spam',
+                        '0,1,eggs'
+                    ].join('\n')
+                });
+
+            const host = {};
+            const options = {
+                paths: {
+                    endpoints: [paths.endpoints.find(p => p.name === 'tmctl')]
+                },
+                properties: {
+                    stats: {
+                        tmstats: allProperties.stats.tmstats,
+                        [statKey]: allProperties.stats[statKey]
+                    },
+                    global: allProperties.global
+                }
+            };
+            const stats = new SystemStats(host, options);
+            return assert.becomes(stats.collect(), {
+                tmstats: {
+                    [statKey]: [
+                        {
+                            a: '0',
+                            b: '0',
+                            c: 'spam'
+                        },
+                        {
+                            a: '0',
+                            b: '1',
+                            c: 'eggs'
+                        }
+                    ]
+                }
+            });
+        }
+
+        it('should collect cpuInfoStat', () => assertTmStat('cpuInfoStat', 'cpu_info_stat'));
     });
 });
