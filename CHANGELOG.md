@@ -1,3 +1,7 @@
+## Release NEXT
+### Bug Fixes
+* Splunk Tmstat table data is being overwritten when forwarded to Splunk
+
 ## Release 1.6.0
 ### New Features
 * Add support for new tagging API
