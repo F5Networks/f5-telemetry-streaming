@@ -37,6 +37,7 @@ const CONDITIONAL_FUNCS = {
  *                                                             true - allows self-signed certs
  */
 function SystemStats(host, options) {
+    options = options || {};
     if (options.tags) this.tags = options.tags;
     const _paths = options.paths || paths;
     const _properties = options.properties || properties;
@@ -218,25 +219,25 @@ SystemStats.prototype._processData = function (property, data, key) {
 /**
  * Load data for property
  *
- * @param {Object} property       - property object
- * @param {String} [property.key] - key to identify endpoint to load data from
+ * @param {Object} property             - property object
+ * @param {String} [property.key]       - key to identify endpoint to load data from
+ * @param {String} [property.keyArgs]   - arguments to pass to the endpoint
  * @returns {Object} Promise resolved with fetched data object
  */
 SystemStats.prototype._loadData = function (property) {
-    return new Promise((resolve, reject) => {
-        const endpoint = this._splitKey(property.key).rootKey;
-        this.loader.loadEndpoint(endpoint, property.keyArgs, (data, err) => {
-            if (err) {
-                reject(err);
-                return;
-            }
+    const endpoint = this._splitKey(property.key).rootKey;
 
+    return this.loader.loadEndpoint(endpoint, property.keyArgs)
+        .then((data) => {
             if (!data.data.items) {
                 data.data.items = [];
             }
-            resolve(data.data);
+            return Promise.resolve(data.data);
+        })
+        .catch((err) => {
+            logger.error(`Error: SystemStats._loadData: ${endpoint} (${property.keyArgs}): ${err}`);
+            return Promise.reject(err);
         });
-    });
 };
 /**
  * Process property

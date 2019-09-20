@@ -170,21 +170,15 @@ describe('Endpoint Loader', () => {
     });
 
     describe('loadEndpoint', () => {
-        it('should error if endpoint is not defined', (done) => {
+        it('should error if endpoint is not defined', () => {
             const eLoader = new EndpointLoader();
             eLoader.endpoints = {};
 
-            eLoader.loadEndpoint('badEndpoint', null, (data, err) => {
-                try {
-                    assert.strictEqual(err.message, 'Endpoint not defined in file: badEndpoint');
-                    done();
-                } catch (e) {
-                    done(e);
-                }
-            });
+            return eLoader.loadEndpoint('badEndpoint', null)
+                .catch(err => assert.strictEqual(err.message, 'Endpoint not defined in file: badEndpoint'));
         });
 
-        it('should replace strings in endpoint body if replaceStrings option is provided', (done) => {
+        it('should replace strings in endpoint body if replaceStrings option is provided', () => {
             const eLoader = new EndpointLoader();
             const body = {
                 command: 'run',
@@ -203,57 +197,37 @@ describe('Endpoint Loader', () => {
 
             sinon.stub(eLoader, '_getData').resolvesArg(1);
 
-            eLoader.loadEndpoint('bash', { replaceStrings: { '\\$replaceMe': 'Hello World' } }, (data, err) => {
-                if (err) {
-                    done(err);
-                    return;
-                }
-
-                try {
+            return eLoader.loadEndpoint('bash', { replaceStrings: { '\\$replaceMe': 'Hello World' } })
+                .then((data) => {
                     assert.deepStrictEqual(data, { name: undefined, body, endpointFields: undefined });
-                    done();
-                } catch (e) {
-                    done(e);
-                }
-            });
+                })
+                .catch(() => assert.fail());
         });
 
-        it('should reply with cached response', (done) => {
+        it('should reply with cached response', () => {
             const eLoader = new EndpointLoader();
-            const hello = () => 'Hello World';
 
             eLoader.endpoints = { bash: { endpoint: '/mgmt/tm/util/bash' } };
-            eLoader.cachedResponse = { bash: [true, [hello], 'Foo Bar'] };
+            eLoader.cachedResponse = { bash: 'Foo Bar' };
 
             sinon.stub(deviceUtil, 'makeDeviceRequest').resolves('New Data');
 
-            eLoader.loadEndpoint('bash', null, (data, err) => {
-                if (err) {
-                    done(err);
-                    return;
-                }
-
-                try {
+            return eLoader.loadEndpoint('bash', null)
+                .then((data) => {
                     assert.deepStrictEqual(
                         data,
                         'Foo Bar',
                         'Cached response should have returned in callback'
                     );
-                    assert.deepStrictEqual(eLoader.cachedResponse.bash, [
-                        true,
-                        [hello], // The hello cb will still exist when this cb is called due to order
-                        'Foo Bar'
-                    ], 'Should not have updated cache');
-                    done();
-                } catch (e) {
-                    done(e);
-                }
-            });
+                    assert.deepStrictEqual(eLoader.cachedResponse.bash,
+                        'Foo Bar',
+                        'Should not have updated cache');
+                })
+                .catch(() => assert.fail());
         });
 
-        it('should invalidate cached response if ignoreCached is set', (done) => {
+        it('should invalidate cached response if ignoreCached is set', () => {
             const eLoader = new EndpointLoader();
-            const hello = () => 'Hello World';
             const expected = {
                 name: '/mgmt/tm/util/bash',
                 data: 'New Data'
@@ -265,35 +239,25 @@ describe('Endpoint Loader', () => {
                     ignoreCached: true
                 }
             };
-            eLoader.cachedResponse = { bash: [true, [hello], 'Foo Bar'] };
+            eLoader.cachedResponse = { bash: 'Foo Bar' };
 
             sinon.stub(deviceUtil, 'makeDeviceRequest').resolves('New Data');
 
-            eLoader.loadEndpoint('bash', null, (data, err) => {
-                if (err) {
-                    done(err);
-                    return;
-                }
-
-                try {
+            return eLoader.loadEndpoint('bash', null)
+                .then((data) => {
                     assert.deepStrictEqual(
                         data,
                         expected,
                         'Updated response should have returned in callback'
                     );
-                    assert.deepStrictEqual(eLoader.cachedResponse.bash, [
-                        true,
-                        [hello], // The hello cb will still exist when this cb is called due to order
-                        expected
-                    ], 'Should have updated cache');
-                    done();
-                } catch (e) {
-                    done(e);
-                }
-            });
+                    assert.deepStrictEqual(eLoader.cachedResponse.bash,
+                        expected,
+                        'Should have updated cache');
+                })
+                .catch(() => assert.fail());
         });
 
-        it('should expand references if expandReferences is set', (done) => {
+        it('should expand references if expandReferences is set', () => {
             const eLoader = new EndpointLoader();
             const expected = {
                 data: {
@@ -340,23 +304,14 @@ describe('Endpoint Loader', () => {
                 return Promise.resolve(data);
             });
 
-            eLoader.loadEndpoint('pools', null, (data, err) => {
-                if (err) {
-                    done(err);
-                    return;
-                }
-
-                try {
+            return eLoader.loadEndpoint('pools', null)
+                .then((data) => {
                     assert.deepStrictEqual(
                         data,
                         expected,
                         'Updated response should have returned in callback'
                     );
-                    done();
-                } catch (e) {
-                    done(e);
-                }
-            });
+                });
         });
     });
 });

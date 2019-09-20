@@ -296,10 +296,10 @@ const stats = [
         const output = [];
 
         Object.keys(tmstats).forEach((key) => {
-            const newData = Object.assign({}, template);
-            newData.source += `.${STAT_2_TMCTL_TABLE[key]}`;
-            newData.event = Object.assign({}, template.event);
             tmstats[key].forEach((entry) => {
+                const newData = Object.assign({}, template);
+                newData.source += `.${STAT_2_TMCTL_TABLE[key]}`;
+                newData.event = Object.assign({}, template.event);
                 newData.event = Object.assign(newData.event, entry);
                 output.push(newData);
             });

@@ -74,97 +74,50 @@ EndpointLoader.prototype.auth = function () {
             throw err;
         });
 };
-/**
- * Notify data listeners
- *
- * @param {String} endpoint    - endpoint name/key
- * @param {Object | null} data - response object or null
- * @param {Error  | null} err  - Error or null
- *
- * @returns (Object) Promise resolved when all listeners were notified
- */
-EndpointLoader.prototype._executeCallbacks = function (endpoint, data, err) {
-    const callbacks = this.cachedResponse[endpoint][1];
-    const promises = [];
 
-    while (callbacks.length) {
-        const callback = callbacks.pop();
-        promises.push(new Promise((resolve) => {
-            callback(data, err);
-            resolve();
-        }));
-    }
-    return Promise.all(promises);
-};
 /**
  * Load data from endpoint
  *
  * @param {String} endpoint                 - endpoint name/key to fetch data from
  * @param {Object} [options]                - function options
  * @param {Object} [options.replaceStrings] - key/value pairs that replace matching strings in request body
- * @param {Function(Object, Error)} cb      - callback function
+ *
+ * @returns {Object} Promise resolved with fetched data
  */
-EndpointLoader.prototype.loadEndpoint = function (endpoint, options, cb) {
+EndpointLoader.prototype.loadEndpoint = function (endpoint, options) {
     const opts = options || {};
     const endpointObj = this.endpoints[endpoint];
 
-    new Promise((resolve, reject) => {
-        let error;
+    if (endpointObj === undefined) {
+        return Promise.reject(new Error(`Endpoint not defined in file: ${endpoint}`));
+    }
 
-        if (endpointObj === undefined) {
-            error = new Error(`Endpoint not defined in file: ${endpoint}`);
-        }
+    let dataIsEmpty = false;
+    if (this.cachedResponse[endpoint] === undefined) {
+        dataIsEmpty = true;
+    }
 
-        let dataIsEmpty = false;
-        if (this.cachedResponse[endpoint] === undefined) {
-            // [loaded, callbacks, data]
-            this.cachedResponse[endpoint] = [false, [cb], null];
-            dataIsEmpty = true;
-        } else {
-            this.cachedResponse[endpoint][1].push(cb);
-        }
+    if ((endpointObj || {}).ignoreCached) {
+        dataIsEmpty = true;
+    }
 
-        if ((endpointObj || {}).ignoreCached && !dataIsEmpty) {
-            this.cachedResponse[endpoint][0] = false;
-            this.cachedResponse[endpoint][2] = null;
-            dataIsEmpty = true;
-        }
-
-        if (error) {
-            reject(error);
-            return;
-        }
-
-        resolve(dataIsEmpty);
-    })
-        .then((dataIsEmpty) => {
-            if (dataIsEmpty) {
-                return this._getAndExpandData(endpointObj, { replaceStrings: opts.replaceStrings })
-                    .then((response) => {
-                        // cache results
-                        this.cachedResponse[endpoint][2] = response;
-                        this.cachedResponse[endpoint][0] = true;
-                    });
-            }
-            return Promise.resolve();
-        })
-        // 1) resolving nested promise with 'reject' to skip follwing 'then'
-        // 2) catch HTTP error here to differentiate it from other errors
-        .catch(err => this._executeCallbacks(endpoint, null, err)
-            .then(() => Promise.reject()))
-
+    return Promise.resolve()
         .then(() => {
-            if (this.cachedResponse[endpoint][0]) {
-                const data = this.cachedResponse[endpoint][2];
-                return this._executeCallbacks(endpoint, data, null);
+            if (dataIsEmpty) {
+                return this._getAndExpandData(endpointObj, { replaceStrings: opts.replaceStrings });
             }
-            return Promise.resolve();
+            return Promise.resolve(this.cachedResponse[endpoint]);
+        })
+        .then((response) => {
+            if (dataIsEmpty) {
+                // Cache data for later calls
+                this.cachedResponse[endpoint] = response;
+            }
+            return Promise.resolve(response);
         })
         .catch((err) => {
-            // error could be empty if Promise was rejected without args.
-            if (err) {
-                logger.exception(`Error: EndpointLoader.loadEndpoint: ${err}`, err);
-            }
+            logger.error(`Error: EndpointLoader.loadEndpoint: ${endpoint}: ${err}`);
+            return Promise.reject(err);
         });
 };
 /**
