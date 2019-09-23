@@ -180,7 +180,14 @@ describe('systemStats', () => {
                 }
             });
         }
+        const stats = allProperties.stats;
+        const tmctlArgs = '\\$tmctlArgs';
 
-        it('should collect cpuInfoStat', () => assertTmStat('cpuInfoStat', 'cpu_info_stat'));
+        Object.keys(stats).forEach((stat) => {
+            if ((stats[stat].structure || {}).parentKey === 'tmstats') {
+                const tableName = stats[stat].keyArgs.replaceStrings[tmctlArgs].split('-c').pop().trim();
+                it(`should collect ${stat}`, () => assertTmStat(stat, tableName));
+            }
+        });
     });
 });
