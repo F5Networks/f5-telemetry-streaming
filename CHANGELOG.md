@@ -1,4 +1,7 @@
 ## Release NEXT
+### New Features
+* AUTOTOOL-690: Collect all supported tmstat tables for Splunk Legacy
+
 ### Bug Fixes
 * Splunk Tmstat table data is being overwritten when forwarded to Splunk
 

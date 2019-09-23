@@ -23,7 +23,6 @@ const CONDITIONAL_FUNCS = {
     isModuleProvisioned
 };
 
-
 /**
  * System Stats Class
  * @param {String}  host                                     - host
@@ -266,7 +265,11 @@ SystemStats.prototype._processProperty = function (key, property) {
 
     return this._loadData(property)
         .then((data) => {
-            this.collectedData[key] = this._processData(property, data, key);
+            const processedData = this._processData(property, data, key);
+            // Only add data to collectedData that exists/is not empty
+            if (!(processedData === undefined || processedData.length === 0)) {
+                this.collectedData[key] = processedData;
+            }
         })
         .catch((err) => {
             logger.error(`Error: SystemStats._processProperty: ${key} (${property.key}): ${err}`);
