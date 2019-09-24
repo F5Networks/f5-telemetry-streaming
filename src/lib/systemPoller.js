@@ -40,7 +40,7 @@ function process(args) {
     const startTimestamp = new Date().toISOString();
     logger.debug('System poller cycle started');
 
-    return new SystemStats().collect(config.host, config.options)
+    return new SystemStats(config.host, config.options).collect()
         .then((data) => {
             const endTimeStamp = new Date().toISOString();
             // inject service data
