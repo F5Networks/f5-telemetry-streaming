@@ -37,10 +37,11 @@ const CONDITIONAL_FUNCS = {
  */
 function SystemStats(host, options) {
     options = options || {};
-    if (options.tags) this.tags = options.tags;
+
     const _paths = options.paths || paths;
     const _properties = options.properties || properties;
 
+    this.tags = options.tags || {};
     this.loader = new EndpointLoader(host, options);
     this.loader.setEndpoints(_paths.endpoints);
 
@@ -51,7 +52,6 @@ function SystemStats(host, options) {
 
     this.contextData = {};
     this.collectedData = {};
-    this.tags = {};
 }
 /**
  * Split key
