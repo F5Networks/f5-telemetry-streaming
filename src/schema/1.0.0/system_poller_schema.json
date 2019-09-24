@@ -1,0 +1,78 @@
+{
+    "$id": "system_poller_schema.json",
+    "$async": true,
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry streaming system poller schema",
+    "description": "",
+    "type": "object",
+    "allOf": [
+        {
+            "if": { "properties": { "class": { "const": "Telemetry_System_Poller" } } },
+            "then": {
+                "required": [
+                    "class",
+                    "interval"
+                ],
+                "properties": {
+                    "class": {
+                        "title": "Class",
+                        "description": "Telemetry streaming system poller class",
+                        "type": "string",
+                        "enum": [ "Telemetry_System_Poller" ]
+                    },
+                    "enable": { "$ref": "base_schema.json#/definitions/enable", "default": true },
+                    "trace": { "$ref": "base_schema.json#/definitions/trace", "default": false },
+                    "allowSelfSignedCert": { "$ref": "base_schema.json#/definitions/allowSelfSignedCert", "default": false },
+                    "interval": {
+                        "title": "Collection interval (in seconds)",
+                        "description": "" ,
+                        "type": "integer",
+                        "minimum": 60,
+                        "maximum": 6000,
+                        "default": 300
+                    },
+                    "host": {
+                        "title": "Host",
+                        "description": "" ,
+                        "type": "string",
+                        "anyOf": [
+                            { "format": "ipv4" },
+                            { "format": "ipv6" },
+                            { "format": "hostname" }
+                        ],
+                        "default": "localhost",
+                        "hostConnectivityCheck": true
+                    },
+                    "enableHostConnectivityCheck": { "$ref": "base_schema.json#/definitions/enableHostConnectivityCheck" },
+                    "port": {
+                        "title": "Port",
+                        "description": "" ,
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 65535,
+                        "default": 8100
+                    },
+                    "protocol": {
+                        "title": "Protocol",
+                        "description": "" ,
+                        "type": "string",
+                        "enum": [ "http", "https" ],
+                        "default": "http"
+                    },
+                    "username": {
+                        "title": "Username",
+                        "description": "" ,
+                        "type": "string"
+                    },
+                    "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
+                    "tag": {
+                        "default": { "tenant": "`T`", "application": "`A`"},
+                        "$ref": "base_schema.json#/definitions/tag"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "else": {}
+        }
+    ]
+}

@@ -1,6 +1,6 @@
 {
     "name": "f5-telemetry",
-    "version": "1.5.0",
+    "version": "1.6.0",
     "author": "F5 Networks",
     "license": "Apache-2.0",
     "repository": {
@@ -12,19 +12,23 @@
         "install-test": "npm install --no-optional",
         "lint": "eslint src test",
         "test-functional": "mocha \"./test/functional/testRunner.js\" --opts ./test/functional/.mocha.opts",
-        "test-only": "mocha --recursive \"./test/unittests/*.js\" --opts ./test/unittests/.mocha.opts",
-        "test": "nyc npm run test-only",
-        "build": "./scripts/build_rpm.sh"
+        "test-only": "mocha --recursive \"./test/unit/*.js\" --opts ./test/unit/.mocha.opts",
+        "test": "nyc --all npm run test-only",
+        "build": "./scripts/build/buildRpm.sh"
     },
     "nyc": {
-        "check-coverage": true,
-        "per-file": true,
-        "lines": 80,
-        "functions": 80,
-        "branches": 70,
         "reporter": [
             "html",
-            "text"
+            "text",
+            "json-summary"
+        ],
+        "exclude": [
+            "coverage/**",
+            "docs/**",
+            "test/**",
+            "scripts/**",
+            "examples/**",
+            "**/node_modules/**"
         ]
     },
     "dependencies": {
@@ -41,12 +45,16 @@
     },
     "devDependencies": {
         "@f5devcentral/eslint-config-f5-atg": "latest",
+        "chai": "^4.2.0",
+        "chai-as-promised": "^7.1.1",
         "eslint": "^5.16.0",
         "eslint-config-airbnb-base": "^13.1.0",
         "eslint-plugin-import": "^2.17.3",
         "icrdk": "git://github.com/f5devcentral/f5-icontrollx-dev-kit#master",
         "mocha": "^5.2.0",
-        "nyc": "^14.0.0",
+        "nock": "10.0.0",
+        "nyc": "^14.1.1",
+        "sinon": "^7.4.1",
         "ssh2": "^0.8.2",
         "winston": "^2.4.4"
     },

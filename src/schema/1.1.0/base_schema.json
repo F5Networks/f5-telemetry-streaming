@@ -1,0 +1,186 @@
+{
+    "$id": "base_schema.json",
+    "$async": true,
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry Streaming",
+    "description": "",
+    "type": "object",
+    "definitions": {
+        "enable": {
+            "title": "Enable",
+            "description": "This property can be used to enable/disable the poller/listener" ,
+            "type": "boolean"
+        },
+        "trace": {
+            "title": "Trace",
+            "description": "Enables data dumping to file. Boolean uses pre-defined file location, however value could be a string which contains path to a specific file instead" ,
+            "type": ["boolean", "string"]
+        },
+        "secret": {
+            "title": "Passphrase (secret)",
+            "description": "" ,
+            "type": "object",
+            "properties": {
+                "class": {
+                    "title": "Class",
+                    "description": "Telemetry streaming secret class",
+                    "type": "string",
+                    "enum": [ "Secret" ],
+                    "default": "Secret"
+               },
+                "cipherText": {
+                    "title": "Cipher Text: this contains a secret to encrypt",
+                    "type": "string"
+                },
+                "environmentVar": {
+                    "title": "Environment Variable: this contains the named env var where the secret resides",
+                    "type": "string"
+                },
+                "protected": {
+                    "$comment": "Meta property primarily used to determine if 'cipherText' needs to be encrypted",
+                    "title": "Protected",
+                    "type": "string",
+                    "enum": [ "plainText", "plainBase64", "SecureVault" ],
+                    "default": "plainText"
+                }
+            },
+            "oneOf": [
+                { "required": [ "cipherText" ] },
+                { "required": [ "environmentVar" ] }
+            ],
+            "f5secret": true
+        },
+        "stringOrSecret": {
+            "$async": true,
+            "allOf": [
+                {
+                    "if": { "type": "string" },
+                    "then": {},
+                    "else": {}
+                },
+                {
+                    "if": { "type": "object" },
+                    "then": { "$ref": "base_schema.json#/definitions/secret" },
+                    "else": {}
+                }
+            ]
+        },
+        "constants": {
+            "title": "Constants",
+            "description": "" ,
+            "type": "object",
+            "properties": {
+                "class": {
+                    "title": "Class",
+                    "description": "Telemetry streaming constants class",
+                    "type": "string",
+                    "enum": [ "Constants" ]
+               }
+            },
+            "additionalProperties": true
+        },
+        "tag": {
+            "$comment": "Defaults do not get applied for $ref objects, so place defaults alongside instead.",
+            "title": "Tag",
+            "description": "" ,
+            "type": "object",
+            "properties": {
+                "tenant": {
+                    "title": "Tenant tag",
+                    "type": "string"
+                },
+                "application": {
+                    "title": "Application tag",
+                    "type": "string"
+                }
+            },
+            "additionalProperties": true
+        },
+        "match": {
+            "$comment": "Defaults do not get applied for $ref objects, so place defaults alongside instead.",
+            "title": "Pattern to filter data",
+            "description": "",
+            "type": "string"
+        },
+        "enableHostConnectivityCheck": {
+            "$comment": "This property can be used to enable/disable the host connectivity check in configurations where this is in effect",
+            "title": "Host",
+            "description": "" ,
+            "type": "boolean"
+        },
+        "allowSelfSignedCert": {
+            "$comment": "This property can be used by consumers, system pollers to enable/disable SSL Cert check",
+            "title": "Allow Self-Signed Certificate",
+            "description": "" ,
+            "type": "boolean"
+        }
+    },
+    "properties": {
+       "class": {
+            "title": "Class",
+            "description": "Telemetry streaming top level class",
+            "type": "string",
+            "enum": [ "Telemetry" ]
+       },
+       "schemaVersion": {
+            "title": "Schema version",
+            "description": "Version of ADC Declaration schema this declaration uses",
+            "type": "string",
+            "$comment": "IMPORTANT: In enum array, please put current schema version first, oldest-supported version last.  Keep enum array sorted most-recent-first.",
+            "enum": [ "1.1.0", "1.0.0", "0.9.0" ],
+            "default": "1.1.0"
+       },
+       "$schema": {
+            "title": "Schema",
+            "description": "",
+            "type": "string"
+        },
+        "scratch": {
+            "title": "Scratch",
+            "description": "Holds some system data during declaration processing",
+            "type": "object",
+            "properties": {
+                "expand": {
+                    "title": "Expand",
+                    "type": "boolean"
+                }
+            }
+        }
+    },
+    "additionalProperties": {
+        "$comment": "AJV does not resolve defaults inside oneOf/anyOf, so instead use allOf.  Any schema refs should also use allOf with an if/then/else on class",
+        "properties": {
+            "class": {
+                "title": "Class",
+                "type": "string",
+                "enum": [
+                    "Telemetry_System_Poller",
+                    "Telemetry_Listener",
+                    "Telemetry_Consumer",
+                    "Controls",
+                    "Shared"
+                ]
+            }
+        },    
+        "allOf": [
+            {
+                "$ref": "system_poller_schema.json#"
+            },
+            {
+                "$ref": "listener_schema.json#"
+            },
+            {
+                "$ref": "consumer_schema.json#"
+            },
+            {
+                "$ref": "controls_schema.json#"
+            },
+            {
+                "$ref": "shared_schema.json#"
+            }
+        ]
+    },
+    "required": [
+        "class"
+    ]
+}

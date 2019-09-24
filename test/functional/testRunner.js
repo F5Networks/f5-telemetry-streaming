@@ -16,25 +16,36 @@ const constants = require('./shared/constants.js');
 const dutTests = require('./dutTests.js');
 const consumerHostTests = require('./consumerSystemTests.js');
 
+const skipDut = process.env[constants.ENV_VARS.TEST_CONTROLS.SKIP_DUT_TESTS];
+const skipConsumer = process.env[constants.ENV_VARS.TEST_CONTROLS.SKIP_CONSUMER_TESTS];
+const truthyRegex = /^\s*(true|1)\s*$/i;
+
+const runDut = !skipDut || !truthyRegex.test(skipDut);
+const runConsumer = !skipConsumer || !truthyRegex.test(skipConsumer);
+
 describe('Global: Setup', () => {
     dutTests.setup();
-    consumerHostTests.setup();
+    if (runConsumer) {
+        consumerHostTests.setup();
+    }
 });
 
 describe('Global: Test', () => {
-    if (process.env[constants.ENV_VARS.TEST_CONTROLS.SKIP_DUT_TESTS] !== '1') {
+    if (runDut) {
         dutTests.test();
     } else {
-        console.warn('WARN: skip DUT tests');
+        console.warn('WARN: skipping DUT tests');
     }
-    if (process.env[constants.ENV_VARS.TEST_CONTROLS.SKIP_CONSUMER_TESTS] !== '1') {
+    if (runConsumer) {
         consumerHostTests.test();
     } else {
-        console.warn('WARN: skip Consumers tests');
+        console.warn('WARN: skipping Consumers tests');
     }
 });
 
 describe('Global: Teardown', () => {
     dutTests.teardown();
-    consumerHostTests.teardown();
+    if (runConsumer) {
+        consumerHostTests.teardown();
+    }
 });

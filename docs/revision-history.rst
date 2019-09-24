@@ -58,7 +58,7 @@ Document Revision History
 
 .. |schemalink| raw:: html
 
-   <a href="https://github.com/F5Networks/f5-telemetry-streaming/tree/master/src/nodejs/schema" target="_blank">schema files</a>
+   <a href="https://github.com/F5Networks/f5-telemetry-streaming/tree/master/src/schema" target="_blank">schema files</a>
 
 
 
