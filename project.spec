@@ -23,6 +23,7 @@ echo -n %{version}-%{release} > %{_builddir}/src/version
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{IAPP_INSTALL_DIR}
 cp -r %{_builddir}/src/* $RPM_BUILD_ROOT%{IAPP_INSTALL_DIR}
+$(cd $RPM_BUILD_ROOT%{IAPP_INSTALL_DIR}/schema; ln -s latest/*.json .)
 
 %clean
 rm -rf $RPM_BUILD_ROOT
