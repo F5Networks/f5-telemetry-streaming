@@ -8,6 +8,7 @@ Changes to this project are documented in this file. More detail and links can b
 
 ### Fixed
 - Splunk Tmstat table data is being overwritten when forwarded to Splunk
+- Fixed broken promise chain when loading config file
 
 ### Changed
 

@@ -74,7 +74,7 @@ ConfigWorker.prototype._notifyConfigChange = function (newConfig) {
     if (newConfig && newConfig.parsed) {
         parsedConfig = util.deepCopy(newConfig.parsed);
     } else {
-        return Promise.reject(new Error('_notifyConfigChange() Missing parsed config.'));
+        throw new Error('_notifyConfigChange() Missing parsed config.');
     }
     // handle passphrases first - decrypt, download, etc.
     return deviceUtil.decryptAllSecrets(parsedConfig)
@@ -96,8 +96,7 @@ ConfigWorker.prototype.loadConfig = function () {
     return this.getConfig()
         .then((config) => {
             logger.info('Application config loaded');
-            this.setConfig(config);
-            return Promise.resolve(config);
+            return this.setConfig(config).then(() => config);
         })
         .catch((err) => {
             logger.exception('Unexpected error on attempt to load application state', err);
@@ -127,7 +126,14 @@ ConfigWorker.prototype.saveConfig = function (config) {
  * @returns {Promise} Promise resolved with config
  */
 ConfigWorker.prototype.getConfig = function () {
-    return persistentStorage.get(PERSISTENT_STORAGE_KEY) || BASE_CONFIG;
+    return persistentStorage.get(PERSISTENT_STORAGE_KEY)
+        .then((data) => {
+            if (typeof data === 'undefined') {
+                logger.debug(`persistentStorage did not have a value for ${PERSISTENT_STORAGE_KEY}`);
+            }
+            return (typeof data === 'undefined'
+                || typeof data.parsed === 'undefined') ? BASE_CONFIG : data;
+        });
 };
 
 /**
