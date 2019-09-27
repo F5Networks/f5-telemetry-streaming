@@ -143,6 +143,11 @@ function processClientRequest(restOperation) {
                 error.responseCode = 404;
                 return Promise.reject(error);
             }
+
+            if (!JSON.stringify(config).includes('format":"legacy')) {
+                systemPoller.noTmstats = true;
+            }
+
             return Promise.resolve([system, systemPoller]);
         })
         .then((configs) => {
@@ -210,7 +215,8 @@ function mergeConfigs(system, systemPoller) {
                     passphrase: system.passphrase
                 },
                 tags: systemPoller.tag,
-                actions: systemPoller.actions
+                actions: systemPoller.actions,
+                noTmstats: systemPoller.noTmstats
             }
         }
     };
@@ -328,5 +334,6 @@ configWorker.on('change', (config) => {
 
 module.exports = {
     process,
+    safeProcess,
     processClientRequest
 };
