@@ -8,7 +8,12 @@
 
 'use strict';
 
-const assert = require('assert');
+const sinon = require('sinon');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
 const constants = require('../../src/lib/constants.js');
 
@@ -69,6 +74,7 @@ describe('Config', () => {
     afterEach(() => {
         config.validator = configValidator;
         util.formatConfig = formatConfig;
+        sinon.restore();
     });
     after(() => {
         Object.keys(require.cache).forEach((key) => {
@@ -88,17 +94,7 @@ describe('Config', () => {
             class: 'Telemetry'
         };
         config.validator = null;
-        return config.validate(obj)
-            .then(() => {
-                assert.fail('Should throw an error');
-            })
-            .catch((err) => {
-                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
-                if (/Validator is not available/.test(err)) return Promise.resolve();
-
-                assert.fail(err);
-                return Promise.reject(err);
-            });
+        return assert.isRejected(config.validate(obj), 'Validator is not available');
     });
 
     it('should compile schema', () => {
@@ -117,17 +113,6 @@ describe('Config', () => {
         return config.validateAndApply(obj)
             .then((data) => {
                 assert.deepEqual(data, validatedObj);
-                return Promise.resolve();
-            })
-            .catch(err => Promise.reject(err));
-    });
-
-    it('should load state', () => {
-        deviceUtil.decryptAllSecrets = () => Promise.resolve({});
-
-        return config.loadConfig()
-            .then((data) => {
-                assert.deepEqual(data, baseState._data_.config);
             })
             .catch(err => Promise.reject(err));
     });
@@ -149,7 +134,6 @@ describe('Config', () => {
             .then(() => {
                 assert.strictEqual(mockRestOperation.statusCode, 200);
                 assert.deepEqual(mockRestOperation.body, actualResponseBody);
-                return Promise.resolve();
             })
             .catch(err => Promise.reject(err));
     });
@@ -167,9 +151,7 @@ describe('Config', () => {
             .then(() => {
                 assert.strictEqual(mockRestOperation.statusCode, 200);
                 assert.deepEqual(mockRestOperation.body, actualResponseBody);
-                return Promise.resolve();
-            })
-            .catch(err => Promise.reject(err));
+            });
     });
 
     it('should process client GET request - existing config', () => {
@@ -189,9 +171,7 @@ describe('Config', () => {
             .then(() => {
                 assert.strictEqual(mockRestOperationGET.statusCode, 200);
                 assert.deepEqual(mockRestOperationGET.body, mockRestOperationPOST.body);
-                return Promise.resolve();
-            })
-            .catch(err => Promise.reject(err));
+            });
     });
 
     it('should fail to validate client request', () => {
@@ -203,9 +183,7 @@ describe('Config', () => {
             .then(() => {
                 assert.strictEqual(mockRestOperation.statusCode, 422);
                 assert.strictEqual(mockRestOperation.body.message, 'Unprocessable entity');
-                return Promise.resolve();
-            })
-            .catch(err => Promise.reject(err));
+            });
     });
 
     it('should fail to process client request', () => {
@@ -220,53 +198,65 @@ describe('Config', () => {
             .then(() => {
                 assert.strictEqual(mockRestOperation.statusCode, 500);
                 assert.strictEqual(mockRestOperation.body.message, 'Internal Server Error');
-                return Promise.resolve();
-            })
-            .catch(err => Promise.reject(err));
-    });
-
-    it('should fail to save config', () => {
-        const errMsg = 'saveStateError';
-        persistentStorage.set = () => Promise.reject(new Error(errMsg));
-
-        return config.saveConfig()
-            .then(() => {
-                assert.fail('Should throw an error');
-            })
-            .catch((err) => {
-                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
-                if (RegExp(errMsg).test(err)) return Promise.resolve();
-                assert.fail(err);
-                return Promise.reject(err);
             });
     });
 
-    it('should fail to load config', () => {
-        const errMsg = 'loadStateError';
-        persistentStorage.get = () => Promise.reject(new Error(errMsg));
-
-        return config.loadConfig()
-            .then(() => {
-                assert.fail('Should throw an error');
-            })
-            .catch((err) => {
-                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
-                if (RegExp(errMsg).test(err)) return Promise.resolve();
-                assert.fail(err);
-                return Promise.reject(err);
-            });
+    describe('saveConfig', () => {
+        it('should fail to save config', () => {
+            sinon.stub(persistentStorage, 'set').rejects(new Error('saveStateError'));
+            return assert.isRejected(config.saveConfig(), /saveStateError/);
+        });
     });
 
-    it('should fail to set config when invalid config provided', () => config.setConfig({})
-        .then(() => {
-            assert.fail('Should throw an error');
-        })
-        .catch((err) => {
-            if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
-            if (/Missing parsed config/.test(err)) return Promise.resolve();
-            assert.fail(err);
-            return Promise.reject(err);
-        }));
+    describe('getConfig', () => {
+        it('should return BASE_CONFIG if data.parsed is undefined', () => {
+            sinon.stub(persistentStorage, 'get').resolves(undefined);
+            return assert.becomes(config.getConfig(), { raw: {}, parsed: {} });
+        });
+
+        it('should return BASE_CONFIG if data.parsed is {}', () => {
+            sinon.stub(persistentStorage, 'get').resolves({});
+            return assert.becomes(config.getConfig(), { raw: {}, parsed: {} });
+        });
+
+        it('should return data if data.parsed is set', () => {
+            sinon.stub(persistentStorage, 'get').resolves({ parsed: { value: 'Hello World' } });
+            return assert.becomes(config.getConfig(), { parsed: { value: 'Hello World' } });
+        });
+    });
+
+    describe('loadConfig', () => {
+        it('should reject if persistenStorage errors', () => {
+            sinon.stub(persistentStorage, 'get').rejects(new Error('loadStateError'));
+            return assert.isRejected(config.loadConfig(), /loadStateError/);
+        });
+
+        it('should resolve BASE_CONFIG, even if persistentStorage returns {}', () => {
+            sinon.stub(persistentStorage, 'get').resolves({});
+            return assert.becomes(config.loadConfig(), { raw: {}, parsed: {} });
+        });
+
+        it('should resolve BASE_CONFIG, if decryptAllSecretes returns {}', () => {
+            sinon.stub(deviceUtil, 'decryptAllSecrets').resolves({});
+            return assert.becomes(config.loadConfig(), { raw: {}, parsed: {} });
+        });
+
+        it('should error if there is an unexpected error in setConfig', () => {
+            sinon.stub(config, 'setConfig').rejects(new Error('Unexpected Error'));
+            return assert.isRejected(config.loadConfig(), /Unexpected Error/);
+        });
+    });
+
+    it('should fail to set config when invalid config provided', () => {
+        // assert.isRejected does not work for this test.
+        // Due to the throw new Error in _notifyConfigChange, there is no promise to check against.
+        try {
+            config.setConfig({});
+        } catch (err) {
+            return assert.strictEqual(err.message, '_notifyConfigChange() Missing parsed config.');
+        }
+        return assert.fail('This test PASSED but was supposed to FAIL');
+    });
 
     it('should able to get declaration by name', () => {
         const obj = {
