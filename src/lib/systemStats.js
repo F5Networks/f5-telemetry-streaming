@@ -41,6 +41,7 @@ function SystemStats(host, options) {
     const _paths = options.paths || paths;
     const _properties = options.properties || properties;
 
+    this.noTmstats = options.noTmstats;
     this.tags = options.tags || {};
     this.loader = new EndpointLoader(host, options);
     this.loader.setEndpoints(_paths.endpoints);
@@ -247,6 +248,10 @@ SystemStats.prototype._loadData = function (property) {
  * @returns {Object} Promise resolved when data was successfully colleted
  */
 SystemStats.prototype._processProperty = function (key, property) {
+    if (this.noTmstats && property.structure && property.structure.parentKey === 'tmstats') {
+        return Promise.resolve();
+    }
+
     property = this._renderProperty(this._preprocessProperty(property));
     /**
      * if endpoints will have their own 'disabled' flag

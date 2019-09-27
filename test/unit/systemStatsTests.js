@@ -11,6 +11,7 @@
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
+const sinon = require('sinon');
 
 const SystemStats = require('../../src/lib/systemStats');
 const paths = require('../../src/lib/paths.json');
@@ -188,6 +189,62 @@ describe('systemStats', () => {
                 const tableName = stats[stat].keyArgs.replaceStrings[tmctlArgs].split('-c').pop().trim();
                 it(`should collect ${stat}`, () => assertTmStat(stat, tableName));
             }
+        });
+    });
+
+    describe('._processProperty()', () => {
+        it('should return empty promise when noTmstats is true', () => {
+            const systemStats = new SystemStats({}, { noTmstats: true });
+            const property = {
+                structure: {
+                    parentKey: 'tmstats'
+                }
+            };
+            return systemStats._processProperty('', property)
+                .then(() => {
+                    assert.deepEqual(systemStats.collectedData, {});
+                });
+        });
+
+        it('should return empty promise when disabled', () => {
+            const systemStats = new SystemStats({}, { noTmstats: true });
+            const property = {
+                disabled: true
+            };
+            return systemStats._processProperty('', property)
+                .then(() => {
+                    assert.deepEqual(systemStats.collectedData, {});
+                });
+        });
+
+        it('should add theKey to collectedData', () => {
+            const systemStats = new SystemStats({}, {});
+            const property = {
+                structure: {
+                    folder: true
+                }
+            };
+            return systemStats._processProperty('theKey', property)
+                .then(() => {
+                    assert.deepEqual(systemStats.collectedData.theKey, {});
+                });
+        });
+
+        it('should add to collectedData', () => {
+            const systemStats = new SystemStats({}, {});
+            const property = {
+                key: 'theKey'
+            };
+            const expected = {
+                theKey: {
+                    key: 'theKey'
+                }
+            };
+            sinon.stub(systemStats, '_loadData').callsFake(() => Promise.resolve(property));
+            return systemStats._processProperty('theKey', property)
+                .then(() => {
+                    assert.deepEqual(systemStats.collectedData, expected);
+                });
         });
     });
 });
