@@ -12,6 +12,7 @@ const nodeUtil = require('util');
 const Ajv = require('ajv');
 const setupAsync = require('ajv-async');
 const EventEmitter = require('events');
+const TeemDevice = require('@f5devcentral/f5-teem').Device;
 
 const logger = require('./logger.js');
 const util = require('./util.js');
@@ -30,6 +31,7 @@ const iHealthPollerSchema = require('../schema/latest/ihealth_poller_schema.json
 const customKeywords = require('./customKeywords.js');
 const CONTROLS_CLASS_NAME = require('./constants.js').CONTROLS_CLASS_NAME;
 const CONTROLS_PROPERTY_NAME = require('./constants.js').CONTROLS_PROPERTY_NAME;
+const VERSION = require('./constants.js').VERSION;
 
 const PERSISTENT_STORAGE_KEY = 'config';
 const BASE_CONFIG = {
@@ -46,6 +48,11 @@ const BASE_CONFIG = {
  */
 function ConfigWorker() {
     this.validator = this.compileSchema();
+    const assetInfo = {
+        name: 'Telemetry Streaming',
+        version: VERSION
+    };
+    this.teemDevice = new TeemDevice(assetInfo, 'staging');
 }
 
 nodeUtil.inherits(ConfigWorker, EventEmitter);
@@ -270,10 +277,12 @@ ConfigWorker.prototype.processClientRequest = function (restOperation) {
     const method = restOperation.getMethod().toUpperCase();
     let actionName;
     let promise;
+    let sendAnalytics = false;
 
     if (method === 'POST') {
         // try to validate new config
         actionName = 'validateAndApply';
+        sendAnalytics = true;
         promise = this.validateAndApply(restOperation.getBody());
     } else {
         actionName = 'getDeclaration';
@@ -283,7 +292,15 @@ ConfigWorker.prototype.processClientRequest = function (restOperation) {
     return promise.then((config) => {
         util.restOperationResponder(restOperation, 200,
             { message: 'success', declaration: config });
+        return config;
     })
+        .then((config) => {
+            if (sendAnalytics) {
+                const extraFields = util.getConsumerClasses(config);
+                this.teemDevice.report('Telemetry Streaming Telemetry Data', '1', config, extraFields)
+                    .catch(err => logger.info(`Unable to send analytics data: ${err.message}`));
+            }
+        })
         .catch((err) => {
             const errObj = {};
             if (err.code === 'ValidationError') {

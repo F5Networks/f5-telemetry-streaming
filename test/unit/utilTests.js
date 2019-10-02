@@ -492,6 +492,66 @@ describe('Util', () => {
                 }
             });
     }).timeout(10000);
+
+    describe('.getConsumerClasses', () => {
+        it('should return empty consumer object', () => {
+            const result = util.getConsumerClasses({});
+            assert.deepEqual(result, { consumers: {} });
+        });
+
+        it('should return object with count of consumer classes', () => {
+            const declaration = {
+                class1: {
+                    class: 'Telemetry_Consumer',
+                    type: 'Generic_HTTP'
+                },
+                class2: {
+                    class: 'Telemetry_Consumer',
+                    type: 'Splunk'
+                },
+                class3: {
+                    class: 'Telemetry_Consumer',
+                    type: 'Azure_Log_Analytics'
+                },
+                class4: {
+                    class: 'Telemetry_Consumer',
+                    type: 'Graphite'
+                },
+                class5: {
+                    class: 'Telemetry_Consumer',
+                    type: 'Kafka'
+                },
+                class6: {
+                    class: 'Telemetry_Consumer',
+                    type: 'ElasticSearch'
+                },
+                class7: {
+                    class: 'Telemetry_Consumer',
+                    type: 'Generic_HTTP'
+                },
+                class8: {
+                    class: 'Telemetry_Consumer',
+                    type: 'Azure_Log_Analytics'
+                },
+                class9: {
+                    class: 'Telemetry_Consumer',
+                    type: 'Azure_Log_Analytics'
+                }
+            };
+            const expected = {
+                consumers: {
+                    Generic_HTTP: 2,
+                    Splunk: 1,
+                    Azure_Log_Analytics: 3,
+                    Graphite: 1,
+                    Kafka: 1,
+                    ElasticSearch: 1
+                }
+            };
+            const result = util.getConsumerClasses(declaration);
+            assert.deepEqual(result, expected);
+        });
+    });
 });
 
 describe('validate renameKeys function', () => {
