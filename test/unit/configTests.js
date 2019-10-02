@@ -11,6 +11,7 @@
 const sinon = require('sinon');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
+const TeemDevice = require('@f5devcentral/f5-teem').Device;
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -198,6 +199,50 @@ describe('Config', () => {
             .then(() => {
                 assert.strictEqual(mockRestOperation.statusCode, 500);
                 assert.strictEqual(mockRestOperation.body.message, 'Internal Server Error');
+            });
+    });
+
+    it('should send TEEM report', (done) => {
+        const decl = {
+            class: 'Telemetry',
+            schemaVersion: '1.6.0'
+        };
+        const assetInfo = {
+            name: 'Telemetry Streaming',
+            version: '1.6.0'
+        };
+        const teemDevice = new TeemDevice(assetInfo);
+
+        sinon.stub(teemDevice, 'report').callsFake((type, version, declaration) => {
+            assert.deepEqual(declaration, decl);
+            done();
+        });
+        const restOperation = new MockRestOperation({ method: 'POST' });
+        restOperation.setBody(decl);
+        config.teemDevice = teemDevice;
+        config.processClientRequest(restOperation);
+    });
+
+    it('should still receive 200 response if f5-teem fails', () => {
+        const decl = {
+            class: 'Telemetry',
+            schemaVersion: '1.6.0'
+        };
+        const assetInfo = {
+            name: 'Telemetry Streaming',
+            version: '1.6.0'
+        };
+        const teemDevice = new TeemDevice(assetInfo);
+
+        sinon.stub(teemDevice, 'report').rejects(new Error('f5-teem failed'));
+        const restOperation = new MockRestOperation({ method: 'POST' });
+        restOperation.setBody(decl);
+        config.teemDevice = teemDevice;
+        return config.processClientRequest(restOperation)
+            .then(() => {
+                assert.equal(restOperation.statusCode, 200);
+                assert.equal(restOperation.body.message, 'success');
+                assert.deepEqual(restOperation.body.declaration, decl);
             });
     });
 
