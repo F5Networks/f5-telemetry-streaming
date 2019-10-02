@@ -30,6 +30,8 @@ Splunk Legacy format
 ^^^^^^^^^^^^^^^^^^^^
 The **format** property can be set to **legacy** for Splunk users who wish to convert the stats output similar to the |splunk app|. To see more information, see |Analytics|. To see more information about using the HEC, see |HEC|.  See the following example.
 
+.. NOTE:: To poll for any data involving **tmstats** you must have a Splunk consumer with the legacy format as described in this section.  This includes GET requests to the SystemPoller API because the data is not pulled unless it is a legacy Splunk consumer. 
+
 In Telemetry Streaming v1.6.0 and later, you must use the **facility** parameter with the legacy format to specify a Splunk facility in your declarations.  The facility parameter is for identification of location/facility in which the BIG-IP is located (such as 'Main Data Center', 'AWS', or 'NYC'). 
 
 Required information for **facility**: 
