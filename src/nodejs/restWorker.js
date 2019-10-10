@@ -10,6 +10,8 @@
 
 const fs = require('fs');
 const path = require('path');
+const http = require('http');
+const https = require('https');
 
 const constants = require('../lib/constants.js');
 const logger = require('../lib/logger.js');
@@ -188,6 +190,10 @@ RestWorker.prototype._initializeApplication = function (success, failure) {
     // register REST endpoints
     this.router = new SimpleRouter();
     this.registerRestEndpoints(false);
+
+    // configure global socket maximum
+    http.globalAgent.maxSockets = 5;
+    https.globalAgent.maxSockets = 5;
 
     // config worker change event
     configWorker.on('change', config => this.configChangeHandler(config));
