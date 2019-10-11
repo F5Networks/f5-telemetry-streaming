@@ -7,6 +7,7 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-690: Collect all supported tmstat tables for Splunk Legacy
 - AUTOTOOL-748: Add Telemetry Streaming analytics reporting to F5
 - AUTOTOOL-763: Added maxSockets for HTTP and HTTPS connections, defaults to 5
+- AUTOTOOL-724: Add example using Generic HTTP Consumer to publish data to Fluentd
 
 ### Fixed
 - Splunk Tmstat table data is being overwritten when forwarded to Splunk
