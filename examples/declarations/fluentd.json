@@ -1,0 +1,18 @@
+{
+    "class": "Telemetry",
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Generic_HTTP",
+        "host": "192.0.2.1",
+        "protocol": "https",
+        "port": 9880,
+        "path": "/fluentd.tag",
+        "method": "POST",
+        "headers": [
+            {
+                "name": "content-type",
+                "value": "application/json"
+            }
+        ]
+    }
+}
