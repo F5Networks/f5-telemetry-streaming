@@ -89,6 +89,12 @@ When you upgrade your BIG-IP system, you simply install Telemetry Streaming on t
 
 |
 
+.. _statsinfo:
+
+**Does Telemetry Streaming collect any usage data?**
+
+Telemetry Streaming gathers non-identifiable usage data for the purposes of improving the product as outlined in the end user license agreement for BIG-IP. To opt out of data collection, disable BIG-IP system's phone home feature as described in |phone|.
+
 
 
 

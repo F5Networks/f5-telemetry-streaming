@@ -11,6 +11,10 @@ Document Revision History
         - Description
         - Date
 
+      * - 1.7.0
+        - Updated the documentation for Telemetry Streaming v1.6.0. This release contains the following changes: |br| * Added an FAQ entry about TS collecting non-identifiable usage data  (see :ref:`Usage data<statsinfo>`). |br| * Added the facility parameter for the Splunk Legacy format (see :ref:`splunk-legacy`)  |br| * Added a Schema Reference appendix 
+        - 10-22-19
+
       * - 1.6.0
         - Updated the documentation for Telemetry Streaming v1.6.0. This release contains the following changes: |br| * In version 1.6.0 and later, tagging is now an array inside of which you can add tagging objects  (see :ref:`Tag Property <tagproperty>`). |br| * Added the facility parameter for the Splunk Legacy format (see :ref:`splunk-legacy`)  |br| * Added a Schema Reference appendix 
         - 09-10-19
