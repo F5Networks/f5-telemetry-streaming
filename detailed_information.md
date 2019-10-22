@@ -26,7 +26,7 @@ For the complete Telemetry Streaming documentation, see [http://clouddocs.f5.com
 
 ## Overview
 
-The telemetry streaming design accounts for a number of key components, including ***System Poller***, ***Event Listener*** and ***Consumer***.  Those are described in more detail below.
+The telemetry streaming design accounts for a number of key components, including ***System Poller***, ***Event Listener*** and ***Consumer***.  Those are described in more detail below. To reduce the likelihood of socket overflow, TS restricts the maximum number of sockets per connection to 5.
 
 ### System
 

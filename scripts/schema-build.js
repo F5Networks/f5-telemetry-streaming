@@ -10,16 +10,16 @@
 
 const fs = require('fs');
 
-// const base = require('../src/nodejs/schema/base_schema.json');
+// const base = require('../src/schema/latest/base_schema.json');
 
-const SCHEMA_DIR = `${__dirname}/../src/nodejs/schema`;
-const outputFile = '../../../dist/ts.schema.json';
+const SCHEMA_DIR = `${__dirname}/../src/schema/latest`;
+const outputFile = `${__dirname}/../dist/ts.schema.json`;
 
 const safeTraverse = (p, o) => p.reduce((xs, x) => (xs && xs[x] ? xs[x] : null), o);
 
 function writeSchema(name, data) {
     return new Promise((resolve, reject) => {
-        fs.writeFile(`${SCHEMA_DIR}/${name}`, JSON.stringify(data, null, 2), (error) => {
+        fs.writeFile(name, JSON.stringify(data, null, 2), (error) => {
             if (error) reject(error);
             else resolve();
         });

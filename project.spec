@@ -14,14 +14,16 @@ Telemetry Streaming for BIG-IP
 
 %prep
 cp -r %{main}/src/ %{_builddir}/src/
-cp %{main}/package*.json %{_builddir}/src/nodejs
-npm install --only=prod --prefix %{_builddir}/src/nodejs --no-optional
+rm -r %{_builddir}/src/schema/[0-9]*
+cp %{main}/package*.json %{_builddir}/src
+npm install --only=prod --prefix %{_builddir}/src --no-optional
 echo -n %{version}-%{release} > %{_builddir}/src/version
 
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{IAPP_INSTALL_DIR}
 cp -r %{_builddir}/src/* $RPM_BUILD_ROOT%{IAPP_INSTALL_DIR}
+$(cd $RPM_BUILD_ROOT%{IAPP_INSTALL_DIR}/schema; ln -s latest/*.json .)
 
 %clean
 rm -rf $RPM_BUILD_ROOT

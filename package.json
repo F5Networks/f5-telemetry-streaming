@@ -1,6 +1,6 @@
 {
     "name": "f5-telemetry",
-    "version": "1.6.0",
+    "version": "1.7.0",
     "author": "F5 Networks",
     "license": "Apache-2.0",
     "repository": {
@@ -12,23 +12,27 @@
         "install-test": "npm install --no-optional",
         "lint": "eslint src test",
         "test-functional": "mocha \"./test/functional/testRunner.js\" --opts ./test/functional/.mocha.opts",
-        "test-only": "mocha --recursive \"./test/unittests/*.js\" --opts ./test/unittests/.mocha.opts",
-        "test": "nyc npm run test-only",
-        "build": "./scripts/build_rpm.sh"
+        "test-only": "mocha --recursive \"./test/unit/*.js\" --opts ./test/unit/.mocha.opts",
+        "test": "nyc --all npm run test-only",
+        "build": "./scripts/build/buildRpm.sh"
     },
     "nyc": {
-        "check-coverage": true,
-        "per-file": true,
-        "lines": 80,
-        "functions": 80,
-        "branches": 70,
         "reporter": [
             "html",
             "text",
             "json-summary"
+        ],
+        "exclude": [
+            "coverage/**",
+            "docs/**",
+            "test/**",
+            "scripts/**",
+            "examples/**",
+            "**/node_modules/**"
         ]
     },
     "dependencies": {
+        "@f5devcentral/f5-teem": "^1.0.0",
         "ajv": "^6.5.4",
         "ajv-async": "^1.0.1",
         "aws-sdk": "^2.369.0",
@@ -49,6 +53,7 @@
         "eslint-plugin-import": "^2.17.3",
         "icrdk": "git://github.com/f5devcentral/f5-icontrollx-dev-kit#master",
         "mocha": "^5.2.0",
+        "nock": "10.0.0",
         "nyc": "^14.1.1",
         "sinon": "^7.4.1",
         "ssh2": "^0.8.2",

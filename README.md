@@ -8,6 +8,8 @@
 
 Telemetry Streaming (TS) is an iControl LX Extension delivered as a TMOS-independent RPM file. Installing the TS Extension on BIG-IP enables you to declaratively aggregate, normalize, and forward statistics and events from the BIG-IP to a consumer application by POSTing a single TS JSON declaration to TS’s declarative REST API endpoint.
 
+**IMPORTANT** Beginning with TS 1.7.0, the RPM and checksum files will no longer be located in the **/dist** directory in this repository.  These files can be found on the [Release page](https://github.com/F5Networks/f5-telemetry-streaming/releases), as **Assets**.  You can find historical files on GitHub by using the **Branch** drop-down, clicking the **Tags** tab, and then selecting the appropriate release.
+
 ## Documentation
 
 For the documentation on Telemetry Streaming, including download, installation, and usage instructions, see the Telemetry Streaming User guide at [http://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/](http://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/).

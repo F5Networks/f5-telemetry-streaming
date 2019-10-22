@@ -108,7 +108,7 @@ How does the project handle a typical `POST` request?
             "trace": false,
             "format": "default"
         },
-        "schemaVersion": "1.6.0"
+        "schemaVersion": "1.7.0"
     }
 }
 ```
@@ -119,13 +119,13 @@ How does the project handle a typical `POST` request?
 What happens in the system internals between request and response?
 
 - LX worker receives request which validates URI, etc.
-    - ref: [restWorkers/main.js](../src/nodejs/restWorkers/main.js)
+    - ref: [restWorker.js](../src/nodejs/restWorker.js)
 - Request is validated using JSON schema and AJV, config event fires
-    - ref: [config.js](../src/nodejs/config.js)
+    - ref: [config.js](../src/lib/config.js)
 - System poller, event listener, etc. configures system resources
-    - ref: [systemPoller.js](../src/nodejs/systemPoller.js), [eventListener.js](../src/nodejs/eventListener.js), etc.
+    - ref: [systemPoller.js](../src/lib/systemPoller.js), [eventListener.js](../src/lib/eventListener.js), etc.
 - Client response sent with validated config
-    - ref: [config.js](../src/nodejs/config.js)
+    - ref: [config.js](../src/lib/config.js)
     ```javascript
         return promise.then((config) => {
         util.restOperationResponder(restOperation, 200,
@@ -148,22 +148,22 @@ Ok, overview done!  Now let's dive into the major areas to be aware of as a deve
 ---
 ### Core modules
 
-All core modules are included inside `../src/nodejs/`
+All core modules are included inside `../src/lib/`
 
-- [restWorkers/main.js](../src/nodejs/restWorkers/main.js)
+- [restWorker.js](../src/nodejs/restWorker.js)
     - Purpose: Hook for incoming HTTP requests
-- [config.js](../src/nodejs/config.js)
+- [config.js](../src/lib/config.js)
     - Purpose: Handle configuration actions... such as validation, persistent storage, etc.
-- [systemPoller.js](../src/nodejs/systemPoller.js)
+- [systemPoller.js](../src/lib/systemPoller.js)
     - Purpose: Handles CRUD-like actions for any system pollers required based on client configuration
-    - Related: See [iHealthPoller.js](../src/nodejs/iHealthPoller.js)
-- [eventListener.js](../src/nodejs/eventListener.js)
+    - Related: See [iHealthPoller.js](../src/lib/iHealthPoller.js)
+- [eventListener.js](../src/lib/eventListener.js)
     - Purpose: Handles CRUD-like actions for any event listeners required based on client configuration.
-- [systemStats.js](../src/nodejs/systemStats.js)
-    - Purpose: Called by system poller to create stats object based on the static JSON configuration files available in `config/` directory such as [properties.json](../src/nodejs/config/properties.json)
-- [consumers.js](../src/nodejs/consumers.js)
+- [systemStats.js](../src/lib/systemStats.js)
+    - Purpose: Called by system poller to create stats object based on the static JSON configuration files available in `config/` directory such as [properties.json](../src/lib/properties.json)
+- [consumers.js](../src/lib/consumers.js)
     - Purpose: Handles load/unload actions for any consumers required based on client configuration. Consumers must exist in `consumers` directory, see [Adding a New Consumer](#adding-a-new-consumer)
-- [forwarder.js](../src/nodejs/forwarder.js)
+- [forwarder.js](../src/lib/forwarder.js)
     - Purpose: Handles calling each loaded consumer when an event is ready for forwarding (system poller event, event listener event, etc.)
 
 ---
@@ -175,7 +175,7 @@ Adding stats to the system poller is a frequent activity, below describes the co
 
 Collect the raw data from the device by adding a new endpoint to the paths configuration file.
 
-[Paths.json](../src/nodejs/config/paths.json)
+[Paths.json](../src/lib/paths.json)
 
 *Basic Example:*
 
@@ -204,7 +204,7 @@ Collect the raw data from the device by adding a new endpoint to the paths confi
 
 Enable and define how the data should look by adding a new key under *stats* in the properties configuration file.
 
-[Properties.json](../src/nodejs/config/properties.json)
+[Properties.json](../src/lib/properties.json)
 
 *Basic Example:*
 
@@ -216,7 +216,7 @@ Enable and define how the data should look by adding a new key under *stats* in 
 }
 ```
 
-*Advanced Macros:* These macros can manipulate the data in some specific, additional ways.  The following block describes the complete list:
+*Advanced Macros:* These macros can manipulate the data in some specific, additional ways. The "normalization" process will run in the order specified in the "normalization" array.  The following block describes the complete list:
 
 ```javascript
 {
@@ -227,12 +227,26 @@ Enable and define how the data should look by adding a new key under *stats* in 
         }
         "normalize": false, // This can override normalization, can be useful when adding new info/stat
         "disabled": true, // This alerts the engine to ignore specific info/stat
-        "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" }, // Converts an array to a map using the value of a standard key such as 'name' in each object in the array.  Optionally add a prefix to that value (useful if filterKeys is also used)
-        "filterKeys": { "exclude": [ "removeMe"] }, // Filter all keys in object using either an inclusio or exclusion list - include also supported, not an exact match
-        "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "~": { "replaceCharacter": "/" },  }, // Rename keys, useful if key contains unneccesary prefix/suffix or needs a specific character replaced. This can also be an array with 1+ rename key objects inside it to guarantee order.
-        "includeFirstEntry": { "pattern": "/stats", "excludePattern": "/members/" }, // This is useful if aggregating data from /endpoint and /endpoint/stats typically.  Allows a complex object to by merged instead of nesting down into entries, instead the values in the first entry of 'entries' will be copied to the top level object and then discarded.  There may be multiple 'entries', of which only some should follow this property, that is supported with an optional pattern and excludePattern.
-        "runFunctions": [{ "name": "getPercentFromKeys", "args": { "totalKey": "memoryTotal", "partialKey": "memoryUsed" } }], // Run custom functions, nail meet hammer.  This is to be used for one-offs where creating a standard macro does not make sense, keeping in mind each custom function could be used multiple times.  The function should already exist inside of normalizeUtil.js.
-        "addKeysByTag": true || { "skip": [ "members" ] }, // Add keys by tag(s) defined in the configuration, default value to use should be 'true'.  The global property 'addKeysByTag' contains the default behavior regarding keys to skip, etc.
+        "normalization": [
+            {
+                "convertArrayToMap": { "keyName": "name", "keyNamePrefix": "name/" }, // Converts an array to a map using the value of a standard key such as 'name' in each object in the array.  Optionally add a prefix to that value (useful if filterKeys is also used)
+            },
+            {
+                "includeFirstEntry": { "pattern": "/stats", "excludePattern": "/members/" }, // This is useful if aggregating data from /endpoint and /endpoint/stats typically.  Allows a complex object to by merged instead of nesting down into entries, instead the values in the first entry of 'entries' will be copied to the top level object and then discarded.  There may be multiple 'entries', of which only some should follow this property, that is supported with an optional pattern and excludePattern.
+            },
+            {
+                "filterKeys": { "exclude": [ "removeMe"] }, // Filter all keys in object using either an inclusio or exclusion list - include also supported, not an exact match
+            },
+            {
+                "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "~": { "replaceCharacter": "/" },  }, // Rename keys, useful if key contains unneccesary prefix/suffix or needs a specific character replaced. This can also be an array with 1+ rename key objects inside it to guarantee order.
+            },
+            {
+                "runFunctions": [{ "name": "getPercentFromKeys", "args": { "totalKey": "memoryTotal", "partialKey": "memoryUsed" } }], // Run custom functions, nail meet hammer.  This is to be used for one-offs where creating a standard macro does not make sense, keeping in mind each custom function could be used multiple times.  The function should already exist inside of normalizeUtil.js.
+            },
+            {
+                "addKeysByTag": true || { "skip": [ "members" ] }, // Add keys by tag(s) defined in the configuration, default value to use should be 'true'.  The global property 'addKeysByTag' contains the default behavior regarding keys to skip, etc.
+            }
+        ]
         "comment": "some comment", // Simple means to provide a comment in properties.json about a particular stat for other contributors
         "if": { "deviceVersionGreaterOrEqual": "13.0" }, // Simple conditional block. Every key inside "if" is predefined function to test which returns 'true' or 'false'. If several key are encountered then logical AND will be used to compute final result. More information about available function below. By default result is true for empty block.
         "then": { "pkey": "pvalue" }, // Optional block. When condition(s) inside "if" is True, the data inside "then" will be used. It is allowed to have nested "if...then...else" block.
@@ -291,7 +305,7 @@ This context data is defined on the same level as *stats* in the properties conf
 
 ---
 #### Adding System Poller Stats - Conditional blocks
-Some stats may only be available in certain conditions, for example on BIG-IP v13+.  This is the list of functions available inside the `"if"` block.  These functions should exist inside [systemStats.js](../src/nodejs/systemStats.js).
+Some stats may only be available in certain conditions, for example on BIG-IP v13+.  This is the list of functions available inside the `"if"` block.  These functions should exist inside [systemStats.js](../src/lib/systemStats.js).
 
 *deviceVersionGreaterOrEqual:* Function to compare current device's version against provided one.
 ```javascript
@@ -316,10 +330,10 @@ Some stats may only be available in certain conditions, for example on BIG-IP v1
 
 Adding a new consumer involves two "simple" steps:
 
-- Add a new plugin to ../src/nodejs/consumers
-- Add any new configuration properties to the consumer [schema](../src/nodejs/schema/consumer_schema.json)
+- Add a new plugin to ../src/lib/consumers
+- Add any new configuration properties to the consumer [schema](../src/schema/latest/consumer_schema.json)
 
-Additional information about adding a new consumer plugin can be found in the [consumer readme](../src/nodejs/consumers/README.md)
+Additional information about adding a new consumer plugin can be found in the [consumer readme](../src/lib/consumers/README.md)
 
 ---
 ### Testing methodology
@@ -338,7 +352,7 @@ Build/publish makes heavy use of GitLab and [.gitlab-ci.yml](../.gitlab-ci.yml).
 
 *Local development build process*: Various strategies exist here, see the following for an inexhaustive list.
 
-- Build locally using `build_rpm.sh` or similar, copy RPM to BIG-IP
+- Build locally using `buildRpm.sh` or similar, copy RPM to BIG-IP
 - VS Code `tasks.json` to copy `src/` files to BIG-IP and run `restart restnoded`
 - Matthe Zinke's ICRDK [development kit](https://github.com/f5devcentral/f5-icontrollx-dev-kit/blob/master/README.md)
 - Vim on BIG-IP (enough said, you know who you are)

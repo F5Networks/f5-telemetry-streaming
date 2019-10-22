@@ -82,7 +82,7 @@ Use the following procedure to validate a declaration.
 
 .. |schema| raw:: html
 
-   <a href="https://github.com/F5Networks/f5-telemetry-streaming/tree/master/src/nodejs/schema" target="_blank">schema</a>
+   <a href="https://github.com/F5Networks/f5-telemetry-streaming/tree/master/src/schema" target="_blank">schema</a>
 
 .. |br| raw:: html
    

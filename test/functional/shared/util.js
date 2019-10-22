@@ -103,9 +103,7 @@ module.exports = {
      */
     getPackageDetails() {
         // default to new build directory if it exists, otherwise use dist directory
-        const existingBuildDir = `${__dirname}/../../../dist`;
-        const newBuildDir = `${existingBuildDir}/new_build`;
-        const dir = fs.existsSync(newBuildDir) ? newBuildDir : existingBuildDir;
+        const dir = `${__dirname}/../../../dist`;
 
         const distFiles = fs.readdirSync(dir);
         const packageFiles = distFiles.filter(f => f.endsWith('.rpm'));
@@ -121,6 +119,9 @@ module.exports = {
             }
         });
         const packageFile = latest.file;
+        if (!packageFile) {
+            throw new Error(`Unable to find RPM in ${dir}`);
+        }
 
         return { name: packageFile, path: dir };
     },
