@@ -89,6 +89,12 @@ When you upgrade your BIG-IP system, you simply install Telemetry Streaming on t
 
 |
 
+.. _statsinfo:
+
+**Does Telemetry Streaming collect any usage data?**
+
+Telemetry Streaming gathers non-identifiable usage data for the purposes of improving the product as outlined in the end user license agreement for BIG-IP. To opt out of data collection, disable BIG-IP system's phone home feature as described in |phone|.
+
 
 
 
@@ -140,3 +146,7 @@ When you upgrade your BIG-IP system, you simply install Telemetry Streaming on t
 .. |issues| raw:: html
 
    <a href="https://github.com/F5Networks/f5-telemetry-streaming/issues" target="_blank">GitHub Issues</a>
+
+.. |phone| raw:: html
+
+   <a href="https://support.f5.com/csp/article/K15000#phone" target="_blank">K15000</a>

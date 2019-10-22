@@ -18,7 +18,8 @@ Telemetry Streaming general troubleshooting tips
 Troubleshooting
 ---------------
 
-**I'm receiving a path not registered error when I try to post a declaration**  
+I'm receiving a path not registered error when I try to post a declaration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  
 
 If you are receiving this error, it means either you did not install Telemetry Streaming, or it did not install properly. The error contains the following message:  
 
@@ -37,7 +38,8 @@ If you receive this error, see :doc:`installation` to install or re-install Tele
 
 .. _elkerror:
 
-**I'm receiving a limit of total fields exceeded error when Telemetry Streaming forwards statistics to ElasticSearch**
+I'm receiving a limit of total fields exceeded error when Telemetry Streaming forwards statistics to ElasticSearch
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you are receiving this error, it means that Telemetry Streaming is exceeding the maximum allowed number of fields in the ElasticSearch index to which it is forwarding. The error contains the following message: |br|
 
@@ -75,11 +77,21 @@ If you receive this error, use **one** of the following methods to correct the i
 
 .. _certerror:
 
-**I'm receiving a SELF_SIGNED_CERT_IN_CHAIN error**
+I'm receiving a SELF_SIGNED_CERT_IN_CHAIN error
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you are receiving this error, you are using a self-signed certificate in a declaration.  You can use the **allowSelfSignedCert** parameter set to **true** to use self-signed certificates (see :doc:`advanced-options` for more information and usage).  
 
+|
 
+.. _nodist:
+
+I can no longer find the TS source RPM on GitHub
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Beginning with TS 1.7.0, the RPM and checksum files are no longer located in the **/dist** directory in the Telemetry Streaming repository on GitHub.  These files can be found on the |release|, as **Assets**. 
+
+You can find historical files on GitHub by using the **Branch** drop-down, clicking the **Tags** tab, and then selecting the appropriate release.
 
 
 
@@ -90,3 +102,7 @@ If you are receiving this error, you are using a self-signed certificate in a de
 .. |br| raw:: html
    
    <br />
+
+.. |release| raw:: html
+
+   <a href="https://github.com/F5Networks/f5-telemetry-streaming/releases" target="_blank">GitHub Release</a>

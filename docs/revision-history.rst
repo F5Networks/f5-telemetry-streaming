@@ -11,6 +11,14 @@ Document Revision History
         - Description
         - Date
 
+      * - 1.7.0
+        - Updated the documentation for Telemetry Streaming v1.7.0. This release contains the following changes: |br| * Added a new Consumer for Fluentd (see :ref:`fluentd-ref`) |br| * Added a note to :ref:`splunk-legacy` stating TS 1.7.0 and later gathers additional data from tmstats tables to improve compatibility with Splunk Legacy consumers |br| * Added a troubleshooting entry and other notes about the **/dist** directory going away on GitHub, and the TS RPM being available as a release Asset (see :ref:`Troubleshooting<nodist>`) |br| * Added an FAQ entry about TS collecting non-identifiable usage data  (see :ref:`Usage data<statsinfo>`) |br| * Updated the maximum number of concurrent established TCP sockets per consumer to 5 |br| |br| Issues Resolved: |br| * Splunk Tmstat table data is being overwritten when forwarded to Splunk |br| * Broken promise chain when loading config file.
+        - 10-22-19
+
+      * - 1.6.0
+        - Updated the documentation for Telemetry Streaming v1.6.0. This release contains the following changes: |br| * In version 1.6.0 and later, tagging is now an array inside of which you can add tagging objects  (see :ref:`Tag Property <tagproperty>`). |br| * Added the facility parameter for the Splunk Legacy format (see :ref:`splunk-legacy`)  |br| * Added a Schema Reference appendix 
+        - 09-10-19
+
       * - 1.5.0
         - Updated the documentation for Telemetry Streaming v1.5.0. This release contains the following changes: |br| * Added support for Carrier Grade NAT (CGNAT) event logs (see :ref:`cgnat`) |br| * Telemetry Streaming now collects **mask** and **ipProtocol** for virtual servers (see the virtualServers lines of :ref:`System Information Output<sysinfo>` for example output. |br| * Telemetry Streaming now collects the system status information: **devicegroup**, **asm_state**, **last_asm_change**, **apm_state**, **afm_state**, **last_afm_deploy**, **ltm_config_time**, and **gtm_config_time** (see the :ref:`System Information Output<sysinfo>` for example output) |br| * Added iRules support to system poller stats (see the iRules lines of :ref:`System Information Output<sysinfo>` for example output) |br| * Added a :ref:`Troubleshooting entry<certerror>` about a self-signed certificate error.  Also added a related **allowSelfSignedCert** row to the :doc:`advanced-options` table.  |br| |br| Issues Resolved: |br| * Elastic Search Unable to parse and index some messages with previously used keys |br| * Elastic Search event data objects containing consecutive periods will be replaced with a single period |br| * Splunk Host property is null for TS events
         - 07-30-19
@@ -54,7 +62,7 @@ Document Revision History
 
 .. |schemalink| raw:: html
 
-   <a href="https://github.com/F5Networks/f5-telemetry-streaming/tree/master/src/nodejs/schema" target="_blank">schema files</a>
+   <a href="https://github.com/F5Networks/f5-telemetry-streaming/tree/master/src/schema" target="_blank">schema files</a>
 
 
 

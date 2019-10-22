@@ -125,6 +125,8 @@ build_docs:
     image: ${CONTAINTHEDOCS_IMAGE}
     stage: build
     script:
+        # create 'dist' folder because it probably not exists yet
+        - mkdir -p dist
         - node scripts/schema-build.js
         # - node scripts/schema-check.js
         - node scripts/schema-to-rst.js
@@ -233,7 +235,6 @@ publish_rpm_to_artifactory:
     tags:
         - docker-executor
     script:
-        # we do not want the new build (dist/new_build/*.rpm), we want the checked in build
         - RPM_FILE=$(ls dist/*.rpm)
         - RPM_NAME=$(basename $RPM_FILE)
         - URL=${ARTIFACTORY_BASE_URL}/f5-telemetry-streaming-rpm/${RPM_NAME}
@@ -284,7 +285,6 @@ pages:
     only:
         # only update on designated, stable branch
         - develop
-        - v1.5.0-RC1
 
 # Publish docs to clouddocs.f5networks.net
 # publish_docs_to_staging:

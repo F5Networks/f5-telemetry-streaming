@@ -9,6 +9,8 @@ Downloading the RPM file
 ------------------------
 The first task is to download the latest RPM file.  Go to the |github|, and download the latest (highest numbered) RPM file.
 
+.. IMPORTANT:: Beginning with TS 1.7.0, the RPM and checksum files will no longer be located in the **/dist** directory in the Telemetry Streaming  repository on GitHub.  These files can be found on the |release|, as **Assets**. You can find historical files on GitHub by using the **Branch** drop-down, clicking the **Tags** tab, and then selecting the appropriate release.
+
 Uploading and installing the Telemetry Streaming file on the BIG-IP
 -------------------------------------------------------------------
 After you download the RPM, you must upload and then install it on your BIG-IP system. You can use the BIG-IP Configuration utility or cURL (you can alternatively use SCP to upload the file to **/var/config/rest/downloads**, but you would still have to use cURL command to install the package).  Use only one of the following procedures.
@@ -99,9 +101,13 @@ Linux: ``sha256sum <path_to_template>``
 
 Windows using CertUtil: ``CertUtil –hashfile <path_to_template> SHA256``
 
-You can compare the checksum produced by that command against the **.sha256** file in the **dist** directory (https://github.com/F5Networks/f5-telemetry-streaming/tree/master/dist).
+You can compare the checksum produced by that command against the **.sha256** file in the Release Assets on GitHub.
 
 
 .. |github| raw:: html
 
-   <a href="https://github.com/F5Networks/f5-telemetry-streaming" target="_blank">F5 Telemetry site on GitHub</a>
+   <a href="https://github.com/F5Networks/f5-telemetry-streaming/releases" target="_blank">F5 Telemetry site on GitHub</a>
+
+.. |release| raw:: html
+
+   <a href="https://github.com/F5Networks/f5-telemetry-streaming/releases" target="_blank">GitHub Release</a>
