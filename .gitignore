@@ -2,7 +2,8 @@
 node_modules/
 # rpm build
 rpmbuild/
-dist/new_build/
+# dist folder
+dist/
 # docs build
 _build/
 # coverage

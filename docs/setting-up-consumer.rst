@@ -30,7 +30,7 @@ Splunk Legacy format
 ^^^^^^^^^^^^^^^^^^^^
 The **format** property can be set to **legacy** for Splunk users who wish to convert the stats output similar to the |splunk app|. To see more information, see |Analytics|. To see more information about using the HEC, see |HEC|.  See the following example.
 
-.. NOTE:: To poll for any data involving **tmstats** you must have a Splunk consumer with the legacy format as described in this section.  This includes GET requests to the SystemPoller API because the data is not pulled unless it is a legacy Splunk consumer. 
+.. NOTE:: To poll for any data involving **tmstats** you must have a Splunk consumer with the legacy format as described in this section.  This includes GET requests to the SystemPoller API because the data is not pulled unless it is a legacy Splunk consumer. |br| |br| Telemetry Streaming 1.7.0 and later gathers additional data from tmstats tables to improve compatibility with Splunk Legacy consumers.
 
 In Telemetry Streaming v1.6.0 and later, you must use the **facility** parameter with the legacy format to specify a Splunk facility in your declarations.  The facility parameter is for identification of location/facility in which the BIG-IP is located (such as 'Main Data Center', 'AWS', or 'NYC'). 
 
@@ -71,6 +71,7 @@ The following is an example of the Azure dashboard with Telemetry Streaming data
 
 |azure_log_analytics_dashboard|
 
+|
 
 .. _awscloud-ref:
 
@@ -92,6 +93,7 @@ Example Declaration:
 .. literalinclude:: ../examples/declarations/aws_cloudwatch.json
     :language: json
 
+|
 
 .. _awss3-ref:
 
@@ -112,6 +114,7 @@ Example Declaration:
 .. literalinclude:: ../examples/declarations/aws_s3.json
     :language: json
 
+|
 
 .. _graphite-ref:
 
@@ -129,6 +132,7 @@ Required Information:
 .. literalinclude:: ../examples/declarations/graphite.json
     :language: json
 
+|
 
 .. _kafka-ref:
 
@@ -150,6 +154,7 @@ Required Information:
 .. literalinclude:: ../examples/declarations/kafka.json
     :language: json
 
+|
 
 .. _elasticsearch-ref:
 
@@ -176,7 +181,7 @@ Optional Parameters:
 .. literalinclude:: ../examples/declarations/elasticsearch.json
     :language: json
 
-
+|
 
 .. _sumologic-ref:
 
@@ -196,7 +201,7 @@ Required Information:
 .. literalinclude:: ../examples/declarations/sumo_logic.json
     :language: json
 
-
+|
 
 .. _statsd-ref:
 
@@ -214,7 +219,7 @@ Required Information:
 .. literalinclude:: ../examples/declarations/statsd.json
     :language: json
 
-
+|
 
 .. _http-ref:
 
@@ -223,8 +228,8 @@ Generic HTTP
 
 Required Information:
  - Host: The address of the system.
- - Protocol: The protocol of the system. Options: ``https`` or ``http``. Default is ``http``.
- - Port: The protocol of the system. Default is ``443``.
+ - Protocol: The protocol of the system. Options: ``https`` or ``http``. Default is ``https``.
+ - Port: The port of the system. Default is ``443``.
  - Path: The path of the system. Default is ``/``.
  - Method: The method of the system. Options: ``POST``, ``PUT``, ``GET``. Default is ``POST``.
  - Headers: The headers of the system.
@@ -240,6 +245,24 @@ Required Information:
 Example with multiple passphrases:
 
 .. literalinclude:: ../examples/declarations/multiple_passphrases.json
+    :language: json
+
+
+.. _fluentd-ref:
+
+Fluentd
+~~~~~~~
+|Fluentd|
+
+Required Information:
+ - Host: The address of the system.
+ - Protocol: The protocol of the system. Options: ``https`` or ``http``. Default is ``https``.
+ - Port: The port of the system. Default is ``9880``.
+ - Path: The path of the system. This parameter corresponds to the **tag** of the event being sent to Fluentd (see |fluentdocs| for information) 
+ - Method: The method of the system. This must be ``POST``.
+ - Headers: The headers of the system.  **Important**: The **content-type = application/json** header as shown in the example is required.
+
+.. literalinclude:: ../examples/declarations/fluentd.json
     :language: json
 
 
@@ -286,13 +309,9 @@ Example with multiple passphrases:
    :target: https://github.com/statsd/statsd/blob/master/docs/graphite.md
    :alt: StatsD
 
-
-
-.. toctree::
-   :caption: Choose a provider
-   :hidden:
-   :glob:
-   :maxdepth: 1
+.. |Fluentd| image:: /images/fluentd.png
+   :target: https://www.fluentd.org/
+   :alt: fluentd
 
    
 .. |Azure documentation| raw:: html
@@ -350,3 +369,12 @@ Example with multiple passphrases:
 .. |StatsDWiki| raw:: html
 
    <a href="https://github.com/statsd/statsd/blob/master/docs/graphite.md" target="_blank">StatsD documentation on GitHub</a>
+
+.. |fluentdocs| raw:: html
+
+   <a href="https://docs.fluentd.org/quickstart/life-of-a-fluentd-event#event-structure" target="_blank">Fluentd documentation</a>
+
+
+.. |br| raw:: html
+   
+   <br />

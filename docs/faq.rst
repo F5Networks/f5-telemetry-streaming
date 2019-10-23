@@ -146,3 +146,7 @@ Telemetry Streaming gathers non-identifiable usage data for the purposes of impr
 .. |issues| raw:: html
 
    <a href="https://github.com/F5Networks/f5-telemetry-streaming/issues" target="_blank">GitHub Issues</a>
+
+.. |phone| raw:: html
+
+   <a href="https://support.f5.com/csp/article/K15000#phone" target="_blank">K15000</a>

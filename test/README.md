@@ -75,7 +75,7 @@ Internal tool notes:
 
 ##### Creating a new build
 
-Simply run `npm run build` to create a new rpm. A new package and sha256 file are created in `dist/new_build`.
+Simply run `npm run build` to create a new rpm. A new package and sha256 file are created in `dist` directory.
 
 For mac users, you may need to follow the additional steps before you run the build if you're missing `sha256sum` on your machine.
 
@@ -113,7 +113,7 @@ If you already have an existing set of devices, you can run the functional tests
         ]
 
 
-2. Set your environment variables. Note that the DUT tests will still run setup. It grabs the rpm if it exists in `dist/new_build`, otherwise, it will check the main `dist/` for rpms, picking one with the latest timestamp.
+2. Set your environment variables. Note that the DUT tests will still run setup. It grabs the rpm if it exists in `dist` directory.
 
         Env variables
 

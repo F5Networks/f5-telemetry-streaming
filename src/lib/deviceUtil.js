@@ -572,6 +572,10 @@ module.exports = {
                                 resolve();
                             }
                         });
+                        if (!wsOpened) {
+                            // multiple 'resolve' possible but 'promise' will be fulfilled already.
+                            resolve();
+                        }
                     });
                 }
                 promise = promise || Promise.resolve();

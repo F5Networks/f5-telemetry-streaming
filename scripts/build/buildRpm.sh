@@ -3,7 +3,7 @@
 set -e
 
 MAINDIR=$(pwd)
-FINALBUILDDIR=${MAINDIR}/dist/new_build
+FINALBUILDDIR=${MAINDIR}/dist
 
 FULL_VERSION=$(node -e "v=require('./package.json').version.split('-');v.length===1?v.push('1'):'';console.log(v.join('-'));")
 VERSION=$(echo $FULL_VERSION | cut -d - -f 1)
