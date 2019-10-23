@@ -81,7 +81,7 @@ describe('Device Util', () => {
         const mockRes = { statusCode: 200, statusMessage: 'message', headers: mockHeaders };
         setupRequestMock(mockRes, mockBody);
 
-        return deviceUtil.downloadFileFromDevice('/wrong/path/to/file//downloadFileFromDevice_test', constants.LOCAL_HOST, '/uri/to/path')
+        return deviceUtil.downloadFileFromDevice('/wrong/path/to/file', constants.LOCAL_HOST, '/uri/to/path')
             .then(() => {
                 assert.fail('Should throw an error');
             })

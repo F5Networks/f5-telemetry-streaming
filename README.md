@@ -26,7 +26,7 @@ Be sure to see the [Support page](SUPPORT.md) in this repo for more details and 
 
 ## Copyright
 
-Copyright 2014-2018 F5 Networks Inc.
+Copyright 2014-2019 F5 Networks Inc.
 
 ### F5 Networks Contributor License Agreement
 
