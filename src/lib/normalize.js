@@ -164,7 +164,7 @@ module.exports = {
         try {
             return normalizeUtil[options.func](args);
         } catch (e) {
-            // should possibly just return an empty string/object instead
+            logger.exception(`runCustomFunction failed: ${e}`, e);
             throw new Error(`runCustomFunction failed: ${e}`);
         }
     },
