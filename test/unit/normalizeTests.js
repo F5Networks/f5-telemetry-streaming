@@ -316,6 +316,44 @@ describe('Normalize', () => {
         assert.deepEqual(result, expectedResult);
     });
 
+    it('should execute catch with stack trace when thrown error from run custom function', () => {
+        const options = {
+            normalization: [
+                {
+                    runFunctions: [
+                        {
+                            name: 'getAverage',
+                            args: {
+                                keyWithValue: 'oneMinAverageSystem'
+                            }
+                        }
+                    ]
+                }
+            ]
+        };
+
+        const data = {
+            tmm0: {
+                oneMinAverageSystem: 10
+            },
+            tmm1: {
+                oneMinAverageSystem: 20
+            },
+            tmm2: {
+                // intentionally missing value
+            }
+        };
+
+        let caught = false;
+        try {
+            normalize.data(data, options);
+        } catch (err) {
+            caught = true;
+            assert.notStrictEqual(err.message.indexOf('runCustomFunction failed'), -1);
+        }
+        assert(caught);
+    });
+
     it('should add keys by tag', () => {
         const data = {
             '/Common/app.app/foo': {
