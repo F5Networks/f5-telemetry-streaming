@@ -19,7 +19,7 @@
 
 * Check that all `feature` and `docs` branches targeted to the current release were merged to `develop` branch
 * Choose the right commit in `develop` branch and create separate branch from it for release candidate with name "vX.Y.Z"
-* Update build number changes to:
+* Make sure RC branch has actual release version and build numbers in following files, do corrections if needed:
   * [package.json](package.json)
   * [package-lock.json](package-lock.json)
   * [project.spec](project.spec) (not required starting from 1.5)
@@ -32,6 +32,7 @@
   * There should be exact same files across following directories:
     * [src/schema/latest](src/schema/latest)
     * `src/schema/X.Y.Z` - where X.Y.Z is release version
+* Update release version and build numbers in `develop` branch using list of the files above.
 * Update [SUPPORT.md](SUPPORT.md) if not yet done (or at least check that everything looks valid):
   * add new version to the list of `Currently supported versions` with appropriate dates
   * remove no longer supported versions from `Currently supported versions` and add it to `Versions no longer supported`
@@ -55,11 +56,16 @@
 
 ## Release process
 
-* Merge RC branch into master - squash to avoid commits leaking sensitive url's, etc.
-  * git checkout master
+* Create new branch from `master`, e.g. `rc-master-branch`. It will be easier to merge branches and resolve conflicts without any following up issues.
+* Merge RC branch into RC master branch - squash to avoid commits leaking sensitive url's, etc.
+  * git checkout rc-master-branch
   * git merge --squash vX.Y.Z
   * git push origin
 * Ideally it will be good to run functional and unit testing
+* After that merge `rc-master-branch` to `master` branch:
+  * git checkout master
+  * git merge --squash rc-master-branch
+  * git push origin
 * Create tag in master branch:
   * git checkout master
   * git tag -m 'Release X.Y.Z' vX.Y.Z
@@ -74,12 +80,10 @@
   * git merge master
   * git push origin
   * Now you can remove RC branch
+* Do not forget to clean up stale branches, e.g. RC branches
 * Create GitHub release - [GitHub Releases](https://github.com/f5networks/f5-telemetry-streaming/releases)
   * Navigate to the latest release, select `edit` and upload artifacts:
     * `.rpm` file
     * `.sha256` file
-
-
-In case if you have merge conflicts on attempt to merge RC to 'master' then create new branch from 'master' and try to merge RC changes to this new branch.
 
 # ATTENTION: DO NOT FORGET TO MERGE 'MASTER' BRANCH INTO 'DEVELOP' WHEN YOU ARE DONE WITH RELEASE PROCESS
