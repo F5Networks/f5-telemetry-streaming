@@ -133,6 +133,11 @@ describe('systemStats', () => {
     });
 
     describe('.collect()', () => {
+        function filterPaths(name) {
+            return {
+                endpoints: [paths.endpoints.find(p => p.name === name)]
+            };
+        }
         function assertTmStat(statKey, tmctlKey) {
             nock('http://localhost:8100')
                 .post(
@@ -152,9 +157,7 @@ describe('systemStats', () => {
 
             const host = {};
             const options = {
-                paths: {
-                    endpoints: [paths.endpoints.find(p => p.name === 'tmctl')]
-                },
+                paths: filterPaths('tmctl'),
                 properties: {
                     stats: {
                         tmstats: allProperties.stats.tmstats,
@@ -181,14 +184,216 @@ describe('systemStats', () => {
                 }
             });
         }
-        const stats = allProperties.stats;
-        const tmctlArgs = '\\$tmctlArgs';
 
-        Object.keys(stats).forEach((stat) => {
-            if ((stats[stat].structure || {}).parentKey === 'tmstats') {
-                const tableName = stats[stat].keyArgs.replaceStrings[tmctlArgs].split('-c').pop().trim();
-                it(`should collect ${stat}`, () => assertTmStat(stat, tableName));
-            }
+        describe('tmstats', () => {
+            const stats = allProperties.stats;
+            const tmctlArgs = '\\$tmctlArgs';
+
+            Object.keys(stats).forEach((stat) => {
+                if ((stats[stat].structure || {}).parentKey === 'tmstats') {
+                    const tableName = stats[stat].keyArgs.replaceStrings[tmctlArgs].split('-c').pop().trim();
+                    it(`should collect ${stat}`, () => assertTmStat(stat, tableName));
+                }
+            });
+        });
+
+        it('should collect virtualServers', () => {
+            const query = `$select=${[
+                'name',
+                'fullPath',
+                'selfLink',
+                'appService',
+                'ipProtocol',
+                'mask',
+                'pool'
+            ].join(',')}`;
+            nock('http://localhost:8100')
+                .get(`/mgmt/tm/ltm/virtual?${query}`)
+                .reply(200, {
+                    items: [
+                        {
+                            name: 'test',
+                            fullPath: '/Common/test',
+                            selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test?ver=13.1.1.3',
+                            ipProtocol: 'tcp',
+                            mask: '255.255.255.255',
+                            pool: '/Common/pool',
+                            poolReference: {
+                                link: 'https://localhost/mgmt/tm/ltm/pool/~Common~pool?ver=13.1.1.3'
+                            }
+                        }
+                    ]
+                });
+            nock('http://localhost:8100')
+                .get('/mgmt/tm/ltm/virtual/~Common~test/stats')
+                .reply(200, {
+                    kind: 'tm:ltm:virtual:virtualstats',
+                    generation: 1,
+                    selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test/stats?ver=13.1.1.3',
+                    entries: {
+                        'https://localhost/mgmt/tm/ltm/virtual/~Common~test/~Common~test/stats': {
+                            nestedStats: {
+                                kind: 'tm:ltm:virtual:virtualstats',
+                                selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test/~Common~test/stats?ver=13.1.1.3',
+                                entries: {
+                                    'clientside.bitsIn': {
+                                        value: 1
+                                    },
+                                    'clientside.bitsOut': {
+                                        value: 2
+                                    },
+                                    'clientside.curConns': {
+                                        value: 3
+                                    },
+                                    'clientside.evictedConns': {
+                                        value: 0
+                                    },
+                                    'clientside.maxConns': {
+                                        value: 0
+                                    },
+                                    'clientside.pktsIn': {
+                                        value: 0
+                                    },
+                                    'clientside.pktsOut': {
+                                        value: 0
+                                    },
+                                    'clientside.slowKilled': {
+                                        value: 0
+                                    },
+                                    'clientside.totConns': {
+                                        value: 0
+                                    },
+                                    cmpEnableMode: {
+                                        description: 'all-cpus'
+                                    },
+                                    cmpEnabled: {
+                                        description: 'enabled'
+                                    },
+                                    csMaxConnDur: {
+                                        value: 0
+                                    },
+                                    csMeanConnDur: {
+                                        value: 0
+                                    },
+                                    csMinConnDur: {
+                                        value: 0
+                                    },
+                                    destination: {
+                                        description: '192.0.2.1:80'
+                                    },
+                                    'ephemeral.bitsIn': {
+                                        value: 0
+                                    },
+                                    'ephemeral.bitsOut': {
+                                        value: 0
+                                    },
+                                    'ephemeral.curConns': {
+                                        value: 0
+                                    },
+                                    'ephemeral.evictedConns': {
+                                        value: 0
+                                    },
+                                    'ephemeral.maxConns': {
+                                        value: 0
+                                    },
+                                    'ephemeral.pktsIn': {
+                                        value: 0
+                                    },
+                                    'ephemeral.pktsOut': {
+                                        value: 0
+                                    },
+                                    'ephemeral.slowKilled': {
+                                        value: 0
+                                    },
+                                    'ephemeral.totConns': {
+                                        value: 0
+                                    },
+                                    fiveMinAvgUsageRatio: {
+                                        value: 0
+                                    },
+                                    fiveSecAvgUsageRatio: {
+                                        value: 0
+                                    },
+                                    tmName: {
+                                        description: '/Common/test'
+                                    },
+                                    oneMinAvgUsageRatio: {
+                                        value: 0
+                                    },
+                                    'status.availabilityState': {
+                                        description: 'unknown'
+                                    },
+                                    'status.enabledState': {
+                                        description: 'enabled'
+                                    },
+                                    'status.statusReason': {
+                                        description: 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet'
+                                    },
+                                    syncookieStatus: {
+                                        description: 'not-activated'
+                                    },
+                                    'syncookie.accepts': {
+                                        value: 0
+                                    },
+                                    'syncookie.hwAccepts': {
+                                        value: 0
+                                    },
+                                    'syncookie.hwSyncookies': {
+                                        value: 0
+                                    },
+                                    'syncookie.hwsyncookieInstance': {
+                                        value: 0
+                                    },
+                                    'syncookie.rejects': {
+                                        value: 0
+                                    },
+                                    'syncookie.swsyncookieInstance': {
+                                        value: 0
+                                    },
+                                    'syncookie.syncacheCurr': {
+                                        value: 0
+                                    },
+                                    'syncookie.syncacheOver': {
+                                        value: 0
+                                    },
+                                    'syncookie.syncookies': {
+                                        value: 0
+                                    },
+                                    totRequests: {
+                                        value: 0
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            const host = {};
+            const options = {
+                paths: filterPaths('virtualServers'),
+                properties: {
+                    stats: {
+                        virtualServers: allProperties.stats.virtualServers
+                    },
+                    global: allProperties.global
+                }
+            };
+            const stats = new SystemStats(host, options);
+            return assert.becomes(stats.collect(), {
+                virtualServers: {
+                    '/Common/test': {
+                        availabilityState: 'unknown',
+                        'clientside.bitsIn': 1,
+                        'clientside.bitsOut': 2,
+                        'clientside.curConns': 3,
+                        destination: '192.0.2.1:80',
+                        enabledState: 'enabled',
+                        ipProtocol: 'tcp',
+                        mask: '255.255.255.255',
+                        name: '/Common/test',
+                        pool: '/Common/pool'
+                    }
+                }
+            });
         });
     });
 
