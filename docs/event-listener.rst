@@ -244,7 +244,7 @@ Note the following:
 
     - Create a pool using the following command: |br| ``tmsh create ltm pool telemetry members replace-all-with { fe80::298:76ff:fe54:3210.6514 }``  (replace the IPv6 link-local address with the one returned from the BIG-IP in the first step)
 
-    - Continue with step 4.
+    - SKIP steps 1-3 below, and then continue with step 4.
 
 
 1. Create an iRule (localhost forwarder). **This is only required when TS is a local listener**.
