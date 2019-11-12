@@ -11,6 +11,10 @@ Document Revision History
         - Description
         - Date
 
+      * - 1.8.0
+        - Updated the documentation for Telemetry Streaming v1.8.0. This release contains the following changes: |br| *  |br| |br| Issues Resolved: |br| * Improved error handling to preserve stack trace
+        - 12-3-19
+      
       * - 1.7.0
         - Updated the documentation for Telemetry Streaming v1.7.0. This release contains the following changes: |br| * Added a new Consumer for Fluentd (see :ref:`fluentd-ref`) |br| * Added a note to :ref:`splunk-legacy` stating TS 1.7.0 and later gathers additional data from tmstats tables to improve compatibility with Splunk Legacy consumers |br| * Added a troubleshooting entry and other notes about the **/dist** directory going away on GitHub, and the TS RPM being available as a release Asset (see :ref:`Troubleshooting<nodist>`) |br| * Added an FAQ entry about TS collecting non-identifiable usage data  (see :ref:`Usage data<statsinfo>`) |br| * Updated the maximum number of concurrent established TCP sockets per consumer to 5 |br| |br| Issues Resolved: |br| * Splunk Tmstat table data is being overwritten when forwarded to Splunk |br| * Broken promise chain when loading config file.
         - 10-22-19
