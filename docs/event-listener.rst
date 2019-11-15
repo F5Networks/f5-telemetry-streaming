@@ -79,14 +79,14 @@ To configure carrier-grade network address translation (CGNAT), use the followin
 
    - The Large Scale NAT (LSN) Pool must use the Telemetry Streaming Log Publisher you created (**telemetry_publisher** if you used the AS3 example to configure TS logging).  |br| If you have an existing pool, update the pool to use the TS Log Publisher:
 
-      - TMSH: ``modify ltm lsn-pool cgnat_lsn_pool log-publisher telemetry_publisher``
-      - GUI: **Carrier Grade NAT > LSN Pools > LSN Pools List**  
+     - TMSH:|br| ``modify ltm lsn-pool cgnat_lsn_pool log-publisher telemetry_publisher``
+     - GUI:|br| **Carrier Grade NAT > LSN Pools > LSN Pools List**  |br| |br|
 
    - Create and attach a new CGNAT Logging Profile to the LSN pool.  This determines what types of logs you wish to receive (optional).
 
-     - TMSH-create: ``create ltm lsn-log-profile telemetry_lsn_log_profile { start-inbound-session { action enabled } }``
-     - TMSH-attach: ``modify ltm lsn-pool cgnat_lsn_pool log-profile telemetry_lsn_log_profile``
-     - GUI: **Carrier Grade NAT -> Logging Profiles -> LSN**
+     - TMSH-create:|br| ``create ltm lsn-log-profile telemetry_lsn_log_profile { start-inbound-session { action enabled } }``
+     - TMSH-attach:|br| ``modify ltm lsn-pool cgnat_lsn_pool log-profile telemetry_lsn_log_profile``
+     - GUI:|br| **Carrier Grade NAT -> Logging Profiles -> LSN**
 
 Example output:
 
