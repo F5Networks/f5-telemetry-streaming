@@ -79,14 +79,14 @@ To configure carrier-grade network address translation (CGNAT), use the followin
 
    - The Large Scale NAT (LSN) Pool must use the Telemetry Streaming Log Publisher you created (**telemetry_publisher** if you used the AS3 example to configure TS logging).  |br| If you have an existing pool, update the pool to use the TS Log Publisher:
 
-      - TMSH: ``modify ltm lsn-pool cgnat_lsn_pool log-publisher telemetry_publisher``
-      - GUI: **Carrier Grade NAT > LSN Pools > LSN Pools List**  
+     - TMSH:|br| ``modify ltm lsn-pool cgnat_lsn_pool log-publisher telemetry_publisher``
+     - GUI:|br| **Carrier Grade NAT > LSN Pools > LSN Pools List**  |br| |br|
 
    - Create and attach a new CGNAT Logging Profile to the LSN pool.  This determines what types of logs you wish to receive (optional).
 
-     - TMSH-create: ``create ltm lsn-log-profile telemetry_lsn_log_profile { start-inbound-session { action enabled } }``
-     - TMSH-attach: ``modify ltm lsn-pool cgnat_lsn_pool log-profile telemetry_lsn_log_profile``
-     - GUI: **Carrier Grade NAT -> Logging Profiles -> LSN**
+     - TMSH-create:|br| ``create ltm lsn-log-profile telemetry_lsn_log_profile { start-inbound-session { action enabled } }``
+     - TMSH-attach:|br| ``modify ltm lsn-pool cgnat_lsn_pool log-profile telemetry_lsn_log_profile``
+     - GUI:|br| **Carrier Grade NAT -> Logging Profiles -> LSN**
 
 Example output:
 
@@ -244,7 +244,7 @@ Note the following:
 
     - Create a pool using the following command: |br| ``tmsh create ltm pool telemetry members replace-all-with { fe80::298:76ff:fe54:3210.6514 }``  (replace the IPv6 link-local address with the one returned from the BIG-IP in the first step)
 
-    - Continue with step 4.
+    - SKIP steps 1-3 below, and then continue with step 4.
 
 
 1. Create an iRule (localhost forwarder). **This is only required when TS is a local listener**.
