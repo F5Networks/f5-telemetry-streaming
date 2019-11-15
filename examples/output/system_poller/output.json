@@ -1,6 +1,7 @@
 {
     "system": {
         "hostname": "telemetry.bigip.com",
+        "machineId": "cd5e51b8-74ef-44c8-985c-7965512c2e87",
         "version": "14.0.0.1",
         "versionBuild": "0.0.2",
         "location": "Seattle",

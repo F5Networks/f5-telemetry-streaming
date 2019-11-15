@@ -135,7 +135,10 @@ describe('systemStats', () => {
     describe('.collect()', () => {
         function filterPaths(name) {
             return {
-                endpoints: [paths.endpoints.find(p => p.name === name)]
+                endpoints: [paths.endpoints.find(
+                    p => p.name === name || p.endpoint === name
+                )]
+
             };
         }
         function assertTmStat(statKey, tmctlKey) {
@@ -193,6 +196,35 @@ describe('systemStats', () => {
                 if ((stats[stat].structure || {}).parentKey === 'tmstats') {
                     const tableName = stats[stat].keyArgs.replaceStrings[tmctlArgs].split('-c').pop().trim();
                     it(`should collect ${stat}`, () => assertTmStat(stat, tableName));
+                }
+            });
+        });
+
+        it('should collect hostname and machineId', () => {
+            nock('http://localhost:8100')
+                .get('/mgmt/shared/identified-devices/config/device-info')
+                .times(2)
+                .reply(200, {
+                    machineId: 'cc4826c5-d557-40c0-aa3f-3fc3aca0e40c',
+                    hostname: 'test.local'
+                });
+            const host = {};
+            const options = {
+                paths: filterPaths('deviceInfo'),
+                properties: {
+                    stats: {
+                        system: allProperties.stats.system,
+                        hostname: allProperties.stats.hostname,
+                        machineId: allProperties.stats.machineId
+                    },
+                    global: allProperties.global
+                }
+            };
+            const stats = new SystemStats(host, options);
+            return assert.becomes(stats.collect(), {
+                system: {
+                    hostname: 'test.local',
+                    machineId: 'cc4826c5-d557-40c0-aa3f-3fc3aca0e40c'
                 }
             });
         });
