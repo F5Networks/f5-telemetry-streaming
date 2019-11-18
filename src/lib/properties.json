@@ -4,7 +4,7 @@
             "structure": { "folder": true }
         },
         "hostname": {
-            "key": "/mgmt/tm/sys/global-settings::hostname",
+            "key": "deviceInfo::hostname",
             "structure": { "parentKey": "system" },
             "normalize": null,
             "normalization": [
@@ -24,6 +24,10 @@
                     "addKeysByTag": null
                 }
             ]
+        },
+        "machineId": {
+            "structure": { "parentKey": "system" },
+            "key": "deviceInfo::machineId"
         },
         "version": {
             "structure": { "parentKey": "system" },

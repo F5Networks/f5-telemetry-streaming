@@ -134,6 +134,10 @@
                 "command": "run",
                 "utilCmdArgs": "-c '/bin/tmctl $tmctlArgs'"
             }
+        },
+        {
+            "name": "deviceInfo",
+            "endpoint": "/mgmt/shared/identified-devices/config/device-info"
         }
     ]
 }

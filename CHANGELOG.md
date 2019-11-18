@@ -4,6 +4,7 @@ Changes to this project are documented in this file. More detail and links can b
 ## 1.8.0
 ### Added
 - [GitHub #22](https://github.com/F5Networks/f5-telemetry-streaming/pull/22): Reference to pools in virtual server data
+- AUTOTOOl-905: Add machineId to System Poller output
 
 ### Fixed
 ### Changed
