@@ -53,7 +53,6 @@ This example shows a case where Telemetry Streaming on one BIG-IP can pull stati
 
 Example 4: iHealth Poller
 -------------------------
-This example shows a case where Telemetry Streaming on one BIG-IP can pull statistics from an additional BIG-IP.
 
 .. literalinclude:: ../examples/declarations/ihealth_basic.json
     :language: json

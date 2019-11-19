@@ -24,7 +24,7 @@ This section describes additional options that you may want to configure once yo
 
 Tag property
 ~~~~~~~~~~~~
-As of Telemetry Streaming 1.6.0, tagging is now an actions array.  Inside this actions array, you can add tagging objects.  The following is a snippet that includes this tagging action, see the table for details on the parameters, and then the example following the table.
+As of Telemetry Streaming 1.6.0, tagging is now an actions array (the old Tag property, shown below, has been deprecated).  Inside this actions array, you can add tagging objects.  The following is a snippet that includes this tagging action, see the table for details on the parameters, and then the example following the table.
          
 .. code-block:: bash
    :linenos:  
