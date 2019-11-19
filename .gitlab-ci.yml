@@ -4,7 +4,7 @@ stages:
     - lint
     - test
     - build
-    - docs
+    - doc
     - deploy
     - functional test
     - teardown
@@ -251,7 +251,7 @@ publish_rpm_to_artifactory:
 # Publish docs to internal pages - note: this job name MUST be 'pages'
 pages:
     image: ${CONTAINTHEDOCS_IMAGE}
-    stage: docs
+    stage: doc
     environment:
         name: staging
         url: https://${CI_PROJECT_NAMESPACE}.${PAGES_DOMAIN}/${CI_PROJECT_NAME}
@@ -293,7 +293,7 @@ pages:
 Publish docs to clouddocs.f5networks.net
 publish_docs_to_staging:
     image: ${CONTAINTHEDOCS_IMAGE}
-    stage: docs
+    stage: doc
     environment:
         name: staging
         url: https://clouddocs.f5networks.net/products/extensions/f5-telemetry-streaming/latest
@@ -310,7 +310,7 @@ publish_docs_to_staging:
 # Publish docs to clouddocs.f5.com
 publish_docs_to_production:
     image: ${CONTAINTHEDOCS_IMAGE}
-    stage: docs
+    stage: doc
     environment:
         name: production
         url: https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest
