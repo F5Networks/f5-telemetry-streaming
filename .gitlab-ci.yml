@@ -290,7 +290,7 @@ pages:
         # only update on designated, stable branch
         - develop
 
-Publish docs to clouddocs.f5networks.net
+# Publish docs to clouddocs.f5networks.net
 publish_docs_to_staging:
     image: ${CONTAINTHEDOCS_IMAGE}
     stage: doc
@@ -301,7 +301,7 @@ publish_docs_to_staging:
         - cm-official-docker-executor
     only:
         - docs-staging@automation-toolchain/f5-telemetry
-   script:
+    script:
         - aws s3 sync docs/_build/html s3://clouddocs.f5networks.net/products/extensions/f5-telemetry-streaming/latest
         # - aws s3 cp versions.json s3://clouddocs.f5networks.net/products/extensions/f5-telemetry-streaming/versions.json
         # create invalidation to clear cloudfront cache
