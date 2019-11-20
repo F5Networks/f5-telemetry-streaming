@@ -230,17 +230,18 @@ Example output:
 .. _configurelogpub-ref:
 
 Configure the Log Publisher using TMSH
-``````````````````````````````````````
+--------------------------------------
 
 Note the following:
 
-  - Examples assume the TS listener is using port 6514.
-  - Additional objects are required for BIG-IP configurations pointing to a local on-box listener (configuration notes included in the following procedure).
+- Examples assume the TS listener is using port 6514.
+- Additional objects are required for BIG-IP configurations pointing to a local on-box listener (configuration notes included in the following procedure).
 
-The first steps depend on which type of BIG-IP system you are using, a standard BIG-IP system, or a Per-App BIG-IP VE (Virtual Edition). Use only one of the following procedures for initial configuration.
+The first steps depend on which type of BIG-IP system you are using: a standard BIG-IP system or a Per-App BIG-IP VE (Virtual Edition). Use only one of the following procedures for initial configuration.
 
 Initial configuration for Per-App BIG-IP VE
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+```````````````````````````````````````````
+
 The configuration for a Per-App VE is different because it limits the number of virtual servers (one virtual IP address and three virtual servers). 
   
 If you are using a Per-App VE, to avoid creating the virtual server you can point the pool directly at the TMM link-local IPv6 address, using the following guidance:
@@ -255,7 +256,8 @@ If you are using a Per-App VE, to avoid creating the virtual server you can poin
 
 
 Initial configuration for a standard BIG-IP system
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``````````````````````````````````````````````````
+
 If you are using a standard BIG-IP system (one that does not have restrictions on the number of virtual servers like the Per-App VE), use the following guidance to initially configure the system.
 
 
@@ -292,7 +294,8 @@ If you are using a standard BIG-IP system (one that does not have restrictions o
 .. _restlogpub:
 
 Configuring the rest of the Log Publisher
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+`````````````````````````````````````````
+
 In this section, you configure the remaining objects for the Log Publisher, no matter which initial configuration method you used.
 
 
