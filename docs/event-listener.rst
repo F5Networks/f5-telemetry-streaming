@@ -236,15 +236,27 @@ Note the following:
 
   - Examples assume the TS listener is using port 6514.
   - Additional objects are required for BIG-IP configurations pointing to a local on-box listener (configuration notes included in the following procedure).
-  - Per-app Virtual Edition BIG-IP limits the number of virtual servers available. To avoid creating the virtual server creating the virtual server in the following configuration, it is possible to point the pool directly at the TMM link-local IPv6 address, using the following guidance:
 
-    - From the BIG-IP Command line, type the following command ``ip -6 a s tmm scope link``.  |br| You see the system return something similar to the following: |br| ``tmm: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 state UP qlen 1000`` |br| ``inet6 fe80::298:76ff:fe54:3210/64 scope link`` |br| ``valid_lft forever preferred_lft forever``
+The first steps depend on which type of BIG-IP system you are using, a standard BIG-IP system, or a Per-App BIG-IP VE (Virtual Edition). Use only one of the following procedures for initial configuration.
 
-    - Copy the IPv6 address starting after inet6, beginning with fe80, and without any mask. In our example, we copy **fe80::298:76ff:fe54:3210**
+Initial configuration for Per-App BIG-IP VE
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The configuration for a Per-App VE is different because it limits the number of virtual servers (one virtual IP address and three virtual servers). 
+  
+If you are using a Per-App VE, to avoid creating the virtual server you can point the pool directly at the TMM link-local IPv6 address, using the following guidance:
 
-    - Create a pool using the following command: |br| ``tmsh create ltm pool telemetry members replace-all-with { fe80::298:76ff:fe54:3210.6514 }``  (replace the IPv6 link-local address with the one returned from the BIG-IP in the first step)
+1. From the BIG-IP Command line, type the following command ``ip -6 a s tmm scope link``.  |br| You see the system return something similar to the following: |br| ``tmm: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 state UP qlen 1000`` |br| ``inet6 fe80::298:76ff:fe54:3210/64 scope link`` |br| ``valid_lft forever preferred_lft forever``
 
-    - SKIP steps 1-3 below, and then continue with step 4.
+2. Copy the IPv6 address starting after inet6, beginning with fe80, and without any mask. In our example, we copy **fe80::298:76ff:fe54:3210**
+
+3. Create a pool using the following command: |br| ``tmsh create ltm pool telemetry members replace-all-with { fe80::298:76ff:fe54:3210.6514 }``  (replace the IPv6 link-local address with the one returned from the BIG-IP in the first step)
+
+4. Continue with :ref:`restlogpub`.
+
+
+Initial configuration for a standard BIG-IP system
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+If you are using a standard BIG-IP system (one that does not have restrictions on the number of virtual servers like the Per-App VE), use the following guidance to initially configure the system.
 
 
 1. Create an iRule (localhost forwarder). **This is only required when TS is a local listener**.
@@ -274,6 +286,14 @@ Note the following:
    .. code-block:: bash
 
         create ltm pool telemetry monitor tcp members replace-all-with { 255.255.255.254:6514 }
+
+4. Continue with :ref:`restlogpub`.
+
+.. _restlogpub:
+
+Configuring the rest of the Log Publisher
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+In this section, you configure the remaining objects for the Log Publisher, no matter which initial configuration method you used.
 
 
 4. Create the Log Destination (Remote HSL):
