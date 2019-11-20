@@ -246,13 +246,13 @@ The configuration for a Per-App VE is different because it limits the number of 
   
 If you are using a Per-App VE, to avoid creating the virtual server you can point the pool directly at the TMM link-local IPv6 address, using the following guidance:
 
-1. From the BIG-IP Command line, type the following command ``ip -6 a s tmm scope link``.  |br| You see the system return something similar to the following: |br| ``tmm: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 state UP qlen 1000`` |br| ``inet6 fe80::298:76ff:fe54:3210/64 scope link`` |br| ``valid_lft forever preferred_lft forever``
+#. From the BIG-IP Command line, type the following command ``ip -6 a s tmm scope link``.  |br| You see the system return something similar to the following: |br| ``tmm: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 state UP qlen 1000`` |br| ``inet6 fe80::298:76ff:fe54:3210/64 scope link`` |br| ``valid_lft forever preferred_lft forever``
 
-2. Copy the IPv6 address starting after inet6, beginning with fe80, and without any mask. In our example, we copy **fe80::298:76ff:fe54:3210**
+#. Copy the IPv6 address starting after inet6, beginning with fe80, and without any mask. In our example, we copy **fe80::298:76ff:fe54:3210**
 
-3. Create a pool using the following command: |br| ``tmsh create ltm pool telemetry members replace-all-with { fe80::298:76ff:fe54:3210.6514 }``  (replace the IPv6 link-local address with the one returned from the BIG-IP in the first step)
+#. Create a pool using the following command: |br| ``tmsh create ltm pool telemetry members replace-all-with { fe80::298:76ff:fe54:3210.6514 }``  (replace the IPv6 link-local address with the one returned from the BIG-IP in the first step)
 
-4. Continue with :ref:`restlogpub`.
+#. Continue with :ref:`restlogpub`.
 
 
 Initial configuration for a standard BIG-IP system
@@ -261,7 +261,7 @@ Initial configuration for a standard BIG-IP system
 If you are using a standard BIG-IP system (one that does not have restrictions on the number of virtual servers like the Per-App VE), use the following guidance to initially configure the system.
 
 
-1. Create an iRule (localhost forwarder). **This is only required when TS is a local listener**.
+#. Create an iRule (localhost forwarder). **This is only required when TS is a local listener**.
 
    .. code-block:: bash
 
@@ -276,20 +276,20 @@ If you are using a standard BIG-IP system (one that does not have restrictions o
         }
 
 
-2. Create the virtual server. **This is only required when TS is a local listener**.
+#. Create the virtual server. **This is only required when TS is a local listener**.
 
    .. code-block:: bash
 
         create ltm virtual telemetry_local destination 255.255.255.254:6514 rules { telemetry_local_rule }
 
 
-3. Create the pool. When TS is not a local listener, the member should be the listener's remote address.
+#. Create the pool. When TS is not a local listener, the member should be the listener's remote address.
 
    .. code-block:: bash
 
         create ltm pool telemetry monitor tcp members replace-all-with { 255.255.255.254:6514 }
 
-4. Continue with :ref:`restlogpub`.
+#. Continue with :ref:`restlogpub`.
 
 .. _restlogpub:
 
@@ -299,21 +299,21 @@ Configuring the rest of the Log Publisher
 In this section, you configure the remaining objects for the Log Publisher, no matter which initial configuration method you used.
 
 
-4. Create the Log Destination (Remote HSL):
+#. Create the Log Destination (Remote HSL):
 
    .. code-block:: python
 
         create sys log-config destination remote-high-speed-log telemetry_hsl protocol tcp pool-name telemetry
 
 
-5. Create the Log Destination (Format):
+#. Create the Log Destination (Format):
 
    .. code-block:: python
 
         create sys log-config destination splunk telemetry_formatted forward-to telemetry_hsl
 
 
-6. Create the Log Publisher:
+#. Create the Log Publisher:
 
    .. code-block:: python
 
