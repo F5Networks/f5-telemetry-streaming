@@ -17,7 +17,6 @@ const normalize = require('./normalize.js');
 const dataPipeline = require('./dataPipeline.js');
 const configWorker = require('./config.js');
 const properties = require('./properties.json');
-const dataTagging = require('./dataTagging');
 
 const tracers = require('./util.js').tracer;
 const stringify = require('./util.js').stringify;
@@ -44,13 +43,14 @@ const protocols = ['tcp', 'udp'];
 /**
  * Event Listener class
  *
- * @param {String} name                 - listener's name
- * @param {String} port                 - port to listen on
- * @param {Object} opts                 - additional configuration options
- * @param {Object} [opts.tags]          - tags to add to the event data
- * @param {String} [opts.protocol]      - protocol to listen on: tcp or udp
- * @param {Function} [opts.tracer]      - tracer
- * @param {Function} [opts.filterFunc]  - function to filter events
+ * @param {String} name                      - listener's name
+ * @param {String} port                      - port to listen on
+ * @param {Object} opts                      - additional configuration options
+ * @param {Object} [opts.tags]               - tags to add to the event data
+ * @param {String} [opts.protocol]           - protocol to listen on: tcp or udp
+ * @param {module:util~Tracer} [opts.tracer] - tracer
+ * @param {Array}  [opts.actions]            - list of actions to apply to the event data
+ * @param {Function} [opts.filterFunc]       - function to filter events
  *
  * @returns {Object} Returns EventListener object
  */
@@ -58,17 +58,31 @@ function EventListener(name, port, opts) {
     this.name = name;
     this.port = port;
     this.protocol = opts.protocol || 'tcp';
-    this.tracer = opts.tracer;
-    this.tags = opts.tags || {};
-    this.filterFunc = opts.filterFunc;
     this.logger = logger.getChild(`${this.name}:${this.port}:${this.protocol}`);
-    this.actions = opts.actions;
+    this.updateConfig(opts);
 
     this._server = null;
     this._clientConnMap = {};
     this._lastConnKey = 0;
     this._connDataBuffers = {};
 }
+
+/**
+ * Update listener's configuration - tracer, tags, actions and etc.
+ *
+ * @param {Array}    [opts.actions]          - list of actions to apply to the event data
+ * @param {Object}   [opts.tags]             - tags to add to the event data
+ * @param {Function} [opts.filterFunc]       - function to filter events
+ * @param {module:util~Tracer} [opts.tracer] - tracer
+ *
+ * @returns {void}
+ */
+EventListener.prototype.updateConfig = function (config) {
+    this.tracer = config.tracer;
+    this.tags = config.tags || {};
+    this.filterFunc = config.filterFunc;
+    this.actions = config.actions || [];
+};
 
 /**
  * Server options to start listening
@@ -333,17 +347,14 @@ EventListener.prototype._processEvent = function (data) {
         // lets normalize the data
         const normalizedData = normalize.event(line, options);
 
-        if (this.actions) {
-            dataTagging.handleActions(normalizedData, this.actions);
-        }
-
-        if (this.tracer) {
-            this.tracer.write(JSON.stringify(normalizedData, null, 4));
-        }
-
         // keep filtering as part of event listener for now
         if (!this.filterFunc || this.filterFunc(normalizedData)) {
-            dataPipeline.process(normalizedData, normalizedData.telemetryEventCategory);
+            const dataCtx = {
+                data: normalizedData,
+                type: normalizedData.telemetryEventCategory || constants.EVENT_TYPES.EVENT_LISTENER
+            };
+            dataPipeline.process(dataCtx, { tracer: this.tracer, actions: this.actions })
+                .catch(err => this.logger.exception('EventListener:_processEvent unexpected error from dataPipeline:process', err));
         }
     });
 };
@@ -410,33 +421,31 @@ configWorker.on('change', (config) => {
         }
         // pre-create all variables
         const port = lConfig.port || DEFAULT_PORT;
-        const tags = lConfig.tag;
-        const actions = lConfig.actions;
+        const tags = lConfig.tag || {};
+        const actions = lConfig.actions || [];
         const tracer = tracers.createFromConfig(CLASS_NAME, lKey, lConfig);
         const filterFunc = buildFilterFunc(lConfig);
 
         protocols.forEach((protocol) => {
             let protocolListener = listener ? listener[protocol] : undefined;
+            const opts = {
+                protocol,
+                tags,
+                actions,
+                tracer,
+                filterFunc
+            };
+
             // when port is the same - no sense to restart listener and drop connections
             if (protocolListener && protocolListener.port === port) {
                 logger.debug(`Updating event listener '${lKey}' protocol '${protocol}'`);
-                protocolListener.tags = tags;
-                protocolListener.tracer = tracer;
-                protocolListener.filterFunc = filterFunc;
+                protocolListener.updateConfig(opts);
             } else {
                 // stop existing listener to free the port
                 if (protocolListener) {
                     protocolListener.stop();
                 }
-
-                protocolListener = new EventListener(lKey, port, {
-                    protocol,
-                    tags,
-                    actions,
-                    tracer,
-                    filterFunc
-                });
-
+                protocolListener = new EventListener(lKey, port, opts);
                 protocolListener.start();
                 listeners[lKey] = listeners[lKey] || {};
                 listeners[lKey][protocol] = protocolListener;

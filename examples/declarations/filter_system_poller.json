@@ -1,0 +1,65 @@
+{
+    "class": "Telemetry",
+    "My_System": {
+        "class": "Telemetry_System",
+        "systemPoller": {
+            "interval": 60,
+            "actions": [
+                {
+                    "excludeData": {},
+                    "locations": {
+                        "system": {
+                            "provisioning": true,
+                            "diskLatency": true
+                        }
+                    },
+                    "ifAllMatch" :{
+                        "system": {
+                            "hostname": "hostname.localhost"
+                        }
+                    }
+                },
+                {
+                    "includeData": {},
+                    "locations": {
+                         "system": true,
+                         "virtualServers": {
+                             "vs$": true
+                         },
+                         "pools": {
+                             "^/Common/Shared/": true
+                         }
+                    }
+                },
+                {
+                    "excludeData": {},
+                    "locations": {
+                         "system": {
+                             "hostname": true
+                         }
+                    }
+                }
+            ]
+        }
+    },
+    "My_Event_Listener": {
+        "class": "Telemetry_Listener",
+        "actions": [
+            {
+                "excludeData": {},
+                "locations": {
+                    "hostname": true
+                }
+            },
+            {
+                "includeData": {},
+                "locations": {
+                    "virtual_name": true
+                },
+                "ifAllMatch": {
+                    "telemetryEventCategory": "LTM"
+                }
+            }
+        ]
+    }
+}

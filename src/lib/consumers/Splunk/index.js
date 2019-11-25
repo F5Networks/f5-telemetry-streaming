@@ -12,6 +12,7 @@ const request = require('request');
 const zlib = require('zlib');
 
 const dataMapping = require('./dataMapping.js');
+const EVENT_TYPES = require('../../constants.js').EVENT_TYPES;
 
 const GZIP_DATA = true;
 const MAX_CHUNK_SIZE = 99000;
@@ -110,10 +111,10 @@ function transformData(globalCtx) {
         };
     }
     let p = null;
-    if (globalCtx.event.type === 'systemInfo') {
+    if (globalCtx.event.type === EVENT_TYPES.SYSTEM_POLLER) {
         p = Promise.all(dataMapping.stats.map(func => safeDataTransform(func, requestCtx)));
         p.then(() => safeDataTransform(dataMapping.overall, requestCtx));
-    } else if (globalCtx.event.type === 'ihealthInfo') {
+    } else if (globalCtx.event.type === EVENT_TYPES.IHEALTH_POLLER) {
         p = safeDataTransform(dataMapping.ihealth, requestCtx);
     }
 

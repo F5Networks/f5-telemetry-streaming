@@ -9,92 +9,45 @@
 'use strict';
 
 const assert = require('assert');
-const DataFilter = require('../../src/lib/dataFilter.js');
+
+const dataFilter = require('../../src/lib/dataFilter.js');
+const dataFilterTestsData = require('./dataFilterTestsData.js');
+
 
 describe('Data Filter', () => {
-    it('should blacklist tmstats if consumer is not Splunk legacy', () => {
-        const consumerConfig = {
-            type: 'Kafka'
-        };
-        const expected = { tmstats: true };
-        const dataFilter = new DataFilter(consumerConfig);
+    describe('DataFilter', () => {
+        it('should blacklist tmstats if consumer is not Splunk legacy', () => {
+            const consumerConfig = {
+                type: 'Kafka'
+            };
+            const expected = { tmstats: true };
+            const filter = new dataFilter.DataFilter(consumerConfig);
 
-        assert.deepEqual(dataFilter.blacklist, expected);
+            assert.deepEqual(filter.blacklist, expected);
+        });
+
+        it('should not blacklist tmstats if consumer is Splunk legacy', () => {
+            const consumerConfig = {
+                type: 'Splunk',
+                config: {
+                    format: 'legacy'
+                }
+            };
+            const expected = {};
+            const filter = new dataFilter.DataFilter(consumerConfig);
+
+            assert.deepEqual(filter.blacklist, expected);
+        });
     });
 
-    it('should not blacklist tmstats if consumer is Splunk legacy', () => {
-        const consumerConfig = {
-            type: 'Splunk',
-            config: {
-                format: 'legacy'
-            }
-        };
-        const expected = {};
-        const dataFilter = new DataFilter(consumerConfig);
+    describe('handleAction', () => {
+        const getCallableIt = testConf => (testConf.testOpts && testConf.testOpts.only ? it.only : it);
 
-        assert.deepEqual(dataFilter.blacklist, expected);
-    });
-
-    describe('apply', () => {
-        it('should filter data based on blacklist', () => {
-            const data = {
-                type: 'systemInfo',
-                data: {
-                    virtualServers: {
-                        virtual1: {}
-                    },
-                    httpProfiles: {
-                        httpProfile1: {},
-                        httpProfile2: {}
-                    },
-                    tmstats: {
-                        cpuInfoStat: [
-                            {},
-                            {}
-                        ],
-                        diskInfoStat: [
-                            { hello: 'world' },
-                            { foo: 'bar' }
-                        ]
-                    },
-                    system: {}
-                }
-            };
-            const blacklist = {
-                virtualServers: {
-                    '.*': true
-                },
-                httpProfiles: {
-                    Profile2: true
-                },
-                tmstats: {
-                    cpuInfoStat: {
-                        '.*': true
-                    },
-                    diskInfoStat: {
-                        1: true
-                    }
-                }
-            };
-            const expected = {
-                type: 'systemInfo',
-                data: {
-                    virtualServers: {
-                    },
-                    httpProfiles: {
-                        httpProfile1: {}
-                    },
-                    tmstats: {
-                        cpuInfoStat: [],
-                        diskInfoStat: [{ hello: 'world' }]
-                    },
-                    system: {}
-                }
-            };
-            const dataFilter = new DataFilter({});
-            dataFilter.blacklist = blacklist;
-
-            assert.deepEqual(dataFilter.apply(data), expected);
+        dataFilterTestsData.handleAction.forEach((testConf) => {
+            getCallableIt(testConf)(testConf.name, () => {
+                dataFilter.handleAction(testConf.dataCtx, testConf.actionCtx);
+                assert.deepStrictEqual(testConf.dataCtx, testConf.expectedCtx);
+            });
         });
     });
 });

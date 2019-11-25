@@ -9,137 +9,124 @@
 'use strict';
 
 const assert = require('assert');
+
 const dataUtil = require('../../src/lib/dataUtil.js');
+const dataUtilTestsData = require('./dataUtilTestsData.js');
 
 describe('Data Util', () => {
+    const getCallableIt = testConf => (testConf.testOpts && testConf.testOpts.only ? it.only : it);
+
     describe('getMatches', () => {
-        it('should return what matches the property when it is a literal string', () => {
-            const data = {
-                system: {},
-                httpProfiles: {},
-                virtualServers: {}
-            };
-            const property = 'virtualServers';
-            const expected = ['virtualServers'];
-            const result = dataUtil.getMatches(data, property);
-            assert.deepEqual(expected, result);
-        });
-
-        it('should return what matches the property when a regex is used', () => {
-            const data = {
-                httpProfiles: {},
-                virtualServers: {},
-                httpProfiles2: {}
-            };
-            const property = 'http.*';
-            const expected = ['httpProfiles', 'httpProfiles2'];
-            const result = dataUtil.getMatches(data, property);
-            assert.deepEqual(expected, result);
-        });
-
-        it('should return no matches', () => {
-            const data = {
-                virtualServers: {},
-                httpProfiles: {}
-            };
-            const property = 'noReults';
-            const expected = [];
-            const result = dataUtil.getMatches(data, property);
-            assert.deepEqual(expected, result);
+        dataUtilTestsData.getMatches.forEach((testConf) => {
+            getCallableIt(testConf)(testConf.name, () => {
+                const resultCtx = dataUtil.getMatches(
+                    testConf.dataCtx,
+                    testConf.propertyCtx,
+                    testConf.propertyRegexCtx
+                );
+                assert.deepEqual(resultCtx, testConf.expectedCtx);
+            });
         });
     });
 
     describe('getDeepMatches', () => {
-        it('should match specified properties', () => {
-            const data = {
-                virtualServers: {
-                    virtual1: {}
-                },
-                httpProfiles: {
-                    httpProfile1: {},
-                    httpProfile2: {}
-                },
-                tmstats: {
-                    cpuInfoStat: [
-                        {},
-                        {}
-                    ],
-                    diskInfoStat: [
-                        {},
-                        {}
-                    ]
-                },
-                system: {}
-            };
-            const properties = {
-                virtualServers: {
-                    '.*': true
-                },
-                httpProfiles: {
-                    Profile2: true
-                },
-                tmstats: {
-                    cpuInfoStat: {
-                        '.*': true
-                    },
-                    diskInfoStat: {
-                        1: true
-                    }
-                }
-            };
-            const expected = [
-                {
-                    data: {
-                        virtual1: {
-                        }
-                    },
-                    key: 'virtual1'
-                },
-                {
-                    data: {
-                        httpProfile1: {},
-                        httpProfile2: {}
-                    },
-                    key: 'httpProfile2'
-                },
-                {
-                    data: [
-                        {},
-                        {}
-                    ],
-                    key: '0'
-                },
-                {
-                    data: [
-                        {},
-                        {}
-                    ],
-                    key: '1'
-                },
-                {
-                    data: [
-                        {},
-                        {}
-                    ],
-                    key: '1'
-                }
-            ];
-            assert.deepEqual(dataUtil.getDeepMatches(data, properties), expected);
+        dataUtilTestsData.getDeepMatches.forEach((testConf) => {
+            getCallableIt(testConf)(testConf.name, () => {
+                const resultCtx = dataUtil.getDeepMatches(
+                    testConf.dataCtx,
+                    testConf.propertiesCtx
+                );
+                assert.deepEqual(resultCtx, testConf.expectedCtx);
+            });
         });
+    });
 
-        it('should not match bad properties', () => {
-            const data = {
-                system: {},
-                virtualServers: {
-                    virtual1: {}
+    describe('checkConditions', () => {
+        dataUtilTestsData.checkConditions.forEach((testConf) => {
+            getCallableIt(testConf)(testConf.name, () => {
+                const resultCtx = dataUtil.checkConditions(
+                    testConf.dataCtx,
+                    testConf.conditionsCtx
+                );
+                assert.strictEqual(resultCtx, testConf.expectedCtx);
+            });
+        });
+    });
+
+    describe('searchAnyMatches', () => {
+        dataUtilTestsData.searchAnyMatches.forEach((testConf) => {
+            getCallableIt(testConf)(testConf.name, () => {
+                const resultCtx = [];
+                const callback = (key, item) => {
+                    resultCtx.push(key);
+                    return testConf.nestedKey ? item[testConf.nestedKey] : null;
+                };
+                dataUtil.searchAnyMatches(
+                    testConf.dataCtx,
+                    testConf.propertiesCtx,
+                    callback
+                );
+                assert.deepEqual(resultCtx, testConf.expectedCtx);
+            });
+        });
+    });
+
+    describe('removeStrictMatches', () => {
+        dataUtilTestsData.removeStrictMatches.forEach((testConf) => {
+            getCallableIt(testConf)(testConf.name, () => {
+                const callback = (key, item, getNestedKey) => {
+                    if (getNestedKey) {
+                        return testConf.nestedKey ? item[testConf.nestedKey] : null;
+                    }
+                    if (testConf.propertiesToKeep
+                            && Object.prototype.hasOwnProperty.call(testConf.propertiesToKeep, key)) {
+                        return !testConf.propertiesToKeep[key];
+                    }
+                    return true;
+                };
+                let expectedCtx = testConf.expectedCtx;
+                if (typeof expectedCtx === 'function') {
+                    expectedCtx = expectedCtx();
                 }
-            };
-            const properties = {
-                virtualServers: {
-                    virtual2: true
-                }
-            };
-            assert.deepEqual(dataUtil.getDeepMatches(data, properties), []);
+                const actualRetVal = dataUtil.removeStrictMatches(
+                    testConf.dataCtx,
+                    testConf.propertiesCtx,
+                    testConf.useCallback === false ? undefined : callback
+                );
+                assert.deepStrictEqual(testConf.dataCtx, expectedCtx);
+                assert.strictEqual(actualRetVal, testConf.expectedRetVal);
+            });
+        });
+    });
+
+    [true, false].forEach((strictVal) => {
+        describe(`preserveStrictMatches - strict=${strictVal}`, () => {
+            dataUtilTestsData[`preserveStrictMatches_strict_${strictVal}`].forEach((testConf) => {
+                getCallableIt(testConf)(testConf.name, () => {
+                    const callback = (key, item, getNestedKey) => {
+                        if (getNestedKey) {
+                            return testConf.nestedKey ? item[testConf.nestedKey] : null;
+                        }
+                        if (testConf.propertiesToKeep
+                                && Object.prototype.hasOwnProperty.call(testConf.propertiesToKeep, key)) {
+                            return !testConf.propertiesToKeep[key];
+                        }
+                        return true;
+                    };
+                    let expectedCtx = testConf.expectedCtx;
+                    if (typeof expectedCtx === 'function') {
+                        expectedCtx = expectedCtx();
+                    }
+                    const actualRetVal = dataUtil.preserveStrictMatches(
+                        testConf.dataCtx,
+                        testConf.propertiesCtx,
+                        strictVal,
+                        testConf.useCallback === false ? undefined : callback
+                    );
+                    assert.deepStrictEqual(testConf.dataCtx, expectedCtx);
+                    assert.strictEqual(actualRetVal, testConf.expectedRetVal);
+                });
+            });
         });
     });
 });

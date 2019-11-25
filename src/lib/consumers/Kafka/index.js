@@ -50,7 +50,9 @@ module.exports = function (context) {
         }
     ];
 
-    if (context.tracer) context.tracer.write(JSON.stringify(payload, null, 4));
+    if (context.tracer) {
+        context.tracer.write(JSON.stringify(payload, null, 4));
+    }
 
     producer.on('ready', () => {
         // eslint-disable-next-line no-unused-vars

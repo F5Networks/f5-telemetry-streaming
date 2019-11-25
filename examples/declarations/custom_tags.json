@@ -1,6 +1,6 @@
 {
     "class": "Telemetry",
-    "My_System": {
+    "My_System_1": {
         "class": "Telemetry_System",
         "systemPoller": {
             "interval": 60,
@@ -11,7 +11,43 @@
             }
         }
     },
-    "My_Listener": {
+    "My_System_2": {
+        "class": "Telemetry_System",
+        "systemPoller": {
+            "interval": 60,
+            "actions": [
+                {
+                    "setTag": {
+                        "tenant": "`A`",
+                        "application": "`A`",
+                        "foo": "bar"
+                    }
+                },
+                {
+                    "setTag": {
+                        "facility": "facilityValue"
+                    },
+                    "locations": {
+                        "system": true
+                    }
+                },
+                {
+                    "setTag": {
+                        "dcName": "dcNameValue"
+                    },
+                    "locations": {
+                        "system": true
+                    },
+                    "ifAllMatch": {
+                        "system": {
+                            "facility": "anotherFacility"
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    "My_Listener_1": {
         "class": "Telemetry_Listener",
         "port": 6514,
         "tag": {
@@ -26,5 +62,37 @@
                 "group": 1
             }
         }
+    },
+    "My_Listener_2": {
+        "class": "Telemetry_Listener",
+        "port": 6514,
+        "actions": [
+            {
+                "setTag": {
+                    "tenant": "`A`",
+                    "application": "`A`",
+                    "foo": "bar"
+                }
+            },
+            {
+                "setTag": {
+                    "facility": "facilityValue"
+                },
+                "locations": {
+                    ".*": true
+                }
+            },
+            {
+                "setTag": {
+                    "dcName": "dcNameValue"
+                },
+                "locations": {
+                    "system": true
+                },
+                "ifAllMatch": {
+                    "hostname": "hostname.localhost"
+                }
+            }
+        ]
     }
 }
