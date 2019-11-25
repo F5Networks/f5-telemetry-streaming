@@ -16,6 +16,7 @@ const sinon = require('sinon');
 const SystemStats = require('../../src/lib/systemStats');
 const paths = require('../../src/lib/paths.json');
 const allProperties = require('../../src/lib/properties.json');
+const systemStatsTestsData = require('./systemStatsTestsData.js');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -425,6 +426,56 @@ describe('systemStats', () => {
                         pool: '/Common/pool'
                     }
                 }
+            });
+        });
+    });
+
+    describe('._filterStats', () => {
+        const getCallableIt = testConf => (testConf.testOpts && testConf.testOpts.only ? it.only : it);
+
+        systemStatsTestsData._filterStats.forEach((testConf) => {
+            getCallableIt(testConf)(testConf.name, () => {
+                const systemStats = new SystemStats({}, { noTmstats: true, actions: testConf.actions });
+                systemStats._filterStats();
+                const statsKeys = Object.keys(systemStats.stats);
+
+                // not strict, just verifies that properties are presented
+                const shouldKeep = (testConf.shouldKeep || testConf.shouldKeepOnly || []).filter(
+                    statKey => statsKeys.indexOf(statKey) === -1
+                );
+                assert.strictEqual(shouldKeep.length, 0,
+                    `[shouldKeep] should keep following properties - '${JSON.stringify(shouldKeep)}'`);
+
+                // not strict, just verifies that properties are removed
+                const shouldRemove = (testConf.shouldRemove || testConf.shouldRemoveOnly || []).filter(
+                    statKey => statsKeys.indexOf(statKey) !== -1
+                );
+                assert.strictEqual(shouldRemove.length, 0,
+                    `[shouldRemove] should remove following properties - '${JSON.stringify(shouldRemove)}'`);
+
+                // strict, verifies only that properties are presented.
+                // [] (empty array) - means 'keep nothing'
+                let notRemoved = [];
+                if (testConf.shouldKeepOnly) {
+                    notRemoved = statsKeys.filter(
+                        statKey => testConf.shouldKeepOnly.indexOf(statKey) === -1
+                    );
+                }
+                assert.strictEqual(notRemoved.length, 0,
+                    `[shouldKeepOnly] should remove following properties - '${JSON.stringify(notRemoved)}'`);
+
+                // strict, verifies only that properties are removed.
+                // [] (empty array) - means 'remove nothing'
+                let notKept = [];
+                if (testConf.shouldRemoveOnly) {
+                    const defaultKeys = Object.keys(allProperties.stats);
+                    notKept = defaultKeys.filter(
+                        statKey => statsKeys.indexOf(statKey) === -1
+                                    && testConf.shouldRemoveOnly.indexOf(statKey) === -1
+                    );
+                }
+                assert.strictEqual(notKept.length, 0,
+                    `[shouldRemoveOnly] should keep following properties - '${JSON.stringify(notKept)}'`);
             });
         });
     });

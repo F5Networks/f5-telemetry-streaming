@@ -990,19 +990,9 @@ describe('Util (Tracer)', () => {
             });
     });
 
-    it('should fail to write when no data provided', () => {
+    it('should accept no data', () => {
         const tracer = util.tracer.createFromConfig('class', 'obj', config);
-        return tracer.write(null)
-            .then(() => {
-                assert.fail('Should throw an error');
-            })
-            .catch((err) => {
-                util.tracer.remove(tracer); // cleanup, otherwise will not exit
-                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
-                if (/Missing data to write/.test(err)) return Promise.resolve();
-                assert.fail(err);
-                return Promise.reject(err);
-            });
+        return tracer.write(null);
     });
 
     it('should get existing tracer by the name', () => {

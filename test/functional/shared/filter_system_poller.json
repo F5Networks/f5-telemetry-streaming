@@ -1,0 +1,34 @@
+{
+    "class": "Telemetry",
+    "controls": {
+        "class": "Controls",
+        "logLevel": "debug",
+        "debug": true
+    },
+    "My_System": {
+        "class": "Telemetry_System",
+        "systemPoller": {
+            "interval": 60,
+            "actions": [
+                {
+                    "excludeData": {},
+                    "locations": {
+                        "system": {
+                            "provisioning": true,
+                            "diskLatency": true,
+                            "diskStorage": {
+                                "/usr": true
+                            }
+                        }
+                    }
+                },
+                {
+                    "includeData": {},
+                    "locations": {
+                         "system": true
+                    }
+                }
+            ]
+        }
+    }
+}

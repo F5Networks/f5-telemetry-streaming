@@ -14,7 +14,7 @@ const deepCopy = require('./util.js').deepCopy;
 const tracers = require('./util.js').tracer;
 const constants = require('./constants.js');
 const configWorker = require('./config.js');
-const DataFilter = require('./dataFilter.js');
+const DataFilter = require('./dataFilter.js').DataFilter;
 
 const CONSUMERS_DIR = constants.CONSUMERS_DIR;
 const CLASS_NAME = constants.CONSUMERS_CLASS_NAME;
@@ -80,6 +80,7 @@ function loadConsumers(config) {
                 resolve(undefined);
             } else {
                 const consumer = {
+                    name: consumerConfig.name,
                     config: deepCopy(consumerConfig.config),
                     consumer: consumerModule,
                     tracer: tracers.createFromConfig(CLASS_NAME, consumerConfig.name, consumerConfig.config),

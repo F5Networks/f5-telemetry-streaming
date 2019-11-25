@@ -752,6 +752,30 @@ describe('Declarations', () => {
                                 '.*': true
                             }
                         }
+                    },
+                    {
+                        enable: true,
+                        includeData: {},
+                        locations: {
+                            system: true
+                        },
+                        ifAllMatch: {
+                            system: {
+                                location: 'system_location'
+                            }
+                        }
+                    },
+                    {
+                        enable: true,
+                        excludeData: {},
+                        locations: {
+                            pools: true
+                        },
+                        ifAllMatch: {
+                            system: {
+                                location: 'system_location'
+                            }
+                        }
                     }
                 ]
             }
@@ -773,9 +797,18 @@ describe('Declarations', () => {
                 assert.strictEqual(poller.username, 'username');
                 assert.strictEqual(poller.passphrase.cipherText, 'foo');
                 assert.strictEqual(poller.actions[0].enable, true);
+                // setTag action
                 assert.deepStrictEqual(poller.actions[0].setTag, { tag1: 'tag1 value', tag2: {} });
                 assert.deepStrictEqual(poller.actions[0].ifAllMatch, { system: { location: 'system_location' } });
                 assert.deepStrictEqual(poller.actions[0].locations, { virtualServers: { '.*': true } });
+                // includeData action
+                assert.deepStrictEqual(poller.actions[1].includeData, {});
+                assert.deepStrictEqual(poller.actions[1].locations, { system: true });
+                assert.deepStrictEqual(poller.actions[1].ifAllMatch, { system: { location: 'system_location' } });
+                // excludeData action
+                assert.deepStrictEqual(poller.actions[2].excludeData, {});
+                assert.deepStrictEqual(poller.actions[2].locations, { pools: true });
+                assert.deepStrictEqual(poller.actions[2].ifAllMatch, { system: { location: 'system_location' } });
             });
     });
 
@@ -855,6 +888,30 @@ describe('Declarations', () => {
                                 '.*': true
                             }
                         }
+                    },
+                    {
+                        enable: true,
+                        includeData: {},
+                        locations: {
+                            system: true
+                        },
+                        ifAllMatch: {
+                            system: {
+                                location: 'system_location'
+                            }
+                        }
+                    },
+                    {
+                        enable: true,
+                        excludeData: {},
+                        locations: {
+                            pools: true
+                        },
+                        ifAllMatch: {
+                            system: {
+                                location: 'system_location'
+                            }
+                        }
                     }
                 ]
             }
@@ -870,9 +927,18 @@ describe('Declarations', () => {
                 assert.deepStrictEqual(listener.tag, { tenant: '`B`', application: '`C`' });
                 assert.deepStrictEqual(listener.match, 'matchSomething');
                 assert.strictEqual(listener.actions[0].enable, true);
+                // setTag action
                 assert.deepStrictEqual(listener.actions[0].setTag, { tag1: 'tag1 value', tag2: {} });
                 assert.deepStrictEqual(listener.actions[0].ifAllMatch, { system: { location: 'system_location' } });
                 assert.deepStrictEqual(listener.actions[0].locations, { virtualServers: { '.*': true } });
+                // includeData action
+                assert.deepStrictEqual(listener.actions[1].includeData, {});
+                assert.deepStrictEqual(listener.actions[1].locations, { system: true });
+                assert.deepStrictEqual(listener.actions[1].ifAllMatch, { system: { location: 'system_location' } });
+                // excludeData action
+                assert.deepStrictEqual(listener.actions[2].excludeData, {});
+                assert.deepStrictEqual(listener.actions[2].locations, { pools: true });
+                assert.deepStrictEqual(listener.actions[2].ifAllMatch, { system: { location: 'system_location' } });
             });
     });
 
@@ -1837,6 +1903,7 @@ describe('Declarations', () => {
                 assert.deepStrictEqual(actions[0].locations, { a: { b: true } });
             });
     });
+
     it('should pass with object type location with multiple properties', () => {
         const data = {
             class: 'Telemetry',
@@ -1941,6 +2008,99 @@ describe('Declarations', () => {
                 }
                 assert.fail(err);
                 return Promise.reject(err);
+            });
+    });
+
+    it('should fail when multiple actions are in the same action object', () => {
+        const data = {
+            class: 'Telemetry',
+            My_Poller: {
+                class: 'Telemetry_System_Poller',
+                interval: 90,
+                actions: [
+                    {
+                        enable: true,
+                        includeData: {},
+                        excludeData: {},
+                        locations: {
+                            system: true
+                        }
+                    }
+                ]
+            }
+        };
+
+        return config.validate(data)
+            .then(() => {
+                assert.fail('Should throw an error');
+            })
+            .catch((err) => {
+                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
+                if (/should NOT be valid/.test(err) && /My_Poller\/actions\/0/.test(err)) {
+                    return Promise.resolve();
+                }
+                assert.fail(err);
+                return Promise.reject(err);
+            });
+    });
+
+    it('should fail when a location is not provided with includeData action', () => {
+        const data = {
+            class: 'Telemetry',
+            My_Poller: {
+                class: 'Telemetry_System_Poller',
+                interval: 90,
+                actions: [
+                    {
+                        enable: true,
+                        excludeData: {}
+                    }
+                ]
+            }
+        };
+
+        return config.validate(data)
+            .then(() => {
+                assert.fail('Should throw an error');
+            })
+            .catch((err) => {
+                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
+                if (/should have required property 'locations'/.test(err) && /dependencies\/excludeData\/allOf\/0\/required/.test(err)) {
+                    return Promise.resolve();
+                }
+                assert.fail(err);
+                return Promise.reject(err);
+            });
+    });
+
+    it('should pass when regexes are used in action locations', () => {
+        const data = {
+            class: 'Telemetry',
+            My_Poller: {
+                class: 'Telemetry_System_Poller',
+                interval: 90,
+                actions: [
+                    {
+                        enable: true,
+                        includeData: {},
+                        locations: {
+                            virtualServers: {
+                                vs$: true
+                            },
+                            pools: {
+                                '^/Common/Shared/': true
+                            }
+                        }
+                    }
+                ]
+            }
+        };
+
+        return config.validate(data)
+            .then((validConfig) => {
+                const poller = validConfig.My_Poller;
+                assert.deepStrictEqual(poller.actions[0].locations.virtualServers, { vs$: true });
+                assert.deepStrictEqual(poller.actions[0].locations.pools, { '^/Common/Shared/': true });
             });
     });
 });

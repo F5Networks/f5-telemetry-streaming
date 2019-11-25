@@ -10,6 +10,7 @@
 
 const request = require('request');
 const crypto = require('crypto');
+const EVENT_TYPES = require('../../constants.js').EVENT_TYPES;
 
 function makeRequest(requestOptions) {
     return new Promise((resolve, reject) => {
@@ -35,7 +36,7 @@ module.exports = function (context) {
 
     // for event types other than systemInfo, let's not chunk
     // so simply format according to what the chunking code expects
-    if (context.event.type !== 'systemInfo') {
+    if (context.event.type !== EVENT_TYPES.SYSTEM_POLLER) {
         const copyData = JSON.parse(JSON.stringify(context.event.data));
         context.event.data = {};
         context.event.data[context.event.type] = copyData;

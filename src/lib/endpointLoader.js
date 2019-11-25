@@ -132,6 +132,7 @@ EndpointLoader.prototype.loadEndpoint = function (endpoint, options) {
  * @returns {Object} Promise which is resolved with data
  */
 EndpointLoader.prototype._getData = function (uri, options) {
+    logger.debug(`EndpointLoader._getData: loading data from URI = ${uri}`);
     // remove parse-stringify in case of optimizations
     const httpOptions = Object.assign({}, util.deepCopy(this.options.connection));
     httpOptions.credentials = {

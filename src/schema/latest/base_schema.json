@@ -124,6 +124,18 @@
                     "type": "object",
                     "additionalProperties": true
                 },
+                "includeData": {
+                    "title": "Include Data",
+                    "description": "The data fields to include in the output",
+                    "type": "object",
+                    "additionalProperties": false
+                },
+                "excludeData": {
+                    "title": "Exclude Data",
+                    "description": "The data fields to exclude in the output",
+                    "type": "object",
+                    "additionalProperties": false
+                },
                 "locations": {
                     "title": "Location",
                     "description": "The location(s) to apply the action.",
@@ -133,8 +145,47 @@
                     }
                 }
             },
+            "dependencies": {
+                "includeData": {
+                    "allOf": [
+                        {
+                            "required": ["locations"]
+                        },
+                        {
+                            "not": { "required": ["setTag"] }
+                        },
+                        {
+                            "not": { "required": ["excludeData"] }
+                        }
+                    ]
+                },
+                "excludeData": {
+                    "allOf": [
+                        {
+                            "required": ["locations"]
+                        },
+                        {
+                            "not": { "required": ["setTag"] }
+                        },
+                        {
+                            "not": { "required": ["includeData"] }
+                        }
+                    ]
+                },
+                "setTag": {
+                    "allOf": [
+                        {
+                            "not": { "required": ["includeData"] }
+                        },
+                        {
+                            "not": { "required": ["excludeData"] }
+                        }
+                    ]
+                }
+            },
             "additionalProperties": false,
             "if": {
+                "required": [ "setTag" ],
                 "properties": {
                     "setTag": {
                         "anyOf": [

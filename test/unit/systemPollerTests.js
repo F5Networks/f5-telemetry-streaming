@@ -89,7 +89,8 @@ describe('systemPoller', () => {
 
             const restOperation = new MockRestOperation({ uri: 'shared/telemetry/systempoller/Telemetry_System/My_System' });
             restOperation.complete = function () {
-                assert.equal(restOperation.getStatusCode(), 200);
+                assert.strictEqual(restOperation.body.telemetryEventCategory, 'systemInfo');
+                assert.strictEqual(restOperation.getStatusCode(), 200);
                 done();
             };
             systemPoller.processClientRequest(restOperation);

@@ -9,7 +9,7 @@
 'use strict';
 
 const assert = require('assert');
-const DataFilter = require('../../src/lib/dataFilter.js');
+const DataFilter = require('../../src/lib/dataFilter.js').DataFilter;
 
 /* eslint-disable global-require */
 
