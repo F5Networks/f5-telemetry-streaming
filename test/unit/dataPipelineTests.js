@@ -23,31 +23,35 @@ const assert = chai.assert;
 
 
 describe('Data Pipeline', () => {
+    let forwardFlag;
     let forwardedData;
     let forwardError;
     let handleActionsData;
+    let taggingHandlerStub;
 
-    before(() => {
+    beforeEach(() => {
+        forwardedData = undefined;
+        forwardError = undefined;
+        forwardFlag = false;
+        handleActionsData = [];
+
         sinon.stub(forwarder, 'forward').callsFake((data) => {
+            forwardFlag = true;
             if (forwardError) {
                 return Promise.reject(forwardError);
             }
             forwardedData = data;
             return Promise.resolve();
         });
-        sinon.stub(dataTagging, 'handleAction').callsFake((dataCtx, actionCtx) => {
+        taggingHandlerStub = sinon.stub(dataTagging, 'handleAction');
+        taggingHandlerStub.callsFake((dataCtx, actionCtx) => {
             handleActionsData.push({ dataCtx, actionCtx });
         });
         sinon.stub(dataFilter, 'handleAction').callsFake((dataCtx, actionCtx) => {
             handleActionsData.push({ dataCtx, actionCtx });
         });
     });
-    beforeEach(() => {
-        forwardedData = undefined;
-        forwardError = undefined;
-        handleActionsData = [];
-    });
-    after(() => {
+    afterEach(() => {
         sinon.restore();
     });
 
@@ -185,7 +189,7 @@ describe('Data Pipeline', () => {
             });
     });
 
-    it('should fail when unknown ', () => {
+    it('should fail when unknown', () => {
         const dataCtx = {
             data: {
                 foo: 'bar'
@@ -205,5 +209,28 @@ describe('Data Pipeline', () => {
             /unknown action/,
             'should fail when unknown action passed'
         );
+    });
+
+    it('should not forward when no data', () => {
+        taggingHandlerStub.reset();
+        taggingHandlerStub.callsFake((dataCtx) => {
+            dataCtx.data = {};
+        });
+        const dataCtx = {
+            data: {},
+            type: EVENT_TYPES.DEFAULT
+        };
+        const options = {
+            actions: [
+                {
+                    enable: true,
+                    setTag: {}
+                }
+            ]
+        };
+        return dataPipeline.process(dataCtx, options)
+            .then(() => {
+                assert.strictEqual(forwardFlag, false, 'should not call forwarder');
+            });
     });
 });

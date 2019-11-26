@@ -77,14 +77,17 @@ function process(dataCtx, options) {
         if (options.tracer) {
             options.tracer.write(JSON.stringify(dataCtx, null, 4));
         }
-
         let promise = Promise.resolve();
         if (!options.noConsumers) {
-            promise = promise.then(() => {
-                // detach forwarding process from here
-                forwarder.forward(dataCtx)
-                    .catch(err => logger.exception(`Error on attempt to forward data to consumers: ${err}`, err));
-            });
+            if (util.isObjectEmpty(dataCtx.data)) {
+                logger.debug('Pipeline received empty object - no data to process, skip it (might be the result of the actions chain execution).');
+            } else {
+                promise = promise.then(() => {
+                    // detach forwarding process from here
+                    forwarder.forward(dataCtx)
+                        .catch(err => logger.exception(`Error on attempt to forward data to consumers: ${err}`, err));
+                });
+            }
         }
         promise.then(() => {
             logger.debug(`Pipeline processed data of type: ${dataCtx.type}`);
