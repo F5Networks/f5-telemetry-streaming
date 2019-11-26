@@ -230,9 +230,9 @@ This table shows the parameters available for the Tag property.
 +----------------------+----------+------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Parameter            | Required | Type             |  Description/Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 +======================+==========+==================+=========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================+
-| enable               | false    | Boolean          |  This value is used to enable an action.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-+----------------------+----------+------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | setTag               | true     | Object           |  The setTag property is the tag(s) that will be applied (each additional property inside setTag is a tag that will be applied).                                                                                                                                                                                                                                                                                                                                                                                                         |
++----------------------+----------+------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| enable               | false    | Boolean          |  This value is used to enable an action.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 +----------------------+----------+------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | ifAllMatch           | false    | Object           |  This property contains conditions you specify for the tag.  If you use this property, Telemetry Streaming verifies the conditions inside ifAllMatch and checks against the data.  All conditions inside this property must match the data for tagging to be performed. If you do not use this property, then the system tags everything in the **locations** property.                                                                                                                                                                 |
 +----------------------+----------+------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -386,8 +386,8 @@ The following table shows the possible parameters for includeData.  After the ta
 
 |
 
-includeData Example 1
-^^^^^^^^^^^^^^^^^^^^^
+Example 1
+^^^^^^^^^
 
 The following is an example of Telemetry output without using includeData:
 
@@ -431,9 +431,8 @@ And this is an example of the output from the Action definition.
 
 |
 
-includeData Example 2
-^^^^^^^^^^^^^^^^^^^^^
-
+Example 2
+^^^^^^^^^
 The following is an example of Telemetry output without using includeData:
 
 .. code-block:: json
@@ -473,8 +472,8 @@ And this is an example of the output from the Action definition.
 
 |
 
-includeData Example 3
-^^^^^^^^^^^^^^^^^^^^^
+Example 3
+^^^^^^^^^
 
 The following is an example of Telemetry output without using includeData:
 
@@ -554,9 +553,8 @@ The following table shows the possible parameters for excludeData.  After the ta
 
 |
 
-excludeData Example 1
-^^^^^^^^^^^^^^^^^^^^^
-
+Example 1
+^^^^^^^^^
 The following is an example of Telemetry output without using excludeData:
 
 .. code-block:: json
@@ -600,8 +598,8 @@ And this is an example of the output from the Action definition.
 
 |
 
-excludeData Example 2a
-^^^^^^^^^^^^^^^^^^^^^^
+Example 2a
+^^^^^^^^^^
 
 The following is an example of Telemetry output without using excludeData. Note that excludeData tries to find an exact match first, and if no exact match exists, then treats the property as a regular expression (see example 2b).
 
@@ -643,8 +641,8 @@ And this is an example of the output from the Action definition.
 
 
 
-excludeData Example 2b
-^^^^^^^^^^^^^^^^^^^^^^
+Example 2b
+^^^^^^^^^^
 This example highlights how Telemetry Streaming treats a non-exact match as a regular expression (this example uses the same example without using excludeData).
 
 
@@ -676,8 +674,8 @@ And this is an example of the output from the Action definition.
 
 |
 
-excludeData Example 3
-^^^^^^^^^^^^^^^^^^^^^
+Example 3
+^^^^^^^^^
 
 The following is an example of Telemetry output without using excludeData:
 
