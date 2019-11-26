@@ -1,6 +1,6 @@
 Data Modification
 =================
-This section details how you can manipulate the data to better meet your Telemetry goals.  This includes the new :ref:`Actions Chain<actions>`, which can contain the :ref:`includeData<include>` and :ref:`excludeData<exclude>` options introduced in Telemetry Streaming 1.8.0, and the previously introduced setTag property.
+This section details how you can manipulate the data to better meet your Telemetry goals.  This includes the new :ref:`Actions Chain<actions>`, which can contain the :ref:`includeData<include>` and :ref:`excludeData<exclude>` options introduced in Telemetry Streaming 1.8.0, and the previously introduced :ref:`setTag<tagproperty>` property.
 
 .. _actions: 
 
@@ -215,7 +215,8 @@ Example 2:
  
 As result of the actions chain analysis, the Telemetry System will fetch **virtualServers** only and not **pools** (and not anything else) because only **virtualServers** should be included in the result's output.
  
-
+|
+|
 
 .. _tagproperty:
 
