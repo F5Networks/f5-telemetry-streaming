@@ -423,6 +423,87 @@ DeviceAsyncCLI.prototype._removeAsyncTaskFromDevice = function (taskID, errOk) {
  * F5 Device async CLI class definition ends here
  */
 
+/**
+ * Helper function for the encryptSecret function
+ *
+ * @private
+ * @param {Array} splitData - the secret that has been split up
+ * @param {Array} dataArray - the array that the encrypted data will be put
+ * @param {Integer} index - the endex value used to go through the split data
+ *
+ * @returns {Promise} Promise resolved with the encrypted data
+ */
+function encryptSecretHelper(splitData, dataArray, index) {
+    let encryptedData = null;
+    let error = null;
+    // can't have a + or / in the radius object name, so replace those if they exist
+    const radiusObjectName = `telemetry_delete_me_${crypto.randomBytes(6)
+        .toString('base64')
+        .replace(/[+]/g, '-')
+        .replace(/\x2f/g, '_')}`;
+    const uri = '/mgmt/tm/ltm/auth/radius-server';
+    const httpPostOptions = {
+        method: 'POST',
+        body: {
+            name: radiusObjectName,
+            secret: splitData[index],
+            server: 'foo'
+        }
+    };
+
+    return module.exports.makeDeviceRequest(constants.LOCAL_HOST, uri, httpPostOptions)
+        .then((res) => {
+            if (typeof res.secret !== 'string') {
+                // well this can't be good
+                logger.error(`Secret could not be retrieved: ${util.stringify(res)}`);
+            }
+            // update text field with Secure Vault cryptogram - should we base64 encode?
+            encryptedData = res.secret;
+            return module.exports.getDeviceVersion(constants.LOCAL_HOST);
+        })
+        .then((deviceVersion) => {
+            let promise;
+            if (util.compareVersionStrings(deviceVersion.version, '>=', '14.1')
+                    && util.compareVersionStrings(deviceVersion.version, '<', '15.0')) {
+                // TMOS 14.1.x fix for 745423
+                const tmshCmd = `tmsh -a list auth radius-server ${radiusObjectName} secret`;
+                promise = module.exports.executeShellCommandOnDevice(constants.LOCAL_HOST, tmshCmd)
+                    .then((res) => {
+                        /**
+                         * auth radius-server telemetry_delete_me {
+                         *   secret <secret-data>
+                         * }
+                         */
+                        encryptedData = res.split('\n')[1].trim().split(' ', 2)[1];
+                    });
+            }
+            return promise || Promise.resolve();
+        })
+        .catch((e) => {
+            error = e;
+        })
+        .then(() => {
+            const httpDeleteOptions = {
+                method: 'DELETE',
+                continueOnErrorCode: true
+            };
+            module.exports.makeDeviceRequest(constants.LOCAL_HOST, `${uri}/${radiusObjectName}`, httpDeleteOptions);
+            if (error) {
+                throw error;
+            }
+        })
+        .then(() => {
+            if (encryptedData.indexOf(',') !== -1) {
+                throw new Error('Encrypted data should not have a comma in it');
+            }
+            dataArray.push(encryptedData);
+            index += 1;
+            if (index < splitData.length) {
+                return encryptSecretHelper(splitData, dataArray, index);
+            }
+            return Promise.resolve(dataArray);
+        });
+}
 
 module.exports = {
     /**
@@ -784,65 +865,8 @@ module.exports = {
      * @returns {Object} Returns promise resolved with encrypted secret
      */
     encryptSecret(data) {
-        let encryptedData = null;
-        let error = null;
-        // can't have a + or / in the radius object name, so replace those if they exist
-        const radiusObjectName = `telemetry_delete_me_${crypto.randomBytes(6)
-            .toString('base64')
-            .replace(/[+]/g, '-')
-            .replace(/\x2f/g, '_')}`;
-        const uri = '/mgmt/tm/ltm/auth/radius-server';
-        const httpPostOptions = {
-            method: 'POST',
-            body: {
-                name: radiusObjectName,
-                secret: data,
-                server: 'foo'
-            }
-        };
-
-        return this.makeDeviceRequest(constants.LOCAL_HOST, uri, httpPostOptions)
-            .then((res) => {
-                if (typeof res.secret !== 'string') {
-                    // well this can't be good
-                    logger.error(`Secret could not be retrieved: ${util.stringify(res)}`);
-                }
-                // update text field with Secure Vault cryptogram - should we base64 encode?
-                encryptedData = res.secret;
-                return this.getDeviceVersion(constants.LOCAL_HOST);
-            })
-            .then((deviceVersion) => {
-                let promise;
-                if (util.compareVersionStrings(deviceVersion.version, '>=', '14.1')
-                        && util.compareVersionStrings(deviceVersion.version, '<', '15.0')) {
-                    // TMOS 14.1.x fix for 745423
-                    const tmshCmd = `tmsh -a list auth radius-server ${radiusObjectName} secret`;
-                    promise = this.executeShellCommandOnDevice(constants.LOCAL_HOST, tmshCmd)
-                        .then((res) => {
-                            /**
-                             * auth radius-server telemetry_delete_me {
-                             *   secret <secret-data>
-                             * }
-                             */
-                            encryptedData = res.split('\n')[1].trim().split(' ', 2)[1];
-                        });
-                }
-                return promise || Promise.resolve();
-            })
-            .catch((e) => {
-                error = e;
-            })
-            .then(() => {
-                const httpDeleteOptions = {
-                    method: 'DELETE',
-                    continueOnErrorCode: true
-                };
-                this.makeDeviceRequest(constants.LOCAL_HOST, `${uri}/${radiusObjectName}`, httpDeleteOptions);
-                if (error) {
-                    throw error;
-                }
-            })
-            .then(() => encryptedData);
+        const splitData = data.match(/(.|\n).{1,500}/g);
+        return encryptSecretHelper(splitData, [], 0).then(result => result.join(','));
     },
 
     /**
@@ -853,8 +877,10 @@ module.exports = {
      * @returns {Object} Returns promise resolved with decrypted secret
      */
     decryptSecret(data) {
+        const splitData = data.split(',');
+        const args = [`${__dirname}/decryptConfValue.php`].concat(splitData);
         return new Promise((resolve, reject) => {
-            childProcess.exec(`/usr/bin/php ${__dirname}/decryptConfValue.php '${data}'`, (error, stdout, stderr) => {
+            childProcess.execFile('/usr/bin/php', args, (error, stdout, stderr) => {
                 if (error) {
                     reject(new Error(`decryptSecret exec error: ${error} ${stderr}`));
                 } else {

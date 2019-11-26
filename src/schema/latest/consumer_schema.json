@@ -171,6 +171,27 @@
                 "SASL-PLAIN",
                 "None"
             ]
+        },
+        "projectId": {
+            "$comment": "Required for certain consumers: Google_StackDriver",
+            "title": "Project ID",
+            "description": "The ID of the relevant project.",
+            "type": "string",
+            "f5expand": true
+        },
+        "serviceEmail": {
+            "$comment": "Required for certain consumers: Google_StackDriver",
+            "title": "Service Email",
+            "description": "The service email.",
+            "type": "string",
+            "f5expand": true
+        },
+        "privateKeyId": {
+            "$comment": "Required for certain consumers: Google_StackDriver",
+            "title": "Private Key ID",
+            "description": "The private key ID.",
+            "type": "string",
+            "f5expand": true
         }
     },
     "allOf": [
@@ -194,7 +215,7 @@
                         "title": "Type",
                         "description": "" ,
                         "type": "string",
-                        "enum": [ "default", "Generic_HTTP", "Splunk", "Azure_Log_Analytics", "AWS_CloudWatch", "AWS_S3", "Graphite", "Kafka", "ElasticSearch", "Sumo_Logic", "Statsd" ]
+                        "enum": [ "default", "Generic_HTTP", "Splunk", "Azure_Log_Analytics", "AWS_CloudWatch", "AWS_S3", "Graphite", "Kafka", "ElasticSearch", "Sumo_Logic", "Statsd", "Google_StackDriver" ]
                     },
                     "enableHostConnectivityCheck": { "$ref": "base_schema.json#/definitions/enableHostConnectivityCheck" },
                     "allowSelfSignedCert": { "$ref": "base_schema.json#/definitions/allowSelfSignedCert" }
@@ -227,7 +248,11 @@
                             "apiVersion": {},
                             "index": {},
                             "dataType": {},
-                            "authenticationProtocol": {}
+                            "authenticationProtocol": {},
+                            "projectId": {},
+                            "serviceEmail": {},
+                            "privateKey": {},
+                            "privateKeyId": {}
                         },
                         "additionalProperties": false
                     },
@@ -423,6 +448,24 @@
                                 "host": { "$ref": "#/definitions/host" },
                                 "protocol": { "$ref": "#/definitions/protocols", "default": "udp" },
                                 "port": { "$ref": "#/definitions/port", "default": 8125 }
+                            }
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "Google_StackDriver" } } },
+                        "then": {
+                            "required": [
+                                "projectId",
+                                "privateKeyId",
+                                "privateKey",
+                                "serviceEmail"
+                            ],
+                            "properties": {
+                                "privateKeyId": { "$ref": "#/definitions/privateKeyId" },
+                                "serviceEmail": { "$ref": "#/definitions/serviceEmail" },
+                                "privateKey": { "$ref": "base_schema.json#/definitions/secret" },
+                                "projectId": { "$ref": "#/definitions/projectId" }
                             }
                         },
                         "else": {}

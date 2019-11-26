@@ -6,6 +6,7 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-487: Add support for filtering (System Poller and Event Listener)
 - [GitHub #22](https://github.com/F5Networks/f5-telemetry-streaming/pull/22): Reference to pools in virtual server data
 - AUTOTOOl-905: Add machineId to System Poller output
+- AUTOTOOL-817: Add Google StackDriver as a consumer
 
 ### Fixed
 ### Changed
