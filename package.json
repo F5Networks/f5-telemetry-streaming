@@ -12,7 +12,7 @@
         "install-test": "npm install --no-optional",
         "lint": "eslint src test",
         "test-functional": "mocha \"./test/functional/testRunner.js\" --opts ./test/functional/.mocha.opts",
-        "test-only": "mocha --recursive \"./test/unit/*.js\" --opts ./test/unit/.mocha.opts",
+        "test-only": "mocha --recursive \"./test/unit/**/*.js\" --opts ./test/unit/.mocha.opts",
         "test": "nyc --all npm run test-only",
         "build": "./scripts/build/buildRpm.sh"
     },
@@ -39,6 +39,7 @@
         "commander": "^2.19.0",
         "deep-diff": "^1.0.2",
         "elasticsearch": "^15.3.0",
+        "jsonwebtoken": "^8.5.1",
         "kafka-node": "^2.6.1",
         "mustache": "^3.0.0",
         "node-statsd": "0.1.1",

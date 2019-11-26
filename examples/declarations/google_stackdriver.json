@@ -1,0 +1,13 @@
+{
+    "class": "Telemetry",
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Google_StackDriver",
+        "privateKey": {
+        	"cipherText": "yourPrivateKey"
+    	},
+        "projectId": "yourGoogleStackDriverProjectId",
+        "privateKeyId": "yourPrivateKeyId",
+        "serviceEmail": "yourServiceEmail"
+    }
+}
