@@ -57,7 +57,7 @@
             "name": "virtualServers",
             "endpoint": "/mgmt/tm/ltm/virtual",
             "includeStats": true,
-            "endpointFields": [ "name", "fullPath", "selfLink", "appService", "ipProtocol", "mask" ]
+            "endpointFields": [ "name", "fullPath", "selfLink", "appService", "ipProtocol", "mask", "pool" ]
         },
         {
             "name": "pools",
@@ -134,6 +134,10 @@
                 "command": "run",
                 "utilCmdArgs": "-c '/bin/tmctl $tmctlArgs'"
             }
+        },
+        {
+            "name": "deviceInfo",
+            "endpoint": "/mgmt/shared/identified-devices/config/device-info"
         }
     ]
 }

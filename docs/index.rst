@@ -54,6 +54,7 @@ Previous buttons to explore the documentation.
    using-ts
    declarations
    output-example
+   data-modification
    troubleshooting
    revision-history
    schema-reference

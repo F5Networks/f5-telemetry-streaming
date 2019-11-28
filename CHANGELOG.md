@@ -1,6 +1,18 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.8.0
+### Added
+- AUTOTOOL-487: Add support for filtering (System Poller and Event Listener)
+- [GitHub #22](https://github.com/F5Networks/f5-telemetry-streaming/pull/22): Reference to pools in virtual server data
+- AUTOTOOl-905: Add machineId to System Poller output
+- AUTOTOOL-817: Add Google StackDriver as a consumer
+
+### Fixed
+### Changed
+- AUTOTOOL-784: Improved error handling to preserve stack trace.  Problem was discovered on a Viprion.  Opened AUTOTOOL-853 to support Viprion in future.
+### Removed
+
 ## 1.7.0
 ### Added
 - AUTOTOOL-690: Collect all supported tmstat tables for Splunk Legacy

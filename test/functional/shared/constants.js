@@ -13,6 +13,8 @@ const fs = require('fs');
 module.exports = {
     DECL: {
         BASIC_EXAMPLE: `${__dirname}/basic.json`,
+        FILTER_EXAMPLE: `${__dirname}/filter_system_poller.json`,
+        ACTION_CHAINING_EXAMPLE: `${__dirname}/system_poller_chained_actions.json`,
         CONSUMER_NAME: 'My_Consumer',
         SYSTEM_NAME: 'My_System',
         SYSTEM_POLLER_SCHEMA: fs.realpathSync(`${__dirname}/../../../shared/output_schemas/system_poller_schema.json`)

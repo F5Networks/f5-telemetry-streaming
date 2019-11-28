@@ -17,6 +17,7 @@ const properties = require('./properties.json');
 const paths = require('./paths.json');
 const logger = require('./logger.js');
 const EndpointLoader = require('./endpointLoader');
+const dataUtil = require('./dataUtil');
 
 const CONDITIONAL_FUNCS = {
     deviceVersionGreaterOrEqual,
@@ -46,7 +47,10 @@ function SystemStats(host, options) {
     this.loader = new EndpointLoader(host, options);
     this.loader.setEndpoints(_paths.endpoints);
 
-    this.stats = _properties.stats;
+    this.actions = options.actions || [];
+
+    // deep copy this.stats so that new instances of SystemStats get their own version of this.stats
+    this.stats = util.deepCopy(_properties.stats);
     this.context = _properties.context;
     this.definitions = _properties.definitions;
     this.global = _properties.global;
@@ -72,7 +76,7 @@ SystemStats.prototype._splitKey = function (key) {
 /**
  * Evaluate conditional block
  *
- * @param {Object} conditionalBlock - block to evaluate, where object's key - conditional opertor
+ * @param {Object} conditionalBlock - block to evaluate, where object's key - conditional operator
  *                                    object's value - params for that operator
  *
  * @returns {boolean} conditional result
@@ -325,6 +329,103 @@ SystemStats.prototype._computeContextData = function () {
     return promise;
 };
 /**
+ * Applies all filters from declaration, to the set of System Stat properties that will be collected.
+ * Processing of filters occurs sequentially, from top-to-bottom (of the declaration).
+ * All filtering of properties / fields by value (ex: VirtualServers matching name of 'test*') must be handled after
+ * stats are collected, and will not be filtered by _filterStats().
+ *
+ * @returns {Object} Promise resolved when all filtering is completed
+ */
+SystemStats.prototype._filterStats = function () {
+    /**
+     * This function for optimization purpose only - it is not actual data exclusion,
+     * it only disables endpoints we are not going to use at all.
+     *
+     * From the user's point of view this process should be explicit - the user should still think
+     * that TS fetches all data.
+     *
+     * Ideally this function should be ran just once per System Poller's config update but due nature of
+     * System Poller and the fact that it runs every 60 secs or more we can compute on demand every time
+     * to avoid memory usage.
+     */
+    // early return
+    if (util.isObjectEmpty(this.actions)) {
+        return;
+    }
+    const FLAGS = {
+        UNTOUCHED: 0,
+        PRESERVE: 1
+    };
+    /**
+     * Reasons to create tree of stats that mimics actual TS output:
+     * - much easier deal with regular expressions (at least can avoid regex comparisons)
+     * - all location pointers are object of objects
+     */
+    const statsSkeleton = {};
+    const nestedKey = 'nested';
+
+    Object.keys(this.stats).forEach((statKey) => {
+        const stat = this.stats[statKey];
+        if (!stat.structure) {
+            statsSkeleton[statKey] = { flag: FLAGS.UNTOUCHED };
+        } else if (stat.structure.parentKey) {
+            if (!statsSkeleton[stat.structure.parentKey]) {
+                statsSkeleton[stat.structure.parentKey] = { flag: FLAGS.UNTOUCHED };
+            }
+            statsSkeleton[stat.structure.parentKey][nestedKey] = statsSkeleton[stat.structure.parentKey][nestedKey]
+                || {};
+            statsSkeleton[stat.structure.parentKey][nestedKey][statKey] = { flag: FLAGS.UNTOUCHED };
+        }
+    });
+    this.actions.forEach((actionCtx) => {
+        if (!actionCtx.enable) {
+            return;
+        }
+        if (actionCtx.ifAllMatch) {
+            // if ifAllMatch points to nonexisting data - VS name, tag or what ever else
+            // we have to mark all existing paths with PRESERVE flag
+            dataUtil.searchAnyMatches(statsSkeleton, actionCtx.ifAllMatch, (key, item) => {
+                item.flag = FLAGS.PRESERVE;
+                return nestedKey;
+            });
+        }
+        // if includeData/excludeData paired with ifAllMatch then we can simply ignore it
+        // because we can't include/exclude data without conditional check
+        if (actionCtx.excludeData && !actionCtx.ifAllMatch) {
+            dataUtil.removeStrictMatches(statsSkeleton, actionCtx.locations, (key, item, getNestedKey) => {
+                if (getNestedKey) {
+                    return nestedKey;
+                }
+                return item.flag !== FLAGS.PRESERVE;
+            });
+        }
+        if (actionCtx.includeData && !actionCtx.ifAllMatch) {
+            // strict is false - it is okay to have partial matches because we can't be sure
+            // for 100% that such data was not added by previous action
+            dataUtil.preserveStrictMatches(statsSkeleton, actionCtx.locations, false, (key, item, getNestedKey) => {
+                if (getNestedKey) {
+                    return nestedKey;
+                }
+                return item.flag !== FLAGS.PRESERVE;
+            });
+        }
+    });
+    Object.keys(this.stats).forEach((statKey) => {
+        let skeleton = statsSkeleton;
+        // path to stat should exists otherwise we can delete it
+        const exists = computeStatPath.call(this, statKey).every((key) => {
+            skeleton = skeleton[key];
+            if (skeleton && skeleton[nestedKey]) {
+                skeleton = skeleton[nestedKey];
+            }
+            return skeleton;
+        });
+        if (!exists) {
+            delete this.stats[statKey];
+        }
+    });
+};
+/**
  * Compute properties
  *
  * @param {Object} propertiesData - object with properties
@@ -343,6 +444,10 @@ SystemStats.prototype._computePropertiesData = function () {
 SystemStats.prototype.collect = function () {
     return this.loader.auth()
         .then(() => this._computeContextData())
+        .then(() => {
+            this._filterStats();
+            return Promise.resolve();
+        })
         .then(() => this._computePropertiesData())
         .then(() => {
             // order data according to properties file
@@ -403,6 +508,29 @@ function isModuleProvisioned(contextData, moduleToCompare) {
         throw new Error('isModuleProvisioned: context has no property \'provisioning\'');
     }
     return ((provisioning[moduleToCompare] || {}).level || 'none') !== 'none';
+}
+
+/**
+ * Helpers for stats filtering
+ */
+
+/**
+ * Compute stats's path
+ * Note: call with .call(this, <args>)
+ *
+ * @param {String} statKey - stat's key
+ *
+ * @returns {Array<String>} - path to stat
+ */
+function computeStatPath(statKey) {
+    const path = [statKey];
+    const stat = this.stats[statKey];
+    if (stat.structure) {
+        if (stat.structure.parentKey) {
+            path.push(stat.structure.parentKey);
+        }
+    }
+    return path.reverse();
 }
 
 module.exports = SystemStats;

@@ -10,6 +10,7 @@
 
 const ESClient = require('elasticsearch').Client;
 const util = require('../../util.js');
+const EVENT_TYPES = require('../../constants.js').EVENT_TYPES;
 
 
 function elasticLogger(logger, tracer) {
@@ -66,20 +67,15 @@ module.exports = function (context) {
         index: config.index,
         type: config.dataType
     };
-    if (context.event.data.telemetryEventCategory === 'systemInfo'
-        || context.event.data.telemetryEventCategory === 'ihealthInfo') {
+    if (context.event.type === EVENT_TYPES.SYSTEM_POLLER || context.event.type === EVENT_TYPES.IHEALTH_POLLER) {
         payload.body = context.event.data;
     } else {
+        // event listener data
         payload.body = {
-            data: {}
+            data: context.event.data,
+            telemetryEventCategory: context.event.type
         };
-        Object.keys(context.event.data).forEach((key) => {
-            if (key === 'telemetryEventCategory') {
-                payload.body[key] = context.event.data[key];
-            } else {
-                payload.body.data[key] = context.event.data[key];
-            }
-        });
+        delete payload.body.data.telemetryEventCategory;
     }
     if (context.tracer) {
         context.tracer.write(JSON.stringify(payload, null, 4));

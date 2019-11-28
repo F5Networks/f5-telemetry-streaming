@@ -4,7 +4,7 @@
             "structure": { "folder": true }
         },
         "hostname": {
-            "key": "/mgmt/tm/sys/global-settings::hostname",
+            "key": "deviceInfo::hostname",
             "structure": { "parentKey": "system" },
             "normalize": null,
             "normalization": [
@@ -24,6 +24,10 @@
                     "addKeysByTag": null
                 }
             ]
+        },
+        "machineId": {
+            "structure": { "parentKey": "system" },
+            "key": "deviceInfo::machineId"
         },
         "version": {
             "structure": { "parentKey": "system" },
@@ -266,7 +270,7 @@
                     "includeFirstEntry": { "pattern": "/stats"}
                 },
                 {
-                    "filterKeys": { "exclude": [ "fullPath", "generation", "appServiceReference", "tmName", "status.statusReason", "cmpEnabled", "cmpEnableMode", "csMaxConnDur", "csMeanConnDur", "csMinConnDur", "totRequests", "oneMinAvgUsageRatio", "clientside.pktsIn", "clientside.pktsOut", "clientside.evictedConns", "clientside.slowKilled", "clientside.maxConns", "clientside.totConns", "ephemeral.bitsIn", "ephemeral.bitsOut", "ephemeral.curConns", "ephemeral.evictedConns", "ephemeral.maxConns", "ephemeral.pktsIn", "ephemeral.pktsOut", "ephemeral.slowKilled", "ephemeral.totConns", "fiveSecAvgUsageRatio", "fiveMinAvgUsageRatio", "syncookieStatus", "syncookie.accepts", "syncookie.hwAccepts", "syncookie.hwSyncookies", "syncookie.rejects", "syncookie.hwsyncookieInstance", "syncookie.swsyncookieInstance", "syncookie.syncacheCurr", "syncookie.syncacheOver", "syncookie.syncookies", "syncookie.syncacheOver" ] }
+                    "filterKeys": { "exclude": [ "fullPath", "generation", "appServiceReference", "tmName", "status.statusReason", "cmpEnabled", "cmpEnableMode", "csMaxConnDur", "csMeanConnDur", "csMinConnDur", "totRequests", "oneMinAvgUsageRatio", "clientside.pktsIn", "clientside.pktsOut", "clientside.evictedConns", "clientside.slowKilled", "clientside.maxConns", "clientside.totConns", "ephemeral.bitsIn", "ephemeral.bitsOut", "ephemeral.curConns", "ephemeral.evictedConns", "ephemeral.maxConns", "ephemeral.pktsIn", "ephemeral.pktsOut", "ephemeral.slowKilled", "ephemeral.totConns", "fiveSecAvgUsageRatio", "fiveMinAvgUsageRatio", "syncookieStatus", "syncookie.accepts", "syncookie.hwAccepts", "syncookie.hwSyncookies", "syncookie.rejects", "syncookie.hwsyncookieInstance", "syncookie.swsyncookieInstance", "syncookie.syncacheCurr", "syncookie.syncacheOver", "syncookie.syncookies", "syncookie.syncacheOver", "poolReference" ] }
                 },
                 {
                     "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/virtual": { "pattern": "virtual\/(.*)\/", "group": 1 } } }

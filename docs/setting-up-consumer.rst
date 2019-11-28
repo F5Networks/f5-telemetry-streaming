@@ -266,10 +266,38 @@ Required Information:
     :language: json
 
 
+Google StackDriver
+~~~~~~~~~~~~~~~~~~
+|stackd|
+
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+   Support for Google StackDriver is available in TS 1.8.0 and later.  
+
+Required Information:
+ - projectId: The ID of the GCP project.
+ - serviceEmail: The email for the Google Service Account. To check if you have an existing Service Account, from the left menu of GCP, select **IAM & admin**, and then click **Service Accounts**. If you do not have a Service Account, you must create one.
+ - privateKeyId: The ID of the private key that the user created for the Service Account (if you do not have a key, from the account page, click **Create Key** with a type of **JSON**. The Private key is in the file that was created when making the account).
+ - privateKey: The private key given to the user when a private key was added to the service account.
+
+For complete information on deploying StackDriver, see |sddocs|.
+
+**Finding the Data**  |br|
+Once you have configured the StackDriver consumer and sent a Telemetry Streaming declaration, Telemetry Streaming creates custom MetricDescriptors to which it sends metrics.  These metrics can be found under a path such as **custom/system/cpu**. To make it easier to find data that is relevant to a specific device,TS uses the **Generic Node** resource type, and assigns machine ID to the **node_id** label to identify which device the data is from.
+
+.. IMPORTANT:: There is a quota of 500 custom MetricDescriptors for StackDriver Monitoring. Telemetry Streaming creates these MetricDescriptors, and if this quota is ever hit, you must delete custom some of these MetricDescriptors.
+
+.. literalinclude:: ../examples/declarations/stackdriver.json
+    :language: json
+
 
 .. |splunk_img| image:: /images/splunk_logo.png
    :target: https://www.splunk.com
    :alt: Splunk
+
+.. |stackd| image:: /images/stackdriver_logo.png
+   :target: https://cloud.google.com/stackdriver/
+   :alt: Google StackDriver
 
 .. |azure_img| image:: /images/azure_logo.png
    :target: https://docs.microsoft.com/en-us/azure/azure-monitor/log-query/log-query-overview
@@ -373,6 +401,10 @@ Required Information:
 .. |fluentdocs| raw:: html
 
    <a href="https://docs.fluentd.org/quickstart/life-of-a-fluentd-event#event-structure" target="_blank">Fluentd documentation</a>
+
+.. |sddocs| raw:: html
+
+   <a href="https://cloud.google.com/stackdriver/" target="_blank">StackDriver documentation</a>
 
 
 .. |br| raw:: html

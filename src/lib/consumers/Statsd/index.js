@@ -15,6 +15,7 @@
 // udp/tcp it might be simpler to just implement net module directly for this use case
 const StatsD = require('node-statsd');
 const deepDiff = require('deep-diff');
+const EVENT_TYPES = require('../../constants.js').EVENT_TYPES;
 
 const stripMetrics = (data) => {
     Object.keys(data).forEach((item) => {
@@ -36,7 +37,7 @@ module.exports = function (context) {
 
     // statsd does not process just any data - focus on metrics
     // so only process system poller info
-    if (context.event.type !== 'systemInfo') {
+    if (context.event.type !== EVENT_TYPES.SYSTEM_POLLER) {
         context.logger.debug('Event is not systemInfo, skipping');
         return Promise.resolve();
     }

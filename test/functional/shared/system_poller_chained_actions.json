@@ -1,0 +1,55 @@
+{
+    "class": "Telemetry",
+    "controls": {
+        "class": "Controls",
+        "logLevel": "debug",
+        "debug": true
+    },
+    "My_System": {
+        "class": "Telemetry_System",
+        "systemPoller": {
+            "interval": 60,
+            "actions": [
+                {
+                    "setTag": {
+                        "1_tagA": "myTag",
+                        "1_tagB": {
+                            "1_valueB_1": "value1"
+                        }
+                    },
+                    "locations": {
+                        "system": {
+                            "diskStorage": {
+                                "^/var": true
+                            }
+                        }
+                    }
+                },
+                {
+                    "includeData": {},
+                    "locations": {
+                        "system": {
+                            "diskStorage": {
+                                "^/var": true,
+                                "^/dev": true
+                            }
+                        }
+                    }
+                },
+                {
+                    "excludeData": {},
+                    "enable": true,
+                    "locations": {
+                        "system": {
+                            "diskStorage": {
+                                "^/var/": {
+                                    "1_tagB": true
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}

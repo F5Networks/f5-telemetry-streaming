@@ -17,11 +17,11 @@ function defaultFormat(globalCtx) {
     let host = 'null';
 
     if (data.system) {
-        try {
+        if (data.system.systemTimestamp) {
             time = Date.parse(data.system.systemTimestamp);
+        }
+        if (data.system.hostname) {
             host = data.system.hostname;
-        } catch (e) {
-            // continue
         }
     } else if (data.hostname) {
         host = data.hostname;

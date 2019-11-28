@@ -124,6 +124,18 @@
                     "type": "object",
                     "additionalProperties": true
                 },
+                "includeData": {
+                    "title": "Include Data",
+                    "description": "The data fields to include in the output",
+                    "type": "object",
+                    "additionalProperties": false
+                },
+                "excludeData": {
+                    "title": "Exclude Data",
+                    "description": "The data fields to exclude in the output",
+                    "type": "object",
+                    "additionalProperties": false
+                },
                 "locations": {
                     "title": "Location",
                     "description": "The location(s) to apply the action.",
@@ -133,8 +145,47 @@
                     }
                 }
             },
+            "dependencies": {
+                "includeData": {
+                    "allOf": [
+                        {
+                            "required": ["locations"]
+                        },
+                        {
+                            "not": { "required": ["setTag"] }
+                        },
+                        {
+                            "not": { "required": ["excludeData"] }
+                        }
+                    ]
+                },
+                "excludeData": {
+                    "allOf": [
+                        {
+                            "required": ["locations"]
+                        },
+                        {
+                            "not": { "required": ["setTag"] }
+                        },
+                        {
+                            "not": { "required": ["includeData"] }
+                        }
+                    ]
+                },
+                "setTag": {
+                    "allOf": [
+                        {
+                            "not": { "required": ["includeData"] }
+                        },
+                        {
+                            "not": { "required": ["excludeData"] }
+                        }
+                    ]
+                }
+            },
             "additionalProperties": false,
             "if": {
+                "required": [ "setTag" ],
                 "properties": {
                     "setTag": {
                         "anyOf": [
@@ -274,8 +325,8 @@
             "description": "Version of ADC Declaration schema this declaration uses",
             "type": "string",
             "$comment": "IMPORTANT: In enum array, please put current schema version first, oldest-supported version last.  Keep enum array sorted most-recent-first.",
-            "enum": [ "1.6.0", "1.5.0", "1.4.0", "1.3.0", "1.2.0", "1.1.0", "1.0.0", "0.9.0" ],
-            "default": "1.6.0"
+            "enum": [ "1.8.0", "1.7.0", "1.6.0", "1.5.0", "1.4.0", "1.3.0", "1.2.0", "1.1.0", "1.0.0", "0.9.0" ],
+            "default": "1.8.0"
        },
        "$schema": {
             "title": "Schema",

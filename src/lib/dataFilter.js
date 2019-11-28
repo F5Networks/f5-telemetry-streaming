@@ -76,4 +76,37 @@ DataFilter.prototype._applyBlacklist = function (data) {
     });
 };
 
-module.exports = DataFilter;
+/**
+ * Handle filter actions
+ * Note:
+ *  - data will be modified in place - make a copy (if need) before passing to this function.
+ *
+ * @public
+ *
+ * @param {Object}  dataCtx                 - data collected from a BIG-IP
+ * @param {Object}  dataCtx.data            - data to process
+ * @param {String}  dataCtx.type            - type of data to process
+ * @param {Object}  actionCtx               - Action property block
+ * @param {Object}  [actionCtx.includeData] - 'Include' filter definition
+ * @param {Object}  [actionCtx.excludeData] - 'Exclude' filter definition
+ * @param {Object}  [actionCtx.locations]   - The locations of data to be filtered
+ * @param {Object}  [actionCtx.ifAllMatch]  - conditions to check before
+ *
+ * @returns {void}
+ */
+function handleAction(dataCtx, actionCtx) {
+    if ((actionCtx.includeData || actionCtx.excludeData)
+            && (util.isObjectEmpty(actionCtx.ifAllMatch)
+                || dataUtil.checkConditions(dataCtx.data, actionCtx.ifAllMatch))) {
+        if (actionCtx.includeData) {
+            dataUtil.preserveStrictMatches(dataCtx.data, actionCtx.locations, true);
+        } else if (actionCtx.excludeData) {
+            dataUtil.removeStrictMatches(dataCtx.data, actionCtx.locations);
+        }
+    }
+}
+
+module.exports = {
+    DataFilter,
+    handleAction
+};

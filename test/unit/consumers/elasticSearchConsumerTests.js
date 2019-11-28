@@ -16,7 +16,7 @@ describe('Rename Keys', () => {
     let util;
 
     before(() => {
-        util = require('../../src/lib/util.js');
+        util = require('../../../src/lib/util.js');
     });
 
     const member1 = '.members.x.';

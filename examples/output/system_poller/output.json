@@ -1,6 +1,7 @@
 {
     "system": {
         "hostname": "telemetry.bigip.com",
+        "machineId": "cd5e51b8-74ef-44c8-985c-7965512c2e87",
         "version": "14.0.0.1",
         "versionBuild": "0.0.2",
         "location": "Seattle",
@@ -278,6 +279,7 @@
             "appService": "/Common/foofoo.app/foofoo",
             "ipProtocol": "tcp",
             "tenant": "Common",
+            "pool": "/Common/foofoo.app/foofoo_pool",
             "application": "foofoo.app"
         },
         "/Example_Tenant/A1/serviceMain": {
@@ -291,6 +293,7 @@
             "name": "/Example_Tenant/A1/serviceMain",
             "ipProtocol": "tcp",
             "tenant": "Example_Tenant",
+            "pool": "/Example_Tenant/A1/barbar_pool",
             "application": "A1"
         },
         "/Example_Tenant/A1/serviceMain-Redirect": {
