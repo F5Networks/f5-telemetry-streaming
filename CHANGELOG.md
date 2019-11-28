@@ -1,6 +1,12 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.9.0
+### Added
+### Fixed
+### Changed
+### Removed
+
 ## 1.8.0
 ### Added
 - AUTOTOOL-487: Add support for filtering (System Poller and Event Listener)
