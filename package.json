@@ -1,6 +1,6 @@
 {
     "name": "f5-telemetry",
-    "version": "1.7.0",
+    "version": "1.8.0",
     "author": "F5 Networks",
     "license": "Apache-2.0",
     "repository": {
@@ -12,7 +12,7 @@
         "install-test": "npm install --no-optional",
         "lint": "eslint src test",
         "test-functional": "mocha \"./test/functional/testRunner.js\" --opts ./test/functional/.mocha.opts",
-        "test-only": "mocha --recursive \"./test/unit/*.js\" --opts ./test/unit/.mocha.opts",
+        "test-only": "mocha --recursive \"./test/unit/**/*.js\" --opts ./test/unit/.mocha.opts",
         "test": "nyc --all npm run test-only",
         "build": "./scripts/build/buildRpm.sh"
     },
@@ -32,13 +32,14 @@
         ]
     },
     "dependencies": {
-        "@f5devcentral/f5-teem": "^1.0.0",
+        "@f5devcentral/f5-teem": "^1.1.0",
         "ajv": "^6.5.4",
         "ajv-async": "^1.0.1",
         "aws-sdk": "^2.369.0",
         "commander": "^2.19.0",
         "deep-diff": "^1.0.2",
         "elasticsearch": "^15.3.0",
+        "jsonwebtoken": "^8.5.1",
         "kafka-node": "^2.6.1",
         "mustache": "^3.0.0",
         "node-statsd": "0.1.1",

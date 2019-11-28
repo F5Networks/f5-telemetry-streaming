@@ -439,7 +439,9 @@ Tracer.prototype.stop = function () {
  * @param {string} data - data to write to tracer
  */
 Tracer.prototype.write = function (data) {
-    if (!data) return Promise.reject(new Error('Missing data to write'));
+    if (!data) {
+        return Promise.resolve();
+    }
 
     return this._open()
         .then(() => this._truncate())

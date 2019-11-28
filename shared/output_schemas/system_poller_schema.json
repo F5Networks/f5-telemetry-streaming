@@ -11,6 +11,9 @@
                 "hostname": {
                     "type": "string"
                 },
+                "machineId": {
+                    "type": "string"
+                },
                 "version": {
                     "type": "string"
                 },

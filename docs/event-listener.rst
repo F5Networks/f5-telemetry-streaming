@@ -79,14 +79,14 @@ To configure carrier-grade network address translation (CGNAT), use the followin
 
    - The Large Scale NAT (LSN) Pool must use the Telemetry Streaming Log Publisher you created (**telemetry_publisher** if you used the AS3 example to configure TS logging).  |br| If you have an existing pool, update the pool to use the TS Log Publisher:
 
-      - TMSH: ``modify ltm lsn-pool cgnat_lsn_pool log-publisher telemetry_publisher``
-      - GUI: **Carrier Grade NAT > LSN Pools > LSN Pools List**  
+     - TMSH:|br| ``modify ltm lsn-pool cgnat_lsn_pool log-publisher telemetry_publisher``
+     - GUI:|br| **Carrier Grade NAT > LSN Pools > LSN Pools List**  |br| |br|
 
    - Create and attach a new CGNAT Logging Profile to the LSN pool.  This determines what types of logs you wish to receive (optional).
 
-     - TMSH-create: ``create ltm lsn-log-profile telemetry_lsn_log_profile { start-inbound-session { action enabled } }``
-     - TMSH-attach: ``modify ltm lsn-pool cgnat_lsn_pool log-profile telemetry_lsn_log_profile``
-     - GUI: **Carrier Grade NAT -> Logging Profiles -> LSN**
+     - TMSH-create:|br| ``create ltm lsn-log-profile telemetry_lsn_log_profile { start-inbound-session { action enabled } }``
+     - TMSH-attach:|br| ``modify ltm lsn-pool cgnat_lsn_pool log-profile telemetry_lsn_log_profile``
+     - GUI:|br| **Carrier Grade NAT -> Logging Profiles -> LSN**
 
 Example output:
 
@@ -230,14 +230,38 @@ Example output:
 .. _configurelogpub-ref:
 
 Configure the Log Publisher using TMSH
-``````````````````````````````````````
+--------------------------------------
 
 Note the following:
+
 - Examples assume the TS listener is using port 6514.
 - Additional objects are required for BIG-IP configurations pointing to a local on-box listener (configuration notes included in the following procedure).
-- Per-app Virtual Edition BIG-IP limits the number of virtual servers available. To avoid creating the virtual server creating the virtual server in the following configuration, it is possible to point the pool directly at the TMM link-local IPv6 address. 
 
-1. Create an iRule (localhost forwarder). **This is only required when TS is a local listener**.
+The first steps depend on which type of BIG-IP system you are using: a standard BIG-IP system or a Per-App BIG-IP VE (Virtual Edition). Use only one of the following procedures for initial configuration.
+
+Initial configuration for Per-App BIG-IP VE
+```````````````````````````````````````````
+
+The configuration for a Per-App VE is different because it limits the number of virtual servers (one virtual IP address and three virtual servers). 
+  
+If you are using a Per-App VE, to avoid creating the virtual server you can point the pool directly at the TMM link-local IPv6 address, using the following guidance:
+
+#. From the BIG-IP Command line, type the following command ``ip -6 a s tmm scope link``.  |br| You see the system return something similar to the following: |br| ``tmm: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 state UP qlen 1000`` |br| ``inet6 fe80::298:76ff:fe54:3210/64 scope link`` |br| ``valid_lft forever preferred_lft forever``
+
+#. Copy the IPv6 address starting after inet6, beginning with fe80, and without any mask. In our example, we copy **fe80::298:76ff:fe54:3210**
+
+#. Create a pool using the following command: |br| ``tmsh create ltm pool telemetry members replace-all-with { fe80::298:76ff:fe54:3210.6514 }``  (replace the IPv6 link-local address with the one returned from the BIG-IP in the first step)
+
+#. Continue with :ref:`restlogpub`.
+
+
+Initial configuration for a standard BIG-IP system
+``````````````````````````````````````````````````
+
+If you are using a standard BIG-IP system (one that does not have restrictions on the number of virtual servers like the Per-App VE), use the following guidance to initially configure the system.
+
+
+#. Create an iRule (localhost forwarder). **This is only required when TS is a local listener**.
 
    .. code-block:: bash
 
@@ -252,40 +276,48 @@ Note the following:
         }
 
 
-2. Create the virtual server. **This is only required when TS is a local listener**.
+#. Create the virtual server. **This is only required when TS is a local listener**.
 
    .. code-block:: bash
 
         create ltm virtual telemetry_local destination 255.255.255.254:6514 rules { telemetry_local_rule }
 
 
-3. Create the pool. When TS is not a local listener, the member should be the listener's remote address.
+#. Create the pool. When TS is not a local listener, the member should be the listener's remote address.
 
    .. code-block:: bash
 
         create ltm pool telemetry monitor tcp members replace-all-with { 255.255.255.254:6514 }
 
+#. Continue with :ref:`restlogpub`.
 
-4. Create the Log Destination (Remote HSL):
+.. _restlogpub:
+
+Configuring the rest of the Log Publisher
+`````````````````````````````````````````
+
+In this section, you configure the remaining objects for the Log Publisher, no matter which initial configuration method you used.
+
+
+#. Create the Log Destination (Remote HSL):
 
    .. code-block:: python
 
         create sys log-config destination remote-high-speed-log telemetry_hsl protocol tcp pool-name telemetry
 
 
-5. Create the Log Destination (Format):
+#. Create the Log Destination (Format):
 
    .. code-block:: python
 
         create sys log-config destination splunk telemetry_formatted forward-to telemetry_hsl
 
 
-6. Create the Log Publisher:
+#. Create the Log Publisher:
 
    .. code-block:: python
 
         create sys log-config publisher telemetry_publisher destinations replace-all-with { telemetry_formatted }
-
 
 
 

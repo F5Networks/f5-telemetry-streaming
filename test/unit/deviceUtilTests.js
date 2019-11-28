@@ -81,7 +81,7 @@ describe('Device Util', () => {
         const mockRes = { statusCode: 200, statusMessage: 'message', headers: mockHeaders };
         setupRequestMock(mockRes, mockBody);
 
-        return deviceUtil.downloadFileFromDevice('/wrong/path/to/file//downloadFileFromDevice_test', constants.LOCAL_HOST, '/uri/to/path')
+        return deviceUtil.downloadFileFromDevice('/wrong/path/to/file', constants.LOCAL_HOST, '/uri/to/path')
             .then(() => {
                 assert.fail('Should throw an error');
             })
@@ -504,6 +504,47 @@ describe('Device Util', () => {
             .catch(err => Promise.reject(err));
     });
 
+    it('should encrypt data that is 1k characters long', () => {
+        const secret = 'abcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabc'
+            + 'abcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabca'
+            + 'bcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabc'
+            + 'abcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
+            + 'cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
+            + 'cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
+            + 'cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
+            + 'cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
+            + 'cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
+            + 'cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
+            + 'cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
+            + 'cabcabcabcabcabcabcabcabca';
+        const mockRes = { statusCode: 200, statusMessage: 'message' };
+        const mockBody = {
+            secret: 'encryptedData',
+            entries: {
+                someKey: {
+                    nestedStats: {
+                        entries: {
+                            version: {
+                                description: '14.0.0'
+                            },
+                            BuildInfo: {
+                                description: '0.0.1'
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        setupRequestMock(mockRes, mockBody);
+
+        return deviceUtil.encryptSecret(secret)
+            .then((data) => {
+                assert.strictEqual(data, 'encryptedData,encryptedData');
+                return Promise.resolve();
+            })
+            .catch(err => Promise.reject(err));
+    });
+
     it('should encrypt secret and retrieve it via REST API when software version is 15.0.0', () => {
         const secret = 'asecret';
         const mockRes = { statusCode: 200, statusMessage: 'message' };
@@ -595,7 +636,7 @@ describe('Device Util', () => {
 
     it('should decrypt secret', () => {
         const secret = 'asecret';
-        childProcess.exec = (cmd, cb) => { cb(null, secret, null); };
+        childProcess.execFile = (cmd, args, cb) => { cb(null, secret, null); };
 
         return deviceUtil.decryptSecret('foo')
             .then((data) => {
@@ -607,7 +648,7 @@ describe('Device Util', () => {
 
     it('should decrypt all secrets', () => {
         const secret = 'asecret';
-        childProcess.exec = (cmd, cb) => { cb(null, secret, null); };
+        childProcess.execFile = (cmd, args, cb) => { cb(null, secret, null); };
         process.env.MY_SECRET_TEST_VAR = secret;
 
         const obj = {

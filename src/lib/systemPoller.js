@@ -15,7 +15,6 @@ const deviceUtil = require('./deviceUtil.js');
 const configWorker = require('./config.js');
 const SystemStats = require('./systemStats.js');
 const dataPipeline = require('./dataPipeline.js');
-const dataTagging = require('./dataTagging');
 
 const SYSTEM_CLASS_NAME = constants.SYSTEM_CLASS_NAME;
 const SYSTEM_POLLER_CLASS_NAME = constants.SYSTEM_POLLER_CLASS_NAME;
@@ -30,18 +29,21 @@ const pollerIDs = {};
  * @param {Object}   args.config              - system config
  * @param {Boolean}  [args.process]           - determine whether to process through pipeline
  * @param {module:util~Tracer} [args.tracer]  - tracer to write to disk
+ * @param []
  *
  * @returns {Promise} Promise which is resolved with data sent
  */
-function process(args) {
+function process() {
+    const args = arguments[0];
+    const options = arguments.length > 1 ? arguments[1] : {};
+
     const config = args.config;
     const tracer = args.tracer;
-
     const startTimestamp = new Date().toISOString();
-    logger.debug('System poller cycle started');
 
+    logger.debug('System poller cycle started');
     return new SystemStats(config.host, config.options).collect()
-        .then((data) => {
+        .then((normalizedData) => {
             const endTimeStamp = new Date().toISOString();
             // inject service data
             const telemetryServiceInfo = {
@@ -49,26 +51,20 @@ function process(args) {
                 cycleStart: startTimestamp,
                 cycleEnd: endTimeStamp
             };
-            data.telemetryServiceInfo = telemetryServiceInfo;
-            data.telemetryEventCategory = constants.EVENT_TYPES.SYSTEM_POLLER;
+            normalizedData.telemetryServiceInfo = telemetryServiceInfo;
+            normalizedData.telemetryEventCategory = constants.EVENT_TYPES.SYSTEM_POLLER;
             // end inject service data
 
-            if (config.options.actions) {
-                dataTagging.handleActions(data, config.options.actions);
-            }
-
-            if (tracer) {
-                tracer.write(JSON.stringify(data, null, 4));
-            }
-            let ret = null;
-            if (args.process === false) {
-                ret = Promise.resolve(data);
-            } else {
-                // call out to pipeline
-                dataPipeline.process(data, constants.EVENT_TYPES.SYSTEM_POLLER);
-            }
+            const dataCtx = { data: normalizedData, type: constants.EVENT_TYPES.SYSTEM_POLLER };
+            return dataPipeline.process(dataCtx, {
+                noConsumers: options.requestFromUser,
+                tracer,
+                actions: config.options.actions
+            });
+        })
+        .then((dataCtx) => {
             logger.debug('System poller cycle finished');
-            return ret;
+            return dataCtx;
         })
         .catch((e) => {
             throw e;
@@ -167,10 +163,9 @@ function processClientRequest(restOperation) {
         })
         .then((configs) => {
             const config = mergeConfigs(configs[0], configs[1]);
-            config.process = false;
-            return safeProcess(config);
+            return safeProcess(config, { requestFromUser: true });
         })
-        .then(data => util.restOperationResponder(restOperation, 200, data))
+        .then(dataCtx => util.restOperationResponder(restOperation, 200, dataCtx.data))
         .catch((error) => {
             let message;
             let code;
@@ -302,6 +297,10 @@ configWorker.on('change', (config) => {
         spConfig.tracer = util.tracer.createFromConfig(
             SYSTEM_POLLER_CLASS_NAME, spConfig.name, spConfig
         );
+        // Only collect tmstats if Splunk consumer is using legacy format
+        if (!JSON.stringify(config).includes('format":"legacy')) {
+            spConfig.config.options.noTmstats = true;
+        }
 
         const baseMsg = `system poller ${spConfig.name}. Interval = ${spConfig.interval} sec.`;
         if (pollerIDs[spConfig.name]) {

@@ -437,6 +437,72 @@ function test() {
                     });
                 });
             });
+
+            it('should post a configuration containing system poller filtering', () => {
+                const filterDeclaration = fs.readFileSync(constants.DECL.FILTER_EXAMPLE).toString();
+                const uri = `${baseILXUri}/declare`;
+                const postOptions = {
+                    method: 'POST',
+                    headers: options.headers,
+                    body: filterDeclaration
+                };
+
+                return util.makeRequest(host, uri, postOptions)
+                    .then((data) => {
+                        util.logger.info('Declaration response:', { host, data });
+                        assert.strictEqual(data.message, 'success');
+                    });
+            });
+
+
+            it('should get filtered systempoller info', () => {
+                const uri = `${baseILXUri}/systempoller/${constants.DECL.SYSTEM_NAME}`;
+
+                return util.makeRequest(host, uri, options)
+                    .then((data) => {
+                        data = data || {};
+                        util.logger.info(`Filtered SystemPoller response (${uri}):`, { host, data });
+                        // verify that certain data was filtered out, while other data was preserved
+                        assert.strictEqual(Object.keys(data.system).indexOf('provisioning'), -1);
+                        assert.strictEqual(Object.keys(data.system.diskStorage).indexOf('/usr'), -1);
+                        assert.notStrictEqual(Object.keys(data.system.diskStorage).indexOf('/'), -1);
+                        assert.notStrictEqual(Object.keys(data.system).indexOf('version'), -1);
+                        assert.notStrictEqual(Object.keys(data.system).indexOf('hostname'), -1);
+                    });
+            });
+
+            it('should post a configuration containing chained system poller actions', () => {
+                const filterDeclaration = fs.readFileSync(constants.DECL.ACTION_CHAINING_EXAMPLE).toString();
+                const uri = `${baseILXUri}/declare`;
+                const postOptions = {
+                    method: 'POST',
+                    headers: options.headers,
+                    body: filterDeclaration
+                };
+
+                return util.makeRequest(host, uri, postOptions)
+                    .then((data) => {
+                        util.logger.info('Declaration response:', { host, data });
+                        assert.strictEqual(data.message, 'success');
+                    });
+            });
+
+
+            it('should get filtered systempoller info', () => {
+                const uri = `${baseILXUri}/systempoller/${constants.DECL.SYSTEM_NAME}`;
+
+                return util.makeRequest(host, uri, options)
+                    .then((data) => {
+                        data = data || {};
+                        util.logger.info(`Filtered SystemPoller response (${uri}):`, { host, data });
+                        // verify /var is included with, with 1_tagB removed
+                        assert.notStrictEqual(Object.keys(data.system.diskStorage).indexOf('/var'), -1);
+                        assert.deepEqual(data.system.diskStorage['/var']['1_tagB'], { '1_valueB_1': 'value1' });
+                        // verify /var/log is included with, with 1_tagB included
+                        assert.strictEqual(Object.keys(data.system.diskStorage['/var/log']).indexOf('1_tagB'), -1);
+                        assert.deepEqual(data.system.diskStorage['/var/log']['1_tagA'], 'myTag');
+                    });
+            });
         });
     });
 }
