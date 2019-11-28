@@ -106,7 +106,7 @@ coverage:
     tags:
         - cm-official-docker-executor
 
-build_package:
+build_rpm:
     image: f5devcentral/containthedocs:rpmbuild
     stage: build
     script:
