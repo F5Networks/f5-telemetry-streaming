@@ -265,6 +265,7 @@ Required Information:
 .. literalinclude:: ../examples/declarations/fluentd.json
     :language: json
 
+.. _stackdrive:
 
 Google StackDriver
 ~~~~~~~~~~~~~~~~~~
