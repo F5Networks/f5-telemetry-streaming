@@ -3,7 +3,7 @@
 Example Output
 ==============
 
-Use this page to see the type of information that Telemetry Streaming collects. Use the links in the left pane to find a particular example
+Use this page to see the type of information that Telemetry Streaming collects. Use the links in the right pane to find a particular example
 
 .. _sysinfo:
 

@@ -12,7 +12,7 @@ Document Revision History
         - Date
 
       * - 1.8.0
-        - Updated the documentation for Telemetry Streaming v1.8.0. This release contains the following changes: |br| *  |br| |br| Issues Resolved: |br| * Improved error handling to preserve stack trace
+        - Updated the documentation for Telemetry Streaming v1.8.0. This release contains the following changes: |br| * Added support for Google StackDriver as a consumer (see :ref:`stackdrive`) |br| * Added a new page for :doc:`data-modification`, which includes support for Action Chains, and includeData and excludeData filtering (see :ref:`Action Chains<actions>` for information on these items). |br| * Added **machineId** to System Poller output |br| * Added reference to pools in virtual server data  |br| |br| Issues Resolved: |br| * Improved error handling to preserve stack traces
         - 12-3-19
       
       * - 1.7.0
