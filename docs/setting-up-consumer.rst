@@ -285,7 +285,7 @@ For complete information on deploying StackDriver, see |sddocs|.
 **Finding the Data**  |br|
 Once you have configured the StackDriver consumer and sent a Telemetry Streaming declaration, Telemetry Streaming creates custom MetricDescriptors to which it sends metrics.  These metrics can be found under a path such as **custom/system/cpu**. To make it easier to find data that is relevant to a specific device,TS uses the **Generic Node** resource type, and assigns machine ID to the **node_id** label to identify which device the data is from.
 
-.. IMPORTANT:: There is a quota of 500 custom MetricDescriptors for StackDriver Monitoring. Telemetry Streaming creates these MetricDescriptors, and if this quota is ever hit, you must delete custom some of these MetricDescriptors.
+.. IMPORTANT:: There is a quota of 500 custom MetricDescriptors for StackDriver Monitoring. Telemetry Streaming creates these MetricDescriptors, and if this quota is ever reached, you must delete some of these MetricDescriptors.
 
 .. literalinclude:: ../examples/declarations/stackdriver.json
     :language: json
