@@ -237,7 +237,7 @@ html_use_index = True
 #
 # html_show_sourcelink = True
 
-# If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
+# If true, "Created using Sphinx" is shown in the HTML footer. The default is True.
 #
 html_show_sphinx = False
 
