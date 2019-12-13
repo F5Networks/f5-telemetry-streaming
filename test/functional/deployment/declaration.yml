@@ -24,6 +24,13 @@ request:
       flavor: F5-BIGIP-small
     - harness:
         _copy: request/hypervisor
+      name: bigip_14_0
+      software:
+        _copy: request/software/bigip_14_0
+      type: bigip
+      flavor: F5-BIGIP-small
+    - harness:
+        _copy: request/hypervisor
       name: bigip_14_1
       software:
         _copy: request/software/bigip_14_1
@@ -54,6 +61,15 @@ request:
         build: 0.0.4
         iso_file: ''
         version: 13.1.1.4
+    bigip_14_0:
+      default:
+        force: false
+        image: BIGIP-13.0.0.0.0.1650
+      desired:
+        branch: ''
+        build: 0.0.3
+        iso_file: ''
+        version: 14.0.0.5
     bigip_14_1:
       default:
         force: false
