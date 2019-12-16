@@ -234,6 +234,7 @@ ConfigWorker.prototype.validateAndApply = function (data) {
         raw: {},
         parsed: {}
     };
+    logger.debug(`Configuration to process: ${util.stringify(data)}`);
 
     // validate declaration, then run it back through validator with scratch
     // property set for additional processing required prior to internal consumption

@@ -431,6 +431,7 @@ module.exports = {
 
         return new Promise((resolve, reject) => {
             const client = net.createConnection({ host, port }, () => {
+                logger.info(`Sending following message to ${host} :${port}`, { msg });
                 client.write(msg);
                 client.end();
             });
