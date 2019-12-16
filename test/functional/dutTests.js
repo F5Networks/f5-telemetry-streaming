@@ -39,6 +39,7 @@ function postDeclarationToDUTs(callback) {
         const user = item.username;
         const password = item.password;
 
+        util.logger.info(`Going to send following declaration to host ${item.hostname}`, declaration);
         return util.getAuthToken(host, user, password)
             .then((data) => {
                 const postOptions = {
