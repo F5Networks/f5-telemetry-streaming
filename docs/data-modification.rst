@@ -589,12 +589,11 @@ And this is an example of the output from the Action definition.
     {
         "system": {
             "hostname": "hostname",
-            "versionBuild": "0.0.1"
         }
     }
 
 
-.. NOTE:: **includeData** treats 'version' as a regular expression, so as result both 'version' and 'versionBuild' are included in output.
+.. NOTE:: **includeData** treats 'version' as a regular expression, so as result both 'version' and 'versionBuild' are excluded in output.
 
 |
 
