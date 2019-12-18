@@ -55,8 +55,8 @@ module.exports = function (context) {
     };
     if (config.username) {
         clientConfig.httpAuth = config.username;
-        if (config.password) {
-            clientConfig.httpAuth = `${clientConfig.httpAuth}:${config.password}`;
+        if (config.passphrase) {
+            clientConfig.httpAuth = `${clientConfig.httpAuth}:${config.passphrase}`;
         }
     }
     if (config.apiVersion) {
