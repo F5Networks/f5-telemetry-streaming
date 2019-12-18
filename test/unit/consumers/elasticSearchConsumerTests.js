@@ -71,7 +71,7 @@ describe('ElasticSearch', () => {
                     allowSelfSignedCert: true,
                     protocol: 'http',
                     username: 'myUser',
-                    password: 'myPassword',
+                    passphrase: 'myPassword',
                     apiVersion: '12'
                 }
             });

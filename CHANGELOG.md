@@ -4,6 +4,7 @@ Changes to this project are documented in this file. More detail and links can b
 ## 1.9.0
 ### Added
 ### Fixed
+- AUTOTOOL-1061: Basic auth does not work with ElasticSearch consumer
 ### Changed
 ### Removed
 
