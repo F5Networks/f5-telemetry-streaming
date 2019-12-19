@@ -6,6 +6,7 @@ Changes to this project are documented in this file. More detail and links can b
 ### Fixed
 - AUTOTOOL-1061: Basic auth does not work with ElasticSearch consumer
 ### Changed
+- AUTOTOOL-1068: The username and passphrase settings for AWS CloudWatch consumers are now optional
 ### Removed
 
 ## 1.8.0
