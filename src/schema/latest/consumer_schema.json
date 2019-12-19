@@ -319,9 +319,7 @@
                             "required": [
                                 "region",
                                 "logGroup",
-                                "logStream",
-                                "username",
-                                "passphrase"
+                                "logStream"
                             ],
                             "properties": {
                                 "region": { "$ref": "#/definitions/region" },

@@ -79,6 +79,20 @@ describe('AWS_CloudWatch', () => {
             new AWS.Credentials({ accessKeyId: 'awsuser', secretAccessKey: 'awssecret' }));
     });
 
+    it('should configure AWS access without creds', () => {
+        let optionsParam;
+        awsConfigUpdate.callsFake((options) => {
+            optionsParam = options;
+        });
+        const config = Object.assign({}, defaultConsumerConfig);
+        delete config.username;
+        delete config.passphrase;
+        const context = util.buildConsumerContext({ config });
+
+        awsCloudWatchIndex(context);
+        assert.strictEqual(optionsParam.region, 'us-west-1');
+    });
+
     describe('process', () => {
         const expectedParams = {
             logGroupName: 'myLogGroup',
