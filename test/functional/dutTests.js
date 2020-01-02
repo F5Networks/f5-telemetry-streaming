@@ -23,6 +23,41 @@ const packageDetails = util.getPackageDetails();
 
 
 /**
+ * Post declaration to TS on DUT
+ *
+ * @param {Object} dut          - DUT (device under test) object
+ * @param {String} dut.ip       - host
+ * @param {String} dut.user     - username
+ * @param {String} dut.password - password
+ * @param {String} dut.hostname - hostname
+ * @param {Object} declaration  - declaration to send to TS
+ *
+ * @returns {Object} Promise resolved when request succeed
+ */
+function postDeclarationToDUT(dut, declaration) {
+    const uri = `${baseILXUri}/declare`;
+    const host = dut.ip;
+    const user = dut.username;
+    const password = dut.password;
+
+    util.logger.info(`Going to send following declaration to host ${dut.hostname}`, declaration);
+    return util.getAuthToken(host, user, password)
+        .then((data) => {
+            const postOptions = {
+                method: 'POST',
+                headers: {
+                    'x-f5-auth-token': data.token
+                },
+                body: declaration
+            };
+            return util.makeRequest(host, uri, postOptions);
+        })
+        .then((data) => {
+            assert.strictEqual(data.message, 'success');
+        });
+}
+
+/**
  * Post declaration to TS on DUTs
  *
  * @param {Function} callback - callback, should return declaration
@@ -30,68 +65,81 @@ const packageDetails = util.getPackageDetails();
  * @returns {Object} Promise resolved when all requests succeed
  */
 function postDeclarationToDUTs(callback) {
-    const uri = `${baseILXUri}/declare`;
+    return Promise.all(duts.map(dut => postDeclarationToDUT(dut, callback(dut))));
+}
 
-    // account for 1+ DUTs
-    const promises = duts.map((item) => {
-        const declaration = callback(item);
-        const host = item.ip;
-        const user = item.username;
-        const password = item.password;
+/**
+ * Send message(s) to TS Event Listener
+ *
+ * @param {Object}  dut             - DUT (device under test) object
+ * @param {String}  dut.ip          - host
+ * @param {String}  message         - message to send
+ * @param {Object}  [opts]          - options
+ * @param {Integer} [opts.numOfMsg] - number of messages to send, by default 15
+ * @param {Integer} [opts.delay]    - delay (in ms) before sending next message, by default 4000ms
+ *
+ * @returns {Object} Promise resolved when all messages were sent to Event Listener
+ */
+function sendDataToEventListener(dut, message, opts) {
+    opts = opts || {};
+    opts.numOfMsg = typeof opts.numOfMsg === 'undefined' ? 15 : opts.numOfMsg;
+    opts.delay = typeof opts.delay === 'undefined' ? 4000 : opts.delay;
 
-        util.logger.info(`Going to send following declaration to host ${item.hostname}`, declaration);
-        return util.getAuthToken(host, user, password)
-            .then((data) => {
-                const postOptions = {
-                    method: 'POST',
-                    headers: {
-                        'x-f5-auth-token': data.token
-                    },
-                    body: declaration
-                };
-                return util.makeRequest(host, uri, postOptions);
-            })
-            .then((data) => {
-                assert.strictEqual(data.message, 'success');
-            });
+    util.logger.info(`Sending ${opts.numOfMsg} messages to Event Listener ${dut.ip}`);
+    return new Promise((resolve, reject) => {
+        function sendData(i) {
+            if (i >= opts.numOfMsg) {
+                resolve();
+                return;
+            }
+            new Promise(timeoutResolve => setTimeout(timeoutResolve, opts.delay))
+                .then(() => util.sendEvent(dut.ip, message))
+                .then(() => sendData(i + 1))
+                .catch(reject);
+        }
+        sendData(0);
     });
-    return Promise.all(promises);
 }
 
 /**
  * Send data to TS Event Listener on DUTs
  *
- * @param {Function} callback - callback, should return data
- * @param {Number} [numOfMsgs]  - number of messages to send, by default 15
- * @param {Number} [delay]      - delay (in ms) before sending next message, by default 4000ms
+ * @param {Function} callback  - callback, should return data
+ * @param {Number}  [numOfMsg] - number of messages to send, by default 15
+ * @param {Number}  [delay]    - delay (in ms) before sending next message, by default 4000ms
  *
- * @returns {Object} Promise resolved when all requests succeed
+ * @returns {Object} Promise resolved when all messages were sent to Event Listeners
  */
-function sendDataToDUTsEventListener(callback, numOfMsgs, delay) {
-    numOfMsgs = numOfMsgs === undefined ? 15 : numOfMsgs;
-    delay = delay === undefined ? 4000 : delay;
-    // account for 1+ DUTs
-    return Promise.all(duts.map((item) => {
-        util.logger.info(`Sending ${numOfMsgs} messages to Event Listener ${item.ip}`);
-        return new Promise((resolve, reject) => {
-            function sendData(i) {
-                if (i >= numOfMsgs) {
-                    resolve();
-                    return;
+function sendDataToEventListeners(callback, numOfMsg, delay) {
+    return Promise.all(duts.map(dut => sendDataToEventListener(dut, callback(dut), { numOfMsg, delay })));
+}
+
+/**
+ * Fetch System Poller data from DUT
+ *
+ * @param {Object} dut          - DUT (device under test) object
+ * @param {String} dut.ip       - host
+ * @param {String} dut.user     - username
+ * @param {String} dut.password - password
+ *
+ * @returns {Object} Promise resolved when request succeed
+ */
+function getSystemPollerData(dut, sysPollerName) {
+    const uri = `${baseILXUri}/systempoller/${sysPollerName}`;
+    const host = dut.ip;
+    const user = dut.username;
+    const password = dut.password;
+
+    return util.getAuthToken(host, user, password)
+        .then((data) => {
+            const postOptions = {
+                method: 'GET',
+                headers: {
+                    'x-f5-auth-token': data.token
                 }
-                new Promise(timeoutResolve => setTimeout(timeoutResolve, delay))
-                    .then(() => util.sendEvent(item.ip, callback(item)))
-                    .then(() => sendData(i + 1))
-                    .catch(reject);
-            }
-            sendData(0);
+            };
+            return util.makeRequest(host, uri, postOptions);
         });
-    }))
-        .catch(err => new Promise((resolve, reject) => {
-            setTimeout(() => {
-                reject(err);
-            }, 1000);
-        }));
 }
 
 /**
@@ -101,28 +149,11 @@ function sendDataToDUTsEventListener(callback, numOfMsgs, delay) {
  *
  * @returns {Object} Promise resolved when all requests succeed
  */
-function getSystemPollerData(callback) {
-    const uri = `${baseILXUri}/systempoller/${constants.DECL.SYSTEM_NAME}`;
-    const promises = duts.map((item) => {
-        const host = item.ip;
-        const user = item.username;
-        const password = item.password;
-
-        return util.getAuthToken(host, user, password)
-            .then((data) => {
-                const postOptions = {
-                    method: 'GET',
-                    headers: {
-                        'x-f5-auth-token': data.token
-                    }
-                };
-                return util.makeRequest(host, uri, postOptions);
-            })
-            .then((data) => {
-                callback(item, data);
-            });
-    });
-    return Promise.all(promises);
+function getSystemPollersData(callback) {
+    return Promise.all(duts.map(
+        dut => getSystemPollerData(dut, constants.DECL.SYSTEM_NAME)
+            .then(data => callback(dut, data))
+    ));
 }
 
 /**
@@ -254,6 +285,10 @@ function setup() {
                         data = data || {};
                         util.logger.info(`${uri} response`, { host, data });
                         assert.notStrictEqual(data.version, undefined);
+                    })
+                    .catch((err) => {
+                        util.logger.error(`Unable to verify package installation due following error: ${err}`);
+                        return Promise.reject(err);
                     });
             });
 
@@ -577,7 +612,14 @@ function teardown() {
                     });
             });
 
-            it('should remove existing TS packages', () => uninstallAllTSpackages(host, authToken, options));
+            it('should remove existing TS packages', () => new Promise((resolve, reject) => {
+                uninstallAllTSpackages(host, authToken, options)
+                    .then(resolve)
+                    .catch((err) => {
+                        util.logger.info(`Unable to verify package uninstall due following error: ${err}`);
+                        setTimeout(() => reject(err), 5000);
+                    });
+            }));
         });
     });
 }
@@ -587,8 +629,11 @@ module.exports = {
     test,
     teardown,
     utils: {
+        getSystemPollerData,
+        getSystemPollersData,
+        postDeclarationToDUT,
         postDeclarationToDUTs,
-        sendDataToDUTsEventListener,
-        getSystemPollerData
+        sendDataToEventListener,
+        sendDataToEventListeners
     }
 };
