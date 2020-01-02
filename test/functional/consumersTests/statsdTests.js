@@ -189,7 +189,7 @@ function test() {
 
         const sysPollerMetricsData = {};
 
-        it('should fetch system poller data via debug endpoint from DUTs', () => dutUtils.getSystemPollerData((hostObj, data) => {
+        it('should fetch system poller data via debug endpoint from DUTs', () => dutUtils.getSystemPollersData((hostObj, data) => {
             sysPollerMetricsData[hostObj.hostname] = getMerticsName(data);
         }));
 

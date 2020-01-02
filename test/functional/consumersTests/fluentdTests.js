@@ -95,7 +95,7 @@ function test() {
 
         it('should send event to TS Event Listener', () => {
             const msg = `testDataTimestamp="${testDataTimestamp}",test="true",testType="${FLUENTD_CONSUMER_NAME}"`;
-            return dutUtils.sendDataToDUTsEventListener((hostObj => `hostname="${hostObj.hostname}",${msg}`), 10, 3000);
+            return dutUtils.sendDataToEventListeners((hostObj => `hostname="${hostObj.hostname}",${msg}`));
         });
     });
 
@@ -103,7 +103,7 @@ function test() {
         const systemPollerData = {};
         const fluentLogs = [];
         before(() => new Promise(resolve => setTimeout(resolve, 30 * 1000))
-            .then(() => dutUtils.getSystemPollerData((hostObj, data) => {
+            .then(() => dutUtils.getSystemPollersData((hostObj, data) => {
                 systemPollerData[hostObj.hostname] = data;
             })));
 

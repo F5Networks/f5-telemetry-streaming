@@ -78,7 +78,7 @@ function test() {
 
         it('should send event to TS Event Listener', () => {
             const msg = `timestamp="${dataTimestamp}",test="${dataTimestamp}",testType="${testType}"`;
-            return dutUtils.sendDataToDUTsEventListener(hostObj => `hostname="${hostObj.hostname}",${msg}`);
+            return dutUtils.sendDataToEventListeners(hostObj => `hostname="${hostObj.hostname}",${msg}`);
         });
     });
 
