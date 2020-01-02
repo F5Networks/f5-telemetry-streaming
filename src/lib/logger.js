@@ -64,15 +64,15 @@ function maskSecrets(msg) {
     let ret = msg;
     const secrets = {
         passphrase: {
-            replace: /(?:"passphrase":{)(.*?)(?:})/g,
+            replace: /(?:"passphrase":\s*{)(.*?)(?:})/g,
             with: '"passphrase":{*********}'
         },
         '"passphrase"': {
-            replace: /(?:"passphrase":")(.*?)(?:")/g,
+            replace: /(?:"passphrase":\s*")(.*?)(?:")/g,
             with: '"passphrase":"*********"'
         },
         cipherText: {
-            replace: /(?:"cipherText":")(.*?)(?:")/g,
+            replace: /(?:"cipherText":\s*")(.*?)(?:")/g,
             with: '"cipherText":"*********"'
         }
     };

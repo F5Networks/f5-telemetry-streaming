@@ -115,16 +115,6 @@ describe('Logger', () => {
         assert.notStrictEqual(loggedMessages.error[0].indexOf(`this is a ${level} message`), -1);
     });
 
-    it('should mask secrets', () => {
-        const decl = {
-            passphrase: {
-                cipherText: 'foo'
-            }
-        };
-        logger.info(`this contains secrets: ${JSON.stringify(decl)}`);
-        assert.notStrictEqual(loggedMessages.info[0].indexOf('this contains secrets: {"passphrase":{*********}}'), -1);
-    });
-
     it('should stringify object', () => {
         const msg = {
             foo: 'bar'
@@ -140,5 +130,46 @@ describe('Logger', () => {
 
         childLogger.info('foo');
         assert.notStrictEqual(loggedMessages.info[0].indexOf(`[telemetry.${prefix}]`), -1);
+    });
+
+    describe('mask secrets', () => {
+        it('should mask secrets - cipherText (without new lines)', () => {
+            const decl = {
+                passphrase: {
+                    cipherText: 'foo'
+                }
+            };
+            const expected = 'this contains secrets: {"passphrase":{*********}}';
+            logger.info(`this contains secrets: ${JSON.stringify(decl)}`);
+            assert.notStrictEqual(loggedMessages.info[0].indexOf(expected), -1);
+        });
+
+        it('should mask secrets - cipherText (with new lines)', () => {
+            const decl = {
+                passphrase: {
+                    cipherText: 'foo'
+                }
+            };
+            const expected = 'this contains secrets: {\n    "passphrase": {\n        "cipherText":"*********"\n    }\n}';
+            logger.info(`this contains secrets: ${JSON.stringify(decl, null, 4)}`);
+            assert.notStrictEqual(loggedMessages.info[0].indexOf(expected), -1);
+        });
+        it('should mask secrets - passphrase (without new lines)', () => {
+            const decl = {
+                passphrase: 'foo'
+            };
+            const expected = 'this contains secrets: {"passphrase":"*********"}';
+            logger.info(`this contains secrets: ${JSON.stringify(decl)}`);
+            assert.notStrictEqual(loggedMessages.info[0].indexOf(expected), -1);
+        });
+
+        it('should mask secrets - passphrase (with new lines)', () => {
+            const decl = {
+                passphrase: 'foo'
+            };
+            const expected = 'this contains secrets: {\n    "passphrase":"*********"\n}';
+            logger.info(`this contains secrets: ${JSON.stringify(decl, null, 4)}`);
+            assert.notStrictEqual(loggedMessages.info[0].indexOf(expected), -1);
+        });
     });
 });
