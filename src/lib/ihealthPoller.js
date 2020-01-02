@@ -10,6 +10,7 @@
 
 const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
 const constants = require('./constants.js');
+const datetimeUtil = require('./datetimeUtil.js');
 const util = require('./util.js');
 const deviceUtil = require('./deviceUtil.js');
 const ihUtil = require('./ihealthUtil.js');
@@ -817,7 +818,7 @@ IHealthPoller.prototype.putOnSchedule = function () {
     let nextExecDate = this.getNextFireDate();
     const fromDate = nextExecDate;
     const allowNow = !nextExecDate;
-    nextExecDate = util.getNextFireDate(this.config.iHealth.interval, fromDate, allowNow);
+    nextExecDate = datetimeUtil.getNextFireDate(this.config.iHealth.interval, fromDate, allowNow);
 
     this._storage.nextExecTime = nextExecDate.getTime();
     this.logger.debug(`Next execution date for iHealth Poller "${this.sysName}": ${nextExecDate.toISOString()}`);
