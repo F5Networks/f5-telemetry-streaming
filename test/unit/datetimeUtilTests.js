@@ -292,7 +292,7 @@ describe('Date and Time utils', () => {
                         }
                         if (endDate < secondDate) {
                             const errMsg = `Date ${secondDate.toISOString()} (from date ${firstDate.toISOString()}) `
-                                + `should be less than ${endDate.toISOString()}`;
+                                + `should be less than or equal to ${endDate.toISOString()}`;
                             throw new Error(errMsg);
                         }
                     });

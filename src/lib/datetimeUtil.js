@@ -222,14 +222,14 @@ function getNextFireDate(schedule, fromDate, allowNow, utcOnly) {
     const endTimeTuple = timeStrToTuple(schedule.timeWindow.end);
 
     let startExecDate = new Date(fromDate);
-    startExecDate.setUTCHours(startTimeTuple[0], startTimeTuple[1], 0);
+    startExecDate.setUTCHours(startTimeTuple[0], startTimeTuple[1], 0, 0);
     // simply moving clock for 1 day back if we a going to try fit current time
     if (allowNow) {
         setNextDate(startExecDate, -1);
     }
 
     let endExecDate = new Date(startExecDate);
-    endExecDate.setUTCHours(endTimeTuple[0], endTimeTuple[1], 0);
+    endExecDate.setUTCHours(endTimeTuple[0], endTimeTuple[1], 0, 0);
     // handle situations like start 23pm and end 4am
     if (startExecDate >= endExecDate) {
         setNextDate(endExecDate);
