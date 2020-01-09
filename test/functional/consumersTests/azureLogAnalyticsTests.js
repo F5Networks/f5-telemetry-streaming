@@ -24,6 +24,7 @@ const PASSPHRASE = process.env[constants.ENV_VARS.AZURE_PASSPHRASE];
 const WORKSPACE_ID = process.env[constants.ENV_VARS.AZURE_WORKSPACE];
 const TENANT_ID = process.env[constants.ENV_VARS.AZURE_TENANT];
 const CLIENT_SECRET = process.env[constants.ENV_VARS.AZURE_LOG_KEY];
+const AZURE_LA_CONSUMER_NAME = 'Azure_LA_Consumer';
 
 let oauthToken = null;
 
@@ -59,26 +60,26 @@ function setup() {
 }
 
 function test() {
-    const testType = 'Azure_Consumer_Test';
-    const dataTimestamp = Date.now();
+    const testDataTimestamp = Date.now();
 
     describe('Consumer Test: Azure Log Analytics - Configure TS and generate data', () => {
-        it('should configure TS', () => {
-            const consumerDeclaration = util.deepCopy(DECLARATION);
-            consumerDeclaration.My_Consumer = {
-                class: 'Telemetry_Consumer',
-                type: 'Azure_Log_Analytics',
-                workspaceId: WORKSPACE_ID,
-                passphrase: {
-                    cipherText: PASSPHRASE
-                }
-            };
-            return dutUtils.postDeclarationToDUTs(() => consumerDeclaration);
-        });
+        const consumerDeclaration = util.deepCopy(DECLARATION);
+        consumerDeclaration[AZURE_LA_CONSUMER_NAME] = {
+            class: 'Telemetry_Consumer',
+            type: 'Azure_Log_Analytics',
+            workspaceId: WORKSPACE_ID,
+            passphrase: {
+                cipherText: PASSPHRASE
+            }
+        };
+        DUTS.forEach(dut => it(
+            `should configure TS - ${dut.hostname}`,
+            () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(consumerDeclaration))
+        ));
 
         it('should send event to TS Event Listener', () => {
-            const msg = `timestamp="${dataTimestamp}",test="${dataTimestamp}",testType="${testType}"`;
-            return dutUtils.sendDataToEventListeners(hostObj => `hostname="${hostObj.hostname}",${msg}`);
+            const msg = `timestamp="${testDataTimestamp}",test="${testDataTimestamp}",testType="${AZURE_LA_CONSUMER_NAME}"`;
+            return dutUtils.sendDataToEventListeners(dut => `hostname="${dut.hostname}",${msg}`);
         });
     });
 
@@ -125,7 +126,7 @@ function test() {
                 const queryString = [
                     'F5Telemetry_LTM_CL',
                     `where hostname_s == "${dut.hostname}"`,
-                    `where test_s == "${dataTimestamp}"`
+                    `where test_s == "${testDataTimestamp}"`
                 ].join(' | ');
                 return new Promise(resolve => setTimeout(resolve, 10000))
                     .then(() => queryAzure(queryString))

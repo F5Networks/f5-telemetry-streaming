@@ -23,6 +23,7 @@ const PROJECT_ID = process.env[constants.ENV_VARS.GCP_PROJECT_ID];
 const PRIVATE_KEY_ID = process.env[constants.ENV_VARS.GCP_PRIVATE_KEY_ID];
 const PRIVATE_KEY = process.env[constants.ENV_VARS.GCP_PRIVATE_KEY].replace(/REPLACE/g, '\n');
 const SERVICE_EMAIL = process.env[constants.ENV_VARS.GCP_SERVICE_EMAIL];
+const GOOGLE_SD_CONSUMER_NAME = 'Google_SD_Consumer';
 
 let accessToken;
 
@@ -72,20 +73,21 @@ function setup() {
 
 function test() {
     describe('Consumer Test: Google StackDriver - Configure TS', () => {
-        it('should configure TS', () => {
-            const consumerDeclaration = util.deepCopy(DECLARATION);
-            consumerDeclaration.My_Consumer = {
-                class: 'Telemetry_Consumer',
-                type: 'Google_StackDriver',
-                privateKey: {
-                    cipherText: PRIVATE_KEY
-                },
-                projectId: PROJECT_ID,
-                serviceEmail: SERVICE_EMAIL,
-                privateKeyId: PRIVATE_KEY_ID
-            };
-            return dutUtils.postDeclarationToDUTs(() => consumerDeclaration);
-        });
+        const consumerDeclaration = util.deepCopy(DECLARATION);
+        consumerDeclaration[GOOGLE_SD_CONSUMER_NAME] = {
+            class: 'Telemetry_Consumer',
+            type: 'Google_StackDriver',
+            privateKey: {
+                cipherText: PRIVATE_KEY
+            },
+            projectId: PROJECT_ID,
+            serviceEmail: SERVICE_EMAIL,
+            privateKeyId: PRIVATE_KEY_ID
+        };
+        DUTS.forEach(dut => it(
+            `should configure TS - ${dut.hostname}`,
+            () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(consumerDeclaration))
+        ));
     });
 
     describe('Consumer Test: Google StackDriver - Test', () => {
