@@ -200,15 +200,15 @@ Example Dashboard - dashboard export in [examples/consumers](examples/consumers)
 
 ![image](images/azure_la_dashboard_example.png)
 
-### AWS Cloud Watch
+### AWS CloudWatch
 
 Website: [https://aws.amazon.com/cloudwatch](https://aws.amazon.com/cloudwatch).
 
 Required information:
 
-- Region: AWS region of the cloud watch resource.
-- Log Group: Navigate to Cloud Watch > Logs to find the name of the log group.
-- Log Stream: Navigate to Cloud Watch > Logs > Your_Log_Group_Name to find the name of the log stream.
+- Region: AWS region of the CloudWatch resource.
+- Log Group: Navigate to CloudWatch > Logs to find the name of the log group.
+- Log Stream: Navigate to CloudWatch > Logs > Your_Log_Group_Name to find the name of the log stream.
 - Access Key: Navigate to IAM > Users to find the access key.
 - Secret Key: Navigate to IAM > Users to find the secret key.
 

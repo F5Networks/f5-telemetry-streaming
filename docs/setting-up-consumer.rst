@@ -75,18 +75,20 @@ The following is an example of the Azure dashboard with Telemetry Streaming data
 
 .. _awscloud-ref:
 
-AWS Cloud Watch
+AWS CloudWatch
 ~~~~~~~~~~~~~~~
 |aws_img|   
 
 Required information:
- - Region: AWS region of the cloud watch resource.
- - Log Group: Navigate to :guilabel:`Cloud Watch > Logs`
- - Log Stream: Navigate to :guilabel:`Cloud Watch > Logs > Your_Log_Group_Name`
+ - Region: AWS region of the CloudWatch resource.
+ - Log Group: Navigate to :guilabel:`CloudWatch > Logs`
+ - Log Stream: Navigate to :guilabel:`CloudWatch > Logs > Your_Log_Group_Name`
  - Access Key: Navigate to :guilabel:`IAM > Users`
  - Secret Key: Navigate to :guilabel:`IAM > Users`
 
-.. NOTE:: To see more information about creating and using IAM roles, see |IAM roles|.
+To see more information about creating and using IAM roles, see |IAM roles|.
+
+.. IMPORTANT:: In TS 1.9.0 and later, the username and passphrase for CloudWatch are optional.  This is because a user can send data from a BIG-IP that has an appropriate IAM role in AWS to AWS CloudWatch without a username and passphrase.
 
 Example Declaration:
 
