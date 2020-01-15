@@ -11,6 +11,10 @@ Document Revision History
         - Description
         - Date
 
+      * - 1.9.0
+        - Updated the documentation for Telemetry Streaming v1.9.0. This release contains the following changes: |br| * Username and passphrase are now optional on the AWS CloudWatch consumer (see the important note in :ref:`awscloud-ref`) |br| *  |br| |br| Issues Resolved: |br| * Basic auth does not work with ElasticSearch consumer
+        - 01-28-20
+
       * - 1.8.0
         - Updated the documentation for Telemetry Streaming v1.8.0. This release contains the following changes: |br| * Added support for Google StackDriver as a consumer (see :ref:`stackdrive`) |br| * Added a new page for :doc:`data-modification`, which includes support for Action Chains, and includeData and excludeData filtering (see :ref:`Action Chains<actions>` for information on these items). |br| * Added **machineId** to System Poller output |br| * Added reference to pools in virtual server data  |br| |br| Issues Resolved: |br| * Improved error handling to preserve stack traces
         - 12-3-19
