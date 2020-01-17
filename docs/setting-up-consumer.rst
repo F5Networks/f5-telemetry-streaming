@@ -88,7 +88,7 @@ Required information:
 
 To see more information about creating and using IAM roles, see |IAM roles|.
 
-.. IMPORTANT:: In TS 1.9.0 and later, the username and passphrase for CloudWatch are optional.  This is because a user can send data from a BIG-IP that has an appropriate IAM role in AWS to AWS CloudWatch without a username and passphrase.
+.. IMPORTANT:: In TS 1.9.0 and later, the **username** and **passphrase** for CloudWatch are optional.  This is because a user can send data from a BIG-IP that has an appropriate IAM role in AWS to AWS CloudWatch without a username and passphrase.
 
 Example Declaration:
 
