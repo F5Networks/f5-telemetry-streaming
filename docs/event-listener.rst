@@ -327,11 +327,9 @@ In this section, you configure the remaining objects for the Log Publisher, no m
 
 Character Encoding information
 ------------------------------
-F5 logs may contain various character encoding or byte streams that include illegal characters for a specific encoding.  Telemetry Streaming does not currently enforce validation of encoding for the log data that an event listener receives. The encoding depends on the source of the data and if F5 logs contain an invalid UTF-8 string. In this case, Telemetry Streaming does not attempt to correct the string, but simply passes it along.  
+F5 logs may contain various character encoding or byte streams that include illegal characters for a specific encoding, or invalid UTF-8 strings. Telemetry Streaming does not currently enforce validation of the data that an event listener receives. It simply attempts to convert the raw input it receives into a JSON-formatted string for forwarding. 
 
 .. NOTE:: Varying character encodings and illegal characters in the byte streams are very common in BIG-IP ASM logs.
-
-Telemetry Streaming does eventually convert the raw data it receives into a JSON-formatted string. For more information on invalid UTF-8 strings, see |utf|.
 
 For example, the following "message" is sent through TCP (input) and shows the received data in a format that will be handed off for forwarder use (output):
 
