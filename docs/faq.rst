@@ -96,6 +96,16 @@ When you upgrade your BIG-IP system, you simply install Telemetry Streaming on t
 Telemetry Streaming gathers non-identifiable usage data for the purposes of improving the product as outlined in the end user license agreement for BIG-IP. To opt out of data collection, disable BIG-IP system's phone home feature as described in |phone|.
 
 
+|
+
+.. _encodinginfo:
+
+**How do Telemetry Streaming event listeners handle character encoding and illegal characters?**
+
+Telemetry Streaming does not currently enforce validation of the data that an event listener receives. It simply attempts to convert the raw input it receives into a JSON-formatted string for forwarding.  
+
+For complete information and examples, see :ref:`char-encoding`. 
+
 
 
 .. |intro| raw:: html
