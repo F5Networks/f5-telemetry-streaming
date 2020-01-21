@@ -174,5 +174,56 @@ describe('Splunk', () => {
 
             splunkIndex(context);
         });
+
+        describe('tmstats', () => {
+            it('should replace periods in tmstat key names with underscores', (done) => {
+                const context = util.buildConsumerContext({
+                    eventType: 'systemInfo',
+                    config: defaultConsumerConfig
+                });
+                context.config.format = 'legacy';
+                context.event.data = {
+                    system: {
+                        systemTimestamp: '2020-01-17T18:02:51.000Z'
+                    },
+                    tmstats: {
+                        interfaceStat: [
+                            {
+                                name: '1.0',
+                                if_index: '48',
+                                'counters.pkts_in': '346790792',
+                                'counters.pkts_out': '943520'
+                            },
+                            {
+                                name: 'mgmt',
+                                if_index: '32',
+                                'counters.bytes_in': '622092889300',
+                                'counters.bytes_out': '766030668'
+                            }
+                        ]
+                    },
+                    telemetryServiceInfo: context.event.data.telemetryServiceInfo,
+                    telemetryEventCategory: context.event.data.telemetryEventCategory
+                };
+                sinon.stub(request, 'post').callsFake((opts) => {
+                    try {
+                        const output = zlib.gunzipSync(opts.body).toString();
+                        assert.notStrictEqual(
+                            output.indexOf('"counters_bytes_in":'), -1, 'output should include counters_bytes_in as a key'
+                        );
+                        assert.strictEqual(
+                            output.indexOf('"counters.bytes_in":'), -1, 'output should not include counters.bytes_in as a key'
+                        );
+                        done();
+                    } catch (err) {
+                        // done() with parameter is treated as an error.
+                        // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                        done(err);
+                    }
+                });
+
+                splunkIndex(context);
+            });
+        });
     });
 });

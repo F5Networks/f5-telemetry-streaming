@@ -5,6 +5,7 @@ Changes to this project are documented in this file. More detail and links can b
 ### Added
 ### Fixed
 - AUTOTOOL-1061: Basic auth does not work with ElasticSearch consumer
+- AUTOTOOL-1017: Some Splunk legacy tmstats datamodels have period in property name instead of underscore
 ### Changed
 - AUTOTOOL-1068: The username and passphrase settings for AWS CloudWatch consumers are now optional
 ### Removed
