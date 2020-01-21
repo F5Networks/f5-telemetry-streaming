@@ -192,13 +192,15 @@ describe('Splunk', () => {
                                 name: '1.0',
                                 if_index: '48',
                                 'counters.pkts_in': '346790792',
-                                'counters.pkts_out': '943520'
+                                'counters.pkts_out': '943520',
+                                'longer.key.name.with.periods': true
                             },
                             {
                                 name: 'mgmt',
                                 if_index: '32',
                                 'counters.bytes_in': '622092889300',
-                                'counters.bytes_out': '766030668'
+                                'counters.bytes_out': '766030668',
+                                'longer.key.name.with.periods': true
                             }
                         ]
                     },
@@ -213,6 +215,12 @@ describe('Splunk', () => {
                         );
                         assert.strictEqual(
                             output.indexOf('"counters.bytes_in":'), -1, 'output should not include counters.bytes_in as a key'
+                        );
+                        assert.notStrictEqual(
+                            output.indexOf('"longer_key_name_with_periods":'), -1, 'output should include longer_key_name_with_periods as a key'
+                        );
+                        assert.strictEqual(
+                            output.indexOf('"longer.key.name.with.periods":'), -1, 'output should not include longer.key.name.with.periods as a key'
                         );
                         done();
                     } catch (err) {

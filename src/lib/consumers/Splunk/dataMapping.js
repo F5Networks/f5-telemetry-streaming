@@ -340,7 +340,7 @@ const stats = [
 
         const template = getTemplate('bigip.tmstats', request.globalCtx.event.data, request.cache);
         const output = [];
-        const periodRegex = RegExp(/\./);
+        const periodRegex = RegExp(/\./g);
 
         Object.keys(tmstats).forEach((key) => {
             tmstats[key].forEach((entry) => {
