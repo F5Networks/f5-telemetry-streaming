@@ -1,6 +1,13 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.10.0
+### Added
+### Fixed
+- AUTOTOOL-1051: Event Listener unable to classify AFM DoS event
+### Changed
+### Removed
+
 ## 1.9.0
 ### Added
 - AUTOTOOL-725 and AUTOTOOL-755: Add support for GSLB WideIP and Pools Config and Stats

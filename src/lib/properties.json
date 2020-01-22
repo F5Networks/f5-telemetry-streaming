@@ -1357,7 +1357,10 @@
             "AVR": { "keys": [ { "required": [ "EOCTimestamp" ], "optional": [ "AggrInterval", "Microtimestamp", "STAT_SRC", "Entity", "errdefs_msgno" ] } ] },
             "ASM": { "keys": [ { "required": [ "policy_name" ], "optional": [ "policy_apply_date", "request_status" ] } ] },
             "APM": { "keys": [ { "required": [ "Access_Profile" ] } ] },
-            "AFM": { "keys": [ { "required": [ "acl_policy_name" ], "optional": [ "acl_policy_type", "acl_rule_name" ] } ] },
+            "AFM": { "keys": [
+                { "required": [ "acl_policy_name" ], "optional": [ "acl_policy_type", "acl_rule_name" ] },
+                { "required": [ "dos_attack_id" ], "optional": [ "flow_id", "action", "errdefs_msg_name" ] }
+            ]},
             "CGNAT": { "keys": [ { "required": [ "lsn_event" ], "optional": [ "lsn_client", "lsn_pb", "start" ] } ] }
        }
     },
