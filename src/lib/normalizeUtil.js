@@ -20,20 +20,21 @@ module.exports = {
      * @param {Object} data                - data
      * @param {String} key                 - key in array containing value to use as key in map
      * @param {Object} options             - optional arguments
-     * @param {String} [options.keyPrefix] - prefix for key
+     * @param {String} [options.keyNamePrefix] - prefix for key
+     * @param {Boolean} [options.skipWhenKeyMissing] - skip conversion when key does not exist
      *
      * @returns {Object} Converted data
      */
     _convertArrayToMap(data, key, options) {
-        const ret = {};
-        options = options || {};
-
         if (!Array.isArray(data)) {
             throw new Error(`convertArrayToMap() array required: ${util.stringify(data)}`);
         }
 
+        const ret = {};
+        options = options || {};
+
         data.forEach((i) => {
-            const keyName = options.keyPrefix ? `${options.keyPrefix}${i[key]}` : i[key];
+            const keyName = options.keyNamePrefix ? `${options.keyNamePrefix}${i[key]}` : i[key];
             ret[keyName] = i;
         });
         return ret;
@@ -351,5 +352,69 @@ module.exports = {
             });
         });
         return newRules;
+    },
+
+    /**
+     * restructureGslbPool
+     *
+     * @param {Object} args              - args object
+     * @param {Object} [args.data]       - data to process (always included)
+     *
+     * @returns {Object} Returns formatted data
+     */
+    restructureGslbPool(args) {
+        const data = args.data;
+        if (data.membersReference) {
+            if (data.membersReference.entries) {
+                const statsKeys = Object.keys(data.membersReference.entries);
+                statsKeys.forEach((key) => {
+                    const statsEntry = data.membersReference.entries[key];
+                    const vsAndServer = statsEntry.nestedStats.selfLink.split('/members/')[1].split('/stats')[0];
+                    const vs = vsAndServer.split(':')[0];
+                    const server = vsAndServer.split(':')[1];
+                    const item = data.membersReference.items.find(i => i.selfLink.includes(`${server}:${vs}`));
+                    Object.assign(data.membersReference.entries[key].nestedStats.entries, item);
+                });
+            } else {
+                delete data.membersReference.items;
+            }
+        }
+        return data;
+    },
+
+    /**
+     * restructureGslbWideIp
+     *
+     * @param {Object} args              - args object
+     * @param {Object} [args.data]       - data to process (always included)
+     *
+     * @returns {Object} Returns formatted data
+     */
+    restructureGslbWideIp(args) {
+        const data = args.data;
+
+        const buildFullPath = (pool) => {
+            const subPath = pool.subPath ? `/${pool.subPath}` : '';
+            return `/${pool.partition}${subPath}/${pool.name}`;
+        };
+
+        Object.keys(data).forEach((key) => {
+            const item = data[key];
+            if (item.pools) {
+                item.pools = item.pools.map(p => buildFullPath(p));
+            }
+
+            if (item.poolsCname) {
+                item.pools = item.pools || [];
+                item.pools = item.pools.concat(item.poolsCname.map(p => buildFullPath(p)));
+            }
+
+            if (item.lastResortPool) {
+                item.lastResortPool = item.lastResortPool.split(' ')[1];
+            }
+            delete item.poolsCname;
+        });
+
+        return data;
     }
 };

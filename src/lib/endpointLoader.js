@@ -196,7 +196,29 @@ EndpointLoader.prototype._getAndExpandData = function (endpointProperties, optio
                     }
 
                     if (childKey) {
-                        completeData.data[childItemKey][i.name][childKey] = dataToSubstitute;
+                        // if this is the first time substituting data, overwrite the containing object with data
+                        // e.g.
+                        // itemsRef: {
+                        //    link: 'http://objLink/objItems',
+                        //    isSubcollection: true
+                        // }
+                        // will become:
+                        // itemsRef: {
+                        //    objItemProp1: 123 //data from link
+                        // }
+                        if (completeData.data[childItemKey][i.name][childKey].link) {
+                            completeData.data[childItemKey][i.name][childKey] = dataToSubstitute;
+                        } else {
+                            // otherwise if same object has been previously substituted
+                            // and we're merging new set of props from a different link (e.g. objItems/stats)
+                            // then copy over the properties of the new dataToSubstitute
+                            // e.g.
+                            // itemsRef: {
+                            //     objItemProp1: 123
+                            //     objItemProp2: true
+                            // }
+                            Object.assign(completeData.data[childItemKey][i.name][childKey], dataToSubstitute);
+                        }
                     } else {
                         completeData.data[childItemKey][i.name] = dataToSubstitute;
                     }
@@ -246,6 +268,9 @@ EndpointLoader.prototype._getAndExpandData = function (endpointProperties, optio
                             let referenceEndpoint = fixEndpoint(item[referenceKey].link);
                             if (referenceObj.endpointSuffix) {
                                 referenceEndpoint = `${referenceEndpoint}${referenceObj.endpointSuffix}`;
+                            }
+                            if (referenceObj.includeStats) {
+                                promises.push(this._getData(`${referenceEndpoint}/stats`, { name: i }));
                             }
                             promises.push(this._getData(referenceEndpoint, { name: i }));
                         }

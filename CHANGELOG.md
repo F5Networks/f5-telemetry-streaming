@@ -3,6 +3,7 @@ Changes to this project are documented in this file. More detail and links can b
 
 ## 1.9.0
 ### Added
+- AUTOTOOL-725 and AUTOTOOL-755: Add support for GSLB WideIP and Pools Config and Stats
 ### Fixed
 - AUTOTOOL-1061: Basic auth does not work with ElasticSearch consumer
 - AUTOTOOL-1017: Some Splunk legacy tmstats datamodels have period in property name instead of underscore

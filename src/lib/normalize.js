@@ -222,6 +222,16 @@ module.exports = {
             if (iFE && normalizeUtil._checkForMatch(entryKey, iFE.pattern, iFE.group, iFE.excludePattern)) {
                 data = Object.assign(data[entries][entryKey], data);
                 delete data[entries]; // delete entries key after merge
+                if (iFE.runFunctions) {
+                    iFE.runFunctions.forEach((customFunction) => {
+                        const rCFOptions = {
+                            func: customFunction.name,
+                            args: customFunction.args
+                        };
+                        data = this._runCustomFunction(data, rCFOptions);
+                    });
+                }
+
                 Object.keys(data).forEach((k) => {
                     ret[simplifyKey(k)] = this._reduceData(data[k], options);
                 });
@@ -239,8 +249,11 @@ module.exports = {
             if (Array.isArray(data)) {
                 // convert array to map if required, otherwise just include
                 const catm = options.convertArrayToMap;
-                if (catm && catm.keyName) {
-                    ret = normalizeUtil._convertArrayToMap(data, catm.keyName, { keyPrefix: catm.keyNamePrefix });
+                const catmSpecified = catm && catm.keyName;
+                const isArrayOfObjects = typeof data[0] === 'object';
+                const isKeyPresent = catmSpecified && isArrayOfObjects && typeof data[0][catm.keyName] !== 'undefined';
+                if (catmSpecified && ((isArrayOfObjects && isKeyPresent) || !catm.skipWhenKeyMissing)) {
+                    ret = normalizeUtil._convertArrayToMap(data, catm.keyName, catm);
                     ret = this._reduceData(ret, options);
                 } else {
                     data.forEach((i) => {

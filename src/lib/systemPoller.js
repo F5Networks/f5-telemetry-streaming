@@ -42,7 +42,8 @@ function process() {
     const startTimestamp = new Date().toISOString();
 
     logger.debug('System poller cycle started');
-    return new SystemStats(config.host, config.options).collect()
+    const systemStats = new SystemStats(config.host, config.options);
+    return systemStats.collect()
         .then((normalizedData) => {
             const endTimeStamp = new Date().toISOString();
             // inject service data
@@ -59,7 +60,8 @@ function process() {
             return dataPipeline.process(dataCtx, {
                 noConsumers: options.requestFromUser,
                 tracer,
-                actions: config.options.actions
+                actions: config.options.actions,
+                deviceContext: systemStats.contextData
             });
         })
         .then((dataCtx) => {

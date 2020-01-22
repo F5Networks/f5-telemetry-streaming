@@ -27,8 +27,10 @@ const EVENT_TYPES = require('./constants.js').EVENT_TYPES;
  * @param {Object}  [actions.setTag]      - apply tag
  * @param {Object}  [actions.includeData] - include data
  * @param {Object}  [actions.excludeData] - exclude data
+ * @param {Object}  deviceCtx             - device context
  */
-function processActions(dataCtx, actions) {
+
+function processActions(dataCtx, actions, deviceCtx) {
     actions.forEach((actionCtx) => {
         if (!actionCtx.enable) {
             return;
@@ -44,7 +46,7 @@ function processActions(dataCtx, actions) {
             logger.error(errMsg);
             throw new Error(errMsg);
         }
-        handler.handleAction(dataCtx, actionCtx);
+        handler.handleAction(dataCtx, actionCtx, deviceCtx);
     });
 }
 
@@ -59,7 +61,7 @@ function processActions(dataCtx, actions) {
 * @param {module:util~Tracer} [options.tracer] - tracer instance
 * @param {Object}  [options.actions]           - actions to apply to data (e.g. filters, tags)
 * @param {Boolean} [options.noConsumers]       - don't send data to consumers, instead just return it
-*
+* @param {Object} [options.deviceContext]      - optional addtl context about device
 * @returns {Promise} resolved with data if options.returnData === true otherwise will be resolved
 *       once data will be forwarded to consumers
 */
@@ -72,7 +74,7 @@ function process(dataCtx, options) {
         }
         // iHealthPoller doesn't support actions (filtering and tagging)
         if (dataCtx.type !== EVENT_TYPES.IHEALTH_POLLER && !util.isObjectEmpty(options.actions)) {
-            processActions(dataCtx, options.actions);
+            processActions(dataCtx, options.actions, options.deviceContext);
         }
         if (options.tracer) {
             options.tracer.write(JSON.stringify(dataCtx, null, 4));

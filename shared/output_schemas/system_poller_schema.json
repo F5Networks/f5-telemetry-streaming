@@ -220,6 +220,42 @@
         },
         "tmstats": {
             "type": "object"
+        },
+        "aWideIps": {
+            "type": "object"
+        },
+        "aaaaWideIps": {
+            "type": "object"
+        },
+        "cnameWideIps": {
+            "type": "object"
+        },
+        "mxWideIps": {
+            "type": "object"
+        },
+        "srvWideIps": {
+            "type": "object"
+        },
+        "naptrWideIps": {
+            "type": "object"
+        },
+        "aPools": {
+            "type": "object"
+        },
+        "aaaaPools": {
+            "type": "object"
+        },
+        "cnamePools": {
+            "type": "object"
+        },
+        "mxPools": {
+            "type": "object"
+        },
+        "srvPools": {
+            "type": "object"
+        },
+        "naptrPools": {
+            "type": "object"
         }
     },
     "additionalProperties": false,
