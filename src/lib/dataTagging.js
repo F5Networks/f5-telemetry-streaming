@@ -12,8 +12,8 @@ const properties = require('./properties.json');
 const normalizeUtil = require('./normalizeUtil');
 const dataUtil = require('./dataUtil.js');
 const util = require('./util.js');
+const systemStatsUtil = require('./systemStatsUtil');
 const EVENT_TYPES = require('./constants.js').EVENT_TYPES;
-
 
 /**
  * Handle tagging actions on the data.
@@ -33,11 +33,11 @@ const EVENT_TYPES = require('./constants.js').EVENT_TYPES;
  *
  * @returns {void}
  */
-function handleAction(dataCtx, actionCtx) {
+function handleAction(dataCtx, actionCtx, deviceCtx) {
     if (!util.isObjectEmpty(actionCtx.setTag)
             && (util.isObjectEmpty(actionCtx.ifAllMatch)
                 || dataUtil.checkConditions(dataCtx.data, actionCtx.ifAllMatch))) {
-        addTags(dataCtx, actionCtx);
+        addTags(dataCtx, actionCtx, deviceCtx);
     }
 }
 
@@ -50,13 +50,14 @@ function handleAction(dataCtx, actionCtx) {
  * @param {Object} dataCtx             - data context wrapper
  * @param {Object} dataCtx.data        - data to process
  * @param {String} dataCtx.type        - type of data to process
+ * @param {Object} deviceCtx           - device context
  * @param {Object} actionCtx           - 'setTag' action to perform on the data
  * @param {Object} actionCtx.setTag    - tag(s) that will be applied
  * @param {Object} actionCtx.locations - where the tags should be applied
  *
  * @returns {void}
  */
-function addTags(dataCtx, actionCtx) {
+function addTags(dataCtx, actionCtx, deviceCtx) {
     const data = dataCtx.data;
     const locations = actionCtx.locations;
     const tags = actionCtx.setTag;
@@ -68,7 +69,7 @@ function addTags(dataCtx, actionCtx) {
             // Apply tags to default locations (where addKeysByTag is true) for system info
             Object.keys(properties.stats).forEach((statKey) => {
                 const items = data[statKey];
-                const statProp = properties.stats[statKey];
+                const statProp = systemStatsUtil.renderProperty(deviceCtx, properties.stats[statKey]);
                 // tags can be applied to objects only - usually it is collections of objects
                 // e.g. Virtual Servers, pools, profiles and etc.
                 if (typeof items === 'object'

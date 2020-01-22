@@ -257,61 +257,131 @@ describe('Endpoint Loader', () => {
                 .catch(() => assert.fail());
         });
 
-        it('should expand references if expandReferences is set', () => {
-            const eLoader = new EndpointLoader();
-            const expected = {
-                data: {
-                    items: [
-                        {
-                            membersReference: {
-                                stat: 12345,
-                                uri: 'foo/stats'
-                            }
-                        },
-                        {
-                            membersReference: {
-                                stat: 12345,
-                                uri: 'bar/stats'
-                            }
-                        }
-                    ]
-                },
-                name: '/mgmt/tm/ltm/pool'
-            };
-
-            eLoader.endpoints = {
-                pools: {
-                    endpoint: '/mgmt/tm/ltm/pool',
-                    expandReferences: { membersReference: { endpointSuffix: '/stats' } }
-                }
-            };
-
-            sinon.stub(deviceUtil, 'makeDeviceRequest').callsFake((host, uri) => {
-                let data;
-                if (uri.endsWith('stats')) {
-                    data = {
-                        uri,
-                        stat: 12345
-                    };
-                } else {
-                    data = {
-                        items: [
-                            { membersReference: { link: 'foo' } },
-                            { membersReference: { link: 'bar' } }
-                        ]
-                    };
-                }
-                return Promise.resolve(data);
+        describe('expandReferences', () => {
+            beforeEach(() => {
+                sinon.stub(deviceUtil, 'makeDeviceRequest').callsFake((host, uri) => {
+                    let data;
+                    if (uri.endsWith('anySuffix')) {
+                        data = {
+                            anySuffixUri: uri,
+                            anySuffix: 'abcd12345'
+                        };
+                    } else if (uri.endsWith('stats')) {
+                        data = {
+                            uriStats: uri,
+                            stat: 12345
+                        };
+                    } else if (uri.includes('members')) {
+                        data = {
+                            uriConfig: uri,
+                            config: 'abcd'
+                        };
+                    } else {
+                        data = {
+                            items: [
+                                {
+                                    nonRefProp: 'some1',
+                                    membersReference: { link: 'members/foo' }
+                                },
+                                {
+                                    nonRefProp: 'some2',
+                                    membersReference: { link: 'members/bar' }
+                                }
+                            ]
+                        };
+                    }
+                    return Promise.resolve(data);
+                });
             });
 
-            return eLoader.loadEndpoint('pools', null)
-                .then((data) => {
-                    assert.deepStrictEqual(
-                        data,
-                        expected,
-                        'Updated response should have returned in callback'
-                    );
-                });
+            it('should handle endpointSuffix', () => {
+                const expected = {
+                    data: {
+                        items: [
+                            {
+                                nonRefProp: 'some1',
+                                membersReference: {
+                                    anySuffixUri: 'members/foo/anySuffix',
+                                    anySuffix: 'abcd12345'
+                                }
+                            },
+                            {
+                                nonRefProp: 'some2',
+                                membersReference: {
+                                    anySuffixUri: 'members/bar/anySuffix',
+                                    anySuffix: 'abcd12345'
+                                }
+                            }
+                        ]
+                    },
+                    name: '/mgmt/tm/ltm/pool'
+                };
+
+                const eLoader = new EndpointLoader();
+                eLoader.endpoints = {
+                    pools: {
+                        endpoint: '/mgmt/tm/ltm/pool',
+                        expandReferences: {
+                            membersReference: { endpointSuffix: '/anySuffix' }
+                        }
+                    }
+                };
+
+                return eLoader.loadEndpoint('pools', null)
+                    .then((data) => {
+                        assert.deepEqual(
+                            data,
+                            expected,
+                            'Updated response should have returned in callback'
+                        );
+                    });
+            });
+
+            it('should handle includeStats', () => {
+                const expected = {
+                    data: {
+                        items: [
+                            {
+                                nonRefProp: 'some1',
+                                membersReference: {
+                                    config: 'abcd',
+                                    uriConfig: 'members/foo',
+                                    stat: 12345,
+                                    uriStats: 'members/foo/stats'
+                                }
+                            },
+                            {
+                                nonRefProp: 'some2',
+                                membersReference: {
+                                    config: 'abcd',
+                                    uriConfig: 'members/bar',
+                                    stat: 12345,
+                                    uriStats: 'members/bar/stats'
+                                }
+                            }
+                        ]
+                    },
+                    name: '/mgmt/tm/ltm/pool'
+                };
+                const eLoader = new EndpointLoader();
+                eLoader.endpoints = {
+                    pools: {
+                        endpoint: '/mgmt/tm/ltm/pool',
+                        expandReferences: {
+                            membersReference: { includeStats: true }
+                        }
+                    }
+                };
+
+                return eLoader.loadEndpoint('pools', null)
+                    .then((data) => {
+                        assert.deepEqual(
+                            data,
+                            expected,
+                            'Updated response should have returned in callback'
+                        );
+                    });
+            });
         });
     });
 });

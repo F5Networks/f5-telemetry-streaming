@@ -54,6 +54,72 @@
             "endpoint": "/mgmt/tm/sys/tmm-traffic"
         },
         {
+            "name": "aWideIps",
+            "endpoint": "/mgmt/tm/gtm/wideip/a",
+            "includeStats": true
+        },
+        {
+            "name": "aaaaWideIps",
+            "endpoint": "/mgmt/tm/gtm/wideip/aaaa",
+            "includeStats": true
+        },
+        {
+            "name": "cnameWideIps",
+            "endpoint": "/mgmt/tm/gtm/wideip/cname",
+            "includeStats": true
+        },
+        {
+            "name": "mxWideIps",
+            "endpoint": "/mgmt/tm/gtm/wideip/mx",
+            "includeStats": true
+        },
+        {
+            "name": "naptrWideIps",
+            "endpoint": "/mgmt/tm/gtm/wideip/naptr",
+            "includeStats": true
+        },
+        {
+            "name": "srvWideIps",
+            "endpoint": "/mgmt/tm/gtm/wideip/srv",
+            "includeStats": true
+        },
+        {
+            "name": "aPools",
+            "endpoint": "/mgmt/tm/gtm/pool/a",
+            "includeStats": true,
+            "expandReferences": { "membersReference": { "includeStats": true } }
+        },
+        {
+            "name": "aaaaPools",
+            "endpoint": "/mgmt/tm/gtm/pool/aaaa",
+            "includeStats": true,
+            "expandReferences": { "membersReference": { "includeStats": true } }
+        },
+        {
+            "name": "cnamePools",
+            "endpoint": "/mgmt/tm/gtm/pool/cname",
+            "includeStats": true,
+            "expandReferences": { "membersReference": { "includeStats": true } }
+        },
+        {
+            "name": "mxPools",
+            "endpoint": "/mgmt/tm/gtm/pool/mx",
+            "includeStats": true,
+            "expandReferences": { "membersReference": { "includeStats": true } }
+        },
+        {
+            "name": "naptrPools",
+            "endpoint": "/mgmt/tm/gtm/pool/naptr",
+            "includeStats": true,
+            "expandReferences": { "membersReference": { "includeStats": true } }
+        },
+        {
+            "name": "srvPools",
+            "endpoint": "/mgmt/tm/gtm/pool/srv",
+            "includeStats": true,
+            "expandReferences": { "membersReference": { "includeStats": true } }
+        },
+        {
             "name": "virtualServers",
             "endpoint": "/mgmt/tm/ltm/virtual",
             "includeStats": true,

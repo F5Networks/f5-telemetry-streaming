@@ -20,7 +20,7 @@ describe('Data Tagging', () => {
 
         dataTaggingTestsData.handleAction.forEach((testConf) => {
             getCallableIt(testConf)(testConf.name, () => {
-                dataTagging.handleAction(testConf.dataCtx, testConf.actionCtx);
+                dataTagging.handleAction(testConf.dataCtx, testConf.actionCtx, testConf.deviceCtx);
                 assert.deepStrictEqual(testConf.dataCtx, testConf.expectedCtx);
             });
         });
