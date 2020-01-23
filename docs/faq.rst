@@ -106,6 +106,17 @@ Telemetry Streaming does not currently enforce validation of the data that an ev
 
 For complete information and examples, see :ref:`char-encoding`. 
 
+|
+
+.. _contract:
+
+**What is F5's Automation Toolchain API Contract?**
+ 
+The API Contract for the F5 Automation Toolchain (Telemetry Streaming, AS3, and Declarative Onboarding) is our assurance that we will not make arbitrary breaking changes to our API.  We take this commitment seriously.  We semantically version our declarative API schemas ("xx.yy.zz") and do not make breaking changes within a minor ("yy") or patch ("zz") releases.  For example, early declarations using AS3 schema "3.0.0" are accepted by all subsequent minor releases including "3.16.0."  
+ 
+As of January 2020, no breaking changes have been made to AS3, Declarative Onboarding, or Telemetry Streaming since inception.  None are anticipated at this time.  A breaking change, if any, will be noted by a change to the major release number ("xx").  For example, the AS3 schema version would become "4.0.0."
+
+
 
 
 .. |intro| raw:: html
