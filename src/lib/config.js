@@ -52,7 +52,7 @@ function ConfigWorker() {
         name: 'Telemetry Streaming',
         version: VERSION
     };
-    this.teemDevice = new TeemDevice(assetInfo, 'staging');
+    this.teemDevice = new TeemDevice(assetInfo);
 }
 
 nodeUtil.inherits(ConfigWorker, EventEmitter);
