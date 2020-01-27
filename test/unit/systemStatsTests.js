@@ -203,6 +203,81 @@ describe('systemStats', () => {
         });
 
         describe('system info', () => {
+            it('should collect cpu data', () => {
+                nock('http://localhost:8100')
+                    .get('/mgmt/tm/sys/host-info')
+                    .times(1)
+                    .reply(200, {
+                        entries: {
+                            'https://localhost/mgmt/tm/sys/host-info/0': {
+                                nestedStats: {
+                                    entries: {
+                                        'https://localhost/mgmt/tm/sys/hostInfo/0/cpuInfo': {
+                                            nestedStats: {
+                                                entries: {
+                                                    'https://localhost/mgmt/tm/sys/hostInfo/0/cpuInfo/0': {
+                                                        nestedStats: {
+                                                            entries: {
+                                                                oneMinAvgSystem: {
+                                                                    value: 6
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                    'https://localhost/mgmt/tm/sys/hostInfo/0/cpuInfo/1': {
+                                                        nestedStats: {
+                                                            entries: {
+                                                                oneMinAvgSystem: {
+                                                                    value: 8
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                    'https://localhost/mgmt/tm/sys/hostInfo/0/cpuInfo/2': {
+                                                        nestedStats: {
+                                                            entries: {
+                                                                oneMinAvgSystem: {
+                                                                    value: 12
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                    'https://localhost/mgmt/tm/sys/hostInfo/0/cpuInfo/3': {
+                                                        nestedStats: {
+                                                            entries: {
+                                                                oneMinAvgSystem: {
+                                                                    value: 2
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                const host = {};
+                const options = {
+                    paths: filterPaths('/mgmt/tm/sys/host-info'),
+                    properties: {
+                        stats: {
+                            system: allProperties.stats.system,
+                            cpu: allProperties.stats.cpu
+                        },
+                        global: allProperties.global
+                    }
+                };
+                const stats = new SystemStats(host, options);
+                return assert.becomes(stats.collect(), {
+                    system: {
+                        cpu: 7
+                    }
+                });
+            });
+
             it('should collect hostname and machineId', () => {
                 nock('http://localhost:8100')
                     .get('/mgmt/shared/identified-devices/config/device-info')
