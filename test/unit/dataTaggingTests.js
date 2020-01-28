@@ -20,7 +20,12 @@ describe('Data Tagging', () => {
 
         dataTaggingTestsData.handleAction.forEach((testConf) => {
             getCallableIt(testConf)(testConf.name, () => {
-                dataTagging.handleAction(testConf.dataCtx, testConf.actionCtx, testConf.deviceCtx);
+                const deviceCtx = testConf.deviceCtx || {
+                    deviceVersion: '13.0.0.0',
+                    provisioning: { ltm: { name: 'ltm', level: 'nominal' } }
+                };
+
+                dataTagging.handleAction(testConf.dataCtx, testConf.actionCtx, deviceCtx);
                 assert.deepStrictEqual(testConf.dataCtx, testConf.expectedCtx);
             });
         });

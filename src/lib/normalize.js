@@ -285,10 +285,19 @@ module.exports = {
      * @param {Object} options                 - options
      * @param {Array} [options.skip]           - array of child object keys to skip
      * @param {Array} [options.classifyByKeys] - classify by specific keys (used by events)
+     * @param {Array} [options.tags]           - tags to apply in addition to "tags"
      *
      * @returns {Object} Returns data with added tags
      */
     _addKeysByTag(data, tags, definitions, options) {
+        tags = Object.assign({}, tags);
+        if (options && options.tags) {
+            Object.keys(options.tags).forEach((key) => {
+                if (typeof tags[key] === 'undefined') {
+                    tags[key] = options.tags[key];
+                }
+            });
+        }
         const tagKeys = Object.keys(tags);
         const skip = options.skip || [];
         const def = definitions || {};
@@ -301,15 +310,20 @@ module.exports = {
                 // then check if the tag value contains 'pattern'
                 // otherwise assume the tag value is a 'constant'
                 let tagValue = tags[t];
-                if (tagValue in def) tagValue = def[tagValue]; // overwrite with def value
-
+                if (tagValue in def) {
+                    tagValue = def[tagValue]; // overwrite with def value
+                }
                 if (tagValue.pattern) {
                     const match = normalizeUtil._checkForMatch(key, tagValue.pattern, tagValue.group);
-                    if (match) val = match;
+                    if (match) {
+                        val = match;
+                    }
                 } else {
                     val = tagValue;
                 }
-                thisData[t] = val;
+                if (val) {
+                    thisData[t] = val;
+                }
             });
             return thisData;
         };

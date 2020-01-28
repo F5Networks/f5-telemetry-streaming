@@ -5,6 +5,8 @@ Changes to this project are documented in this file. More detail and links can b
 ### Added
 ### Fixed
 - AUTOTOOL-1051: Event Listener unable to classify AFM DoS event
+- AUTOTOOL-1037: Splunk legacy tmstats - include last_cycle_count
+- AUTOTOOL-1019: Splunk legacy tmstats - add tenant and application data
 ### Changed
 ### Removed
 

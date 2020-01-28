@@ -162,8 +162,11 @@ describe('Splunk', () => {
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
-                    const output = zlib.gunzipSync(opts.body).toString();
-                    assert.strictEqual(output, expectedLegacyData.replace(/(\r\n|\n|\r)/g, ''));
+                    let output = zlib.gunzipSync(opts.body).toString();
+                    output = output.replace(/}{"time/g, '},{"time');
+                    output = JSON.parse(`[${output}]`);
+
+                    assert.deepStrictEqual(output, expectedLegacyData.map(d => JSON.parse(d)));
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
@@ -221,6 +224,191 @@ describe('Splunk', () => {
                         );
                         assert.strictEqual(
                             output.indexOf('"longer.key.name.with.periods":'), -1, 'output should not include longer.key.name.with.periods as a key'
+                        );
+                        done();
+                    } catch (err) {
+                        // done() with parameter is treated as an error.
+                        // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                        done(err);
+                    }
+                });
+
+                splunkIndex(context);
+            });
+
+            it('should replace IPv6 prefix in monitorInstanceStat', (done) => {
+                const context = util.buildConsumerContext({
+                    eventType: 'systemInfo',
+                    config: defaultConsumerConfig
+                });
+                context.config.format = 'legacy';
+                context.event.data = {
+                    system: {
+                        systemTimestamp: '2020-01-17T18:02:51.000Z'
+                    },
+                    tmstats: {
+                        monitorInstanceStat: [
+                            {
+                                ip_address: '::FFFF:192.0.0.1'
+                            },
+                            {
+                                'ip.address': '::ffff:192.0.0.2'
+                            },
+                            {
+                                'ip.address': '192.0.0.3'
+                            }
+                        ]
+                    },
+                    telemetryServiceInfo: context.event.data.telemetryServiceInfo,
+                    telemetryEventCategory: context.event.data.telemetryEventCategory
+                };
+                sinon.stub(request, 'post').callsFake((opts) => {
+                    try {
+                        const output = zlib.gunzipSync(opts.body).toString();
+                        assert.notStrictEqual(
+                            output.indexOf('"192.0.0.1"'), -1, 'output should remove ::FFFF from ::FFFF:192.0.0.1'
+                        );
+                        assert.notStrictEqual(
+                            output.indexOf('"192.0.0.2"'), -1, 'output should remove ::FFFF from ::ffff:192.0.0.2'
+                        );
+                        assert.notStrictEqual(
+                            output.indexOf('"192.0.0.3"'), -1, 'output should include 192.0.0.3'
+                        );
+                        done();
+                    } catch (err) {
+                        // done() with parameter is treated as an error.
+                        // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                        done(err);
+                    }
+                });
+
+                splunkIndex(context);
+            });
+
+            it('should format hex IP', (done) => {
+                const context = util.buildConsumerContext({
+                    eventType: 'systemInfo',
+                    config: defaultConsumerConfig
+                });
+                context.config.format = 'legacy';
+                context.event.data = {
+                    system: {
+                        systemTimestamp: '2020-01-17T18:02:51.000Z'
+                    },
+                    tmstats: {
+                        virtualServerStat: [
+                            {
+                                source: '00:00:00:00:00:00:00:00:00:00:FF:FF:C0:00:00:01:00:00:00:00'
+                            },
+                            {
+                                addr: '10:00:00:00:00:00:00:00:00:00:FF:F8:C0:00:00:01:00:00:00:00'
+                            },
+                            {
+                                destination: '192.0.0.3'
+                            }
+                        ]
+                    },
+                    telemetryServiceInfo: context.event.data.telemetryServiceInfo,
+                    telemetryEventCategory: context.event.data.telemetryEventCategory
+                };
+                sinon.stub(request, 'post').callsFake((opts) => {
+                    try {
+                        const output = zlib.gunzipSync(opts.body).toString();
+                        assert.notStrictEqual(
+                            output.indexOf('"source":"192.0.0.1"'), -1, 'output should include 192.0.0.1'
+                        );
+                        assert.notStrictEqual(
+                            output.indexOf('"addr":"1000:0000:0000:0000:0000:FFF8:C000:0001"'), -1, 'output should include 1000:0000:0000:0000:0000:FFF8:C000:0001'
+                        );
+                        assert.notStrictEqual(
+                            output.indexOf('"destination":"192.0.0.3"'), -1, 'output should include 192.0.0.3'
+                        );
+                        done();
+                    } catch (err) {
+                        // done() with parameter is treated as an error.
+                        // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                        done(err);
+                    }
+                });
+
+                splunkIndex(context);
+            });
+
+            it('should include tenant and application', (done) => {
+                const context = util.buildConsumerContext({
+                    eventType: 'systemInfo',
+                    config: defaultConsumerConfig
+                });
+                context.config.format = 'legacy';
+                context.event.data = {
+                    system: {
+                        systemTimestamp: '2020-01-17T18:02:51.000Z'
+                    },
+                    tmstats: {
+                        virtualServerStat: [
+                            {
+                                source: '00:00:00:00:00:00:00:00:00:00:FF:FF:C0:00:00:01:00:00:00:00',
+                                tenant: 'tenant',
+                                application: 'application'
+                            }
+                        ]
+                    },
+                    telemetryServiceInfo: context.event.data.telemetryServiceInfo,
+                    telemetryEventCategory: context.event.data.telemetryEventCategory
+                };
+                sinon.stub(request, 'post').callsFake((opts) => {
+                    try {
+                        const output = zlib.gunzipSync(opts.body).toString();
+                        assert.notStrictEqual(
+                            output.indexOf('"tenant":"tenant"'), -1, 'output should include tenant'
+                        );
+                        assert.notStrictEqual(
+                            output.indexOf('"application":"application"'), -1, 'output should include application'
+                        );
+                        assert.notStrictEqual(
+                            output.indexOf('"appComponent":""'), -1, 'output should include appComponent'
+                        );
+                        done();
+                    } catch (err) {
+                        // done() with parameter is treated as an error.
+                        // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                        done(err);
+                    }
+                });
+
+                splunkIndex(context);
+            });
+
+            it('should include last_cycle_count', (done) => {
+                const context = util.buildConsumerContext({
+                    eventType: 'systemInfo',
+                    config: defaultConsumerConfig
+                });
+                context.config.format = 'legacy';
+                context.event.data = {
+                    system: {
+                        systemTimestamp: '2020-01-17T18:02:51.000Z'
+                    },
+                    tmstats: {
+                        virtualServerStat: [
+                            {
+                                cycle_count: '10'
+                            }
+                        ],
+                        virtualServerCpuStat: [
+                            {
+                                avg: '10'
+                            }
+                        ]
+                    },
+                    telemetryServiceInfo: context.event.data.telemetryServiceInfo,
+                    telemetryEventCategory: context.event.data.telemetryEventCategory
+                };
+                sinon.stub(request, 'post').callsFake((opts) => {
+                    try {
+                        const output = zlib.gunzipSync(opts.body).toString();
+                        assert.notStrictEqual(
+                            output.indexOf('"last_cycle_count":"10"'), -1, 'output should include last_cycle_count'
                         );
                         done();
                     } catch (err) {
