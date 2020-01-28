@@ -355,6 +355,25 @@ module.exports = {
     },
 
     /**
+     * Convert map to array using provided options
+     *
+     * @param {Object} data - data
+     *
+     * @returns {Object} Converted data
+     */
+    convertMapToArray(data) {
+        const ret = [];
+        data = data.data;
+
+        if (typeof data !== 'object') {
+            throw new Error(`convertMapToArray() object required: ${util.stringify(data)}`);
+        }
+
+        Object.keys(data).forEach(key => ret.push(data[key]));
+        return ret;
+    },
+
+    /**
      * restructureGslbPool
      *
      * @param {Object} args              - args object

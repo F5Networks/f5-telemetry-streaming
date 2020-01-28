@@ -27,6 +27,7 @@ const EVENT_TYPES = require('./constants.js').EVENT_TYPES;
  * @param {Object}  dataCtx.data           - data to process
  * @param {String}  dataCtx.type           - type of data to process
  * @param {Object}  actionCtx              - 'setTag' action to perfrom on the data
+ * @param {Object}  deviceCtx              - device context
  * @param {Object}  [actionCtx.setTag]     - tag(s) that will be applied
  * @param {Object}  [actionCtx.locations]  - where thae tags should be applied
  * @param {Object}  [actionCtx.ifAllMatch] - conditions to check before
@@ -68,8 +69,10 @@ function addTags(dataCtx, actionCtx, deviceCtx) {
         if (dataCtx.type === EVENT_TYPES.SYSTEM_POLLER) {
             // Apply tags to default locations (where addKeysByTag is true) for system info
             Object.keys(properties.stats).forEach((statKey) => {
-                const items = data[statKey];
                 const statProp = systemStatsUtil.renderProperty(deviceCtx, properties.stats[statKey]);
+                const items = statProp.structure && statProp.structure.parentKey
+                    ? (data[statProp.structure.parentKey] || {})[statKey] : data[statKey];
+
                 // tags can be applied to objects only - usually it is collections of objects
                 // e.g. Virtual Servers, pools, profiles and etc.
                 if (typeof items === 'object'

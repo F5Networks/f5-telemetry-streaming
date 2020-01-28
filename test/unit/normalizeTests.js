@@ -553,7 +553,8 @@ describe('Normalize', () => {
                         key: 'value',
                         tenant: 'Common',
                         application: 'app.app',
-                        foo: 'bar'
+                        foo: 'bar',
+                        addntlTag: 'tag'
                     }
                 };
                 const options = {
@@ -567,7 +568,10 @@ describe('Normalize', () => {
                                 },
                                 definitions: properties.definitions,
                                 opts: {
-                                    skip: ['somekey']
+                                    skip: ['somekey'],
+                                    tags: {
+                                        addntlTag: 'tag'
+                                    }
                                 }
                             }
                         }

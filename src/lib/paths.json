@@ -198,7 +198,7 @@
             "ignoreCached": true,
             "body": {
                 "command": "run",
-                "utilCmdArgs": "-c '/bin/tmctl $tmctlArgs'"
+                "utilCmdArgs": "-c 'tmctl $tmctlArgs'"
             }
         },
         {

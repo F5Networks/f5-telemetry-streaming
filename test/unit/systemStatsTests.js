@@ -142,23 +142,27 @@ describe('systemStats', () => {
 
             };
         }
-
         describe('tmstats', () => {
             function assertTmStat(statKey, tmctlKey) {
+                const mapKey = allProperties.stats[statKey].normalization[0].runFunctions[0].args.mapKey;
+                let hasTagging = allProperties.stats[statKey].normalization[1];
+                hasTagging = hasTagging && typeof hasTagging.addKeysByTag !== 'undefined';
+
+                const apiResponseData = [
+                    ['a', 'b', 'c', mapKey || 'someKey'],
+                    [1, 2, 'spam', '/Tenant/app/test'],
+                    [3, 4, 'eggs', '/Tenant/test']
+                ];
                 nock('http://localhost:8100')
                     .post(
                         '/mgmt/tm/util/bash',
                         {
                             command: 'run',
-                            utilCmdArgs: `-c '/bin/tmctl -c ${tmctlKey}'`
+                            utilCmdArgs: `-c 'tmctl -c ${tmctlKey}'`
                         }
                     )
                     .reply(200, {
-                        commandResult: [
-                            'a,b,c',
-                            '0,0,spam',
-                            '0,1,eggs'
-                        ].join('\n')
+                        commandResult: apiResponseData.map(data => data.join(',')).join('\n')
                     });
 
                 const host = {};
@@ -169,26 +173,38 @@ describe('systemStats', () => {
                             tmstats: allProperties.stats.tmstats,
                             [statKey]: allProperties.stats[statKey]
                         },
-                        global: allProperties.global
+                        global: allProperties.global,
+                        definitions: allProperties.definitions
                     }
                 };
-                const stats = new SystemStats(host, options);
-                return assert.becomes(stats.collect(), {
+                const expected = {
                     tmstats: {
                         [statKey]: [
                             {
-                                a: '0',
-                                b: '0',
-                                c: 'spam'
+                                a: '1',
+                                b: '2',
+                                c: 'spam',
+                                [mapKey || 'someKey']: '/Tenant/app/test'
                             },
                             {
-                                a: '0',
-                                b: '1',
-                                c: 'eggs'
+                                a: '3',
+                                b: '4',
+                                c: 'eggs',
+                                [mapKey || 'someKey']: '/Tenant/test'
                             }
                         ]
                     }
-                });
+                };
+                if (hasTagging) {
+                    expected.tmstats[statKey][0].application = 'app';
+                    expected.tmstats[statKey][0].tenant = 'Tenant';
+                    expected.tmstats[statKey][0].name = '/Tenant/app/test';
+                    expected.tmstats[statKey][1].tenant = 'Tenant';
+                    expected.tmstats[statKey][1].name = '/Tenant/test';
+                }
+
+                const stats = new SystemStats(host, options);
+                return assert.becomes(stats.collect(), expected);
             }
 
             const stats = allProperties.stats;
