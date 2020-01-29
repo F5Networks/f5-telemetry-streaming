@@ -31,9 +31,48 @@ if (!fs.existsSync(artifactsDir.dir)) {
 // using syslog level
 winston.setLevels(winston.config.syslog.levels);
 
+/**
+ * Mask Secrets (as needed)
+ *
+ * @param {String} msg - message to mask
+ *
+ * @returns {String} Masked message
+ */
+function maskSecrets(msg) {
+    let ret = msg;
+    const secrets = {
+        passphrase: {
+            replace: /(?:"passphrase":\s*{)(.*?)(?:})/g,
+            with: '"passphrase":{*********}'
+        },
+        '"passphrase"': {
+            replace: /(?:"passphrase":\s*")(.*?)(?:")/g,
+            with: '"passphrase":"*********"'
+        },
+        cipherText: {
+            replace: /(?:"cipherText":\s*")(.*?)(?:")/g,
+            with: '"cipherText":"*********"'
+        }
+    };
+    // place in try/catch
+    try {
+        Object.keys(secrets).forEach((k) => {
+            if (msg.indexOf(k) !== -1) {
+                ret = ret.replace(secrets[k].replace, secrets[k].with);
+            }
+        });
+    } catch (e) {
+        // just continue
+    }
+    return ret;
+}
+
+
 const timestamp = () => (new Date()).toISOString();
-/* eslint-disable-next-line prefer-template */
-const formatter = options => `[${options.timestamp()}][${options.level.toUpperCase()}] ${(options.message ? options.message : '')}${(options.meta && Object.keys(options.meta).length ? '\n\t' + JSON.stringify(options.meta, null, 4) : '')}`;
+/* eslint-disable prefer-template */
+const formatter = options => `[${options.timestamp()}][${options.level.toUpperCase()}] `
+    + `${maskSecrets(options.message ? options.message : '')}`
+    + `${maskSecrets(options.meta && Object.keys(options.meta).length ? ('\n' + JSON.stringify(options.meta, null, 4)) : '')}`;
 
 // json === false to allow custom formatting
 const fileTransport = new (winston.transports.File)({

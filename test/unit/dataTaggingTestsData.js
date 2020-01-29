@@ -159,6 +159,10 @@ module.exports = {
                     }
                 }
             },
+            deviceCtx: {
+                deviceVersion: '13.0.0.0',
+                provisioning: { ltm: { name: 'ltm', level: 'nominal' } }
+            },
             expectedCtx: {
                 data: {
                     httpProfiles: {
@@ -507,6 +511,10 @@ module.exports = {
                     applicationTag: '`A`'
                 }
             },
+            deviceCtx: {
+                deviceVersion: '13.0.0.0',
+                provisioning: { ltm: { name: 'ltm', level: 'nominal' } }
+            },
             expectedCtx: {
                 data: {
                     system: {},
@@ -559,6 +567,11 @@ module.exports = {
                         client3: {},
                         client4: {}
                     },
+                    aPools: {
+                        '/tenant1/application1/pool1': {},
+                        '/tenant2/application1/pool2': {},
+                        pool3: {}
+                    },
                     telemetryEventCategory: EVENT_TYPES.SYSTEM_POLLER
                 },
                 type: EVENT_TYPES.SYSTEM_POLLER
@@ -573,6 +586,10 @@ module.exports = {
                         }
                     }
                 }
+            },
+            deviceCtx: {
+                deviceVersion: '13.0.0.0',
+                provisioning: { ltm: { name: 'ltm', level: 'nominal' }, gtm: { name: 'gtm', level: 'minimum' } }
             },
             expectedCtx: {
                 data: {
@@ -634,6 +651,29 @@ module.exports = {
                             }
                         }
                     },
+                    aPools: {
+                        '/tenant1/application1/pool1': {
+                            parentTag: {
+                                nestedTag: {
+                                    tenantTag: 'tenant1',
+                                    applicationTag: 'application1'
+                                }
+                            }
+                        },
+                        '/tenant2/application1/pool2': {
+                            parentTag: {
+                                nestedTag: {
+                                    tenantTag: 'tenant2',
+                                    applicationTag: 'application1'
+                                }
+                            }
+                        },
+                        pool3: {
+                            parentTag: {
+                                nestedTag: {}
+                            }
+                        }
+                    },
                     telemetryEventCategory: EVENT_TYPES.SYSTEM_POLLER
                 },
                 type: EVENT_TYPES.SYSTEM_POLLER
@@ -656,6 +696,11 @@ module.exports = {
                         '/tenant2/application1/client2': {},
                         client3: {},
                         client4: {}
+                    },
+                    srvWideIps: {
+                        '/Common/www.srvish.com': {
+                            srvProp: true
+                        }
                     },
                     someDeepProperty: {
                         someDeepProperty: {
@@ -697,6 +742,9 @@ module.exports = {
                         '/tenant2/application1/client2': true,
                         client3: true
                     },
+                    srvWideIps: {
+                        '.*': true
+                    },
                     someDeepProperty: {
                         someDeepProperty: {
                             someDeepProperty: {
@@ -709,6 +757,10 @@ module.exports = {
                         somethingElseDeep: true
                     }
                 }
+            },
+            deviceCtx: {
+                deviceVersion: '13.0.0.0',
+                provisioning: { ltm: { name: 'ltm', level: 'nominal' }, gtm: { name: 'gtm', level: 'minimum' } }
             },
             expectedCtx: {
                 data: {
@@ -730,6 +782,12 @@ module.exports = {
                         },
                         client3: {},
                         client4: {}
+                    },
+                    srvWideIps: {
+                        '/Common/www.srvish.com': {
+                            srvProp: true,
+                            tenantTag: 'Common'
+                        }
                     },
                     someDeepProperty: {
                         someDeepProperty: {

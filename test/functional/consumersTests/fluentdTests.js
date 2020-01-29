@@ -73,37 +73,40 @@ function setup() {
 
 function test() {
     const testDataTimestamp = Date.now();
-    describe('Consumer Test: Fluentd - Configure Service', () => {
-        it('should configure TS', () => {
-            const consumerDeclaration = util.deepCopy(DECLARATION);
-            consumerDeclaration[FLUENTD_CONSUMER_NAME] = {
-                class: 'Telemetry_Consumer',
-                type: 'Generic_HTTP',
-                host: FLUENTD_HOST,
-                protocol: FLUENTD_PROTOCOL,
-                port: FLUENTD_PORT,
-                path: `/${FLUENTD_TAG_NAME}`,
-                headers: [
-                    {
-                        name: 'Content-Type',
-                        value: 'application/json'
-                    }
-                ]
-            };
-            return dutUtils.postDeclarationToDUTs(() => consumerDeclaration);
-        });
+
+    describe('Consumer Test: Fluentd - Configure TS and generate data', () => {
+        const consumerDeclaration = util.deepCopy(DECLARATION);
+        consumerDeclaration[FLUENTD_CONSUMER_NAME] = {
+            class: 'Telemetry_Consumer',
+            type: 'Generic_HTTP',
+            host: FLUENTD_HOST,
+            protocol: FLUENTD_PROTOCOL,
+            port: FLUENTD_PORT,
+            path: `/${FLUENTD_TAG_NAME}`,
+            headers: [
+                {
+                    name: 'Content-Type',
+                    value: 'application/json'
+                }
+            ]
+        };
+        DUTS.forEach(dut => it(
+            `should configure TS - ${dut.hostname}`,
+            () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(consumerDeclaration))
+        ));
 
         it('should send event to TS Event Listener', () => {
             const msg = `testDataTimestamp="${testDataTimestamp}",test="true",testType="${FLUENTD_CONSUMER_NAME}"`;
-            return dutUtils.sendDataToDUTsEventListener((hostObj => `hostname="${hostObj.hostname}",${msg}`), 10, 3000);
+            return dutUtils.sendDataToEventListeners(dut => `hostname="${dut.hostname}",${msg}`);
         });
     });
 
     describe('Consumer Test: Fluentd - Tests', () => {
         const systemPollerData = {};
         const fluentLogs = [];
+
         before(() => new Promise(resolve => setTimeout(resolve, 30 * 1000))
-            .then(() => dutUtils.getSystemPollerData((hostObj, data) => {
+            .then(() => dutUtils.getSystemPollersData((hostObj, data) => {
                 systemPollerData[hostObj.hostname] = data;
             })));
 

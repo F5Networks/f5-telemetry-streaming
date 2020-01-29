@@ -27,7 +27,7 @@ const STATSD_CONTAINER_NAME = 'ts_statsd_consumer';
 const STATSD_HTTP_PROTO = 'http';
 const STATSD_HTTP_PORT = 80;
 const STATSD_DATA_PORT = 8125;
-const STATSD_CONSUMER_NAME = 'Consumer_Splunk';
+const STATSD_CONSUMER_NAME = 'StatsD_Consumer';
 
 // read in example config
 const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC_EXAMPLE));
@@ -79,17 +79,18 @@ function test() {
     });
 
     describe('Consumer Test: Statsd - Configure TS', () => {
-        it('should configure TS', () => {
-            const consumerDeclaration = util.deepCopy(DECLARATION);
-            consumerDeclaration[STATSD_CONSUMER_NAME] = {
-                class: 'Telemetry_Consumer',
-                type: 'Statsd',
-                host: CONSUMER_HOST.ip,
-                protocol: 'udp',
-                port: STATSD_DATA_PORT
-            };
-            return dutUtils.postDeclarationToDUTs(() => consumerDeclaration);
-        });
+        const consumerDeclaration = util.deepCopy(DECLARATION);
+        consumerDeclaration[STATSD_CONSUMER_NAME] = {
+            class: 'Telemetry_Consumer',
+            type: 'Statsd',
+            host: CONSUMER_HOST.ip,
+            protocol: 'udp',
+            port: STATSD_DATA_PORT
+        };
+        DUTS.forEach(dut => it(
+            `should configure TS - ${dut.hostname}`,
+            () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(consumerDeclaration))
+        ));
     });
 
     describe('Consumer Test: Statsd - Test', () => {
@@ -189,7 +190,7 @@ function test() {
 
         const sysPollerMetricsData = {};
 
-        it('should fetch system poller data via debug endpoint from DUTs', () => dutUtils.getSystemPollerData((hostObj, data) => {
+        it('should fetch system poller data via debug endpoint from DUTs', () => dutUtils.getSystemPollersData((hostObj, data) => {
             sysPollerMetricsData[hostObj.hostname] = getMerticsName(data);
         }));
 

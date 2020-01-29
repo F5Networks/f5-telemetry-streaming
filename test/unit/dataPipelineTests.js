@@ -44,8 +44,8 @@ describe('Data Pipeline', () => {
             return Promise.resolve();
         });
         taggingHandlerStub = sinon.stub(dataTagging, 'handleAction');
-        taggingHandlerStub.callsFake((dataCtx, actionCtx) => {
-            handleActionsData.push({ dataCtx, actionCtx });
+        taggingHandlerStub.callsFake((dataCtx, actionCtx, deviceCtx) => {
+            handleActionsData.push({ dataCtx, actionCtx, deviceCtx });
         });
         sinon.stub(dataFilter, 'handleAction').callsFake((dataCtx, actionCtx) => {
             handleActionsData.push({ dataCtx, actionCtx });
@@ -138,6 +138,7 @@ describe('Data Pipeline', () => {
         const options = {
             actions: [
                 {
+                    enable: true,
                     setTag: {}
                 }
             ]
@@ -145,6 +146,45 @@ describe('Data Pipeline', () => {
         return dataPipeline.process(dataCtx, options)
             .then(() => {
                 assert.deepStrictEqual(handleActionsData, []);
+            });
+    });
+
+    it('should pass deviceCtx as param for dataTagging handleAction if event is systemPoller', () => {
+        const dataCtx = {
+            data: {
+                foo: 'bar'
+            },
+            type: EVENT_TYPES.SYSTEM_POLLER
+        };
+        const options = {
+            actions: [
+                {
+                    enable: true,
+                    setTag: {}
+                }
+            ],
+            deviceContext: {
+                deviceVersion: 'a.b.c.1'
+            }
+        };
+        return dataPipeline.process(dataCtx, options)
+            .then(() => {
+                assert.deepEqual(
+                    handleActionsData,
+                    [
+                        {
+                            dataCtx: {
+                                data: {
+                                    foo: 'bar',
+                                    telemetryEventCategory: 'systemInfo'
+                                },
+                                type: 'systemInfo'
+                            },
+                            actionCtx: { enable: true, setTag: {} },
+                            deviceCtx: { deviceVersion: 'a.b.c.1' }
+                        }
+                    ]
+                );
             });
     });
 

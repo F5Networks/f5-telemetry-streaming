@@ -1,6 +1,16 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.9.0
+### Added
+- AUTOTOOL-725 and AUTOTOOL-755: Add support for GSLB WideIP and Pools Config and Stats
+### Fixed
+- AUTOTOOL-1061: Basic auth does not work with ElasticSearch consumer
+- AUTOTOOL-1017: Some Splunk legacy tmstats datamodels have period in property name instead of underscore
+### Changed
+- AUTOTOOL-1068: The username and passphrase settings for AWS CloudWatch consumers are now optional
+### Removed
+
 ## 1.8.0
 ### Added
 - AUTOTOOL-487: Add support for filtering (System Poller and Event Listener)

@@ -29,6 +29,7 @@ const SPLUNK_AUTH_HEADER = `Basic ${Buffer.from(`${SPLUNK_USERNAME}:${SPLUNK_PAS
 const SPLUNK_HTTP_PORT = 8000;
 const SPLUNK_HEC_PORT = 8088;
 const SPLUNK_SVC_PORT = 8089;
+const SPLUNK_CONSUMER_NAME = 'Splunk_Consumer';
 
 // read in example config
 const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC_EXAMPLE));
@@ -45,7 +46,6 @@ function setup() {
 }
 
 function test() {
-    const testType = 'Splunk_Consumer_Test';
     const testDataTimestamp = (new Date()).getTime();
     let splunkHecToken;
 
@@ -125,9 +125,10 @@ function test() {
     });
 
     describe('Consumer Test: Splunk - Configure TS and generate data', () => {
-        it('should configure TS', () => {
-            const consumerDeclaration = util.deepCopy(DECLARATION);
-            consumerDeclaration.Consumer_Splunk = {
+        const consumerDeclaration = util.deepCopy(DECLARATION);
+        // this need only to insert 'splunkHecToken'
+        it('should compute declaration', () => {
+            consumerDeclaration[SPLUNK_CONSUMER_NAME] = {
                 class: 'Telemetry_Consumer',
                 type: 'Splunk',
                 host: CONSUMER_HOST.ip,
@@ -138,12 +139,16 @@ function test() {
                 },
                 allowSelfSignedCert: true
             };
-            return dutUtils.postDeclarationToDUTs(() => consumerDeclaration);
         });
 
+        DUTS.forEach(dut => it(
+            `should configure TS - ${dut.hostname}`,
+            () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(consumerDeclaration))
+        ));
+
         it('should send event to TS Event Listener', () => {
-            const msg = `testDataTimestamp="${testDataTimestamp}",test="true",testType="${testType}"`;
-            return dutUtils.sendDataToDUTsEventListener(hostObj => `hostname="${hostObj.hostname}",${msg}`);
+            const msg = `testDataTimestamp="${testDataTimestamp}",test="true",testType="${SPLUNK_CONSUMER_NAME}"`;
+            return dutUtils.sendDataToEventListeners(dut => `hostname="${dut.hostname}",${msg}`);
         });
     });
 
@@ -199,7 +204,7 @@ function test() {
 
         DUTS.forEach((dut) => {
             const searchQuerySP = `search source=f5.telemetry | search "system.hostname"="${dut.hostname}" | head 1`;
-            const searchQueryEL = `search source=f5.telemetry | spath testType | search testType=${testType} | search hostname="${dut.hostname}" | search testDataTimestamp="${testDataTimestamp}" | head 1`;
+            const searchQueryEL = `search source=f5.telemetry | spath testType | search testType=${SPLUNK_CONSUMER_NAME} | search hostname="${dut.hostname}" | search testDataTimestamp="${testDataTimestamp}" | head 1`;
 
             it(`should check for system poller data from - ${dut.hostname}`, () => new Promise(resolve => setTimeout(resolve, 30000))
                 .then(() => {
@@ -240,14 +245,14 @@ function test() {
                     const result = results[0];
                     const rawData = JSON.parse(result._raw);
 
-                    assert.strictEqual(rawData.testType, testType);
+                    assert.strictEqual(rawData.testType, SPLUNK_CONSUMER_NAME);
                     assert.strictEqual(rawData.hostname, dut.hostname);
                     // validate data parsed by Splunk
                     assert.strictEqual(result.host, dut.hostname);
                     assert.strictEqual(result.source, splunkSourceStr);
                     assert.strictEqual(result.sourcetype, splunkSourceTypeStr);
                     assert.strictEqual(result.hostname, dut.hostname);
-                    assert.strictEqual(result.testType, testType);
+                    assert.strictEqual(result.testType, SPLUNK_CONSUMER_NAME);
                     assert.strictEqual(result.testDataTimestamp, `${testDataTimestamp}`);
                 }));
         });

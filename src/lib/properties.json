@@ -260,6 +260,342 @@
                 }
             ]
         },
+        "aWideIps": {
+            "if": {
+                "isModuleProvisioned": "gtm"
+            },
+            "then": {
+                "key": "aWideIps::items",
+                "normalization": [
+                    {
+                        "convertArrayToMap": { "keyName": "fullPath", "skipWhenKeyMissing": true }
+                    },
+                    {
+                        "includeFirstEntry": { "pattern": "/stats" }
+                    },
+                    {
+                        "filterKeys": { "exclude": [ "fullPath", "generation", "wipName", "rulesReference", "nameReference" ] }
+                    },
+                    {
+                        "runFunctions": [ { "name": "restructureGslbWideIp" } ]
+                    },
+                    {
+                        "addKeysByTag": true
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "aaaaWideIps": {
+            "if": {
+                "isModuleProvisioned": "gtm"
+            },
+            "then": {
+                "key": "aaaaWideIps::items",
+                "normalization": [
+                    {
+                        "convertArrayToMap": { "keyName": "fullPath", "skipWhenKeyMissing": true }
+                    },
+                    {
+                        "includeFirstEntry": { "pattern": "/stats" }
+                    },
+                    {
+                        "filterKeys": { "exclude": [ "fullPath", "generation", "wipName", "rulesReference", "nameReference" ] }
+                    },
+                    {
+                        "runFunctions": [ { "name": "restructureGslbWideIp" } ]
+                    },
+                    {
+                        "addKeysByTag": true
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "cnameWideIps": {
+            "if": {
+                "isModuleProvisioned": "gtm"
+            },
+            "then": {
+                "key": "cnameWideIps::items",
+                "normalization": [
+                    {
+                        "convertArrayToMap": { "keyName": "fullPath", "skipWhenKeyMissing": true }
+                    },
+                    {
+                        "includeFirstEntry": { "pattern": "/stats" }
+                    },
+                    {
+                        "filterKeys": { "exclude": [ "fullPath", "generation", "wipName", "rulesReference", "nameReference" ] }
+                    },
+                    {
+                        "runFunctions": [ { "name": "restructureGslbWideIp" } ]
+                    },
+                    {
+                        "addKeysByTag": true
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "mxWideIps": {
+            "if": {
+                "isModuleProvisioned": "gtm"
+            },
+            "then": {
+                "key": "mxWideIps::items",
+                "normalization": [
+                    {
+                        "convertArrayToMap": { "keyName": "fullPath", "skipWhenKeyMissing": true }
+                    },
+                    {
+                        "includeFirstEntry": { "pattern": "/stats" }
+                    },
+                    {
+                        "filterKeys": { "exclude": [ "fullPath", "generation", "wipName", "rulesReference", "nameReference" ] }
+                    },
+                    {
+                        "runFunctions": [ { "name": "restructureGslbWideIp" } ]
+                    },
+                    {
+                        "addKeysByTag": true
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "naptrWideIps": {
+            "if": {
+                "isModuleProvisioned": "gtm"
+            },
+            "then": {
+                "key": "naptrWideIps::items",
+                "normalization": [
+                    {
+                        "convertArrayToMap": { "keyName": "fullPath", "skipWhenKeyMissing": true }
+                    },
+                    {
+                        "includeFirstEntry": { "pattern": "/stats" }
+                    },
+                    {
+                        "filterKeys": { "exclude": [ "fullPath", "generation", "wipName", "rulesReference", "nameReference" ] }
+                    },
+                    {
+                        "runFunctions": [ { "name": "restructureGslbWideIp" } ]
+                    },
+                    {
+                        "addKeysByTag": true
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "srvWideIps": {
+            "if": {
+                "isModuleProvisioned": "gtm"
+            },
+            "then": {
+                "key": "srvWideIps::items",
+                "normalization": [
+                    {
+                        "convertArrayToMap": { "keyName": "fullPath", "skipWhenKeyMissing": true }
+                    },
+                    {
+                        "includeFirstEntry": { "pattern": "/stats" }
+                    },
+                    {
+                        "filterKeys": { "exclude": [ "fullPath", "generation", "wipName", "rulesReference", "nameReference" ] }
+                    },
+                    {
+                        "runFunctions": [ { "name": "restructureGslbWideIp" } ]
+                    },
+                    {
+                        "addKeysByTag": true
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "aPools": {
+            "if": {
+                "isModuleProvisioned": "gtm"
+            },
+            "then": {
+                "key": "aPools::items",
+                "normalization": [
+                    {
+                        "includeFirstEntry": { "pattern": "/stats", "excludePattern": "/members/", "runFunctions": [ {"name": "restructureGslbPool" } ] }
+                    },
+                    {
+                        "convertArrayToMap": { "keyName": "selfLink", "keyNamePrefix": "name/" }
+                    },
+                    {
+                        "filterKeys": { "exclude": [ "fullPath", "generation", "tmName" ] }
+                    },
+                    {
+                        "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "gtm/pool/a/": { "pattern": "gtm\/pool\/a\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members" } }
+                    },
+                    {
+                        "addKeysByTag": true
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "aaaaPools": {
+            "if": {
+                "isModuleProvisioned": "gtm"
+            },
+            "then": {
+                "key": "aaaaPools::items",
+                "normalization": [
+                    {
+                        "includeFirstEntry": { "pattern": "/stats", "excludePattern": "/members/", "runFunctions": [ {"name": "restructureGslbPool" } ]  }
+                    },
+                    {
+                        "convertArrayToMap": { "keyName": "selfLink", "keyNamePrefix": "name/" }
+                    },
+                    {
+                        "filterKeys": { "exclude": [ "fullPath", "generation", "tmName" ] }
+                    },
+                    {
+                        "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "gtm/pool/aaaa/": { "pattern": "gtm\/pool\/aaaa\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members" } }
+                    },
+                    {
+                        "addKeysByTag": true
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "cnamePools": {
+            "if": {
+                "isModuleProvisioned": "gtm"
+            },
+            "then": {
+                "key": "cnamePools::items",
+                "normalization": [
+                    {
+                        "includeFirstEntry": { "pattern": "/stats", "excludePattern": "/members/", "runFunctions": [ {"name": "restructureGslbPool" } ]  }
+                    },
+                    {
+                        "convertArrayToMap": { "keyName": "fullPath", "keyNamePrefix": "name/" }
+                    },
+                    {
+                        "filterKeys": { "exclude": [ "fullPath", "generation", "tmName" ] }
+                    },
+                    {
+                        "renameKeys": { "patterns":  { "name/": { "pattern": "name\/(.*)", "group": 1 }, "%20:": { "pattern": "%20:(.*)/stats", "group": 1 }, "gtm/pool/cname/": { "pattern": "gtm\/pool\/cname\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members" } }
+                    },
+                    {
+                        "addKeysByTag": true
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "mxPools": {
+            "if": {
+                "isModuleProvisioned": "gtm"
+            },
+            "then": {
+                "key": "mxPools::items",
+                "normalization": [
+                    {
+                        "includeFirstEntry": { "pattern": "/stats", "excludePattern": "/members/", "runFunctions": [ {"name": "restructureGslbPool" } ]  }
+                    },
+                    {
+                        "convertArrayToMap": { "keyName": "selfLink", "keyNamePrefix": "name/" }
+                    },
+                    {
+                        "filterKeys": { "exclude": [ "fullPath", "generation", "tmName" ] }
+                    },
+                    {
+                        "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "%20:": { "pattern": "%20:(.*)/stats", "group": 1 }, "gtm/pool/mx/": { "pattern": "gtm\/pool\/mx\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members" } }
+                    },
+                    {
+                        "addKeysByTag": true
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "naptrPools": {
+            "if": {
+                "isModuleProvisioned": "gtm"
+            },
+            "then": {
+                "key": "naptrPools::items",
+                "normalization": [
+                    {
+                        "includeFirstEntry": { "pattern": "/stats", "excludePattern": "/members/", "runFunctions": [ {"name": "restructureGslbPool" } ]  }
+                    },
+                    {
+                        "convertArrayToMap": { "keyName": "selfLink", "keyNamePrefix": "name/" }
+                    },
+                    {
+                        "filterKeys": { "exclude": [ "fullPath", "generation", "tmName" ] }
+                    },
+                    {
+                        "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "%20:": { "pattern": "%20:(.*)/stats", "group": 1 }, "gtm/pool/naptr/": { "pattern": "gtm\/pool\/naptr\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members" } }
+                    },
+                    {
+                        "addKeysByTag": true
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "srvPools": {
+            "if": {
+                "isModuleProvisioned": "gtm"
+            },
+            "then": {
+                "key": "srvPools::items",
+                "normalization": [
+                    {
+                        "includeFirstEntry": { "pattern": "/stats", "excludePattern": "/members/", "runFunctions": [ {"name": "restructureGslbPool" } ]  }
+                    },
+                    {
+                        "convertArrayToMap": { "keyName": "selfLink", "keyNamePrefix": "name/" }
+                    },
+                    {
+                        "filterKeys": { "exclude": [ "fullPath", "generation", "tmName" ] }
+                    },
+                    {
+                        "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "%20:": { "pattern": "%20:(.*)/stats", "group": 1 }, "gtm/pool/srv/": { "pattern": "gtm\/pool\/srv\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members" } }
+                    },
+                    {
+                        "addKeysByTag": true
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
         "virtualServers": {
             "key": "virtualServers::items",
             "normalization": [

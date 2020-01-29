@@ -134,3 +134,15 @@ If you already have an existing set of devices, you can run the functional tests
         export TEST_HARNESS_FILE="/path/to/harness_facts_flat.json"
         npm run test-functional
         
+#### Google StackDriver consumer tests
+
+These tests are under /test/functional/consumers/googleStackDriverTests.js. They have a few environment variables that will need to be present in Gitlab. These environment variables are:
+
+- GCP_PRIVATE_KEY
+- GCP_PRIVATE_KEY_ID
+- GCP_PROJECT_ID
+- GCP_SERVICE_EMAIL
+
+The above environment variables all come from a service account in GCP. The service account that the tests are using is named telemetryStreamingTesting. In the GCP GUI, you can go to IAM & Admin -> Service Accounts to get to the list of service account. Once the service profile has been selected, you will be able to see what the service account email is and should also see any private key ids for keys that have been created. To get a new private key, the service account should be edited and the "CREATE KEY" option is used. After choosing to create a new key, select the JSON file option. You will be given a file that will have the private key inside of it. 
+
+Important note: Gitlab does not like \n's and there are many of these in the private key given from GCP. Currently the \n's have all been replaced with "REPLACE" as an easy way to identify where \n's should go so that we can manually add them in the code. The \n's should be replaced before adding the private key to the environment variable in Gitlab.

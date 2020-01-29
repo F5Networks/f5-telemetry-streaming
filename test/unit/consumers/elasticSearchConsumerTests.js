@@ -9,16 +9,117 @@
 'use strict';
 
 const assert = require('assert');
+const sinon = require('sinon');
 
+const elastic = require('elasticsearch');
+
+const util = require('../../../src/lib/util');
+const testUtil = require('../shared/util.js');
 /* eslint-disable global-require */
 
-describe('Rename Keys', () => {
-    let util;
+describe('ElasticSearch', () => {
+    let passedPayload;
+    let passedClientConfig;
 
-    before(() => {
-        util = require('../../../src/lib/util.js');
+    // stub elastic.Client before requiring elastic consumer, to ensure Client constructor is stubbed
+    sinon.stub(elastic, 'Client').callsFake((config) => {
+        passedClientConfig = config;
+        return {
+            index: (payload) => {
+                passedPayload = payload;
+                return Promise.resolve();
+            }
+        };
+    });
+    const elasticSearchIndex = require('../../../src/lib/consumers/ElasticSearch/index');
+
+    const defaultConsumerConfig = {
+        host: 'localhost',
+        port: '9200',
+        path: '/path/to/post/data',
+        index: 'ts_elasticsearch_consumer',
+        dataType: 'f5telemetry',
+        allowSelfSignedCert: true,
+        protocol: 'http'
+    };
+
+    afterEach(() => {
+        sinon.restore();
     });
 
+    describe('process', () => {
+        it('should configure ESClient with default options', () => {
+            const context = testUtil.buildConsumerContext({
+                config: defaultConsumerConfig
+            });
+
+            elasticSearchIndex(context);
+            assert.strictEqual(passedClientConfig.host.host, 'localhost');
+            assert.strictEqual(passedClientConfig.host.path, '/path/to/post/data');
+            assert.strictEqual(passedClientConfig.host.port, '9200');
+            assert.strictEqual(passedClientConfig.host.protocol, 'http');
+        });
+
+        it('should configure ESClient with default options', () => {
+            const context = testUtil.buildConsumerContext({
+                config: {
+                    host: 'localhost',
+                    port: '9200',
+                    path: '/path/to/post/data',
+                    index: 'ts_elasticsearch_consumer',
+                    dataType: 'f5telemetry',
+                    allowSelfSignedCert: true,
+                    protocol: 'http',
+                    username: 'myUser',
+                    passphrase: 'myPassword',
+                    apiVersion: '12'
+                }
+            });
+
+            elasticSearchIndex(context);
+            assert.strictEqual(passedClientConfig.httpAuth, 'myUser:myPassword');
+            assert.strictEqual(passedClientConfig.apiVersion, '12');
+        });
+
+        it('should process systemInfo data', () => {
+            const context = testUtil.buildConsumerContext({
+                eventType: 'systemInfo',
+                config: defaultConsumerConfig
+            });
+
+            const expectedPayload = {
+                body: testUtil.deepCopy(context.event.data),
+                index: 'ts_elasticsearch_consumer',
+                type: 'f5telemetry'
+            };
+            elasticSearchIndex(context);
+            assert.deepEqual(passedPayload, expectedPayload);
+        });
+
+        it('should process event data', () => {
+            const context = testUtil.buildConsumerContext({
+                eventType: 'AVR',
+                config: defaultConsumerConfig
+            });
+
+            const expectedData = testUtil.deepCopy(context.event.data);
+            delete expectedData.telemetryEventCategory;
+            const expectedPayload = {
+                body: {
+                    data: expectedData,
+                    telemetryEventCategory: 'AVR'
+                },
+                index: 'ts_elasticsearch_consumer',
+                type: 'f5telemetry'
+            };
+
+            elasticSearchIndex(context);
+            assert.deepEqual(passedPayload, expectedPayload);
+        });
+    });
+});
+
+describe('Rename Keys', () => {
     const member1 = '.members.x.';
     const member2Pre = '..members.x..y..';
     const member2Post = '.members.x.y.';

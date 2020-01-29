@@ -319,6 +319,79 @@ In this section, you configure the remaining objects for the Log Publisher, no m
 
         create sys log-config publisher telemetry_publisher destinations replace-all-with { telemetry_formatted }
 
+|
+|
+
+
+.. _char-encoding:
+
+Character Encoding information
+------------------------------
+F5 logs may contain various character encoding or byte streams that include illegal characters for a specific encoding, or invalid UTF-8 strings. Telemetry Streaming does not currently enforce validation of the data that an event listener receives. It simply attempts to convert the raw input it receives into a JSON-formatted string for forwarding. 
+
+.. NOTE:: Varying character encodings and illegal characters in the byte streams are very common in BIG-IP ASM logs.
+
+For example, the following "message" is sent through TCP (input) and shows the received data in a format that will be handed off for forwarder use (output):
+
+.. code-block:: bash
+
+   let message = 'policy_name="some_test",key1="это безопасно",key2="U+0000 = fc 80 80 80 80 80 = "������"",key3="ひほわれよ HЯ⾀ U+FFFF = ef bf bf = "￿""';
+
+
+The following shows the input sent as different buffers, and the resulting output:
+
+#. *Input*: |br| Sent as buffer (default utf-8) |br| *Output*:
+
+   .. code-block:: bash
+
+      {
+          "data": {
+              "policy_name": "some_test",
+              "key1": "это безопасно",
+              "key2": "U+0000 = fc 80 80 80 80 80 = \"������\"",
+              "key3": "ひほわれよ HЯ⾀ U+FFFF = ef bf bf = \"\"",
+              "telemetryEventCategory": "ASM"
+           },
+              "type": "ASM"
+      }
+
+#. *Input*: |br| Sent as buffer (utf16le) |br| *Output*:
+
+   .. code-block:: bash
+
+      {
+          "data": {
+              "data": "p\u0000o\u0000l\u0000i\u0000c\u0000y\u0000_\u0000n\u0000a\u0000m\u0000e\u0000=\u0000
+              \"\u0000s\u0000o\u0000m\u0000e\u0000_\u0000t\u0000e\u0000s\u0000t\u0000\"\u0000,\u0000k\u0000e\u0000y
+              \u00001\u0000=\u0000\"\u0000M\u0004B\u0004>\u0004 \u00001\u00045\u00047\u0004>\u0004?\u00040\u0004A\u
+              0004=\u0004>\u0004\"\u0000,\u0000k\u0000e\u0000y\u00002\u0000=\u0000\"\u0000U\u0000+\u00000\u00000\u0
+              0000\u00000\u0000 \u0000=\u0000 \u0000f\u0000c\u0000 \u00008\u00000\u0000 \u00008\u00000\u0000 \u0000
+              8\u00000\u0000 \u00008\u00000\u0000 \u00008\u00000\u0000 \u0000=\u0000 \u0000\"\u0000������������\"\u
+              0000\"\u0000,\u0000k\u0000e\u0000y\u00003\u0000=\u0000\"\u0000r0{0�0�0�0 \u0000H\u0000/\u0004�/ \u000
+              0U\u0000+\u0000F\u0000F\u0000F\u0000F\u0000 \u0000=\u0000 \u0000e\u0000f\u0000 \u0000b\u0000f\u0000 \
+              u0000b\u0000f\u0000 \u0000=\u0000 \u0000\"\u0000��\"\u0000\"\u0000",
+              "telemetryEventCategory": "event"
+          },
+          "type": "event"
+      }
+          
+#. *Input*: |br| Sent as buffer (ascii) |br| *Output*:
+
+   .. code-block:: bash
+
+      {
+          "data": {
+              "policy_name": "some_test",
+              "key1": "MB> 157>?0A=>",
+              "key2": "U+0000 = fc 80 80 80 80 80 = \"������\"",
+              "key3": "r{��� H/� U+FFFF = ef bf bf = \"�\"",
+              "telemetryEventCategory": "ASM"
+          },
+          "type": "ASM"
+      }
+
+
+
 
 
 .. |as3docs| raw:: html
@@ -341,6 +414,9 @@ In this section, you configure the remaining objects for the Log Publisher, no m
    
    <br />
 
+.. |utf| raw:: html
+
+   <a href="https://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt" target="_blank">BIG-IP CGNAT: Implementations - Using CGNAT Logging and Subscriber Traceability</a>
 
    
 

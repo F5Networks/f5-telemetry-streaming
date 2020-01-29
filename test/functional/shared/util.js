@@ -412,7 +412,7 @@ module.exports = {
             // end environment variables
         } else {
             const msg = 'Error: Please provide appropriate test harness environment variables';
-            this.log(msg);
+            logger.error(msg);
             throw new Error(msg);
         }
         return hosts;
@@ -431,6 +431,7 @@ module.exports = {
 
         return new Promise((resolve, reject) => {
             const client = net.createConnection({ host, port }, () => {
+                logger.info(`Sending following message to ${host} [port=${port}]`, { msg });
                 client.write(msg);
                 client.end();
             });

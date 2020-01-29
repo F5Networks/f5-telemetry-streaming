@@ -340,10 +340,18 @@ const stats = [
 
         const template = getTemplate('bigip.tmstats', request.globalCtx.event.data, request.cache);
         const output = [];
+        const periodRegex = RegExp(/\./g);
 
         Object.keys(tmstats).forEach((key) => {
             tmstats[key].forEach((entry) => {
                 const newData = Object.assign({}, template);
+                // replace periods in tmstat key names with underscores
+                Object.keys(entry).forEach((entryKey) => {
+                    if (periodRegex.test(entryKey)) {
+                        entry[entryKey.replace(periodRegex, '_')] = entry[entryKey];
+                        delete entry[entryKey];
+                    }
+                });
                 newData.source += `.${STAT_2_TMCTL_TABLE[key]}`;
                 newData.event = Object.assign({}, template.event);
                 newData.event = Object.assign(newData.event, entry);

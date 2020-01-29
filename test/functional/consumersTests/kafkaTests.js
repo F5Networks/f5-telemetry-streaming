@@ -20,7 +20,7 @@ const dutUtils = require('../dutTests.js').utils;
 // module requirements
 const MODULE_REQUIREMENTS = { DOCKER: true };
 
-// const DUTS = util.getHosts('BIGIP');
+const DUTS = util.getHosts('BIGIP');
 const CONSUMER_HOST = util.getHosts('CONSUMER')[0]; // only expect one
 const KAFKA_IMAGE_NAME = 'bitnami/kafka:latest';
 const ZOOKEEPER_NAME = 'zookeeper-server';
@@ -74,19 +74,20 @@ function test() {
     // const dataTimestamp = (new Date()).getTime();
 
     describe('Consumer Test: Kafka', () => {
-        it('should configure TS', () => {
-            const consumerDeclaration = util.deepCopy(DECLARATION);
-            consumerDeclaration[KAFKA_CONSUMER_NAME] = {
-                class: 'Telemetry_Consumer',
-                type: 'Kafka',
-                host: KAFKA_HOST,
-                protocol: KAFKA_PROTOCOL,
-                port: KAFKA_PORT,
-                topic: KAFKA_TOPIC,
-                authenticationProtocol: KAFKA_AUTH_PROTOCOL
-            };
-            return dutUtils.postDeclarationToDUTs(() => consumerDeclaration);
-        });
+        const consumerDeclaration = util.deepCopy(DECLARATION);
+        consumerDeclaration[KAFKA_CONSUMER_NAME] = {
+            class: 'Telemetry_Consumer',
+            type: 'Kafka',
+            host: KAFKA_HOST,
+            protocol: KAFKA_PROTOCOL,
+            port: KAFKA_PORT,
+            topic: KAFKA_TOPIC,
+            authenticationProtocol: KAFKA_AUTH_PROTOCOL
+        };
+        DUTS.forEach(dut => it(
+            `should configure TS - ${dut.hostname}`,
+            () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(consumerDeclaration))
+        ));
 
         it('should receive message on Kafka consumer', function (done) {
             this.retries(0);

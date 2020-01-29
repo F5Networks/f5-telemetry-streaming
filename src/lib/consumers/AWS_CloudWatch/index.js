@@ -20,13 +20,15 @@ module.exports = function (context) {
     const date = new Date();
     const epochDate = date.getTime();
 
-    AWS.config.update({
-        region,
-        credentials: new AWS.Credentials({
+    const awsConfig = { region };
+    if (context.config.username && context.config.passphrase) {
+        awsConfig.credentials = new AWS.Credentials({
             accessKeyId: context.config.username,
             secretAccessKey: context.config.passphrase
-        })
-    });
+        });
+    }
+    AWS.config.update(awsConfig);
+
     const cloudWatchLogs = new AWS.CloudWatchLogs({ apiVersion: '2014-03-28' });
 
     const params = {

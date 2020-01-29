@@ -8,7 +8,6 @@
 
 'use strict';
 
-const mustache = require('mustache');
 
 const constants = require('./constants.js');
 const util = require('./util.js');
@@ -18,11 +17,8 @@ const paths = require('./paths.json');
 const logger = require('./logger.js');
 const EndpointLoader = require('./endpointLoader');
 const dataUtil = require('./dataUtil');
+const systemStatsUtil = require('./systemStatsUtil');
 
-const CONDITIONAL_FUNCS = {
-    deviceVersionGreaterOrEqual,
-    isModuleProvisioned
-};
 
 /**
  * System Stats Class
@@ -73,74 +69,7 @@ SystemStats.prototype._splitKey = function (key) {
     const childKey = splitKeys.length > 0 ? splitKeys.join(constants.STATS_KEY_SEP) : undefined;
     return { rootKey, childKey };
 };
-/**
- * Evaluate conditional block
- *
- * @param {Object} conditionalBlock - block to evaluate, where object's key - conditional operator
- *                                    object's value - params for that operator
- *
- * @returns {boolean} conditional result
- */
-SystemStats.prototype._resolveConditional = function (conditionalBlock) {
-    let ret = true;
-    Object.keys(conditionalBlock).forEach((key) => {
-        const func = CONDITIONAL_FUNCS[key];
-        if (func === undefined) {
-            throw new Error(`Unknown property in conditional block ${key}`);
-        }
-        ret = ret && func(this.contextData, conditionalBlock[key]);
-    });
-    return ret;
-};
-/**
- * Property pre-processing to resolve conditionals
- *
- * @param {Object} property - property object
- *
- * @returns {Object} pre-processed deep copy of property object
- */
-SystemStats.prototype._preprocessProperty = function (property) {
-    if (property.if) {
-        const newObj = {};
-        // property can result in 'false' when
-        // 'else' or 'then' were not defined.
-        while (property) {
-            // copy all non-conditional data on same level to new object
-            // eslint-disable-next-line no-loop-func
-            Object.keys(property).forEach((key) => {
-                if (!(key === 'if' || key === 'then' || key === 'else')) {
-                    newObj[key] = property[key];
-                }
-            });
-            // so, we copied everything we needed.
-            // break in case there is no nested 'if' block
-            if (!property.if) {
-                break;
-            }
-            // trying to resolve conditional
-            property = this._resolveConditional(property.if)
-                ? property.then : property.else;
-        }
-        property = newObj;
-    }
-    // deep copy
-    return util.deepCopy(property);
-};
-/**
- * Render key using mustache template system
- *
- * @param {Object} property - property object
- *
- * @returns {Object} rendered property object
- */
-SystemStats.prototype._renderProperty = function (property) {
-    // should be easy to add support for more complex templates like {{ #something }}
-    // but not sure we are really need it now.
-    // For now just supporting simple templates which
-    // generates single string only
-    if (property.key) property.key = mustache.render(property.key, this.contextData);
-    return property;
-};
+
 /**
  * Process loaded data
  *
@@ -256,7 +185,7 @@ SystemStats.prototype._processProperty = function (key, property) {
         return Promise.resolve();
     }
 
-    property = this._renderProperty(this._preprocessProperty(property));
+    property = systemStatsUtil.renderProperty(this.contextData, property);
     /**
      * if endpoints will have their own 'disabled' flag
      * we will need to add additional check here or simply return empty value.
@@ -472,43 +401,6 @@ SystemStats.prototype.collect = function () {
         });
 };
 
-/**
- * Comparison functions
- */
-
-/**
- * Compare device versions
- *
- * @param {Object} contextData               - context data
- * @param {Object} contextData.deviceVersion - device's version to compare
- * @param {String} versionToCompare          - version to compare against
- *
- * @returns {boolean} true when device's version is greater or equal
- */
-function deviceVersionGreaterOrEqual(contextData, versionToCompare) {
-    const deviceVersion = contextData.deviceVersion;
-    if (deviceVersion === undefined) {
-        throw new Error('deviceVersionGreaterOrEqual: context has no property \'deviceVersion\'');
-    }
-    return util.compareVersionStrings(deviceVersion, '>=', versionToCompare);
-}
-
-/**
- * Compare provisioned modules
- *
- * @param {Object} contextData               - context data
- * @param {Object} contextData.provisioning  - provision state of modules to compare
- * @param {String} moduletoCompare           - module to compare against
- *
- * @returns {boolean} true when device's module is provisioned
- */
-function isModuleProvisioned(contextData, moduleToCompare) {
-    const provisioning = contextData.provisioning;
-    if (provisioning === undefined) {
-        throw new Error('isModuleProvisioned: context has no property \'provisioning\'');
-    }
-    return ((provisioning[moduleToCompare] || {}).level || 'none') !== 'none';
-}
 
 /**
  * Helpers for stats filtering

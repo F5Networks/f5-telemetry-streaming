@@ -142,54 +142,55 @@ describe('systemStats', () => {
 
             };
         }
-        function assertTmStat(statKey, tmctlKey) {
-            nock('http://localhost:8100')
-                .post(
-                    '/mgmt/tm/util/bash',
-                    {
-                        command: 'run',
-                        utilCmdArgs: `-c '/bin/tmctl -c ${tmctlKey}'`
-                    }
-                )
-                .reply(200, {
-                    commandResult: [
-                        'a,b,c',
-                        '0,0,spam',
-                        '0,1,eggs'
-                    ].join('\n')
-                });
-
-            const host = {};
-            const options = {
-                paths: filterPaths('tmctl'),
-                properties: {
-                    stats: {
-                        tmstats: allProperties.stats.tmstats,
-                        [statKey]: allProperties.stats[statKey]
-                    },
-                    global: allProperties.global
-                }
-            };
-            const stats = new SystemStats(host, options);
-            return assert.becomes(stats.collect(), {
-                tmstats: {
-                    [statKey]: [
-                        {
-                            a: '0',
-                            b: '0',
-                            c: 'spam'
-                        },
-                        {
-                            a: '0',
-                            b: '1',
-                            c: 'eggs'
-                        }
-                    ]
-                }
-            });
-        }
 
         describe('tmstats', () => {
+            function assertTmStat(statKey, tmctlKey) {
+                nock('http://localhost:8100')
+                    .post(
+                        '/mgmt/tm/util/bash',
+                        {
+                            command: 'run',
+                            utilCmdArgs: `-c '/bin/tmctl -c ${tmctlKey}'`
+                        }
+                    )
+                    .reply(200, {
+                        commandResult: [
+                            'a,b,c',
+                            '0,0,spam',
+                            '0,1,eggs'
+                        ].join('\n')
+                    });
+
+                const host = {};
+                const options = {
+                    paths: filterPaths('tmctl'),
+                    properties: {
+                        stats: {
+                            tmstats: allProperties.stats.tmstats,
+                            [statKey]: allProperties.stats[statKey]
+                        },
+                        global: allProperties.global
+                    }
+                };
+                const stats = new SystemStats(host, options);
+                return assert.becomes(stats.collect(), {
+                    tmstats: {
+                        [statKey]: [
+                            {
+                                a: '0',
+                                b: '0',
+                                c: 'spam'
+                            },
+                            {
+                                a: '0',
+                                b: '1',
+                                c: 'eggs'
+                            }
+                        ]
+                    }
+                });
+            }
+
             const stats = allProperties.stats;
             const tmctlArgs = '\\$tmctlArgs';
 
@@ -201,231 +202,369 @@ describe('systemStats', () => {
             });
         });
 
-        it('should collect hostname and machineId', () => {
-            nock('http://localhost:8100')
-                .get('/mgmt/shared/identified-devices/config/device-info')
-                .times(2)
-                .reply(200, {
-                    machineId: 'cc4826c5-d557-40c0-aa3f-3fc3aca0e40c',
-                    hostname: 'test.local'
+        describe('system info', () => {
+            it('should collect hostname and machineId', () => {
+                nock('http://localhost:8100')
+                    .get('/mgmt/shared/identified-devices/config/device-info')
+                    .times(2)
+                    .reply(200, {
+                        machineId: 'cc4826c5-d557-40c0-aa3f-3fc3aca0e40c',
+                        hostname: 'test.local'
+                    });
+                const host = {};
+                const options = {
+                    paths: filterPaths('deviceInfo'),
+                    properties: {
+                        stats: {
+                            system: allProperties.stats.system,
+                            hostname: allProperties.stats.hostname,
+                            machineId: allProperties.stats.machineId
+                        },
+                        global: allProperties.global
+                    }
+                };
+                const stats = new SystemStats(host, options);
+                return assert.becomes(stats.collect(), {
+                    system: {
+                        hostname: 'test.local',
+                        machineId: 'cc4826c5-d557-40c0-aa3f-3fc3aca0e40c'
+                    }
                 });
-            const host = {};
-            const options = {
-                paths: filterPaths('deviceInfo'),
-                properties: {
-                    stats: {
-                        system: allProperties.stats.system,
-                        hostname: allProperties.stats.hostname,
-                        machineId: allProperties.stats.machineId
-                    },
-                    global: allProperties.global
-                }
-            };
-            const stats = new SystemStats(host, options);
-            return assert.becomes(stats.collect(), {
-                system: {
-                    hostname: 'test.local',
-                    machineId: 'cc4826c5-d557-40c0-aa3f-3fc3aca0e40c'
-                }
             });
         });
 
-        it('should collect virtualServers', () => {
-            const query = `$select=${[
-                'name',
-                'fullPath',
-                'selfLink',
-                'appService',
-                'ipProtocol',
-                'mask',
-                'pool'
-            ].join(',')}`;
-            nock('http://localhost:8100')
-                .get(`/mgmt/tm/ltm/virtual?${query}`)
-                .reply(200, {
-                    items: [
-                        {
-                            name: 'test',
-                            fullPath: '/Common/test',
-                            selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test?ver=13.1.1.3',
+        describe('virtual servers', () => {
+            before(() => {
+                const mockResps = systemStatsTestsData.collectVirtualServers;
+                mockResps.forEach((mock) => {
+                    nock('http://localhost:8100')
+                        .get(mock.endpoint)
+                        .reply(200, mock.response);
+                });
+            });
+
+            it('should collect virtualServers config and stats', () => {
+                const host = {};
+                const options = {
+                    paths: filterPaths('virtualServers'),
+                    properties: {
+                        stats: {
+                            virtualServers: allProperties.stats.virtualServers
+                        },
+                        global: allProperties.global
+                    }
+                };
+                const stats = new SystemStats(host, options);
+                return assert.becomes(stats.collect(), {
+                    virtualServers: {
+                        '/Common/test': {
+                            availabilityState: 'unknown',
+                            'clientside.bitsIn': 1,
+                            'clientside.bitsOut': 2,
+                            'clientside.curConns': 3,
+                            destination: '192.0.2.1:80',
+                            enabledState: 'enabled',
                             ipProtocol: 'tcp',
                             mask: '255.255.255.255',
-                            pool: '/Common/pool',
-                            poolReference: {
-                                link: 'https://localhost/mgmt/tm/ltm/pool/~Common~pool?ver=13.1.1.3'
+                            name: '/Common/test',
+                            pool: '/Common/pool'
+                        }
+                    }
+                });
+            });
+        });
+
+        describe('dns and gslb', () => {
+            let stats;
+
+            before(() => {
+                sinon.stub(SystemStats.prototype, '_computeContextData').resolves();
+            });
+
+            beforeEach(() => {
+                const mockResps = systemStatsTestsData.collectGtm;
+                mockResps.forEach((mock) => {
+                    nock('http://localhost:8100')
+                        .get(mock.endpoint)
+                        .reply(200, mock.response);
+                });
+                const endpointNames = [
+                    'aWideIps',
+                    'cnameWideIps',
+                    'aPools',
+                    'mxPools'
+                ];
+                const host = {};
+                const options = {
+                    paths: {
+                        endpoints: paths.endpoints.filter(p => endpointNames.indexOf(p.name) > -1)
+                    },
+                    properties: {
+                        stats: {
+                            aWideIps: allProperties.stats.aWideIps,
+                            cnameWideIps: allProperties.stats.cnameWideIps,
+                            aPools: allProperties.stats.aPools,
+                            mxPools: allProperties.stats.mxPools
+                        },
+                        global: allProperties.global
+                    }
+                };
+                stats = new SystemStats(host, options);
+                SystemStats.prototype._computeContextData.restore();
+                sinon.stub(SystemStats.prototype, '_computeContextData').callsFake(() => {
+                    stats.contextData = {
+                        provisioning: {
+                            gtm: {
+                                name: 'gtm',
+                                level: 'minimum'
                             }
                         }
-                    ]
+                    };
+                    return Promise.resolve();
                 });
-            nock('http://localhost:8100')
-                .get('/mgmt/tm/ltm/virtual/~Common~test/stats')
-                .reply(200, {
-                    kind: 'tm:ltm:virtual:virtualstats',
-                    generation: 1,
-                    selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test/stats?ver=13.1.1.3',
-                    entries: {
-                        'https://localhost/mgmt/tm/ltm/virtual/~Common~test/~Common~test/stats': {
-                            nestedStats: {
-                                kind: 'tm:ltm:virtual:virtualstats',
-                                selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test/~Common~test/stats?ver=13.1.1.3',
-                                entries: {
-                                    'clientside.bitsIn': {
-                                        value: 1
-                                    },
-                                    'clientside.bitsOut': {
-                                        value: 2
-                                    },
-                                    'clientside.curConns': {
-                                        value: 3
-                                    },
-                                    'clientside.evictedConns': {
-                                        value: 0
-                                    },
-                                    'clientside.maxConns': {
-                                        value: 0
-                                    },
-                                    'clientside.pktsIn': {
-                                        value: 0
-                                    },
-                                    'clientside.pktsOut': {
-                                        value: 0
-                                    },
-                                    'clientside.slowKilled': {
-                                        value: 0
-                                    },
-                                    'clientside.totConns': {
-                                        value: 0
-                                    },
-                                    cmpEnableMode: {
-                                        description: 'all-cpus'
-                                    },
-                                    cmpEnabled: {
-                                        description: 'enabled'
-                                    },
-                                    csMaxConnDur: {
-                                        value: 0
-                                    },
-                                    csMeanConnDur: {
-                                        value: 0
-                                    },
-                                    csMinConnDur: {
-                                        value: 0
-                                    },
-                                    destination: {
-                                        description: '192.0.2.1:80'
-                                    },
-                                    'ephemeral.bitsIn': {
-                                        value: 0
-                                    },
-                                    'ephemeral.bitsOut': {
-                                        value: 0
-                                    },
-                                    'ephemeral.curConns': {
-                                        value: 0
-                                    },
-                                    'ephemeral.evictedConns': {
-                                        value: 0
-                                    },
-                                    'ephemeral.maxConns': {
-                                        value: 0
-                                    },
-                                    'ephemeral.pktsIn': {
-                                        value: 0
-                                    },
-                                    'ephemeral.pktsOut': {
-                                        value: 0
-                                    },
-                                    'ephemeral.slowKilled': {
-                                        value: 0
-                                    },
-                                    'ephemeral.totConns': {
-                                        value: 0
-                                    },
-                                    fiveMinAvgUsageRatio: {
-                                        value: 0
-                                    },
-                                    fiveSecAvgUsageRatio: {
-                                        value: 0
-                                    },
-                                    tmName: {
-                                        description: '/Common/test'
-                                    },
-                                    oneMinAvgUsageRatio: {
-                                        value: 0
-                                    },
-                                    'status.availabilityState': {
-                                        description: 'unknown'
-                                    },
-                                    'status.enabledState': {
-                                        description: 'enabled'
-                                    },
-                                    'status.statusReason': {
-                                        description: 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet'
-                                    },
-                                    syncookieStatus: {
-                                        description: 'not-activated'
-                                    },
-                                    'syncookie.accepts': {
-                                        value: 0
-                                    },
-                                    'syncookie.hwAccepts': {
-                                        value: 0
-                                    },
-                                    'syncookie.hwSyncookies': {
-                                        value: 0
-                                    },
-                                    'syncookie.hwsyncookieInstance': {
-                                        value: 0
-                                    },
-                                    'syncookie.rejects': {
-                                        value: 0
-                                    },
-                                    'syncookie.swsyncookieInstance': {
-                                        value: 0
-                                    },
-                                    'syncookie.syncacheCurr': {
-                                        value: 0
-                                    },
-                                    'syncookie.syncacheOver': {
-                                        value: 0
-                                    },
-                                    'syncookie.syncookies': {
-                                        value: 0
-                                    },
-                                    totRequests: {
-                                        value: 0
-                                    }
+            });
+
+            afterEach(() => {
+                nock.cleanAll();
+            });
+
+            it('should collect wideip config and stats', () => stats.collect()
+                .then((actualStats) => {
+                    assert.deepEqual(actualStats.aWideIps,
+                        {
+                            '/Common/www.aone.tstest.com': {
+                                alternate: 0,
+                                cnameResolutions: 0,
+                                dropped: 0,
+                                fallback: 0,
+                                persisted: 0,
+                                preferred: 2,
+                                rcode: 0,
+                                requests: 8,
+                                resolutions: 2,
+                                returnFromDns: 0,
+                                returnToDns: 3,
+                                'status.availabilityState': 'offline',
+                                'status.enabledState': 'enabled',
+                                'status.statusReason': 'No enabled pools available',
+                                wipType: 'A',
+                                lastResortPool: '',
+                                name: '/Common/www.aone.tstest.com',
+                                partition: 'Common',
+                                persistCidrIpv4: 32,
+                                loadBalancingDecisionLogVerbosity: [
+                                    'pool-selection',
+                                    'pool-traversal',
+                                    'pool-member-selection',
+                                    'pool-member-traversal'
+                                ],
+                                pools: [
+                                    '/Common/ts_a_pool'
+                                ],
+                                poolLbMode: 'round-robin',
+                                persistence: 'disabled',
+                                ttlPersistence: 3600,
+                                failureRcode: 'noerror',
+                                minimalResponse: 'enabled',
+                                failureRcodeTtl: 0,
+                                aliases: [
+                                    'www.aone.com'
+                                ],
+                                enabled: true,
+                                persistCidrIpv6: 128,
+                                failureRcodeResponse: 'disabled'
+                            }
+                        });
+
+                    assert.deepEqual(actualStats.cnameWideIps,
+                        {
+                            '/Common/www.cnameone.tstest.com': {
+                                alternate: 0,
+                                cnameResolutions: 0,
+                                dropped: 0,
+                                fallback: 0,
+                                persisted: 0,
+                                preferred: 0,
+                                rcode: 0,
+                                requests: 0,
+                                resolutions: 0,
+                                returnFromDns: 0,
+                                returnToDns: 0,
+                                'status.availabilityState': 'unknown',
+                                'status.enabledState': 'enabled',
+                                'status.statusReason': 'Checking',
+                                wipType: 'CNAME',
+                                name: 'www.cnameone.tstest.com',
+                                partition: 'Common',
+                                enabled: true,
+                                failureRcode: 'noerror',
+                                failureRcodeResponse: 'disabled',
+                                failureRcodeTtl: 0,
+                                lastResortPool: '',
+                                minimalResponse: 'enabled',
+                                persistCidrIpv4: 32,
+                                persistCidrIpv6: 128,
+                                persistence: 'disabled',
+                                poolLbMode: 'round-robin',
+                                ttlPersistence: 3600
+                            }
+                        });
+                }));
+
+            it('should collect pools and members config and stats', () => stats.collect().then((actualStats) => {
+                assert.deepEqual(actualStats.aPools,
+                    {
+                        '/Common/ts_a_pool': {
+                            alternate: 10,
+                            dropped: 10,
+                            fallback: 10,
+                            poolType: 'A',
+                            preferred: 10,
+                            returnFromDns: 10,
+                            returnToDns: 10,
+                            availabilityState: 'offline',
+                            enabledState: 'enabled',
+                            'status.statusReason': 'No enabled pool members available',
+                            name: '/Common/ts_a_pool',
+                            alternateMode: 'round-robin',
+                            dynamicRatio: 'disabled',
+                            enabled: true,
+                            fallbackIp: '8.8.8.8',
+                            fallbackMode: 'return-to-dns',
+                            limitMaxBps: 0,
+                            limitMaxBpsStatus: 'disabled',
+                            limitMaxConnections: 0,
+                            limitMaxConnectionsStatus: 'disabled',
+                            limitMaxPps: 0,
+                            limitMaxPpsStatus: 'disabled',
+                            loadBalancingMode: 'ratio',
+                            manualResume: 'disabled',
+                            maxAnswersReturned: 1,
+                            monitor: '/Common/gateway_icmp',
+                            partition: 'Common',
+                            qosHitRatio: 5,
+                            qosHops: 0,
+                            qosKilobytesSecond: 3,
+                            qosLcs: 30,
+                            qosPacketRate: 1,
+                            qosRtt: 50,
+                            qosTopology: 0,
+                            qosVsCapacity: 0,
+                            qosVsScore: 0,
+                            ttl: 30,
+                            verifyMemberAvailability: 'disabled',
+                            members: {
+                                'vs1:/Common/server1': {
+                                    enabled: true,
+                                    limitMaxBps: 100,
+                                    limitMaxBpsStatus: 'disabled',
+                                    limitMaxConnections: 100,
+                                    limitMaxConnectionsStatus: 'disabled',
+                                    limitMaxPps: 100,
+                                    limitMaxPpsStatus: 'disabled',
+                                    memberOrder: 100,
+                                    monitor: 'default',
+                                    name: 'server1:vs1',
+                                    ratio: 1,
+                                    alternate: 20,
+                                    fallback: 20,
+                                    partition: 'Common',
+                                    poolName: '/Common/ts_a_pool',
+                                    poolType: 'A',
+                                    preferred: 20,
+                                    serverName: '/Common/server1',
+                                    availabilityState: 'offline',
+                                    enabledState: 'enabled',
+                                    'status.statusReason': ' Monitor /Common/gateway_icmp from 172.16.100.17 : no route',
+                                    vsName: 'vs1'
                                 }
                             }
                         }
-                    }
+                    });
+
+                assert.deepEqual(actualStats.mxPools,
+                    {
+                        '/Common/ts_mx_pool': {
+                            alternate: 0,
+                            dropped: 0,
+                            fallback: 0,
+                            poolType: 'MX',
+                            preferred: 0,
+                            returnFromDns: 0,
+                            returnToDns: 0,
+                            availabilityState: 'offline',
+                            enabledState: 'enabled',
+                            'status.statusReason': 'No enabled pool members available',
+                            fallbackMode: 'return-to-dns',
+                            ttl: 30,
+                            name: '/Common/ts_mx_pool',
+                            partition: 'Common',
+                            members: {
+                                'www.aaaaone.tstest.com': {
+                                    alternate: 0,
+                                    fallback: 0,
+                                    poolName: '/Common/ts_mx_pool',
+                                    poolType: 'MX',
+                                    preferred: 0,
+                                    serverName: 'www.aaaaone.tstest.com',
+                                    availabilityState: 'offline',
+                                    enabledState: 'enabled',
+                                    'status.statusReason': 'No Wide IPs available: No enabled pools available',
+                                    vsName: ' '
+                                },
+                                'www.aone.tstest.com': {
+                                    alternate: 0,
+                                    fallback: 0,
+                                    poolName: '/Common/ts_mx_pool',
+                                    poolType: 'MX',
+                                    preferred: 0,
+                                    serverName: 'www.aone.tstest.com',
+                                    availabilityState: 'offline',
+                                    enabledState: 'enabled',
+                                    'status.statusReason': 'No Wide IPs available: No enabled pools available',
+                                    vsName: ' '
+                                }
+                            },
+                            alternateMode: 'topology',
+                            qosHops: 0,
+                            verifyMemberAvailability: 'enabled',
+                            qosPacketRate: 1,
+                            qosRtt: 50,
+                            enabled: true,
+                            qosLcs: 30,
+                            qosVsCapacity: 0,
+                            qosVsScore: 0,
+                            maxAnswersReturned: 12,
+                            loadBalancingMode: 'round-robin',
+                            qosHitRatio: 5,
+                            qosKilobytesSecond: 3,
+                            qosTopology: 0,
+                            manualResume: 'enabled',
+                            dynamicRatio: 'enabled'
+                        }
+                    });
+            }));
+
+            it('data should be undefined if gtm is not provisioned', () => {
+                SystemStats.prototype._computeContextData.restore();
+                sinon.stub(SystemStats.prototype, '_computeContextData').callsFake(() => {
+                    stats.contextData = {
+                        provisioning: {
+                            ltm: {
+                                name: 'ltm',
+                                level: 'nominal'
+                            }
+                        }
+                    };
+                    return Promise.resolve();
                 });
-            const host = {};
-            const options = {
-                paths: filterPaths('virtualServers'),
-                properties: {
-                    stats: {
-                        virtualServers: allProperties.stats.virtualServers
-                    },
-                    global: allProperties.global
-                }
-            };
-            const stats = new SystemStats(host, options);
-            return assert.becomes(stats.collect(), {
-                virtualServers: {
-                    '/Common/test': {
-                        availabilityState: 'unknown',
-                        'clientside.bitsIn': 1,
-                        'clientside.bitsOut': 2,
-                        'clientside.curConns': 3,
-                        destination: '192.0.2.1:80',
-                        enabledState: 'enabled',
-                        ipProtocol: 'tcp',
-                        mask: '255.255.255.255',
-                        name: '/Common/test',
-                        pool: '/Common/pool'
-                    }
-                }
+
+                return assert.becomes(stats.collect(), {
+                    aWideIps: undefined,
+                    aPools: undefined,
+                    cnameWideIps: undefined,
+                    mxPools: undefined
+                });
             });
         });
     });
