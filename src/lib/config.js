@@ -118,6 +118,7 @@ ConfigWorker.prototype.loadConfig = function () {
  * @returns {Object} Promise which is resolved once state is saved
  */
 ConfigWorker.prototype.saveConfig = function (config) {
+    // persistentStorage.set will make copy of data
     return persistentStorage.set(PERSISTENT_STORAGE_KEY, config)
         .then(() => logger.debug('Application config saved'))
         .catch((err) => {
@@ -133,13 +134,14 @@ ConfigWorker.prototype.saveConfig = function (config) {
  * @returns {Promise} Promise resolved with config
  */
 ConfigWorker.prototype.getConfig = function () {
+    // persistentStorage.get returns data copy
     return persistentStorage.get(PERSISTENT_STORAGE_KEY)
         .then((data) => {
             if (typeof data === 'undefined') {
                 logger.debug(`persistentStorage did not have a value for ${PERSISTENT_STORAGE_KEY}`);
             }
             return (typeof data === 'undefined'
-                || typeof data.parsed === 'undefined') ? BASE_CONFIG : data;
+                || typeof data.parsed === 'undefined') ? util.deepCopy(BASE_CONFIG) : data;
         });
 };
 

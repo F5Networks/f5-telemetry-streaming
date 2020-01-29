@@ -9,6 +9,7 @@
 'use strict';
 
 const logger = require('./logger.js');
+const util = require('./util.js');
 
 /** @module persistentStorage */
 
@@ -26,7 +27,7 @@ const logger = require('./logger.js');
  *
  * @param {String} key - key to be searched in the storage
  *
- * @returns {Promise.<any>} Promise resolved with data
+ * @returns {Promise.<any>} Promise resolved with copy data
  */
 /**
  * Set data to the specified key
@@ -38,7 +39,7 @@ const logger = require('./logger.js');
  * @param {String} key - key to be used
  * @param {} data      - data to be set to the key
  *
- * @returns {Promise} Promise resolved when data saved to the storage
+ * @returns {Promise} Promise resolved when copy data saved to the storage
  */
 /**
  * Remove data by the specified key
@@ -87,11 +88,20 @@ function PersistentStorageProxy(storage) {
 
 /** @inheritdoc */
 PersistentStorageProxy.prototype.get = function (key) {
-    return this.storage.get(key);
+    return this.storage.get(key)
+        .then((value) => {
+            if (typeof value === 'object') {
+                value = util.deepCopy(value);
+            }
+            return Promise.resolve(value);
+        });
 };
 
 /** @inheritdoc */
 PersistentStorageProxy.prototype.set = function (key, data) {
+    if (typeof data === 'object') {
+        data = util.deepCopy(data);
+    }
     return this.storage.set(key, data);
 };
 
@@ -186,7 +196,7 @@ RestStorage.prototype._load = function () {
         loadPromise = loadPromise.then(() => this._unsafeLoad())
             .then((state) => {
                 this._loadPromise = null;
-                this._cache = this._validateLoadedState(state || {});
+                this._cache = this._validateLoadedState(state || this._getBaseState());
                 loadPromise.loadResults = this._cache._data_;
                 logger.debug('RestStorage.load: application state loaded');
             })
