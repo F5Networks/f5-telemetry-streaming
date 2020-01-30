@@ -384,7 +384,6 @@ const stats = [
         const hexIpProps = ['addr', 'source', 'destination'];
         const template = getTemplate('bigip.tmstats', request.globalCtx.event.data, request.cache);
         const output = [];
-        const periodRegex = RegExp(/\./g);
 
         Object.keys(tmstats).forEach((key) => {
             if (key === 'virtualServerCpuStat') {
