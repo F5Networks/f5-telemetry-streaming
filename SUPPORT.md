@@ -18,7 +18,7 @@ Currently supported versions:
 | Software Version | Release Type  | First Customer Ship | End of Support  |
 |------------------|---------------|---------------------|-----------------|
 | TS 1.8.0         | Feature       |  03-Dec-2019        | 03-Mar-2020     |
-| TS 1.9.0         | Feature       |  23-Jan-2020        | 23-Apr-2020     |
+| TS 1.9.0         | Feature       |  28-Jan-2020        | 28-Apr-2020     |
 
 Versions no longer supported:
 
