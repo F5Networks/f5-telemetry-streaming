@@ -159,6 +159,10 @@ module.exports = {
                     }
                 }
             },
+            deviceCtx: {
+                deviceVersion: '13.0.0.0',
+                provisioning: { ltm: { name: 'ltm', level: 'nominal' } }
+            },
             expectedCtx: {
                 data: {
                     httpProfiles: {
@@ -506,6 +510,10 @@ module.exports = {
                     tenantTag: '`T`',
                     applicationTag: '`A`'
                 }
+            },
+            deviceCtx: {
+                deviceVersion: '13.0.0.0',
+                provisioning: { ltm: { name: 'ltm', level: 'nominal' } }
             },
             expectedCtx: {
                 data: {
