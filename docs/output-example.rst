@@ -9,6 +9,9 @@ Use this page to see the type of information that Telemetry Streaming collects. 
 
 System Information
 ------------------
+The following shows the system information that Telemetry Streaming collects. 
+
+.. NOTE:: For some of the output to appear, you must have the applicable BIG-IP module licensed and provisioned (for example, you must have BIG-IP DNS provisioned to get GSLB wide IP and Pool information).
 
 .. literalinclude:: ../examples/output/system_poller/output.json
     :language: json
