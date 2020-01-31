@@ -591,6 +591,59 @@ describe('Device Util', () => {
             });
     });
 
+    it('should chunk large secrets and preserve newlines when encrypting secrets', () => {
+        // secret that is > 500 characters, with newlines
+        const largeSecret = 'largeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\n'
+            + 'largeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\n'
+            + 'largeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\n'
+            + 'largeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\n'
+            + 'largeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\n'
+            + 'largeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\n'
+            + 'largeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\n'
+            + 'largeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\n'
+            + 'largeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\n'
+            + 'largeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\n';
+        const radiusRequests = [];
+
+        const mockRes = { statusCode: 200, statusMessage: 'message' };
+        const mockBody = {
+            secret: largeSecret,
+            entries: {
+                someKey: {
+                    nestedStats: {
+                        entries: {
+                            version: {
+                                description: '15.0.0'
+                            },
+                            BuildInfo: {
+                                description: '0.0.1'
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        const requestHandler = (opts, cb) => {
+            if (opts.method === 'POST' && opts.uri.match(/auth\/radius-server/)) {
+                radiusRequests.push(opts.body);
+            }
+            cb(null, mockRes, mockBody);
+        };
+        request.post = requestHandler;
+        request.get = requestHandler;
+
+        return deviceUtil.encryptSecret(largeSecret)
+            .then(() => {
+                const requestSecret = JSON.parse(radiusRequests[0]).secret;
+
+                assert.strictEqual(radiusRequests.length, 2, 'largeSecret should be in 2 chunks');
+                assert.strictEqual(requestSecret.length, 500, 'length of chunk should be 500');
+                assert.ok(new RegExp(/\n/).test(requestSecret), 'newlines should be preserved');
+                return Promise.resolve();
+            })
+            .catch(err => Promise.reject(err));
+    });
+
     it('should encrypt secret and retreive it from device via TMSH when software version is 14.1.x', () => {
         const invalidSecret = { secret: 'invalidSecret' };
         const validSecret = 'secret';
