@@ -865,7 +865,7 @@ module.exports = {
      * @returns {Object} Returns promise resolved with encrypted secret
      */
     encryptSecret(data) {
-        const splitData = data.match(/(.|\n).{1,500}/g);
+        const splitData = data.match(/(.|\n){1,500}/g);
         return encryptSecretHelper(splitData, [], 0).then(result => result.join(','));
     },
 
