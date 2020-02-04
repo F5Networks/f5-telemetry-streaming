@@ -38,19 +38,18 @@ function SystemStats(host, options) {
     const _paths = options.paths || paths;
     const _properties = options.properties || properties;
 
-    this.noTmstats = options.noTmstats;
-    this.tags = options.tags || {};
     this.loader = new EndpointLoader(host, options);
     this.loader.setEndpoints(_paths.endpoints);
 
+    this.noTmstats = options.noTmstats;
+    this.tags = options.tags || {};
     this.actions = options.actions || [];
-
-    // deep copy this.stats so that new instances of SystemStats get their own version of this.stats
-    this.stats = util.deepCopy(_properties.stats);
+    this.stats = _properties.stats;
     this.context = _properties.context;
     this.definitions = _properties.definitions;
     this.global = _properties.global;
 
+    this.isStatsFilterApplied = false;
     this.contextData = {};
     this.collectedData = {};
 }
@@ -185,7 +184,7 @@ SystemStats.prototype._processProperty = function (key, property) {
         return Promise.resolve();
     }
 
-    property = systemStatsUtil.renderProperty(this.contextData, property);
+    property = systemStatsUtil.renderProperty(this.contextData, util.deepCopy(property));
     /**
      * if endpoints will have their own 'disabled' flag
      * we will need to add additional check here or simply return empty value.
@@ -278,7 +277,7 @@ SystemStats.prototype._filterStats = function () {
      * to avoid memory usage.
      */
     // early return
-    if (util.isObjectEmpty(this.actions)) {
+    if (util.isObjectEmpty(this.actions) || this.isStatsFilterApplied) {
         return;
     }
     const FLAGS = {
@@ -339,6 +338,8 @@ SystemStats.prototype._filterStats = function () {
             });
         }
     });
+
+    let statsCopy;
     Object.keys(this.stats).forEach((statKey) => {
         let skeleton = statsSkeleton;
         // path to stat should exists otherwise we can delete it
@@ -350,9 +351,16 @@ SystemStats.prototype._filterStats = function () {
             return skeleton;
         });
         if (!exists) {
-            delete this.stats[statKey];
+            if (!statsCopy) {
+                statsCopy = util.deepCopy(this.stats);
+            }
+            delete statsCopy[statKey];
         }
     });
+    if (statsCopy) {
+        this.stats = statsCopy;
+    }
+    this.isStatsFilterApplied = true;
 };
 /**
  * Compute properties

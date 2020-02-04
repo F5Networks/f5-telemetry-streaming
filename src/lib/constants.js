@@ -79,6 +79,10 @@ module.exports = {
         SYSTEM_POLLER: 'systemInfo',
         IHEALTH_POLLER: 'ihealthInfo'
     },
+    HTTP_REQUEST: {
+        DEFAULT_PORT: 80,
+        DEFAULT_PROTOCOL: 'http'
+    },
     IHEALTH_API_LOGIN: 'https://api.f5.com/auth/pub/sso/login/ihealth-api',
     IHEALTH_API_UPLOAD: 'https://ihealth-api.f5.com/qkview-analyzer/api/qkviews',
     IHEALTH_POLLER_CLASS_NAME: 'Telemetry_iHealth_Poller',
@@ -87,9 +91,7 @@ module.exports = {
     PASSPHRASE_ENVIRONMENT_VAR: 'environmentVar',
     PORT_TO_PROTO,
     PROTO_TO_PORT,
-    QKVIEW_CMD_LOCAL_TIMEOUT: 1 * 60 * 60 * 1000, // 1 hour in miliseconds
-    REQUEST_DEFAULT_PORT: 80,
-    REQUEST_DEFAULT_PROTOCOL: 'http',
+    QKVIEW_CMD_LOCAL_TIMEOUT: 1 * 60 * 60 * 1000, // 1 hour in milliseconds
     STATS_KEY_SEP: '::',
     SYSTEM_CLASS_NAME: 'Telemetry_System',
     SYSTEM_POLLER_CLASS_NAME: 'Telemetry_System_Poller',
