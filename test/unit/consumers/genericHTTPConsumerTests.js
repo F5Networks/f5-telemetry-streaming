@@ -80,6 +80,43 @@ describe('Generic_HTTP', () => {
             genericHttpIndex(context);
         });
 
+        it('should trace data with secrets redacted', (done) => {
+            let traceData;
+            const context = util.buildConsumerContext({
+                config: {
+                    method: 'POST',
+                    protocol: 'http',
+                    port: '8080',
+                    path: '/ingest',
+                    host: 'myMetricsSystem',
+                    headers: [
+                        {
+                            name: 'Authorization',
+                            value: 'Basic ABC123'
+                        }
+                    ]
+                }
+            });
+            context.tracer = {
+                write: (input) => {
+                    traceData = JSON.parse(input);
+                }
+            };
+
+            sinon.stub(request, 'post').callsFake((opts) => {
+                try {
+                    assert.deepEqual(traceData.headers, { Authorization: '*****' });
+                    assert.deepEqual(opts.headers, { Authorization: 'Basic ABC123' });
+                    done();
+                } catch (err) {
+                    // done() with parameter is treated as an error.
+                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    done(err);
+                }
+            });
+            genericHttpIndex(context);
+        });
+
         it('should process systemInfo data', (done) => {
             const context = util.buildConsumerContext({
                 eventType: 'systemInfo',

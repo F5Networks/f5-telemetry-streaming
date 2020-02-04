@@ -91,6 +91,37 @@ describe('Azure_Log_Analytics', () => {
                 });
         });
 
+        it('should trace data with secrets redacted', () => {
+            let traceData;
+            const context = util.buildConsumerContext({
+                eventType: 'systemInfo',
+                config: {
+                    workspaceId: 'myWorkspace',
+                    passphrase: 'secret',
+                    logType: 'customLogType'
+                }
+            });
+            context.event.data = {
+                new: 'data'
+            };
+            context.tracer = {
+                write: (input) => {
+                    traceData = JSON.parse(input);
+                }
+            };
+
+            return azureAnalyticsIndex(context)
+                .then(() => {
+                    assert.deepEqual(requests[0].headers, {
+                        Authorization: 'SharedKey myWorkspace:MGiiWY+WTAxB35tyZ1YljyfwMM5QCqr4ge+giSjcgfI=',
+                        'Content-Type': 'application/json',
+                        'Log-Type': 'customLogType_new',
+                        'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
+                    });
+                    assert.strictEqual(traceData[0].headers.Authorization, '*****');
+                });
+        });
+
         it('should process systemInfo data', () => {
             const context = util.buildConsumerContext({
                 eventType: 'systemInfo',

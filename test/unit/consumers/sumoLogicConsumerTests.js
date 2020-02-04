@@ -80,6 +80,39 @@ describe('Sumo_Logic', () => {
             sumoLogicIndex(context);
         });
 
+        it('should trace data with secrets redacted', (done) => {
+            let traceData;
+            const context = util.buildConsumerContext({
+                config: {
+                    host: 'localhost',
+                    path: '/receiver/v1/http/',
+                    passphrase: 'mySecret',
+                    protocol: 'http',
+                    port: 80,
+                    allowSelfSignedCert: true
+                }
+            });
+            context.tracer = {
+                write: (input) => {
+                    traceData = JSON.parse(input);
+                }
+            };
+
+            sinon.stub(request, 'post').callsFake((opts) => {
+                try {
+                    assert.notStrictEqual(traceData.url.indexOf('*****'), -1);
+                    assert.strictEqual(opts.url, 'http://localhost:80/receiver/v1/http/mySecret');
+                    done();
+                } catch (err) {
+                    // done() with parameter is treated as an error.
+                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    done(err);
+                }
+            });
+
+            sumoLogicIndex(context);
+        });
+
         it('should process systemInfo data', (done) => {
             const context = util.buildConsumerContext({
                 eventType: 'systemInfo',

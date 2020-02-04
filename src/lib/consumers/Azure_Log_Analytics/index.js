@@ -84,6 +84,8 @@ module.exports = function (context) {
             // deep copy and parse body, otherwise it will be stringified again
             const requestOptionsCopy = JSON.parse(JSON.stringify(requestOptions));
             requestOptionsCopy.body = JSON.parse(requestOptionsCopy.body);
+            // redact secrets in Authorization header
+            requestOptionsCopy.headers.Authorization = '*****';
             tracerMsg.push(requestOptionsCopy);
         }
 

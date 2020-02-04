@@ -43,8 +43,15 @@ module.exports = function (context) {
         strictSSL: !context.config.allowSelfSignedCert
     };
     if (context.tracer) {
+        let tracedHeaders = httpHeaders;
+        // redact Basic Auth passphrase, if provided
+        if (Object.keys(httpHeaders).indexOf('Authorization') > -1) {
+            tracedHeaders = JSON.parse(JSON.stringify(httpHeaders));
+            tracedHeaders.Authorization = '*****';
+        }
+
         context.tracer.write(JSON.stringify({
-            method, url, headers: httpHeaders, body: JSON.parse(httpBody)
+            method, url, headers: tracedHeaders, body: JSON.parse(httpBody)
         }, null, 4));
     }
 
