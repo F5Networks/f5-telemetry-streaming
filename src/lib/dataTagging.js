@@ -69,7 +69,7 @@ function addTags(dataCtx, actionCtx, deviceCtx) {
         if (dataCtx.type === EVENT_TYPES.SYSTEM_POLLER) {
             // Apply tags to default locations (where addKeysByTag is true) for system info
             Object.keys(properties.stats).forEach((statKey) => {
-                const statProp = systemStatsUtil.renderProperty(deviceCtx, properties.stats[statKey]);
+                const statProp = systemStatsUtil.renderProperty(deviceCtx, util.deepCopy(properties.stats[statKey]));
                 const items = statProp.structure && statProp.structure.parentKey
                     ? (data[statProp.structure.parentKey] || {})[statKey] : data[statKey];
 
