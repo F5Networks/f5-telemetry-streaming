@@ -32,7 +32,14 @@ module.exports = function (context) {
         strictSSL: !config.allowSelfSignedCert
     };
     if (context.tracer) {
-        context.tracer.write(JSON.stringify({ url, headers: httpHeaders, body: JSON.parse(httpBody) }, null, 4));
+        // redact secret from url
+        const tracedUrl = (secret === '' ? url : url
+            .split('/')
+            .slice(0, -1)
+            .join('/')
+            .concat('/*****'));
+        const traceData = { url: tracedUrl, headers: httpHeaders, body: JSON.parse(httpBody) };
+        context.tracer.write(JSON.stringify(traceData, null, 4));
     }
 
     // eslint-disable-next-line no-unused-vars

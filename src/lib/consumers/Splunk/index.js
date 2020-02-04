@@ -230,10 +230,18 @@ function forwardData(dataToSend, globalCtx) {
         context.request = request.defaults(context.requestOpts);
 
         if (globalCtx.tracer) {
+            // redact passphrase in consumer config
+            const tracedConsumerCtx = JSON.parse(JSON.stringify(context.consumer));
+            tracedConsumerCtx.passphrase = '*****';
+
+            // redact passphrase in request options
+            const traceRequestOpts = JSON.parse(JSON.stringify(context.requestOpts));
+            traceRequestOpts.headers.Authorization = '*****';
+
             globalCtx.tracer.write(JSON.stringify({
                 dataToSend,
-                consumer: context.consumer,
-                requestOpts: context.requestOpts
+                consumer: tracedConsumerCtx,
+                requestOpts: traceRequestOpts
             }, null, 2));
         }
 

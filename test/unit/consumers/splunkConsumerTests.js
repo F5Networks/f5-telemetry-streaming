@@ -105,6 +105,46 @@ describe('Splunk', () => {
             splunkIndex(context);
         });
 
+        it('should trace data with secrets redacted', (done) => {
+            let traceData;
+            const context = util.buildConsumerContext({
+                config: {
+                    protocol: 'http',
+                    host: 'remoteSplunk',
+                    port: '4567',
+                    passphrase: 'superSecret',
+                    gzip: false
+                }
+            });
+            context.tracer = {
+                write: (input) => {
+                    traceData = JSON.parse(input);
+                }
+            };
+
+            sinon.stub(request, 'post').callsFake((opts) => {
+                try {
+                    assert.deepEqual(opts.headers, {
+                        Authorization: 'Splunk superSecret',
+                        'Content-Length': 92
+                    });
+                    assert.notStrictEqual(traceData.consumer.passphrase.indexOf('*****'), -1,
+                        'consumer config passphrase should be redacted');
+                    assert.notStrictEqual(traceData.requestOpts.headers.Authorization.indexOf('*****'), -1,
+                        'passphrase in request headers should be redacted');
+                    assert.strictEqual(JSON.stringify(traceData).indexOf('superSecret'), -1,
+                        'passphrase should not be present anywhere in trace data');
+                    done();
+                } catch (err) {
+                    // done() with parameter is treated as an error.
+                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    done(err);
+                }
+            });
+
+            splunkIndex(context);
+        });
+
         it('should process systemInfo data', (done) => {
             const context = util.buildConsumerContext({
                 eventType: 'systemInfo',
