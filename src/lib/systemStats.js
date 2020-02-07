@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2020. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -39,7 +39,7 @@ function SystemStats(host, options) {
     const _properties = options.properties || properties;
 
     this.loader = new EndpointLoader(host, options);
-    this.loader.setEndpoints(_paths.endpoints);
+    this.loader.setEndpoints(_paths.endpoints || []);
 
     this.noTmstats = options.noTmstats;
     this.tags = options.tags || {};
@@ -161,10 +161,12 @@ SystemStats.prototype._loadData = function (property) {
 
     return this.loader.loadEndpoint(endpoint, property.keyArgs)
         .then((data) => {
-            if (!data.data.items) {
-                data.data.items = [];
+            data = data.data;
+            if (data && typeof data === 'object' && typeof data.items === 'undefined'
+                && Object.keys(data).length === 2 && data.kind.endsWith('state')) {
+                data.items = [];
             }
-            return Promise.resolve(data.data);
+            return Promise.resolve(data);
         })
         .catch((err) => {
             logger.error(`Error: SystemStats._loadData: ${endpoint} (${property.keyArgs}): ${err}`);
@@ -379,6 +381,9 @@ SystemStats.prototype._computePropertiesData = function () {
  * @returns {Object} Promise which is resolved with a map of stats
  */
 SystemStats.prototype.collect = function () {
+    let err;
+    let collectedData;
+
     return this.loader.auth()
         .then(() => this._computeContextData())
         .then(() => {
@@ -401,11 +406,19 @@ SystemStats.prototype.collect = function () {
                     delete data[key];
                 }
             });
-            return Promise.resolve(data);
+            collectedData = data;
         })
-        .catch((err) => {
-            logger.error(`Error: SystemStats.collect: ${err}`);
-            return Promise.reject(err);
+        .catch((_err) => {
+            err = _err;
+        })
+        .then(() => {
+            // erase cached data
+            this.loader.eraseCache();
+            if (err) {
+                logger.error(`Error: SystemStats.collect: ${err}`);
+                return Promise.reject(err);
+            }
+            return Promise.resolve(collectedData);
         });
 };
 

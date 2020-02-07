@@ -12,8 +12,8 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
+const util = require('./shared/util');
 const persistentStorage = require('../../src/lib/persistentStorage.js');
-const util = require('../../src/lib/util.js');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;

@@ -13,6 +13,26 @@ const util = require('./util.js');
 
 
 module.exports = {
+    /**
+     * Format MAC address
+     *
+     * @param {String} mac - MAC address
+     *
+     * @returns {String} formatted MAC address
+     */
+    _formatMACAddress(mac) {
+        // expect ':' in mac addr - aa:b:cc:d:ee:f
+        if (mac.indexOf(':') === -1) {
+            return mac;
+        }
+        return mac.split(':').map((item) => {
+            item = item.toUpperCase();
+            if (item.length === 1) {
+                item = `0${item}`;
+            }
+            return item;
+        }).join(':');
+    },
 
     /**
      * Convert array to map using provided options
@@ -196,15 +216,22 @@ module.exports = {
      * @returns {Object} Returns averaged value
      */
     getAverage(args) {
-        if (!args.keyWithValue) { throw new Error('Argument keyWithValue required'); }
+        if (!args.keyWithValue) {
+            throw new Error('Argument keyWithValue required');
+        }
         const data = args.data;
+        if (typeof data !== 'object') {
+            return data;
+        }
         const values = [];
 
         // for now assume in object, could also be provided an array and just average that
         Object.keys(data).forEach((k) => {
             const key = args.keyWithValue;
             // throw error if key is missing
-            if (!(key in data[k])) { throw new Error(`Expecting key: ${key} in object: ${util.stringify(data[k])}`); }
+            if (!(key in data[k])) {
+                throw new Error(`Expecting key: ${key} in object: ${util.stringify(data[k])}`);
+            }
             values.push(data[k][key]);
         });
         const averageFunc = arr => Math.round(arr.reduce((a, b) => a + b, 0) / arr.length);
@@ -434,6 +461,46 @@ module.exports = {
             delete item.poolsCname;
         });
 
+        return data;
+    },
+
+    /**
+     * Normalize MAC Address - upper case and etc.
+     *
+     * @param {Object} args                      - args object
+     * @param {Object} [args.data]               - data to process (always included)
+     * @param {Array.<String>} [args.properties] - list of properties to format
+     *
+     * @returns {Object} Returns formatted data
+     */
+    normalizeMACAddress(args) {
+        let data = args.data;
+        if (data) {
+            if (typeof args.properties === 'undefined') {
+                data = this._formatMACAddress(data);
+            } else {
+                const properties = args.properties;
+                const stack = [data];
+                let obj;
+
+                const forKey = (key) => {
+                    const val = obj[key];
+                    if (typeof val === 'object') {
+                        if (val !== null) {
+                            stack.push(val);
+                        }
+                    } else if (properties.indexOf(key) !== -1 && typeof val === 'string') {
+                        obj[key] = this._formatMACAddress(val);
+                    }
+                };
+
+                while (stack.length) {
+                    obj = stack[0];
+                    Object.keys(obj).forEach(forKey);
+                    stack.shift();
+                }
+            }
+        }
         return data;
     }
 };

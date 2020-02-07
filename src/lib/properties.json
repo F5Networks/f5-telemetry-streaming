@@ -31,11 +31,11 @@
         },
         "version": {
             "structure": { "parentKey": "system" },
-            "key": "/mgmt/tm/sys/version::sys/version/0::Version"
+            "key": "deviceInfo::version"
         },
         "versionBuild": {
             "structure": { "parentKey": "system" },
-            "key": "/mgmt/tm/sys/version::sys/version/0::Build"
+            "key": "deviceInfo::build"
         },
         "location": {
             "structure": { "parentKey": "system" },
@@ -57,34 +57,24 @@
         },
         "marketingName": {
             "structure": { "parentKey": "system" },
-            "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::marketingName",
-            "normalization": [
-                {
-                    "convertArrayToMap": { "keyName": "name" }
-                }
-            ]
+            "key": "deviceInfo::platformMarketingName"
         },
         "platformId": {
             "structure": { "parentKey": "system" },
-            "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::platformId",
-            "normalization": [
-                {
-                    "convertArrayToMap": { "keyName": "name" }
-                }
-            ]
+            "key": "deviceInfo::platform"
         },
         "chassisId": {
             "structure": { "parentKey": "system" },
-            "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::chassisId",
-            "normalization": [
-                {
-                    "convertArrayToMap": { "keyName": "name" }
-                }
-            ]
+            "key": "deviceInfo::chassisSerialNumber"
         },
         "baseMac": {
             "structure": { "parentKey": "system" },
-            "key": "/mgmt/tm/sys/hardware::sys/hardware/platform::sys/hardware/platform/0::baseMac"
+            "key": "deviceInfo::baseMac",
+            "normalization": [
+                {
+                    "runFunctions": [{ "name": "normalizeMACAddress" }]
+                }
+            ]
         },
         "callBackUrl": {
             "structure": { "parentKey": "system" },
@@ -259,6 +249,124 @@
                     "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 } } }
                 }
             ]
+        },
+        "asmState": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "asm"
+            },
+            "then": {
+                "key": "asmQuery::commandResult",
+                "normalization": [
+                    {
+                        "runFunctions": [
+                            { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "asm_state" } },
+                            { "name": "getFirstKey" }
+                        ]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "lastAsmChange": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "asm"
+            },
+            "then": {
+                "key": "asmQuery::commandResult",
+                "normalization": [
+                    {
+                        "runFunctions": [
+                            { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "last_asm_change", "renameKeys": { "patterns": { "NULL": { "constant": "" } } } } },
+                            { "name": "getFirstKey" }
+                        ]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "apmState": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "apm"
+            },
+            "then": {
+                "key": "apmState::commandResult",
+                "normalization": [
+                    {
+                        "runFunctions": [
+                            { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "apm_state", "renameKeys": { "patterns": { "NULL": { "constant": "" } } } } },
+                            { "name": "getFirstKey" }
+                        ]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "afmState": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "afm"
+            },
+            "then": {
+                "key": "firewallCurrentState::pccdStatus",
+                "normalization": [
+                    {
+                        "includeFirstEntry": { "pattern": "/stats" }
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "lastAfmDeploy": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "afm"
+            },
+            "then": {
+                "key": "firewallCurrentState::ruleDeployEndTimeFmt",
+                "normalization": [
+                    {
+                        "includeFirstEntry": { "pattern": "/stats" }
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "ltmConfigTime": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "ltm"
+            },
+            "then": {
+                "key": "ltmConfigTime::value"
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "gtmConfigTime": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "gtm"
+            },
+            "then": {
+                "key": "gtmConfigTime::value"
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "aWideIps": {
             "if": {
@@ -739,124 +847,6 @@
                     "addKeysByTag": true
                 }
             ]
-        },
-        "asmState": {
-            "structure": { "parentKey": "system" },
-            "if": {
-                "isModuleProvisioned": "asm"
-            },
-            "then": {
-                "key": "asmQuery::commandResult",
-                "normalization": [
-                    {
-                        "runFunctions": [
-                            { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "asm_state" } },
-                            { "name": "getFirstKey" }
-                        ]
-                    }
-                ]
-            },
-            "else": {
-                "disabled": true
-            }
-        },
-        "lastAsmChange": {
-            "structure": { "parentKey": "system" },
-            "if": {
-                "isModuleProvisioned": "asm"
-            },
-            "then": {
-                "key": "asmQuery::commandResult",
-                "normalization": [
-                    {
-                        "runFunctions": [
-                            { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "last_asm_change", "renameKeys": { "patterns": { "NULL": { "constant": "" } } } } },
-                            { "name": "getFirstKey" }
-                        ]
-                    }
-                ]
-            },
-            "else": {
-                "disabled": true
-            }
-        },
-        "apmState": {
-            "structure": { "parentKey": "system" },
-            "if": {
-                "isModuleProvisioned": "apm"
-            },
-            "then": {
-                "key": "apmState::commandResult",
-                "normalization": [
-                    {
-                        "runFunctions": [
-                            { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "apm_state", "renameKeys": { "patterns": { "NULL": { "constant": "" } } } } },
-                            { "name": "getFirstKey" }
-                        ]
-                    }
-                ]
-            },
-            "else": {
-                "disabled": true
-            }
-        },
-        "afmState": {
-            "structure": { "parentKey": "system" },
-            "if": {
-                "isModuleProvisioned": "afm"
-            },
-            "then": {
-                "key": "firewallCurrentState::pccdStatus",
-                "normalization": [
-                    {
-                        "includeFirstEntry": { "pattern": "/stats" }
-                    }
-                ]
-            },
-            "else": {
-                "disabled": true
-            }
-        },
-        "lastAfmDeploy": {
-            "structure": { "parentKey": "system" },
-            "if": {
-                "isModuleProvisioned": "afm"
-            },
-            "then": {
-                "key": "firewallCurrentState::ruleDeployEndTimeFmt",
-                "normalization": [
-                    {
-                        "includeFirstEntry": { "pattern": "/stats" }
-                    }
-                ]
-            },
-            "else": {
-                "disabled": true
-            }
-        },
-        "ltmConfigTime": {
-            "structure": { "parentKey": "system" },
-            "if": {
-                "isModuleProvisioned": "ltm"
-            },
-            "then": {
-                "key": "ltmConfigTime::value"
-            },
-            "else": {
-                "disabled": true
-            }
-        },
-        "gtmConfigTime": {
-            "structure": { "parentKey": "system" },
-            "if": {
-                "isModuleProvisioned": "gtm"
-            },
-            "then": {
-                "key": "gtmConfigTime::value"
-            },
-            "else": {
-                "disabled": true
-            }
         },
         "iRules": {
             "key": "iRules",
@@ -1484,13 +1474,20 @@
     },
     "context": {
         "HOSTNAME": {
-            "key": "/mgmt/tm/sys/global-settings::hostname"
+            "key": "deviceInfo::hostname"
+        },
+        "BASE_MAC_ADDR": {
+            "key": "deviceInfo::baseMac",
+            "normalization": [
+                {
+                    "runFunctions": [{ "name": "normalizeMACAddress" }]
+                }
+            ]
         },
         "deviceVersion": {
-            "key": "/mgmt/tm/sys/version::sys/version/0::Version"
+            "key": "deviceInfo::version"
         },
         "provisioning": {
-            "structure": { "parentKey": "system" },
             "key": "provisioning::items",
             "normalization": [
                 {

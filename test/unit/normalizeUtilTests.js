@@ -461,4 +461,50 @@ describe('Normalize Util', () => {
         const actual = normalizeUtil.restructureGslbPool(args);
         assert.deepEqual(actual, expected);
     });
+
+    describe('normalizeMACAddress', () => {
+        it('should normalize mac address (string)', () => {
+            const inputOutputMap = {
+                '00:11:22:33:44:55': '00:11:22:33:44:55',
+                '0:a:B:c:D:e': '00:0A:0B:0C:0D:0E'
+            };
+            Object.keys(inputOutputMap).forEach((input) => {
+                assert.strictEqual(
+                    normalizeUtil.normalizeMACAddress({ data: input }),
+                    inputOutputMap[input]
+                );
+            });
+        });
+
+        it('should normalize mac address (object)', () => {
+            const data = {
+                obj1: [
+                    {
+                        mac: '0:a:B:c:D:e'
+                    }
+                ],
+                mac: '0:a:B:c:D:e'
+            };
+            const properties = ['mac'];
+            const expected = {
+                obj1: [
+                    {
+                        mac: '00:0A:0B:0C:0D:0E'
+                    }
+                ],
+                mac: '00:0A:0B:0C:0D:0E'
+            };
+            assert.deepStrictEqual(
+                normalizeUtil.normalizeMACAddress({ data, properties }),
+                expected
+            );
+        });
+
+        it('should return data as is when no colon in it', () => {
+            assert.strictEqual(
+                normalizeUtil.normalizeMACAddress({ data: 'missing data' }),
+                'missing data'
+            );
+        });
+    });
 });

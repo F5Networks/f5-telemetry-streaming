@@ -10,15 +10,14 @@
 
 const assert = require('assert');
 
+const util = require('./shared/util');
 const dataUtil = require('../../src/lib/dataUtil.js');
 const dataUtilTestsData = require('./dataUtilTestsData.js');
 
 describe('Data Util', () => {
-    const getCallableIt = testConf => (testConf.testOpts && testConf.testOpts.only ? it.only : it);
-
     describe('getMatches', () => {
         dataUtilTestsData.getMatches.forEach((testConf) => {
-            getCallableIt(testConf)(testConf.name, () => {
+            util.getCallableIt(testConf)(testConf.name, () => {
                 const resultCtx = dataUtil.getMatches(
                     testConf.dataCtx,
                     testConf.propertyCtx,
@@ -31,7 +30,7 @@ describe('Data Util', () => {
 
     describe('getDeepMatches', () => {
         dataUtilTestsData.getDeepMatches.forEach((testConf) => {
-            getCallableIt(testConf)(testConf.name, () => {
+            util.getCallableIt(testConf)(testConf.name, () => {
                 const resultCtx = dataUtil.getDeepMatches(
                     testConf.dataCtx,
                     testConf.propertiesCtx
@@ -43,7 +42,7 @@ describe('Data Util', () => {
 
     describe('checkConditions', () => {
         dataUtilTestsData.checkConditions.forEach((testConf) => {
-            getCallableIt(testConf)(testConf.name, () => {
+            util.getCallableIt(testConf)(testConf.name, () => {
                 const resultCtx = dataUtil.checkConditions(
                     testConf.dataCtx,
                     testConf.conditionsCtx
@@ -55,7 +54,7 @@ describe('Data Util', () => {
 
     describe('searchAnyMatches', () => {
         dataUtilTestsData.searchAnyMatches.forEach((testConf) => {
-            getCallableIt(testConf)(testConf.name, () => {
+            util.getCallableIt(testConf)(testConf.name, () => {
                 const resultCtx = [];
                 const callback = (key, item) => {
                     resultCtx.push(key);
@@ -73,7 +72,7 @@ describe('Data Util', () => {
 
     describe('removeStrictMatches', () => {
         dataUtilTestsData.removeStrictMatches.forEach((testConf) => {
-            getCallableIt(testConf)(testConf.name, () => {
+            util.getCallableIt(testConf)(testConf.name, () => {
                 const callback = (key, item, getNestedKey) => {
                     if (getNestedKey) {
                         return testConf.nestedKey ? item[testConf.nestedKey] : null;
@@ -102,7 +101,7 @@ describe('Data Util', () => {
     [true, false].forEach((strictVal) => {
         describe(`preserveStrictMatches - strict=${strictVal}`, () => {
             dataUtilTestsData[`preserveStrictMatches_strict_${strictVal}`].forEach((testConf) => {
-                getCallableIt(testConf)(testConf.name, () => {
+                util.getCallableIt(testConf)(testConf.name, () => {
                     const callback = (key, item, getNestedKey) => {
                         if (getNestedKey) {
                             return testConf.nestedKey ? item[testConf.nestedKey] : null;

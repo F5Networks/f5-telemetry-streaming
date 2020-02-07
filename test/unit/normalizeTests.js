@@ -535,7 +535,7 @@ describe('Normalize', () => {
                     normalize.data(data, options);
                 } catch (err) {
                     caught = true;
-                    assert.notStrictEqual(err.message.indexOf('runCustomFunction failed'), -1);
+                    assert.notStrictEqual(err.message.indexOf('runCustomFunction \'getAverage\' failed'), -1);
                 }
                 assert(caught);
             });
