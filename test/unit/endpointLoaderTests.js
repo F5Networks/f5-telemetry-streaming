@@ -8,46 +8,56 @@
 
 'use strict';
 
-const sinon = require('sinon');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
+const nock = require('nock');
+const sinon = require('sinon');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+const util = require('./shared/util');
+const endpointLoaderTestsData = require('./endpointLoaderTestsData.js');
 const EndpointLoader = require('../../src/lib/endpointLoader.js');
 const deviceUtil = require('../../src/lib/deviceUtil.js');
 
+
 describe('Endpoint Loader', () => {
+    let eLoader;
+
+    beforeEach(() => {
+        eLoader = new EndpointLoader();
+    });
+
     afterEach(() => {
         sinon.restore();
     });
 
-    it('should set defaults', () => {
-        const eLoader = new EndpointLoader();
-        assert.strictEqual(eLoader.host, 'localhost');
-        assert.deepStrictEqual(eLoader.options, { credentials: {}, connection: {} });
-        assert.strictEqual(eLoader.endpoints, null);
-        assert.deepStrictEqual(eLoader.cachedResponse, {});
-    });
+    describe('constructor', () => {
+        it('should set defaults', () => {
+            assert.strictEqual(eLoader.host, 'localhost');
+            assert.deepStrictEqual(eLoader.options, { credentials: {}, connection: {} });
+            assert.strictEqual(eLoader.endpoints, null);
+            assert.deepStrictEqual(eLoader.cachedResponse, {});
+        });
 
-    it('should set host when argument is string', () => {
-        const eLoader = new EndpointLoader('10.10.0.1');
-        assert.strictEqual(eLoader.host, '10.10.0.1');
-    });
+        it('should set host when argument is string', () => {
+            eLoader = new EndpointLoader('10.10.0.1');
+            assert.strictEqual(eLoader.host, '10.10.0.1');
+        });
 
-    it('should set options when argument is object', () => {
-        const eLoader = new EndpointLoader({ foo: 'bar' });
-        assert.deepStrictEqual(eLoader.options, {
-            foo: 'bar',
-            credentials: {},
-            connection: {}
+        it('should set options when argument is object', () => {
+            eLoader = new EndpointLoader({ foo: 'bar' });
+            assert.deepStrictEqual(eLoader.options, {
+                foo: 'bar',
+                credentials: {},
+                connection: {}
+            });
         });
     });
 
-    describe('setEndpoints', () => {
+    describe('.setEndpoints()', () => {
         it('should set endpoints', () => {
-            const eLoader = new EndpointLoader();
             const expected = {
                 foo: {
                     name: 'foo',
@@ -58,7 +68,6 @@ describe('Endpoint Loader', () => {
                     body: 'Hello World!'
                 }
             };
-
             eLoader.setEndpoints([
                 {
                     name: 'foo',
@@ -69,36 +78,29 @@ describe('Endpoint Loader', () => {
                     body: 'Hello World!'
                 }
             ]);
-
             assert.deepStrictEqual(eLoader.endpoints, expected);
         });
 
         it('should overwrite endpoints', () => {
-            const eLoader = new EndpointLoader();
             const expected = {
                 bar: { name: 'bar' }
             };
-
             eLoader.endpoints = {
                 foo: {}
             };
-
             eLoader.setEndpoints([
                 {
                     name: 'bar'
                 }
             ]);
-
             assert.deepStrictEqual(eLoader.endpoints, expected);
         });
     });
 
-    describe('setEndpoints', () => {
+    describe('.auth()', () => {
         it('should not change token if already exists and resolve', () => {
-            const eLoader = new EndpointLoader({ credentials: { token: '56789' } });
-
             sinon.stub(deviceUtil, 'getAuthToken').resolves({ token: '12345' });
-
+            eLoader = new EndpointLoader({ credentials: { token: '56789' } });
             return eLoader.auth()
                 .then(() => {
                     assert.strictEqual(
@@ -110,10 +112,7 @@ describe('Endpoint Loader', () => {
         });
 
         it('should save the token and resolve', () => {
-            const eLoader = new EndpointLoader();
-
             sinon.stub(deviceUtil, 'getAuthToken').resolves({ token: '12345' });
-
             return eLoader.auth()
                 .then(() => {
                     assert.strictEqual(
@@ -125,16 +124,12 @@ describe('Endpoint Loader', () => {
         });
 
         it('should reject with error if getAuthToken fails', () => {
-            const eLoader = new EndpointLoader();
-            const error = new Error('getAuthToken: Username and password required');
-
-            sinon.stub(deviceUtil, 'getAuthToken').rejects(error);
-
-            assert.isRejected(eLoader.auth(error));
+            sinon.stub(deviceUtil, 'getAuthToken').rejects(new Error('some error'));
+            return assert.isRejected(eLoader.auth(), /some error/);
         });
 
         it('should pass connection and credential information to getAuthToken', () => {
-            const eLoader = new EndpointLoader({
+            eLoader = new EndpointLoader({
                 credentials: {
                     username: 'admin',
                     passphrase: '12345'
@@ -146,7 +141,6 @@ describe('Endpoint Loader', () => {
             });
 
             let getAuthTokenArgs;
-
             sinon.stub(deviceUtil, 'getAuthToken').callsFake((host, username, password, options) => {
                 getAuthTokenArgs = {
                     host, username, password, options
@@ -169,23 +163,112 @@ describe('Endpoint Loader', () => {
         });
     });
 
-    describe('loadEndpoint', () => {
-        it('should error if endpoint is not defined', () => {
-            const eLoader = new EndpointLoader();
-            eLoader.endpoints = {};
-
-            return eLoader.loadEndpoint('badEndpoint', null)
-                .catch(err => assert.strictEqual(err.message, 'Endpoint not defined in file: badEndpoint'));
-        });
-
-        it('should replace strings in endpoint body if replaceStrings option is provided', () => {
-            const eLoader = new EndpointLoader();
+    describe('.replaceBodyVars()', () => {
+        it('should replace string in body (object)', () => {
             const body = {
                 command: 'run',
-                utilCmdArgs: '-c "echo Hello World"'
+                utilCmdArgs: '-c "echo $replaceMe"'
             };
+            return assert.deepStrictEqual(
+                eLoader.replaceBodyVars(body, { '\\$replaceMe': 'Hello World' }),
+                {
+                    command: 'run',
+                    utilCmdArgs: '-c "echo Hello World"'
+                }
+            );
+        });
 
-            eLoader.endpoints = {
+        it('should replace string in body (string)', () => assert.deepStrictEqual(
+            eLoader.replaceBodyVars('$replaceMe', { '\\$replaceMe': 'Hello World' }),
+            'Hello World'
+        ));
+    });
+
+    describe('.getURIPath()', () => {
+        it('should get path from URI', () => {
+            assert.strictEqual(
+                eLoader.getURIPath('https://localhost/path/to/something?arg=value'),
+                '/path/to/something'
+            );
+        });
+    });
+
+    describe('.getData()', () => {
+        it('should use POST when sending body', () => {
+            // resolves with httOptions
+            sinon.stub(deviceUtil, 'makeDeviceRequest').resolvesArg(2);
+            return assert.becomes(
+                eLoader.getData('/uri', { body: 'body' }),
+                {
+                    name: '/uri',
+                    data: {
+                        body: 'body',
+                        method: 'POST',
+                        credentials: {
+                            username: undefined,
+                            token: undefined
+                        }
+                    }
+                }
+            );
+        });
+
+        it('should retry request when failed', () => {
+            const requestStub = sinon.stub(deviceUtil, 'makeDeviceRequest');
+            requestStub.onFirstCall().rejects(new Error('some error'));
+            requestStub.onSecondCall().resolves(Promise.resolve({ key: 'value' }));
+            return eLoader.getData('/uri')
+                .then((data) => {
+                    assert.ok(requestStub.calledTwice, 'should re-try request on fail');
+                    assert.deepStrictEqual(
+                        data,
+                        {
+                            name: '/uri',
+                            data: { key: 'value' }
+                        }
+                    );
+                });
+        });
+
+        it('should build url using endpointFields', () => {
+            // resolves with fullUri
+            sinon.stub(deviceUtil, 'makeDeviceRequest').resolvesArg(1);
+            return eLoader.getData('/uri', { endpointFields: ['field2', 'field1', 'field3'] })
+                .then((data) => {
+                    const fields = data.data.split('?')[1].split('=')[1].split(',').sort();
+                    assert.deepStrictEqual(fields, ['field1', 'field2', 'field3']);
+                });
+        });
+    });
+
+    describe('.loadEndpoint()', () => {
+        it('should error if endpoint is not defined', () => {
+            eLoader.endpoints = {};
+            return assert.isRejected(
+                eLoader.loadEndpoint('badEndpoint'),
+                /Endpoint not defined in file: badEndpoint/
+            );
+        });
+
+        it('should fail when unable to get data', () => {
+            sinon.stub(eLoader, 'getAndExpandData').rejects(new Error('some error'));
+            eLoader.setEndpoints([{ name: 'endpoint' }]);
+            return assert.isRejected(
+                eLoader.loadEndpoint('endpoint'),
+                /some error/
+            );
+        });
+
+        it('should keep endpoint untouched when need to replace keys in body', () => {
+            sinon.stub(eLoader, 'getAndExpandData').resolvesArg(0);
+            const expectedEndpointObj = {
+                endpoint: '/mgmt/tm/util/bash',
+                body: {
+                    command: 'run',
+                    utilCmdArgs: '-c "echo Hello World"'
+                }
+            };
+            const endpoints = {
                 bash: {
                     endpoint: '/mgmt/tm/util/bash',
                     body: {
@@ -194,25 +277,19 @@ describe('Endpoint Loader', () => {
                     }
                 }
             };
-
-            sinon.stub(eLoader, '_getData').resolvesArg(1);
-
+            eLoader.endpoints = util.deepCopy(endpoints);
             return eLoader.loadEndpoint('bash', { replaceStrings: { '\\$replaceMe': 'Hello World' } })
                 .then((data) => {
-                    assert.deepStrictEqual(data, { name: undefined, body, endpointFields: undefined });
-                })
-                .catch(() => assert.fail());
+                    assert.deepStrictEqual(data, expectedEndpointObj);
+                    // verify that original endpoint not changed
+                    assert.deepStrictEqual(eLoader.endpoints, endpoints);
+                });
         });
 
         it('should reply with cached response', () => {
-            const eLoader = new EndpointLoader();
-
             eLoader.endpoints = { bash: { endpoint: '/mgmt/tm/util/bash' } };
             eLoader.cachedResponse = { bash: 'Foo Bar' };
-
-            sinon.stub(deviceUtil, 'makeDeviceRequest').resolves('New Data');
-
-            return eLoader.loadEndpoint('bash', null)
+            return eLoader.loadEndpoint('bash')
                 .then((data) => {
                     assert.deepStrictEqual(
                         data,
@@ -222,16 +299,15 @@ describe('Endpoint Loader', () => {
                     assert.deepStrictEqual(eLoader.cachedResponse.bash,
                         'Foo Bar',
                         'Should not have updated cache');
-                })
-                .catch(() => assert.fail());
+                });
         });
 
         it('should invalidate cached response if ignoreCached is set', () => {
-            const eLoader = new EndpointLoader();
             const expected = {
                 name: '/mgmt/tm/util/bash',
                 data: 'New Data'
             };
+            sinon.stub(eLoader, 'getAndExpandData').resolves(expected);
 
             eLoader.endpoints = {
                 bash: {
@@ -240,10 +316,7 @@ describe('Endpoint Loader', () => {
                 }
             };
             eLoader.cachedResponse = { bash: 'Foo Bar' };
-
-            sinon.stub(deviceUtil, 'makeDeviceRequest').resolves('New Data');
-
-            return eLoader.loadEndpoint('bash', null)
+            return eLoader.loadEndpoint('bash')
                 .then((data) => {
                     assert.deepStrictEqual(
                         data,
@@ -253,134 +326,56 @@ describe('Endpoint Loader', () => {
                     assert.deepStrictEqual(eLoader.cachedResponse.bash,
                         expected,
                         'Should have updated cache');
-                })
-                .catch(() => assert.fail());
+                });
         });
 
-        describe('expandReferences', () => {
-            beforeEach(() => {
-                sinon.stub(deviceUtil, 'makeDeviceRequest').callsFake((host, uri) => {
-                    let data;
-                    if (uri.endsWith('anySuffix')) {
-                        data = {
-                            anySuffixUri: uri,
-                            anySuffix: 'abcd12345'
-                        };
-                    } else if (uri.endsWith('stats')) {
-                        data = {
-                            uriStats: uri,
-                            stat: 12345
-                        };
-                    } else if (uri.includes('members')) {
-                        data = {
-                            uriConfig: uri,
-                            config: 'abcd'
-                        };
-                    } else {
-                        data = {
-                            items: [
-                                {
-                                    nonRefProp: 'some1',
-                                    membersReference: { link: 'members/foo' }
-                                },
-                                {
-                                    nonRefProp: 'some2',
-                                    membersReference: { link: 'members/bar' }
-                                }
-                            ]
-                        };
-                    }
-                    return Promise.resolve(data);
+        it('should load updated data when cache is empty/erased', () => {
+            const expected = {
+                name: '/mgmt/tm/util/bash',
+                data: 'New Data'
+            };
+            sinon.stub(eLoader, 'getAndExpandData').resolves(expected);
+
+            eLoader.endpoints = {
+                bash: {
+                    endpoint: '/mgmt/tm/util/bash',
+                    ignoreCached: true
+                }
+            };
+            eLoader.cachedResponse = { bash: 'Foo Bar' };
+            eLoader.eraseCache();
+            return eLoader.loadEndpoint('bash')
+                .then((data) => {
+                    assert.deepStrictEqual(
+                        data,
+                        expected,
+                        'Updated response should have returned in callback'
+                    );
+                    assert.deepStrictEqual(eLoader.cachedResponse.bash,
+                        expected,
+                        'Should have updated cache');
                 });
-            });
+        });
+    });
 
-            it('should handle endpointSuffix', () => {
-                const expected = {
-                    data: {
-                        items: [
-                            {
-                                nonRefProp: 'some1',
-                                membersReference: {
-                                    anySuffixUri: 'members/foo/anySuffix',
-                                    anySuffix: 'abcd12345'
-                                }
-                            },
-                            {
-                                nonRefProp: 'some2',
-                                membersReference: {
-                                    anySuffixUri: 'members/bar/anySuffix',
-                                    anySuffix: 'abcd12345'
-                                }
-                            }
-                        ]
-                    },
-                    name: '/mgmt/tm/ltm/pool'
-                };
+    describe('.getAndExpandData()', () => {
+        const checkResponse = (endpointMock, response) => {
+            if (!response.kind) {
+                throw new Error(`Endpoint '${endpointMock.endpoint}' has no property 'kind' in response`);
+            }
+        };
 
-                const eLoader = new EndpointLoader();
-                eLoader.endpoints = {
-                    pools: {
-                        endpoint: '/mgmt/tm/ltm/pool',
-                        expandReferences: {
-                            membersReference: { endpointSuffix: '/anySuffix' }
-                        }
-                    }
-                };
+        afterEach(() => {
+            nock.cleanAll();
+        });
 
-                return eLoader.loadEndpoint('pools', null)
-                    .then((data) => {
-                        assert.deepEqual(
-                            data,
-                            expected,
-                            'Updated response should have returned in callback'
-                        );
-                    });
-            });
-
-            it('should handle includeStats', () => {
-                const expected = {
-                    data: {
-                        items: [
-                            {
-                                nonRefProp: 'some1',
-                                membersReference: {
-                                    config: 'abcd',
-                                    uriConfig: 'members/foo',
-                                    stat: 12345,
-                                    uriStats: 'members/foo/stats'
-                                }
-                            },
-                            {
-                                nonRefProp: 'some2',
-                                membersReference: {
-                                    config: 'abcd',
-                                    uriConfig: 'members/bar',
-                                    stat: 12345,
-                                    uriStats: 'members/bar/stats'
-                                }
-                            }
-                        ]
-                    },
-                    name: '/mgmt/tm/ltm/pool'
-                };
-                const eLoader = new EndpointLoader();
-                eLoader.endpoints = {
-                    pools: {
-                        endpoint: '/mgmt/tm/ltm/pool',
-                        expandReferences: {
-                            membersReference: { includeStats: true }
-                        }
-                    }
-                };
-
-                return eLoader.loadEndpoint('pools', null)
-                    .then((data) => {
-                        assert.deepEqual(
-                            data,
-                            expected,
-                            'Updated response should have returned in callback'
-                        );
-                    });
+        endpointLoaderTestsData.getAndExpandData.forEach((testConf) => {
+            util.getCallableIt(testConf)(testConf.name, () => {
+                util.mockEndpoints(testConf.endpoints, { responseChecker: checkResponse });
+                return assert.becomes(
+                    eLoader.getAndExpandData(testConf.endpointObj),
+                    testConf.expectedData
+                );
             });
         });
     });

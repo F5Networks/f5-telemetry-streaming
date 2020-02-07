@@ -10,16 +10,15 @@
 
 const assert = require('assert');
 
+const util = require('./shared/util');
 const dataTagging = require('../../src/lib/dataTagging');
 const dataTaggingTestsData = require('./dataTaggingTestsData.js');
 
 
 describe('Data Tagging', () => {
     describe('handleAction', () => {
-        const getCallableIt = testConf => (testConf.testOpts && testConf.testOpts.only ? it.only : it);
-
         dataTaggingTestsData.handleAction.forEach((testConf) => {
-            getCallableIt(testConf)(testConf.name, () => {
+            util.getCallableIt(testConf)(testConf.name, () => {
                 const deviceCtx = testConf.deviceCtx || {
                     deviceVersion: '13.0.0.0',
                     provisioning: { ltm: { name: 'ltm', level: 'nominal' } }

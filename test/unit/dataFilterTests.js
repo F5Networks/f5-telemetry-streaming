@@ -10,6 +10,7 @@
 
 const assert = require('assert');
 
+const util = require('./shared/util');
 const dataFilter = require('../../src/lib/dataFilter.js');
 const dataFilterTestsData = require('./dataFilterTestsData.js');
 
@@ -41,10 +42,8 @@ describe('Data Filter', () => {
     });
 
     describe('handleAction', () => {
-        const getCallableIt = testConf => (testConf.testOpts && testConf.testOpts.only ? it.only : it);
-
         dataFilterTestsData.handleAction.forEach((testConf) => {
-            getCallableIt(testConf)(testConf.name, () => {
+            util.getCallableIt(testConf)(testConf.name, () => {
                 dataFilter.handleAction(testConf.dataCtx, testConf.actionCtx);
                 assert.deepStrictEqual(testConf.dataCtx, testConf.expectedCtx);
             });

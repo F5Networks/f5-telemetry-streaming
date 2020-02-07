@@ -13,14 +13,55 @@ const constants = require('./constants.js');
 const util = require('./util.js');
 const logger = require('./logger.js');
 
+/** @module EndpointLoader */
+
 /**
- * Endpoint Loader class
+ * Options to use to expand reference
  *
- * @param {String}  host                                     - host
+ * @typedef {Object} ExpandReferencesOpts
+ * @property {String} [endpointSuffix] - URI suffix to use to modify link
+ * @property {Boolean} [includeStats] - include response from /stats
+ */
+/**
+ * References to expand
+ *
+ * @typedef {Object.<string, module:EndpointLoader~ExpandReferencesOpts} ExpandReferences
+ */
+/**
+ * @typedef {Object} Endpoint
+ * @param {String}  endpoint           - endpoint's URI
+ * @param {String}  [name]             - endpoint's name
+ * @param {Object|String} [body]       - body to send to endpoint
+ * @param {Boolean} [includeStats]     - include stats for each object
+ * @param {module:EndpointLoader~ExpandReferences} [expandReferences] - references to expand
+ */
+/**
+ * Fetched data
+ *
+ * @typedef {Object} FetchedData
+ * @param {String} name         - name for this set of data
+ * @param {Object} data         - fetched data
+ * @param {String} [refKey] - reference key
+ */
+
+/**
+ * Endpoint Loader class.
+ *
+ * @example
+ * // initialize with host and options
+ * new EndpointLoader(host, options)
+ * @example
+ * // initialize with host only
+ * new EndpointLoader(host)
+ * @example
+ * // initialize with options only (all requests will be sent to localhost)
+ * new EndpointLoader(options)
+ *
+ * @param {String}  [host]                                   - host, by  default localhost
  * @param {Object}  [options]                                - options
- * @param {Object}  [options.tags]                           - tags to add to the data (each key)
  * @param {String}  [options.credentials.username]           - username for host
  * @param {String}  [options.credentials.passphrase]         - password for host
+ * @param {String}  [options.credentials.token]              - auth token
  * @param {String}  [options.connection.protocol]            - protocol for host
  * @param {Integer} [options.connection.port]                - port for host
  * @param {Boolean} [options.connection.allowSelfSignedCert] - false - requires SSL certificates be valid,
@@ -32,18 +73,27 @@ function EndpointLoader() {
     this.host = this.host || constants.LOCAL_HOST;
 
     this.options = typeof arguments[0] === 'object' ? arguments[0] : arguments[1];
-    this.options = this.options || {};
-    // rely on makeDeviceRequest
-    this.options.credentials = this.options.credentials || {};
-    this.options.connection = this.options.connection || {};
+    this.options = util.assignDefaults(
+        this.options,
+        {
+            credentials: {},
+            connection: {}
+        }
+    );
 
     this.endpoints = null;
-    this.cachedResponse = {};
+    this.eraseCache();
 }
+/**
+ * Erase cache
+ */
+EndpointLoader.prototype.eraseCache = function () {
+    this.cachedResponse = {};
+};
 /**
  * Set endpoints definition
  *
- * @param {Array} newEndpoints - list of endpoints to add
+ * @param {Array.<module:EndpointLoader~Endpoint>} newEndpoints - list of endpoints to add
  */
 EndpointLoader.prototype.setEndpoints = function (newEndpoints) {
     this.endpoints = {};
@@ -56,25 +106,20 @@ EndpointLoader.prototype.setEndpoints = function (newEndpoints) {
 /**
  * Authenticate on target device
  *
- * @returns {Object} Promise which is resolved when successfully authenticated
+ * @returns {Promise} Promise which is resolved when successfully authenticated
  */
 EndpointLoader.prototype.auth = function () {
     if (this.options.credentials.token) {
         return Promise.resolve();
     }
-    // in case of optimization, replace with Object.assign
-    const options = util.deepCopy(this.options.connection);
+    const options = Object.assign({}, this.options.connection);
     return deviceUtil.getAuthToken(
         this.host, this.options.credentials.username, this.options.credentials.passphrase, options
     )
         .then((token) => {
             this.options.credentials.token = token.token;
-        })
-        .catch((err) => {
-            throw err;
         });
 };
-
 /**
  * Load data from endpoint
  *
@@ -82,37 +127,24 @@ EndpointLoader.prototype.auth = function () {
  * @param {Object} [options]                - function options
  * @param {Object} [options.replaceStrings] - key/value pairs that replace matching strings in request body
  *
- * @returns {Object} Promise resolved with fetched data
+ * @returns {Promise<module:EndpointLoader~FetchedData>} Promise resolved with FetchedData
  */
 EndpointLoader.prototype.loadEndpoint = function (endpoint, options) {
-    const opts = options || {};
-    const endpointObj = this.endpoints[endpoint];
-
+    let endpointObj = this.endpoints[endpoint];
     if (endpointObj === undefined) {
         return Promise.reject(new Error(`Endpoint not defined in file: ${endpoint}`));
     }
-
-    let dataIsEmpty = false;
-    if (this.cachedResponse[endpoint] === undefined) {
-        dataIsEmpty = true;
+    // TODO: fix it later, right now it doesn't work with multiple concurrent connections
+    if (!endpointObj.ignoreCached && typeof this.cachedResponse[endpoint] !== 'undefined') {
+        return Promise.resolve(this.cachedResponse[endpoint]);
     }
-
-    if ((endpointObj || {}).ignoreCached) {
-        dataIsEmpty = true;
+    if ((options || {}).replaceStrings) {
+        endpointObj = Object.assign({}, endpointObj);
+        endpointObj.body = this.replaceBodyVars(endpointObj.body, options.replaceStrings);
     }
-
-    return Promise.resolve()
-        .then(() => {
-            if (dataIsEmpty) {
-                return this._getAndExpandData(endpointObj, { replaceStrings: opts.replaceStrings });
-            }
-            return Promise.resolve(this.cachedResponse[endpoint]);
-        })
+    return this.getAndExpandData(endpointObj)
         .then((response) => {
-            if (dataIsEmpty) {
-                // Cache data for later calls
-                this.cachedResponse[endpoint] = response;
-            }
+            this.cachedResponse[endpoint] = response;
             return Promise.resolve(response);
         })
         .catch((err) => {
@@ -121,20 +153,131 @@ EndpointLoader.prototype.loadEndpoint = function (endpoint, options) {
         });
 };
 /**
+ * Expand references
+ *
+ * @param {module:EndpointLoader~Endpoint} endpointObj - endpoint object
+ * @param {module:EndpointLoader~FetchedData} data     - fetched data
+ *
+ * @returns {Promise<Array<module:EndpointLoader~FetchedData>>} resolved with array of FetchedData
+ */
+EndpointLoader.prototype.expandReferences = function (endpointObj, data) {
+    const promises = [];
+    const dataItems = data.data.items;
+    if (endpointObj.expandReferences && dataItems && Array.isArray(dataItems) && dataItems.length) {
+        // for now let's just support a single reference
+        const referenceKey = Object.keys(endpointObj.expandReferences)[0];
+        const referenceObj = endpointObj.expandReferences[referenceKey];
+        for (let i = 0; i < dataItems.length; i += 1) {
+            const item = dataItems[i][referenceKey];
+            if (item && item.link) {
+                let referenceEndpoint = this.getURIPath(item.link);
+                if (referenceObj.endpointSuffix) {
+                    referenceEndpoint = `${referenceEndpoint}${referenceObj.endpointSuffix}`;
+                }
+                if (referenceObj.includeStats) {
+                    promises.push(this.getData(`${referenceEndpoint}/stats`, { name: i, refKey: referenceKey }));
+                }
+                promises.push(this.getData(referenceEndpoint, { name: i, refKey: referenceKey }));
+            }
+        }
+    }
+    return Promise.all(promises);
+};
+/**
+ * Fetch stats for each item
+ *
+ * @param {module:EndpointLoader~Endpoint} endpointObj - endpoint object
+ * @param {Object} data                                - data
+ * @param {String} data.name                           - name
+ * @param {Object} data.data                           - data to process
+ *
+ * @returns {Promise<Array<module:EndpointLoader~FetchedData>>}} resolved with array of FetchedData
+ */
+EndpointLoader.prototype.fetchStats = function (endpointObj, data) {
+    const promises = [];
+    const dataItems = data.data.items;
+    if (endpointObj.includeStats && dataItems && Array.isArray(dataItems) && dataItems.length) {
+        for (let i = 0; i < dataItems.length; i += 1) {
+            const item = dataItems[i];
+            // check for selfLink property
+            if (item.selfLink) {
+                promises.push(this.getData(`${this.getURIPath(item.selfLink)}/stats`, { name: i }));
+            }
+        }
+    }
+    return Promise.all(promises);
+};
+/**
+ * Substitute data
+ *
+ * @param {module:EndpointLoader~FetchedData} baseData         - base data
+ * @param {Array<module:EndpointLoader~FetchedData>} dataArray - array of data to use for substitution
+ * @param {Boolean} shallowCopy                                - true if shallow copy required else
+ *                                                               original object will be used
+ */
+EndpointLoader.prototype.substituteData = function (baseData, dataArray, shallowCopy) {
+    if (!dataArray.length) {
+        return;
+    }
+    const baseDataItems = baseData.data.items;
+    dataArray.forEach((data) => {
+        try {
+            let dataToSubstitute;
+            if (shallowCopy === true) {
+                dataToSubstitute = Object.assign(data.data, baseDataItems[data.name]);
+            } else {
+                dataToSubstitute = data.data;
+            }
+            if (data.refKey) {
+                // if this is the first time substituting data, overwrite the containing object with data
+                // e.g.
+                // itemsRef: {
+                //    link: 'http://objLink/objItems',
+                //    isSubcollection: true
+                // }
+                // will become:
+                // itemsRef: {
+                //    objItemProp1: 123 //data from link
+                // }
+                if (baseDataItems[data.name][data.refKey].link) {
+                    baseDataItems[data.name][data.refKey] = dataToSubstitute;
+                } else {
+                    // otherwise if same object has been previously substituted
+                    // and we're merging new set of props from a different link (e.g. objItems/stats)
+                    // then copy over the properties of the new dataToSubstitute
+                    // e.g.
+                    // itemsRef: {
+                    //     objItemProp1: 123
+                    //     objItemProp2: true
+                    // }
+                    Object.assign(baseDataItems[data.name][data.refKey], dataToSubstitute);
+                }
+            } else {
+                baseDataItems[data.name] = dataToSubstitute;
+            }
+        } catch (e) {
+            // just continue
+        }
+    });
+};
+/**
  * Get data for specific endpoint
  *
  * @param {String}   uri                      - uri where data resides
- * @param {Object}   options                  - function options
+ * @param {Object}   [options]                - function options
  * @param {String}   [options.name]           - name of key to store as, will override default of uri
  * @param {String}   [options.body]           - body to send, sent via POST request
+ * @param {String}   [options.refKey]         - reference key
  * @param {String[]} [options.endpointFields] - restrict collection to these fields
  *
- * @returns {Object} Promise which is resolved with data
+ * @returns {Promise<module:EndpointLoader~FetchedData>} resolved with FetchedData
  */
-EndpointLoader.prototype._getData = function (uri, options) {
-    logger.debug(`EndpointLoader._getData: loading data from URI = ${uri}`);
-    // remove parse-stringify in case of optimizations
-    const httpOptions = Object.assign({}, util.deepCopy(this.options.connection));
+EndpointLoader.prototype.getData = function (uri, options) {
+    logger.debug(`EndpointLoader.getData: loading data from URI = ${uri}`);
+
+    options = options || {};
+    const httpOptions = Object.assign({}, this.options.connection);
+
     httpOptions.credentials = {
         username: this.options.credentials.username,
         token: this.options.credentials.token
@@ -147,165 +290,86 @@ EndpointLoader.prototype._getData = function (uri, options) {
         maxTries: 3,
         backoff: 100
     };
-
-    let fullUri = uri;
-    if (options.endpointFields) {
-        fullUri = `${fullUri}?$select=${options.endpointFields.join(',')}`;
-    }
-
+    const fullUri = options.endpointFields ? `${uri}?$select=${options.endpointFields.join(',')}` : uri;
     return util.retryPromise(() => deviceUtil.makeDeviceRequest(this.host, fullUri, httpOptions), retryOpts)
         .then((data) => {
-            // use uri unless name is explicitly provided
-            const nameToUse = options.name !== undefined ? options.name : uri;
-            const ret = { name: nameToUse, data };
+            const ret = {
+                name: options.name !== undefined ? options.name : uri,
+                data
+            };
+            if (options.refKey) {
+                ret.refKey = options.refKey;
+            }
             return ret;
-        })
-        .catch((err) => {
-            throw err;
         });
 };
 /**
  * Get data for specific endpoint (with some extra logic)
  *
- * @param {Object} endpointProperties       - endpoint properties
- * @param {Object} [options]                - function options
- * @param {Object} [options.replaceStrings] - key/value pairs that replace matching strings in request body
+ * @param {module:EndpointLoader~Endpoint} endpointObj - endpoint object
  *
- * @returns {Object} Promise which is resolved with data
+ * @returns {Promise<module:EndpointLoader~FetchedData>} resolved with FetchedData
  */
-EndpointLoader.prototype._getAndExpandData = function (endpointProperties, options) {
-    const opts = options || {};
-    const p = endpointProperties;
-    let completeData;
-    let referenceKey;
-    const childItemKey = 'items'; // assume we are looking inside of 'items'
-
-    // remote protocol, host and query params
-    const fixEndpoint = i => i.replace('https://localhost', '').split('?')[0];
-
-    const substituteData = (data, childKey, assign) => {
-        // this tells us we need to modify the data
-        if (completeData) {
-            data.forEach((i) => {
-                try {
-                    let dataToSubstitute;
-                    if (assign === true) {
-                        dataToSubstitute = Object.assign(i.data, completeData.data[childItemKey][i.name]);
-                    } else {
-                        dataToSubstitute = i.data;
-                    }
-
-                    if (childKey) {
-                        // if this is the first time substituting data, overwrite the containing object with data
-                        // e.g.
-                        // itemsRef: {
-                        //    link: 'http://objLink/objItems',
-                        //    isSubcollection: true
-                        // }
-                        // will become:
-                        // itemsRef: {
-                        //    objItemProp1: 123 //data from link
-                        // }
-                        if (completeData.data[childItemKey][i.name][childKey].link) {
-                            completeData.data[childItemKey][i.name][childKey] = dataToSubstitute;
-                        } else {
-                            // otherwise if same object has been previously substituted
-                            // and we're merging new set of props from a different link (e.g. objItems/stats)
-                            // then copy over the properties of the new dataToSubstitute
-                            // e.g.
-                            // itemsRef: {
-                            //     objItemProp1: 123
-                            //     objItemProp2: true
-                            // }
-                            Object.assign(completeData.data[childItemKey][i.name][childKey], dataToSubstitute);
-                        }
-                    } else {
-                        completeData.data[childItemKey][i.name] = dataToSubstitute;
-                    }
-                } catch (e) {
-                    // just continue
-                }
-            });
-            return Promise.resolve(completeData); // return substituted data
-        }
-        return Promise.resolve(data); // return data
-    };
-
-    const replaceBodyVars = (body, replaceStrings) => {
-        let bodyStr = JSON.stringify(body);
-
-        Object.keys(replaceStrings).forEach((key) => {
-            bodyStr = bodyStr.replace(new RegExp(key), replaceStrings[key]);
-        });
-
-        return JSON.parse(bodyStr);
-    };
-
-    const body = opts.replaceStrings ? replaceBodyVars(p.body, opts.replaceStrings) : p.body;
-
-    return this._getData(
-        p.endpoint,
-        { name: p.name, body, endpointFields: p.endpointFields }
-    )
-        .then((data) => {
-            // data: { name: foo, data: bar }
-            // check if expandReferences property was specified
-            if (p.expandReferences) {
-                completeData = data;
-                const actualData = data.data;
-                // set default value if not exists
-                actualData[childItemKey] = actualData[childItemKey] === undefined ? [] : actualData[childItemKey];
-                // for now let's just support a single reference
-                referenceKey = Object.keys(p.expandReferences)[0];
-                const referenceObj = p.expandReferences[Object.keys(p.expandReferences)[0]];
-
-                const promises = [];
-                if (typeof actualData === 'object' && Array.isArray(actualData[childItemKey])) {
-                    for (let i = 0; i < actualData[childItemKey].length; i += 1) {
-                        const item = actualData[childItemKey][i];
-                        // first check for reference and then link property
-                        if (item[referenceKey] && item[referenceKey].link) {
-                            let referenceEndpoint = fixEndpoint(item[referenceKey].link);
-                            if (referenceObj.endpointSuffix) {
-                                referenceEndpoint = `${referenceEndpoint}${referenceObj.endpointSuffix}`;
-                            }
-                            if (referenceObj.includeStats) {
-                                promises.push(this._getData(`${referenceEndpoint}/stats`, { name: i }));
-                            }
-                            promises.push(this._getData(referenceEndpoint, { name: i }));
-                        }
-                    }
-                }
-                return Promise.all(promises);
-            }
-            return Promise.resolve(data); // just return the data
+EndpointLoader.prototype.getAndExpandData = function (endpointObj) {
+    // baseData in this method is the data fetched from endpointObj.endpoint
+    return this.getData(endpointObj.endpoint, endpointObj)
+        // Promise below will be resolved with array of 2 elements:
+        // [ baseData, [refData, refData] ]
+        .then(baseData => Promise.all([
+            Promise.resolve(baseData),
+            this.expandReferences(endpointObj, baseData)
+        ]))
+        .then((dataArray) => {
+            // dataArray === [ baseData, [refData, refData] ]
+            const baseData = dataArray[0];
+            this.substituteData(baseData, dataArray[1], false);
+            return Promise.all([
+                Promise.resolve(baseData),
+                this.fetchStats(endpointObj, baseData)
+            ]);
         })
-        .then(data => substituteData(data, referenceKey, false))
-        .then((data) => {
-            completeData = null;
-            // check if includeStats property was specified
-            if (p.includeStats) {
-                completeData = data;
-                const actualData = data.data;
-
-                const promises = [];
-                if (typeof actualData === 'object' && Array.isArray(actualData[childItemKey])) {
-                    for (let i = 0; i < actualData[childItemKey].length; i += 1) {
-                        const item = actualData[childItemKey][i];
-                        // check for selfLink property
-                        if (item.selfLink) {
-                            promises.push(this._getData(`${fixEndpoint(item.selfLink)}/stats`, { name: i }));
-                        }
-                    }
-                }
-                return Promise.all(promises);
-            }
-            return Promise.resolve(data); // just return the data
-        })
-        .then(data => substituteData(data, null, true))
-        .catch((err) => {
-            throw err;
+        // Promise below will be resolved with array of 2 elements:
+        // [ baseData, [statsData, statsData] ]
+        .then((dataArray) => {
+            // dataArray === [ baseData, [statsData, statsData] ]
+            const baseData = dataArray[0];
+            this.substituteData(baseData, dataArray[1], true);
+            return baseData;
         });
+};
+
+/**
+ * Replace variables in body with values
+ *
+ * @param {Object|String} body - request body
+ * @param {Object} keys        - keys/vars to replace
+ *
+ * @returns {Object|String}
+ */
+EndpointLoader.prototype.replaceBodyVars = function (body, keys) {
+    let isObject = false;
+    if (typeof body !== 'string') {
+        isObject = true;
+        body = JSON.stringify(body);
+    }
+    Object.keys(keys).forEach((key) => {
+        body = body.replace(new RegExp(key), keys[key]);
+    });
+    if (isObject) {
+        body = JSON.parse(body);
+    }
+    return body;
+};
+
+/**
+ * Get URI path
+ *
+ * @param {String} uri - URI
+ *
+ * @returns {String} URI path
+ */
+EndpointLoader.prototype.getURIPath = function (uri) {
+    return uri.replace('https://localhost', '').split('?')[0];
 };
 
 module.exports = EndpointLoader;

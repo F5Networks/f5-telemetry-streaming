@@ -164,8 +164,10 @@ module.exports = {
         try {
             return normalizeUtil[options.func](args);
         } catch (e) {
-            logger.exception(`runCustomFunction failed: ${e}`, e);
-            throw new Error(`runCustomFunction failed: ${e}`);
+            const errMsg = `runCustomFunction '${options.func}' failed: ${e}`;
+            logger.exception(errMsg, e);
+            e.message = errMsg;
+            throw e;
         }
     },
 
@@ -208,7 +210,9 @@ module.exports = {
         const keysToReduce = ['nestedStats', 'value', 'description', 'color'];
         for (let i = 0; i < keysToReduce.length; i += 1) {
             const item = data[keysToReduce[i]];
-            if (item !== undefined && Object.keys(data).length === 1) return this._reduceData(item, options);
+            if (item !== undefined && Object.keys(data).length === 1) {
+                return this._reduceData(item, options);
+            }
         }
 
         // .entries evaluates to true if data is an array

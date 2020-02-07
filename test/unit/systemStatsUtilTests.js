@@ -11,19 +11,17 @@
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 
+const util = require('./shared/util');
 const systemStatsUtil = require('../../src/lib/systemStatsUtil.js');
 const systemStatsUtilTestsData = require('./systemStatsUtilTestsData.js');
-const util = require('../../src/lib/util.js');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe('System Stats Utils', () => {
-    const getCallableIt = testConf => (testConf.testOpts && testConf.testOpts.only ? it.only : it);
-
     describe('._resolveConditional()', () => {
         systemStatsUtilTestsData._resolveConditional.forEach((testConf) => {
-            getCallableIt(testConf)(testConf.name, () => {
+            util.getCallableIt(testConf)(testConf.name, () => {
                 const promise = new Promise((resolve, reject) => {
                     try {
                         resolve(systemStatsUtil._resolveConditional(
@@ -44,7 +42,7 @@ describe('System Stats Utils', () => {
 
     describe('._preprocessProperty()', () => {
         systemStatsUtilTestsData._preprocessProperty.forEach((testConf) => {
-            getCallableIt(testConf)(testConf.name, () => assert.deepStrictEqual(
+            util.getCallableIt(testConf)(testConf.name, () => assert.deepStrictEqual(
                 systemStatsUtil._preprocessProperty(
                     util.deepCopy(testConf.contextData),
                     util.deepCopy(testConf.propertyData)
@@ -56,7 +54,7 @@ describe('System Stats Utils', () => {
 
     describe('._renderTemplate()', () => {
         systemStatsUtilTestsData._renderTemplate.forEach((testConf) => {
-            getCallableIt(testConf)(testConf.name, () => assert.deepStrictEqual(
+            util.getCallableIt(testConf)(testConf.name, () => assert.deepStrictEqual(
                 systemStatsUtil._renderTemplate(
                     util.deepCopy(testConf.contextData),
                     util.deepCopy(testConf.propertyData)
@@ -68,7 +66,7 @@ describe('System Stats Utils', () => {
 
     describe('.renderProperty()', () => {
         systemStatsUtilTestsData.renderProperty.forEach((testConf) => {
-            getCallableIt(testConf)(testConf.name, () => assert.deepStrictEqual(
+            util.getCallableIt(testConf)(testConf.name, () => assert.deepStrictEqual(
                 systemStatsUtil.renderProperty(
                     util.deepCopy(testConf.contextData),
                     util.deepCopy(testConf.propertyData)
