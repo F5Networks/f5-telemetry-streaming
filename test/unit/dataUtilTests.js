@@ -19,7 +19,7 @@ describe('Data Util', () => {
         dataUtilTestsData.getMatches.forEach((testConf) => {
             util.getCallableIt(testConf)(testConf.name, () => {
                 const resultCtx = dataUtil.getMatches(
-                    testConf.dataCtx,
+                    testConf.data,
                     testConf.propertyCtx,
                     testConf.propertyRegexCtx
                 );
@@ -32,7 +32,7 @@ describe('Data Util', () => {
         dataUtilTestsData.getDeepMatches.forEach((testConf) => {
             util.getCallableIt(testConf)(testConf.name, () => {
                 const resultCtx = dataUtil.getDeepMatches(
-                    testConf.dataCtx,
+                    testConf.data,
                     testConf.propertiesCtx
                 );
                 assert.deepEqual(resultCtx, testConf.expectedCtx);
@@ -41,13 +41,17 @@ describe('Data Util', () => {
     });
 
     describe('checkConditions', () => {
-        dataUtilTestsData.checkConditions.forEach((testConf) => {
-            util.getCallableIt(testConf)(testConf.name, () => {
-                const resultCtx = dataUtil.checkConditions(
-                    testConf.dataCtx,
-                    testConf.conditionsCtx
-                );
-                assert.strictEqual(resultCtx, testConf.expectedCtx);
+        ['', '_ifAnyMatch', '_ifAllMatch'].forEach((matchType) => {
+            describe(matchType, () => {
+                dataUtilTestsData[`checkConditions${matchType}`].forEach((testConf) => {
+                    util.getCallableIt(testConf)(testConf.name, () => {
+                        const resultCtx = dataUtil.checkConditions(
+                            testConf.dataCtx,
+                            testConf.actionsCtx
+                        );
+                        assert.strictEqual(resultCtx, testConf.expectedCtx);
+                    });
+                });
             });
         });
     });
@@ -61,7 +65,7 @@ describe('Data Util', () => {
                     return testConf.nestedKey ? item[testConf.nestedKey] : null;
                 };
                 dataUtil.searchAnyMatches(
-                    testConf.dataCtx,
+                    testConf.data,
                     testConf.propertiesCtx,
                     callback
                 );
@@ -88,11 +92,11 @@ describe('Data Util', () => {
                     expectedCtx = expectedCtx();
                 }
                 const actualRetVal = dataUtil.removeStrictMatches(
-                    testConf.dataCtx,
+                    testConf.data,
                     testConf.propertiesCtx,
                     testConf.useCallback === false ? undefined : callback
                 );
-                assert.deepStrictEqual(testConf.dataCtx, expectedCtx);
+                assert.deepStrictEqual(testConf.data, expectedCtx);
                 assert.strictEqual(actualRetVal, testConf.expectedRetVal);
             });
         });
@@ -117,12 +121,12 @@ describe('Data Util', () => {
                         expectedCtx = expectedCtx();
                     }
                     const actualRetVal = dataUtil.preserveStrictMatches(
-                        testConf.dataCtx,
+                        testConf.data,
                         testConf.propertiesCtx,
                         strictVal,
                         testConf.useCallback === false ? undefined : callback
                     );
-                    assert.deepStrictEqual(testConf.dataCtx, expectedCtx);
+                    assert.deepStrictEqual(testConf.data, expectedCtx);
                     assert.strictEqual(actualRetVal, testConf.expectedRetVal);
                 });
             });

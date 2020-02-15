@@ -106,6 +106,35 @@ module.exports = {
         },
         // TEST RELATED DATA STARTS HERE
         {
+            name: 'should execute action when ifAnyMatch is valid',
+            actionCtx: {
+                enable: true,
+                setTag: {
+                    tag: 'tag'
+                },
+                ifAnyMatch: [
+                    {
+                        foo: 'bar'
+                    },
+                    {
+                        foo: 'baz'
+                    }
+                ]
+            },
+            dataCtx: {
+                data: {
+                    foo: 'baz'
+                }
+            },
+            expectedCtx: {
+                data: {
+                    foo: 'baz',
+                    tag: 'tag'
+                }
+            }
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
             name: 'should not execute action when ifAllMatch is invalid',
             actionCtx: {
                 enable: true,
@@ -115,6 +144,34 @@ module.exports = {
                 ifAllMatch: {
                     foo: 'foo'
                 }
+            },
+            dataCtx: {
+                data: {
+                    foo: 'bar'
+                }
+            },
+            expectedCtx: {
+                data: {
+                    foo: 'bar'
+                }
+            }
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should not execute action when ifAnyMatch is invalid',
+            actionCtx: {
+                enable: true,
+                setTag: {
+                    tag: 'tag'
+                },
+                ifAnyMatch: [
+                    {
+                        foo: 'foo'
+                    },
+                    {
+                        foo: 'fooz'
+                    }
+                ]
             },
             dataCtx: {
                 data: {

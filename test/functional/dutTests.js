@@ -539,6 +539,37 @@ function test() {
                         assert.deepEqual(data.system.diskStorage['/var/log']['1_tagA'], 'myTag');
                     });
             });
+
+            it('should post a configuration containing filters with ifAnyMatch', () => {
+                const filterDeclaration = fs.readFileSync(constants.DECL.FILTERING_WITH_MATCHING_EXAMPLE).toString();
+                const uri = `${baseILXUri}/declare`;
+                const postOptions = {
+                    method: 'POST',
+                    headers: options.headers,
+                    body: filterDeclaration
+                };
+
+                return util.makeRequest(host, uri, postOptions)
+                    .then((data) => {
+                        util.logger.info('Declaration response:', { host, data });
+                        assert.strictEqual(data.message, 'success');
+                    });
+            });
+
+            it('should get matched and filtered systempoller info', () => {
+                const uri = `${baseILXUri}/systempoller/${constants.DECL.SYSTEM_NAME}`;
+
+                return util.makeRequest(host, uri, options)
+                    .then((data) => {
+                        data = data || {};
+                        util.logger.info(`Filtered and Matched SystemPoller response (${uri}):`, { host, data });
+                        // verify that 'system' key and child objects are included
+                        assert.deepEqual(Object.keys(data), ['system']);
+                        assert.ok(Object.keys(data.system).length > 1);
+                        // verify that 'system.diskStorage' is NOT excluded
+                        assert.notStrictEqual(Object.keys(data.system).indexOf('diskStorage'), -1);
+                    });
+            });
         });
     });
 }

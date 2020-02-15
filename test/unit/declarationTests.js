@@ -971,6 +971,25 @@ describe('Declarations', () => {
                                     location: 'system_location'
                                 }
                             }
+                        },
+                        {
+                            enable: true,
+                            includeData: {},
+                            locations: {
+                                virtualServers: true
+                            },
+                            ifAnyMatch: [
+                                {
+                                    system: {
+                                        hostname: 'bigip1.example.com'
+                                    }
+                                },
+                                {
+                                    system: {
+                                        hostname: 'bigip2.example.com'
+                                    }
+                                }
+                            ]
                         }
                     ]
                 }
@@ -1004,7 +1023,71 @@ describe('Declarations', () => {
                     assert.deepStrictEqual(poller.actions[2].excludeData, {});
                     assert.deepStrictEqual(poller.actions[2].locations, { pools: true });
                     assert.deepStrictEqual(poller.actions[2].ifAllMatch, { system: { location: 'system_location' } });
+                    // ifAnyMatch with includeData
+                    assert.deepStrictEqual(poller.actions[3].includeData, {});
+                    assert.deepStrictEqual(poller.actions[3].locations, { virtualServers: true });
+                    assert.deepStrictEqual(
+                        poller.actions[3].ifAnyMatch,
+                        [{ system: { hostname: 'bigip1.example.com' } }, { system: { hostname: 'bigip2.example.com' } }]
+                    );
                 });
+        });
+
+        it('should not allow ifAnyMatch and ifAllMatch in same action', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Poller: {
+                    class: 'Telemetry_System_Poller',
+                    actions: [
+                        {
+                            setTag: {
+                                tag1: 'tag1 value'
+                            },
+                            ifAllMatch: {
+                                system: {
+                                    location: 'system_location'
+                                }
+                            },
+                            ifAnyMatch: [{
+                                system: {
+                                    hostname: 'system_hostname'
+                                }
+                            }],
+                            locations: {
+                                virtualServers: {
+                                    '.*': true
+                                }
+                            }
+                        }
+                    ]
+                }
+            };
+            return assert.isRejected(config.validate(data), /should NOT be valid/);
+        });
+
+        it('should not allow an ifAnyMatch block that is not an array', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Poller: {
+                    class: 'Telemetry_System_Poller',
+                    actions: [
+                        {
+                            setTag: {
+                                tag1: 'tag1 value'
+                            },
+                            ifAnyMatch: {
+                                top: 'level value'
+                            },
+                            locations: {
+                                virtualServers: {
+                                    '.*': true
+                                }
+                            }
+                        }
+                    ]
+                }
+            };
+            return assert.isRejected(config.validate(data), /should be array/);
         });
 
         it('should not allow additional properties', () => {

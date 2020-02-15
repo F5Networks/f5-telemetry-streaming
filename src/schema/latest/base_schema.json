@@ -124,6 +124,12 @@
                     "type": "object",
                     "additionalProperties": true
                 },
+                "ifAnyMatch": {
+                    "title": "If Any Match",
+                    "description": "An array of ifAllMatch objects. Any individual ifAllMatch object may match, but each condition within an ifAllMatch object must be true",
+                    "type": "array",
+                    "additionalProperties": false
+                },
                 "includeData": {
                     "title": "Include Data",
                     "description": "The data fields to include in the output",
@@ -179,6 +185,20 @@
                         },
                         {
                             "not": { "required": ["excludeData"] }
+                        }
+                    ]
+                },
+                "ifAnyMatch": {
+                    "allOf": [
+                        {
+                            "not": { "required": ["ifAllMatch"] }
+                        }
+                    ]
+                },
+                "ifAllMatch": {
+                    "allOf": [
+                        {
+                            "not": { "required": ["ifAnyMatch"] }
                         }
                     ]
                 }
