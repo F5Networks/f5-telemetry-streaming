@@ -311,17 +311,17 @@ SystemStats.prototype._filterStats = function () {
         if (!actionCtx.enable) {
             return;
         }
-        if (actionCtx.ifAllMatch) {
-            // if ifAllMatch points to nonexisting data - VS name, tag or what ever else
+        if (actionCtx.ifAllMatch || actionCtx.ifAnyMatch) {
+            // if ifAllMatch or ifAnyMatch points to nonexisting data - VS name, tag or what ever else
             // we have to mark all existing paths with PRESERVE flag
-            dataUtil.searchAnyMatches(statsSkeleton, actionCtx.ifAllMatch, (key, item) => {
+            dataUtil.searchAnyMatches(statsSkeleton, actionCtx.ifAllMatch || actionCtx.ifAnyMatch, (key, item) => {
                 item.flag = FLAGS.PRESERVE;
                 return nestedKey;
             });
         }
-        // if includeData/excludeData paired with ifAllMatch then we can simply ignore it
+        // if includeData/excludeData paired with ifAllMatch or ifAnyMatch then we can simply ignore it
         // because we can't include/exclude data without conditional check
-        if (actionCtx.excludeData && !actionCtx.ifAllMatch) {
+        if (actionCtx.excludeData && !(actionCtx.ifAllMatch || actionCtx.ifAnyMatch)) {
             dataUtil.removeStrictMatches(statsSkeleton, actionCtx.locations, (key, item, getNestedKey) => {
                 if (getNestedKey) {
                     return nestedKey;
@@ -329,7 +329,7 @@ SystemStats.prototype._filterStats = function () {
                 return item.flag !== FLAGS.PRESERVE;
             });
         }
-        if (actionCtx.includeData && !actionCtx.ifAllMatch) {
+        if (actionCtx.includeData && !(actionCtx.ifAllMatch || actionCtx.ifAnyMatch)) {
             // strict is false - it is okay to have partial matches because we can't be sure
             // for 100% that such data was not added by previous action
             dataUtil.preserveStrictMatches(statsSkeleton, actionCtx.locations, false, (key, item, getNestedKey) => {

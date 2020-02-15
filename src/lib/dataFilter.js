@@ -91,13 +91,14 @@ DataFilter.prototype._applyBlacklist = function (data) {
  * @param {Object}  [actionCtx.excludeData] - 'Exclude' filter definition
  * @param {Object}  [actionCtx.locations]   - The locations of data to be filtered
  * @param {Object}  [actionCtx.ifAllMatch]  - conditions to check before
+ * @param {Object}  [actionCtx.ifAnyMatch]  - conditions to check before
  *
  * @returns {void}
  */
 function handleAction(dataCtx, actionCtx) {
     if ((actionCtx.includeData || actionCtx.excludeData)
-            && (util.isObjectEmpty(actionCtx.ifAllMatch)
-                || dataUtil.checkConditions(dataCtx.data, actionCtx.ifAllMatch))) {
+            && !util.isObjectEmpty(dataCtx.data) // completely short-circuit if dataCtx.data is empty
+            && dataUtil.checkConditions(dataCtx, actionCtx)) {
         if (actionCtx.includeData) {
             dataUtil.preserveStrictMatches(dataCtx.data, actionCtx.locations, true);
         } else if (actionCtx.excludeData) {

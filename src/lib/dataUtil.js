@@ -9,36 +9,105 @@
 'use strict';
 
 const logger = require('./logger.js');
+const util = require('./util.js');
 
 /**
- * Checks the conditions against the data
+ * Checks the conditions against the data.
  *
  * @private - use for testing only
  *
- * @param {Object} data       - data to process
- * @param {Object} conditions - conditions to check
+ * @param {Object} dataCtx    - complete data context collected from BIG-IP
+ * @param {Object} actionCtx  - individual action context
  *
- * @returns {Boolean} true when all conditions are met
+ * @returns {Boolean} True if a condition is met, or if a matching function is not provided.
  */
-function checkConditions(data, conditions) {
-    // Array.prototype.every will stop on first 'false'
-    return Object.keys(conditions).every((condition) => {
-        const matches = getMatches(data, condition);
-        const conditionVal = conditions[condition];
+function checkConditions(dataCtx, actionCtx) {
+    let func;
+    let condition;
+
+    if (!util.isObjectEmpty(actionCtx.ifAnyMatch)) {
+        func = checkAnyMatches;
+        condition = actionCtx.ifAnyMatch;
+    }
+    if (!util.isObjectEmpty(actionCtx.ifAllMatch)) {
+        func = checkAllMatches;
+        condition = actionCtx.ifAllMatch;
+    }
+    if (func) {
+        return util.isObjectEmpty(dataCtx.data) ? false : func(dataCtx.data, condition);
+    }
+    return true;
+}
+
+function checkAnyMatches(data, matchObjects) {
+    // Use 'Array.prototype.some' to check whether atleast 1 condition is true
+    return matchObjects.some(conditions => checkAllMatches(data, conditions));
+}
+
+function checkAllMatches(data, conditions) {
+    // Use 'Array.prototype.every' to check whether every condition is true
+    return Object.keys(conditions).every((conditionKey) => {
+        const matches = getMatches(data, conditionKey);
 
         if (matches.length === 0) {
-            // No matches were found so the condition was not met
-            logger.debug(`No matches were found for ${condition}`);
+            logger.debug(`No matches were found for "${conditionKey}"`);
             return false;
         }
-        if (typeof conditionVal !== 'object') {
-            // The condition to check is not an object and matches have been found in the data
-            return matches.every(match => data[match] === conditionVal
-                || data[match].toString().match(conditionVal.toString()));
+
+        const conditionVals = conditions[conditionKey];
+
+        if (typeof conditionVals !== 'object') {
+            return matches.every(match => checkScalarValue(data[match], conditionVals));
         }
-        // The next condition is an object so we do recursion and matches for the key have been found
-        return matches.every(match => checkConditions(data[match], conditionVal));
+
+        if (Array.isArray(conditionVals)) {
+            return matches.every((match) => {
+                const dataMatch = data[match];
+                // If conditionVals is array, dataMatch must also be an array for matching to occur.
+                if (!Array.isArray(dataMatch) && dataMatch.length !== conditionVals.length) {
+                    return false;
+                }
+
+                // Arrays have no order guarantee; sort both, then compare each array item
+                dataMatch.sort();
+                conditionVals.sort();
+                return conditionVals.every((conditionVal, index) => checkScalarValue(dataMatch[index], conditionVal));
+            });
+        }
+
+        // the next condition is an object (and not array); do recursion and matches for the key have been found
+        return matches.every(match => checkAllMatches(data[match], conditionVals));
     });
+}
+
+function checkScalarValue(data, condition) {
+    // Perform easiest strict equality (===) comparison (before type conversion or regex)
+    // Perform this check first, since we may have null === null, which should evaluate true
+    if (data === condition) {
+        return true;
+    }
+    // Function only performs matching on scalar values against scalar values
+    if (typeof data === 'object' || typeof condition === 'object') {
+        return false;
+    }
+
+    // 'data' and 'condition' are simple scalars - but not strictly equal (different type, or requires regex)
+    try {
+        // Force each to be strings for later comparison
+        condition = condition.toString();
+        data = data.toString();
+
+        // Perform another strict equality (which will be more performant than a regex match),
+        // with types converted to strings, before attempting regex match.
+        return data === condition || data.match(condition);
+    } catch (err) {
+        // Possible to have invalid regex - catch and log error. Return false. Matching unsuccessful.
+        if (err instanceof SyntaxError) {
+            logger.exception(`checkScalarValue error (data = "${data}" condition = "${condition}"): ${err.message || err}`, err);
+            return false;
+        }
+        throw err;
+    }
 }
 
 /**
@@ -123,19 +192,23 @@ function getDeepMatches(data, matchObj) {
  * @returns {void}
  */
 function searchAnyMatches(data, matchObj, cb) {
-    Object.keys(matchObj).forEach((matchKey) => {
-        getMatches(data, matchKey).forEach((key) => {
-            let item = data[key];
-            const nextMatchObj = matchObj[matchKey];
-            const nestedKey = cb(key, item);
-            if (nestedKey) {
-                item = item[nestedKey];
-            }
-            if (typeof item === 'object' && typeof nextMatchObj === 'object') {
-                searchAnyMatches(item, nextMatchObj, cb);
-            }
+    if (Array.isArray(matchObj)) {
+        matchObj.forEach(matchItem => searchAnyMatches(data, matchItem, cb));
+    } else {
+        Object.keys(matchObj).forEach((matchKey) => {
+            getMatches(data, matchKey).forEach((key) => {
+                let item = data[key];
+                const nextMatchObj = matchObj[matchKey];
+                const nestedKey = cb(key, item);
+                if (nestedKey) {
+                    item = item[nestedKey];
+                }
+                if (typeof item === 'object' && typeof nextMatchObj === 'object') {
+                    searchAnyMatches(item, nextMatchObj, cb);
+                }
+            });
         });
-    });
+    }
 }
 
 /**

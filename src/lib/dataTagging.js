@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2020. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -31,13 +31,13 @@ const EVENT_TYPES = require('./constants.js').EVENT_TYPES;
  * @param {Object}  [actionCtx.setTag]     - tag(s) that will be applied
  * @param {Object}  [actionCtx.locations]  - where thae tags should be applied
  * @param {Object}  [actionCtx.ifAllMatch] - conditions to check before
+ * @param {Object}  [actionCtx.ifAnyMatch] - conditions to check before
  *
  * @returns {void}
  */
 function handleAction(dataCtx, actionCtx, deviceCtx) {
     if (!util.isObjectEmpty(actionCtx.setTag)
-            && (util.isObjectEmpty(actionCtx.ifAllMatch)
-                || dataUtil.checkConditions(dataCtx.data, actionCtx.ifAllMatch))) {
+            && dataUtil.checkConditions(dataCtx, actionCtx)) {
         addTags(dataCtx, actionCtx, deviceCtx);
     }
 }

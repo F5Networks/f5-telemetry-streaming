@@ -3,6 +3,7 @@ Changes to this project are documented in this file. More detail and links can b
 
 ## 1.10.0
 ### Added
+- AUTOTOOL-1148: Allow 'OR' logic by adding ifAnyMatch functionality.
 ### Fixed
 - AUTOTOOL-1051: Event Listener unable to classify AFM DoS event
 - AUTOTOOL-1037: Splunk legacy tmstats - include last_cycle_count
