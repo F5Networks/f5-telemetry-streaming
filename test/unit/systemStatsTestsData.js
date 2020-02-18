@@ -467,7 +467,55 @@ module.exports = {
                 {
                     excludeData: {},
                     enable: true,
-                    ifAnyMatch: {
+                    ifAnyMatch: [{
+                        system: {
+                            diskStorage: {
+                                '/usr': {
+                                    name: '/usr'
+                                }
+                            }
+                        }
+                    }],
+                    locations: {
+                        system: {
+                            hostname: true
+                        }
+                    }
+                },
+                {
+                    includeData: {},
+                    enable: true,
+                    locations: {
+                        virtualServers: true
+                    }
+                }
+            ],
+            shouldKeepOnly: ['system', 'hostname', 'virtualServers', 'pools', 'diskStorage']
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should preserve with ifAllMatch and ifAnyMatch locations (example 1)',
+            actions: [
+                {
+                    setTags: {},
+                    enable: true,
+                    ifAnyMatch: [
+                        {
+                            system: {
+                                hostname: 'hostname'
+                            },
+                            virtualServers: {
+                                '.*': {
+                                    enabledState: 'enabled'
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    excludeData: {},
+                    enable: true,
+                    ifAllMatch: {
                         system: {
                             diskStorage: {
                                 '/usr': {
@@ -486,11 +534,57 @@ module.exports = {
                     includeData: {},
                     enable: true,
                     locations: {
+                        pools: true
+                    }
+                }
+            ],
+            shouldKeepOnly: ['system', 'hostname', 'virtualServers', 'diskStorage', 'pools']
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should preserve with ifAllMatch and ifAnyMatch locations (example 2)',
+            actions: [
+                {
+                    includeData: {},
+                    enable: true,
+                    ifAllMatch: {
+                        system: {
+                            version: '12'
+                        }
+                    },
+                    locations: {
+                        system: {
+                            hostname: true
+                        }
+                    }
+                },
+                {
+                    setTags: {},
+                    enable: true,
+                    ifAnyMatch: [
+                        {
+                            virtualServers: {
+                                '.*': {
+                                    enabledState: 'enabled'
+                                }
+                            },
+                            pools: {
+                                '.*': {
+                                    availabilityState: 'offline'
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    includeData: {},
+                    enable: true,
+                    locations: {
                         virtualServers: true
                     }
                 }
             ],
-            shouldKeepOnly: ['system', 'hostname', 'virtualServers', 'pools', 'diskStorage']
+            shouldKeepOnly: ['system', 'version', 'pools', 'virtualServers']
         }
     ]
 };
