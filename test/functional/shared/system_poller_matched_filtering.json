@@ -15,13 +15,11 @@
                     "ifAnyMatch": [
                         {
                             "system": {
-                                "hostname": "shouldnotmatch",
-                                "configReady": "ready"
+                                "configReady": "shouldnotmatch"
                             }
                         },
                         {
                             "system": {
-                                "hostname": "shouldnotmatch",
                                 "configReady": "yes"
                             }
                         }
