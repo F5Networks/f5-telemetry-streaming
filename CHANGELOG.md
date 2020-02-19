@@ -11,6 +11,7 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-1128: Declarations with large secrets may timeout
 - AUTOTOOL-1154: Passphrases should be obfuscated in consumer trace files
 ### Changed
+- AUTOTOOL-1062: Update NPM packages
 ### Removed
 
 ## 1.9.0
