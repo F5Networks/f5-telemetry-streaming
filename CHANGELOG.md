@@ -10,6 +10,7 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-1019: Splunk legacy tmstats - add tenant and application data
 - AUTOTOOL-1128: Declarations with large secrets may timeout
 - AUTOTOOL-1154: Passphrases should be obfuscated in consumer trace files
+- AUTOTOOL-1160: cipherText validation when protected by SecureVault
 ### Changed
 - AUTOTOOL-1062: Update NPM packages
 ### Removed

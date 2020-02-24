@@ -29,7 +29,7 @@ describe('Declarations', () => {
 
     beforeEach(() => {
         encryptSecretStub = sinon.stub(deviceUtil, 'encryptSecret');
-        encryptSecretStub.callsFake(() => Promise.resolve('foo'));
+        encryptSecretStub.callsFake(() => Promise.resolve('$M$foo'));
         getDeviceTypeStub = sinon.stub(deviceUtil, 'getDeviceType');
         getDeviceTypeStub.callsFake(() => Promise.resolve(constants.BIG_IP_DEVICE_TYPE));
         networkCheckStub = sinon.stub(util, 'networkCheck');
@@ -133,7 +133,7 @@ describe('Declarations', () => {
                         assert.strictEqual(proxy.allowSelfSignedCert, true);
                         assert.strictEqual(proxy.enableHostConnectivityCheck, false);
                         assert.strictEqual(proxy.username, 'username');
-                        assert.strictEqual(proxy.passphrase.cipherText, 'foo');
+                        assert.strictEqual(proxy.passphrase.cipherText, '$M$foo');
                     });
             });
 
@@ -568,7 +568,7 @@ describe('Declarations', () => {
 
         describe('f5secret', () => {
             it('should fail cipherText with wrong device type', () => {
-                deviceUtil.getDeviceType = () => Promise.resolve(constants.CONTAINER_DEVICE_TYPE);
+                getDeviceTypeStub.resolves(constants.CONTAINER_DEVICE_TYPE);
                 const data = {
                     class: 'Telemetry',
                     My_Poller: {
@@ -583,7 +583,7 @@ describe('Declarations', () => {
             });
 
             it('should not re-encrypt', () => {
-                const cipher = '$M$foo';
+                const cipher = '$M$fo02';
                 const data = {
                     class: 'Telemetry',
                     My_Poller: {
@@ -601,7 +601,7 @@ describe('Declarations', () => {
             });
 
             it('should base64 decode cipherText', () => {
-                deviceUtil.encryptSecret = secret => Promise.resolve(secret);
+                encryptSecretStub.resolvesArg(0);
                 const cipher = 'ZjVzZWNyZXQ='; // f5secret
                 const data = {
                     class: 'Telemetry',
@@ -617,6 +617,21 @@ describe('Declarations', () => {
                     .then(() => {
                         assert.strictEqual(data.My_Poller.passphrase.cipherText, 'f5secret');
                     });
+            });
+
+            it('should fail when cipherText protected by SecureVault but is not encrypted', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Poller: {
+                        class: 'Telemetry_System_Poller',
+                        passphrase: {
+                            cipherText: 'mycipher',
+                            protected: 'SecureVault'
+                        }
+                    }
+                };
+
+                return assert.isRejected(config.validate(data), /should be encrypted by BIG-IP when.*protected.*SecureVault/);
             });
         });
 
@@ -755,8 +770,8 @@ describe('Declarations', () => {
             });
 
             it('should expand pointer (object)', () => {
-                const resolvedSecret = 'bar';
-                deviceUtil.encryptSecret = () => Promise.resolve(resolvedSecret);
+                const resolvedSecret = '$M$bar';
+                encryptSecretStub.resolves(resolvedSecret);
 
                 const expectedValue = {
                     class: 'Secret',
@@ -797,12 +812,12 @@ describe('Declarations', () => {
                     .then((validated) => {
                         assert.deepEqual(validated.My_Consumer.path, expectedValue);
                         assert.deepEqual(validated.My_Consumer.headers[0].value, expectedValue);
-                        return config.validate(validated);
+                        return assert.isFulfilled(config.validate(validated));
                     });
             });
 
             it('should fail pointer (object) with additional chars', () => {
-                deviceUtil.encryptSecret = secret => Promise.resolve(secret);
+                encryptSecretStub.resolvesArg(0);
 
                 const data = {
                     class: 'Telemetry',
@@ -864,7 +879,7 @@ describe('Declarations', () => {
 
             it('should fail host network check', () => {
                 const errMsg = 'failed network check';
-                networkCheckStub.callsFake(() => Promise.reject(new Error(errMsg)));
+                networkCheckStub.rejects(new Error(errMsg));
 
                 const data = {
                     class: 'Telemetry',
@@ -1009,7 +1024,7 @@ describe('Declarations', () => {
                     assert.strictEqual(poller.allowSelfSignedCert, true);
                     assert.strictEqual(poller.enableHostConnectivityCheck, false);
                     assert.strictEqual(poller.username, 'username');
-                    assert.strictEqual(poller.passphrase.cipherText, 'foo');
+                    assert.strictEqual(poller.passphrase.cipherText, '$M$foo');
                     assert.strictEqual(poller.actions[0].enable, true);
                     // setTag action
                     assert.deepStrictEqual(poller.actions[0].setTag, { tag1: 'tag1 value', tag2: {} });
@@ -1243,7 +1258,7 @@ describe('Declarations', () => {
                     assert.notStrictEqual(poller, undefined);
                     assert.strictEqual(poller.class, 'Telemetry_iHealth_Poller');
                     assert.strictEqual(poller.username, 'username');
-                    assert.strictEqual(poller.passphrase.cipherText, 'foo');
+                    assert.strictEqual(poller.passphrase.cipherText, '$M$foo');
                     assert.deepStrictEqual(poller.interval, {
                         timeWindow: {
                             start: '00:00',
@@ -1290,7 +1305,7 @@ describe('Declarations', () => {
                     assert.notStrictEqual(poller, undefined);
                     assert.strictEqual(poller.class, 'Telemetry_iHealth_Poller');
                     assert.strictEqual(poller.username, 'username');
-                    assert.strictEqual(poller.passphrase.cipherText, 'foo');
+                    assert.strictEqual(poller.passphrase.cipherText, '$M$foo');
                     assert.deepStrictEqual(poller.interval, {
                         frequency: 'weekly',
                         day: 1,
@@ -1306,7 +1321,7 @@ describe('Declarations', () => {
                     assert.strictEqual(proxy.allowSelfSignedCert, true);
                     assert.strictEqual(proxy.enableHostConnectivityCheck, false);
                     assert.strictEqual(proxy.username, 'username');
-                    assert.strictEqual(proxy.passphrase.cipherText, 'foo');
+                    assert.strictEqual(proxy.passphrase.cipherText, '$M$foo');
                 });
         });
 
@@ -1573,7 +1588,7 @@ describe('Declarations', () => {
                     assert.strictEqual(system.allowSelfSignedCert, true);
                     assert.strictEqual(system.enableHostConnectivityCheck, false);
                     assert.strictEqual(system.username, 'username');
-                    assert.strictEqual(system.passphrase.cipherText, 'foo');
+                    assert.strictEqual(system.passphrase.cipherText, '$M$foo');
                 });
         });
 
@@ -1750,7 +1765,7 @@ describe('Declarations', () => {
                     const poller = validConfig.My_System.iHealthPoller;
                     assert.notStrictEqual(poller, undefined);
                     assert.strictEqual(poller.username, 'username');
-                    assert.strictEqual(poller.passphrase.cipherText, 'foo');
+                    assert.strictEqual(poller.passphrase.cipherText, '$M$foo');
                     assert.deepStrictEqual(poller.interval, {
                         timeWindow: {
                             start: '00:00',
@@ -1798,7 +1813,7 @@ describe('Declarations', () => {
                     const poller = validConfig.My_System.iHealthPoller;
                     assert.notStrictEqual(poller, undefined);
                     assert.strictEqual(poller.username, 'username');
-                    assert.strictEqual(poller.passphrase.cipherText, 'foo');
+                    assert.strictEqual(poller.passphrase.cipherText, '$M$foo');
                     assert.deepStrictEqual(poller.interval, {
                         frequency: 'weekly',
                         day: 1,
@@ -1814,7 +1829,7 @@ describe('Declarations', () => {
                     assert.strictEqual(proxy.allowSelfSignedCert, true);
                     assert.strictEqual(proxy.enableHostConnectivityCheck, false);
                     assert.strictEqual(proxy.username, 'username');
-                    assert.strictEqual(proxy.passphrase.cipherText, 'foo');
+                    assert.strictEqual(proxy.passphrase.cipherText, '$M$foo');
                 });
         });
 
