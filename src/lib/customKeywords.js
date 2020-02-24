@@ -17,6 +17,7 @@ const deviceUtil = require('./deviceUtil.js');
 const textNamedKey = 'plainText';
 const base64NamedKey = 'plainBase64';
 const secureVaultNamedKey = 'SecureVault';
+const secureVaultCipherPrefix = '$M$';
 
 
 /**
@@ -189,57 +190,47 @@ const keywords = {
         compile(schema, parentSchema) {
             // eslint-disable-next-line no-unused-vars
             return function (data, dataPath, parentData, propertyName, rootData) {
-                const ajvErrors = [];
-
-                // we handle a number of passphrase object in this function, the following describes each of them
-                // 'cipherText': this means we plan to store a plain text secret locally, which requires we encrypt
-                // it first. This also assumes that we are running on a BIG-IP where we have the means to do so
-                // 'environmentVar': undefined
-
-                // handle 'environmentVar' passphrase object
-                if (data[constants.PASSPHRASE_ENVIRONMENT_VAR] !== undefined) {
-                    return Promise.resolve(true);
-                }
-                // handle 'cipherText' passphrase object
-                if (data[constants.PASSPHRASE_CIPHER_TEXT] !== undefined) {
-                    // if data is already encrypted just return
-                    if (data.protected === secureVaultNamedKey) {
-                        return Promise.resolve(true);
-                    }
-
-                    // base64 decode before encrypting - if needed
-                    if (data.protected === base64NamedKey) {
-                        data[constants.PASSPHRASE_CIPHER_TEXT] = util.base64('decode', data[constants.PASSPHRASE_CIPHER_TEXT]);
-                        data.protected = textNamedKey;
-                    }
-
-                    return deviceUtil.getDeviceType()
-                        .then((deviceType) => {
-                            // check if on a BIG-IP and fail validation if not
-                            if (deviceType !== constants.BIG_IP_DEVICE_TYPE) {
-                                throw new Error(`Specifying '${constants.PASSPHRASE_CIPHER_TEXT}' requires running on ${constants.BIG_IP_DEVICE_TYPE}`);
+                return Promise.resolve()
+                    .then(() => {
+                        /**
+                         * we handle a number of passphrase object in this function,
+                         * the following describes each of them:
+                         * - 'cipherText': this means we plan to store a plain text secret locally,
+                         *   which requires we encrypt it first. This also assumes that we are
+                         *   running on a BIG-IP where we have the means to do so.
+                         * - 'environmentVar': undefined
+                         */
+                        if (typeof data[constants.PASSPHRASE_ENVIRONMENT_VAR] !== 'undefined') {
+                            return Promise.resolve(true);
+                        }
+                        if (typeof data[constants.PASSPHRASE_CIPHER_TEXT] === 'undefined') {
+                            return Promise.reject(new Error(`missing ${constants.PASSPHRASE_CIPHER_TEXT} or ${constants.PASSPHRASE_ENVIRONMENT_VAR}`));
+                        }
+                        if (data.protected === secureVaultNamedKey) {
+                            if (data[constants.PASSPHRASE_CIPHER_TEXT].startsWith(secureVaultCipherPrefix)) {
+                                return Promise.resolve(true);
                             }
-                            // encrypt secret
-                            return deviceUtil.encryptSecret(data[constants.PASSPHRASE_CIPHER_TEXT]);
-                        })
-                        .then((secret) => {
-                            // update text field with secret - should we base64 encode?
-                            data[constants.PASSPHRASE_CIPHER_TEXT] = secret;
-                            // set protected key - in case we return validated schema to requestor
-                            data.protected = secureVaultNamedKey;
+                            return Promise.reject(new Error(`'${constants.PASSPHRASE_CIPHER_TEXT}' should be encrypted by ${constants.BIG_IP_DEVICE_TYPE} when 'protected' is '${secureVaultNamedKey}'`));
+                        }
+                        if (data.protected === base64NamedKey) {
+                            data[constants.PASSPHRASE_CIPHER_TEXT] = util.base64('decode', data[constants.PASSPHRASE_CIPHER_TEXT]);
+                            data.protected = textNamedKey;
+                        }
 
-                            // notify success
-                            return true;
-                        })
-                        .catch((e) => {
-                            ajvErrors.push({ keyword: 'f5secret', message: e.message, params: {} });
-                            throw new Ajv.ValidationError(ajvErrors);
-                        });
-                }
-
-                // if we make it here we should reject with a useful message
-                const message = `missing ${constants.PASSPHRASE_CIPHER_TEXT} or ${constants.PASSPHRASE_ENVIRONMENT_VAR}`;
-                return Promise.reject(new Ajv.ValidationError([{ keyword: 'f5secret', message, params: {} }]));
+                        return deviceUtil.getDeviceType()
+                            .then((deviceType) => {
+                                if (deviceType !== constants.BIG_IP_DEVICE_TYPE) {
+                                    return Promise.reject(new Error(`Specifying '${constants.PASSPHRASE_CIPHER_TEXT}' requires running on ${constants.BIG_IP_DEVICE_TYPE}`));
+                                }
+                                return deviceUtil.encryptSecret(data[constants.PASSPHRASE_CIPHER_TEXT]);
+                            })
+                            .then((secret) => {
+                                data[constants.PASSPHRASE_CIPHER_TEXT] = secret;
+                                data.protected = secureVaultNamedKey;
+                                return true;
+                            });
+                    })
+                    .catch(e => Promise.reject(new Ajv.ValidationError([{ keyword: 'f5secret', message: e.message || e.toString(), params: {} }])));
             };
         }
     },
