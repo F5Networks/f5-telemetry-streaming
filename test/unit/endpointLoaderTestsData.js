@@ -20,7 +20,7 @@ module.exports = {
         {
             name: 'should get data empty data',
             endpointObj: {
-                endpoint: '/endpoint'
+                path: '/endpoint'
             },
             endpoints: [
                 {
@@ -42,7 +42,7 @@ module.exports = {
         {
             name: 'should fetch just the data',
             endpointObj: {
-                endpoint: '/endpoint'
+                path: '/endpoint'
             },
             endpoints: [
                 {
@@ -78,7 +78,7 @@ module.exports = {
         {
             name: 'should fetch data with stats when includeStats specified',
             endpointObj: {
-                endpoint: '/endpoint',
+                path: '/endpoint',
                 includeStats: true
             },
             endpoints: [
@@ -141,7 +141,7 @@ module.exports = {
         {
             name: 'should expand reference',
             endpointObj: {
-                endpoint: '/endpoint',
+                path: '/endpoint',
                 expandReferences: { someRef: {} }
             },
             endpoints: [
@@ -204,7 +204,7 @@ module.exports = {
         {
             name: 'should expand reference using endpointSuffix',
             endpointObj: {
-                endpoint: '/endpoint',
+                path: '/endpoint',
                 expandReferences: { someRef: { endpointSuffix: '/suffix' } }
             },
             endpoints: [
@@ -267,7 +267,7 @@ module.exports = {
         {
             name: 'should expand reference and include reference\'s stats',
             endpointObj: {
-                endpoint: '/endpoint',
+                path: '/endpoint',
                 expandReferences: { someRef: { includeStats: true } }
             },
             endpoints: [
@@ -357,7 +357,7 @@ module.exports = {
         {
             name: 'should expand reference and include reference\'s stats using endpointSuffix',
             endpointObj: {
-                endpoint: '/endpoint',
+                path: '/endpoint',
                 expandReferences: { someRef: { includeStats: true, endpointSuffix: '/suffix' } }
             },
             endpoints: [
@@ -447,7 +447,7 @@ module.exports = {
         {
             name: 'should include stats, expand reference using suffix and include reference\'s stats',
             endpointObj: {
-                endpoint: '/endpoint',
+                path: '/endpoint',
                 expandReferences: { someRef: { includeStats: true } },
                 includeStats: true
             },
@@ -564,7 +564,7 @@ module.exports = {
         {
             name: 'should not query reference objects without link property',
             endpointObj: {
-                endpoint: '/endpoint',
+                path: '/endpoint',
                 expandReferences: { someRef: { } }
             },
             endpoints: [
@@ -607,7 +607,7 @@ module.exports = {
         {
             name: 'should not query objects without selfLink property',
             endpointObj: {
-                endpoint: '/endpoint',
+                path: '/endpoint',
                 includeStats: true
             },
             endpoints: [

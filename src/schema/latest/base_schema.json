@@ -377,6 +377,7 @@
                     "Telemetry_Listener",
                     "Telemetry_Consumer",
                     "Telemetry_iHealth_Poller",
+                    "Telemetry_Endpoints",
                     "Controls",
                     "Shared"
                 ]
@@ -397,6 +398,9 @@
             },
             {
                 "$ref": "ihealth_poller_schema.json#"
+            },
+            {
+                "$ref": "endpoints_schema.json#"
             },
             {
                 "$ref": "controls_schema.json#"

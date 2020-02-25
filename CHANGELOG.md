@@ -3,6 +3,7 @@ Changes to this project are documented in this file. More detail and links can b
 
 ## 1.10.0
 ### Added
+- AUTOTOOL-1111: Enable configurable polling with Telemetry_Endpoints (BIG-IP paths) and multiple system poller support
 - AUTOTOOL-1148: Allow 'OR' logic by adding ifAnyMatch functionality.
 ### Fixed
 - AUTOTOOL-1051: Event Listener unable to classify AFM DoS event

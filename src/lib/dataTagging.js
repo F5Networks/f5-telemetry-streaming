@@ -68,24 +68,28 @@ function addTags(dataCtx, actionCtx, deviceCtx) {
         // properties.json - like old-style tagging
         if (dataCtx.type === EVENT_TYPES.SYSTEM_POLLER) {
             // Apply tags to default locations (where addKeysByTag is true) for system info
-            Object.keys(properties.stats).forEach((statKey) => {
-                const statProp = systemStatsUtil.renderProperty(deviceCtx, util.deepCopy(properties.stats[statKey]));
-                const items = statProp.structure && statProp.structure.parentKey
-                    ? (data[statProp.structure.parentKey] || {})[statKey] : data[statKey];
+            if (!dataCtx.isCustom) {
+                Object.keys(properties.stats).forEach((statKey) => {
+                    const statProp = systemStatsUtil.renderProperty(
+                        deviceCtx, util.deepCopy(properties.stats[statKey])
+                    );
+                    const items = statProp.structure && statProp.structure.parentKey
+                        ? (data[statProp.structure.parentKey] || {})[statKey] : data[statKey];
 
-                // tags can be applied to objects only - usually it is collections of objects
-                // e.g. Virtual Servers, pools, profiles and etc.
-                if (typeof items === 'object'
-                        && !util.isObjectEmpty(items)
-                        && statProp.normalization
-                        && statProp.normalization.find(norm => norm.addKeysByTag)) {
-                    Object.keys(items).forEach((itemKey) => {
-                        Object.keys(tags).forEach((tagKey) => {
-                            addTag(items[itemKey], tagKey, tags[tagKey], itemKey, statProp);
+                    // tags can be applied to objects only - usually it is collections of objects
+                    // e.g. Virtual Servers, pools, profiles and etc.
+                    if (typeof items === 'object'
+                            && !util.isObjectEmpty(items)
+                            && statProp.normalization
+                            && statProp.normalization.find(norm => norm.addKeysByTag)) {
+                        Object.keys(items).forEach((itemKey) => {
+                            Object.keys(tags).forEach((tagKey) => {
+                                addTag(items[itemKey], tagKey, tags[tagKey], itemKey, statProp);
+                            });
                         });
-                    });
-                }
-            });
+                    }
+                });
+            }
         } else {
             // Apply tags to default locations of events (and not iHealth data)
             Object.keys(tags).forEach((tagKey) => {

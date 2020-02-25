@@ -490,7 +490,6 @@ function test() {
                     });
             });
 
-
             it('should get filtered systempoller info', () => {
                 const uri = `${baseILXUri}/systempoller/${constants.DECL.SYSTEM_NAME}`;
 
@@ -522,7 +521,6 @@ function test() {
                         assert.strictEqual(data.message, 'success');
                     });
             });
-
 
             it('should get filtered systempoller info', () => {
                 const uri = `${baseILXUri}/systempoller/${constants.DECL.SYSTEM_NAME}`;
@@ -568,6 +566,39 @@ function test() {
                         assert.ok(Object.keys(data.system).length > 1);
                         // verify that 'system.diskStorage' is NOT excluded
                         assert.notStrictEqual(Object.keys(data.system).indexOf('diskStorage'), -1);
+                    });
+            });
+
+            it('should post and get configuration with multiple system pollers and endpointList', () => {
+                const customEndptsDecl = fs.readFileSync(constants.DECL.ENDPOINTLIST_EXAMPLE).toString();
+                let uri = `${baseILXUri}/declare`;
+                let reqOptions = {
+                    method: 'POST',
+                    headers: options.headers,
+                    body: customEndptsDecl
+                };
+
+                return util.makeRequest(host, uri, reqOptions)
+                    .then((data) => {
+                        util.logger.info('Declaration response:', { host, data });
+                        assert.strictEqual(data.message, 'success');
+                    })
+                    .then(() => {
+                        uri = `${baseILXUri}/systempoller/${constants.DECL.SYSTEM_NAME}`;
+                        reqOptions = {
+                            method: 'GET',
+                            headers: options.headers
+                        };
+                        return util.makeRequest(host, uri, reqOptions);
+                    })
+                    .then((data) => {
+                        util.logger.info(`System Poller with endpointList response (${uri}):`, { host, data });
+                        assert.ok(Array.isArray(data));
+                        const pollerOneData = data[0];
+                        const pollerTwoData = data[1];
+                        assert.ok(typeof pollerOneData.custom_ipOther !== 'undefined');
+                        assert.ok(typeof pollerOneData.custom_dns !== 'undefined');
+                        assert.ok(pollerTwoData.custom_provisioning.items.length > 0);
                     });
             });
         });

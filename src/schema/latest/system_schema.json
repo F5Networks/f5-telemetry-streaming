@@ -94,7 +94,8 @@
                                             "trace": {},
                                             "interval": {},
                                             "tag": {},
-                                            "actions": {}
+                                            "actions": {},
+                                            "endpointList": {}
                                         },
                                         "additionalProperties": false
                                     },
@@ -102,6 +103,21 @@
                                         "$ref": "system_poller_schema.json#/definitions/systemPoller"
                                     }
                                 ]
+                            },
+                            {
+                                "type": "array",
+                                "items": {
+                                    "anyOf": [
+                                        {
+                                            "$ref": "system_poller_schema.json#/definitions/systemPoller"
+                                        },
+                                        {
+                                            "type": "string",
+                                            "declarationClass": "Telemetry_System_Poller",
+                                            "minLength": 1
+                                        }
+                                    ]
+                                }
                             }
                         ]
                     },

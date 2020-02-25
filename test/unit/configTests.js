@@ -318,9 +318,9 @@ describe('Config', () => {
             .then((validated) => {
                 validated = util.formatConfig(validated);
                 const poller = util.getDeclarationByName(
-                    validated, constants.SYSTEM_POLLER_CLASS_NAME, 'My_Poller'
+                    validated, constants.CONFIG_CLASSES.SYSTEM_POLLER_CLASS_NAME, 'My_Poller'
                 );
-                assert.strictEqual(poller.class, constants.SYSTEM_POLLER_CLASS_NAME);
+                assert.strictEqual(poller.class, constants.CONFIG_CLASSES.SYSTEM_POLLER_CLASS_NAME);
             });
     });
 });

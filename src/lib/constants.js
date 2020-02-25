@@ -50,7 +50,15 @@ module.exports = {
     VERSION,
 
     BIG_IP_DEVICE_TYPE: 'BIG-IP',
-    CONSUMERS_CLASS_NAME: 'Telemetry_Consumer',
+    CONFIG_CLASSES: {
+        CONSUMERS_CLASS_NAME: 'Telemetry_Consumer',
+        ENDPOINTS_CLASS_NAME: 'Telemetry_Endpoints',
+        EVENTS_CLASS_NAME: 'Telemetry_Events',
+        EVENT_LISTENER_CLASS_NAME: 'Telemetry_Listener',
+        IHEALTH_POLLER_CLASS_NAME: 'Telemetry_iHealth_Poller',
+        SYSTEM_CLASS_NAME: 'Telemetry_System',
+        SYSTEM_POLLER_CLASS_NAME: 'Telemetry_System_Poller'
+    },
     CONSUMERS_DIR: './consumers',
     CONTAINER_DEVICE_TYPE: 'Container',
     CONTROLS_CLASS_NAME: 'Controls',
@@ -65,7 +73,6 @@ module.exports = {
     DEVICE_REST_MADM_URI: '/mgmt/shared/file-transfer/madm/',
     DEVICE_TMP_DIR: '/shared/tmp',
     DEFAULT_EVENT_LISTENER_PORT: 6514,
-    EVENT_LISTENER_CLASS_NAME: 'Telemetry_Listener',
     EVENT_TYPES: {
         DEFAULT: 'event',
         AVR_EVENT: 'AVR',
@@ -85,7 +92,6 @@ module.exports = {
     },
     IHEALTH_API_LOGIN: 'https://api.f5.com/auth/pub/sso/login/ihealth-api',
     IHEALTH_API_UPLOAD: 'https://ihealth-api.f5.com/qkview-analyzer/api/qkviews',
-    IHEALTH_POLLER_CLASS_NAME: 'Telemetry_iHealth_Poller',
     LOCAL_HOST: 'localhost',
     PASSPHRASE_CIPHER_TEXT: 'cipherText',
     PASSPHRASE_ENVIRONMENT_VAR: 'environmentVar',
@@ -93,8 +99,6 @@ module.exports = {
     PROTO_TO_PORT,
     QKVIEW_CMD_LOCAL_TIMEOUT: 1 * 60 * 60 * 1000, // 1 hour in milliseconds
     STATS_KEY_SEP: '::',
-    SYSTEM_CLASS_NAME: 'Telemetry_System',
-    SYSTEM_POLLER_CLASS_NAME: 'Telemetry_System_Poller',
     STRICT_TLS_REQUIRED: true,
     TRACER_DIR: '/var/tmp/telemetry',
     USER_AGENT: `f5-telemetry/${VERSION}`,

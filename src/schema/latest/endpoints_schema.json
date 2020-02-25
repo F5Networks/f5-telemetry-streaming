@@ -1,0 +1,112 @@
+{
+    "$id": "endpoints_schema.json",
+    "$async": true,
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry Streaming Endpoints schema",
+    "description": "",
+    "type": "object",
+    "definitions": {
+        "telemetryEndpoint": {
+            "title": "Telemetry Endpoint",
+            "description": "",
+            "type": "object",
+            "properties": {
+                "enable": {
+                    "title": "Enable endpoint",
+                    "default": true,
+                    "allOf": [
+                        {
+                            "$ref": "base_schema.json#/definitions/enable"
+                        }
+                    ]
+                },
+                "name": {
+                    "title": "Endpoint name",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "path": {
+                    "title": "Path to query data from",
+                    "type": "string",
+                    "minLength": 1
+                }
+            },
+            "additionalProperties": false
+        },
+        "telemetryEndpoints": {
+            "$comment": "system_poller_schema.json should be updated when new property added",
+            "$async": true,
+            "title": "Telemetry Endpoints",
+            "description": "",
+            "type": "object",
+            "properties": {
+                "enable": {
+                    "title": "Enable endpoints",
+                    "default": true,
+                    "allOf": [
+                        {
+                            "$ref": "base_schema.json#/definitions/enable"
+                        }
+                    ]
+                },
+                "basePath": {
+                    "title": "Base Path",
+                    "description": "Optional base path value to prepend to each invidual endpoint paths",
+                    "type": "string",
+                    "default": ""
+                },
+                "items": {
+                    "title": "Items",
+                    "description": "Object with each property an endpoint with their own properties",
+                    "type": "object",
+                    "additionalProperties": {
+                        "allOf": [
+                            {
+                                "$ref": "#/definitions/telemetryEndpoint"
+                            },
+                            { 
+                                "required": [ "path" ]
+                            }
+                        ]
+                    },
+                    "minProperties": 1
+                }
+            }
+        }
+    },
+    "allOf": [
+        {
+            "if": { "properties": { "class": { "const": "Telemetry_Endpoints" } } },
+            "then": {
+                "required": [
+                    "class",
+                    "items"
+                ],
+                "properties": {
+                    "class": {
+                        "title": "Class",
+                        "description": "Telemetry Streaming Endpoints class",
+                        "type": "string",
+                        "enum": [ "Telemetry_Endpoints" ]
+                    }
+                },
+                "allOf": [
+                    {
+                        "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a seperate block",
+                        "properties": {
+                            "class": {},
+                            "enable": {},
+                            "basePath": {},
+                            "items": {}
+                        },
+                        "additionalProperties": false
+                    },
+                    {
+                        "$ref": "#/definitions/telemetryEndpoints"
+                    }
+                ]
+            },
+            "else": {}
+        }
+    ]
+}

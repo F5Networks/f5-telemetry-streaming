@@ -181,7 +181,7 @@ Collect the raw data from the device by adding a new endpoint to the paths confi
 
 ```javascript
 {
-    "endpoint": "/mgmt/tm/sys/global-settings"
+    "path": "/mgmt/tm/sys/global-settings"
 }
 ```
 
@@ -189,11 +189,11 @@ Collect the raw data from the device by adding a new endpoint to the paths confi
 
 ```javascript
 {
-    "endpoint": "/mgmt/tm/sys/someEndpoint", // REST endpoint
+    "path": "/mgmt/tm/sys/someEndpoint", // REST endpoint
     "includeStats": true, // Certain data is only available via /mgmt/tm/sys/someEndpoint as opposed to /mgmt/tm/sys/someEndpoint/stats, this property accomodates for this by making call to /stats (for each item) and adding that data to the original object
     "expandReferences": { "membersReference": { "endpointSuffix": "/stats" } }, // Certain data requires getting a list of objects and then in each object expanding/following references to a child object.  'membersReference' is the name of that key (currently looking under 'items' in the data returned) and will result in self link data being retrived and 'membersReference' key being replaced with that data. If 'endpointSuffix' is supplied, a suffix is added to each self link prior to retrieval, otherwise, the value of self link as is will be used. In cases like gslb where both config and stats are needed, both the `link` and `link/stats` need to be fetched, hence, the resulting config is "expandReferences": { "membersReference": { "includeStats": true } }, which is equivalent to "expandReferences": { "membersReference": { "endpointSuffix": "", "includeStats": true } }. TODO: revisit keywords/ naming here to consolidate and avoid confusion
     "endpointFields": [ "name", "fullPath", "selfLink", "ipProtocol", "mask" ], // Will collect only these fields from the endoint. Useful when using includeStats and the same property exists in both endpoints. Also can be used instead of a large exclude/include statement in properties.json
-    "body": "{ \"command\": \"run\", \"utilCmdArgs\": \"-c \\\"/bin/df -P | /usr/bin/tr -s ' ' ','\\\"\" }", // Certain information may require using POST instead of GET and require an HTTP body, if body is defined that gets used along with a POST
+    "body": "{ \"command\": \"run\", \"utilCmdArgs\": \"-c \\\"/bin/df -P | /usr/bin/tr -s ' ' ','\\\"\" }", // Certain information may require using POST instead of GET and require an HTTP body, if body is defined that gets used along with a POST. Body can be either string or object
     "name": "someStatRef", // Alternate name to reference in properties.json, default is to use the endpoint
     "ignoreCached": true // Invalidate cached response of previous request to endpoint
 }

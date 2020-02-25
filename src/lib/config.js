@@ -27,6 +27,7 @@ const systemPollerSchema = require('../schema/latest/system_poller_schema.json')
 const listenerSchema = require('../schema/latest/listener_schema.json');
 const consumerSchema = require('../schema/latest/consumer_schema.json');
 const iHealthPollerSchema = require('../schema/latest/ihealth_poller_schema.json');
+const endpointsSchema = require('../schema/latest/endpoints_schema.json');
 
 const customKeywords = require('./customKeywords.js');
 const CONTROLS_CLASS_NAME = require('./constants.js').CONTROLS_CLASS_NAME;
@@ -160,7 +161,8 @@ ConfigWorker.prototype.compileSchema = function () {
         systemPoller: systemPollerSchema,
         listener: listenerSchema,
         consumer: consumerSchema,
-        iHealthPoller: iHealthPollerSchema
+        iHealthPoller: iHealthPollerSchema,
+        endpoints: endpointsSchema
     };
     const keywords = customKeywords;
 

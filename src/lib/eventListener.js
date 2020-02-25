@@ -27,7 +27,7 @@ const events = properties.events;
 const definitions = properties.definitions;
 
 const DEFAULT_PORT = constants.DEFAULT_EVENT_LISTENER_PORT;
-const CLASS_NAME = constants.EVENT_LISTENER_CLASS_NAME;
+const CLASS_NAME = constants.CONFIG_CLASSES.EVENT_LISTENER_CLASS_NAME;
 
 const MAX_BUFFER_SIZE = 16 * 1024; // 16k chars
 const MAX_BUFFER_TIMEOUTS = 5;

@@ -339,6 +339,80 @@ const keywords = {
             };
         }
     },
+    declarationClassProp: {
+        type: 'string',
+        errors: true,
+        modifying: true,
+        async: true,
+        metaSchema: {
+            type: 'string',
+            description: 'Automatically resolve a path with given {declarationClass}/{propLevel_1}/...{propLevel_n}',
+            minLength: 1
+        },
+        // eslint-disable-next-line no-unused-vars
+        compile(schema, parentSchema) {
+            return function (data, dataPath, parentData, propertyName, rootData) {
+                const ajvErrors = [];
+                if (typeof data === 'string') {
+                    // Given sample obj"
+                    // {
+                    //   class: "The_Class",
+                    //   collProp: { { key1: val1 }, { key2: val2 } }
+                    // }
+
+                    // the path defined in the schema {class}/{propLevel_1}/../{propLevel_n}, e.g. The_Class/collProp
+                    const schemaParts = schema.split('/');
+                    // the path defined by the user in their declaration, e.g. The_Class/key1
+                    const dataParts = data.split('/');
+                    const className = schemaParts[0];
+                    const classInstanceName = dataParts[0];
+
+                    let objInstance = rootData[classInstanceName];
+
+                    if (dataParts.length < 2 || !(dataParts[0].trim() && dataParts[1].trim())) {
+                        ajvErrors.push({
+                            keyword: 'declarationClassProp',
+                            message: `Value: "${data}" does not follow format {declarationClass}/{propName}`,
+                            params: {}
+                        });
+                    } else if (typeof objInstance !== 'object' || objInstance.class !== className) {
+                        ajvErrors.push({
+                            keyword: 'declarationClassProp',
+                            message: `"${classInstanceName}" must be of object type and class "${className}"`,
+                            params: {}
+                        });
+                    } else {
+                        const pathFromSchema = schemaParts.slice(1);
+                        const pathFromData = dataParts.slice(1);
+                        // skip if already resolved
+                        if (pathFromSchema[0] !== pathFromData[0]) {
+                            pathFromData.forEach(d => pathFromSchema.push(d));
+                            const exists = pathFromSchema.every((key) => {
+                                objInstance = objInstance[key];
+                                return typeof objInstance !== 'undefined';
+                            });
+                            const resolvedPath = `${classInstanceName}/${pathFromSchema.join('/')}`;
+                            if (exists) {
+                                parentData[propertyName] = resolvedPath;
+                            } else {
+                                ajvErrors.push({
+                                    keyword: 'declarationClassProp',
+                                    message: `Unable to find "${resolvedPath}"`,
+                                    params: {}
+                                });
+                            }
+                        }
+                    }
+                }
+
+                if (ajvErrors.length) {
+                    return Promise.reject(new Ajv.ValidationError(ajvErrors));
+                }
+
+                return Promise.resolve(true);
+            };
+        }
+    },
     pathExists: {
         type: 'string',
         errors: true,

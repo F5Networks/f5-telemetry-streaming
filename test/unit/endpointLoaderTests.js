@@ -64,7 +64,7 @@ describe('Endpoint Loader', () => {
                     body: 'bar'
                 },
                 '/hello/world': {
-                    endpoint: '/hello/world',
+                    path: '/hello/world',
                     body: 'Hello World!'
                 }
             };
@@ -74,7 +74,7 @@ describe('Endpoint Loader', () => {
                     body: 'bar'
                 },
                 {
-                    endpoint: '/hello/world',
+                    path: '/hello/world',
                     body: 'Hello World!'
                 }
             ]);
@@ -252,9 +252,9 @@ describe('Endpoint Loader', () => {
 
         it('should fail when unable to get data', () => {
             sinon.stub(eLoader, 'getAndExpandData').rejects(new Error('some error'));
-            eLoader.setEndpoints([{ name: 'endpoint' }]);
+            eLoader.setEndpoints([{ name: 'path' }]);
             return assert.isRejected(
-                eLoader.loadEndpoint('endpoint'),
+                eLoader.loadEndpoint('path'),
                 /some error/
             );
         });
@@ -262,7 +262,7 @@ describe('Endpoint Loader', () => {
         it('should keep endpoint untouched when need to replace keys in body', () => {
             sinon.stub(eLoader, 'getAndExpandData').resolvesArg(0);
             const expectedEndpointObj = {
-                endpoint: '/mgmt/tm/util/bash',
+                path: '/mgmt/tm/util/bash',
                 body: {
                     command: 'run',
                     utilCmdArgs: '-c "echo Hello World"'
@@ -270,7 +270,7 @@ describe('Endpoint Loader', () => {
             };
             const endpoints = {
                 bash: {
-                    endpoint: '/mgmt/tm/util/bash',
+                    path: '/mgmt/tm/util/bash',
                     body: {
                         command: 'run',
                         utilCmdArgs: '-c "echo $replaceMe"'
@@ -287,7 +287,7 @@ describe('Endpoint Loader', () => {
         });
 
         it('should reply with cached response', () => {
-            eLoader.endpoints = { bash: { endpoint: '/mgmt/tm/util/bash' } };
+            eLoader.endpoints = { bash: { path: '/mgmt/tm/util/bash' } };
             eLoader.cachedResponse = { bash: 'Foo Bar' };
             return eLoader.loadEndpoint('bash')
                 .then((data) => {
@@ -311,7 +311,7 @@ describe('Endpoint Loader', () => {
 
             eLoader.endpoints = {
                 bash: {
-                    endpoint: '/mgmt/tm/util/bash',
+                    path: '/mgmt/tm/util/bash',
                     ignoreCached: true
                 }
             };
@@ -338,7 +338,7 @@ describe('Endpoint Loader', () => {
 
             eLoader.endpoints = {
                 bash: {
-                    endpoint: '/mgmt/tm/util/bash',
+                    path: '/mgmt/tm/util/bash',
                     ignoreCached: true
                 }
             };
@@ -361,7 +361,7 @@ describe('Endpoint Loader', () => {
     describe('.getAndExpandData()', () => {
         const checkResponse = (endpointMock, response) => {
             if (!response.kind) {
-                throw new Error(`Endpoint '${endpointMock.endpoint}' has no property 'kind' in response`);
+                throw new Error(`Endpoint '${endpointMock.path}' has no property 'kind' in response`);
             }
         };
 

@@ -29,7 +29,7 @@ const logger = require('./logger.js');
  */
 /**
  * @typedef {Object} Endpoint
- * @param {String}  endpoint           - endpoint's URI
+ * @param {String}  [path]         - endpoint's URI
  * @param {String}  [name]             - endpoint's name
  * @param {Object|String} [body]       - body to send to endpoint
  * @param {Boolean} [includeStats]     - include stats for each object
@@ -96,12 +96,16 @@ EndpointLoader.prototype.eraseCache = function () {
  * @param {Array.<module:EndpointLoader~Endpoint>} newEndpoints - list of endpoints to add
  */
 EndpointLoader.prototype.setEndpoints = function (newEndpoints) {
-    this.endpoints = {};
-    newEndpoints.forEach((endpoint) => {
-        // if 'name' presented then use it as unique ID
-        // otherwise using 'endpoint' prop
-        this.endpoints[endpoint.name || endpoint.endpoint] = endpoint;
-    });
+    if (Array.isArray(newEndpoints)) {
+        this.endpoints = {};
+        newEndpoints.forEach((endpoint) => {
+            // if 'name' presented then use it as unique ID
+            // otherwise use path prop
+            this.endpoints[endpoint.name || endpoint.path] = endpoint;
+        });
+    } else {
+        this.endpoints = newEndpoints;
+    }
 };
 /**
  * Authenticate on target device
@@ -152,6 +156,7 @@ EndpointLoader.prototype.loadEndpoint = function (endpoint, options) {
             return Promise.reject(err);
         });
 };
+
 /**
  * Expand references
  *
@@ -307,12 +312,12 @@ EndpointLoader.prototype.getData = function (uri, options) {
  * Get data for specific endpoint (with some extra logic)
  *
  * @param {module:EndpointLoader~Endpoint} endpointObj - endpoint object
- *
+ * @param {String} endpointObj.path - URI path to get data from
  * @returns {Promise<module:EndpointLoader~FetchedData>} resolved with FetchedData
  */
 EndpointLoader.prototype.getAndExpandData = function (endpointObj) {
-    // baseData in this method is the data fetched from endpointObj.endpoint
-    return this.getData(endpointObj.endpoint, endpointObj)
+    // baseData in this method is the data fetched from endpointObj.path
+    return this.getData(endpointObj.path, endpointObj)
         // Promise below will be resolved with array of 2 elements:
         // [ baseData, [refData, refData] ]
         .then(baseData => Promise.all([
