@@ -1632,6 +1632,7 @@ module.exports = {
                 expectedData: {
                     aWideIps: {
                         '/Common/testA.com': {
+                            tenant: 'Common',
                             alternate: 0,
                             cnameResolutions: 0,
                             dropped: 0,
@@ -1677,6 +1678,7 @@ module.exports = {
                     },
                     aaaaWideIps: {
                         '/Common/testAAAA.com': {
+                            tenant: 'Common',
                             alternate: 0,
                             cnameResolutions: 0,
                             dropped: 0,
@@ -1722,6 +1724,7 @@ module.exports = {
                     },
                     cnameWideIps: {
                         '/Common/testCNAME.com': {
+                            tenant: 'Common',
                             alternate: 0,
                             cnameResolutions: 0,
                             dropped: 0,
@@ -1767,6 +1770,7 @@ module.exports = {
                     },
                     mxWideIps: {
                         '/Common/testMX.com': {
+                            tenant: 'Common',
                             alternate: 0,
                             cnameResolutions: 0,
                             dropped: 0,
@@ -1812,6 +1816,7 @@ module.exports = {
                     },
                     naptrWideIps: {
                         '/Common/testNAPTR.com': {
+                            tenant: 'Common',
                             alternate: 0,
                             cnameResolutions: 0,
                             dropped: 0,
@@ -1857,6 +1862,7 @@ module.exports = {
                     },
                     srvWideIps: {
                         '/Common/testSRV.com': {
+                            tenant: 'Common',
                             alternate: 0,
                             cnameResolutions: 0,
                             dropped: 0,
@@ -1902,6 +1908,7 @@ module.exports = {
                     },
                     aPools: {
                         '/Common/ts_a_pool': {
+                            tenant: 'Common',
                             alternate: 0,
                             dropped: 0,
                             fallback: 0,
@@ -1969,6 +1976,7 @@ module.exports = {
                     },
                     aaaaPools: {
                         '/Common/ts_aaaa_pool': {
+                            tenant: 'Common',
                             alternate: 0,
                             dropped: 0,
                             fallback: 0,
@@ -2036,6 +2044,7 @@ module.exports = {
                     },
                     cnamePools: {
                         '/Common/ts_cname_pool': {
+                            tenant: 'Common',
                             alternate: 0,
                             dropped: 0,
                             fallback: 0,
@@ -2046,7 +2055,7 @@ module.exports = {
                             availabilityState: 'offline',
                             enabledState: 'enabled',
                             'status.statusReason': 'No enabled pool members available',
-                            name: 'ts_cname_pool',
+                            name: '/Common/ts_cname_pool',
                             partition: 'Common',
                             alternateMode: 'round-robin',
                             dynamicRatio: 'disabled',
@@ -2084,6 +2093,7 @@ module.exports = {
                     },
                     mxPools: {
                         '/Common/ts_mx_pool': {
+                            tenant: 'Common',
                             alternate: 0,
                             dropped: 0,
                             fallback: 0,
@@ -2132,6 +2142,7 @@ module.exports = {
                     },
                     naptrPools: {
                         '/Common/ts_naptr_pool': {
+                            tenant: 'Common',
                             alternate: 0,
                             dropped: 0,
                             fallback: 0,
@@ -2180,6 +2191,7 @@ module.exports = {
                     },
                     srvPools: {
                         '/Common/ts_srv_pool': {
+                            tenant: 'Common',
                             alternate: 0,
                             dropped: 0,
                             fallback: 0,
@@ -2636,6 +2648,7 @@ module.exports = {
                 expectedData: {
                     aPools: {
                         '/Common/ts_a_pool': {
+                            tenant: 'Common',
                             alternate: 0,
                             dropped: 0,
                             fallback: 0,
@@ -2679,6 +2692,7 @@ module.exports = {
                     },
                     aaaaPools: {
                         '/Common/ts_aaaa_pool': {
+                            tenant: 'Common',
                             alternate: 0,
                             dropped: 0,
                             fallback: 0,
@@ -2722,6 +2736,7 @@ module.exports = {
                     },
                     cnamePools: {
                         '/Common/ts_cname_pool': {
+                            tenant: 'Common',
                             alternate: 0,
                             dropped: 0,
                             fallback: 0,
@@ -2732,7 +2747,7 @@ module.exports = {
                             availabilityState: 'offline',
                             enabledState: 'enabled',
                             'status.statusReason': 'No enabled pool members available',
-                            name: 'ts_cname_pool',
+                            name: '/Common/ts_cname_pool',
                             partition: 'Common',
                             alternateMode: 'round-robin',
                             dynamicRatio: 'disabled',
@@ -2757,6 +2772,7 @@ module.exports = {
                     },
                     mxPools: {
                         '/Common/ts_mx_pool': {
+                            tenant: 'Common',
                             alternate: 0,
                             dropped: 0,
                             fallback: 0,
@@ -2792,6 +2808,7 @@ module.exports = {
                     },
                     naptrPools: {
                         '/Common/ts_naptr_pool': {
+                            tenant: 'Common',
                             alternate: 0,
                             dropped: 0,
                             fallback: 0,
@@ -2827,6 +2844,7 @@ module.exports = {
                     },
                     srvPools: {
                         '/Common/ts_srv_pool': {
+                            tenant: 'Common',
                             alternate: 0,
                             dropped: 0,
                             fallback: 0,
@@ -3088,7 +3106,7 @@ module.exports = {
                 contextToCollect: [],
                 expectedData: {
                     virtualServers: {
-                        '/Common/test_vs_0': {
+                        '/Common/app/test_vs_0': {
                             availabilityState: 'unknown',
                             'clientside.bitsIn': 0,
                             'clientside.bitsOut': 0,
@@ -3097,8 +3115,10 @@ module.exports = {
                             enabledState: 'enabled',
                             ipProtocol: 'tcp',
                             mask: '255.255.255.255',
-                            name: '/Common/test_vs_0',
-                            pool: '/Common/test_pool_0'
+                            name: '/Common/app/test_vs_0',
+                            pool: '/Common/test_pool_0',
+                            tenant: 'Common',
+                            application: 'app'
                         }
                     }
                 },
@@ -3111,8 +3131,8 @@ module.exports = {
                             items: [
                                 {
                                     name: 'test_vs_0',
-                                    fullPath: '/Common/test_vs_0',
-                                    selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test_vs_0?ver=14.1.0',
+                                    fullPath: '/Common/app/test_vs_0',
+                                    selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~app~test_vs_0?ver=14.1.0',
                                     ipProtocol: 'tcp',
                                     mask: '255.255.255.255',
                                     pool: '/Common/test_pool_0',
@@ -3124,15 +3144,15 @@ module.exports = {
                         }
                     },
                     {
-                        endpoint: '/mgmt/tm/ltm/virtual/~Common~test_vs_0/stats',
+                        endpoint: '/mgmt/tm/ltm/virtual/~Common~app~test_vs_0/stats',
                         response: {
                             kind: 'tm:ltm:virtual:virtualstats',
-                            selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test_vs_0/stats?ver=14.1.0',
+                            selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~app~test_vs_0/stats?ver=14.1.0',
                             entries: {
-                                'https://localhost/mgmt/tm/ltm/virtual/~Common~test_vs_0/stats': {
+                                'https://localhost/mgmt/tm/ltm/virtual/~Common~app~test_vs_0/stats': {
                                     nestedStats: {
                                         kind: 'tm:ltm:virtual:virtualstats',
-                                        selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test_vs_0/stats?ver=14.1.0',
+                                        selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~app~test_vs_0/stats?ver=14.1.0',
                                         entries: {
                                             'clientside.bitsIn': {
                                                 value: 0
@@ -3327,6 +3347,7 @@ module.exports = {
                 expectedData: {
                     pools: {
                         '/Common/test_pool_0': {
+                            tenant: 'Common',
                             activeMemberCnt: 0,
                             availabilityState: 'unknown',
                             curPriogrp: 0,
@@ -3654,6 +3675,7 @@ module.exports = {
                             },
                             invoked: 1,
                             name: '/Common/asm_auto_l7_policy__test_vs',
+                            tenant: 'Common',
                             succeeded: 1
                         }
                     }
@@ -3766,6 +3788,7 @@ module.exports = {
                             getReqs: 1,
                             maxKeepaliveReq: 1,
                             name: '/Common/http',
+                            tenant: 'Common',
                             numberReqs: 1,
                             postReqs: 0,
                             respGreaterThan2m: 0,
@@ -3979,7 +4002,8 @@ module.exports = {
                             recordsIn: 0,
                             recordsOut: 0,
                             sniRejects: 0,
-                            name: '/Common/clientssl'
+                            name: '/Common/clientssl',
+                            tenant: 'Common'
                         }
                     }
                 },
@@ -4416,6 +4440,7 @@ module.exports = {
                             'protocolUses.tlsv1_3': 0,
                             recordsIn: 0,
                             recordsOut: 0,
+                            tenant: 'Common',
                             name: '/Common/apm-default-serverssl'
                         }
                     }
@@ -4872,6 +4897,7 @@ module.exports = {
                             inUnknownProtos: 0,
                             outDiscards: 0,
                             outErrors: 0,
+                            tenant: 'Common',
                             name: '/Common/http-tunnel'
                         }
                     }
@@ -5004,6 +5030,7 @@ module.exports = {
                             lssTime: '2020-01-30T07:48:42.000Z',
                             timeSinceLastSync: '-',
                             name: '/Common/datasync-device-ts-big-inst.localhost.localdomain-dg',
+                            tenant: 'Common',
                             type: 'sync-only'
                         }
                     }
@@ -5129,6 +5156,7 @@ module.exports = {
                                     totalExecutions: 0
                                 }
                             },
+                            tenant: 'Common',
                             name: '/Common/_sys_APM_ExchangeSupport_OA_BasicAuth'
                         }
                     }

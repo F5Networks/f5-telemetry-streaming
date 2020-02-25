@@ -502,5 +502,23 @@ module.exports = {
             }
         }
         return data;
+    },
+
+    /**
+     * Get value by key
+     */
+    getValue(args) {
+        let data = args.data;
+        if (data && args.path) {
+            args.path.every((key) => {
+                data = data[key];
+                if (typeof data === 'undefined') {
+                    data = 'missing data';
+                    return false;
+                }
+                return true;
+            });
+        }
+        return data;
     }
 };

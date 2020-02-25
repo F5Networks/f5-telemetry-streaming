@@ -81,6 +81,10 @@ describe('properties.json', () => {
                             context: contextToCollect,
                             global: allProperties.global,
                             definitions: allProperties.definitions
+                        },
+                        tags: {
+                            tenant: '`T`',
+                            application: '`A`'
                         }
                     };
 
