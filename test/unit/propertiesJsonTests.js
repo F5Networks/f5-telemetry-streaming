@@ -82,9 +82,11 @@ describe('properties.json', () => {
                             global: allProperties.global,
                             definitions: allProperties.definitions
                         },
-                        tags: {
-                            tenant: '`T`',
-                            application: '`A`'
+                        dataOpts: {
+                            tags: {
+                                tenant: '`T`',
+                                application: '`A`'
+                            }
                         }
                     };
 
