@@ -39,19 +39,31 @@
         },
         "location": {
             "structure": { "parentKey": "system" },
-            "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::location",
+            "key": "/mgmt/tm/cm/device::items",
             "normalization": [
                 {
-                    "convertArrayToMap": { "keyName": "name" }
+                    "runFunctions": [{ "name": "normalizeMACAddress", "args": { "properties": ["baseMac"] } } ]
+                },
+                {
+                    "convertArrayToMap": { "keyName": "baseMac" }, "useCurrentData": true, "keepKey": true
+                },
+                {
+                    "runFunctions": [{ "name": "getValue", "args": { "path": ["{{ BASE_MAC_ADDR }}", "location" ] } } ]
                 }
             ]
         },
         "description": {
             "structure": { "parentKey": "system" },
-            "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::description",
+            "key": "/mgmt/tm/cm/device::items",
             "normalization": [
                 {
-                    "convertArrayToMap": { "keyName": "name" }
+                    "runFunctions": [{ "name": "normalizeMACAddress", "args": { "properties": ["baseMac"] } } ]
+                },
+                {
+                    "convertArrayToMap": { "keyName": "baseMac" }, "useCurrentData": true, "keepKey": true
+                },
+                {
+                    "runFunctions": [{ "name": "getValue", "args": { "path": ["{{ BASE_MAC_ADDR }}", "description" ] } } ]
                 }
             ]
         },

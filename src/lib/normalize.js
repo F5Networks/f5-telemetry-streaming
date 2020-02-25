@@ -567,11 +567,11 @@ module.exports = {
                         includeFirstEntry: (options.normalization.find(n => n.includeFirstEntry)
                             || {}).includeFirstEntry
                     };
-                    ret = this._reduceData(data, reduceDataOptions);
+                    ret = this._reduceData(norm.useCurrentData ? ret : data, reduceDataOptions);
                     setReduced = true;
 
                     // get data by key
-                    ret = options.key ? this._getDataByKey(ret, options.key) : ret;
+                    ret = options.key && !norm.keepKey ? this._getDataByKey(ret, options.key) : ret;
                 }
 
                 if (norm.filterKeys) {
