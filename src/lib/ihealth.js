@@ -17,8 +17,8 @@ const dataPipeline = require('./dataPipeline.js');
 const normalize = require('./normalize.js');
 const properties = require('./properties.json').ihealth;
 
-const SYSTEM_CLASS_NAME = constants.SYSTEM_CLASS_NAME;
-const IHEALTH_POLLER_CLASS_NAME = constants.IHEALTH_POLLER_CLASS_NAME;
+const SYSTEM_CLASS_NAME = constants.CONFIG_CLASSES.SYSTEM_CLASS_NAME;
+const IHEALTH_POLLER_CLASS_NAME = constants.CONFIG_CLASSES.IHEALTH_POLLER_CLASS_NAME;
 
 
 /** @module ihealth */

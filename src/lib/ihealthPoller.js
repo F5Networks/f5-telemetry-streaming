@@ -17,8 +17,8 @@ const ihUtil = require('./ihealthUtil.js');
 const persistentStorage = require('./persistentStorage.js').persistentStorage;
 const configWorker = require('./config.js');
 
-const SYSTEM_CLASS_NAME = constants.SYSTEM_CLASS_NAME;
-const IHEALTH_POLLER_CLASS_NAME = constants.IHEALTH_POLLER_CLASS_NAME;
+const SYSTEM_CLASS_NAME = constants.CONFIG_CLASSES.SYSTEM_CLASS_NAME;
+const IHEALTH_POLLER_CLASS_NAME = constants.CONFIG_CLASSES.IHEALTH_POLLER_CLASS_NAME;
 const PERSISTENT_STORAGE_KEY = 'ihealth';
 
 const IHEALTH_POLL_MAX_TIMEOUT = 60 * 60 * 1000; // 1 h.

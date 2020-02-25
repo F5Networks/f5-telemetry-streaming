@@ -1,0 +1,38 @@
+{
+    "class": "Telemetry",
+    "controls": {
+        "class": "Controls",
+        "logLevel": "debug",
+        "debug": true
+    },
+    "My_Endpoints": {
+    	"class": "Telemetry_Endpoints",
+        "basePath": "mgmt/tm/ltm/profile",
+        "items": {
+            "custom_ipOther": {
+                "path": "ipother/stats"
+            },
+            "custom_dns": {
+                "path": "dns/stats"
+            }
+        }
+    },
+    "My_System": {
+        "class": "Telemetry_System",
+        "systemPoller": [
+            {
+                "interval": 30,
+                "endpointList": "My_Endpoints"
+            },
+            {
+                "interval": 12000,
+                "endpointList": [
+                    {
+                        "name": "custom_provisioning",
+                        "path": "/mgmt/tm/sys/provision"
+                    }
+                ]
+            }
+        ]
+    }
+}

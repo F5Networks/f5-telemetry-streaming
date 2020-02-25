@@ -29,14 +29,6 @@
                         }
                     ]
                 },
-                "interval": {
-                    "title": "Collection interval (in seconds)",
-                    "description": "" ,
-                    "type": "integer",
-                    "minimum": 60,
-                    "maximum": 6000,
-                    "default": 300
-                },
                 "tag": {
                     "$comment": "Deprecated! Use actions with a setTag action.",
                     "allOf": [
@@ -64,8 +56,118 @@
                             }
                         }
                     ]
+                },
+                "endpointList": {
+                    "title": "Endpoint List",
+                    "description": "List of endpoints to use in data collection",
+                    "oneOf": [
+                        {
+                            "type": "array",
+                            "items": {
+                                "oneOf": [
+                                    {
+                                        "title": "Telemetry_Endpoints Name",
+                                        "description": "Name of the Telemetry_Endpoints object",
+                                        "type": "string",
+                                        "declarationClass": "Telemetry_Endpoints",
+                                        "minLength": 1
+                                    },
+                                    {
+                                        "title": "Telemetry_Endpoints Name and Item Key",
+                                        "description": "Name of the Telemetry_Endpoints object and the endpoint item key, e.g endpointsA/item1",
+                                        "type": "string",
+                                        "declarationClassProp": "Telemetry_Endpoints/items",
+                                        "minLength": 1
+                                    },
+                                    {
+                                        "if": { "required": [ "items" ]},
+                                        "then": {
+                                            "allOf": [
+                                                { "$ref": "endpoints_schema.json#/definitions/telemetryEndpoints" },
+                                                {
+                                                    "properties": {
+                                                        "enable": {},
+                                                        "basePath": {},
+                                                        "items": {},
+                                                        "class": {}
+                                                    },
+                                                    "additionalProperties": false
+                                                }
+                                            ]
+                                        },
+                                        "else": {
+                                            "allOf": [
+                                                { "$ref": "endpoints_schema.json#/definitions/telemetryEndpoint" },
+                                                {
+                                                    "properties": {
+                                                        "enable": {},
+                                                        "name": {},
+                                                        "path": {}
+                                                    },
+                                                    "required": [ "name", "path" ],
+                                                    "additionalProperties": false
+                                                }
+                                            ]
+                                        }
+                                    }
+
+                                ]
+                            },
+                            "minItems": 1
+                        },
+                        {
+                            "type": "string",
+                            "declarationClass": "Telemetry_Endpoints",
+                            "minLength": 1
+                        },
+                        {
+                            "allOf": [
+                                {
+                                    "properties": {
+                                        "enable": {},
+                                        "basePath": {},
+                                        "items": {
+                                            "minProperties": 1
+                                        }
+                                    },
+                                    "additionalProperties": false
+                                },
+                                {
+                                    "$ref": "endpoints_schema.json#/definitions/telemetryEndpoints"
+                                }
+                            ]
+                        }
+                    ]
                 }
-            }
+            },
+            "allOf": [
+                {
+                    "if": { "required": [ "endpointList" ] },
+                    "then": {
+                        "properties": {
+                            "interval": {
+                                "title": "Collection interval (in seconds)",
+                                "description": "If endpointList is specified, minimum=1. Without endpointList, minimum=60 and maximum=60000" ,
+                                "type": "integer",
+                                "minimum": 1,
+                                "default": 300
+                            }
+                        }
+                    },
+                    "else": {
+                        "properties":{
+                            "interval": {
+                                "title": "Collection interval (in seconds)",
+                                "description": "If endpointList is specified, minimum=1. Without endpointList, minimum=60 and maximum=60000" ,
+                                "type": "integer",
+                                "default": 300,
+                                "minimum": 60,
+                                "maximum": 6000
+                            }
+                        }
+                    }
+                }
+            ]
         }
     },
     "allOf": [
@@ -142,7 +244,8 @@
                             "enableHostConnectivityCheck": {},
                             "username": {},
                             "passphrase": {},
-                            "actions": {}
+                            "actions": {},
+                            "endpointList": {}
                         },
                         "additionalProperties": false
                     },

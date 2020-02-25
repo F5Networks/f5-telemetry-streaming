@@ -30,7 +30,7 @@ describe('System Stats', () => {
     });
 
     describe('.processData', () => {
-        const sysStats = new SystemStats({}, {});
+        const sysStats = new SystemStats();
 
         it('should skip normalization', () => {
             const property = {
@@ -143,7 +143,7 @@ describe('System Stats', () => {
     describe('._filterStats', () => {
         systemStatsTestsData._filterStats.forEach((testConf) => {
             util.getCallableIt(testConf)(testConf.name, () => {
-                const systemStats = new SystemStats({}, { noTmstats: true, actions: testConf.actions });
+                const systemStats = new SystemStats({ dataOpts: { noTMstats: true, actions: testConf.actions } });
                 systemStats._filterStats();
                 const statsKeys = Object.keys(systemStats.stats);
 
@@ -190,7 +190,7 @@ describe('System Stats', () => {
 
     describe('._processProperty()', () => {
         it('should return empty promise when noTmstats is true', () => {
-            const systemStats = new SystemStats({}, { noTmstats: true });
+            const systemStats = new SystemStats({ dataOpts: { noTMStats: true } });
             const property = {
                 structure: {
                     parentKey: 'tmstats'
@@ -203,7 +203,7 @@ describe('System Stats', () => {
         });
 
         it('should return empty promise when disabled', () => {
-            const systemStats = new SystemStats({}, { noTmstats: true });
+            const systemStats = new SystemStats({ dataOpts: { noTMStats: true } });
             const property = {
                 disabled: true
             };
@@ -214,7 +214,7 @@ describe('System Stats', () => {
         });
 
         it('should add theKey to collectedData', () => {
-            const systemStats = new SystemStats({}, {});
+            const systemStats = new SystemStats();
             const property = {
                 structure: {
                     folder: true
@@ -227,7 +227,7 @@ describe('System Stats', () => {
         });
 
         it('should add to collectedData', () => {
-            const systemStats = new SystemStats({}, {});
+            const systemStats = new SystemStats();
             const property = {
                 key: 'theKey'
             };

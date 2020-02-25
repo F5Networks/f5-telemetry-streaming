@@ -1,147 +1,147 @@
 {
     "endpoints": [
         {
-            "endpoint": "/mgmt/tm/sys/global-settings"
+            "path": "/mgmt/tm/sys/global-settings"
         },
         {
-            "endpoint": "/mgmt/tm/cm/device"
+            "path": "/mgmt/tm/cm/device"
         },
         {
-            "endpoint": "/mgmt/tm/sys/hardware"
+            "path": "/mgmt/tm/sys/hardware"
         },
         {
-            "endpoint": "/mgmt/tm/sys/version"
+            "path": "/mgmt/tm/sys/version"
         },
         {
-            "endpoint": "/mgmt/tm/sys/ready"
+            "path": "/mgmt/tm/sys/ready"
         },
         {
-            "endpoint": "/mgmt/tm/cm/sync-status"
+            "path": "/mgmt/tm/cm/sync-status"
         },
         {
-            "endpoint": "/mgmt/tm/cm/failover-status"
+            "path": "/mgmt/tm/cm/failover-status"
         },
         {
-            "endpoint": "/mgmt/tm/sys/clock"
+            "path": "/mgmt/tm/sys/clock"
         },
         {
-            "endpoint": "/mgmt/tm/sys/host-info"
+            "path": "/mgmt/tm/sys/host-info"
         },
         {
-            "endpoint": "/mgmt/tm/sys/memory"
+            "path": "/mgmt/tm/sys/memory"
         },
         {
-            "endpoint": "/mgmt/tm/sys/management-ip"
+            "path": "/mgmt/tm/sys/management-ip"
         },
         {
             "name": "provisioning",
-            "endpoint": "/mgmt/tm/sys/provision"
+            "path": "/mgmt/tm/sys/provision"
         },
         {
             "name": "networkInterfaces",
-            "endpoint": "/mgmt/tm/net/interface/stats"
+            "path": "/mgmt/tm/net/interface/stats"
         },
         {
             "name": "networkTunnels",
-            "endpoint": "/mgmt/tm/net/tunnels/tunnel/stats"
+            "path": "/mgmt/tm/net/tunnels/tunnel/stats"
         },
         {
             "name": "tmmInfo",
-            "endpoint": "/mgmt/tm/sys/tmm-info"
+            "path": "/mgmt/tm/sys/tmm-info"
         },
         {
             "name": "tmmTraffic",
-            "endpoint": "/mgmt/tm/sys/tmm-traffic"
+            "path": "/mgmt/tm/sys/tmm-traffic"
         },
         {
             "name": "aWideIps",
-            "endpoint": "/mgmt/tm/gtm/wideip/a",
+            "path": "/mgmt/tm/gtm/wideip/a",
             "includeStats": true
         },
         {
             "name": "aaaaWideIps",
-            "endpoint": "/mgmt/tm/gtm/wideip/aaaa",
+            "path": "/mgmt/tm/gtm/wideip/aaaa",
             "includeStats": true
         },
         {
             "name": "cnameWideIps",
-            "endpoint": "/mgmt/tm/gtm/wideip/cname",
+            "path": "/mgmt/tm/gtm/wideip/cname",
             "includeStats": true
         },
         {
             "name": "mxWideIps",
-            "endpoint": "/mgmt/tm/gtm/wideip/mx",
+            "path": "/mgmt/tm/gtm/wideip/mx",
             "includeStats": true
         },
         {
             "name": "naptrWideIps",
-            "endpoint": "/mgmt/tm/gtm/wideip/naptr",
+            "path": "/mgmt/tm/gtm/wideip/naptr",
             "includeStats": true
         },
         {
             "name": "srvWideIps",
-            "endpoint": "/mgmt/tm/gtm/wideip/srv",
+            "path": "/mgmt/tm/gtm/wideip/srv",
             "includeStats": true
         },
         {
             "name": "aPools",
-            "endpoint": "/mgmt/tm/gtm/pool/a",
+            "path": "/mgmt/tm/gtm/pool/a",
             "includeStats": true,
             "expandReferences": { "membersReference": { "includeStats": true } }
         },
         {
             "name": "aaaaPools",
-            "endpoint": "/mgmt/tm/gtm/pool/aaaa",
+            "path": "/mgmt/tm/gtm/pool/aaaa",
             "includeStats": true,
             "expandReferences": { "membersReference": { "includeStats": true } }
         },
         {
             "name": "cnamePools",
-            "endpoint": "/mgmt/tm/gtm/pool/cname",
+            "path": "/mgmt/tm/gtm/pool/cname",
             "includeStats": true,
             "expandReferences": { "membersReference": { "includeStats": true } }
         },
         {
             "name": "mxPools",
-            "endpoint": "/mgmt/tm/gtm/pool/mx",
+            "path": "/mgmt/tm/gtm/pool/mx",
             "includeStats": true,
             "expandReferences": { "membersReference": { "includeStats": true } }
         },
         {
             "name": "naptrPools",
-            "endpoint": "/mgmt/tm/gtm/pool/naptr",
+            "path": "/mgmt/tm/gtm/pool/naptr",
             "includeStats": true,
             "expandReferences": { "membersReference": { "includeStats": true } }
         },
         {
             "name": "srvPools",
-            "endpoint": "/mgmt/tm/gtm/pool/srv",
+            "path": "/mgmt/tm/gtm/pool/srv",
             "includeStats": true,
             "expandReferences": { "membersReference": { "includeStats": true } }
         },
         {
             "name": "virtualServers",
-            "endpoint": "/mgmt/tm/ltm/virtual",
+            "path": "/mgmt/tm/ltm/virtual",
             "includeStats": true,
             "endpointFields": [ "name", "fullPath", "selfLink", "appService", "ipProtocol", "mask", "pool" ]
         },
         {
             "name": "pools",
-            "endpoint": "/mgmt/tm/ltm/pool",
+            "path": "/mgmt/tm/ltm/pool",
             "includeStats": true,
             "expandReferences": { "membersReference": { "endpointSuffix": "/stats" } }
         },
         {
             "name": "ltmPolicies",
-            "endpoint": "/mgmt/tm/ltm/policy/stats"
+            "path": "/mgmt/tm/ltm/policy/stats"
         },
         {
             "name": "sslCerts",
-            "endpoint": "/mgmt/tm/sys/file/ssl-cert"
+            "path": "/mgmt/tm/sys/file/ssl-cert"
         },
         {
             "name": "diskStorage",
-            "endpoint": "/mgmt/tm/util/bash",
+            "path": "/mgmt/tm/util/bash",
             "ignoreCached": true,
             "body": {
                 "command": "run",
@@ -150,7 +150,7 @@
         },
         {
             "name": "diskLatency",
-            "endpoint": "/mgmt/tm/util/bash",
+            "path": "/mgmt/tm/util/bash",
             "ignoreCached": true,
             "body": {
                 "command": "run",
@@ -159,24 +159,24 @@
         },
         {
             "name": "httpProfiles",
-            "endpoint": "/mgmt/tm/ltm/profile/http/stats"
+            "path": "/mgmt/tm/ltm/profile/http/stats"
         },
         {
             "name": "clientSslProfiles",
-            "endpoint": "/mgmt/tm/ltm/profile/client-ssl/stats"
+            "path": "/mgmt/tm/ltm/profile/client-ssl/stats"
         },
         {
             "name": "serverSslProfiles",
-            "endpoint": "/mgmt/tm/ltm/profile/server-ssl/stats"
+            "path": "/mgmt/tm/ltm/profile/server-ssl/stats"
         },
         {
             "name": "deviceGroups",
-            "endpoint": "/mgmt/tm/cm/device-group",
+            "path": "/mgmt/tm/cm/device-group",
             "includeStats": true
         },
         {
             "name": "asmQuery",
-            "endpoint": "/mgmt/tm/util/bash",
+            "path": "/mgmt/tm/util/bash",
             "ignoreCached": true,
             "body": {
                 "command": "run",
@@ -185,7 +185,7 @@
         },
         {
             "name": "apmState",
-            "endpoint": "/mgmt/tm/util/bash",
+            "path": "/mgmt/tm/util/bash",
             "ignoreCached": true,
             "body": {
                 "command": "run",
@@ -194,23 +194,23 @@
         },
         {
             "name": "firewallCurrentState",
-            "endpoint": "/mgmt/tm/security/firewall/current-state/stats"
+            "path": "/mgmt/tm/security/firewall/current-state/stats"
         },
         {
             "name": "ltmConfigTime",
-            "endpoint": "/mgmt/tm/sys/db/ltm.configtime"
+            "path": "/mgmt/tm/sys/db/ltm.configtime"
         },
         {
             "name": "gtmConfigTime",
-            "endpoint": "/mgmt/tm/sys/db/gtm.configtime"
+            "path": "/mgmt/tm/sys/db/gtm.configtime"
         },
         {
             "name": "iRules",
-            "endpoint": "/mgmt/tm/ltm/rule/stats"
+            "path": "/mgmt/tm/ltm/rule/stats"
         },
         {
             "name": "tmctl",
-            "endpoint": "/mgmt/tm/util/bash",
+            "path": "/mgmt/tm/util/bash",
             "ignoreCached": true,
             "body": {
                 "command": "run",
@@ -219,7 +219,7 @@
         },
         {
             "name": "deviceInfo",
-            "endpoint": "/mgmt/shared/identified-devices/config/device-info"
+            "path": "/mgmt/shared/identified-devices/config/device-info"
         }
     ]
 }

@@ -17,7 +17,7 @@ const configWorker = require('./config.js');
 const DataFilter = require('./dataFilter.js').DataFilter;
 
 const CONSUMERS_DIR = constants.CONSUMERS_DIR;
-const CLASS_NAME = constants.CONSUMERS_CLASS_NAME;
+const CLASS_NAME = constants.CONFIG_CLASSES.CONSUMERS_CLASS_NAME;
 let CONSUMERS = null;
 
 /**
