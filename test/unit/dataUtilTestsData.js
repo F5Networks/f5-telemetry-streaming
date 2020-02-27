@@ -1264,7 +1264,7 @@ module.exports = {
                     }
                 }
             },
-            expectedCtx: ['virtualServers', 0, 'vs1', 'ip']
+            expectedCtx: ['virtualServers', '0', 'vs1', 'ip']
         },
         // TEST RELATED DATA STARTS HERE
         {

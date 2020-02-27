@@ -8,11 +8,19 @@
 
 'use strict';
 
-const assert = require('assert');
-const fileLogger = require('../winstonLogger.js').logger;
-const constants = require('../../src/lib/constants.js');
-const datetimeUtil = require('../../src/lib/datetimeUtil.js');
+/* eslint-disable import/order */
 
+require('./shared/restoreCache')();
+
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+
+const constants = require('../../src/lib/constants');
+const datetimeUtil = require('../../src/lib/datetimeUtil');
+const fileLogger = require('../winstonLogger').logger;
+
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
 describe('Date and Time utils', () => {
     describe('getLastDayOfMonth', () => {

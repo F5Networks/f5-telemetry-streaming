@@ -8,12 +8,16 @@
 
 'use strict';
 
+/* eslint-disable import/order */
+
+require('./shared/restoreCache')();
+
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const util = require('./shared/util');
-const persistentStorage = require('../../src/lib/persistentStorage.js');
+const persistentStorage = require('../../src/lib/persistentStorage');
+const testUtil = require('./shared/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -210,7 +214,7 @@ describe('Persistent Storage', () => {
                 }
             };
             sinon.stub(restWorker, 'loadState').callsFake((first, cb) => {
-                cb(null, util.deepCopy(baseState));
+                cb(null, testUtil.deepCopy(baseState));
             });
             return assert.becomes(persistentStorageInst.load(), baseState);
         });
@@ -222,7 +226,7 @@ describe('Persistent Storage', () => {
                 }
             };
             sinon.stub(restWorker, 'loadState').callsFake((first, cb) => {
-                cb(null, util.deepCopy(baseState));
+                cb(null, testUtil.deepCopy(baseState));
             });
             return assert.isFulfilled(
                 persistentStorageInst.load()

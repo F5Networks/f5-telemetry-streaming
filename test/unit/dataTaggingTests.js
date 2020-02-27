@@ -8,17 +8,24 @@
 
 'use strict';
 
-const assert = require('assert');
+/* eslint-disable import/order */
 
-const util = require('./shared/util');
+require('./shared/restoreCache')();
+
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+
 const dataTagging = require('../../src/lib/dataTagging');
-const dataTaggingTestsData = require('./dataTaggingTestsData.js');
+const dataTaggingTestsData = require('./dataTaggingTestsData');
+const testUtil = require('./shared/util');
 
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
 describe('Data Tagging', () => {
     describe('handleAction', () => {
         dataTaggingTestsData.handleAction.forEach((testConf) => {
-            util.getCallableIt(testConf)(testConf.name, () => {
+            testUtil.getCallableIt(testConf)(testConf.name, () => {
                 const deviceCtx = testConf.deviceCtx || {
                     deviceVersion: '13.0.0.0',
                     provisioning: { ltm: { name: 'ltm', level: 'nominal' } }

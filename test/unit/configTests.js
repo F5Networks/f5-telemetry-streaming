@@ -8,40 +8,28 @@
 
 'use strict';
 
-const sinon = require('sinon');
+/* eslint-disable import/order */
+
+require('./shared/restoreCache')();
+
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
+const sinon = require('sinon');
 const TeemDevice = require('@f5devcentral/f5-teem').Device;
+
+const config = require('../../src/lib/config');
+const constants = require('../../src/lib/constants');
+const deviceUtil = require('../../src/lib/deviceUtil');
+const psModule = require('../../src/lib/persistentStorage');
+const util = require('../../src/lib/util');
+const MockRestOperation = require('./shared/util').MockRestOperation;
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
-const constants = require('../../src/lib/constants.js');
-
-/* eslint-disable global-require */
-
-function MockRestOperation(opts) {
-    this.method = opts.method || 'GET';
-    this.body = opts.body;
-    this.statusCode = null;
-}
-MockRestOperation.prototype.getMethod = function () { return this.method; };
-MockRestOperation.prototype.setMethod = function (method) { this.method = method; };
-MockRestOperation.prototype.getBody = function () { return this.body; };
-MockRestOperation.prototype.setBody = function (body) { this.body = body; };
-MockRestOperation.prototype.getStatusCode = function () { return this.statusCode; };
-MockRestOperation.prototype.setStatusCode = function (code) { this.statusCode = code; };
-MockRestOperation.prototype.complete = function () { };
-
-
 describe('Config', () => {
     let persistentStorage;
-    let config;
-    let util;
-    let deviceUtil;
-
-    let configValidator;
-    let formatConfig;
+    let restStorage;
 
     const baseState = {
         _data_: {
@@ -53,49 +41,20 @@ describe('Config', () => {
     };
 
     before(() => {
-        const psModule = require('../../src/lib/persistentStorage.js');
-        config = require('../../src/lib/config.js');
-        util = require('../../src/lib/util.js');
-        deviceUtil = require('../../src/lib/deviceUtil.js');
-
-        const restWorker = {
-            loadState: (cb) => { cb(null, baseState); },
-            saveState: (first, state, cb) => { cb(null); }
-        };
         persistentStorage = psModule.persistentStorage;
-        persistentStorage.storage = new psModule.RestStorage(restWorker);
-
-        configValidator = config.validator;
-
-        formatConfig = util.formatConfig;
-    });
-    beforeEach(() => {
-        persistentStorage.storage._cache = JSON.parse(JSON.stringify(baseState));
-    });
-    afterEach(() => {
-        config.validator = configValidator;
-        util.formatConfig = formatConfig;
-        sinon.restore();
-    });
-    after(() => {
-        Object.keys(require.cache).forEach((key) => {
-            delete require.cache[key];
+        restStorage = new psModule.RestStorage({
+            loadState: (first, cb) => { cb(null, baseState); },
+            saveState: (first, state, cb) => { cb(null); }
         });
     });
 
-    it('should validate basic declaration', () => {
-        const obj = {
-            class: 'Telemetry'
-        };
-        return config.validate(obj);
+    beforeEach(() => {
+        sinon.stub(persistentStorage, 'storage').value(restStorage);
+        restStorage._cache = JSON.parse(JSON.stringify(baseState));
     });
 
-    it('should throw error in validate function', () => {
-        const obj = {
-            class: 'Telemetry'
-        };
-        config.validator = null;
-        return assert.isRejected(config.validate(obj), 'Validator is not available');
+    afterEach(() => {
+        sinon.restore();
     });
 
     it('should compile schema', () => {
@@ -103,157 +62,168 @@ describe('Config', () => {
         assert.strictEqual(typeof compiledSchema, 'function');
     });
 
-    it('should validate and apply basic declaration', () => {
-        const obj = {
-            class: 'Telemetry'
-        };
-        const validatedObj = {
-            class: 'Telemetry',
-            schemaVersion: constants.VERSION
-        };
-        return config.validateAndApply(obj)
-            .then((data) => {
-                assert.deepEqual(data, validatedObj);
-            })
-            .catch(err => Promise.reject(err));
-    });
-
-    it('should process client POST request', () => {
-        const mockRestOperation = new MockRestOperation({ method: 'POST' });
-        mockRestOperation.setBody({
-            class: 'Telemetry'
+    describe('.validate()', () => {
+        it('should validate basic declaration', () => {
+            const obj = {
+                class: 'Telemetry'
+            };
+            return assert.isFulfilled(config.validate(obj));
         });
 
-        const actualResponseBody = {
-            message: 'success',
-            declaration: {
+        it('should throw error in validate function', () => {
+            const obj = {
+                class: 'Telemetry'
+            };
+            sinon.stub(config, 'validator').value(null);
+            return assert.isRejected(config.validate(obj), 'Validator is not available');
+        });
+    });
+
+    describe('.validateAndApply()', () => {
+        it('should validate and apply basic declaration', () => {
+            const obj = {
+                class: 'Telemetry'
+            };
+            const validatedObj = {
                 class: 'Telemetry',
                 schemaVersion: constants.VERSION
-            }
-        };
-        return config.processClientRequest(mockRestOperation)
-            .then(() => {
-                assert.strictEqual(mockRestOperation.statusCode, 200);
-                assert.deepEqual(mockRestOperation.body, actualResponseBody);
-            })
-            .catch(err => Promise.reject(err));
+            };
+            return assert.becomes(config.validateAndApply(obj), validatedObj);
+        });
     });
 
-    it('should process client GET request - no configuration', () => {
-        const actualResponseBody = {
-            message: 'success',
-            declaration: {}
-        };
-
-        const mockRestOperation = new MockRestOperation({ method: 'GET' });
-        mockRestOperation.setBody({});
-
-        return config.processClientRequest(mockRestOperation)
-            .then(() => {
-                assert.strictEqual(mockRestOperation.statusCode, 200);
-                assert.deepEqual(mockRestOperation.body, actualResponseBody);
+    describe('.processClientRequest()', () => {
+        it('should process client POST request', () => {
+            const mockRestOperation = new MockRestOperation({ method: 'POST' });
+            mockRestOperation.setBody({
+                class: 'Telemetry'
             });
-    });
-
-    it('should process client GET request - existing config', () => {
-        const mockRestOperationPOST = new MockRestOperation({ method: 'POST' });
-        mockRestOperationPOST.setBody({
-            class: 'Telemetry'
+            const actualResponseBody = {
+                message: 'success',
+                declaration: {
+                    class: 'Telemetry',
+                    schemaVersion: constants.VERSION
+                }
+            };
+            return assert.isFulfilled(config.processClientRequest(mockRestOperation)
+                .then(() => {
+                    assert.strictEqual(mockRestOperation.statusCode, 200);
+                    assert.deepStrictEqual(mockRestOperation.body, actualResponseBody);
+                }));
         });
 
-        const mockRestOperationGET = new MockRestOperation({ method: 'GET' });
-        mockRestOperationGET.setBody({});
+        it('should process client GET request - no configuration', () => {
+            const actualResponseBody = {
+                message: 'success',
+                declaration: {}
+            };
+            const mockRestOperation = new MockRestOperation({ method: 'GET' });
+            mockRestOperation.setBody({});
 
-        return config.processClientRequest(mockRestOperationPOST)
-            .then(() => {
-                assert.strictEqual(mockRestOperationPOST.statusCode, 200);
-                return config.processClientRequest(mockRestOperationGET);
-            })
-            .then(() => {
-                assert.strictEqual(mockRestOperationGET.statusCode, 200);
-                assert.deepEqual(mockRestOperationGET.body, mockRestOperationPOST.body);
-            });
-    });
-
-    it('should fail to validate client request', () => {
-        const mockRestOperation = new MockRestOperation({ method: 'POST' });
-        mockRestOperation.setBody({
-            class: 'foo'
-        });
-        return config.processClientRequest(mockRestOperation)
-            .then(() => {
-                assert.strictEqual(mockRestOperation.statusCode, 422);
-                assert.strictEqual(mockRestOperation.body.message, 'Unprocessable entity');
-            });
-    });
-
-    it('should fail to process client request', () => {
-        const mockRestOperation = new MockRestOperation({ method: 'POST' });
-        mockRestOperation.setBody({
-            class: 'Telemetry'
+            return assert.isFulfilled(config.processClientRequest(mockRestOperation)
+                .then(() => {
+                    assert.strictEqual(mockRestOperation.statusCode, 200);
+                    assert.deepStrictEqual(mockRestOperation.body, actualResponseBody);
+                }));
         });
 
-        util.formatConfig = () => { throw new Error('foo'); };
-
-        return config.processClientRequest(mockRestOperation)
-            .then(() => {
-                assert.strictEqual(mockRestOperation.statusCode, 500);
-                assert.strictEqual(mockRestOperation.body.message, 'Internal Server Error');
+        it('should process client GET request - existing config', () => {
+            const mockRestOperationPOST = new MockRestOperation({ method: 'POST' });
+            mockRestOperationPOST.setBody({
+                class: 'Telemetry'
             });
-    });
+            const mockRestOperationGET = new MockRestOperation({ method: 'GET' });
+            mockRestOperationGET.setBody({});
 
-    it('should send TEEM report', (done) => {
-        const decl = {
-            class: 'Telemetry',
-            schemaVersion: '1.6.0'
-        };
-        const assetInfo = {
-            name: 'Telemetry Streaming',
-            version: '1.6.0'
-        };
-        const teemDevice = new TeemDevice(assetInfo);
-
-        sinon.stub(teemDevice, 'report').callsFake((type, version, declaration) => {
-            assert.deepEqual(declaration, decl);
-            done();
+            return assert.isFulfilled(config.processClientRequest(mockRestOperationPOST)
+                .then(() => {
+                    assert.strictEqual(mockRestOperationPOST.statusCode, 200);
+                    return config.processClientRequest(mockRestOperationGET);
+                })
+                .then(() => {
+                    assert.strictEqual(mockRestOperationGET.statusCode, 200);
+                    assert.deepStrictEqual(mockRestOperationGET.body, mockRestOperationPOST.body);
+                }));
         });
-        const restOperation = new MockRestOperation({ method: 'POST' });
-        restOperation.setBody(decl);
-        config.teemDevice = teemDevice;
-        config.processClientRequest(restOperation);
-    });
 
-    it('should still receive 200 response if f5-teem fails', () => {
-        const decl = {
-            class: 'Telemetry',
-            schemaVersion: '1.6.0'
-        };
-        const assetInfo = {
-            name: 'Telemetry Streaming',
-            version: '1.6.0'
-        };
-        const teemDevice = new TeemDevice(assetInfo);
-
-        sinon.stub(teemDevice, 'report').rejects(new Error('f5-teem failed'));
-        const restOperation = new MockRestOperation({ method: 'POST' });
-        restOperation.setBody(decl);
-        config.teemDevice = teemDevice;
-        return config.processClientRequest(restOperation)
-            .then(() => {
-                assert.equal(restOperation.statusCode, 200);
-                assert.equal(restOperation.body.message, 'success');
-                assert.deepEqual(restOperation.body.declaration, decl);
+        it('should fail to validate client request', () => {
+            const mockRestOperation = new MockRestOperation({ method: 'POST' });
+            mockRestOperation.setBody({
+                class: 'foo'
             });
+            return assert.isFulfilled(config.processClientRequest(mockRestOperation)
+                .then(() => {
+                    assert.strictEqual(mockRestOperation.statusCode, 422);
+                    assert.strictEqual(mockRestOperation.body.message, 'Unprocessable entity');
+                }));
+        });
+
+        it('should fail to process client request', () => {
+            sinon.stub(util, 'formatConfig').throws(new Error('foo'));
+            const mockRestOperation = new MockRestOperation({ method: 'POST' });
+            mockRestOperation.setBody({
+                class: 'Telemetry'
+            });
+            return assert.isFulfilled(config.processClientRequest(mockRestOperation)
+                .then(() => {
+                    assert.strictEqual(mockRestOperation.statusCode, 500);
+                    assert.strictEqual(mockRestOperation.body.message, 'Internal Server Error');
+                }));
+        });
+
+        it('should send TEEM report', (done) => {
+            const decl = {
+                class: 'Telemetry',
+                schemaVersion: '1.6.0'
+            };
+            const assetInfo = {
+                name: 'Telemetry Streaming',
+                version: '1.6.0'
+            };
+            const teemDevice = new TeemDevice(assetInfo);
+            sinon.stub(teemDevice, 'report').callsFake((type, version, declaration) => {
+                assert.deepStrictEqual(declaration, decl);
+                done();
+            });
+
+            const restOperation = new MockRestOperation({ method: 'POST' });
+            restOperation.setBody(decl);
+            config.teemDevice = teemDevice;
+            config.processClientRequest(restOperation);
+        });
+
+        it('should still receive 200 response if f5-teem fails', () => {
+            const decl = {
+                class: 'Telemetry',
+                schemaVersion: '1.6.0'
+            };
+            const assetInfo = {
+                name: 'Telemetry Streaming',
+                version: '1.6.0'
+            };
+            const teemDevice = new TeemDevice(assetInfo);
+            sinon.stub(teemDevice, 'report').rejects(new Error('f5-teem failed'));
+
+            const restOperation = new MockRestOperation({ method: 'POST' });
+            restOperation.setBody(decl);
+            config.teemDevice = teemDevice;
+            return assert.isFulfilled(config.processClientRequest(restOperation)
+                .then(() => {
+                    assert.equal(restOperation.statusCode, 200);
+                    assert.equal(restOperation.body.message, 'success');
+                    assert.deepStrictEqual(restOperation.body.declaration, decl);
+                }));
+        });
     });
 
-    describe('saveConfig', () => {
+    describe('.saveConfig()', () => {
         it('should fail to save config', () => {
             sinon.stub(persistentStorage, 'set').rejects(new Error('saveStateError'));
             return assert.isRejected(config.saveConfig(), /saveStateError/);
         });
     });
 
-    describe('getConfig', () => {
+    describe('.getConfig()', () => {
         it('should return BASE_CONFIG if data.parsed is undefined', () => {
             sinon.stub(persistentStorage, 'get').resolves(undefined);
             return assert.becomes(config.getConfig(), { raw: {}, parsed: {} });
@@ -270,7 +240,7 @@ describe('Config', () => {
         });
     });
 
-    describe('loadConfig', () => {
+    describe('.loadConfig()', () => {
         it('should reject if persistenStorage errors', () => {
             sinon.stub(persistentStorage, 'get').rejects(new Error('loadStateError'));
             return assert.isRejected(config.loadConfig(), /loadStateError/);
@@ -292,35 +262,12 @@ describe('Config', () => {
         });
     });
 
-    it('should fail to set config when invalid config provided', () => {
-        // assert.isRejected does not work for this test.
-        // Due to the throw new Error in _notifyConfigChange, there is no promise to check against.
-        try {
-            config.setConfig({});
-        } catch (err) {
-            return assert.strictEqual(err.message, '_notifyConfigChange() Missing parsed config.');
-        }
-        return assert.fail('This test PASSED but was supposed to FAIL');
-    });
-
-    it('should able to get declaration by name', () => {
-        const obj = {
-            class: 'Telemetry',
-            My_System: {
-                class: 'Telemetry_System',
-                systemPoller: 'My_Poller'
-            },
-            My_Poller: {
-                class: 'Telemetry_System_Poller'
-            }
-        };
-        return config.validate(obj)
-            .then((validated) => {
-                validated = util.formatConfig(validated);
-                const poller = util.getDeclarationByName(
-                    validated, constants.CONFIG_CLASSES.SYSTEM_POLLER_CLASS_NAME, 'My_Poller'
-                );
-                assert.strictEqual(poller.class, constants.CONFIG_CLASSES.SYSTEM_POLLER_CLASS_NAME);
-            });
+    describe('.setConfig()', () => {
+        it('should fail to set config when invalid config provided', () => {
+            assert.throws(
+                () => config.setConfig({}),
+                '_notifyConfigChange() Missing parsed config.'
+            );
+        });
     });
 });

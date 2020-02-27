@@ -8,19 +8,22 @@
 
 'use strict';
 
+/* eslint-disable import/order */
+
+require('./shared/restoreCache')();
+
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
 const sinon = require('sinon');
 
+const EndpointLoader = require('../../src/lib/endpointLoader');
+const deviceUtil = require('../../src/lib/deviceUtil');
+const endpointLoaderTestsData = require('./endpointLoaderTestsData');
+const testUtil = require('./shared/util');
+
 chai.use(chaiAsPromised);
 const assert = chai.assert;
-
-const util = require('./shared/util');
-const endpointLoaderTestsData = require('./endpointLoaderTestsData.js');
-const EndpointLoader = require('../../src/lib/endpointLoader.js');
-const deviceUtil = require('../../src/lib/deviceUtil.js');
-
 
 describe('Endpoint Loader', () => {
     let eLoader;
@@ -30,6 +33,7 @@ describe('Endpoint Loader', () => {
     });
 
     afterEach(() => {
+        nock.cleanAll();
         sinon.restore();
     });
 
@@ -277,7 +281,7 @@ describe('Endpoint Loader', () => {
                     }
                 }
             };
-            eLoader.endpoints = util.deepCopy(endpoints);
+            eLoader.endpoints = testUtil.deepCopy(endpoints);
             return eLoader.loadEndpoint('bash', { replaceStrings: { '\\$replaceMe': 'Hello World' } })
                 .then((data) => {
                     assert.deepStrictEqual(data, expectedEndpointObj);
@@ -365,13 +369,9 @@ describe('Endpoint Loader', () => {
             }
         };
 
-        afterEach(() => {
-            nock.cleanAll();
-        });
-
         endpointLoaderTestsData.getAndExpandData.forEach((testConf) => {
-            util.getCallableIt(testConf)(testConf.name, () => {
-                util.mockEndpoints(testConf.endpoints, { responseChecker: checkResponse });
+            testUtil.getCallableIt(testConf)(testConf.name, () => {
+                testUtil.mockEndpoints(testConf.endpoints, { responseChecker: checkResponse });
                 return assert.becomes(
                     eLoader.getAndExpandData(testConf.endpointObj),
                     testConf.expectedData

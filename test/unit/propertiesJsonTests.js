@@ -8,23 +8,27 @@
 
 'use strict';
 
+/* eslint-disable import/order */
+
+require('./shared/restoreCache')();
+
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
 
-const util = require('./shared/util');
 const defaultPaths = require('../../src/lib/paths.json');
 const defaultProperties = require('../../src/lib/properties.json');
+const propertiesTestsData = require('./propertiesJsonTestsData');
 const SystemStats = require('../../src/lib/systemStats');
-const propertiesTestsData = require('./propertiesJsonTestsData.js');
+const testUtil = require('./shared/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe('properties.json', () => {
     // global vars - to avoid problems with 'before(Each)'
-    let paths = util.deepCopy(defaultPaths);
-    let allProperties = util.deepCopy(defaultProperties);
+    let paths = testUtil.deepCopy(defaultPaths);
+    let allProperties = testUtil.deepCopy(defaultProperties);
 
     const checkResponse = (endpointMock, response) => {
         if (!response.kind) {
@@ -56,11 +60,11 @@ describe('properties.json', () => {
     Object.keys(propertiesTestsData).forEach((testSetKey) => {
         const testSet = propertiesTestsData[testSetKey];
 
-        util.getCallableDescribe(testSet)(testSet.name, () => {
+        testUtil.getCallableDescribe(testSet)(testSet.name, () => {
             beforeEach(() => {
                 // copy before each test to avoid modifications
-                paths = util.deepCopy(defaultPaths);
-                allProperties = util.deepCopy(defaultProperties);
+                paths = testUtil.deepCopy(defaultPaths);
+                allProperties = testUtil.deepCopy(defaultProperties);
             });
 
             afterEach(() => {
@@ -68,7 +72,7 @@ describe('properties.json', () => {
             });
 
             testSet.tests.forEach((testConf) => {
-                util.getCallableIt(testConf)(testConf.name, () => {
+                testUtil.getCallableIt(testConf)(testConf.name, () => {
                     const contextToCollect = generateProperties(allProperties.context, testConf.contextToCollect)
                         || allProperties.context;
                     const statsToCollect = generateProperties(allProperties.stats, testConf.statsToCollect)
@@ -97,7 +101,7 @@ describe('properties.json', () => {
 
                     return Promise.resolve()
                         .then(() => {
-                            util.mockEndpoints(testConf.endpoints || [], { responseChecker: checkResponse });
+                            testUtil.mockEndpoints(testConf.endpoints || [], { responseChecker: checkResponse });
                             return assert.becomes(
                                 getCollectedData(stats.collect(), stats),
                                 testConf.expectedData,
@@ -109,7 +113,7 @@ describe('properties.json', () => {
                         })
                         .then(() => {
                             // if after second attempt output will be the properties, paths and etc. works correctly.
-                            util.mockEndpoints(testConf.endpoints || [], { responseChecker: checkResponse });
+                            testUtil.mockEndpoints(testConf.endpoints || [], { responseChecker: checkResponse });
                             return assert.becomes(
                                 getCollectedData(stats.collect(), stats),
                                 testConf.expectedData,

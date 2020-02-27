@@ -8,18 +8,21 @@
 
 'use strict';
 
+/* eslint-disable import/order */
+
+require('../shared/restoreCache')();
+
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const request = require('request');
-
-chai.use(chaiAsPromised);
-const assert = chai.assert;
 const sinon = require('sinon');
 
 const sumoLogicIndex = require('../../../src/lib/consumers/Sumo_Logic/index');
-const util = require('../shared/util.js');
+const testUtil = require('../shared/util');
 
-/* eslint-disable global-require */
+chai.use(chaiAsPromised);
+const assert = chai.assert;
+
 describe('Sumo_Logic', () => {
     afterEach(() => {
         sinon.restore();
@@ -32,19 +35,19 @@ describe('Sumo_Logic', () => {
         };
 
         it('should configure default request options', (done) => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 config: defaultConsumerConfig
             });
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
-                    assert.deepEqual(opts.headers, { 'content-type': 'application/json' });
+                    assert.deepStrictEqual(opts.headers, { 'content-type': 'application/json' });
                     assert.strictEqual(opts.strictSSL, true);
                     assert.strictEqual(opts.url, 'https://localhost:443/receiver/v1/http/');
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             });
@@ -53,7 +56,7 @@ describe('Sumo_Logic', () => {
         });
 
         it('should configure request options with provided values', (done) => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 config: {
                     host: 'localhost',
                     path: '/receiver/v1/http/',
@@ -66,13 +69,13 @@ describe('Sumo_Logic', () => {
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
-                    assert.deepEqual(opts.headers, { 'content-type': 'application/json' });
+                    assert.deepStrictEqual(opts.headers, { 'content-type': 'application/json' });
                     assert.strictEqual(opts.strictSSL, false);
                     assert.strictEqual(opts.url, 'http://localhost:80/receiver/v1/http/mySecret');
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             });
@@ -82,7 +85,7 @@ describe('Sumo_Logic', () => {
 
         it('should trace data with secrets redacted', (done) => {
             let traceData;
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 config: {
                     host: 'localhost',
                     path: '/receiver/v1/http/',
@@ -105,7 +108,7 @@ describe('Sumo_Logic', () => {
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             });
@@ -114,19 +117,19 @@ describe('Sumo_Logic', () => {
         });
 
         it('should process systemInfo data', (done) => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 eventType: 'systemInfo',
                 config: defaultConsumerConfig
             });
-            const expectedData = util.deepCopy(context.event.data);
+            const expectedData = testUtil.deepCopy(context.event.data);
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
-                    assert.deepEqual(opts.body, JSON.stringify(expectedData));
+                    assert.deepStrictEqual(opts.body, JSON.stringify(expectedData));
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             });
@@ -135,19 +138,19 @@ describe('Sumo_Logic', () => {
         });
 
         it('should process event data', (done) => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 eventType: 'AVR',
                 config: defaultConsumerConfig
             });
-            const expectedData = util.deepCopy(context.event.data);
+            const expectedData = testUtil.deepCopy(context.event.data);
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
-                    assert.deepEqual(opts.body, JSON.stringify(expectedData));
+                    assert.deepStrictEqual(opts.body, JSON.stringify(expectedData));
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             });

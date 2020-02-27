@@ -816,7 +816,7 @@ QkviewManager.prototype.prepare = function () {
         .then(() => deviceUtil.getDeviceType())
         .then((deviceType) => {
             this.deviceType = deviceType;
-            if (this.deviceType === constants.BIG_IP_DEVICE_TYPE) {
+            if (this.deviceType === constants.DEVICE_TYPE.BIG_IP) {
                 return this.checkIsItLocalDevice();
             }
             return Promise.resolve();

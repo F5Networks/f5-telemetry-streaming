@@ -8,19 +8,22 @@
 
 'use strict';
 
+/* eslint-disable import/order */
+
+require('../shared/restoreCache')();
+
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const request = require('request');
-
-chai.use(chaiAsPromised);
-const assert = chai.assert;
 const sinon = require('sinon');
 
 const azureAnalyticsIndex = require('../../../src/lib/consumers/Azure_Log_Analytics/index');
-const util = require('../shared/util.js');
-const azureLogData = require('./azureLogAnalyticsConsumerTestsData.js');
+const azureLogData = require('./azureLogAnalyticsConsumerTestsData');
+const testUtil = require('../shared/util');
 
-/* eslint-disable global-require */
+chai.use(chaiAsPromised);
+const assert = chai.assert;
+
 describe('Azure_Log_Analytics', () => {
     let clock;
     let requests;
@@ -29,6 +32,7 @@ describe('Azure_Log_Analytics', () => {
         workspaceId: 'myWorkspace',
         passphrase: 'secret'
     };
+
     beforeEach(() => {
         requests = [];
         sinon.stub(request, 'post').callsFake((opts, cb) => {
@@ -46,7 +50,7 @@ describe('Azure_Log_Analytics', () => {
 
     describe('process', () => {
         it('should configure default request options', () => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 eventType: 'systemInfo',
                 config: defaultConsumerConfig
             });
@@ -57,7 +61,7 @@ describe('Azure_Log_Analytics', () => {
             return azureAnalyticsIndex(context)
                 .then(() => {
                     assert.strictEqual(requests[0].url, 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01');
-                    assert.deepEqual(requests[0].headers, {
+                    assert.deepStrictEqual(requests[0].headers, {
                         Authorization: 'SharedKey myWorkspace:MGiiWY+WTAxB35tyZ1YljyfwMM5QCqr4ge+giSjcgfI=',
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_new',
@@ -67,7 +71,7 @@ describe('Azure_Log_Analytics', () => {
         });
 
         it('should configure request options with provided values', () => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 eventType: 'systemInfo',
                 config: {
                     workspaceId: 'myWorkspace',
@@ -82,7 +86,7 @@ describe('Azure_Log_Analytics', () => {
             return azureAnalyticsIndex(context)
                 .then(() => {
                     assert.strictEqual(requests[0].url, 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01');
-                    assert.deepEqual(requests[0].headers, {
+                    assert.deepStrictEqual(requests[0].headers, {
                         Authorization: 'SharedKey myWorkspace:MGiiWY+WTAxB35tyZ1YljyfwMM5QCqr4ge+giSjcgfI=',
                         'Content-Type': 'application/json',
                         'Log-Type': 'customLogType_new',
@@ -93,7 +97,7 @@ describe('Azure_Log_Analytics', () => {
 
         it('should trace data with secrets redacted', () => {
             let traceData;
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 eventType: 'systemInfo',
                 config: {
                     workspaceId: 'myWorkspace',
@@ -112,7 +116,7 @@ describe('Azure_Log_Analytics', () => {
 
             return azureAnalyticsIndex(context)
                 .then(() => {
-                    assert.deepEqual(requests[0].headers, {
+                    assert.deepStrictEqual(requests[0].headers, {
                         Authorization: 'SharedKey myWorkspace:MGiiWY+WTAxB35tyZ1YljyfwMM5QCqr4ge+giSjcgfI=',
                         'Content-Type': 'application/json',
                         'Log-Type': 'customLogType_new',
@@ -123,18 +127,18 @@ describe('Azure_Log_Analytics', () => {
         });
 
         it('should process systemInfo data', () => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 eventType: 'systemInfo',
                 config: defaultConsumerConfig
             });
             const expectedData = azureLogData.systemData[0].expectedData;
 
             return azureAnalyticsIndex(context)
-                .then(() => assert.deepEqual(requests, expectedData));
+                .then(() => assert.deepStrictEqual(requests, expectedData));
         });
 
         it('should process event data', () => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 eventType: 'AVR',
                 config: defaultConsumerConfig
             });
@@ -142,7 +146,7 @@ describe('Azure_Log_Analytics', () => {
             context.event.type = 'AVR';
 
             return azureAnalyticsIndex(context)
-                .then(() => assert.deepEqual(requests, expectedData));
+                .then(() => assert.deepStrictEqual(requests, expectedData));
         });
     });
 });

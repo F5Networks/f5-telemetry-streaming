@@ -8,6 +8,10 @@
 
 'use strict';
 
+/* eslint-disable import/order */
+
+require('./shared/restoreCache')();
+
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
@@ -19,7 +23,8 @@ const systemPoller = require('../../src/lib/systemPoller');
 const SystemStats = require('../../src/lib/systemStats');
 const util = require('../../src/lib/util');
 
-const systemPollerConfigTestsData = require('./systemPollerTestsData.js');
+const systemPollerConfigTestsData = require('./systemPollerTestsData');
+const testUtil = require('./shared/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -32,37 +37,29 @@ describe('System Poller', () => {
     };
 
     beforeEach(() => {
-        sinon.stub(deviceUtil, 'encryptSecret').callsFake(secret => Promise.resolve(secret));
-        sinon.stub(deviceUtil, 'decryptSecret').callsFake(secret => Promise.resolve(secret));
-        sinon.stub(deviceUtil, 'getDeviceType').callsFake(() => Promise.resolve(constants.BIG_IP_DEVICE_TYPE));
-        sinon.stub(util, 'networkCheck').callsFake(() => Promise.resolve());
+        sinon.stub(deviceUtil, 'encryptSecret').resolvesArg(0);
+        sinon.stub(deviceUtil, 'decryptSecret').resolvesArg(0);
+        sinon.stub(deviceUtil, 'getDeviceType').resolves(constants.DEVICE_TYPE.BIG_IP);
+        sinon.stub(util, 'networkCheck').resolves();
     });
 
     afterEach(() => {
         sinon.restore();
     });
 
-    after(() => {
-        Object.keys(require.cache).forEach((key) => {
-            delete require.cache[key];
-        });
-    });
-
     describe('buildPollerConfigs', () => {
-        const getCallableIt = testConf => (testConf.testOpts && testConf.testOpts.only ? it.only : it);
         /* eslint-disable implicit-arrow-linebreak */
         systemPollerConfigTestsData.buildPollerConfigs.forEach(testConf =>
-            getCallableIt(testConf)(testConf.name, () =>
+            testUtil.getCallableIt(testConf)(testConf.name, () =>
                 validateAndFormat(testConf.declaration)
                     .then(configData =>
                         assert.deepEqual(systemPoller.buildPollerConfigs(configData), testConf.expected))));
     });
 
     describe('getExpandedConfWithNameRefs', () => {
-        const getCallableIt = testConf => (testConf.testOpts && testConf.testOpts.only ? it.only : it);
         /* eslint-disable implicit-arrow-linebreak */
         systemPollerConfigTestsData.getExpandedConfWithNameRefs.forEach(testConf =>
-            getCallableIt(testConf)(testConf.name, () =>
+            testUtil.getCallableIt(testConf)(testConf.name, () =>
                 validateAndFormat(testConf.declaration)
                     .then((configData) => {
                         if (testConf.errorMessage) {
@@ -104,26 +101,11 @@ describe('System Poller', () => {
                 return returnCtx();
             });
         });
-
-        function MockRestOperation(opts) {
-            this.method = opts.method || 'GET';
-            this.body = opts.body;
-            this.statusCode = null;
-            this.uri = { pathname: opts.uri };
-        }
-        MockRestOperation.prototype.getUri = function () { return this.uri; };
-        MockRestOperation.prototype.setStatusCode = function (status) { this.statusCode = status; };
-        MockRestOperation.prototype.getStatusCode = function () { return this.statusCode; };
-        MockRestOperation.prototype.setBody = function (body) { this.body = body; };
-        MockRestOperation.prototype.getBody = function () { return this.body; };
-        MockRestOperation.prototype.complete = function () { };
-
-        const getCallableIt = testConf => (testConf.testOpts && testConf.testOpts.only ? it.only : it);
         /* eslint-disable implicit-arrow-linebreak */
         systemPollerConfigTestsData.processClientRequest.forEach(testConf =>
-            getCallableIt(testConf)(testConf.name, () => {
+            testUtil.getCallableIt(testConf)(testConf.name, () => {
                 declaration = testConf.declaration;
-                const restOpMock = new MockRestOperation(testConf.requestOpts);
+                const restOpMock = new testUtil.MockRestOperation(testConf.requestOpts);
 
                 if (typeof testConf.returnCtx !== 'undefined') {
                     returnCtx = testConf.returnCtx;

@@ -8,19 +8,22 @@
 
 'use strict';
 
+/* eslint-disable import/order */
+
+require('./shared/restoreCache')();
+
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const fs = require('fs');
 const sinon = require('sinon');
 
+const config = require('../../src/lib/config');
+const constants = require('../../src/lib/constants');
+const deviceUtil = require('../../src/lib/deviceUtil');
+const util = require('../../src/lib/util');
+
 chai.use(chaiAsPromised);
 const assert = chai.assert;
-
-const config = require('../../src/lib/config.js');
-const constants = require('../../src/lib/constants.js');
-const deviceUtil = require('../../src/lib/deviceUtil.js');
-const util = require('../../src/lib/util.js');
-
 
 describe('Declarations', () => {
     let encryptSecretStub;
@@ -29,11 +32,11 @@ describe('Declarations', () => {
 
     beforeEach(() => {
         encryptSecretStub = sinon.stub(deviceUtil, 'encryptSecret');
-        encryptSecretStub.callsFake(() => Promise.resolve('$M$foo'));
+        encryptSecretStub.resolves('$M$foo');
         getDeviceTypeStub = sinon.stub(deviceUtil, 'getDeviceType');
-        getDeviceTypeStub.callsFake(() => Promise.resolve(constants.BIG_IP_DEVICE_TYPE));
+        getDeviceTypeStub.resolves(constants.DEVICE_TYPE.BIG_IP);
         networkCheckStub = sinon.stub(util, 'networkCheck');
-        networkCheckStub.callsFake(() => Promise.resolve());
+        networkCheckStub.resolves();
     });
     afterEach(() => {
         sinon.restore();
@@ -568,7 +571,7 @@ describe('Declarations', () => {
 
         describe('f5secret', () => {
             it('should fail cipherText with wrong device type', () => {
-                getDeviceTypeStub.resolves(constants.CONTAINER_DEVICE_TYPE);
+                getDeviceTypeStub.resolves(constants.DEVICE_TYPE.CONTAINER);
                 const data = {
                     class: 'Telemetry',
                     My_Poller: {
