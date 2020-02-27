@@ -12,7 +12,7 @@
         "install-test": "npm install --no-optional",
         "lint": "eslint src test",
         "test-functional": "mocha \"./test/functional/testRunner.js\" --opts ./test/functional/.mocha.opts",
-        "test-only": "mocha --recursive \"./test/unit/**/*.js\" --opts ./test/unit/.mocha.opts",
+        "test-only": "mocha --opts ./test/unit/.mocha.opts",
         "test": "nyc --all npm run test-only",
         "build": "./scripts/build/buildRpm.sh"
     },

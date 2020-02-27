@@ -8,29 +8,37 @@
 
 'use strict';
 
+/* eslint-disable import/order */
+
+require('./shared/restoreCache')();
+
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const util = require('./shared/util');
 const defaultProperties = require('../../src/lib/properties.json');
+const systemStatsTestsData = require('./systemStatsTestsData');
 const SystemStats = require('../../src/lib/systemStats');
-const systemStatsTestsData = require('./systemStatsTestsData.js');
+const testUtil = require('./shared/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe('System Stats', () => {
     // global vars - to avoid problems with 'before(Each)'
-    let allProperties = util.deepCopy(defaultProperties);
+    let allProperties = testUtil.deepCopy(defaultProperties);
 
     beforeEach(() => {
         // do copy before each test to avoid modifications
-        allProperties = util.deepCopy(defaultProperties);
+        allProperties = testUtil.deepCopy(defaultProperties);
     });
 
     describe('.processData', () => {
-        const sysStats = new SystemStats();
+        let sysStats;
+
+        beforeEach(() => {
+            sysStats = new SystemStats();
+        });
 
         it('should skip normalization', () => {
             const property = {
@@ -45,7 +53,7 @@ describe('System Stats', () => {
                 kind: 'dataKind'
             };
             const result = sysStats._processData(property, data, key);
-            assert.deepEqual(result, expected);
+            assert.deepStrictEqual(result, expected);
         });
 
         it('should normalize data', () => {
@@ -88,7 +96,7 @@ describe('System Stats', () => {
                 }
             };
             const result = sysStats._processData(property, data, key);
-            assert.deepEqual(result, expected);
+            assert.deepStrictEqual(result, expected);
         });
 
         it('should normalize data and use defaults without normalization array', () => {
@@ -109,7 +117,7 @@ describe('System Stats', () => {
                 }
             };
             const result = sysStats._processData(property, data, key);
-            assert.deepEqual(result, expected);
+            assert.deepStrictEqual(result, expected);
         });
 
         it('should normalize data and use defaults with normalization array', () => {
@@ -136,13 +144,13 @@ describe('System Stats', () => {
                 }
             };
             const result = sysStats._processData(property, data, key);
-            assert.deepEqual(result, expected);
+            assert.deepStrictEqual(result, expected);
         });
     });
 
     describe('._filterStats', () => {
         systemStatsTestsData._filterStats.forEach((testConf) => {
-            util.getCallableIt(testConf)(testConf.name, () => {
+            testUtil.getCallableIt(testConf)(testConf.name, () => {
                 const systemStats = new SystemStats({ dataOpts: { noTMstats: true, actions: testConf.actions } });
                 systemStats._filterStats();
                 const statsKeys = Object.keys(systemStats.stats);
@@ -198,7 +206,7 @@ describe('System Stats', () => {
             };
             return systemStats._processProperty('', property)
                 .then(() => {
-                    assert.deepEqual(systemStats.collectedData, {});
+                    assert.deepStrictEqual(systemStats.collectedData, {});
                 });
         });
 
@@ -209,7 +217,7 @@ describe('System Stats', () => {
             };
             return systemStats._processProperty('', property)
                 .then(() => {
-                    assert.deepEqual(systemStats.collectedData, {});
+                    assert.deepStrictEqual(systemStats.collectedData, {});
                 });
         });
 
@@ -222,7 +230,7 @@ describe('System Stats', () => {
             };
             return systemStats._processProperty('theKey', property)
                 .then(() => {
-                    assert.deepEqual(systemStats.collectedData.theKey, {});
+                    assert.deepStrictEqual(systemStats.collectedData.theKey, {});
                 });
         });
 
@@ -236,10 +244,10 @@ describe('System Stats', () => {
                     key: 'theKey'
                 }
             };
-            sinon.stub(systemStats, '_loadData').callsFake(() => Promise.resolve(property));
+            sinon.stub(systemStats, '_loadData').resolves(property);
             return systemStats._processProperty('theKey', property)
                 .then(() => {
-                    assert.deepEqual(systemStats.collectedData, expected);
+                    assert.deepStrictEqual(systemStats.collectedData, expected);
                 });
         });
     });

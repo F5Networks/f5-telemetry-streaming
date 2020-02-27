@@ -519,10 +519,10 @@ module.exports = {
             childProcess.exec('/usr/bin/tmsh -a show sys version', (error, stdout, stderr) => {
                 if (error) {
                     // don't reject, just assume we are running on a container
-                    resolve(constants.CONTAINER_DEVICE_TYPE);
+                    resolve(constants.DEVICE_TYPE.CONTAINER);
                 } else {
                     // command did not error so we must be a BIG-IP
-                    resolve(constants.BIG_IP_DEVICE_TYPE);
+                    resolve(constants.DEVICE_TYPE.BIG_IP);
                 }
             });
         });

@@ -8,34 +8,42 @@
 
 'use strict';
 
-const assert = require('assert');
+/* eslint-disable import/order */
 
-const util = require('./shared/util');
-const dataUtil = require('../../src/lib/dataUtil.js');
-const dataUtilTestsData = require('./dataUtilTestsData.js');
+require('./shared/restoreCache')();
+
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+
+const dataUtil = require('../../src/lib/dataUtil');
+const dataUtilTestsData = require('./dataUtilTestsData');
+const testUtil = require('./shared/util');
+
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
 describe('Data Util', () => {
     describe('getMatches', () => {
         dataUtilTestsData.getMatches.forEach((testConf) => {
-            util.getCallableIt(testConf)(testConf.name, () => {
+            testUtil.getCallableIt(testConf)(testConf.name, () => {
                 const resultCtx = dataUtil.getMatches(
                     testConf.data,
                     testConf.propertyCtx,
                     testConf.propertyRegexCtx
                 );
-                assert.deepEqual(resultCtx, testConf.expectedCtx);
+                assert.deepStrictEqual(resultCtx, testConf.expectedCtx);
             });
         });
     });
 
     describe('getDeepMatches', () => {
         dataUtilTestsData.getDeepMatches.forEach((testConf) => {
-            util.getCallableIt(testConf)(testConf.name, () => {
+            testUtil.getCallableIt(testConf)(testConf.name, () => {
                 const resultCtx = dataUtil.getDeepMatches(
                     testConf.data,
                     testConf.propertiesCtx
                 );
-                assert.deepEqual(resultCtx, testConf.expectedCtx);
+                assert.deepStrictEqual(resultCtx, testConf.expectedCtx);
             });
         });
     });
@@ -44,7 +52,7 @@ describe('Data Util', () => {
         ['', '_ifAnyMatch', '_ifAllMatch'].forEach((matchType) => {
             describe(matchType, () => {
                 dataUtilTestsData[`checkConditions${matchType}`].forEach((testConf) => {
-                    util.getCallableIt(testConf)(testConf.name, () => {
+                    testUtil.getCallableIt(testConf)(testConf.name, () => {
                         const resultCtx = dataUtil.checkConditions(
                             testConf.dataCtx,
                             testConf.actionsCtx
@@ -58,7 +66,7 @@ describe('Data Util', () => {
 
     describe('searchAnyMatches', () => {
         dataUtilTestsData.searchAnyMatches.forEach((testConf) => {
-            util.getCallableIt(testConf)(testConf.name, () => {
+            testUtil.getCallableIt(testConf)(testConf.name, () => {
                 const resultCtx = [];
                 const callback = (key, item) => {
                     resultCtx.push(key);
@@ -69,14 +77,14 @@ describe('Data Util', () => {
                     testConf.propertiesCtx,
                     callback
                 );
-                assert.deepEqual(resultCtx, testConf.expectedCtx);
+                assert.deepStrictEqual(resultCtx, testConf.expectedCtx);
             });
         });
     });
 
     describe('removeStrictMatches', () => {
         dataUtilTestsData.removeStrictMatches.forEach((testConf) => {
-            util.getCallableIt(testConf)(testConf.name, () => {
+            testUtil.getCallableIt(testConf)(testConf.name, () => {
                 const callback = (key, item, getNestedKey) => {
                     if (getNestedKey) {
                         return testConf.nestedKey ? item[testConf.nestedKey] : null;
@@ -105,7 +113,7 @@ describe('Data Util', () => {
     [true, false].forEach((strictVal) => {
         describe(`preserveStrictMatches - strict=${strictVal}`, () => {
             dataUtilTestsData[`preserveStrictMatches_strict_${strictVal}`].forEach((testConf) => {
-                util.getCallableIt(testConf)(testConf.name, () => {
+                testUtil.getCallableIt(testConf)(testConf.name, () => {
                     const callback = (key, item, getNestedKey) => {
                         if (getNestedKey) {
                             return testConf.nestedKey ? item[testConf.nestedKey] : null;

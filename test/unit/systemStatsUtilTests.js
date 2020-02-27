@@ -8,12 +8,16 @@
 
 'use strict';
 
+/* eslint-disable import/order */
+
+require('./shared/restoreCache')();
+
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 
-const util = require('./shared/util');
-const systemStatsUtil = require('../../src/lib/systemStatsUtil.js');
-const systemStatsUtilTestsData = require('./systemStatsUtilTestsData.js');
+const systemStatsUtil = require('../../src/lib/systemStatsUtil');
+const systemStatsUtilTestsData = require('./systemStatsUtilTestsData');
+const testUtil = require('./shared/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -21,12 +25,12 @@ const assert = chai.assert;
 describe('System Stats Utils', () => {
     describe('._resolveConditional()', () => {
         systemStatsUtilTestsData._resolveConditional.forEach((testConf) => {
-            util.getCallableIt(testConf)(testConf.name, () => {
+            testUtil.getCallableIt(testConf)(testConf.name, () => {
                 const promise = new Promise((resolve, reject) => {
                     try {
                         resolve(systemStatsUtil._resolveConditional(
-                            util.deepCopy(testConf.contextData),
-                            util.deepCopy(testConf.conditionalBlock)
+                            testUtil.deepCopy(testConf.contextData),
+                            testUtil.deepCopy(testConf.conditionalBlock)
                         ));
                     } catch (err) {
                         reject(err);
@@ -42,10 +46,10 @@ describe('System Stats Utils', () => {
 
     describe('._preprocessProperty()', () => {
         systemStatsUtilTestsData._preprocessProperty.forEach((testConf) => {
-            util.getCallableIt(testConf)(testConf.name, () => assert.deepStrictEqual(
+            testUtil.getCallableIt(testConf)(testConf.name, () => assert.deepStrictEqual(
                 systemStatsUtil._preprocessProperty(
-                    util.deepCopy(testConf.contextData),
-                    util.deepCopy(testConf.propertyData)
+                    testUtil.deepCopy(testConf.contextData),
+                    testUtil.deepCopy(testConf.propertyData)
                 ),
                 testConf.expectedData
             ));
@@ -54,10 +58,10 @@ describe('System Stats Utils', () => {
 
     describe('._renderTemplate()', () => {
         systemStatsUtilTestsData._renderTemplate.forEach((testConf) => {
-            util.getCallableIt(testConf)(testConf.name, () => assert.deepStrictEqual(
+            testUtil.getCallableIt(testConf)(testConf.name, () => assert.deepStrictEqual(
                 systemStatsUtil._renderTemplate(
-                    util.deepCopy(testConf.contextData),
-                    util.deepCopy(testConf.propertyData)
+                    testUtil.deepCopy(testConf.contextData),
+                    testUtil.deepCopy(testConf.propertyData)
                 ),
                 testConf.expectedData
             ));
@@ -66,10 +70,10 @@ describe('System Stats Utils', () => {
 
     describe('.renderProperty()', () => {
         systemStatsUtilTestsData.renderProperty.forEach((testConf) => {
-            util.getCallableIt(testConf)(testConf.name, () => assert.deepStrictEqual(
+            testUtil.getCallableIt(testConf)(testConf.name, () => assert.deepStrictEqual(
                 systemStatsUtil.renderProperty(
-                    util.deepCopy(testConf.contextData),
-                    util.deepCopy(testConf.propertyData)
+                    testUtil.deepCopy(testConf.contextData),
+                    testUtil.deepCopy(testConf.propertyData)
                 ),
                 testConf.expectedData
             ));

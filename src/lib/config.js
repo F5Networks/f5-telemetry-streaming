@@ -30,7 +30,7 @@ const iHealthPollerSchema = require('../schema/latest/ihealth_poller_schema.json
 const endpointsSchema = require('../schema/latest/endpoints_schema.json');
 
 const customKeywords = require('./customKeywords.js');
-const CONTROLS_CLASS_NAME = require('./constants.js').CONTROLS_CLASS_NAME;
+const CONTROLS_CLASS_NAME = require('./constants.js').CONFIG_CLASSES.CONTROLS_CLASS_NAME;
 const CONTROLS_PROPERTY_NAME = require('./constants.js').CONTROLS_PROPERTY_NAME;
 const VERSION = require('./constants.js').VERSION;
 

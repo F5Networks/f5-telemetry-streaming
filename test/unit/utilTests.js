@@ -8,6 +8,10 @@
 
 'use strict';
 
+/* eslint-disable import/order */
+
+require('./shared/restoreCache')();
+
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const fs = require('fs');
@@ -18,11 +22,11 @@ const path = require('path');
 const request = require('request');
 const sinon = require('sinon');
 
+const constants = require('../../src/lib/constants');
+const util = require('../../src/lib/util');
+
 chai.use(chaiAsPromised);
 const assert = chai.assert;
-
-const constants = require('../../src/lib/constants.js');
-const util = require('../../src/lib/util.js');
 
 describe('Util', () => {
     describe('.start()', () => {
@@ -46,10 +50,10 @@ describe('Util', () => {
             new Promise((resolve) => {
                 const intervalID = util.start(
                     () => {
-                        const netIntervalID = util.update(
+                        const newIntervalID = util.update(
                             intervalID,
                             (args) => {
-                                util.stop(netIntervalID);
+                                util.stop(newIntervalID);
                                 assert.strictEqual(args, 'test');
                                 resolve();
                             },

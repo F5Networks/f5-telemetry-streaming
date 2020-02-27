@@ -8,30 +8,25 @@
 
 'use strict';
 
-const assert = require('assert');
+/* eslint-disable import/order */
+
+require('../shared/restoreCache')();
+
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+const elastic = require('elasticsearch');
 const sinon = require('sinon');
 
-const elastic = require('elasticsearch');
-
+const elasticSearchIndex = require('../../../src/lib/consumers/ElasticSearch/index');
 const util = require('../../../src/lib/util');
-const testUtil = require('../shared/util.js');
-/* eslint-disable global-require */
+const testUtil = require('../shared/util');
+
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
 describe('ElasticSearch', () => {
     let passedPayload;
     let passedClientConfig;
-
-    // stub elastic.Client before requiring elastic consumer, to ensure Client constructor is stubbed
-    sinon.stub(elastic, 'Client').callsFake((config) => {
-        passedClientConfig = config;
-        return {
-            index: (payload) => {
-                passedPayload = payload;
-                return Promise.resolve();
-            }
-        };
-    });
-    const elasticSearchIndex = require('../../../src/lib/consumers/ElasticSearch/index');
 
     const defaultConsumerConfig = {
         host: 'localhost',
@@ -42,6 +37,18 @@ describe('ElasticSearch', () => {
         allowSelfSignedCert: true,
         protocol: 'http'
     };
+
+    beforeEach(() => {
+        sinon.stub(elastic, 'Client').callsFake((config) => {
+            passedClientConfig = config;
+            return {
+                index: (payload) => {
+                    passedPayload = payload;
+                    return Promise.resolve();
+                }
+            };
+        });
+    });
 
     afterEach(() => {
         sinon.restore();
@@ -93,7 +100,7 @@ describe('ElasticSearch', () => {
                 type: 'f5telemetry'
             };
             elasticSearchIndex(context);
-            assert.deepEqual(passedPayload, expectedPayload);
+            assert.deepStrictEqual(passedPayload, expectedPayload);
         });
 
         it('should process event data', () => {
@@ -114,7 +121,7 @@ describe('ElasticSearch', () => {
             };
 
             elasticSearchIndex(context);
-            assert.deepEqual(passedPayload, expectedPayload);
+            assert.deepStrictEqual(passedPayload, expectedPayload);
         });
     });
 });

@@ -8,22 +8,20 @@
 
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
 const http = require('http');
 const https = require('https');
 
-const constants = require('../lib/constants.js');
-const logger = require('../lib/logger.js');
-const util = require('../lib/util.js');
+const constants = require('../lib/constants');
+const logger = require('../lib/logger');
+const util = require('../lib/util');
 
 const baseSchema = require('../schema/latest/base_schema.json');
-const persistentStorage = require('../lib/persistentStorage.js');
-const configWorker = require('../lib/config.js');
-const eventListener = require('../lib/eventListener.js'); // eslint-disable-line no-unused-vars
-const consumers = require('../lib/consumers.js'); // eslint-disable-line no-unused-vars
-const systemPoller = require('../lib/systemPoller.js');
-const iHealthPoller = require('../lib/ihealth.js'); // eslint-disable-line no-unused-vars
+const persistentStorage = require('../lib/persistentStorage');
+const configWorker = require('../lib/config');
+const eventListener = require('../lib/eventListener'); // eslint-disable-line no-unused-vars
+const consumers = require('../lib/consumers'); // eslint-disable-line no-unused-vars
+const systemPoller = require('../lib/systemPoller');
+const iHealthPoller = require('../lib/ihealth'); // eslint-disable-line no-unused-vars
 
 /** @module restWorkers */
 
@@ -54,7 +52,7 @@ function SimpleRouter() {
  * @param {SimpleRouter~requestCallback} callback - request handler
  */
 SimpleRouter.prototype.register = function (method, endpointURI, callback) {
-    if (this.routes[endpointURI] === undefined) {
+    if (typeof this.routes[endpointURI] === 'undefined') {
         this.routes[endpointURI] = {};
     }
     if (Array.isArray(method)) {
@@ -105,7 +103,7 @@ SimpleRouter.prototype._processRestOperation = function (restOperation) {
     // evaluate data as JSON and returns code 500 on failure.
     // Don't know how to re-define this behavior.
     if (restOperation.getBody() && restOperation.getContentType().toLowerCase() !== 'application/json') {
-        util.restOperationResponder(restOperation, 405,
+        util.restOperationResponder(restOperation, 415,
             { code: 415, message: 'Unsupported Media Type', accept: ['application/json'] });
         return;
     }
@@ -255,16 +253,13 @@ RestWorker.prototype.onPost = function (restOperation) {
  * @returns {void}
  */
 RestWorker.prototype.processInfoRequest = function (restOperation) {
-    // usually version located at this path - /var/config/rest/iapps/f5-telemetry/version,
-    // we are in /var/config/rest/iapps/f5-telemetry/nodejs/restWorkers/ dir.
-    const vinfo = fs.readFileSync(path.join(__dirname, '..', 'version'), 'ascii').split('-');
-
+    const schemaVersionEnum = baseSchema.properties.schemaVersion.enum;
     util.restOperationResponder(restOperation, 200, {
         nodeVersion: process.version,
-        version: vinfo[0],
-        release: vinfo[1],
-        schemaCurrent: baseSchema.properties.schemaVersion.enum[0],
-        schemaMinimum: baseSchema.properties.schemaVersion.enum.reverse()[0]
+        version: constants.VERSION,
+        release: constants.RELEASE,
+        schemaCurrent: schemaVersionEnum[0],
+        schemaMinimum: schemaVersionEnum[schemaVersionEnum.length - 1]
     });
 };
 
@@ -294,11 +289,9 @@ RestWorker.prototype.configChangeHandler = function (config) {
     logger.debug('configWorker change event in restWorker'); // helpful debug
 
     const settings = util.getDeclarationByName(
-        config, constants.CONTROLS_CLASS_NAME, constants.CONTROLS_PROPERTY_NAME
-    );
-    if (util.isObjectEmpty(settings)) {
-        return;
-    }
+        config, constants.CONFIG_CLASSES.CONTROLS_CLASS_NAME, constants.CONTROLS_PROPERTY_NAME
+    ) || {};
+
     this.router.removeAllHandlers();
     this.registerRestEndpoints(settings.debug);
 };

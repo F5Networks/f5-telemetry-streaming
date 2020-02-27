@@ -8,19 +8,23 @@
 
 'use strict';
 
+/* eslint-disable import/order */
+
+require('./shared/restoreCache')();
+require('./shared/disableAjv'); // forwarder imports config with ajv
+
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const dataFilter = require('../../src/lib/dataFilter.js');
-const dataPipeline = require('../../src/lib/dataPipeline.js');
-const dataTagging = require('../../src/lib/dataTagging.js');
-const forwarder = require('../../src/lib/forwarder.js');
-const EVENT_TYPES = require('../../src/lib/constants.js').EVENT_TYPES;
+const dataFilter = require('../../src/lib/dataFilter');
+const dataPipeline = require('../../src/lib/dataPipeline');
+const dataTagging = require('../../src/lib/dataTagging');
+const EVENT_TYPES = require('../../src/lib/constants').EVENT_TYPES;
+const forwarder = require('../../src/lib/forwarder');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
-
 
 describe('Data Pipeline', () => {
     let forwardFlag;
@@ -51,6 +55,7 @@ describe('Data Pipeline', () => {
             handleActionsData.push({ dataCtx, actionCtx });
         });
     });
+
     afterEach(() => {
         sinon.restore();
     });
@@ -169,7 +174,7 @@ describe('Data Pipeline', () => {
         };
         return dataPipeline.process(dataCtx, options)
             .then(() => {
-                assert.deepEqual(
+                assert.deepStrictEqual(
                     handleActionsData,
                     [
                         {

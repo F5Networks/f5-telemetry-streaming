@@ -8,39 +8,50 @@
 
 'use strict';
 
-const assert = require('assert');
-const logger = require('../../src/lib/logger.js');
+/* eslint-disable import/order */
 
-const logLevels = [
-    'notset',
-    'debug',
-    'info',
-    'error'
-];
-const loggedMessages = {
-    error: [],
-    info: [],
-    debug: []
-};
-const loggerMock = {
-    severe(msg) { loggedMessages.error.push(msg); },
-    info(msg) { loggedMessages.info.push(msg); },
-    finest(msg) { loggedMessages.debug.push(msg); }
-};
+require('./shared/restoreCache')();
 
-logger.logger = loggerMock;
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+const sinon = require('sinon');
+
+const logger = require('../../src/lib/logger');
+
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
 describe('Logger', () => {
+    const logLevels = [
+        'notset',
+        'debug',
+        'info',
+        'error'
+    ];
+    const loggedMessages = {
+        error: [],
+        info: [],
+        debug: []
+    };
+    const loggerMock = {
+        severe(msg) { loggedMessages.error.push(msg); },
+        info(msg) { loggedMessages.info.push(msg); },
+        finest(msg) { loggedMessages.debug.push(msg); }
+    };
+
+    before(() => {
+        sinon.stub(logger, 'logger').value(loggerMock);
+    });
+
     beforeEach(() => {
         logger.setLogLevel('info');
         Object.keys(loggedMessages).forEach((msgType) => {
             loggedMessages[msgType] = [];
         });
     });
+
     after(() => {
-        Object.keys(require.cache).forEach((key) => {
-            delete require.cache[key];
-        });
+        sinon.restore();
     });
 
     it('defaults: should be by default \'info\' level', () => {
@@ -154,6 +165,7 @@ describe('Logger', () => {
             logger.info(`this contains secrets: ${JSON.stringify(decl, null, 4)}`);
             assert.notStrictEqual(loggedMessages.info[0].indexOf(expected), -1);
         });
+
         it('should mask secrets - passphrase (without new lines)', () => {
             const decl = {
                 passphrase: 'foo'

@@ -1,3 +1,5 @@
 # mocha.opts
+  --require ./test/unit/shared/restoreCache.js
+  --recursive ./test/unit/**/*.js 
   --timeout 600000
   --reporter ./test/customMochaReporter.js

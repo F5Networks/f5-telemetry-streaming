@@ -8,7 +8,28 @@
 
 'use strict';
 
-const VERSION = '1.9.0';
+
+const packageVersionInfo = (function () {
+    let packageVersion = '0.0.0-0';
+    ['../package.json', '../../package.json'].some((fname) => {
+        try {
+            packageVersion = require(fname).version; // eslint-disable-line global-require,import/no-dynamic-require
+            delete require.cache[require.resolve(fname)];
+        } catch (err) {
+            return false;
+        }
+        return true;
+    });
+    packageVersion = packageVersion.split('-');
+    if (packageVersion.length === 1) {
+        // push RELEASE number
+        packageVersion.push('1');
+    }
+    return packageVersion;
+}());
+
+const VERSION = packageVersionInfo[0];
+const RELEASE = packageVersionInfo[1];
 
 
 /**
@@ -47,11 +68,12 @@ WEEKDAY_TO_DAY_NAME[7] = 'sunday';
 
 
 module.exports = {
+    RELEASE,
     VERSION,
 
-    BIG_IP_DEVICE_TYPE: 'BIG-IP',
     CONFIG_CLASSES: {
         CONSUMERS_CLASS_NAME: 'Telemetry_Consumer',
+        CONTROLS_CLASS_NAME: 'Controls',
         ENDPOINTS_CLASS_NAME: 'Telemetry_Endpoints',
         EVENTS_CLASS_NAME: 'Telemetry_Events',
         EVENT_LISTENER_CLASS_NAME: 'Telemetry_Listener',
@@ -60,8 +82,6 @@ module.exports = {
         SYSTEM_POLLER_CLASS_NAME: 'Telemetry_System_Poller'
     },
     CONSUMERS_DIR: './consumers',
-    CONTAINER_DEVICE_TYPE: 'Container',
-    CONTROLS_CLASS_NAME: 'Controls',
     CONTROLS_PROPERTY_NAME: 'controls',
     DAY_NAME_TO_WEEKDAY,
     DEVICE_DEFAULT_PORT: 8100,
@@ -72,6 +92,10 @@ module.exports = {
     DEVICE_REST_MAMD_DIR: '/var/config/rest/madm',
     DEVICE_REST_MADM_URI: '/mgmt/shared/file-transfer/madm/',
     DEVICE_TMP_DIR: '/shared/tmp',
+    DEVICE_TYPE: {
+        BIG_IP: 'BIG-IP',
+        CONTAINER: 'Container'
+    },
     DEFAULT_EVENT_LISTENER_PORT: 6514,
     EVENT_TYPES: {
         DEFAULT: 'event',

@@ -8,7 +8,7 @@
 
 'use strict';
 
-const ESClient = require('elasticsearch').Client;
+const elasticsearch = require('elasticsearch');
 const util = require('../../util.js');
 const EVENT_TYPES = require('../../constants.js').EVENT_TYPES;
 
@@ -80,7 +80,7 @@ module.exports = function (context) {
     if (context.tracer) {
         context.tracer.write(JSON.stringify(payload, null, 4));
     }
-    const client = new ESClient(clientConfig);
+    const client = new elasticsearch.Client(clientConfig);
     client.index(payload)
         .then(() => {
             context.logger.debug('success');

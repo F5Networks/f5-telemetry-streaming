@@ -210,7 +210,7 @@ const keywords = {
                             if (data[constants.PASSPHRASE_CIPHER_TEXT].startsWith(secureVaultCipherPrefix)) {
                                 return Promise.resolve(true);
                             }
-                            return Promise.reject(new Error(`'${constants.PASSPHRASE_CIPHER_TEXT}' should be encrypted by ${constants.BIG_IP_DEVICE_TYPE} when 'protected' is '${secureVaultNamedKey}'`));
+                            return Promise.reject(new Error(`'${constants.PASSPHRASE_CIPHER_TEXT}' should be encrypted by ${constants.DEVICE_TYPE.BIG_IP} when 'protected' is '${secureVaultNamedKey}'`));
                         }
                         if (data.protected === base64NamedKey) {
                             data[constants.PASSPHRASE_CIPHER_TEXT] = util.base64('decode', data[constants.PASSPHRASE_CIPHER_TEXT]);
@@ -219,8 +219,8 @@ const keywords = {
 
                         return deviceUtil.getDeviceType()
                             .then((deviceType) => {
-                                if (deviceType !== constants.BIG_IP_DEVICE_TYPE) {
-                                    return Promise.reject(new Error(`Specifying '${constants.PASSPHRASE_CIPHER_TEXT}' requires running on ${constants.BIG_IP_DEVICE_TYPE}`));
+                                if (deviceType !== constants.DEVICE_TYPE.BIG_IP) {
+                                    return Promise.reject(new Error(`Specifying '${constants.PASSPHRASE_CIPHER_TEXT}' requires running on ${constants.DEVICE_TYPE.BIG_IP}`));
                                 }
                                 return deviceUtil.encryptSecret(data[constants.PASSPHRASE_CIPHER_TEXT]);
                             })
