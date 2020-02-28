@@ -54,6 +54,7 @@ const SOURCE_2_TYPES = {
     'bigip.objectmodel.profile': 'f5:bigip:config:iapp:json',
     'bigip.objectmodel.virtual': 'f5:bigip:config:iapp:json',
     'bigip.objectmodel.virtual.pools': 'f5:bigip:config:iapp:json',
+    'bigip.objectmodel.virtual.profiles': 'f5:bigip:config:iapp:json',
     'bigip.ihealth.diagnostics': 'f5:bigip:ihealth:iapp:json',
     'bigip.tmstats': 'f5:bigip:stats:iapp.json'
 };
@@ -323,6 +324,33 @@ const stats = [
             newData.event.protocol = vsStat.ipProtocol;
             return newData;
         });
+    },
+
+    function (request) {
+        const vsStats = getData(request, 'virtualServers');
+        if (vsStats === undefined) return undefined;
+
+        const template = getTemplate('bigip.objectmodel.virtual.profiles', request.globalCtx.event.data, request.cache);
+        const ret = [];
+        Object.keys(vsStats).forEach((vsKey) => {
+            const vsStat = vsStats[vsKey];
+            if (!vsStat.profiles) {
+                return;
+            }
+            const profiles = vsStat.profiles;
+            Object.keys(profiles).forEach((profKey) => {
+                const newData = Object.assign({}, template);
+                newData.event = Object.assign({}, template.event);
+                newData.event.virtual_name = vsKey;
+                newData.event.tenant = vsStat.tenant;
+                newData.event.app = vsStat.application;
+                newData.event.appComponent = '';
+                newData.event.profile_name = profKey;
+                newData.event.profile_type = 'profile';
+                ret.push(newData);
+            });
+        });
+        return ret;
     },
 
     function (request) {

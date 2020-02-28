@@ -515,4 +515,77 @@ describe('Normalize Util', () => {
             );
         });
     });
+
+    describe('restructureVirtualServerProfiles', () => {
+        it('should restructure virtual server profiles (without items property)', () => {
+            const data = {
+                vs1: {
+                    profiles: {
+                        name: 'profiles'
+                    }
+                }
+            };
+            const expected = {
+                vs1: {
+                    profiles: {}
+                }
+            };
+            assert.deepStrictEqual(normalizeUtil.restructureVirtualServerProfiles({ data }), expected);
+        });
+
+        it('should restructure virtual server profiles (with items property but without profiles data)', () => {
+            const data = {
+                vs1: {
+                    profiles: {
+                        name: 'profiles',
+                        items: {
+                            name: 'items'
+                        }
+                    }
+                }
+            };
+            const expected = {
+                vs1: {
+                    profiles: {}
+                }
+            };
+            assert.deepStrictEqual(normalizeUtil.restructureVirtualServerProfiles({ data }), expected);
+        });
+
+        it('should restructure virtual server profiles', () => {
+            const data = {
+                vs1: {
+                    profiles: {
+                        name: 'profiles',
+                        items: {
+                            name: 'items',
+                            profile1: {
+                                name: 'profile1',
+                                tenant: 'Common'
+                            },
+                            profile2: {
+                                name: 'profile2',
+                                tenant: 'Common'
+                            }
+                        }
+                    }
+                }
+            };
+            const expected = {
+                vs1: {
+                    profiles: {
+                        profile1: {
+                            name: 'profile1',
+                            tenant: 'Common'
+                        },
+                        profile2: {
+                            name: 'profile2',
+                            tenant: 'Common'
+                        }
+                    }
+                }
+            };
+            assert.deepStrictEqual(normalizeUtil.restructureVirtualServerProfiles({ data }), expected);
+        });
+    });
 });

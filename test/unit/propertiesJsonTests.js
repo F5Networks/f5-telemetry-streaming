@@ -112,7 +112,8 @@ describe('properties.json', () => {
                             assert.deepStrictEqual(stats.loader.cachedResponse, {}, 'cache should be erased');
                         })
                         .then(() => {
-                            // if after second attempt output will be the properties, paths and etc. works correctly.
+                            // if after second attempt output will be the same
+                            // then properties, paths and etc. works correctly
                             testUtil.mockEndpoints(testConf.endpoints || [], { responseChecker: checkResponse });
                             return assert.becomes(
                                 getCollectedData(stats.collect(), stats),

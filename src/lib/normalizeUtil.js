@@ -505,7 +505,57 @@ module.exports = {
     },
 
     /**
-     * Get value by key
+     * Restructure Virtual Server Profiles
+     *
+     * @param {Object} args              - args object
+     * @param {Object} [args.data]       - data to process (always included)
+     *
+     * @returns {Object} Returns formatted data
+     */
+    restructureVirtualServerProfiles(args) {
+        /**
+         * Possible issues:
+         * profiles: {
+         *      name: 'profiles', <---- should be removed
+         *      items: { <---- should be removed
+         *         name: 'items', <---- should be removed
+         *         profile1: { <---- should be moved one level up
+         *             name: 'profile1',
+         *             .....
+         *         }
+         *      }
+         * }
+         */
+        const data = args.data;
+        if (data) {
+            Object.keys(data).forEach((vsName) => {
+                const vsObj = data[vsName];
+                if (vsObj.profiles) {
+                    const profiles = vsObj.profiles;
+                    delete profiles.name;
+
+                    if (profiles.items) {
+                        delete profiles.items.name;
+
+                        Object.keys(profiles.items).forEach((profileName) => {
+                            profiles[profileName] = profiles.items[profileName];
+                        });
+                        delete profiles.items;
+                    }
+                }
+            });
+        }
+        return data;
+    },
+
+    /**
+     * Get value by key/path
+     *
+     * @param {Object} args               - args object
+     * @param {Object} [args.data]        - data to process (always included)
+     * @param {Array<String>} [args.path] - path to fetch data from
+     *
+     * @returns {Object} Returns value that belongs to key/path
      */
     getValue(args) {
         let data = args.data;

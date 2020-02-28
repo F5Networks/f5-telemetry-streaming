@@ -280,7 +280,19 @@
             "ipProtocol": "tcp",
             "tenant": "Common",
             "pool": "/Common/foofoo.app/foofoo_pool",
-            "application": "foofoo.app"
+            "application": "foofoo.app",
+            "profiles": {
+                "/Common/tcp": {
+                    "name": "/Common/tcp",
+                    "tenant": "Common"
+                },
+                "/Common/app/http": {
+                    "name": "/Common/app/http",
+                    "tenant": "Common",
+                    "application": "app"
+                }
+            }
+
         },
         "/Example_Tenant/A1/serviceMain": {
             "clientside.bitsIn": 0,
@@ -294,7 +306,8 @@
             "ipProtocol": "tcp",
             "tenant": "Example_Tenant",
             "pool": "/Example_Tenant/A1/barbar_pool",
-            "application": "A1"
+            "application": "A1",
+            "profiles": {}
         },
         "/Example_Tenant/A1/serviceMain-Redirect": {
             "clientside.bitsIn": 0,
@@ -305,7 +318,18 @@
             "enabledState": "enabled",
             "name": "/Example_Tenant/A1/serviceMain-Redirect",
             "tenant": "Example_Tenant",
-            "application": "A1"
+            "application": "A1",
+            "profiles": {
+                "/Common/customTcp": {
+                    "name": "/Common/customTcp",
+                    "tenant": "Common"
+                },
+                "/Common/app/http": {
+                    "name": "/Common/app/http",
+                    "tenant": "Common",
+                    "application": "app"
+                }
+            }
         }
     },
     "pools": {
