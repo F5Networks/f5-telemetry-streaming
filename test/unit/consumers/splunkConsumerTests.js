@@ -196,20 +196,22 @@ describe('Splunk', () => {
         });
 
         it('should process systemInfo in legacy format', (done) => {
+            // test works correctly while:
+            // - we generating output in predictable order
+            // - Object.keys() returns the same array on different node versions
+            const expectedData = splunkData.legacySystemData[0].expectedData;
             const context = testUtil.buildConsumerContext({
                 eventType: 'systemInfo',
                 config: defaultConsumerConfig
             });
             context.config.format = 'legacy';
-            const expectedLegacyData = splunkData.legacySystemData[0].expectedData;
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
                     let output = zlib.gunzipSync(opts.body).toString();
                     output = output.replace(/}{"time/g, '},{"time');
                     output = JSON.parse(`[${output}]`);
-
-                    assert.deepStrictEqual(output, expectedLegacyData.map(d => JSON.parse(d)));
+                    assert.deepStrictEqual(output, expectedData);
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.

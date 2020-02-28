@@ -264,7 +264,18 @@
             "ipProtocol": "tcp",
             "mask": "255.255.255.255",
             "tenant": "Common",
-            "application": "Shared"
+            "application": "Shared",
+            "profiles": {
+                "/Common/tcp": {
+                    "name": "/Common/tcp",
+                    "tenant": "Common"
+                },
+                "/Common/app/http": {
+                    "name": "/Common/app/http",
+                    "tenant": "Common",
+                    "application": "app"
+                }
+            }
         },
         "/Common/something": {
             "clientside.bitsIn": 0,
@@ -277,7 +288,18 @@
             "ipProtocol": "tcp",
             "mask": "255.255.255.255",
             "pool": "/Common/static",
-            "tenant": "Common"
+            "tenant": "Common",
+            "profiles": {
+                "/Common/tcpCustom": {
+                    "name": "/Common/tcpCustom",
+                    "tenant": "Common"
+                },
+                "/Common/app/http": {
+                    "name": "/Common/app/http",
+                    "tenant": "Common",
+                    "application": "app"
+                }
+            }
         },
         "/Common/telemetry_gjd": {
             "clientside.bitsIn": 0,
