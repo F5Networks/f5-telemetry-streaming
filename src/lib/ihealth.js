@@ -8,13 +8,13 @@
 
 'use strict';
 
-const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
-const constants = require('./constants.js');
-const util = require('./util.js');
-const configWorker = require('./config.js');
-const iHealthPoller = require('./ihealthPoller.js');
-const dataPipeline = require('./dataPipeline.js');
-const normalize = require('./normalize.js');
+const logger = require('./logger'); // eslint-disable-line no-unused-vars
+const constants = require('./constants');
+const util = require('./util');
+const configWorker = require('./config');
+const iHealthPoller = require('./ihealthPoller');
+const dataPipeline = require('./dataPipeline');
+const normalize = require('./normalize');
 const properties = require('./properties.json').ihealth;
 
 const SYSTEM_CLASS_NAME = constants.CONFIG_CLASSES.SYSTEM_CLASS_NAME;

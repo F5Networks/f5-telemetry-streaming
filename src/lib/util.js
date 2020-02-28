@@ -13,8 +13,8 @@ const net = require('net');
 const path = require('path');
 const request = require('request');
 
-const constants = require('./constants.js');
-const logger = require('./logger.js');
+const constants = require('./constants');
+const logger = require('./logger');
 
 /** @module util */
 

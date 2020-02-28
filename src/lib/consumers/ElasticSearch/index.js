@@ -9,8 +9,8 @@
 'use strict';
 
 const elasticsearch = require('elasticsearch');
-const util = require('../../util.js');
-const EVENT_TYPES = require('../../constants.js').EVENT_TYPES;
+const util = require('../../util');
+const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 
 
 function elasticLogger(logger, tracer) {

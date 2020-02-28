@@ -9,7 +9,7 @@
 'use strict';
 
 const mustache = require('mustache');
-const util = require('./util.js');
+const util = require('./util');
 
 /**
  * Comparison functions

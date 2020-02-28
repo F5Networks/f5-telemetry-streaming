@@ -11,10 +11,10 @@
 /* eslint-disable no-console */
 
 // initliaze logger
-const util = require('./shared/util.js'); // eslint-disable-line
-const constants = require('./shared/constants.js');
-const dutTests = require('./dutTests.js');
-const consumerHostTests = require('./consumerSystemTests.js');
+const util = require('./shared/util'); // eslint-disable-line
+const constants = require('./shared/constants');
+const dutTests = require('./dutTests');
+const consumerHostTests = require('./consumerSystemTests');
 
 const skipDut = process.env[constants.ENV_VARS.TEST_CONTROLS.SKIP_DUT_TESTS];
 const skipConsumer = process.env[constants.ENV_VARS.TEST_CONTROLS.SKIP_CONSUMER_TESTS];

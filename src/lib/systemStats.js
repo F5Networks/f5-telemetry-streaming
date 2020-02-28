@@ -9,12 +9,12 @@
 'use strict';
 
 
-const constants = require('./constants.js');
-const util = require('./util.js');
-const normalize = require('./normalize.js');
+const constants = require('./constants');
+const util = require('./util');
+const normalize = require('./normalize');
 const defaultProperties = require('./properties.json');
 const defaultPaths = require('./paths.json');
-const logger = require('./logger.js');
+const logger = require('./logger');
 const EndpointLoader = require('./endpointLoader');
 const dataUtil = require('./dataUtil');
 const systemStatsUtil = require('./systemStatsUtil');

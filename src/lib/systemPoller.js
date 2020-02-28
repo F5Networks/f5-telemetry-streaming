@@ -8,13 +8,13 @@
 
 'use strict';
 
-const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
-const constants = require('./constants.js');
-const util = require('./util.js');
-const deviceUtil = require('./deviceUtil.js');
-const configWorker = require('./config.js');
-const SystemStats = require('./systemStats.js');
-const dataPipeline = require('./dataPipeline.js');
+const logger = require('./logger'); // eslint-disable-line no-unused-vars
+const constants = require('./constants');
+const util = require('./util');
+const deviceUtil = require('./deviceUtil');
+const configWorker = require('./config');
+const SystemStats = require('./systemStats');
+const dataPipeline = require('./dataPipeline');
 
 
 const CONSUMER_CLASS_NAME = constants.CONFIG_CLASSES.CONSUMERS_CLASS_NAME;

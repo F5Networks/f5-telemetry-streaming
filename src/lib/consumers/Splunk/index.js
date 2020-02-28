@@ -11,8 +11,8 @@
 const request = require('request');
 const zlib = require('zlib');
 
-const dataMapping = require('./dataMapping.js');
-const EVENT_TYPES = require('../../constants.js').EVENT_TYPES;
+const dataMapping = require('./dataMapping');
+const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 
 const GZIP_DATA = true;
 const MAX_CHUNK_SIZE = 99000;

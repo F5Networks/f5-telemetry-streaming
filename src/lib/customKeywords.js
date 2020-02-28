@@ -10,9 +10,9 @@
 
 const Ajv = require('ajv');
 const fs = require('fs');
-const constants = require('./constants.js');
-const util = require('./util.js');
-const deviceUtil = require('./deviceUtil.js');
+const constants = require('./constants');
+const util = require('./util');
+const deviceUtil = require('./deviceUtil');
 
 const textNamedKey = 'plainText';
 const base64NamedKey = 'plainBase64';
