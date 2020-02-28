@@ -10,10 +10,10 @@
 
 const properties = require('./properties.json');
 const normalizeUtil = require('./normalizeUtil');
-const dataUtil = require('./dataUtil.js');
-const util = require('./util.js');
+const dataUtil = require('./dataUtil');
+const util = require('./util');
 const systemStatsUtil = require('./systemStatsUtil');
-const EVENT_TYPES = require('./constants.js').EVENT_TYPES;
+const EVENT_TYPES = require('./constants').EVENT_TYPES;
 
 /**
  * Handle tagging actions on the data.

@@ -8,9 +8,9 @@
 
 'use strict';
 
-const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
-const constants = require('./constants.js');
-const normalizeUtil = require('./normalizeUtil.js');
+const logger = require('./logger'); // eslint-disable-line no-unused-vars
+const constants = require('./constants');
+const normalizeUtil = require('./normalizeUtil');
 
 
 /**

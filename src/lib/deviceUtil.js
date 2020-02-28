@@ -13,9 +13,9 @@ const fs = require('fs');
 const crypto = require('crypto');
 const diff = require('deep-diff');
 
-const constants = require('./constants.js');
-const logger = require('./logger.js');
-const util = require('./util.js');
+const constants = require('./constants');
+const logger = require('./logger');
+const util = require('./util');
 
 
 /**

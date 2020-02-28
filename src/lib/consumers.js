@@ -9,12 +9,12 @@
 'use strict';
 
 const path = require('path');
-const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
-const deepCopy = require('./util.js').deepCopy;
-const tracers = require('./util.js').tracer;
-const constants = require('./constants.js');
-const configWorker = require('./config.js');
-const DataFilter = require('./dataFilter.js').DataFilter;
+const logger = require('./logger'); // eslint-disable-line no-unused-vars
+const deepCopy = require('./util').deepCopy;
+const tracers = require('./util').tracer;
+const constants = require('./constants');
+const configWorker = require('./config');
+const DataFilter = require('./dataFilter').DataFilter;
 
 const CONSUMERS_DIR = constants.CONSUMERS_DIR;
 const CLASS_NAME = constants.CONFIG_CLASSES.CONSUMERS_CLASS_NAME;

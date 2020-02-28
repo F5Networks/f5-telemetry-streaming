@@ -10,7 +10,7 @@
 
 const request = require('request');
 const crypto = require('crypto');
-const EVENT_TYPES = require('../../constants.js').EVENT_TYPES;
+const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 
 function makeRequest(requestOptions) {
     return new Promise((resolve, reject) => {

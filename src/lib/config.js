@@ -14,10 +14,10 @@ const setupAsync = require('ajv-async');
 const EventEmitter = require('events');
 const TeemDevice = require('@f5devcentral/f5-teem').Device;
 
-const logger = require('./logger.js');
-const util = require('./util.js');
-const deviceUtil = require('./deviceUtil.js');
-const persistentStorage = require('./persistentStorage.js').persistentStorage;
+const logger = require('./logger');
+const util = require('./util');
+const deviceUtil = require('./deviceUtil');
+const persistentStorage = require('./persistentStorage').persistentStorage;
 
 const baseSchema = require('../schema/latest/base_schema.json');
 const controlsSchema = require('../schema/latest/controls_schema.json');
@@ -29,10 +29,10 @@ const consumerSchema = require('../schema/latest/consumer_schema.json');
 const iHealthPollerSchema = require('../schema/latest/ihealth_poller_schema.json');
 const endpointsSchema = require('../schema/latest/endpoints_schema.json');
 
-const customKeywords = require('./customKeywords.js');
-const CONTROLS_CLASS_NAME = require('./constants.js').CONFIG_CLASSES.CONTROLS_CLASS_NAME;
-const CONTROLS_PROPERTY_NAME = require('./constants.js').CONTROLS_PROPERTY_NAME;
-const VERSION = require('./constants.js').VERSION;
+const customKeywords = require('./customKeywords');
+const CONTROLS_CLASS_NAME = require('./constants').CONFIG_CLASSES.CONTROLS_CLASS_NAME;
+const CONTROLS_PROPERTY_NAME = require('./constants').CONTROLS_PROPERTY_NAME;
+const VERSION = require('./constants').VERSION;
 
 const PERSISTENT_STORAGE_KEY = 'config';
 const BASE_CONFIG = {
