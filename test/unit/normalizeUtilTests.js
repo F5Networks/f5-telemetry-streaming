@@ -87,6 +87,88 @@ describe('Normalize Util', () => {
         });
     });
 
+    describe('restructureHostCpuInfo', () => {
+        const cpuInfoPattern = '^sys/host-info/\\d+::^sys/hostInfo/\\d+/cpuInfo';
+
+        it('should get cpuInfo properties via regex', () => {
+            const data = {
+                'sys/host-info/0': {
+                    'sys/hostInfo/0/cpuInfo': {
+                        'sys/hostInfo/0/cpuInfo/0': {
+                            oneMinAvgSystem: 2
+                        },
+                        'sys/hostInfo/0/cpuInfo/1': {
+                            oneMinAvgSystem: 4
+                        }
+                    }
+                },
+                'sys/host-info/1': {
+                    'sys/hostInfo/1/cpuInfo': {
+                        'sys/hostInfo/1/cpuInfo/0': {
+                            oneMinAvgSystem: 6
+                        },
+                        'sys/hostInfo/1/cpuInfo/1': {
+                            oneMinAvgSystem: 8
+                        }
+                    }
+                },
+                'notsys/host-info/2': {
+                    'sys/hostInfo/2/cpuInfo': {
+                        'sys/hostInfo/2/cpuInfo/0': {
+                            oneMinAvgSystem: 77
+                        },
+                        'sys/hostInfo/2/cpuInfo/1': {
+                            oneMinAvgSystem: 78
+                        }
+                    }
+                },
+                'sys/host-info/3': {
+                    'sys/hostInfo/notNumber/cpuInfo': {
+                        'sys/hostInfo/notNumber/cpuInfo/0': {
+                            oneMinAvgSystem: 87
+                        },
+                        'sys/hostInfo/notNumber/cpuInfo/1': {
+                            oneMinAvgSystem: 88
+                        }
+                    }
+                }
+            };
+            const expectedResult = {
+                'sys/hostInfo/0/cpuInfo/0': {
+                    oneMinAvgSystem: 2
+                },
+                'sys/hostInfo/0/cpuInfo/1': {
+                    oneMinAvgSystem: 4
+                },
+                'sys/hostInfo/1/cpuInfo/0': {
+                    oneMinAvgSystem: 6
+                },
+                'sys/hostInfo/1/cpuInfo/1': {
+                    oneMinAvgSystem: 8
+                }
+            };
+            const result = normalizeUtil.restructureHostCpuInfo({ data, keyPattern: cpuInfoPattern });
+            assert.deepStrictEqual(result, expectedResult);
+        });
+
+        it('should return \'missing data\' if empty data', () => {
+            const data = {};
+
+            const result = normalizeUtil.restructureHostCpuInfo({ data, keyPattern: cpuInfoPattern });
+            assert.deepStrictEqual(result, 'missing data');
+        });
+
+        it('should return \'missing data\' if no matches', () => {
+            const data = {
+                a: {
+                    b: '1'
+                }
+            };
+
+            const result = normalizeUtil.restructureHostCpuInfo({ data, keyPattern: cpuInfoPattern });
+            assert.deepStrictEqual(result, 'missing data');
+        });
+    });
     describe('.getSum()', () => {
         it('should get sum', () => {
             const data = {
@@ -153,6 +235,33 @@ describe('Normalize Util', () => {
 
             const result = normalizeUtil.getPercentFromKeys({ data, totalKey: 'total', partialKey: 'partial' });
             assert.strictEqual(result, expectedResult);
+        });
+
+        it('should get percent from nested keys', () => {
+            const data = {
+                one: {
+                    total: 10000,
+                    partial: 2000
+                },
+                two: {
+                    total: 30000,
+                    partial: 4000
+                }
+            };
+            const expectedResult = 15; // percent
+
+            const result = normalizeUtil.getPercentFromKeys({
+                data, totalKey: 'total', partialKey: 'partial', nestedObjects: true
+            });
+            assert.strictEqual(result, expectedResult);
+        });
+
+        it('should not fail when \'missing data\'', () => {
+            const data = 'missing data';
+
+            assert.doesNotThrow(() => normalizeUtil.getPercentFromKeys({
+                data, totalKey: 'total', partialKey: 'partial', nestedObjects: true
+            }));
         });
     });
 

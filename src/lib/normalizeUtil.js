@@ -10,6 +10,7 @@
 
 const logger = require('./logger'); // eslint-disable-line no-unused-vars
 const util = require('./util');
+const constants = require('./constants');
 
 
 module.exports = {
@@ -207,6 +208,48 @@ module.exports = {
     },
 
     /**
+     * Restructure host-info to collect CPU statistics for the host(s) and cpu(s)
+     * that match the provided key pattern.
+     * This function depends upon the exact output from the host-info endpoint, and will requires
+     * that every object key is unique.
+     *
+     * @param {Object} args                 - args object
+     * @param {Object} [args.data]          - data to process (always included)
+     * @param {Object} [args.keyPattern]    - pattern used to traverse object keys
+     *
+     * @returns {Object} Returns matching sub-properties
+     */
+    restructureHostCpuInfo(args) {
+        if (!args.keyPattern) {
+            throw new Error('Argument keyPattern required');
+        }
+        const data = args.data;
+        if (typeof data !== 'object') {
+            return data;
+        }
+        const keys = args.keyPattern.split(constants.STATS_KEY_SEP);
+
+        const findMatches = (inputData) => {
+            if (keys.length === 0) {
+                return inputData;
+            }
+            const keyExp = new RegExp(keys.splice(0, 1));
+            const matchedData = {};
+
+            Object.keys(inputData).forEach((dataItem) => {
+                if (keyExp.test(dataItem)) {
+                    // Capture ALL sub-properties if property matches, instead of iterating over object keys
+                    // Will overwrite matching keys in 'matchedData' - assumption is that *EVERY* key is unique
+                    Object.assign(matchedData, inputData[dataItem]);
+                }
+            });
+            return findMatches(matchedData);
+        };
+        const result = findMatches(data);
+        return Object.keys(result).length === 0 ? 'missing data' : result;
+    },
+
+    /**
      * Average values
      *
      * @param {Object} args                - args object
@@ -294,16 +337,29 @@ module.exports = {
     /**
      * getPercentFromKeys
      *
-     * @param {Object} args              - args object
-     * @param {Object} [args.data]       - data to process (always included)
-     * @param {Object} [args.totalKey]   - key containing total (max) value
-     * @param {Object} [args.partialKey] - key containing partial value, such as free or used
-     * @param {Object} [args.inverse]    - inverse percentage
+     * @param {Object} args                     - args object
+     * @param {Object} [args.data]              - data to process (always included)
+     * @param {Object} [args.totalKey]          - key containing total (max) value
+     * @param {Object} [args.partialKey]        - key containing partial value, such as free or used
+     * @param {Object} [args.inverse]           - inverse percentage
+     * @param {Object} [args.nestedObjects]     - whether or not to traverse sub-objects for keys
      *
      * @returns {Object} Returns calculated percentage
      */
     getPercentFromKeys(args) {
         const data = args.data;
+
+        const accumulateSubKeys = (arg, dataKeys) => dataKeys
+            .map(key => data[key][arg])
+            .reduce((acc, val) => acc + val);
+
+        if (args.nestedObjects && typeof data === 'object') {
+            // Get object keys before modifying the data object
+            const dataKeys = Object.keys(data);
+            [args.partialKey, args.totalKey].forEach((arg) => {
+                data[arg] = accumulateSubKeys(arg, dataKeys);
+            });
+        }
 
         // this should result in a number between 0 and 100 (percentage)
         let ret = Math.round(data[args.partialKey] / data[args.totalKey] * 100);
