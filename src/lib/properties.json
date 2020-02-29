@@ -166,20 +166,25 @@
         },
         "cpu": {
             "structure": { "parentKey": "system" },
-            "key": "/mgmt/tm/sys/host-info::sys/host-info/0::sys/hostInfo/0/cpuInfo",
+            "key": "/mgmt/tm/sys/host-info",
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "getAverage", "args": { "keyWithValue": "oneMinAvgSystem" } }]
+                    "runFunctions": [
+                        { "name": "restructureHostCpuInfo", "args": { "keyPattern": "^sys/host-info/\\d+::^sys/hostInfo/\\d+/cpuInfo" } },
+                        { "name": "getAverage", "args": { "keyWithValue": "oneMinAvgSystem" } }
+                    ]
                 }
             ],
             "comment": "also oneMinAvgUser, need to determine how that should be factored in"
         },
         "memory": {
             "structure": { "parentKey": "system" },
-            "key": "/mgmt/tm/sys/memory::sys/memory/memory-host::sys/memory/memory-host/0",
+            "key": "/mgmt/tm/sys/memory::sys/memory/memory-host",
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "getPercentFromKeys", "args": { "totalKey": "memoryTotal", "partialKey": "memoryUsed" } }]
+                    "runFunctions": [
+                        { "name": "getPercentFromKeys", "args": { "totalKey": "memoryTotal", "partialKey": "memoryUsed", "nestedObjects": true } }
+                    ]
                 }
             ]
         },
@@ -194,10 +199,12 @@
         },
         "tmmMemory": {
             "structure": { "parentKey": "system" },
-            "key": "/mgmt/tm/sys/memory::sys/memory/memory-host::sys/memory/memory-host/0",
+            "key": "/mgmt/tm/sys/memory::sys/memory/memory-host",
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "getPercentFromKeys", "args": { "totalKey": "tmmMemoryTotal", "partialKey": "tmmMemoryUsed" } }]
+                    "runFunctions": [
+                        { "name": "getPercentFromKeys", "args": { "totalKey": "tmmMemoryTotal", "partialKey": "tmmMemoryUsed", "nestedObjects": true } }
+                    ]
                 }
             ]
         },

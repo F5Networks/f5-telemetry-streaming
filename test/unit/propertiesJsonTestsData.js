@@ -906,6 +906,337 @@ module.exports = {
             },
             /**
              * TEST DATA STARTS HERE
+             */
+            {
+                name: 'should collect cpuInfo on a multi CPU device',
+                statsToCollect: ['system', 'cpu'],
+                contextToCollect: context => context,
+                expectedData: {
+                    system: {
+                        cpu: 20
+                    }
+                },
+                endpoints: [
+                    {
+                        endpoint: '/mgmt/tm/sys/host-info',
+                        response: {
+                            kind: 'tm:sys:host-info:host-infostats',
+                            selfLink: 'https://localhost/mgmt/tm/sys/host-info?ver=14.1.0',
+                            entries: {
+                                'https://localhost/mgmt/tm/sys/host-info/1': {
+                                    nestedStats: {
+                                        entries: {
+                                            'https://localhost/mgmt/tm/sys/hostInfo/1/cpuInfo': {
+                                                nestedStats: {
+                                                    entries: {
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/1/cpuInfo/0': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 2
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/1/cpuInfo/1': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 4
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/1/cpuInfo/2': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 6
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/1/cpuInfo/3': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 8
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                'https://localhost/mgmt/tm/sys/host-info/2': {
+                                    nestedStats: {
+                                        entries: {
+                                            'https://localhost/mgmt/tm/sys/hostInfo/2/cpuInfo': {
+                                                nestedStats: {
+                                                    entries: {
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/2/cpuInfo/0': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 12
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/2/cpuInfo/1': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 14
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/2/cpuInfo/2': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 16
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/2/cpuInfo/3': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 18
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                'https://localhost/mgmt/tm/sys/host-info/3': {
+                                    nestedStats: {
+                                        entries: {
+                                            'https://localhost/mgmt/tm/sys/hostInfo/3/cpuInfo': {
+                                                nestedStats: {
+                                                    entries: {
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/3/cpuInfo/0': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 22
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/3/cpuInfo/1': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 24
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/3/cpuInfo/2': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 26
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/3/cpuInfo/3': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 28
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                'https://localhost/mgmt/tm/sys/host-info/4': {
+                                    nestedStats: {
+                                        entries: {
+                                            'https://localhost/mgmt/tm/sys/hostInfo/4/cpuInfo': {
+                                                nestedStats: {
+                                                    entries: {
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/4/cpuInfo/0': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 32
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/4/cpuInfo/1': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 34
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/4/cpuInfo/2': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 36
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/4/cpuInfo/3': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 38
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        endpoint: '/mgmt/shared/identified-devices/config/device-info',
+                        options: {
+                            times: 999
+                        },
+                        response: {
+                            kind: 'shared:resolver:device-groups:deviceinfostate',
+                            selfLink: 'https://localhost/mgmt/shared/identified-devices/config/device-info',
+                            baseMac: '00:01:2:a:B:d0',
+                            hostname: 'bigip1',
+                            version: '12.1.5.1',
+                            machineId: '00000000-0000-0000-0000-000000000000'
+                        }
+                    },
+                    {
+                        endpoint: '/mgmt/tm/sys/provision',
+                        options: {
+                            times: 999
+                        },
+                        response: {
+                            kind: 'tm:sys:provision:provisioncollectionstate',
+                            selfLink: 'https://localhost/mgmt/tm/sys/provision?ver=14.1.0'
+                        }
+                    }
+                ]
+            },
+            /**
+             * TEST DATA STARTS HERE
+             */
+            {
+                name: 'should collect memory-host on a multi host device',
+                statsToCollect: ['system', 'memory', 'tmmMemory'],
+                contextToCollect: context => context,
+                expectedData: {
+                    system: {
+                        memory: 70,
+                        tmmMemory: 7
+                    }
+                },
+                endpoints: [
+                    {
+                        endpoint: '/mgmt/tm/sys/memory',
+                        options: {
+                            times: 2
+                        },
+                        response: {
+                            kind: 'tm:sys:memory:memorystats',
+                            selfLink: 'https://localhost/mgmt/tm/sys/memory?ver=14.1.0',
+                            entries: {
+                                'https://localhost/mgmt/tm/sys/memory/memory-host': {
+                                    nestedStats: {
+                                        entries: {
+                                            'https://localhost/mgmt/tm/sys/memory/memory-host/0': {
+                                                nestedStats: {
+                                                    entries: {
+                                                        memoryTotal: {
+                                                            value: 8062742528
+                                                        },
+                                                        memoryUsed: {
+                                                            value: 1314352272
+                                                        },
+                                                        tmmMemoryTotal: {
+                                                            value: 6320816128
+                                                        },
+                                                        tmmMemoryUsed: {
+                                                            value: 169258128
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            'https://localhost/mgmt/tm/sys/memory/memory-host/1': {
+                                                nestedStats: {
+                                                    entries: {
+                                                        memoryTotal: {
+                                                            value: 16759459840
+                                                        },
+                                                        memoryUsed: {
+                                                            value: 16091751448
+                                                        },
+                                                        tmmMemoryTotal: {
+                                                            value: 423624704
+                                                        },
+                                                        tmmMemoryUsed: {
+                                                            value: 283849752
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        endpoint: '/mgmt/shared/identified-devices/config/device-info',
+                        options: {
+                            times: 999
+                        },
+                        response: {
+                            kind: 'shared:resolver:device-groups:deviceinfostate',
+                            selfLink: 'https://localhost/mgmt/shared/identified-devices/config/device-info',
+                            baseMac: '00:01:2:a:B:d0',
+                            hostname: 'bigip1',
+                            version: '12.1.5.1',
+                            machineId: '00000000-0000-0000-0000-000000000000'
+                        }
+                    },
+                    {
+                        endpoint: '/mgmt/tm/sys/provision',
+                        response: {
+                            kind: 'tm:sys:provision:provisioncollectionstate',
+                            selfLink: 'https://localhost/mgmt/tm/sys/provision?ver=14.1.0'
+                        }
+                    }
+                ]
+            },
+            /**
+             * TEST DATA STARTS HERE
              * */
             {
                 name: 'should not fail when no data (with items property)',

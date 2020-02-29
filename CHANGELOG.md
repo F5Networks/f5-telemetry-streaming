@@ -5,6 +5,7 @@ Changes to this project are documented in this file. More detail and links can b
 ### Added
 - AUTOTOOL-1111: Enable configurable polling with Telemetry_Endpoints (BIG-IP paths) and multiple system poller support
 - AUTOTOOL-1148: Allow 'OR' logic by adding ifAnyMatch functionality.
+- AUTOTOOL-853: Support F5 systems (ex: Viprion) that have multiple hosts
 ### Fixed
 - AUTOTOOL-1051: Event Listener unable to classify AFM DoS event
 - AUTOTOOL-1037: Splunk legacy tmstats - include last_cycle_count
