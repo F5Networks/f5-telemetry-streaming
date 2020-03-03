@@ -1,5 +1,5 @@
-Configuring Custom Endpoints
-============================
+Appendix B: Configuring Custom Endpoints
+========================================
 
 .. WARNING:: Configuring custom Endpoints and multiple System poller support is currently an EXPERIMENTAL feature, and the associated API could change based on testing and user feedback.
 
@@ -14,21 +14,21 @@ The Telemetry_Endpoints class is where you define your endpoints and their paths
 
 
 
-+--------------------+-------------------------+------------+------------------------------------------------------------------------------------------------------------------------------------+
-| Parameter          | Options                 | Required?  |  Description/Notes                                                                                                                 |
-+====================+=========================+============+====================================================================================================================================+
-| class              | Telemetry_Endpoints     |   Yes      |  Indicates that this property contains route configuration.                                                                        |
-+--------------------+-------------------------+------------+------------------------------------------------------------------------------------------------------------------------------------+
-| basePath           | string                  |   No       |  Optional base path value to prepend to each individual endpoint path you specify in "items"                                       |
-+--------------------+-------------------------+------------+------------------------------------------------------------------------------------------------------------------------------------+
-| enable             | boolean                 |   No       |  Whether you want to enable this class. The default is **true**.                                                                   |
-+--------------------+-------------------------+------------+------------------------------------------------------------------------------------------------------------------------------------+
-| items              | integer                 |   Yes      |  Object with each property an endpoint with their own properties.                                                                  |
-+--------------------+-------------------------+------------+------------------------------------------------------------------------------------------------------------------------------------+
-|    \- name         | string                  |   No       |  Optional name for the item                                                                                                        |
-+--------------------+-------------------------+------------+------------------------------------------------------------------------------------------------------------------------------------+
-|    \- path         | string                  |   Yes      |  Path to query data from                                                                                                           |
-+--------------------+-------------------------+------------+------------------------------------------------------------------------------------------------------------------------------------+
++--------------------+------------+---------------------------------------------------------------------------------------------------------+
+| Parameter          | Required?  |  Description/Notes                                                                                      |
++====================+============+=========================================================================================================+
+| class              |   Yes      |  Telemetry_Endpoints                                                                                    |
++--------------------+------------+---------------------------------------------------------------------------------------------------------+
+| basePath           |   No       |  Optional base path value to prepend to each individual endpoint path you specify in "items"            |
++--------------------+------------+---------------------------------------------------------------------------------------------------------+
+| enable             |   No       |  Whether you want to enable this class. The default is **true**.                                        |
++--------------------+------------+---------------------------------------------------------------------------------------------------------+
+| items              |   Yes      |  Object with each property an endpoint with their own properties.                                       |
++--------------------+------------+---------------------------------------------------------------------------------------------------------+
+|    \- name         |   No       |  Optional name for the item                                                                             |
++--------------------+------------+---------------------------------------------------------------------------------------------------------+
+|    \- path         |   Yes      |  Path to query data from                                                                                |
++--------------------+------------+---------------------------------------------------------------------------------------------------------+
 
 
 For example, your declaration could include the following snippet, which contains endpoints for profiles, and for total connections for a virtual:
@@ -74,8 +74,8 @@ EndpointList is simply a list of endpoints to use in data collection, and can in
 
 * **Array** |br| When using an array, the item in the array must be one of the following: |br| |br|
 
-  1. Name of the Telemetry_Endpoints object (for example, ``My_endpt``) 
-  2. Name of Telemetry_Endpoints object and the endpoint object key (``My_endpt/itemA``)
+  1. Name of the Telemetry_Endpoints object (for example, ``Endpoints_Profiles``) 
+  2. Name of Telemetry_Endpoints object and the endpoint object key (``Endpoints_Profiles/radiusProfiles``)
   3. A Telemetry_Endpoint (name is required).  For example:
 
         .. code-block:: json
@@ -89,7 +89,7 @@ EndpointList is simply a list of endpoints to use in data collection, and can in
 
 * **String** |br| The name of the Telemetry_Endpoints object
 
-* **Object** An object that conforms to the definition
+* **Object** An object that conforms to the definition of the Telemetry_Endpoints class.
 
 The following is an example the system pollers, which correspond to the preceding Telemetry_Endpoints example:
 
