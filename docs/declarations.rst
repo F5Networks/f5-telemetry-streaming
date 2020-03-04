@@ -100,7 +100,7 @@ Example 7: Value-based matching
 -------------------------------
 .. IMPORTANT:: Value-based matching is available in TS v1.10.0 and later. See :ref:`valuebased` for more information on this feature.
 
-.. literalinclude:: ../examples/declarations/system_custom_endpoints.json
+.. literalinclude:: ../examples/declarations/action_matching.json
     :language: json
 
     
