@@ -122,7 +122,7 @@ As of January 2020, no breaking changes have been made to AS3, Declarative Onboa
 
 **Can I use Telemetry Streaming on F5 devices with multiple hosts, such as the Viprion platform?**
  
-Beginning with TS v1.10.0, you can use Telemetry Streaming on F5 devices with multiple hosts, such as the Viprion platform.  In versions prior to v1.10, devices with multiple hosts were not supported.
+Beginning with TS v1.10.0, you can use Telemetry Streaming on F5 devices with multiple hosts, such as the Viprion platform and vCMP systems.  In versions prior to v1.10, devices with multiple hosts were not supported.
 
 
 .. |intro| raw:: html
