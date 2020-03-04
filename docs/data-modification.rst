@@ -216,6 +216,53 @@ Example 2:
 As result of the actions chain analysis, the Telemetry System will fetch **virtualServers** only and not **pools** (and not anything else) because only **virtualServers** should be included in the result's output.
  
 |
+
+.. _valuebased:
+
+Value-based matching
+--------------------
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+   Support for value-based matching is available in TS v1.10.0 and later
+
+Telemetry Streaming v1.10 introduces value-based matching.  Value-based matching means that TS can filter based on the value of **ifAnyMatch** instead of just the presence of the field. You can provide multiple values, and the *Action* (**includeData, excludeData or setTag**, described in detail in the section starting with :ref:`include`) is triggered if any of the blocks in the array evaluate to true.
+
+The following example snippet uses the **includeData** action, so if any of the virtual servers in the **test** tenant are either enabled or disabled (and have a state of **available**), then *only* the virtualServer data is included. And because it uses **includeData**, the action must evaluate to true to occur, so if none of the virtualServers have a state of available, then ALL data is included.
+
+.. code-block:: bash
+
+    "actions": [
+        {
+            "includeData": {},
+            "ifAnyMatch": [
+                {
+                    "virtualServers": {
+                        "/test/*": {
+                            "enabledState": "enabled",
+                            "availabilityState": "available"
+                        }
+                    }
+                },
+                {
+                    "virtualServers": {
+                        "/test/*": {
+                            "enabledState": "disabled",
+                            "availabilityState": "available"
+                        }
+                    }
+                }
+            ],
+            "locations": {
+                "virtualServers": {
+                    ".*": true
+                }
+            }
+        },
+
+
+For a complete declaration with value-based matching, see :ref:`value`.
+
+|
 |
 
 .. _tagproperty:
