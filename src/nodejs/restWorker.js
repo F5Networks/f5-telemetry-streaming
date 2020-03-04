@@ -16,6 +16,8 @@ const logger = require('../lib/logger');
 const util = require('../lib/util');
 
 const baseSchema = require('../schema/latest/base_schema.json');
+const deviceUtil = require('../lib/deviceUtil');
+const retryPromise = require('../lib/util').retryPromise;
 const persistentStorage = require('../lib/persistentStorage');
 const configWorker = require('../lib/config');
 const eventListener = require('../lib/eventListener'); // eslint-disable-line no-unused-vars
@@ -26,7 +28,7 @@ const iHealthPoller = require('../lib/ihealth'); // eslint-disable-line no-unuse
 /** @module restWorkers */
 
 /**
- * Simple router to route incomming requests to REST API.
+ * Simple router to route incoming requests to REST API.
  *
  * @class
  *
@@ -209,6 +211,17 @@ RestWorker.prototype._initializeApplication = function (success, failure) {
         .catch((err) => {
             logger.exception('Startup Failed', err);
             failure();
+        });
+
+    // Gather info about host device. Running it as decoupled process
+    // to do not slow down application startup due REST API or other
+    // service may be not started yet.
+    retryPromise(() => deviceUtil.gatherHostDeviceInfo(), { maxTries: 100, delay: 30 })
+        .then(() => {
+            logger.debug('Host Device Info gathered');
+        })
+        .catch((err) => {
+            logger.exception(`Unable to gather Host Device Info: ${err}`, err);
         });
 };
 

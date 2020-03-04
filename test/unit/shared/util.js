@@ -169,5 +169,19 @@ module.exports = {
             }
             apiMock.reply(endpointMock.code || 200, response, endpointMock.responseHeaders);
         });
+    },
+
+    /**
+     * Check if nock has unused mocks and raise assertion error if so
+     *
+     * @param {Object} nockInstance - instance of nock library
+     * @param {Object} assertInstance - instance of assert library
+     */
+    checkNockActiveMocks(nockInstance, assertInstance) {
+        const activeMocks = nockInstance.activeMocks().join('\n');
+        assertInstance.ok(
+            activeMocks.length === 0,
+            `nock should have no active mocks after the test, instead mocks are still active:\n${activeMocks}\n`
+        );
     }
 };

@@ -33,14 +33,89 @@ const assert = chai.assert;
 
 describe('Device Util', () => {
     afterEach(() => {
+        testUtil.checkNockActiveMocks(nock, assert);
         nock.cleanAll();
         sinon.restore();
     });
 
+    describe('Host Device Info', () => {
+        beforeEach(() => {
+            deviceUtil.clearHostDeviceInfo();
+        });
+
+        it('should gather device info', () => {
+            sinon.stub(deviceUtil, 'getDeviceType').resolves(constants.DEVICE_TYPE.BIG_IP);
+            sinon.stub(deviceUtil, 'getDeviceVersion').resolves({ version: '14.0.0' });
+            return deviceUtil.gatherHostDeviceInfo()
+                .then(() => {
+                    assert.deepStrictEqual(
+                        deviceUtil.getHostDeviceInfo(),
+                        {
+                            TYPE: 'BIG-IP',
+                            VERSION: { version: '14.0.0' },
+                            RETRIEVE_SECRETS_FROM_TMSH: false
+                        }
+                    );
+                });
+        });
+
+        it('should set and get info by key', () => {
+            deviceUtil.setHostDeviceInfo('key1', 'value1');
+            deviceUtil.setHostDeviceInfo('key2', { value2: 10 });
+            assert.strictEqual(deviceUtil.getHostDeviceInfo('key1'), 'value1');
+            assert.deepStrictEqual(deviceUtil.getHostDeviceInfo('key2'), { value2: 10 });
+        });
+
+        it('should remove key', () => {
+            deviceUtil.setHostDeviceInfo('key1', 'value1');
+            assert.strictEqual(deviceUtil.getHostDeviceInfo('key1'), 'value1');
+            deviceUtil.clearHostDeviceInfo('key1');
+            assert.strictEqual(deviceUtil.getHostDeviceInfo('key1'), undefined);
+            assert.deepStrictEqual(deviceUtil.getHostDeviceInfo(), {});
+        });
+
+        it('should remove keys', () => {
+            deviceUtil.setHostDeviceInfo('key1', 'value1');
+            deviceUtil.setHostDeviceInfo('key2', 'value2');
+            assert.strictEqual(deviceUtil.getHostDeviceInfo('key1'), 'value1');
+            assert.strictEqual(deviceUtil.getHostDeviceInfo('key2'), 'value2');
+            deviceUtil.clearHostDeviceInfo('key1', 'key2');
+            assert.strictEqual(deviceUtil.getHostDeviceInfo('key1'), undefined);
+            assert.strictEqual(deviceUtil.getHostDeviceInfo('key2'), undefined);
+            assert.deepStrictEqual(deviceUtil.getHostDeviceInfo(), {});
+        });
+    });
+
     describe('.getDeviceType()', () => {
+        beforeEach(() => {
+            deviceUtil.clearHostDeviceInfo();
+        });
+
+        it('should get container device type when /VERSION file is absent', () => {
+            sinon.stub(fs, 'readFile').callsFake((first, cb) => {
+                cb(new Error('foo'), null);
+            });
+            return assert.becomes(
+                deviceUtil.getDeviceType(),
+                constants.DEVICE_TYPE.CONTAINER,
+                'incorrect device type, should be CONTAINER'
+            );
+        });
+
+        it('should get container device type when /VERSION has no desired data', () => {
+            sinon.stub(fs, 'readFile').callsFake((first, cb) => {
+                cb(null, deviceUtilTestsData.getDeviceType.incorrectData);
+            });
+            return assert.becomes(
+                deviceUtil.getDeviceType(),
+                constants.DEVICE_TYPE.CONTAINER,
+                'incorrect device type, should be CONTAINER'
+            );
+        });
+
         it('should get BIG-IP device type', () => {
-            sinon.stub(childProcess, 'exec').callsFake((cmd, cb) => {
-                cb(null, cmd, null);
+            sinon.stub(fs, 'readFile').callsFake((first, cb) => {
+                cb(null, deviceUtilTestsData.getDeviceType.correctData);
             });
             return assert.becomes(
                 deviceUtil.getDeviceType(),
@@ -49,15 +124,29 @@ describe('Device Util', () => {
             );
         });
 
-        it('should get container device type', () => {
-            sinon.stub(childProcess, 'exec').callsFake((cmd, cb) => {
-                cb(new Error('foo'), null, null);
+        it('should process /VERSION file correctly when readFile returns Buffer instead of String', () => {
+            sinon.stub(fs, 'readFile').callsFake((first, cb) => {
+                cb(null, Buffer.from(deviceUtilTestsData.getDeviceType.correctData));
             });
             return assert.becomes(
                 deviceUtil.getDeviceType(),
-                constants.DEVICE_TYPE.CONTAINER,
-                'incorrect device type, should be CONTAINER'
+                constants.DEVICE_TYPE.BIG_IP,
+                'incorrect device type, should be BIG-IP'
             );
+        });
+
+        it('should read result from cache', () => {
+            const readFileStub = sinon.stub(fs, 'readFile');
+            readFileStub.callsFake((first, cb) => {
+                cb(null, deviceUtilTestsData.getDeviceType.correctData);
+            });
+            sinon.stub(deviceUtil, 'getDeviceVersion').resolves({ version: '14.0.0' });
+            return deviceUtil.gatherHostDeviceInfo()
+                .then(() => deviceUtil.getDeviceType())
+                .then((deviceType) => {
+                    assert.strictEqual(deviceType, constants.DEVICE_TYPE.BIG_IP, 'incorrect device type, should be BIG-IP');
+                    assert.strictEqual(readFileStub.callCount, 1);
+                });
         });
     });
 
@@ -139,7 +228,7 @@ describe('Device Util', () => {
             );
         });
 
-        it('should fail to download file (response\' code !== 200)', () => {
+        it('should fail to download file (response code !== 200)', () => {
             const response = 'response';
             testUtil.mockEndpoints([{
                 endpoint: '/uri/to/path',
@@ -150,7 +239,7 @@ describe('Device Util', () => {
                     'content-length': response.length
                 },
                 options: {
-                    times: 10
+                    times: 5
                 }
             }]);
             return assert.isRejected(
@@ -381,7 +470,7 @@ describe('Device Util', () => {
                 }
             }]);
             return assert.isRejected(
-                deviceUtil.executeShellCommandOnDevice(constants.LOCAL_HOST, 'echo "something"'),
+                deviceUtil.executeShellCommandOnDevice(constants.LOCAL_HOST, 'echo something'),
                 /executeShellCommandOnDevice:/
             );
         });
@@ -451,12 +540,23 @@ describe('Device Util', () => {
     describe('.encryptSecret()', () => {
         beforeEach(() => {
             sinon.stub(crypto, 'randomBytes').returns('test');
+            deviceUtil.clearHostDeviceInfo();
+        });
+
+        it('should use cached device info on attempt to encrypt data', () => {
+            testUtil.mockEndpoints(deviceUtilTestsData.encryptSecret['encrypt-14.0.0']);
+            sinon.stub(deviceUtil, 'getDeviceType').resolves(constants.DEVICE_TYPE.BIG_IP);
+            return deviceUtil.gatherHostDeviceInfo()
+                .then(() => deviceUtil.encryptSecret('foo'))
+                .then((encryptedData) => {
+                    assert.strictEqual(encryptedData, 'secret');
+                });
         });
 
         it('should encrypt secret and retrieve it via REST API when software version is 14.0.0', () => {
             testUtil.mockEndpoints(deviceUtilTestsData.encryptSecret['encrypt-14.0.0']);
             return assert.becomes(
-                deviceUtil.encryptSecret('foo'),
+                deviceUtil.encryptSecret('foo', true),
                 'secret'
             );
         });
@@ -464,7 +564,7 @@ describe('Device Util', () => {
         it('should encrypt secret and retrieve it from device via TMSH when software version is 14.1.x', () => {
             testUtil.mockEndpoints(deviceUtilTestsData.encryptSecret['encrypt-14.1.x']);
             return assert.becomes(
-                deviceUtil.encryptSecret('foo'),
+                deviceUtil.encryptSecret('foo', true),
                 'secret'
             );
         });
@@ -472,7 +572,7 @@ describe('Device Util', () => {
         it('should encrypt secret and retrieve it via REST API when software version is 15.0.0', () => {
             testUtil.mockEndpoints(deviceUtilTestsData.encryptSecret['encrypt-15.0.0']);
             return assert.becomes(
-                deviceUtil.encryptSecret('foo'),
+                deviceUtil.encryptSecret('foo', true),
                 'secret'
             );
         });
@@ -492,7 +592,7 @@ describe('Device Util', () => {
                 + 'cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
                 + 'cabcabcabcabcabcabcabcabca';
             return assert.becomes(
-                deviceUtil.encryptSecret(secret),
+                deviceUtil.encryptSecret(secret, true),
                 'secret,secret'
             );
         });
@@ -526,19 +626,19 @@ describe('Device Util', () => {
                 + 'largeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\n'
                 + 'largeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\n';
 
-            return assert.isFulfilled(deviceUtil.encryptSecret(largeSecret)
+            return deviceUtil.encryptSecret(largeSecret, true)
                 .then(() => {
                     const requestSecret = radiusRequests[0];
                     assert.strictEqual(radiusRequests.length, 2, 'largeSecret should be in 2 chunks');
                     assert.strictEqual(requestSecret.length, 500, 'length of chunk should be 500');
                     assert.ok(new RegExp(/\n/).test(requestSecret), 'newlines should be preserved');
-                }));
+                });
         });
 
         it('should fail when unable to encrypt secret', () => {
             testUtil.mockEndpoints(deviceUtilTestsData.encryptSecret.errorResponseExample);
             return assert.isRejected(
-                deviceUtil.encryptSecret('foo'),
+                deviceUtil.encryptSecret('foo', true),
                 /Bad status code: 400/
             );
         });
@@ -546,7 +646,7 @@ describe('Device Util', () => {
         it('should fail when encrypted secret has comma', () => {
             testUtil.mockEndpoints(deviceUtilTestsData.encryptSecret.errorWhenResponseHasComma);
             return assert.isRejected(
-                deviceUtil.encryptSecret('foo'),
+                deviceUtil.encryptSecret('foo', true),
                 /Encrypted data should not have a comma in it/
             );
         });

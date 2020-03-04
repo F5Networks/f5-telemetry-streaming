@@ -1,5 +1,5 @@
 # mocha.opts
-  --require ./test/unit/shared/restoreCache.js
+  --require ./test/unit/shared/bootstrap.js
   --recursive ./test/unit/**/*.js 
   --timeout 600000
   --reporter ./test/customMochaReporter.js
