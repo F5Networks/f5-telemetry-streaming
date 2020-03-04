@@ -116,7 +116,13 @@ The API Contract for the F5 Automation Toolchain (Telemetry Streaming, AS3, and 
  
 As of January 2020, no breaking changes have been made to AS3, Declarative Onboarding, or Telemetry Streaming since inception.  None are anticipated at this time.  A breaking change, if any, will be noted by a change to the major release number ("xx").  For example, the AS3 schema version would become "4.0.0."
 
+|
 
+.. _viprion:
+
+**Can I use Telemetry Streaming on F5 devices with multiple hosts, such as the Viprion platform?**
+ 
+Beginning with TS v1.10.0, you can use Telemetry Streaming on F5 devices with multiple hosts, such as the Viprion platform.  In versions prior to v1.10, devices with multiple hosts were not supported.
 
 
 .. |intro| raw:: html

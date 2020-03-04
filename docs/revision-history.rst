@@ -13,7 +13,7 @@ Document Revision History
 
       * - 1.10.0
         - Updated the documentation for Telemetry Streaming v1.10.0. This release contains the following changes: |br| *  |br| |br| Issues Resolved: |br| * Event Listener unable to classify AFM DoS event |br| * Splunk legacy tmstats - include last_cycle_count |br| * Splunk legacy tmstats - add tenant and application data |br| * Declarations with large secrets may timeout
-        - 03-1--20
+        - 03-10-20
 
       * - 1.9.0
         - Updated the documentation for Telemetry Streaming v1.9.0. This release contains the following changes: |br| * Added support for gathering configuration information and statistics for GSLB Wide IP and Pools (see :ref:`System Information example output<sysinfo>`) |br| * Username and passphrase are now optional on the AWS CloudWatch consumer (see the important note in :ref:`awscloud-ref`) |br| * Added detailed information about character encoding and Telemetry Streaming (see :ref:`char-encoding`) |br| * Added a FAQ entry to define the F5 Automation Toolchain API contract (see :ref:`What is the Automation Toolchain API Contract?<contract>`) |br| |br| Issues Resolved: |br| * Basic auth does not work with ElasticSearch consumer |br| * Some Splunk legacy tmstats datamodels have a period in property name instead of underscore
