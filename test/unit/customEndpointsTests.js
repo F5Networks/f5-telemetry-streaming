@@ -12,7 +12,7 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
 
-const util = require('./shared/util');
+const testUtil = require('./shared/util');
 const SystemStats = require('../../src/lib/systemStats');
 const customEndptsTestsData = require('./customEndpointsTestsData');
 
@@ -29,13 +29,13 @@ describe('Custom Endpoints (Telemetry_Endpoints)', () => {
     Object.keys(customEndptsTestsData).forEach((testSetKey) => {
         const testSet = customEndptsTestsData[testSetKey];
 
-        util.getCallableDescribe(testSet)(testSet.name, () => {
+        testUtil.getCallableDescribe(testSet)(testSet.name, () => {
             afterEach(() => {
                 nock.cleanAll();
             });
 
             testSet.tests.forEach((testConf) => {
-                util.getCallableIt(testConf)(testConf.name, () => {
+                testUtil.getCallableIt(testConf)(testConf.name, () => {
                     const options = {
                         endpointList: testConf.endpointList
                     };
@@ -46,7 +46,7 @@ describe('Custom Endpoints (Telemetry_Endpoints)', () => {
 
                     return Promise.resolve()
                         .then(() => {
-                            util.mockEndpoints(testConf.endpoints || [], { responseChecker: checkResponse });
+                            testUtil.mockEndpoints(testConf.endpoints || [], { responseChecker: checkResponse });
                             return assert.becomes(
                                 getCollectedData(stats.collect(), stats),
                                 testConf.expectedData,
@@ -57,7 +57,7 @@ describe('Custom Endpoints (Telemetry_Endpoints)', () => {
                             assert.deepStrictEqual(stats.loader.cachedResponse, {}, 'cache should be erased');
                         })
                         .then(() => {
-                            util.mockEndpoints(testConf.endpoints || [], { responseChecker: checkResponse });
+                            testUtil.mockEndpoints(testConf.endpoints || [], { responseChecker: checkResponse });
                             return assert.becomes(
                                 getCollectedData(stats.collect(), stats),
                                 testConf.expectedData,

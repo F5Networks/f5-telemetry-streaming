@@ -15,6 +15,7 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-1147: Add 'profiles' data (profiles attached to Virtual Server) to 'virtualServers'
 - AUTOTOOL-896: [GitHub #26](https://github.com/F5Networks/f5-telemetry-streaming/pull/26): Use baseMac instead of hostname to fetch CM device
 - AUTOTOOL-1160: cipherText validation when protected by SecureVault
+- AUTOTOOL-1239: Caching data about the host device to speed up declaration processing
 ### Changed
 - AUTOTOOL-1062: Update NPM packages
 ### Removed

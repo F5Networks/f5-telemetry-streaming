@@ -21,6 +21,7 @@ const urllib = require('url');
 const baseSchema = require('../../src/schema/latest/base_schema.json');
 const constants = require('../../src/lib/constants');
 const config = require('../../src/lib/config');
+const deviceUtil = require('../../src/lib/deviceUtil');
 const iHealthPoller = require('../../src/lib/ihealth');
 const RestWorker = require('../../src/nodejs/restWorker');
 const systemPoller = require('../../src/lib/systemPoller');
@@ -33,6 +34,7 @@ const assert = chai.assert;
 describe('restWorker', () => {
     let restWorker;
     let loadConfigStub;
+    let gatherHostDeviceInfoStub;
 
     let parseURL;
     if (process.versions.node.startsWith('4.')) {
@@ -66,6 +68,8 @@ describe('restWorker', () => {
         config.removeAllListeners();
         loadConfigStub = sinon.stub(config, 'loadConfig');
         loadConfigStub.resolves();
+        gatherHostDeviceInfoStub = sinon.stub(deviceUtil, 'gatherHostDeviceInfo');
+        gatherHostDeviceInfoStub.resolves();
     });
 
     afterEach(() => {
@@ -112,6 +116,28 @@ describe('restWorker', () => {
                 .then(() => {
                     assert.notStrictEqual(loadConfigStub.callCount, 0);
                 });
+        });
+
+        it('should gather host device info', () => new Promise((resolve, reject) => {
+            restWorker.onStartCompleted(resolve, msg => reject(new Error(msg || 'no message provided')));
+        })
+            .then(() => new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    try {
+                        // should be 1 because gatherHostDeviceInfo resolves on first attempt
+                        assert.strictEqual(gatherHostDeviceInfoStub.callCount, 1);
+                        resolve();
+                    } catch (err) {
+                        reject(err);
+                    }
+                }, 200);
+            })));
+
+        it('should not fail when unable to gather host device info', () => {
+            gatherHostDeviceInfoStub.rejects(new Error('expected error'));
+            return new Promise((resolve, reject) => {
+                restWorker.onStartCompleted(resolve, msg => reject(new Error(msg || 'no message provided')));
+            });
         });
     });
 

@@ -81,6 +81,7 @@ function restoreCache(preExistedCache) {
  * @returns {Function} that restores initial require.cache state
  */
 module.exports = (function () {
+    console.info('Saving initial \'require.cache\' state');
     console.info(`Source code directory - ${SRC_DIR}`);
     // just to be sure that modules from /src are not imported yet
     checkCache(require.cache);

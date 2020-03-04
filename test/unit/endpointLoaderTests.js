@@ -33,6 +33,7 @@ describe('Endpoint Loader', () => {
     });
 
     afterEach(() => {
+        testUtil.checkNockActiveMocks(nock, assert);
         nock.cleanAll();
         sinon.restore();
     });

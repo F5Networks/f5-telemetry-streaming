@@ -13,6 +13,10 @@ function encryptEncode(data) {
 }
 
 module.exports = {
+    getDeviceType: {
+        correctData: 'Edition: Final\nProduct: BIG-IP\nVersion: 14.1.0\n',
+        incorrectData: 'Edition: Final\nProduct: BIG-IQ\nVersion: 14.1.0\n'
+    },
     encryptSecret: {
         'encrypt-14.0.0': [
             {
@@ -145,6 +149,25 @@ module.exports = {
             {
                 endpoint: `/mgmt/tm/ltm/auth/radius-server/telemetry_delete_me_${encryptEncode('test')}`,
                 method: 'delete'
+            },
+            {
+                endpoint: '/mgmt/tm/sys/version',
+                response: {
+                    entries: {
+                        someKey: {
+                            nestedStats: {
+                                entries: {
+                                    version: {
+                                        description: '15.0.0'
+                                    },
+                                    BuildInfo: {
+                                        description: '0.0.1'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         ],
         encrypt1kSecret: [
@@ -175,9 +198,6 @@ module.exports = {
                             }
                         }
                     }
-                },
-                options: {
-                    times: 2
                 }
             },
             {
@@ -206,9 +226,6 @@ module.exports = {
                             }
                         }
                     }
-                },
-                options: {
-                    times: 2
                 }
             },
             {

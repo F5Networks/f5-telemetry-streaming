@@ -24,6 +24,7 @@ const sinon = require('sinon');
 
 const constants = require('../../src/lib/constants');
 const util = require('../../src/lib/util');
+const testUtil = require('./shared/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -203,6 +204,7 @@ describe('Util', () => {
 
     describe('.makeRequest()', () => {
         afterEach(() => {
+            testUtil.checkNockActiveMocks(nock, assert);
             sinon.restore();
             nock.cleanAll();
         });
@@ -336,15 +338,11 @@ describe('Util', () => {
         });
 
         it('should convert request data to string', () => {
-            nock('http://example.com')
-                .get('/')
-                .reply(200);
-
             sinon.stub(request, 'get').callsFake((opts, cb) => {
                 assert.strictEqual(typeof opts.body, 'string');
                 cb(null, { statusCode: 200, statusMessage: 'message' }, {});
             });
-            return assert.isFulfilled(util.makeRequest('example.com', { body: true }));
+            return assert.isFulfilled(util.makeRequest('example.com', { body: { key: 'value' } }));
         });
 
         it('should return data and response object', () => {
