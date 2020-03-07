@@ -39,6 +39,7 @@
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
+const fileLogger = require('../../winstonLogger');
 
 chai.use(chaiAsPromised);
 
