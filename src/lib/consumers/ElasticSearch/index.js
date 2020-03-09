@@ -50,7 +50,7 @@ module.exports = function (context) {
             path: config.path
         },
         ssl: {
-            rejectUnauthorized: config.allowSelfSignedCert
+            rejectUnauthorized: !config.allowSelfSignedCert
         }
     };
     if (config.username) {

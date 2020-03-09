@@ -26,7 +26,7 @@ const assert = chai.assert;
 describe('Consumers', () => {
     it('should get valid consumers', () => {
         const exampleConfig = {};
-        exampleConfig[constants.CONFIG_CLASSES.CONSUMERS_CLASS_NAME] = {
+        exampleConfig[constants.CONFIG_CLASSES.CONSUMER_CLASS_NAME] = {
             My_Consumer: {
                 class: 'Consumer',
                 type: 'default'

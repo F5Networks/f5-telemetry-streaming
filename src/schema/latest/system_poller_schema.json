@@ -21,13 +21,14 @@
                         }
                     ]
                 },
+                "interval": {
+                    "title": "Collection interval (in seconds)",
+                    "description": "If endpointList is specified, minimum=1. Without endpointList, minimum=60 and maximum=60000" ,
+                    "type": "integer",
+                    "default": 300
+                },
                 "trace": {
-                    "default": false,
-                    "allOf": [
-                        {
-                            "$ref": "base_schema.json#/definitions/trace"
-                        }
-                    ]
+                    "$ref": "base_schema.json#/definitions/trace"
                 },
                 "tag": {
                     "$comment": "Deprecated! Use actions with a setTag action.",
@@ -66,48 +67,18 @@
                             "items": {
                                 "oneOf": [
                                     {
-                                        "title": "Telemetry_Endpoints Name",
-                                        "description": "Name of the Telemetry_Endpoints object",
-                                        "type": "string",
-                                        "declarationClass": "Telemetry_Endpoints",
-                                        "minLength": 1
+                                        "$ref": "endpoints_schema.json#/definitions/endpointsPointerRef"
                                     },
                                     {
-                                        "title": "Telemetry_Endpoints Name and Item Key",
-                                        "description": "Name of the Telemetry_Endpoints object and the endpoint item key, e.g endpointsA/item1",
-                                        "type": "string",
-                                        "declarationClassProp": "Telemetry_Endpoints/items",
-                                        "minLength": 1
+                                        "$ref": "endpoints_schema.json#/definitions/endpointsItemPointerRef"
                                     },
                                     {
                                         "if": { "required": [ "items" ]},
                                         "then": {
-                                            "allOf": [
-                                                { "$ref": "endpoints_schema.json#/definitions/telemetryEndpoints" },
-                                                {
-                                                    "properties": {
-                                                        "enable": {},
-                                                        "basePath": {},
-                                                        "items": {},
-                                                        "class": {}
-                                                    },
-                                                    "additionalProperties": false
-                                                }
-                                            ]
+                                            "$ref": "endpoints_schema.json#/definitions/endpointsObjectRef"
                                         },
                                         "else": {
-                                            "allOf": [
-                                                { "$ref": "endpoints_schema.json#/definitions/telemetryEndpoint" },
-                                                {
-                                                    "properties": {
-                                                        "enable": {},
-                                                        "name": {},
-                                                        "path": {}
-                                                    },
-                                                    "required": [ "name", "path" ],
-                                                    "additionalProperties": false
-                                                }
-                                            ]
+                                            "$ref": "endpoints_schema.json#/definitions/endpointObjectRef"
                                         }
                                     }
 
@@ -116,26 +87,10 @@
                             "minItems": 1
                         },
                         {
-                            "type": "string",
-                            "declarationClass": "Telemetry_Endpoints",
-                            "minLength": 1
+                            "$ref": "endpoints_schema.json#/definitions/endpointsPointerRef"
                         },
                         {
-                            "allOf": [
-                                {
-                                    "properties": {
-                                        "enable": {},
-                                        "basePath": {},
-                                        "items": {
-                                            "minProperties": 1
-                                        }
-                                    },
-                                    "additionalProperties": false
-                                },
-                                {
-                                    "$ref": "endpoints_schema.json#/definitions/telemetryEndpoints"
-                                }
-                            ]
+                            "$ref": "endpoints_schema.json#/definitions/endpointsObjectRef"
                         }
                     ]
                 }
@@ -146,26 +101,43 @@
                     "then": {
                         "properties": {
                             "interval": {
-                                "title": "Collection interval (in seconds)",
-                                "description": "If endpointList is specified, minimum=1. Without endpointList, minimum=60 and maximum=60000" ,
-                                "type": "integer",
-                                "minimum": 1,
-                                "default": 300
+                                "minimum": 1
                             }
                         }
                     },
                     "else": {
                         "properties":{
                             "interval": {
-                                "title": "Collection interval (in seconds)",
-                                "description": "If endpointList is specified, minimum=1. Without endpointList, minimum=60 and maximum=60000" ,
-                                "type": "integer",
-                                "default": 300,
                                 "minimum": 60,
                                 "maximum": 6000
                             }
                         }
                     }
+                }
+            ]
+        },
+        "systemPollerPointerRef": {
+            "$async": true,
+            "type": "string",
+            "declarationClass": "Telemetry_System_Poller"
+        },
+        "systemPollerObjectRef": {
+            "$async": true,
+            "allOf": [
+                {
+                    "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a seperate block",
+                    "properties": {
+                        "enable": {},
+                        "trace": {},
+                        "interval": {},
+                        "tag": {},
+                        "actions": {},
+                        "endpointList": {}
+                    },
+                    "additionalProperties": false
+                },
+                {
+                    "$ref": "#/definitions/systemPoller"
                 }
             ]
         }
@@ -213,7 +185,13 @@
                     },
                     "allowSelfSignedCert": {
                         "$comment": "Deprecated! Use Telemetry_System to define target device",
-                        "$ref": "base_schema.json#/definitions/allowSelfSignedCert"
+                        "title": "Allow Self-Signed Certificate",
+                        "default": false,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/allowSelfSignedCert"
+                            }
+                        ]
                     },
                     "enableHostConnectivityCheck": {
                         "$comment": "Deprecated! Use Telemetry_System to define target device",

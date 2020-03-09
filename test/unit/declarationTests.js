@@ -633,8 +633,20 @@ describe('Declarations', () => {
                         }
                     }
                 };
-
                 return assert.isRejected(config.validate(data), /should be encrypted by BIG-IP when.*protected.*SecureVault/);
+            });
+
+            it('should fail when cipherText or environmentVar missed', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Poller: {
+                        class: 'Telemetry_System_Poller',
+                        passphrase: {
+                            protected: 'SecureVault'
+                        }
+                    }
+                };
+                return assert.isRejected(config.validate(data), /missing cipherText or environmentVar/);
             });
         });
 
@@ -924,11 +936,36 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return config.validate(data)
-                    .then(() => {
-                        const endpoints = data.My_System.systemPoller.endpointList;
-                        assert.strictEqual(endpoints[0], 'My_Endpoints/items/a');
-                    });
+                return assert.isFulfilled(config.validate(data));
+            });
+
+            it('should trim leading and trailing backslashes', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Endpoints: {
+                        class: 'Telemetry_Endpoints',
+                        items: {
+                            testA: {
+                                name: 'a',
+                                path: '/1/a'
+                            },
+                            a: {
+                                name: 'a',
+                                path: 'something/a'
+                            }
+                        }
+                    },
+                    My_System: {
+                        class: 'Telemetry_System',
+                        systemPoller: {
+                            interval: 100,
+                            endpointList: [
+                                '/My_Endpoints/a/'
+                            ]
+                        }
+                    }
+                };
+                return assert.isFulfilled(config.validate(data));
             });
 
             it('should return error when full item path cannot be resolved', () => {
@@ -980,7 +1017,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                const errMsg = 'Value: \\"Non_Existing\\" does not follow format {declarationClass}/{propName}';
+                const errMsg = '\\"Non_Existing\\" does not follow format \\"ObjectName/key1\\"';
                 return assert.isRejected(config.validate(data), errMsg);
             });
 
@@ -1033,6 +1070,61 @@ describe('Declarations', () => {
                     }));
             });
         });
+
+        describe('declarationClass', () => {
+            it('should pass when object exists', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Poller: {
+                        class: 'Telemetry_System_Poller'
+                    },
+                    My_System: {
+                        class: 'Telemetry_System',
+                        systemPoller: 'My_Poller'
+                    }
+                };
+                return assert.isFulfilled(config.validate(data));
+            });
+
+            it('should return error when object referenced is not correct class', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Poller: {
+                        class: 'Telemetry_System'
+                    },
+                    My_System: {
+                        class: 'Telemetry_System',
+                        systemPoller: 'My_Poller'
+                    }
+                };
+                const errMsg = 'declaration with name \\"My_Poller\\" and class \\"Telemetry_System_Poller\\" doesn\'t exist';
+                return assert.isRejected(config.validate(data), errMsg);
+            });
+
+            it('should return error when object referenced is not "object" type', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_System: {
+                        class: 'Telemetry_System',
+                        systemPoller: 'class'
+                    }
+                };
+                const errMsg = 'declaration with name \\"class\\" and class \\"Telemetry_System_Poller\\" doesn\'t exist';
+                return assert.isRejected(config.validate(data), errMsg);
+            });
+
+            it('should return error when object not exist', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_System: {
+                        class: 'Telemetry_System',
+                        systemPoller: 'Non_Existing_Poller'
+                    }
+                };
+                const errMsg = 'declaration with name \\"Non_Existing_Poller\\" and class \\"Telemetry_System_Poller\\" doesn\'t exist';
+                return assert.isRejected(config.validate(data), errMsg);
+            });
+        });
     });
 
     describe('Telemetry_System_Poller', () => {
@@ -1049,7 +1141,7 @@ describe('Declarations', () => {
                     assert.notStrictEqual(poller, undefined);
                     assert.strictEqual(poller.class, 'Telemetry_System_Poller');
                     assert.strictEqual(poller.enable, true);
-                    assert.strictEqual(poller.trace, false);
+                    assert.strictEqual(poller.trace, undefined);
                     assert.strictEqual(poller.interval, 300);
                     assert.deepStrictEqual(poller.actions, [{ enable: true, setTag: { tenant: '`T`', application: '`A`' } }]);
                     assert.strictEqual(poller.actions[0].ifAllMAtch, undefined);
@@ -1057,7 +1149,7 @@ describe('Declarations', () => {
                     assert.strictEqual(poller.host, 'localhost');
                     assert.strictEqual(poller.port, 8100);
                     assert.strictEqual(poller.protocol, 'http');
-                    assert.strictEqual(poller.allowSelfSignedCert, undefined);
+                    assert.strictEqual(poller.allowSelfSignedCert, false);
                     assert.strictEqual(poller.enableHostConnectivityCheck, undefined);
                     assert.strictEqual(poller.username, undefined);
                     assert.strictEqual(poller.passphrase, undefined);
@@ -1303,6 +1395,7 @@ describe('Declarations', () => {
                 const errMsg = /interval\/minimum.*should be >= 60/;
                 return assert.isRejected(config.validate(data), errMsg);
             });
+
             it('should restrict maximum to 6000 when endpointList is NOT specified', () => {
                 const data = {
                     class: 'Telemetry',
@@ -1396,7 +1489,7 @@ describe('Declarations', () => {
                             poller.endpointList,
                             [
                                 'My_Endpoints1',
-                                'My_Endpoints2/items/testD',
+                                'My_Endpoints2/testD',
                                 {
                                     name: 'anEndpoint',
                                     path: 'aPath',
@@ -1420,6 +1513,7 @@ describe('Declarations', () => {
 
             it('should require endpointList to have at least one item if array', () => {
                 const data = {
+                    class: 'Telemetry',
                     My_Poller: {
                         class: 'Telemetry_System_Poller',
                         endpointList: []
@@ -1431,12 +1525,13 @@ describe('Declarations', () => {
 
             it('should not allow endpointList to be empty object', () => {
                 const data = {
+                    class: 'Telemetry',
                     My_Poller: {
                         class: 'Telemetry_System_Poller',
                         endpointList: {}
                     }
                 };
-                const errMsg = 'should have required property \'class\'';
+                const errMsg = 'should have required property \'items\'';
                 return assert.isRejected(config.validate(data), errMsg);
             });
 
@@ -1496,7 +1591,7 @@ describe('Declarations', () => {
     });
 
     describe('Telemetry_Listener', () => {
-        it('should pass miminal declaration', () => {
+        it('should pass minimal declaration', () => {
             const data = {
                 class: 'Telemetry',
                 My_Listener: {
@@ -1613,7 +1708,7 @@ describe('Declarations', () => {
     });
 
     describe('Telemetry_iHealth_Poller', () => {
-        it('should pass miminal declaration', () => {
+        it('should pass minimal declaration', () => {
             const data = {
                 class: 'Telemetry',
                 My_iHealth_Poller: {
@@ -1924,11 +2019,11 @@ describe('Declarations', () => {
                     assert.notStrictEqual(system, undefined);
                     assert.strictEqual(system.class, 'Telemetry_System');
                     assert.strictEqual(system.enable, true);
-                    assert.strictEqual(system.trace, false);
+                    assert.strictEqual(system.trace, undefined);
                     assert.strictEqual(system.host, 'localhost');
                     assert.strictEqual(system.port, 8100);
                     assert.strictEqual(system.protocol, 'http');
-                    assert.strictEqual(system.allowSelfSignedCert, undefined);
+                    assert.strictEqual(system.allowSelfSignedCert, false);
                     assert.strictEqual(system.enableHostConnectivityCheck, undefined);
                     assert.strictEqual(system.username, undefined);
                     assert.strictEqual(system.passphrase, undefined);
@@ -1938,6 +2033,22 @@ describe('Declarations', () => {
         it('should pass full declaration', () => {
             const data = {
                 class: 'Telemetry',
+                My_Poller: {
+                    class: 'Telemetry_System_Poller'
+                },
+                My_iHealth_Poller: {
+                    class: 'Telemetry_iHealth_Poller',
+                    username: 'username',
+                    passphrase: {
+                        cipherText: 'passphrase'
+                    },
+                    interval: {
+                        timeWindow: {
+                            start: '00:00',
+                            end: '03:00'
+                        }
+                    }
+                },
                 My_System: {
                     class: 'Telemetry_System',
                     enable: true,
@@ -1950,7 +2061,14 @@ describe('Declarations', () => {
                     username: 'username',
                     passphrase: {
                         cipherText: 'passphrase'
-                    }
+                    },
+                    systemPoller: [
+                        'My_Poller',
+                        {
+                            interval: 100
+                        }
+                    ],
+                    iHealthPoller: 'My_iHealth_Poller'
                 }
             };
             return config.validate(data)
@@ -1967,6 +2085,23 @@ describe('Declarations', () => {
                     assert.strictEqual(system.enableHostConnectivityCheck, false);
                     assert.strictEqual(system.username, 'username');
                     assert.strictEqual(system.passphrase.cipherText, '$M$foo');
+                    assert.strictEqual(system.iHealthPoller, 'My_iHealth_Poller');
+                    assert.deepStrictEqual(system.systemPoller, [
+                        'My_Poller',
+                        {
+                            actions: [
+                                {
+                                    enable: true,
+                                    setTag: {
+                                        application: '`A`',
+                                        tenant: '`T`'
+                                    }
+                                }
+                            ],
+                            enable: true,
+                            interval: 100
+                        }
+                    ]);
                 });
         });
 
@@ -2034,7 +2169,7 @@ describe('Declarations', () => {
                     const poller = validConfig.My_System.systemPoller;
                     assert.notStrictEqual(poller, undefined);
                     assert.strictEqual(poller.enable, true);
-                    assert.strictEqual(poller.trace, false);
+                    assert.strictEqual(poller.trace, undefined);
                     assert.strictEqual(poller.interval, 300);
                     assert.deepStrictEqual(poller.actions, [{ enable: true, setTag: { tenant: '`T`', application: '`A`' } }]);
                     assert.strictEqual(poller.actions[0].ifAllMAtch, undefined);
@@ -2106,7 +2241,7 @@ describe('Declarations', () => {
                 });
         });
 
-        it('should not allow to attach inline System Poller declaration with specified host', () => {
+        it('should not allow to attach inline System Poller declaration with additional properties', () => {
             const data = {
                 class: 'Telemetry',
                 My_System: {
@@ -2211,6 +2346,29 @@ describe('Declarations', () => {
                 });
         });
 
+        it('should not allow to attach inline iHealth Poller declaration with additional properties', () => {
+            const data = {
+                class: 'Telemetry',
+                My_System: {
+                    class: 'Telemetry_System',
+                    iHealthPoller: {
+                        something: true,
+                        username: 'username',
+                        passphrase: {
+                            cipherText: 'passphrase'
+                        },
+                        interval: {
+                            timeWindow: {
+                                start: '00:00',
+                                end: '03:00'
+                            }
+                        }
+                    }
+                }
+            };
+            return assert.isRejected(config.validate(data), /iHealthPoller.*should NOT have additional properties/);
+        });
+
         it('should allow to attach inline declaration for System Poller and iHealth Poller', () => {
             const data = {
                 class: 'Telemetry',
@@ -2262,8 +2420,8 @@ describe('Declarations', () => {
                                     enable: true,
                                     setTag: { application: '`A`', tenant: '`T`' }
                                 }],
-                                interval: 1440,
                                 trace: true,
+                                interval: 1440,
                                 enable: true
                             },
                             {
@@ -2272,7 +2430,6 @@ describe('Declarations', () => {
                                     setTag: { application: '`A`', tenant: '`T`' }
                                 }],
                                 interval: 90,
-                                trace: false,
                                 enable: true
                             }
                         ]);
@@ -2322,8 +2479,21 @@ describe('Declarations', () => {
             return assert.isFulfilled(config.validate(data));
         });
 
+        it('should not allow a systemPoller as empty array', () => {
+            const data = {
+                class: 'Telemetry',
+                My_System: {
+                    class: 'Telemetry_System',
+                    systemPoller: []
+                }
+            };
+            const errMsg = 'should NOT have fewer than 1 items';
+            return assert.isRejected(config.validate(data), errMsg);
+        });
+
         it('should not allow a systemPoller with empty endpointList object', () => {
             const data = {
+                class: 'Telemetry',
                 My_System: {
                     class: 'Telemetry_System',
                     systemPoller: {
@@ -2332,12 +2502,30 @@ describe('Declarations', () => {
                     }
                 }
             };
-            const errMsg = 'should have required property \'class\'';
+            const errMsg = 'should have required property \'items\'';
+            return assert.isRejected(config.validate(data), errMsg);
+        });
+
+        it('should not allow a systemPoller with empty items in endpointList object', () => {
+            const data = {
+                class: 'Telemetry',
+                My_System: {
+                    class: 'Telemetry_System',
+                    systemPoller: {
+                        interval: 120,
+                        endpointList: {
+                            items: {}
+                        }
+                    }
+                }
+            };
+            const errMsg = 'should NOT have fewer than 1 properties';
             return assert.isRejected(config.validate(data), errMsg);
         });
 
         it('should not allow a systemPoller with empty endpointList array', () => {
             const data = {
+                class: 'Telemetry',
                 My_System: {
                     class: 'Telemetry_System',
                     systemPoller: {
@@ -2347,6 +2535,25 @@ describe('Declarations', () => {
                 }
             };
             const errMsg = 'should NOT have fewer than 1 items';
+            return assert.isRejected(config.validate(data), errMsg);
+        });
+
+        it('should not allow a systemPoller with empty items in endpointList array', () => {
+            const data = {
+                class: 'Telemetry',
+                My_System: {
+                    class: 'Telemetry_System',
+                    systemPoller: {
+                        interval: 120,
+                        endpointList: [
+                            {
+                                items: {}
+                            }
+                        ]
+                    }
+                }
+            };
+            const errMsg = 'should NOT have fewer than 1 properties';
             return assert.isRejected(config.validate(data), errMsg);
         });
     });
@@ -2359,7 +2566,6 @@ describe('Declarations', () => {
                     class: 'Telemetry_Endpoints',
                     items: {
                         test: {
-                            name: 'test',
                             path: '/test/path'
                         }
                     }
@@ -2368,7 +2574,12 @@ describe('Declarations', () => {
             return config.validate(data)
                 .then((validConfig) => {
                     const endpoints = validConfig.My_Endpoints;
-                    assert.notStrictEqual(endpoints.items, undefined);
+                    assert.deepStrictEqual(endpoints.items, {
+                        test: {
+                            enable: true,
+                            path: '/test/path'
+                        }
+                    });
                     // check defaults
                     assert.strictEqual(endpoints.enable, true);
                 });
@@ -2471,6 +2682,39 @@ describe('Declarations', () => {
                 }
             };
             return assert.isRejected(config.validate(data), /\/My_Endpoints\/items.*should NOT have additional properties/);
+        });
+
+        it('should not allow empty name', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Endpoints: {
+                    class: 'Telemetry_Endpoints',
+                    enable: true,
+                    items: {
+                        first: {
+                            name: '',
+                            path: 'path'
+                        }
+                    }
+                }
+            };
+            return assert.isRejected(config.validate(data), /\/My_Endpoints\/items\/first\/name.*should NOT be shorter than/);
+        });
+
+        it('should not allow empty path', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Endpoints: {
+                    class: 'Telemetry_Endpoints',
+                    enable: true,
+                    items: {
+                        first: {
+                            path: ''
+                        }
+                    }
+                }
+            };
+            return assert.isRejected(config.validate(data), /\/My_Endpoints\/items\/first\/path.*should NOT be shorter than/);
         });
     });
 });

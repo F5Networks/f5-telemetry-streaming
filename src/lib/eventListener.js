@@ -454,6 +454,6 @@ configWorker.on('change', (config) => {
     });
 
     logger.debug(`${Object.keys(listeners).length} event listener(s) listening`);
-    tracers.remove(null, tracer => tracer.name.startsWith(CLASS_NAME)
-                                   && tracer.lastGetTouch < tracersTimestamp);
+    tracers.remove(tracer => tracer.name.startsWith(CLASS_NAME)
+        && tracer.lastGetTouch < tracersTimestamp);
 });

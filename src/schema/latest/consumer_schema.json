@@ -209,16 +209,39 @@
                         "type": "string",
                         "enum": [ "Telemetry_Consumer" ]
                     },
-                    "enable": { "$ref": "base_schema.json#/definitions/enable", "default": true },
-                    "trace": { "$ref": "base_schema.json#/definitions/trace", "default": false },
+                    "enable": {
+                        "default": true,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/enable"
+                            }
+                        ]
+                    },
+                    "trace": {
+                        "default": false,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/trace"
+                            }
+                        ]
+                    },
                     "type": {
                         "title": "Type",
                         "description": "" ,
                         "type": "string",
                         "enum": [ "default", "Generic_HTTP", "Splunk", "Azure_Log_Analytics", "AWS_CloudWatch", "AWS_S3", "Graphite", "Kafka", "ElasticSearch", "Sumo_Logic", "Statsd", "Google_StackDriver" ]
                     },
-                    "enableHostConnectivityCheck": { "$ref": "base_schema.json#/definitions/enableHostConnectivityCheck" },
-                    "allowSelfSignedCert": { "$ref": "base_schema.json#/definitions/allowSelfSignedCert" }
+                    "enableHostConnectivityCheck": {
+                        "$ref": "base_schema.json#/definitions/enableHostConnectivityCheck"
+                    },
+                    "allowSelfSignedCert": {
+                        "default": false,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/allowSelfSignedCert"
+                            }
+                        ]
+                    }
                 },
                 "allOf": [
                     {

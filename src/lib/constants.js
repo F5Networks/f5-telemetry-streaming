@@ -72,10 +72,9 @@ module.exports = {
     VERSION,
 
     CONFIG_CLASSES: {
-        CONSUMERS_CLASS_NAME: 'Telemetry_Consumer',
+        CONSUMER_CLASS_NAME: 'Telemetry_Consumer',
         CONTROLS_CLASS_NAME: 'Controls',
         ENDPOINTS_CLASS_NAME: 'Telemetry_Endpoints',
-        EVENTS_CLASS_NAME: 'Telemetry_Events',
         EVENT_LISTENER_CLASS_NAME: 'Telemetry_Listener',
         IHEALTH_POLLER_CLASS_NAME: 'Telemetry_iHealth_Poller',
         SYSTEM_CLASS_NAME: 'Telemetry_System',
