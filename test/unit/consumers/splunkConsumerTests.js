@@ -8,20 +8,23 @@
 
 'use strict';
 
+/* eslint-disable import/order */
+
+require('../shared/restoreCache')();
+
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const request = require('request');
+const sinon = require('sinon');
 const zlib = require('zlib');
+
+const splunkIndex = require('../../../src/lib/consumers/Splunk/index');
+const splunkData = require('./splunkConsumerTestsData');
+const testUtil = require('../shared/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
-const sinon = require('sinon');
 
-const splunkIndex = require('../../../src/lib/consumers/Splunk/index');
-const splunkData = require('./splunkConsumerTestsData.js');
-const util = require('../shared/util.js');
-
-/* eslint-disable global-require */
 describe('Splunk', () => {
     let clock;
 
@@ -51,14 +54,14 @@ describe('Splunk', () => {
         };
 
         it('should configure request options with default values', (done) => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 config: defaultConsumerConfig
             });
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
                     assert.strictEqual(opts.gzip, true);
-                    assert.deepEqual(opts.headers, {
+                    assert.deepStrictEqual(opts.headers, {
                         'Accept-Encoding': 'gzip',
                         Authorization: 'Splunk mySecret',
                         'Content-Encoding': 'gzip',
@@ -68,7 +71,7 @@ describe('Splunk', () => {
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             });
@@ -77,7 +80,7 @@ describe('Splunk', () => {
         });
 
         it('should configure request options with provided values', (done) => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 config: {
                     protocol: 'http',
                     host: 'remoteSplunk',
@@ -89,7 +92,7 @@ describe('Splunk', () => {
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
-                    assert.deepEqual(opts.headers, {
+                    assert.deepStrictEqual(opts.headers, {
                         Authorization: 'Splunk superSecret',
                         'Content-Length': 92
                     });
@@ -97,7 +100,7 @@ describe('Splunk', () => {
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             });
@@ -107,7 +110,7 @@ describe('Splunk', () => {
 
         it('should trace data with secrets redacted', (done) => {
             let traceData;
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 config: {
                     protocol: 'http',
                     host: 'remoteSplunk',
@@ -124,7 +127,7 @@ describe('Splunk', () => {
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
-                    assert.deepEqual(opts.headers, {
+                    assert.deepStrictEqual(opts.headers, {
                         Authorization: 'Splunk superSecret',
                         'Content-Length': 92
                     });
@@ -137,7 +140,7 @@ describe('Splunk', () => {
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             });
@@ -146,22 +149,22 @@ describe('Splunk', () => {
         });
 
         it('should process systemInfo data', (done) => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 eventType: 'systemInfo',
                 config: defaultConsumerConfig
             });
-            const expectedData = util.deepCopy(expectedDataTemplate);
+            const expectedData = testUtil.deepCopy(expectedDataTemplate);
             expectedData.time = 1576001615000;
-            expectedData.event = util.deepCopy(context.event.data);
+            expectedData.event = testUtil.deepCopy(context.event.data);
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
                     const output = zlib.gunzipSync(opts.body).toString();
-                    assert.deepEqual(output, JSON.stringify(expectedData));
+                    assert.deepStrictEqual(output, JSON.stringify(expectedData));
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             });
@@ -170,21 +173,21 @@ describe('Splunk', () => {
         });
 
         it('should process event data', (done) => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 eventType: 'AVR',
                 config: defaultConsumerConfig
             });
-            const expectedData = util.deepCopy(expectedDataTemplate);
-            expectedData.event = util.deepCopy(context.event.data);
+            const expectedData = testUtil.deepCopy(expectedDataTemplate);
+            expectedData.event = testUtil.deepCopy(context.event.data);
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
                     const output = zlib.gunzipSync(opts.body).toString();
-                    assert.deepEqual(output, JSON.stringify(expectedData));
+                    assert.deepStrictEqual(output, JSON.stringify(expectedData));
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             });
@@ -193,24 +196,26 @@ describe('Splunk', () => {
         });
 
         it('should process systemInfo in legacy format', (done) => {
-            const context = util.buildConsumerContext({
+            // test works correctly while:
+            // - we generating output in predictable order
+            // - Object.keys() returns the same array on different node versions
+            const expectedData = splunkData.legacySystemData[0].expectedData;
+            const context = testUtil.buildConsumerContext({
                 eventType: 'systemInfo',
                 config: defaultConsumerConfig
             });
             context.config.format = 'legacy';
-            const expectedLegacyData = splunkData.legacySystemData[0].expectedData;
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
                     let output = zlib.gunzipSync(opts.body).toString();
                     output = output.replace(/}{"time/g, '},{"time');
                     output = JSON.parse(`[${output}]`);
-
-                    assert.deepStrictEqual(output, expectedLegacyData.map(d => JSON.parse(d)));
+                    assert.deepStrictEqual(output, expectedData);
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             });
@@ -220,7 +225,7 @@ describe('Splunk', () => {
 
         describe('tmstats', () => {
             it('should replace periods in tmstat key names with underscores', (done) => {
-                const context = util.buildConsumerContext({
+                const context = testUtil.buildConsumerContext({
                     eventType: 'systemInfo',
                     config: defaultConsumerConfig
                 });
@@ -268,7 +273,7 @@ describe('Splunk', () => {
                         done();
                     } catch (err) {
                         // done() with parameter is treated as an error.
-                        // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                        // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                         done(err);
                     }
                 });
@@ -277,7 +282,7 @@ describe('Splunk', () => {
             });
 
             it('should replace IPv6 prefix in monitorInstanceStat', (done) => {
-                const context = util.buildConsumerContext({
+                const context = testUtil.buildConsumerContext({
                     eventType: 'systemInfo',
                     config: defaultConsumerConfig
                 });
@@ -317,7 +322,7 @@ describe('Splunk', () => {
                         done();
                     } catch (err) {
                         // done() with parameter is treated as an error.
-                        // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                        // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                         done(err);
                     }
                 });
@@ -326,7 +331,7 @@ describe('Splunk', () => {
             });
 
             it('should format hex IP', (done) => {
-                const context = util.buildConsumerContext({
+                const context = testUtil.buildConsumerContext({
                     eventType: 'systemInfo',
                     config: defaultConsumerConfig
                 });
@@ -366,7 +371,7 @@ describe('Splunk', () => {
                         done();
                     } catch (err) {
                         // done() with parameter is treated as an error.
-                        // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                        // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                         done(err);
                     }
                 });
@@ -375,7 +380,7 @@ describe('Splunk', () => {
             });
 
             it('should include tenant and application', (done) => {
-                const context = util.buildConsumerContext({
+                const context = testUtil.buildConsumerContext({
                     eventType: 'systemInfo',
                     config: defaultConsumerConfig
                 });
@@ -411,7 +416,7 @@ describe('Splunk', () => {
                         done();
                     } catch (err) {
                         // done() with parameter is treated as an error.
-                        // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                        // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                         done(err);
                     }
                 });
@@ -420,7 +425,7 @@ describe('Splunk', () => {
             });
 
             it('should include last_cycle_count', (done) => {
-                const context = util.buildConsumerContext({
+                const context = testUtil.buildConsumerContext({
                     eventType: 'systemInfo',
                     config: defaultConsumerConfig
                 });
@@ -453,7 +458,7 @@ describe('Splunk', () => {
                         done();
                     } catch (err) {
                         // done() with parameter is treated as an error.
-                        // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                        // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                         done(err);
                     }
                 });

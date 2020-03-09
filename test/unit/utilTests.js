@@ -8,6 +8,10 @@
 
 'use strict';
 
+/* eslint-disable import/order */
+
+require('./shared/restoreCache')();
+
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const fs = require('fs');
@@ -18,11 +22,12 @@ const path = require('path');
 const request = require('request');
 const sinon = require('sinon');
 
+const constants = require('../../src/lib/constants');
+const util = require('../../src/lib/util');
+const testUtil = require('./shared/util');
+
 chai.use(chaiAsPromised);
 const assert = chai.assert;
-
-const constants = require('../../src/lib/constants.js');
-const util = require('../../src/lib/util.js');
 
 describe('Util', () => {
     describe('.start()', () => {
@@ -46,10 +51,10 @@ describe('Util', () => {
             new Promise((resolve) => {
                 const intervalID = util.start(
                     () => {
-                        const netIntervalID = util.update(
+                        const newIntervalID = util.update(
                             intervalID,
                             (args) => {
-                                util.stop(netIntervalID);
+                                util.stop(newIntervalID);
                                 assert.strictEqual(args, 'test');
                                 resolve();
                             },
@@ -199,6 +204,7 @@ describe('Util', () => {
 
     describe('.makeRequest()', () => {
         afterEach(() => {
+            testUtil.checkNockActiveMocks(nock, assert);
             sinon.restore();
             nock.cleanAll();
         });
@@ -332,15 +338,11 @@ describe('Util', () => {
         });
 
         it('should convert request data to string', () => {
-            nock('http://example.com')
-                .get('/')
-                .reply(200);
-
             sinon.stub(request, 'get').callsFake((opts, cb) => {
                 assert.strictEqual(typeof opts.body, 'string');
                 cb(null, { statusCode: 200, statusMessage: 'message' }, {});
             });
-            return assert.isFulfilled(util.makeRequest('example.com', { body: true }));
+            return assert.isFulfilled(util.makeRequest('example.com', { body: { key: 'value' } }));
         });
 
         it('should return data and response object', () => {
@@ -954,6 +956,21 @@ describe('Util', () => {
             );
         });
 
+        it('should write data to same file (2 tracers)', () => {
+            // due to implementation of Tracer it is hard to verify output
+            // so, just verify it is not fails
+            const filePath = path.join(tracerDir, 'output');
+            const tracer1 = util.tracer.createFromConfig('class2', 'obj2', { trace: filePath });
+            const tracer2 = util.tracer.createFromConfig('class2', 'obj3', { trace: filePath });
+            return assert.isFulfilled(Promise.all([
+                tracer1.write('tracer1'),
+                tracer2.write('tracer2')
+            ])
+                .then(() => {
+                    assert.ok(/tracer[12]/.test(fs.readFileSync(filePath, 'utf8')));
+                }));
+        });
+
         it('should write data to file', () => assert.isFulfilled(
             tracer.write('foobar')
                 .then(() => {
@@ -974,7 +991,7 @@ describe('Util', () => {
         });
 
         it('should remove tracer by filter', () => {
-            util.tracer.remove(null, t => t.name === tracer.name);
+            util.tracer.remove(t => t.name === tracer.name);
             assert.strictEqual(util.tracer.instances[tracer.name], undefined);
         });
 

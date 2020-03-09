@@ -9,15 +9,15 @@
 'use strict';
 
 const path = require('path');
-const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
-const deepCopy = require('./util.js').deepCopy;
-const tracers = require('./util.js').tracer;
-const constants = require('./constants.js');
-const configWorker = require('./config.js');
-const DataFilter = require('./dataFilter.js').DataFilter;
+const logger = require('./logger'); // eslint-disable-line no-unused-vars
+const deepCopy = require('./util').deepCopy;
+const tracers = require('./util').tracer;
+const constants = require('./constants');
+const configWorker = require('./config');
+const DataFilter = require('./dataFilter').DataFilter;
 
 const CONSUMERS_DIR = constants.CONSUMERS_DIR;
-const CLASS_NAME = constants.CONFIG_CLASSES.CONSUMERS_CLASS_NAME;
+const CLASS_NAME = constants.CONFIG_CLASSES.CONSUMER_CLASS_NAME;
 let CONSUMERS = null;
 
 /**
@@ -168,8 +168,8 @@ configWorker.on('change', (config) => {
         })
         .then(() => {
             unloadUnusedModules(typesBefore);
-            tracers.remove(null, tracer => tracer.name.startsWith(CLASS_NAME)
-                                           && tracer.lastGetTouch < tracersTimestamp);
+            tracers.remove(tracer => tracer.name.startsWith(CLASS_NAME)
+                && tracer.lastGetTouch < tracersTimestamp);
         });
 });
 

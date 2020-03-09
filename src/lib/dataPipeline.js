@@ -8,12 +8,12 @@
 
 'use strict';
 
-const logger = require('./logger.js');
-const forwarder = require('./forwarder.js');
-const dataTagging = require('./dataTagging.js');
-const dataFilter = require('./dataFilter.js');
-const util = require('./util.js');
-const EVENT_TYPES = require('./constants.js').EVENT_TYPES;
+const logger = require('./logger');
+const forwarder = require('./forwarder');
+const dataTagging = require('./dataTagging');
+const dataFilter = require('./dataFilter');
+const util = require('./util');
+const EVENT_TYPES = require('./constants').EVENT_TYPES;
 
 
 /**

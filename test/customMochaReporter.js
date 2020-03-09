@@ -92,6 +92,10 @@ function CustomMochaReporter(runner, options) {
         fileLogger.info(`PASSED: ${test.title}`);
     });
 
+    runner.on('retry', (test, err) => {
+        fileLogger.error(`RETRY-ERROR: ${test.title}\n${err.message || err}\n${err.stack}`);
+    });
+
     runner.on('fail', (test) => {
         failedTests += 1;
         currentTest.endTime = Date.now();

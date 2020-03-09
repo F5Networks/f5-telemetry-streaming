@@ -14,8 +14,8 @@ const assert = require('assert');
 const fs = require('fs');
 const net = require('net');
 const readline = require('readline');
-const util = require('./shared/util.js');
-const constants = require('./shared/constants.js');
+const util = require('./shared/util');
+const constants = require('./shared/constants');
 
 const baseILXUri = '/mgmt/shared/telemetry';
 const duts = util.getHosts('BIGIP');
@@ -367,11 +367,38 @@ function test() {
     // read in example config
     const declaration = fs.readFileSync(constants.DECL.BASIC_EXAMPLE).toString();
 
+    function searchCipherTexts(data, cb) {
+        const stack = [data];
+        const forKey = (key) => {
+            const val = stack[0][key];
+            if (key === 'cipherText') {
+                const ret = cb(val);
+                if (typeof ret !== 'undefined') {
+                    stack[0][key] = ret;
+                }
+            } else if (typeof val === 'object' && val !== null) {
+                stack.push(val);
+            }
+        };
+        while (stack.length) {
+            Object.keys(stack[0]).forEach(forKey);
+            stack.shift();
+        }
+    }
+
     function checkPassphraseObject(data) {
-        const passphrase = data.declaration[constants.DECL.CONSUMER_NAME].passphrase;
         // check that the declaration returned contains encrypted text
         // note: this only applies to TS running on BIG-IP (which is all we are testing for now)
-        assert.strictEqual(passphrase.cipherText.startsWith('$M'), true);
+        let secretsFound = 0;
+        searchCipherTexts(data, (cipherText) => {
+            secretsFound += 1;
+            assert.strictEqual(cipherText.startsWith('$M'), true, 'cipherText should start with $M$');
+        });
+        assert.notStrictEqual(secretsFound, 0, 'Expected at least 1 cipherText field');
+    }
+
+    function removeCipherTexts(data) {
+        searchCipherTexts(data, () => 'replacedSecret');
     }
 
     // account for 1+ DUTs
@@ -381,7 +408,6 @@ function test() {
             const user = item.username;
             const password = item.password;
 
-            let postResponse;
             let authToken = null;
             let options = {};
 
@@ -398,58 +424,59 @@ function test() {
                 };
             });
 
-            it('should post configuration', () => {
-                const uri = `${baseILXUri}/declare`;
-
-                const postOptions = {
+            it('should post same configuration twice and get it after', () => {
+                let uri = `${baseILXUri}/declare`;
+                const postOptions = Object.assign(util.deepCopy(options), {
                     method: 'POST',
-                    headers: options.headers,
                     body: declaration
-                };
+                });
+                let postResponses = [];
 
-                return util.makeRequest(host, uri, postOptions)
+                return util.makeRequest(host, uri, util.deepCopy(postOptions))
                     .then((data) => {
-                        util.logger.info('Declaration response:', { host, data });
+                        util.logger.info('POST request #1: Declaration response:', { host, data });
                         assert.strictEqual(data.message, 'success');
+
                         checkPassphraseObject(data);
-                    });
-            });
+                        postResponses.push(data);
 
-            it('should post configuration (again)', () => {
-                const uri = `${baseILXUri}/declare`;
-
-                const postOptions = {
-                    method: 'POST',
-                    headers: options.headers,
-                    body: declaration
-                };
-
-                return util.makeRequest(host, uri, postOptions)
+                        return util.makeRequest(host, uri, util.deepCopy(postOptions));
+                    })
                     .then((data) => {
-                        util.logger.info('Declaration response:', { host, data });
-                        postResponse = data; // used later
-                    });
-            });
+                        util.logger.info('POST request #2: Declaration response:', { host, data });
+                        assert.strictEqual(data.message, 'success');
 
-            it('should get configuration', () => {
-                const uri = `${baseILXUri}/declare`;
-
-                return util.makeRequest(host, uri, options)
-                    .then((data) => {
-                        util.logger.info('Declaration response:', { host, data });
-                        assert.strictEqual(JSON.stringify(data.declaration), JSON.stringify(postResponse.declaration));
                         checkPassphraseObject(data);
+                        postResponses.push(data);
+
+                        uri = `${baseILXUri}/declare`;
+                        return util.makeRequest(host, uri, util.deepCopy(options));
+                    })
+                    .then((data) => {
+                        util.logger.info('GET request: Declaration response:', { host, data });
+                        assert.strictEqual(data.message, 'success');
+
+                        checkPassphraseObject(data);
+                        postResponses.push(data);
+
+                        // compare GET to recent POST
+                        assert.deepStrictEqual(postResponses[2], postResponses[1]);
+                        // lest compare first POST to second POST (only one difference is secrets)
+                        postResponses = postResponses.map(removeCipherTexts);
+                        assert.deepStrictEqual(postResponses[0], postResponses[1]);
                     });
             });
 
-            it('should get systempoller info', () => {
+            it('should get response from systempoller endpoint', () => {
                 const uri = `${baseILXUri}/systempoller/${constants.DECL.SYSTEM_NAME}`;
 
                 return util.makeRequest(host, uri, options)
                     .then((data) => {
-                        data = data || {};
+                        data = data || [];
                         util.logger.info(`SystemPoller response (${uri}):`, { host, data });
+                        assert.strictEqual(data.length, 1);
                         // read schema and validate data
+                        data = data[0];
                         const schema = JSON.parse(fs.readFileSync(constants.DECL.SYSTEM_POLLER_SCHEMA));
                         const valid = util.validateAgainstSchema(data, schema);
                         if (valid !== true) {
@@ -474,30 +501,28 @@ function test() {
                 });
             });
 
-            it('should post a configuration containing system poller filtering', () => {
-                const filterDeclaration = fs.readFileSync(constants.DECL.FILTER_EXAMPLE).toString();
-                const uri = `${baseILXUri}/declare`;
-                const postOptions = {
+            it('should apply configuration containing system poller filtering', () => {
+                let uri = `${baseILXUri}/declare`;
+                const postOptions = Object.assign(util.deepCopy(options), {
                     method: 'POST',
-                    headers: options.headers,
-                    body: filterDeclaration
-                };
+                    body: fs.readFileSync(constants.DECL.FILTER_EXAMPLE).toString()
+                });
 
                 return util.makeRequest(host, uri, postOptions)
                     .then((data) => {
                         util.logger.info('Declaration response:', { host, data });
                         assert.strictEqual(data.message, 'success');
-                    });
-            });
 
-            it('should get filtered systempoller info', () => {
-                const uri = `${baseILXUri}/systempoller/${constants.DECL.SYSTEM_NAME}`;
-
-                return util.makeRequest(host, uri, options)
+                        uri = `${baseILXUri}/systempoller/${constants.DECL.SYSTEM_NAME}`;
+                        return util.makeRequest(host, uri, util.deepCopy(options));
+                    })
                     .then((data) => {
-                        data = data || {};
+                        data = data || [];
                         util.logger.info(`Filtered SystemPoller response (${uri}):`, { host, data });
+
+                        assert.strictEqual(data.length, 1);
                         // verify that certain data was filtered out, while other data was preserved
+                        data = data[0];
                         assert.strictEqual(Object.keys(data.system).indexOf('provisioning'), -1);
                         assert.strictEqual(Object.keys(data.system.diskStorage).indexOf('/usr'), -1);
                         assert.notStrictEqual(Object.keys(data.system.diskStorage).indexOf('/'), -1);
@@ -506,29 +531,27 @@ function test() {
                     });
             });
 
-            it('should post a configuration containing chained system poller actions', () => {
-                const filterDeclaration = fs.readFileSync(constants.DECL.ACTION_CHAINING_EXAMPLE).toString();
-                const uri = `${baseILXUri}/declare`;
-                const postOptions = {
+            it('should apply configuration containing chained system poller actions', () => {
+                let uri = `${baseILXUri}/declare`;
+                const postOptions = Object.assign(util.deepCopy(options), {
                     method: 'POST',
-                    headers: options.headers,
-                    body: filterDeclaration
-                };
+                    body: fs.readFileSync(constants.DECL.ACTION_CHAINING_EXAMPLE).toString()
+                });
 
                 return util.makeRequest(host, uri, postOptions)
                     .then((data) => {
                         util.logger.info('Declaration response:', { host, data });
                         assert.strictEqual(data.message, 'success');
-                    });
-            });
 
-            it('should get filtered systempoller info', () => {
-                const uri = `${baseILXUri}/systempoller/${constants.DECL.SYSTEM_NAME}`;
-
-                return util.makeRequest(host, uri, options)
+                        uri = `${baseILXUri}/systempoller/${constants.DECL.SYSTEM_NAME}`;
+                        return util.makeRequest(host, uri, util.deepCopy(options));
+                    })
                     .then((data) => {
                         data = data || {};
                         util.logger.info(`Filtered SystemPoller response (${uri}):`, { host, data });
+
+                        assert.strictEqual(data.length, 1);
+                        data = data[0];
                         // verify /var is included with, with 1_tagB removed
                         assert.notStrictEqual(Object.keys(data.system.diskStorage).indexOf('/var'), -1);
                         assert.deepEqual(data.system.diskStorage['/var']['1_tagB'], { '1_valueB_1': 'value1' });
@@ -538,29 +561,27 @@ function test() {
                     });
             });
 
-            it('should post a configuration containing filters with ifAnyMatch', () => {
-                const filterDeclaration = fs.readFileSync(constants.DECL.FILTERING_WITH_MATCHING_EXAMPLE).toString();
-                const uri = `${baseILXUri}/declare`;
-                const postOptions = {
+            it('should apply configuration containing filters with ifAnyMatch', () => {
+                let uri = `${baseILXUri}/declare`;
+                const postOptions = Object.assign(util.deepCopy(options), {
                     method: 'POST',
-                    headers: options.headers,
-                    body: filterDeclaration
-                };
+                    body: fs.readFileSync(constants.DECL.FILTERING_WITH_MATCHING_EXAMPLE).toString()
+                });
 
                 return util.makeRequest(host, uri, postOptions)
                     .then((data) => {
                         util.logger.info('Declaration response:', { host, data });
                         assert.strictEqual(data.message, 'success');
-                    });
-            });
 
-            it('should get matched and filtered systempoller info', () => {
-                const uri = `${baseILXUri}/systempoller/${constants.DECL.SYSTEM_NAME}`;
-
-                return util.makeRequest(host, uri, options)
+                        uri = `${baseILXUri}/systempoller/${constants.DECL.SYSTEM_NAME}`;
+                        return util.makeRequest(host, uri, util.deepCopy(options));
+                    })
                     .then((data) => {
                         data = data || {};
                         util.logger.info(`Filtered and Matched SystemPoller response (${uri}):`, { host, data });
+
+                        assert.strictEqual(data.length, 1);
+                        data = data[0];
                         // verify that 'system' key and child objects are included
                         assert.deepEqual(Object.keys(data), ['system']);
                         assert.ok(Object.keys(data.system).length > 1);
@@ -569,35 +590,29 @@ function test() {
                     });
             });
 
-            it('should post and get configuration with multiple system pollers and endpointList', () => {
-                const customEndptsDecl = fs.readFileSync(constants.DECL.ENDPOINTLIST_EXAMPLE).toString();
+            it('should apply configuration containing multiple system pollers and endpointList', () => {
                 let uri = `${baseILXUri}/declare`;
-                let reqOptions = {
+                const postOptions = Object.assign(util.deepCopy(options), {
                     method: 'POST',
-                    headers: options.headers,
-                    body: customEndptsDecl
-                };
+                    body: fs.readFileSync(constants.DECL.ENDPOINTLIST_EXAMPLE).toString()
+                });
 
-                return util.makeRequest(host, uri, reqOptions)
+                return util.makeRequest(host, uri, postOptions)
                     .then((data) => {
                         util.logger.info('Declaration response:', { host, data });
                         assert.strictEqual(data.message, 'success');
-                    })
-                    .then(() => {
+
                         uri = `${baseILXUri}/systempoller/${constants.DECL.SYSTEM_NAME}`;
-                        reqOptions = {
-                            method: 'GET',
-                            headers: options.headers
-                        };
-                        return util.makeRequest(host, uri, reqOptions);
+                        return util.makeRequest(host, uri, util.deepCopy(options));
                     })
                     .then((data) => {
                         util.logger.info(`System Poller with endpointList response (${uri}):`, { host, data });
                         assert.ok(Array.isArray(data));
+
                         const pollerOneData = data[0];
                         const pollerTwoData = data[1];
-                        assert.ok(typeof pollerOneData.custom_ipOther !== 'undefined');
-                        assert.ok(typeof pollerOneData.custom_dns !== 'undefined');
+                        assert.notStrictEqual(pollerOneData.custom_ipOther, undefined);
+                        assert.notStrictEqual(pollerOneData.custom_dns, undefined);
                         assert.ok(pollerTwoData.custom_provisioning.items.length > 0);
                     });
             });

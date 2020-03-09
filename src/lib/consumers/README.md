@@ -42,7 +42,7 @@ This describes the structure of the context object.
 Creating and testing new consumers within TS itself by posting expected declaration and watching logs, etc. is an entirely valid way to add a new consumer.  However getting the index.js file right initially might require some iteration, and ideally this can be locally.  Below is an example script to call the consumer with a mock event.
 
 ```javascript
-const index = require('./index.js');
+const index = require('./index');
 
 const mockLogger = {
     debug: msg => console.log(msg),

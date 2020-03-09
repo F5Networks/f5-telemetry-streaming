@@ -13,8 +13,8 @@ const net = require('net');
 const path = require('path');
 const request = require('request');
 
-const constants = require('./constants.js');
-const logger = require('./logger.js');
+const constants = require('./constants');
+const logger = require('./logger');
 
 /** @module util */
 
@@ -493,9 +493,10 @@ Tracer.get = function (name, tracerPath) {
 /**
  * Create tracer from config
  *
- * @param {String} className - object's class name
- * @param {String} objName   - object's name
- * @param {Object} config    - object's config
+ * @param {String} className              - object's class name
+ * @param {String} objName                - object's name
+ * @param {Object} config                 - object's config
+ * @param {String|Boolean} [config.trace] - path to file, if 'true' then default path will be used
  *
  * @returns {Tracer} Tracer object
  */
@@ -536,23 +537,22 @@ Tracer.removeTracer = function (tracer) {
 /**
  * Remove Tracer instance
  *
- * @param {String | Tracer} toRemove - tracer or tracer's name to remove
- * @param {Tracer~filterCallback} filter  - filter function
+ * @param {String | Tracer | Tracer~filterCallback} toRemove - tracer or tracer's name to remove
+ *                                                             or filter function
  */
-Tracer.remove = function (toRemove, filter) {
-    if (toRemove) {
+Tracer.remove = function (toRemove) {
+    if (typeof toRemove === 'function') {
+        Object.keys(Tracer.instances).forEach((tracerName) => {
+            const tracer = Tracer.instances[tracerName];
+            if (toRemove(tracer)) {
+                Tracer.removeTracer(tracer);
+            }
+        });
+    } else {
         if (typeof toRemove !== 'string') {
             toRemove = toRemove.name;
         }
         Tracer.removeTracer(Tracer.instances[toRemove]);
-    }
-    if (filter) {
-        Object.keys(Tracer.instances).forEach((tracerName) => {
-            const tracer = Tracer.instances[tracerName];
-            if (filter(tracer)) {
-                Tracer.removeTracer(tracer);
-            }
-        });
     }
 };
 
@@ -898,10 +898,11 @@ module.exports = {
             options.body = JSON.stringify(options.body);
         }
 
-        options.uri = host ? `${options.protocol}://${host}:${options.port}${uri || ''}` : options.fullURI;
-        if (!options.uri) {
+        uri = host ? `${options.protocol}://${host}:${options.port}${uri || ''}` : options.fullURI;
+        if (!uri) {
             throw new Error('makeRequest: no fullURI or host provided');
         }
+        options.uri = uri;
 
         const continueOnErrorCode = options.continueOnErrorCode;
         const expectedResponseCode = Array.isArray(options.expectedResponseCode)

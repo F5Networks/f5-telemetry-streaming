@@ -23,7 +23,7 @@
   * [package.json](package.json)
   * [package-lock.json](package-lock.json)
   * [project.spec](project.spec) (not required starting from 1.5)
-  * [src/lib/constants.js](src/lib/constants.js)
+  * [src/lib/constants.js](src/lib/constants.js) (not required starting from 1.10)
   * [src/schema/latest/base_schema.json](src/schema/latest/base_schema.json)
   * [contributing/README.md](contributing/README.md) (example of response, optional)
   * [docs/conf.py](docs/conf.py)

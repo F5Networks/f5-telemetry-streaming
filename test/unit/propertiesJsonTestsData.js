@@ -906,6 +906,337 @@ module.exports = {
             },
             /**
              * TEST DATA STARTS HERE
+             */
+            {
+                name: 'should collect cpuInfo on a multi CPU device',
+                statsToCollect: ['system', 'cpu'],
+                contextToCollect: context => context,
+                expectedData: {
+                    system: {
+                        cpu: 20
+                    }
+                },
+                endpoints: [
+                    {
+                        endpoint: '/mgmt/tm/sys/host-info',
+                        response: {
+                            kind: 'tm:sys:host-info:host-infostats',
+                            selfLink: 'https://localhost/mgmt/tm/sys/host-info?ver=14.1.0',
+                            entries: {
+                                'https://localhost/mgmt/tm/sys/host-info/1': {
+                                    nestedStats: {
+                                        entries: {
+                                            'https://localhost/mgmt/tm/sys/hostInfo/1/cpuInfo': {
+                                                nestedStats: {
+                                                    entries: {
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/1/cpuInfo/0': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 2
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/1/cpuInfo/1': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 4
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/1/cpuInfo/2': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 6
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/1/cpuInfo/3': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 8
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                'https://localhost/mgmt/tm/sys/host-info/2': {
+                                    nestedStats: {
+                                        entries: {
+                                            'https://localhost/mgmt/tm/sys/hostInfo/2/cpuInfo': {
+                                                nestedStats: {
+                                                    entries: {
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/2/cpuInfo/0': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 12
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/2/cpuInfo/1': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 14
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/2/cpuInfo/2': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 16
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/2/cpuInfo/3': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 18
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                'https://localhost/mgmt/tm/sys/host-info/3': {
+                                    nestedStats: {
+                                        entries: {
+                                            'https://localhost/mgmt/tm/sys/hostInfo/3/cpuInfo': {
+                                                nestedStats: {
+                                                    entries: {
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/3/cpuInfo/0': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 22
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/3/cpuInfo/1': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 24
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/3/cpuInfo/2': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 26
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/3/cpuInfo/3': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 28
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                'https://localhost/mgmt/tm/sys/host-info/4': {
+                                    nestedStats: {
+                                        entries: {
+                                            'https://localhost/mgmt/tm/sys/hostInfo/4/cpuInfo': {
+                                                nestedStats: {
+                                                    entries: {
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/4/cpuInfo/0': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 32
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/4/cpuInfo/1': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 34
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/4/cpuInfo/2': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 36
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        'https://localhost/mgmt/tm/sys/hostInfo/4/cpuInfo/3': {
+                                                            nestedStats: {
+                                                                entries: {
+                                                                    oneMinAvgSystem: {
+                                                                        value: 38
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        endpoint: '/mgmt/shared/identified-devices/config/device-info',
+                        options: {
+                            times: 999
+                        },
+                        response: {
+                            kind: 'shared:resolver:device-groups:deviceinfostate',
+                            selfLink: 'https://localhost/mgmt/shared/identified-devices/config/device-info',
+                            baseMac: '00:01:2:a:B:d0',
+                            hostname: 'bigip1',
+                            version: '12.1.5.1',
+                            machineId: '00000000-0000-0000-0000-000000000000'
+                        }
+                    },
+                    {
+                        endpoint: '/mgmt/tm/sys/provision',
+                        options: {
+                            times: 999
+                        },
+                        response: {
+                            kind: 'tm:sys:provision:provisioncollectionstate',
+                            selfLink: 'https://localhost/mgmt/tm/sys/provision?ver=14.1.0'
+                        }
+                    }
+                ]
+            },
+            /**
+             * TEST DATA STARTS HERE
+             */
+            {
+                name: 'should collect memory-host on a multi host device',
+                statsToCollect: ['system', 'memory', 'tmmMemory'],
+                contextToCollect: context => context,
+                expectedData: {
+                    system: {
+                        memory: 70,
+                        tmmMemory: 7
+                    }
+                },
+                endpoints: [
+                    {
+                        endpoint: '/mgmt/tm/sys/memory',
+                        options: {
+                            times: 2
+                        },
+                        response: {
+                            kind: 'tm:sys:memory:memorystats',
+                            selfLink: 'https://localhost/mgmt/tm/sys/memory?ver=14.1.0',
+                            entries: {
+                                'https://localhost/mgmt/tm/sys/memory/memory-host': {
+                                    nestedStats: {
+                                        entries: {
+                                            'https://localhost/mgmt/tm/sys/memory/memory-host/0': {
+                                                nestedStats: {
+                                                    entries: {
+                                                        memoryTotal: {
+                                                            value: 8062742528
+                                                        },
+                                                        memoryUsed: {
+                                                            value: 1314352272
+                                                        },
+                                                        tmmMemoryTotal: {
+                                                            value: 6320816128
+                                                        },
+                                                        tmmMemoryUsed: {
+                                                            value: 169258128
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            'https://localhost/mgmt/tm/sys/memory/memory-host/1': {
+                                                nestedStats: {
+                                                    entries: {
+                                                        memoryTotal: {
+                                                            value: 16759459840
+                                                        },
+                                                        memoryUsed: {
+                                                            value: 16091751448
+                                                        },
+                                                        tmmMemoryTotal: {
+                                                            value: 423624704
+                                                        },
+                                                        tmmMemoryUsed: {
+                                                            value: 283849752
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        endpoint: '/mgmt/shared/identified-devices/config/device-info',
+                        options: {
+                            times: 999
+                        },
+                        response: {
+                            kind: 'shared:resolver:device-groups:deviceinfostate',
+                            selfLink: 'https://localhost/mgmt/shared/identified-devices/config/device-info',
+                            baseMac: '00:01:2:a:B:d0',
+                            hostname: 'bigip1',
+                            version: '12.1.5.1',
+                            machineId: '00000000-0000-0000-0000-000000000000'
+                        }
+                    },
+                    {
+                        endpoint: '/mgmt/tm/sys/provision',
+                        response: {
+                            kind: 'tm:sys:provision:provisioncollectionstate',
+                            selfLink: 'https://localhost/mgmt/tm/sys/provision?ver=14.1.0'
+                        }
+                    }
+                ]
+            },
+            /**
+             * TEST DATA STARTS HERE
              * */
             {
                 name: 'should not fail when no data (with items property)',
@@ -3287,6 +3618,648 @@ module.exports = {
                         }
                     }
                 ]
+            },
+            /**
+             * TEST DATA STARTS HERE
+             * */
+            {
+                name: 'should collect virtual servers stats and expand profilesReference',
+                statsToCollect: ['virtualServers'],
+                contextToCollect: [],
+                expectedData: {
+                    virtualServers: {
+                        '/Common/test_vs_0': {
+                            tenant: 'Common',
+                            availabilityState: 'unknown',
+                            'clientside.bitsIn': 0,
+                            'clientside.bitsOut': 0,
+                            'clientside.curConns': 0,
+                            destination: '10.11.0.2:80',
+                            enabledState: 'enabled',
+                            ipProtocol: 'tcp',
+                            mask: '255.255.255.255',
+                            name: '/Common/test_vs_0',
+                            pool: '/Common/test_pool_0',
+                            profiles: {
+                                '/Common/f5-tcp-lan': {
+                                    name: '/Common/f5-tcp-lan',
+                                    tenant: 'Common'
+                                },
+                                '/Common/http': {
+                                    name: '/Common/http',
+                                    tenant: 'Common'
+                                },
+                                '/Common/http-proxy-connect': {
+                                    name: '/Common/http-proxy-connect',
+                                    tenant: 'Common'
+                                },
+                                '/Common/tcp': {
+                                    name: '/Common/tcp',
+                                    tenant: 'Common'
+                                }
+                            }
+                        }
+                    }
+                },
+                endpoints: [
+                    {
+                        endpoint: /\/mgmt\/tm\/ltm\/virtual/,
+                        response: {
+                            kind: 'tm:ltm:virtual:virtualcollectionstate',
+                            selfLink: 'https://localhost/mgmt/tm/ltm/virtual?ver=14.1.0',
+                            items: [
+                                {
+                                    name: 'test_vs_0',
+                                    fullPath: '/Common/test_vs_0',
+                                    selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test_vs_0?ver=14.1.0',
+                                    ipProtocol: 'tcp',
+                                    mask: '255.255.255.255',
+                                    pool: '/Common/test_pool_0',
+                                    poolReference: {
+                                        link: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0?ver=14.1.0'
+                                    },
+                                    profilesReference: {
+                                        link: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test_vs_0/profiles?ver=14.1.0',
+                                        isSubcollection: true
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        endpoint: '/mgmt/tm/ltm/virtual/~Common~test_vs_0/stats',
+                        response: {
+                            kind: 'tm:ltm:virtual:virtualstats',
+                            selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test_vs_0/stats?ver=14.1.0',
+                            entries: {
+                                'https://localhost/mgmt/tm/ltm/virtual/~Common~test_vs_0/stats': {
+                                    nestedStats: {
+                                        kind: 'tm:ltm:virtual:virtualstats',
+                                        selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test_vs_0/stats?ver=14.1.0',
+                                        entries: {
+                                            'clientside.bitsIn': {
+                                                value: 0
+                                            },
+                                            'clientside.bitsOut': {
+                                                value: 0
+                                            },
+                                            'clientside.curConns': {
+                                                value: 0
+                                            },
+                                            'clientside.evictedConns': {
+                                                value: 0
+                                            },
+                                            'clientside.maxConns': {
+                                                value: 0
+                                            },
+                                            'clientside.pktsIn': {
+                                                value: 0
+                                            },
+                                            'clientside.pktsOut': {
+                                                value: 0
+                                            },
+                                            'clientside.slowKilled': {
+                                                value: 0
+                                            },
+                                            'clientside.totConns': {
+                                                value: 0
+                                            },
+                                            cmpEnableMode: {
+                                                description: 'all-cpus'
+                                            },
+                                            cmpEnabled: {
+                                                description: 'enabled'
+                                            },
+                                            csMaxConnDur: {
+                                                value: 0
+                                            },
+                                            csMeanConnDur: {
+                                                value: 0
+                                            },
+                                            csMinConnDur: {
+                                                value: 0
+                                            },
+                                            destination: {
+                                                description: '10.11.0.2:80'
+                                            },
+                                            'ephemeral.bitsIn': {
+                                                value: 0
+                                            },
+                                            'ephemeral.bitsOut': {
+                                                value: 0
+                                            },
+                                            'ephemeral.curConns': {
+                                                value: 0
+                                            },
+                                            'ephemeral.evictedConns': {
+                                                value: 0
+                                            },
+                                            'ephemeral.maxConns': {
+                                                value: 0
+                                            },
+                                            'ephemeral.pktsIn': {
+                                                value: 0
+                                            },
+                                            'ephemeral.pktsOut': {
+                                                value: 0
+                                            },
+                                            'ephemeral.slowKilled': {
+                                                value: 0
+                                            },
+                                            'ephemeral.totConns': {
+                                                value: 0
+                                            },
+                                            fiveMinAvgUsageRatio: {
+                                                value: 0
+                                            },
+                                            fiveSecAvgUsageRatio: {
+                                                value: 0
+                                            },
+                                            tmName: {
+                                                description: '/Common/test_vs_0'
+                                            },
+                                            oneMinAvgUsageRatio: {
+                                                value: 0
+                                            },
+                                            'status.availabilityState': {
+                                                description: 'unknown'
+                                            },
+                                            'status.enabledState': {
+                                                description: 'enabled'
+                                            },
+                                            'status.statusReason': {
+                                                description: 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet'
+                                            },
+                                            syncookieStatus: {
+                                                description: 'not-activated'
+                                            },
+                                            'syncookie.accepts': {
+                                                value: 0
+                                            },
+                                            'syncookie.hwAccepts': {
+                                                value: 0
+                                            },
+                                            'syncookie.hwSyncookies': {
+                                                value: 0
+                                            },
+                                            'syncookie.hwsyncookieInstance': {
+                                                value: 0
+                                            },
+                                            'syncookie.rejects': {
+                                                value: 0
+                                            },
+                                            'syncookie.swsyncookieInstance': {
+                                                value: 0
+                                            },
+                                            'syncookie.syncacheCurr': {
+                                                value: 0
+                                            },
+                                            'syncookie.syncacheOver': {
+                                                value: 0
+                                            },
+                                            'syncookie.syncookies': {
+                                                value: 0
+                                            },
+                                            totRequests: {
+                                                value: 0
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        endpoint: '/mgmt/tm/ltm/virtual/~Common~test_vs_0/profiles?$select=name,fullPath',
+                        response: {
+                            kind: 'tm:ltm:virtual:profiles:profilescollectionstate',
+                            selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test_vs/profiles?$select=name%2CfullPath&ver=14.1.0',
+                            items: [
+                                {
+                                    name: 'f5-tcp-lan',
+                                    fullPath: '/Common/f5-tcp-lan'
+                                },
+                                {
+                                    name: 'http',
+                                    fullPath: '/Common/http'
+                                },
+                                {
+                                    name: 'http-proxy-connect',
+                                    fullPath: '/Common/http-proxy-connect'
+                                },
+                                {
+                                    name: 'tcp',
+                                    fullPath: '/Common/tcp'
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            /**
+             * TEST DATA STARTS HERE
+             * */
+            {
+                name: 'should expand profilesReference even if no profiles attached (with items property)',
+                statsToCollect: ['virtualServers'],
+                contextToCollect: [],
+                expectedData: {
+                    virtualServers: {
+                        '/Common/test_vs_0': {
+                            tenant: 'Common',
+                            availabilityState: 'unknown',
+                            'clientside.bitsIn': 0,
+                            'clientside.bitsOut': 0,
+                            'clientside.curConns': 0,
+                            destination: '10.11.0.2:80',
+                            enabledState: 'enabled',
+                            ipProtocol: 'tcp',
+                            mask: '255.255.255.255',
+                            name: '/Common/test_vs_0',
+                            pool: '/Common/test_pool_0',
+                            profiles: {}
+                        }
+                    }
+                },
+                endpoints: [
+                    {
+                        endpoint: /\/mgmt\/tm\/ltm\/virtual/,
+                        response: {
+                            kind: 'tm:ltm:virtual:virtualcollectionstate',
+                            selfLink: 'https://localhost/mgmt/tm/ltm/virtual?ver=14.1.0',
+                            items: [
+                                {
+                                    name: 'test_vs_0',
+                                    fullPath: '/Common/test_vs_0',
+                                    selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test_vs_0?ver=14.1.0',
+                                    ipProtocol: 'tcp',
+                                    mask: '255.255.255.255',
+                                    pool: '/Common/test_pool_0',
+                                    poolReference: {
+                                        link: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0?ver=14.1.0'
+                                    },
+                                    profilesReference: {
+                                        link: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test_vs_0/profiles?ver=14.1.0',
+                                        isSubcollection: true
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        endpoint: '/mgmt/tm/ltm/virtual/~Common~test_vs_0/stats',
+                        response: {
+                            kind: 'tm:ltm:virtual:virtualstats',
+                            selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test_vs_0/stats?ver=14.1.0',
+                            entries: {
+                                'https://localhost/mgmt/tm/ltm/virtual/~Common~test_vs_0/stats': {
+                                    nestedStats: {
+                                        kind: 'tm:ltm:virtual:virtualstats',
+                                        selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test_vs_0/stats?ver=14.1.0',
+                                        entries: {
+                                            'clientside.bitsIn': {
+                                                value: 0
+                                            },
+                                            'clientside.bitsOut': {
+                                                value: 0
+                                            },
+                                            'clientside.curConns': {
+                                                value: 0
+                                            },
+                                            'clientside.evictedConns': {
+                                                value: 0
+                                            },
+                                            'clientside.maxConns': {
+                                                value: 0
+                                            },
+                                            'clientside.pktsIn': {
+                                                value: 0
+                                            },
+                                            'clientside.pktsOut': {
+                                                value: 0
+                                            },
+                                            'clientside.slowKilled': {
+                                                value: 0
+                                            },
+                                            'clientside.totConns': {
+                                                value: 0
+                                            },
+                                            cmpEnableMode: {
+                                                description: 'all-cpus'
+                                            },
+                                            cmpEnabled: {
+                                                description: 'enabled'
+                                            },
+                                            csMaxConnDur: {
+                                                value: 0
+                                            },
+                                            csMeanConnDur: {
+                                                value: 0
+                                            },
+                                            csMinConnDur: {
+                                                value: 0
+                                            },
+                                            destination: {
+                                                description: '10.11.0.2:80'
+                                            },
+                                            'ephemeral.bitsIn': {
+                                                value: 0
+                                            },
+                                            'ephemeral.bitsOut': {
+                                                value: 0
+                                            },
+                                            'ephemeral.curConns': {
+                                                value: 0
+                                            },
+                                            'ephemeral.evictedConns': {
+                                                value: 0
+                                            },
+                                            'ephemeral.maxConns': {
+                                                value: 0
+                                            },
+                                            'ephemeral.pktsIn': {
+                                                value: 0
+                                            },
+                                            'ephemeral.pktsOut': {
+                                                value: 0
+                                            },
+                                            'ephemeral.slowKilled': {
+                                                value: 0
+                                            },
+                                            'ephemeral.totConns': {
+                                                value: 0
+                                            },
+                                            fiveMinAvgUsageRatio: {
+                                                value: 0
+                                            },
+                                            fiveSecAvgUsageRatio: {
+                                                value: 0
+                                            },
+                                            tmName: {
+                                                description: '/Common/test_vs_0'
+                                            },
+                                            oneMinAvgUsageRatio: {
+                                                value: 0
+                                            },
+                                            'status.availabilityState': {
+                                                description: 'unknown'
+                                            },
+                                            'status.enabledState': {
+                                                description: 'enabled'
+                                            },
+                                            'status.statusReason': {
+                                                description: 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet'
+                                            },
+                                            syncookieStatus: {
+                                                description: 'not-activated'
+                                            },
+                                            'syncookie.accepts': {
+                                                value: 0
+                                            },
+                                            'syncookie.hwAccepts': {
+                                                value: 0
+                                            },
+                                            'syncookie.hwSyncookies': {
+                                                value: 0
+                                            },
+                                            'syncookie.hwsyncookieInstance': {
+                                                value: 0
+                                            },
+                                            'syncookie.rejects': {
+                                                value: 0
+                                            },
+                                            'syncookie.swsyncookieInstance': {
+                                                value: 0
+                                            },
+                                            'syncookie.syncacheCurr': {
+                                                value: 0
+                                            },
+                                            'syncookie.syncacheOver': {
+                                                value: 0
+                                            },
+                                            'syncookie.syncookies': {
+                                                value: 0
+                                            },
+                                            totRequests: {
+                                                value: 0
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        endpoint: '/mgmt/tm/ltm/virtual/~Common~test_vs_0/profiles?$select=name,fullPath',
+                        response: {
+                            kind: 'tm:ltm:virtual:profiles:profilescollectionstate',
+                            selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test_vs/profiles?$select=name%2CfullPath&ver=14.1.0',
+                            items: []
+                        }
+                    }
+                ]
+            },
+            /**
+             * TEST DATA STARTS HERE
+             * */
+            {
+                name: 'should expand profilesReference even if no profiles attached (without items property)',
+                statsToCollect: ['virtualServers'],
+                contextToCollect: [],
+                expectedData: {
+                    virtualServers: {
+                        '/Common/test_vs_0': {
+                            tenant: 'Common',
+                            availabilityState: 'unknown',
+                            'clientside.bitsIn': 0,
+                            'clientside.bitsOut': 0,
+                            'clientside.curConns': 0,
+                            destination: '10.11.0.2:80',
+                            enabledState: 'enabled',
+                            ipProtocol: 'tcp',
+                            mask: '255.255.255.255',
+                            name: '/Common/test_vs_0',
+                            pool: '/Common/test_pool_0',
+                            profiles: {}
+                        }
+                    }
+                },
+                endpoints: [
+                    {
+                        endpoint: /\/mgmt\/tm\/ltm\/virtual/,
+                        response: {
+                            kind: 'tm:ltm:virtual:virtualcollectionstate',
+                            selfLink: 'https://localhost/mgmt/tm/ltm/virtual?ver=14.1.0',
+                            items: [
+                                {
+                                    name: 'test_vs_0',
+                                    fullPath: '/Common/test_vs_0',
+                                    selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test_vs_0?ver=14.1.0',
+                                    ipProtocol: 'tcp',
+                                    mask: '255.255.255.255',
+                                    pool: '/Common/test_pool_0',
+                                    poolReference: {
+                                        link: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0?ver=14.1.0'
+                                    },
+                                    profilesReference: {
+                                        link: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test_vs_0/profiles?ver=14.1.0',
+                                        isSubcollection: true
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        endpoint: '/mgmt/tm/ltm/virtual/~Common~test_vs_0/stats',
+                        response: {
+                            kind: 'tm:ltm:virtual:virtualstats',
+                            selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test_vs_0/stats?ver=14.1.0',
+                            entries: {
+                                'https://localhost/mgmt/tm/ltm/virtual/~Common~test_vs_0/stats': {
+                                    nestedStats: {
+                                        kind: 'tm:ltm:virtual:virtualstats',
+                                        selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test_vs_0/stats?ver=14.1.0',
+                                        entries: {
+                                            'clientside.bitsIn': {
+                                                value: 0
+                                            },
+                                            'clientside.bitsOut': {
+                                                value: 0
+                                            },
+                                            'clientside.curConns': {
+                                                value: 0
+                                            },
+                                            'clientside.evictedConns': {
+                                                value: 0
+                                            },
+                                            'clientside.maxConns': {
+                                                value: 0
+                                            },
+                                            'clientside.pktsIn': {
+                                                value: 0
+                                            },
+                                            'clientside.pktsOut': {
+                                                value: 0
+                                            },
+                                            'clientside.slowKilled': {
+                                                value: 0
+                                            },
+                                            'clientside.totConns': {
+                                                value: 0
+                                            },
+                                            cmpEnableMode: {
+                                                description: 'all-cpus'
+                                            },
+                                            cmpEnabled: {
+                                                description: 'enabled'
+                                            },
+                                            csMaxConnDur: {
+                                                value: 0
+                                            },
+                                            csMeanConnDur: {
+                                                value: 0
+                                            },
+                                            csMinConnDur: {
+                                                value: 0
+                                            },
+                                            destination: {
+                                                description: '10.11.0.2:80'
+                                            },
+                                            'ephemeral.bitsIn': {
+                                                value: 0
+                                            },
+                                            'ephemeral.bitsOut': {
+                                                value: 0
+                                            },
+                                            'ephemeral.curConns': {
+                                                value: 0
+                                            },
+                                            'ephemeral.evictedConns': {
+                                                value: 0
+                                            },
+                                            'ephemeral.maxConns': {
+                                                value: 0
+                                            },
+                                            'ephemeral.pktsIn': {
+                                                value: 0
+                                            },
+                                            'ephemeral.pktsOut': {
+                                                value: 0
+                                            },
+                                            'ephemeral.slowKilled': {
+                                                value: 0
+                                            },
+                                            'ephemeral.totConns': {
+                                                value: 0
+                                            },
+                                            fiveMinAvgUsageRatio: {
+                                                value: 0
+                                            },
+                                            fiveSecAvgUsageRatio: {
+                                                value: 0
+                                            },
+                                            tmName: {
+                                                description: '/Common/test_vs_0'
+                                            },
+                                            oneMinAvgUsageRatio: {
+                                                value: 0
+                                            },
+                                            'status.availabilityState': {
+                                                description: 'unknown'
+                                            },
+                                            'status.enabledState': {
+                                                description: 'enabled'
+                                            },
+                                            'status.statusReason': {
+                                                description: 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet'
+                                            },
+                                            syncookieStatus: {
+                                                description: 'not-activated'
+                                            },
+                                            'syncookie.accepts': {
+                                                value: 0
+                                            },
+                                            'syncookie.hwAccepts': {
+                                                value: 0
+                                            },
+                                            'syncookie.hwSyncookies': {
+                                                value: 0
+                                            },
+                                            'syncookie.hwsyncookieInstance': {
+                                                value: 0
+                                            },
+                                            'syncookie.rejects': {
+                                                value: 0
+                                            },
+                                            'syncookie.swsyncookieInstance': {
+                                                value: 0
+                                            },
+                                            'syncookie.syncacheCurr': {
+                                                value: 0
+                                            },
+                                            'syncookie.syncacheOver': {
+                                                value: 0
+                                            },
+                                            'syncookie.syncookies': {
+                                                value: 0
+                                            },
+                                            totRequests: {
+                                                value: 0
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        endpoint: '/mgmt/tm/ltm/virtual/~Common~test_vs_0/profiles?$select=name,fullPath',
+                        response: {
+                            kind: 'tm:ltm:virtual:profiles:profilescollectionstate',
+                            selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~test_vs/profiles?$select=name%2CfullPath&ver=14.1.0'
+                        }
+                    }
+                ]
             }
         ]
     },
@@ -3377,13 +4350,6 @@ module.exports = {
                         endpoint: /\/mgmt\/tm\/ltm\/pool/,
                         response: {
                             kind: 'tm:ltm:pool:poolcollectionstate',
-                            selfLink: 'https://localhost/mgmt/tm/ltm/pool?$top=1&ver=14.1.0',
-                            currentItemCount: 1,
-                            itemsPerPage: 1,
-                            pageIndex: 2,
-                            startIndex: 1,
-                            totalItems: 2000,
-                            totalPages: 2000,
                             items: [
                                 {
                                     kind: 'tm:ltm:pool:poolstate',
@@ -3415,8 +4381,7 @@ module.exports = {
                                         isSubcollection: true
                                     }
                                 }
-                            ],
-                            nextLink: 'https://localhost/mgmt/tm/ltm/pool?$top=1&$skip=1&ver=14.1.0'
+                            ]
                         }
                     },
                     {
@@ -5026,11 +5991,11 @@ module.exports = {
                 expectedData: {
                     deviceGroups: {
                         '/Common/datasync-device-ts-big-inst.localhost.localdomain-dg': {
+                            tenant: 'Common',
                             commitIdTime: '2020-01-30T07:48:42.000Z',
                             lssTime: '2020-01-30T07:48:42.000Z',
                             timeSinceLastSync: '-',
                             name: '/Common/datasync-device-ts-big-inst.localhost.localdomain-dg',
-                            tenant: 'Common',
                             type: 'sync-only'
                         }
                     }

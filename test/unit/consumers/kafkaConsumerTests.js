@@ -8,18 +8,21 @@
 
 'use strict';
 
+/* eslint-disable import/order */
+
+require('../shared/restoreCache')();
+
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const kafka = require('kafka-node');
-
-chai.use(chaiAsPromised);
-const assert = chai.assert;
 const sinon = require('sinon');
 
 const kafkaIndex = require('../../../src/lib/consumers/Kafka/index');
-const util = require('../shared/util.js');
+const testUtil = require('../shared/util');
 
-/* eslint-disable global-require */
+chai.use(chaiAsPromised);
+const assert = chai.assert;
+
 describe('Kafka', () => {
     let sendStub;
     let passedClientOptions;
@@ -29,6 +32,7 @@ describe('Kafka', () => {
         port: '9092',
         topic: 'dataTopic'
     };
+
     beforeEach(() => {
         sinon.stub(kafka, 'KafkaClient').callsFake((opts) => {
             passedClientOptions = opts;
@@ -52,7 +56,7 @@ describe('Kafka', () => {
         }];
 
         it('should configure Kafka Client client options with default values', (done) => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 config: defaultConsumerConfig
             });
             const expectedOptions = {
@@ -65,11 +69,11 @@ describe('Kafka', () => {
 
             sendStub = () => {
                 try {
-                    assert.deepEqual(passedClientOptions, expectedOptions);
+                    assert.deepStrictEqual(passedClientOptions, expectedOptions);
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             };
@@ -78,7 +82,7 @@ describe('Kafka', () => {
         });
 
         it('should configure Kafka Client client options with provided values', (done) => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 config: {
                     host: 'kafka-second-host',
                     port: '4545',
@@ -105,11 +109,11 @@ describe('Kafka', () => {
 
             sendStub = () => {
                 try {
-                    assert.deepEqual(passedClientOptions, expectedOptions);
+                    assert.deepStrictEqual(passedClientOptions, expectedOptions);
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             };
@@ -118,19 +122,19 @@ describe('Kafka', () => {
         });
 
         it('should process systemInfo data', (done) => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 eventType: 'systemInfo',
                 config: defaultConsumerConfig
             });
-            expectedPayload[0].messages = JSON.stringify(util.deepCopy(context.event.data));
+            expectedPayload[0].messages = JSON.stringify(testUtil.deepCopy(context.event.data));
 
             sendStub = (payload) => {
                 try {
-                    assert.deepEqual(payload, expectedPayload);
+                    assert.deepStrictEqual(payload, expectedPayload);
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             };
@@ -139,19 +143,19 @@ describe('Kafka', () => {
         });
 
         it('should process event data', (done) => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 eventType: 'AVR',
                 config: defaultConsumerConfig
             });
-            expectedPayload[0].messages = JSON.stringify(util.deepCopy(context.event.data));
+            expectedPayload[0].messages = JSON.stringify(testUtil.deepCopy(context.event.data));
 
             sendStub = (payload) => {
                 try {
-                    assert.deepEqual(payload, expectedPayload);
+                    assert.deepStrictEqual(payload, expectedPayload);
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             };

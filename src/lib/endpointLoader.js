@@ -8,10 +8,10 @@
 
 'use strict';
 
-const deviceUtil = require('./deviceUtil.js');
-const constants = require('./constants.js');
-const util = require('./util.js');
-const logger = require('./logger.js');
+const deviceUtil = require('./deviceUtil');
+const constants = require('./constants');
+const util = require('./util');
+const logger = require('./logger');
 
 /** @module EndpointLoader */
 
@@ -59,6 +59,7 @@ const logger = require('./logger.js');
  *
  * @param {String}  [host]                                   - host, by  default localhost
  * @param {Object}  [options]                                - options
+ * @param {module:logger~Logger} [options.logger]            - logger
  * @param {String}  [options.credentials.username]           - username for host
  * @param {String}  [options.credentials.passphrase]         - password for host
  * @param {String}  [options.credentials.token]              - auth token
@@ -77,10 +78,12 @@ function EndpointLoader() {
         this.options,
         {
             credentials: {},
-            connection: {}
+            connection: {},
+            logger
         }
     );
 
+    this.logger = this.options.logger;
     this.endpoints = null;
     this.eraseCache();
 }
@@ -152,7 +155,7 @@ EndpointLoader.prototype.loadEndpoint = function (endpoint, options) {
             return Promise.resolve(response);
         })
         .catch((err) => {
-            logger.error(`Error: EndpointLoader.loadEndpoint: ${endpoint}: ${err}`);
+            this.logger.error(`Error: EndpointLoader.loadEndpoint: ${endpoint}: ${err}`);
             return Promise.reject(err);
         });
 };
@@ -278,7 +281,7 @@ EndpointLoader.prototype.substituteData = function (baseData, dataArray, shallow
  * @returns {Promise<module:EndpointLoader~FetchedData>} resolved with FetchedData
  */
 EndpointLoader.prototype.getData = function (uri, options) {
-    logger.debug(`EndpointLoader.getData: loading data from URI = ${uri}`);
+    this.logger.debug(`EndpointLoader.getData: loading data from URI = ${uri}`);
 
     options = options || {};
     const httpOptions = Object.assign({}, this.options.connection);

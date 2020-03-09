@@ -9,16 +9,17 @@
 'use strict';
 
 
-const constants = require('./constants.js');
-const util = require('./util.js');
-const normalize = require('./normalize.js');
+const constants = require('./constants');
+const util = require('./util');
+const normalize = require('./normalize');
 const defaultProperties = require('./properties.json');
 const defaultPaths = require('./paths.json');
-const logger = require('./logger.js');
+const logger = require('./logger');
 const EndpointLoader = require('./endpointLoader');
 const dataUtil = require('./dataUtil');
 const systemStatsUtil = require('./systemStatsUtil');
 
+/** @module systemStats */
 
 /**
  * System Stats Class
@@ -36,7 +37,7 @@ const systemStatsUtil = require('./systemStatsUtil');
  * @param {Object}  [config.dataOpts.actions]               - actions to apply to the data (each key)
  * @param {Boolean} [config.dataOpts.noTMStats]             - true if don't need to fetch TMSTAT data
  * @param {Object}  [config.endpoints]                      - endpoints to use to fetch data
- * @param {Array}   [config.events]                         - events to produce using endpoints
+ * @param {String}  [config.name]                           - name
  */
 function SystemStats(config) {
     config = util.assignDefaults(
@@ -44,7 +45,8 @@ function SystemStats(config) {
         {
             connection: {},
             credentials: {},
-            dataOpts: {}
+            dataOpts: {},
+            name: 'UnknownPoller'
         }
     );
 
@@ -56,7 +58,7 @@ function SystemStats(config) {
             actions: []
         }
     );
-
+    this.logger = logger.getChild(`${config.name}`);
     this.noTMStats = config.dataOpts.noTMStats;
     this.tags = config.dataOpts.tags;
     this.actions = config.dataOpts.actions;
@@ -66,7 +68,8 @@ function SystemStats(config) {
         config.connection.host,
         {
             credentials: util.deepCopy(config.credentials),
-            connection: util.deepCopy(config.connection)
+            connection: util.deepCopy(config.connection),
+            logger: this.logger
         }
     );
 
@@ -202,7 +205,7 @@ SystemStats.prototype._loadData = function (property) {
             return Promise.resolve(data);
         })
         .catch((err) => {
-            logger.error(`Error: SystemStats._loadData: ${endpoint} (${property.keyArgs}): ${err}`);
+            this.logger.error(`Error: SystemStats._loadData: ${endpoint} (${property.keyArgs}): ${err}`);
             return Promise.reject(err);
         });
 };
@@ -244,7 +247,7 @@ SystemStats.prototype._processProperty = function (key, property) {
             }
         })
         .catch((err) => {
-            logger.error(`Error: SystemStats._processProperty: ${key} (${property.key}): ${err}`);
+            this.logger.error(`Error: SystemStats._processProperty: ${key} (${property.key}): ${err}`);
             return Promise.reject(err);
         });
 };
@@ -515,7 +518,7 @@ SystemStats.prototype.collectCustomEndpoints = function () {
 SystemStats.prototype.collect = function () {
     let collectedData;
     let caughtErr;
-
+    this.logger.debug('Starting stats collection');
     return this.loader.auth()
         .then(() => {
             this.loader.setEndpoints(this.endpoints);
@@ -532,7 +535,7 @@ SystemStats.prototype.collect = function () {
             this.loader.eraseCache();
             if (caughtErr) {
                 const message = caughtErr.message || `Error: SystemStats.collect: ${caughtErr}`;
-                logger.error(message);
+                this.logger.error(message);
                 return Promise.reject(caughtErr);
             }
             return Promise.resolve(collectedData);

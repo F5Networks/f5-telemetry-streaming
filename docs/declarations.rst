@@ -61,13 +61,46 @@ Example 4: iHealth Poller
 
 |
 
-
 .. _referencedpollers:
 
 Example 5: Referenced Pollers
 -----------------------------
 
 .. literalinclude:: ../examples/declarations/system.json
+    :language: json
+
+    
+
+    
+:ref:`Back to top<examples>`
+
+|
+
+.. _customendpoint:
+
+Example 6: Custom Endpoints
+---------------------------
+.. IMPORTANT:: Configuring custom endpoints and multiple system pollers specific to those endpoints is currently EXPERIMENTAL and is available in TS v1.10.0 and later. See :doc:`custom-endpoints` for more information on this feature.
+
+|
+
+.. literalinclude:: ../examples/declarations/system_custom_endpoints.json
+    :language: json
+
+    
+
+    
+:ref:`Back to top<examples>`
+
+|
+
+.. _value:
+
+Example 7: Value-based matching
+-------------------------------
+.. IMPORTANT:: Value-based matching is available in TS v1.10.0 and later. See :ref:`valuebased` for more information on this feature.
+
+.. literalinclude:: ../examples/declarations/action_matching.json
     :language: json
 
     
