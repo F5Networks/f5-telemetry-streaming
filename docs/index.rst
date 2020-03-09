@@ -58,6 +58,7 @@ Previous buttons to explore the documentation.
    troubleshooting
    revision-history
    schema-reference
+   custom-endpoints
 
 
 .. |video| raw:: html
