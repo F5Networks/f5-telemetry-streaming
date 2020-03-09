@@ -8,7 +8,6 @@
 
 'use strict';
 
-
 const packageVersionInfo = (function () {
     let packageVersion = '0.0.0-0';
     ['../package.json', '../../package.json'].some((fname) => {
