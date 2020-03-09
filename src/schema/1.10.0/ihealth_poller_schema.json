@@ -169,6 +169,32 @@
                     ]
                 }
             }
+        },
+        "iHealthPollerPointerRef": {
+            "$async": true,
+            "type": "string",
+            "declarationClass": "Telemetry_iHealth_Poller"
+        },
+        "iHealthPollerObjectRef": {
+            "$async": true,
+            "allOf": [
+                {
+                    "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a seperate block",
+                    "properties": {
+                        "enable": {},
+                        "trace": {},
+                        "interval": {},
+                        "proxy": {},
+                        "username": {},
+                        "passphrase": {},
+                        "downloadFolder": {}
+                    },
+                    "additionalProperties": false
+                },
+                {
+                    "$ref": "ihealth_poller_schema.json#/definitions/iHealthPoller"
+                }
+            ]
         }
     },
     "allOf": [

@@ -6,7 +6,8 @@
     "description": "",
     "type": "object",
     "definitions": {
-        "telemetryEndpoint": {
+        "endpoint": {
+            "$async": true,
             "title": "Telemetry Endpoint",
             "description": "",
             "type": "object",
@@ -33,8 +34,7 @@
             },
             "additionalProperties": false
         },
-        "telemetryEndpoints": {
-            "$comment": "system_poller_schema.json should be updated when new property added",
+        "endpoints": {
             "$async": true,
             "title": "Telemetry Endpoints",
             "description": "",
@@ -51,7 +51,7 @@
                 },
                 "basePath": {
                     "title": "Base Path",
-                    "description": "Optional base path value to prepend to each invidual endpoint paths",
+                    "description": "Optional base path value to prepend to each individual endpoint paths",
                     "type": "string",
                     "default": ""
                 },
@@ -62,7 +62,7 @@
                     "additionalProperties": {
                         "allOf": [
                             {
-                                "$ref": "#/definitions/telemetryEndpoint"
+                                "$ref": "#/definitions/endpoint"
                             },
                             { 
                                 "required": [ "path" ]
@@ -72,6 +72,59 @@
                     "minProperties": 1
                 }
             }
+        },
+        "endpointsObjectRef": {
+            "$async": true,
+            "allOf": [
+                {
+                    "$ref": "#/definitions/endpoints"
+                },
+                {
+                    "properties": {
+                        "enable": {},
+                        "basePath": {},
+                        "items": {}
+                    },
+                    "required": [ "items" ],
+                    "additionalProperties": false
+                }
+            ]
+        },
+        "endpointObjectRef": {
+            "$async": true,
+            "allOf": [
+                {
+                    "$ref": "#/definitions/endpoint"
+                },
+                {
+                    "properties": {
+                        "enable": {},
+                        "name": {},
+                        "path": {}
+                    },
+                    "required": [ "name", "path" ],
+                    "additionalProperties": false
+                }
+            ]
+        },
+        "endpointsPointerRef": {
+            "$async": true,
+            "title": "Telemetry_Endpoints Name",
+            "description": "Name of the Telemetry_Endpoints object",
+            "type": "string",
+            "declarationClass": "Telemetry_Endpoints",
+            "minLength": 1
+        },
+        "endpointsItemPointerRef": {
+            "$async": true,
+            "title": "Telemetry_Endpoints Name and Item Key",
+            "description": "Name of the Telemetry_Endpoints object and the endpoint item key, e.g endpointsA/item1",
+            "type": "string",
+            "declarationClassProp": {
+                "path" :"Telemetry_Endpoints/items",
+                "partsNum": 2
+            },
+            "minLength": 1
         }
     },
     "allOf": [
@@ -92,7 +145,7 @@
                 },
                 "allOf": [
                     {
-                        "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a seperate block",
+                        "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a separate block",
                         "properties": {
                             "class": {},
                             "enable": {},
@@ -102,7 +155,7 @@
                         "additionalProperties": false
                     },
                     {
-                        "$ref": "#/definitions/telemetryEndpoints"
+                        "$ref": "#/definitions/endpoints"
                     }
                 ]
             },
