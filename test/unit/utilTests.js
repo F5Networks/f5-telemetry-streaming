@@ -956,6 +956,21 @@ describe('Util', () => {
             );
         });
 
+        it('should write data to same file (2 tracers)', () => {
+            // due to implementation of Tracer it is hard to verify output
+            // so, just verify it is not fails
+            const filePath = path.join(tracerDir, 'output');
+            const tracer1 = util.tracer.createFromConfig('class2', 'obj2', { trace: filePath });
+            const tracer2 = util.tracer.createFromConfig('class2', 'obj3', { trace: filePath });
+            return assert.isFulfilled(Promise.all([
+                tracer1.write('tracer1'),
+                tracer2.write('tracer2')
+            ])
+                .then(() => {
+                    assert.ok(/tracer[12]/.test(fs.readFileSync(filePath, 'utf8')));
+                }));
+        });
+
         it('should write data to file', () => assert.isFulfilled(
             tracer.write('foobar')
                 .then(() => {
@@ -976,7 +991,7 @@ describe('Util', () => {
         });
 
         it('should remove tracer by filter', () => {
-            util.tracer.remove(null, t => t.name === tracer.name);
+            util.tracer.remove(t => t.name === tracer.name);
             assert.strictEqual(util.tracer.instances[tracer.name], undefined);
         });
 

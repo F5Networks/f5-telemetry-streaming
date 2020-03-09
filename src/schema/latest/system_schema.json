@@ -29,13 +29,7 @@
                         ]
                     },
                     "trace": {
-                        "title": "Enable all pollers' tracers attached to device",
-                        "default": false,
-                        "allOf": [
-                            {
-                                "$ref": "base_schema.json#/definitions/trace"
-                            }
-                        ]
+                        "$ref": "base_schema.json#/definitions/trace"
                     },
                     "host": {
                         "title": "System connection address",
@@ -65,7 +59,13 @@
                         ]
                     },
                     "allowSelfSignedCert": {
-                        "$ref": "base_schema.json#/definitions/allowSelfSignedCert"
+                        "title": "Allow Self-Signed Certificate",
+                        "default": false,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/allowSelfSignedCert"
+                            }
+                        ]
                     },
                     "enableHostConnectivityCheck": {
                         "$ref": "base_schema.json#/definitions/enableHostConnectivityCheck"
@@ -82,42 +82,24 @@
                         "title": "System Poller declaration",
                         "oneOf": [
                             {
-                                "type": "string",
-                                "declarationClass": "Telemetry_System_Poller"
+                                "$ref": "system_poller_schema.json#/definitions/systemPollerPointerRef"
                             },
                             {
-                                "allOf": [
-                                    {
-                                        "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a seperate block",
-                                        "properties": {
-                                            "enable": {},
-                                            "trace": {},
-                                            "interval": {},
-                                            "tag": {},
-                                            "actions": {},
-                                            "endpointList": {}
-                                        },
-                                        "additionalProperties": false
-                                    },
-                                    {
-                                        "$ref": "system_poller_schema.json#/definitions/systemPoller"
-                                    }
-                                ]
+                                "$ref": "system_poller_schema.json#/definitions/systemPollerObjectRef"
                             },
                             {
                                 "type": "array",
                                 "items": {
                                     "anyOf": [
                                         {
-                                            "$ref": "system_poller_schema.json#/definitions/systemPoller"
+                                            "$ref": "system_poller_schema.json#/definitions/systemPollerObjectRef"
                                         },
                                         {
-                                            "type": "string",
-                                            "declarationClass": "Telemetry_System_Poller",
-                                            "minLength": 1
+                                            "$ref": "system_poller_schema.json#/definitions/systemPollerPointerRef"
                                         }
                                     ]
-                                }
+                                },
+                                "minItems": 1
                             }
                         ]
                     },
@@ -125,35 +107,16 @@
                         "title": "iHealth Poller declaration",
                         "oneOf": [
                             {
-                                "type": "string",
-                                "declarationClass": "Telemetry_iHealth_Poller"
+                                "$ref": "ihealth_poller_schema.json#/definitions/iHealthPollerPointerRef"
                             },
                             {
-                                "allOf": [
-                                    {
-                                        "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a seperate block",
-                                        "properties": {
-                                            "enable": {},
-                                            "trace": {},
-                                            "interval": {},
-                                            "proxy": {},
-                                            "username": {},
-                                            "passphrase": {},
-                                            "downloadFolder": {}
-                                        },
-                                        "additionalProperties": false
-                                    },
-                                    {
-                                        "$ref": "ihealth_poller_schema.json#/definitions/iHealthPoller"
-                                    }
-                                ]
+                                "$ref": "ihealth_poller_schema.json#/definitions/iHealthPollerObjectRef"
                             }
                         ]
                     }
                 },
                 "additionalProperties": false
-            },
-            "else": {}
+            }
         }
     ]
 }

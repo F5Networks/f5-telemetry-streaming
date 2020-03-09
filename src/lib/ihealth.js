@@ -241,8 +241,8 @@ configWorker.on('change', (config) => {
         }
     });
 
-    util.tracer.remove(null, tracer => tracer.name.startsWith(IHEALTH_POLLER_CLASS_NAME)
-                                        && tracer.lastGetTouch < tracersTimestamp);
+    util.tracer.remove(tracer => tracer.name.startsWith(IHEALTH_POLLER_CLASS_NAME)
+        && tracer.lastGetTouch < tracersTimestamp);
 
     logger.debug(`${Object.keys(pollers).length} iHealth poller(s) running`);
 });

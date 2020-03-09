@@ -41,7 +41,8 @@ describe('Endpoint Loader', () => {
     describe('constructor', () => {
         it('should set defaults', () => {
             assert.strictEqual(eLoader.host, 'localhost');
-            assert.deepStrictEqual(eLoader.options, { credentials: {}, connection: {} });
+            assert.deepStrictEqual(eLoader.options.credentials, {});
+            assert.deepStrictEqual(eLoader.options.connection, {});
             assert.strictEqual(eLoader.endpoints, null);
             assert.deepStrictEqual(eLoader.cachedResponse, {});
         });
@@ -53,11 +54,9 @@ describe('Endpoint Loader', () => {
 
         it('should set options when argument is object', () => {
             eLoader = new EndpointLoader({ foo: 'bar' });
-            assert.deepStrictEqual(eLoader.options, {
-                foo: 'bar',
-                credentials: {},
-                connection: {}
-            });
+            assert.strictEqual(eLoader.options.foo, 'bar');
+            assert.deepStrictEqual(eLoader.options.credentials, {});
+            assert.deepStrictEqual(eLoader.options.connection, {});
         });
     });
 

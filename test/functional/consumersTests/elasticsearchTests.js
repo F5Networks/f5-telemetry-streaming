@@ -131,7 +131,7 @@ function test() {
 
                     it('should retrieve SystemPoller data', () => dutUtils.getSystemPollerData(dut, constants.DECL.SYSTEM_NAME)
                         .then((data) => {
-                            systemPollerData = data;
+                            systemPollerData = data[0];
                             assert.notStrictEqual(systemPollerData, undefined);
                             assert.notStrictEqual(systemPollerData.system, undefined);
                         }));

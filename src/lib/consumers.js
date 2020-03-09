@@ -17,7 +17,7 @@ const configWorker = require('./config');
 const DataFilter = require('./dataFilter').DataFilter;
 
 const CONSUMERS_DIR = constants.CONSUMERS_DIR;
-const CLASS_NAME = constants.CONFIG_CLASSES.CONSUMERS_CLASS_NAME;
+const CLASS_NAME = constants.CONFIG_CLASSES.CONSUMER_CLASS_NAME;
 let CONSUMERS = null;
 
 /**
@@ -168,8 +168,8 @@ configWorker.on('change', (config) => {
         })
         .then(() => {
             unloadUnusedModules(typesBefore);
-            tracers.remove(null, tracer => tracer.name.startsWith(CLASS_NAME)
-                                           && tracer.lastGetTouch < tracersTimestamp);
+            tracers.remove(tracer => tracer.name.startsWith(CLASS_NAME)
+                && tracer.lastGetTouch < tracersTimestamp);
         });
 });
 

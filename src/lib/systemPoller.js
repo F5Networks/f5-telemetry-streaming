@@ -8,23 +8,214 @@
 
 'use strict';
 
-const logger = require('./logger'); // eslint-disable-line no-unused-vars
 const constants = require('./constants');
-const util = require('./util');
-const deviceUtil = require('./deviceUtil');
 const configWorker = require('./config');
-const SystemStats = require('./systemStats');
 const dataPipeline = require('./dataPipeline');
-
-
-const CONSUMER_CLASS_NAME = constants.CONFIG_CLASSES.CONSUMERS_CLASS_NAME;
-const ENDPOINTS_CLASS_NAME = constants.CONFIG_CLASSES.ENDPOINTS_CLASS_NAME;
-const SYSTEM_CLASS_NAME = constants.CONFIG_CLASSES.SYSTEM_CLASS_NAME;
-const SYSTEM_POLLER_CLASS_NAME = constants.CONFIG_CLASSES.SYSTEM_POLLER_CLASS_NAME;
-
-const pollerIDs = {};
+const deviceUtil = require('./deviceUtil');
+const logger = require('./logger'); // eslint-disable-line no-unused-vars
+const normalizeConfig = require('./normalizeConfig');
+const SystemStats = require('./systemStats');
+const util = require('./util');
 
 /** @module systemPoller */
+
+const CONFIG_CLASSES = constants.CONFIG_CLASSES;
+// use SYSTEM_POLLER_CLASS_NAME to keep compatibility with previous versions
+// but it is possible use SYSTEM_CLASS_NAME instead too
+const TRACER_CLASS_NAME = CONFIG_CLASSES.SYSTEM_POLLER_CLASS_NAME;
+// key - poller name, value - timer ID
+const POLLER_TIMERS = {};
+
+function getPollerTimers() {
+    return POLLER_TIMERS;
+}
+
+function getTelemetryObjects(originalConfig, className) {
+    return originalConfig[className] || {};
+}
+
+function getTelemetrySystems(originalConfig) {
+    return getTelemetryObjects(originalConfig, CONFIG_CLASSES.SYSTEM_CLASS_NAME);
+}
+
+function getTelemetrySystemPollers(originalConfig) {
+    return getTelemetryObjects(originalConfig, CONFIG_CLASSES.SYSTEM_POLLER_CLASS_NAME);
+}
+
+function getTelemetryConsumers(originalConfig) {
+    return getTelemetryObjects(originalConfig, CONFIG_CLASSES.CONSUMER_CLASS_NAME);
+}
+
+function createCustomConfig(originalConfig, sysOrPollerName, pollerName) {
+    // originalConfig is not normalized yet
+    let systems = getTelemetrySystems(originalConfig);
+    let pollers = getTelemetrySystemPollers(originalConfig);
+    let system;
+    let poller;
+
+    if (sysOrPollerName && pollerName) {
+        system = systems[sysOrPollerName];
+        poller = pollers[pollerName];
+    } else {
+        // each object has unique name across the entire declaration.
+        // so, one of them will be 'undefined'
+        system = systems[sysOrPollerName];
+        poller = pollers[sysOrPollerName];
+    }
+
+    const systemFound = !util.isObjectEmpty(system);
+    const pollerFound = !util.isObjectEmpty(poller);
+    // check for errors at first
+    if (!systemFound || !pollerFound) {
+        if (pollerName) {
+            // sysOrPollerName and pollerName both passed to the function
+            if (!systemFound) {
+                throw new Error(`System with name '${sysOrPollerName}' doesn't exist`);
+            }
+            if (!pollerFound) {
+                throw new Error(`System Poller with name '${pollerName}' doesn't exist`);
+            }
+        }
+        if (!(systemFound || pollerFound)) {
+            throw new Error(`System or System Poller with name '${sysOrPollerName}' doesn't exist`);
+        }
+        if (systemFound && util.isObjectEmpty(system.systemPoller)) {
+            throw new Error(`System with name '${sysOrPollerName}' has no System Poller configured`);
+        }
+    }
+    // error check passed and now we have valid objects to continue with
+    if (systemFound && pollerFound) {
+        systems = { [sysOrPollerName]: system };
+        pollers = { [pollerName]: poller };
+        system.systemPoller = pollerName;
+    } else if (pollerFound) {
+        systems = {};
+        pollers = { [sysOrPollerName]: poller };
+    } else {
+        const newPollers = {};
+        systems = { [sysOrPollerName]: system };
+
+        system.systemPoller = Array.isArray(system.systemPoller) ? system.systemPoller
+            : [system.systemPoller];
+
+        system.systemPoller.forEach((pollerVal) => {
+            if (typeof pollerVal === 'string') {
+                newPollers[pollerVal] = pollers[pollerVal];
+            }
+        });
+        pollers = newPollers;
+    }
+    originalConfig[CONFIG_CLASSES.SYSTEM_CLASS_NAME] = systems;
+    originalConfig[CONFIG_CLASSES.SYSTEM_POLLER_CLASS_NAME] = pollers;
+    return originalConfig;
+}
+
+/**
+ * Compute trace's value from System and System Poller config
+ *
+ * @param {Boolean|String} [systemTrace] - system's trace config
+ * @param {Boolean|String} [pollerTrace] - poller's trace config
+ *
+ * @returns {Boolean|String} trace's value
+ */
+function getTraceValue(systemTrace, pollerTrace) {
+    if (typeof systemTrace === 'undefined' && typeof pollerTrace === 'undefined') {
+        pollerTrace = false;
+    } else {
+        // we know that one of the values is defined (or both)
+        // set default value to true to do not block tracer usage
+        systemTrace = typeof systemTrace === 'undefined' ? true : systemTrace;
+        pollerTrace = typeof pollerTrace === 'undefined' ? true : pollerTrace;
+        if (typeof pollerTrace === 'string') {
+            // preserve poller's value
+            pollerTrace = systemTrace && pollerTrace;
+        } else if (pollerTrace === true) {
+            // preserve system's value
+            pollerTrace = systemTrace;
+        }
+    }
+    return pollerTrace;
+}
+
+function createPollerConfig(systemConfig, pollerConfig, fetchTMStats) {
+    return {
+        name: `${systemConfig.name}::${pollerConfig.name}`,
+        enable: Boolean(systemConfig.enable && pollerConfig.enable),
+        trace: module.exports.getTraceValue(systemConfig.trace, pollerConfig.trace),
+        interval: pollerConfig.interval,
+        connection: {
+            host: systemConfig.host,
+            port: systemConfig.port,
+            protocol: systemConfig.protocol,
+            allowSelfSignedCert: systemConfig.allowSelfSignedCert
+        },
+        credentials: {
+            username: systemConfig.username,
+            passphrase: systemConfig.passphrase
+        },
+        dataOpts: {
+            tags: pollerConfig.tag,
+            actions: pollerConfig.actions,
+            noTMStats: !fetchTMStats
+        },
+        endpointList: pollerConfig.endpointList
+    };
+}
+
+function getEnabledPollerConfigs(systemObj, fetchTMStats, includeDisabled) {
+    const pollers = [];
+    if (systemObj.enable || includeDisabled) {
+        systemObj.systemPollers.forEach((pollerConfig) => {
+            if (pollerConfig.enable || includeDisabled) {
+                const newPollerConfig = module.exports.createPollerConfig(systemObj, pollerConfig, fetchTMStats);
+                pollers.push(newPollerConfig);
+            }
+        });
+    }
+    return pollers;
+}
+
+function hasSplunkLegacy(originalConfig) {
+    const consumers = getTelemetryConsumers(originalConfig);
+    return Object.keys(consumers).some(consumerKey => consumers[consumerKey].type === 'Splunk'
+        && consumers[consumerKey].format === 'legacy');
+}
+
+function applyConfig(originalConfig) {
+    const systems = getTelemetrySystems(originalConfig);
+    const fetchTMStats = hasSplunkLegacy(originalConfig);
+    const newPollerIDs = [];
+    const currPollerIDs = module.exports.getPollerTimers();
+
+    Object.keys(systems).forEach((systemName) => {
+        module.exports.getEnabledPollerConfigs(systems[systemName], fetchTMStats).forEach((pollerConfig) => {
+            newPollerIDs.push(pollerConfig.name);
+            pollerConfig.tracer = util.tracer.createFromConfig(
+                TRACER_CLASS_NAME, pollerConfig.name, pollerConfig
+            );
+            const baseMsg = `system poller ${pollerConfig.name}. Interval = ${pollerConfig.interval} sec.`;
+            if (currPollerIDs[pollerConfig.name]) {
+                logger.info(`Updating ${baseMsg}`);
+                currPollerIDs[pollerConfig.name] = util.update(
+                    currPollerIDs[pollerConfig.name], module.exports.safeProcess, pollerConfig, pollerConfig.interval
+                );
+            } else {
+                logger.info(`Starting ${baseMsg}`);
+                currPollerIDs[pollerConfig.name] = util.start(
+                    module.exports.safeProcess, pollerConfig, pollerConfig.interval
+                );
+            }
+        });
+    });
+
+    Object.keys(currPollerIDs).forEach((key) => {
+        if (newPollerIDs.indexOf(key) === -1) {
+            logger.info(`Disabling system poller ${key}`);
+            util.stop(currPollerIDs[key]);
+            delete currPollerIDs[key];
+        }
+    });
+}
 
 /**
  * Process system(s) stats
@@ -133,24 +324,31 @@ function processClientRequest(restOperation) {
     }))
         .then(() => configWorker.getConfig())
         .then((config) => {
+            // config was copied by getConfig already
+            // before calling normalizeConfig we have to create custom config
             try {
-                return module.exports.getExpandedConfWithNameRefs(config.parsed, objName, subObjName);
+                return module.exports.createCustomConfig(config.parsed, objName, subObjName);
             } catch (err) {
-                err.responseCode = 400;
+                err.responseCode = 404;
                 return Promise.reject(err);
             }
         })
         .then(config => deviceUtil.decryptAllSecrets(config))
-        .then(config => Promise.resolve(buildPollerConfigs(config)))
-        .then((configs) => {
-            // system can have multiple pollers
-            const config = configs[objName]
+        .then((config) => {
+            const system = getTelemetrySystems(normalizeConfig(config))[objName];
+            if (util.isObjectEmpty(system.systemPollers)) {
+                // unexpected, something went wrong
+                const err = new Error(`System '${objName}' has no System Poller(s) configured`);
+                err.responseCode = 404;
+                return Promise.reject(err);
+            }
+
+            const pollers = module.exports.getEnabledPollerConfigs(system, false, true)
                 .map(pollerConfig => module.exports.safeProcess(pollerConfig, { requestFromUser: true }));
-            return Promise.all(config);
+            return Promise.all(pollers);
         })
         .then((dataCtx) => {
-            const body = dataCtx.length === 1 ? dataCtx[0].data : dataCtx.map(d => d.data);
-            util.restOperationResponder(restOperation, 200, body);
+            util.restOperationResponder(restOperation, 200, dataCtx.map(d => d.data));
         })
         .catch((error) => {
             let message;
@@ -160,367 +358,37 @@ function processClientRequest(restOperation) {
                 code = error.responseCode;
                 message = `${error}`;
             } else {
-                logger.error(`poller request ended up with error: ${error}`);
+                message = `${error}`;
                 code = 500;
-                message = `systemPoller.process error: ${error}`;
+                logger.exception(`poller request ended up with error: ${message}`, error);
             }
             util.restOperationResponder(restOperation, code, { code, message });
         });
 }
 
-/**
- *
- * Returns a copy of the config wherein the name references to system pollers are resolved
- *
- * @param {Object} origConfig - Config to copy and expand
- * @param {String} sysOrPollerName - System or System Poller name to look up
- * @param {String} systemPollerName - System Poller name to look up, optional
- * @returns
- */
-function getExpandedConfWithNameRefs(origConfig, sysOrPollerName, systemPollerName) {
-    // copy here because origConfig needs to be preserved for proper lookup
-    const expandedConfig = util.deepCopy(origConfig);
-    let systems = expandedConfig[SYSTEM_CLASS_NAME] || {};
-    let systemPollers = expandedConfig[SYSTEM_POLLER_CLASS_NAME] || {};
-
-    if (sysOrPollerName && systemPollerName) {
-        if (!util.isObjectEmpty(systems[sysOrPollerName]) && !util.isObjectEmpty(systemPollers[systemPollerName])) {
-            const system = systems[sysOrPollerName];
-            // attach desired System Poller to System
-            system.systemPoller = systemPollerName;
-            systems = { [sysOrPollerName]: system };
-            systemPollers = { [systemPollerName]: systemPollers[systemPollerName] };
-        } else {
-            throw new Error(`System with name '${sysOrPollerName}' and System Poller with name '${systemPollerName}' don't exist`);
-        }
-    } else if (!util.isObjectEmpty(systemPollers[sysOrPollerName])) {
-        systems = null;
-        systemPollers = { [sysOrPollerName]: systemPollers[sysOrPollerName] };
-    } else if (!util.isObjectEmpty(systems[sysOrPollerName])) {
-        const system = systems[sysOrPollerName];
-        systems = { [sysOrPollerName]: system };
-
-        if (typeof system.systemPoller === 'string') {
-            systemPollers = { [system.systemPoller]: systemPollers[system.systemPoller] };
-        } else if (util.isObjectEmpty(system.systemPoller)) {
-            throw new Error(`System with name '${sysOrPollerName}' has no System Poller configured`);
-        } else if (Array.isArray(system.systemPoller)) {
-            const newPollers = {};
-            system.systemPoller.forEach((pollerItem) => {
-                if (typeof pollerItem === 'string') {
-                    newPollers[pollerItem] = systemPollers[pollerItem];
-                }
-            });
-            systemPollers = util.isObjectEmpty(newPollers) ? null : newPollers;
-        } else {
-            systemPollers = null;
-        }
-    } else {
-        throw new Error(`System with name '${sysOrPollerName}' or System Poller with name '${sysOrPollerName}' don't exist`);
-    }
-
-    if (systems) {
-        expandedConfig[SYSTEM_CLASS_NAME] = systems;
-    } else {
-        delete expandedConfig[SYSTEM_CLASS_NAME];
-    }
-    if (systemPollers) {
-        expandedConfig[SYSTEM_POLLER_CLASS_NAME] = systemPollers;
-    } else {
-        delete expandedConfig[SYSTEM_POLLER_CLASS_NAME];
-    }
-    return expandedConfig;
-}
-
-function createPollerConfig(system, fetchTMStats) {
-    const config = [];
-    // trace can be boolean or string (path to file) or undefined
-    // when no systemPoller defined
-    // TODO: entire block should be re-written and schema should be updated
-    // because 'trace' should have no default value
-    let trace = system.trace;
-    system.systemPoller.forEach((poller) => {
-        if (trace && poller.trace) {
-            if (typeof poller.trace === 'string') {
-                trace = poller.trace;
-            }
-        } else {
-            trace = false;
-        }
-        config.push({
-            enable: Boolean(system.enable && poller.enable),
-            trace,
-            interval: poller.interval,
-            connection: {
-                host: system.host,
-                port: system.port,
-                protocol: system.protocol,
-                // TODO: schema should set default value to 'false' instead of undefined
-                allowSelfSignedCert: system.allowSelfSignedCert
-            },
-            credentials: {
-                username: system.username,
-                passphrase: system.passphrase
-            },
-            dataOpts: {
-                tags: poller.tag,
-                actions: poller.actions,
-                noTMStats: !fetchTMStats
-            },
-            endpointList: poller.endpointList
-        });
-    });
-    return config;
-}
-
-function expandEndpoints(systems, globalConfig) {
-    const endpointsGlobal = globalConfig[ENDPOINTS_CLASS_NAME] || {};
-
-    function computeBasePath(endpoint) {
-        let basePath = '';
-        if (endpoint.basePath && endpoint.basePath.length > 0) {
-            const pathPrefix = endpoint.basePath[0] === '/' ? '' : '/';
-            if (endpoint.basePath[endpoint.basePath.length - 1] === '/') {
-                basePath = endpoint.basePath.substring(0, endpoint.basePath.length - 1);
-            } else {
-                basePath = endpoint.basePath;
-            }
-            basePath = `${pathPrefix}${basePath}`;
-        }
-        return basePath;
-    }
-
-    function parseEndpointItem(endpoint, key) {
-        const basePath = computeBasePath(endpoint);
-        const innerEndpoint = endpoint.items[key];
-        innerEndpoint.enable = endpoint.enable && innerEndpoint.enable;
-        const separator = innerEndpoint.path[0] === '/' ? '' : '/';
-        innerEndpoint.path = `${basePath}${separator}${innerEndpoint.path}`;
-        innerEndpoint.name = innerEndpoint.name || key;
-        return innerEndpoint;
-    }
-
-    function processEndpoint(endpoint, cb) {
-        if (typeof endpoint === 'object') {
-            // array of definitions - can be all of the following
-            if (Array.isArray(endpoint)) {
-                endpoint.forEach(innerEndpoint => processEndpoint(innerEndpoint, cb));
-            // endpoint is Telemetry_Endpoints
-            } else if (endpoint.class === ENDPOINTS_CLASS_NAME || endpoint.items) {
-                const endpKeys = Object.keys(endpoint.items);
-                endpKeys.forEach((key) => {
-                    const innerEndpoint = parseEndpointItem(endpoint, key);
-                    cb(innerEndpoint);
-                });
-            // endpoint is Telemetry_Endpoint
-            } else if (typeof endpoint.path === 'string') {
-                endpoint.path = endpoint.path[0] === '/' ? endpoint.path : `/${endpoint.path}`;
-                cb(endpoint);
-            }
-        } else if (typeof endpoint === 'string') {
-            const refs = endpoint.split('/');
-            // reference to a Telemetry_Endpoints object
-            let resolvedObj = endpointsGlobal[refs[0]];
-            if (refs.length > 1) {
-                // reference to a child of Telemetry_Endpoints.items
-                const item = resolvedObj[refs[1]][refs[2]];
-                resolvedObj = {
-                    items: { [item.name]: item },
-                    basePath: resolvedObj.basePath,
-                    enable: resolvedObj.enable
-                };
-            }
-            processEndpoint(resolvedObj, cb);
-        }
-    }
-
-    Object.keys(systems).forEach((systemName) => {
-        const system = systems[systemName];
-        system.systemPoller.forEach((poller) => {
-            const endpoints = {};
-            if (poller.endpointList) {
-                processEndpoint(poller.endpointList, (endpoint) => {
-                    if (endpoint.enable) {
-                        endpoints[endpoint.name] = endpoint;
-                    } else {
-                        logger.debug(`Ignoring disabled endpoint with name "${endpoint.name}" and path "${endpoint.path}"`);
-                    }
-                });
-                poller.endpointList = endpoints;
-            }
-        });
-    });
-}
-
-function createSystemFromSystemPoller(systemPoller) {
-    const keysToCopy = [
-        'allowSelfSignedCert', 'enable', 'enableHostConnectivityCheck', 'host',
-        'port', 'protocol', 'passphrase', 'trace', 'username'
-    ];
-    const skipDelete = ['enable', 'trace'];
-    const system = {};
-
-    keysToCopy.forEach((key) => {
-        system[key] = systemPoller[key];
-        if (skipDelete.indexOf(key) === -1) {
-            delete systemPoller[key];
-        }
-    });
-    system.systemPoller = [systemPoller];
-    return system;
-}
-
-function buildSystems(globalConfig) {
-    const systems = globalConfig[SYSTEM_CLASS_NAME] || {};
-    const systemPollers = globalConfig[SYSTEM_POLLER_CLASS_NAME] || {};
-    const sysPollerNamedRefs = [];
-
-    Object.keys(systems).forEach((systemName) => {
-        const system = systems[systemName];
-        system.systemPoller = system.systemPoller || {};
-
-        if (typeof system.systemPoller === 'string') {
-            // track System Poller referenced by name
-            sysPollerNamedRefs.push(system.systemPoller);
-            // copy system poller to avoid conflicts later
-            // if system poller was shared by several systems
-            system.systemPoller = [util.deepCopy(systemPollers[system.systemPoller])];
-        }
-        if (typeof system.systemPoller === 'object') {
-            if (Array.isArray(system.systemPoller)) {
-                const pollers = util.deepCopy(system.systemPoller);
-                system.systemPoller = [];
-                pollers.forEach((poller) => {
-                    if (typeof poller === 'string') {
-                        sysPollerNamedRefs.push(poller);
-                        system.systemPoller.push(util.deepCopy(systemPollers[poller]));
-                    } else {
-                        system.systemPoller.push(poller);
-                    }
-                });
-            } else {
-                system.systemPoller = [system.systemPoller];
-            }
-        }
-    });
-
-    sysPollerNamedRefs.forEach((systemPollerName) => {
-        delete systemPollers[systemPollerName];
-    });
-    Object.keys(systemPollers).forEach((systemPollerName) => {
-        systems[systemPollerName] = createSystemFromSystemPoller(systemPollers[systemPollerName]);
-    });
-    return systems;
-}
-
-function hasSplunkLegacy(globalConfig) {
-    const consumers = globalConfig[CONSUMER_CLASS_NAME] || {};
-    return Object.keys(consumers).some(consumerKey => consumers[consumerKey].type === 'Splunk' && consumers[consumerKey].format === 'legacy');
-}
-
-function buildPollerConfigs(globalConfig) {
-    const systems = buildSystems(globalConfig);
-    expandEndpoints(systems, globalConfig);
-
-    const configs = {};
-    const fetchTMStats = hasSplunkLegacy(globalConfig);
-    Object.keys(systems).forEach((systemName) => {
-        configs[systemName] = createPollerConfig(systems[systemName], fetchTMStats);
-    });
-    return configs;
-}
-
-function getPollerIDs() {
-    return pollerIDs;
-}
-
 // config worker change event
 configWorker.on('change', (config) => {
     logger.debug('configWorker change event in systemPoller');
-
-    config = config || {};
-    const systems = config[SYSTEM_CLASS_NAME] || {};
-    const systemPollers = config[SYSTEM_POLLER_CLASS_NAME] || {};
-    const validPollerIDs = [];
-    const sysOrPollerObjs = {};
-    let systemPollerRefs = [];
-
-    const currPollerIDs = module.exports.getPollerIDs();
-
-    Object.keys(systems).forEach((sysKey) => {
-        const system = systems[sysKey];
-        sysOrPollerObjs[sysKey] = system;
-
-        if (typeof system.systemPoller === 'string') {
-            systemPollerRefs.push(system.systemPoller);
-        } else if (Array.isArray(system.systemPoller)) {
-            systemPollerRefs = systemPollerRefs.concat(system.systemPoller.filter(p => typeof p === 'string'));
-        }
-    });
-
-    Object.keys(systemPollers).forEach((sysPollerKey) => {
-        sysOrPollerObjs[sysPollerKey] = systemPollers[sysPollerKey];
-    });
-
     // timestamp to find out-dated tracers
     const tracersTimestamp = new Date().getTime();
+    // copy, normalize and apply config
+    module.exports.applyConfig(normalizeConfig(util.deepCopy(config || {})));
+    // remove tracers that were not touched
+    util.tracer.remove(tracer => tracer.name.startsWith(TRACER_CLASS_NAME)
+        && tracer.lastGetTouch < tracersTimestamp);
 
-    Object.keys(sysOrPollerObjs).forEach((sysOrPollerKey) => {
-        // skip System Pollers that are referenced by System already
-        if (systemPollerRefs.indexOf(sysOrPollerKey) !== -1) {
-            return;
-        }
-
-        // for this System or System_Poller, build the config
-        const resolvedConfigs = buildPollerConfigs(getExpandedConfWithNameRefs(config, sysOrPollerKey));
-        const confName = Object.keys(resolvedConfigs)[0];
-        const confArr = resolvedConfigs[confName];
-
-        confArr.forEach((spConfig, index) => {
-            if (util.isObjectEmpty(spConfig) || !spConfig.enable) {
-                return;
-            }
-            spConfig.name = confArr.length === 1 ? confName : `${confName}_${index}`;
-            validPollerIDs.push(spConfig.name);
-            spConfig.tracer = util.tracer.createFromConfig(
-                SYSTEM_POLLER_CLASS_NAME, spConfig.name, spConfig
-            );
-
-            const baseMsg = `system poller ${spConfig.name}. Interval = ${spConfig.interval} sec.`;
-            if (currPollerIDs[spConfig.name]) {
-                logger.info(`Updating ${baseMsg}`);
-                currPollerIDs[spConfig.name] = util.update(
-                    currPollerIDs[spConfig.name], safeProcess, spConfig, spConfig.interval
-                );
-            } else {
-                logger.info(`Starting ${baseMsg}`);
-                currPollerIDs[spConfig.name] = util.start(
-                    safeProcess, spConfig, spConfig.interval
-                );
-            }
-        });
-    });
-
-    Object.keys(currPollerIDs).forEach((key) => {
-        if (validPollerIDs.indexOf(key) === -1) {
-            logger.info(`Disabling system poller ${key}`);
-            util.stop(currPollerIDs[key]);
-            delete currPollerIDs[key];
-        }
-    });
-
-    util.tracer.remove(null, tracer => tracer.name.startsWith(SYSTEM_POLLER_CLASS_NAME)
-                                       && tracer.lastGetTouch < tracersTimestamp);
-
-    logger.debug(`${Object.keys(currPollerIDs).length} system poller(s) running`);
+    logger.debug(`${Object.keys(module.exports.getPollerTimers()).length} system poller(s) running`);
 });
 
 
 module.exports = {
-    buildPollerConfigs,
-    getExpandedConfWithNameRefs,
+    applyConfig,
+    createCustomConfig,
+    createPollerConfig,
+    getEnabledPollerConfigs,
+    getPollerTimers,
+    getTraceValue,
     process,
-    safeProcess,
     processClientRequest,
-    getPollerIDs
+    safeProcess
 };

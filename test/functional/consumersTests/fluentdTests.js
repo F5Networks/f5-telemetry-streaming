@@ -107,7 +107,7 @@ function test() {
 
         before(() => new Promise(resolve => setTimeout(resolve, 30 * 1000))
             .then(() => dutUtils.getSystemPollersData((hostObj, data) => {
-                systemPollerData[hostObj.hostname] = data;
+                systemPollerData[hostObj.hostname] = data[0];
             })));
 
         it('should get log data from Fluentd stdout', () => runRemoteCmd(`docker logs ${FLUENTD_NAME}`)
