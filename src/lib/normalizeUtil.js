@@ -8,11 +8,32 @@
 
 'use strict';
 
-const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
-const util = require('./util.js');
+const logger = require('./logger'); // eslint-disable-line no-unused-vars
+const util = require('./util');
+const constants = require('./constants');
 
 
 module.exports = {
+    /**
+     * Format MAC address
+     *
+     * @param {String} mac - MAC address
+     *
+     * @returns {String} formatted MAC address
+     */
+    _formatMACAddress(mac) {
+        // expect ':' in mac addr - aa:b:cc:d:ee:f
+        if (mac.indexOf(':') === -1) {
+            return mac;
+        }
+        return mac.split(':').map((item) => {
+            item = item.toUpperCase();
+            if (item.length === 1) {
+                item = `0${item}`;
+            }
+            return item;
+        }).join(':');
+    },
 
     /**
      * Convert array to map using provided options
@@ -187,6 +208,48 @@ module.exports = {
     },
 
     /**
+     * Restructure host-info to collect CPU statistics for the host(s) and cpu(s)
+     * that match the provided key pattern.
+     * This function depends upon the exact output from the host-info endpoint, and will requires
+     * that every object key is unique.
+     *
+     * @param {Object} args                 - args object
+     * @param {Object} [args.data]          - data to process (always included)
+     * @param {Object} [args.keyPattern]    - pattern used to traverse object keys
+     *
+     * @returns {Object} Returns matching sub-properties
+     */
+    restructureHostCpuInfo(args) {
+        if (!args.keyPattern) {
+            throw new Error('Argument keyPattern required');
+        }
+        const data = args.data;
+        if (typeof data !== 'object') {
+            return data;
+        }
+        const keys = args.keyPattern.split(constants.STATS_KEY_SEP);
+
+        const findMatches = (inputData) => {
+            if (keys.length === 0) {
+                return inputData;
+            }
+            const keyExp = new RegExp(keys.splice(0, 1));
+            const matchedData = {};
+
+            Object.keys(inputData).forEach((dataItem) => {
+                if (keyExp.test(dataItem)) {
+                    // Capture ALL sub-properties if property matches, instead of iterating over object keys
+                    // Will overwrite matching keys in 'matchedData' - assumption is that *EVERY* key is unique
+                    Object.assign(matchedData, inputData[dataItem]);
+                }
+            });
+            return findMatches(matchedData);
+        };
+        const result = findMatches(data);
+        return Object.keys(result).length === 0 ? 'missing data' : result;
+    },
+
+    /**
      * Average values
      *
      * @param {Object} args                - args object
@@ -196,15 +259,22 @@ module.exports = {
      * @returns {Object} Returns averaged value
      */
     getAverage(args) {
-        if (!args.keyWithValue) { throw new Error('Argument keyWithValue required'); }
+        if (!args.keyWithValue) {
+            throw new Error('Argument keyWithValue required');
+        }
         const data = args.data;
+        if (typeof data !== 'object') {
+            return data;
+        }
         const values = [];
 
         // for now assume in object, could also be provided an array and just average that
         Object.keys(data).forEach((k) => {
             const key = args.keyWithValue;
             // throw error if key is missing
-            if (!(key in data[k])) { throw new Error(`Expecting key: ${key} in object: ${util.stringify(data[k])}`); }
+            if (!(key in data[k])) {
+                throw new Error(`Expecting key: ${key} in object: ${util.stringify(data[k])}`);
+            }
             values.push(data[k][key]);
         });
         const averageFunc = arr => Math.round(arr.reduce((a, b) => a + b, 0) / arr.length);
@@ -267,16 +337,29 @@ module.exports = {
     /**
      * getPercentFromKeys
      *
-     * @param {Object} args              - args object
-     * @param {Object} [args.data]       - data to process (always included)
-     * @param {Object} [args.totalKey]   - key containing total (max) value
-     * @param {Object} [args.partialKey] - key containing partial value, such as free or used
-     * @param {Object} [args.inverse]    - inverse percentage
+     * @param {Object} args                     - args object
+     * @param {Object} [args.data]              - data to process (always included)
+     * @param {Object} [args.totalKey]          - key containing total (max) value
+     * @param {Object} [args.partialKey]        - key containing partial value, such as free or used
+     * @param {Object} [args.inverse]           - inverse percentage
+     * @param {Object} [args.nestedObjects]     - whether or not to traverse sub-objects for keys
      *
      * @returns {Object} Returns calculated percentage
      */
     getPercentFromKeys(args) {
         const data = args.data;
+
+        const accumulateSubKeys = (arg, dataKeys) => dataKeys
+            .map(key => data[key][arg])
+            .reduce((acc, val) => acc + val);
+
+        if (args.nestedObjects && typeof data === 'object') {
+            // Get object keys before modifying the data object
+            const dataKeys = Object.keys(data);
+            [args.partialKey, args.totalKey].forEach((arg) => {
+                data[arg] = accumulateSubKeys(arg, dataKeys);
+            });
+        }
 
         // this should result in a number between 0 and 100 (percentage)
         let ret = Math.round(data[args.partialKey] / data[args.totalKey] * 100);
@@ -355,6 +438,25 @@ module.exports = {
     },
 
     /**
+     * Convert map to array using provided options
+     *
+     * @param {Object} data - data
+     *
+     * @returns {Object} Converted data
+     */
+    convertMapToArray(data) {
+        const ret = [];
+        data = data.data;
+
+        if (typeof data !== 'object') {
+            throw new Error(`convertMapToArray() object required: ${util.stringify(data)}`);
+        }
+
+        Object.keys(data).forEach(key => ret.push(data[key]));
+        return ret;
+    },
+
+    /**
      * restructureGslbPool
      *
      * @param {Object} args              - args object
@@ -415,6 +517,114 @@ module.exports = {
             delete item.poolsCname;
         });
 
+        return data;
+    },
+
+    /**
+     * Normalize MAC Address - upper case and etc.
+     *
+     * @param {Object} args                      - args object
+     * @param {Object} [args.data]               - data to process (always included)
+     * @param {Array.<String>} [args.properties] - list of properties to format
+     *
+     * @returns {Object} Returns formatted data
+     */
+    normalizeMACAddress(args) {
+        let data = args.data;
+        if (data) {
+            if (typeof args.properties === 'undefined') {
+                data = this._formatMACAddress(data);
+            } else {
+                const properties = args.properties;
+                const stack = [data];
+                let obj;
+
+                const forKey = (key) => {
+                    const val = obj[key];
+                    if (typeof val === 'object') {
+                        if (val !== null) {
+                            stack.push(val);
+                        }
+                    } else if (properties.indexOf(key) !== -1 && typeof val === 'string') {
+                        obj[key] = this._formatMACAddress(val);
+                    }
+                };
+
+                while (stack.length) {
+                    obj = stack[0];
+                    Object.keys(obj).forEach(forKey);
+                    stack.shift();
+                }
+            }
+        }
+        return data;
+    },
+
+    /**
+     * Restructure Virtual Server Profiles
+     *
+     * @param {Object} args              - args object
+     * @param {Object} [args.data]       - data to process (always included)
+     *
+     * @returns {Object} Returns formatted data
+     */
+    restructureVirtualServerProfiles(args) {
+        /**
+         * Possible issues:
+         * profiles: {
+         *      name: 'profiles', <---- should be removed
+         *      items: { <---- should be removed
+         *         name: 'items', <---- should be removed
+         *         profile1: { <---- should be moved one level up
+         *             name: 'profile1',
+         *             .....
+         *         }
+         *      }
+         * }
+         */
+        const data = args.data;
+        if (data) {
+            Object.keys(data).forEach((vsName) => {
+                const vsObj = data[vsName];
+                if (vsObj.profiles) {
+                    const profiles = vsObj.profiles;
+                    delete profiles.name;
+
+                    if (profiles.items) {
+                        delete profiles.items.name;
+
+                        Object.keys(profiles.items).forEach((profileName) => {
+                            profiles[profileName] = profiles.items[profileName];
+                        });
+                        delete profiles.items;
+                    }
+                }
+            });
+        }
+        return data;
+    },
+
+    /**
+     * Get value by key/path
+     *
+     * @param {Object} args               - args object
+     * @param {Object} [args.data]        - data to process (always included)
+     * @param {Array<String>} [args.path] - path to fetch data from
+     *
+     * @returns {Object} Returns value that belongs to key/path
+     */
+    getValue(args) {
+        let data = args.data;
+        if (data && args.path) {
+            args.path.every((key) => {
+                data = data[key];
+                if (typeof data === 'undefined') {
+                    data = 'missing data';
+                    return false;
+                }
+                return true;
+            });
+        }
         return data;
     }
 };

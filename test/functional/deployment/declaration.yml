@@ -3,7 +3,9 @@ f5_do_ntp_config: true
 f5_do_provisioning: true
 f5_provisioning:
   ltm: nominal
+f5_do_force_licensing: false
 f5_do_licensing: true
+f5_do_phoning_home: false
 request:
   project:
     folder: /root/deploy-projects/_DEPLOYMENT_NAME_

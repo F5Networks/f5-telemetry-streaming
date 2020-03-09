@@ -11,23 +11,23 @@
 const net = require('net');
 const dgram = require('dgram');
 
-const logger = require('./logger.js');
-const constants = require('./constants.js');
-const normalize = require('./normalize.js');
-const dataPipeline = require('./dataPipeline.js');
-const configWorker = require('./config.js');
+const logger = require('./logger');
+const constants = require('./constants');
+const normalize = require('./normalize');
+const dataPipeline = require('./dataPipeline');
+const configWorker = require('./config');
 const properties = require('./properties.json');
 
-const tracers = require('./util.js').tracer;
-const stringify = require('./util.js').stringify;
-const isObjectEmpty = require('./util.js').isObjectEmpty;
+const tracers = require('./util').tracer;
+const stringify = require('./util').stringify;
+const isObjectEmpty = require('./util').isObjectEmpty;
 
 const global = properties.global;
 const events = properties.events;
 const definitions = properties.definitions;
 
 const DEFAULT_PORT = constants.DEFAULT_EVENT_LISTENER_PORT;
-const CLASS_NAME = constants.EVENT_LISTENER_CLASS_NAME;
+const CLASS_NAME = constants.CONFIG_CLASSES.EVENT_LISTENER_CLASS_NAME;
 
 const MAX_BUFFER_SIZE = 16 * 1024; // 16k chars
 const MAX_BUFFER_TIMEOUTS = 5;
@@ -454,6 +454,6 @@ configWorker.on('change', (config) => {
     });
 
     logger.debug(`${Object.keys(listeners).length} event listener(s) listening`);
-    tracers.remove(null, tracer => tracer.name.startsWith(CLASS_NAME)
-                                   && tracer.lastGetTouch < tracersTimestamp);
+    tracers.remove(tracer => tracer.name.startsWith(CLASS_NAME)
+        && tracer.lastGetTouch < tracersTimestamp);
 });

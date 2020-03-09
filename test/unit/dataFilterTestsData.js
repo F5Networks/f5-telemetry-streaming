@@ -70,6 +70,36 @@ module.exports = {
         },
         // TEST RELATED DATA STARTS HERE
         {
+            name: 'should execute action when ifAnyMatch is valid',
+            actionCtx: {
+                enable: true,
+                includeData: {},
+                locations: {
+                    tag: 'tag'
+                },
+                ifAnyMatch: [
+                    {
+                        foo: 'bar'
+                    },
+                    {
+                        foo: 'baz'
+                    }
+                ]
+            },
+            dataCtx: {
+                data: {
+                    foo: 'baz',
+                    tag: 'tag'
+                }
+            },
+            expectedCtx: {
+                data: {
+                    tag: 'tag'
+                }
+            }
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
             name: 'should not execute action when ifAllMatch is invalid',
             actionCtx: {
                 enable: true,
@@ -80,6 +110,39 @@ module.exports = {
                 ifAllMatch: {
                     foo: 'foo'
                 }
+            },
+            dataCtx: {
+                data: {
+                    foo: 'bar',
+                    tag: 'tag'
+                }
+            },
+            expectedCtx: {
+                data: {
+                    foo: 'bar',
+                    tag: 'tag'
+                }
+            }
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should not execute action when ifAnyMatch is invalid',
+            actionCtx: {
+                enable: true,
+                includeData: {},
+                locations: {
+                    tag: 'tag'
+                },
+                ifAnyMatch: [
+                    {
+                        foo: 'foo',
+                        tag: 'untagged'
+                    },
+                    {
+                        foo: 'foo',
+                        tag: 'notag'
+                    }
+                ]
             },
             dataCtx: {
                 data: {

@@ -8,749 +8,772 @@
 
 'use strict';
 
-const assert = require('assert');
+/* eslint-disable import/order */
+
+require('./shared/restoreCache')();
+
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+const childProcess = require('child_process');
+const crypto = require('crypto');
 const os = require('os');
 const fs = require('fs');
+const nock = require('nock');
+const request = require('request');
+const sinon = require('sinon');
 const urllib = require('url');
 
-const constants = require('../../src/lib/constants.js');
+const constants = require('../../src/lib/constants');
+const deviceUtil = require('../../src/lib/deviceUtil');
+const deviceUtilTestsData = require('./deviceUtilTestsData');
+const testUtil = require('./shared/util');
 
-/* eslint-disable global-require */
-
-let parseURL;
-if (process.versions.node.startsWith('4.')) {
-    parseURL = urllib.parse;
-} else {
-    parseURL = url => new urllib.URL(url);
-}
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
 describe('Device Util', () => {
-    let deviceUtil;
-    let childProcess;
-    let request;
+    afterEach(() => {
+        testUtil.checkNockActiveMocks(nock, assert);
+        nock.cleanAll();
+        sinon.restore();
+    });
 
-    const setupRequestMock = (res, body, mockOpts) => {
-        mockOpts = mockOpts || {};
-        ['get', 'post', 'delete'].forEach((method) => {
-            request[method] = (opts, cb) => {
-                cb(mockOpts.err, res, mockOpts.toJSON === false ? body : JSON.stringify(body));
+    describe('Host Device Info', () => {
+        beforeEach(() => {
+            deviceUtil.clearHostDeviceInfo();
+        });
+
+        it('should gather device info', () => {
+            sinon.stub(deviceUtil, 'getDeviceType').resolves(constants.DEVICE_TYPE.BIG_IP);
+            sinon.stub(deviceUtil, 'getDeviceVersion').resolves({ version: '14.0.0' });
+            return deviceUtil.gatherHostDeviceInfo()
+                .then(() => {
+                    assert.deepStrictEqual(
+                        deviceUtil.getHostDeviceInfo(),
+                        {
+                            TYPE: 'BIG-IP',
+                            VERSION: { version: '14.0.0' },
+                            RETRIEVE_SECRETS_FROM_TMSH: false
+                        }
+                    );
+                });
+        });
+
+        it('should set and get info by key', () => {
+            deviceUtil.setHostDeviceInfo('key1', 'value1');
+            deviceUtil.setHostDeviceInfo('key2', { value2: 10 });
+            assert.strictEqual(deviceUtil.getHostDeviceInfo('key1'), 'value1');
+            assert.deepStrictEqual(deviceUtil.getHostDeviceInfo('key2'), { value2: 10 });
+        });
+
+        it('should remove key', () => {
+            deviceUtil.setHostDeviceInfo('key1', 'value1');
+            assert.strictEqual(deviceUtil.getHostDeviceInfo('key1'), 'value1');
+            deviceUtil.clearHostDeviceInfo('key1');
+            assert.strictEqual(deviceUtil.getHostDeviceInfo('key1'), undefined);
+            assert.deepStrictEqual(deviceUtil.getHostDeviceInfo(), {});
+        });
+
+        it('should remove keys', () => {
+            deviceUtil.setHostDeviceInfo('key1', 'value1');
+            deviceUtil.setHostDeviceInfo('key2', 'value2');
+            assert.strictEqual(deviceUtil.getHostDeviceInfo('key1'), 'value1');
+            assert.strictEqual(deviceUtil.getHostDeviceInfo('key2'), 'value2');
+            deviceUtil.clearHostDeviceInfo('key1', 'key2');
+            assert.strictEqual(deviceUtil.getHostDeviceInfo('key1'), undefined);
+            assert.strictEqual(deviceUtil.getHostDeviceInfo('key2'), undefined);
+            assert.deepStrictEqual(deviceUtil.getHostDeviceInfo(), {});
+        });
+    });
+
+    describe('.getDeviceType()', () => {
+        beforeEach(() => {
+            deviceUtil.clearHostDeviceInfo();
+        });
+
+        it('should get container device type when /VERSION file is absent', () => {
+            sinon.stub(fs, 'readFile').callsFake((first, cb) => {
+                cb(new Error('foo'), null);
+            });
+            return assert.becomes(
+                deviceUtil.getDeviceType(),
+                constants.DEVICE_TYPE.CONTAINER,
+                'incorrect device type, should be CONTAINER'
+            );
+        });
+
+        it('should get container device type when /VERSION has no desired data', () => {
+            sinon.stub(fs, 'readFile').callsFake((first, cb) => {
+                cb(null, deviceUtilTestsData.getDeviceType.incorrectData);
+            });
+            return assert.becomes(
+                deviceUtil.getDeviceType(),
+                constants.DEVICE_TYPE.CONTAINER,
+                'incorrect device type, should be CONTAINER'
+            );
+        });
+
+        it('should get BIG-IP device type', () => {
+            sinon.stub(fs, 'readFile').callsFake((first, cb) => {
+                cb(null, deviceUtilTestsData.getDeviceType.correctData);
+            });
+            return assert.becomes(
+                deviceUtil.getDeviceType(),
+                constants.DEVICE_TYPE.BIG_IP,
+                'incorrect device type, should be BIG-IP'
+            );
+        });
+
+        it('should process /VERSION file correctly when readFile returns Buffer instead of String', () => {
+            sinon.stub(fs, 'readFile').callsFake((first, cb) => {
+                cb(null, Buffer.from(deviceUtilTestsData.getDeviceType.correctData));
+            });
+            return assert.becomes(
+                deviceUtil.getDeviceType(),
+                constants.DEVICE_TYPE.BIG_IP,
+                'incorrect device type, should be BIG-IP'
+            );
+        });
+
+        it('should read result from cache', () => {
+            const readFileStub = sinon.stub(fs, 'readFile');
+            readFileStub.callsFake((first, cb) => {
+                cb(null, deviceUtilTestsData.getDeviceType.correctData);
+            });
+            sinon.stub(deviceUtil, 'getDeviceVersion').resolves({ version: '14.0.0' });
+            return deviceUtil.gatherHostDeviceInfo()
+                .then(() => deviceUtil.getDeviceType())
+                .then((deviceType) => {
+                    assert.strictEqual(deviceType, constants.DEVICE_TYPE.BIG_IP, 'incorrect device type, should be BIG-IP');
+                    assert.strictEqual(readFileStub.callCount, 1);
+                });
+        });
+    });
+
+    describe('.downloadFileFromDevice()', () => {
+        const dstPath = `${os.tmpdir()}/testDownloadFileUserStream`;
+        const cleanUp = () => {
+            if (fs.existsSync(dstPath)) {
+                fs.unlinkSync(dstPath);
+            }
+        };
+
+        beforeEach(cleanUp);
+        afterEach(cleanUp);
+
+        it('should fail to write data to file', () => {
+            const response = 'response';
+            testUtil.mockEndpoints([{
+                endpoint: '/uri/to/path',
+                response,
+                responseHeaders: {
+                    'content-range': `0-${response.length - 1}/${response.length}`,
+                    'content-length': response.length
+                }
+            }]);
+            return assert.isRejected(
+                deviceUtil.downloadFileFromDevice('/non-existing/path', constants.LOCAL_HOST, '/uri/to/path'),
+                /downloadFileFromDevice.*no such file or directory/
+            );
+        });
+
+        it('should fail on invalid response on attempt to download file', () => {
+            const response = 'response';
+            testUtil.mockEndpoints([{
+                endpoint: '/uri/to/path',
+                response,
+                responseHeaders: {
+                    'content-length': response.length
+                }
+            }]);
+            return assert.isRejected(
+                deviceUtil.downloadFileFromDevice(fs.createWriteStream(dstPath), constants.LOCAL_HOST, '/uri/to/path'),
+                /HTTP Error:/
+            );
+        });
+
+        it('should able to download file to provided stream', () => {
+            const response = 'response';
+            testUtil.mockEndpoints([{
+                endpoint: '/uri/to/path',
+                response,
+                responseHeaders: {
+                    'content-range': `0-${response.length - 1}/${response.length}`,
+                    'content-length': response.length
+                }
+            }]);
+            return deviceUtil.downloadFileFromDevice(dstPath, constants.LOCAL_HOST, '/uri/to/path')
+                .then(() => {
+                    const contents = fs.readFileSync(dstPath);
+                    assert.ok(contents.equals(Buffer.from(response)), 'should equal to origin Buffer');
+                });
+        });
+
+        it('should fail to download file when content-range is invalid', () => {
+            const response = 'response';
+            testUtil.mockEndpoints([{
+                endpoint: '/uri/to/path',
+                response,
+                responseHeaders: {
+                    'content-range': `0-${response.length - 3}/${response.length - 2}`,
+                    'content-length': response.length
+                },
+                options: {
+                    times: 2
+                }
+            }]);
+            return assert.isRejected(
+                deviceUtil.downloadFileFromDevice(dstPath, constants.LOCAL_HOST, '/uri/to/path'),
+                /Exceeded expected size/
+            );
+        });
+
+        it('should fail to download file (response code !== 200)', () => {
+            const response = 'response';
+            testUtil.mockEndpoints([{
+                endpoint: '/uri/to/path',
+                code: 404,
+                response,
+                responseHeaders: {
+                    'content-range': `0-${response.length - 1}/${response.length}`,
+                    'content-length': response.length
+                },
+                options: {
+                    times: 5
+                }
+            }]);
+            return assert.isRejected(
+                deviceUtil.downloadFileFromDevice(dstPath, constants.LOCAL_HOST, '/uri/to/path'),
+                /Exceeded number of attempts on HTTP error/
+            );
+        });
+    });
+
+    describe('.runTMUtilUnixCommand()', () => {
+        it('should fail on attempt to execute invalid unix command', () => assert.throws(
+            () => deviceUtil.runTMUtilUnixCommand('cp'),
+            /runTMUtilUnixCommand: invalid command/
+        ));
+
+        it('should fail on attempt to list non-existing folder', () => {
+            testUtil.mockEndpoints([{
+                endpoint: '/mgmt/tm/util/unix-ls',
+                method: 'post',
+                response: {
+                    commandResult: '/bin/ls: cannot access /config1: No such file or directory\n'
+                }
+            }]);
+            return assert.isRejected(
+                deviceUtil.runTMUtilUnixCommand('ls', '/config1', constants.LOCAL_HOST),
+                /No such file or directory/
+            );
+        });
+
+        it('should fail on attempt to move non-existing folder', () => {
+            testUtil.mockEndpoints([{
+                endpoint: '/mgmt/tm/util/unix-mv',
+                method: 'post',
+                response: {
+                    commandResult: 'some error here'
+                }
+            }]);
+            return assert.isRejected(
+                deviceUtil.runTMUtilUnixCommand('mv', '/config1', constants.LOCAL_HOST),
+                /some error here/
+            );
+        });
+
+        it('should fail on attempt to remove non-existing folder', () => {
+            testUtil.mockEndpoints([{
+                endpoint: '/mgmt/tm/util/unix-rm',
+                method: 'post',
+                response: {
+                    commandResult: 'some error here'
+                }
+            }]);
+            return assert.isRejected(
+                deviceUtil.runTMUtilUnixCommand('rm', '/config1', constants.LOCAL_HOST),
+                /some error here/
+            );
+        });
+
+        it('should pass on attempt to remove/move folder', () => {
+            testUtil.mockEndpoints([{
+                endpoint: /\/mgmt\/tm\/util\/unix-(rm|mv)/,
+                method: 'post',
+                response: {},
+                options: {
+                    times: 2
+                }
+            }]);
+            return assert.isFulfilled(deviceUtil.runTMUtilUnixCommand('rm', '/config1', constants.LOCAL_HOST)
+                .then(() => deviceUtil.runTMUtilUnixCommand('mv', '/config1', constants.LOCAL_HOST)));
+        });
+
+        it('should pass on attempt to list folder', () => {
+            testUtil.mockEndpoints([{
+                endpoint: '/mgmt/tm/util/unix-ls',
+                method: 'post',
+                response: {
+                    commandResult: 'something'
+                }
+            }]);
+            return assert.becomes(
+                deviceUtil.runTMUtilUnixCommand('ls', '/config1', constants.LOCAL_HOST),
+                'something'
+            );
+        });
+    });
+
+    describe('.getDeviceVersion()', () => {
+        it('should return device version', () => {
+            testUtil.mockEndpoints([{
+                endpoint: '/mgmt/tm/sys/version',
+                response: {
+                    entries: {
+                        someKey: {
+                            nestedStats: {
+                                entries: {
+                                    version: {
+                                        description: '14.1.0'
+                                    },
+                                    BuildInfo: {
+                                        description: '0.0.1'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }]);
+            const expected = {
+                version: '14.1.0',
+                buildInfo: '0.0.1'
             };
+            return assert.becomes(
+                deviceUtil.getDeviceVersion(constants.LOCAL_HOST),
+                expected
+            );
         });
-    };
 
-    before(() => {
-        deviceUtil = require('../../src/lib/deviceUtil.js');
-        childProcess = require('child_process');
-        request = require('request');
-    });
-    after(() => {
-        Object.keys(require.cache).forEach((key) => {
-            delete require.cache[key];
+        it('should fail on return device version', () => {
+            testUtil.mockEndpoints([{
+                endpoint: '/mgmt/tm/sys/version',
+                code: 400,
+                response: {}
+            }]);
+            return assert.isRejected(
+                deviceUtil.getDeviceVersion(constants.LOCAL_HOST),
+                /getDeviceVersion:/
+            );
         });
     });
 
-    it('should get BIG-IP device type', () => {
-        childProcess.exec = (cmd, cb) => { cb(null, cmd, null); };
+    describe('.makeDeviceRequest()', () => {
+        it('should preserve device\'s default port, protocol, HTTP method and etc.', () => {
+            testUtil.mockEndpoints(
+                [{
+                    endpoint: '/uri/something',
+                    requestHeaders: {
+                        'x-f5-auth-token': 'authToken',
+                        'User-Agent': constants.USER_AGENT
+                    },
+                    response: 'something'
+                }],
+                {
+                    host: '1.1.1.1',
+                    port: constants.DEVICE_DEFAULT_PORT,
+                    proto: constants.DEVICE_DEFAULT_PROTOCOL
+                }
+            );
+            const opts = {
+                headers: {
+                    'x-f5-auth-token': 'authToken'
+                },
+                credentials: {
+                    token: 'newToken',
+                    username: 'username'
+                }
+            };
+            return assert.becomes(
+                deviceUtil.makeDeviceRequest('1.1.1.1', '/uri/something', opts),
+                'something'
+            );
+        });
 
-        const BIG_IP_DEVICE_TYPE = constants.BIG_IP_DEVICE_TYPE;
-        return deviceUtil.getDeviceType()
-            .then((data) => {
-                assert.strictEqual(data, BIG_IP_DEVICE_TYPE, 'incorrect device type');
-                return Promise.resolve();
-            })
-            .catch(err => Promise.reject(err));
+        it('should use token instead of username', () => {
+            testUtil.mockEndpoints([{
+                endpoint: '/',
+                requestHeaders: {
+                    'x-f5-auth-token': 'validToken'
+                },
+                response: 'something'
+            }]);
+            const opts = {
+                credentials: {
+                    token: 'validToken'
+                }
+            };
+            return assert.becomes(
+                deviceUtil.makeDeviceRequest('localhost', '/', opts),
+                'something'
+            );
+        });
+
+        it('should correctly encode username for auth header', () => {
+            testUtil.mockEndpoints([{
+                endpoint: '/',
+                requestHeaders: {
+                    Authorization: `Basic ${Buffer.from('username:').toString('base64')}`
+                },
+                response: 'something'
+            }]);
+            const opts = {
+                credentials: {
+                    username: 'username'
+                }
+            };
+            return assert.becomes(
+                deviceUtil.makeDeviceRequest('localhost', '/', opts),
+                'something'
+            );
+        });
     });
 
-    it('should get container device type', () => {
-        childProcess.exec = (cmd, cb) => { cb(new Error('foo'), null, null); };
+    describe('.executeShellCommandOnDevice()', () => {
+        it('should execute shell command', () => {
+            testUtil.mockEndpoints([{
+                endpoint: '/mgmt/tm/util/bash',
+                method: 'post',
+                request: {
+                    command: 'run',
+                    utilCmdArgs: '-c "echo something"'
+                },
+                response: {
+                    commandResult: 'something'
+                }
+            }]);
+            return assert.becomes(
+                deviceUtil.executeShellCommandOnDevice(constants.LOCAL_HOST, 'echo something'),
+                'something'
+            );
+        });
 
-        const CONTAINER_DEVICE_TYPE = constants.CONTAINER_DEVICE_TYPE;
-        return deviceUtil.getDeviceType()
-            .then((data) => {
-                assert.strictEqual(data, CONTAINER_DEVICE_TYPE, 'incorrect device type');
-                return Promise.resolve();
-            })
-            .catch(err => Promise.reject(err));
+        it('should fail on execute shell command', () => {
+            testUtil.mockEndpoints([{
+                endpoint: '/mgmt/tm/util/bash',
+                code: 400,
+                method: 'post',
+                request: {
+                    command: 'run',
+                    utilCmdArgs: '-c "echo something"'
+                }
+            }]);
+            return assert.isRejected(
+                deviceUtil.executeShellCommandOnDevice(constants.LOCAL_HOST, 'echo something'),
+                /executeShellCommandOnDevice:/
+            );
+        });
     });
 
-    it('should fail on non-valid response on attempt to download file', () => {
-        const mockBody = 'somedata';
-        const mockHeaders = {
-            'content-length': mockBody.length
-        };
-        const mockRes = { statusCode: 200, statusMessage: 'message', headers: mockHeaders };
-        setupRequestMock(mockRes, mockBody);
+    describe('.getAuthToken()', () => {
+        it('should fail to get an auth token', () => {
+            testUtil.mockEndpoints(
+                [{
+                    endpoint: '/mgmt/shared/authn/login',
+                    code: 404,
+                    method: 'post',
+                    request: {
+                        username: 'username',
+                        password: 'password',
+                        loginProviderName: 'tmos'
+                    }
+                }],
+                {
+                    host: 'example.com'
+                }
+            );
+            return assert.isRejected(
+                deviceUtil.getAuthToken('example.com', 'username', 'password'),
+                /requestAuthToken:/
+            );
+        });
 
-        return deviceUtil.downloadFileFromDevice('/wrong/path/to/file', constants.LOCAL_HOST, '/uri/to/path')
-            .then(() => {
-                assert.fail('Should throw an error');
-            })
-            .catch((err) => {
-                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
-                if (/HTTP Error:/.test(err)) return Promise.resolve();
-                assert.fail(err);
-                return Promise.reject(err);
-            });
+        it('should get an auth token', () => {
+            testUtil.mockEndpoints(
+                [{
+                    endpoint: '/mgmt/shared/authn/login',
+                    code: 200,
+                    method: 'post',
+                    request: {
+                        username: 'username',
+                        password: 'password',
+                        loginProviderName: 'tmos'
+                    },
+                    response: {
+                        token: {
+                            token: 'token'
+                        }
+                    }
+                }],
+                {
+                    host: 'example.com'
+                }
+            );
+            return assert.becomes(
+                deviceUtil.getAuthToken('example.com', 'username', 'password'),
+                { token: 'token' }
+            );
+        });
+
+        it('should return null auth token for localhost', () => assert.becomes(
+            deviceUtil.getAuthToken('localhost'),
+            { token: null }
+        ));
+
+        it('should fail to get auth token when no username and/or no password', () => assert.isRejected(
+            deviceUtil.getAuthToken('example.com'),
+            /getAuthToken: Username/
+        ));
     });
 
-    it('should able to download file to provided stream', () => {
-        const expectedData = 'somedata';
-        const mockHeaders = {
-            'content-range': `0-${expectedData.length - 1}/${expectedData.length}`,
-            'content-length': expectedData.length
-        };
-        const mockRes = { statusCode: 200, statusMessage: 'message', headers: mockHeaders };
-        const mockBody = Buffer.from(expectedData);
-        request.get = (opts, cb) => {
-            cb(null, mockRes, mockBody);
-        };
+    describe('.encryptSecret()', () => {
+        beforeEach(() => {
+            sinon.stub(crypto, 'randomBytes').returns('test');
+            deviceUtil.clearHostDeviceInfo();
+        });
 
-        const dstPath = `${os.tmpdir()}/testDownloadFileUserStream`;
-        const dst = fs.createWriteStream(dstPath);
+        it('should use cached device info on attempt to encrypt data', () => {
+            testUtil.mockEndpoints(deviceUtilTestsData.encryptSecret['encrypt-14.0.0']);
+            sinon.stub(deviceUtil, 'getDeviceType').resolves(constants.DEVICE_TYPE.BIG_IP);
+            return deviceUtil.gatherHostDeviceInfo()
+                .then(() => deviceUtil.encryptSecret('foo'))
+                .then((encryptedData) => {
+                    assert.strictEqual(encryptedData, 'secret');
+                });
+        });
 
-        return deviceUtil.downloadFileFromDevice(dst, constants.LOCAL_HOST, '/uri/to/path')
-            .then(() => {
-                const contents = fs.readFileSync(dstPath);
-                assert.ok(contents.equals(mockBody), 'should equal to origin Buffer');
-            });
-    });
+        it('should encrypt secret and retrieve it via REST API when software version is 14.0.0', () => {
+            testUtil.mockEndpoints(deviceUtilTestsData.encryptSecret['encrypt-14.0.0']);
+            return assert.becomes(
+                deviceUtil.encryptSecret('foo', true),
+                'secret'
+            );
+        });
 
-    it('should fail to download file when content-range is invalid', () => {
-        const expectedData = 'somedata';
-        const mockHeaders = {
-            'content-range': `0-${expectedData.length - 3}/${expectedData.length - 2}`,
-            'content-length': expectedData.length
-        };
-        const mockRes = { statusCode: 200, statusMessage: 'message', headers: mockHeaders };
-        request.get = (opts, cb) => {
-            cb(null, mockRes, Buffer.from(expectedData));
-        };
+        it('should encrypt secret and retrieve it from device via TMSH when software version is 14.1.x', () => {
+            testUtil.mockEndpoints(deviceUtilTestsData.encryptSecret['encrypt-14.1.x']);
+            return assert.becomes(
+                deviceUtil.encryptSecret('foo', true),
+                'secret'
+            );
+        });
 
-        const dstPath = `${os.tmpdir()}/testDownloadFileUserStream`;
+        it('should encrypt secret and retrieve it via REST API when software version is 15.0.0', () => {
+            testUtil.mockEndpoints(deviceUtilTestsData.encryptSecret['encrypt-15.0.0']);
+            return assert.becomes(
+                deviceUtil.encryptSecret('foo', true),
+                'secret'
+            );
+        });
 
-        return deviceUtil.downloadFileFromDevice(dstPath, constants.LOCAL_HOST, '/uri/to/path')
-            .then(() => {
-                assert.fail('Should throw an error');
-            })
-            .catch((err) => {
-                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
-                if (/Exceeded expected size/.test(err)) return Promise.resolve();
-                assert.fail(err);
-                return Promise.reject(err);
-            });
-    });
+        it('should encrypt data that is 1k characters long', () => {
+            testUtil.mockEndpoints(deviceUtilTestsData.encryptSecret.encrypt1kSecret);
+            const secret = 'abcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabc'
+                + 'abcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabca'
+                + 'bcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabc'
+                + 'abcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
+                + 'cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
+                + 'cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
+                + 'cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
+                + 'cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
+                + 'cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
+                + 'cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
+                + 'cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
+                + 'cabcabcabcabcabcabcabcabca';
+            return assert.becomes(
+                deviceUtil.encryptSecret(secret, true),
+                'secret,secret'
+            );
+        });
 
-    it('should fail to download file (response\' code !== 200)', () => {
-        const expectedData = 'somedata';
-        const mockHeaders = {
-            'content-range': `0-${expectedData.length - 1}/${expectedData.length}`,
-            'content-length': expectedData.length
-        };
-        const mockRes = { statusCode: 404, statusMessage: 'message', headers: mockHeaders };
-        request.get = (opts, cb) => {
-            cb(null, mockRes, Buffer.from(expectedData));
-        };
-
-        const dstPath = `${os.tmpdir()}/testDownloadFileUserStream`;
-        const dst = fs.createWriteStream(dstPath);
-
-        return deviceUtil.downloadFileFromDevice(dst, constants.LOCAL_HOST, '/uri/to/path')
-            .then(() => {
-                assert.fail('Should throw an error');
-            })
-            .catch((err) => {
-                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
-                if (/Exceeded number of attempts on HTTP error/.test(err)) return Promise.resolve();
-                assert.fail(err);
-                return Promise.reject(err);
-            });
-    });
-
-    it('should fail on attempt to execute invalid unix command', () => {
-        assert.throws(
-            () => {
-                deviceUtil.runTMUtilUnixCommand('cp');
-            },
-            (err) => {
-                if ((err instanceof Error) && /invalid command/.test(err)) {
+        it('should chunk large secrets and preserve newlines when encrypting secrets', () => {
+            const radiusRequests = [];
+            testUtil.mockEndpoints([{
+                endpoint: '/mgmt/tm/ltm/auth/radius-server',
+                method: 'post',
+                request: (body) => {
+                    radiusRequests.push(body.secret);
                     return true;
+                },
+                response: {
+                    secret: 'secret'
+                },
+                options: {
+                    times: 2
                 }
-                return false;
-            },
-            'unexpected error'
-        );
+            }]);
+            testUtil.mockEndpoints(deviceUtilTestsData.encryptSecret.encrypt1kSecretWithNewLines);
+            // secret that is > 500 characters, with newlines
+            const largeSecret = 'largeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\n'
+                + 'largeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\n'
+                + 'largeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\n'
+                + 'largeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\n'
+                + 'largeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\n'
+                + 'largeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\n'
+                + 'largeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\n'
+                + 'largeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\n'
+                + 'largeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\n'
+                + 'largeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\nlargeSecret123\n';
+
+            return deviceUtil.encryptSecret(largeSecret, true)
+                .then(() => {
+                    const requestSecret = radiusRequests[0];
+                    assert.strictEqual(radiusRequests.length, 2, 'largeSecret should be in 2 chunks');
+                    assert.strictEqual(requestSecret.length, 500, 'length of chunk should be 500');
+                    assert.ok(new RegExp(/\n/).test(requestSecret), 'newlines should be preserved');
+                });
+        });
+
+        it('should fail when unable to encrypt secret', () => {
+            testUtil.mockEndpoints(deviceUtilTestsData.encryptSecret.errorResponseExample);
+            return assert.isRejected(
+                deviceUtil.encryptSecret('foo', true),
+                /Bad status code: 400/
+            );
+        });
+
+        it('should fail when encrypted secret has comma', () => {
+            testUtil.mockEndpoints(deviceUtilTestsData.encryptSecret.errorWhenResponseHasComma);
+            return assert.isRejected(
+                deviceUtil.encryptSecret('foo', true),
+                /Encrypted data should not have a comma in it/
+            );
+        });
     });
 
-    it('should fail on attempt to list non-existing folder', () => {
-        const mockRes = { statusCode: 200, statusMessage: 'message' };
-        const mockBody = { commandResult: '/bin/ls: cannot access /config1: No such file or directory\n' };
-        setupRequestMock(mockRes, mockBody);
-
-        return deviceUtil.runTMUtilUnixCommand('ls', '/config1', constants.LOCAL_HOST)
-            .then(() => {
-                assert.fail('Should throw an error');
-            })
-            .catch((err) => {
-                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
-                if (/No such file or directory/.test(err)) return Promise.resolve();
-                assert.fail(err);
-                return Promise.reject(err);
+    describe('.decryptSecret()', () => {
+        it('should decrypt secret', () => {
+            sinon.stub(childProcess, 'execFile').callsFake((cmd, args, cb) => {
+                cb(null, 'secret', null);
             });
-    });
+            return assert.becomes(
+                deviceUtil.decryptSecret('foo'),
+                'secret'
+            );
+        });
 
-    it('should fail on attempt to move non-existing folder', () => {
-        const mockRes = { statusCode: 200, statusMessage: 'message' };
-        const mockBody = { commandResult: 'some error here' };
-        setupRequestMock(mockRes, mockBody);
-
-        return deviceUtil.runTMUtilUnixCommand('mv', '/config1', constants.LOCAL_HOST)
-            .then(() => {
-                assert.fail('Should throw an error');
-            })
-            .catch((err) => {
-                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
-                if (/some error here/.test(err)) return Promise.resolve();
-                assert.fail(err);
-                return Promise.reject(err);
+        it('should fail when unable to decrypt secret', () => {
+            sinon.stub(childProcess, 'execFile').callsFake((cmd, args, cb) => {
+                cb(new Error('decrypt error'), null, 'stderr');
             });
+            return assert.isRejected(
+                deviceUtil.decryptSecret('foo'),
+                /decryptSecret exec error.*decrypt error.*stderr/
+            );
+        });
     });
 
-    it('should fail on attempt to remove non-existing folder', () => {
-        const mockRes = { statusCode: 200, statusMessage: 'message' };
-        const mockBody = { commandResult: 'some error here' };
-        setupRequestMock(mockRes, mockBody);
-
-        return deviceUtil.runTMUtilUnixCommand('rm', '/config1', constants.LOCAL_HOST)
-            .then(() => {
-                assert.fail('Should throw an error');
-            })
-            .catch((err) => {
-                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
-                if (/some error here/.test(err)) return Promise.resolve();
-                assert.fail(err);
-                return Promise.reject(err);
+    describe('.decryptAllSecrets()', () => {
+        it('should decrypt all secrets', () => {
+            sinon.stub(childProcess, 'execFile').callsFake((cmd, args, cb) => {
+                cb(null, 'secret', null);
             });
-    });
+            sinon.stub(process, 'env').value({ MY_SECRET_TEST_VAR: 'envSecret' });
 
-    it('should pass on attempt to remove/move folder', () => {
-        const mockRes = { statusCode: 200, statusMessage: 'message' };
-        const mockBody = {};
-        setupRequestMock(mockRes, mockBody);
-
-        return deviceUtil.runTMUtilUnixCommand('rm', '/config1', constants.LOCAL_HOST)
-            .then(() => deviceUtil.runTMUtilUnixCommand('mv', '/config1', constants.LOCAL_HOST));
-    });
-
-    it('should pass on attempt to list folder', () => {
-        const mockRes = { statusCode: 200, statusMessage: 'message' };
-        const mockBody = { commandResult: 'something' };
-        setupRequestMock(mockRes, mockBody);
-
-        return deviceUtil.runTMUtilUnixCommand('ls', '/config1', constants.LOCAL_HOST);
-    });
-
-    it('should return device version', () => {
-        const mockRes = { statusCode: 200, statusMessage: 'message' };
-        const mockBody = {
-            entries: {
-                someKey: {
-                    nestedStats: {
-                        entries: {
-                            version: {
-                                description: '14.1.0'
-                            },
-                            BuildInfo: {
-                                description: '0.0.1'
-                            }
-                        }
+            const declaration = {
+                My_Consumer: {
+                    class: 'Consumer',
+                    passphrase: {
+                        class: 'Secret',
+                        cipherText: 'foo'
+                    }
+                },
+                My_Consumer2: {
+                    class: 'Consumer',
+                    passphrase: {
+                        class: 'Secret',
+                        environmentVar: 'MY_SECRET_TEST_VAR'
+                    }
+                },
+                My_Consumer3: {
+                    class: 'Consumer',
+                    passphrase: {
+                        class: 'Secret',
+                        environmentVar: 'VAR_THAT_DOES_NOT_EXIST'
+                    }
+                },
+                My_Consumer4: {
+                    class: 'Consumer',
+                    passphrase: {
+                        class: 'Secret',
+                        someUnknownKey: 'foo'
+                    }
+                },
+                My_Consumer5: {
+                    class: 'Consumer',
+                    otherkey: {
+                        class: 'Secret',
+                        cipherText: 'foo'
                     }
                 }
-            }
-        };
-        const expected = {
-            version: '14.1.0',
-            buildInfo: '0.0.1'
-        };
-        setupRequestMock(mockRes, mockBody);
-        return deviceUtil.getDeviceVersion(constants.LOCAL_HOST)
-            .then((data) => {
-                assert.deepEqual(data, expected);
-                return Promise.resolve();
-            })
-            .catch(err => Promise.reject(err));
-    });
-
-    it('should fail on return device version', () => {
-        const mockRes = { statusCode: 400, statusMessage: 'error' };
-        const mockBody = {};
-        setupRequestMock(mockRes, mockBody);
-
-        return deviceUtil.getDeviceVersion(constants.LOCAL_HOST)
-            .then(() => {
-                assert.fail('Should throw an error');
-            })
-            .catch((err) => {
-                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
-                if (/getDeviceVersion:/.test(err)) return Promise.resolve();
-                assert.fail(err);
-                return Promise.reject(err);
-            });
-    });
-
-    it('should preserve device\'s default port, protocol, HTTP method and etc.', () => {
-        const uri = '/uri/something';
-        const authToken = 'token';
-
-        request.get = (opts, cb) => {
-            const parsedURL = parseURL(opts.uri);
-
-            assert.strictEqual(parsedURL.pathname, uri);
-            assert.strictEqual(parsedURL.protocol.slice(0, -1), constants.DEVICE_DEFAULT_PROTOCOL);
-            assert.strictEqual(parseInt(parsedURL.port, 10), constants.DEVICE_DEFAULT_PORT);
-            assert.strictEqual(opts.headers['x-f5-auth-token'], authToken);
-            assert.strictEqual(opts.headers['User-Agent'], constants.USER_AGENT);
-
-            const mockRes = { statusCode: 200, statusMessage: 'mockMessage' };
-            const mockBody = { text: uri };
-            cb(null, mockRes, mockBody);
-        };
-
-        const opts = {
-            headers: {
-                'x-f5-auth-token': authToken
-            },
-            credentials: {
-                token: 'newToken',
-                username: 'username'
-            }
-        };
-        return deviceUtil.makeDeviceRequest('1.1.1.1', uri, opts)
-            .then((body) => {
-                assert.strictEqual(body.text, uri);
-                Promise.resolve();
-            })
-            .catch(err => Promise.reject(err));
-    });
-
-    it('should use token instead of username', () => {
-        const authToken = 'validToken';
-
-        request.get = (opts, cb) => {
-            assert.strictEqual(opts.headers['x-f5-auth-token'], authToken);
-
-            const mockRes = { statusCode: 200, statusMessage: 'mockMessage' };
-            const mockBody = { text: 'success' };
-            cb(null, mockRes, mockBody);
-        };
-
-        const opts = {
-            credentials: {
-                token: authToken
-            }
-        };
-        return deviceUtil.makeDeviceRequest('1.1.1.1', '/', opts)
-            .then((body) => {
-                assert.strictEqual(body.text, 'success');
-                Promise.resolve();
-            })
-            .catch(err => Promise.reject(err));
-    });
-
-    it('should corretly encode username for auth header', () => {
-        const username = 'username';
-        const valid = `Basic ${Buffer.from(`${username}:`).toString('base64')}`;
-
-        request.get = (opts, cb) => {
-            assert.strictEqual(opts.headers.Authorization, valid);
-
-            const mockRes = { statusCode: 200, statusMessage: 'mockMessage' };
-            const mockBody = { text: 'success' };
-            cb(null, mockRes, mockBody);
-        };
-
-        const opts = {
-            credentials: {
-                username
-            }
-        };
-        return deviceUtil.makeDeviceRequest('1.1.1.1', '/', opts)
-            .then((body) => {
-                assert.strictEqual(body.text, 'success');
-                Promise.resolve();
-            })
-            .catch(err => Promise.reject(err));
-    });
-
-    it('should execute shell command', () => {
-        const mockRes = { statusCode: 200, statusMessage: 'message' };
-        const mockBody = { commandResult: 'somestring' };
-        setupRequestMock(mockRes, mockBody);
-
-        return deviceUtil.executeShellCommandOnDevice(constants.LOCAL_HOST, 'echo somestring')
-            .then((data) => {
-                assert.strictEqual(data, mockBody.commandResult);
-                return Promise.resolve();
-            })
-            .catch(err => Promise.reject(err));
-    });
-
-    it('should fail on execute shell command', () => {
-        const mockRes = { statusCode: 404, statusMessage: 'message' };
-        const mockBody = { commandResult: 'somestring' };
-        setupRequestMock(mockRes, mockBody);
-
-        return deviceUtil.executeShellCommandOnDevice(constants.LOCAL_HOST, 'echo somestring')
-            .then(() => {
-                assert.fail('Should throw an error');
-            })
-            .catch((err) => {
-                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
-                if (/executeShellCommandOnDevice:/.test(err)) return Promise.resolve();
-                assert.fail(err);
-                return Promise.reject(err);
-            });
-    });
-
-    it('should fail to get an auth token', () => {
-        const token = 'atoken';
-        const mockRes = { statusCode: 404, statusMessage: 'message' };
-        const mockBody = { token: { token } };
-        setupRequestMock(mockRes, mockBody);
-
-        return deviceUtil.getAuthToken('example.com', 'admin', 'password')
-            .then(() => {
-                assert.fail('Should throw an error');
-            })
-            .catch((err) => {
-                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
-                if (/requestAuthToken:/.test(err)) return Promise.resolve();
-                assert.fail(err);
-                return Promise.reject(err);
-            });
-    });
-
-    it('should get an auth token', () => {
-        const token = 'atoken';
-        const mockRes = { statusCode: 200, statusMessage: 'message' };
-        const mockBody = { token: { token } };
-        setupRequestMock(mockRes, mockBody);
-
-        return deviceUtil.getAuthToken('example.com', 'admin', 'password')
-            .then((data) => {
-                assert.strictEqual(data.token, token);
-                return Promise.resolve();
-            })
-            .catch(err => Promise.reject(err));
-    });
-
-    it('should return null auth token for localhost', () => {
-        const expected = null;
-        return deviceUtil.getAuthToken('localhost')
-            .then((data) => {
-                assert.strictEqual(data.token, expected);
-                return Promise.resolve();
-            })
-            .catch(err => Promise.reject(err));
-    });
-
-    it('should fail to get auth token when no username and/or no password', () => deviceUtil.getAuthToken('example.com')
-        .then(() => {
-            assert.fail('Should throw an error');
-        })
-        .catch((err) => {
-            if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
-            if (/getAuthToken: Username/.test(err)) return Promise.resolve();
-            assert.fail(err);
-            return Promise.reject(err);
-        })
-        .then(() => deviceUtil.getAuthToken('example.com'))
-        .then(() => {
-            assert.fail('Should throw an error');
-        })
-        .catch((err) => {
-            if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
-            if (/getAuthToken: Username/.test(err)) return Promise.resolve();
-            assert.fail(err);
-            return Promise.reject(err);
-        }));
-
-    it('should encrypt secret and retrieve it via REST API when software version is 14.0.0', () => {
-        const secret = 'asecret';
-        const mockRes = { statusCode: 200, statusMessage: 'message' };
-        const mockBody = {
-            secret,
-            entries: {
-                someKey: {
-                    nestedStats: {
-                        entries: {
-                            version: {
-                                description: '14.0.0'
-                            },
-                            BuildInfo: {
-                                description: '0.0.1'
-                            }
-                        }
-                    }
+            };
+            const expected = {
+                My_Consumer: {
+                    class: 'Consumer',
+                    passphrase: 'secret'
+                },
+                My_Consumer2: {
+                    class: 'Consumer',
+                    passphrase: 'envSecret'
+                },
+                My_Consumer3: {
+                    class: 'Consumer',
+                    passphrase: null
+                },
+                My_Consumer4: {
+                    class: 'Consumer',
+                    passphrase: null
+                },
+                My_Consumer5: {
+                    class: 'Consumer',
+                    otherkey: 'secret'
                 }
-            }
-        };
-        setupRequestMock(mockRes, mockBody);
-
-        return deviceUtil.encryptSecret('foo')
-            .then((data) => {
-                assert.strictEqual(data, secret);
-                return Promise.resolve();
-            })
-            .catch(err => Promise.reject(err));
+            };
+            return assert.becomes(
+                deviceUtil.decryptAllSecrets(declaration),
+                expected
+            );
+        });
     });
 
-    it('should encrypt data that is 1k characters long', () => {
-        const secret = 'abcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabc'
-            + 'abcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabca'
-            + 'bcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabc'
-            + 'abcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
-            + 'cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
-            + 'cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
-            + 'cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
-            + 'cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
-            + 'cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
-            + 'cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
-            + 'cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab'
-            + 'cabcabcabcabcabcabcabcabca';
-        const mockRes = { statusCode: 200, statusMessage: 'message' };
-        const mockBody = {
-            secret: 'encryptedData',
-            entries: {
-                someKey: {
-                    nestedStats: {
-                        entries: {
-                            version: {
-                                description: '14.0.0'
-                            },
-                            BuildInfo: {
-                                description: '0.0.1'
-                            }
-                        }
-                    }
-                }
-            }
-        };
-        setupRequestMock(mockRes, mockBody);
+    describe('.transformTMOSobjectName()', () => {
+        it('should fail when subPath passed without partition', () => assert.throws(
+            () => deviceUtil.transformTMOSobjectName('', '', 'subPath'),
+            /transformTMOSobjectName:/
+        ));
 
-        return deviceUtil.encryptSecret(secret)
-            .then((data) => {
-                assert.strictEqual(data, 'encryptedData,encryptedData');
-                return Promise.resolve();
-            })
-            .catch(err => Promise.reject(err));
-    });
-
-    it('should encrypt secret and retrieve it via REST API when software version is 15.0.0', () => {
-        const secret = 'asecret';
-        const mockRes = { statusCode: 200, statusMessage: 'message' };
-        const mockBody = {
-            secret,
-            entries: {
-                someKey: {
-                    nestedStats: {
-                        entries: {
-                            version: {
-                                description: '15.0.0'
-                            },
-                            BuildInfo: {
-                                description: '0.0.1'
-                            }
-                        }
-                    }
-                }
-            }
-        };
-        setupRequestMock(mockRes, mockBody);
-
-        return deviceUtil.encryptSecret('foo')
-            .then((data) => {
-                assert.strictEqual(data, secret);
-                return Promise.resolve();
-            })
-            .catch(err => Promise.reject(err));
-    });
-
-    it('should error during encrypt secret', () => {
-        const mockRes = { statusCode: 400, statusMessage: 'message' };
-        setupRequestMock(mockRes, {});
-
-        return deviceUtil.encryptSecret('foo')
-            .then(() => {
-                assert.fail('Should throw an error');
-            })
-            .catch((err) => {
-                if (err.code === 'ERR_ASSERTION') return Promise.reject(err);
-                if (/Bad status code: 400 message/.test(err)) return Promise.resolve();
-                assert.fail(err);
-                return Promise.reject(err);
-            });
-    });
-
-    it('should encrypt secret and retreive it from device via TMSH when software version is 14.1.x', () => {
-        const invalidSecret = { secret: 'invalidSecret' };
-        const validSecret = 'secret';
-        const tmshResp = { commandResult: `auth radius-server telemetry_delete_me {\n    secret ${validSecret}\n}` };
-
-        const mockRes = { statusCode: 200, statusMessage: 'message' };
-        const mockBody = {
-            invalidSecret,
-            entries: {
-                someKey: {
-                    nestedStats: {
-                        entries: {
-                            version: {
-                                description: '14.1.0'
-                            },
-                            BuildInfo: {
-                                description: '0.0.1'
-                            }
-                        }
-                    }
-                }
-            }
-        };
-        const requestHandler = (opts, cb) => {
-            const parsedURL = parseURL(opts.uri);
-
-            let body = mockBody;
-            if (parsedURL.pathname === '/mgmt/tm/util/bash') {
-                body = tmshResp;
-            }
-            cb(null, mockRes, body);
-        };
-        request.post = requestHandler;
-        request.get = requestHandler;
-
-        return deviceUtil.encryptSecret('foo')
-            .then((data) => {
-                assert.strictEqual(data, validSecret);
-                return Promise.resolve();
-            })
-            .catch(err => Promise.reject(err));
-    });
-
-    it('should decrypt secret', () => {
-        const secret = 'asecret';
-        childProcess.execFile = (cmd, args, cb) => { cb(null, secret, null); };
-
-        return deviceUtil.decryptSecret('foo')
-            .then((data) => {
-                assert.strictEqual(data, secret);
-                return Promise.resolve();
-            })
-            .catch(err => Promise.reject(err));
-    });
-
-    it('should decrypt all secrets', () => {
-        const secret = 'asecret';
-        childProcess.execFile = (cmd, args, cb) => { cb(null, secret, null); };
-        process.env.MY_SECRET_TEST_VAR = secret;
-
-        const obj = {
-            My_Consumer: {
-                class: 'Consumer',
-                passphrase: {
-                    class: 'Secret',
-                    cipherText: 'foo'
-                }
-            },
-            My_Consumer2: {
-                class: 'Consumer',
-                passphrase: {
-                    class: 'Secret',
-                    environmentVar: 'MY_SECRET_TEST_VAR'
-                }
-            },
-            My_Consumer3: {
-                class: 'Consumer',
-                passphrase: {
-                    class: 'Secret',
-                    environmentVar: 'VAR_THAT_DOES_NOT_EXIST'
-                }
-            },
-            My_Consumer4: {
-                class: 'Consumer',
-                passphrase: {
-                    class: 'Secret',
-                    someUnknownKey: 'foo'
-                }
-            },
-            My_Consumer5: {
-                class: 'Consumer',
-                otherkey: {
-                    class: 'Secret',
-                    cipherText: 'foo'
-                }
-            }
-        };
-        const decryptedObj = {
-            My_Consumer: {
-                class: 'Consumer',
-                passphrase: secret
-            },
-            My_Consumer2: {
-                class: 'Consumer',
-                passphrase: secret
-            },
-            My_Consumer3: {
-                class: 'Consumer',
-                passphrase: null
-            },
-            My_Consumer4: {
-                class: 'Consumer',
-                passphrase: null
-            },
-            My_Consumer5: {
-                class: 'Consumer',
-                otherkey: secret
-            }
-        };
-
-        return deviceUtil.decryptAllSecrets(obj)
-            .then((data) => {
-                assert.deepEqual(data, decryptedObj);
-                return Promise.resolve();
-            })
-            .catch(err => Promise.reject(err));
-    });
-
-    it('should fail when subPath passed without parition to transformTMOSobjectName', () => {
-        try {
-            deviceUtil.transformTMOSobjectName('', '', 'subPath');
-            assert.fail('Should throw an error');
-        } catch (err) {
-            if (!/transformTMOSobjectName:/.test(err)) assert.fail(err);
-        }
-    });
-
-    it('should correctly transform TMOS object nane', () => {
-        assert.strictEqual(deviceUtil.transformTMOSobjectName('partition', 'name', 'subPath'), '~partition~subPath~name');
-        assert.strictEqual(deviceUtil.transformTMOSobjectName('partition', '/name/name', 'subPath'), '~partition~subPath~~name~name');
-        assert.strictEqual(deviceUtil.transformTMOSobjectName('partition', '/name/name', 'subPath'), '~partition~subPath~~name~name');
-        assert.strictEqual(deviceUtil.transformTMOSobjectName('', 'name'), 'name');
+        it('should correctly transform TMOS object name', () => {
+            assert.strictEqual(deviceUtil.transformTMOSobjectName('partition', 'name', 'subPath'), '~partition~subPath~name');
+            assert.strictEqual(deviceUtil.transformTMOSobjectName('partition', '/name/name', 'subPath'), '~partition~subPath~~name~name');
+            assert.strictEqual(deviceUtil.transformTMOSobjectName('partition', '/name/name', 'subPath'), '~partition~subPath~~name~name');
+            assert.strictEqual(deviceUtil.transformTMOSobjectName('', 'name'), 'name');
+        });
     });
 });
 
-
 // purpose: validate util (DeviceAsyncCLI)
 describe('Device Util (DeviceAsyncCLI)', () => {
-    let deviceUtil;
-    let request;
+    afterEach(() => {
+        sinon.restore();
+    });
 
-    before(() => {
-        deviceUtil = require('../../src/lib/deviceUtil.js');
-        request = require('request');
-    });
-    after(() => {
-        Object.keys(require.cache).forEach((key) => {
-            delete require.cache[key];
-        });
-    });
+    let parseURL;
+    if (process.versions.node.startsWith('4.')) {
+        parseURL = urllib.parse;
+    } else {
+        parseURL = url => new urllib.URL(url);
+    }
 
     const testScriptName = 'testScriptName';
     const testScriptCode = 'testScriptCode';
@@ -1230,7 +1253,7 @@ describe('Device Util (DeviceAsyncCLI)', () => {
 
             const responder = mockedResponse(uris, options);
             mockedHTTPmethods.forEach((method) => {
-                request[method] = responder;
+                sinon.stub(request, method).callsFake(responder);
             });
             return runMethodTesting(testParams, options);
         });
@@ -1250,7 +1273,7 @@ describe('Device Util (DeviceAsyncCLI)', () => {
             cb(null, response, responseBody);
         };
         mockedHTTPmethods.forEach((method) => {
-            request[method] = responder;
+            sinon.stub(request, method).callsFake(responder);
         });
 
         // ideally all testSets should be covered
@@ -1274,7 +1297,7 @@ describe('Device Util (DeviceAsyncCLI)', () => {
             cb(null, response, responseBody);
         };
         mockedHTTPmethods.forEach((method) => {
-            request[method] = responder;
+            sinon.stub(request, method).callsFake(responder);
         });
 
         // ideally all testSets should be covered
@@ -1298,7 +1321,7 @@ describe('Device Util (DeviceAsyncCLI)', () => {
             cb(null, response, responseBody);
         };
         mockedHTTPmethods.forEach((method) => {
-            request[method] = responder;
+            sinon.stub(request, method).callsFake(responder);
         });
 
         // ideally all testSets should be covered
@@ -1324,22 +1347,14 @@ describe('Device Util (DeviceAsyncCLI)', () => {
             cb(null, response, responseBody);
         };
         mockedHTTPmethods.forEach((method) => {
-            request[method] = responder;
+            sinon.stub(request, method).callsFake(responder);
         });
-        let err;
+
         // ideally all testSets should be covered
         const dacli = new deviceUtil.DeviceAsyncCLI('localhost');
         dacli.scriptName = testScriptName;
         dacli.retryDelay = 0;
-        return dacli.execute('command')
-            .catch((e) => {
-                err = e;
-            })
-            .then(() => {
-                if (!err) {
-                    assert.fail('Error expected');
-                }
-            });
+        return assert.isRejected(dacli.execute('command'));
     });
 
     it('should parse init params correctly', () => {
@@ -1356,18 +1371,18 @@ describe('Device Util (DeviceAsyncCLI)', () => {
         assert.strictEqual(dacli.options.opts, 'opts');
 
         dacli = new deviceUtil.DeviceAsyncCLI();
-        assert.deepEqual(dacli.options, { connection: {}, credentials: {} });
+        assert.deepStrictEqual(dacli.options, { connection: {}, credentials: {} });
 
         dacli = new deviceUtil.DeviceAsyncCLI({});
-        assert.deepEqual(dacli.options, { connection: {}, credentials: {} });
+        assert.deepStrictEqual(dacli.options, { connection: {}, credentials: {} });
 
         dacli = new deviceUtil.DeviceAsyncCLI({ something: 'something' });
-        assert.deepEqual(dacli.options, { connection: {}, credentials: {}, something: 'something' });
+        assert.deepStrictEqual(dacli.options, { connection: {}, credentials: {}, something: 'something' });
 
         dacli = new deviceUtil.DeviceAsyncCLI({ connection: { port: 80 }, credentials: { token: 'token' } });
-        assert.deepEqual(dacli.options, { connection: { port: 80 }, credentials: { token: 'token' } });
+        assert.deepStrictEqual(dacli.options, { connection: { port: 80 }, credentials: { token: 'token' } });
 
         dacli = new deviceUtil.DeviceAsyncCLI({ connection: { port: 80 } });
-        assert.deepEqual(dacli.options, { connection: { port: 80 }, credentials: {} });
+        assert.deepStrictEqual(dacli.options, { connection: { port: 80 }, credentials: {} });
     });
 });

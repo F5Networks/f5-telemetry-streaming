@@ -8,6 +8,11 @@
 
 'use strict';
 
+const TMSTATS_PERIOD_PREFIX = RegExp(/\./g);
+const IPV4_REGEXP = /FFFF([A-Fa-f0-9].)([A-Fa-f0-9].)([A-Fa-f0-9].)([A-Fa-f0-9].)/;
+const IPV6_REGEXP = /([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})/;
+const IPV6_V4_PREFIX_REGEXP = RegExp(/::ffff:/ig);
+
 // Canonical format
 function defaultFormat(globalCtx) {
     const data = globalCtx.event.data;
@@ -48,6 +53,8 @@ const SOURCE_2_TYPES = {
     'bigip.objectmodel.cert': 'f5:bigip:config:iapp:json',
     'bigip.objectmodel.profile': 'f5:bigip:config:iapp:json',
     'bigip.objectmodel.virtual': 'f5:bigip:config:iapp:json',
+    'bigip.objectmodel.virtual.pools': 'f5:bigip:config:iapp:json',
+    'bigip.objectmodel.virtual.profiles': 'f5:bigip:config:iapp:json',
     'bigip.ihealth.diagnostics': 'f5:bigip:ihealth:iapp:json',
     'bigip.tmstats': 'f5:bigip:stats:iapp.json'
 };
@@ -132,6 +139,19 @@ function getData(request, key) {
         }
     }
     return data;
+}
+
+function formatHexIP(originData) {
+    const data = originData.replace(/:/g, '').substring(0, 32);
+    const matchIpV4 = data.match(IPV4_REGEXP);
+    if (matchIpV4) {
+        return `${parseInt(matchIpV4[1], 16)}.${parseInt(matchIpV4[2], 16)}.${parseInt(matchIpV4[3], 16)}.${parseInt(matchIpV4[4], 16)}`;
+    }
+    const matchIpV6 = data.match(IPV6_REGEXP);
+    if (matchIpV6) {
+        return `${matchIpV6[1]}:${matchIpV6[2]}:${matchIpV6[3]}:${matchIpV6[4]}:${matchIpV6[5]}:${matchIpV6[6]}:${matchIpV6[7]}:${matchIpV6[8]}`;
+    }
+    return originData;
 }
 
 function overall(request) {
@@ -307,6 +327,57 @@ const stats = [
     },
 
     function (request) {
+        const vsStats = getData(request, 'virtualServers');
+        if (vsStats === undefined) return undefined;
+
+        const template = getTemplate('bigip.objectmodel.virtual.profiles', request.globalCtx.event.data, request.cache);
+        const ret = [];
+        Object.keys(vsStats).forEach((vsKey) => {
+            const vsStat = vsStats[vsKey];
+            if (!vsStat.profiles) {
+                return;
+            }
+            const profiles = vsStat.profiles;
+            Object.keys(profiles).forEach((profKey) => {
+                const newData = Object.assign({}, template);
+                newData.event = Object.assign({}, template.event);
+                newData.event.virtual_name = vsKey;
+                newData.event.tenant = vsStat.tenant;
+                newData.event.app = vsStat.application;
+                newData.event.appComponent = '';
+                newData.event.profile_name = profKey;
+                newData.event.profile_type = 'profile';
+                ret.push(newData);
+            });
+        });
+        return ret;
+    },
+
+    function (request) {
+        const vsStats = getData(request, 'virtualServers');
+        if (vsStats === undefined) return undefined;
+
+        const template = getTemplate('bigip.objectmodel.virtual.pools', request.globalCtx.event.data, request.cache);
+        const ret = [];
+        Object.keys(vsStats).forEach((key) => {
+            const vsStat = vsStats[key];
+            if (!vsStat.pool) {
+                return;
+            }
+
+            const newData = Object.assign({}, template);
+            newData.event = Object.assign({}, template.event);
+            newData.event.virtual_name = key;
+            newData.event.app = vsStat.application;
+            newData.event.appComponent = '';
+            newData.event.tenant = vsStat.tenant;
+            newData.event.pool_name = vsStat.pool;
+            ret.push(newData);
+        });
+        return ret;
+    },
+
+    function (request) {
         const poolStats = getData(request, 'pools');
         if (poolStats === undefined) return undefined;
 
@@ -338,23 +409,52 @@ const stats = [
         const tmstats = getData(request, 'tmstats');
         if (tmstats === undefined) return undefined;
 
+        const hexIpProps = ['addr', 'source', 'destination'];
         const template = getTemplate('bigip.tmstats', request.globalCtx.event.data, request.cache);
         const output = [];
-        const periodRegex = RegExp(/\./g);
 
         Object.keys(tmstats).forEach((key) => {
+            if (key === 'virtualServerCpuStat') {
+                const tmstData = tmstats[key];
+                // 1) table 'virtualServerStat' should exist
+                // 2) last_cycle_count was removed starting from 13.1+
+                if (tmstats.virtualServerStat && tmstData && tmstData.length
+                        && typeof tmstData[0].last_cycle_count === 'undefined') {
+                    const vsCycleCount = {};
+                    tmstats.virtualServerStat.forEach((entry) => {
+                        vsCycleCount[entry.name] = entry.cycle_count;
+                    });
+                    tmstData.forEach((entry) => {
+                        entry.last_cycle_count = vsCycleCount[entry.name];
+                    });
+                }
+            }
+
             tmstats[key].forEach((entry) => {
                 const newData = Object.assign({}, template);
                 // replace periods in tmstat key names with underscores
                 Object.keys(entry).forEach((entryKey) => {
-                    if (periodRegex.test(entryKey)) {
-                        entry[entryKey.replace(periodRegex, '_')] = entry[entryKey];
+                    if (TMSTATS_PERIOD_PREFIX.test(entryKey)) {
+                        entry[entryKey.replace(TMSTATS_PERIOD_PREFIX, '_')] = entry[entryKey];
                         delete entry[entryKey];
                     }
                 });
                 newData.source += `.${STAT_2_TMCTL_TABLE[key]}`;
                 newData.event = Object.assign({}, template.event);
                 newData.event = Object.assign(newData.event, entry);
+                newData.event.app = newData.event.application;
+                // newData.event.tenant = newData.event.tenant; // just as reminder that tenant is already there
+                newData.event.appComponent = '';
+
+                if (key === 'monitorInstanceStat' && newData.event.ip_address) {
+                    newData.event.ip_address = newData.event.ip_address.replace(IPV6_V4_PREFIX_REGEXP, '');
+                }
+                hexIpProps.forEach((hexProp) => {
+                    if (newData.event[hexProp]) {
+                        newData.event[hexProp] = formatHexIP(newData.event[hexProp]);
+                    }
+                });
+
                 output.push(newData);
             });
         });

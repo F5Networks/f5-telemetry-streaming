@@ -13,8 +13,8 @@ const net = require('net');
 const path = require('path');
 const request = require('request');
 
-const constants = require('./constants.js');
-const logger = require('./logger.js');
+const constants = require('./constants');
+const logger = require('./logger');
 
 /** @module util */
 
@@ -24,8 +24,8 @@ const logger = require('./logger.js');
  *
  * @class
  *
- * @param {string} name       - tracer's name
- * @param {string} tracerPath - path to file
+ * @param {String} name       - tracer's name
+ * @param {String} tracerPath - path to file
  *
  * @property {String} name    - tracer's name
  * @property {String} path    - path to file
@@ -88,7 +88,7 @@ Tracer.prototype.removeScheduledReopen = function () {
  * Set state
  *
  * @private
- * @param {string} newState - tracer's new state
+ * @param {String} newState - tracer's new state
  */
 Tracer.prototype._setState = function (newState) {
     // reject any state if current is STOP
@@ -251,8 +251,11 @@ Tracer.prototype._mkdir = function () {
             return new Promise((resolve, reject) => {
                 logger.info(`Creating dir '${baseDir}' for tracer '${self.name}'`);
                 fs.mkdir(baseDir, { recursive: true }, (mkdirErr) => {
-                    if (mkdirErr) reject(mkdirErr);
-                    else resolve();
+                    if (mkdirErr) {
+                        reject(mkdirErr);
+                    } else {
+                        resolve();
+                    }
                 });
             });
         });
@@ -342,7 +345,7 @@ Tracer.prototype._truncate = function () {
  * @async
  * @private
  *
- * @param {string} data - data to write to stream
+ * @param {String} data - data to write to stream
  *
  * @returns {Promise} Promise resolved when data was written
  */
@@ -354,8 +357,11 @@ Tracer.prototype._write = function (data) {
             resolve();
         } else {
             self.stream.write(data, (err) => {
-                if (err) reject(err);
-                else resolve();
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
             });
         }
     });
@@ -364,7 +370,7 @@ Tracer.prototype._write = function (data) {
 /**
  * Check if tracer ready to process data
  *
- * @returns {boolean} true if ready else false
+ * @returns {Boolean} true if ready else false
  */
 Tracer.prototype.isReady = function () {
     return this.state === Tracer.STATE.READY;
@@ -373,7 +379,7 @@ Tracer.prototype.isReady = function () {
 /**
  * Check if tracer is able to process/buffer data
  *
- * @returns {boolean} true if ready else false
+ * @returns {Boolean} true if ready else false
  */
 Tracer.prototype.isAvailable = function () {
     return this.isReady()
@@ -384,7 +390,7 @@ Tracer.prototype.isAvailable = function () {
 /**
  * Check if tracer should be initialized
  *
- * @returns {boolean} true if not initialized else false
+ * @returns {Boolean} true if not initialized else false
  */
 Tracer.prototype.isNew = function () {
     return this.state === Tracer.STATE.NEW
@@ -401,7 +407,7 @@ Tracer.prototype.touch = function () {
 /**
  * Reopen stream if needed
  *
- * @param {boolean} schedule - true when need to schedule function
+ * @param {Boolean} schedule - true when need to schedule function
  */
 Tracer.prototype.reopenIfNeeded = function (schedule) {
     this.removeScheduledReopen();
@@ -436,7 +442,7 @@ Tracer.prototype.stop = function () {
  * Write data to tracer
  *
  * @async
- * @param {string} data - data to write to tracer
+ * @param {String} data - data to write to tracer
  */
 Tracer.prototype.write = function (data) {
     if (!data) {
@@ -454,15 +460,15 @@ Tracer.prototype.write = function (data) {
 /**
  * Instances cache.
  *
- * @member {Object.<string, Tracer>}
+ * @member {Object.<String, Tracer>}
  */
 Tracer.instances = {};
 
 /**
  * Get Tracer instance or create new one
  *
- * @param {string} name       - tracer name
- * @param {string} tracerPath - destination path
+ * @param {String} name       - tracer name
+ * @param {String} tracerPath - destination path
  *
  * @returns {Tracer} Tracer instance
  */
@@ -487,9 +493,10 @@ Tracer.get = function (name, tracerPath) {
 /**
  * Create tracer from config
  *
- * @param {string} className - object's class name
- * @param {string} objName   - object's name
- * @param {Object} config    - object's config
+ * @param {String} className              - object's class name
+ * @param {String} objName                - object's name
+ * @param {Object} config                 - object's config
+ * @param {String|Boolean} [config.trace] - path to file, if 'true' then default path will be used
  *
  * @returns {Tracer} Tracer object
  */
@@ -530,23 +537,22 @@ Tracer.removeTracer = function (tracer) {
 /**
  * Remove Tracer instance
  *
- * @param {string | Tracer} toRemove - tracer or tracer's name to remove
- * @param {Tracer~filterCallback} filter  - filter function
+ * @param {String | Tracer | Tracer~filterCallback} toRemove - tracer or tracer's name to remove
+ *                                                             or filter function
  */
-Tracer.remove = function (toRemove, filter) {
-    if (toRemove) {
+Tracer.remove = function (toRemove) {
+    if (typeof toRemove === 'function') {
+        Object.keys(Tracer.instances).forEach((tracerName) => {
+            const tracer = Tracer.instances[tracerName];
+            if (toRemove(tracer)) {
+                Tracer.removeTracer(tracer);
+            }
+        });
+    } else {
         if (typeof toRemove !== 'string') {
             toRemove = toRemove.name;
         }
         Tracer.removeTracer(Tracer.instances[toRemove]);
-    }
-    if (filter) {
-        Object.keys(Tracer.instances).forEach((tracerName) => {
-            const tracer = Tracer.instances[tracerName];
-            if (filter(tracer)) {
-                Tracer.removeTracer(tracer);
-            }
-        });
     }
 };
 
@@ -594,8 +600,44 @@ function retryPromise(fn, opts) {
         });
 }
 
+// cleanup options. Update tests (test/unit/utilTests.js) when adding new value
+const MAKE_REQUEST_OPTS_TO_REMOVE = [
+    'allowSelfSignedCert',
+    'continueOnErrorCode',
+    'expectedResponseCode',
+    'fullURI',
+    'includeResponseObject',
+    'json',
+    'port',
+    'protocol',
+    'rawResponseBody'
+];
+
+const VERSION_COMPARATORS = ['==', '===', '<', '<=', '>', '>=', '!=', '!=='];
+
 
 module.exports = {
+    /**
+     * Assign defaults to object
+     *
+     * @param {Object} obj      - object to assign defaults to
+     * @param {Object} defaults - defaults to assign to object
+     *
+     * @returns {Object}
+     */
+    assignDefaults(obj, defaults) {
+        // from docs: if the value is null or undefined, it will create and return an empty object
+        // otherwise, it will return an object of a Type that corresponds to the given value.
+        // If the value is an object already, it will return the value.
+        obj = Object(obj);
+        Object.keys(defaults).forEach((key) => {
+            if (!Object.prototype.hasOwnProperty.call(obj, key)) {
+                obj[key] = defaults[key];
+            }
+        });
+        return obj;
+    },
+
     /**
      * Check if object has any data or not
      *
@@ -604,10 +646,18 @@ module.exports = {
      * @returns {Boolean} 'true' if empty else 'false'
      */
     isObjectEmpty(obj) {
-        if (obj === undefined || obj === null) return true;
-        if (Array.isArray(obj) || typeof obj === 'string') return obj.length === 0;
+        if (obj === undefined || obj === null) {
+            return true;
+        }
+        if (Array.isArray(obj) || typeof obj === 'string') {
+            return obj.length === 0;
+        }
         /* eslint-disable no-restricted-syntax */
-        for (const key in obj) if (Object.prototype.hasOwnProperty.call(obj, key)) return false;
+        for (const key in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                return false;
+            }
+        }
         return true;
     },
     /**
@@ -673,7 +723,7 @@ module.exports = {
      */
     compareVersionStrings(version1, comparator, version2) {
         comparator = comparator === '=' ? '==' : comparator;
-        if (['==', '===', '<', '<=', '>', '>=', '!=', '!=='].indexOf(comparator) === -1) {
+        if (VERSION_COMPARATORS.indexOf(comparator) === -1) {
             throw new Error(`Invalid comparator '${comparator}'`);
         }
         const v1parts = version1.split('.');
@@ -729,7 +779,9 @@ module.exports = {
                 const v = data[k];
                 // check if value for v is an object that contains a class
                 if (typeof v === 'object' && v.class) {
-                    if (!ret[v.class]) { ret[v.class] = {}; }
+                    if (!ret[v.class]) {
+                        ret[v.class] = {};
+                    }
                     ret[v.class][k] = v;
                 }
             });
@@ -765,27 +817,49 @@ module.exports = {
     /**
      * Perform HTTP request
      *
+     * @example
+     * // host only
+     * makeRequest(hostStr)
+     * @example
+     * // options only
+     * makeRequest(optionsObj)
+     * @example
+     * // host and options
+     * makeRequest(hostStr, optionsObj)
+     * @example
+     * // host and uri and options
+     * makeRequest(hostStr, uriStr, optionsObj)
+     * @example
+     * // host and uri
+     * makeRequest(hostStr, uriStr)
+     *
      * @param {String}  [host]                         - HTTP host
      * @param {String}  [uri]                          - HTTP uri
      * @param {Object}  [options]                      - function options. Copy it before pass to function.
      * @param {String}  [options.fullURI]              - full HTTP URI
-     * @param {String}  [options.protocol]             - HTTP protocol
-     * @param {Integer} [options.port]                 - HTTP port
-     * @param {String}  [options.method]               - HTTP method
-     * @param {String}  [options.body]                 - HTTP body
+     * @param {String}  [options.protocol]             - HTTP protocol, by default http
+     * @param {Integer} [options.port]                 - HTTP port, by default 80
+     * @param {String}  [options.method]               - HTTP method, by default GET
+     * @param {Any}     [options.body]                 - HTTP body, must be a Buffer, String or ReadStream or
+     *                                                   JSON-serializable object
+     * @param {Boolean} [options.json]                 - sets HTTP body to JSON representation of value and adds
+     *                                                   Content-type: application/json header, by default true
      * @param {Object}  [options.headers]              - HTTP headers
-     * @param {Object}  [options.continueOnErrorCode]  - resolve promise even on non-successful response code
-     * @param {Boolean} [options.allowSelfSignedCert]  - false - requires SSL certificates be valid,
-     *                                                  true  - allows self-signed certs
-     * @param {Object}  [options.rawResponseBody]      - true - Buffer object with binary data will be returned as body
-     * @param {Integer} [options.expectedResponseCode] - expected response code
-     * @param {Boolean} [options.includeResponseObject] - false - only body object/string will be returned
-     *                                                    true  - array with [body, responseObject] will be returned
+     * @param {Object}  [options.continueOnErrorCode]  - continue on non-successful response code, by default false
+     * @param {Boolean} [options.allowSelfSignedCert]  - do not require SSL certificates be valid, by default false
+     * @param {Object}  [options.rawResponseBody]      - return response as Buffer object with binary data,
+     *                                                   by default false
+     * @param {Boolean} [options.includeResponseObject] - return [body, responseObject], by default false
+     * @param {Array<Integer>|Integer} [options.expectedResponseCode]  - expected response code, by default 200
      *
      * @returns {Promise.<?any>} Returns promise resolved with response
      */
     makeRequest() {
-        // rest params syntax supported only fron node 6+
+        if (arguments.length === 0) {
+            throw new Error('makeRequest: no arguments were passed to function');
+        }
+
+        // rest params syntax supported by node 6+ only
         let host;
         let uri;
         let options;
@@ -801,42 +875,42 @@ module.exports = {
             options = arguments[2];
         }
 
-        options = options || {};
-        options.method = options.method || 'GET';
-        options.protocol = options.protocol || constants.REQUEST_DEFAULT_PROTOCOL;
-        options.port = options.port || constants.REQUEST_DEFAULT_PORT;
-        options.body = options.body ? this.stringify(options.body) : undefined;
+        options = this.assignDefaults(options, {
+            continueOnErrorCode: false,
+            expectedResponseCode: [200],
+            headers: {},
+            includeResponseObject: false,
+            json: true,
+            method: 'GET',
+            port: constants.HTTP_REQUEST.DEFAULT_PORT,
+            protocol: constants.HTTP_REQUEST.DEFAULT_PROTOCOL,
+            rawResponseBody: false
+        });
+        options.headers['User-Agent'] = options.headers['User-Agent'] || constants.USER_AGENT;
         options.strictSSL = options.allowSelfSignedCert === undefined
             ? constants.STRICT_TLS_REQUIRED : !options.allowSelfSignedCert;
-
-        options.headers = options.headers || {};
-        options.headers['User-Agent'] = options.headers['User-Agent'] || constants.USER_AGENT;
 
         if (options.rawResponseBody) {
             options.encoding = null;
         }
 
-        if (host) {
-            options.uri = `${options.protocol}://${host}:${options.port}${uri || ''}`;
-        } else {
-            options.uri = options.fullURI;
+        if (options.json && typeof options.body !== 'undefined') {
+            options.body = JSON.stringify(options.body);
         }
 
-        if (!options.uri) {
-            throw new Error('makeRequest: No fullURI or host provided');
+        uri = host ? `${options.protocol}://${host}:${options.port}${uri || ''}` : options.fullURI;
+        if (!uri) {
+            throw new Error('makeRequest: no fullURI or host provided');
         }
+        options.uri = uri;
 
-        const rawResponseBody = options.rawResponseBody;
         const continueOnErrorCode = options.continueOnErrorCode;
+        const expectedResponseCode = Array.isArray(options.expectedResponseCode)
+            ? options.expectedResponseCode : [options.expectedResponseCode];
         const includeResponseObject = options.includeResponseObject;
-        let expectedResponseCode = options.expectedResponseCode || [200];
-        expectedResponseCode = Array.isArray(expectedResponseCode) ? expectedResponseCode
-            : [expectedResponseCode];
+        const rawResponseBody = options.rawResponseBody;
 
-        // cleanup options. Update tests when adding new value
-        ['rawResponseBody', 'continueOnErrorCode', 'expectedResponseCode', 'includeResponseObject',
-            'port', 'protocol', 'fullURI', 'allowSelfSignedCert'
-        ].forEach((key) => {
+        MAKE_REQUEST_OPTS_TO_REMOVE.forEach((key) => {
             delete options[key];
         });
 
@@ -886,12 +960,15 @@ module.exports = {
     /**
      * Network check - with max timeout interval (5 seconds)
      *
-     * @param {String} host  - host address
-     * @param {Integer} port - host port
+     * @param {String} host               - host address
+     * @param {Integer} port              - host port
+     * @param {Object}  [options]         - options
+     * @param {Integer} [options.timeout] - timeout before fail if unable to establish connection, by default 5s.
+     * @param {Integer} [options.period]  - how often to check connection status, by default 100ms.
      *
      * @returns {Promise} Returns promise resolved on successful check
      */
-    networkCheck(host, port) {
+    networkCheck(host, port, options) {
         let done = false;
         const connectPromise = new Promise((resolve, reject) => {
             const client = net.createConnection({ host, port })
@@ -908,23 +985,31 @@ module.exports = {
                 });
         });
 
-        // 100 ms period with 50 max tries = 5 sec
-        const period = 100; const maxTries = 50; let currentTry = 1;
+        options = this.assignDefaults(options, {
+            period: 100,
+            timeout: 5 * 1000
+        });
+        if (options.timeout <= options.period) {
+            options.period = options.timeout;
+        }
         const timeoutPromise = new Promise((resolve, reject) => {
             const interval = setInterval(() => {
+                options.timeout -= options.period;
+
                 const fail = () => {
                     clearInterval(interval);
-                    reject(new Error(`unable to connect: ${host}:${port}`)); // max timeout, reject
+                    reject(new Error(`unable to connect: ${host}:${port} (timeout exceeded)`)); // max timeout, reject
                 };
 
                 if (done === true) {
                     clearInterval(interval);
                     resolve(); // connection success, resolve
-                } else if (done === 'error') fail();
-                else if (currentTry < maxTries) ; // try again
-                else fail();
-                currentTry += 1;
-            }, period);
+                } else if (done === 'error') {
+                    fail();
+                } else if (options.timeout <= 0) {
+                    fail();
+                }
+            }, options.period);
         });
 
         return Promise.all([connectPromise, timeoutPromise])

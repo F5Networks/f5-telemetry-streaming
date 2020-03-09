@@ -8,6 +8,8 @@
 
 'use strict';
 
+/** @module logger */
+
 let logger;
 try {
     // eslint-disable-next-line global-require, import/no-unresolved

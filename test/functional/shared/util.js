@@ -15,8 +15,8 @@ const net = require('net');
 const request = require('request');
 const SSHClient = require('ssh2').Client; // eslint-disable-line import/no-extraneous-dependencies
 
-const constants = require('./constants.js');
-const logger = require('../../winstonLogger.js').logger;
+const constants = require('./constants');
+const logger = require('../../winstonLogger').logger;
 
 /**
  * Allows calling makeRequest with retryOptions

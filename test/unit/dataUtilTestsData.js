@@ -21,33 +21,633 @@ module.exports = {
     checkConditions: [
         // TEST RELATED DATA STARTS HERE
         {
-            name: 'should determine data doesn\'t pass conditions (example 1)',
+            name: 'should only execute ifAllMatch, if ifAllMatch and ifAnyMatch happen to be in same action',
             dataCtx: {
-                virtualServers: {
-                    virtual1: {
-                        'serverside.bitsIn': true
-                    },
-                    virtual2: {
-                        'serverside.bitsIn': true
+                data: {
+                    block1: {
+                        b1_i1: {
+                            value1: 'doesmatch'
+                        }
                     }
-                },
-                httpProfiles: {
-                    httpProfile1: {
-                        cookiePersistInserts: 1
-                    }
-                },
-                system: {
-                    hostname: 'bigip.example.com'
                 }
             },
-            conditionsCtx: {
-                httpProfiles: {
-                    '.*': {
-                        cookiePersistInserts: 0
+            actionsCtx: {
+                ifAnyMatch: [{
+                    block1: {
+                        '.*': {
+                            value1: 'doesmatch'
+                        }
                     }
-                },
-                system: {
-                    hostname: 'something'
+                }],
+                ifAllMatch: {
+                    block1: {
+                        value1: 'notpresent'
+                    }
+                }
+            },
+            expectedCtx: false
+        }
+    ],
+    checkConditions_ifAnyMatch: [
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should pass when any ifAnyMatch item matches data',
+            dataCtx: {
+                data: {
+                    virtualServers: {
+                        '/test/gjd_ftp': {
+                            'serverside.bitsIn': true,
+                            enabledState: 'enabled'
+                        },
+                        virtual2: {
+                            'serverside.bitsIn': true
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip.example.com'
+                    }
+                }
+            },
+            actionsCtx: {
+                ifAnyMatch: [
+                    {
+                        virtualServers: {
+                            '/test/gjd_ftp': {
+                                enabledState: 'enabled'
+                            }
+                        }
+                    },
+                    {
+                        virtualServers: {
+                            '/test/gjd_ftp': {
+                                enabledState: 'disabled'
+                            }
+                        }
+                    }
+                ]
+            },
+            expectedCtx: true
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should pass when second ifAnyMatch item matches data',
+            dataCtx: {
+                data: {
+                    virtualServers: {
+                        virtual1: {
+                            enabledState: 'enabled'
+                        },
+                        virtual2: {
+                            enabledState: 'enabled'
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip.example.com'
+                    }
+                }
+            },
+            actionsCtx: {
+                ifAnyMatch: [
+                    {
+                        virtualServers: {
+                            '.*': {
+                                enabledState: 'disabled'
+                            }
+                        }
+                    },
+                    {
+                        virtualServers: {
+                            '.*': {
+                                enabledState: 'enabled'
+                            }
+                        }
+                    }
+                ]
+            },
+            expectedCtx: true
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should pass when there are multiple matches',
+            dataCtx: {
+                data: {
+                    virtualServers: {
+                        one: {
+                            enabledState: 'enabled',
+                            otherKey: 'val1'
+                        },
+                        two: {
+                            enabledState: 'disabled',
+                            otherKey: 'val1'
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip.example.com'
+                    }
+                }
+            },
+            actionsCtx: {
+                ifAnyMatch: [
+                    {
+                        virtualServers: {
+                            one: {
+                                enabledState: 'enabled',
+                                otherKey: 'val1'
+                            }
+                        }
+                    },
+                    {
+                        virtualServers: {
+                            two: {
+                                enabledState: 'disabled',
+                                otherKey: 'val1'
+                            }
+                        }
+                    }
+                ]
+            },
+            expectedCtx: true
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should pass when ifAnyMatch is empty array',
+            dataCtx: {
+                data: {
+                    system: {
+                        hostname: 'bigip.example.com'
+                    }
+                }
+            },
+            actionsCtx: {
+                ifAnyMatch: []
+            },
+            expectedCtx: true
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should pass when ifAnyMatch contains empty object',
+            dataCtx: {
+                data: {
+                    system: {
+                        hostname: 'bigip.example.com'
+                    }
+                }
+            },
+            actionsCtx: {
+                ifAnyMatch: [{}]
+            },
+            expectedCtx: true
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should pass when matching against array values',
+            dataCtx: {
+                data: {
+                    aWideIps: {
+                        '/Common/www.aone.tstest.com': {
+                            wipType: 'A',
+                            aliases: ['www.aone.com', 'www.cone.com']
+                        },
+                        '/Common/www.atwo.tstest.com': {
+                            wipType: 'A',
+                            aliases: ['www.atwo.com', 'www.ctwo.com']
+                        }
+                    }
+                }
+            },
+            actionsCtx: {
+                ifAnyMatch: [
+                    {
+                        aWideIps: {
+                            '/Common/www.aone.tstest.com': {
+                                aliases: ['www.aone.com', 'www.cone.com']
+                            }
+                        }
+                    }
+                ]
+            },
+            expectedCtx: true
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should pass when matching against unsorted array values',
+            dataCtx: {
+                data: {
+                    aWideIps: {
+                        '/Common/www.aone.tstest.com': {
+                            wipType: 'A',
+                            aliases: ['www.aone.com', 'www.cone.com']
+                        },
+                        '/Common/www.atwo.tstest.com': {
+                            wipType: 'A',
+                            aliases: ['www.atwo.com', 'www.ctwo.com']
+                        }
+                    }
+                }
+            },
+            actionsCtx: {
+                ifAnyMatch: [
+                    {
+                        aWideIps: {
+                            '/Common/www.aone.tstest.com': {
+                                aliases: ['www.cone.com', 'www.aone.com']
+                            }
+                        }
+                    }
+                ]
+            },
+            expectedCtx: true
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should pass when matching against array regexes',
+            dataCtx: {
+                data: {
+                    aWideIps: {
+                        '/Common/www.aone.tstest.com': {
+                            wipType: 'A',
+                            aliases: ['www.aone.com', 'www.cone.com']
+                        },
+                        '/Common/www.atwo.tstest.com': {
+                            wipType: 'A',
+                            aliases: ['www.atwo.com', 'www.ctwo.com']
+                        }
+                    }
+                }
+            },
+            actionsCtx: {
+                ifAnyMatch: [
+                    {
+                        aWideIps: {
+                            '/Common/www.atwo.tstest.com': {
+                                aliases: ['atwo.com$', 'ctwo.com$']
+                            }
+                        }
+                    }
+                ]
+            },
+            expectedCtx: true
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should pass when any constant value matches data value',
+            dataCtx: {
+                data: {
+                    virtualServers: {
+                        '/test/gjd_ftp': {
+                            'serverside.bitsIn': true,
+                            enabledState: 'enabled'
+                        },
+                        virtual2: {
+                            'serverside.bitsIn': true
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip.example.com'
+                    }
+                }
+            },
+            actionsCtx: {
+                ifAnyMatch: [{
+                    virtualServers: {
+                        '/test/gjd_ftp': {
+                            enabledState: 'enabled'
+                        }
+                    }
+                }]
+            },
+            expectedCtx: true
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should pass with multiple keys in ifAnyMatch',
+            dataCtx: {
+                data: {
+                    virtualServers: {
+                        '/test/gjd_ftp': {
+                            'serverside.bitsIn': true,
+                            enabledState: 'enabled'
+                        },
+                        virtual2: {
+                            'serverside.bitsIn': true
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip.example.com'
+                    }
+                }
+            },
+            actionsCtx: {
+                ifAnyMatch: [{
+                    virtualServers: {
+                        '/test/gjd_ftp': {
+                            enabledState: 'enabled'
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip.example.com'
+                    }
+                }]
+            },
+            expectedCtx: true
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should not pass if any sub-item in ifAnyMatch does not match',
+            dataCtx: {
+                data: {
+                    virtualServers: {
+                        '/test/gjd_ftp': {
+                            'serverside.bitsIn': true,
+                            enabledState: 'enabled'
+                        },
+                        virtual2: {
+                            'serverside.bitsIn': true
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip.example.com'
+                    }
+                }
+            },
+            actionsCtx: {
+                ifAnyMatch: [{
+                    virtualServers: {
+                        '/test/gjd_ftp': {
+                            enabledState: 'disabled'
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip.example.com'
+                    }
+                }]
+            },
+            expectedCtx: false
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'shouldn\'t pass when no match is made',
+            dataCtx: {
+                data: {
+                    virtualServers: {
+                        '/test/gjd_ftp': {
+                            'serverside.bitsIn': true,
+                            enabledState: 'enabled'
+                        },
+                        virtual2: {
+                            'serverside.bitsIn': true
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip.example.com'
+                    }
+                }
+            },
+            actionsCtx: {
+                ifAnyMatch: [{
+                    virtualServers: {
+                        '/test/gjd_ftp': {
+                            enabledState: 'disabled'
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip1.example.com'
+                    }
+                }]
+            },
+            expectedCtx: false
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'shouldn\'t pass when no data is present',
+            dataCtx: {
+                data: {}
+            },
+            actionsCtx: {
+                ifAnyMatch: [{
+                    virtualServers: {
+                        '/test/gjd_ftp': {
+                            enabledState: 'disabled'
+                        }
+                    }
+                }]
+            },
+            expectedCtx: false
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'shouldn\'t pass when array values do not match',
+            dataCtx: {
+                data: {
+                    aWideIps: {
+                        '/Common/www.aone.tstest.com': {
+                            wipType: 'A',
+                            aliases: ['www.aone.com', 'www.cone.com']
+                        },
+                        '/Common/www.atwo.tstest.com': {
+                            wipType: 'A',
+                            aliases: ['www.atwo.com', 'www.ctwo.com']
+                        }
+                    }
+                }
+            },
+            actionsCtx: {
+                ifAnyMatch: [{
+                    aWideIps: {
+                        '.*': {
+                            aliases: 'www.none.com'
+                        }
+                    }
+                }]
+            },
+            expectedCtx: false
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should pass when a single regex matches',
+            dataCtx: {
+                data: {
+                    virtualServers: {
+                        '/test/gjd_ftp': {
+                            'serverside.bitsIn': true,
+                            enabledState: 'enabled'
+                        },
+                        virtual2: {
+                            'serverside.bitsIn': true
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip.example.com'
+                    }
+                }
+            },
+            actionsCtx: {
+                ifAnyMatch: [{
+                    system: {
+                        hostname: '^bigip.exa'
+                    }
+                }]
+            },
+            expectedCtx: true
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'shouldn\'t pass when the regex does not match',
+            dataCtx: {
+                data: {
+                    virtualServers: {
+                        '/test/gjd_ftp': {
+                            'serverside.bitsIn': true,
+                            enabledState: 'enabled'
+                        },
+                        virtual2: {
+                            'serverside.bitsIn': true
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip.example.com'
+                    }
+                }
+            },
+            actionsCtx: {
+                ifAnyMatch: [{
+                    system: {
+                        hostname: '^example'
+                    }
+                }]
+            },
+            expectedCtx: false
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'shouldn\'t pass when value does not match',
+            dataCtx: {
+                data: {
+                    system: {
+                        hostname: 'bigip.example.com',
+                        version: '14.1.0'
+                    }
+                }
+            },
+            actionsCtx: {
+                ifAnyMatch: [{
+                    system: {
+                        version: 'shouldnotmatch'
+                    }
+                }]
+            },
+            expectedCtx: false
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'shouldn\'t reject on bad regex',
+            dataCtx: {
+                data: {
+                    system: {
+                        hostname: 'bigip.example.com',
+                        version: '14.1.0'
+                    }
+                }
+            },
+            actionsCtx: {
+                ifAnyMatch: [{
+                    system: {
+                        version: '*'
+                    }
+                }]
+            },
+            expectedCtx: false
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'shouldn\'t pass when literal \'object\' only matches Javascript object',
+            dataCtx: {
+                data: {
+                    virtualServers: {
+                        '/test/gjd_ftp': {
+                            'serverside.bitsIn': true,
+                            enabledState: 'enabled'
+                        },
+                        virtual2: {
+                            'serverside.bitsIn': true
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip.example.com'
+                    }
+                }
+            },
+            actionsCtx: {
+                ifAnyMatch: [{
+                    virtualServers: 'object'
+                }]
+            },
+            expectedCtx: false
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should pass if \'object\' is used as matching value',
+            dataCtx: {
+                data: {
+                    virtualServers: {
+                        objectName: {
+                            'serverside.bitsIn': true
+                        },
+                        virtual2: {
+                            'serverside.bitsIn': true
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip.example.com'
+                    }
+                }
+            },
+            actionsCtx: {
+                ifAnyMatch: [{
+                    virtualServers: {
+                        'object.*': {
+                            'serverside.bitsIn': true
+                        }
+                    }
+                }]
+            },
+            expectedCtx: true
+        }
+    ],
+    checkConditions_ifAllMatch: [
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should determine data doesn\'t pass conditions (example 1)',
+            dataCtx: {
+                data: {
+                    virtualServers: {
+                        virtual1: {
+                            'serverside.bitsIn': true
+                        },
+                        virtual2: {
+                            'serverside.bitsIn': true
+                        }
+                    },
+                    httpProfiles: {
+                        httpProfile1: {
+                            cookiePersistInserts: 1
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip.example.com'
+                    }
+                }
+            },
+            actionsCtx: {
+                ifAllMatch: {
+                    httpProfiles: {
+                        '.*': {
+                            cookiePersistInserts: 0
+                        }
+                    },
+                    system: {
+                        hostname: 'something'
+                    }
                 }
             },
             expectedCtx: false
@@ -56,27 +656,31 @@ module.exports = {
         {
             name: 'should determine data doesn\'t pass conditions (example 2)',
             dataCtx: {
-                virtualServers: {
-                    virtual1: {
-                        'serverside.bitsIn': true
+                data: {
+                    virtualServers: {
+                        virtual1: {
+                            'serverside.bitsIn': true
+                        },
+                        virtual2: {
+                            'serverside.bitsIn': true
+                        }
                     },
-                    virtual2: {
-                        'serverside.bitsIn': true
+                    httpProfiles: {
+                        httpProfile1: {
+                            cookiePersistInserts: 1
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip.example.com'
                     }
-                },
-                httpProfiles: {
-                    httpProfile1: {
-                        cookiePersistInserts: 1
-                    }
-                },
-                system: {
-                    hostname: 'bigip.example.com'
                 }
             },
-            conditionsCtx: {
-                clientSSL: {
-                    '.*': {
-                        cookiePersistInserts: 0
+            actionsCtx: {
+                ifAllMatch: {
+                    clientSSL: {
+                        '.*': {
+                            cookiePersistInserts: 0
+                        }
                     }
                 }
             },
@@ -86,27 +690,31 @@ module.exports = {
         {
             name: 'should determine that data passes conditions',
             dataCtx: {
-                httpProfiles: {
-                    http1: {
-                        getReqs: 10
+                data: {
+                    httpProfiles: {
+                        http1: {
+                            getReqs: 10
+                        },
+                        http2: {
+                            getReqs: 10
+                        }
                     },
-                    http2: {
-                        getReqs: 10
+                    system: {
+                        hostname: 'bigip.example.com',
+                        version: '14.0.0.4'
                     }
-                },
-                system: {
-                    hostname: 'bigip.example.com',
-                    version: '14.0.0.4'
                 }
             },
-            conditionsCtx: {
-                'ht*': {
-                    '.*': {
-                        getReqs: 10
+            actionsCtx: {
+                ifAllMatch: {
+                    'ht*': {
+                        '.*': {
+                            getReqs: 10
+                        }
+                    },
+                    system: {
+                        version: '14*'
                     }
-                },
-                system: {
-                    version: '14*'
                 }
             },
             expectedCtx: true
@@ -115,33 +723,37 @@ module.exports = {
         {
             name: 'should process arrays correctly (example 1)',
             dataCtx: {
-                httpProfiles: [
-                    {
-                        http1: {
-                            getReqs: 10
+                data: {
+                    httpProfiles: [
+                        {
+                            http1: {
+                                getReqs: 10
+                            }
+                        },
+                        {
+                            http2: {
+                                getReqs: 10
+                            }
                         }
-                    },
-                    {
-                        http2: {
-                            getReqs: 10
-                        }
+                    ],
+                    system: {
+                        hostname: 'bigip.example.com',
+                        version: '14.0.0.4'
                     }
-                ],
-                system: {
-                    hostname: 'bigip.example.com',
-                    version: '14.0.0.4'
                 }
             },
-            conditionsCtx: {
-                'ht*': {
-                    '.*': {
+            actionsCtx: {
+                ifAllMatch: {
+                    'ht*': {
                         '.*': {
-                            getReqs: 10
+                            '.*': {
+                                getReqs: 10
+                            }
                         }
+                    },
+                    system: {
+                        version: '14*'
                     }
-                },
-                system: {
-                    version: '14*'
                 }
             },
             expectedCtx: true
@@ -150,33 +762,37 @@ module.exports = {
         {
             name: 'should process arrays correctly (example 2)',
             dataCtx: {
-                httpProfiles: [
-                    {
-                        http1: {
-                            getReqs: 20
+                data: {
+                    httpProfiles: [
+                        {
+                            http1: {
+                                getReqs: 20
+                            }
+                        },
+                        {
+                            http2: {
+                                getReqs: 10
+                            }
                         }
-                    },
-                    {
-                        http2: {
-                            getReqs: 10
-                        }
+                    ],
+                    system: {
+                        hostname: 'bigip.example.com',
+                        version: '14.0.0.4'
                     }
-                ],
-                system: {
-                    hostname: 'bigip.example.com',
-                    version: '14.0.0.4'
                 }
             },
-            conditionsCtx: {
-                'ht*': {
-                    0: {
-                        '.*': {
-                            getReqs: 20
-                        }
-                    },
-                    1: {
-                        http2: {
-                            getReqs: 10
+            actionsCtx: {
+                ifAllMatch: {
+                    'ht*': {
+                        0: {
+                            '.*': {
+                                getReqs: 20
+                            }
+                        },
+                        1: {
+                            http2: {
+                                getReqs: 10
+                            }
                         }
                     }
                 }
@@ -187,15 +803,19 @@ module.exports = {
         {
             name: 'should work with events (example 1)',
             dataCtx: {
-                event_source: 'request_logging',
-                event_timestamp: '2019-01-01:01:01.000Z',
-                hostname: 'hostname',
-                virtual_name: 'app_vs',
-                telemetryEventCategory: 'defaultEvent'
+                data: {
+                    event_source: 'request_logging',
+                    event_timestamp: '2019-01-01:01:01.000Z',
+                    hostname: 'hostname',
+                    virtual_name: 'app_vs',
+                    telemetryEventCategory: 'defaultEvent'
+                }
             },
-            conditionsCtx: {
-                telemetryEventCategory: 'defaultEvent',
-                tenant: 'app'
+            actionsCtx: {
+                ifAllMatch: {
+                    telemetryEventCategory: 'defaultEvent',
+                    tenant: 'app'
+                }
             },
             expectedCtx: false
         },
@@ -203,24 +823,78 @@ module.exports = {
         {
             name: 'should work with events (example 2)',
             dataCtx: {
-                event_source: 'request_logging',
-                event_timestamp: '2019-01-01:01:01.000Z',
-                hostname: 'hostname',
-                virtual_name: 'app_vs',
-                telemetryEventCategory: 'defaultEvent'
+                data: {
+                    event_source: 'request_logging',
+                    event_timestamp: '2019-01-01:01:01.000Z',
+                    hostname: 'hostname',
+                    virtual_name: 'app_vs',
+                    telemetryEventCategory: 'defaultEvent'
+                }
             },
-            conditionsCtx: {
-                telemetryEventCategory: 'defaultEvent',
-                virtual_name: 'app_vs'
+            actionsCtx: {
+                ifAllMatch: {
+                    telemetryEventCategory: 'defaultEvent',
+                    virtual_name: 'app_vs'
+                }
             },
             expectedCtx: true
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'shouldn\'t reject on bad regex',
+            dataCtx: {
+                data: {
+                    system: {
+                        hostname: 'bigip.example.com',
+                        version: '14.1.0'
+                    }
+                }
+            },
+            actionsCtx: {
+                ifAllMatch: {
+                    system: {
+                        version: '*'
+                    }
+                }
+            },
+            expectedCtx: false
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should return successful when negation regexes are used',
+            dataCtx: {
+                data: {
+                    Entity: 'TcpStat'
+                }
+            },
+            actionsCtx: {
+                ifAllMatch: {
+                    Entity: '^(?!OffBoxAll|^VS).*'
+                }
+            },
+            expectedCtx: true
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should not match when negation regexes are used',
+            dataCtx: {
+                data: {
+                    Entity: 'OffBoxAll'
+                }
+            },
+            actionsCtx: {
+                ifAllMatch: {
+                    Entity: '^(?!OffBoxAll|^VS).*'
+                }
+            },
+            expectedCtx: false
         }
     ],
     getMatches: [
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should return what matches the property when it is a literal string',
-            dataCtx: {
+            data: {
                 system: {},
                 httpProfiles: {},
                 virtualServers: {}
@@ -231,7 +905,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should return what matches the property when a regex is used (example 1)',
-            dataCtx: {
+            data: {
                 httpProfiles: {},
                 virtualServers: {},
                 httpProfiles2: {}
@@ -242,7 +916,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should return what matches the property when a regex is used (example 2)',
-            dataCtx: {
+            data: {
                 '/dev': {},
                 '/dev/shm': {},
                 '/var': {},
@@ -263,7 +937,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should return no matches',
-            dataCtx: {
+            data: {
                 virtualServers: {},
                 httpProfiles: {}
             },
@@ -273,42 +947,42 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should work with array when index (integer) exists',
-            dataCtx: ['vs1'],
+            data: ['vs1'],
             propertyCtx: 0,
             expectedCtx: [0]
         },
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should work with array when index (string) exists',
-            dataCtx: ['vs1'],
+            data: ['vs1'],
             propertyCtx: '0',
             expectedCtx: ['0']
         },
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should work with array when index (integer) not exists',
-            dataCtx: [],
+            data: [],
             propertyCtx: 0,
             expectedCtx: []
         },
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should work with array when index (string) not exists (example 1)',
-            dataCtx: [],
+            data: [],
             propertyCtx: '0',
             expectedCtx: []
         },
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should work with array when index (string) not exists (example 2)',
-            dataCtx: ['vs1'],
+            data: ['vs1'],
             propertyCtx: 'noResult',
             expectedCtx: []
         },
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should check property param against regex patterers from the data keys (example 1)',
-            dataCtx: {
+            data: {
                 irtualServer: true,
                 ttpProfile: true
             },
@@ -319,7 +993,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should check property param against regex patterns from the data keys (example 2)',
-            dataCtx: {
+            data: {
                 irtualServer: true,
                 Server: true
             },
@@ -330,7 +1004,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should check property param against regex patterns from the data keys (example 3)',
-            dataCtx: {
+            data: {
                 irtualServer: true,
                 server: true
             },
@@ -341,7 +1015,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should check property param against regex patterns from the data keys (example 4)',
-            dataCtx: {
+            data: {
                 ttpProfile: true
             },
             propertyCtx: 'virtualServers',
@@ -353,7 +1027,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should match specified properties',
-            dataCtx: {
+            data: {
                 virtualServers: {
                     virtual1: {},
                     virtual2: {}
@@ -438,7 +1112,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should not match bad properties',
-            dataCtx: {
+            data: {
                 system: {},
                 virtualServers: {
                     virtual1: {}
@@ -456,7 +1130,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should be able to access nested data by key',
-            dataCtx: {
+            data: {
                 system: {
                     nestedKey: 'nestedData',
                     nestedData: {
@@ -477,7 +1151,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should match specified properties (example 1)',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 }
@@ -494,7 +1168,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should match specified properties (example 2)',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 }
@@ -507,7 +1181,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should match specified properties (example 3)',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 }
@@ -522,7 +1196,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should match specified properties (example 4)',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 }
@@ -537,7 +1211,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should match specified properties (example 5)',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 }
@@ -552,7 +1226,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should not match specified properties',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 }
@@ -567,7 +1241,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should be able work with arrays (example 1)',
-            dataCtx: {
+            data: {
                 virtualServers: [
                     {
                         vs1: {
@@ -590,12 +1264,12 @@ module.exports = {
                     }
                 }
             },
-            expectedCtx: ['virtualServers', 0, 'vs1', 'ip']
+            expectedCtx: ['virtualServers', '0', 'vs1', 'ip']
         },
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should be able work with arrays (example 2)',
-            dataCtx: {
+            data: {
                 virtualServers: [
                     {
                         vs1: {
@@ -623,7 +1297,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should be able work with arrays (example 3)',
-            dataCtx: {
+            data: {
                 virtualServers: [
                     {
                         vs1: {
@@ -651,7 +1325,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should be able work with regex',
-            dataCtx: {
+            data: {
                 virtualServers: [
                     {
                         vs1: {
@@ -674,13 +1348,40 @@ module.exports = {
                 }
             },
             expectedCtx: ['virtualServers', 'system', 'hostname']
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should be able to accept array of property contexts',
+            data: {
+                system: {
+                    hostname: 'hostname',
+                    nestedKey1: 'value1'
+                },
+                otherSystem: {
+                    keyOne: 'one',
+                    keyTwo: 'two'
+                }
+            },
+            propertiesCtx: [
+                {
+                    system: {
+                        hostname: true
+                    }
+                },
+                {
+                    otherSystem: {
+                        keyTwo: 'two'
+                    }
+                }
+            ],
+            expectedCtx: ['system', 'hostname', 'otherSystem', 'keyTwo']
         }
     ],
     removeStrictMatches: [
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should be able to access nested data by key (example 1)',
-            dataCtx: {
+            data: {
                 system: {
                     nestedKey: 'nested',
                     nested: {
@@ -706,7 +1407,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should be able to access nested data by key (example 2)',
-            dataCtx: {
+            data: {
                 system: {
                     nestedKey: 'nested',
                     nested: {
@@ -724,7 +1425,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should keep nested data if not empty (example 1)',
-            dataCtx: {
+            data: {
                 system: {
                     nestedKey: 'nested',
                     nested: {
@@ -753,7 +1454,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should keep nested data if not empty (example 2)',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname',
                     version: 'version'
@@ -775,7 +1476,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should remove nested key only',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 }
@@ -793,7 +1494,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should remove parent object despite on nested data',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 }
@@ -807,7 +1508,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should work with regex (example 1)',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 }
@@ -821,7 +1522,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should work with regex (example 2)',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 },
@@ -849,7 +1550,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should remove nothing if no matches',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 },
@@ -879,7 +1580,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should work with array',
-            dataCtx: {
+            data: {
                 virtualServers: [
                     {
                         ip: 'x.x.x.x',
@@ -913,7 +1614,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should work with array - preserve access by index to elements',
-            dataCtx: {
+            data: {
                 virtualServers: [
                     {
                         ip: 'x.x.x.x'
@@ -957,7 +1658,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should work without callback',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 },
@@ -988,7 +1689,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should be able to access nested data by key',
-            dataCtx: {
+            data: {
                 system: {
                     nestedKey: 'nested',
                     nested: {
@@ -1015,7 +1716,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should keep nested data',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 },
@@ -1036,7 +1737,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should work with regex (example 1)',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 },
@@ -1073,7 +1774,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should work with regex (example 2)',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 },
@@ -1099,7 +1800,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should keep nested data if not empty (example 1)',
-            dataCtx: {
+            data: {
                 system: {
                     nestedKey: 'nested',
                     nested: {
@@ -1130,7 +1831,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should keep nested data if not empty (example 2)',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname',
                     version: 'version'
@@ -1155,7 +1856,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should keep nested data if not empty (example 3)',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname',
                     version: 'version'
@@ -1182,7 +1883,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should remove parent object despite on nested data',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 },
@@ -1204,7 +1905,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should remove everything if no matches',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 },
@@ -1224,7 +1925,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should keep only matched keys',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 },
@@ -1248,7 +1949,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should work with array',
-            dataCtx: {
+            data: {
                 virtualServers: [
                     {
                         ip: 'x.x.x.x',
@@ -1286,7 +1987,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should work with array - preserve access by index to elements',
-            dataCtx: {
+            data: {
                 virtualServers: [
                     {
                         ip: 'x.x.x.x'
@@ -1330,7 +2031,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should work without callback',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 },
@@ -1363,7 +2064,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should be able to access nested data by key',
-            dataCtx: {
+            data: {
                 system: {
                     nestedKey: 'nested',
                     nested: {
@@ -1390,7 +2091,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should keep nested data',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 },
@@ -1411,7 +2112,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should work with regex (example 1)',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 },
@@ -1448,7 +2149,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should work with regex (example 2)',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 },
@@ -1474,7 +2175,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should keep nested data if not empty (example 1)',
-            dataCtx: {
+            data: {
                 system: {
                     nestedKey: 'nested',
                     nested: {
@@ -1505,7 +2206,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should keep nested data if not empty (example 2)',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname',
                     version: 'version'
@@ -1530,7 +2231,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should remove parent object despite on nested data',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 },
@@ -1552,7 +2253,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should remove everything if no matches (example 1)',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 },
@@ -1572,7 +2273,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should remove everything if no matches (example 2)',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 },
@@ -1596,7 +2297,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should keep only matched keys',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 },
@@ -1618,7 +2319,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should work with array',
-            dataCtx: {
+            data: {
                 virtualServers: [
                     {
                         ip: 'x.x.x.x',
@@ -1660,7 +2361,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should work with array - preserve access by index to elements',
-            dataCtx: {
+            data: {
                 virtualServers: [
                     {
                         ip: 'x.x.x.x'
@@ -1704,7 +2405,7 @@ module.exports = {
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should work without callback',
-            dataCtx: {
+            data: {
                 system: {
                     hostname: 'hostname'
                 },

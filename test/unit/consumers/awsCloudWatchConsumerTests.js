@@ -8,18 +8,21 @@
 
 'use strict';
 
+/* eslint-disable import/order */
+
+require('../shared/restoreCache')();
+
+const AWS = require('aws-sdk');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
-const AWS = require('aws-sdk');
+const sinon = require('sinon');
+
+const awsCloudWatchIndex = require('../../../src/lib/consumers/AWS_CloudWatch/index');
+const testUtil = require('../shared/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
-const sinon = require('sinon');
 
-const util = require('../shared/util.js');
-const awsCloudWatchIndex = require('../../../src/lib/consumers/AWS_CloudWatch/index');
-
-/* eslint-disable global-require */
 describe('AWS_CloudWatch', () => {
     let clock;
     let awsConfigUpdate;
@@ -32,6 +35,7 @@ describe('AWS_CloudWatch', () => {
         username: 'awsuser',
         passphrase: 'awssecret'
     };
+
     beforeEach(() => {
         awsConfigUpdate = sinon.stub(AWS.config, 'update').resolves();
         sinon.stub(AWS, 'CloudWatchLogs').returns({
@@ -69,13 +73,13 @@ describe('AWS_CloudWatch', () => {
         awsConfigUpdate.callsFake((options) => {
             optionsParam = options;
         });
-        const context = util.buildConsumerContext({
+        const context = testUtil.buildConsumerContext({
             config: defaultConsumerConfig
         });
 
         awsCloudWatchIndex(context);
         assert.strictEqual(optionsParam.region, 'us-west-1');
-        assert.deepEqual(optionsParam.credentials,
+        assert.deepStrictEqual(optionsParam.credentials,
             new AWS.Credentials({ accessKeyId: 'awsuser', secretAccessKey: 'awssecret' }));
     });
 
@@ -87,7 +91,7 @@ describe('AWS_CloudWatch', () => {
         const config = Object.assign({}, defaultConsumerConfig);
         delete config.username;
         delete config.passphrase;
-        const context = util.buildConsumerContext({ config });
+        const context = testUtil.buildConsumerContext({ config });
 
         awsCloudWatchIndex(context);
         assert.strictEqual(optionsParam.region, 'us-west-1');
@@ -102,22 +106,22 @@ describe('AWS_CloudWatch', () => {
         };
 
         it('should process systemInfo data', (done) => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 eventType: 'systemInfo',
                 config: defaultConsumerConfig
             });
             expectedParams.logEvents[0] = {
-                message: JSON.stringify(util.deepCopy(context.event.data)),
+                message: JSON.stringify(testUtil.deepCopy(context.event.data)),
                 timestamp: 0
             };
 
             putLogEventsStub = (params) => {
                 try {
-                    assert.deepEqual(params, expectedParams);
+                    assert.deepStrictEqual(params, expectedParams);
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             };
@@ -126,22 +130,22 @@ describe('AWS_CloudWatch', () => {
         });
 
         it('should process event data', (done) => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 eventType: 'AVR',
                 config: defaultConsumerConfig
             });
             expectedParams.logEvents[0] = {
-                message: JSON.stringify(util.deepCopy(context.event.data)),
+                message: JSON.stringify(testUtil.deepCopy(context.event.data)),
                 timestamp: 0
             };
 
             putLogEventsStub = (params) => {
                 try {
-                    assert.deepEqual(params, expectedParams);
+                    assert.deepStrictEqual(params, expectedParams);
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             };
