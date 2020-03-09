@@ -8,45 +8,43 @@
 
 'use strict';
 
-const assert = require('assert');
-const fs = require('fs');
+/* eslint-disable import/order */
+
+require('./shared/restoreCache')();
+
 const Ajv = require('ajv');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+const fs = require('fs');
 
-/* eslint-disable global-require */
-
-const DISABLED_FOLDERS = ['request_logs', 'avr', 'consumers'];
-
-
-function validateAgainstSchema(data, schema) {
-    const ajv = new Ajv({ useDefaults: true });
-    const validator = ajv.compile(schema);
-    const valid = validator(data);
-    if (!valid) {
-        return { errors: validator.errors };
-    }
-    return true;
-}
-
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
 describe('Example Output', () => {
-    after(() => {
-        Object.keys(require.cache).forEach((key) => {
-            delete require.cache[key];
-        });
-    });
+    function validateAgainstSchema(data, schema) {
+        const ajv = new Ajv({ useDefaults: true });
+        const validator = ajv.compile(schema);
+        const valid = validator(data);
+        if (!valid) {
+            return { errors: validator.errors };
+        }
+        return true;
+    }
 
     // baseDir contains 1+ folders, each of which contain a schema.json and output.json file
     const baseDir = `${__dirname}/../../examples/output`;
     const schemaDir = `${__dirname}/../../shared/output_schemas`;
-    const dirs = fs.readdirSync(baseDir);
-    dirs.forEach((dir) => {
-        if (DISABLED_FOLDERS.indexOf(dir) !== -1) {
+    const disabledFolders = ['request_logs', 'avr', 'consumers'];
+
+    fs.readdirSync(baseDir).forEach((dir) => {
+        if (disabledFolders.indexOf(dir) !== -1) {
             return;
         }
 
         const schemaFile = `${schemaDir}/${dir}_schema.json`; // example directory name + _schema.json
         const outputFile = `${baseDir}/${dir}/output.json`;
-        it(`should validate output in ${dir}`, () => {
+
+        it(`should validate output in '${baseDir}/${dir}'`, () => {
             const schema = JSON.parse(fs.readFileSync(schemaFile));
             const data = JSON.parse(fs.readFileSync(outputFile));
 

@@ -13,10 +13,10 @@ const fs = require('fs');
 const path = require('path');
 const request = require('request');
 
-const logger = require('./logger.js');
-const constants = require('./constants.js');
-const util = require('./util.js');
-const deviceUtil = require('./deviceUtil.js');
+const logger = require('./logger');
+const constants = require('./constants');
+const util = require('./util');
+const deviceUtil = require('./deviceUtil');
 
 /** @module ihealthUtil */
 
@@ -816,7 +816,7 @@ QkviewManager.prototype.prepare = function () {
         .then(() => deviceUtil.getDeviceType())
         .then((deviceType) => {
             this.deviceType = deviceType;
-            if (this.deviceType === constants.BIG_IP_DEVICE_TYPE) {
+            if (this.deviceType === constants.DEVICE_TYPE.BIG_IP) {
                 return this.checkIsItLocalDevice();
             }
             return Promise.resolve();

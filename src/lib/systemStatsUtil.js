@@ -9,12 +9,7 @@
 'use strict';
 
 const mustache = require('mustache');
-const util = require('./util.js');
-
-const CONDITIONAL_FUNCS = {
-    deviceVersionGreaterOrEqual,
-    isModuleProvisioned
-};
+const util = require('./util');
 
 /**
  * Comparison functions
@@ -43,7 +38,7 @@ function deviceVersionGreaterOrEqual(contextData, versionToCompare) {
  *
  * @param {Object} contextData               - context data
  * @param {Object} contextData.provisioning  - provision state of modules to compare
- * @param {String} moduletoCompare           - module to compare against
+ * @param {String} moduleToCompare           - module to compare against
  *
  * @returns {boolean} true when device's module is provisioned
  */
@@ -57,41 +52,63 @@ function isModuleProvisioned(contextData, moduleToCompare) {
 
 module.exports = {
 
+    CONDITIONAL_FUNCS: {
+        deviceVersionGreaterOrEqual,
+        isModuleProvisioned
+    },
+
     /**
      * Evaluate conditional block
      *
-     * @param {Object} contextData - contextData object
+     * @param {Object} contextData      - contextData object
      * @param {Object} conditionalBlock - block to evaluate, where object's key - conditional operator
      *                                    object's value - params for that operator
      *
      * @returns {boolean} conditional result
      */
     _resolveConditional(contextData, conditionalBlock) {
-        let ret = true;
-        Object.keys(conditionalBlock).forEach((key) => {
-            const func = CONDITIONAL_FUNCS[key];
+        return Object.keys(conditionalBlock).every((key) => {
+            const func = this.CONDITIONAL_FUNCS[key];
             if (func === undefined) {
-                throw new Error(`Unknown property in conditional block ${key}`);
+                throw new Error(`Unknown property '${key}' in conditional block`);
             }
-            ret = ret && func(contextData, conditionalBlock[key]);
+            return func(contextData, conditionalBlock[key]);
         });
-        return ret;
     },
 
     /**
-     * Render key using mustache template system
+     * Render property using mustache template system.
      *
      * @param {Object} contextData - contextData object
-     * @param {Object} property - property object
+     * @param {Object} property    - property object
      *
      * @returns {Object} rendered property object
      */
-    _renderPropTemplate(contextData, property) {
-        // should be easy to add support for more complex templates like {{ #something }}
-        // but not sure we are really need it now.
-        // For now just supporting simple templates which
-        // generates single string only
-        if (property.key) property.key = mustache.render(property.key, contextData);
+    _renderTemplate(contextData, property) {
+        // traverse object without recursion
+        const stack = [property];
+        const forKey = (key) => {
+            const val = stack[0][key];
+            switch (typeof val) {
+            case 'object':
+                if (val !== null) {
+                    stack.push(val);
+                }
+                break;
+            case 'string':
+                if (val.indexOf('{{') !== -1) {
+                    stack[0][key] = mustache.render(val, contextData);
+                }
+                break;
+            default:
+                break;
+            }
+        };
+        while (stack.length) {
+            // expecting objects only to be in stack var
+            Object.keys(stack[0]).forEach(forKey);
+            stack.shift();
+        }
         return property;
     },
 
@@ -99,48 +116,57 @@ module.exports = {
      * Property pre-processing to resolve conditionals
      *
      * @param {Object} contextData - contextData object
-     * @param {Object} property - property object
+     * @param {Object} property    - property object
      *
      * @returns {Object} pre-processed deep copy of property object
      */
     _preprocessProperty(contextData, property) {
-        if (property.if) {
-            const newObj = {};
-            // property can result in 'false' when
-            // 'else' or 'then' were not defined.
-            while (property) {
-                // copy all non-conditional data on same level to new object
-                // eslint-disable-next-line no-loop-func
-                Object.keys(property).forEach((key) => {
-                    if (!(key === 'if' || key === 'then' || key === 'else')) {
-                        newObj[key] = property[key];
-                    }
-                });
-                // so, we copied everything we needed.
-                // break in case there is no nested 'if' block
-                if (!property.if) {
-                    break;
-                }
-                // trying to resolve conditional
-                property = this._resolveConditional(contextData, property.if)
-                    ? property.then : property.else;
+        // traverse object without recursion
+        const stack = [property];
+        let obj;
+
+        const forKey = (key) => {
+            if (typeof obj[key] === 'object' && obj[key] !== null) {
+                stack.push(obj[key]);
             }
-            property = newObj;
+        };
+
+        while (stack.length) {
+            obj = stack[0];
+            if (obj.if) {
+                const ifBlock = obj.if;
+                const thenBlock = obj.then;
+                const elseBlock = obj.else;
+                delete obj.if;
+                delete obj.then;
+                delete obj.else;
+                if (this._resolveConditional(contextData, ifBlock)) {
+                    if (thenBlock) {
+                        Object.assign(obj, thenBlock);
+                    }
+                } else if (elseBlock) {
+                    Object.assign(obj, elseBlock);
+                }
+            } else {
+                Object.keys(obj).forEach(forKey);
+                stack.shift();
+            }
         }
-        // deep copy
-        return util.deepCopy(property);
+        return property;
     },
 
     /**
      * Render property based on template and conditionals
      *
      * @param {Object} contextData - contextData object
-     * @param {Object} property - property object
+     * @param {Object} property    - property object
      *
      * @returns {Object} rendered property
      */
     renderProperty(contextData, property) {
-        return this._renderPropTemplate(contextData, this._preprocessProperty(contextData, property));
+        return this._preprocessProperty(
+            contextData,
+            this._renderTemplate(contextData, property)
+        );
     }
-
 };

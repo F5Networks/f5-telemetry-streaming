@@ -8,18 +8,21 @@
 
 'use strict';
 
+/* eslint-disable import/order */
+
+require('../shared/restoreCache')();
+
+const AWS = require('aws-sdk');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
-const AWS = require('aws-sdk');
-
-chai.use(chaiAsPromised);
-const assert = chai.assert;
 const sinon = require('sinon');
 
 const awsS3Index = require('../../../src/lib/consumers/AWS_S3/index');
-const util = require('../shared/util.js');
+const testUtil = require('../shared/util');
 
-/* eslint-disable global-require */
+chai.use(chaiAsPromised);
+const assert = chai.assert;
+
 describe('AWS_S3', () => {
     let clock;
     let awsConfigUpdate;
@@ -60,13 +63,13 @@ describe('AWS_S3', () => {
         awsConfigUpdate.callsFake((options) => {
             optionsParam = options;
         });
-        const context = util.buildConsumerContext({
+        const context = testUtil.buildConsumerContext({
             config: defaultConsumerConfig
         });
 
         awsS3Index(context);
         assert.strictEqual(optionsParam.region, 'us-west-1');
-        assert.deepEqual(optionsParam.credentials,
+        assert.deepStrictEqual(optionsParam.credentials,
             new AWS.Credentials({ accessKeyId: 'awsuser', secretAccessKey: 'awssecret' }));
     });
 
@@ -82,25 +85,25 @@ describe('AWS_S3', () => {
         };
 
         it('should process systemInfo data', () => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 eventType: 'systemInfo',
                 config: defaultConsumerConfig
             });
-            expectedParams.Body = JSON.stringify(util.deepCopy(context.event.data));
+            expectedParams.Body = JSON.stringify(testUtil.deepCopy(context.event.data));
 
             awsS3Index(context);
-            assert.deepEqual(s3PutObjectParams, expectedParams);
+            assert.deepStrictEqual(s3PutObjectParams, expectedParams);
         });
 
         it('should process event data', () => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 eventType: 'AVR',
                 config: defaultConsumerConfig
             });
-            expectedParams.Body = JSON.stringify(util.deepCopy(context.event.data));
+            expectedParams.Body = JSON.stringify(testUtil.deepCopy(context.event.data));
 
             awsS3Index(context);
-            assert.deepEqual(s3PutObjectParams, expectedParams);
+            assert.deepStrictEqual(s3PutObjectParams, expectedParams);
         });
     });
 });

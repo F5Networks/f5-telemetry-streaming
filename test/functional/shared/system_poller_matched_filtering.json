@@ -1,0 +1,48 @@
+{
+    "class": "Telemetry",
+    "controls": {
+        "class": "Controls",
+        "logLevel": "debug",
+        "debug": true
+    },
+    "My_System": {
+        "class": "Telemetry_System",
+        "systemPoller": {
+            "interval": 60,
+            "actions": [
+                {
+                    "includeData": {},
+                    "ifAnyMatch": [
+                        {
+                            "system": {
+                                "configReady": "shouldnotmatch"
+                            }
+                        },
+                        {
+                            "system": {
+                                "configReady": "yes"
+                            }
+                        }
+                    ],
+                    "locations": {
+                        "system": true
+                    }
+                },
+                {
+                    "ifAllMatch": {
+                        "system": {
+                            "version": "shouldnotmatch"
+                        }
+                    },
+                    "excludeData": {},
+                    "enable": true,
+                    "locations": {
+                        "system": {
+                            "diskStorage": true
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}

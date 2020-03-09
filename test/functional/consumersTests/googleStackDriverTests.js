@@ -12,7 +12,7 @@ const assert = require('assert');
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
 const constants = require('../shared/constants');
-const dutUtils = require('../dutTests.js').utils;
+const dutUtils = require('../dutTests').utils;
 const sharedUtil = require('../shared/util');
 const util = require('../../../src/lib/util');
 

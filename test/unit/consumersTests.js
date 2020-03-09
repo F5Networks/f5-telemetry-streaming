@@ -8,33 +8,25 @@
 
 'use strict';
 
+/* eslint-disable import/order */
+
+require('./shared/restoreCache')();
+require('./shared/disableAjv'); // consumers imports config with ajv
+
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
+
+const config = require('../../src/lib/config');
+const constants = require('../../src/lib/constants');
+const consumers = require('../../src/lib/consumers');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
-const constants = require('../../src/lib/constants.js');
-
-/* eslint-disable global-require */
-
 describe('Consumers', () => {
-    let config;
-    let consumers;
-
-    before(() => {
-        config = require('../../src/lib/config.js');
-        consumers = require('../../src/lib/consumers.js');
-    });
-    after(() => {
-        Object.keys(require.cache).forEach((key) => {
-            delete require.cache[key];
-        });
-    });
-
     it('should get valid consumers', () => {
         const exampleConfig = {};
-        exampleConfig[constants.CONSUMERS_CLASS_NAME] = {
+        exampleConfig[constants.CONFIG_CLASSES.CONSUMER_CLASS_NAME] = {
             My_Consumer: {
                 class: 'Consumer',
                 type: 'default'
@@ -45,22 +37,19 @@ describe('Consumers', () => {
             }
         };
         config.emit('change', exampleConfig); // emit change event, then wait a short period
-
-        return new Promise(resolve => setTimeout(() => { resolve(); }, 250))
+        return assert.isFulfilled(new Promise(resolve => setTimeout(() => { resolve(); }, 250))
             .then(() => {
                 const loadedConsumers = consumers.getConsumers();
-                assert.strictEqual(1, loadedConsumers.length);
-            })
-            .catch(err => Promise.reject(err));
+                assert.strictEqual(loadedConsumers.length, 1, 'should load default consumer');
+            }));
     });
 
     it('should return empty list of consumers', () => {
         config.emit('change', {}); // emit change event, then wait a short period
-
         return new Promise(resolve => setTimeout(() => { resolve(); }, 250))
             .then(() => {
                 const loadedConsumers = consumers.getConsumers();
-                assert.strictEqual(0, loadedConsumers.length);
+                assert.strictEqual(loadedConsumers.length, 0);
             })
             .catch(err => Promise.reject(err));
     });

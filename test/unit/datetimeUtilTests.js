@@ -8,11 +8,19 @@
 
 'use strict';
 
-const assert = require('assert');
-const fileLogger = require('../winstonLogger.js').logger;
-const constants = require('../../src/lib/constants.js');
-const datetimeUtil = require('../../src/lib/datetimeUtil.js');
+/* eslint-disable import/order */
 
+require('./shared/restoreCache')();
+
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+
+const constants = require('../../src/lib/constants');
+const datetimeUtil = require('../../src/lib/datetimeUtil');
+const fileLogger = require('../winstonLogger').logger;
+
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
 describe('Date and Time utils', () => {
     describe('getLastDayOfMonth', () => {
@@ -342,10 +350,11 @@ describe('Date and Time utils', () => {
                     || (start > end && (start <= time || time <= end));
             }
 
-            function standardCheck(first, second) {
-                // check that second start not earlier first ends
-                if (second <= first) {
-                    const errMsg = `Date ${second.toISOString()} should be > ${first.toISOString()}`;
+            function standardCheck(first, second, strict) {
+                // strict is true then secondDate should be strictly greater than firstDate
+                // strict is false then secondDate should be greater or equal to firstDate
+                if (!(strict ? second > first : second >= first)) {
+                    const errMsg = `Date ${second.toISOString()} should be ${strict ? '>' : '>='} ${first.toISOString()}`;
                     throw new Error(errMsg);
                 }
             }
@@ -405,14 +414,15 @@ describe('Date and Time utils', () => {
                 const secondEnd = getEndDate(second, schedule);
                 const secondStart = getStartDate(second, schedule);
 
+                // first date should be in boundaries (inclusively)
                 standardCheck(firstStart, first);
                 standardCheck(first, firstEnd);
-                // standardCheck(firstEnd, secondStart);
+                // second date should be in boundaries (inclusively)
                 standardCheck(secondStart, second);
                 standardCheck(second, secondEnd);
 
                 const startDistance = (secondStart - firstStart) / _MS_PER_DAY;
-                const endDistance = (secondStart - firstStart) / _MS_PER_DAY;
+                const endDistance = (secondEnd - firstEnd) / _MS_PER_DAY;
                 if (!(startDistance > 0.8 && startDistance < 1.2 && endDistance > 0.8 && endDistance < 1.2)) {
                     const errMsg = `Dates ${first.toISOString()} and ${second.toISOString()} are not in daily schedule`;
                     throw new Error(errMsg);
@@ -465,20 +475,18 @@ describe('Date and Time utils', () => {
                         + ` (start date = ${startDate || 'random date'})`, () => {
                         startDate = startDate ? new Date(startDate) : startDate;
                         const validator = scheduleValidators[testSet.schedule.frequency];
-                        const dates = [datetimeUtil.getNextFireDate(testSet.schedule, startDate, false, true)];
-                        let firstDate = dates[0];
+                        let firstDate = datetimeUtil.getNextFireDate(testSet.schedule, startDate, false, true);
 
-                        for (let j = 0; j < 100; j += 1) {
+                        for (let j = 0; j < 1000; j += 1) {
                             const secondDate = datetimeUtil.getNextFireDate(testSet.schedule, firstDate, false, true);
-                            dates.push(secondDate);
                             try {
-                                standardCheck(firstDate, secondDate);
+                                // secondDate should be strictly greater than firstDate
+                                standardCheck(firstDate, secondDate, true);
                                 checkTimeRanges([firstDate, secondDate], testSet.schedule);
                                 // frequency specific validation(s)
                                 validator(testSet.schedule, new Date(firstDate), new Date(secondDate));
                             } catch (err) {
-                                // eslint-disable-next-line no-console
-                                fileLogger.debug('List of dates', dates);
+                                fileLogger.debug(`Failed on ${j} iteration: ${err}`);
                                 throw err;
                             }
                             firstDate = secondDate;

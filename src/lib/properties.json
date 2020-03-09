@@ -31,60 +31,62 @@
         },
         "version": {
             "structure": { "parentKey": "system" },
-            "key": "/mgmt/tm/sys/version::sys/version/0::Version"
+            "key": "deviceInfo::version"
         },
         "versionBuild": {
             "structure": { "parentKey": "system" },
-            "key": "/mgmt/tm/sys/version::sys/version/0::Build"
+            "key": "deviceInfo::build"
         },
         "location": {
             "structure": { "parentKey": "system" },
-            "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::location",
+            "key": "/mgmt/tm/cm/device::items",
             "normalization": [
                 {
-                    "convertArrayToMap": { "keyName": "name" }
+                    "runFunctions": [{ "name": "normalizeMACAddress", "args": { "properties": ["baseMac"] } } ]
+                },
+                {
+                    "convertArrayToMap": { "keyName": "baseMac" }, "useCurrentData": true, "keepKey": true
+                },
+                {
+                    "runFunctions": [{ "name": "getValue", "args": { "path": ["{{ BASE_MAC_ADDR }}", "location" ] } } ]
                 }
             ]
         },
         "description": {
             "structure": { "parentKey": "system" },
-            "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::description",
+            "key": "/mgmt/tm/cm/device::items",
             "normalization": [
                 {
-                    "convertArrayToMap": { "keyName": "name" }
+                    "runFunctions": [{ "name": "normalizeMACAddress", "args": { "properties": ["baseMac"] } } ]
+                },
+                {
+                    "convertArrayToMap": { "keyName": "baseMac" }, "useCurrentData": true, "keepKey": true
+                },
+                {
+                    "runFunctions": [{ "name": "getValue", "args": { "path": ["{{ BASE_MAC_ADDR }}", "description" ] } } ]
                 }
             ]
         },
         "marketingName": {
             "structure": { "parentKey": "system" },
-            "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::marketingName",
-            "normalization": [
-                {
-                    "convertArrayToMap": { "keyName": "name" }
-                }
-            ]
+            "key": "deviceInfo::platformMarketingName"
         },
         "platformId": {
             "structure": { "parentKey": "system" },
-            "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::platformId",
-            "normalization": [
-                {
-                    "convertArrayToMap": { "keyName": "name" }
-                }
-            ]
+            "key": "deviceInfo::platform"
         },
         "chassisId": {
             "structure": { "parentKey": "system" },
-            "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::chassisId",
-            "normalization": [
-                {
-                    "convertArrayToMap": { "keyName": "name" }
-                }
-            ]
+            "key": "deviceInfo::chassisSerialNumber"
         },
         "baseMac": {
             "structure": { "parentKey": "system" },
-            "key": "/mgmt/tm/sys/hardware::sys/hardware/platform::sys/hardware/platform/0::baseMac"
+            "key": "deviceInfo::baseMac",
+            "normalization": [
+                {
+                    "runFunctions": [{ "name": "normalizeMACAddress" }]
+                }
+            ]
         },
         "callBackUrl": {
             "structure": { "parentKey": "system" },
@@ -164,20 +166,25 @@
         },
         "cpu": {
             "structure": { "parentKey": "system" },
-            "key": "/mgmt/tm/sys/host-info::sys/host-info/0::sys/hostInfo/0/cpuInfo",
+            "key": "/mgmt/tm/sys/host-info",
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "getAverage", "args": { "keyWithValue": "oneMinAvgSystem" } }]
+                    "runFunctions": [
+                        { "name": "restructureHostCpuInfo", "args": { "keyPattern": "^sys/host-info/\\d+::^sys/hostInfo/\\d+/cpuInfo" } },
+                        { "name": "getAverage", "args": { "keyWithValue": "oneMinAvgSystem" } }
+                    ]
                 }
             ],
             "comment": "also oneMinAvgUser, need to determine how that should be factored in"
         },
         "memory": {
             "structure": { "parentKey": "system" },
-            "key": "/mgmt/tm/sys/memory::sys/memory/memory-host::sys/memory/memory-host/0",
+            "key": "/mgmt/tm/sys/memory::sys/memory/memory-host",
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "getPercentFromKeys", "args": { "totalKey": "memoryTotal", "partialKey": "memoryUsed" } }]
+                    "runFunctions": [
+                        { "name": "getPercentFromKeys", "args": { "totalKey": "memoryTotal", "partialKey": "memoryUsed", "nestedObjects": true } }
+                    ]
                 }
             ]
         },
@@ -192,10 +199,12 @@
         },
         "tmmMemory": {
             "structure": { "parentKey": "system" },
-            "key": "/mgmt/tm/sys/memory::sys/memory/memory-host::sys/memory/memory-host/0",
+            "key": "/mgmt/tm/sys/memory::sys/memory/memory-host",
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "getPercentFromKeys", "args": { "totalKey": "tmmMemoryTotal", "partialKey": "tmmMemoryUsed" } }]
+                    "runFunctions": [
+                        { "name": "getPercentFromKeys", "args": { "totalKey": "tmmMemoryTotal", "partialKey": "tmmMemoryUsed", "nestedObjects": true } }
+                    ]
                 }
             ]
         },
@@ -259,6 +268,124 @@
                     "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 } } }
                 }
             ]
+        },
+        "asmState": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "asm"
+            },
+            "then": {
+                "key": "asmQuery::commandResult",
+                "normalization": [
+                    {
+                        "runFunctions": [
+                            { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "asm_state" } },
+                            { "name": "getFirstKey" }
+                        ]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "lastAsmChange": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "asm"
+            },
+            "then": {
+                "key": "asmQuery::commandResult",
+                "normalization": [
+                    {
+                        "runFunctions": [
+                            { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "last_asm_change", "renameKeys": { "patterns": { "NULL": { "constant": "" } } } } },
+                            { "name": "getFirstKey" }
+                        ]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "apmState": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "apm"
+            },
+            "then": {
+                "key": "apmState::commandResult",
+                "normalization": [
+                    {
+                        "runFunctions": [
+                            { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "apm_state", "renameKeys": { "patterns": { "NULL": { "constant": "" } } } } },
+                            { "name": "getFirstKey" }
+                        ]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "afmState": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "afm"
+            },
+            "then": {
+                "key": "firewallCurrentState::pccdStatus",
+                "normalization": [
+                    {
+                        "includeFirstEntry": { "pattern": "/stats" }
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "lastAfmDeploy": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "afm"
+            },
+            "then": {
+                "key": "firewallCurrentState::ruleDeployEndTimeFmt",
+                "normalization": [
+                    {
+                        "includeFirstEntry": { "pattern": "/stats" }
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "ltmConfigTime": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "ltm"
+            },
+            "then": {
+                "key": "ltmConfigTime::value"
+            },
+            "else": {
+                "disabled": true
+            }
+        },
+        "gtmConfigTime": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "gtm"
+            },
+            "then": {
+                "key": "gtmConfigTime::value"
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "aWideIps": {
             "if": {
@@ -609,10 +736,15 @@
                     "filterKeys": { "exclude": [ "fullPath", "generation", "appServiceReference", "tmName", "status.statusReason", "cmpEnabled", "cmpEnableMode", "csMaxConnDur", "csMeanConnDur", "csMinConnDur", "totRequests", "oneMinAvgUsageRatio", "clientside.pktsIn", "clientside.pktsOut", "clientside.evictedConns", "clientside.slowKilled", "clientside.maxConns", "clientside.totConns", "ephemeral.bitsIn", "ephemeral.bitsOut", "ephemeral.curConns", "ephemeral.evictedConns", "ephemeral.maxConns", "ephemeral.pktsIn", "ephemeral.pktsOut", "ephemeral.slowKilled", "ephemeral.totConns", "fiveSecAvgUsageRatio", "fiveMinAvgUsageRatio", "syncookieStatus", "syncookie.accepts", "syncookie.hwAccepts", "syncookie.hwSyncookies", "syncookie.rejects", "syncookie.hwsyncookieInstance", "syncookie.swsyncookieInstance", "syncookie.syncacheCurr", "syncookie.syncacheOver", "syncookie.syncookies", "syncookie.syncacheOver", "poolReference" ] }
                 },
                 {
-                    "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/virtual": { "pattern": "virtual\/(.*)\/", "group": 1 } } }
+                    "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/virtual": { "pattern": "virtual\/(.*)\/", "group": 1 }, "profilesReference": "profiles" } }
                 },
                 {
                     "addKeysByTag": true
+                },
+                {
+                    "runFunctions": [
+                        { "name": "restructureVirtualServerProfiles" }
+                    ]
                 }
             ]
         },
@@ -740,124 +872,6 @@
                 }
             ]
         },
-        "asmState": {
-            "structure": { "parentKey": "system" },
-            "if": {
-                "isModuleProvisioned": "asm"
-            },
-            "then": {
-                "key": "asmQuery::commandResult",
-                "normalization": [
-                    {
-                        "runFunctions": [
-                            { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "asm_state" } },
-                            { "name": "getFirstKey" }
-                        ]
-                    }
-                ]
-            },
-            "else": {
-                "disabled": true
-            }
-        },
-        "lastAsmChange": {
-            "structure": { "parentKey": "system" },
-            "if": {
-                "isModuleProvisioned": "asm"
-            },
-            "then": {
-                "key": "asmQuery::commandResult",
-                "normalization": [
-                    {
-                        "runFunctions": [
-                            { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "last_asm_change", "renameKeys": { "patterns": { "NULL": { "constant": "" } } } } },
-                            { "name": "getFirstKey" }
-                        ]
-                    }
-                ]
-            },
-            "else": {
-                "disabled": true
-            }
-        },
-        "apmState": {
-            "structure": { "parentKey": "system" },
-            "if": {
-                "isModuleProvisioned": "apm"
-            },
-            "then": {
-                "key": "apmState::commandResult",
-                "normalization": [
-                    {
-                        "runFunctions": [
-                            { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "apm_state", "renameKeys": { "patterns": { "NULL": { "constant": "" } } } } },
-                            { "name": "getFirstKey" }
-                        ]
-                    }
-                ]
-            },
-            "else": {
-                "disabled": true
-            }
-        },
-        "afmState": {
-            "structure": { "parentKey": "system" },
-            "if": {
-                "isModuleProvisioned": "afm"
-            },
-            "then": {
-                "key": "firewallCurrentState::pccdStatus",
-                "normalization": [
-                    {
-                        "includeFirstEntry": { "pattern": "/stats" }
-                    }
-                ]
-            },
-            "else": {
-                "disabled": true
-            }
-        },
-        "lastAfmDeploy": {
-            "structure": { "parentKey": "system" },
-            "if": {
-                "isModuleProvisioned": "afm"
-            },
-            "then": {
-                "key": "firewallCurrentState::ruleDeployEndTimeFmt",
-                "normalization": [
-                    {
-                        "includeFirstEntry": { "pattern": "/stats" }
-                    }
-                ]
-            },
-            "else": {
-                "disabled": true
-            }
-        },
-        "ltmConfigTime": {
-            "structure": { "parentKey": "system" },
-            "if": {
-                "isModuleProvisioned": "ltm"
-            },
-            "then": {
-                "key": "ltmConfigTime::value"
-            },
-            "else": {
-                "disabled": true
-            }
-        },
-        "gtmConfigTime": {
-            "structure": { "parentKey": "system" },
-            "if": {
-                "isModuleProvisioned": "gtm"
-            },
-            "then": {
-                "key": "gtmConfigTime::value"
-            },
-            "else": {
-                "disabled": true
-            }
-        },
         "iRules": {
             "key": "iRules",
             "normalization": [
@@ -886,7 +900,13 @@
             "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c asm_cpu_util_stats" } },
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                },
+                {
+                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                },
+                {
+                    "runFunctions": [{ "name": "convertMapToArray" }]
                 }
             ]
         },
@@ -936,7 +956,13 @@
             "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c dos_stat" } },
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                },
+                {
+                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                },
+                {
+                    "runFunctions": [{ "name": "convertMapToArray" }]
                 }
             ]
         },
@@ -966,7 +992,13 @@
             "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c flow_eviction_policy_stat" } },
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "context_name" } }]
+                },
+                {
+                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                },
+                {
+                    "runFunctions": [{ "name": "convertMapToArray" }]
                 }
             ]
         },
@@ -1126,7 +1158,13 @@
             "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c pool_member_stat" } },
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "pool_name" } }]
+                },
+                {
+                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                },
+                {
+                    "runFunctions": [{ "name": "convertMapToArray" }]
                 }
             ]
         },
@@ -1156,7 +1194,13 @@
             "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_bigproto_stat" } },
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                },
+                {
+                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                },
+                {
+                    "runFunctions": [{ "name": "convertMapToArray" }]
                 }
             ]
         },
@@ -1166,7 +1210,13 @@
             "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_clientssl_stat" } },
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                },
+                {
+                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                },
+                {
+                    "runFunctions": [{ "name": "convertMapToArray" }]
                 }
             ]
         },
@@ -1176,7 +1226,13 @@
             "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_connpool_stat" } },
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                },
+                {
+                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                },
+                {
+                    "runFunctions": [{ "name": "convertMapToArray" }]
                 }
             ]
         },
@@ -1186,7 +1242,13 @@
             "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_dns_stat" } },
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                },
+                {
+                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                },
+                {
+                    "runFunctions": [{ "name": "convertMapToArray" }]
                 }
             ]
         },
@@ -1196,7 +1258,13 @@
             "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_ftp_stat" } },
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                },
+                {
+                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                },
+                {
+                    "runFunctions": [{ "name": "convertMapToArray" }]
                 }
             ]
         },
@@ -1206,7 +1274,13 @@
             "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_http_stat" } },
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                },
+                {
+                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                },
+                {
+                    "runFunctions": [{ "name": "convertMapToArray" }]
                 }
             ]
         },
@@ -1216,7 +1290,13 @@
             "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_httpcompression_stat" } },
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                },
+                {
+                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                },
+                {
+                    "runFunctions": [{ "name": "convertMapToArray" }]
                 }
             ]
         },
@@ -1226,7 +1306,13 @@
             "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_serverssl_stat" } },
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                },
+                {
+                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                },
+                {
+                    "runFunctions": [{ "name": "convertMapToArray" }]
                 }
             ]
         },
@@ -1236,7 +1322,13 @@
             "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_tcp_stat" } },
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                },
+                {
+                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                },
+                {
+                    "runFunctions": [{ "name": "convertMapToArray" }]
                 }
             ]
         },
@@ -1246,7 +1338,13 @@
             "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_udp_stat" } },
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                },
+                {
+                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                },
+                {
+                    "runFunctions": [{ "name": "convertMapToArray" }]
                 }
             ]
         },
@@ -1256,7 +1354,13 @@
             "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_webacceleration_stat" } },
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                },
+                {
+                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                },
+                {
+                    "runFunctions": [{ "name": "convertMapToArray" }]
                 }
             ]
         },
@@ -1326,7 +1430,7 @@
             "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c virtual_server_conn_stat" } },
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "$comment": "can't dump table on 12.0+" } }]
                 }
             ]
         },
@@ -1336,7 +1440,13 @@
             "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c virtual_server_cpu_stat" } },
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "name" } }]
+                },
+                {
+                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                },
+                {
+                    "runFunctions": [{ "name": "convertMapToArray" }]
                 }
             ]
         },
@@ -1346,7 +1456,13 @@
             "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c virtual_server_stat" } },
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "name" } }]
+                },
+                {
+                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                },
+                {
+                    "runFunctions": [{ "name": "convertMapToArray" }]
                 }
             ]
         }
@@ -1357,7 +1473,10 @@
             "AVR": { "keys": [ { "required": [ "EOCTimestamp" ], "optional": [ "AggrInterval", "Microtimestamp", "STAT_SRC", "Entity", "errdefs_msgno" ] } ] },
             "ASM": { "keys": [ { "required": [ "policy_name" ], "optional": [ "policy_apply_date", "request_status" ] } ] },
             "APM": { "keys": [ { "required": [ "Access_Profile" ] } ] },
-            "AFM": { "keys": [ { "required": [ "acl_policy_name" ], "optional": [ "acl_policy_type", "acl_rule_name" ] } ] },
+            "AFM": { "keys": [
+                { "required": [ "acl_policy_name" ], "optional": [ "acl_policy_type", "acl_rule_name" ] },
+                { "required": [ "dos_attack_id" ], "optional": [ "flow_id", "action", "errdefs_msg_name" ] }
+            ]},
             "CGNAT": { "keys": [ { "required": [ "lsn_event" ], "optional": [ "lsn_client", "lsn_pb", "start" ] } ] }
        }
     },
@@ -1379,13 +1498,20 @@
     },
     "context": {
         "HOSTNAME": {
-            "key": "/mgmt/tm/sys/global-settings::hostname"
+            "key": "deviceInfo::hostname"
+        },
+        "BASE_MAC_ADDR": {
+            "key": "deviceInfo::baseMac",
+            "normalization": [
+                {
+                    "runFunctions": [{ "name": "normalizeMACAddress" }]
+                }
+            ]
         },
         "deviceVersion": {
-            "key": "/mgmt/tm/sys/version::sys/version/0::Version"
+            "key": "deviceInfo::version"
         },
         "provisioning": {
-            "structure": { "parentKey": "system" },
             "key": "provisioning::items",
             "normalization": [
                 {

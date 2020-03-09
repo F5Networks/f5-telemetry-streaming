@@ -1,0 +1,49 @@
+{
+    "class": "Telemetry",
+    "My_System": {
+        "class": "Telemetry_System",
+        "systemPoller": {
+            "interval": 60,
+            "actions": [
+                {
+                    "includeData": {},
+                    "ifAnyMatch": [
+                        {
+                            "virtualServers": {
+                                "/test/*": {
+                                    "enabledState": "enabled",
+                                    "availabilityState": "available"
+                                }
+                            }
+                        },
+                        {
+                            "virtualServers": {
+                                "/test/*": {
+                                    "enabledState": "disabled",
+                                    "availabilityState": "available"
+                                }
+                            }
+                        }
+                    ],
+                    "locations": {
+                        "virtualServers": {
+                            ".*": true
+                        }
+                    }
+                },
+                {
+                    "excludeData": {},
+                    "ifAllMatch": {
+                        "system": {
+                            "licenseReady": "no",
+                            "provisionReady": "no"
+                        }
+                    },
+                    "locations": {
+                        ".*": true
+                    }
+                }
+            ]
+        }
+    }
+}

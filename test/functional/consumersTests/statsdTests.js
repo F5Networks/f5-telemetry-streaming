@@ -13,9 +13,9 @@
 const assert = require('assert');
 const fs = require('fs');
 const deepDiff = require('deep-diff');
-const util = require('../shared/util.js');
-const constants = require('../shared/constants.js');
-const dutUtils = require('../dutTests.js').utils;
+const util = require('../shared/util');
+const constants = require('../shared/constants');
+const dutUtils = require('../dutTests').utils;
 
 // module requirements
 const MODULE_REQUIREMENTS = { DOCKER: true };
@@ -120,7 +120,7 @@ function test() {
             });
         };
 
-        const getMerticsName = (data) => {
+        const getMetricsName = (data) => {
             const copyData = JSON.parse(JSON.stringify(data));
             stripMetrics(copyData);
             const diff = deepDiff(copyData, data) || [];
@@ -191,7 +191,7 @@ function test() {
         const sysPollerMetricsData = {};
 
         it('should fetch system poller data via debug endpoint from DUTs', () => dutUtils.getSystemPollersData((hostObj, data) => {
-            sysPollerMetricsData[hostObj.hostname] = getMerticsName(data);
+            sysPollerMetricsData[hostObj.hostname] = getMetricsName(data[0]);
         }));
 
         DUTS.forEach((dut) => {

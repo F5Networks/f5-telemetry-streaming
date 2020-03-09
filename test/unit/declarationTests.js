@@ -8,19 +8,22 @@
 
 'use strict';
 
+/* eslint-disable import/order */
+
+require('./shared/restoreCache')();
+
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const fs = require('fs');
 const sinon = require('sinon');
 
+const config = require('../../src/lib/config');
+const constants = require('../../src/lib/constants');
+const deviceUtil = require('../../src/lib/deviceUtil');
+const util = require('../../src/lib/util');
+
 chai.use(chaiAsPromised);
 const assert = chai.assert;
-
-const config = require('../../src/lib/config.js');
-const constants = require('../../src/lib/constants.js');
-const deviceUtil = require('../../src/lib/deviceUtil.js');
-const util = require('../../src/lib/util.js');
-
 
 describe('Declarations', () => {
     let encryptSecretStub;
@@ -29,11 +32,11 @@ describe('Declarations', () => {
 
     beforeEach(() => {
         encryptSecretStub = sinon.stub(deviceUtil, 'encryptSecret');
-        encryptSecretStub.callsFake(() => Promise.resolve('foo'));
+        encryptSecretStub.resolves('$M$foo');
         getDeviceTypeStub = sinon.stub(deviceUtil, 'getDeviceType');
-        getDeviceTypeStub.callsFake(() => Promise.resolve(constants.BIG_IP_DEVICE_TYPE));
+        getDeviceTypeStub.resolves(constants.DEVICE_TYPE.BIG_IP);
         networkCheckStub = sinon.stub(util, 'networkCheck');
-        networkCheckStub.callsFake(() => Promise.resolve());
+        networkCheckStub.resolves();
     });
     afterEach(() => {
         sinon.restore();
@@ -133,7 +136,7 @@ describe('Declarations', () => {
                         assert.strictEqual(proxy.allowSelfSignedCert, true);
                         assert.strictEqual(proxy.enableHostConnectivityCheck, false);
                         assert.strictEqual(proxy.username, 'username');
-                        assert.strictEqual(proxy.passphrase.cipherText, 'foo');
+                        assert.strictEqual(proxy.passphrase.cipherText, '$M$foo');
                     });
             });
 
@@ -568,7 +571,7 @@ describe('Declarations', () => {
 
         describe('f5secret', () => {
             it('should fail cipherText with wrong device type', () => {
-                deviceUtil.getDeviceType = () => Promise.resolve(constants.CONTAINER_DEVICE_TYPE);
+                getDeviceTypeStub.resolves(constants.DEVICE_TYPE.CONTAINER);
                 const data = {
                     class: 'Telemetry',
                     My_Poller: {
@@ -583,7 +586,7 @@ describe('Declarations', () => {
             });
 
             it('should not re-encrypt', () => {
-                const cipher = '$M$foo';
+                const cipher = '$M$fo02';
                 const data = {
                     class: 'Telemetry',
                     My_Poller: {
@@ -601,7 +604,7 @@ describe('Declarations', () => {
             });
 
             it('should base64 decode cipherText', () => {
-                deviceUtil.encryptSecret = secret => Promise.resolve(secret);
+                encryptSecretStub.resolvesArg(0);
                 const cipher = 'ZjVzZWNyZXQ='; // f5secret
                 const data = {
                     class: 'Telemetry',
@@ -617,6 +620,33 @@ describe('Declarations', () => {
                     .then(() => {
                         assert.strictEqual(data.My_Poller.passphrase.cipherText, 'f5secret');
                     });
+            });
+
+            it('should fail when cipherText protected by SecureVault but is not encrypted', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Poller: {
+                        class: 'Telemetry_System_Poller',
+                        passphrase: {
+                            cipherText: 'mycipher',
+                            protected: 'SecureVault'
+                        }
+                    }
+                };
+                return assert.isRejected(config.validate(data), /should be encrypted by BIG-IP when.*protected.*SecureVault/);
+            });
+
+            it('should fail when cipherText or environmentVar missed', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Poller: {
+                        class: 'Telemetry_System_Poller',
+                        passphrase: {
+                            protected: 'SecureVault'
+                        }
+                    }
+                };
+                return assert.isRejected(config.validate(data), /missing cipherText or environmentVar/);
             });
         });
 
@@ -755,8 +785,8 @@ describe('Declarations', () => {
             });
 
             it('should expand pointer (object)', () => {
-                const resolvedSecret = 'bar';
-                deviceUtil.encryptSecret = () => Promise.resolve(resolvedSecret);
+                const resolvedSecret = '$M$bar';
+                encryptSecretStub.resolves(resolvedSecret);
 
                 const expectedValue = {
                     class: 'Secret',
@@ -797,12 +827,12 @@ describe('Declarations', () => {
                     .then((validated) => {
                         assert.deepEqual(validated.My_Consumer.path, expectedValue);
                         assert.deepEqual(validated.My_Consumer.headers[0].value, expectedValue);
-                        return config.validate(validated);
+                        return assert.isFulfilled(config.validate(validated));
                     });
             });
 
             it('should fail pointer (object) with additional chars', () => {
-                deviceUtil.encryptSecret = secret => Promise.resolve(secret);
+                encryptSecretStub.resolvesArg(0);
 
                 const data = {
                     class: 'Telemetry',
@@ -864,7 +894,7 @@ describe('Declarations', () => {
 
             it('should fail host network check', () => {
                 const errMsg = 'failed network check';
-                networkCheckStub.callsFake(() => Promise.reject(new Error(errMsg)));
+                networkCheckStub.rejects(new Error(errMsg));
 
                 const data = {
                     class: 'Telemetry',
@@ -878,10 +908,227 @@ describe('Declarations', () => {
                 return assert.isRejected(config.validate(data), new RegExp(errMsg));
             });
         });
+
+        describe('declarationClassProp', () => {
+            it('should resolve full item path based on class and prop name', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Endpoints: {
+                        class: 'Telemetry_Endpoints',
+                        items: {
+                            testA: {
+                                name: 'a',
+                                path: '/1/a'
+                            },
+                            a: {
+                                name: 'a',
+                                path: 'something/a'
+                            }
+                        }
+                    },
+                    My_System: {
+                        class: 'Telemetry_System',
+                        systemPoller: {
+                            interval: 100,
+                            endpointList: [
+                                'My_Endpoints/a'
+                            ]
+                        }
+                    }
+                };
+                return assert.isFulfilled(config.validate(data));
+            });
+
+            it('should trim leading and trailing backslashes', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Endpoints: {
+                        class: 'Telemetry_Endpoints',
+                        items: {
+                            testA: {
+                                name: 'a',
+                                path: '/1/a'
+                            },
+                            a: {
+                                name: 'a',
+                                path: 'something/a'
+                            }
+                        }
+                    },
+                    My_System: {
+                        class: 'Telemetry_System',
+                        systemPoller: {
+                            interval: 100,
+                            endpointList: [
+                                '/My_Endpoints/a/'
+                            ]
+                        }
+                    }
+                };
+                return assert.isFulfilled(config.validate(data));
+            });
+
+            it('should return error when full item path cannot be resolved', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Endpoints: {
+                        class: 'Telemetry_Endpoints',
+                        items: {
+                            testA: {
+                                name: 'a',
+                                path: '/1/a'
+                            }
+                        }
+                    },
+                    My_System: {
+                        class: 'Telemetry_System',
+                        systemPoller: {
+                            interval: 100,
+                            endpointList: [
+                                'My_Endpoints/testA',
+                                'My_Endpoints/i_dont_exist'
+                            ]
+                        }
+                    }
+                };
+                const errMsg = 'Unable to find \\"My_Endpoints/items/i_dont_exist\\"';
+                return assert.isRejected(config.validate(data), errMsg);
+            });
+
+            it('should return error when value is not valid declarationClassProp', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Endpoints: {
+                        class: 'Telemetry_Endpoints',
+                        items: {
+                            testA: {
+                                name: 'a',
+                                path: '/1/a'
+                            }
+                        }
+                    },
+                    My_System: {
+                        class: 'Telemetry_System',
+                        systemPoller: {
+                            interval: 100,
+                            endpointList: [
+                                'Non_Existing'
+                            ]
+                        }
+                    }
+                };
+                const errMsg = '\\"Non_Existing\\" does not follow format \\"ObjectName/key1\\"';
+                return assert.isRejected(config.validate(data), errMsg);
+            });
+
+            it('should return error when object referenced is not correct class', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Endpoints: {
+                        class: 'Telemetry_System'
+                    },
+                    My_System: {
+                        class: 'Telemetry_System',
+                        systemPoller: {
+                            interval: 100,
+                            endpointList: [
+                                'My_Endpoints/something'
+                            ]
+                        }
+                    }
+                };
+                const errMsg = '\\"My_Endpoints\\" must be of object type and class \\"Telemetry_Endpoints\\"';
+                return assert.isRejected(config.validate(data), errMsg);
+            });
+
+            it('should fail to resolve when instance property matches class property', () => {
+                // TODO: this behavior should be fixed in future releases
+                const declaration = {
+                    class: 'Telemetry',
+                    My_Endpoints: {
+                        class: 'Telemetry_Endpoints',
+                        items: {
+                            items: {
+                                name: 'a',
+                                path: '/1/a'
+                            }
+                        }
+                    },
+                    My_System: {
+                        class: 'Telemetry_System',
+                        systemPoller: {
+                            interval: 100,
+                            endpointList: [
+                                'My_Endpoints/items'
+                            ]
+                        }
+                    }
+                };
+                return assert.isFulfilled(config.validate(declaration)
+                    .then((data) => {
+                        assert.notStrictEqual(data.My_System.systemPoller.endpointList[0], 'My_Endpoints/items/items');
+                    }));
+            });
+        });
+
+        describe('declarationClass', () => {
+            it('should pass when object exists', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Poller: {
+                        class: 'Telemetry_System_Poller'
+                    },
+                    My_System: {
+                        class: 'Telemetry_System',
+                        systemPoller: 'My_Poller'
+                    }
+                };
+                return assert.isFulfilled(config.validate(data));
+            });
+
+            it('should return error when object referenced is not correct class', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Poller: {
+                        class: 'Telemetry_System'
+                    },
+                    My_System: {
+                        class: 'Telemetry_System',
+                        systemPoller: 'My_Poller'
+                    }
+                };
+                const errMsg = 'declaration with name \\"My_Poller\\" and class \\"Telemetry_System_Poller\\" doesn\'t exist';
+                return assert.isRejected(config.validate(data), errMsg);
+            });
+
+            it('should return error when object referenced is not "object" type', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_System: {
+                        class: 'Telemetry_System',
+                        systemPoller: 'class'
+                    }
+                };
+                const errMsg = 'declaration with name \\"class\\" and class \\"Telemetry_System_Poller\\" doesn\'t exist';
+                return assert.isRejected(config.validate(data), errMsg);
+            });
+
+            it('should return error when object not exist', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_System: {
+                        class: 'Telemetry_System',
+                        systemPoller: 'Non_Existing_Poller'
+                    }
+                };
+                const errMsg = 'declaration with name \\"Non_Existing_Poller\\" and class \\"Telemetry_System_Poller\\" doesn\'t exist';
+                return assert.isRejected(config.validate(data), errMsg);
+            });
+        });
     });
 
     describe('Telemetry_System_Poller', () => {
-        it('should pass miminal declaration', () => {
+        it('should pass minimal declaration', () => {
             const data = {
                 class: 'Telemetry',
                 My_Poller: {
@@ -894,7 +1141,7 @@ describe('Declarations', () => {
                     assert.notStrictEqual(poller, undefined);
                     assert.strictEqual(poller.class, 'Telemetry_System_Poller');
                     assert.strictEqual(poller.enable, true);
-                    assert.strictEqual(poller.trace, false);
+                    assert.strictEqual(poller.trace, undefined);
                     assert.strictEqual(poller.interval, 300);
                     assert.deepStrictEqual(poller.actions, [{ enable: true, setTag: { tenant: '`T`', application: '`A`' } }]);
                     assert.strictEqual(poller.actions[0].ifAllMAtch, undefined);
@@ -902,10 +1149,11 @@ describe('Declarations', () => {
                     assert.strictEqual(poller.host, 'localhost');
                     assert.strictEqual(poller.port, 8100);
                     assert.strictEqual(poller.protocol, 'http');
-                    assert.strictEqual(poller.allowSelfSignedCert, undefined);
+                    assert.strictEqual(poller.allowSelfSignedCert, false);
                     assert.strictEqual(poller.enableHostConnectivityCheck, undefined);
                     assert.strictEqual(poller.username, undefined);
                     assert.strictEqual(poller.passphrase, undefined);
+                    assert.strictEqual(poller.endpointList, undefined);
                 });
         });
 
@@ -971,6 +1219,31 @@ describe('Declarations', () => {
                                     location: 'system_location'
                                 }
                             }
+                        },
+                        {
+                            enable: true,
+                            includeData: {},
+                            locations: {
+                                virtualServers: true
+                            },
+                            ifAnyMatch: [
+                                {
+                                    system: {
+                                        hostname: 'bigip1.example.com'
+                                    }
+                                },
+                                {
+                                    system: {
+                                        hostname: 'bigip2.example.com'
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    endpointList: [
+                        {
+                            name: 'myEndpoint',
+                            path: 'myPath'
                         }
                     ]
                 }
@@ -990,7 +1263,7 @@ describe('Declarations', () => {
                     assert.strictEqual(poller.allowSelfSignedCert, true);
                     assert.strictEqual(poller.enableHostConnectivityCheck, false);
                     assert.strictEqual(poller.username, 'username');
-                    assert.strictEqual(poller.passphrase.cipherText, 'foo');
+                    assert.strictEqual(poller.passphrase.cipherText, '$M$foo');
                     assert.strictEqual(poller.actions[0].enable, true);
                     // setTag action
                     assert.deepStrictEqual(poller.actions[0].setTag, { tag1: 'tag1 value', tag2: {} });
@@ -1004,7 +1277,82 @@ describe('Declarations', () => {
                     assert.deepStrictEqual(poller.actions[2].excludeData, {});
                     assert.deepStrictEqual(poller.actions[2].locations, { pools: true });
                     assert.deepStrictEqual(poller.actions[2].ifAllMatch, { system: { location: 'system_location' } });
+                    // ifAnyMatch with includeData
+                    assert.deepStrictEqual(poller.actions[3].includeData, {});
+                    assert.deepStrictEqual(poller.actions[3].locations, { virtualServers: true });
+                    assert.deepStrictEqual(
+                        poller.actions[3].ifAnyMatch,
+                        [{ system: { hostname: 'bigip1.example.com' } }, { system: { hostname: 'bigip2.example.com' } }]
+                    );
+                    // endpointList
+                    assert.deepStrictEqual(
+                        poller.endpointList,
+                        [
+                            {
+                                enable: true,
+                                name: 'myEndpoint',
+                                path: 'myPath'
+                            }
+                        ]
+                    );
                 });
+        });
+
+        it('should not allow ifAnyMatch and ifAllMatch in same action', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Poller: {
+                    class: 'Telemetry_System_Poller',
+                    actions: [
+                        {
+                            setTag: {
+                                tag1: 'tag1 value'
+                            },
+                            ifAllMatch: {
+                                system: {
+                                    location: 'system_location'
+                                }
+                            },
+                            ifAnyMatch: [{
+                                system: {
+                                    hostname: 'system_hostname'
+                                }
+                            }],
+                            locations: {
+                                virtualServers: {
+                                    '.*': true
+                                }
+                            }
+                        }
+                    ]
+                }
+            };
+            return assert.isRejected(config.validate(data), /should NOT be valid/);
+        });
+
+        it('should not allow an ifAnyMatch block that is not an array', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Poller: {
+                    class: 'Telemetry_System_Poller',
+                    actions: [
+                        {
+                            setTag: {
+                                tag1: 'tag1 value'
+                            },
+                            ifAnyMatch: {
+                                top: 'level value'
+                            },
+                            locations: {
+                                virtualServers: {
+                                    '.*': true
+                                }
+                            }
+                        }
+                    ]
+                }
+            };
+            return assert.isRejected(config.validate(data), /should be array/);
         });
 
         it('should not allow additional properties', () => {
@@ -1017,10 +1365,233 @@ describe('Declarations', () => {
             };
             return assert.isRejected(config.validate(data), /someProp.*should NOT have additional properties/);
         });
+
+        describe('interval', () => {
+            it('should restrict minimum to 1 when endpointList is specified', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Poller: {
+                        class: 'Telemetry_System_Poller',
+                        interval: 0,
+                        endpointList: {
+                            items: {
+                                testA: { name: 'a', path: 'some/a' }
+                            }
+                        }
+                    }
+                };
+                const errMsg = /interval\/minimum.*should be >= 1/;
+                return assert.isRejected(config.validate(data), errMsg);
+            });
+
+            it('should restrict minimum to 60 when endpointList is NOT specified', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Poller: {
+                        class: 'Telemetry_System_Poller',
+                        interval: 10
+                    }
+                };
+                const errMsg = /interval\/minimum.*should be >= 60/;
+                return assert.isRejected(config.validate(data), errMsg);
+            });
+
+            it('should restrict maximum to 6000 when endpointList is NOT specified', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Poller: {
+                        class: 'Telemetry_System_Poller',
+                        interval: 60001
+                    }
+                };
+                const errMsg = /interval\/maximum.*should be <= 6000/;
+                return assert.isRejected(config.validate(data), errMsg);
+            });
+
+            it('should not restrict maximum to 6000 when endpointList is specified', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Poller: {
+                        class: 'Telemetry_System_Poller',
+                        interval: 100000,
+                        endpointList: {
+                            items: {
+                                testA: { name: 'a', path: 'some/a' }
+                            }
+                        }
+                    }
+                };
+                return config.validate(data)
+                    .then(validated => assert.strictEqual(validated.My_Poller.interval, 100000));
+            });
+        });
+
+        describe('endpointList', () => {
+            it('should allow endpointList as array (with different item types)', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Endpoints1: {
+                        class: 'Telemetry_Endpoints',
+                        enable: true,
+                        items: {
+                            testA: {
+                                name: 'a',
+                                path: '/test/a',
+                                enable: false
+                            },
+                            testB: {
+                                name: 'b',
+                                path: '/test/b'
+                            }
+                        }
+                    },
+                    My_Endpoints2: {
+                        class: 'Telemetry_Endpoints',
+                        enable: true,
+                        basePath: '/testing',
+                        items: {
+                            testC: {
+                                name: 'c',
+                                path: '/item/c',
+                                enable: false
+                            },
+                            testD: {
+                                name: 'd',
+                                path: '/item/d'
+                            }
+                        }
+                    },
+                    My_Poller: {
+                        class: 'Telemetry_System_Poller',
+                        endpointList: [
+                            'My_Endpoints1',
+                            'My_Endpoints2/testD',
+                            {
+                                name: 'anEndpoint',
+                                path: 'aPath'
+                            },
+                            {
+                                basePath: '/myBase/',
+                                items: {
+                                    myEndpoint: {
+                                        name: 'myEndpoint',
+                                        path: 'myPath'
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                };
+                return config.validate(data)
+                    .then((validConfig) => {
+                        const poller = validConfig.My_Poller;
+                        assert.deepStrictEqual(
+                            poller.endpointList,
+                            [
+                                'My_Endpoints1',
+                                'My_Endpoints2/testD',
+                                {
+                                    name: 'anEndpoint',
+                                    path: 'aPath',
+                                    enable: true
+                                },
+                                {
+                                    enable: true,
+                                    basePath: '/myBase/',
+                                    items: {
+                                        myEndpoint: {
+                                            name: 'myEndpoint',
+                                            path: 'myPath',
+                                            enable: true
+                                        }
+                                    }
+                                }
+                            ]
+                        );
+                    });
+            });
+
+            it('should require endpointList to have at least one item if array', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Poller: {
+                        class: 'Telemetry_System_Poller',
+                        endpointList: []
+                    }
+                };
+                const errMsg = 'should NOT have fewer than 1 items';
+                return assert.isRejected(config.validate(data), errMsg);
+            });
+
+            it('should not allow endpointList to be empty object', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Poller: {
+                        class: 'Telemetry_System_Poller',
+                        endpointList: {}
+                    }
+                };
+                const errMsg = 'should have required property \'items\'';
+                return assert.isRejected(config.validate(data), errMsg);
+            });
+
+            it('should allow endpointList as Telemetry_Endpoints (as single reference)', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Endpoints: {
+                        class: 'Telemetry_Endpoints',
+                        enable: true,
+                        items: {
+                            testA: { name: 'a', path: 'some/a' }
+                        }
+                    },
+                    My_Poller: {
+                        class: 'Telemetry_System_Poller',
+                        endpointList: 'My_Endpoints'
+                    }
+                };
+                return config.validate(data)
+                    .then((validConfig) => {
+                        const poller = validConfig.My_Poller;
+                        assert.deepStrictEqual(poller.endpointList, 'My_Endpoints');
+                    });
+            });
+
+            it('should allow endpointList as Telemetry_Endpoints (as inline object)', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Poller: {
+                        class: 'Telemetry_System_Poller',
+                        endpointList: {
+                            enable: true,
+                            items: {
+                                testA: { name: 'a', path: 'some/a' }
+                            }
+                        }
+                    }
+                };
+                return config.validate(data)
+                    .then((validConfig) => {
+                        const poller = validConfig.My_Poller;
+                        assert.deepStrictEqual(poller.endpointList,
+                            {
+                                enable: true,
+                                items: {
+                                    testA: {
+                                        enable: true,
+                                        name: 'a',
+                                        path: 'some/a'
+                                    }
+                                },
+                                basePath: ''
+                            });
+                    });
+            });
+        });
     });
 
     describe('Telemetry_Listener', () => {
-        it('should pass miminal declaration', () => {
+        it('should pass minimal declaration', () => {
             const data = {
                 class: 'Telemetry',
                 My_Listener: {
@@ -1137,7 +1708,7 @@ describe('Declarations', () => {
     });
 
     describe('Telemetry_iHealth_Poller', () => {
-        it('should pass miminal declaration', () => {
+        it('should pass minimal declaration', () => {
             const data = {
                 class: 'Telemetry',
                 My_iHealth_Poller: {
@@ -1160,7 +1731,7 @@ describe('Declarations', () => {
                     assert.notStrictEqual(poller, undefined);
                     assert.strictEqual(poller.class, 'Telemetry_iHealth_Poller');
                     assert.strictEqual(poller.username, 'username');
-                    assert.strictEqual(poller.passphrase.cipherText, 'foo');
+                    assert.strictEqual(poller.passphrase.cipherText, '$M$foo');
                     assert.deepStrictEqual(poller.interval, {
                         timeWindow: {
                             start: '00:00',
@@ -1207,7 +1778,7 @@ describe('Declarations', () => {
                     assert.notStrictEqual(poller, undefined);
                     assert.strictEqual(poller.class, 'Telemetry_iHealth_Poller');
                     assert.strictEqual(poller.username, 'username');
-                    assert.strictEqual(poller.passphrase.cipherText, 'foo');
+                    assert.strictEqual(poller.passphrase.cipherText, '$M$foo');
                     assert.deepStrictEqual(poller.interval, {
                         frequency: 'weekly',
                         day: 1,
@@ -1223,7 +1794,7 @@ describe('Declarations', () => {
                     assert.strictEqual(proxy.allowSelfSignedCert, true);
                     assert.strictEqual(proxy.enableHostConnectivityCheck, false);
                     assert.strictEqual(proxy.username, 'username');
-                    assert.strictEqual(proxy.passphrase.cipherText, 'foo');
+                    assert.strictEqual(proxy.passphrase.cipherText, '$M$foo');
                 });
         });
 
@@ -1435,7 +2006,7 @@ describe('Declarations', () => {
     });
 
     describe('Telemetry_System', () => {
-        it('should pass miminal declaration', () => {
+        it('should pass minimal declaration', () => {
             const data = {
                 class: 'Telemetry',
                 My_System: {
@@ -1448,11 +2019,11 @@ describe('Declarations', () => {
                     assert.notStrictEqual(system, undefined);
                     assert.strictEqual(system.class, 'Telemetry_System');
                     assert.strictEqual(system.enable, true);
-                    assert.strictEqual(system.trace, false);
+                    assert.strictEqual(system.trace, undefined);
                     assert.strictEqual(system.host, 'localhost');
                     assert.strictEqual(system.port, 8100);
                     assert.strictEqual(system.protocol, 'http');
-                    assert.strictEqual(system.allowSelfSignedCert, undefined);
+                    assert.strictEqual(system.allowSelfSignedCert, false);
                     assert.strictEqual(system.enableHostConnectivityCheck, undefined);
                     assert.strictEqual(system.username, undefined);
                     assert.strictEqual(system.passphrase, undefined);
@@ -1462,6 +2033,22 @@ describe('Declarations', () => {
         it('should pass full declaration', () => {
             const data = {
                 class: 'Telemetry',
+                My_Poller: {
+                    class: 'Telemetry_System_Poller'
+                },
+                My_iHealth_Poller: {
+                    class: 'Telemetry_iHealth_Poller',
+                    username: 'username',
+                    passphrase: {
+                        cipherText: 'passphrase'
+                    },
+                    interval: {
+                        timeWindow: {
+                            start: '00:00',
+                            end: '03:00'
+                        }
+                    }
+                },
                 My_System: {
                     class: 'Telemetry_System',
                     enable: true,
@@ -1474,7 +2061,14 @@ describe('Declarations', () => {
                     username: 'username',
                     passphrase: {
                         cipherText: 'passphrase'
-                    }
+                    },
+                    systemPoller: [
+                        'My_Poller',
+                        {
+                            interval: 100
+                        }
+                    ],
+                    iHealthPoller: 'My_iHealth_Poller'
                 }
             };
             return config.validate(data)
@@ -1490,7 +2084,24 @@ describe('Declarations', () => {
                     assert.strictEqual(system.allowSelfSignedCert, true);
                     assert.strictEqual(system.enableHostConnectivityCheck, false);
                     assert.strictEqual(system.username, 'username');
-                    assert.strictEqual(system.passphrase.cipherText, 'foo');
+                    assert.strictEqual(system.passphrase.cipherText, '$M$foo');
+                    assert.strictEqual(system.iHealthPoller, 'My_iHealth_Poller');
+                    assert.deepStrictEqual(system.systemPoller, [
+                        'My_Poller',
+                        {
+                            actions: [
+                                {
+                                    enable: true,
+                                    setTag: {
+                                        application: '`A`',
+                                        tenant: '`T`'
+                                    }
+                                }
+                            ],
+                            enable: true,
+                            interval: 100
+                        }
+                    ]);
                 });
         });
 
@@ -1558,7 +2169,7 @@ describe('Declarations', () => {
                     const poller = validConfig.My_System.systemPoller;
                     assert.notStrictEqual(poller, undefined);
                     assert.strictEqual(poller.enable, true);
-                    assert.strictEqual(poller.trace, false);
+                    assert.strictEqual(poller.trace, undefined);
                     assert.strictEqual(poller.interval, 300);
                     assert.deepStrictEqual(poller.actions, [{ enable: true, setTag: { tenant: '`T`', application: '`A`' } }]);
                     assert.strictEqual(poller.actions[0].ifAllMAtch, undefined);
@@ -1630,7 +2241,7 @@ describe('Declarations', () => {
                 });
         });
 
-        it('should not-allow to attach inline System Poller declaration with specified host', () => {
+        it('should not allow to attach inline System Poller declaration with additional properties', () => {
             const data = {
                 class: 'Telemetry',
                 My_System: {
@@ -1667,7 +2278,7 @@ describe('Declarations', () => {
                     const poller = validConfig.My_System.iHealthPoller;
                     assert.notStrictEqual(poller, undefined);
                     assert.strictEqual(poller.username, 'username');
-                    assert.strictEqual(poller.passphrase.cipherText, 'foo');
+                    assert.strictEqual(poller.passphrase.cipherText, '$M$foo');
                     assert.deepStrictEqual(poller.interval, {
                         timeWindow: {
                             start: '00:00',
@@ -1715,7 +2326,7 @@ describe('Declarations', () => {
                     const poller = validConfig.My_System.iHealthPoller;
                     assert.notStrictEqual(poller, undefined);
                     assert.strictEqual(poller.username, 'username');
-                    assert.strictEqual(poller.passphrase.cipherText, 'foo');
+                    assert.strictEqual(poller.passphrase.cipherText, '$M$foo');
                     assert.deepStrictEqual(poller.interval, {
                         frequency: 'weekly',
                         day: 1,
@@ -1731,8 +2342,31 @@ describe('Declarations', () => {
                     assert.strictEqual(proxy.allowSelfSignedCert, true);
                     assert.strictEqual(proxy.enableHostConnectivityCheck, false);
                     assert.strictEqual(proxy.username, 'username');
-                    assert.strictEqual(proxy.passphrase.cipherText, 'foo');
+                    assert.strictEqual(proxy.passphrase.cipherText, '$M$foo');
                 });
+        });
+
+        it('should not allow to attach inline iHealth Poller declaration with additional properties', () => {
+            const data = {
+                class: 'Telemetry',
+                My_System: {
+                    class: 'Telemetry_System',
+                    iHealthPoller: {
+                        something: true,
+                        username: 'username',
+                        passphrase: {
+                            cipherText: 'passphrase'
+                        },
+                        interval: {
+                            timeWindow: {
+                                start: '00:00',
+                                end: '03:00'
+                            }
+                        }
+                    }
+                }
+            };
+            return assert.isRejected(config.validate(data), /iHealthPoller.*should NOT have additional properties/);
         });
 
         it('should allow to attach inline declaration for System Poller and iHealth Poller', () => {
@@ -1758,6 +2392,329 @@ describe('Declarations', () => {
                 }
             };
             return assert.isFulfilled(config.validate(data));
+        });
+
+        it('should allow systemPoller as an array (inline object)', () => {
+            const data = {
+                class: 'Telemetry',
+                My_System: {
+                    class: 'Telemetry_System',
+                    systemPoller: [
+                        {
+                            interval: 1440,
+                            trace: true
+                        },
+                        {
+                            interval: 90
+                        }
+                    ]
+                }
+            };
+            return config.validate(data)
+                .then((validConfig) => {
+                    const poller = validConfig.My_System.systemPoller;
+                    assert.deepStrictEqual(poller,
+                        [
+                            {
+                                actions: [{
+                                    enable: true,
+                                    setTag: { application: '`A`', tenant: '`T`' }
+                                }],
+                                trace: true,
+                                interval: 1440,
+                                enable: true
+                            },
+                            {
+                                actions: [{
+                                    enable: true,
+                                    setTag: { application: '`A`', tenant: '`T`' }
+                                }],
+                                interval: 90,
+                                enable: true
+                            }
+                        ]);
+                });
+        });
+
+        it('should allow systemPoller as an array of references', () => {
+            const data = {
+                class: 'Telemetry',
+                My_System: {
+                    class: 'Telemetry_System',
+                    systemPoller: [
+                        'Poller_1',
+                        'Poller_2'
+                    ]
+                },
+                Poller_1: {
+                    class: 'Telemetry_System_Poller',
+                    interval: 80
+                },
+                Poller_2: {
+                    class: 'Telemetry_System_Poller',
+                    interval: 100,
+                    trace: true
+                }
+            };
+            return assert.isFulfilled(config.validate(data));
+        });
+
+        it('should allow systemPoller as an array (mixed ref and object)', () => {
+            const data = {
+                class: 'Telemetry',
+                My_System: {
+                    class: 'Telemetry_System',
+                    systemPoller: [
+                        'Poller_1',
+                        {
+                            interval: 299
+                        }
+                    ]
+                },
+                Poller_1: {
+                    class: 'Telemetry_System_Poller',
+                    interval: 80
+                }
+            };
+            return assert.isFulfilled(config.validate(data));
+        });
+
+        it('should not allow a systemPoller as empty array', () => {
+            const data = {
+                class: 'Telemetry',
+                My_System: {
+                    class: 'Telemetry_System',
+                    systemPoller: []
+                }
+            };
+            const errMsg = 'should NOT have fewer than 1 items';
+            return assert.isRejected(config.validate(data), errMsg);
+        });
+
+        it('should not allow a systemPoller with empty endpointList object', () => {
+            const data = {
+                class: 'Telemetry',
+                My_System: {
+                    class: 'Telemetry_System',
+                    systemPoller: {
+                        interval: 120,
+                        endpointList: {}
+                    }
+                }
+            };
+            const errMsg = 'should have required property \'items\'';
+            return assert.isRejected(config.validate(data), errMsg);
+        });
+
+        it('should not allow a systemPoller with empty items in endpointList object', () => {
+            const data = {
+                class: 'Telemetry',
+                My_System: {
+                    class: 'Telemetry_System',
+                    systemPoller: {
+                        interval: 120,
+                        endpointList: {
+                            items: {}
+                        }
+                    }
+                }
+            };
+            const errMsg = 'should NOT have fewer than 1 properties';
+            return assert.isRejected(config.validate(data), errMsg);
+        });
+
+        it('should not allow a systemPoller with empty endpointList array', () => {
+            const data = {
+                class: 'Telemetry',
+                My_System: {
+                    class: 'Telemetry_System',
+                    systemPoller: {
+                        interval: 120,
+                        endpointList: []
+                    }
+                }
+            };
+            const errMsg = 'should NOT have fewer than 1 items';
+            return assert.isRejected(config.validate(data), errMsg);
+        });
+
+        it('should not allow a systemPoller with empty items in endpointList array', () => {
+            const data = {
+                class: 'Telemetry',
+                My_System: {
+                    class: 'Telemetry_System',
+                    systemPoller: {
+                        interval: 120,
+                        endpointList: [
+                            {
+                                items: {}
+                            }
+                        ]
+                    }
+                }
+            };
+            const errMsg = 'should NOT have fewer than 1 properties';
+            return assert.isRejected(config.validate(data), errMsg);
+        });
+    });
+
+    describe('Telemetry_Endpoints', () => {
+        it('should pass minimal declaration', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Endpoints: {
+                    class: 'Telemetry_Endpoints',
+                    items: {
+                        test: {
+                            path: '/test/path'
+                        }
+                    }
+                }
+            };
+            return config.validate(data)
+                .then((validConfig) => {
+                    const endpoints = validConfig.My_Endpoints;
+                    assert.deepStrictEqual(endpoints.items, {
+                        test: {
+                            enable: true,
+                            path: '/test/path'
+                        }
+                    });
+                    // check defaults
+                    assert.strictEqual(endpoints.enable, true);
+                });
+        });
+
+        it('should not allow additional properties', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Endpoints: {
+                    class: 'Telemetry_Endpoints',
+                    items: {
+                        test: {
+                            name: 'test',
+                            path: '/test/path'
+                        }
+                    },
+                    something: true
+                }
+            };
+            return assert.isRejected(config.validate(data), /something.*should NOT have additional properties/);
+        });
+
+        it('should allow full declaration', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Endpoints: {
+                    class: 'Telemetry_Endpoints',
+                    enable: true,
+                    basePath: '/some/base',
+                    items: {
+                        a: {
+                            name: 'testA',
+                            path: '/test/A'
+                        },
+                        b: {
+                            name: 'testB',
+                            path: '/test/B',
+                            enable: false
+                        }
+                    }
+                }
+            };
+
+            return config.validate(data)
+                .then((validConfig) => {
+                    const endpoints = validConfig.My_Endpoints;
+                    assert.deepStrictEqual(endpoints.items, {
+                        a: {
+                            enable: true,
+                            name: 'testA',
+                            path: '/test/A'
+                        },
+                        b: {
+                            name: 'testB',
+                            path: '/test/B',
+                            enable: false
+                        }
+                    });
+                });
+        });
+
+        it('should not allow empty items', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Endpoints: {
+                    class: 'Telemetry_Endpoints',
+                    items: {}
+                }
+            };
+            return assert.isRejected(config.validate(data), /\/My_Endpoints\/items.*items\/minProperties.*limit":1/);
+        });
+
+        it('should not allow items that are not of type object', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Endpoints: {
+                    class: 'Telemetry_Endpoints',
+                    enable: true,
+                    items: [
+                        'endpoint'
+                    ]
+                }
+            };
+            return assert.isRejected(config.validate(data), /\/My_Endpoints\/items.*should be object/);
+        });
+
+        it('should not allow additional properties in items', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Endpoints: {
+                    class: 'Telemetry_Endpoints',
+                    enable: true,
+                    items: {
+                        first: {
+                            name: 'myEndpoint',
+                            path: 'myPath',
+                            something: 'else'
+                        }
+                    }
+                }
+            };
+            return assert.isRejected(config.validate(data), /\/My_Endpoints\/items.*should NOT have additional properties/);
+        });
+
+        it('should not allow empty name', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Endpoints: {
+                    class: 'Telemetry_Endpoints',
+                    enable: true,
+                    items: {
+                        first: {
+                            name: '',
+                            path: 'path'
+                        }
+                    }
+                }
+            };
+            return assert.isRejected(config.validate(data), /\/My_Endpoints\/items\/first\/name.*should NOT be shorter than/);
+        });
+
+        it('should not allow empty path', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Endpoints: {
+                    class: 'Telemetry_Endpoints',
+                    enable: true,
+                    items: {
+                        first: {
+                            path: ''
+                        }
+                    }
+                }
+            };
+            return assert.isRejected(config.validate(data), /\/My_Endpoints\/items\/first\/path.*should NOT be shorter than/);
         });
     });
 });

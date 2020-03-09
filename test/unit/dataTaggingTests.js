@@ -8,19 +8,30 @@
 
 'use strict';
 
-const assert = require('assert');
+/* eslint-disable import/order */
+
+require('./shared/restoreCache')();
+
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 
 const dataTagging = require('../../src/lib/dataTagging');
-const dataTaggingTestsData = require('./dataTaggingTestsData.js');
+const dataTaggingTestsData = require('./dataTaggingTestsData');
+const testUtil = require('./shared/util');
 
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
 describe('Data Tagging', () => {
     describe('handleAction', () => {
-        const getCallableIt = testConf => (testConf.testOpts && testConf.testOpts.only ? it.only : it);
-
         dataTaggingTestsData.handleAction.forEach((testConf) => {
-            getCallableIt(testConf)(testConf.name, () => {
-                dataTagging.handleAction(testConf.dataCtx, testConf.actionCtx, testConf.deviceCtx);
+            testUtil.getCallableIt(testConf)(testConf.name, () => {
+                const deviceCtx = testConf.deviceCtx || {
+                    deviceVersion: '13.0.0.0',
+                    provisioning: { ltm: { name: 'ltm', level: 'nominal' } }
+                };
+
+                dataTagging.handleAction(testConf.dataCtx, testConf.actionCtx, deviceCtx);
                 assert.deepStrictEqual(testConf.dataCtx, testConf.expectedCtx);
             });
         });

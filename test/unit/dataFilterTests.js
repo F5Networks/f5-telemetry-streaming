@@ -8,11 +8,19 @@
 
 'use strict';
 
-const assert = require('assert');
+/* eslint-disable import/order */
 
-const dataFilter = require('../../src/lib/dataFilter.js');
-const dataFilterTestsData = require('./dataFilterTestsData.js');
+require('./shared/restoreCache')();
 
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+
+const dataFilterTestsData = require('./dataFilterTestsData');
+const dataFilter = require('../../src/lib/dataFilter');
+const testUtil = require('./shared/util');
+
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
 describe('Data Filter', () => {
     describe('DataFilter', () => {
@@ -20,10 +28,18 @@ describe('Data Filter', () => {
             const consumerConfig = {
                 type: 'Kafka'
             };
+            const data = {
+                data: {
+                    tmstats: {}
+                }
+            };
+
             const expected = { tmstats: true };
             const filter = new dataFilter.DataFilter(consumerConfig);
+            const filteredData = filter.apply(data);
 
-            assert.deepEqual(filter.blacklist, expected);
+            assert.deepStrictEqual(filter.blacklist, expected);
+            assert.deepStrictEqual(filteredData, { data: {} });
         });
 
         it('should not blacklist tmstats if consumer is Splunk legacy', () => {
@@ -33,18 +49,23 @@ describe('Data Filter', () => {
                     format: 'legacy'
                 }
             };
+            const data = {
+                data: {
+                    tmstats: {}
+                }
+            };
             const expected = {};
             const filter = new dataFilter.DataFilter(consumerConfig);
+            const filteredData = filter.apply(data);
 
-            assert.deepEqual(filter.blacklist, expected);
+            assert.deepStrictEqual(filter.blacklist, expected);
+            assert.deepStrictEqual(filteredData, data);
         });
     });
 
     describe('handleAction', () => {
-        const getCallableIt = testConf => (testConf.testOpts && testConf.testOpts.only ? it.only : it);
-
         dataFilterTestsData.handleAction.forEach((testConf) => {
-            getCallableIt(testConf)(testConf.name, () => {
+            testUtil.getCallableIt(testConf)(testConf.name, () => {
                 dataFilter.handleAction(testConf.dataCtx, testConf.actionCtx);
                 assert.deepStrictEqual(testConf.dataCtx, testConf.expectedCtx);
             });

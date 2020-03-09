@@ -8,72 +8,83 @@
 
 'use strict';
 
-const assert = require('assert');
+/* eslint-disable import/order */
 
-const dataUtil = require('../../src/lib/dataUtil.js');
-const dataUtilTestsData = require('./dataUtilTestsData.js');
+require('./shared/restoreCache')();
+
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+
+const dataUtil = require('../../src/lib/dataUtil');
+const dataUtilTestsData = require('./dataUtilTestsData');
+const testUtil = require('./shared/util');
+
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
 describe('Data Util', () => {
-    const getCallableIt = testConf => (testConf.testOpts && testConf.testOpts.only ? it.only : it);
-
     describe('getMatches', () => {
         dataUtilTestsData.getMatches.forEach((testConf) => {
-            getCallableIt(testConf)(testConf.name, () => {
+            testUtil.getCallableIt(testConf)(testConf.name, () => {
                 const resultCtx = dataUtil.getMatches(
-                    testConf.dataCtx,
+                    testConf.data,
                     testConf.propertyCtx,
                     testConf.propertyRegexCtx
                 );
-                assert.deepEqual(resultCtx, testConf.expectedCtx);
+                assert.deepStrictEqual(resultCtx, testConf.expectedCtx);
             });
         });
     });
 
     describe('getDeepMatches', () => {
         dataUtilTestsData.getDeepMatches.forEach((testConf) => {
-            getCallableIt(testConf)(testConf.name, () => {
+            testUtil.getCallableIt(testConf)(testConf.name, () => {
                 const resultCtx = dataUtil.getDeepMatches(
-                    testConf.dataCtx,
+                    testConf.data,
                     testConf.propertiesCtx
                 );
-                assert.deepEqual(resultCtx, testConf.expectedCtx);
+                assert.deepStrictEqual(resultCtx, testConf.expectedCtx);
             });
         });
     });
 
     describe('checkConditions', () => {
-        dataUtilTestsData.checkConditions.forEach((testConf) => {
-            getCallableIt(testConf)(testConf.name, () => {
-                const resultCtx = dataUtil.checkConditions(
-                    testConf.dataCtx,
-                    testConf.conditionsCtx
-                );
-                assert.strictEqual(resultCtx, testConf.expectedCtx);
+        ['', '_ifAnyMatch', '_ifAllMatch'].forEach((matchType) => {
+            describe(matchType, () => {
+                dataUtilTestsData[`checkConditions${matchType}`].forEach((testConf) => {
+                    testUtil.getCallableIt(testConf)(testConf.name, () => {
+                        const resultCtx = dataUtil.checkConditions(
+                            testConf.dataCtx,
+                            testConf.actionsCtx
+                        );
+                        assert.strictEqual(resultCtx, testConf.expectedCtx);
+                    });
+                });
             });
         });
     });
 
     describe('searchAnyMatches', () => {
         dataUtilTestsData.searchAnyMatches.forEach((testConf) => {
-            getCallableIt(testConf)(testConf.name, () => {
+            testUtil.getCallableIt(testConf)(testConf.name, () => {
                 const resultCtx = [];
                 const callback = (key, item) => {
                     resultCtx.push(key);
                     return testConf.nestedKey ? item[testConf.nestedKey] : null;
                 };
                 dataUtil.searchAnyMatches(
-                    testConf.dataCtx,
+                    testConf.data,
                     testConf.propertiesCtx,
                     callback
                 );
-                assert.deepEqual(resultCtx, testConf.expectedCtx);
+                assert.deepStrictEqual(resultCtx, testConf.expectedCtx);
             });
         });
     });
 
     describe('removeStrictMatches', () => {
         dataUtilTestsData.removeStrictMatches.forEach((testConf) => {
-            getCallableIt(testConf)(testConf.name, () => {
+            testUtil.getCallableIt(testConf)(testConf.name, () => {
                 const callback = (key, item, getNestedKey) => {
                     if (getNestedKey) {
                         return testConf.nestedKey ? item[testConf.nestedKey] : null;
@@ -89,11 +100,11 @@ describe('Data Util', () => {
                     expectedCtx = expectedCtx();
                 }
                 const actualRetVal = dataUtil.removeStrictMatches(
-                    testConf.dataCtx,
+                    testConf.data,
                     testConf.propertiesCtx,
                     testConf.useCallback === false ? undefined : callback
                 );
-                assert.deepStrictEqual(testConf.dataCtx, expectedCtx);
+                assert.deepStrictEqual(testConf.data, expectedCtx);
                 assert.strictEqual(actualRetVal, testConf.expectedRetVal);
             });
         });
@@ -102,7 +113,7 @@ describe('Data Util', () => {
     [true, false].forEach((strictVal) => {
         describe(`preserveStrictMatches - strict=${strictVal}`, () => {
             dataUtilTestsData[`preserveStrictMatches_strict_${strictVal}`].forEach((testConf) => {
-                getCallableIt(testConf)(testConf.name, () => {
+                testUtil.getCallableIt(testConf)(testConf.name, () => {
                     const callback = (key, item, getNestedKey) => {
                         if (getNestedKey) {
                             return testConf.nestedKey ? item[testConf.nestedKey] : null;
@@ -118,12 +129,12 @@ describe('Data Util', () => {
                         expectedCtx = expectedCtx();
                     }
                     const actualRetVal = dataUtil.preserveStrictMatches(
-                        testConf.dataCtx,
+                        testConf.data,
                         testConf.propertiesCtx,
                         strictVal,
                         testConf.useCallback === false ? undefined : callback
                     );
-                    assert.deepStrictEqual(testConf.dataCtx, expectedCtx);
+                    assert.deepStrictEqual(testConf.data, expectedCtx);
                     assert.strictEqual(actualRetVal, testConf.expectedRetVal);
                 });
             });

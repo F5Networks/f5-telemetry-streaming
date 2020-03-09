@@ -8,17 +8,17 @@
 
 'use strict';
 
-const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
-const constants = require('./constants.js');
-const datetimeUtil = require('./datetimeUtil.js');
-const util = require('./util.js');
-const deviceUtil = require('./deviceUtil.js');
-const ihUtil = require('./ihealthUtil.js');
-const persistentStorage = require('./persistentStorage.js').persistentStorage;
-const configWorker = require('./config.js');
+const logger = require('./logger'); // eslint-disable-line no-unused-vars
+const constants = require('./constants');
+const datetimeUtil = require('./datetimeUtil');
+const util = require('./util');
+const deviceUtil = require('./deviceUtil');
+const ihUtil = require('./ihealthUtil');
+const persistentStorage = require('./persistentStorage').persistentStorage;
+const configWorker = require('./config');
 
-const SYSTEM_CLASS_NAME = constants.SYSTEM_CLASS_NAME;
-const IHEALTH_POLLER_CLASS_NAME = constants.IHEALTH_POLLER_CLASS_NAME;
+const SYSTEM_CLASS_NAME = constants.CONFIG_CLASSES.SYSTEM_CLASS_NAME;
+const IHEALTH_POLLER_CLASS_NAME = constants.CONFIG_CLASSES.IHEALTH_POLLER_CLASS_NAME;
 const PERSISTENT_STORAGE_KEY = 'ihealth';
 
 const IHEALTH_POLL_MAX_TIMEOUT = 60 * 60 * 1000; // 1 h.

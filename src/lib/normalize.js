@@ -8,9 +8,9 @@
 
 'use strict';
 
-const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
-const constants = require('./constants.js');
-const normalizeUtil = require('./normalizeUtil.js');
+const logger = require('./logger'); // eslint-disable-line no-unused-vars
+const constants = require('./constants');
+const normalizeUtil = require('./normalizeUtil');
 
 
 /**
@@ -164,8 +164,10 @@ module.exports = {
         try {
             return normalizeUtil[options.func](args);
         } catch (e) {
-            logger.exception(`runCustomFunction failed: ${e}`, e);
-            throw new Error(`runCustomFunction failed: ${e}`);
+            const errMsg = `runCustomFunction '${options.func}' failed: ${e}`;
+            logger.exception(errMsg, e);
+            e.message = errMsg;
+            throw e;
         }
     },
 
@@ -208,7 +210,9 @@ module.exports = {
         const keysToReduce = ['nestedStats', 'value', 'description', 'color'];
         for (let i = 0; i < keysToReduce.length; i += 1) {
             const item = data[keysToReduce[i]];
-            if (item !== undefined && Object.keys(data).length === 1) return this._reduceData(item, options);
+            if (item !== undefined && Object.keys(data).length === 1) {
+                return this._reduceData(item, options);
+            }
         }
 
         // .entries evaluates to true if data is an array
@@ -285,10 +289,19 @@ module.exports = {
      * @param {Object} options                 - options
      * @param {Array} [options.skip]           - array of child object keys to skip
      * @param {Array} [options.classifyByKeys] - classify by specific keys (used by events)
+     * @param {Array} [options.tags]           - tags to apply in addition to "tags"
      *
      * @returns {Object} Returns data with added tags
      */
     _addKeysByTag(data, tags, definitions, options) {
+        tags = Object.assign({}, tags);
+        if (options && options.tags) {
+            Object.keys(options.tags).forEach((key) => {
+                if (typeof tags[key] === 'undefined') {
+                    tags[key] = options.tags[key];
+                }
+            });
+        }
         const tagKeys = Object.keys(tags);
         const skip = options.skip || [];
         const def = definitions || {};
@@ -301,15 +314,20 @@ module.exports = {
                 // then check if the tag value contains 'pattern'
                 // otherwise assume the tag value is a 'constant'
                 let tagValue = tags[t];
-                if (tagValue in def) tagValue = def[tagValue]; // overwrite with def value
-
+                if (tagValue in def) {
+                    tagValue = def[tagValue]; // overwrite with def value
+                }
                 if (tagValue.pattern) {
                     const match = normalizeUtil._checkForMatch(key, tagValue.pattern, tagValue.group);
-                    if (match) val = match;
+                    if (match) {
+                        val = match;
+                    }
                 } else {
                     val = tagValue;
                 }
-                thisData[t] = val;
+                if (val) {
+                    thisData[t] = val;
+                }
             });
             return thisData;
         };
@@ -549,11 +567,11 @@ module.exports = {
                         includeFirstEntry: (options.normalization.find(n => n.includeFirstEntry)
                             || {}).includeFirstEntry
                     };
-                    ret = this._reduceData(data, reduceDataOptions);
+                    ret = this._reduceData(norm.useCurrentData ? ret : data, reduceDataOptions);
                     setReduced = true;
 
                     // get data by key
-                    ret = options.key ? this._getDataByKey(ret, options.key) : ret;
+                    ret = options.key && !norm.keepKey ? this._getDataByKey(ret, options.key) : ret;
                 }
 
                 if (norm.filterKeys) {

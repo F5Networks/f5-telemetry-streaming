@@ -12,8 +12,8 @@
 
 const fs = require('fs');
 
-const constants = require('./shared/constants.js');
-const util = require('./shared/util.js');
+const constants = require('./shared/constants');
+const util = require('./shared/util');
 
 const consumerHost = util.getHosts('CONSUMER')[0]; // only expect one
 const checkDockerCmd = 'if [[ -e $(which docker) ]]; then echo exists; fi';

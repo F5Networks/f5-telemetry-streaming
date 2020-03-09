@@ -13,10 +13,25 @@ const fs = require('fs');
 const crypto = require('crypto');
 const diff = require('deep-diff');
 
-const constants = require('./constants.js');
-const logger = require('./logger.js');
-const util = require('./util.js');
+const constants = require('./constants');
+const logger = require('./logger');
+const util = require('./util');
 
+
+/**
+ * Cache for info about the device TS is running on
+ *
+ * @property {String}  TYPE    - device's type - BIG-IP or Container
+ * @property {Object}  VERSION - version information
+ * @property {Boolean} RETRIEVE_SECRETS_FROM_TMSH - true when device is affected by bug and you should run
+ *                                                  TMSH command to retrieve secret (BZ745423)
+ */
+const HOST_DEVICE_CACHE = {};
+const HDC_KEYS = {
+    TYPE: 'TYPE',
+    VERSION: 'VERSION',
+    RETRIEVE_SECRETS_FROM_TMSH: 'RETRIEVE_SECRETS_FROM_TMSH'
+};
 
 /**
  * F5 Device async CLI class definition starts here
@@ -427,13 +442,14 @@ DeviceAsyncCLI.prototype._removeAsyncTaskFromDevice = function (taskID, errOk) {
  * Helper function for the encryptSecret function
  *
  * @private
- * @param {Array} splitData - the secret that has been split up
- * @param {Array} dataArray - the array that the encrypted data will be put
- * @param {Integer} index - the endex value used to go through the split data
+ * @param {Array} splitData         - the secret that has been split up
+ * @param {Array} dataArray         - the array that the encrypted data will be put
+ * @param {Integer} index           - the index value used to go through the split data
+ * @param {Boolean} secretsFromTMSH - fetch secrets from TMSH
  *
  * @returns {Promise} Promise resolved with the encrypted data
  */
-function encryptSecretHelper(splitData, dataArray, index) {
+function encryptSecretHelper(splitData, dataArray, index, secretsFromTMSH) {
     let encryptedData = null;
     let error = null;
     // can't have a + or / in the radius object name, so replace those if they exist
@@ -459,70 +475,139 @@ function encryptSecretHelper(splitData, dataArray, index) {
             }
             // update text field with Secure Vault cryptogram - should we base64 encode?
             encryptedData = res.secret;
-            return module.exports.getDeviceVersion(constants.LOCAL_HOST);
-        })
-        .then((deviceVersion) => {
-            let promise;
-            if (util.compareVersionStrings(deviceVersion.version, '>=', '14.1')
-                    && util.compareVersionStrings(deviceVersion.version, '<', '15.0')) {
-                // TMOS 14.1.x fix for 745423
-                const tmshCmd = `tmsh -a list auth radius-server ${radiusObjectName} secret`;
-                promise = module.exports.executeShellCommandOnDevice(constants.LOCAL_HOST, tmshCmd)
-                    .then((res) => {
-                        /**
-                         * auth radius-server telemetry_delete_me {
-                         *   secret <secret-data>
-                         * }
-                         */
-                        encryptedData = res.split('\n')[1].trim().split(' ', 2)[1];
-                    });
+
+            if (!secretsFromTMSH) {
+                return Promise.resolve();
             }
-            return promise || Promise.resolve();
+
+            // TMOS 14.1.x fix for 745423
+            const tmshCmd = `tmsh -a list auth radius-server ${radiusObjectName} secret`;
+            return module.exports.executeShellCommandOnDevice(constants.LOCAL_HOST, tmshCmd)
+                .then((tmosOutput) => {
+                    /**
+                     * auth radius-server telemetry_delete_me {
+                     *   secret <secret-data>
+                     * }
+                     */
+                    encryptedData = tmosOutput.split('\n')[1].trim().split(' ', 2)[1];
+                });
         })
         .catch((e) => {
             error = e;
         })
         .then(() => {
+            // remove TMOS object at first to keep BIG-IP clean and then throw error if needed
             const httpDeleteOptions = {
                 method: 'DELETE',
-                continueOnErrorCode: true
+                continueOnErrorCode: true // ignore error to avoid UnhandledPromiseRejection error
             };
             module.exports.makeDeviceRequest(constants.LOCAL_HOST, `${uri}/${radiusObjectName}`, httpDeleteOptions);
             if (error) {
                 throw error;
             }
-        })
-        .then(() => {
             if (encryptedData.indexOf(',') !== -1) {
                 throw new Error('Encrypted data should not have a comma in it');
             }
             dataArray.push(encryptedData);
             index += 1;
             if (index < splitData.length) {
-                return encryptSecretHelper(splitData, dataArray, index);
+                return encryptSecretHelper(splitData, dataArray, index, secretsFromTMSH);
             }
             return Promise.resolve(dataArray);
         });
 }
 
+/**
+ * Check if TMOS version affected by bug when secrets should be fetched from TMSH only (BZ745423)
+ *
+ * @param {Object} version         - TMOS version info
+ * @param {String} version.version - TMOS version string
+ *
+ * @returns {Boolean} true if TMOS version affected by bug
+ */
+function isVersionAffectedBySecretsBug(version) {
+    return util.compareVersionStrings(version.version, '>=', '14.1')
+        && util.compareVersionStrings(version.version, '<', '15.0');
+}
+
+
 module.exports = {
+    /**
+     * Gather Host Device Info
+     *
+     * @returns {Promise} resolved once info about Host Device was gathered
+     */
+    gatherHostDeviceInfo() {
+        return this.getDeviceType()
+            .then((deviceType) => {
+                this.setHostDeviceInfo(HDC_KEYS.TYPE, deviceType);
+                return this.getDeviceVersion(constants.LOCAL_HOST);
+            })
+            .then((deviceVersion) => {
+                this.setHostDeviceInfo(HDC_KEYS.VERSION, deviceVersion);
+                this.setHostDeviceInfo(HDC_KEYS.RETRIEVE_SECRETS_FROM_TMSH,
+                    isVersionAffectedBySecretsBug(deviceVersion));
+            });
+    },
+
+    /**
+     * Clear Host Device Info
+     *
+     * @param {...String} [key] - key(s) to remove, if absent then all keys will be removed
+     */
+    clearHostDeviceInfo() {
+        const keysToRemove = arguments.length ? arguments : Object.keys(HOST_DEVICE_CACHE);
+        Array.prototype.forEach.call(keysToRemove, (toRemove) => {
+            delete HOST_DEVICE_CACHE[toRemove];
+        });
+    },
+
+    /**
+     * Get Host Device info
+     *
+     * @param {String} [key] - key, if omitted then copy of cache will be returned
+     *
+     * @returns {Object|Any} value from cache for the key or copy of cache if no arguments were passed to function
+     */
+    getHostDeviceInfo(key) {
+        if (arguments.length === 0) {
+            return util.deepCopy(HOST_DEVICE_CACHE);
+        }
+        return HOST_DEVICE_CACHE[key];
+    },
+
+    /**
+     * Set Host Device Info
+     * @param {String} key - key
+     * @param {Any} value  - value
+     */
+    setHostDeviceInfo(key, value) {
+        HOST_DEVICE_CACHE[key] = value;
+    },
+
     /**
      * Performs a check of the local environment and returns device type
      *
      * @returns {Promise} A promise which is resolved with the device type.
-     *
      */
     getDeviceType() {
-        // eslint-disable-next-line no-unused-vars
-        return new Promise((resolve, reject) => {
-            // eslint-disable-next-line no-unused-vars
-            childProcess.exec('/usr/bin/tmsh -a show sys version', (error, stdout, stderr) => {
-                if (error) {
-                    // don't reject, just assume we are running on a container
-                    resolve(constants.CONTAINER_DEVICE_TYPE);
+        const deviceType = this.getHostDeviceInfo(HDC_KEYS.TYPE);
+        if (typeof deviceType !== 'undefined') {
+            return Promise.resolve(deviceType);
+        }
+
+        return new Promise((resolve) => {
+            const versionFile = '/VERSION';
+            fs.readFile(versionFile, (err, data) => {
+                // .toString() in case if data is Buffer
+                if (!err && (new RegExp('product:\\s+big-ip', 'i')).test(data.toString())) {
+                    resolve(constants.DEVICE_TYPE.BIG_IP);
                 } else {
-                    // command did not error so we must be a BIG-IP
-                    resolve(constants.BIG_IP_DEVICE_TYPE);
+                    // don't reject, just assume we are running on a container
+                    if (err) {
+                        logger.debug(`Unable to read '${versionFile}': ${err}`);
+                    }
+                    resolve(constants.DEVICE_TYPE.CONTAINER);
                 }
             });
         });
@@ -600,8 +685,9 @@ module.exports = {
                     // should have content-range header
                     if (!crange) {
                         const msg = `${respObj.statusCode} ${respObj.statusMessage} ${JSON.stringify(respBody)}`;
-                        throw new Error(`HTTP Error: ${msg}`);
-                    } else if (respObj.statusCode >= 200 && respObj.statusCode < 300) {
+                        return Promise.reject(new Error(`HTTP Error: ${msg}`));
+                    }
+                    if (respObj.statusCode >= 200 && respObj.statusCode < 300) {
                         // handle it in async way, waiting for callabck from write
                         promise = new Promise((resolve, reject) => {
                             currentBytes += parseInt(respObj.headers['content-length'], 10);
@@ -616,7 +702,7 @@ module.exports = {
                     } else {
                         attempt += 1;
                         if (attempt >= attemptsOnHTTPerror) {
-                            error = new Error('Exceeded number of attempts on HTTP error');
+                            return Promise.reject(new Error('Exceeded number of attempts on HTTP error'));
                         }
                     }
 
@@ -865,8 +951,19 @@ module.exports = {
      * @returns {Object} Returns promise resolved with encrypted secret
      */
     encryptSecret(data) {
-        const splitData = data.match(/(.|\n).{1,500}/g);
-        return encryptSecretHelper(splitData, [], 0).then(result => result.join(','));
+        let affectedByBug = this.getHostDeviceInfo(HDC_KEYS.RETRIEVE_SECRETS_FROM_TMSH);
+        let promise = Promise.resolve();
+
+        if (typeof affectedByBug === 'undefined') {
+            promise = promise.then(() => this.getDeviceVersion(constants.LOCAL_HOST))
+                .then((deviceVersion) => {
+                    affectedByBug = isVersionAffectedBySecretsBug(deviceVersion);
+                });
+        }
+        return promise.then(() => {
+            const splitData = data.match(/(.|\n){1,500}/g);
+            return encryptSecretHelper(splitData, [], 0, affectedByBug).then(result => result.join(','));
+        });
     },
 
     /**
@@ -978,8 +1075,9 @@ module.exports = {
                 // return (modified) data
                 return data;
             })
-            .catch((e) => {
-                throw e;
+            .catch((err) => {
+                const msg = `decryptAllSecrets: ${err}`;
+                throw new Error(msg);
             });
     },
 

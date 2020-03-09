@@ -10,7 +10,7 @@
 
 const request = require('request');
 const crypto = require('crypto');
-const EVENT_TYPES = require('../../constants.js').EVENT_TYPES;
+const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 
 function makeRequest(requestOptions) {
     return new Promise((resolve, reject) => {
@@ -84,6 +84,8 @@ module.exports = function (context) {
             // deep copy and parse body, otherwise it will be stringified again
             const requestOptionsCopy = JSON.parse(JSON.stringify(requestOptions));
             requestOptionsCopy.body = JSON.parse(requestOptionsCopy.body);
+            // redact secrets in Authorization header
+            requestOptionsCopy.headers.Authorization = '*****';
             tracerMsg.push(requestOptionsCopy);
         }
 

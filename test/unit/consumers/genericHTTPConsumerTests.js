@@ -8,18 +8,21 @@
 
 'use strict';
 
+/* eslint-disable import/order */
+
+require('../shared/restoreCache')();
+
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const request = require('request');
-
-chai.use(chaiAsPromised);
-const assert = chai.assert;
 const sinon = require('sinon');
 
 const genericHttpIndex = require('../../../src/lib/consumers/Generic_HTTP/index');
-const util = require('../shared/util.js');
+const testUtil = require('../shared/util');
 
-/* eslint-disable global-require */
+chai.use(chaiAsPromised);
+const assert = chai.assert;
+
 describe('Generic_HTTP', () => {
     const defaultConsumerConfig = {
         port: 80,
@@ -32,17 +35,17 @@ describe('Generic_HTTP', () => {
 
     describe('process', () => {
         it('should POST using default request options', (done) => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 config: defaultConsumerConfig
             });
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
-                    assert.deepEqual(opts.url, 'https://localhost:80/');
+                    assert.deepStrictEqual(opts.url, 'https://localhost:80/');
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             });
@@ -50,7 +53,7 @@ describe('Generic_HTTP', () => {
         });
 
         it('should GET using provided request options', (done) => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 config: {
                     method: 'GET',
                     protocol: 'http',
@@ -68,12 +71,49 @@ describe('Generic_HTTP', () => {
 
             sinon.stub(request, 'get').callsFake((opts) => {
                 try {
-                    assert.deepEqual(opts.url, 'http://myMetricsSystem:8080/ingest');
-                    assert.deepEqual(opts.headers, { 'x-api-key': 'superSecret' });
+                    assert.deepStrictEqual(opts.url, 'http://myMetricsSystem:8080/ingest');
+                    assert.deepStrictEqual(opts.headers, { 'x-api-key': 'superSecret' });
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
+                    done(err);
+                }
+            });
+            genericHttpIndex(context);
+        });
+
+        it('should trace data with secrets redacted', (done) => {
+            let traceData;
+            const context = testUtil.buildConsumerContext({
+                config: {
+                    method: 'POST',
+                    protocol: 'http',
+                    port: '8080',
+                    path: '/ingest',
+                    host: 'myMetricsSystem',
+                    headers: [
+                        {
+                            name: 'Authorization',
+                            value: 'Basic ABC123'
+                        }
+                    ]
+                }
+            });
+            context.tracer = {
+                write: (input) => {
+                    traceData = JSON.parse(input);
+                }
+            };
+
+            sinon.stub(request, 'post').callsFake((opts) => {
+                try {
+                    assert.deepStrictEqual(traceData.headers, { Authorization: '*****' });
+                    assert.deepStrictEqual(opts.headers, { Authorization: 'Basic ABC123' });
+                    done();
+                } catch (err) {
+                    // done() with parameter is treated as an error.
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             });
@@ -81,19 +121,19 @@ describe('Generic_HTTP', () => {
         });
 
         it('should process systemInfo data', (done) => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 eventType: 'systemInfo',
                 config: defaultConsumerConfig
             });
-            const expectedData = util.deepCopy(context.event.data);
+            const expectedData = testUtil.deepCopy(context.event.data);
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
-                    assert.deepEqual(opts.body, JSON.stringify(expectedData));
+                    assert.deepStrictEqual(opts.body, JSON.stringify(expectedData));
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             });
@@ -102,19 +142,19 @@ describe('Generic_HTTP', () => {
         });
 
         it('should process event data', (done) => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 eventType: 'AVR',
                 config: defaultConsumerConfig
             });
-            const expectedData = util.deepCopy(context.event.data);
+            const expectedData = testUtil.deepCopy(context.event.data);
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
-                    assert.deepEqual(opts.body, JSON.stringify(expectedData));
+                    assert.deepStrictEqual(opts.body, JSON.stringify(expectedData));
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             });

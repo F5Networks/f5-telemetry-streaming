@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2020. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -9,50 +9,84 @@
 'use strict';
 
 
-const constants = require('./constants.js');
-const util = require('./util.js');
-const normalize = require('./normalize.js');
-const properties = require('./properties.json');
-const paths = require('./paths.json');
-const logger = require('./logger.js');
+const constants = require('./constants');
+const util = require('./util');
+const normalize = require('./normalize');
+const defaultProperties = require('./properties.json');
+const defaultPaths = require('./paths.json');
+const logger = require('./logger');
 const EndpointLoader = require('./endpointLoader');
 const dataUtil = require('./dataUtil');
 const systemStatsUtil = require('./systemStatsUtil');
 
+/** @module systemStats */
 
 /**
  * System Stats Class
- * @param {String}  host                                     - host
- * @param {Object}  [options]                                - options
- * @param {Object}  [options.tags]                           - tags to add to the data (each key)
- * @param {String}  [options.credentials.username]           - username for host
- * @param {String}  [options.credentials.passphrase]         - password for host
- * @param {String}  [options.connection.protocol]            - protocol for host
- * @param {Integer} [options.connection.port]                - port for host
- * @param {Boolean} [options.connection.allowSelfSignedCert] - false - requires SSL certificates be valid,
- *                                                             true - allows self-signed certs
+ * @param {Object}  config                                  - config object
+ * @param {Object}  config.connection                       - connection info
+ * @param {String}  config.connection.host                  - host to connect to
+ * @param {Integer} [config.connection.port]                - port to use
+ * @param {String}  [config.connection.protocol]            - protocol to use to connect
+ * @param {Boolean} [config.connection.allowSelfSignedCert] - false - requires SSL certificates be valid,
+ *                                                            true - allows self-signed certs
+ * @param {String}  [config.credentials.username]           - username for host
+ * @param {String}  [config.credentials.passphrase]         - password for host
+ * @param {Object}  [config.dataOpts]                       - data options
+ * @param {Object}  [config.dataOpts.tags]                  - tags to add to the data (each key)
+ * @param {Object}  [config.dataOpts.actions]               - actions to apply to the data (each key)
+ * @param {Boolean} [config.dataOpts.noTMStats]             - true if don't need to fetch TMSTAT data
+ * @param {Object}  [config.endpoints]                      - endpoints to use to fetch data
+ * @param {String}  [config.name]                           - name
  */
-function SystemStats(host, options) {
-    options = options || {};
+function SystemStats(config) {
+    config = util.assignDefaults(
+        config,
+        {
+            connection: {},
+            credentials: {},
+            dataOpts: {},
+            name: 'UnknownPoller'
+        }
+    );
 
-    const _paths = options.paths || paths;
-    const _properties = options.properties || properties;
-
-    this.noTmstats = options.noTmstats;
-    this.tags = options.tags || {};
-    this.loader = new EndpointLoader(host, options);
-    this.loader.setEndpoints(_paths.endpoints);
-
-    this.actions = options.actions || [];
-
-    // deep copy this.stats so that new instances of SystemStats get their own version of this.stats
-    this.stats = util.deepCopy(_properties.stats);
-    this.context = _properties.context;
-    this.definitions = _properties.definitions;
-    this.global = _properties.global;
-
-    this.contextData = {};
+    config.dataOpts = util.assignDefaults(
+        config.dataOpts,
+        {
+            tags: {},
+            noTMStats: false,
+            actions: []
+        }
+    );
+    this.logger = logger.getChild(`${config.name}`);
+    this.noTMStats = config.dataOpts.noTMStats;
+    this.tags = config.dataOpts.tags;
+    this.actions = config.dataOpts.actions;
     this.collectedData = {};
+
+    this.loader = new EndpointLoader(
+        config.connection.host,
+        {
+            credentials: util.deepCopy(config.credentials),
+            connection: util.deepCopy(config.connection),
+            logger: this.logger
+        }
+    );
+
+    const paths = config.paths || defaultPaths;
+    const properties = config.properties || defaultProperties;
+    this.global = properties.global;
+
+    if (typeof config.endpointList === 'undefined') {
+        this.stats = properties.stats;
+        this.definitions = properties.definitions;
+        this.endpoints = paths.endpoints;
+        this.contextProps = properties.context;
+        this.contextData = {};
+    } else {
+        this.endpoints = config.endpointList;
+        this.isCustom = true;
+    }
 }
 /**
  * Split key
@@ -83,6 +117,7 @@ SystemStats.prototype._processData = function (property, data, key) {
     const defaultTags = { name: { pattern: '(.*)', group: 1 } };
     const addKeysByTagIsObject = property.normalization
         && property.normalization.find(n => n.addKeysByTag && typeof n.addKeysByTag === 'object');
+
     const options = {
         key: this._splitKey(property.key).childKey,
         propertyKey: key
@@ -162,13 +197,15 @@ SystemStats.prototype._loadData = function (property) {
 
     return this.loader.loadEndpoint(endpoint, property.keyArgs)
         .then((data) => {
-            if (!data.data.items) {
-                data.data.items = [];
+            data = data.data;
+            if (data && typeof data === 'object' && typeof data.items === 'undefined'
+                && Object.keys(data).length === 2 && data.kind.endsWith('state')) {
+                data.items = [];
             }
-            return Promise.resolve(data.data);
+            return Promise.resolve(data);
         })
         .catch((err) => {
-            logger.error(`Error: SystemStats._loadData: ${endpoint} (${property.keyArgs}): ${err}`);
+            this.logger.error(`Error: SystemStats._loadData: ${endpoint} (${property.keyArgs}): ${err}`);
             return Promise.reject(err);
         });
 };
@@ -181,11 +218,11 @@ SystemStats.prototype._loadData = function (property) {
  * @returns {Object} Promise resolved when data was successfully colleted
  */
 SystemStats.prototype._processProperty = function (key, property) {
-    if (this.noTmstats && property.structure && property.structure.parentKey === 'tmstats') {
+    if (this.noTMStats && property.structure && property.structure.parentKey === 'tmstats') {
         return Promise.resolve();
     }
 
-    property = systemStatsUtil.renderProperty(this.contextData, property);
+    property = systemStatsUtil.renderProperty(this.contextData, util.deepCopy(property));
     /**
      * if endpoints will have their own 'disabled' flag
      * we will need to add additional check here or simply return empty value.
@@ -210,7 +247,7 @@ SystemStats.prototype._processProperty = function (key, property) {
             }
         })
         .catch((err) => {
-            logger.error(`Error: SystemStats._processProperty: ${key} (${property.key}): ${err}`);
+            this.logger.error(`Error: SystemStats._processProperty: ${key} (${property.key}): ${err}`);
             return Promise.reject(err);
         });
 };
@@ -242,15 +279,15 @@ SystemStats.prototype._processContext = function (contextData) {
 SystemStats.prototype._computeContextData = function () {
     let promise;
 
-    if (Array.isArray(this.context)) {
-        if (this.context.length) {
-            promise = this._processContext(this.context[0]);
-            for (let i = 1; i < this.context.length; i += 1) {
-                promise.then(this._processContext(this.context[i]));
+    if (Array.isArray(this.contextProps)) {
+        if (this.contextProps.length) {
+            promise = this._processContext(this.contextProps[0]);
+            for (let i = 1; i < this.contextProps.length; i += 1) {
+                promise.then(this._processContext(this.contextProps[i]));
             }
         }
-    } else if (this.context) {
-        promise = this._processContext(this.context);
+    } else if (this.contextProps) {
+        promise = this._processContext(this.contextProps);
     }
     if (!promise) {
         promise = Promise.resolve();
@@ -278,7 +315,7 @@ SystemStats.prototype._filterStats = function () {
      * to avoid memory usage.
      */
     // early return
-    if (util.isObjectEmpty(this.actions)) {
+    if (util.isObjectEmpty(this.actions) || this.isStatsFilterApplied) {
         return;
     }
     const FLAGS = {
@@ -310,17 +347,17 @@ SystemStats.prototype._filterStats = function () {
         if (!actionCtx.enable) {
             return;
         }
-        if (actionCtx.ifAllMatch) {
-            // if ifAllMatch points to nonexisting data - VS name, tag or what ever else
+        if (actionCtx.ifAllMatch || actionCtx.ifAnyMatch) {
+            // if ifAllMatch or ifAnyMatch points to nonexisting data - VS name, tag or what ever else
             // we have to mark all existing paths with PRESERVE flag
-            dataUtil.searchAnyMatches(statsSkeleton, actionCtx.ifAllMatch, (key, item) => {
+            dataUtil.searchAnyMatches(statsSkeleton, actionCtx.ifAllMatch || actionCtx.ifAnyMatch, (key, item) => {
                 item.flag = FLAGS.PRESERVE;
                 return nestedKey;
             });
         }
-        // if includeData/excludeData paired with ifAllMatch then we can simply ignore it
+        // if includeData/excludeData paired with ifAllMatch or ifAnyMatch then we can simply ignore it
         // because we can't include/exclude data without conditional check
-        if (actionCtx.excludeData && !actionCtx.ifAllMatch) {
+        if (actionCtx.excludeData && !(actionCtx.ifAllMatch || actionCtx.ifAnyMatch)) {
             dataUtil.removeStrictMatches(statsSkeleton, actionCtx.locations, (key, item, getNestedKey) => {
                 if (getNestedKey) {
                     return nestedKey;
@@ -328,7 +365,7 @@ SystemStats.prototype._filterStats = function () {
                 return item.flag !== FLAGS.PRESERVE;
             });
         }
-        if (actionCtx.includeData && !actionCtx.ifAllMatch) {
+        if (actionCtx.includeData && !(actionCtx.ifAllMatch || actionCtx.ifAnyMatch)) {
             // strict is false - it is okay to have partial matches because we can't be sure
             // for 100% that such data was not added by previous action
             dataUtil.preserveStrictMatches(statsSkeleton, actionCtx.locations, false, (key, item, getNestedKey) => {
@@ -339,6 +376,8 @@ SystemStats.prototype._filterStats = function () {
             });
         }
     });
+
+    let statsCopy;
     Object.keys(this.stats).forEach((statKey) => {
         let skeleton = statsSkeleton;
         // path to stat should exists otherwise we can delete it
@@ -350,10 +389,50 @@ SystemStats.prototype._filterStats = function () {
             return skeleton;
         });
         if (!exists) {
-            delete this.stats[statKey];
+            if (!statsCopy) {
+                statsCopy = util.deepCopy(this.stats);
+            }
+            delete statsCopy[statKey];
         }
     });
+    if (statsCopy) {
+        this.stats = statsCopy;
+    }
+    this.isStatsFilterApplied = true;
 };
+
+/**
+ * Converts a telemetry_endpoint to a standard property.
+ * Only BIG-IP paths currently supported,
+ * For e.g. /mgmt/tm/subPath?$select=prop1,prop2
+ * (Note that we don't guarantee behavior for all types of query params)
+ *
+ * @param {String} keyName - property key
+ * @param {Object} endpoint - object to convert
+ *
+ * @returns {Object} Converted property
+ */
+
+SystemStats.prototype._convertToProperty = function (keyName, endpoint) {
+    let normalization;
+    const statsIndex = endpoint.path.indexOf('/stats');
+    const bigipBasePath = 'mgmt/tm/';
+    if (statsIndex > -1) {
+        const mgmtTmIndex = endpoint.path.indexOf(bigipBasePath) + bigipBasePath.length;
+        const renameKeys = { patterns: {} };
+        const pathMatch = endpoint.path.substring(mgmtTmIndex, statsIndex);
+
+        // eslint-disable-next-line no-useless-escape
+        renameKeys.patterns[pathMatch] = { pattern: `${pathMatch}\/(.*)`, group: 1 };
+        normalization = [{ renameKeys }];
+    }
+    return {
+        key: keyName,
+        normalization
+    };
+};
+
+
 /**
  * Compute properties
  *
@@ -365,14 +444,14 @@ SystemStats.prototype._computePropertiesData = function () {
     return Promise.all(Object.keys(this.stats)
         .map(key => this._processProperty(key, this.stats[key])));
 };
+
 /**
- * Collect info based on object provided in properties
+ * Collect info based on object provided in paths and properties files (builtin/ defaults)
  *
  * @returns {Object} Promise which is resolved with a map of stats
  */
-SystemStats.prototype.collect = function () {
-    return this.loader.auth()
-        .then(() => this._computeContextData())
+SystemStats.prototype.collectDefaultPathsProps = function () {
+    return this._computeContextData()
         .then(() => {
             this._filterStats();
             return Promise.resolve();
@@ -394,10 +473,72 @@ SystemStats.prototype.collect = function () {
                 }
             });
             return Promise.resolve(data);
+        });
+};
+
+/**
+ * Collect info based on object provided in declaration (config from user input)
+ * Currently customEndpoints supported are only BIG-IP endpoints
+ *
+ * @returns {Object} Promise
+ */
+SystemStats.prototype.collectCustomEndpoints = function () {
+    return new Promise((resolve, reject) => {
+        const endpKeys = Object.keys(this.endpoints);
+
+        const processEndpoint = (idx) => {
+            if (idx >= endpKeys.length) {
+                return resolve(this.collectedData);
+            }
+            const endpointKey = endpKeys[idx];
+            const endpoint = this.endpoints[endpointKey];
+            const keyName = endpoint.name || endpointKey;
+
+            return Promise.resolve()
+                .then(() => this._processProperty(keyName, this._convertToProperty(keyName, endpoint)))
+                .then(() => {
+                    processEndpoint(idx + 1);
+                })
+                .catch((err) => {
+                    const msg = `Error on attempt to load data from endpoint '${endpoint.name}[${endpoint.path}]': ${err}`;
+                    err.message = msg;
+                    reject(err);
+                });
+        };
+
+        processEndpoint(0);
+    });
+};
+
+/**
+ * Collect info
+ *
+ * @returns {Object} Promise which is resolved with a map of stats
+ */
+SystemStats.prototype.collect = function () {
+    let collectedData;
+    let caughtErr;
+    this.logger.debug('Starting stats collection');
+    return this.loader.auth()
+        .then(() => {
+            this.loader.setEndpoints(this.endpoints);
+            return this.isCustom ? this.collectCustomEndpoints() : this.collectDefaultPathsProps();
+        })
+        .then((data) => {
+            collectedData = data;
         })
         .catch((err) => {
-            logger.error(`Error: SystemStats.collect: ${err}`);
-            return Promise.reject(err);
+            caughtErr = err;
+        })
+        .then(() => {
+            // erase cached data
+            this.loader.eraseCache();
+            if (caughtErr) {
+                const message = caughtErr.message || `Error: SystemStats.collect: ${caughtErr}`;
+                this.logger.error(message);
+                return Promise.reject(caughtErr);
+            }
+            return Promise.resolve(collectedData);
         });
 };
 
