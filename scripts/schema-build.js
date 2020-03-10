@@ -8,6 +8,7 @@
 
 'use strict';
 
+const assert = require('assert');
 const fs = require('fs');
 
 // const base = require('../src/schema/latest/base_schema.json');
@@ -15,7 +16,26 @@ const fs = require('fs');
 const SCHEMA_DIR = `${__dirname}/../src/schema/latest`;
 const outputFile = `${__dirname}/../dist/ts.schema.json`;
 
-const safeTraverse = (p, o) => p.reduce((xs, x) => (xs && xs[x] ? xs[x] : null), o);
+const safeTraverse = (pathArray, parentObject) => pathArray.reduce(
+    (curObj, curPath) => (typeof curObj !== 'undefined' && typeof curObj[curPath] !== 'undefined' ? curObj[curPath] : undefined),
+    parentObject
+);
+
+const normalizeReference = (ref, schemaId) => {
+    ref = ref.startsWith('#') ? `${schemaId}${ref}` : ref;
+    return ref.split('#').join('');
+};
+
+const getReferenceValue = (ref, schemaId, schemaMap) => {
+    const normalizedRef = normalizeReference(ref, schemaId);
+    const refParts = normalizedRef.split('/');
+    const definition = safeTraverse(refParts, schemaMap);
+    assert.notStrictEqual(definition, undefined, `Unable to dereference '${ref}' from schema with id '${schemaId}'`);
+    return {
+        definition,
+        schemaId: refParts[0]
+    };
+};
 
 function writeSchema(name, data) {
     return new Promise((resolve, reject) => {
@@ -27,58 +47,65 @@ function writeSchema(name, data) {
 }
 
 function combineSchemas() {
-    const paths = fs.readdirSync(`${SCHEMA_DIR}/`)
-        .filter(name => !(name.includes('draft')) && name.endsWith('schema.json'))
-        .map(fileName => `${SCHEMA_DIR}/${fileName}`);
-
     const base = { definitions: {} };
-    const contents = [];
-    const defs = {};
+    const schemaMap = {};
 
-    paths.forEach((path) => {
-        const content = JSON.parse(fs.readFileSync(path, 'utf8'));
-        contents.push(content);
-        if (content.definitions) {
-            Object.assign(defs, content.definitions);
+    fs.readdirSync(`${SCHEMA_DIR}/`)
+        .filter(name => !(name.includes('draft')) && name.endsWith('schema.json'))
+        .map(fileName => `${SCHEMA_DIR}/${fileName}`)
+        .forEach((path) => {
+            const schema = JSON.parse(fs.readFileSync(path, 'utf8'));
+            assert.notStrictEqual(schema.$id, undefined, `Schema at path '${path}' should have $id property`);
+            schemaMap[schema.$id] = schema;
+        });
+
+    Object.keys(schemaMap).forEach((schemaId) => {
+        const schema = schemaMap[schemaId];
+        if (!schema.allOf) {
+            return;
         }
-    });
 
-    contents.forEach((content) => {
-        if (content.allOf) {
-            content.allOf.forEach((tsClass) => {
-                const classType = safeTraverse(['if', 'properties', 'class', 'const'], tsClass);
+        schema.allOf.forEach((tsClass) => {
+            const classType = safeTraverse(['if', 'properties', 'class', 'const'], tsClass);
+            if (!classType) {
+                return;
+            }
 
-                if (classType) {
-                    const tmp = {};
-                    const propKeys = Object.keys(tsClass.then.properties);
-                    propKeys.forEach((propKey) => {
-                        const prop = tsClass.then.properties[propKey];
+            const tmp = {};
+            const properties = tsClass.then.properties;
 
-                        // dereference all values
-                        const ref = prop.$ref;
-                        if (ref) {
-                            const def = ref.split('/').pop();
-                            tsClass.then.properties[propKey] = defs[def];
-                        } else if (prop.allOf) {
-                            const def = prop.allOf[0].$ref.split('/').pop();
-                            tsClass.then.properties[propKey] = defs[def];
-                        } else if (prop.oneOf) {
-                            const def = prop.oneOf[1].allOf[1].$ref.split('/').pop();
-                            tsClass.then.properties[propKey] = defs[def];
-                        }
-
-                        // inherit default value on top of the definition
-                        if (prop.$ref || prop.allOf || prop.oneOf) {
-                            tsClass.then.properties[propKey].default = prop.default;
-                        }
-                    });
-
-                    tmp[classType] = tsClass.then;
-                    tmp[classType].description = tsClass.description;
-                    base.definitions = Object.assign(base.definitions, tmp);
+            Object.keys(properties).forEach((propKey) => {
+                const prop = properties[propKey];
+                // dereference all values
+                if (prop.$ref) {
+                    properties[propKey] = getReferenceValue(prop.$ref, schemaId, schemaMap).definition;
+                } else if (prop.allOf) {
+                    properties[propKey] = getReferenceValue(prop.allOf[0].$ref, schemaId, schemaMap).definition;
+                } else if (prop.oneOf) {
+                    let value;
+                    if (propKey === 'systemPoller') {
+                        // Telemetry_System -> systemPoller property -> ref to systemPollerObjectRef -> systemPoller
+                        value = getReferenceValue(prop.oneOf[1].$ref, schemaId, schemaMap);
+                        value = getReferenceValue(value.definition.allOf[1].$ref, value.schemaId, schemaMap).definition;
+                    } else if (propKey === 'iHealthPoller') {
+                        // Telemetry_System -> iHealthPoller property -> ref to iHealthPollerRef -> iHealthPoller
+                        value = getReferenceValue(prop.oneOf[1].$ref, schemaId, schemaMap);
+                        value = getReferenceValue(value.definition.allOf[1].$ref, value.schemaId, schemaMap).definition;
+                    } else {
+                        value = getReferenceValue(prop.oneOf[1].allOf[1].$ref, schemaId, schemaMap).definition;
+                    }
+                    properties[propKey] = value;
+                }
+                // inherit default value on top of the definition
+                if (prop.$ref || prop.allOf || prop.oneOf) {
+                    properties[propKey].default = prop.default;
                 }
             });
-        }
+
+            tmp[classType] = tsClass.then;
+            tmp[classType].description = tsClass.description;
+            base.definitions = Object.assign(base.definitions, tmp);
+        });
     });
     return writeSchema(outputFile, base);
 }

@@ -8,22 +8,26 @@
 
 'use strict';
 
-const assert = require('assert');
+/* eslint-disable import/order */
+
+require('./shared/restoreCache')();
+
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
-const normalize = require('../../src/lib/normalize.js');
-const normalizeUtil = require('../../src/lib/normalizeUtil');
 
 const properties = require('../../src/lib/properties.json');
-const dataExamples = require('./normalizeTestsData.js');
-const EVENT_TYPES = require('../../src/lib/constants.js').EVENT_TYPES;
+const normalize = require('../../src/lib/normalize');
+const normalizeUtil = require('../../src/lib/normalizeUtil');
+const EVENT_TYPES = require('../../src/lib/constants').EVENT_TYPES;
+const dataExamples = require('./normalizeTestsData');
 
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
 describe('Normalize', () => {
-    after(() => {
+    afterEach(() => {
         sinon.restore();
-        Object.keys(require.cache).forEach((key) => {
-            delete require.cache[key];
-        });
     });
 
     const exampleData = {
@@ -78,7 +82,7 @@ describe('Normalize', () => {
                     assert.strictEqual(result.telemetryEventCategory, eventDataExample.category);
                 }
                 if (eventDataExample.expectedData !== undefined) {
-                    assert.deepEqual(result, eventDataExample.expectedData);
+                    assert.deepStrictEqual(result, eventDataExample.expectedData);
                 }
             });
         });
@@ -91,7 +95,7 @@ describe('Normalize', () => {
             };
 
             const result = normalize.event(event);
-            assert.deepEqual(result, expectedResult);
+            assert.deepStrictEqual(result, expectedResult);
         });
 
         it('should normalize event and rename key(s)', () => {
@@ -109,7 +113,7 @@ describe('Normalize', () => {
                 }
             };
             const result = normalize.event(event, options);
-            assert.deepEqual(result, expectedResult);
+            assert.deepStrictEqual(result, expectedResult);
         });
 
         it('should normalize event and format timestamps', () => {
@@ -123,7 +127,7 @@ describe('Normalize', () => {
                 formatTimestamps: ['date_time']
             };
             const result = normalize.event(event, options);
-            assert.deepEqual(result, expectedResult);
+            assert.deepStrictEqual(result, expectedResult);
         });
     });
 
@@ -135,7 +139,7 @@ describe('Normalize', () => {
             };
 
             const result = normalize.data(data);
-            assert.deepEqual(result, data);
+            assert.deepStrictEqual(result, data);
         });
 
         it('should normalize data', () => {
@@ -151,7 +155,7 @@ describe('Normalize', () => {
             };
 
             const result = normalize.data(exampleData);
-            assert.deepEqual(result, expectedResult);
+            assert.deepStrictEqual(result, expectedResult);
         });
 
         it('should get key', () => {
@@ -179,7 +183,7 @@ describe('Normalize', () => {
                 };
 
                 const result = normalize.data(exampleData, options);
-                assert.deepEqual(result, expectedResult);
+                assert.deepStrictEqual(result, expectedResult);
             });
         });
 
@@ -252,7 +256,7 @@ describe('Normalize', () => {
                 };
 
                 const result = normalize.data(data, options);
-                assert.deepEqual(result, expectedResult);
+                assert.deepStrictEqual(result, expectedResult);
             });
 
             it('should preserve array if convertArrayToMap not specified', () => {
@@ -268,7 +272,7 @@ describe('Normalize', () => {
                 };
 
                 const result = normalize.data(data, options);
-                assert.deepEqual(result, result);
+                assert.deepStrictEqual(result, result);
             });
 
             it('should preserve array if skipWheKeyMissing specified and key does not exist', () => {
@@ -308,7 +312,7 @@ describe('Normalize', () => {
                 };
 
                 const result = normalize.data(data, options);
-                assert.deepEqual(result, expectedResult);
+                assert.deepStrictEqual(result, expectedResult);
             });
 
             it('should return empty list if empty array and skipWhenKeyMissing is specified', () => {
@@ -331,7 +335,7 @@ describe('Normalize', () => {
                 };
 
                 const result = normalize.data(data, options);
-                assert.deepEqual(result, expectedResult);
+                assert.deepStrictEqual(result, expectedResult);
             });
 
             it('should return empty object if empty array and skipWhenKeyMissing not specified', () => {
@@ -353,7 +357,7 @@ describe('Normalize', () => {
                 };
 
                 const result = normalize.data(data, options);
-                assert.deepEqual(result, expectedResult);
+                assert.deepStrictEqual(result, expectedResult);
             });
         });
 
@@ -383,7 +387,7 @@ describe('Normalize', () => {
                 };
 
                 const result = normalize.data(data, options);
-                assert.deepEqual(result, expectedResult);
+                assert.deepStrictEqual(result, expectedResult);
             });
 
             it('should not flatten data with first entry when pattern and excludePattern both match', () => {
@@ -418,7 +422,7 @@ describe('Normalize', () => {
                 };
 
                 const result = normalize.data(data, options);
-                assert.deepEqual(result, expectedResult);
+                assert.deepStrictEqual(result, expectedResult);
             });
 
             it('should run custom functions on first entries', () => {
@@ -472,7 +476,7 @@ describe('Normalize', () => {
                 });
 
                 const result = normalize.data(data, options);
-                assert.deepEqual(result, expectedResult);
+                assert.deepStrictEqual(result, expectedResult);
             });
         });
 
@@ -499,7 +503,7 @@ describe('Normalize', () => {
                 const expectedResult = 'name';
 
                 const result = normalize.data('named_key,key1\nname,value', options);
-                assert.deepEqual(result, expectedResult);
+                assert.deepStrictEqual(result, expectedResult);
             });
 
             it('should execute catch with stack trace when thrown error from run custom function', () => {
@@ -535,7 +539,7 @@ describe('Normalize', () => {
                     normalize.data(data, options);
                 } catch (err) {
                     caught = true;
-                    assert.notStrictEqual(err.message.indexOf('runCustomFunction failed'), -1);
+                    assert.notStrictEqual(err.message.indexOf('runCustomFunction \'getAverage\' failed'), -1);
                 }
                 assert(caught);
             });
@@ -553,7 +557,8 @@ describe('Normalize', () => {
                         key: 'value',
                         tenant: 'Common',
                         application: 'app.app',
-                        foo: 'bar'
+                        foo: 'bar',
+                        addntlTag: 'tag'
                     }
                 };
                 const options = {
@@ -567,7 +572,10 @@ describe('Normalize', () => {
                                 },
                                 definitions: properties.definitions,
                                 opts: {
-                                    skip: ['somekey']
+                                    skip: ['somekey'],
+                                    tags: {
+                                        addntlTag: 'tag'
+                                    }
                                 }
                             }
                         }
@@ -575,7 +583,7 @@ describe('Normalize', () => {
                 };
 
                 const result = normalize.data(data, options);
-                assert.deepEqual(result, expectedResult);
+                assert.deepStrictEqual(result, expectedResult);
             });
 
             it('should add keys by tag (flat classify)', () => {
@@ -605,7 +613,7 @@ describe('Normalize', () => {
                 };
 
                 const result = normalize.data(data, options);
-                assert.deepEqual(result, expectedResult);
+                assert.deepStrictEqual(result, expectedResult);
             });
         });
 
@@ -637,7 +645,7 @@ describe('Normalize', () => {
                 };
 
                 const result = normalize.data(data, options);
-                assert.deepEqual(result, expectedResult);
+                assert.deepStrictEqual(result, expectedResult);
             });
 
             it('should format timestamps when matching property key', () => {
@@ -653,7 +661,7 @@ describe('Normalize', () => {
                 };
 
                 const result = normalize.data(data, options);
-                assert.deepEqual(result, expectedResult);
+                assert.deepStrictEqual(result, expectedResult);
             });
         });
     });
@@ -671,7 +679,7 @@ describe('Normalize', () => {
                 ltmConfigTime: '2019-06-19T20:15:28.000Z'
             };
             const result = normalize._handleTimestamps(ret, timestamps, options);
-            assert.deepEqual(result, expected);
+            assert.deepStrictEqual(result, expected);
         });
 
         it('should format timestamps without propertyKey', () => {
@@ -683,7 +691,7 @@ describe('Normalize', () => {
                 formatMe: '2019-09-16T01:00:00.000Z'
             };
             const result = normalize._handleTimestamps(ret, timestamps, {});
-            assert.deepEqual(result, expected);
+            assert.deepStrictEqual(result, expected);
         });
     });
 
@@ -703,7 +711,7 @@ describe('Normalize', () => {
                 key2: 'hello'
             };
             const result = normalize._handleFilterByKeys(ret, filterByKeys);
-            assert.deepEqual(result, expected);
+            assert.deepStrictEqual(result, expected);
         });
     });
 
@@ -723,7 +731,7 @@ describe('Normalize', () => {
                 prop3: 'value3'
             };
             const result = normalize._handleRenameKeys(ret, renameKeys);
-            assert.deepEqual(result, expected);
+            assert.deepStrictEqual(result, expected);
         });
     });
 });

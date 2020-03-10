@@ -12,9 +12,9 @@
 
 const assert = require('assert');
 const fs = require('fs');
-const util = require('../shared/util.js');
-const constants = require('../shared/constants.js');
-const dutUtils = require('../dutTests.js').utils;
+const util = require('../shared/util');
+const constants = require('../shared/constants');
+const dutUtils = require('../dutTests').utils;
 
 // module requirements
 const MODULE_REQUIREMENTS = { DOCKER: true };
@@ -131,7 +131,7 @@ function test() {
 
                     it('should retrieve SystemPoller data', () => dutUtils.getSystemPollerData(dut, constants.DECL.SYSTEM_NAME)
                         .then((data) => {
-                            systemPollerData = data;
+                            systemPollerData = data[0];
                             assert.notStrictEqual(systemPollerData, undefined);
                             assert.notStrictEqual(systemPollerData.system, undefined);
                         }));

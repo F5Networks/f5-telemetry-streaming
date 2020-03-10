@@ -8,7 +8,27 @@
 
 'use strict';
 
-const VERSION = '1.9.0';
+const packageVersionInfo = (function () {
+    let packageVersion = '0.0.0-0';
+    ['../package.json', '../../package.json'].some((fname) => {
+        try {
+            packageVersion = require(fname).version; // eslint-disable-line global-require,import/no-dynamic-require
+            delete require.cache[require.resolve(fname)];
+        } catch (err) {
+            return false;
+        }
+        return true;
+    });
+    packageVersion = packageVersion.split('-');
+    if (packageVersion.length === 1) {
+        // push RELEASE number
+        packageVersion.push('1');
+    }
+    return packageVersion;
+}());
+
+const VERSION = packageVersionInfo[0];
+const RELEASE = packageVersionInfo[1];
 
 
 /**
@@ -47,13 +67,19 @@ WEEKDAY_TO_DAY_NAME[7] = 'sunday';
 
 
 module.exports = {
+    RELEASE,
     VERSION,
 
-    BIG_IP_DEVICE_TYPE: 'BIG-IP',
-    CONSUMERS_CLASS_NAME: 'Telemetry_Consumer',
+    CONFIG_CLASSES: {
+        CONSUMER_CLASS_NAME: 'Telemetry_Consumer',
+        CONTROLS_CLASS_NAME: 'Controls',
+        ENDPOINTS_CLASS_NAME: 'Telemetry_Endpoints',
+        EVENT_LISTENER_CLASS_NAME: 'Telemetry_Listener',
+        IHEALTH_POLLER_CLASS_NAME: 'Telemetry_iHealth_Poller',
+        SYSTEM_CLASS_NAME: 'Telemetry_System',
+        SYSTEM_POLLER_CLASS_NAME: 'Telemetry_System_Poller'
+    },
     CONSUMERS_DIR: './consumers',
-    CONTAINER_DEVICE_TYPE: 'Container',
-    CONTROLS_CLASS_NAME: 'Controls',
     CONTROLS_PROPERTY_NAME: 'controls',
     DAY_NAME_TO_WEEKDAY,
     DEVICE_DEFAULT_PORT: 8100,
@@ -64,8 +90,11 @@ module.exports = {
     DEVICE_REST_MAMD_DIR: '/var/config/rest/madm',
     DEVICE_REST_MADM_URI: '/mgmt/shared/file-transfer/madm/',
     DEVICE_TMP_DIR: '/shared/tmp',
+    DEVICE_TYPE: {
+        BIG_IP: 'BIG-IP',
+        CONTAINER: 'Container'
+    },
     DEFAULT_EVENT_LISTENER_PORT: 6514,
-    EVENT_LISTENER_CLASS_NAME: 'Telemetry_Listener',
     EVENT_TYPES: {
         DEFAULT: 'event',
         AVR_EVENT: 'AVR',
@@ -79,20 +108,19 @@ module.exports = {
         SYSTEM_POLLER: 'systemInfo',
         IHEALTH_POLLER: 'ihealthInfo'
     },
+    HTTP_REQUEST: {
+        DEFAULT_PORT: 80,
+        DEFAULT_PROTOCOL: 'http'
+    },
     IHEALTH_API_LOGIN: 'https://api.f5.com/auth/pub/sso/login/ihealth-api',
     IHEALTH_API_UPLOAD: 'https://ihealth-api.f5.com/qkview-analyzer/api/qkviews',
-    IHEALTH_POLLER_CLASS_NAME: 'Telemetry_iHealth_Poller',
     LOCAL_HOST: 'localhost',
     PASSPHRASE_CIPHER_TEXT: 'cipherText',
     PASSPHRASE_ENVIRONMENT_VAR: 'environmentVar',
     PORT_TO_PROTO,
     PROTO_TO_PORT,
-    QKVIEW_CMD_LOCAL_TIMEOUT: 1 * 60 * 60 * 1000, // 1 hour in miliseconds
-    REQUEST_DEFAULT_PORT: 80,
-    REQUEST_DEFAULT_PROTOCOL: 'http',
+    QKVIEW_CMD_LOCAL_TIMEOUT: 1 * 60 * 60 * 1000, // 1 hour in milliseconds
     STATS_KEY_SEP: '::',
-    SYSTEM_CLASS_NAME: 'Telemetry_System',
-    SYSTEM_POLLER_CLASS_NAME: 'Telemetry_System_Poller',
     STRICT_TLS_REQUIRED: true,
     TRACER_DIR: '/var/tmp/telemetry',
     USER_AGENT: `f5-telemetry/${VERSION}`,

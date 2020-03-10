@@ -12,9 +12,9 @@
 
 const assert = require('assert');
 const fs = require('fs');
-const util = require('../shared/util.js');
-const constants = require('../shared/constants.js');
-const dutUtils = require('../dutTests.js').utils;
+const util = require('../shared/util');
+const constants = require('../shared/constants');
+const dutUtils = require('../dutTests').utils;
 
 const DUTS = util.getHosts('BIGIP');
 

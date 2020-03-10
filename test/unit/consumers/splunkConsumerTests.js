@@ -8,20 +8,23 @@
 
 'use strict';
 
+/* eslint-disable import/order */
+
+require('../shared/restoreCache')();
+
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const request = require('request');
+const sinon = require('sinon');
 const zlib = require('zlib');
+
+const splunkIndex = require('../../../src/lib/consumers/Splunk/index');
+const splunkData = require('./splunkConsumerTestsData');
+const testUtil = require('../shared/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
-const sinon = require('sinon');
 
-const splunkIndex = require('../../../src/lib/consumers/Splunk/index');
-const splunkData = require('./splunkConsumerTestsData.js');
-const util = require('../shared/util.js');
-
-/* eslint-disable global-require */
 describe('Splunk', () => {
     let clock;
 
@@ -51,14 +54,14 @@ describe('Splunk', () => {
         };
 
         it('should configure request options with default values', (done) => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 config: defaultConsumerConfig
             });
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
                     assert.strictEqual(opts.gzip, true);
-                    assert.deepEqual(opts.headers, {
+                    assert.deepStrictEqual(opts.headers, {
                         'Accept-Encoding': 'gzip',
                         Authorization: 'Splunk mySecret',
                         'Content-Encoding': 'gzip',
@@ -68,7 +71,7 @@ describe('Splunk', () => {
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             });
@@ -77,7 +80,7 @@ describe('Splunk', () => {
         });
 
         it('should configure request options with provided values', (done) => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 config: {
                     protocol: 'http',
                     host: 'remoteSplunk',
@@ -89,7 +92,7 @@ describe('Splunk', () => {
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
-                    assert.deepEqual(opts.headers, {
+                    assert.deepStrictEqual(opts.headers, {
                         Authorization: 'Splunk superSecret',
                         'Content-Length': 92
                     });
@@ -97,7 +100,47 @@ describe('Splunk', () => {
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
+                    done(err);
+                }
+            });
+
+            splunkIndex(context);
+        });
+
+        it('should trace data with secrets redacted', (done) => {
+            let traceData;
+            const context = testUtil.buildConsumerContext({
+                config: {
+                    protocol: 'http',
+                    host: 'remoteSplunk',
+                    port: '4567',
+                    passphrase: 'superSecret',
+                    gzip: false
+                }
+            });
+            context.tracer = {
+                write: (input) => {
+                    traceData = JSON.parse(input);
+                }
+            };
+
+            sinon.stub(request, 'post').callsFake((opts) => {
+                try {
+                    assert.deepStrictEqual(opts.headers, {
+                        Authorization: 'Splunk superSecret',
+                        'Content-Length': 92
+                    });
+                    assert.notStrictEqual(traceData.consumer.passphrase.indexOf('*****'), -1,
+                        'consumer config passphrase should be redacted');
+                    assert.notStrictEqual(traceData.requestOpts.headers.Authorization.indexOf('*****'), -1,
+                        'passphrase in request headers should be redacted');
+                    assert.strictEqual(JSON.stringify(traceData).indexOf('superSecret'), -1,
+                        'passphrase should not be present anywhere in trace data');
+                    done();
+                } catch (err) {
+                    // done() with parameter is treated as an error.
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             });
@@ -106,22 +149,22 @@ describe('Splunk', () => {
         });
 
         it('should process systemInfo data', (done) => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 eventType: 'systemInfo',
                 config: defaultConsumerConfig
             });
-            const expectedData = util.deepCopy(expectedDataTemplate);
+            const expectedData = testUtil.deepCopy(expectedDataTemplate);
             expectedData.time = 1576001615000;
-            expectedData.event = util.deepCopy(context.event.data);
+            expectedData.event = testUtil.deepCopy(context.event.data);
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
                     const output = zlib.gunzipSync(opts.body).toString();
-                    assert.deepEqual(output, JSON.stringify(expectedData));
+                    assert.deepStrictEqual(output, JSON.stringify(expectedData));
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             });
@@ -130,21 +173,21 @@ describe('Splunk', () => {
         });
 
         it('should process event data', (done) => {
-            const context = util.buildConsumerContext({
+            const context = testUtil.buildConsumerContext({
                 eventType: 'AVR',
                 config: defaultConsumerConfig
             });
-            const expectedData = util.deepCopy(expectedDataTemplate);
-            expectedData.event = util.deepCopy(context.event.data);
+            const expectedData = testUtil.deepCopy(expectedDataTemplate);
+            expectedData.event = testUtil.deepCopy(context.event.data);
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
                     const output = zlib.gunzipSync(opts.body).toString();
-                    assert.deepEqual(output, JSON.stringify(expectedData));
+                    assert.deepStrictEqual(output, JSON.stringify(expectedData));
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             });
@@ -153,21 +196,26 @@ describe('Splunk', () => {
         });
 
         it('should process systemInfo in legacy format', (done) => {
-            const context = util.buildConsumerContext({
+            // test works correctly while:
+            // - we generating output in predictable order
+            // - Object.keys() returns the same array on different node versions
+            const expectedData = splunkData.legacySystemData[0].expectedData;
+            const context = testUtil.buildConsumerContext({
                 eventType: 'systemInfo',
                 config: defaultConsumerConfig
             });
             context.config.format = 'legacy';
-            const expectedLegacyData = splunkData.legacySystemData[0].expectedData;
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
-                    const output = zlib.gunzipSync(opts.body).toString();
-                    assert.strictEqual(output, expectedLegacyData.replace(/(\r\n|\n|\r)/g, ''));
+                    let output = zlib.gunzipSync(opts.body).toString();
+                    output = output.replace(/}{"time/g, '},{"time');
+                    output = JSON.parse(`[${output}]`);
+                    assert.deepStrictEqual(output, expectedData);
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
-                    // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                     done(err);
                 }
             });
@@ -177,7 +225,7 @@ describe('Splunk', () => {
 
         describe('tmstats', () => {
             it('should replace periods in tmstat key names with underscores', (done) => {
-                const context = util.buildConsumerContext({
+                const context = testUtil.buildConsumerContext({
                     eventType: 'systemInfo',
                     config: defaultConsumerConfig
                 });
@@ -225,7 +273,192 @@ describe('Splunk', () => {
                         done();
                     } catch (err) {
                         // done() with parameter is treated as an error.
-                        // Use catch back to pass thrown error from assert.deepEqual to done() callback
+                        // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
+                        done(err);
+                    }
+                });
+
+                splunkIndex(context);
+            });
+
+            it('should replace IPv6 prefix in monitorInstanceStat', (done) => {
+                const context = testUtil.buildConsumerContext({
+                    eventType: 'systemInfo',
+                    config: defaultConsumerConfig
+                });
+                context.config.format = 'legacy';
+                context.event.data = {
+                    system: {
+                        systemTimestamp: '2020-01-17T18:02:51.000Z'
+                    },
+                    tmstats: {
+                        monitorInstanceStat: [
+                            {
+                                ip_address: '::FFFF:192.0.0.1'
+                            },
+                            {
+                                'ip.address': '::ffff:192.0.0.2'
+                            },
+                            {
+                                'ip.address': '192.0.0.3'
+                            }
+                        ]
+                    },
+                    telemetryServiceInfo: context.event.data.telemetryServiceInfo,
+                    telemetryEventCategory: context.event.data.telemetryEventCategory
+                };
+                sinon.stub(request, 'post').callsFake((opts) => {
+                    try {
+                        const output = zlib.gunzipSync(opts.body).toString();
+                        assert.notStrictEqual(
+                            output.indexOf('"192.0.0.1"'), -1, 'output should remove ::FFFF from ::FFFF:192.0.0.1'
+                        );
+                        assert.notStrictEqual(
+                            output.indexOf('"192.0.0.2"'), -1, 'output should remove ::FFFF from ::ffff:192.0.0.2'
+                        );
+                        assert.notStrictEqual(
+                            output.indexOf('"192.0.0.3"'), -1, 'output should include 192.0.0.3'
+                        );
+                        done();
+                    } catch (err) {
+                        // done() with parameter is treated as an error.
+                        // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
+                        done(err);
+                    }
+                });
+
+                splunkIndex(context);
+            });
+
+            it('should format hex IP', (done) => {
+                const context = testUtil.buildConsumerContext({
+                    eventType: 'systemInfo',
+                    config: defaultConsumerConfig
+                });
+                context.config.format = 'legacy';
+                context.event.data = {
+                    system: {
+                        systemTimestamp: '2020-01-17T18:02:51.000Z'
+                    },
+                    tmstats: {
+                        virtualServerStat: [
+                            {
+                                source: '00:00:00:00:00:00:00:00:00:00:FF:FF:C0:00:00:01:00:00:00:00'
+                            },
+                            {
+                                addr: '10:00:00:00:00:00:00:00:00:00:FF:F8:C0:00:00:01:00:00:00:00'
+                            },
+                            {
+                                destination: '192.0.0.3'
+                            }
+                        ]
+                    },
+                    telemetryServiceInfo: context.event.data.telemetryServiceInfo,
+                    telemetryEventCategory: context.event.data.telemetryEventCategory
+                };
+                sinon.stub(request, 'post').callsFake((opts) => {
+                    try {
+                        const output = zlib.gunzipSync(opts.body).toString();
+                        assert.notStrictEqual(
+                            output.indexOf('"source":"192.0.0.1"'), -1, 'output should include 192.0.0.1'
+                        );
+                        assert.notStrictEqual(
+                            output.indexOf('"addr":"1000:0000:0000:0000:0000:FFF8:C000:0001"'), -1, 'output should include 1000:0000:0000:0000:0000:FFF8:C000:0001'
+                        );
+                        assert.notStrictEqual(
+                            output.indexOf('"destination":"192.0.0.3"'), -1, 'output should include 192.0.0.3'
+                        );
+                        done();
+                    } catch (err) {
+                        // done() with parameter is treated as an error.
+                        // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
+                        done(err);
+                    }
+                });
+
+                splunkIndex(context);
+            });
+
+            it('should include tenant and application', (done) => {
+                const context = testUtil.buildConsumerContext({
+                    eventType: 'systemInfo',
+                    config: defaultConsumerConfig
+                });
+                context.config.format = 'legacy';
+                context.event.data = {
+                    system: {
+                        systemTimestamp: '2020-01-17T18:02:51.000Z'
+                    },
+                    tmstats: {
+                        virtualServerStat: [
+                            {
+                                source: '00:00:00:00:00:00:00:00:00:00:FF:FF:C0:00:00:01:00:00:00:00',
+                                tenant: 'tenant',
+                                application: 'application'
+                            }
+                        ]
+                    },
+                    telemetryServiceInfo: context.event.data.telemetryServiceInfo,
+                    telemetryEventCategory: context.event.data.telemetryEventCategory
+                };
+                sinon.stub(request, 'post').callsFake((opts) => {
+                    try {
+                        const output = zlib.gunzipSync(opts.body).toString();
+                        assert.notStrictEqual(
+                            output.indexOf('"tenant":"tenant"'), -1, 'output should include tenant'
+                        );
+                        assert.notStrictEqual(
+                            output.indexOf('"application":"application"'), -1, 'output should include application'
+                        );
+                        assert.notStrictEqual(
+                            output.indexOf('"appComponent":""'), -1, 'output should include appComponent'
+                        );
+                        done();
+                    } catch (err) {
+                        // done() with parameter is treated as an error.
+                        // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
+                        done(err);
+                    }
+                });
+
+                splunkIndex(context);
+            });
+
+            it('should include last_cycle_count', (done) => {
+                const context = testUtil.buildConsumerContext({
+                    eventType: 'systemInfo',
+                    config: defaultConsumerConfig
+                });
+                context.config.format = 'legacy';
+                context.event.data = {
+                    system: {
+                        systemTimestamp: '2020-01-17T18:02:51.000Z'
+                    },
+                    tmstats: {
+                        virtualServerStat: [
+                            {
+                                cycle_count: '10'
+                            }
+                        ],
+                        virtualServerCpuStat: [
+                            {
+                                avg: '10'
+                            }
+                        ]
+                    },
+                    telemetryServiceInfo: context.event.data.telemetryServiceInfo,
+                    telemetryEventCategory: context.event.data.telemetryEventCategory
+                };
+                sinon.stub(request, 'post').callsFake((opts) => {
+                    try {
+                        const output = zlib.gunzipSync(opts.body).toString();
+                        assert.notStrictEqual(
+                            output.indexOf('"last_cycle_count":"10"'), -1, 'output should include last_cycle_count'
+                        );
+                        done();
+                    } catch (err) {
+                        // done() with parameter is treated as an error.
+                        // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
                         done(err);
                     }
                 });

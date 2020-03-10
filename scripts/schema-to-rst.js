@@ -242,7 +242,7 @@ function getProperties(definition, props, defName) {
 
 function conditionalDescription(definition, props, defName) {
     if ((definition.if && definition.if.properties)
-        || (definition.else && definition.else.properties)) {
+        || (definition.else && definition.else.properties && !definition.if.required)) {
         const conditionalProps = definition.then;
         if (conditionalProps.properties) {
             const conditionalKey = Object.keys(definition.if.properties)[0];

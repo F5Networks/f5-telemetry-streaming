@@ -10,13 +10,14 @@
 
 const Ajv = require('ajv');
 const fs = require('fs');
-const constants = require('./constants.js');
-const util = require('./util.js');
-const deviceUtil = require('./deviceUtil.js');
+const constants = require('./constants');
+const util = require('./util');
+const deviceUtil = require('./deviceUtil');
 
 const textNamedKey = 'plainText';
 const base64NamedKey = 'plainBase64';
 const secureVaultNamedKey = 'SecureVault';
+const secureVaultCipherPrefix = '$M$';
 
 
 /**
@@ -176,6 +177,61 @@ function expandPointers(str, origin, srcPointer) {
     return ret;
 }
 
+/**
+ * Validate path
+ *
+ * @param {Object} origin            - origin object
+ * @param {String} srcPath           - path to follow
+ * @param {Object} options           - options
+ * @param {String} options.path      - base path that starts with class name
+ * @param {Integer} options.partsNum - number of parts the value should consist of. 0 - no limits
+ */
+function validateDeclarationPath(origin, srcPath, options) {
+    // Given sample obj
+    // {
+    //   class: "The_Class",
+    //   collProp: { { key1: val1 }, { key2: val2 } }
+    // }
+
+    // remove leading and trailing '/'
+    const trimPath = val => val.substring(
+        val.startsWith('/') ? 1 : 0,
+        val.endsWith('/') ? (val.length - 1) : val.length
+    );
+
+    // the path defined by the user in their declaration, e.g. The_Class/key_1/.../key_n
+    const dataParts = trimPath(srcPath).split('/');
+    if (options.partsNum && dataParts.length !== options.partsNum) {
+        let exampleFormat = 'ObjectName';
+        if (options.partsNum) {
+            for (let i = 1; i < options.partsNum; i += 1) {
+                exampleFormat = `${exampleFormat}/key${i}`;
+            }
+        } else {
+            exampleFormat = `${exampleFormat}/key1/.../keyN`;
+        }
+        throw new Error(`"${srcPath}" does not follow format "${exampleFormat}"`);
+    }
+
+    // the path defined in the schema {class}/{propLevel_1}/../{propLevel_n}, e.g. The_Class/collProp
+    const schemaParts = trimPath(options.path).split('/');
+    const className = schemaParts[0];
+    const classInstanceName = dataParts[0];
+    let objInstance = origin[classInstanceName];
+
+    if (typeof objInstance !== 'object' || objInstance.class !== className) {
+        throw new Error(`"${classInstanceName}" must be of object type and class "${className}"`);
+    }
+
+    const pathParts = schemaParts.slice(1).concat(dataParts.slice(1));
+    /* eslint-disable no-return-assign */
+    if (!pathParts.every(key => typeof (objInstance = objInstance[key]) !== 'undefined')) {
+        const resolvedPath = `${classInstanceName}/${pathParts.join('/')}`;
+        throw new Error(`Unable to find "${resolvedPath}"`);
+    }
+}
+
+
 const keywords = {
     f5secret: {
         type: 'object',
@@ -189,57 +245,47 @@ const keywords = {
         compile(schema, parentSchema) {
             // eslint-disable-next-line no-unused-vars
             return function (data, dataPath, parentData, propertyName, rootData) {
-                const ajvErrors = [];
-
-                // we handle a number of passphrase object in this function, the following describes each of them
-                // 'cipherText': this means we plan to store a plain text secret locally, which requires we encrypt
-                // it first. This also assumes that we are running on a BIG-IP where we have the means to do so
-                // 'environmentVar': undefined
-
-                // handle 'environmentVar' passphrase object
-                if (data[constants.PASSPHRASE_ENVIRONMENT_VAR] !== undefined) {
-                    return Promise.resolve(true);
-                }
-                // handle 'cipherText' passphrase object
-                if (data[constants.PASSPHRASE_CIPHER_TEXT] !== undefined) {
-                    // if data is already encrypted just return
-                    if (data.protected === secureVaultNamedKey) {
-                        return Promise.resolve(true);
-                    }
-
-                    // base64 decode before encrypting - if needed
-                    if (data.protected === base64NamedKey) {
-                        data[constants.PASSPHRASE_CIPHER_TEXT] = util.base64('decode', data[constants.PASSPHRASE_CIPHER_TEXT]);
-                        data.protected = textNamedKey;
-                    }
-
-                    return deviceUtil.getDeviceType()
-                        .then((deviceType) => {
-                            // check if on a BIG-IP and fail validation if not
-                            if (deviceType !== constants.BIG_IP_DEVICE_TYPE) {
-                                throw new Error(`Specifying '${constants.PASSPHRASE_CIPHER_TEXT}' requires running on ${constants.BIG_IP_DEVICE_TYPE}`);
+                return Promise.resolve()
+                    .then(() => {
+                        /**
+                         * we handle a number of passphrase object in this function,
+                         * the following describes each of them:
+                         * - 'cipherText': this means we plan to store a plain text secret locally,
+                         *   which requires we encrypt it first. This also assumes that we are
+                         *   running on a BIG-IP where we have the means to do so.
+                         * - 'environmentVar': undefined
+                         */
+                        if (typeof data[constants.PASSPHRASE_ENVIRONMENT_VAR] !== 'undefined') {
+                            return Promise.resolve(true);
+                        }
+                        if (typeof data[constants.PASSPHRASE_CIPHER_TEXT] === 'undefined') {
+                            return Promise.reject(new Error(`missing ${constants.PASSPHRASE_CIPHER_TEXT} or ${constants.PASSPHRASE_ENVIRONMENT_VAR}`));
+                        }
+                        if (data.protected === secureVaultNamedKey) {
+                            if (data[constants.PASSPHRASE_CIPHER_TEXT].startsWith(secureVaultCipherPrefix)) {
+                                return Promise.resolve(true);
                             }
-                            // encrypt secret
-                            return deviceUtil.encryptSecret(data[constants.PASSPHRASE_CIPHER_TEXT]);
-                        })
-                        .then((secret) => {
-                            // update text field with secret - should we base64 encode?
-                            data[constants.PASSPHRASE_CIPHER_TEXT] = secret;
-                            // set protected key - in case we return validated schema to requestor
-                            data.protected = secureVaultNamedKey;
+                            return Promise.reject(new Error(`'${constants.PASSPHRASE_CIPHER_TEXT}' should be encrypted by ${constants.DEVICE_TYPE.BIG_IP} when 'protected' is '${secureVaultNamedKey}'`));
+                        }
+                        if (data.protected === base64NamedKey) {
+                            data[constants.PASSPHRASE_CIPHER_TEXT] = util.base64('decode', data[constants.PASSPHRASE_CIPHER_TEXT]);
+                            data.protected = textNamedKey;
+                        }
 
-                            // notify success
-                            return true;
-                        })
-                        .catch((e) => {
-                            ajvErrors.push({ keyword: 'f5secret', message: e.message, params: {} });
-                            throw new Ajv.ValidationError(ajvErrors);
-                        });
-                }
-
-                // if we make it here we should reject with a useful message
-                const message = `missing ${constants.PASSPHRASE_CIPHER_TEXT} or ${constants.PASSPHRASE_ENVIRONMENT_VAR}`;
-                return Promise.reject(new Ajv.ValidationError([{ keyword: 'f5secret', message, params: {} }]));
+                        return deviceUtil.getDeviceType()
+                            .then((deviceType) => {
+                                if (deviceType !== constants.DEVICE_TYPE.BIG_IP) {
+                                    return Promise.reject(new Error(`Specifying '${constants.PASSPHRASE_CIPHER_TEXT}' requires running on ${constants.DEVICE_TYPE.BIG_IP}`));
+                                }
+                                return deviceUtil.encryptSecret(data[constants.PASSPHRASE_CIPHER_TEXT]);
+                            })
+                            .then((secret) => {
+                                data[constants.PASSPHRASE_CIPHER_TEXT] = secret;
+                                data.protected = secureVaultNamedKey;
+                                return true;
+                            });
+                    })
+                    .catch(e => Promise.reject(new Ajv.ValidationError([{ keyword: 'f5secret', message: e.message || e.toString(), params: {} }])));
             };
         }
     },
@@ -329,20 +375,57 @@ const keywords = {
         compile(schema, parentSchema) {
             // eslint-disable-next-line no-unused-vars
             return function (data, dataPath, parentData, propertyName, rootData) {
-                const ajvErrors = [];
-                // string passed
                 if (typeof data === 'string') {
                     const declarationClass = schema;
-                    if (!(rootData[data] && rootData[data].class === declarationClass)) {
-                        ajvErrors.push({
-                            keyword: 'ihealth',
+                    const objectInstance = rootData[data];
+                    if (typeof objectInstance !== 'object' || objectInstance.class !== declarationClass) {
+                        return Promise.reject(new Ajv.ValidationError([{
+                            keyword: 'declarationClass',
                             message: `declaration with name "${data}" and class "${declarationClass}" doesn't exist`,
                             params: {}
-                        });
+                        }]));
                     }
                 }
-                if (ajvErrors.length) {
-                    return Promise.reject(new Ajv.ValidationError(ajvErrors));
+                return Promise.resolve(true);
+            };
+        }
+    },
+    declarationClassProp: {
+        type: 'string',
+        errors: true,
+        modifying: true,
+        async: true,
+        metaSchema: {
+            type: 'object',
+            description: 'Automatically resolve a path with given {declarationClass}/{propLevel_1}/...{propLevel_n}',
+            properties: {
+                partsNum: {
+                    description: 'Expected number of parts the value should consist of. 0 - no limits',
+                    type: 'integer',
+                    minimum: 0,
+                    maximum: 100,
+                    default: 0
+                },
+                path: {
+                    description: '{declarationClass}/{propLevel_1}/...{propLevel_n}',
+                    type: 'string',
+                    minLength: 1
+                }
+            }
+        },
+        // eslint-disable-next-line no-unused-vars
+        compile(schema, parentSchema) {
+            return function (data, dataPath, parentData, propertyName, rootData) {
+                if (typeof data === 'string') {
+                    try {
+                        validateDeclarationPath(rootData, data, schema);
+                    } catch (err) {
+                        return Promise.reject(new Ajv.ValidationError([{
+                            keyword: 'declarationClassProp',
+                            message: `${err}`,
+                            params: {}
+                        }]));
+                    }
                 }
                 return Promise.resolve(true);
             };
@@ -360,7 +443,7 @@ const keywords = {
         // eslint-disable-next-line no-unused-vars
         validate(schema, data, parentSchema, dataPath, parentData, propertyName, rootData) {
             // looks like instance is configured as default
-            if (data) {
+            if (typeof data === 'string') {
                 return new Promise((resolve, reject) => {
                     fs.access(data, (fs.constants || fs).R_OK, (accessErr) => {
                         if (accessErr) {

@@ -12,9 +12,9 @@
 
 const assert = require('assert');
 const fs = require('fs');
-const util = require('../shared/util.js');
-const constants = require('../shared/constants.js');
-const dutUtils = require('../dutTests.js').utils;
+const util = require('../shared/util');
+const constants = require('../shared/constants');
+const dutUtils = require('../dutTests').utils;
 
 // module requirements
 const MODULE_REQUIREMENTS = { DOCKER: true };
@@ -107,7 +107,7 @@ function test() {
 
         before(() => new Promise(resolve => setTimeout(resolve, 30 * 1000))
             .then(() => dutUtils.getSystemPollersData((hostObj, data) => {
-                systemPollerData[hostObj.hostname] = data;
+                systemPollerData[hostObj.hostname] = data[0];
             })));
 
         it('should get log data from Fluentd stdout', () => runRemoteCmd(`docker logs ${FLUENTD_NAME}`)

@@ -1,6 +1,25 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.10.0
+### Added
+- AUTOTOOL-1111: Enable configurable polling with Telemetry_Endpoints (BIG-IP paths) and multiple system poller support
+- AUTOTOOL-1148: Allow 'OR' logic by adding ifAnyMatch functionality.
+- AUTOTOOL-853: Support F5 systems (ex: Viprion) that have multiple hosts
+### Fixed
+- AUTOTOOL-1051: Event Listener unable to classify AFM DoS event
+- AUTOTOOL-1037: Splunk legacy tmstats - include last_cycle_count
+- AUTOTOOL-1019: Splunk legacy tmstats - add tenant and application data
+- AUTOTOOL-1128: Declarations with large secrets may timeout
+- AUTOTOOL-1154: Passphrases should be obfuscated in consumer trace files
+- AUTOTOOL-1147: Add 'profiles' data (profiles attached to Virtual Server) to 'virtualServers'
+- AUTOTOOL-896: [GitHub #26](https://github.com/F5Networks/f5-telemetry-streaming/pull/26): Use baseMac instead of hostname to fetch CM device
+- AUTOTOOL-1160: cipherText validation when protected by SecureVault
+- AUTOTOOL-1239: Caching data about the host device to speed up declaration processing
+### Changed
+- AUTOTOOL-1062: Update NPM packages
+### Removed
+
 ## 1.9.0
 ### Added
 - AUTOTOOL-725 and AUTOTOOL-755: Add support for GSLB WideIP and Pools Config and Stats

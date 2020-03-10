@@ -8,8 +8,8 @@
 
 'use strict';
 
-const logger = require('./logger.js'); // eslint-disable-line no-unused-vars
-const consumersHndlr = require('./consumers.js');
+const logger = require('./logger'); // eslint-disable-line no-unused-vars
+const consumersHndlr = require('./consumers');
 
 /**
 * Forward data to consumer

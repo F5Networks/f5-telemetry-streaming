@@ -8,7 +8,7 @@
 
 'use strict';
 
-const EVENT_TYPES = require('../../src/lib/constants.js').EVENT_TYPES;
+const EVENT_TYPES = require('../../src/lib/constants').EVENT_TYPES;
 
 /* eslint-disable no-useless-escape */
 
@@ -106,6 +106,35 @@ module.exports = {
         },
         // TEST RELATED DATA STARTS HERE
         {
+            name: 'should execute action when ifAnyMatch is valid',
+            actionCtx: {
+                enable: true,
+                setTag: {
+                    tag: 'tag'
+                },
+                ifAnyMatch: [
+                    {
+                        foo: 'bar'
+                    },
+                    {
+                        foo: 'baz'
+                    }
+                ]
+            },
+            dataCtx: {
+                data: {
+                    foo: 'baz'
+                }
+            },
+            expectedCtx: {
+                data: {
+                    foo: 'baz',
+                    tag: 'tag'
+                }
+            }
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
             name: 'should not execute action when ifAllMatch is invalid',
             actionCtx: {
                 enable: true,
@@ -115,6 +144,34 @@ module.exports = {
                 ifAllMatch: {
                     foo: 'foo'
                 }
+            },
+            dataCtx: {
+                data: {
+                    foo: 'bar'
+                }
+            },
+            expectedCtx: {
+                data: {
+                    foo: 'bar'
+                }
+            }
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should not execute action when ifAnyMatch is invalid',
+            actionCtx: {
+                enable: true,
+                setTag: {
+                    tag: 'tag'
+                },
+                ifAnyMatch: [
+                    {
+                        foo: 'foo'
+                    },
+                    {
+                        foo: 'fooz'
+                    }
+                ]
             },
             dataCtx: {
                 data: {
@@ -808,6 +865,51 @@ module.exports = {
                             '/tenant2/application1/property2': {},
                             property3: {},
                             property4: {}
+                        }
+                    },
+                    telemetryEventCategory: EVENT_TYPES.SYSTEM_POLLER
+                },
+                type: EVENT_TYPES.SYSTEM_POLLER
+            }
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should set tenant and application tags to tmstats',
+            dataCtx: {
+                data: {
+                    tmstats: {
+                        virtualServerStat: {
+                            '/tenant1/application1/vs1': {},
+                            '/tenant2/application1/vs2': {},
+                            vs3: {},
+                            vs4: {}
+                        }
+                    },
+                    telemetryEventCategory: EVENT_TYPES.SYSTEM_POLLER
+                },
+                type: EVENT_TYPES.SYSTEM_POLLER
+            },
+            actionCtx: {
+                enable: true,
+                setTag: {
+                    tenantTag: '`T`',
+                    applicationTag: '`A`'
+                }
+            },
+            expectedCtx: {
+                data: {
+                    tmstats: {
+                        virtualServerStat: {
+                            '/tenant1/application1/vs1': {
+                                tenantTag: 'tenant1',
+                                applicationTag: 'application1'
+                            },
+                            '/tenant2/application1/vs2': {
+                                tenantTag: 'tenant2',
+                                applicationTag: 'application1'
+                            },
+                            vs3: {},
+                            vs4: {}
                         }
                     },
                     telemetryEventCategory: EVENT_TYPES.SYSTEM_POLLER

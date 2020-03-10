@@ -14,10 +14,10 @@ const setupAsync = require('ajv-async');
 const EventEmitter = require('events');
 const TeemDevice = require('@f5devcentral/f5-teem').Device;
 
-const logger = require('./logger.js');
-const util = require('./util.js');
-const deviceUtil = require('./deviceUtil.js');
-const persistentStorage = require('./persistentStorage.js').persistentStorage;
+const logger = require('./logger');
+const util = require('./util');
+const deviceUtil = require('./deviceUtil');
+const persistentStorage = require('./persistentStorage').persistentStorage;
 
 const baseSchema = require('../schema/latest/base_schema.json');
 const controlsSchema = require('../schema/latest/controls_schema.json');
@@ -27,11 +27,12 @@ const systemPollerSchema = require('../schema/latest/system_poller_schema.json')
 const listenerSchema = require('../schema/latest/listener_schema.json');
 const consumerSchema = require('../schema/latest/consumer_schema.json');
 const iHealthPollerSchema = require('../schema/latest/ihealth_poller_schema.json');
+const endpointsSchema = require('../schema/latest/endpoints_schema.json');
 
-const customKeywords = require('./customKeywords.js');
-const CONTROLS_CLASS_NAME = require('./constants.js').CONTROLS_CLASS_NAME;
-const CONTROLS_PROPERTY_NAME = require('./constants.js').CONTROLS_PROPERTY_NAME;
-const VERSION = require('./constants.js').VERSION;
+const customKeywords = require('./customKeywords');
+const CONTROLS_CLASS_NAME = require('./constants').CONFIG_CLASSES.CONTROLS_CLASS_NAME;
+const CONTROLS_PROPERTY_NAME = require('./constants').CONTROLS_PROPERTY_NAME;
+const VERSION = require('./constants').VERSION;
 
 const PERSISTENT_STORAGE_KEY = 'config';
 const BASE_CONFIG = {
@@ -52,7 +53,7 @@ function ConfigWorker() {
         name: 'Telemetry Streaming',
         version: VERSION
     };
-    this.teemDevice = new TeemDevice(assetInfo, 'staging');
+    this.teemDevice = new TeemDevice(assetInfo);
 }
 
 nodeUtil.inherits(ConfigWorker, EventEmitter);
@@ -118,6 +119,7 @@ ConfigWorker.prototype.loadConfig = function () {
  * @returns {Object} Promise which is resolved once state is saved
  */
 ConfigWorker.prototype.saveConfig = function (config) {
+    // persistentStorage.set will make copy of data
     return persistentStorage.set(PERSISTENT_STORAGE_KEY, config)
         .then(() => logger.debug('Application config saved'))
         .catch((err) => {
@@ -133,13 +135,14 @@ ConfigWorker.prototype.saveConfig = function (config) {
  * @returns {Promise} Promise resolved with config
  */
 ConfigWorker.prototype.getConfig = function () {
+    // persistentStorage.get returns data copy
     return persistentStorage.get(PERSISTENT_STORAGE_KEY)
         .then((data) => {
             if (typeof data === 'undefined') {
                 logger.debug(`persistentStorage did not have a value for ${PERSISTENT_STORAGE_KEY}`);
             }
             return (typeof data === 'undefined'
-                || typeof data.parsed === 'undefined') ? BASE_CONFIG : data;
+                || typeof data.parsed === 'undefined') ? util.deepCopy(BASE_CONFIG) : data;
         });
 };
 
@@ -158,7 +161,8 @@ ConfigWorker.prototype.compileSchema = function () {
         systemPoller: systemPollerSchema,
         listener: listenerSchema,
         consumer: consumerSchema,
-        iHealthPoller: iHealthPollerSchema
+        iHealthPoller: iHealthPollerSchema,
+        endpoints: endpointsSchema
     };
     const keywords = customKeywords;
 

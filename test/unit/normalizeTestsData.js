@@ -8,7 +8,7 @@
 
 'use strict';
 
-const EVENT_TYPES = require('../../src/lib/constants.js').EVENT_TYPES;
+const EVENT_TYPES = require('../../src/lib/constants').EVENT_TYPES;
 
 /* eslint-disable no-useless-escape */
 
@@ -52,6 +52,11 @@ module.exports = {
         {
             name: 'valid AFM event (2)',
             data: 'acl_policy_name="AFM_PROFILE_NAME",acl_rule_name="AFM_RULE_NAME",key1="value",key2="value2"',
+            category: EVENT_TYPES.AFM_EVENT
+        },
+        {
+            name: 'valid AFM DoS event',
+            data: 'action="Allow",hostname="bigip1.velasco",bigip_mgmt_ip="10.201.198.70",context_name="/Common/10.10.10.140",date_time="2019-12-18T03:37:19.000Z",dest_ip="10.10.10.140",dest_port="80",device_product="Advanced Firewall Module",device_vendor="F5",device_version="13.1.1.0.0.4",dos_attack_event="Attack Sampled",dos_attack_id="710253591",dos_attack_name="TCP RST flood",dos_packets_dropped="0",dos_packets_received="1",errdefs_msgno="23003138",errdefs_msg_name="Network DoS Event",flow_id="0000000000000000",severity="4",dos_mode="Enforced",dos_src="Volumetric, Aggregated across all SrcIP\'s, VS-Specific attack, metric:PPS",partition_name="Common",route_domain="0",source_ip="10.10.10.210",source_port="9607",vlan="/Common/internal",telemetryEventCategory="LTM",tenant="Common',
             category: EVENT_TYPES.AFM_EVENT
         },
         {

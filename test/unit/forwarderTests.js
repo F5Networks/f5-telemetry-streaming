@@ -8,34 +8,36 @@
 
 'use strict';
 
-const assert = require('assert');
-const DataFilter = require('../../src/lib/dataFilter.js').DataFilter;
+/* eslint-disable import/order */
 
-/* eslint-disable global-require */
+require('./shared/restoreCache')();
+require('./shared/disableAjv'); // consumers and forwarder import config with ajv
+
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+const sinon = require('sinon');
+
+const DataFilter = require('../../src/lib/dataFilter').DataFilter;
+const forwarder = require('../../src/lib/forwarder');
+const consumers = require('../../src/lib/consumers');
+
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
 describe('Forwarder', () => {
-    let forwarder;
-    let consumers;
-
-    let actualContext;
     const config = {
         type: 'consumerType'
     };
     const type = 'dataType';
     const data = { foo: 'bar' };
 
-    before(() => {
-        forwarder = require('../../src/lib/forwarder.js');
-        consumers = require('../../src/lib/consumers.js');
-    });
-    after(() => {
-        Object.keys(require.cache).forEach((key) => {
-            delete require.cache[key];
-        });
+    afterEach(() => {
+        sinon.restore();
     });
 
     it('should forward to consumer', () => {
-        consumers.getConsumers = () => [
+        let actualContext;
+        sinon.stub(consumers, 'getConsumers').returns([
             {
                 consumer: (context) => {
                     actualContext = context;
@@ -44,26 +46,21 @@ describe('Forwarder', () => {
                 tracer: null,
                 filter: new DataFilter({})
             }
-        ];
-
-        return forwarder.forward({ type, data })
+        ]);
+        return assert.isFulfilled(forwarder.forward({ type, data })
             .then(() => {
-                assert.deepEqual(actualContext.event.data, data);
-                assert.deepEqual(actualContext.config, config);
-            })
-            .catch(err => Promise.reject(err));
+                assert.deepStrictEqual(actualContext.event.data, data);
+                assert.deepStrictEqual(actualContext.config, config);
+            }));
     });
 
     it('should resolve with no consumers', () => {
-        consumers.getConsumers = () => null;
-
-        return forwarder.forward({ type, data })
-            .then(() => {})
-            .catch(err => Promise.reject(new Error(`Should not error: ${err}`)));
+        sinon.stub(consumers, 'getConsumers').returns(null);
+        return assert.isFulfilled(forwarder.forward({ type, data }));
     });
 
     it('should resolve on consumer error', () => {
-        consumers.getConsumers = () => [
+        sinon.stub(consumers, 'getConsumers').returns([
             {
                 consumer: () => {
                     throw new Error('foo');
@@ -72,10 +69,7 @@ describe('Forwarder', () => {
                 tracer: null,
                 filter: new DataFilter({})
             }
-        ];
-
-        return forwarder.forward({ type, data })
-            .then(() => {})
-            .catch(err => Promise.reject(new Error(`Should not error: ${err}`)));
+        ]);
+        return assert.isFulfilled(forwarder.forward({ type, data }));
     });
 });

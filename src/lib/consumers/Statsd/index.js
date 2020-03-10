@@ -15,7 +15,7 @@
 // udp/tcp it might be simpler to just implement net module directly for this use case
 const StatsD = require('node-statsd');
 const deepDiff = require('deep-diff');
-const EVENT_TYPES = require('../../constants.js').EVENT_TYPES;
+const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 
 const stripMetrics = (data) => {
     Object.keys(data).forEach((item) => {
