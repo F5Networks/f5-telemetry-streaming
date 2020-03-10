@@ -229,7 +229,20 @@
                         "title": "Type",
                         "description": "" ,
                         "type": "string",
-                        "enum": [ "default", "Generic_HTTP", "Splunk", "Azure_Log_Analytics", "AWS_CloudWatch", "AWS_S3", "Graphite", "Kafka", "ElasticSearch", "Sumo_Logic", "Statsd", "Google_StackDriver" ]
+                        "enum": [
+                            "AWS_CloudWatch",
+                            "AWS_S3",
+                            "Azure_Log_Analytics",
+                            "default",
+                            "ElasticSearch",
+                            "Generic_HTTP",
+                            "Google_StackDriver",
+                            "Graphite",
+                            "Kafka",
+                            "Splunk",
+                            "Statsd",
+                            "Sumo_Logic"
+                        ]
                     },
                     "enableHostConnectivityCheck": {
                         "$ref": "base_schema.json#/definitions/enableHostConnectivityCheck"
@@ -252,13 +265,13 @@
                             "trace": {},
                             "type": {},
                             "enableHostConnectivityCheck": {},
+                            "allowSelfSignedCert": {},
                             "host": {},
                             "protocol": {},
                             "port": {},
                             "path": {},
                             "method": {},
                             "headers": {},
-                            "allowSelfSignedCert": {},
                             "username": {},
                             "passphrase": {},
                             "format": {},

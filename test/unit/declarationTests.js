@@ -2717,4 +2717,571 @@ describe('Declarations', () => {
             return assert.isRejected(config.validate(data), /\/My_Endpoints\/items\/first\/path.*should NOT be shorter than/);
         });
     });
+
+    describe('Telemetry_Consumer', () => {
+        let minimalDeclaration;
+        let minimalExpected;
+        let fullDeclaration;
+        let fullExpected;
+
+        const validate = (targetDeclaration, consumerProps, expectedTarget, expectedProps) => {
+            Object.assign(targetDeclaration.My_Consumer, consumerProps);
+            Object.assign(expectedTarget || {}, expectedProps || {});
+            return config.validate(targetDeclaration)
+                .then((validConfig) => {
+                    assert.deepStrictEqual(validConfig.My_Consumer, expectedTarget);
+                });
+        };
+
+        const validateMinimal = (consumerProps, expectedProps) => validate(
+            minimalDeclaration,
+            consumerProps,
+            minimalExpected,
+            expectedProps
+        );
+
+        const validateFull = (consumerProps, expectedProps) => validate(
+            fullDeclaration,
+            consumerProps,
+            fullExpected,
+            expectedProps
+        );
+
+        beforeEach(() => {
+            minimalDeclaration = {
+                class: 'Telemetry',
+                My_Consumer: {
+                    class: 'Telemetry_Consumer',
+                    type: 'default'
+                }
+            };
+            minimalExpected = {
+                class: 'Telemetry_Consumer',
+                type: 'default',
+                enable: true,
+                trace: false,
+                allowSelfSignedCert: false
+            };
+            fullDeclaration = {
+                class: 'Telemetry',
+                My_Consumer: {
+                    class: 'Telemetry_Consumer',
+                    type: 'default',
+                    enable: false,
+                    trace: true,
+                    enableHostConnectivityCheck: true,
+                    allowSelfSignedCert: true
+                }
+            };
+            fullExpected = {
+                class: 'Telemetry_Consumer',
+                type: 'default',
+                enable: false,
+                trace: true,
+                enableHostConnectivityCheck: true,
+                allowSelfSignedCert: true
+            };
+        });
+
+        // use 'default' consumer because it has no additional properties
+        it('should pass minimal declaration', () => validateMinimal({}, {}));
+        it('should allow full declaration', () => validateFull({}, {}));
+        it('should not allow additional properties', () => assert.isRejected(
+            validateMinimal({ someKey: 'someValue' }),
+            /My_Consumer.*someKey.*should NOT have additional properties/
+        ));
+
+        describe('AWS_CloudWatch', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'AWS_CloudWatch',
+                    region: 'region',
+                    logGroup: 'logGroup',
+                    logStream: 'logStream'
+                },
+                {
+                    type: 'AWS_CloudWatch',
+                    region: 'region',
+                    logGroup: 'logGroup',
+                    logStream: 'logStream'
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'AWS_CloudWatch',
+                    region: 'region',
+                    logGroup: 'logGroup',
+                    logStream: 'logStream',
+                    username: 'username',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                {
+                    type: 'AWS_CloudWatch',
+                    region: 'region',
+                    logGroup: 'logGroup',
+                    logStream: 'logStream',
+                    username: 'username',
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+        });
+
+        describe('AWS_S3', () => {
+            it('should pass declaration', () => validateMinimal(
+                {
+                    type: 'AWS_S3',
+                    region: 'region',
+                    bucket: 'bucket',
+                    username: 'username',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                {
+                    type: 'AWS_S3',
+                    region: 'region',
+                    bucket: 'bucket',
+                    username: 'username',
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'AWS_S3',
+                    region: 'region',
+                    bucket: 'bucket',
+                    username: 'username',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                {
+                    type: 'AWS_S3',
+                    region: 'region',
+                    bucket: 'bucket',
+                    username: 'username',
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+        });
+
+        describe('Azure_Log_Analytics', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'Azure_Log_Analytics',
+                    workspaceId: 'workspaceId',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                {
+                    type: 'Azure_Log_Analytics',
+                    workspaceId: 'workspaceId',
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'Azure_Log_Analytics',
+                    workspaceId: 'workspaceId',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                {
+                    type: 'Azure_Log_Analytics',
+                    workspaceId: 'workspaceId',
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+        });
+
+        describe('ElasticSearch', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'ElasticSearch',
+                    host: 'host',
+                    index: 'index'
+                },
+                {
+                    type: 'ElasticSearch',
+                    host: 'host',
+                    index: 'index',
+                    dataType: 'f5.telemetry',
+                    port: 9200,
+                    protocol: 'https'
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'ElasticSearch',
+                    host: 'host',
+                    protocol: 'http',
+                    port: 8080,
+                    path: 'path',
+                    index: 'index',
+                    username: 'username',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    },
+                    apiVersion: '1.0',
+                    dataType: 'dataType'
+                },
+                {
+                    type: 'ElasticSearch',
+                    host: 'host',
+                    protocol: 'http',
+                    port: 8080,
+                    path: 'path',
+                    index: 'index',
+                    username: 'username',
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    },
+                    apiVersion: '1.0',
+                    dataType: 'dataType'
+                }
+            ));
+        });
+
+        describe('Generic_HTTP', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'Generic_HTTP',
+                    host: 'host'
+                },
+                {
+                    type: 'Generic_HTTP',
+                    host: 'host',
+                    protocol: 'https',
+                    port: 443,
+                    path: '/',
+                    method: 'POST'
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'Generic_HTTP',
+                    host: 'host',
+                    protocol: 'http',
+                    port: 80,
+                    path: '/path',
+                    method: 'PUT',
+                    headers: [
+                        {
+                            name: 'headerName',
+                            value: 'headerValue'
+                        }
+                    ],
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                {
+                    type: 'Generic_HTTP',
+                    host: 'host',
+                    protocol: 'http',
+                    port: 80,
+                    path: '/path',
+                    method: 'PUT',
+                    headers: [
+                        {
+                            name: 'headerName',
+                            value: 'headerValue'
+                        }
+                    ],
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+        });
+
+        describe('Google_StackDriver', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'Google_StackDriver',
+                    projectId: 'projectId',
+                    privateKeyId: 'privateKeyId',
+                    privateKey: {
+                        cipherText: 'privateKey'
+                    },
+                    serviceEmail: 'serviceEmail'
+                },
+                {
+                    type: 'Google_StackDriver',
+                    projectId: 'projectId',
+                    privateKeyId: 'privateKeyId',
+                    privateKey: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    },
+                    serviceEmail: 'serviceEmail'
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'Google_StackDriver',
+                    projectId: 'projectId',
+                    privateKeyId: 'privateKeyId',
+                    privateKey: {
+                        cipherText: 'privateKey'
+                    },
+                    serviceEmail: 'serviceEmail'
+                },
+                {
+                    type: 'Google_StackDriver',
+                    projectId: 'projectId',
+                    privateKeyId: 'privateKeyId',
+                    privateKey: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    },
+                    serviceEmail: 'serviceEmail'
+                }
+            ));
+        });
+
+        describe('Graphite', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'Graphite',
+                    host: 'host'
+                },
+                {
+                    type: 'Graphite',
+                    host: 'host',
+                    protocol: 'https',
+                    port: 443,
+                    path: '/events/'
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'Graphite',
+                    host: 'host',
+                    protocol: 'http',
+                    port: 80,
+                    path: 'path'
+                },
+                {
+                    type: 'Graphite',
+                    host: 'host',
+                    protocol: 'http',
+                    port: 80,
+                    path: 'path'
+                }
+            ));
+        });
+
+        describe('Kafka', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'Kafka',
+                    host: 'host',
+                    topic: 'topic'
+                },
+                {
+                    type: 'Kafka',
+                    host: 'host',
+                    topic: 'topic',
+                    authenticationProtocol: 'None',
+                    protocol: 'binaryTcpTls',
+                    port: 9092
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'Kafka',
+                    host: 'host',
+                    topic: 'topic',
+                    port: 80,
+                    protocol: 'binaryTcp',
+                    authenticationProtocol: 'SASL-PLAIN',
+                    username: 'username',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                {
+                    type: 'Kafka',
+                    host: 'host',
+                    topic: 'topic',
+                    port: 80,
+                    protocol: 'binaryTcp',
+                    authenticationProtocol: 'SASL-PLAIN',
+                    username: 'username',
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+        });
+
+        describe('Splunk', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'Splunk',
+                    host: 'host',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                {
+                    type: 'Splunk',
+                    host: 'host',
+                    protocol: 'https',
+                    port: 8088,
+                    format: 'default',
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'Splunk',
+                    host: 'host',
+                    protocol: 'http',
+                    port: 80,
+                    format: 'legacy',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                {
+                    type: 'Splunk',
+                    host: 'host',
+                    protocol: 'http',
+                    port: 80,
+                    format: 'legacy',
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+        });
+
+        describe('Statsd', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'Statsd',
+                    host: 'host'
+                },
+                {
+                    type: 'Statsd',
+                    host: 'host',
+                    protocol: 'udp',
+                    port: 8125
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'Statsd',
+                    host: 'host',
+                    protocol: 'tcp',
+                    port: 80
+                },
+                {
+                    type: 'Statsd',
+                    host: 'host',
+                    protocol: 'tcp',
+                    port: 80
+                }
+            ));
+        });
+
+        describe('Sumo_Logic', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'Sumo_Logic',
+                    host: 'host',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                {
+                    type: 'Sumo_Logic',
+                    host: 'host',
+                    protocol: 'https',
+                    port: 443,
+                    path: '/receiver/v1/http/',
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'Sumo_Logic',
+                    host: 'host',
+                    protocol: 'http',
+                    port: 80,
+                    path: 'path',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                {
+                    type: 'Sumo_Logic',
+                    host: 'host',
+                    protocol: 'http',
+                    port: 80,
+                    path: 'path',
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+        });
+    });
 });
