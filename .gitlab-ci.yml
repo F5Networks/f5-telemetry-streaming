@@ -196,6 +196,31 @@ test_functional:
         - npm install mocha@7.1.0
         - npm run test-functional
 
+# Deploy Azure test environment, and run Azure Cloud tests
+test_functional_azure:
+    image: mcr.microsoft.com/azure-cli
+    stage: functional test
+    script:
+        - $SHELL ./scripts/functional-testing/azure/deploy_env.sh
+        # TODO: Add tests here - resources are ready for testing
+    tags:
+        - cm-official-docker-executor
+    only:
+        variables:
+            - $RUN_AZURE_TESTS == "true"
+
+# Tear-down Azure environment in separate job, since 'after_script' has a 5min timeout
+teardown_env_azure:
+    image: mcr.microsoft.com/azure-cli
+    stage: teardown
+    script:
+        - $SHELL ./scripts/functional-testing/azure/teardown_env.sh
+    when: always
+    only:
+        variables:
+            - $RUN_AZURE_TESTS == "true"
+
+# should be executed manually to remove the harness
 teardown_env:
     extends:
         - .harness_deployment_definition
