@@ -1,13 +1,11 @@
+#!/bin/bash
+
 # Log in to Azure, deploy a BIG-IP and assign a User-Managed Identity to the VM
 
-# Check if an environment variable is set. If not set, log and exit.
-function checkEnvVariable {
-    if [ -z "${!1}" ]
-    then
-        echo "EnvVar '$1' should be set."
-        exit 1
-    fi
-}
+# Exit on any failed commands
+set -e
+
+source "$(dirname $0)/../util.sh"
 
 # Required Environment Variables:
 checkEnvVariable AZURE_SVCP_USERNAME
