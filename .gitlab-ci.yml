@@ -169,7 +169,7 @@ deploy_env:
         variables:
             - $REQ_DEVICE_PIPELINE == "true"
     script:
-        - $SHELL ./scripts/functional-testing/setup.sh
+        - $SHELL ./scripts/functional-testing/vio/setup.sh
 
 test_functional:
     stage: functional test
@@ -230,7 +230,7 @@ teardown_env:
         variables:
             - $REQ_DEVICE_PIPELINE == "true"
     script:
-        - $SHELL ./scripts/functional-testing/teardown.sh
+        - $SHELL ./scripts/functional-testing/vio/teardown.sh
 
 # Publish to internal artifactory
 # Note: Will publish when new tags are pushed and use the current build in dist directory
