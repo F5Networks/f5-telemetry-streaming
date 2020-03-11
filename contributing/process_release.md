@@ -36,6 +36,7 @@
 * Update [SUPPORT.md](SUPPORT.md) if not yet done (or at least check that everything looks valid):
   * add new version to the list of `Currently supported versions` with appropriate dates
   * remove no longer supported versions from `Currently supported versions` and add it to `Versions no longer supported`
+* Would be good to remove local `node_modules` directory and `package-lock.json` and do `npm run install-test`. Ideally `package-lock.json` will be the same as before. If not then it probably means that someone forgot to update it.
 * Push all changes to GitLab
 * Get build artifacts (`.rpm` and `.sha256` checksum) from latest build and:
   * Check `.rpm` size, ideally it should not exceed 10 MB.:
@@ -60,7 +61,7 @@
   * git push origin
   * git push origin --tags
 * Check pipeline for artifactory URL to package (or browse in artifactory)
-* Create and send release candidate email with features, bugs, artifactory URL
+* Send release candidate email with features, bugs, artifactory URL
 
 ## Release process
 
@@ -69,6 +70,7 @@
   * git checkout rc-master-branch
   * git merge --squash vX.Y.Z
   * git push origin
+* Would be good to remove local `node_modules` directory and `package-lock.json` and do `npm run install-test`. Ideally `package-lock.json` will be the same as before. If not then it probably means that someone forgot to update it.
 * Ideally it will be good to run functional and unit testing
 * After that merge `rc-master-branch` to `master` branch:
   * git checkout master
@@ -93,5 +95,6 @@
   * Navigate to the latest release, select `edit` and upload artifacts:
     * `.rpm` file
     * `.sha256` file
+* Remove all RC tags and branches and other stale branches that were used for release or RC process
 
 # ATTENTION: DO NOT FORGET TO MERGE 'MASTER' BRANCH INTO 'DEVELOP' WHEN YOU ARE DONE WITH RELEASE PROCESS
