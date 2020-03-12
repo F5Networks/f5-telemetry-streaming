@@ -246,14 +246,17 @@ ConfigWorker.prototype.validateAndApply = function (data) {
     return this.validate(data)
         .then((config) => {
             validatedConfig = config;
-            configToSave.raw = JSON.parse(JSON.stringify(validatedConfig));
+            configToSave.raw = util.deepCopy(validatedConfig);
 
             logger.debug('Expanding configuration');
             data.scratch = { expand: true }; // set flag for additional decl processing
             return this.validate(data);
         })
         .then((expandedConfig) => {
-            if (expandedConfig.scratch) delete expandedConfig.scratch; // cleanup
+            if (expandedConfig.scratch) {
+                // cleanup
+                delete expandedConfig.scratch;
+            }
             configToSave.parsed = util.formatConfig(expandedConfig);
 
             logger.debug('Configuration successfully validated');
