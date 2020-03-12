@@ -101,8 +101,7 @@ function transformData(globalCtx) {
             translatedData: []
         },
         cache: {
-            dataTimestamp: Date.parse(globalCtx.event.data.system.systemTimestamp)
-                           || (new Date()).getTime()
+            dataTimestamp: (new Date()).getTime()
         }
     };
     if (globalCtx.config.dumpUndefinedValues) {
@@ -112,6 +111,7 @@ function transformData(globalCtx) {
     }
     let p = null;
     if (globalCtx.event.type === EVENT_TYPES.SYSTEM_POLLER) {
+        requestCtx.cache.dataTimestamp = Date.parse(globalCtx.event.data.system.systemTimestamp);
         p = Promise.all(dataMapping.stats.map(func => safeDataTransform(func, requestCtx)));
         p.then(() => safeDataTransform(dataMapping.overall, requestCtx));
     } else if (globalCtx.event.type === EVENT_TYPES.IHEALTH_POLLER) {
