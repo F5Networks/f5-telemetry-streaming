@@ -1,13 +1,11 @@
 {
     "$id": "endpoints_schema.json",
-    "$async": true,
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Telemetry Streaming Endpoints schema",
     "description": "",
     "type": "object",
     "definitions": {
         "endpoint": {
-            "$async": true,
             "title": "Telemetry Endpoint",
             "description": "",
             "type": "object",
@@ -35,7 +33,6 @@
             "additionalProperties": false
         },
         "endpoints": {
-            "$async": true,
             "title": "Telemetry Endpoints",
             "description": "",
             "type": "object",
@@ -74,7 +71,6 @@
             }
         },
         "endpointsObjectRef": {
-            "$async": true,
             "allOf": [
                 {
                     "$ref": "#/definitions/endpoints"
@@ -91,7 +87,6 @@
             ]
         },
         "endpointObjectRef": {
-            "$async": true,
             "allOf": [
                 {
                     "$ref": "#/definitions/endpoint"
@@ -108,7 +103,6 @@
             ]
         },
         "endpointsPointerRef": {
-            "$async": true,
             "title": "Telemetry_Endpoints Name",
             "description": "Name of the Telemetry_Endpoints object",
             "type": "string",
@@ -116,7 +110,6 @@
             "minLength": 1
         },
         "endpointsItemPointerRef": {
-            "$async": true,
             "title": "Telemetry_Endpoints Name and Item Key",
             "description": "Name of the Telemetry_Endpoints object and the endpoint item key, e.g endpointsA/item1",
             "type": "string",

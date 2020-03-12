@@ -8,28 +8,16 @@
 
 'use strict';
 
-const nodeUtil = require('util');
-const Ajv = require('ajv');
-const setupAsync = require('ajv-async');
 const EventEmitter = require('events');
+const nodeUtil = require('util');
 const TeemDevice = require('@f5devcentral/f5-teem').Device;
 
-const logger = require('./logger');
-const util = require('./util');
+const declValidator = require('./declarationValidator');
 const deviceUtil = require('./deviceUtil');
+const logger = require('./logger');
 const persistentStorage = require('./persistentStorage').persistentStorage;
+const util = require('./util');
 
-const baseSchema = require('../schema/latest/base_schema.json');
-const controlsSchema = require('../schema/latest/controls_schema.json');
-const systemSchema = require('../schema/latest/system_schema.json');
-const sharedSchema = require('../schema/latest/shared_schema.json');
-const systemPollerSchema = require('../schema/latest/system_poller_schema.json');
-const listenerSchema = require('../schema/latest/listener_schema.json');
-const consumerSchema = require('../schema/latest/consumer_schema.json');
-const iHealthPollerSchema = require('../schema/latest/ihealth_poller_schema.json');
-const endpointsSchema = require('../schema/latest/endpoints_schema.json');
-
-const customKeywords = require('./customKeywords');
 const CONTROLS_CLASS_NAME = require('./constants').CONFIG_CLASSES.CONTROLS_CLASS_NAME;
 const CONTROLS_PROPERTY_NAME = require('./constants').CONTROLS_PROPERTY_NAME;
 const VERSION = require('./constants').VERSION;
@@ -48,7 +36,7 @@ const BASE_CONFIG = {
  * @event change - config was validated and can be propogated
  */
 function ConfigWorker() {
-    this.validator = this.compileSchema();
+    this.validator = declValidator.getValidator();
     const assetInfo = {
         name: 'Telemetry Streaming',
         version: VERSION
@@ -147,76 +135,19 @@ ConfigWorker.prototype.getConfig = function () {
 };
 
 /**
- * Pre-compile schema (avoids ~5 second delay during config event, when using ajv-async nodent transpiler)
- *
- * @public
- * @returns {Object} Promise which is resolved with the validated schema validator
- */
-ConfigWorker.prototype.compileSchema = function () {
-    const schemas = {
-        base: baseSchema,
-        controls: controlsSchema,
-        system: systemSchema,
-        shared: sharedSchema,
-        systemPoller: systemPollerSchema,
-        listener: listenerSchema,
-        consumer: consumerSchema,
-        iHealthPoller: iHealthPollerSchema,
-        endpoints: endpointsSchema
-    };
-    const keywords = customKeywords;
-
-    const ajvOptions = {
-        useDefaults: true,
-        coerceTypes: true,
-        async: true,
-        extendRefs: true,
-        jsonPointers: true
-    };
-    const ajv = setupAsync(new Ajv(ajvOptions));
-    // add schemas
-    Object.keys(schemas).forEach((k) => {
-        // ignore base, that will be added later
-        if (k !== 'base') {
-            ajv.addSchema(schemas[k]);
-        }
-    });
-    // add keywords
-    Object.keys(keywords).forEach((k) => {
-        ajv.addKeyword(k, keywords[k]);
-    });
-    // ajv-async nodent transpiler very slow, for now simply prime the pump with seperate compile function
-    return ajv.compile(schemas.base);
-};
-
-/**
  * Validate JSON data against config schema
  *
  * @public
- * @param {Object} data - data to validate against config schema
+ * @param {Object} data      - data to validate against config schema
+ * @param {Object} [context] - context to pass to validator
  *
  * @returns {Object} Promise which is resolved with the validated schema
  */
-ConfigWorker.prototype.validate = function (data) {
+ConfigWorker.prototype.validate = function (data, context) {
     if (this.validator) {
-        return this.validator(data)
-            .then(() => data)
+        return declValidator.validate(this.validator, data, context)
             .catch((err) => {
-                if (err instanceof Ajv.ValidationError) {
-                    // eslint-disable-next-line arrow-body-style
-                    const errorMap = err.errors.map((errItem) => {
-                        return {
-                            keyword: errItem.keyword,
-                            dataPath: errItem.dataPath,
-                            schemaPath: errItem.schemaPath,
-                            params: errItem.params,
-                            message: errItem.message
-                        };
-                    });
-                    const customError = new Error(util.stringify(errorMap));
-                    customError.code = 'ValidationError';
-                    return Promise.reject(customError);
-                }
+                err.code = 'ValidationError';
                 return Promise.reject(err);
             });
     }
@@ -249,14 +180,9 @@ ConfigWorker.prototype.validateAndApply = function (data) {
             configToSave.raw = util.deepCopy(validatedConfig);
 
             logger.debug('Expanding configuration');
-            data.scratch = { expand: true }; // set flag for additional decl processing
-            return this.validate(data);
+            return this.validate(data, { expand: true }); // set flag for additional decl processing
         })
         .then((expandedConfig) => {
-            if (expandedConfig.scratch) {
-                // cleanup
-                delete expandedConfig.scratch;
-            }
             configToSave.parsed = util.formatConfig(expandedConfig);
 
             logger.debug('Configuration successfully validated');

@@ -4,6 +4,7 @@ Changes to this project are documented in this file. More detail and links can b
 ## 1.11.0
 ### Added
 ### Fixed
+- AUTOTOOL-1334: Fix [Regular Expression Denial of Service vulnerability](https://www.npmjs.com/advisories/1488) and improve start up time on node v4.x and v6.x
 - AUTOTOOL-1150: [GitHub #30](https://github.com/F5Networks/f5-telemetry-streaming/issues/30) Fix error when Splunk consumer (configured with 'legacy' format) tries to forward event from Event Listener
 ### Changed
 ### Removed

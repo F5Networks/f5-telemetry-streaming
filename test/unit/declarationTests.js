@@ -68,6 +68,146 @@ describe('Declarations', () => {
         });
     });
 
+    describe('validator', () => {
+        it('should validate multiple declarations in parallel', () => {
+            const decl1 = {
+                class: 'Telemetry',
+                My_iHealth_1: {
+                    class: 'Telemetry_iHealth_Poller',
+                    username: 'username',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    },
+                    interval: {
+                        timeWindow: {
+                            start: '00:00',
+                            end: '03:00'
+                        }
+                    },
+                    proxy: {
+                        host: 'localhost'
+                    }
+                }
+            };
+            const decl2 = {
+                class: 'Telemetry',
+                My_iHealth_2: {
+                    class: 'Telemetry_iHealth_Poller',
+                    username: 'username',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    },
+                    interval: {
+                        timeWindow: {
+                            start: '00:00',
+                            end: '03:00'
+                        }
+                    },
+                    proxy: {
+                        host: 'localhost'
+                    }
+                }
+            };
+            return assert.isFulfilled(Promise.all([
+                config.validate(decl1),
+                config.validate(decl2)
+            ]));
+        });
+
+        it('should validate multiple invalid declarations in parallel', () => {
+            const pathErrMsg = /downloadFolder.*Unable to access path/;
+            const declClassErrMsg = /\\"My_Endpoints\\" must be of object type and class \\"Telemetry_Endpoints\\"/;
+            const deviceCheckErrMsg = /requires running on BIG-IP/;
+            const networkErrMsg = /failed network check/;
+
+            const errMap = {
+                invalidPath: pathErrMsg,
+                invalidHost: networkErrMsg,
+                invalidClass: declClassErrMsg,
+                invalidDevice: deviceCheckErrMsg
+            };
+
+            networkCheckStub.rejects(new Error('failed network check'));
+            getDeviceTypeStub.resolves(constants.DEVICE_TYPE.CONTAINER);
+
+            const decl1 = {
+                class: 'Telemetry',
+                My_iHealth: {
+                    class: 'Telemetry_iHealth_Poller',
+                    downloadFolder: '/some/invalid/dir',
+                    username: 'username',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    },
+                    interval: {
+                        timeWindow: {
+                            start: '08:00',
+                            end: '18:00'
+                        },
+                        frequency: 'daily'
+                    }
+                }
+            };
+            const decl2 = {
+                class: 'Telemetry',
+                My_Consumer: {
+                    class: 'Telemetry_Consumer',
+                    type: 'Graphite',
+                    host: '192.0.2.1',
+                    enableHostConnectivityCheck: true
+                }
+            };
+            const decl3 = {
+                class: 'Telemetry',
+                My_Endpoints: {
+                    class: 'Telemetry_System'
+                },
+                My_System: {
+                    class: 'Telemetry_System',
+                    systemPoller: {
+                        interval: 100,
+                        endpointList: [
+                            'My_Endpoints/something'
+                        ]
+                    }
+                }
+            };
+            const decl4 = {
+                class: 'Telemetry',
+                My_Poller: {
+                    class: 'Telemetry_System_Poller',
+                    passphrase: {
+                        cipherText: 'mycipher'
+                    }
+                }
+            };
+            const errors = {};
+            const validate = (name, decl) => config.validate(decl).catch((e) => {
+                errors[name] = e.message || e;
+            });
+            return Promise.all([
+                validate('invalidPath', decl1),
+                validate('invalidHost', decl2),
+                validate('invalidClass', decl3),
+                validate('invalidDevice', decl4)
+            ])
+                .then(() => {
+                    Object.keys(errMap).forEach((errKey) => {
+                        const errMsg = errors[errKey];
+                        assert.notStrictEqual(errMsg, undefined, `should have error for key "${errKey}"`);
+                        assert.ok(errMap[errKey].test(errMsg), `should have error for key "${errKey}`);
+                        // check that there are no errors from other declarations
+                        Object.keys(errMap).forEach((anotherErrKey) => {
+                            if (anotherErrKey === errKey) {
+                                return;
+                            }
+                            assert.notOk(errMap[anotherErrKey].test(errMsg), `should have not error for key "${anotherErrKey}`);
+                        });
+                    });
+                });
+        });
+    });
+
     describe('Base Schema objects', () => {
         describe('proxy', () => {
             it('should pass minimal declaration', () => {
@@ -652,14 +792,13 @@ describe('Declarations', () => {
 
         describe('f5expand', () => {
             it('should expand pointer (absolute)', () => {
-                const expectedValue = '/foo';
                 const data = {
                     class: 'Telemetry',
                     Shared: {
                         class: 'Shared',
                         constants: {
                             class: 'Constants',
-                            path: expectedValue
+                            path: '/foo'
                         }
                     },
                     My_Consumer: {
@@ -667,47 +806,39 @@ describe('Declarations', () => {
                         type: 'Generic_HTTP',
                         host: '192.0.2.1',
                         path: '`=/Shared/constants/path`'
-                    },
-                    scratch: {
-                        expand: true
                     }
                 };
 
-                return config.validate(data)
+                return config.validate(data, { expand: true })
                     .then((validated) => {
-                        assert.strictEqual(validated.My_Consumer.path, expectedValue);
+                        assert.strictEqual(validated.My_Consumer.path, '/foo');
                     });
             });
 
             it('should expand pointer (relative)', () => {
-                const expectedValue = '192.0.2.1';
                 const data = {
                     class: 'Telemetry',
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: expectedValue,
+                        host: '192.0.2.1',
                         path: '`=host`'
-                    },
-                    scratch: {
-                        expand: true
                     }
                 };
 
-                return config.validate(data)
+                return config.validate(data, { expand: true })
                     .then((validated) => {
-                        assert.strictEqual(validated.My_Consumer.path, expectedValue);
+                        assert.strictEqual(validated.My_Consumer.path, '192.0.2.1');
                     });
             });
 
             it('should expand pointer (relative to class)', () => {
-                const expectedValue = '192.0.2.1';
                 const data = {
                     class: 'Telemetry',
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: expectedValue,
+                        host: '192.0.2.1',
                         path: '/',
                         headers: [
                             {
@@ -715,20 +846,16 @@ describe('Declarations', () => {
                                 value: '`=@/host`'
                             }
                         ]
-                    },
-                    scratch: {
-                        expand: true
                     }
                 };
 
-                return config.validate(data)
+                return config.validate(data, { expand: true })
                     .then((validated) => {
-                        assert.strictEqual(validated.My_Consumer.headers[0].value, expectedValue);
+                        assert.strictEqual(validated.My_Consumer.headers[0].value, '192.0.2.1');
                     });
             });
 
             it('should expand pointer (multiple pointers in string)', () => {
-                const expectedValue = '/foo/bar/baz';
                 const data = {
                     class: 'Telemetry',
                     Shared: {
@@ -744,20 +871,16 @@ describe('Declarations', () => {
                         type: 'Generic_HTTP',
                         host: '192.0.2.1',
                         path: '/`=/Shared/constants/path`/bar/`=/Shared/constants/path2`'
-                    },
-                    scratch: {
-                        expand: true
                     }
                 };
 
-                return config.validate(data)
+                return config.validate(data, { expand: true })
                     .then((validated) => {
-                        assert.strictEqual(validated.My_Consumer.path, expectedValue);
+                        assert.strictEqual(validated.My_Consumer.path, '/foo/bar/baz');
                     });
             });
 
             it('should expand pointer (base64 decode)', () => {
-                const expectedValue = 'foo';
                 const data = {
                     class: 'Telemetry',
                     Shared: {
@@ -772,15 +895,12 @@ describe('Declarations', () => {
                         type: 'Generic_HTTP',
                         host: '192.0.2.1',
                         path: '`+/Shared/constants/path`'
-                    },
-                    scratch: {
-                        expand: true
                     }
                 };
 
-                return config.validate(data)
+                return config.validate(data, { expand: true })
                     .then((validated) => {
-                        assert.strictEqual(validated.My_Consumer.path, expectedValue);
+                        assert.strictEqual(validated.My_Consumer.path, 'foo');
                     });
             });
 
@@ -817,16 +937,13 @@ describe('Declarations', () => {
                             class: 'Secret',
                             cipherText: 'foo'
                         }
-                    },
-                    scratch: {
-                        expand: true
                     }
                 };
 
-                return config.validate(data)
+                return config.validate(data, { expand: true })
                     .then((validated) => {
-                        assert.deepEqual(validated.My_Consumer.path, expectedValue);
-                        assert.deepEqual(validated.My_Consumer.headers[0].value, expectedValue);
+                        assert.deepStrictEqual(validated.My_Consumer.path, expectedValue);
+                        assert.deepStrictEqual(validated.My_Consumer.headers[0].value, expectedValue);
                         return assert.isFulfilled(config.validate(validated));
                     });
             });
@@ -844,12 +961,9 @@ describe('Declarations', () => {
                         passphrase: {
                             cipherText: 'foo'
                         }
-                    },
-                    scratch: {
-                        expand: true
                     }
                 };
-                return assert.isRejected(config.validate(data), /syntax requires single pointer/);
+                return assert.isRejected(config.validate(data, { expand: true }), /syntax requires single pointer/);
             });
 
             it('should fail pointer (absolute) outside \'Shared\'', () => {
@@ -860,12 +974,9 @@ describe('Declarations', () => {
                         type: 'Generic_HTTP',
                         host: '192.0.2.1',
                         path: '`=/class`'
-                    },
-                    scratch: {
-                        expand: true
                     }
                 };
-                return assert.isRejected(config.validate(data), /requires pointers root to be 'Shared'/);
+                return assert.isRejected(config.validate(data, { expand: true }), /requires pointers root to be 'Shared'/);
             });
         });
 

@@ -57,11 +57,6 @@ describe('Config', () => {
         sinon.restore();
     });
 
-    it('should compile schema', () => {
-        const compiledSchema = config.compileSchema;
-        assert.strictEqual(typeof compiledSchema, 'function');
-    });
-
     describe('.validate()', () => {
         it('should validate basic declaration', () => {
             const obj = {
@@ -89,6 +84,35 @@ describe('Config', () => {
                 schemaVersion: constants.VERSION
             };
             return assert.becomes(config.validateAndApply(obj), validatedObj);
+        });
+
+        it('should expand config', () => {
+            let savedConfig;
+            sinon.stub(config, 'saveConfig').callsFake((configToSave) => {
+                savedConfig = configToSave;
+            });
+
+            const data = {
+                class: 'Telemetry',
+                Shared: {
+                    class: 'Shared',
+                    constants: {
+                        class: 'Constants',
+                        path: '/foo'
+                    }
+                },
+                My_Consumer: {
+                    class: 'Telemetry_Consumer',
+                    type: 'Generic_HTTP',
+                    host: '192.0.2.1',
+                    path: '`=/Shared/constants/path`'
+                }
+            };
+            return config.validateAndApply(data)
+                .then(() => {
+                    const consumer = savedConfig.parsed.Telemetry_Consumer.My_Consumer;
+                    assert.strictEqual(consumer.path, '/foo');
+                });
         });
     });
 
