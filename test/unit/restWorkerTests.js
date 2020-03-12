@@ -11,7 +11,6 @@
 /* eslint-disable import/order */
 
 require('./shared/restoreCache')();
-require('./shared/disableAjv');
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');

@@ -1,6 +1,5 @@
 {
     "$id": "consumer_schema.json",
-    "$async": true,
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Telemetry Streaming Consumer schema",
     "description": "",
@@ -34,7 +33,6 @@
             "maximum": 65535
         },
         "path": {
-            "$async": true,
             "$comment": "Required for certain consumers: standard property",
             "title": "Path",
             "description": "Path to post data to",
@@ -54,7 +52,6 @@
             "enum": [ "POST", "GET", "PUT" ]
         },
         "headers": {
-            "$async": true,
             "$comment": "Required for certain consumers: standard property",
             "title": "Headers",
             "description": "HTTP headers to use" ,

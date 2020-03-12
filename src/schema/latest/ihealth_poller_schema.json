@@ -1,6 +1,5 @@
 {
     "$id": "ihealth_poller_schema.json",
-    "$async": true,
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Telemetry Streaming iHealth Poller schema",
     "description": "",
@@ -14,7 +13,6 @@
         },
         "iHealthPoller": {
             "$comment": "system_schema.json should be updated when new property added",
-            "$async": true,
             "title": "iHealth Poller",
             "description": "",
             "type": "object",
@@ -171,12 +169,10 @@
             }
         },
         "iHealthPollerPointerRef": {
-            "$async": true,
             "type": "string",
             "declarationClass": "Telemetry_iHealth_Poller"
         },
         "iHealthPollerObjectRef": {
-            "$async": true,
             "allOf": [
                 {
                     "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a seperate block",
