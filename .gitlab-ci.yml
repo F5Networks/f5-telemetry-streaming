@@ -98,6 +98,7 @@ npm_audit:
         - apt-get install -y jq
         # install node modules
         - *install_unittest_packages_cmd
+        - npm list --json
         # npm audit - install includes audit, but perform specific check and fail if needed
         - audit_report=$(npm audit --json) || echo ""
         - echo "$audit_report"
