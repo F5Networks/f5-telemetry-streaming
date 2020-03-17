@@ -14,11 +14,12 @@ require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
-const request = require('request');
 const sinon = require('sinon');
+const util = require('../../../src/lib/util');
 
 const azureAnalyticsIndex = require('../../../src/lib/consumers/Azure_Log_Analytics/index');
 const azureLogData = require('./azureLogAnalyticsConsumerTestsData');
+const azureUtil = require('../../../src/lib/consumers/Azure_Log_Analytics/azureUtil');
 const testUtil = require('../shared/util');
 
 chai.use(chaiAsPromised);
@@ -30,15 +31,18 @@ describe('Azure_Log_Analytics', () => {
 
     const defaultConsumerConfig = {
         workspaceId: 'myWorkspace',
-        passphrase: 'secret'
+        passphrase: 'secret',
+        useManagedIdentity: false
     };
 
     beforeEach(() => {
         requests = [];
-        sinon.stub(request, 'post').callsFake((opts, cb) => {
+        sinon.stub(util, 'makeRequest').callsFake((opts) => {
             requests.push(opts);
-            cb(null, { statusCode: 200 }, '');
+            return Promise.resolve({ statusCode: 200 });
         });
+
+        sinon.stub(azureUtil, 'getSharedKey').resolves('stubbed-shared-key');
         // Fake the clock to get consistent values in the 'x-ms-date' variable
         clock = sinon.useFakeTimers();
     });
@@ -60,7 +64,7 @@ describe('Azure_Log_Analytics', () => {
 
             return azureAnalyticsIndex(context)
                 .then(() => {
-                    assert.strictEqual(requests[0].url, 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01');
+                    assert.strictEqual(requests[0].fullURI, 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01');
                     assert.deepStrictEqual(requests[0].headers, {
                         Authorization: 'SharedKey myWorkspace:MGiiWY+WTAxB35tyZ1YljyfwMM5QCqr4ge+giSjcgfI=',
                         'Content-Type': 'application/json',
@@ -76,7 +80,8 @@ describe('Azure_Log_Analytics', () => {
                 config: {
                     workspaceId: 'myWorkspace',
                     passphrase: 'secret',
-                    logType: 'customLogType'
+                    logType: 'customLogType',
+                    allowSelfSignedCert: true
                 }
             });
             context.event.data = {
@@ -85,13 +90,14 @@ describe('Azure_Log_Analytics', () => {
 
             return azureAnalyticsIndex(context)
                 .then(() => {
-                    assert.strictEqual(requests[0].url, 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01');
+                    assert.strictEqual(requests[0].fullURI, 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01');
                     assert.deepStrictEqual(requests[0].headers, {
                         Authorization: 'SharedKey myWorkspace:MGiiWY+WTAxB35tyZ1YljyfwMM5QCqr4ge+giSjcgfI=',
                         'Content-Type': 'application/json',
                         'Log-Type': 'customLogType_new',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
                     });
+                    assert.deepStrictEqual(requests[0].allowSelfSignedCert, true);
                 });
         });
 
@@ -140,13 +146,41 @@ describe('Azure_Log_Analytics', () => {
         it('should process event data', () => {
             const context = testUtil.buildConsumerContext({
                 eventType: 'AVR',
-                config: defaultConsumerConfig
+                config: util.deepCopy(defaultConsumerConfig)
             });
+            context.config.allowSelfSignedCert = true;
             const expectedData = azureLogData.eventData[0].expectedData;
             context.event.type = 'AVR';
 
             return azureAnalyticsIndex(context)
                 .then(() => assert.deepStrictEqual(requests, expectedData));
+        });
+
+        it('should generate sharedKey to use when useManagedIdentity is true', () => {
+            const context = testUtil.buildConsumerContext({
+                eventType: 'systemInfo',
+                config: {
+                    workspaceId: 'myWorkspace',
+                    useManagedIdentity: true,
+                    logType: 'customLogType'
+                }
+            });
+            context.event.data = {
+                type1: { prop: 'data' }
+            };
+            const expSignedKey = azureUtil.signSharedKey(
+                'stubbed-shared-key',
+                'Thu, 01 Jan 1970 00:00:00 GMT',
+                JSON.stringify([{ prop: 'data' }])
+            );
+            return azureAnalyticsIndex(context)
+                .then(() => assert.strictEqual(requests[0].fullURI, 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01'))
+                .then(() => assert.deepStrictEqual(requests[0].headers, {
+                    Authorization: `SharedKey myWorkspace:${expSignedKey}`,
+                    'Content-Type': 'application/json',
+                    'Log-Type': 'customLogType_type1',
+                    'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
+                }));
         });
     });
 });

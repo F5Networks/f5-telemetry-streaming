@@ -13,17 +13,18 @@
 const assert = require('assert');
 const fs = require('fs');
 const util = require('../shared/util');
+const azureUtil = require('../shared/azureUtil');
 const constants = require('../shared/constants');
 const dutUtils = require('../dutTests').utils;
 
 const DUTS = util.getHosts('BIGIP');
 
-// read in example config
 const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC_EXAMPLE));
-const PASSPHRASE = process.env[constants.ENV_VARS.AZURE_PASSPHRASE];
-const WORKSPACE_ID = process.env[constants.ENV_VARS.AZURE_WORKSPACE];
-const TENANT_ID = process.env[constants.ENV_VARS.AZURE_TENANT];
-const CLIENT_SECRET = process.env[constants.ENV_VARS.AZURE_LOG_KEY];
+const PASSPHRASE = process.env[constants.ENV_VARS.AZURE.PASSPHRASE];
+const WORKSPACE_ID = process.env[constants.ENV_VARS.AZURE.WORKSPACE];
+const TENANT_ID = process.env[constants.ENV_VARS.AZURE.TENANT];
+const CLIENT_SECRET = process.env[constants.ENV_VARS.AZURE.LOG_KEY];
+const CLIENT_ID = process.env[constants.ENV_VARS.AZURE.CLIENT_ID];
 const AZURE_LA_CONSUMER_NAME = 'Azure_LA_Consumer';
 
 let oauthToken = null;
@@ -31,31 +32,15 @@ let oauthToken = null;
 
 function setup() {
     describe('Consumer Setup: Azure Log Analytics - OAuth token', () => {
-        it('should get OAuth token', () => {
-            const options = {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: [
-                    'grant_type=client_credentials',
-                    'client_id=bc3d6996-2535-4203-851d-7a9a6e3b9165',
-                    'redirect_uri=https://login.microsoftonline.com/common/oauth2/nativeclient',
-                    `client_secret=${encodeURIComponent(CLIENT_SECRET)}`,
-                    'resource=https://api.loganalytics.io/'
-                ].join('&')
-            };
-            return util.makeRequest(
-                'login.microsoftonline.com',
-                `/${TENANT_ID}/oauth2/token`,
-                options
-            )
-                .then((data) => {
-                    oauthToken = data.access_token;
-                })
-                .catch((err) => {
-                    util.logger.error(`Unable to get OAuth token: ${err}`);
-                    return Promise.reject(err);
-                });
-        });
+        it('should get OAuth token', () => azureUtil.getOAuthToken(CLIENT_ID, CLIENT_SECRET, TENANT_ID)
+            .then((data) => {
+                oauthToken = data.access_token;
+                return assert.notStrictEqual(oauthToken, undefined);
+            })
+            .catch((err) => {
+                util.logger.error(`Unable to get OAuth token: ${err}`);
+                return Promise.reject(err);
+            }));
     });
 }
 
@@ -84,24 +69,6 @@ function test() {
     });
 
     describe('Consumer Test: Azure Log Analytics - Test', () => {
-        // helper function to query Azure for data
-        const queryAzure = (queryString) => {
-            const options = {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${oauthToken}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ query: queryString })
-
-            };
-            return util.makeRequest(
-                'api.loganalytics.io',
-                `/v1/workspaces/${WORKSPACE_ID}/query`,
-                options
-            );
-        };
-
         DUTS.forEach((dut) => {
             it(`should check for system poller data from - ${dut.hostname}`, () => {
                 // system poller is on an interval, so space out the retries
@@ -113,7 +80,7 @@ function test() {
                     'where TimeGenerated > ago(5m)'
                 ].join(' | ');
                 return new Promise(resolve => setTimeout(resolve, 30000))
-                    .then(() => queryAzure(queryString))
+                    .then(() => azureUtil.queryLogs(oauthToken, WORKSPACE_ID, queryString))
                     .then((results) => {
                         util.logger.info('Response from Log Analytics:', { hostname: dut.hostname, results });
                         assert(results.tables[0], 'Log Analytics query returned no results');
@@ -129,7 +96,7 @@ function test() {
                     `where test_s == "${testDataTimestamp}"`
                 ].join(' | ');
                 return new Promise(resolve => setTimeout(resolve, 10000))
-                    .then(() => queryAzure(queryString))
+                    .then(() => azureUtil.queryLogs(oauthToken, WORKSPACE_ID, queryString))
                     .then((results) => {
                         util.logger.info('Response from Log Analytics:', { hostname: dut.hostname, results });
                         assert(results.tables[0], 'Log Analytics query returned no results');
