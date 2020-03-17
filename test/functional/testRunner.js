@@ -10,7 +10,7 @@
 
 /* eslint-disable no-console */
 
-// initliaze logger
+// initialize logger
 const util = require('./shared/util'); // eslint-disable-line
 const constants = require('./shared/constants');
 const dutTests = require('./dutTests');

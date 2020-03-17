@@ -265,7 +265,7 @@ describe('Config', () => {
     });
 
     describe('.loadConfig()', () => {
-        it('should reject if persistenStorage errors', () => {
+        it('should reject if persistentStorage errors', () => {
             sinon.stub(persistentStorage, 'get').rejects(new Error('loadStateError'));
             return assert.isRejected(config.loadConfig(), /loadStateError/);
         });

@@ -255,7 +255,7 @@
                 },
                 "allOf": [
                     {
-                        "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a seperate block",
+                        "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a separate block",
                         "properties": {
                             "class": {},
                             "enable": {},

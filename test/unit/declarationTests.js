@@ -1255,7 +1255,7 @@ describe('Declarations', () => {
                     assert.strictEqual(poller.trace, undefined);
                     assert.strictEqual(poller.interval, 300);
                     assert.deepStrictEqual(poller.actions, [{ enable: true, setTag: { tenant: '`T`', application: '`A`' } }]);
-                    assert.strictEqual(poller.actions[0].ifAllMAtch, undefined);
+                    assert.strictEqual(poller.actions[0].ifAllMatch, undefined);
                     assert.strictEqual(poller.actions[0].locations, undefined);
                     assert.strictEqual(poller.host, 'localhost');
                     assert.strictEqual(poller.port, 8100);
@@ -2283,7 +2283,7 @@ describe('Declarations', () => {
                     assert.strictEqual(poller.trace, undefined);
                     assert.strictEqual(poller.interval, 300);
                     assert.deepStrictEqual(poller.actions, [{ enable: true, setTag: { tenant: '`T`', application: '`A`' } }]);
-                    assert.strictEqual(poller.actions[0].ifAllMAtch, undefined);
+                    assert.strictEqual(poller.actions[0].ifAllMatch, undefined);
                     assert.strictEqual(poller.actions[0].locations, undefined);
                     assert.strictEqual(poller.host, undefined);
                     assert.strictEqual(poller.port, undefined);

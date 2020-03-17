@@ -123,7 +123,7 @@ There is a fixed class called "Controls", which contains a number of properties:
 
 ### Additional properties
 
-The schema has some additional properties which might not be covered elesewhere, defined below.
+The schema has some additional properties which might not be covered elsewhere, defined below.
 
 - enable
   - Definition: Useful to disable any object in declaration
@@ -176,8 +176,8 @@ Website: [https://docs.microsoft.com/en-us/azure/azure-monitor/log-query/log-que
 
 Required information:
 
-- Workspace ID: Navigate to the Log Analaytics workspace > Advanced Settings > Connected Sources to find the workspace ID.  More information [here](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/data-collector-api).
-- Shared Key: Navigate to the Log Analaytics workspace > Advanced Settings > Connected Sources to find the primary key.  More information [here](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/data-collector-api).
+- Workspace ID: Navigate to the Log Analytics workspace > Advanced Settings > Connected Sources to find the workspace ID.  More information [here](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/data-collector-api).
+- Shared Key: Navigate to the Log Analytics workspace > Advanced Settings > Connected Sources to find the primary key.  More information [here](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/data-collector-api).
 
 Note: More information about using the data collector API can be found [here](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/data-collector-api).
 
@@ -592,7 +592,7 @@ Note: All metrics are stored as gauges in statsd, those can be seen within graph
 
 Configuration of TS is typically straightforward, however the need to reference objects in other parts of the configuration may be necessary for certain use cases, such as the generic http consumer with secrets.  TS uses JSON pointers to accomplish this, with syntax derived primarily from one of the other tool chain components Application Services 3.
 
-- RFC 6901 compliant, with some enhacements to account for scenarios not outlined in the RFC
+- RFC 6901 compliant, with some enhancements to account for scenarios not outlined in the RFC
 - Pointer types
   - Absolute pointer: \`=/Shared/secretPath\`
   - Relative pointer: \`=passphrase\`
@@ -671,7 +671,7 @@ Useful for demo or to check if poller was able to connect to device.
 **systemName** and **pollerName** should match the name of one of configured Systems or System Pollers.
 Otherwise *HTTP 404* will be returned. For output example see [System Info](#system-info).
 
-Note: availble only when `debug` is turned on.
+Note: available only when `debug` is turned on.
 
 
 ### iHealth poller
@@ -684,11 +684,11 @@ Useful for demo or to check if poller was able to connect to device.
 
 When no **pollerName** and **ihealthName** specified then current status for running pollers will be returned.
 When **pollerName** specified then iHealth poller will be stared with System Poller's configuration.
-When **ihealthName** specified then iHealth poller will be stared with System Poller's configuration and matched iHealth Poller's configuration. 
+When **ihealthName** specified then iHealth poller will be stared with System Poller's configuration and matched iHealth Poller's configuration.
 
 Otherwise *HTTP 404* will be returned. For output example see [iHealth Info](#ihealth-info).
 
-Note: availble only when `debug` is turned on.
+Note: available only when `debug` is turned on.
 
 ## Output Example
 

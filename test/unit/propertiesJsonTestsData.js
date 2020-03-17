@@ -6999,7 +6999,7 @@ module.exports = {
              * TEST DATA STARTS HERE
              * */
             {
-                name: 'should not fail when command retruns headers only',
+                name: 'should not fail when command returns headers only',
                 statsToCollect: (stats) => {
                     const ret = {
                         tmstats: stats.tmstats

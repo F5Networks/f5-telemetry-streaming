@@ -53,7 +53,7 @@ function test() {
             return runRemoteCmd(`docker ps | grep ${STATSD_CONTAINER_NAME}`)
                 .then((data) => {
                     if (data) {
-                        return Promise.resolve(); // exists, contine
+                        return Promise.resolve(); // exists, continue
                     }
                     return runRemoteCmd(cmd);
                 });
@@ -95,7 +95,7 @@ function test() {
 
     describe('Consumer Test: Statsd - Test', () => {
         /**
-         * Note: statsd/graphire stores only counters, no strings.
+         * Note: statsd/graphite stores only counters, no strings.
          * Verification is simple - just check that at least one metric is not empty
          */
         // helper function to query statsd for data

@@ -130,7 +130,7 @@ EventListener.prototype._start = function () {
     // TODO: investigate constraining listener when running on local BIG-IP, however
     // for now cannot until a valid address is found - loopback address not allowed for LTM objects
 
-    if (protocols.indexOf(this.protocol) === -1) throw new Error(`Procotol unexpected: ${this.protocol}`);
+    if (protocols.indexOf(this.protocol) === -1) throw new Error(`Protocol unexpected: ${this.protocol}`);
 
     if (this.protocol === 'tcp') {
         this._server = net.createServer((conn) => {
@@ -222,7 +222,7 @@ EventListener.prototype.processRawData = function (data, connInfo) {
          * it means GC is unable to remove original string until all references
          * to it will be removed.
          * So, let's use some strategy like if valid data takes less then 70%
-         * of string then keep it as incompleted and wait for more data.
+         * of string then keep it as incomplete and wait for more data.
          * In any case max lifetime is about 5-7 sec.
          */
         if (idx === -1 || idx / data.length < 0.7) {
@@ -340,9 +340,9 @@ EventListener.prototype._processEvent = function (data) {
     };
     data = String(data).trim();
 
-    // note: data may contain multiple events seperated by newline
+    // note: data may contain multiple events separated by newline
     // however newline chars may also show up inside a given event
-    // so split only on newline with preceeding double quote
+    // so split only on newline with preceding double quote
     data.split(/"\n|\r\n/).forEach((line) => {
         // lets normalize the data
         const normalizedData = normalize.event(line, options);

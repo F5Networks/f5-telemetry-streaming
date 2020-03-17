@@ -160,7 +160,7 @@ Tracer.prototype._updateInode = function () {
  *
  * @async
  * @private
- * @returns {Promise} Promise resolved when destination file re-opene or opened already
+ * @returns {Promise} Promise resolved when destination file re-opened or opened already
  */
 Tracer.prototype._reopenIfNeeded = function () {
     // if stream is not ready then skip check
@@ -292,7 +292,7 @@ Tracer.prototype._open = function () {
                 logger.error(`tracer.error: tracer '${this.name}' stream to file '${this.path}': ${err}`);
                 this.close();
             });
-            // resolving here, because it is more simplier and reliable
+            // resolving here, because it is more simpler and reliable
             // than wait inside 'open'
             return Promise.resolve();
         })
@@ -584,7 +584,7 @@ function retryPromise(fn, opts) {
                 opts.tries += 1;
                 let delay = opts.delay || 0;
 
-                // applying backof after the second try only
+                // applying backoff after the second try only
                 if (opts.backoff && opts.tries > 1) {
                     /* eslint-disable no-restricted-properties */
                     delay += opts.backoff * Math.pow(2, opts.tries - 1);

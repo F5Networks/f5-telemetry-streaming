@@ -129,10 +129,10 @@ function getTemplate(sourceName, data, cache) {
 
 function getData(request, key) {
     let data = request.globalCtx.event.data;
-    const splitedKey = key.split('.');
+    const splittedKey = key.split('.');
 
-    for (let i = 0; i < splitedKey.length; i += 1) {
-        data = data[splitedKey[i]];
+    for (let i = 0; i < splittedKey.length; i += 1) {
+        data = data[splittedKey[i]];
         if (data === undefined || data === 'missing data') {
             data = undefined;
             break;
