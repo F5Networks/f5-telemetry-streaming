@@ -35,10 +35,19 @@ module.exports = {
             PWD: 'CONSUMER_HOSTS_PWD',
             TYPE_REGEX: 'CONSUMER_TYPE_REGEX'
         },
-        AZURE_WORKSPACE: 'AZURE_WORKSPACE',
-        AZURE_TENANT: 'AZURE_TENANT',
-        AZURE_PASSPHRASE: 'AZURE_PASSPHRASE',
-        AZURE_LOG_KEY: 'AZURE_LOG_KEY',
+        AZURE: {
+            WORKSPACE_MI: 'AZURE_WORKSPACE_MI',
+            WORKSPACE: 'AZURE_WORKSPACE',
+            TENANT: 'AZURE_TENANT',
+            PASSPHRASE: 'AZURE_PASSPHRASE',
+            LOG_KEY: 'AZURE_LOG_KEY',
+            CLIENT_ID: 'AZURE_CLIENT_ID',
+            VM_HOSTNAME: 'AZURE_VM_HOSTNAME',
+            VM_PORT: 'AZURE_VM_PORT',
+            VM_IP: 'AZURE_VM_IP',
+            VM_USER: 'AZURE_VM_USER'
+        },
+        CICD_AUTH_OS_PASSWORD: 'CICD_AUTH_OS_PASSWORD',
         TEST_CONTROLS: {
             REUSE_INSTALLED_PACKAGE: 'REUSE_INSTALLED_PACKAGE',
             SKIP_DUT_TESTS: 'SKIP_DUT_TESTS',
@@ -55,5 +64,6 @@ module.exports = {
         PROTOCOL: 'https'
     },
     CONSUMERS_DIR: `${__dirname}/../consumersTests`,
-    ARTIFACTS_DIR: `${__dirname}/../../artifacts`
+    ARTIFACTS_DIR: `${__dirname}/../../artifacts`,
+    BASE_ILX_URI: '/mgmt/shared/telemetry'
 };

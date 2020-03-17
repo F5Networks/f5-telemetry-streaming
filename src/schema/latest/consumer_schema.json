@@ -130,6 +130,13 @@
             "type": "string",
             "f5expand": true
         },
+        "useManagedIdentity": {
+            "$comment": "Required for certain consumers: Azure Log Analytics",
+            "title": "Use Managed Identity",
+            "description": "Determines whether to use Managed Identity to perform authorization for Azure services",
+            "type": "boolean",
+            "default": false
+        },
         "topic": {
             "$comment": "Required for certain consumers: Kafka",
             "title": "Topic",
@@ -273,6 +280,7 @@
                             "passphrase": {},
                             "format": {},
                             "workspaceId": {},
+                            "useManagedIdentity": {},
                             "region": {},
                             "logGroup": {},
                             "logStream": {},
@@ -336,13 +344,34 @@
                         "if": { "properties": { "type": { "const": "Azure_Log_Analytics" } } },
                         "then": {
                             "required": [
-                                "workspaceId",
-                                "passphrase"
+                                "workspaceId"
                             ],
                             "properties": {
                                 "workspaceId": { "$ref": "#/definitions/workspaceId" },
-                                "passphrase": { "$ref": "base_schema.json#/definitions/secret" }
-                            }
+                                "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
+                                "useManagedIdentity": { "$ref": "#/definitions/useManagedIdentity" }
+                            },
+                            "allOf": [
+                                {
+                                    "dependencies": {
+                                        "passphrase": {
+                                            "anyOf": [
+                                                { "not": {"required": [ "useManagedIdentity" ] } },
+                                                { "properties": { "useManagedIdentity": { "const": false } } }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "if": { "not": { "required" : [ "useManagedIdentity"] } },
+                                    "then": { "required": ["passphrase"] },
+                                    "else": {
+                                            "if": { "properties": { "useManagedIdentity": { "const": true } } },
+                                            "then": { "not": { "required": ["passphrase"] } },
+                                            "else": { "required": ["passphrase"]}
+                                    }
+                                }
+                            ]
                         },
                         "else": {}
                     },

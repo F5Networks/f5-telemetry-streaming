@@ -170,7 +170,7 @@ deploy_env:
         variables:
             - $REQ_DEVICE_PIPELINE == "true"
     script:
-        - $SHELL ./scripts/functional-testing/vio/setup.sh
+        - $SHELL ./scripts/functional_testing/vio/setup.sh
 
 test_functional:
     stage: functional test
@@ -197,13 +197,45 @@ test_functional:
         - npm install mocha@7.1.0
         - npm run test-functional
 
-# Deploy Azure test environment, and run Azure Cloud tests
-test_functional_azure:
+# should be executed manually to remove the harness
+teardown_env:
+    extends:
+        - .harness_deployment_definition
+    stage: teardown
+    when: manual
+    only:
+        variables:
+            - $REQ_DEVICE_PIPELINE == "true"
+    script:
+        - $SHELL ./scripts/functional_testing/vio/teardown.sh
+
+# Deploy Azure test environment
+deploy_env_azure:
     image: mcr.microsoft.com/azure-cli
+    stage: deploy
+    script:
+        - mkdir -p './deploy_output'
+        - source ./scripts/functional_testing/azure/deploy_env.sh
+    tags:
+        - cm-official-docker-executor
+    only:
+        variables:
+            - $RUN_AZURE_TESTS == "true"
+    artifacts:
+        name: CI_COMMIT_REF_NAME_azure
+        paths:
+            - deploy_output
+        expire_in: 4 days
+
+test_functional_azure:
     stage: functional test
     script:
-        - $SHELL ./scripts/functional-testing/azure/deploy_env.sh
-        # TODO: Add tests here - resources are ready for testing
+        - source ./deploy_output/azure.sh
+        - echo $AZURE_VM_HOSTNAME
+        - echo $AZURE_VM_IP
+        - *install_unittest_packages_cmd
+        - npm install mocha@7.1.0
+        - npm run test-functional-cloud-azure
     tags:
         - cm-official-docker-executor
     only:
@@ -215,23 +247,11 @@ teardown_env_azure:
     image: mcr.microsoft.com/azure-cli
     stage: teardown
     script:
-        - $SHELL ./scripts/functional-testing/azure/teardown_env.sh
+        - source ./scripts/functional_testing/azure/teardown_env.sh
     when: always
     only:
         variables:
             - $RUN_AZURE_TESTS == "true"
-
-# should be executed manually to remove the harness
-teardown_env:
-    extends:
-        - .harness_deployment_definition
-    stage: teardown
-    when: manual
-    only:
-        variables:
-            - $REQ_DEVICE_PIPELINE == "true"
-    script:
-        - $SHELL ./scripts/functional-testing/vio/teardown.sh
 
 # Publish to internal artifactory
 # Note: Will publish when new tags are pushed and use the current build in dist directory

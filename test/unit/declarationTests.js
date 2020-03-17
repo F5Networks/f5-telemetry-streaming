@@ -3016,6 +3016,7 @@ describe('Declarations', () => {
                 {
                     type: 'Azure_Log_Analytics',
                     workspaceId: 'workspaceId',
+                    useManagedIdentity: false,
                     passphrase: {
                         cipherText: 'cipherText'
                     }
@@ -3023,12 +3024,42 @@ describe('Declarations', () => {
                 {
                     type: 'Azure_Log_Analytics',
                     workspaceId: 'workspaceId',
+                    useManagedIdentity: false,
                     passphrase: {
                         class: 'Secret',
                         protected: 'SecureVault',
                         cipherText: '$M$foo'
                     }
                 }
+            ));
+
+            it('should require passphrase when useManagedIdentity is omitted', () => assert.isRejected(
+                validateMinimal({
+                    type: 'Azure_Log_Analytics',
+                    workspaceId: 'someId'
+                }),
+                /should have required property 'passphrase'/
+            ));
+
+            it('should require passphrase when useManagedIdentity is false', () => assert.isRejected(
+                validateFull({
+                    type: 'Azure_Log_Analytics',
+                    workspaceId: 'someId',
+                    useManagedIdentity: false
+                }),
+                /should have required property 'passphrase'/
+            ));
+
+            it('should not allow passphrase when useManagedIdentity is true', () => assert.isRejected(
+                validateFull({
+                    type: 'Azure_Log_Analytics',
+                    workspaceId: 'someId',
+                    useManagedIdentity: true,
+                    passphrase: {
+                        cipherText: 'mumblemumblemumble'
+                    }
+                }),
+                /useManagedIdentity\/const.*"allowedValue":false/
             ));
         });
 
