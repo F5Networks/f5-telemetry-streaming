@@ -40,7 +40,7 @@ function checkConditions(dataCtx, actionCtx) {
 }
 
 function checkAnyMatches(data, matchObjects) {
-    // Use 'Array.prototype.some' to check whether atleast 1 condition is true
+    // Use 'Array.prototype.some' to check whether at least 1 condition is true
     return matchObjects.some(conditions => checkAllMatches(data, conditions));
 }
 

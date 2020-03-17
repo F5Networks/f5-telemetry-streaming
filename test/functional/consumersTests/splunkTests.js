@@ -59,7 +59,7 @@ function test() {
             return runRemoteCmd(`docker ps | grep ${SPLUNK_CONTAINER_NAME}`)
                 .then((data) => {
                     if (data) {
-                        return Promise.resolve(); // exists, contine
+                        return Promise.resolve(); // exists, continue
                     }
                     return runRemoteCmd(cmd);
                 });
@@ -219,7 +219,7 @@ function test() {
                     // check that the event is what we expect
                     const result = results[0];
                     const rawData = JSON.parse(result._raw);
-                    // validate raw data agains schema
+                    // validate raw data against schema
                     const schema = JSON.parse(fs.readFileSync(constants.DECL.SYSTEM_POLLER_SCHEMA));
                     const valid = util.validateAgainstSchema(rawData, schema);
                     if (valid !== true) {

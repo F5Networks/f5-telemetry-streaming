@@ -42,5 +42,5 @@ make setup
 # for debugging purpose only
 ls -als ${PROJECT_DIR}
 
-# copy info about deployed harness to project's folder to create artifcat
+# copy info about deployed harness to project's folder to create artifact
 cp ${PROJECT_DIR}/harness_facts_flat.json ${CI_PROJECT_DIR}/harness_facts_flat.json

@@ -26,10 +26,10 @@ const EVENT_TYPES = require('./constants').EVENT_TYPES;
  * @param {Object}  dataCtx                - data context wrapper
  * @param {Object}  dataCtx.data           - data to process
  * @param {String}  dataCtx.type           - type of data to process
- * @param {Object}  actionCtx              - 'setTag' action to perfrom on the data
+ * @param {Object}  actionCtx              - 'setTag' action to perform on the data
  * @param {Object}  deviceCtx              - device context
  * @param {Object}  [actionCtx.setTag]     - tag(s) that will be applied
- * @param {Object}  [actionCtx.locations]  - where thae tags should be applied
+ * @param {Object}  [actionCtx.locations]  - where the tags should be applied
  * @param {Object}  [actionCtx.ifAllMatch] - conditions to check before
  * @param {Object}  [actionCtx.ifAnyMatch] - conditions to check before
  *

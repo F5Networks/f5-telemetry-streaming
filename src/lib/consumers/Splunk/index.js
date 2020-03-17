@@ -81,7 +81,7 @@ function defaultDataFormat(ctx) {
     return Promise.resolve([JSON.stringify(dataMapping.defaultFormat(ctx))]);
 }
 /**
-* Transform incomming data
+* Transform incoming data
 *
 * @param {Object} globalCtx - global context
 *

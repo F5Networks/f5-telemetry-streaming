@@ -66,9 +66,9 @@ const DACLI_SCRIPT_CODE = 'proc script::run {} {\n    set cmd [lreplace $tmsh::a
  *
  * @property {String}  host       - HTTP host
  * @property {String}  options    - see 'options' parameter
- * @property {String}  scriptName - script's name on the destionation device.
+ * @property {String}  scriptName - script's name on the destination device.
  *                                  See DACLI_SCRIPT_NAME constant for default value
- * @property {String}  scriptCode - script's code on the destionation device.
+ * @property {String}  scriptCode - script's code on the destination device.
  *                                  See DACLI_SCRIPT_CODE constant for default value
  * @property {String}  partition  - TMOS partition to use for script creation
  * @property {String}  subPath    - TMOS subPath to use for script creation, requires partition
@@ -76,7 +76,7 @@ const DACLI_SCRIPT_CODE = 'proc script::run {} {\n    set cmd [lreplace $tmsh::a
  *                                  See DACLI_RETRY_DELAY constant for default value
  */
 function DeviceAsyncCLI() {
-    // rest params syntax supported only fron node 6+
+    // rest params syntax supported only from node 6+
     /* eslint-disable prefer-rest-params */
     this.host = typeof arguments[0] === 'string' ? arguments[0] : null;
     this.host = this.host || constants.LOCAL_HOST;
@@ -207,7 +207,7 @@ DeviceAsyncCLI.prototype._request = function (uri, options) {
 };
 
 /**
- * Confgure temporary TMOS script object on the device
+ * Configure temporary TMOS script object on the device
  *
  * @private
  * @param {Object} script                  - script object
@@ -688,7 +688,7 @@ module.exports = {
                         return Promise.reject(new Error(`HTTP Error: ${msg}`));
                     }
                     if (respObj.statusCode >= 200 && respObj.statusCode < 300) {
-                        // handle it in async way, waiting for callabck from write
+                        // handle it in async way, waiting for callback from write
                         promise = new Promise((resolve, reject) => {
                             currentBytes += parseInt(respObj.headers['content-length'], 10);
                             dst.write(respBody, (err) => {

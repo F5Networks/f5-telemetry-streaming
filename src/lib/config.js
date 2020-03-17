@@ -33,7 +33,7 @@ const BASE_CONFIG = {
  *
  * @property {Object} validator - JSON schema validator
  *
- * @event change - config was validated and can be propogated
+ * @event change - config was validated and can be propagated
  */
 function ConfigWorker() {
     this.validator = declValidator.getValidator();

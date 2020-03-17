@@ -46,7 +46,7 @@ function SimpleRouter() {
  */
 
 /**
- * Register request habdler.
+ * Register request handler.
  *
  * @public
  * @param {String | String[]} method              - HTTP method (POST, GET, etc.), could be array

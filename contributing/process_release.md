@@ -66,7 +66,7 @@
 ## Release process
 
 * Create new branch from `master`, e.g. `rc-master-branch`. It will be easier to merge branches and resolve conflicts without any following up issues.
-* Merge RC branch into RC master branch - squash to avoid commits leaking sensitive url's, etc.
+* Merge RC branch into RC master branch - squash to avoid leaking sensitive URLs, etc. through commits
   * git checkout rc-master-branch
   * git merge --squash vX.Y.Z
   * git push origin
