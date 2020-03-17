@@ -697,7 +697,7 @@ IHealthPoller.prototype.process = function () {
         })
         .catch((err) => {
             this.setState(IHealthPoller.STATE.FAILED);
-            this.logger.exception(`IHealthPoller.processs: ${err}`, err);
+            this.logger.exception('IHealthPoller.process error', err);
         })
         .then(() => {
             if (this.isStateEq(IHealthPoller.STATE.IHEALTH_POLL_DONE)) {
@@ -717,7 +717,7 @@ IHealthPoller.prototype.process = function () {
         .then(() => this._saveStorageState())
         .catch((err) => {
             this.setState(IHealthPoller.STATE.FAILED);
-            this.logger.exception(`IHealthPoller.processs: ${err}`, err);
+            this.logger.exception('IHealthPoller.process error', err);
         })
         .then(() => {
             // set it here to set correct timeout
@@ -737,7 +737,7 @@ IHealthPoller.prototype.process = function () {
             return Promise.resolve();
         })
         .catch((err) => {
-            this.logger.exception('IHealthPoller.processs: unexpected error', err);
+            this.logger.exception('IHealthPoller.process: unhandled error', err);
         });
 };
 

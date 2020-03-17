@@ -26,7 +26,7 @@ module.exports = function (context) {
     transformData(context)
         .then(data => forwardData(data, context))
         .catch((err) => {
-            context.logger.exception(`Splunk data processing error: ${err}`, err);
+            context.logger.exception('Splunk data processing error', err);
         });
 };
 
@@ -69,7 +69,7 @@ function safeDataTransform(cb, ctx) {
             }
         }
     }).catch((err) => {
-        ctx.globalCtx.logger.exception(`Splunk.computeSourceType error: ${err}`, err);
+        ctx.globalCtx.logger.exception('Splunk.safeDataTransform error', err);
     });
 }
 /**

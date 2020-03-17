@@ -246,7 +246,7 @@ ConfigWorker.prototype.processClientRequest = function (restOperation) {
                 errObj.message = 'Internal Server Error';
                 errObj.error = `${err.message ? err.message : err}`;
             }
-            logger.exception(`${actionName} error: ${err}`, err);
+            logger.exception(`config.${actionName} error`, err);
             util.restOperationResponder(restOperation, errObj.code, errObj);
         });
 };

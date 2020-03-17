@@ -203,7 +203,7 @@ RestStorage.prototype._load = function () {
             .catch((err) => {
                 this._loadPromise = null;
                 loadPromise.loadError = err;
-                logger.exception('RestStorage.load:', err);
+                logger.exception('RestStorage.load error', err);
             });
 
         this._loadPromise = loadPromise;
@@ -265,7 +265,7 @@ RestStorage.prototype._save = function () {
             })
             .catch((err) => {
                 savePromise.saveError = err;
-                logger.exception('RestStorage.save:', err);
+                logger.exception('RestStorage.save error', err);
             })
             .then(() => {
                 this._savePromise = null;

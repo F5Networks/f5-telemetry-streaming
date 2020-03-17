@@ -147,7 +147,7 @@ function processClientRequest(restOperation) {
                 ihInstance.dataCallback = safeProcess;
                 ihInstance.process()
                     .catch((err) => {
-                        logger.exception(`processClientRequest: iHealthPoller.process error: ${err}`, err);
+                        logger.exception('processClientRequest: iHealthPoller.process error', err);
                         return ihInstance.removeAllData();
                     });
             }
