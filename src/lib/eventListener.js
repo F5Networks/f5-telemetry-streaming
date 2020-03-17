@@ -106,7 +106,7 @@ EventListener.prototype.start = function () {
     try {
         this._start();
     } catch (err) {
-        this.logger.exception(`Unable to start: ${err}`, err);
+        this.logger.exception('Unable to start', err);
     }
 };
 
@@ -182,7 +182,7 @@ EventListener.prototype._start = function () {
     // message on close event
     this._server.on('close', (err) => {
         if (err) {
-            this.logger.exception(`Unexpected error on attempt to stop: ${err}`, err);
+            this.logger.exception('Unexpected error on attempt to stop', err);
         } else {
             this.logger.debug('Event listener stopped');
         }

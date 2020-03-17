@@ -360,7 +360,7 @@ function processClientRequest(restOperation) {
             } else {
                 message = `${error}`;
                 code = 500;
-                logger.exception(`poller request ended up with error: ${message}`, error);
+                logger.exception('poller request ended up with error', error);
             }
             util.restOperationResponder(restOperation, code, { code, message });
         });

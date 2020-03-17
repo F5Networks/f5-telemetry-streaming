@@ -221,7 +221,7 @@ Tracer.prototype._reopenIfNeeded = function () {
                 }
             });
         })
-        .catch(err => logger.exception(`tracer._reopenIfNeeded exception: ${err}`, err));
+        .catch(err => logger.exception('tracer._reopenIfNeeded exception', err));
 };
 
 /**

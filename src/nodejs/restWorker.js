@@ -83,7 +83,7 @@ SimpleRouter.prototype.processRestOperation = function (restOperation) {
     try {
         this._processRestOperation(restOperation);
     } catch (err) {
-        logger.exception(`restOperation processing error: ${err}`, err);
+        logger.exception('restOperation processing error', err);
         util.restOperationResponder(restOperation, 500,
             { code: 500, message: 'Internal Server Error' });
     }
@@ -221,7 +221,7 @@ RestWorker.prototype._initializeApplication = function (success, failure) {
             logger.debug('Host Device Info gathered');
         })
         .catch((err) => {
-            logger.exception(`Unable to gather Host Device Info: ${err}`, err);
+            logger.exception('Unable to gather Host Device Info', err);
         });
 };
 
