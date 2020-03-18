@@ -45,9 +45,9 @@ module.exports = {
             VM_HOSTNAME: 'AZURE_VM_HOSTNAME',
             VM_PORT: 'AZURE_VM_PORT',
             VM_IP: 'AZURE_VM_IP',
-            VM_USER: 'AZURE_VM_USER'
+            VM_USER: 'AZURE_VM_USER',
+            VM_PWD: 'AZURE_VM_PWD'
         },
-        CICD_AUTH_OS_PASSWORD: 'CICD_AUTH_OS_PASSWORD',
         TEST_CONTROLS: {
             REUSE_INSTALLED_PACKAGE: 'REUSE_INSTALLED_PACKAGE',
             SKIP_DUT_TESTS: 'SKIP_DUT_TESTS',
