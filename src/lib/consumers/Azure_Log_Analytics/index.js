@@ -88,6 +88,6 @@ module.exports = function (context) {
             context.logger.debug('success');
         })
         .catch((error) => {
-            context.logger.error(`Unable to forward to Azure Log Analytics consumer. ${error.message || error}. StackTrace: ${error.stack}`);
+            context.logger.exception('Unable to forward to Azure Log Analytics consumer.', error);
         });
 };
