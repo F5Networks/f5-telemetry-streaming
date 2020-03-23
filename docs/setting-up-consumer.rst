@@ -87,7 +87,7 @@ Telemetry Streaming v1.10 adds support for sending data to Azure Log Analytics w
 - List workspaces for the subscription(s)
 - Log Analytics Contributor for the workspace (either at the Workspace resource level or inherited via resource group)
 
-Telemetry Streaming supports Managed Identities using a new **useManagedIdentity** property, set to **true**.  You cannot specify a passphrase when this property is set to true.  You must specify passphrase when this property is omitted or when value is **false**.
+Telemetry Streaming supports Managed Identities using a new **useManagedIdentity** property, set to **true**.  You cannot specify a passphrase when this property is set to true.  You must specify passphrase when this property is omitted or when value is **false**.  If you do not include this property at all, Telemetry Streaming behaves as though the value is false.
 
 So in the example declaration above, to use a Managed Identity you would just change the value for useManagedIdentity to true (for example ``"useManagedIdentity": true``).
 
