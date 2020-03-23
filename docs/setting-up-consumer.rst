@@ -10,7 +10,7 @@ Use this section to find example declarations and notes for supported consumers.
 .. _splunk-ref:
 
 Splunk
-~~~~~~
+------
 |splunk_img|
 
 Required information:
@@ -27,7 +27,7 @@ Example Declaration:
 .. _splunk-legacy:
 
 Splunk Legacy format
-^^^^^^^^^^^^^^^^^^^^
+--------------------
 The **format** property can be set to **legacy** for Splunk users who wish to convert the stats output similar to the |splunk app|. To see more information, see |Analytics|. To see more information about using the HEC, see |HEC|.  See the following example.
 
 .. NOTE:: To poll for any data involving **tmstats** you must have a Splunk consumer with the legacy format as described in this section.  This includes GET requests to the SystemPoller API because the data is not pulled unless it is a legacy Splunk consumer. |br| |br| Telemetry Streaming 1.7.0 and later gathers additional data from tmstats tables to improve compatibility with Splunk Legacy consumers.
@@ -50,7 +50,7 @@ Example Declaration for Legacy (including facility):
 .. _azure-ref:
 
 Microsoft Azure Log Analytics
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------
 |azure_img|
 
 Required Information:
@@ -58,6 +58,8 @@ Required Information:
  - Shared Key: Navigate to :guilabel:`Log Analytics workspace > Advanced Settings > Connected Sources` and use the primary key.
 
 .. NOTE:: To see more information about sending data to Log Analytics, see |HTTP Data Collector API|.
+
+Note the following example has been updated with the **useManagedIdentity** property. See :ref:`mi` following the example for information about using Azure Managed Identities and Telemetry Streaming. 
 
 Example Declaration:
 
@@ -71,12 +73,31 @@ The following is an example of the Azure dashboard with Telemetry Streaming data
 
 |azure_log_analytics_dashboard|
 
+| 
+
+.. _mi:
+
+Using Microsoft Managed Identities
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Telemetry Streaming v1.10 adds support for sending data to Azure Log Analytics with an Azure Managed Identity. For specific information on Managed Identities, see |managedid|.
+
+**Important:** The managed identity assigned to the VM must have at the minimum, the following permissions (see the Azure documentation for detailed information):
+
+- List subscriptions
+- List workspaces for the subscription(s)
+- Log Analytics Contributor for the workspace (either at the Workspace resource level or inherited via resource group)
+
+Telemetry Streaming supports Managed Identities using a new **useManagedIdentity** property, set to **true**.  You cannot specify a passphrase when this property is set to true.  You must specify passphrase when this property is omitted or when value is **false**.
+
+So in the example declaration above, to use a Managed Identity you would just change the value for useManagedIdentity to true (for example ``"useManagedIdentity": true``).
+
+
 |
 
 .. _awscloud-ref:
 
 AWS CloudWatch
-~~~~~~~~~~~~~~~
+--------------
 |aws_img|   
 
 Required information:
@@ -100,7 +121,7 @@ Example Declaration:
 .. _awss3-ref:
 
 AWS S3
-~~~~~~
+------
 |aws_s3|
 
 Required Information:
@@ -121,7 +142,7 @@ Example Declaration:
 .. _graphite-ref:
 
 Graphite
-~~~~~~~~
+--------
 |graphite|
 
 Required Information:
@@ -139,7 +160,7 @@ Required Information:
 .. _kafka-ref:
 
 Kafka
-~~~~~
+-----
 |Kafka|
 
 Required Information:
@@ -161,7 +182,7 @@ Required Information:
 .. _elasticsearch-ref:
 
 ElasticSearch
-~~~~~~~~~~~~~
+-------------
 |ElasticSearch|
 
 Required Information:
@@ -188,7 +209,7 @@ Optional Parameters:
 .. _sumologic-ref:
 
 Sumo Logic
-~~~~~~~~~~
+----------
 |Sumo Logic|
 
 Required Information:
@@ -208,7 +229,7 @@ Required Information:
 .. _statsd-ref:
 
 StatsD
-~~~~~~
+------
 |StatsD|
 
 Required Information:
@@ -226,7 +247,7 @@ Required Information:
 .. _http-ref:
 
 Generic HTTP
-~~~~~~~~~~~~
+------------
 
 Required Information:
  - Host: The address of the system.
@@ -253,7 +274,7 @@ Example with multiple passphrases:
 .. _fluentd-ref:
 
 Fluentd
-~~~~~~~
+-------
 |Fluentd|
 
 Required Information:
@@ -270,7 +291,7 @@ Required Information:
 .. _stackdrive:
 
 Google StackDriver
-~~~~~~~~~~~~~~~~~~
+------------------
 |stackd|
 
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
@@ -409,7 +430,10 @@ Once you have configured the StackDriver consumer and sent a Telemetry Streaming
 
    <a href="https://cloud.google.com/stackdriver/" target="_blank">StackDriver documentation</a>
 
-
 .. |br| raw:: html
    
    <br />
+
+.. |managedid| raw:: html
+
+   <a href="https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview" target="_blank">Microsoft documentation</a>
