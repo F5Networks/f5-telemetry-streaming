@@ -36,6 +36,15 @@ describe('Kafka', () => {
     beforeEach(() => {
         sinon.stub(kafka, 'KafkaClient').callsFake((opts) => {
             passedClientOptions = opts;
+            const events = {};
+            return {
+                on: (event, cb) => {
+                    events[event] = cb;
+                },
+                emit: (event, data) => {
+                    events[event](data);
+                }
+            };
         });
         sinon.stub(kafka, 'Producer').returns({
             on: (event, cb) => {

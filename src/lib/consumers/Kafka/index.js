@@ -11,6 +11,24 @@
 const kafka = require('kafka-node');
 
 /**
+ * AUTOTOOL-491 workaround to resolve following situation:
+ * - connection to broker was removed from pool already - assertion failed
+ * - another connection was registered with the same key (addr:port) - assertion failed
+ *
+ * source: kafka-node v2.6.1, kafkaClient.js, line 669
+ */
+if (typeof kafka.KafkaClient.prototype.deleteDisconnected !== 'undefined') {
+    const originalMethod = kafka.KafkaClient.prototype.deleteDisconnected;
+    kafka.KafkaClient.prototype.deleteDisconnected = function () {
+        try {
+            originalMethod.apply(this, arguments);
+        } catch (err) {
+            this.emit('f5error', err);
+        }
+    };
+}
+
+/**
  * See {@link ../README.md#context} for documentation
  */
 module.exports = function (context) {
@@ -42,6 +60,10 @@ module.exports = function (context) {
     };
 
     const client = new kafka.KafkaClient(clientOptions);
+    client.on('f5error', (err) => {
+        context.logger.exception('Unexpected error in KafkaClient', err);
+    });
+
     const producer = new kafka.Producer(client);
     const payload = [
         {
