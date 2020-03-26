@@ -9,7 +9,7 @@
 'use strict';
 
 const util = require('../../util');
-const azureUtil = require('./azureUtil');
+const azureUtil = require('./../shared/azureUtil');
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 
 /**

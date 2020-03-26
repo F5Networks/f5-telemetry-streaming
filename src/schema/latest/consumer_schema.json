@@ -61,7 +61,8 @@
                     "name": {
                         "description": "Name of this header",
                         "type": "string",
-                        "f5expand": true
+                        "f5expand": true,
+                        "minLength": 1
                     },
                     "value": {
                         "description": "Value of this header",
@@ -80,6 +81,50 @@
                 ],
                 "additionalProperties": false
             }
+        },
+        "customOpts": {
+            "$comment": "Required for certain consumers: standard property",
+            "title": "Custom Opts (Client Library Dependent)",
+            "description": "Additional options for use by consumer client library. Refer to corresponding consumer lib documentation for acceptable keys and values." ,
+            "type": "array",
+            "items": {
+                "properties": {
+                    "name": {
+                        "description": "Name of the option",
+                        "type": "string",
+                        "f5expand": true,
+                        "minLength": 1
+                    },
+                    "value": {
+                        "description": "Value of the option",
+                        "minLength": 1,
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "f5expand": true
+                                    },
+                                    {
+                                        "$ref": "base_schema.json#/definitions/stringOrSecret"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "name",
+                    "value"
+                ],
+                "additionalProperties": false
+            },
+            "minItems": 1
         },
         "format": {
             "$comment": "Required for certain consumers: standard property",
@@ -131,11 +176,35 @@
             "f5expand": true
         },
         "useManagedIdentity": {
-            "$comment": "Required for certain consumers: Azure Log Analytics",
+            "$comment": "Required for certain consumers: Azure_Log_Analytics",
             "title": "Use Managed Identity",
             "description": "Determines whether to use Managed Identity to perform authorization for Azure services",
             "type": "boolean",
             "default": false
+        },
+        "instrumentationKey": {
+            "$comment": "Required for certain consumers: Azure_Application_Insights",
+            "title": "Instrumentation Key",
+            "description": "Used to determine which App Insight resource to send metrics to",
+            "type": "string",
+            "f5expand": true,
+            "minLength": 1
+        },
+        "maxBatchIntervalMs": {
+            "$comment": "Required for certain consumers: Azure_Application_Insights",
+            "title": "Maximum Batch Interval (ms)",
+            "description": "The maximum amount of time to wait in milliseconds to for payload to reach maxBatchSize",
+            "type": "integer",
+            "minimum": 1000,
+            "default": 5000
+        },
+        "maxBatchSize": {
+            "$comment": "Required for certain consumers: Azure_Application_Insights",
+            "title": "Maximum Batch Size",
+            "description": "The maximum number of telemetry items to include in a payload to the ingestion endpoint",
+            "type": "integer",
+            "minimum": 1,
+            "default": 250
         },
         "topic": {
             "$comment": "Required for certain consumers: Kafka",
@@ -237,6 +306,7 @@
                             "AWS_CloudWatch",
                             "AWS_S3",
                             "Azure_Log_Analytics",
+                            "Azure_Application_Insights",
                             "default",
                             "ElasticSearch",
                             "Generic_HTTP",
@@ -276,11 +346,15 @@
                             "path": {},
                             "method": {},
                             "headers": {},
+                            "customOpts": {},
                             "username": {},
                             "passphrase": {},
                             "format": {},
                             "workspaceId": {},
                             "useManagedIdentity": {},
+                            "instrumentationKey": {},
+                            "maxBatchIntervalMs": {},
+                            "maxBatchSize": {},
                             "region": {},
                             "logGroup": {},
                             "logStream": {},
@@ -372,6 +446,21 @@
                                     }
                                 }
                             ]
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "Azure_Application_Insights" } } },
+                        "then": {
+                            "required": [
+                                "instrumentationKey"
+                            ],
+                            "properties": {
+                                "instrumentationKey": { "$ref": "#/definitions/instrumentationKey" },
+                                "maxBatchSize": { "$ref": "#/definitions/maxBatchSize", "default": 250 },
+                                "maxBatchIntervalMs": { "$ref": "#/definitions/maxBatchIntervalMs", "default": 5000 },
+                                "customOpts": { "$ref": "#/definitions/customOpts" }
+                            }
                         },
                         "else": {}
                     },

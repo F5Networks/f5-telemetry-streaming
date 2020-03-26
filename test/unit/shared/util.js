@@ -77,7 +77,10 @@ module.exports = {
             },
             logger: {
                 error: () => { },
-                debug: () => { }
+                debug: () => { },
+                info: () => { },
+                exception: () => { },
+                getLevelName: () => { }
             }
         };
         return context;

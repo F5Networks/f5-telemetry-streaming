@@ -2835,27 +2835,40 @@ describe('Declarations', () => {
         let fullDeclaration;
         let fullExpected;
 
-        const validate = (targetDeclaration, consumerProps, expectedTarget, expectedProps) => {
+        const validate = (targetDeclaration, consumerProps, expectedTarget, expectedProps, addtlContext) => {
+            let context;
             Object.assign(targetDeclaration.My_Consumer, consumerProps);
             Object.assign(expectedTarget || {}, expectedProps || {});
-            return config.validate(targetDeclaration)
+            if (addtlContext) {
+                context = { expand: true };
+                targetDeclaration.Shared = {
+                    class: 'Shared',
+                    constants: {
+                        class: 'Constants'
+                    }
+                };
+                Object.assign(targetDeclaration.Shared.constants, addtlContext.constants);
+            }
+            return config.validate(targetDeclaration, context)
                 .then((validConfig) => {
                     assert.deepStrictEqual(validConfig.My_Consumer, expectedTarget);
                 });
         };
 
-        const validateMinimal = (consumerProps, expectedProps) => validate(
+        const validateMinimal = (consumerProps, expectedProps, addtlContext) => validate(
             minimalDeclaration,
             consumerProps,
             minimalExpected,
-            expectedProps
+            expectedProps,
+            addtlContext
         );
 
-        const validateFull = (consumerProps, expectedProps) => validate(
+        const validateFull = (consumerProps, expectedProps, addtlContext) => validate(
             fullDeclaration,
             consumerProps,
             fullExpected,
-            expectedProps
+            expectedProps,
+            addtlContext
         );
 
         beforeEach(() => {
@@ -3060,6 +3073,190 @@ describe('Declarations', () => {
                     }
                 }),
                 /useManagedIdentity\/const.*"allowedValue":false/
+            ));
+        });
+
+        describe('Azure_Application_Insights', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: 'some-key-here'
+                },
+                {
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: 'some-key-here',
+                    maxBatchIntervalMs: 5000,
+                    maxBatchSize: 250
+                }
+            ));
+
+            it('should pass with constants pointers', () => validateFull(
+                {
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: '`=/Shared/constants/instrKey`',
+                    customOpts: [
+                        {
+                            name: '`=/Shared/constants/customOptsName`',
+                            value: '`=/Shared/constants/customOptsVal`'
+                        }
+                    ]
+                },
+                {
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: 'key-from-pointer',
+                    maxBatchIntervalMs: 5000,
+                    maxBatchSize: 250,
+                    customOpts: [
+                        {
+                            name: 'nameFromPointer',
+                            value: 'valFromPointer'
+                        }
+                    ]
+                },
+                {
+                    constants: {
+                        instrKey: 'key-from-pointer',
+                        customOptsName: 'nameFromPointer',
+                        customOptsVal: 'valFromPointer'
+                    }
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'Azure_Application_Insights',
+                    workspaceId: 'workspaceId',
+                    instrumentationKey: '-jumbledChars++==',
+                    maxBatchSize: 20,
+                    maxBatchIntervalMs: 3000,
+                    customOpts: [
+                        {
+                            name: 'clientLibNum',
+                            value: 10.29
+                        },
+                        {
+                            name: 'clientLibInt',
+                            value: 222
+                        },
+                        {
+                            name: 'clientLibSecret',
+                            value: {
+                                cipherText: 'cipherText'
+                            }
+                        },
+                        {
+                            name: 'clientLibString',
+                            value: 'going to be passed through the client lib as is'
+                        },
+                        {
+                            name: 'clientLibBool',
+                            value: true
+                        }
+                    ]
+                },
+                {
+                    type: 'Azure_Application_Insights',
+                    workspaceId: 'workspaceId',
+                    instrumentationKey: '-jumbledChars++==',
+                    maxBatchSize: 20,
+                    maxBatchIntervalMs: 3000,
+                    customOpts: [
+                        {
+                            name: 'clientLibNum',
+                            value: 10.29
+                        },
+                        {
+                            name: 'clientLibInt',
+                            value: 222
+                        },
+                        {
+                            name: 'clientLibSecret',
+                            value: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$foo'
+                            }
+                        },
+                        {
+                            name: 'clientLibString',
+                            value: 'going to be passed through the client lib as is'
+                        },
+                        {
+                            name: 'clientLibBool',
+                            value: true
+                        }
+                    ]
+                }
+            ));
+
+            it('should require instrumentationKey', () => assert.isRejected(
+                validateMinimal({
+                    type: 'Azure_Application_Insights'
+                }),
+                /should have required property 'instrumentationKey'/
+            ));
+
+            it('should require at least one item if customOpts property is specified', () => assert.isRejected(
+                validateFull({
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: 'cheddar-swiss-gouda',
+                    customOpts: []
+                }),
+                /customOpts.*should NOT have fewer than 1 items/
+            ));
+
+            it('should not allow less than 1000 for maxBatchIntervalMs', () => assert.isRejected(
+                validateMinimal({
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: 'cosmic-palace',
+                    maxBatchIntervalMs: 10
+                }),
+                /maxBatchIntervalMs\/minimum.*should be >= 1000/
+            ));
+
+            it('should not allow less than 1 for maxBatchSize', () => assert.isRejected(
+                validateMinimal({
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: 'somewhere-void',
+                    maxBatchSize: 0
+                }),
+                /maxBatchSize\/minimum.*should be >= 1/
+            ));
+
+            it('should require at least 1 character for instrumentationKey', () => assert.isRejected(
+                validateMinimal({
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: ''
+                }),
+                /instrumentationKey.*should NOT be shorter than 1 characters/
+            ));
+
+            it('should require at least 1 character for customOpts name', () => assert.isRejected(
+                validateMinimal({
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: 'somewhere-void',
+                    customOpts: [
+                        {
+                            name: '',
+                            value: false
+                        }
+                    ]
+                }),
+                /customOpts\/0\/name.*should NOT be shorter than 1 characters/
+            ));
+
+            it('should require at least 1 character for customOpts value', () => assert.isRejected(
+                validateMinimal({
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: 'somewhere-void',
+                    customOpts: [
+                        {
+                            name: 'test',
+                            value: ''
+                        }
+                    ]
+                }),
+                /customOpts\/0\/value.*should NOT be shorter than 1 characters/
             ));
         });
 

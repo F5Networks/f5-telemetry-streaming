@@ -47,7 +47,21 @@ function queryLogs(oauthToken, workspaceId, queryString) {
     );
 }
 
+function queryAppInsights(appId, apiKey) {
+    const options = {
+        headers: {
+            'x-api-key': apiKey
+        }
+    };
+    return util.makeRequest(
+        'api.applicationinsights.io',
+        `/v1/apps/${appId}/metrics/customMetrics/F5_system_tmmMemory?timespan=PT3M`,
+        options
+    );
+}
+
 module.exports = {
     getOAuthToken,
-    queryLogs
+    queryLogs,
+    queryAppInsights
 };

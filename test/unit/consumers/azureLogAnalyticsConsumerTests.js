@@ -19,7 +19,7 @@ const util = require('../../../src/lib/util');
 
 const azureAnalyticsIndex = require('../../../src/lib/consumers/Azure_Log_Analytics/index');
 const azureLogData = require('./azureLogAnalyticsConsumerTestsData');
-const azureUtil = require('../../../src/lib/consumers/Azure_Log_Analytics/azureUtil');
+const azureUtil = require('../../../src/lib/consumers/shared/azureUtil');
 const testUtil = require('../shared/util');
 
 chai.use(chaiAsPromised);
