@@ -17,6 +17,9 @@ checkEnvVariable AZURE_PIPELINE_RESOURCE_GROUP
 checkEnvVariable AZURE_TEMPLATE_URI
 checkEnvVariable AZURE_VM_PWD
 checkEnvVariable AZURE_MANAGED_IDENTITY_ID
+checkEnvVariable AZURE_APPINS_APP_ID
+checkEnvVariable AZURE_APPINS_API_KEY
+checkEnvVariable AZURE_APPINS_INSTR_KEY
 
 instanceName=tsbigipvm01
 
@@ -40,3 +43,4 @@ curl "https://$AZURE_VM_IP:8443/mgmt/shared/identified-devices/config/device-inf
 
 
 printf "export AZURE_VM_IP=%s \n export AZURE_VM_HOSTNAME=%s \n" "$AZURE_VM_IP" "$AZURE_VM_HOSTNAME" > ./deploy_output/azure.sh
+

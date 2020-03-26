@@ -126,7 +126,50 @@ function getSharedKey(context) {
         });
 }
 
+/**
+ * Converts a data object into an array of metric objects
+ * Non numeric values are skipped
+ * Names will be in the format F5_{keyLevel1}_{keyLevel2}...{propName}.
+ *
+ * For arrays:
+ *   if item contains a name prop, it will be used as key,
+ *   otherwise, index will be used
+ *
+ * @param {Object} data The data to convert into metrics format
+ * @param {String} key The key for the current data
+ * @param {Array} metrics The array containing transformed data
+ * @returns {Array} Data converted array of { name: 'name', value: val }
+ */
+function getMetrics(data, key, metrics) {
+    metrics = metrics || [];
+
+    if (typeof data === 'number') {
+        metrics.push({ name: `F5_${key}`, value: data });
+    }
+
+    if (typeof data === 'string') {
+        const numData = Number(data);
+        if (!Number.isNaN(numData)) {
+            metrics.push({ name: `F5_${key}`, value: numData });
+        }
+    }
+
+    if (typeof data === 'object') {
+        if (Array.isArray(data)) {
+            data.forEach((d, index) => getMetrics(d, d.name ? `${key}_${d.name}` : `${key}_${index}`, metrics));
+        } else {
+            Object.keys(data).forEach((dataKey) => {
+                const newKey = key ? `${key}_${dataKey}` : dataKey;
+                getMetrics(data[dataKey], newKey, metrics);
+            });
+        }
+    }
+
+    return metrics;
+}
+
 module.exports = {
     signSharedKey,
-    getSharedKey
+    getSharedKey,
+    getMetrics
 };

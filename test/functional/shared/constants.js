@@ -46,7 +46,10 @@ module.exports = {
             VM_PORT: 'AZURE_VM_PORT',
             VM_IP: 'AZURE_VM_IP',
             VM_USER: 'AZURE_VM_USER',
-            VM_PWD: 'AZURE_VM_PWD'
+            VM_PWD: 'AZURE_VM_PWD',
+            APPINS_INSTR_KEY: 'AZURE_APPINS_INSTR_KEY',
+            APPINS_API_KEY: 'AZURE_APPINS_API_KEY',
+            APPINS_APP_ID: 'AZURE_APPINS_APP_ID'
         },
         TEST_CONTROLS: {
             REUSE_INSTALLED_PACKAGE: 'REUSE_INSTALLED_PACKAGE',

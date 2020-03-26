@@ -16,7 +16,7 @@ const sinon = require('sinon');
 const assert = require('assert');
 const testUtil = require('./../shared/util');
 const util = require('./../../../src/lib/util');
-const azureUtil = require('./../../../src/lib/consumers/Azure_Log_Analytics/azureUtil');
+const azureUtil = require('./../../../src/lib/consumers/shared/azureUtil');
 
 describe('Azure Util Tests', () => {
     describe('Managed Identities', () => {
@@ -114,6 +114,77 @@ describe('Azure Util Tests', () => {
             });
             return azureUtil.getSharedKey(context)
                 .then(key => assert.strictEqual(key, 'the-hidden-key'));
+        });
+    });
+    describe('Application Insights', () => {
+        describe('getMetrics', () => {
+            it('should properly convert data into array of metrics', () => {
+                const testData = {
+                    system: {
+                        stringProp: 'string',
+                        numProp: 1234,
+                        numStringProp: '1.342',
+                        objProp: {
+                            objKey1: false,
+                            objKey2: 145
+                        }
+                    },
+                    someStats: {
+                        statsType1: [
+                            {
+                                name: 'statsname1',
+                                statsValue: 3899
+                            },
+                            {
+                                name: 'statsname2',
+                                statsValue: 18
+                            }
+                        ],
+                        statsType2: [
+                            {
+                                not_name: 'statsname1',
+                                statsValue: '1401'
+                            },
+                            {
+                                not_name: 'statsname2',
+                                statsValue: '242'
+                            }
+                        ]
+                    }
+                };
+                const expectedData = [
+                    {
+                        name: 'F5_system_numProp',
+                        value: 1234
+                    },
+                    {
+                        name: 'F5_system_numStringProp',
+                        value: 1.342
+                    },
+                    {
+                        name: 'F5_system_objProp_objKey2',
+                        value: 145
+                    },
+                    {
+                        name: 'F5_someStats_statsType1_statsname1_statsValue',
+                        value: 3899
+                    },
+                    {
+                        name: 'F5_someStats_statsType1_statsname2_statsValue',
+                        value: 18
+                    },
+                    {
+                        name: 'F5_someStats_statsType2_0_statsValue',
+                        value: 1401
+                    },
+                    {
+                        name: 'F5_someStats_statsType2_1_statsValue',
+                        value: 242
+                    }
+                ];
+                const actualMetrics = azureUtil.getMetrics(testData);
+                assert.deepStrictEqual(actualMetrics, expectedData);
+            });
         });
     });
 });

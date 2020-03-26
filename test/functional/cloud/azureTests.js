@@ -25,9 +25,21 @@ const CLIENT_ID = process.env[constants.ENV_VARS.AZURE.CLIENT_ID];
 
 
 describe('Azure Cloud-based Tests', function () {
-    this.timeout(180000);
+    this.timeout(600000);
     let options = {};
     let vmAuthToken;
+    const deviceInfo = {
+        ip: VM_IP,
+        username: VM_USER,
+        port: VM_PORT,
+        password: VM_PWD
+    };
+
+    const assertPost = declaration => testUtil.postDeclaration(deviceInfo, declaration)
+        .then((response) => {
+            testUtil.logger.info('Response from declaration post', { hostname: VM_HOSTNAME, response });
+            return assert.strictEqual(response.message, 'success', 'POST declaration should return success');
+        });
 
     before((done) => {
         testUtil.getAuthToken(VM_IP, VM_USER, VM_PWD, VM_PORT)
@@ -92,35 +104,31 @@ describe('Azure Cloud-based Tests', function () {
                     useManagedIdentity: true
                 }
             };
-
-            const deviceInfo = {
-                ip: VM_IP,
-                username: VM_USER,
-                port: VM_PORT,
-                password: VM_PWD
-            };
-            return testUtil.postDeclaration(deviceInfo, declaration)
-                .then((response) => {
-                    testUtil.logger.info('Response from declaration post', { hostname: VM_HOSTNAME, response });
-                    return assert.strictEqual(response.message, 'success', 'POST declaration should return success');
-                });
+            return assertPost(declaration);
         });
 
         it('should retrieve systemPoller info from Log Analytics workspace', function () {
-            this.timeout(45000);
+            this.timeout(120000);
             const queryString = [
                 'F5Telemetry_system_CL',
                 `where hostname_s == "${VM_HOSTNAME}"`,
                 'where TimeGenerated > ago(5m)'
             ].join(' | ');
 
-            return new Promise(resolve => setTimeout(resolve, 30000))
+            return new Promise(resolve => setTimeout(resolve, 60000))
                 .then(() => azureUtil.queryLogs(laReaderToken, WORKSPACE_ID, queryString))
                 .then((results) => {
                     testUtil.logger.info('Response from Log Analytics:', { hostname: VM_HOSTNAME, results });
                     const hasRows = results.tables[0] && results.tables[0].rows && results.tables[0].rows[0];
                     return assert(hasRows, 'Log Analytics query returned no tables/rows');
                 });
+        });
+
+        it('should remove configuration', () => {
+            const declaration = {
+                class: 'Telemetry'
+            };
+            return assertPost(declaration);
         });
     });
 });
