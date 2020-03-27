@@ -246,21 +246,21 @@
             ]
         },
         "projectId": {
-            "$comment": "Required for certain consumers: Google_StackDriver",
+            "$comment": "Required for certain consumers: Google_Cloud_Monitoring",
             "title": "Project ID",
             "description": "The ID of the relevant project.",
             "type": "string",
             "f5expand": true
         },
         "serviceEmail": {
-            "$comment": "Required for certain consumers: Google_StackDriver",
+            "$comment": "Required for certain consumers: Google_Cloud_Monitoring",
             "title": "Service Email",
             "description": "The service email.",
             "type": "string",
             "f5expand": true
         },
         "privateKeyId": {
-            "$comment": "Required for certain consumers: Google_StackDriver",
+            "$comment": "Required for certain consumers: Google_Cloud_Monitoring",
             "title": "Private Key ID",
             "description": "The private key ID.",
             "type": "string",
@@ -310,6 +310,7 @@
                             "default",
                             "ElasticSearch",
                             "Generic_HTTP",
+                            "Google_Cloud_Monitoring",
                             "Google_StackDriver",
                             "Graphite",
                             "Kafka",
@@ -602,7 +603,9 @@
                         "else": {}
                     },
                     {
-                        "if": { "properties": { "type": { "const": "Google_StackDriver" } } },
+                        "if": {
+                            "properties": { "type": { "enum": ["Google_Cloud_Monitoring", "Google_StackDriver"] } }
+                        },
                         "then": {
                             "required": [
                                 "projectId",

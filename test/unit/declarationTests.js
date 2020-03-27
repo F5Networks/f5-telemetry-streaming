@@ -3367,10 +3367,10 @@ describe('Declarations', () => {
             ));
         });
 
-        describe('Google_StackDriver', () => {
+        describe('Google_Cloud_Monitoring', () => {
             it('should pass minimal declaration', () => validateMinimal(
                 {
-                    type: 'Google_StackDriver',
+                    type: 'Google_Cloud_Monitoring',
                     projectId: 'projectId',
                     privateKeyId: 'privateKeyId',
                     privateKey: {
@@ -3379,7 +3379,7 @@ describe('Declarations', () => {
                     serviceEmail: 'serviceEmail'
                 },
                 {
-                    type: 'Google_StackDriver',
+                    type: 'Google_Cloud_Monitoring',
                     projectId: 'projectId',
                     privateKeyId: 'privateKeyId',
                     privateKey: {
@@ -3392,6 +3392,29 @@ describe('Declarations', () => {
             ));
 
             it('should allow full declaration', () => validateFull(
+                {
+                    type: 'Google_Cloud_Monitoring',
+                    projectId: 'projectId',
+                    privateKeyId: 'privateKeyId',
+                    privateKey: {
+                        cipherText: 'privateKey'
+                    },
+                    serviceEmail: 'serviceEmail'
+                },
+                {
+                    type: 'Google_Cloud_Monitoring',
+                    projectId: 'projectId',
+                    privateKeyId: 'privateKeyId',
+                    privateKey: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    },
+                    serviceEmail: 'serviceEmail'
+                }
+            ));
+
+            it('should allow backward compatibility with StackDriver reference', () => validateMinimal(
                 {
                     type: 'Google_StackDriver',
                     projectId: 'projectId',

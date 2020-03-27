@@ -10,6 +10,7 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-1150: [GitHub #30](https://github.com/F5Networks/f5-telemetry-streaming/issues/30) Fix error when Splunk consumer (configured with 'legacy' format) tries to forward event from Event Listener
 - AUTOTOOL-491: [GitHub #17](https://github.com/F5Networks/f5-telemetry-streaming/issues/17) Fix crash in Kafka consumer on attempt to close idle connections to brokers
 ### Changed
+- AUTOTOOL-1376: Rename Google StackDriver consumer to 'Google Cloud Monitoring'
 ### Removed
 
 ## 1.10.0
