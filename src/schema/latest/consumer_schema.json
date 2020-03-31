@@ -176,19 +176,38 @@
             "f5expand": true
         },
         "useManagedIdentity": {
-            "$comment": "Required for certain consumers: Azure_Log_Analytics",
+            "$comment": "Required for certain consumers: Azure_Log_Analytics and Azure_Application_Insights",
             "title": "Use Managed Identity",
             "description": "Determines whether to use Managed Identity to perform authorization for Azure services",
             "type": "boolean",
             "default": false
         },
+        "appInsightsResourceName": {
+            "$comment": "Required for certain consumers: Azure_Application_Insights",
+            "title": "Application Insights Resource Name (Pattern)",
+            "description": "Name filter used to determine which App Insights resource to send metrics to. If not provided, TS will send metrics to App Insights in the subscription in which the managed identity has permissions to",
+            "type": "string"
+        },
         "instrumentationKey": {
             "$comment": "Required for certain consumers: Azure_Application_Insights",
             "title": "Instrumentation Key",
-            "description": "Used to determine which App Insight resource to send metrics to",
-            "type": "string",
-            "f5expand": true,
-            "minLength": 1
+            "description": "Used to determine which App Insights resource to send metrics to",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "f5expand": true,
+                    "minLength": 1
+                },
+                {
+                    "type":"array",
+                    "items": {
+                        "type": "string",
+                        "f5expand": true,
+                        "minLength": 1
+                    },
+                    "minItems": 1
+                }
+            ]
         },
         "maxBatchIntervalMs": {
             "$comment": "Required for certain consumers: Azure_Application_Insights",
@@ -354,6 +373,7 @@
                             "workspaceId": {},
                             "useManagedIdentity": {},
                             "instrumentationKey": {},
+                            "appInsightsResourceName": {},
                             "maxBatchIntervalMs": {},
                             "maxBatchSize": {},
                             "region": {},
@@ -424,7 +444,7 @@
                             "properties": {
                                 "workspaceId": { "$ref": "#/definitions/workspaceId" },
                                 "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
-                                "useManagedIdentity": { "$ref": "#/definitions/useManagedIdentity" }
+                                "useManagedIdentity": { "$ref": "#/definitions/useManagedIdentity", "default": false }
                             },
                             "allOf": [
                                 {
@@ -453,15 +473,51 @@
                     {
                         "if": { "properties": { "type": { "const": "Azure_Application_Insights" } } },
                         "then": {
-                            "required": [
-                                "instrumentationKey"
-                            ],
                             "properties": {
                                 "instrumentationKey": { "$ref": "#/definitions/instrumentationKey" },
                                 "maxBatchSize": { "$ref": "#/definitions/maxBatchSize", "default": 250 },
                                 "maxBatchIntervalMs": { "$ref": "#/definitions/maxBatchIntervalMs", "default": 5000 },
-                                "customOpts": { "$ref": "#/definitions/customOpts" }
-                            }
+                                "customOpts": { "$ref": "#/definitions/customOpts" },
+                                "useManagedIdentity": { "$ref": "#/definitions/useManagedIdentity", "default": false },
+                                "appInsightsResourceName": { "$ref": "#/definitions/appInsightsResourceName" }
+                            },
+                            "allOf": [
+                                {
+                                    "dependencies": {
+                                        "instrumentationKey": {
+                                            "allOf": [
+                                                {
+                                                    "anyOf": [
+                                                        { "not": { "required": [ "useManagedIdentity" ] } },
+                                                        { "properties": { "useManagedIdentity": { "const": false } } }
+                                                    ]
+                                                },
+                                                {
+                                                    "not": { "required": ["appInsightsResourceName"] }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "if": { "not": { "required" : [ "useManagedIdentity"] } },
+                                    "then": { "required": ["instrumentationKey"] },
+                                    "else": {
+                                            "if": { "properties": { "useManagedIdentity": { "const": true } } },
+                                            "then": { "not": { "required": ["instrumentationKey"] } },
+                                            "else": {
+                                                "allOf": [
+                                                    { "required": [ "instrumentationKey" ]},
+                                                    { "not": { "required": [ "appInsightsResourceName" ] } }
+                                                ]
+                                            }
+                                    }
+                                },
+                                {
+                                    "if": { "required": [ "appInsightsResourceName" ] },
+                                    "then": { "properties": { "appInsightsResourceName": { "minLength": 1 } }}
+                                }
+                            ]
                         },
                         "else": {}
                     },

@@ -18,47 +18,71 @@ const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 module.exports = function (context) {
     if (context.event.type !== EVENT_TYPES.SYSTEM_POLLER) {
         context.logger.debug('Skipping non-systemPoller data.');
-        return;
+        return Promise.resolve();
     }
 
     const metrics = azureUtil.getMetrics(context.event.data);
     if (metrics.length === 0) {
         context.logger.debug('No metrics found.');
-        return;
+        return Promise.resolve();
     }
 
-    try {
+    const setupDefaultClient = () => {
+        if (!appInsights.defaultClient) {
+            context.logger.debug('Initializing default client');
+
+            // these set functions configure the global SDK behavior
+            // a "defaultClient" needs to be initialized
+            appInsights.setup('f5-telemetry-default')
+                .setAutoDependencyCorrelation(false)
+                .setAutoCollectRequests(false)
+                .setAutoCollectPerformance(false)
+                .setAutoCollectExceptions(false)
+                .setAutoCollectDependencies(false)
+                .setAutoCollectConsole(false)
+                .setUseDiskRetryCaching(false)
+                .start();
+        }
         // lib only supports console out for non-error level logs
         // by default these will go to /var/tmp/restnoded.out
         const enableRestNodedOut = context.logger.getLevelName() === 'debug';
-        appInsights.setup(context.config.instrumentationKey)
-            .setAutoDependencyCorrelation(false)
-            .setAutoCollectRequests(false)
-            .setAutoCollectPerformance(false)
-            .setAutoCollectExceptions(false)
-            .setAutoCollectDependencies(false)
-            .setAutoCollectConsole(false)
-            .setUseDiskRetryCaching(false)
-            .setInternalLogging(enableRestNodedOut, enableRestNodedOut)
-            .start();
+        appInsights.Configuration.setInternalLogging(enableRestNodedOut, enableRestNodedOut);
+    };
+
+    const createClient = (instrKey) => {
+        const appInsightsClient = new appInsights.TelemetryClient(instrKey);
 
         // Sample customOpts (See https://www.npmjs.com/package/applicationinsights#advanced-configuration-options)
-        const client = new appInsights.TelemetryClient(context.config.instrumentationKey);
         const clientOpts = context.config.customOpts;
         if (clientOpts) {
             clientOpts.forEach((opt) => {
-                client.config[opt.name] = opt.value;
+                appInsightsClient.config[opt.name] = opt.value;
             });
         }
-        client.config.maxBatchIntervalMs = context.config.maxBatchIntervalMs;
-        client.config.maxBatchSize = context.config.maxBatchSize;
+        appInsightsClient.config.maxBatchIntervalMs = context.config.maxBatchIntervalMs;
+        appInsightsClient.config.maxBatchSize = context.config.maxBatchSize;
 
-        metrics.forEach((metric) => {
-            client.trackMetric(metric);
+        return appInsightsClient;
+    };
+
+    return azureUtil.getInstrumentationKeys(context)
+        .then((instrKeys) => {
+            setupDefaultClient();
+
+            instrKeys.forEach((item) => {
+                try {
+                    const appInsightsClient = createClient(item.instrKey);
+                    metrics.forEach((metric) => {
+                        appInsightsClient.trackMetric(metric);
+                    });
+                } catch (err) {
+                    context.logger.exception(`Unable to forward to Azure App Insights consumer. ${item.name || item.instrKey}`, err);
+                }
+                context.logger.debug(`Finished sending total of ${metrics.length} metrics to Azure App Insights ${item.name || item.instrKey}`);
+            });
+            return Promise.resolve();
+        })
+        .catch((error) => {
+            context.logger.exception('Error encountered while processing for Azure App Insights', error);
         });
-
-        context.logger.debug(`Finished sending total of ${metrics.length} metrics to Azure App Insights`);
-    } catch (error) {
-        context.logger.exception('Unable to forward to Azure App Insights consumer.', error);
-    }
 };

@@ -19,7 +19,6 @@ checkEnvVariable AZURE_VM_PWD
 checkEnvVariable AZURE_MANAGED_IDENTITY_ID
 checkEnvVariable AZURE_APPINS_APP_ID
 checkEnvVariable AZURE_APPINS_API_KEY
-checkEnvVariable AZURE_APPINS_INSTR_KEY
 
 instanceName=tsbigipvm01
 

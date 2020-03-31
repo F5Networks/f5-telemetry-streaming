@@ -3017,6 +3017,7 @@ describe('Declarations', () => {
                 {
                     type: 'Azure_Log_Analytics',
                     workspaceId: 'workspaceId',
+                    useManagedIdentity: false,
                     passphrase: {
                         class: 'Secret',
                         protected: 'SecureVault',
@@ -3086,7 +3087,28 @@ describe('Declarations', () => {
                     type: 'Azure_Application_Insights',
                     instrumentationKey: 'some-key-here',
                     maxBatchIntervalMs: 5000,
-                    maxBatchSize: 250
+                    maxBatchSize: 250,
+                    useManagedIdentity: false
+                }
+            ));
+
+            it('should pass minimal declaration - multiple instr Keys', () => validateMinimal(
+                {
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: [
+                        'key-1-guid',
+                        'key-2-guid'
+                    ]
+                },
+                {
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: [
+                        'key-1-guid',
+                        'key-2-guid'
+                    ],
+                    maxBatchIntervalMs: 5000,
+                    maxBatchSize: 250,
+                    useManagedIdentity: false
                 }
             ));
 
@@ -3104,6 +3126,7 @@ describe('Declarations', () => {
                 {
                     type: 'Azure_Application_Insights',
                     instrumentationKey: 'key-from-pointer',
+                    useManagedIdentity: false,
                     maxBatchIntervalMs: 5000,
                     maxBatchSize: 250,
                     customOpts: [
@@ -3122,11 +3145,11 @@ describe('Declarations', () => {
                 }
             ));
 
-            it('should allow full declaration', () => validateFull(
+            it('should allow full declaration - managedIdentity disabled', () => validateFull(
                 {
                     type: 'Azure_Application_Insights',
-                    workspaceId: 'workspaceId',
                     instrumentationKey: '-jumbledChars++==',
+                    useManagedIdentity: false,
                     maxBatchSize: 20,
                     maxBatchIntervalMs: 3000,
                     customOpts: [
@@ -3156,8 +3179,8 @@ describe('Declarations', () => {
                 },
                 {
                     type: 'Azure_Application_Insights',
-                    workspaceId: 'workspaceId',
                     instrumentationKey: '-jumbledChars++==',
+                    useManagedIdentity: false,
                     maxBatchSize: 20,
                     maxBatchIntervalMs: 3000,
                     customOpts: [
@@ -3189,7 +3212,36 @@ describe('Declarations', () => {
                 }
             ));
 
-            it('should require instrumentationKey', () => assert.isRejected(
+            it('should allow full declaration - managedIdentity enabled', () => validateFull(
+                {
+                    type: 'Azure_Application_Insights',
+                    appInsightsResourceName: 'test.*',
+                    useManagedIdentity: true,
+                    maxBatchSize: 20,
+                    maxBatchIntervalMs: 3000,
+                    customOpts: [
+                        {
+                            name: 'clientLibNum',
+                            value: 221100
+                        }
+                    ]
+                },
+                {
+                    type: 'Azure_Application_Insights',
+                    appInsightsResourceName: 'test.*',
+                    useManagedIdentity: true,
+                    maxBatchSize: 20,
+                    maxBatchIntervalMs: 3000,
+                    customOpts: [
+                        {
+                            name: 'clientLibNum',
+                            value: 221100
+                        }
+                    ]
+                }
+            ));
+
+            it('should require instrumentationKey if useManagedIdentity is omitted', () => assert.isRejected(
                 validateMinimal({
                     type: 'Azure_Application_Insights'
                 }),
@@ -3223,12 +3275,28 @@ describe('Declarations', () => {
                 /maxBatchSize\/minimum.*should be >= 1/
             ));
 
-            it('should require at least 1 character for instrumentationKey', () => assert.isRejected(
+            it('should require at least 1 character for instrumentationKey (string)', () => assert.isRejected(
                 validateMinimal({
                     type: 'Azure_Application_Insights',
                     instrumentationKey: ''
                 }),
                 /instrumentationKey.*should NOT be shorter than 1 characters/
+            ));
+
+            it('should require at least 1 character for instrumentationKey (array item)', () => assert.isRejected(
+                validateMinimal({
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: ['']
+                }),
+                /instrumentationKey.*items\/minLength.*should NOT be shorter than 1 characters/
+            ));
+
+            it('should require at least 1 item for instrumentationKey (array)', () => assert.isRejected(
+                validateMinimal({
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: []
+                }),
+                /instrumentationKey.*minItems.*should NOT have fewer than 1 items/
             ));
 
             it('should require at least 1 character for customOpts name', () => assert.isRejected(
@@ -3257,6 +3325,53 @@ describe('Declarations', () => {
                     ]
                 }),
                 /customOpts\/0\/value.*should NOT be shorter than 1 characters/
+            ));
+
+            it('should not allow instrumentationKey when useManagedIdentity is true', () => assert.isRejected(
+                validateMinimal({
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: 'somewhere-void',
+                    useManagedIdentity: true
+                }),
+                /dependencies\/instrumentationKey.*useManagedIdentity\/const.*allowedValue":false/
+            ));
+
+            it('should not require instrumentationKey when useManagedIdentity is false', () => validateMinimal(
+                {
+                    type: 'Azure_Application_Insights',
+                    useManagedIdentity: true
+                },
+                {
+                    type: 'Azure_Application_Insights',
+                    useManagedIdentity: true,
+                    maxBatchIntervalMs: 5000,
+                    maxBatchSize: 250
+                }
+            ));
+
+            it('should allow appInsightsResourceName when useManagedIdentity is true', () => validateMinimal(
+                {
+                    type: 'Azure_Application_Insights',
+                    useManagedIdentity: true,
+                    appInsightsResourceName: 'app.*pattern',
+                    maxBatchSize: 10
+                },
+                {
+                    type: 'Azure_Application_Insights',
+                    useManagedIdentity: true,
+                    maxBatchIntervalMs: 5000,
+                    maxBatchSize: 10,
+                    appInsightsResourceName: 'app.*pattern'
+                }
+            ));
+
+            it('should not allow appInsightsResourceName when instrumentationKey is present', () => assert.isRejected(
+                validateMinimal({
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: 'test-app1-instr-key',
+                    appInsightsResourceName: 'test-app-1'
+                }),
+                /dependencies\/instrumentationKey\/allOf\/1\/not/
             ));
         });
 
