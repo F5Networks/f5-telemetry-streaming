@@ -100,22 +100,135 @@ describe('Azure Util Tests', () => {
                         primarySharedKey: 'the-hidden-key'
                     });
                 }
+                // list app insight components
+                if (reqOpts.fullURI.includes('providers/Microsoft.Insights/components')) {
+                    const sub1AppInsights = {
+                        value: [
+                            {
+                                properties: { InstrumentationKey: 'sub1-appins1-key1' },
+                                name: 'sub1AppIns1'
+                            },
+                            {
+                                properties: { InstrumentationKey: 'sub1-appins2-key2' },
+                                name: 'sub1AppIns2'
+                            }
+                        ]
+                    };
+                    const sub2AppInsights = {
+                        value: [
+                            {
+                                properties: { InstrumentationKey: 'sub2-appins1-key1' },
+                                name: 'sub2AppIns1'
+                            },
+                            {
+                                properties: { InstrumentationKey: 'sub2-appins2-key2' },
+                                name: 'sub2AppIns2'
+                            }
+                        ]
+                    };
+                    return Promise.resolve(reqOpts.fullURI.includes('sub-guid-1') ? sub1AppInsights : sub2AppInsights);
+                }
                 return Promise.resolve({});
             });
         });
 
-        it('should generate correct sharedKey when there are multiple subscriptions', () => {
-            const context = testUtil.buildConsumerContext({
-                eventType: 'systemInfo',
-                config: {
-                    workspaceId: 'sub1-workspace-guid-2',
-                    useManagedIdentity: true
-                }
+        describe('getSharedKey', () => {
+            it('should generate correct sharedKey when there are multiple subscriptions', () => {
+                const context = testUtil.buildConsumerContext({
+                    eventType: 'systemInfo',
+                    config: {
+                        workspaceId: 'sub1-workspace-guid-2',
+                        useManagedIdentity: true
+                    }
+                });
+                return azureUtil.getSharedKey(context)
+                    .then(key => assert.strictEqual(key, 'the-hidden-key'));
             });
-            return azureUtil.getSharedKey(context)
-                .then(key => assert.strictEqual(key, 'the-hidden-key'));
+        });
+
+        describe('getInstrumentationKeys', () => {
+            describe('useManagedIdentity is false', () => {
+                it('should return array with single key if there is a single key provided', () => {
+                    const context = testUtil.buildConsumerContext({
+                        eventType: 'systemInfo',
+                        config: {
+                            useManagedIdentity: false,
+                            instrumentationKey: 'test-single-key'
+                        }
+                    });
+                    return azureUtil.getInstrumentationKeys(context)
+                        .then((keys) => {
+                            const expectedData = [
+                                { instrKey: 'test-single-key' }
+                            ];
+                            return assert.deepStrictEqual(keys, expectedData);
+                        });
+                });
+            });
+
+
+            describe('useManagedIdentity is true', () => {
+                it('should return array of keys if there are multiple keys provided', () => {
+                    const context = testUtil.buildConsumerContext({
+                        eventType: 'systemInfo',
+                        config: {
+                            useManagedIdentity: false,
+                            instrumentationKey: [
+                                'test-multi-key1',
+                                'test-multi-key2'
+                            ]
+                        }
+                    });
+                    return azureUtil.getInstrumentationKeys(context)
+                        .then((keys) => {
+                            const expectedData = [
+                                { instrKey: 'test-multi-key1' },
+                                { instrKey: 'test-multi-key2' }
+                            ];
+                            return assert.deepStrictEqual(keys, expectedData);
+                        });
+                });
+
+                it('should return correct instrumentationKeys when there are multiple subscriptions and resources', () => {
+                    const context = testUtil.buildConsumerContext({
+                        eventType: 'systemInfo',
+                        config: {
+                            useManagedIdentity: true
+                        }
+                    });
+                    return azureUtil.getInstrumentationKeys(context)
+                        .then((keys) => {
+                            const expectedData = [
+                                { instrKey: 'sub1-appins1-key1', name: 'sub1AppIns1' },
+                                { instrKey: 'sub1-appins2-key2', name: 'sub1AppIns2' },
+                                { instrKey: 'sub2-appins1-key1', name: 'sub2AppIns1' },
+                                { instrKey: 'sub2-appins2-key2', name: 'sub2AppIns2' }
+                            ];
+                            return assert.deepStrictEqual(keys, expectedData);
+                        });
+                });
+
+                it('should return correct instrumentationKeys when a name filter is included', () => {
+                    const context = testUtil.buildConsumerContext({
+                        eventType: 'systemInfo',
+                        config: {
+                            useManagedIdentity: true,
+                            appInsightsResourceName: 'sub1.*'
+                        }
+                    });
+                    return azureUtil.getInstrumentationKeys(context)
+                        .then((keys) => {
+                            const expectedData = [
+                                { instrKey: 'sub1-appins1-key1', name: 'sub1AppIns1' },
+                                { instrKey: 'sub1-appins2-key2', name: 'sub1AppIns2' }
+                            ];
+                            return assert.deepStrictEqual(keys, expectedData);
+                        });
+                });
+            });
         });
     });
+
     describe('Application Insights', () => {
         describe('getMetrics', () => {
             it('should properly convert data into array of metrics', () => {
@@ -183,7 +296,7 @@ describe('Azure Util Tests', () => {
                     }
                 ];
                 const actualMetrics = azureUtil.getMetrics(testData);
-                assert.deepStrictEqual(actualMetrics, expectedData);
+                return assert.deepStrictEqual(actualMetrics, expectedData);
             });
         });
     });

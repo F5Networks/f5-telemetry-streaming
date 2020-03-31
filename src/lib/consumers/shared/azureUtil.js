@@ -41,7 +41,7 @@ function getAccessTokenFromMetadata(context) {
         });
 }
 
-function listWorkspaces(context, accessToken) {
+function listSubscriptions(accessToken) {
     const listSubOpts = {
         fullURI: 'https://management.azure.com/subscriptions?api-version=2019-11-01',
         headers: {
@@ -49,7 +49,12 @@ function listWorkspaces(context, accessToken) {
         }
     };
 
-    return util.makeRequest(listSubOpts)
+    return util.makeRequest(listSubOpts);
+}
+
+
+function listWorkspaces(context, accessToken) {
+    return listSubscriptions(accessToken)
         .then((resp) => {
             const listWorkspaceBySubOpts = resp.value.map(v => ({
                 fullURI: `https://management.azure.com/subscriptions/${v.subscriptionId}/providers/Microsoft.OperationalInsights/workspaces?api-version=2015-11-01-preview`,
@@ -168,8 +173,59 @@ function getMetrics(data, key, metrics) {
     return metrics;
 }
 
+function getInstrumentationKeys(context) {
+    if (!context.config.useManagedIdentity) {
+        const keys = Array.isArray(context.config.instrumentationKey)
+            ? context.config.instrumentationKey.map(iKey => ({ instrKey: iKey }))
+            : [{ instrKey: context.config.instrumentationKey }];
+        return Promise.resolve(keys);
+    }
+
+    const aiNamePattern = context.config.appInsightsResourceName;
+    let accessToken;
+
+    return getAccessTokenFromMetadata(context)
+        .then((resp) => {
+            accessToken = resp;
+            return listSubscriptions(accessToken);
+        })
+        .then((resp) => {
+            const listAppInsightsBySubOpts = resp.value.map(v => ({
+                fullURI: `https://management.azure.com/subscriptions/${v.subscriptionId}/providers/Microsoft.Insights/components?api-version=2015-05-01`,
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                },
+                allowSelfSignedCert: context.config.allowSelfSignedCert
+            }));
+
+            const aiResourcesPromises = listAppInsightsBySubOpts
+                .map(o => util.makeRequest(o)
+                    .then(items => items.value)
+                    .catch((e) => {
+                        context.logger.error(`Error when listing Application Insights resources: ${e.stack}`);
+                        // don't reject right away when one of the subscription list action failed for some reason
+                        return e;
+                    }));
+
+            return Promise.all(aiResourcesPromises);
+        })
+        .then((results) => {
+            const values = Array.prototype.concat.apply([], results);
+            const aiResources = values.filter(r => r.properties && r.properties.InstrumentationKey
+                && (aiNamePattern ? r.name.match(aiNamePattern) : true));
+            if (aiResources.length === 0) {
+                return Promise.reject(new Error(`Unable to find Application Insights resources for subscription(s). Name filter: ${aiNamePattern || 'none'}`));
+            }
+            const instrKeys = aiResources.map(a => (
+                { name: a.name, instrKey: a.properties.InstrumentationKey }
+            ));
+            return instrKeys;
+        });
+}
+
 module.exports = {
     signSharedKey,
     getSharedKey,
-    getMetrics
+    getMetrics,
+    getInstrumentationKeys
 };

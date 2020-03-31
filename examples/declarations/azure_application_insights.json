@@ -11,6 +11,7 @@
                 "name": "samplingPercentage",
                 "value": 75
             }
-        ]
+        ],
+        "useManagedIdentity": false
     }
 }
