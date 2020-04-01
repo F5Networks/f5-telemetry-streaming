@@ -107,13 +107,28 @@ Microsoft Azure Application Insights
 Required Information:
 
 - **instrumentationKey** if **useManagedIdentity** is *false* or omitted (default)
+
+  - Application Insights > {AppInsightsName} > Overview
+
 - if **useManagedIdentity** is *true*:
 
   - **instrumentationKey** must not be provided
+  - **appInsightsResourceName** can be provided as a name filter (exact match or regex) for the App Insights Resource to send metrics to
+  - **customOpts** are passthrough options (key value pair) to send to the Microsoft node client. There options are not guaranteed to work and may change according to the client lib API, must use with caution
   - The Managed Identity should have:
 
     - permissions to list Microsoft.Insight components for subscription(s) e.g. Monitoring Reader permissions
     - permissions to push metrics to App Insights resource e.g. Monitoring Metrics Publisher permissions
+
+
+Optional Properties:
+
+- ``"maxBatchSize": { "$ref": "#/definitions/maxBatchSize", "default": 250,``
+- ``"maxBatchIntervalMs": { "$ref": "#/definitions/maxBatchIntervalMs", "default": 5000``
+- ``"customOpts": { "$ref": "#/definitions/customOpts" ,``
+- ``"useManagedIdentity": { "$ref": "#/definitions/useManagedIdentity", "default": false``
+- ``"appInsightsResourceName": { "$ref": "#/definitions/appInsightsResourceName"``
+
 
 To see more information about Azure Application Insights, see |appinsight|.
 
@@ -330,7 +345,7 @@ Google Cloud Operations Suite's Cloud Monitoring
 
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-   Support for Google StackDriver is available in TS 1.8.0 and later.  
+   Support for Google StackDriver/Cloud Monitoring is available in TS 1.8.0 and later.  
 
 .. NOTE:: Google recently changed the name of their StackDriver product to Cloud Operations Suite with the monitoring product named *Cloud Monitoring*.
 
@@ -343,9 +358,9 @@ Required Information:
 For complete information on deploying Google Cloud Operations Suite, see |sddocs|.
 
 **Finding the Data**  |br|
-Once you have configured the StackDriver consumer and sent a Telemetry Streaming declaration, Telemetry Streaming creates custom MetricDescriptors to which it sends metrics.  These metrics can be found under a path such as **custom/system/cpu**. To make it easier to find data that is relevant to a specific device,TS uses the **Generic Node** resource type, and assigns machine ID to the **node_id** label to identify which device the data is from.
+Once you have configured the Google Cloud Monitoring consumer and sent a Telemetry Streaming declaration, Telemetry Streaming creates custom MetricDescriptors to which it sends metrics.  These metrics can be found under a path such as **custom/system/cpu**. To make it easier to find data that is relevant to a specific device, TS uses the **Generic Node** resource type, and assigns machine ID to the **node_id** label to identify which device the data is from.
 
-.. IMPORTANT:: There is a quota of 500 custom MetricDescriptors for StackDriver Monitoring. Telemetry Streaming creates these MetricDescriptors, and if this quota is ever reached, you must delete some of these MetricDescriptors.
+.. IMPORTANT:: There is a quota of 500 custom MetricDescriptors for Google Cloud Monitoring. Telemetry Streaming creates these MetricDescriptors, and if this quota is ever reached, you must delete some of these MetricDescriptors.
 
 .. literalinclude:: ../examples/declarations/google_cloud_monitoring.json
     :language: json
@@ -354,10 +369,6 @@ Once you have configured the StackDriver consumer and sent a Telemetry Streaming
 .. |splunk_img| image:: /images/splunk_logo.png
    :target: https://www.splunk.com
    :alt: Splunk
-
-.. |stackd| image:: /images/stackdriver_logo.png
-   :target: https://cloud.google.com/stackdriver/
-   :alt: Google StackDriver
 
 .. |azure_img| image:: /images/azure_logo.png
    :target: https://docs.microsoft.com/en-us/azure/azure-monitor/log-query/log-query-overview
@@ -468,7 +479,7 @@ Once you have configured the StackDriver consumer and sent a Telemetry Streaming
 
 .. |sddocs| raw:: html
 
-   <a href="https://cloud.google.com/stackdriver/" target="_blank">Google Operations suite documentation</a>
+   <a href="https://cloud.google.com/products/operations" target="_blank">Google Operations suite documentation</a>
 
 .. |br| raw:: html
    
