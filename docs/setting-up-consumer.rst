@@ -94,6 +94,38 @@ So in the example declaration above, to use a Managed Identity you would just ch
 
 |
 
+.. _appinsight-ref:
+
+Microsoft Azure Application Insights
+------------------------------------
+|azure_img|
+
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+   Support for Azure Application Insights is available in Telemetry Streaming 1.10 and later. 
+
+Required Information:
+
+- **instrumentationKey** if **useManagedIdentity** is *false* or omitted (default)
+- if **useManagedIdentity** is *true*:
+
+  - **instrumentationKey** must not be provided
+  - The Managed Identity should have:
+
+    - permissions to list Microsoft.Insight components for subscription(s) e.g. Monitoring Reader permissions
+    - permissions to push metrics to App Insights resource e.g. Monitoring Metrics Publisher permissions
+
+To see more information about Azure Application Insights, see |appinsight|.
+
+
+Example Declaration:
+
+.. literalinclude:: ../examples/declarations/azure_application_insights.json
+    :language: json
+
+| 
+
+
 .. _awscloud-ref:
 
 AWS CloudWatch
@@ -288,15 +320,19 @@ Required Information:
 .. literalinclude:: ../examples/declarations/fluentd.json
     :language: json
 
+|
+
 .. _stackdrive:
 
-Google StackDriver
-------------------
-|stackd|
+Google Cloud Operations Suite's Cloud Monitoring
+------------------------------------------------
+|Google Cloud|
 
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
    Support for Google StackDriver is available in TS 1.8.0 and later.  
+
+.. NOTE:: Google recently changed the name of their StackDriver product to Cloud Operations Suite with the monitoring product named *Cloud Monitoring*.
 
 Required Information:
  - projectId: The ID of the GCP project.
@@ -304,14 +340,14 @@ Required Information:
  - privateKeyId: The ID of the private key that the user created for the Service Account (if you do not have a key, from the account page, click **Create Key** with a type of **JSON**. The Private key is in the file that was created when making the account).
  - privateKey: The private key given to the user when a private key was added to the service account.
 
-For complete information on deploying StackDriver, see |sddocs|.
+For complete information on deploying Google Cloud Operations Suite, see |sddocs|.
 
 **Finding the Data**  |br|
 Once you have configured the StackDriver consumer and sent a Telemetry Streaming declaration, Telemetry Streaming creates custom MetricDescriptors to which it sends metrics.  These metrics can be found under a path such as **custom/system/cpu**. To make it easier to find data that is relevant to a specific device,TS uses the **Generic Node** resource type, and assigns machine ID to the **node_id** label to identify which device the data is from.
 
 .. IMPORTANT:: There is a quota of 500 custom MetricDescriptors for StackDriver Monitoring. Telemetry Streaming creates these MetricDescriptors, and if this quota is ever reached, you must delete some of these MetricDescriptors.
 
-.. literalinclude:: ../examples/declarations/stackdriver.json
+.. literalinclude:: ../examples/declarations/google_cloud_monitoring.json
     :language: json
 
 
@@ -364,6 +400,10 @@ Once you have configured the StackDriver consumer and sent a Telemetry Streaming
 .. |Fluentd| image:: /images/fluentd.png
    :target: https://www.fluentd.org/
    :alt: fluentd
+
+.. |Google Cloud| image:: /images/google_logo.png
+   :target: https://cloud.google.com/products/operations
+   :alt: Google Cloud
 
    
 .. |Azure documentation| raw:: html
@@ -428,7 +468,7 @@ Once you have configured the StackDriver consumer and sent a Telemetry Streaming
 
 .. |sddocs| raw:: html
 
-   <a href="https://cloud.google.com/stackdriver/" target="_blank">StackDriver documentation</a>
+   <a href="https://cloud.google.com/stackdriver/" target="_blank">Google Operations suite documentation</a>
 
 .. |br| raw:: html
    
@@ -437,3 +477,9 @@ Once you have configured the StackDriver consumer and sent a Telemetry Streaming
 .. |managedid| raw:: html
 
    <a href="https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview" target="_blank">Microsoft documentation</a>
+
+
+.. |appinsight| raw:: html
+
+   <a href="https://docs.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview" target="_blank">Microsoft documentation</a>
+
