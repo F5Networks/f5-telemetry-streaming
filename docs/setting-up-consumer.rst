@@ -114,7 +114,6 @@ Required Information:
 
   - **instrumentationKey** must not be provided
   - **appInsightsResourceName** can be provided as a name filter (exact match or regex) for the App Insights Resource to send metrics to
-  - **customOpts** are passthrough options (key value pair) to send to the Microsoft node client. There options are not guaranteed to work and may change according to the client lib API, must use with caution
   - The Managed Identity should have:
 
     - permissions to list Microsoft.Insight components for subscription(s), for example the Monitoring Reader role
@@ -125,7 +124,7 @@ Optional Properties:
 
 - **maxBatchSize**: The maximum number of telemetry items to include in a payload to the ingestion endpoint (default: 250)
 - **maxBatchIntervalMs**: The maximum amount of time to wait in milliseconds to for payload to reach maxBatchSize (default: 5000)
-- **customOpts**: Additional options for use by consumer client library. Refer to corresponding consumer lib documentation for acceptable keys and values
+- **customOpts**: Additional options for use by consumer client library. These are passthrough options (key value pair) to send to the Microsoft node client. These options are not guaranteed to work and may change according to the client library API; you must use these options with caution. Refer to corresponding consumer library documentation for acceptable keys and values.
 - **useManagedIdentity**: Determines whether to use Managed Identity to perform authorization for Azure services (default: false)
 - **appInsightsResourceName**: Name filter used to determine to which App Insights resource to send metrics. If not provided, TS will send metrics to App Insights in the subscription in which the managed identity has permissions
 
