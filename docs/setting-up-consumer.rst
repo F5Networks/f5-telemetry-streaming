@@ -79,7 +79,7 @@ The following is an example of the Azure dashboard with Telemetry Streaming data
 
 Using Microsoft Managed Identities for Log Analytics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Telemetry Streaming v1.10 adds support for sending data to Azure Log Analytics with an Azure Managed Identity. For specific information on Managed Identities, see |managedid|.
+Telemetry Streaming v1.11 adds support for sending data to Azure Log Analytics with an Azure Managed Identity. For specific information on Managed Identities, see |managedid|.
 
 **Important:** The managed identity assigned to the VM must have at the minimum, the following permissions (see the Azure documentation for detailed information):
 
@@ -89,8 +89,10 @@ Telemetry Streaming v1.10 adds support for sending data to Azure Log Analytics w
 
 Telemetry Streaming supports Managed Identities using a new **useManagedIdentity** property, set to **true**.  You cannot specify a passphrase when this property is set to true.  You must specify passphrase when this property is omitted or when value is **false**.  If you do not include this property at all, Telemetry Streaming behaves as though the value is false.
 
-So in the example declaration above, to use a Managed Identity you would just change the value for useManagedIdentity to true (for example ``"useManagedIdentity": true``).
+Example Declaration:
 
+.. literalinclude:: ../examples/declarations/azure_log_analytics_mi.json
+    :language: json
 
 |
 
@@ -102,31 +104,24 @@ Microsoft Azure Application Insights
 
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-   Support for Azure Application Insights is available in Telemetry Streaming 1.10 and later. 
+   Support for Azure Application Insights is available in Telemetry Streaming 1.11 and later. 
 
 Required Information:
 
-- **instrumentationKey** if **useManagedIdentity** is *false* or omitted (default)
+- **Instrumentation Key**: If provided, **Use Managed Identity** must be *false* or omitted (default). Navigate to :guilabel:`Application Insights > {AppinsightsName} > Overview`
 
   - Application Insights > {AppInsightsName} > Overview
 
-- if **useManagedIdentity** is *true*:
-
-  - **instrumentationKey** must not be provided
-  - **appInsightsResourceName** can be provided as a name filter (exact match or regex) for the App Insights Resource to send metrics to
-  - The Managed Identity should have:
-
-    - permissions to list Microsoft.Insight components for subscription(s), for example the Monitoring Reader role
-    - permissions to push metrics to App Insights resource, for example the Monitoring Metrics Publisher role
+- **Use Managed Identity**: If true, Instrumentation Key must be omitted. See :ref:`miappin`.
 
 
 Optional Properties:
 
-- **maxBatchSize**: The maximum number of telemetry items to include in a payload to the ingestion endpoint (default: 250)
-- **maxBatchIntervalMs**: The maximum amount of time to wait in milliseconds to for payload to reach maxBatchSize (default: 5000)
-- **customOpts**: Additional options for use by consumer client library. These are passthrough options (key value pair) to send to the Microsoft node client. These options are not guaranteed to work and may change according to the client library API; you must use these options with caution. Refer to corresponding consumer library documentation for acceptable keys and values.
-- **useManagedIdentity**: Determines whether to use Managed Identity to perform authorization for Azure services (default: false)
-- **appInsightsResourceName**: Name filter used to determine to which App Insights resource to send metrics. If not provided, TS will send metrics to App Insights in the subscription in which the managed identity has permissions
+- **MaxBatch Size**: The maximum number of telemetry items to include in a payload to the ingestion endpoint (default: 250)
+- **Max Batch Interval Ms**: The maximum amount of time to wait in milliseconds to for payload to reach maxBatchSize (default: 5000)
+- **App Insights Resource Name**: Name filter used to determine to which App Insights resource to send metrics. If not provided, TS will send metrics to App Insights in the subscription in which the managed identity has permissions. Note: To be used only when useManagedIdentity is true.
+- **customOpts**: Additional options for use by consumer client library. These are passthrough options (key value pair) to send to the Microsoft node client. Warning: These options are not guaranteed to work and may change according to the client library API; you must use these options with caution. Refer to corresponding consumer library documentation for acceptable keys and values.
+
 
 
 To see more information about Azure Application Insights, see |appinsight|.
@@ -143,16 +138,19 @@ Example Declaration:
 
 Using Microsoft Managed Identities for Application Insights
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Telemetry Streaming v1.10 also adds support for sending data to Azure Application Insights with an Azure Managed Identity. For specific information on Managed Identities, see |managedid|.
+Telemetry Streaming v1.11 also adds support for sending data to Azure Application Insights with an Azure Managed Identity. For specific information on Managed Identities, see |managedid|.
 
-**Important:** The managed identity assigned to the VM mustshould have (see the Azure documentation for detailed information):
+**Important:** The managed identity assigned to the VM must have at the minimum, the following permissions  (see the Azure documentation for detailed information):
 
-- Permissions to list Microsoft.Insight components for subscription(s), for example the Monitoring Reader role
-- Permissions to push metrics to App Insights resource, for example the Monitoring Metrics Publisher role
+- List Microsoft.Insight components for subscription(s), for example the Monitoring Reader role
+- Push metrics to the App Insights resource, for example the Monitoring Metrics Publisher role
 
-Telemetry Streaming supports Managed Identities using a new **useManagedIdentity** property, set to **true**.  You cannot specify a passphrase when this property is set to true.  You must specify passphrase when this property is omitted or when value is **false**.  If you do not include this property at all, Telemetry Streaming behaves as though the value is false.
+Telemetry Streaming supports Managed Identities using a new **useManagedIdentity** property, set to **true**.  You cannot specify an instrumentationKey when this property is set to true. You must specify instrumentationKey when this property is omitted or when the value is false. If you do not include this property at all, Telemetry Streaming behaves as though the value is false. You can optionally provide an appInsightsResourceName to limit which App Insights resource(s) to send metrics to. Without the filter, metrics will be sent to all App Insights resources to which the managed identity has permissions. 
 
-So in the example declaration above, to use a Managed Identity you would just change the value for useManagedIdentity to true (for example ``"useManagedIdentity": true``).
+Example Declaration:
+
+.. literalinclude:: ../examples/declarations/azure_application_insights_mi.json
+    :language: json
 
 |
 
