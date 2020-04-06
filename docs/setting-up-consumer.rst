@@ -109,9 +109,6 @@ Microsoft Azure Application Insights
 Required Information:
 
 - **Instrumentation Key**: If provided, **Use Managed Identity** must be *false* or omitted (default). Navigate to :guilabel:`Application Insights > {AppinsightsName} > Overview`
-
-  - Application Insights > {AppInsightsName} > Overview
-
 - **Use Managed Identity**: If true, Instrumentation Key must be omitted. See :ref:`miappin`.
 
 
@@ -120,7 +117,9 @@ Optional Properties:
 - **MaxBatch Size**: The maximum number of telemetry items to include in a payload to the ingestion endpoint (default: 250)
 - **Max Batch Interval Ms**: The maximum amount of time to wait in milliseconds to for payload to reach maxBatchSize (default: 5000)
 - **App Insights Resource Name**: Name filter used to determine to which App Insights resource to send metrics. If not provided, TS will send metrics to App Insights in the subscription in which the managed identity has permissions. Note: To be used only when useManagedIdentity is true.
-- **customOpts**: Additional options for use by consumer client library. These are passthrough options (key value pair) to send to the Microsoft node client. Warning: These options are not guaranteed to work and may change according to the client library API; you must use these options with caution. Refer to corresponding consumer library documentation for acceptable keys and values.
+- **customOpts**: Additional options for use by consumer client library. These are passthrough options (key value pair) to send to the Microsoft node client. 
+   
+   .. WARNING:: The customOpts options are not guaranteed to work and may change according to the client library API; you must use these options with caution. Refer to corresponding consumer library documentation for acceptable keys and values.
 
 
 
