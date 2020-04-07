@@ -226,7 +226,7 @@ From: ``GET /mgmt/shared/telemetry/systempoller/Custom_System/Custom_System_Poll
 
 |
 
-From: ``GET /mgmt/shared/telemetry/systempoller/Custom_System/Custom_System``
+From: ``GET /mgmt/shared/telemetry/systempoller/Custom_System``
 
 .. code-block:: json
 
