@@ -11,6 +11,68 @@
 const crypto = require('crypto');
 const util = require('../../util');
 
+const AZURE_API_TYPES = {
+    MGMT: 'management',
+    OPINSIGHTS: 'opinsights'
+};
+
+const METADATA_URL = 'http://169.254.169.254/metadata';
+
+function getInstanceMetadata(context) {
+    const metadataOpts = {
+        fullURI: `${METADATA_URL}/instance?api-version=2017-08-01`,
+        headers: {
+            Metadata: true
+        },
+        allowSelfSignedCert: context.config.allowSelfSignedCert
+    };
+
+    return util.makeRequest(metadataOpts)
+        .then(resp => resp)
+        // dont reject if unable to retrieve
+        .catch(() => {});
+}
+
+function getInstanceRegion(context) {
+    if (context.config.region) {
+        return Promise.resolve(context.config.region.toLowerCase());
+    }
+    return getInstanceMetadata(context)
+        .then(metadata => (metadata.compute ? metadata.compute.location.toLowerCase() : ''))
+        .catch((e) => {
+            context.logger.debug(`Unable to retrieve instance region. ${e.message}`);
+            return '';
+        });
+}
+
+function isGovCloud(region) {
+    return region.startsWith('usgov') || region.startsWith('usdod');
+}
+
+function getApiDomain(region, apiType) {
+    const isGov = isGovCloud(region);
+
+    switch (apiType) {
+    case AZURE_API_TYPES.MGMT:
+        return isGov ? 'usgovcloudapi.net' : 'azure.com';
+    case AZURE_API_TYPES.OPINSIGHTS:
+        return isGov ? 'azure.us' : 'azure.com';
+    default:
+        return 'azure.com';
+    }
+}
+
+function getApiUrl(context, apiType) {
+    return getInstanceRegion(context)
+        .then((region) => {
+            const domain = getApiDomain(region, apiType);
+            if (apiType === AZURE_API_TYPES.OPINSIGHTS) {
+                return `https://${context.config.workspaceId}.ods.opinsights.${domain}/api/logs?api-version=2016-04-01`;
+            }
+            return `https://management.${domain}`;
+        });
+}
+
 /**
  * Generates a signature for sharedKey to use for authentication
  *
@@ -25,9 +87,9 @@ function signSharedKey(keyToUse, date, httpBody) {
     return crypto.createHmac('sha256', Buffer.from(keyToUse, 'base64')).update(stringToSign, 'utf-8').digest('base64');
 }
 
-function getAccessTokenFromMetadata(context) {
+function getAccessTokenFromMetadata(context, mgmtUrl) {
     const accessTokenOpts = {
-        fullURI: 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https://management.azure.com/',
+        fullURI: `${METADATA_URL}/identity/oauth2/token?api-version=2018-02-01&resource=${mgmtUrl}/`,
         headers: {
             Metadata: 'true'
         },
@@ -41,9 +103,9 @@ function getAccessTokenFromMetadata(context) {
         });
 }
 
-function listSubscriptions(accessToken) {
+function listSubscriptions(accessToken, url) {
     const listSubOpts = {
-        fullURI: 'https://management.azure.com/subscriptions?api-version=2019-11-01',
+        fullURI: `${url}/subscriptions?api-version=2019-11-01`,
         headers: {
             Authorization: `Bearer ${accessToken}`
         }
@@ -54,10 +116,15 @@ function listSubscriptions(accessToken) {
 
 
 function listWorkspaces(context, accessToken) {
-    return listSubscriptions(accessToken)
+    let mgmtUrl;
+    return getApiUrl(context, AZURE_API_TYPES.MGMT)
+        .then((url) => {
+            mgmtUrl = url;
+            return listSubscriptions(accessToken, mgmtUrl);
+        })
         .then((resp) => {
             const listWorkspaceBySubOpts = resp.value.map(v => ({
-                fullURI: `https://management.azure.com/subscriptions/${v.subscriptionId}/providers/Microsoft.OperationalInsights/workspaces?api-version=2015-11-01-preview`,
+                fullURI: `${mgmtUrl}/subscriptions/${v.subscriptionId}/providers/Microsoft.OperationalInsights/workspaces?api-version=2015-11-01-preview`,
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 },
@@ -106,7 +173,12 @@ function getWorkspaceResourceId(context, accessToken) {
  */
 function getSharedKey(context) {
     let accessToken;
-    return getAccessTokenFromMetadata(context)
+    let mgmtUrl;
+    return getApiUrl(context, AZURE_API_TYPES.MGMT)
+        .then((url) => {
+            mgmtUrl = url;
+            return getAccessTokenFromMetadata(context, mgmtUrl);
+        })
         .then((resp) => {
             accessToken = resp;
             return getWorkspaceResourceId(context, accessToken);
@@ -114,7 +186,7 @@ function getSharedKey(context) {
         .then((resourceId) => {
             const sharedKeysOpts = {
                 method: 'POST',
-                fullURI: `https://management.azure.com${resourceId}/sharedKeys?api-version=2015-11-01-preview`,
+                fullURI: `${mgmtUrl}${resourceId}/sharedKeys?api-version=2015-11-01-preview`,
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                     'Content-Length': 0,
@@ -173,25 +245,50 @@ function getMetrics(data, key, metrics) {
     return metrics;
 }
 
+function buildAppInsConnString(instrKey, region) {
+    let connString;
+    if (isGovCloud(region)) {
+        connString = `InstrumentationKey=${instrKey};EndpointSuffix=applicationinsights.us`;
+    }
+    return connString;
+}
+
 function getInstrumentationKeys(context) {
     if (!context.config.useManagedIdentity) {
-        const keys = Array.isArray(context.config.instrumentationKey)
-            ? context.config.instrumentationKey.map(iKey => ({ instrKey: iKey }))
-            : [{ instrKey: context.config.instrumentationKey }];
-        return Promise.resolve(keys);
+        return getInstanceRegion(context)
+            .then((region) => {
+                let keys;
+                if (Array.isArray(context.config.instrumentationKey)) {
+                    keys = context.config.instrumentationKey.map(iKey => ({
+                        instrKey: iKey,
+                        connString: buildAppInsConnString(iKey, region)
+                    }));
+                } else {
+                    keys = [{
+                        instrKey: context.config.instrumentationKey,
+                        connString: buildAppInsConnString(context.config.instrumentationKey, region)
+                    }];
+                }
+                return Promise.resolve(keys);
+            });
     }
 
     const aiNamePattern = context.config.appInsightsResourceName;
     let accessToken;
+    let mgmtUrl;
 
-    return getAccessTokenFromMetadata(context)
+    return getApiUrl(context, AZURE_API_TYPES.MGMT)
+        .then((url) => {
+            mgmtUrl = url;
+            return getAccessTokenFromMetadata(context, mgmtUrl);
+        })
         .then((resp) => {
             accessToken = resp;
-            return listSubscriptions(accessToken);
+            return listSubscriptions(accessToken, mgmtUrl);
         })
         .then((resp) => {
             const listAppInsightsBySubOpts = resp.value.map(v => ({
-                fullURI: `https://management.azure.com/subscriptions/${v.subscriptionId}/providers/Microsoft.Insights/components?api-version=2015-05-01`,
+                fullURI: `${mgmtUrl}/subscriptions/${v.subscriptionId}/providers/Microsoft.Insights/components?api-version=2015-05-01`,
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 },
@@ -217,7 +314,7 @@ function getInstrumentationKeys(context) {
                 return Promise.reject(new Error(`Unable to find Application Insights resources for subscription(s). Name filter: ${aiNamePattern || 'none'}`));
             }
             const instrKeys = aiResources.map(a => (
-                { name: a.name, instrKey: a.properties.InstrumentationKey }
+                { name: a.name, instrKey: a.properties.InstrumentationKey, connString: a.properties.ConnectionString }
             ));
             return instrKeys;
         });
@@ -227,5 +324,6 @@ module.exports = {
     signSharedKey,
     getSharedKey,
     getMetrics,
-    getInstrumentationKeys
+    getInstrumentationKeys,
+    getApiUrl
 };

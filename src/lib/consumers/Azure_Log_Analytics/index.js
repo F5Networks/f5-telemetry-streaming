@@ -16,6 +16,7 @@ const EVENT_TYPES = require('../../constants').EVENT_TYPES;
  * See {@link ../README.md#context} for documentation
  */
 module.exports = function (context) {
+    let fullURI;
     const workspaceId = context.config.workspaceId;
     const sharedKey = context.config.passphrase;
     const logType = context.config.logType || 'F5Telemetry';
@@ -28,9 +29,11 @@ module.exports = function (context) {
         context.event.data[context.event.type] = copyData;
     }
 
-    const promise = sharedKey ? Promise.resolve(sharedKey) : azureUtil.getSharedKey(context);
-
-    return promise
+    return azureUtil.getApiUrl(context, 'opinsights')
+        .then((url) => {
+            fullURI = url;
+            return sharedKey ? Promise.resolve(sharedKey) : azureUtil.getSharedKey(context);
+        })
         .then((keyToUse) => {
             const promises = [];
             const tracerMsg = [];
@@ -57,7 +60,7 @@ module.exports = function (context) {
 
                 const requestOptions = {
                     method: 'POST',
-                    fullURI: `https://${workspaceId}.ods.opinsights.azure.com/api/logs?api-version=2016-04-01`,
+                    fullURI,
                     headers: {
                         'Content-Type': 'application/json',
                         'x-ms-date': date,

@@ -141,7 +141,7 @@
             "f5expand": true
         },
         "region": {
-            "$comment": "Required for certain consumers: AWS_CloudWatch, AWS_S3",
+            "$comment": "Required for certain consumers: AWS_CloudWatch, AWS_S3, Azure_Log_Analytics, Azure_App_Insights",
             "title": "Region",
             "description": "" ,
             "type": "string",
@@ -444,7 +444,8 @@
                             "properties": {
                                 "workspaceId": { "$ref": "#/definitions/workspaceId" },
                                 "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
-                                "useManagedIdentity": { "$ref": "#/definitions/useManagedIdentity", "default": false }
+                                "useManagedIdentity": { "$ref": "#/definitions/useManagedIdentity", "default": false },
+                                "region": { "$ref": "#/definitions/region" }
                             },
                             "allOf": [
                                 {
@@ -479,7 +480,8 @@
                                 "maxBatchIntervalMs": { "$ref": "#/definitions/maxBatchIntervalMs", "default": 5000 },
                                 "customOpts": { "$ref": "#/definitions/customOpts" },
                                 "useManagedIdentity": { "$ref": "#/definitions/useManagedIdentity", "default": false },
-                                "appInsightsResourceName": { "$ref": "#/definitions/appInsightsResourceName" }
+                                "appInsightsResourceName": { "$ref": "#/definitions/appInsightsResourceName" },
+                                "region": { "$ref": "#/definitions/region" }
                             },
                             "allOf": [
                                 {

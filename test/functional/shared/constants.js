@@ -49,7 +49,8 @@ module.exports = {
             VM_PWD: 'AZURE_VM_PWD',
             APPINS_INSTR_KEY: 'AZURE_APPINS_INSTR_KEY',
             APPINS_API_KEY: 'AZURE_APPINS_API_KEY',
-            APPINS_APP_ID: 'AZURE_APPINS_APP_ID'
+            APPINS_APP_ID: 'AZURE_APPINS_APP_ID',
+            CLOUD_TYPE: 'AZURE_CLOUD_TYPE'
         },
         TEST_CONTROLS: {
             REUSE_INSTALLED_PACKAGE: 'REUSE_INSTALLED_PACKAGE',

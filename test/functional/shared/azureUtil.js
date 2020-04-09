@@ -11,26 +11,29 @@
 const util = require('./util');
 
 
-function getOAuthToken(clientId, clientSecret, tenantId) {
+function getOAuthToken(clientId, clientSecret, tenantId, cloudType) {
+    const loginDomain = cloudType === 'gov' ? 'login.microsoftonline.us' : 'login.microsoftonline.com';
+    const resource = cloudType === 'gov' ? 'https://api.loganalytics.us/' : 'https://api.loganalytics.io/';
     const options = {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: [
             'grant_type=client_credentials',
             `client_id=${clientId}`,
-            'redirect_uri=https://login.microsoftonline.com/common/oauth2/nativeclient',
+            `redirect_uri=https://${loginDomain}/common/oauth2/nativeclient`,
             `client_secret=${encodeURIComponent(clientSecret)}`,
-            'resource=https://api.loganalytics.io/'
+            `resource=${resource}`
         ].join('&')
     };
     return util.makeRequest(
-        'login.microsoftonline.com',
+        loginDomain,
         `/${tenantId}/oauth2/token`,
         options
     );
 }
 
-function queryLogs(oauthToken, workspaceId, queryString) {
+function queryLogs(oauthToken, workspaceId, queryString, cloudType) {
+    const apiDomain = cloudType === 'gov' ? 'api.loganalytics.us' : 'api.loganalytics.io';
     const options = {
         method: 'POST',
         headers: {
@@ -41,20 +44,21 @@ function queryLogs(oauthToken, workspaceId, queryString) {
 
     };
     return util.makeRequest(
-        'api.loganalytics.io',
+        apiDomain,
         `/v1/workspaces/${workspaceId}/query`,
         options
     );
 }
 
-function queryAppInsights(appId, apiKey) {
+function queryAppInsights(appId, apiKey, cloudType) {
+    const apiDomain = cloudType === 'gov' ? 'api.applicationinsights.us' : 'api.applicationinsights.io';
     const options = {
         headers: {
             'x-api-key': apiKey
         }
     };
     return util.makeRequest(
-        'api.applicationinsights.io',
+        apiDomain,
         `/v1/apps/${appId}/metrics/customMetrics/F5_system_tmmMemory?timespan=PT3M`,
         options
     );

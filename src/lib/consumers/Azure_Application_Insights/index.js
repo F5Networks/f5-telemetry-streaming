@@ -49,8 +49,8 @@ module.exports = function (context) {
         appInsights.Configuration.setInternalLogging(enableRestNodedOut, enableRestNodedOut);
     };
 
-    const createClient = (instrKey) => {
-        const appInsightsClient = new appInsights.TelemetryClient(instrKey);
+    const createClient = (instrKeyOrConnStr) => {
+        const appInsightsClient = new appInsights.TelemetryClient(instrKeyOrConnStr);
 
         // Sample customOpts (See https://www.npmjs.com/package/applicationinsights#advanced-configuration-options)
         const clientOpts = context.config.customOpts;
@@ -71,7 +71,7 @@ module.exports = function (context) {
 
             instrKeys.forEach((item) => {
                 try {
-                    const appInsightsClient = createClient(item.instrKey);
+                    const appInsightsClient = createClient(item.connString || item.instrKey);
                     metrics.forEach((metric) => {
                         appInsightsClient.trackMetric(metric);
                     });
