@@ -17,12 +17,22 @@ const assert = require('assert');
 const testUtil = require('./../shared/util');
 const util = require('./../../../src/lib/util');
 const azureUtil = require('./../../../src/lib/consumers/shared/azureUtil');
+const azureUtilTestsData = require('./azureUtilTestsData');
 
 describe('Azure Util Tests', () => {
     describe('Managed Identities', () => {
         before(() => {
             sinon.stub(util, 'makeRequest').callsFake((reqOpts) => {
                 // metadata
+                if (reqOpts.fullURI.includes('metadata/instance')) {
+                    return Promise.resolve({
+                        compute: {
+                            location: 'westus2',
+                            name: 'thevm01'
+                        }
+                    });
+                }
+                // metadata token
                 if (reqOpts.fullURI.includes('metadata/identity/oauth2')) {
                     return Promise.resolve({
                         access_token: 'some-long-string-i-will-not-remember',
@@ -105,11 +115,11 @@ describe('Azure Util Tests', () => {
                     const sub1AppInsights = {
                         value: [
                             {
-                                properties: { InstrumentationKey: 'sub1-appins1-key1' },
+                                properties: { InstrumentationKey: 'sub1-appins1-key1', ConnectionString: 'InstrumentationKey=sub1-appins1-key1' },
                                 name: 'sub1AppIns1'
                             },
                             {
-                                properties: { InstrumentationKey: 'sub1-appins2-key2' },
+                                properties: { InstrumentationKey: 'sub1-appins2-key2', ConnectionString: 'InstrumentationKey=sub1-appins2-key2' },
                                 name: 'sub1AppIns2'
                             }
                         ]
@@ -117,11 +127,11 @@ describe('Azure Util Tests', () => {
                     const sub2AppInsights = {
                         value: [
                             {
-                                properties: { InstrumentationKey: 'sub2-appins1-key1' },
+                                properties: { InstrumentationKey: 'sub2-appins1-key1', ConnectionString: 'InstrumentationKey=sub2-appins1-key1;EndpointSuffix=applicationinsights.us' },
                                 name: 'sub2AppIns1'
                             },
                             {
-                                properties: { InstrumentationKey: 'sub2-appins2-key2' },
+                                properties: { InstrumentationKey: 'sub2-appins2-key2', ConnectionString: 'InstrumentationKey=sub2-appins2-key2;EndpointSuffix=applicationinsights.us' },
                                 name: 'sub2AppIns2'
                             }
                         ]
@@ -130,6 +140,10 @@ describe('Azure Util Tests', () => {
                 }
                 return Promise.resolve({});
             });
+        });
+
+        after(() => {
+            sinon.restore();
         });
 
         describe('getSharedKey', () => {
@@ -153,21 +167,19 @@ describe('Azure Util Tests', () => {
                         eventType: 'systemInfo',
                         config: {
                             useManagedIdentity: false,
-                            instrumentationKey: 'test-single-key'
+                            instrumentationKey: 'test-single-key',
+                            region: 'usgovvirginia'
                         }
                     });
                     return azureUtil.getInstrumentationKeys(context)
                         .then((keys) => {
                             const expectedData = [
-                                { instrKey: 'test-single-key' }
+                                { instrKey: 'test-single-key', connString: 'InstrumentationKey=test-single-key;EndpointSuffix=applicationinsights.us' }
                             ];
                             return assert.deepStrictEqual(keys, expectedData);
                         });
                 });
-            });
 
-
-            describe('useManagedIdentity is true', () => {
                 it('should return array of keys if there are multiple keys provided', () => {
                     const context = testUtil.buildConsumerContext({
                         eventType: 'systemInfo',
@@ -182,13 +194,15 @@ describe('Azure Util Tests', () => {
                     return azureUtil.getInstrumentationKeys(context)
                         .then((keys) => {
                             const expectedData = [
-                                { instrKey: 'test-multi-key1' },
-                                { instrKey: 'test-multi-key2' }
+                                { instrKey: 'test-multi-key1', connString: undefined },
+                                { instrKey: 'test-multi-key2', connString: undefined }
                             ];
                             return assert.deepStrictEqual(keys, expectedData);
                         });
                 });
+            });
 
+            describe('useManagedIdentity is true', () => {
                 it('should return correct instrumentationKeys when there are multiple subscriptions and resources', () => {
                     const context = testUtil.buildConsumerContext({
                         eventType: 'systemInfo',
@@ -199,10 +213,10 @@ describe('Azure Util Tests', () => {
                     return azureUtil.getInstrumentationKeys(context)
                         .then((keys) => {
                             const expectedData = [
-                                { instrKey: 'sub1-appins1-key1', name: 'sub1AppIns1' },
-                                { instrKey: 'sub1-appins2-key2', name: 'sub1AppIns2' },
-                                { instrKey: 'sub2-appins1-key1', name: 'sub2AppIns1' },
-                                { instrKey: 'sub2-appins2-key2', name: 'sub2AppIns2' }
+                                { instrKey: 'sub1-appins1-key1', name: 'sub1AppIns1', connString: 'InstrumentationKey=sub1-appins1-key1' },
+                                { instrKey: 'sub1-appins2-key2', name: 'sub1AppIns2', connString: 'InstrumentationKey=sub1-appins2-key2' },
+                                { instrKey: 'sub2-appins1-key1', name: 'sub2AppIns1', connString: 'InstrumentationKey=sub2-appins1-key1;EndpointSuffix=applicationinsights.us' },
+                                { instrKey: 'sub2-appins2-key2', name: 'sub2AppIns2', connString: 'InstrumentationKey=sub2-appins2-key2;EndpointSuffix=applicationinsights.us' }
                             ];
                             return assert.deepStrictEqual(keys, expectedData);
                         });
@@ -219,8 +233,8 @@ describe('Azure Util Tests', () => {
                     return azureUtil.getInstrumentationKeys(context)
                         .then((keys) => {
                             const expectedData = [
-                                { instrKey: 'sub1-appins1-key1', name: 'sub1AppIns1' },
-                                { instrKey: 'sub1-appins2-key2', name: 'sub1AppIns2' }
+                                { instrKey: 'sub1-appins1-key1', name: 'sub1AppIns1', connString: 'InstrumentationKey=sub1-appins1-key1' },
+                                { instrKey: 'sub1-appins2-key2', name: 'sub1AppIns2', connString: 'InstrumentationKey=sub1-appins2-key2' }
                             ];
                             return assert.deepStrictEqual(keys, expectedData);
                         });
@@ -297,6 +311,25 @@ describe('Azure Util Tests', () => {
                 ];
                 const actualMetrics = azureUtil.getMetrics(testData);
                 return assert.deepStrictEqual(actualMetrics, expectedData);
+            });
+        });
+    });
+
+    describe('Methods', function () {
+        // test data include cases with exceptions
+        this.timeout(30000);
+        afterEach(() => {
+            sinon.restore();
+        });
+        Object.keys(azureUtilTestsData).forEach((testSetKey) => {
+            const testSet = azureUtilTestsData[testSetKey];
+            testUtil.getCallableDescribe(testSet)(testSet.name, () => {
+                testSet.tests.forEach(testConf => testUtil.getCallableIt(testConf)(testConf.name, () => {
+                    sinon.stub(util, 'makeRequest').resolves(testConf.stub || {});
+                    const context = testUtil.buildConsumerContext({ config: testConf.config });
+                    return azureUtil.getApiUrl(context, testConf.apiType)
+                        .then(url => assert.strictEqual(url, testConf.expected));
+                }));
             });
         });
     });

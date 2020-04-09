@@ -16,6 +16,7 @@ const assert = require('assert');
 const sinon = require('sinon');
 const appInsights = require('applicationinsights');
 
+const util = require('../../../src/lib/util');
 const azureAppInsightsIndex = require('../../../src/lib/consumers/Azure_Application_Insights/index');
 const azureUtil = require('../../../src/lib/consumers/shared/azureUtil');
 const testUtil = require('../shared/util');
@@ -29,6 +30,8 @@ describe('Azure_Application_Insights', () => {
         sinon.stub(aiSpy.TelemetryClient.prototype, 'trackMetric').callsFake((metric) => {
             requests.push(metric);
         });
+        // stub metadata calls
+        sinon.stub(util, 'makeRequest').resolves({});
     });
 
     afterEach(() => {
@@ -130,6 +133,7 @@ describe('Azure_Application_Insights', () => {
                     instrumentationKey: 'customized-instr-key-guid',
                     maxBatchSize: 222,
                     maxBatchIntervalMs: 3333,
+                    region: 'usgovvirginia',
                     customOpts: [
                         { name: 'maxBatchSize', value: 13 },
                         { name: 'proxyHttpsUrl', value: 'testhost123/proxy' },
@@ -149,7 +153,7 @@ describe('Azure_Application_Insights', () => {
             return azureAppInsightsIndex(context)
                 .then(() => {
                     const actualClientConfig = aiSpy.TelemetryClient.getCalls()
-                        .find(c => c.args[0] === 'customized-instr-key-guid').returnValue.config;
+                        .find(c => c.args[0] === 'InstrumentationKey=customized-instr-key-guid;EndpointSuffix=applicationinsights.us').returnValue.config;
                     // note that maxBatchSize prop overrides value provided in customOpts
                     assert.strictEqual(actualClientConfig.maxBatchSize, 222);
                     assert.strictEqual(actualClientConfig.maxBatchIntervalMs, 3333);
@@ -167,7 +171,7 @@ describe('Azure_Application_Insights', () => {
         it('should get instrumentation keys and setup clients when useManagedIdentity is enabled', () => {
             sinon.stub(azureUtil, 'getInstrumentationKeys').callsFake(() => Promise.resolve([
                 { name: 'app1', instrKey: 'app1-moooooo-mi-guid' },
-                { name: 'app2', instrKey: 'app2-baaaaaa-mi-guid' }
+                { name: 'app2', instrKey: 'app2-baaaaaa-mi-guid', connString: 'InstrumentationKey=optional-conn-props;EndpointSuffix=also-optional' }
             ]));
             const context = testUtil.buildConsumerContext({
                 eventType: 'systemInfo',
@@ -186,7 +190,7 @@ describe('Azure_Application_Insights', () => {
                 .then(() => {
                     const setupCalls = aiSpy.TelemetryClient.getCalls();
                     assert.notStrictEqual(setupCalls.find(c => c.args[0] === 'app1-moooooo-mi-guid'), undefined);
-                    assert.notStrictEqual(setupCalls.find(c => c.args[0] === 'app2-baaaaaa-mi-guid'), undefined);
+                    assert.notStrictEqual(setupCalls.find(c => c.args[0] === 'InstrumentationKey=optional-conn-props;EndpointSuffix=also-optional'), undefined);
 
                     const expectedMetric1 = { name: 'F5_num', value: 1234 };
                     const expectedMetric2 = { name: 'F5_strNum', value: 24.1 };

@@ -35,6 +35,18 @@ describe('Azure_Log_Analytics', () => {
         useManagedIdentity: false
     };
 
+    const getOpsInsightsReq = () => {
+        const opInsightsReq = requests.find(r => r.fullURI === 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01');
+        assert.notStrictEqual(opInsightsReq, undefined);
+        return opInsightsReq;
+    };
+
+    const getAllOpsInsightsReqs = () => {
+        const opInsightsReqs = requests.filter(r => r.fullURI === 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01');
+        assert.notStrictEqual(opInsightsReqs, undefined);
+        return opInsightsReqs;
+    };
+
     beforeEach(() => {
         requests = [];
         sinon.stub(util, 'makeRequest').callsFake((opts) => {
@@ -64,8 +76,8 @@ describe('Azure_Log_Analytics', () => {
 
             return azureAnalyticsIndex(context)
                 .then(() => {
-                    assert.strictEqual(requests[0].fullURI, 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01');
-                    assert.deepStrictEqual(requests[0].headers, {
+                    const opInsightsReq = getOpsInsightsReq();
+                    assert.deepStrictEqual(opInsightsReq.headers, {
                         Authorization: 'SharedKey myWorkspace:MGiiWY+WTAxB35tyZ1YljyfwMM5QCqr4ge+giSjcgfI=',
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_new',
@@ -90,14 +102,14 @@ describe('Azure_Log_Analytics', () => {
 
             return azureAnalyticsIndex(context)
                 .then(() => {
-                    assert.strictEqual(requests[0].fullURI, 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01');
-                    assert.deepStrictEqual(requests[0].headers, {
+                    const opInsightsReq = getOpsInsightsReq();
+                    assert.deepStrictEqual(opInsightsReq.headers, {
                         Authorization: 'SharedKey myWorkspace:MGiiWY+WTAxB35tyZ1YljyfwMM5QCqr4ge+giSjcgfI=',
                         'Content-Type': 'application/json',
                         'Log-Type': 'customLogType_new',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
                     });
-                    assert.deepStrictEqual(requests[0].allowSelfSignedCert, true);
+                    assert.deepStrictEqual(opInsightsReq.allowSelfSignedCert, true);
                 });
         });
 
@@ -122,7 +134,8 @@ describe('Azure_Log_Analytics', () => {
 
             return azureAnalyticsIndex(context)
                 .then(() => {
-                    assert.deepStrictEqual(requests[0].headers, {
+                    const opInsightsReq = getOpsInsightsReq();
+                    assert.deepStrictEqual(opInsightsReq.headers, {
                         Authorization: 'SharedKey myWorkspace:MGiiWY+WTAxB35tyZ1YljyfwMM5QCqr4ge+giSjcgfI=',
                         'Content-Type': 'application/json',
                         'Log-Type': 'customLogType_new',
@@ -140,7 +153,7 @@ describe('Azure_Log_Analytics', () => {
             const expectedData = azureLogData.systemData[0].expectedData;
 
             return azureAnalyticsIndex(context)
-                .then(() => assert.deepStrictEqual(requests, expectedData));
+                .then(() => assert.deepStrictEqual(getAllOpsInsightsReqs(), expectedData));
         });
 
         it('should process event data', () => {
@@ -153,7 +166,7 @@ describe('Azure_Log_Analytics', () => {
             context.event.type = 'AVR';
 
             return azureAnalyticsIndex(context)
-                .then(() => assert.deepStrictEqual(requests, expectedData));
+                .then(() => assert.deepStrictEqual(getAllOpsInsightsReqs(), expectedData));
         });
 
         it('should generate sharedKey to use when useManagedIdentity is true', () => {
@@ -174,13 +187,16 @@ describe('Azure_Log_Analytics', () => {
                 JSON.stringify([{ prop: 'data' }])
             );
             return azureAnalyticsIndex(context)
-                .then(() => assert.strictEqual(requests[0].fullURI, 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01'))
-                .then(() => assert.deepStrictEqual(requests[0].headers, {
-                    Authorization: `SharedKey myWorkspace:${expSignedKey}`,
-                    'Content-Type': 'application/json',
-                    'Log-Type': 'customLogType_type1',
-                    'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
-                }));
+                .then(() => {
+                    const opInsightsReq = getOpsInsightsReq();
+                    assert.strictEqual(opInsightsReq.fullURI, 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01');
+                    assert.deepStrictEqual(opInsightsReq.headers, {
+                        Authorization: `SharedKey myWorkspace:${expSignedKey}`,
+                        'Content-Type': 'application/json',
+                        'Log-Type': 'customLogType_type1',
+                        'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
+                    });
+                });
         });
     });
 });

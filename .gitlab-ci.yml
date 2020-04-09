@@ -48,6 +48,44 @@ stages:
         when: on_failure
         expire_in: 3 days
 
+.base_azure: &base_azure
+    tags:
+        - docker-executor
+    only:
+        variables:
+            - $RUN_AZURE_TESTS == "true"
+
+.deploy_azure: &deploy_azure
+    extends:
+        - .base_azure
+    image: mcr.microsoft.com/azure-cli
+    stage: deploy
+    artifacts:
+        name: ${CI_COMMIT_REF_NAME}_azure
+        paths:
+            - deploy_output
+            - deploy_output_gov
+        expire_in: 4 days
+
+.test_azure: &test_azure
+    extends:
+        - .base_azure
+    stage: functional test
+    artifacts:
+        name: ${CI_JOB_NAME}_functests_artifacts
+        paths:
+            - test/artifacts
+        when: always
+        expire_in: 4 days
+
+# Tear-down Azure environment in separate job, since 'after_script' has a 5min timeout
+.teardown_azure: &teardown_azure
+    extends:
+        - .base_azure
+    image: mcr.microsoft.com/azure-cli
+    stage: teardown
+    when: always
+
 ##############################################################
 #                                                            #
 # Jobs                                                       #
@@ -209,26 +247,17 @@ teardown_env:
     script:
         - $SHELL ./scripts/functional_testing/vio/teardown.sh
 
-# Deploy Azure test environment
+# Azure Public
 deploy_env_azure:
-    image: mcr.microsoft.com/azure-cli
-    stage: deploy
+    extends:
+        - .deploy_azure
     script:
         - mkdir -p './deploy_output'
         - source ./scripts/functional_testing/azure/deploy_env.sh
-    tags:
-        - cm-official-docker-executor
-    only:
-        variables:
-            - $RUN_AZURE_TESTS == "true"
-    artifacts:
-        name: CI_COMMIT_REF_NAME_azure
-        paths:
-            - deploy_output
-        expire_in: 4 days
 
 test_functional_azure:
-    stage: functional test
+    extends:
+        - .test_azure
     script:
         - source ./deploy_output/azure.sh
         - echo $AZURE_VM_HOSTNAME
@@ -236,28 +265,45 @@ test_functional_azure:
         - *install_unittest_packages_cmd
         - npm install mocha@7.1.0
         - npm run test-functional-cloud-azure
-    tags:
-        - cm-official-docker-executor
-    only:
-        variables:
-            - $RUN_AZURE_TESTS == "true"
-    artifacts:
-        name: ${CI_COMMIT_REF_NAME}_functests_artifacts
-        paths:
-            - test/artifacts
-        when: always
-        expire_in: 4 days
+    needs:
+        - build_rpm
+        - deploy_env_azure
 
-# Tear-down Azure environment in separate job, since 'after_script' has a 5min timeout
 teardown_env_azure:
-    image: mcr.microsoft.com/azure-cli
-    stage: teardown
+    extends:
+        - .teardown_azure
     script:
         - source ./scripts/functional_testing/azure/teardown_env.sh
-    when: always
-    only:
-        variables:
-            - $RUN_AZURE_TESTS == "true"
+
+
+# Azure Gov
+deploy_env_azure_gov:
+    extends:
+        - .deploy_azure
+    script:
+        - mkdir -p './deploy_output_gov'
+        - source ./scripts/functional_testing/azure/deploy_env.sh 'gov'
+
+test_functional_azure_gov:
+    extends:
+        - .test_azure
+    script:
+        - source ./deploy_output_gov/azure_gov.sh
+        - echo $AZURE_VM_HOSTNAME
+        - echo $AZURE_VM_IP
+        - *install_unittest_packages_cmd
+        - npm install mocha@7.1.0
+        - npm run test-functional-cloud-azure
+    needs:
+        - build_rpm
+        - deploy_env_azure_gov
+
+
+teardown_env_azure_gov:
+    extends:
+        - .teardown_azure
+    script:
+        - source ./scripts/functional_testing/azure/teardown_env.sh 'gov'
 
 # Publish to internal artifactory
 # Note: Will publish when new tags are pushed and use the current build in dist directory

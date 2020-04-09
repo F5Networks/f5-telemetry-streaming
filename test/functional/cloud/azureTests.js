@@ -24,7 +24,7 @@ const CLIENT_SECRET = process.env[constants.ENV_VARS.AZURE.LOG_KEY];
 const CLIENT_ID = process.env[constants.ENV_VARS.AZURE.CLIENT_ID];
 const APPINS_API_KEY = process.env[constants.ENV_VARS.AZURE.APPINS_API_KEY];
 const APPINS_APP_ID = process.env[constants.ENV_VARS.AZURE.APPINS_APP_ID];
-
+const CLOUD_TYPE = process.env[constants.ENV_VARS.AZURE.CLOUD_TYPE];
 
 describe('Azure Cloud-based Tests', function () {
     this.timeout(600000);
@@ -85,7 +85,7 @@ describe('Azure Cloud-based Tests', function () {
     describe('Managed Identities', () => {
         describe('Azure_Log_Analytics', () => {
             let laReaderToken;
-            it('should get log reader oauth token', () => azureUtil.getOAuthToken(CLIENT_ID, CLIENT_SECRET, TENANT_ID)
+            it('should get log reader oauth token', () => azureUtil.getOAuthToken(CLIENT_ID, CLIENT_SECRET, TENANT_ID, CLOUD_TYPE)
                 .then((data) => {
                     laReaderToken = data.access_token;
                     return assert.notStrictEqual(laReaderToken, undefined);
@@ -119,7 +119,7 @@ describe('Azure Cloud-based Tests', function () {
                 ].join(' | ');
 
                 return new Promise(resolve => setTimeout(resolve, 60000))
-                    .then(() => azureUtil.queryLogs(laReaderToken, WORKSPACE_ID, queryString))
+                    .then(() => azureUtil.queryLogs(laReaderToken, WORKSPACE_ID, queryString, CLOUD_TYPE))
                     .then((results) => {
                         testUtil.logger.info('Response from Log Analytics:', { hostname: VM_HOSTNAME, results });
                         const hasRows = results.tables[0] && results.tables[0].rows && results.tables[0].rows[0];
@@ -158,7 +158,7 @@ describe('Azure Cloud-based Tests', function () {
             it('should retrieve system poller info from Application Insights', () => {
                 testUtil.logger.info('Delay 120000ms to ensure App Insights api data ready');
                 return new Promise(resolve => setTimeout(resolve, 120000))
-                    .then(() => azureUtil.queryAppInsights(APPINS_APP_ID, APPINS_API_KEY))
+                    .then(() => azureUtil.queryAppInsights(APPINS_APP_ID, APPINS_API_KEY, CLOUD_TYPE))
                     .then((response) => {
                         testUtil.logger.info(response);
                         const val = response.value['customMetrics/F5_system_tmmMemory'];

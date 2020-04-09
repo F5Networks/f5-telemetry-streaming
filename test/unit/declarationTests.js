@@ -3033,7 +3033,8 @@ describe('Declarations', () => {
                     useManagedIdentity: false,
                     passphrase: {
                         cipherText: 'cipherText'
-                    }
+                    },
+                    region: 'australiacentral'
                 },
                 {
                     type: 'Azure_Log_Analytics',
@@ -3043,7 +3044,8 @@ describe('Declarations', () => {
                         class: 'Secret',
                         protected: 'SecureVault',
                         cipherText: '$M$foo'
-                    }
+                    },
+                    region: 'australiacentral'
                 }
             ));
 
@@ -3152,6 +3154,7 @@ describe('Declarations', () => {
                     useManagedIdentity: false,
                     maxBatchSize: 20,
                     maxBatchIntervalMs: 3000,
+                    region: 'norwaywest',
                     customOpts: [
                         {
                             name: 'clientLibNum',
@@ -3183,6 +3186,7 @@ describe('Declarations', () => {
                     useManagedIdentity: false,
                     maxBatchSize: 20,
                     maxBatchIntervalMs: 3000,
+                    region: 'norwaywest',
                     customOpts: [
                         {
                             name: 'clientLibNum',

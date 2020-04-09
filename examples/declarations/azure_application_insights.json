@@ -12,6 +12,7 @@
                 "value": 75
             }
         ],
-        "useManagedIdentity": false
+        "useManagedIdentity": false,
+        "region": "usgovarizona"
     }
 }
