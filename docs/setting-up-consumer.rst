@@ -57,9 +57,24 @@ Required Information:
  - Workspace ID: Navigate to :guilabel:`Log Analytics workspace > Advanced Settings > Connected Sources`.
  - Shared Key: Navigate to :guilabel:`Log Analytics workspace > Advanced Settings > Connected Sources` and use the primary key.
 
-.. NOTE:: To see more information about sending data to Log Analytics, see |HTTP Data Collector API|.
+To see more information about sending data to Log Analytics, see |HTTP Data Collector API|.
 
-Note the following example has been updated with the **useManagedIdentity** property. See :ref:`mi` following the example for information about using Azure Managed Identities and Telemetry Streaming. 
+.. NOTE:: The following example has been updated with the **useManagedIdentity** and **region** properties. |br| See :ref:`mi` following the example for information about using Azure Managed Identities and Telemetry Streaming. 
+
+Region property
+^^^^^^^^^^^^^^^
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+   Support for the **region** property is available in Telemetry Streaming 1.11 and later. 
+
+Telemetry Streaming v1.11 adds the **region** property for Azure Log Analytics and Application Insights. This is in part to support the Azure Government regions.
+
+- This optional property is used to determine cloud type (public/commercial, govcloud) so that the correct API URLs can be used (example values: westeurope, japanwest, centralus, usgovvirginia, and so on).  
+- If you do not provide a region, Telemetry Streaming attempts to look it up from the instance metadata. 
+- If it is unable to extract metadata, TS defaults to public/commercial
+- Check the |azregion| for product/region compatibility for Azure Government.
+- See the Azure documentation for a valid list of regions (resource location), and :ref:`Region list<azreg>` for example values from the Azure CLI.
+
 
 Example Declaration:
 
@@ -121,9 +136,21 @@ Optional Properties:
    
    .. WARNING:: The customOpts options are not guaranteed to work and may change according to the client library API; you must use these options with caution. Refer to corresponding consumer library documentation for acceptable keys and values.
 
-
-
 To see more information about Azure Application Insights, see |appinsight|.
+
+Region property
+^^^^^^^^^^^^^^^
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+   Support for the **region** property is available in Telemetry Streaming 1.11 and later. 
+
+Telemetry Streaming v1.11 adds the **region** property for Azure Log Analytics and Application Insights. This is in part to support the Azure Government regions.
+
+- This optional property is used to determine cloud type (public/commercial, govcloud) so that the correct API URLs can be used (example values: westeurope, japanwest, centralus, usgovvirginia, and so on).  
+- If you do not provide a region, Telemetry Streaming attempts to look it up from the instance metadata. 
+- If it is unable to extract metadata, TS defaults to public/commercial
+- Check the |azregion| for product/region compatibility for Azure Government.
+- See the Azure documentation for a valid list of regions (resource location), and :ref:`Region list<azreg>` for example values from the Azure CLI.
 
 
 Example Declaration:
@@ -377,6 +404,106 @@ Once you have configured the Google Cloud Monitoring consumer and sent a Telemet
 .. literalinclude:: ../examples/declarations/google_cloud_monitoring.json
     :language: json
 
+|
+
+.. _azreg:
+
+Azure Regions
+^^^^^^^^^^^^^
+The following table shows an example table when listing regions from the Azure CLI using the command ``az account list-locations -o table``.  Note to list Azure Government Regions, you must use ``az cloud set --name AzureUsGovernment`` before running the list-locations command.
+
+.. IMPORTANT:: This list is just a static example, we strongly recommend running the commands yourself to retrieve the current list. |br| The **Name** column on the right is the value to use in your Telemetry Streaming declaration
+
+
+``az account list-locations -o table``
+
++----------------------+------------+------------+--------------------+
+| DisplayName          |  Latitude  |  Longitude |  **Name**          |
++======================+============+============+====================+
+| East Asia            |  22.267    | 114.188    |  eastasia          |
++----------------------+------------+------------+--------------------+
+| Southeast Asia       |  1.283     | 103.833    |  southeastasia     |
++----------------------+------------+------------+--------------------+
+| Central US           |  41.5908   | -93.6208   |  centralus         |
++----------------------+------------+------------+--------------------+
+| East US              |  37.3719   | -79.8164   | eastus             |
++----------------------+------------+------------+--------------------+
+| East US 2            |  36.6681   | -78.3889   | eastus2            |
++----------------------+------------+------------+--------------------+
+| West US              |  37.783    | -122.417   | westus             |
++----------------------+------------+------------+--------------------+
+| North Central US     |  41.8819   | -87.6278   | northcentralus     |
++----------------------+------------+------------+--------------------+
+| South Central US     |  29.4167   | -98.5      | southcentralus     |
++----------------------+------------+------------+--------------------+
+| North Europe         |  53.3478   | -6.2597    | northeurope        |
++----------------------+------------+------------+--------------------+
+| West Europe          |  52.3667   | 4.9        | westeurope         |
++----------------------+------------+------------+--------------------+
+| Japan West           |  34.6939   | 135.5022   | japanwest          |
++----------------------+------------+------------+--------------------+
+| Japan East           |  35.68     | 139.77     | japaneast          |
++----------------------+------------+------------+--------------------+
+| Brazil South         |  -23.55    | -46.633    | brazilsouth        |
++----------------------+------------+------------+--------------------+
+| Australia East       |  -33.86    | 151.2094   | australiaeast      |
++----------------------+------------+------------+--------------------+
+| Australia Southeast  |  -37.8136  | 144.9631   | australiasoutheast |
++----------------------+------------+------------+--------------------+
+| South India          |  12.9822   | 80.1636    | southindia         |
++----------------------+------------+------------+--------------------+
+| Central India        |  18.5822   | 73.9197    | centralindia       |
++----------------------+------------+------------+--------------------+
+| West India           |  19.088    | 72.868     | westindia          |
++----------------------+------------+------------+--------------------+
+| Canada Central       | 43.653     | -79.383    | canadacentral      |
++----------------------+------------+------------+--------------------+
+| Canada East          | 46.817     | -71.217    | canadaeast         |
++----------------------+------------+------------+--------------------+
+| UK South             | 50.941     | -0.799     | uksouth            |
++----------------------+------------+------------+--------------------+
+| UK West              | 53.427     | -3.084     | ukwest             |
++----------------------+------------+------------+--------------------+
+| West Central US      | 40.890     | -110.234   | westcentralus      |
++----------------------+------------+------------+--------------------+
+| West US 2            | 47.233     | -119.852   | westus2            |
++----------------------+------------+------------+--------------------+
+| Korea Central        | 37.5665    | 126.9780   | koreacentral       |
++----------------------+------------+------------+--------------------+
+| Korea South          | 35.1796    | 129.0756   | koreasouth         |
++----------------------+------------+------------+--------------------+
+| France Central       | 46.3772    | 2.3730     | francecentral      |
++----------------------+------------+------------+--------------------+
+| France South         | 43.8345    | 2.1972     | francesouth        |
++----------------------+------------+------------+--------------------+
+| Australia Central    | -35.3075   | 149.1244   | australiacentral   |
++----------------------+------------+------------+--------------------+
+| Australia Central 2  | -35.3075   | 149.1244   | australiacentral2  |
++----------------------+------------+------------+--------------------+
+| UAE Central          | 24.466667  | 54.366669  | uaecentral         |
++----------------------+------------+------------+--------------------+
+| UAE North            | 25.266666  |  55.316666 | uaenorth           |
++----------------------+------------+------------+--------------------+
+| South Africa North   | -25.731340 | 28.218370  | southafricanorth   |
++----------------------+------------+------------+--------------------+
+| South Africa West    | -34.075691 | 18.843266  | southafricawest    |
++----------------------+------------+------------+--------------------+
+| Switzerland North    | 47.451542  | 8.564572   | switzerlandnorth   |
++----------------------+------------+------------+--------------------+
+| Switzerland West     | 46.204391   6.143158    | switzerlandwest    |
++----------------------+------------+------------+--------------------+
+| Germany North        | 53.073635   8.806422    | germanynorth       |
++----------------------+------------+------------+--------------------+
+| Germany West Central | 50.110924   8.682127    | germanywestcentral |
++----------------------+------------+------------+--------------------+
+| Norway West          | 58.969975   5.733107    | norwaywest         |
++----------------------+------------+------------+--------------------+
+| Norway East          | 59.913868   10.752245   | norwayeast         |
++----------------------+------------+------------+--------------------+
+
+
+
+
 
 .. |splunk_img| image:: /images/splunk_logo.png
    :target: https://www.splunk.com
@@ -505,4 +632,10 @@ Once you have configured the Google Cloud Monitoring consumer and sent a Telemet
 .. |appinsight| raw:: html
 
    <a href="https://docs.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview" target="_blank">Microsoft documentation</a>
+
+
+.. |azregion| raw:: html
+
+   <a href="https://azure.microsoft.com/en-us/global-infrastructure/services/?products=monitor&regions=non-regional,usgov-non-regional,us-dod-central,us-dod-east,usgov-arizona,usgov-iowa,usgov-texas,usgov-virginia" target="_blank">Azure Products Available by Region</a>
+
 
