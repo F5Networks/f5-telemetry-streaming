@@ -406,10 +406,12 @@ Once you have configured the Google Cloud Monitoring consumer and sent a Telemet
 
 |
 
+|
+
 .. _azreg:
 
 Azure Regions
-^^^^^^^^^^^^^
+-------------
 The following table shows an example table when listing regions from the Azure CLI using the command ``az account list-locations -o table``.  Note to list Azure Government Regions, you must use ``az cloud set --name AzureUsGovernment`` before running the list-locations command.
 
 .. IMPORTANT:: This list is just a static example, we strongly recommend running the commands yourself to retrieve the current list. |br| The **Name** column on the right is the value to use in your Telemetry Streaming declaration
@@ -490,17 +492,40 @@ The following table shows an example table when listing regions from the Azure C
 +----------------------+------------+------------+--------------------+
 | Switzerland North    | 47.451542  | 8.564572   | switzerlandnorth   |
 +----------------------+------------+------------+--------------------+
-| Switzerland West     | 46.204391   6.143158    | switzerlandwest    |
+| Switzerland West     | 46.204391  | 6.143158   | switzerlandwest    |
 +----------------------+------------+------------+--------------------+
-| Germany North        | 53.073635   8.806422    | germanynorth       |
+| Germany North        | 53.073635  | 8.806422   | germanynorth       |
 +----------------------+------------+------------+--------------------+
-| Germany West Central | 50.110924   8.682127    | germanywestcentral |
+| Germany West Central | 50.110924  | 8.682127   | germanywestcentral |
 +----------------------+------------+------------+--------------------+
-| Norway West          | 58.969975   5.733107    | norwaywest         |
+| Norway West          | 58.969975  | 5.733107   | norwaywest         |
 +----------------------+------------+------------+--------------------+
-| Norway East          | 59.913868   10.752245   | norwayeast         |
+| Norway East          | 59.913868  | 10.752245  | norwayeast         |
 +----------------------+------------+------------+--------------------+
 
+
+|
+
+In the following table, we list the Azure Government regions.
+
+``az cloud set --name AzureUsGovernment`` |br|
+``az account list-locations -o table``
+
++----------------------+------------+------------+--------------------+
+| DisplayName          |  Latitude  |  Longitude |  **Name**          |
++======================+============+============+====================+
+| USGov Virginia       |  37.3719   | -79.8164   |  usgovvirginia     |
++----------------------+------------+------------+--------------------+
+| USGov Iowa           |  41.5908   | -93.6208   |  usgoviowa         |
++----------------------+------------+------------+--------------------+
+| USDoD East           |  36.6676   | -78.3875   |  usdodeast         |
++----------------------+------------+------------+--------------------+
+| USDoD Central        |  41.6005   | -93.6091   |  usdodcentral      |
++----------------------+------------+------------+--------------------+
+| USGov Texas          |  29.4241   | -98.4936   |  usgovtexas        |
++----------------------+------------+------------+--------------------+
+| USGov Arizona        |  33.4484   | -112.0740  | usgovarizona       |
++----------------------+------------+------------+--------------------+
 
 
 
