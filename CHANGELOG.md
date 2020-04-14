@@ -13,6 +13,7 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-491: [GitHub #17](https://github.com/F5Networks/f5-telemetry-streaming/issues/17) Fix crash in Kafka consumer on attempt to close idle connections to brokers
 ### Changed
 - AUTOTOOL-1376: Rename Google StackDriver consumer to 'Google Cloud Monitoring'
+- AUTOTOOL-1015: Update f5-teem to 1.4.2 for new reportRecord API
 ### Removed
 
 ## 1.10.0
