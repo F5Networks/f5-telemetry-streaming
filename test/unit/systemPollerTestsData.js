@@ -408,6 +408,157 @@ module.exports = {
             }
         }
     ],
+    fetchPollerData: [
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'it should get enabled System Poller when no options provided',
+            config: {
+                parsed: {
+                    Telemetry_System: {
+                        My_System: {
+                            allowSelfSignedCert: false,
+                            class: 'Telemetry_System',
+                            enable: true,
+                            host: 'localhost',
+                            port: 8100,
+                            protocol: 'http',
+                            systemPoller: 'My_System_Poller'
+                        }
+                    },
+                    Telemetry_System_Poller: {
+                        My_System_Poller: {
+                            actions: [],
+                            allowSelfSignedCert: false,
+                            class: 'Telemetry_System_Poller',
+                            enable: true,
+                            host: 'localhost',
+                            interval: 300,
+                            port: 8100,
+                            protocol: 'http'
+                        }
+                    }
+                }
+            },
+            objName: 'My_System_Poller',
+            expectedResponse: [
+                { data: { poller: 'My_System_Poller::My_System_Poller' } }
+            ]
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'it should even get disabled System Poller when includeDisabled=true',
+            config: {
+                parsed: {
+                    Telemetry_System: {
+                        My_System: {
+                            allowSelfSignedCert: false,
+                            class: 'Telemetry_System',
+                            enable: true,
+                            host: 'localhost',
+                            port: 8100,
+                            protocol: 'http',
+                            systemPoller: 'My_System_Poller'
+                        }
+                    },
+                    Telemetry_System_Poller: {
+                        My_System_Poller: {
+                            actions: [],
+                            allowSelfSignedCert: false,
+                            class: 'Telemetry_System_Poller',
+                            enable: false,
+                            host: 'localhost',
+                            interval: 300,
+                            port: 8100,
+                            protocol: 'http'
+                        }
+                    }
+                }
+            },
+            objName: 'My_System_Poller',
+            options: {
+                includeDisabled: true
+            },
+            expectedResponse: [
+                { data: { poller: 'My_System_Poller::My_System_Poller' } }
+            ]
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'it should get System Poller, even when includeDisabled=false',
+            config: {
+                parsed: {
+                    Telemetry_System: {
+                        My_System: {
+                            allowSelfSignedCert: false,
+                            class: 'Telemetry_System',
+                            enable: true,
+                            host: 'localhost',
+                            port: 8100,
+                            protocol: 'http',
+                            systemPoller: 'My_System_Poller'
+                        }
+                    },
+                    Telemetry_System_Poller: {
+                        My_System_Poller: {
+                            actions: [],
+                            allowSelfSignedCert: false,
+                            class: 'Telemetry_System_Poller',
+                            enable: true,
+                            host: 'localhost',
+                            interval: 300,
+                            port: 8100,
+                            protocol: 'http'
+                        }
+                    }
+                }
+            },
+            objName: 'My_System_Poller',
+            options: {
+                includeDisabled: false
+            },
+            expectedResponse: [
+                { data: { poller: 'My_System_Poller::My_System_Poller' } }
+            ]
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should allow passing subObjName through options',
+            config: {
+                parsed: {
+                    Telemetry_System: {
+                        My_System: {
+                            allowSelfSignedCert: false,
+                            class: 'Telemetry_System',
+                            enable: true,
+                            host: 'localhost',
+                            port: 8100,
+                            protocol: 'http',
+                            systemPoller: 'My_System_Poller'
+                        }
+                    },
+                    Telemetry_System_Poller: {
+                        My_System_Poller: {
+                            actions: [],
+                            allowSelfSignedCert: false,
+                            class: 'Telemetry_System_Poller',
+                            enable: true,
+                            host: 'localhost',
+                            interval: 300,
+                            port: 8100,
+                            protocol: 'http'
+                        }
+                    }
+                }
+            },
+            objName: 'My_System',
+            options: {
+                subObjName: 'My_System_Poller'
+            },
+            expectedResponse: [
+                { data: { poller: 'My_System::My_System_Poller' } }
+            ]
+        }
+    ],
     getTraceValue: [
         // matrix (like boolean logic),
         // first array is system's trace value (ignore element at index 0)

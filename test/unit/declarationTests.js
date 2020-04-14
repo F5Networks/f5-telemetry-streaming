@@ -1478,7 +1478,7 @@ describe('Declarations', () => {
         });
 
         describe('interval', () => {
-            it('should restrict minimum to 1 when endpointList is specified', () => {
+            it('should allow interval=0 when endpointList is specified', () => {
                 const data = {
                     class: 'Telemetry',
                     My_Poller: {
@@ -1491,8 +1491,20 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                const errMsg = /interval\/minimum.*should be >= 1/;
-                return assert.isRejected(config.validate(data), errMsg);
+                return config.validate(data)
+                    .then(validated => assert.strictEqual(validated.My_Poller.interval, 0));
+            });
+
+            it('should allow interval=0 when endpointList is not specified', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Poller: {
+                        class: 'Telemetry_System_Poller',
+                        interval: 0
+                    }
+                };
+                return config.validate(data)
+                    .then(validated => assert.strictEqual(validated.My_Poller.interval, 0));
             });
 
             it('should restrict minimum to 60 when endpointList is NOT specified', () => {
@@ -3764,5 +3776,108 @@ describe('Declarations', () => {
                 }
             ));
         });
+    });
+
+    describe('Telemetry_Pull_Consumer', () => {
+        let minimalDeclaration;
+        let minimalExpected;
+        let fullDeclaration;
+        let fullExpected;
+
+        const validate = (targetDeclaration, consumerProps, expectedTarget, expectedProps, addtlContext) => {
+            let context;
+            Object.assign(targetDeclaration.My_Pull_Consumer, consumerProps);
+            Object.assign(expectedTarget || {}, expectedProps || {});
+            if (addtlContext) {
+                context = { expand: true };
+                targetDeclaration.Shared = {
+                    class: 'Shared',
+                    constants: {
+                        class: 'Constants'
+                    }
+                };
+                Object.assign(targetDeclaration.Shared.constants, addtlContext.constants);
+            }
+            return config.validate(targetDeclaration, context)
+                .then((validConfig) => {
+                    assert.deepStrictEqual(validConfig.My_Pull_Consumer, expectedTarget);
+                });
+        };
+
+        const validateMinimal = (consumerProps, expectedProps, addtlContext) => validate(
+            minimalDeclaration,
+            consumerProps,
+            minimalExpected,
+            expectedProps,
+            addtlContext
+        );
+
+        const validateFull = (consumerProps, expectedProps, addtlContext) => validate(
+            fullDeclaration,
+            consumerProps,
+            fullExpected,
+            expectedProps,
+            addtlContext
+        );
+
+        beforeEach(() => {
+            minimalDeclaration = {
+                class: 'Telemetry',
+                My_System: {
+                    class: 'Telemetry_System',
+                    systemPoller: ['My_Poller']
+                },
+                My_Poller: {
+                    class: 'Telemetry_System_Poller'
+                },
+                My_Pull_Consumer: {
+                    class: 'Telemetry_Pull_Consumer',
+                    type: 'default',
+                    systemPoller: 'My_Poller'
+                }
+            };
+            minimalExpected = {
+                class: 'Telemetry_Pull_Consumer',
+                type: 'default',
+                systemPoller: 'My_Poller',
+                enable: true,
+                trace: false
+            };
+            fullDeclaration = {
+                class: 'Telemetry',
+                My_System: {
+                    class: 'Telemetry_System',
+                    systemPoller: ['My_Poller']
+                },
+                My_Poller: {
+                    class: 'Telemetry_System_Poller'
+                },
+                My_Other_Poller: {
+                    class: 'Telemetry_System_Poller'
+                },
+                My_Pull_Consumer: {
+                    class: 'Telemetry_Pull_Consumer',
+                    type: 'default',
+                    enable: false,
+                    trace: true,
+                    systemPoller: ['My_Poller', 'My_Other_Poller']
+                }
+            };
+            fullExpected = {
+                class: 'Telemetry_Pull_Consumer',
+                type: 'default',
+                enable: false,
+                trace: true,
+                systemPoller: ['My_Poller', 'My_Other_Poller']
+            };
+        });
+
+        // use 'default' consumer because it has no additional properties
+        it('should pass minimal declaration', () => validateMinimal({}, {}));
+        it('should allow full declaration', () => validateFull({}, {}));
+        it('should not allow additional properties', () => assert.isRejected(
+            validateMinimal({ someKey: 'someValue' }),
+            /My_Pull_Consumer.*someKey.*should NOT have additional properties/
+        ));
     });
 });

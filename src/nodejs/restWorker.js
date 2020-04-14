@@ -22,6 +22,7 @@ const persistentStorage = require('../lib/persistentStorage');
 const configWorker = require('../lib/config');
 const eventListener = require('../lib/eventListener'); // eslint-disable-line no-unused-vars
 const consumers = require('../lib/consumers'); // eslint-disable-line no-unused-vars
+const pullConsumers = require('../lib/pullConsumers');
 const systemPoller = require('../lib/systemPoller');
 const iHealthPoller = require('../lib/ihealth'); // eslint-disable-line no-unused-vars
 
@@ -285,6 +286,9 @@ RestWorker.prototype.registerRestEndpoints = function (enableDebug) {
 
     this.router.register(['GET', 'POST'], 'declare',
         restOperation => configWorker.processClientRequest(restOperation));
+
+    this.router.register('GET', 'pullconsumer',
+        restOperation => pullConsumers.processClientRequest(restOperation));
 
     if (enableDebug) {
         this.router.register('GET', 'systempoller',

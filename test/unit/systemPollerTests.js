@@ -165,6 +165,31 @@ describe('System Poller', () => {
             }));
     });
 
+    describe('.fetchPollerData', () => {
+        let returnCtx;
+
+        beforeEach(() => {
+            returnCtx = null;
+            sinon.stub(systemPoller, 'process').callsFake((config) => {
+                if (returnCtx) {
+                    return returnCtx();
+                }
+                return Promise.resolve({ data: { poller: config.name } });
+            });
+        });
+        /* eslint-disable implicit-arrow-linebreak */
+        systemPollerConfigTestsData.fetchPollerData.forEach(testConf =>
+            testUtil.getCallableIt(testConf)(testConf.name, () => {
+                if (typeof testConf.returnCtx !== 'undefined') {
+                    returnCtx = testConf.returnCtx;
+                }
+                return systemPoller.fetchPollerData(testConf.config, testConf.objName, testConf.options)
+                    .then((response) => {
+                        assert.deepStrictEqual(response, testConf.expectedResponse);
+                    });
+            }));
+    });
+
     describe('.getTraceValue()', () => {
         it('should preserve trace config', () => {
             const matrix = systemPollerConfigTestsData.getTraceValue;
@@ -495,6 +520,34 @@ describe('System Poller', () => {
                         },
                         endpointList: undefined
                     });
+                });
+        });
+
+        it('should clear existing interval when declaration has interval=0', () => {
+            const newDeclaration = testUtil.deepCopy(defaultDeclaration);
+            newDeclaration.My_System.systemPoller.interval = 0;
+            return validateAndFormat(newDeclaration)
+                .then((config) => {
+                    // expecting the code responsible for 'change' event to be synchronous
+                    configWorker.emit('change', config);
+                    assert.strictEqual(utilStub.start.length, 0);
+                    assert.strictEqual(utilStub.update.length, 0);
+                    assert.strictEqual(utilStub.stop.length, 1);
+                    assert.deepStrictEqual(pollerTimers, { 'My_System::SystemPoller_1': undefined });
+                });
+        });
+
+        it('should update non-scheduled, enabled, System Pollers, when setting interval', () => {
+            const newDeclaration = testUtil.deepCopy(defaultDeclaration);
+            newDeclaration.My_System.systemPoller.interval = 200;
+            return validateAndFormat(newDeclaration)
+                .then((config) => {
+                    // expecting the code responsible for 'change' event to be synchronous
+                    configWorker.emit('change', config);
+                    assert.strictEqual(utilStub.start.length, 0);
+                    assert.strictEqual(utilStub.update.length, 1);
+                    assert.strictEqual(utilStub.stop.length, 0);
+                    assert.deepStrictEqual(pollerTimers, { 'My_System::SystemPoller_1': 200 });
                 });
         });
     });

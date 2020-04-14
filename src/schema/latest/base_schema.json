@@ -362,6 +362,7 @@
                     "Telemetry_System_Poller",
                     "Telemetry_Listener",
                     "Telemetry_Consumer",
+                    "Telemetry_Pull_Consumer",
                     "Telemetry_iHealth_Poller",
                     "Telemetry_Endpoints",
                     "Controls",
@@ -381,6 +382,9 @@
             },
             {
                 "$ref": "consumer_schema.json#"
+            },
+            {
+                "$ref": "pull_consumer_schema.json#"
             },
             {
                 "$ref": "ihealth_poller_schema.json#"

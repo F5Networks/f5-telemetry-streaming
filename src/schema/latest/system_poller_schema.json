@@ -21,7 +21,7 @@
                 },
                 "interval": {
                     "title": "Collection interval (in seconds)",
-                    "description": "If endpointList is specified, minimum=1. Without endpointList, minimum=60 and maximum=60000" ,
+                    "description": "If endpointList is specified, minimum=1. Without endpointList, minimum=60 and maximum=60000. Allows setting interval=0 to not poll on an interval.",
                     "type": "integer",
                     "default": 300
                 },
@@ -93,24 +93,39 @@
                     ]
                 }
             },
-            "allOf": [
+            "oneOf": [
                 {
-                    "if": { "required": [ "endpointList" ] },
-                    "then": {
-                        "properties": {
-                            "interval": {
-                                "minimum": 1
+                    "allOf": [
+                        {
+                            "if": { "required": [ "endpointList" ] },
+                            "then": {
+                                "properties": {
+                                    "interval": {
+                                        "minimum": 1
+                                    }
+                                }
+                            },
+                            "else": {
+                                "properties":{
+                                    "interval": {
+                                        "minimum": 60,
+                                        "maximum": 6000
+                                    }
+                                }
                             }
                         }
-                    },
-                    "else": {
-                        "properties":{
-                            "interval": {
-                                "minimum": 60,
-                                "maximum": 6000
+                    ]
+                },
+                {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "interval": {
+                                    "enum": [0]
+                                }
                             }
                         }
-                    }
+                    ]
                 }
             ]
         },
