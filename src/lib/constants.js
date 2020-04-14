@@ -69,7 +69,7 @@ WEEKDAY_TO_DAY_NAME[7] = 'sunday';
 module.exports = {
     RELEASE,
     VERSION,
-
+    APP_NAME: 'Telemetry Streaming',
     CONFIG_CLASSES: {
         CONSUMER_CLASS_NAME: 'Telemetry_Consumer',
         CONTROLS_CLASS_NAME: 'Controls',

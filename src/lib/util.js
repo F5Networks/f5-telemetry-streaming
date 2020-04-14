@@ -1050,36 +1050,6 @@ module.exports = {
             });
         }
     },
-
-    /**
-     * Count the number of each consumer type.
-     *
-     * @param {Object} declaration - the declaration to search through
-     *
-     * @returns {Object} Consumer types with a count for each
-     */
-    getConsumerClasses(declaration) {
-        if (!declaration) {
-            throw new Error('No declaration was provided for consumer counting');
-        }
-
-        const consumers = { consumers: {} };
-        function countConsumerTypes(subDecl) {
-            if (subDecl.class && subDecl.class === 'Telemetry_Consumer') {
-                consumers.consumers[subDecl.type] = !consumers.consumers[subDecl.type]
-                    ? 1 : consumers.consumers[subDecl.type] + 1;
-            }
-
-            Object.keys(subDecl)
-                .map(prop => subDecl[prop])
-                .filter(value => typeof value === 'object')
-                .forEach(value => countConsumerTypes(value));
-        }
-
-        countConsumerTypes(declaration);
-        return consumers;
-    },
-
     /** @see Tracer */
     tracer: Tracer,
 

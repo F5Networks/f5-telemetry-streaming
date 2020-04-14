@@ -10,17 +10,16 @@
 
 const EventEmitter = require('events');
 const nodeUtil = require('util');
-const TeemDevice = require('@f5devcentral/f5-teem').Device;
 
 const declValidator = require('./declarationValidator');
 const deviceUtil = require('./deviceUtil');
 const logger = require('./logger');
 const persistentStorage = require('./persistentStorage').persistentStorage;
 const util = require('./util');
+const TeemReporter = require('./teemReporter').TeemReporter;
 
 const CONTROLS_CLASS_NAME = require('./constants').CONFIG_CLASSES.CONTROLS_CLASS_NAME;
 const CONTROLS_PROPERTY_NAME = require('./constants').CONTROLS_PROPERTY_NAME;
-const VERSION = require('./constants').VERSION;
 
 const PERSISTENT_STORAGE_KEY = 'config';
 const BASE_CONFIG = {
@@ -37,11 +36,7 @@ const BASE_CONFIG = {
  */
 function ConfigWorker() {
     this.validator = declValidator.getValidator();
-    const assetInfo = {
-        name: 'Telemetry Streaming',
-        version: VERSION
-    };
-    this.teemDevice = new TeemDevice(assetInfo);
+    this.teemReporter = new TeemReporter();
 }
 
 nodeUtil.inherits(ConfigWorker, EventEmitter);
@@ -230,9 +225,7 @@ ConfigWorker.prototype.processClientRequest = function (restOperation) {
     })
         .then((config) => {
             if (sendAnalytics) {
-                const extraFields = util.getConsumerClasses(config);
-                this.teemDevice.report('Telemetry Streaming Telemetry Data', '1', config, extraFields)
-                    .catch(err => logger.info(`Unable to send analytics data: ${err.message}`));
+                this.teemReporter.process(config);
             }
         })
         .catch((err) => {
