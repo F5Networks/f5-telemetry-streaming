@@ -20,6 +20,7 @@ const sharedSchema = require('../schema/latest/shared_schema.json');
 const systemPollerSchema = require('../schema/latest/system_poller_schema.json');
 const listenerSchema = require('../schema/latest/listener_schema.json');
 const consumerSchema = require('../schema/latest/consumer_schema.json');
+const pullConsumerSchema = require('../schema/latest/pull_consumer_schema.json');
 const iHealthPollerSchema = require('../schema/latest/ihealth_poller_schema.json');
 const endpointsSchema = require('../schema/latest/endpoints_schema.json');
 
@@ -63,6 +64,7 @@ module.exports = {
         const schemas = {
             base: baseSchema,
             consumer: consumerSchema,
+            pullConsumer: pullConsumerSchema,
             controls: controlsSchema,
             endpoints: endpointsSchema,
             iHealthPoller: iHealthPollerSchema,

@@ -3,6 +3,7 @@ Changes to this project are documented in this file. More detail and links can b
 
 ## 1.11.0
 ### Added
+- AUTOTOOL-1448: Introduce new Pull Consumer class, Pull Consumer API, and 'default' Pull Consumer
 - AUTOTOOL-1187: Enable use of Managed Identities for Azure Log Analytics
 - AUTOTOOL-1186: New consumer Azure Application Insights
 - AUTOTOOL-1218: Enable use of Managed Identities for Azure Application Insights

@@ -98,6 +98,25 @@ function sendDataToEventListeners(callback, numOfMsg, delay) {
     return Promise.all(duts.map(dut => sendDataToEventListener(dut, callback(dut), { numOfMsg, delay })));
 }
 
+
+function getPullConsumerData(dut, pullConsumerName) {
+    const uri = `${constants.BASE_ILX_URI}/pullconsumer/${pullConsumerName}`;
+    const host = dut.ip;
+    const user = dut.username;
+    const password = dut.password;
+
+    return util.getAuthToken(host, user, password)
+        .then((data) => {
+            const postOptions = {
+                method: 'GET',
+                headers: {
+                    'x-f5-auth-token': data.token
+                }
+            };
+            return util.makeRequest(host, uri, postOptions);
+        });
+}
+
 /**
  * Fetch System Poller data from DUT
  *
@@ -690,6 +709,7 @@ module.exports = {
     test,
     teardown,
     utils: {
+        getPullConsumerData,
         getSystemPollerData,
         getSystemPollersData,
         postDeclarationToDUT,

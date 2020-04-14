@@ -17,6 +17,7 @@ module.exports = {
         ACTION_CHAINING_EXAMPLE: `${__dirname}/system_poller_chained_actions.json`,
         FILTERING_WITH_MATCHING_EXAMPLE: `${__dirname}/system_poller_matched_filtering.json`,
         ENDPOINTLIST_EXAMPLE: `${__dirname}/system_poller_endpointlist.json`,
+        BASIC_PULL_CONSUMER_EXAMPLE: `${__dirname}/basic_pull_consumer.json`,
         CONSUMER_NAME: 'My_Consumer',
         SYSTEM_NAME: 'My_System',
         SYSTEM_POLLER_SCHEMA: fs.realpathSync(`${__dirname}/../../../shared/output_schemas/system_poller_schema.json`)
@@ -34,6 +35,9 @@ module.exports = {
             USER: 'CONSUMER_HOSTS_USER',
             PWD: 'CONSUMER_HOSTS_PWD',
             TYPE_REGEX: 'CONSUMER_TYPE_REGEX'
+        },
+        PULL_CONSUMER_HARNESS: {
+            TYPE_REGEX: 'PULL_CONSUMER_TYPE_REGEX'
         },
         AZURE: {
             WORKSPACE_MI: 'AZURE_WORKSPACE_MI',
@@ -55,7 +59,8 @@ module.exports = {
         TEST_CONTROLS: {
             REUSE_INSTALLED_PACKAGE: 'REUSE_INSTALLED_PACKAGE',
             SKIP_DUT_TESTS: 'SKIP_DUT_TESTS',
-            SKIP_CONSUMER_TESTS: 'SKIP_CONSUMER_TESTS'
+            SKIP_CONSUMER_TESTS: 'SKIP_CONSUMER_TESTS',
+            SKIP_PULL_CONSUMER_TESTS: 'SKIP_PULL_CONSUMER_TESTS'
         },
         GCP_PROJECT_ID: 'GCP_PROJECT_ID',
         GCP_PRIVATE_KEY_ID: 'GCP_PRIVATE_KEY_ID',
@@ -68,6 +73,7 @@ module.exports = {
         PROTOCOL: 'https'
     },
     CONSUMERS_DIR: `${__dirname}/../consumersTests`,
+    PULL_CONSUMERS_DIR: `${__dirname}/../pullConsumersTests`,
     ARTIFACTS_DIR: `${__dirname}/../../artifacts`,
     BASE_ILX_URI: '/mgmt/shared/telemetry'
 };
