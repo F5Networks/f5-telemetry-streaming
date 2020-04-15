@@ -16,6 +16,10 @@ stages:
 #                                                            #
 ##############################################################
 .install_unittest_packages_cmd: &install_unittest_packages_cmd
+- echo "Node.js version - $(node --version)"
+- if node -e "process.exit(process.version.startsWith('v4.')?0:1);"; then
+- npm install --global npm@5.10.0
+- fi
 - npm run install-test
 
 .run_unittest_cmd: &run_unittest_cmd
@@ -34,7 +38,7 @@ stages:
     image: ${CICD_CONTAINER_DEPLOY}
     tags:
         - cm-official-docker-executor
-
+ 
 .run_unittest:
     extends:
         - .test_job_definition
