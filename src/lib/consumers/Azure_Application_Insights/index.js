@@ -71,6 +71,8 @@ module.exports = function (context) {
 
             instrKeys.forEach((item) => {
                 try {
+                    // connString overrides to allow the client to determine which endpoint to connect to
+                    // Endpoint Suffix is included in connString
                     const appInsightsClient = createClient(item.connString || item.instrKey);
                     metrics.forEach((metric) => {
                         appInsightsClient.trackMetric(metric);
