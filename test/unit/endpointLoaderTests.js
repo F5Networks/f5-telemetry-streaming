@@ -33,7 +33,7 @@ describe('Endpoint Loader', () => {
     });
 
     afterEach(() => {
-        testUtil.checkNockActiveMocks(nock, assert);
+        testUtil.checkNockActiveMocks(nock);
         nock.cleanAll();
         sinon.restore();
     });
@@ -250,7 +250,7 @@ describe('Endpoint Loader', () => {
             eLoader.endpoints = {};
             return assert.isRejected(
                 eLoader.loadEndpoint('badEndpoint'),
-                /Endpoint not defined in file: badEndpoint/
+                /Endpoint not defined: badEndpoint/
             );
         });
 

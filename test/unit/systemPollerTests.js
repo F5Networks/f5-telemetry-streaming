@@ -324,7 +324,7 @@ describe('System Poller', () => {
                                 }
                             ]
                         },
-                        endpointList: undefined
+                        endpoints: undefined
                     });
                 });
         });
@@ -481,7 +481,7 @@ describe('System Poller', () => {
                                 }
                             ]
                         },
-                        endpointList: {
+                        endpoints: {
                             endpoint1: {
                                 enable: true,
                                 name: 'endpoint1',
@@ -518,7 +518,7 @@ describe('System Poller', () => {
                                 }
                             ]
                         },
-                        endpointList: undefined
+                        endpoints: undefined
                     });
                 });
         });

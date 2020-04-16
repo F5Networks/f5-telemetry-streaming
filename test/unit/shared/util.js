@@ -8,6 +8,8 @@
 
 'use strict';
 
+const assert = require('assert');
+const cloneDeep = require('lodash/cloneDeep');
 const nock = require('nock');
 
 const systemPollerData = require('../consumers/data/systemPollerData.json');
@@ -43,7 +45,7 @@ module.exports = {
      * @returns {any} deep copy of source object
      */
     deepCopy(obj) {
-        return JSON.parse(JSON.stringify(obj));
+        return cloneDeep(obj);
     },
 
     /**
@@ -178,13 +180,32 @@ module.exports = {
      * Check if nock has unused mocks and raise assertion error if so
      *
      * @param {Object} nockInstance - instance of nock library
-     * @param {Object} assertInstance - instance of assert library
      */
-    checkNockActiveMocks(nockInstance, assertInstance) {
+    checkNockActiveMocks(nockInstance) {
         const activeMocks = nockInstance.activeMocks().join('\n');
-        assertInstance.ok(
+        assert.ok(
             activeMocks.length === 0,
             `nock should have no active mocks after the test, instead mocks are still active:\n${activeMocks}\n`
         );
+    },
+
+    /**
+     * Create validator to validate if data was spoiled.
+     *
+     * @param {Any} source - source data
+     *
+     * @throws {AssertionError} when data not equal to it's original state
+     * @returns {Function} that returns 'true' if data was not spoiled
+     */
+    getSpoiledDataValidator() {
+        const getValidator = (idx, copy, src) => () => {
+            assert.deepStrictEqual(src, copy, `Original data at index ${idx} was spoiled...`);
+            return true;
+        };
+        const validators = [];
+        for (let i = 0; i < arguments.length; i += 1) {
+            validators.push(getValidator(i, this.deepCopy(arguments[i]), arguments[i]));
+        }
+        return () => validators.every(validator => validator());
     }
 };

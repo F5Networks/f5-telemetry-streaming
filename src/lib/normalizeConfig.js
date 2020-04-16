@@ -48,7 +48,8 @@ function verifyAllowSelfSignedCert(originalConfig) {
 }
 
 /**
- * Expand endpoints references in Telemetry_System objects
+ * Expand endpoints references in Telemetry_System objects.
+ * 'endpointList' (Array) property will be renamed to 'endpoints' and converted to 'Object'
  *
  * @param {Object} originalConfig - origin config
  */
@@ -79,6 +80,11 @@ function normalizeTelemetryEndpoints(originalConfig) {
         fixEndpointPath(innerEndpoint);
         innerEndpoint.enable = endpoint.enable && innerEndpoint.enable;
         innerEndpoint.path = `${endpoint.basePath}${innerEndpoint.path}`;
+        // 'key' is endpoint's name too, but if 'name' defined, then use it
+        // because it might be actual endpoint's name and 'key' (in this situation)
+        // might be just 'unique key' to store endpoints with similar names but
+        // different paths under Telemetry_Endpoints (e.g 'key' indicates different
+        // BIG-IP versions)
         innerEndpoint.name = innerEndpoint.name || key;
         return innerEndpoint;
     }
@@ -95,6 +101,7 @@ function normalizeTelemetryEndpoints(originalConfig) {
                 Object.keys(endpoint.items).forEach(key => cb(parseEndpointItem(endpoint, key)));
             // endpoint is Telemetry_Endpoint
             } else if (typeof endpoint.path === 'string') {
+                // it has 'name' and 'path' properties already (see endpoints_schema.json)
                 fixEndpointPath(endpoint);
                 cb(endpoint);
             }
@@ -105,12 +112,8 @@ function normalizeTelemetryEndpoints(originalConfig) {
             endpoint = telemetryEndpoints[refs[0]];
             if (refs.length > 1) {
                 // reference to a child of Telemetry_Endpoints.items
-                const item = endpoint.items[refs[1]];
-                endpoint = {
-                    items: { [refs[1]]: item },
-                    basePath: endpoint.basePath,
-                    enable: endpoint.enable
-                };
+                endpoint = util.deepCopy(endpoint);
+                endpoint.items = { [refs[1]]: endpoint.items[refs[1]] };
             }
             processEndpoint(endpoint, cb);
         }
@@ -120,15 +123,22 @@ function normalizeTelemetryEndpoints(originalConfig) {
         const system = telemetrySystems[systemName];
         system.systemPollers.forEach((poller) => {
             if (Object.prototype.hasOwnProperty.call(poller, 'endpointList')) {
-                const endpointList = {};
+                const endpoints = {};
                 processEndpoint(poller.endpointList, (endpoint) => {
+                    // each endpoint has 'name' property and it is user's responsibility
+                    // to avoid 'name' duplicates in 'endpointList'
                     if (endpoint.enable) {
-                        endpointList[endpoint.name] = endpoint;
+                        if (endpoints[endpoint.name]) {
+                            const existing = endpoints[endpoint.name];
+                            logger.debug(`${systemName}: endpoint '${endpoint.name}' ('${endpoint.path}') overrides  endpoint '${existing.name}' ('${existing.path}')`);
+                        }
+                        endpoints[endpoint.name] = endpoint;
                     } else {
                         logger.debug(`${systemName}: ignoring disabled endpoint '${endpoint.name}' ('${endpoint.path}')`);
                     }
                 });
-                poller.endpointList = endpointList;
+                poller.endpoints = endpoints;
+                delete poller.endpointList;
             }
         });
     });

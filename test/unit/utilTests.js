@@ -204,7 +204,7 @@ describe('Util', () => {
 
     describe('.makeRequest()', () => {
         afterEach(() => {
-            testUtil.checkNockActiveMocks(nock, assert);
+            testUtil.checkNockActiveMocks(nock);
             sinon.restore();
             nock.cleanAll();
         });
@@ -544,9 +544,26 @@ describe('Util', () => {
     });
 
     describe('.deepCopy()', () => {
-        it('should copy object', () => {
+        it('should make deep copy of object', () => {
             const src = { schedule: { frequency: 'daily', time: { start: '04:20', end: '6:00' } } };
-            assert.deepStrictEqual(util.deepCopy(src), src);
+            const copy = util.deepCopy(src);
+            assert.deepStrictEqual(copy, src, 'should deeply equal');
+
+            // let's check that copy is deep
+            src.schedule.frequency = 'frequency';
+            assert.notStrictEqual(copy.schedule.frequency, src.schedule.frequency, 'should not be equal');
+        });
+    });
+
+    describe('.copy()', () => {
+        it('should make copy of object', () => {
+            const src = { schedule: { frequency: 'daily', time: { start: '04:20', end: '6:00' } } };
+            const copy = util.copy(src);
+            assert.deepStrictEqual(copy, src, 'should deeply equal');
+
+            // it is shallow copy - changes in src should affect copy
+            src.schedule.frequency = 'frequency';
+            assert.deepStrictEqual(copy, src, 'should deeply equal');
         });
     });
 
@@ -557,7 +574,17 @@ describe('Util', () => {
             assert.deepStrictEqual(util.assignDefaults(undefined, { a: 1 }), { a: 1 });
             assert.deepStrictEqual(util.assignDefaults({}, { a: 1 }), { a: 1 });
             assert.deepStrictEqual(util.assignDefaults({ a: 1 }, { a: 2 }), { a: 1 }, 'should not override existing property');
-            assert.deepStrictEqual(util.assignDefaults({ a: undefined }, { a: 2 }), { a: undefined }, 'should preserve "undefined" as values');
+            assert.deepStrictEqual(util.assignDefaults({ a: undefined }, { a: 2 }), { a: 2 }, 'should treat "undefined" as valid value');
+        });
+
+        it('should deeply assign defaults', () => {
+            assert.deepStrictEqual(
+                util.assignDefaults(
+                    { a: { b: 'b', d: { e: 'e' } } },
+                    { a: { c: 'c', d: { f: 'f' } } }
+                ),
+                { a: { b: 'b', c: 'c', d: { e: 'e', f: 'f' } } }
+            );
         });
 
         it('should return same object', () => {

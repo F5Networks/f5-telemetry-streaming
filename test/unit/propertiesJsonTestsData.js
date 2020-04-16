@@ -200,7 +200,7 @@ module.exports = {
              * TEST DATA STARTS HERE
              * */
             {
-                name: 'should set properties to undefined when conditional block results to false',
+                name: 'should not have properties when conditional block results to false',
                 statsToCollect: [
                     'system',
                     'configReady',
@@ -216,18 +216,7 @@ module.exports = {
                 ],
                 contextToCollect: ['deviceVersion', 'provisioning'],
                 expectedData: {
-                    system: {
-                        configReady: undefined,
-                        licenseReady: undefined,
-                        provisionReady: undefined,
-                        asmState: undefined,
-                        lastAsmChange: undefined,
-                        apmState: undefined,
-                        afmState: undefined,
-                        lastAfmDeploy: undefined,
-                        ltmConfigTime: undefined,
-                        gtmConfigTime: undefined
-                    }
+                    system: {}
                 },
                 endpoints: [
                     {
@@ -1266,9 +1255,6 @@ module.exports = {
                         chassisId: 'missing data',
                         baseMac: 'missing data',
                         callBackUrl: 'null',
-                        configReady: undefined, // device version missed
-                        licenseReady: undefined, // device version missed
-                        provisionReady: undefined, // device version missed
                         syncColor: 'missing data',
                         syncMode: 'missing data',
                         syncStatus: 'missing data',
@@ -1276,13 +1262,6 @@ module.exports = {
                         failoverStatus: 'missing data',
                         failoverColor: 'missing data',
                         systemTimestamp: 'missing data',
-                        afmState: undefined, // not provisioned
-                        apmState: undefined, // not provisioned
-                        asmState: undefined, // not provisioned
-                        gtmConfigTime: undefined, // not provisioned
-                        lastAfmDeploy: undefined, // not provisioned
-                        lastAsmChange: undefined, // not provisioned
-                        ltmConfigTime: undefined, // not provisioned
                         cpu: 'missing data',
                         memory: NaN, // should be fixed and set to missing data
                         tmmCpu: NaN, // should be fixed and set to missing data
@@ -1511,9 +1490,6 @@ module.exports = {
                         chassisId: 'missing data',
                         baseMac: 'missing data',
                         callBackUrl: 'null',
-                        configReady: undefined, // device version missed
-                        licenseReady: undefined, // device version missed
-                        provisionReady: undefined, // device version missed
                         syncColor: 'missing data',
                         syncMode: 'missing data',
                         syncStatus: 'missing data',
@@ -1521,13 +1497,6 @@ module.exports = {
                         failoverStatus: 'missing data',
                         failoverColor: 'missing data',
                         systemTimestamp: 'missing data',
-                        afmState: undefined, // not provisioned
-                        apmState: undefined, // not provisioned
-                        asmState: undefined, // not provisioned
-                        gtmConfigTime: undefined, // not provisioned
-                        lastAfmDeploy: undefined, // not provisioned
-                        lastAsmChange: undefined, // not provisioned
-                        ltmConfigTime: undefined, // not provisioned
                         cpu: 'missing data',
                         memory: NaN, // should be fixed and set to missing data
                         tmmCpu: NaN, // should be fixed and set to missing data
@@ -1734,7 +1703,7 @@ module.exports = {
              * TEST DATA STARTS HERE
              * */
             {
-                name: 'should set gtm properties to undefined when gtm module is not provisioned',
+                name: 'should not have gtm properties when gtm module is not provisioned',
                 statsToCollect: [
                     'aWideIps',
                     'aaaaWideIps',
@@ -1750,20 +1719,7 @@ module.exports = {
                     'srvPools'
                 ],
                 contextToCollect: ['provisioning'],
-                expectedData: {
-                    aWideIps: undefined,
-                    aaaaWideIps: undefined,
-                    cnameWideIps: undefined,
-                    mxWideIps: undefined,
-                    naptrWideIps: undefined,
-                    srvWideIps: undefined,
-                    aPools: undefined,
-                    aaaaPools: undefined,
-                    cnamePools: undefined,
-                    mxPools: undefined,
-                    naptrPools: undefined,
-                    srvPools: undefined
-                },
+                expectedData: { },
                 endpoints: [
                     {
                         endpoint: '/mgmt/tm/sys/provision',
@@ -1812,12 +1768,6 @@ module.exports = {
                 ],
                 contextToCollect: ['provisioning'],
                 expectedData: {
-                    aWideIps: undefined,
-                    aaaaWideIps: undefined,
-                    cnameWideIps: undefined,
-                    mxWideIps: undefined,
-                    naptrWideIps: undefined,
-                    srvWideIps: undefined,
                     aPools: {},
                     aaaaPools: {},
                     cnamePools: {},
@@ -1887,12 +1837,6 @@ module.exports = {
                 ],
                 contextToCollect: ['provisioning'],
                 expectedData: {
-                    aWideIps: undefined,
-                    aaaaWideIps: undefined,
-                    cnameWideIps: undefined,
-                    mxWideIps: undefined,
-                    naptrWideIps: undefined,
-                    srvWideIps: undefined,
                     aPools: {},
                     aaaaPools: {},
                     cnamePools: {},
@@ -7014,55 +6958,7 @@ module.exports = {
                 },
                 contextToCollect: [],
                 expectedData: {
-                    tmstats: {
-                        asmCpuUtilStats: undefined,
-                        cpuInfoStat: undefined,
-                        diskInfoStat: undefined,
-                        dnsCacheResolverStat: undefined,
-                        dnsexpressZoneStat: undefined,
-                        dosStat: undefined,
-                        dosl7PluginStats: undefined,
-                        dosl7dStat: undefined,
-                        flowEvictionPolicyStat: undefined,
-                        gtmDcStat: undefined,
-                        gtmWideipStat: undefined,
-                        hostInfoStat: undefined,
-                        ifcStats: undefined,
-                        interfaceStat: undefined,
-                        ipIntelligenceStat: undefined,
-                        ipStat: undefined,
-                        iprepdStat: undefined,
-                        kvmVcpuStat: undefined,
-                        kvmVmStat: undefined,
-                        mcpRequestStat: undefined,
-                        mcpTransactionStat: undefined,
-                        memoryUsageStat: undefined,
-                        monitorInstanceStat: undefined,
-                        monitorStat: undefined,
-                        poolMemberStat: undefined,
-                        poolStat: undefined,
-                        procPidStat: undefined,
-                        profileBigprotoStat: undefined,
-                        profileClientsslStat: undefined,
-                        profileConnpoolStat: undefined,
-                        profileDnsStat: undefined,
-                        profileFtpStat: undefined,
-                        profileHttpStat: undefined,
-                        profileHttpcompressionStat: undefined,
-                        profileServersslStat: undefined,
-                        profileTcpStat: undefined,
-                        profileUdpStat: undefined,
-                        profileWebaccelerationStat: undefined,
-                        ruleStat: undefined,
-                        tmmStat: undefined,
-                        tmmdnsServerStat: undefined,
-                        tmmdnsZoneStat: undefined,
-                        vcmpGlobalStat: undefined,
-                        vcmpStat: undefined,
-                        virtualServerConnStat: undefined,
-                        virtualServerCpuStat: undefined,
-                        virtualServerStat: undefined
-                    }
+                    tmstats: { }
                 },
                 endpoints: [
                     {
@@ -7123,55 +7019,7 @@ module.exports = {
                 },
                 contextToCollect: [],
                 expectedData: {
-                    tmstats: {
-                        asmCpuUtilStats: undefined,
-                        cpuInfoStat: undefined,
-                        diskInfoStat: undefined,
-                        dnsCacheResolverStat: undefined,
-                        dnsexpressZoneStat: undefined,
-                        dosStat: undefined,
-                        dosl7PluginStats: undefined,
-                        dosl7dStat: undefined,
-                        flowEvictionPolicyStat: undefined,
-                        gtmDcStat: undefined,
-                        gtmWideipStat: undefined,
-                        hostInfoStat: undefined,
-                        ifcStats: undefined,
-                        interfaceStat: undefined,
-                        ipIntelligenceStat: undefined,
-                        ipStat: undefined,
-                        iprepdStat: undefined,
-                        kvmVcpuStat: undefined,
-                        kvmVmStat: undefined,
-                        mcpRequestStat: undefined,
-                        mcpTransactionStat: undefined,
-                        memoryUsageStat: undefined,
-                        monitorInstanceStat: undefined,
-                        monitorStat: undefined,
-                        poolMemberStat: undefined,
-                        poolStat: undefined,
-                        procPidStat: undefined,
-                        profileBigprotoStat: undefined,
-                        profileClientsslStat: undefined,
-                        profileConnpoolStat: undefined,
-                        profileDnsStat: undefined,
-                        profileFtpStat: undefined,
-                        profileHttpStat: undefined,
-                        profileHttpcompressionStat: undefined,
-                        profileServersslStat: undefined,
-                        profileTcpStat: undefined,
-                        profileUdpStat: undefined,
-                        profileWebaccelerationStat: undefined,
-                        ruleStat: undefined,
-                        tmmStat: undefined,
-                        tmmdnsServerStat: undefined,
-                        tmmdnsZoneStat: undefined,
-                        vcmpGlobalStat: undefined,
-                        vcmpStat: undefined,
-                        virtualServerConnStat: undefined,
-                        virtualServerCpuStat: undefined,
-                        virtualServerStat: undefined
-                    }
+                    tmstats: { }
                 },
                 endpoints: [
                     {

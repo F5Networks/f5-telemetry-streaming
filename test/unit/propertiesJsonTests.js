@@ -25,10 +25,11 @@ const testUtil = require('./shared/util');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+const pathsStateValidator = testUtil.getSpoiledDataValidator(defaultPaths);
+const propertiesStateValidator = testUtil.getSpoiledDataValidator(defaultProperties);
+
 describe('properties.json', () => {
-    // global vars - to avoid problems with 'before(Each)'
-    let paths = testUtil.deepCopy(defaultPaths);
-    let allProperties = testUtil.deepCopy(defaultProperties);
+    const TOTAL_ATTEMPTS = 10;
 
     const checkResponse = (endpointMock, response) => {
         if (!response.kind) {
@@ -61,30 +62,24 @@ describe('properties.json', () => {
         const testSet = propertiesTestsData[testSetKey];
 
         testUtil.getCallableDescribe(testSet)(testSet.name, () => {
-            beforeEach(() => {
-                // copy before each test to avoid modifications
-                paths = testUtil.deepCopy(defaultPaths);
-                allProperties = testUtil.deepCopy(defaultProperties);
-            });
-
             afterEach(() => {
                 nock.cleanAll();
             });
 
             testSet.tests.forEach((testConf) => {
                 testUtil.getCallableIt(testConf)(testConf.name, () => {
-                    const contextToCollect = generateProperties(allProperties.context, testConf.contextToCollect)
-                        || allProperties.context;
-                    const statsToCollect = generateProperties(allProperties.stats, testConf.statsToCollect)
-                        || allProperties.stats;
+                    const contextToCollect = generateProperties(defaultProperties.context, testConf.contextToCollect)
+                        || defaultProperties.context;
+                    const statsToCollect = generateProperties(defaultProperties.stats, testConf.statsToCollect)
+                        || defaultProperties.stats;
 
                     const options = {
-                        paths,
+                        defaultPaths,
                         properties: {
                             stats: statsToCollect,
                             context: contextToCollect,
-                            global: allProperties.global,
-                            definitions: allProperties.definitions
+                            global: defaultProperties.global,
+                            definitions: defaultProperties.definitions
                         },
                         dataOpts: {
                             tags: {
@@ -99,31 +94,21 @@ describe('properties.json', () => {
 
                     const stats = new SystemStats(options);
 
-                    return Promise.resolve()
-                        .then(() => {
+                    let promise = Promise.resolve();
+                    for (let i = 1; i < TOTAL_ATTEMPTS + 1; i += 1) {
+                        promise = promise.then(() => {
                             testUtil.mockEndpoints(testConf.endpoints || [], { responseChecker: checkResponse });
-                            return assert.becomes(
-                                getCollectedData(stats.collect(), stats),
-                                testConf.expectedData,
-                                'should match expected output on first attempt to collect data'
-                            );
+                            return getCollectedData(stats.collect(), stats);
                         })
-                        .then(() => {
-                            assert.deepStrictEqual(stats.loader.cachedResponse, {}, 'cache should be erased');
-                        })
-                        .then(() => {
-                            // if after second attempt output will be the same
-                            // then properties, paths and etc. works correctly
-                            testUtil.mockEndpoints(testConf.endpoints || [], { responseChecker: checkResponse });
-                            return assert.becomes(
-                                getCollectedData(stats.collect(), stats),
-                                testConf.expectedData,
-                                'should match expected output on second attempt to collect data'
-                            );
-                        })
-                        .then(() => {
-                            assert.deepStrictEqual(stats.loader.cachedResponse, {}, 'cache should be erased');
-                        });
+                            .then((data) => {
+                                assert.deepStrictEqual(data, testConf.expectedData, `should match expected output (attempt #${i}`);
+                                assert.deepStrictEqual(stats.loader.cachedResponse, {}, `cache should be erased (attempt #${i}`);
+
+                                pathsStateValidator();
+                                propertiesStateValidator();
+                            });
+                    }
+                    return promise;
                 });
             });
         });
