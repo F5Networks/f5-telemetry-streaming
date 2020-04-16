@@ -11,11 +11,17 @@
 const crypto = require('crypto');
 const util = require('../../util');
 
+
+/**
+ * See {@link ../README.md#Azure} for documentation
+ */
+
 const AZURE_API_TYPES = {
     MGMT: 'management',
     OPINSIGHTS: 'opinsights'
 };
 
+// This ip is the standard link-local address used by cloud platforms to host info
 const METADATA_URL = 'http://169.254.169.254/metadata';
 
 function getInstanceMetadata(context) {
@@ -28,9 +34,7 @@ function getInstanceMetadata(context) {
     };
 
     return util.makeRequest(metadataOpts)
-        .then(resp => resp)
-        // dont reject if unable to retrieve
-        .catch(() => {});
+        .then(resp => resp);
 }
 
 function getInstanceRegion(context) {
@@ -40,6 +44,9 @@ function getInstanceRegion(context) {
     return getInstanceMetadata(context)
         .then(metadata => (metadata.compute ? metadata.compute.location.toLowerCase() : ''))
         .catch((e) => {
+            // we're trying to get region because azure has different endpoints accdg to cloud type
+            // if user did not provide region or metadata failed, we'll just assume to use default endpoints
+            // so we're not going to rejecting here
             context.logger.debug(`Unable to retrieve instance region. ${e.message}`);
             return '';
         });
@@ -135,7 +142,7 @@ function listWorkspaces(context, accessToken) {
                 .map(o => util.makeRequest(o)
                     .then(items => items.value)
                     .catch((e) => {
-                        context.logger.error(`Error when listing workspaces: ${e.stack}`);
+                        context.logger.exception('Error when listing workspaces', e);
                         // don't reject right away when one of the subscription list action failed for some reason
                         return e;
                     }));
@@ -247,12 +254,18 @@ function getMetrics(data, key, metrics) {
 
 function buildAppInsConnString(instrKey, region) {
     let connString;
+    // default commercial endpoint instances don't need/have EndpointSuffix
     if (isGovCloud(region)) {
         connString = `InstrumentationKey=${instrKey};EndpointSuffix=applicationinsights.us`;
     }
     return connString;
 }
-
+/**
+ * Retrieves the instrumentations key info to use to connect to Azure App Insights resource
+ *
+ * @param {Object} context - context object including config
+ * @returns {Array} An array of objects { instrKey: 'string', connString: 'string' }
+ */
 function getInstrumentationKeys(context) {
     if (!context.config.useManagedIdentity) {
         return getInstanceRegion(context)
