@@ -233,7 +233,7 @@ module.exports = {
                                             }
                                         }
                                     ],
-                                    endpointList: {
+                                    endpoints: {
                                         endpoint1: {
                                             enable: true,
                                             name: 'endpoint1',
@@ -567,7 +567,7 @@ module.exports = {
                                             }
                                         }
                                     ],
-                                    endpointList: {
+                                    endpoints: {
                                         endpoint1: {
                                             enable: true,
                                             name: 'endpoint1',
@@ -613,7 +613,7 @@ module.exports = {
                                             }
                                         }
                                     ],
-                                    endpointList: {
+                                    endpoints: {
                                         endpoint1: {
                                             enable: true,
                                             name: 'endpoint1',
@@ -694,7 +694,7 @@ module.exports = {
                                             }
                                         }
                                     ],
-                                    endpointList: {}
+                                    endpoints: {}
                                 }
                             ]
                         }
@@ -746,7 +746,7 @@ module.exports = {
                                             }
                                         }
                                     ],
-                                    endpointList: {
+                                    endpoints: {
                                         endpoint1: {
                                             enable: true,
                                             name: 'endpoint1',
@@ -929,7 +929,7 @@ module.exports = {
                                             }
                                         }
                                     ],
-                                    endpointList: {
+                                    endpoints: {
                                         enabledEndpoint1: {
                                             enable: true,
                                             name: 'enabledEndpoint1',
@@ -961,7 +961,7 @@ module.exports = {
                                             }
                                         }
                                     ],
-                                    endpointList: {
+                                    endpoints: {
                                         enabledEndpoint1: {
                                             enable: true,
                                             name: 'enabledEndpoint1',
@@ -1008,7 +1008,7 @@ module.exports = {
                                             }
                                         }
                                     ],
-                                    endpointList: {
+                                    endpoints: {
                                         enabledEndpoint1: {
                                             enable: true,
                                             name: 'enabledEndpoint1',

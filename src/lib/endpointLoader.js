@@ -139,7 +139,7 @@ EndpointLoader.prototype.auth = function () {
 EndpointLoader.prototype.loadEndpoint = function (endpoint, options) {
     let endpointObj = this.endpoints[endpoint];
     if (endpointObj === undefined) {
-        return Promise.reject(new Error(`Endpoint not defined in file: ${endpoint}`));
+        return Promise.reject(new Error(`Endpoint not defined: ${endpoint}`));
     }
     // TODO: fix it later, right now it doesn't work with multiple concurrent connections
     if (!endpointObj.ignoreCached && typeof this.cachedResponse[endpoint] !== 'undefined') {

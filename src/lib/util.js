@@ -8,6 +8,9 @@
 
 'use strict';
 
+const assignDefaults = require('lodash/defaultsDeep');
+const cloneDeep = require('lodash/cloneDeep');
+const clone = require('lodash/clone');
 const fs = require('fs');
 const net = require('net');
 const path = require('path');
@@ -658,25 +661,14 @@ const VERSION_COMPARATORS = ['==', '===', '<', '<=', '>', '>=', '!=', '!=='];
 
 module.exports = {
     /**
-     * Assign defaults to object
+     * Assign defaults to object (uses lodash.defaultsDeep under the hood)
      *
      * @param {Object} obj      - object to assign defaults to
-     * @param {Object} defaults - defaults to assign to object
+     * @param {...Object} defaults - defaults to assign to object
      *
      * @returns {Object}
      */
-    assignDefaults(obj, defaults) {
-        // from docs: if the value is null or undefined, it will create and return an empty object
-        // otherwise, it will return an object of a Type that corresponds to the given value.
-        // If the value is an object already, it will return the value.
-        obj = Object(obj);
-        Object.keys(defaults).forEach((key) => {
-            if (!Object.prototype.hasOwnProperty.call(obj, key)) {
-                obj[key] = defaults[key];
-            }
-        });
-        return obj;
-    },
+    assignDefaults,
 
     /**
      * Check if object has any data or not
@@ -700,15 +692,28 @@ module.exports = {
         }
         return true;
     },
+
     /**
-     * Deep copy
+     * Copy object (uses lodash.clone under the hood)
+     *
+     * @param {any} obj - object to copy
+     *
+     * @returns {any} copy of source object
+     */
+    copy(obj) {
+        return clone(obj);
+    },
+
+    /**
+     * Deep Copy (uses lodash.cloneDeep under the hood).
+     * Same as `copy` but copies entire object recursively
      *
      * @param {any} obj - object to copy
      *
      * @returns {any} deep copy of source object
      */
     deepCopy(obj) {
-        return JSON.parse(JSON.stringify(obj));
+        return cloneDeep(obj);
     },
 
     /**

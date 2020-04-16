@@ -33,7 +33,7 @@ const assert = chai.assert;
 
 describe('Device Util', () => {
     afterEach(() => {
-        testUtil.checkNockActiveMocks(nock, assert);
+        testUtil.checkNockActiveMocks(nock);
         nock.cleanAll();
         sinon.restore();
     });
