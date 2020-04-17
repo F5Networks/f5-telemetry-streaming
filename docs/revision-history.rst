@@ -11,6 +11,8 @@ Document Revision History
         - Description
         - Date
 
+
+
       * - 1.10.0
         - Updated the documentation for Telemetry Streaming v1.10.0. This release contains the following changes: |br| * Added a feature (currently EXPERIMENTAL) for configuring custom endpoints (see :doc:`custom-endpoints`) |br| * Added **ifAnyMatch** functionality to the existing value-based matching logic (see :ref:`valuebased`) |br| * Added support for F5 devices with multiple hosts (see the :ref:`FAQ<viprion>`)  |br| |br| Issues Resolved: |br| * Event Listener unable to classify AFM DoS event |br| * Splunk legacy tmstats - include last_cycle_count |br| * Splunk legacy tmstats - add tenant and application data |br| * Declarations with large secrets may timeout |br| * Passphrases should be obfuscated in consumer trace files |br| * Add 'profiles' data (profiles attached to Virtual Server) to 'virtualServers' |br| * Use baseMac instead of hostname to fetch CM device (`GitHub Issue 26 <https://github.com/F5Networks/f5-telemetry-streaming/pull/26>`_) |br| * cipherText validation when protected by SecureVault |br| * Caching data about the host device to speed up declaration processing
         - 03-10-20
