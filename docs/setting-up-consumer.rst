@@ -1,9 +1,9 @@
 .. _settingupconsumer-ref:
 
-Consumer class
+Push Consumers
 ==============
 
-Use this section to find example declarations and notes for supported consumers. 
+Use this section to find example declarations and notes for supported push-based consumers. See :doc:`pull-consumers` for pull-based consumers.
 
 .. IMPORTANT:: Each of the following examples shows only the **Consumer** class of a declaration and must be included with the rest of the base declaration (see :ref:`components`).
 
@@ -137,6 +137,8 @@ Optional Properties:
    .. WARNING:: The customOpts options are not guaranteed to work and may change according to the client library API; you must use these options with caution. Refer to corresponding consumer library documentation for acceptable keys and values.
 
 To see more information about Azure Application Insights, see |appinsight|.
+
+.. _region:
 
 Region property
 ^^^^^^^^^^^^^^^
@@ -404,6 +406,7 @@ Once you have configured the Google Cloud Monitoring consumer and sent a Telemet
 .. literalinclude:: ../examples/declarations/google_cloud_monitoring.json
     :language: json
 
+
 |
 
 |
@@ -662,5 +665,11 @@ In the following table, we list the Azure Government regions.
 .. |azregion| raw:: html
 
    <a href="https://azure.microsoft.com/en-us/global-infrastructure/services/?products=monitor&regions=non-regional,usgov-non-regional,us-dod-central,us-dod-east,usgov-arizona,usgov-iowa,usgov-texas,usgov-virginia" target="_blank">Azure Products Available by Region</a>
+
+
+
+
+
+
 
 
