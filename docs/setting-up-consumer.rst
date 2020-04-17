@@ -3,7 +3,7 @@
 Push Consumers
 ==============
 
-Use this section to find example declarations and notes for supported push-based consumers. 
+Use this section to find example declarations and notes for supported push-based consumers. See :doc:`pull-consumers` for pull-based consumers.
 
 .. IMPORTANT:: Each of the following examples shows only the **Consumer** class of a declaration and must be included with the rest of the base declaration (see :ref:`components`).
 
