@@ -12,6 +12,7 @@ Using Telemetry Streaming Index
 
    telemetry-system
    setting-up-consumer
+   pull-consumers
    event-listener
    avr
    validate

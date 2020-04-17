@@ -33,6 +33,7 @@ Click the following links to go directly to the supported third-party consumer e
 -  :ref:`http-ref`
 -  :ref:`fluentd-ref`
 -  :ref:`stackdrive`
+-  :ref:`pullconsumer-ref`
 
 You can use Microsoft Visual Studio Code to validate your declarations, see :ref:`validate` for information.
 
