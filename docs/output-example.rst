@@ -3,7 +3,9 @@
 Example Output
 ==============
 
-Use this page to see the type of information that Telemetry Streaming collects. Use the links in the right pane to find a particular example
+Use this page to see the type of information that Telemetry Streaming collects. Use the links in the right pane to find a particular example.
+
+.. IMPORTANT::  The following are just examples; the actual fields will vary depending on factors such as how the log/event source is configured, BIG-IP versions, and so on. 
 
 .. _sysinfo:
 

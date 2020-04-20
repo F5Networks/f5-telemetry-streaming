@@ -20,3 +20,4 @@ Using Telemetry Streaming Index
    http-methods
    rest-api-endpoints
    advanced-options
+   deleting-ts-config
