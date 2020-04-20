@@ -130,8 +130,8 @@ module.exports = {
                             fiveSecAvgUsageRatio: 0,
                             tmName: '/Common/default',
                             oneMinAvgUsageRatio: 0,
-                            availabilityState: 'unknown',
-                            enabledState: 'enabled',
+                            'status.availabilityState': 'unknown',
+                            'status.enabledState': 'enabled',
                             'status.statusReason': "The children pool member(s) either don't have service checking enabled, or service check results are not available yet",
                             syncookieStatus: 'not-activated',
                             'syncookie.accepts': 0,
@@ -143,8 +143,7 @@ module.exports = {
                             'syncookie.syncacheCurr': 0,
                             'syncookie.syncacheOver': 0,
                             'syncookie.syncookies': 0,
-                            totRequests: 0,
-                            name: '/Common/default/stats'
+                            totRequests: 0
                         },
                         '/Common/vs_with_pool/stats': {
                             'clientside.bitsIn': 0,
@@ -175,8 +174,8 @@ module.exports = {
                             fiveSecAvgUsageRatio: 0,
                             tmName: '/Common/vs_with_pool',
                             oneMinAvgUsageRatio: 0,
-                            availabilityState: 'offline',
-                            enabledState: 'enabled',
+                            'status.availabilityState': 'offline',
+                            'status.enabledState': 'enabled',
                             'status.statusReason': 'The children pool member(s) are down',
                             syncookieStatus: 'not-activated',
                             'syncookie.accepts': 0,
@@ -188,8 +187,7 @@ module.exports = {
                             'syncookie.syncacheCurr': 0,
                             'syncookie.syncacheOver': 0,
                             'syncookie.syncookies': 0,
-                            totRequests: 0,
-                            name: '/Common/vs_with_pool/stats'
+                            totRequests: 0
                         }
                     }
                 },

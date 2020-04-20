@@ -40,7 +40,7 @@ function checkConditions(dataCtx, actionCtx) {
 }
 
 function checkAnyMatches(data, matchObjects) {
-    // Use 'Array.prototype.some' to check whether atleast 1 condition is true
+    // Use 'Array.prototype.some' to check whether at least 1 condition is true
     return matchObjects.some(conditions => checkAllMatches(data, conditions));
 }
 
@@ -103,7 +103,7 @@ function checkScalarValue(data, condition) {
     } catch (err) {
         // Possible to have invalid regex - catch and log error. Return false. Matching unsuccessful.
         if (err instanceof SyntaxError) {
-            logger.exception(`checkScalarValue error (data = "${data}" condition = "${condition}"): ${err.message || err}`, err);
+            logger.exception(`checkScalarValue error (data = "${data}" condition = "${condition}")`, err);
             return false;
         }
         throw err;

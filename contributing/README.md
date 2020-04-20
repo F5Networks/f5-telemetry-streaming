@@ -108,7 +108,7 @@ How does the project handle a typical `POST` request?
             "trace": false,
             "format": "default"
         },
-        "schemaVersion": "1.10.0"
+        "schemaVersion": "1.11.0"
     }
 }
 ```
@@ -190,9 +190,9 @@ Collect the raw data from the device by adding a new endpoint to the paths confi
 ```javascript
 {
     "path": "/mgmt/tm/sys/someEndpoint", // REST endpoint
-    "includeStats": true, // Certain data is only available via /mgmt/tm/sys/someEndpoint as opposed to /mgmt/tm/sys/someEndpoint/stats, this property accomodates for this by making call to /stats (for each item) and adding that data to the original object
-    "expandReferences": { "membersReference": { "endpointSuffix": "/stats" } }, // Certain data requires getting a list of objects and then in each object expanding/following references to a child object.  'membersReference' is the name of that key (currently looking under 'items' in the data returned) and will result in self link data being retrived and 'membersReference' key being replaced with that data. If 'endpointSuffix' is supplied, a suffix is added to each self link prior to retrieval, otherwise, the value of self link as is will be used. In cases like gslb where both config and stats are needed, both the `link` and `link/stats` need to be fetched, hence, the resulting config is "expandReferences": { "membersReference": { "includeStats": true } }, which is equivalent to "expandReferences": { "membersReference": { "endpointSuffix": "", "includeStats": true } }. TODO: revisit keywords/ naming here to consolidate and avoid confusion
-    "endpointFields": [ "name", "fullPath", "selfLink", "ipProtocol", "mask" ], // Will collect only these fields from the endoint. Useful when using includeStats and the same property exists in both endpoints. Also can be used instead of a large exclude/include statement in properties.json
+    "includeStats": true, // Certain data is only available via /mgmt/tm/sys/someEndpoint as opposed to /mgmt/tm/sys/someEndpoint/stats, this property accommodates for this by making call to /stats (for each item) and adding that data to the original object
+    "expandReferences": { "membersReference": { "endpointSuffix": "/stats" } }, // Certain data requires getting a list of objects and then in each object expanding/following references to a child object.  'membersReference' is the name of that key (currently looking under 'items' in the data returned) and will result in self link data being retrieved and 'membersReference' key being replaced with that data. If 'endpointSuffix' is supplied, a suffix is added to each self link prior to retrieval, otherwise, the value of self link as is will be used. In cases like gslb where both config and stats are needed, both the `link` and `link/stats` need to be fetched, hence, the resulting config is "expandReferences": { "membersReference": { "includeStats": true } }, which is equivalent to "expandReferences": { "membersReference": { "endpointSuffix": "", "includeStats": true } }. TODO: revisit keywords/ naming here to consolidate and avoid confusion
+    "endpointFields": [ "name", "fullPath", "selfLink", "ipProtocol", "mask" ], // Will collect only these fields from the endpoint. Useful when using includeStats and the same property exists in both endpoints. Also can be used instead of a large exclude/include statement in properties.json
     "body": "{ \"command\": \"run\", \"utilCmdArgs\": \"-c \\\"/bin/df -P | /usr/bin/tr -s ' ' ','\\\"\" }", // Certain information may require using POST instead of GET and require an HTTP body, if body is defined that gets used along with a POST. Body can be either string or object
     "name": "someStatRef", // Alternate name to reference in properties.json, default is to use the endpoint
     "ignoreCached": true // Invalidate cached response of previous request to endpoint
@@ -221,7 +221,7 @@ Enable and define how the data should look by adding a new key under *stats* in 
 ```javascript
 {
     "someKey": {
-        "key": "/mgmt/tm/sys/someUri::someChildKey", // /uri (or alt name in paths.json) + key(s) seperated by '::' to navigate into object and get a specific value
+        "key": "/mgmt/tm/sys/someUri::someChildKey", // /uri (or alt name in paths.json) + key(s) separated by '::' to navigate into object and get a specific value
         "keyArgs": { // Arguments that can be passed to the associated alt name endpoint in paths.json
             "replaceStrings": { "\\$tmstatsTable": "cpu_info_stat" } // Key/value pairs that replace matching strings in request body. The key is treated as a regular expression
         }
@@ -235,10 +235,10 @@ Enable and define how the data should look by adding a new key under *stats* in 
                 "includeFirstEntry": { "pattern": "/stats", "excludePattern": "/members/",  "runFunctions": [ {"name": "someCustomFunc" } ]  }, // This is useful if aggregating data from /endpoint and /endpoint/stats typically.  Allows a complex object to by merged instead of nesting down into entries, instead the values in the first entry of 'entries' will be copied to the top level object and then discarded.  There may be multiple 'entries', of which only some should follow this property, that is supported with an optional pattern, excludePattern and runFunctions.
             },
             {
-                "filterKeys": { "exclude": [ "removeMe"] }, // Filter all keys in object using either an inclusio or exclusion list - include also supported, not an exact match
+                "filterKeys": { "exclude": [ "removeMe"] }, // Filter all keys in object using either an inclusion or exclusion list - include also supported, not an exact match
             },
             {
-                "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "~": { "replaceCharacter": "/" },  }, // Rename keys, useful if key contains unneccesary prefix/suffix or needs a specific character replaced. This can also be an array with 1+ rename key objects inside it to guarantee order.
+                "renameKeys": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "~": { "replaceCharacter": "/" },  }, // Rename keys, useful if key contains unnecessary prefix/suffix or needs a specific character replaced. This can also be an array with 1+ rename key objects inside it to guarantee order.
             },
             {
                 "runFunctions": [{ "name": "getPercentFromKeys", "args": { "totalKey": "memoryTotal", "partialKey": "memoryUsed" } }], // Run custom functions, nail meet hammer.  This is to be used for one-offs where creating a standard macro does not make sense, keeping in mind each custom function could be used multiple times.  The function should already exist inside of normalizeUtil.js.
@@ -265,7 +265,7 @@ Certain properties require dynamic data to be pulled from the system prior to *s
 ```javascript
 {
     "someStat": {
-        "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::description" // "HOSTNAME" (surrounded by '{{' and '}}') is context key which containts device's hostname
+        "key": "/mgmt/tm/cm/device::items::{{HOSTNAME}}::description" // "HOSTNAME" (surrounded by '{{' and '}}') is context key which contains device's hostname
     }
 }
 ```
@@ -278,7 +278,7 @@ This context data is defined on the same level as *stats* in the properties conf
 {
     "context": {
         "someCtxKey1": {
-            "key": "/mgmt/tm/sys/global-settings::hostname" // other Macros properties are available too. Context data is not availble!
+            "key": "/mgmt/tm/sys/global-settings::hostname" // other Macros properties are available too. Context data is not available!
         }
     }
 }
@@ -291,7 +291,7 @@ This context data is defined on the same level as *stats* in the properties conf
     "context": [
         {
             "someCtxKey1": {
-                "key": "/mgmt/tm/sys/global-settings::hostname" // other Macros properties are available too. Context data is not availble for the first set of Macros.
+                "key": "/mgmt/tm/sys/global-settings::hostname" // other Macros properties are available too. Context data is not available for the first set of Macros.
             }
         },
         {
@@ -345,7 +345,7 @@ Additional information about the testing methodology can be found in the [test r
 
 Build/publish makes heavy use of GitLab and [.gitlab-ci.yml](../.gitlab-ci.yml).  Check out CI file and GitLab documentation for more details.
 
-- Add *new* RPM to `dist/` directory (from build artifact on mainline developement branch)
+- Add *new* RPM to `dist/` directory (from build artifact on mainline development branch)
 - Publish to artifactory (automated on new tags)
 - Push to GitLab (mainline release branch)
 - Push to GitHub (mainline release branch)

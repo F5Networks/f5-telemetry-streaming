@@ -22,6 +22,7 @@ const persistentStorage = require('../lib/persistentStorage');
 const configWorker = require('../lib/config');
 const eventListener = require('../lib/eventListener'); // eslint-disable-line no-unused-vars
 const consumers = require('../lib/consumers'); // eslint-disable-line no-unused-vars
+const pullConsumers = require('../lib/pullConsumers');
 const systemPoller = require('../lib/systemPoller');
 const iHealthPoller = require('../lib/ihealth'); // eslint-disable-line no-unused-vars
 
@@ -46,7 +47,7 @@ function SimpleRouter() {
  */
 
 /**
- * Register request habdler.
+ * Register request handler.
  *
  * @public
  * @param {String | String[]} method              - HTTP method (POST, GET, etc.), could be array
@@ -83,7 +84,7 @@ SimpleRouter.prototype.processRestOperation = function (restOperation) {
     try {
         this._processRestOperation(restOperation);
     } catch (err) {
-        logger.exception(`restOperation processing error: ${err}`, err);
+        logger.exception('restOperation processing error', err);
         util.restOperationResponder(restOperation, 500,
             { code: 500, message: 'Internal Server Error' });
     }
@@ -221,7 +222,7 @@ RestWorker.prototype._initializeApplication = function (success, failure) {
             logger.debug('Host Device Info gathered');
         })
         .catch((err) => {
-            logger.exception(`Unable to gather Host Device Info: ${err}`, err);
+            logger.exception('Unable to gather Host Device Info', err);
         });
 };
 
@@ -285,6 +286,9 @@ RestWorker.prototype.registerRestEndpoints = function (enableDebug) {
 
     this.router.register(['GET', 'POST'], 'declare',
         restOperation => configWorker.processClientRequest(restOperation));
+
+    this.router.register('GET', 'pullconsumer',
+        restOperation => pullConsumers.processClientRequest(restOperation));
 
     if (enableDebug) {
         this.router.register('GET', 'systempoller',

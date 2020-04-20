@@ -684,7 +684,7 @@ describe('Normalize', () => {
 
         it('should format timestamps without propertyKey', () => {
             const ret = {
-                formatMe: 'Septmeber 16, 2019 01:00:00 UTC'
+                formatMe: 'September 16, 2019 01:00:00 UTC'
             };
             const timestamps = ['formatMe'];
             const expected = {

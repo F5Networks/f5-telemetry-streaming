@@ -1,6 +1,9 @@
 #!/bin/bash
 
+# Exit on any failed commands
 set -e
+
+source "$(dirname $0)/../util.sh"
 
 # BIG-IP deployment tool variables stored in GitLab:
 # CICD_AUTH_OS_USERNAME - VIO user
@@ -10,7 +13,12 @@ set -e
 # CICD_AUTH_OS_TOKEN - VIO auth token
 # CICD_AUTH_OS_PROJECT - VIO project
 
-# BIG-IP deployment tool variables:
+# Required Environment Variables:
+checkEnvVariable CI_PROJECT_DIR
+checkEnvVariable CICD_AUTH_OS_USERNAME
+checkEnvVariable CICD_AUTH_OS_PASSWORD
+checkEnvVariable CICD_AUTH_OS_PROJECT
+
 export CUSTOM_DECLARATION="yes"
 export PROJECT_DECLARATION="${CI_PROJECT_DIR}/test/functional/deployment/declaration.yml"
 export PROJECT_NAME=$([ "${CICD_PROJECT_NAME}" == "" ] && echo "test_functional_harness" || echo "${CICD_PROJECT_NAME}")
@@ -29,4 +37,10 @@ cat "${PROJECT_DECLARATION}"
 cd /root/cicd-bigip-deploy
 make configure
 make printvars
-make teardown
+make setup
+
+# for debugging purpose only
+ls -als ${PROJECT_DIR}
+
+# copy info about deployed harness to project's folder to create artifact
+cp ${PROJECT_DIR}/harness_facts_flat.json ${CI_PROJECT_DIR}/harness_facts_flat.json

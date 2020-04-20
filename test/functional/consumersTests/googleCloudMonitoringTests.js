@@ -28,7 +28,7 @@ const GOOGLE_SD_CONSUMER_NAME = 'Google_SD_Consumer';
 let accessToken;
 
 function setup() {
-    describe('Consumer Setup: Google StackDriver - access token', () => {
+    describe('Consumer Setup: Google Cloud Monitoring - access token', () => {
         it('should get access token', () => {
             const newJwt = jwt.sign(
                 {
@@ -72,11 +72,11 @@ function setup() {
 }
 
 function test() {
-    describe('Consumer Test: Google StackDriver - Configure TS', () => {
+    describe('Consumer Test: Google Cloud Monitoring - Configure TS', () => {
         const consumerDeclaration = util.deepCopy(DECLARATION);
         consumerDeclaration[GOOGLE_SD_CONSUMER_NAME] = {
             class: 'Telemetry_Consumer',
-            type: 'Google_StackDriver',
+            type: 'Google_Cloud_Monitoring',
             privateKey: {
                 cipherText: PRIVATE_KEY
             },
@@ -90,7 +90,7 @@ function test() {
         ));
     });
 
-    describe('Consumer Test: Google StackDriver - Test', () => {
+    describe('Consumer Test: Google Cloud Monitoring - Test', () => {
         const queryGoogle = (queryString) => {
             const options = {
                 fullURI: `https://monitoring.googleapis.com/v3/projects/${PROJECT_ID}/timeSeries?${queryString}`,
@@ -116,7 +116,7 @@ function test() {
                 return new Promise(resolve => setTimeout(resolve, 30000))
                     .then(() => queryGoogle(queryString))
                     .then((timeSeries) => {
-                        sharedUtil.logger.info('Response from Google StackDriver:', { hostname: dut.hostname, timeSeries });
+                        sharedUtil.logger.info('Response from Google Cloud Monitoring:', { hostname: dut.hostname, timeSeries });
                         assert.notEqual(timeSeries.timeSeries[0].points[0], undefined);
                         assert.equal(dut.hostname, timeSeries.timeSeries[0].resource.labels.namespace);
                     });

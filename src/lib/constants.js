@@ -69,9 +69,10 @@ WEEKDAY_TO_DAY_NAME[7] = 'sunday';
 module.exports = {
     RELEASE,
     VERSION,
-
+    APP_NAME: 'Telemetry Streaming',
     CONFIG_CLASSES: {
         CONSUMER_CLASS_NAME: 'Telemetry_Consumer',
+        PULL_CONSUMER_CLASS_NAME: 'Telemetry_Pull_Consumer',
         CONTROLS_CLASS_NAME: 'Controls',
         ENDPOINTS_CLASS_NAME: 'Telemetry_Endpoints',
         EVENT_LISTENER_CLASS_NAME: 'Telemetry_Listener',
@@ -119,6 +120,7 @@ module.exports = {
     PASSPHRASE_ENVIRONMENT_VAR: 'environmentVar',
     PORT_TO_PROTO,
     PROTO_TO_PORT,
+    PULL_CONSUMERS_DIR: './pullConsumers',
     QKVIEW_CMD_LOCAL_TIMEOUT: 1 * 60 * 60 * 1000, // 1 hour in milliseconds
     STATS_KEY_SEP: '::',
     STRICT_TLS_REQUIRED: true,

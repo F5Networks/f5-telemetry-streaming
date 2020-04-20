@@ -36,6 +36,7 @@
 
 // preload popular libs here for optimization
 /* eslint-disable no-unused-vars */
+const assert = require('assert');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');

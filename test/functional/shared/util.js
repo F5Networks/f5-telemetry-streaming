@@ -185,10 +185,10 @@ module.exports = {
      * @param {String} host     - host
      * @param {String} username - username
      * @param {String} password - password
-     *
+     * @param {String} port - port
      * @returns {Promise} Returns promise resolved with auth token: { token: 'token' }
      */
-    getAuthToken(host, username, password) {
+    getAuthToken(host, username, password, port) {
         const uri = '/mgmt/shared/authn/login';
         const body = JSON.stringify({
             username,
@@ -197,6 +197,7 @@ module.exports = {
         });
         const postOptions = {
             method: 'POST',
+            port,
             body
         };
 
@@ -217,10 +218,11 @@ module.exports = {
      *
      * @returns {Promise} Returns promise resolved upon completion
      */
-    installPackage(host, authToken, file) {
+    installPackage(host, authToken, file, port) {
         const opts = {
             HOST: host,
-            AUTH_TOKEN: authToken
+            AUTH_TOKEN: authToken,
+            PORT: port
         };
 
         return new Promise((resolve, reject) => {
@@ -460,5 +462,33 @@ module.exports = {
             return { errors: validator.errors };
         }
         return true;
+    },
+
+    /**
+     * Performs a POST declaration request to a device
+     *
+     * @param {Object} deviceInfo
+     * @param {Object} declaration
+     * @returns {Promise} Promise resolved with response
+     */
+    postDeclaration(deviceInfo, declaration) {
+        const uri = `${constants.BASE_ILX_URI}/declare`;
+        const host = deviceInfo.ip;
+        const user = deviceInfo.username;
+        const password = deviceInfo.password;
+        const port = deviceInfo.port;
+
+        return this.getAuthToken(host, user, password, port)
+            .then((data) => {
+                const postOptions = {
+                    port,
+                    method: 'POST',
+                    headers: {
+                        'x-f5-auth-token': data.token
+                    },
+                    body: declaration
+                };
+                return this.makeRequest(host, uri, postOptions);
+            });
     }
 };

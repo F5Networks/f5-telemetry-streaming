@@ -6,6 +6,8 @@
         "workspaceId": "workspaceid",
         "passphrase": {
             "cipherText": "sharedkey"
-        }
+        },
+        "useManagedIdentity": false,
+        "region": "westus"
     }
 }

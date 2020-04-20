@@ -1,0 +1,18 @@
+{
+    "class": "Telemetry",
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Azure_Application_Insights",
+        "instrumentationKey": "app-insights-resource-guid",
+        "maxBatchSize": 125,
+        "maxBatchIntervalMs": 30000,
+        "customOpts": [
+            {
+                "name": "samplingPercentage",
+                "value": 75
+            }
+        ],
+        "useManagedIdentity": false,
+        "region": "usgovarizona"
+    }
+}

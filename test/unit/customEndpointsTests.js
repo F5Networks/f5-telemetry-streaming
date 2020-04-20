@@ -20,6 +20,8 @@ chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe('Custom Endpoints (Telemetry_Endpoints)', () => {
+    const TOTAL_ATTEMPTS = 10;
+
     const checkResponse = (endpointMock, response) => {
         if (!response.kind) {
             throw new Error(`Endpoint '${endpointMock.endpoint}' has no property 'kind' in response`);
@@ -36,37 +38,29 @@ describe('Custom Endpoints (Telemetry_Endpoints)', () => {
 
             testSet.tests.forEach((testConf) => {
                 testUtil.getCallableIt(testConf)(testConf.name, () => {
+                    const endpointsStateValidator = testUtil.getSpoiledDataValidator(testConf.endpointList);
+
                     const options = {
-                        endpointList: testConf.endpointList
+                        endpoints: testConf.endpointList
                     };
                     const getCollectedData = testConf.getCollectedData
                         ? testConf.getCollectedData : promise => promise;
 
                     const stats = new SystemStats(options);
 
-                    return Promise.resolve()
-                        .then(() => {
+                    let promise = Promise.resolve();
+                    for (let i = 1; i < TOTAL_ATTEMPTS + 1; i += 1) {
+                        promise = promise.then(() => {
                             testUtil.mockEndpoints(testConf.endpoints || [], { responseChecker: checkResponse });
-                            return assert.becomes(
-                                getCollectedData(stats.collect(), stats),
-                                testConf.expectedData,
-                                'should match expected output on first attempt to collect data'
-                            );
+                            return getCollectedData(stats.collect(), stats);
                         })
-                        .then(() => {
-                            assert.deepStrictEqual(stats.loader.cachedResponse, {}, 'cache should be erased');
-                        })
-                        .then(() => {
-                            testUtil.mockEndpoints(testConf.endpoints || [], { responseChecker: checkResponse });
-                            return assert.becomes(
-                                getCollectedData(stats.collect(), stats),
-                                testConf.expectedData,
-                                'should match expected output on second attempt to collect data'
-                            );
-                        })
-                        .then(() => {
-                            assert.deepStrictEqual(stats.loader.cachedResponse, {}, 'cache should be erased');
-                        });
+                            .then((data) => {
+                                assert.deepStrictEqual(data, testConf.expectedData, `should match expected output (attempt #${i}`);
+                                assert.deepStrictEqual(stats.loader.cachedResponse, {}, `cache should be erased (attempt #${i}`);
+                                endpointsStateValidator();
+                            });
+                    }
+                    return promise;
                 });
             });
         });

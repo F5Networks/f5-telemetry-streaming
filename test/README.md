@@ -138,9 +138,9 @@ If you already have an existing set of devices, you can run the functional tests
         export TEST_HARNESS_FILE="/path/to/harness_facts_flat.json"
         npm run test-functional
         
-#### Google StackDriver consumer tests
+#### Google Cloud Monitoring consumer tests
 
-These tests are under /test/functional/consumers/googleStackDriverTests.js. They have a few environment variables that will need to be present in Gitlab. These environment variables are:
+These tests are under /test/functional/consumers/googleCloudMonitoringTests.js. They have a few environment variables that will need to be present in Gitlab. These environment variables are:
 
 - GCP_PRIVATE_KEY
 - GCP_PRIVATE_KEY_ID

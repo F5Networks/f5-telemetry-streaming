@@ -1,6 +1,24 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.11.0
+### Added
+- AUTOTOOL-1448: Introduce new Pull Consumer class, Pull Consumer API, and 'default' Pull Consumer
+- AUTOTOOL-1187: Enable use of Managed Identities for Azure Log Analytics
+- AUTOTOOL-1186: New consumer Azure Application Insights
+- AUTOTOOL-1218: Enable use of Managed Identities for Azure Application Insights
+- AUTOTOOL-768: Enable support of AzureGov for Azure consumers and optional region property
+### Fixed
+- AUTOTOOL-1334: Fix [Regular Expression Denial of Service vulnerability](https://www.npmjs.com/advisories/1488) and improve start up time on node v4.x and v6.x
+- AUTOTOOL-1150: [GitHub #30](https://github.com/F5Networks/f5-telemetry-streaming/issues/30) Fix error when Splunk consumer (configured with 'legacy' format) tries to forward event from Event Listener
+- AUTOTOOL-491: [GitHub #17](https://github.com/F5Networks/f5-telemetry-streaming/issues/17) Fix crash in Kafka consumer on attempt to close idle connections to brokers
+- AUTOTOOL-1265: Reduce data copying in System Stats
+- AUTOTOOL-1266: Reduce data copying in Event Listener
+### Changed
+- AUTOTOOL-1376: Rename Google StackDriver consumer to 'Google Cloud Monitoring'
+- AUTOTOOL-1015: Update f5-teem to 1.4.2 for new reportRecord API
+### Removed
+
 ## 1.10.0
 ### Added
 - AUTOTOOL-1111: Enable configurable polling with Telemetry_Endpoints (BIG-IP paths) and multiple system poller support

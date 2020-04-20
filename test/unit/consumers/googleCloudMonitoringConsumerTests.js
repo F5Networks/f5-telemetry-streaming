@@ -15,12 +15,12 @@ require('../shared/restoreCache')();
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
-const stackDriverIndex = require('../../../src/lib/consumers/Google_StackDriver/index');
+const cloudMonitoringIndex = require('../../../src/lib/consumers/Google_Cloud_Monitoring/index');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
-describe('Google_StackDriver', () => {
+describe('Google_Cloud_Monitoring', () => {
     afterEach(() => {
         nock.cleanAll();
     });
@@ -29,7 +29,7 @@ describe('Google_StackDriver', () => {
         const context = {
             event: {}
         };
-        return stackDriverIndex(context)
+        return cloudMonitoringIndex(context)
             .then((result) => {
                 assert.equal(result, undefined);
             })
@@ -147,7 +147,7 @@ describe('Google_StackDriver', () => {
             .post('')
             .reply(200, { access_token: 'hereHaveSomeAccess' });
 
-        return assert.isFulfilled(stackDriverIndex(context))
+        return assert.isFulfilled(cloudMonitoringIndex(context))
             .then(() => {
                 assert.ok(nock.isDone());
             });

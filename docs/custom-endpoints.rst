@@ -127,6 +127,189 @@ The following example contains a complete example declaration for Telemetry Stre
 .. literalinclude:: ../examples/declarations/system_custom_endpoints.json
     :language: json
 
+|
+
+Example output from the pollers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The following is output from the pollers when using custom Endpoints.
+
+
+From: ``GET /mgmt/shared/telemetry/systempoller/Custom_System/Custom_System_Poller1``
+
+.. code-block:: json
+  
+   {
+        "radiusProfiles":{
+        "/Common/radiusLB/stats":{
+            "accepts":0,
+            "acctRequests":0,
+            "acctResponses":0,
+            "challenges":0,
+            "drops":0,
+            "tmName":"/Common/radiusLB",
+            "other":0,
+            "rejects":0,
+            "requests":0,
+            "typeId":"ltm profile radius",
+            "vsName":"N/A",
+            "name":"/Common/radiusLB/stats"
+        },
+        "/Common/radiusLB-subscriber-aware/stats":{
+            "accepts":0,
+            "acctRequests":0,
+            "acctResponses":0,
+            "challenges":0,
+            "drops":0,
+            "tmName":"/Common/radiusLB-subscriber-aware",
+            "other":0,
+            "rejects":0,
+            "requests":0,
+            "typeId":"ltm profile radius",
+            "vsName":"N/A",
+            "name":"/Common/radiusLB-subscriber-aware/stats"
+        }
+        },
+        "ipOtherProfiles":{
+        "/Common/ipother/stats":{
+            "accepts":0,
+            "connects":0,
+            "expires":0,
+            "tmName":"/Common/ipother",
+            "open":0,
+            "rxbaddgram":0,
+            "rxdgram":0,
+            "rxunreach":0,
+            "txdgram":0,
+            "typeId":"ltm profile ipother",
+            "vsName":"N/A",
+            "name":"/Common/ipother/stats"
+        }
+        },
+        "telemetryServiceInfo":{
+        "pollingInterval":60,
+        "cycleStart":"2020-02-11T20:48:42.094Z",
+        "cycleEnd":"2020-02-11T20:48:42.161Z"
+        },
+        "telemetryEventCategory":"systemInfo"
+    }
+
+|
+
+From: ``GET /mgmt/shared/telemetry/systempoller/Custom_System/Custom_System_Poller2``
+
+.. code-block:: json
+
+   {
+    "ipOtherProfiles":{
+        "/Common/ipother/stats":{
+            "accepts":0,
+            "connects":0,
+            "expires":0,
+            "tmName":"/Common/ipother",
+            "open":0,
+            "rxbaddgram":0,
+            "rxdgram":0,
+            "rxunreach":0,
+            "txdgram":0,
+            "typeId":"ltm profile ipother",
+            "vsName":"N/A",
+            "name":"/Common/ipother/stats"
+        }
+    },
+    "telemetryServiceInfo":{
+        "pollingInterval":120,
+        "cycleStart":"2020-02-11T20:50:18.218Z",
+        "cycleEnd":"2020-02-11T20:50:18.277Z"
+    },
+    "telemetryEventCategory":"systemInfo"
+    }
+
+|
+
+From: ``GET /mgmt/shared/telemetry/systempoller/Custom_System``
+
+.. code-block:: json
+
+   [
+        {
+            "radiusProfiles":{
+                "/Common/radiusLB/stats":{
+                    "accepts":0,
+                    "acctRequests":0,
+                    "acctResponses":0,
+                    "challenges":0,
+                    "drops":0,
+                    "tmName":"/Common/radiusLB",
+                    "other":0,
+                    "rejects":0,
+                    "requests":0,
+                    "typeId":"ltm profile radius",
+                    "vsName":"N/A",
+                    "name":"/Common/radiusLB/stats"
+                },
+                "/Common/radiusLB-subscriber-aware/stats":{
+                    "accepts":0,
+                    "acctRequests":0,
+                    "acctResponses":0,
+                    "challenges":0,
+                    "drops":0,
+                    "tmName":"/Common/radiusLB-subscriber-aware",
+                    "other":0,
+                    "rejects":0,
+                    "requests":0,
+                    "typeId":"ltm profile radius",
+                    "vsName":"N/A",
+                    "name":"/Common/radiusLB-subscriber-aware/stats"
+                }
+            },
+            "ipOtherProfiles":{
+                "/Common/ipother/stats":{
+                    "accepts":0,
+                    "connects":0,
+                    "expires":0,
+                    "tmName":"/Common/ipother",
+                    "open":0,
+                    "rxbaddgram":0,
+                    "rxdgram":0,
+                    "rxunreach":0,
+                    "txdgram":0,
+                    "typeId":"ltm profile ipother",
+                    "vsName":"N/A",
+                    "name":"/Common/ipother/stats"
+                }
+            },
+            "telemetryServiceInfo":{
+                "pollingInterval":60,
+                "cycleStart":"2020-02-11T22:29:07.317Z",
+                "cycleEnd":"2020-02-11T22:29:07.441Z"
+            },
+            "telemetryEventCategory":"systemInfo"
+        },
+        {
+            "ipOtherProfiles":{
+                "/Common/ipother/stats":{
+                    "accepts":0,
+                    "connects":0,
+                    "expires":0,
+                    "tmName":"/Common/ipother",
+                    "open":0,
+                    "rxbaddgram":0,
+                    "rxdgram":0,
+                    "rxunreach":0,
+                    "txdgram":0,
+                    "typeId":"ltm profile ipother",
+                    "vsName":"N/A",
+                    "name":"/Common/ipother/stats"
+                }
+            },
+            "telemetryServiceInfo":{
+                "pollingInterval":120,
+                "cycleStart":"2020-02-11T22:29:07.318Z",
+                "cycleEnd":"2020-02-11T22:29:07.423Z"
+            },
+            "telemetryEventCategory":"systemInfo"
+        }
+    ]
 
 
 .. |br| raw:: html
