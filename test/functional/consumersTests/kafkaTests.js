@@ -54,14 +54,14 @@ function setup() {
             return runRemoteCmd(`docker ps | grep ${ZOOKEEPER_NAME}`)
                 .then((data) => {
                     if (data) {
-                        return Promise.resolve(); // exists, contine
+                        return Promise.resolve(); // exists, continue
                     }
                     return runRemoteCmd(cmdZookeeper);
                 })
                 .then(() => runRemoteCmd(`docker ps | grep ${KAFKA_NAME}`))
                 .then((data) => {
                     if (data) {
-                        return Promise.resolve(); // exists, contine
+                        return Promise.resolve(); // exists, continue
                     }
                     return runRemoteCmd(cmdKafka);
                 });

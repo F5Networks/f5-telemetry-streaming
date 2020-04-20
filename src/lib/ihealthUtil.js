@@ -54,9 +54,9 @@ function getAuthToken(targetObj) {
  *
  * @returns {Promise} Promise resolved when file removed
  */
-function removeFileLocaly(src, customLogger) {
+function removeFileLocally(src, customLogger) {
     const log = customLogger || logger;
-    log.debug(`Removing "${src}" localy`);
+    log.debug(`Removing "${src}" locally`);
     return new Promise((resolve, reject) => {
         fs.unlink(src, (err) => {
             if (err) {
@@ -67,7 +67,7 @@ function removeFileLocaly(src, customLogger) {
         });
     })
         .catch((err) => {
-            const msg = `removeFileLocaly: unable to remove file "${src}" localy: ${err}`;
+            const msg = `removeFileLocally: unable to remove file "${src}" locally: ${err}`;
             log.debug(msg);
             throw new Error(msg);
         });
@@ -167,9 +167,9 @@ function fileExistsRemotely(src, host, opts, customLogger) {
  *
  * @returns {Promise} Promise resolved when file exists on the local device
  */
-function fileExistsLocaly(src, customLogger) {
+function fileExistsLocally(src, customLogger) {
     const log = customLogger || logger;
-    log.debug(`Check (ls) "${src}" localy`);
+    log.debug(`Check (ls) "${src}" locally`);
 
     return new Promise((resolve) => {
         fs.access(src, (fs.constants || fs).R_OK, (accessErr) => {
@@ -183,7 +183,7 @@ function fileExistsLocaly(src, customLogger) {
             return Promise.resolve();
         })
         .catch((err) => {
-            const msg = `fileExistsLocal: unable to locate file "${src}" localy: ${err}`;
+            const msg = `fileExistsLocal: unable to locate file "${src}" locally: ${err}`;
             log.debug(msg);
             throw new Error(msg);
         });
@@ -331,7 +331,7 @@ function checkIsItLocalDevice(host, options) {
  * @property {module:ihealthUtil~Qkview}   qkview                - object with info about Qkview
  */
 function QkviewManager() {
-    // rest params syntax supported only fron node 6+
+    // rest params syntax supported only from node 6+
     /* eslint-disable prefer-rest-params */
     this.host = typeof arguments[0] === 'string' ? arguments[0] : null;
     this.host = this.host || constants.LOCAL_HOST;
@@ -437,7 +437,7 @@ QkviewManager.prototype._getQkviewCommand = function (qkviewFilePath) {
  */
 QkviewManager.prototype._remoteFirstLocalLast = function (remote, local) {
     let errors = [];
-    // remote is prefered way
+    // remote is preferred way
     return remote()
         .catch((err) => {
             errors.push(err.message);
@@ -477,12 +477,12 @@ QkviewManager.prototype._remoteFirstLocalLast = function (remote, local) {
  *
  * @returns {Promise} Promise resolved when Qkview file created
  */
-QkviewManager.prototype.createQkviewLocaly = function (qkviewName) {
+QkviewManager.prototype.createQkviewLocally = function (qkviewName) {
     const qkviewPath = this._getQkviewPath(qkviewName);
     const qkviewCmd = this._getQkviewCommand(qkviewPath);
 
     // looks like we are running on device and target device is localhost
-    this.logger.debug(`Creating Qkview localy at ${qkviewPath}`);
+    this.logger.debug(`Creating Qkview locally at ${qkviewPath}`);
     return new Promise((resolve, reject) => {
         // eslint-disable-next-line no-unused-vars
         childProcess.exec(qkviewCmd, { timeout: constants.QKVIEW_CMD_LOCAL_TIMEOUT }, (error, stdout, stderr) => {
@@ -494,7 +494,7 @@ QkviewManager.prototype.createQkviewLocaly = function (qkviewName) {
         });
     })
         .catch((err) => {
-            const msg = `createQkviewLocaly: Unable to create Qkview localy: ${err}`;
+            const msg = `createQkviewLocally: Unable to create Qkview locally: ${err}`;
             this.logger.debug(msg);
             throw new Error(msg);
         });
@@ -523,7 +523,7 @@ QkviewManager.prototype.createQkviewRemotely = function (qkviewName) {
 };
 
 /**
- * Create Qkview via REST API (will try localy on fail)
+ * Create Qkview via REST API (will try locally on fail)
  *
  * @async
  * @returns {Promise.<String>} Promise resolved with file name when Qkview file created
@@ -532,7 +532,7 @@ QkviewManager.prototype.createQkview = function () {
     const qkviewName = this._getQkviewName();
     return this._remoteFirstLocalLast(
         () => this.createQkviewRemotely(qkviewName),
-        () => this.createQkviewLocaly(qkviewName)
+        () => this.createQkviewLocally(qkviewName)
     )
         .then(() => Promise.resolve(qkviewName))
         .catch((err) => {
@@ -574,8 +574,8 @@ QkviewManager.prototype.removeFileRemotely = function (src) {
  *
  * @returns {Promise} Promise resolved when file removed
  */
-QkviewManager.prototype.removeFileLocaly = function (src) {
-    return removeFileLocaly(src, this.logger);
+QkviewManager.prototype.removeFileLocally = function (src) {
+    return removeFileLocally(src, this.logger);
 };
 
 /**
@@ -589,7 +589,7 @@ QkviewManager.prototype.removeFileLocaly = function (src) {
 QkviewManager.prototype.removeFile = function (src) {
     return this._remoteFirstLocalLast(
         () => this.removeFileRemotely(src),
-        () => this.removeFileLocaly(src)
+        () => this.removeFileLocally(src)
     )
         .then(() => Promise.resolve())
         .catch((err) => {
@@ -618,8 +618,8 @@ QkviewManager.prototype.fileExistsRemotely = function (src) {
  *
  * @returns {Promise} Promise resolved when file exists on the local device
  */
-QkviewManager.prototype.fileExistsLocaly = function (src) {
-    return fileExistsLocaly(src, this.logger);
+QkviewManager.prototype.fileExistsLocally = function (src) {
+    return fileExistsLocally(src, this.logger);
 };
 
 /**
@@ -633,7 +633,7 @@ QkviewManager.prototype.fileExistsLocaly = function (src) {
 QkviewManager.prototype.fileExists = function (src) {
     return this._remoteFirstLocalLast(
         () => this.fileExistsRemotely(src),
-        () => this.fileExistsLocaly(src)
+        () => this.fileExistsLocally(src)
     )
         .then(() => Promise.resolve())
         .catch((err) => {
@@ -681,11 +681,11 @@ QkviewManager.prototype.getMD5sumRemotely = function (fileName) {
  *
  * @returns {Promise.<Array>} Promise resolved with MD5 sum and MD5 filename
  */
-QkviewManager.prototype.getMD5sumLocaly = function (fileName) {
+QkviewManager.prototype.getMD5sumLocally = function (fileName) {
     const self = this;
     return new Promise((resolve, reject) => {
         // eslint-disable-next-line no-unused-vars
-        self.logger.debug(`Calculating MD5 for "${fileName}" localy`);
+        self.logger.debug(`Calculating MD5 for "${fileName}" locally`);
         const md5Cmd = `md5sum "${fileName}"`;
 
         // eslint-disable-next-line no-unused-vars
@@ -698,7 +698,7 @@ QkviewManager.prototype.getMD5sumLocaly = function (fileName) {
         });
     })
         .catch((err) => {
-            const msg = `getMD5sumLocaly: Unable to calculate MD5 localy: ${err}`;
+            const msg = `getMD5sumLocally: Unable to calculate MD5 locally: ${err}`;
             this.logger.debug(msg);
             throw new Error(msg);
         });
@@ -764,14 +764,14 @@ QkviewManager.prototype.downloadQkview = function () {
         })
         .then(() => deviceUtil.downloadFileFromDevice(localDownloadPath,
             this.host, deviceRemoteDownloadURI, this._getDefaultRequestOptions()))
-        .then(() => this.fileExistsLocaly(localDownloadPath))
+        .then(() => this.fileExistsLocally(localDownloadPath))
         .then(() => {
             this.qkview.localDownloadPath = localDownloadPath;
             this.qkview.localFiles.push(localDownloadPath);
             this.qkview.downloaded = true;
             this.qkview.md5verified = false;
         })
-        .then(() => this.getMD5sumLocaly(this.qkview.localDownloadPath))
+        .then(() => this.getMD5sumLocally(this.qkview.localDownloadPath))
         .then((ret) => {
             this.qkview.localFiles.push(ret[1]);
             if (ret[0] !== remoteMD5Sum) {
@@ -850,7 +850,7 @@ QkviewManager.prototype.cleanup = function () {
         localFiles.forEach((lfPath) => {
             if (lfPath) {
                 promises.push(
-                    this.fileExistsLocaly(lfPath).then(() => this.removeFileLocaly(lfPath))
+                    this.fileExistsLocally(lfPath).then(() => this.removeFileLocally(lfPath))
                 );
             }
         });
@@ -955,12 +955,12 @@ QkviewManager.prototype.process = function () {
  * @function
  * @name module:ihealthUitl~IHealthManager#cleanup
  *
- * @return {Promise} Promise resolved when cleanup docne
+ * @return {Promise} Promise resolved when cleanup done
  */
 
 
 /**
- * iHealth Manager to upload Qkview and poll diagostics from the local device
+ * iHealth Manager to upload Qkview and poll diagnostics from the local device
  *
  * @class
  * @implements {module:ihealthUtil~IHealthManager}
@@ -1161,7 +1161,7 @@ IHealthManagerLocal.prototype.cleanup = function () {
 };
 
 /**
- * iHealth Manager to upload Qkview and poll diagostics from the remote device
+ * iHealth Manager to upload Qkview and poll diagnostics from the remote device
  *
  * @class
  * @implements {module:ihealthUtil~IHealthManager}
@@ -1178,7 +1178,7 @@ IHealthManagerLocal.prototype.cleanup = function () {
  * @param {module:ihealthUtil~Proxy}       [options.proxy]               - proxy settings
  */
 function IHealthManagerRemote() {
-    // rest params syntax supported only fron node 6+
+    // rest params syntax supported only from node 6+
     /* eslint-disable prefer-rest-params */
     this.host = typeof arguments[0] === 'string' ? arguments[0] : null;
     this.host = this.host || constants.LOCAL_HOST;
@@ -1383,7 +1383,7 @@ IHealthManagerRemote.prototype._getCommandResponse = function () {
 };
 
 /**
- * Execute cURL comman on the remote device
+ * Execute cURL command on the remote device
  *
  * @async
  * @private

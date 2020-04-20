@@ -417,7 +417,7 @@ module.exports = {
 
         let ret = this._formatAsJson(data);
         const retKeys = Object.keys(ret);
-        // in case data doesn't cotains delimiter
+        // in case data doesn't contain delimiter
         if (retKeys.length === 1 && retKeys[0] === 'data') {
             isRawData = true;
             ret.data = originData;
@@ -470,7 +470,7 @@ module.exports = {
      * @param {Object} options                       - options
      * @param {Object} [options.renameKeysByPattern] - contains map or array of keys to rename by pattern
      *                                                 object example: { patterns: {}, options: {}}
-     * @param {Array}  [options.filterByKeys]        - array containg map of keys to filter data further
+     * @param {Array}  [options.filterByKeys]        - array contains map of keys to filter data further
      *                                                 example: { exclude: [], include: []}
      *
      * @returns {Object} Returns normalized event
@@ -513,7 +513,7 @@ module.exports = {
      * @param {Object} data                           - data to normalize
      * @param {Object} options                        - options
      * @param {String} [options.key]                  - key to drill down into data, using a defined notation
-     * @param {Array} [options.filterByKeys]          - array containg map of keys to filter data further
+     * @param {Array} [options.filterByKeys]          - array contains map of keys to filter data further
      *                                                  example: { exclude: [], include: []}
      * @param {Array} [options.renameKeysByPattern]   - array containing 1+ map(s) of keys to rename by pattern
      *                                                  example: [{ patterns: {}, options: {}}]

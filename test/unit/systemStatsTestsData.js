@@ -585,6 +585,188 @@ module.exports = {
                 }
             ],
             shouldKeepOnly: ['system', 'version', 'pools', 'virtualServers']
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should keep all properties (no actions)',
+            actions: [],
+            shouldRemoveOnly: []
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should keep all properties (setTag action only)',
+            actions: [
+                {
+                    setTags: {
+                        tag: 'value'
+                    },
+                    enable: true
+                }
+            ],
+            shouldRemoveOnly: []
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should keep all properties (custom endpoints)',
+            customEndpoints: {
+                endpoint1: {
+                    name: 'endpoint1'
+                },
+                endpoint2: {
+                    name: 'endpoint2'
+                },
+                endpoint3: {
+                    name: 'endpoint3'
+                }
+            },
+            actions: [],
+            shouldKeepOnly: ['endpoint1', 'endpoint2', 'endpoint3']
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should skip properties (custom endpoints)',
+            customEndpoints: {
+                endpoint1: {
+                    name: 'endpoint1'
+                },
+                endpoint2: {
+                    name: 'endpoint2'
+                },
+                endpoint3: {
+                    name: 'endpoint3'
+                }
+            },
+            actions: [
+                {
+                    setTags: {
+                        tag: 'value'
+                    },
+                    locations: {
+                        endpoint1: true
+                    },
+                    enable: true
+                },
+                {
+                    excludeData: {},
+                    locations: {
+                        endpoint1: true,
+                        endpoint2: true
+                    },
+                    enable: true
+                }
+            ],
+            shouldRemoveOnly: ['endpoint1', 'endpoint2'],
+            shouldKeepOnly: ['endpoint3']
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should skip TMStats properties',
+            skipTMStats: true,
+            actions: [],
+            shouldRemoveOnly: [
+                'asmCpuUtilStats',
+                'cpuInfoStat',
+                'diskInfoStat',
+                'dnsCacheResolverStat',
+                'dnsexpressZoneStat',
+                'dosStat',
+                'dosl7PluginStats',
+                'dosl7dStat',
+                'flowEvictionPolicyStat',
+                'gtmDcStat',
+                'gtmWideipStat',
+                'hostInfoStat',
+                'ifcStats',
+                'interfaceStat',
+                'ipIntelligenceStat',
+                'ipStat',
+                'iprepdStat',
+                'kvmVcpuStat',
+                'kvmVmStat',
+                'mcpRequestStat',
+                'mcpTransactionStat',
+                'memoryUsageStat',
+                'monitorInstanceStat',
+                'monitorStat',
+                'poolMemberStat',
+                'poolStat',
+                'procPidStat',
+                'profileBigprotoStat',
+                'profileClientsslStat',
+                'profileConnpoolStat',
+                'profileDnsStat',
+                'profileFtpStat',
+                'profileHttpStat',
+                'profileHttpcompressionStat',
+                'profileServersslStat',
+                'profileTcpStat',
+                'profileUdpStat',
+                'profileWebaccelerationStat',
+                'ruleStat',
+                'tmmStat',
+                'tmmdnsServerStat',
+                'tmmdnsZoneStat',
+                'vcmpGlobalStat',
+                'vcmpStat',
+                'virtualServerConnStat',
+                'virtualServerCpuStat',
+                'virtualServerStat'
+            ]
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should keep TMStats properties',
+            skipTMStats: false,
+            actions: [],
+            shouldKeep: [
+                'asmCpuUtilStats',
+                'cpuInfoStat',
+                'diskInfoStat',
+                'dnsCacheResolverStat',
+                'dnsexpressZoneStat',
+                'dosStat',
+                'dosl7PluginStats',
+                'dosl7dStat',
+                'flowEvictionPolicyStat',
+                'gtmDcStat',
+                'gtmWideipStat',
+                'hostInfoStat',
+                'ifcStats',
+                'interfaceStat',
+                'ipIntelligenceStat',
+                'ipStat',
+                'iprepdStat',
+                'kvmVcpuStat',
+                'kvmVmStat',
+                'mcpRequestStat',
+                'mcpTransactionStat',
+                'memoryUsageStat',
+                'monitorInstanceStat',
+                'monitorStat',
+                'poolMemberStat',
+                'poolStat',
+                'procPidStat',
+                'profileBigprotoStat',
+                'profileClientsslStat',
+                'profileConnpoolStat',
+                'profileDnsStat',
+                'profileFtpStat',
+                'profileHttpStat',
+                'profileHttpcompressionStat',
+                'profileServersslStat',
+                'profileTcpStat',
+                'profileUdpStat',
+                'profileWebaccelerationStat',
+                'ruleStat',
+                'tmmStat',
+                'tmmdnsServerStat',
+                'tmmdnsZoneStat',
+                'vcmpGlobalStat',
+                'vcmpStat',
+                'virtualServerConnStat',
+                'virtualServerCpuStat',
+                'virtualServerStat'
+            ]
         }
     ]
 };

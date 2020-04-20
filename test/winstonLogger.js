@@ -100,7 +100,7 @@ function hookStream(stream, callback) {
 }
 
 /**
- * Insted of overriding all 'console' functions simply writing
+ * Instead of overriding all 'console' functions simply writing
  * stdout and stderr to fileLogger
  */
 hookStream(process.stdout, (string) => {

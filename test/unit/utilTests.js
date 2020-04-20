@@ -204,7 +204,7 @@ describe('Util', () => {
 
     describe('.makeRequest()', () => {
         afterEach(() => {
-            testUtil.checkNockActiveMocks(nock, assert);
+            testUtil.checkNockActiveMocks(nock);
             sinon.restore();
             nock.cleanAll();
         });
@@ -544,9 +544,26 @@ describe('Util', () => {
     });
 
     describe('.deepCopy()', () => {
-        it('should copy object', () => {
+        it('should make deep copy of object', () => {
             const src = { schedule: { frequency: 'daily', time: { start: '04:20', end: '6:00' } } };
-            assert.deepStrictEqual(util.deepCopy(src), src);
+            const copy = util.deepCopy(src);
+            assert.deepStrictEqual(copy, src, 'should deeply equal');
+
+            // let's check that copy is deep
+            src.schedule.frequency = 'frequency';
+            assert.notStrictEqual(copy.schedule.frequency, src.schedule.frequency, 'should not be equal');
+        });
+    });
+
+    describe('.copy()', () => {
+        it('should make copy of object', () => {
+            const src = { schedule: { frequency: 'daily', time: { start: '04:20', end: '6:00' } } };
+            const copy = util.copy(src);
+            assert.deepStrictEqual(copy, src, 'should deeply equal');
+
+            // it is shallow copy - changes in src should affect copy
+            src.schedule.frequency = 'frequency';
+            assert.deepStrictEqual(copy, src, 'should deeply equal');
         });
     });
 
@@ -557,7 +574,17 @@ describe('Util', () => {
             assert.deepStrictEqual(util.assignDefaults(undefined, { a: 1 }), { a: 1 });
             assert.deepStrictEqual(util.assignDefaults({}, { a: 1 }), { a: 1 });
             assert.deepStrictEqual(util.assignDefaults({ a: 1 }, { a: 2 }), { a: 1 }, 'should not override existing property');
-            assert.deepStrictEqual(util.assignDefaults({ a: undefined }, { a: 2 }), { a: undefined }, 'should preserve "undefined" as values');
+            assert.deepStrictEqual(util.assignDefaults({ a: undefined }, { a: 2 }), { a: 2 }, 'should treat "undefined" as valid value');
+        });
+
+        it('should deeply assign defaults', () => {
+            assert.deepStrictEqual(
+                util.assignDefaults(
+                    { a: { b: 'b', d: { e: 'e' } } },
+                    { a: { c: 'c', d: { f: 'f' } } }
+                ),
+                { a: { b: 'b', c: 'c', d: { e: 'e', f: 'f' } } }
+            );
         });
 
         it('should return same object', () => {
@@ -725,73 +752,6 @@ describe('Util', () => {
                     }
                 });
         }).timeout(10000);
-    });
-
-    describe('.getConsumerClasses()', () => {
-        it('should fail when no declaration', () => {
-            assert.throws(
-                () => util.getConsumerClasses(),
-                /No declaration was provided for consumer counting/
-            );
-        });
-
-        it('should return empty consumer object', () => {
-            const result = util.getConsumerClasses({});
-            assert.deepStrictEqual(result, { consumers: {} });
-        });
-
-        it('should return object with count of consumer classes', () => {
-            const declaration = {
-                class1: {
-                    class: 'Telemetry_Consumer',
-                    type: 'Generic_HTTP'
-                },
-                class2: {
-                    class: 'Telemetry_Consumer',
-                    type: 'Splunk'
-                },
-                class3: {
-                    class: 'Telemetry_Consumer',
-                    type: 'Azure_Log_Analytics'
-                },
-                class4: {
-                    class: 'Telemetry_Consumer',
-                    type: 'Graphite'
-                },
-                class5: {
-                    class: 'Telemetry_Consumer',
-                    type: 'Kafka'
-                },
-                class6: {
-                    class: 'Telemetry_Consumer',
-                    type: 'ElasticSearch'
-                },
-                class7: {
-                    class: 'Telemetry_Consumer',
-                    type: 'Generic_HTTP'
-                },
-                class8: {
-                    class: 'Telemetry_Consumer',
-                    type: 'Azure_Log_Analytics'
-                },
-                class9: {
-                    class: 'Telemetry_Consumer',
-                    type: 'Azure_Log_Analytics'
-                }
-            };
-            const expected = {
-                consumers: {
-                    Generic_HTTP: 2,
-                    Splunk: 1,
-                    Azure_Log_Analytics: 3,
-                    Graphite: 1,
-                    Kafka: 1,
-                    ElasticSearch: 1
-                }
-            };
-            const result = util.getConsumerClasses(declaration);
-            assert.deepStrictEqual(result, expected);
-        });
     });
 
     describe('.getRandomArbitrary()', () => {

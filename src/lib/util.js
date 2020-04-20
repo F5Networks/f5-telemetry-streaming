@@ -8,6 +8,9 @@
 
 'use strict';
 
+const assignDefaults = require('lodash/defaultsDeep');
+const cloneDeep = require('lodash/cloneDeep');
+const clone = require('lodash/clone');
 const fs = require('fs');
 const net = require('net');
 const path = require('path');
@@ -17,6 +20,46 @@ const constants = require('./constants');
 const logger = require('./logger');
 
 /** @module util */
+
+/**
+ * ModuleLoader class - reusable functions for loading/unloading Node packages
+ *
+ * @class
+ */
+function ModuleLoader() {}
+
+/**
+* Load a module from the given path
+*
+* @param {String} modulePath - path to module
+*
+* @returns {Object|null} module or null when failed to load module
+*/
+ModuleLoader.load = function (modulePath) {
+    logger.debug(`Loading module ${modulePath}`);
+
+    let module = null;
+    try {
+        module = require(modulePath); // eslint-disable-line
+    } catch (err) {
+        logger.exception(`Unable to load module ${modulePath}`, err);
+    }
+    return module;
+};
+
+/**
+ * Unload a module from a given path
+ *
+ * @param {String} modulePath - path to module
+ */
+ModuleLoader.unload = function (modulePath) {
+    try {
+        delete require.cache[require.resolve(modulePath)];
+        logger.debug(`Module '${modulePath}' was unloaded`);
+    } catch (err) {
+        logger.exception(`Exception on attempt to unload '${modulePath}' from cache`, err);
+    }
+};
 
 /** Note: no 'class' usage to support v12.x, prototype only */
 /**
@@ -160,7 +203,7 @@ Tracer.prototype._updateInode = function () {
  *
  * @async
  * @private
- * @returns {Promise} Promise resolved when destination file re-opene or opened already
+ * @returns {Promise} Promise resolved when destination file re-opened or opened already
  */
 Tracer.prototype._reopenIfNeeded = function () {
     // if stream is not ready then skip check
@@ -221,7 +264,7 @@ Tracer.prototype._reopenIfNeeded = function () {
                 }
             });
         })
-        .catch(err => logger.exception(`tracer._reopenIfNeeded exception: ${err}`, err));
+        .catch(err => logger.exception('tracer._reopenIfNeeded exception', err));
 };
 
 /**
@@ -292,7 +335,7 @@ Tracer.prototype._open = function () {
                 logger.error(`tracer.error: tracer '${this.name}' stream to file '${this.path}': ${err}`);
                 this.close();
             });
-            // resolving here, because it is more simplier and reliable
+            // resolving here, because it is more simpler and reliable
             // than wait inside 'open'
             return Promise.resolve();
         })
@@ -584,7 +627,7 @@ function retryPromise(fn, opts) {
                 opts.tries += 1;
                 let delay = opts.delay || 0;
 
-                // applying backof after the second try only
+                // applying backoff after the second try only
                 if (opts.backoff && opts.tries > 1) {
                     /* eslint-disable no-restricted-properties */
                     delay += opts.backoff * Math.pow(2, opts.tries - 1);
@@ -618,25 +661,14 @@ const VERSION_COMPARATORS = ['==', '===', '<', '<=', '>', '>=', '!=', '!=='];
 
 module.exports = {
     /**
-     * Assign defaults to object
+     * Assign defaults to object (uses lodash.defaultsDeep under the hood)
      *
      * @param {Object} obj      - object to assign defaults to
-     * @param {Object} defaults - defaults to assign to object
+     * @param {...Object} defaults - defaults to assign to object
      *
      * @returns {Object}
      */
-    assignDefaults(obj, defaults) {
-        // from docs: if the value is null or undefined, it will create and return an empty object
-        // otherwise, it will return an object of a Type that corresponds to the given value.
-        // If the value is an object already, it will return the value.
-        obj = Object(obj);
-        Object.keys(defaults).forEach((key) => {
-            if (!Object.prototype.hasOwnProperty.call(obj, key)) {
-                obj[key] = defaults[key];
-            }
-        });
-        return obj;
-    },
+    assignDefaults,
 
     /**
      * Check if object has any data or not
@@ -660,15 +692,28 @@ module.exports = {
         }
         return true;
     },
+
     /**
-     * Deep copy
+     * Copy object (uses lodash.clone under the hood)
+     *
+     * @param {any} obj - object to copy
+     *
+     * @returns {any} copy of source object
+     */
+    copy(obj) {
+        return clone(obj);
+    },
+
+    /**
+     * Deep Copy (uses lodash.cloneDeep under the hood).
+     * Same as `copy` but copies entire object recursively
      *
      * @param {any} obj - object to copy
      *
      * @returns {any} deep copy of source object
      */
     deepCopy(obj) {
-        return JSON.parse(JSON.stringify(obj));
+        return cloneDeep(obj);
     },
 
     /**
@@ -1050,38 +1095,11 @@ module.exports = {
             });
         }
     },
-
-    /**
-     * Count the number of each consumer type.
-     *
-     * @param {Object} declaration - the declaration to search through
-     *
-     * @returns {Object} Consumer types with a count for each
-     */
-    getConsumerClasses(declaration) {
-        if (!declaration) {
-            throw new Error('No declaration was provided for consumer counting');
-        }
-
-        const consumers = { consumers: {} };
-        function countConsumerTypes(subDecl) {
-            if (subDecl.class && subDecl.class === 'Telemetry_Consumer') {
-                consumers.consumers[subDecl.type] = !consumers.consumers[subDecl.type]
-                    ? 1 : consumers.consumers[subDecl.type] + 1;
-            }
-
-            Object.keys(subDecl)
-                .map(prop => subDecl[prop])
-                .filter(value => typeof value === 'object')
-                .forEach(value => countConsumerTypes(value));
-        }
-
-        countConsumerTypes(declaration);
-        return consumers;
-    },
-
     /** @see Tracer */
     tracer: Tracer,
+
+    /** @see ModuleLoader */
+    moduleLoader: ModuleLoader,
 
     retryPromise
 };

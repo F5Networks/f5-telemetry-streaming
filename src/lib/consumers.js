@@ -12,6 +12,7 @@ const path = require('path');
 const logger = require('./logger'); // eslint-disable-line no-unused-vars
 const deepCopy = require('./util').deepCopy;
 const tracers = require('./util').tracer;
+const moduleLoader = require('./util').moduleLoader;
 const constants = require('./constants');
 const configWorker = require('./config');
 const DataFilter = require('./dataFilter').DataFilter;
@@ -19,25 +20,6 @@ const DataFilter = require('./dataFilter').DataFilter;
 const CONSUMERS_DIR = constants.CONSUMERS_DIR;
 const CLASS_NAME = constants.CONFIG_CLASSES.CONSUMER_CLASS_NAME;
 let CONSUMERS = null;
-
-/**
-* Load consumer's module
-*
-* @param {Object} modulePath - path to module
-*
-* @returns {Object|null} module or null when failed to load module
-*/
-function loadModule(modulePath) {
-    logger.debug(`Loading module ${modulePath}`);
-
-    let module = null;
-    try {
-        module = require(modulePath); // eslint-disable-line
-    } catch (err) {
-        logger.exception(`Unable to load module ${modulePath}`, err);
-    }
-    return module;
-}
 
 /**
 * Load plugins for requested consumers
@@ -75,7 +57,7 @@ function loadConsumers(config) {
             const consumerDir = './'.concat(path.join(CONSUMERS_DIR, consumerType));
 
             logger.debug(`Loading consumer ${consumerType} plug-in from ${consumerDir}`);
-            const consumerModule = loadModule(consumerDir);
+            const consumerModule = moduleLoader.load(consumerDir);
             if (consumerModule === null) {
                 resolve(undefined);
             } else {
@@ -123,13 +105,7 @@ function unloadUnusedModules(before) {
             logger.debug(`Unloading Consumer module '${consumerType}'`);
             const consumerDir = './'.concat(path.join(CONSUMERS_DIR, consumerType));
 
-            try {
-                delete require.cache[require.resolve(consumerDir)];
-            } catch (err) {
-                logger.exception(`Exception on attempt to unload '${consumerDir}' from cache`, err);
-                return;
-            }
-            logger.debug(`Consumer module '${consumerDir}' (${consumerType}) was unloaded`);
+            moduleLoader.unload(consumerDir);
         }
     });
 }

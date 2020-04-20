@@ -72,7 +72,7 @@ function isQkviewValid(qkview) {
  *
  * @callback IHealthPoller~dataCallback
  * @param {Object} data - iHealth data
- * @param {Object} othe - othe info
+ * @param {Object} other - other info
  */
 
 /**
@@ -82,7 +82,7 @@ function isQkviewValid(qkview) {
  *
  * @param {String}  sysName      - System declaration name
  * @param {String}  [ihName]     - iHealth Poller declaration name
- * @param {Boolean} [testOnly]   - 'true' to test pipieline only
+ * @param {Boolean} [testOnly]   - 'true' to test pipeline only
  *
  * @property {String}  sysName   - System declaration name
  * @property {String}  ihName    - iHealth Poller declaration name
@@ -258,7 +258,7 @@ IHealthPoller.prototype.setState = function (newState, force) {
 /**
  * Check if instance in process of task execution
  *
- * @returns {Boolean} 'true' when instnance is busy now
+ * @returns {Boolean} 'true' when instance is busy now
  */
 IHealthPoller.prototype.inProgress = function () {
     return this._inProgress;
@@ -697,7 +697,7 @@ IHealthPoller.prototype.process = function () {
         })
         .catch((err) => {
             this.setState(IHealthPoller.STATE.FAILED);
-            this.logger.exception(`IHealthPoller.processs: ${err}`, err);
+            this.logger.exception('IHealthPoller.process error', err);
         })
         .then(() => {
             if (this.isStateEq(IHealthPoller.STATE.IHEALTH_POLL_DONE)) {
@@ -717,7 +717,7 @@ IHealthPoller.prototype.process = function () {
         .then(() => this._saveStorageState())
         .catch((err) => {
             this.setState(IHealthPoller.STATE.FAILED);
-            this.logger.exception(`IHealthPoller.processs: ${err}`, err);
+            this.logger.exception('IHealthPoller.process error', err);
         })
         .then(() => {
             // set it here to set correct timeout
@@ -737,7 +737,7 @@ IHealthPoller.prototype.process = function () {
             return Promise.resolve();
         })
         .catch((err) => {
-            this.logger.exception('IHealthPoller.processs: unexpected error', err);
+            this.logger.exception('IHealthPoller.process: unhandled error', err);
         });
 };
 
@@ -888,7 +888,7 @@ IHealthPoller.instances = {};
  *
  * @param {String} sysName     - System declaration name
  * @param {String} ihName      - iHealth declaration name
- * @param {Boolean} [testOnly] - 'true' to test pipieline only
+ * @param {Boolean} [testOnly] - 'true' to test pipeline only
  *
  * @returns {String} iHealth poller key
  */
@@ -907,7 +907,7 @@ IHealthPoller.getKey = function (sysName, ihName, testOnly) {
  *
  * @param {String} sysName     - System declaration name
  * @param {String} ihName      - iHealth declaration name
- * @param {Boolean} [testOnly] - 'true' to test pipieline only
+ * @param {Boolean} [testOnly] - 'true' to test pipeline only
  *
  * @returns {module:ihealth~IHealthPoller | undefined} iHealth Poller instance
  *     if exists else undefined
@@ -921,7 +921,7 @@ IHealthPoller.get = function (sysName, ihName, testOnly) {
  *
  * @param {String} sysName     - System declaration name
  * @param {String} ihName      - iHealth declaration name
- * @param {Boolean} [testOnly] - 'true' to test pipieline only
+ * @param {Boolean} [testOnly] - 'true' to test pipeline only
  *
  * @returns {module:ihealth~IHealthPoller} iHealth Poller instance
  */

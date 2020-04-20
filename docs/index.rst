@@ -22,6 +22,7 @@ Click the following links to go directly to the supported third-party consumer e
 
 -  :ref:`splunk-ref`
 -  :ref:`azure-ref`
+-  :ref:`appinsight-ref`
 -  :ref:`awscloud-ref`
 -  :ref:`awss3-ref`
 -  :ref:`graphite-ref`
@@ -30,6 +31,8 @@ Click the following links to go directly to the supported third-party consumer e
 -  :ref:`sumologic-ref`
 -  :ref:`statsd-ref`
 -  :ref:`http-ref`
+-  :ref:`fluentd-ref`
+-  :ref:`stackdrive`
 
 You can use Microsoft Visual Studio Code to validate your declarations, see :ref:`validate` for information.
 

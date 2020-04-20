@@ -1,0 +1,9 @@
+{
+    "class": "Telemetry",
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Azure_Log_Analytics",
+        "workspaceId": "workspaceid",
+        "useManagedIdentity": true
+    }
+}

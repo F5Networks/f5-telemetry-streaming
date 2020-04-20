@@ -15,7 +15,6 @@ require('./shared/restoreCache')();
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
-const TeemDevice = require('@f5devcentral/f5-teem').Device;
 
 const config = require('../../src/lib/config');
 const constants = require('../../src/lib/constants');
@@ -57,11 +56,6 @@ describe('Config', () => {
         sinon.restore();
     });
 
-    it('should compile schema', () => {
-        const compiledSchema = config.compileSchema;
-        assert.strictEqual(typeof compiledSchema, 'function');
-    });
-
     describe('.validate()', () => {
         it('should validate basic declaration', () => {
             const obj = {
@@ -89,6 +83,35 @@ describe('Config', () => {
                 schemaVersion: constants.VERSION
             };
             return assert.becomes(config.validateAndApply(obj), validatedObj);
+        });
+
+        it('should expand config', () => {
+            let savedConfig;
+            sinon.stub(config, 'saveConfig').callsFake((configToSave) => {
+                savedConfig = configToSave;
+            });
+
+            const data = {
+                class: 'Telemetry',
+                Shared: {
+                    class: 'Shared',
+                    constants: {
+                        class: 'Constants',
+                        path: '/foo'
+                    }
+                },
+                My_Consumer: {
+                    class: 'Telemetry_Consumer',
+                    type: 'Generic_HTTP',
+                    host: '192.0.2.1',
+                    path: '`=/Shared/constants/path`'
+                }
+            };
+            return config.validateAndApply(data)
+                .then(() => {
+                    const consumer = savedConfig.parsed.Telemetry_Consumer.My_Consumer;
+                    assert.strictEqual(consumer.path, '/foo');
+                });
         });
     });
 
@@ -170,50 +193,6 @@ describe('Config', () => {
                     assert.strictEqual(mockRestOperation.body.message, 'Internal Server Error');
                 }));
         });
-
-        it('should send TEEM report', (done) => {
-            const decl = {
-                class: 'Telemetry',
-                schemaVersion: '1.6.0'
-            };
-            const assetInfo = {
-                name: 'Telemetry Streaming',
-                version: '1.6.0'
-            };
-            const teemDevice = new TeemDevice(assetInfo);
-            sinon.stub(teemDevice, 'report').callsFake((type, version, declaration) => {
-                assert.deepStrictEqual(declaration, decl);
-                done();
-            });
-
-            const restOperation = new MockRestOperation({ method: 'POST' });
-            restOperation.setBody(decl);
-            config.teemDevice = teemDevice;
-            config.processClientRequest(restOperation);
-        });
-
-        it('should still receive 200 response if f5-teem fails', () => {
-            const decl = {
-                class: 'Telemetry',
-                schemaVersion: '1.6.0'
-            };
-            const assetInfo = {
-                name: 'Telemetry Streaming',
-                version: '1.6.0'
-            };
-            const teemDevice = new TeemDevice(assetInfo);
-            sinon.stub(teemDevice, 'report').rejects(new Error('f5-teem failed'));
-
-            const restOperation = new MockRestOperation({ method: 'POST' });
-            restOperation.setBody(decl);
-            config.teemDevice = teemDevice;
-            return assert.isFulfilled(config.processClientRequest(restOperation)
-                .then(() => {
-                    assert.equal(restOperation.statusCode, 200);
-                    assert.equal(restOperation.body.message, 'success');
-                    assert.deepStrictEqual(restOperation.body.declaration, decl);
-                }));
-        });
     });
 
     describe('.saveConfig()', () => {
@@ -241,7 +220,7 @@ describe('Config', () => {
     });
 
     describe('.loadConfig()', () => {
-        it('should reject if persistenStorage errors', () => {
+        it('should reject if persistentStorage errors', () => {
             sinon.stub(persistentStorage, 'get').rejects(new Error('loadStateError'));
             return assert.isRejected(config.loadConfig(), /loadStateError/);
         });

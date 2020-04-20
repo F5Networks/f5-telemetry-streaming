@@ -941,7 +941,7 @@ module.exports = {
                 virtualServers: {},
                 httpProfiles: {}
             },
-            propertyCtx: 'noReults',
+            propertyCtx: 'noResults',
             expectedCtx: []
         },
         // TEST RELATED DATA STARTS HERE
