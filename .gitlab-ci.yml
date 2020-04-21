@@ -320,14 +320,7 @@ publish_rpm_to_artifactory:
     tags:
         - docker-executor
     script:
-        - RPM_FILE=$(ls dist/*.rpm)
-        - RPM_NAME=$(basename $RPM_FILE)
-        - URL=${ARTIFACTORY_BASE_URL}/f5-telemetry-streaming-rpm/${RPM_NAME}
-        - echo ${URL}
-        - >-
-          UPLOAD_RESULT=$(curl -H "Authorization: Bearer ${ARTIFACTORY_TOKEN}" -X PUT --data-binary @${RPM_FILE} ${URL})
-        - if [[ $? -eq 0 ]] && [[ "$UPLOAD_RESULT" == *created* ]]; then echo "Upload complete"; else echo "Upload failed"; exit 1; fi
-        - echo $UPLOAD_RESULT
+        - source ./scripts/build/publishRpm.sh
 
 # Publish docs to internal pages - note: this job name MUST be 'pages'
 pages:
