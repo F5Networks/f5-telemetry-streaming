@@ -258,7 +258,7 @@ module.exports = {
              * TEST DATA STARTS HERE
              * */
             {
-                name: 'should avoild name dups for anonymous pollers',
+                name: 'should avoid name dups for anonymous pollers',
                 declaration: {
                     class: 'Telemetry',
                     SystemPoller_1: {

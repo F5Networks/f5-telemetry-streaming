@@ -26,7 +26,7 @@ module.exports = function (context) {
     transformData(context)
         .then(data => forwardData(data, context))
         .catch((err) => {
-            context.logger.exception(`Splunk data processing error: ${err}`, err);
+            context.logger.exception('Splunk data processing error', err);
         });
 };
 
@@ -69,7 +69,7 @@ function safeDataTransform(cb, ctx) {
             }
         }
     }).catch((err) => {
-        ctx.globalCtx.logger.exception(`Splunk.computeSourceType error: ${err}`, err);
+        ctx.globalCtx.logger.exception('Splunk.safeDataTransform error', err);
     });
 }
 /**
@@ -81,7 +81,7 @@ function defaultDataFormat(ctx) {
     return Promise.resolve([JSON.stringify(dataMapping.defaultFormat(ctx))]);
 }
 /**
-* Transform incomming data
+* Transform incoming data
 *
 * @param {Object} globalCtx - global context
 *
@@ -101,8 +101,7 @@ function transformData(globalCtx) {
             translatedData: []
         },
         cache: {
-            dataTimestamp: Date.parse(globalCtx.event.data.system.systemTimestamp)
-                           || (new Date()).getTime()
+            dataTimestamp: (new Date()).getTime()
         }
     };
     if (globalCtx.config.dumpUndefinedValues) {
@@ -112,6 +111,7 @@ function transformData(globalCtx) {
     }
     let p = null;
     if (globalCtx.event.type === EVENT_TYPES.SYSTEM_POLLER) {
+        requestCtx.cache.dataTimestamp = Date.parse(globalCtx.event.data.system.systemTimestamp);
         p = Promise.all(dataMapping.stats.map(func => safeDataTransform(func, requestCtx)));
         p.then(() => safeDataTransform(dataMapping.overall, requestCtx));
     } else if (globalCtx.event.type === EVENT_TYPES.IHEALTH_POLLER) {

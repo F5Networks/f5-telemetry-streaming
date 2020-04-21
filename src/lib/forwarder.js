@@ -34,13 +34,13 @@ function forwardData(dataCtx) {
                 event: consumer.filter.apply(dataCtx),
                 config: consumer.config,
                 tracer: consumer.tracer,
-                logger: logger.getChild(consumer.config.type)
+                logger: logger.getChild(`${consumer.config.type}.${consumer.name}`)
             };
             // place in try/catch
             try {
                 consumer.consumer(context);
             } catch (err) {
-                logger.exception(`Error on attempt to forward data to consumer "${consumer.name} (${consumers.config.type})": ${err}`, err);
+                context.logger.exception('Error on attempt to forward data to consumer', err);
             } finally {
                 resolve();
             }

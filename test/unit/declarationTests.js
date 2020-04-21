@@ -68,6 +68,146 @@ describe('Declarations', () => {
         });
     });
 
+    describe('validator', () => {
+        it('should validate multiple declarations in parallel', () => {
+            const decl1 = {
+                class: 'Telemetry',
+                My_iHealth_1: {
+                    class: 'Telemetry_iHealth_Poller',
+                    username: 'username',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    },
+                    interval: {
+                        timeWindow: {
+                            start: '00:00',
+                            end: '03:00'
+                        }
+                    },
+                    proxy: {
+                        host: 'localhost'
+                    }
+                }
+            };
+            const decl2 = {
+                class: 'Telemetry',
+                My_iHealth_2: {
+                    class: 'Telemetry_iHealth_Poller',
+                    username: 'username',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    },
+                    interval: {
+                        timeWindow: {
+                            start: '00:00',
+                            end: '03:00'
+                        }
+                    },
+                    proxy: {
+                        host: 'localhost'
+                    }
+                }
+            };
+            return assert.isFulfilled(Promise.all([
+                config.validate(decl1),
+                config.validate(decl2)
+            ]));
+        });
+
+        it('should validate multiple invalid declarations in parallel', () => {
+            const pathErrMsg = /downloadFolder.*Unable to access path/;
+            const declClassErrMsg = /\\"My_Endpoints\\" must be of object type and class \\"Telemetry_Endpoints\\"/;
+            const deviceCheckErrMsg = /requires running on BIG-IP/;
+            const networkErrMsg = /failed network check/;
+
+            const errMap = {
+                invalidPath: pathErrMsg,
+                invalidHost: networkErrMsg,
+                invalidClass: declClassErrMsg,
+                invalidDevice: deviceCheckErrMsg
+            };
+
+            networkCheckStub.rejects(new Error('failed network check'));
+            getDeviceTypeStub.resolves(constants.DEVICE_TYPE.CONTAINER);
+
+            const decl1 = {
+                class: 'Telemetry',
+                My_iHealth: {
+                    class: 'Telemetry_iHealth_Poller',
+                    downloadFolder: '/some/invalid/dir',
+                    username: 'username',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    },
+                    interval: {
+                        timeWindow: {
+                            start: '08:00',
+                            end: '18:00'
+                        },
+                        frequency: 'daily'
+                    }
+                }
+            };
+            const decl2 = {
+                class: 'Telemetry',
+                My_Consumer: {
+                    class: 'Telemetry_Consumer',
+                    type: 'Graphite',
+                    host: '192.0.2.1',
+                    enableHostConnectivityCheck: true
+                }
+            };
+            const decl3 = {
+                class: 'Telemetry',
+                My_Endpoints: {
+                    class: 'Telemetry_System'
+                },
+                My_System: {
+                    class: 'Telemetry_System',
+                    systemPoller: {
+                        interval: 100,
+                        endpointList: [
+                            'My_Endpoints/something'
+                        ]
+                    }
+                }
+            };
+            const decl4 = {
+                class: 'Telemetry',
+                My_Poller: {
+                    class: 'Telemetry_System_Poller',
+                    passphrase: {
+                        cipherText: 'mycipher'
+                    }
+                }
+            };
+            const errors = {};
+            const validate = (name, decl) => config.validate(decl).catch((e) => {
+                errors[name] = e.message || e;
+            });
+            return Promise.all([
+                validate('invalidPath', decl1),
+                validate('invalidHost', decl2),
+                validate('invalidClass', decl3),
+                validate('invalidDevice', decl4)
+            ])
+                .then(() => {
+                    Object.keys(errMap).forEach((errKey) => {
+                        const errMsg = errors[errKey];
+                        assert.notStrictEqual(errMsg, undefined, `should have error for key "${errKey}"`);
+                        assert.ok(errMap[errKey].test(errMsg), `should have error for key "${errKey}`);
+                        // check that there are no errors from other declarations
+                        Object.keys(errMap).forEach((anotherErrKey) => {
+                            if (anotherErrKey === errKey) {
+                                return;
+                            }
+                            assert.notOk(errMap[anotherErrKey].test(errMsg), `should have not error for key "${anotherErrKey}`);
+                        });
+                    });
+                });
+        });
+    });
+
     describe('Base Schema objects', () => {
         describe('proxy', () => {
             it('should pass minimal declaration', () => {
@@ -652,14 +792,13 @@ describe('Declarations', () => {
 
         describe('f5expand', () => {
             it('should expand pointer (absolute)', () => {
-                const expectedValue = '/foo';
                 const data = {
                     class: 'Telemetry',
                     Shared: {
                         class: 'Shared',
                         constants: {
                             class: 'Constants',
-                            path: expectedValue
+                            path: '/foo'
                         }
                     },
                     My_Consumer: {
@@ -667,47 +806,39 @@ describe('Declarations', () => {
                         type: 'Generic_HTTP',
                         host: '192.0.2.1',
                         path: '`=/Shared/constants/path`'
-                    },
-                    scratch: {
-                        expand: true
                     }
                 };
 
-                return config.validate(data)
+                return config.validate(data, { expand: true })
                     .then((validated) => {
-                        assert.strictEqual(validated.My_Consumer.path, expectedValue);
+                        assert.strictEqual(validated.My_Consumer.path, '/foo');
                     });
             });
 
             it('should expand pointer (relative)', () => {
-                const expectedValue = '192.0.2.1';
                 const data = {
                     class: 'Telemetry',
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: expectedValue,
+                        host: '192.0.2.1',
                         path: '`=host`'
-                    },
-                    scratch: {
-                        expand: true
                     }
                 };
 
-                return config.validate(data)
+                return config.validate(data, { expand: true })
                     .then((validated) => {
-                        assert.strictEqual(validated.My_Consumer.path, expectedValue);
+                        assert.strictEqual(validated.My_Consumer.path, '192.0.2.1');
                     });
             });
 
             it('should expand pointer (relative to class)', () => {
-                const expectedValue = '192.0.2.1';
                 const data = {
                     class: 'Telemetry',
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: expectedValue,
+                        host: '192.0.2.1',
                         path: '/',
                         headers: [
                             {
@@ -715,20 +846,16 @@ describe('Declarations', () => {
                                 value: '`=@/host`'
                             }
                         ]
-                    },
-                    scratch: {
-                        expand: true
                     }
                 };
 
-                return config.validate(data)
+                return config.validate(data, { expand: true })
                     .then((validated) => {
-                        assert.strictEqual(validated.My_Consumer.headers[0].value, expectedValue);
+                        assert.strictEqual(validated.My_Consumer.headers[0].value, '192.0.2.1');
                     });
             });
 
             it('should expand pointer (multiple pointers in string)', () => {
-                const expectedValue = '/foo/bar/baz';
                 const data = {
                     class: 'Telemetry',
                     Shared: {
@@ -744,20 +871,16 @@ describe('Declarations', () => {
                         type: 'Generic_HTTP',
                         host: '192.0.2.1',
                         path: '/`=/Shared/constants/path`/bar/`=/Shared/constants/path2`'
-                    },
-                    scratch: {
-                        expand: true
                     }
                 };
 
-                return config.validate(data)
+                return config.validate(data, { expand: true })
                     .then((validated) => {
-                        assert.strictEqual(validated.My_Consumer.path, expectedValue);
+                        assert.strictEqual(validated.My_Consumer.path, '/foo/bar/baz');
                     });
             });
 
             it('should expand pointer (base64 decode)', () => {
-                const expectedValue = 'foo';
                 const data = {
                     class: 'Telemetry',
                     Shared: {
@@ -772,15 +895,12 @@ describe('Declarations', () => {
                         type: 'Generic_HTTP',
                         host: '192.0.2.1',
                         path: '`+/Shared/constants/path`'
-                    },
-                    scratch: {
-                        expand: true
                     }
                 };
 
-                return config.validate(data)
+                return config.validate(data, { expand: true })
                     .then((validated) => {
-                        assert.strictEqual(validated.My_Consumer.path, expectedValue);
+                        assert.strictEqual(validated.My_Consumer.path, 'foo');
                     });
             });
 
@@ -817,16 +937,13 @@ describe('Declarations', () => {
                             class: 'Secret',
                             cipherText: 'foo'
                         }
-                    },
-                    scratch: {
-                        expand: true
                     }
                 };
 
-                return config.validate(data)
+                return config.validate(data, { expand: true })
                     .then((validated) => {
-                        assert.deepEqual(validated.My_Consumer.path, expectedValue);
-                        assert.deepEqual(validated.My_Consumer.headers[0].value, expectedValue);
+                        assert.deepStrictEqual(validated.My_Consumer.path, expectedValue);
+                        assert.deepStrictEqual(validated.My_Consumer.headers[0].value, expectedValue);
                         return assert.isFulfilled(config.validate(validated));
                     });
             });
@@ -844,12 +961,9 @@ describe('Declarations', () => {
                         passphrase: {
                             cipherText: 'foo'
                         }
-                    },
-                    scratch: {
-                        expand: true
                     }
                 };
-                return assert.isRejected(config.validate(data), /syntax requires single pointer/);
+                return assert.isRejected(config.validate(data, { expand: true }), /syntax requires single pointer/);
             });
 
             it('should fail pointer (absolute) outside \'Shared\'', () => {
@@ -860,12 +974,9 @@ describe('Declarations', () => {
                         type: 'Generic_HTTP',
                         host: '192.0.2.1',
                         path: '`=/class`'
-                    },
-                    scratch: {
-                        expand: true
                     }
                 };
-                return assert.isRejected(config.validate(data), /requires pointers root to be 'Shared'/);
+                return assert.isRejected(config.validate(data, { expand: true }), /requires pointers root to be 'Shared'/);
             });
         });
 
@@ -1144,7 +1255,7 @@ describe('Declarations', () => {
                     assert.strictEqual(poller.trace, undefined);
                     assert.strictEqual(poller.interval, 300);
                     assert.deepStrictEqual(poller.actions, [{ enable: true, setTag: { tenant: '`T`', application: '`A`' } }]);
-                    assert.strictEqual(poller.actions[0].ifAllMAtch, undefined);
+                    assert.strictEqual(poller.actions[0].ifAllMatch, undefined);
                     assert.strictEqual(poller.actions[0].locations, undefined);
                     assert.strictEqual(poller.host, 'localhost');
                     assert.strictEqual(poller.port, 8100);
@@ -1367,7 +1478,7 @@ describe('Declarations', () => {
         });
 
         describe('interval', () => {
-            it('should restrict minimum to 1 when endpointList is specified', () => {
+            it('should allow interval=0 when endpointList is specified', () => {
                 const data = {
                     class: 'Telemetry',
                     My_Poller: {
@@ -1380,8 +1491,20 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                const errMsg = /interval\/minimum.*should be >= 1/;
-                return assert.isRejected(config.validate(data), errMsg);
+                return config.validate(data)
+                    .then(validated => assert.strictEqual(validated.My_Poller.interval, 0));
+            });
+
+            it('should allow interval=0 when endpointList is not specified', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Poller: {
+                        class: 'Telemetry_System_Poller',
+                        interval: 0
+                    }
+                };
+                return config.validate(data)
+                    .then(validated => assert.strictEqual(validated.My_Poller.interval, 0));
             });
 
             it('should restrict minimum to 60 when endpointList is NOT specified', () => {
@@ -2172,7 +2295,7 @@ describe('Declarations', () => {
                     assert.strictEqual(poller.trace, undefined);
                     assert.strictEqual(poller.interval, 300);
                     assert.deepStrictEqual(poller.actions, [{ enable: true, setTag: { tenant: '`T`', application: '`A`' } }]);
-                    assert.strictEqual(poller.actions[0].ifAllMAtch, undefined);
+                    assert.strictEqual(poller.actions[0].ifAllMatch, undefined);
                     assert.strictEqual(poller.actions[0].locations, undefined);
                     assert.strictEqual(poller.host, undefined);
                     assert.strictEqual(poller.port, undefined);
@@ -2716,5 +2839,1045 @@ describe('Declarations', () => {
             };
             return assert.isRejected(config.validate(data), /\/My_Endpoints\/items\/first\/path.*should NOT be shorter than/);
         });
+    });
+
+    describe('Telemetry_Consumer', () => {
+        let minimalDeclaration;
+        let minimalExpected;
+        let fullDeclaration;
+        let fullExpected;
+
+        const validate = (targetDeclaration, consumerProps, expectedTarget, expectedProps, addtlContext) => {
+            let context;
+            Object.assign(targetDeclaration.My_Consumer, consumerProps);
+            Object.assign(expectedTarget || {}, expectedProps || {});
+            if (addtlContext) {
+                context = { expand: true };
+                targetDeclaration.Shared = {
+                    class: 'Shared',
+                    constants: {
+                        class: 'Constants'
+                    }
+                };
+                Object.assign(targetDeclaration.Shared.constants, addtlContext.constants);
+            }
+            return config.validate(targetDeclaration, context)
+                .then((validConfig) => {
+                    assert.deepStrictEqual(validConfig.My_Consumer, expectedTarget);
+                });
+        };
+
+        const validateMinimal = (consumerProps, expectedProps, addtlContext) => validate(
+            minimalDeclaration,
+            consumerProps,
+            minimalExpected,
+            expectedProps,
+            addtlContext
+        );
+
+        const validateFull = (consumerProps, expectedProps, addtlContext) => validate(
+            fullDeclaration,
+            consumerProps,
+            fullExpected,
+            expectedProps,
+            addtlContext
+        );
+
+        beforeEach(() => {
+            minimalDeclaration = {
+                class: 'Telemetry',
+                My_Consumer: {
+                    class: 'Telemetry_Consumer',
+                    type: 'default'
+                }
+            };
+            minimalExpected = {
+                class: 'Telemetry_Consumer',
+                type: 'default',
+                enable: true,
+                trace: false,
+                allowSelfSignedCert: false
+            };
+            fullDeclaration = {
+                class: 'Telemetry',
+                My_Consumer: {
+                    class: 'Telemetry_Consumer',
+                    type: 'default',
+                    enable: false,
+                    trace: true,
+                    enableHostConnectivityCheck: true,
+                    allowSelfSignedCert: true
+                }
+            };
+            fullExpected = {
+                class: 'Telemetry_Consumer',
+                type: 'default',
+                enable: false,
+                trace: true,
+                enableHostConnectivityCheck: true,
+                allowSelfSignedCert: true
+            };
+        });
+
+        // use 'default' consumer because it has no additional properties
+        it('should pass minimal declaration', () => validateMinimal({}, {}));
+        it('should allow full declaration', () => validateFull({}, {}));
+        it('should not allow additional properties', () => assert.isRejected(
+            validateMinimal({ someKey: 'someValue' }),
+            /My_Consumer.*someKey.*should NOT have additional properties/
+        ));
+
+        describe('AWS_CloudWatch', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'AWS_CloudWatch',
+                    region: 'region',
+                    logGroup: 'logGroup',
+                    logStream: 'logStream'
+                },
+                {
+                    type: 'AWS_CloudWatch',
+                    region: 'region',
+                    logGroup: 'logGroup',
+                    logStream: 'logStream'
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'AWS_CloudWatch',
+                    region: 'region',
+                    logGroup: 'logGroup',
+                    logStream: 'logStream',
+                    username: 'username',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                {
+                    type: 'AWS_CloudWatch',
+                    region: 'region',
+                    logGroup: 'logGroup',
+                    logStream: 'logStream',
+                    username: 'username',
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+        });
+
+        describe('AWS_S3', () => {
+            it('should pass declaration', () => validateMinimal(
+                {
+                    type: 'AWS_S3',
+                    region: 'region',
+                    bucket: 'bucket',
+                    username: 'username',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                {
+                    type: 'AWS_S3',
+                    region: 'region',
+                    bucket: 'bucket',
+                    username: 'username',
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'AWS_S3',
+                    region: 'region',
+                    bucket: 'bucket',
+                    username: 'username',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                {
+                    type: 'AWS_S3',
+                    region: 'region',
+                    bucket: 'bucket',
+                    username: 'username',
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+        });
+
+        describe('Azure_Log_Analytics', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'Azure_Log_Analytics',
+                    workspaceId: 'workspaceId',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                {
+                    type: 'Azure_Log_Analytics',
+                    workspaceId: 'workspaceId',
+                    useManagedIdentity: false,
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'Azure_Log_Analytics',
+                    workspaceId: 'workspaceId',
+                    useManagedIdentity: false,
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    },
+                    region: 'australiacentral'
+                },
+                {
+                    type: 'Azure_Log_Analytics',
+                    workspaceId: 'workspaceId',
+                    useManagedIdentity: false,
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    },
+                    region: 'australiacentral'
+                }
+            ));
+
+            it('should require passphrase when useManagedIdentity is omitted', () => assert.isRejected(
+                validateMinimal({
+                    type: 'Azure_Log_Analytics',
+                    workspaceId: 'someId'
+                }),
+                /should have required property 'passphrase'/
+            ));
+
+            it('should require passphrase when useManagedIdentity is false', () => assert.isRejected(
+                validateFull({
+                    type: 'Azure_Log_Analytics',
+                    workspaceId: 'someId',
+                    useManagedIdentity: false
+                }),
+                /should have required property 'passphrase'/
+            ));
+
+            it('should not allow passphrase when useManagedIdentity is true', () => assert.isRejected(
+                validateFull({
+                    type: 'Azure_Log_Analytics',
+                    workspaceId: 'someId',
+                    useManagedIdentity: true,
+                    passphrase: {
+                        cipherText: 'mumblemumblemumble'
+                    }
+                }),
+                /useManagedIdentity\/const.*"allowedValue":false/
+            ));
+        });
+
+        describe('Azure_Application_Insights', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: 'some-key-here'
+                },
+                {
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: 'some-key-here',
+                    maxBatchIntervalMs: 5000,
+                    maxBatchSize: 250,
+                    useManagedIdentity: false
+                }
+            ));
+
+            it('should pass minimal declaration - multiple instr Keys', () => validateMinimal(
+                {
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: [
+                        'key-1-guid',
+                        'key-2-guid'
+                    ]
+                },
+                {
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: [
+                        'key-1-guid',
+                        'key-2-guid'
+                    ],
+                    maxBatchIntervalMs: 5000,
+                    maxBatchSize: 250,
+                    useManagedIdentity: false
+                }
+            ));
+
+            it('should pass with constants pointers', () => validateFull(
+                {
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: '`=/Shared/constants/instrKey`',
+                    customOpts: [
+                        {
+                            name: '`=/Shared/constants/customOptsName`',
+                            value: '`=/Shared/constants/customOptsVal`'
+                        }
+                    ]
+                },
+                {
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: 'key-from-pointer',
+                    useManagedIdentity: false,
+                    maxBatchIntervalMs: 5000,
+                    maxBatchSize: 250,
+                    customOpts: [
+                        {
+                            name: 'nameFromPointer',
+                            value: 'valFromPointer'
+                        }
+                    ]
+                },
+                {
+                    constants: {
+                        instrKey: 'key-from-pointer',
+                        customOptsName: 'nameFromPointer',
+                        customOptsVal: 'valFromPointer'
+                    }
+                }
+            ));
+
+            it('should allow full declaration - managedIdentity disabled', () => validateFull(
+                {
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: '-jumbledChars++==',
+                    useManagedIdentity: false,
+                    maxBatchSize: 20,
+                    maxBatchIntervalMs: 3000,
+                    region: 'norwaywest',
+                    customOpts: [
+                        {
+                            name: 'clientLibNum',
+                            value: 10.29
+                        },
+                        {
+                            name: 'clientLibInt',
+                            value: 222
+                        },
+                        {
+                            name: 'clientLibSecret',
+                            value: {
+                                cipherText: 'cipherText'
+                            }
+                        },
+                        {
+                            name: 'clientLibString',
+                            value: 'going to be passed through the client lib as is'
+                        },
+                        {
+                            name: 'clientLibBool',
+                            value: true
+                        }
+                    ]
+                },
+                {
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: '-jumbledChars++==',
+                    useManagedIdentity: false,
+                    maxBatchSize: 20,
+                    maxBatchIntervalMs: 3000,
+                    region: 'norwaywest',
+                    customOpts: [
+                        {
+                            name: 'clientLibNum',
+                            value: 10.29
+                        },
+                        {
+                            name: 'clientLibInt',
+                            value: 222
+                        },
+                        {
+                            name: 'clientLibSecret',
+                            value: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$foo'
+                            }
+                        },
+                        {
+                            name: 'clientLibString',
+                            value: 'going to be passed through the client lib as is'
+                        },
+                        {
+                            name: 'clientLibBool',
+                            value: true
+                        }
+                    ]
+                }
+            ));
+
+            it('should allow full declaration - managedIdentity enabled', () => validateFull(
+                {
+                    type: 'Azure_Application_Insights',
+                    appInsightsResourceName: 'test.*',
+                    useManagedIdentity: true,
+                    maxBatchSize: 20,
+                    maxBatchIntervalMs: 3000,
+                    customOpts: [
+                        {
+                            name: 'clientLibNum',
+                            value: 221100
+                        }
+                    ]
+                },
+                {
+                    type: 'Azure_Application_Insights',
+                    appInsightsResourceName: 'test.*',
+                    useManagedIdentity: true,
+                    maxBatchSize: 20,
+                    maxBatchIntervalMs: 3000,
+                    customOpts: [
+                        {
+                            name: 'clientLibNum',
+                            value: 221100
+                        }
+                    ]
+                }
+            ));
+
+            it('should require instrumentationKey if useManagedIdentity is omitted', () => assert.isRejected(
+                validateMinimal({
+                    type: 'Azure_Application_Insights'
+                }),
+                /should have required property 'instrumentationKey'/
+            ));
+
+            it('should require at least one item if customOpts property is specified', () => assert.isRejected(
+                validateFull({
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: 'cheddar-swiss-gouda',
+                    customOpts: []
+                }),
+                /customOpts.*should NOT have fewer than 1 items/
+            ));
+
+            it('should not allow less than 1000 for maxBatchIntervalMs', () => assert.isRejected(
+                validateMinimal({
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: 'cosmic-palace',
+                    maxBatchIntervalMs: 10
+                }),
+                /maxBatchIntervalMs\/minimum.*should be >= 1000/
+            ));
+
+            it('should not allow less than 1 for maxBatchSize', () => assert.isRejected(
+                validateMinimal({
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: 'somewhere-void',
+                    maxBatchSize: 0
+                }),
+                /maxBatchSize\/minimum.*should be >= 1/
+            ));
+
+            it('should require at least 1 character for instrumentationKey (string)', () => assert.isRejected(
+                validateMinimal({
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: ''
+                }),
+                /instrumentationKey.*should NOT be shorter than 1 characters/
+            ));
+
+            it('should require at least 1 character for instrumentationKey (array item)', () => assert.isRejected(
+                validateMinimal({
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: ['']
+                }),
+                /instrumentationKey.*items\/minLength.*should NOT be shorter than 1 characters/
+            ));
+
+            it('should require at least 1 item for instrumentationKey (array)', () => assert.isRejected(
+                validateMinimal({
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: []
+                }),
+                /instrumentationKey.*minItems.*should NOT have fewer than 1 items/
+            ));
+
+            it('should require at least 1 character for customOpts name', () => assert.isRejected(
+                validateMinimal({
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: 'somewhere-void',
+                    customOpts: [
+                        {
+                            name: '',
+                            value: false
+                        }
+                    ]
+                }),
+                /customOpts\/0\/name.*should NOT be shorter than 1 characters/
+            ));
+
+            it('should require at least 1 character for customOpts value', () => assert.isRejected(
+                validateMinimal({
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: 'somewhere-void',
+                    customOpts: [
+                        {
+                            name: 'test',
+                            value: ''
+                        }
+                    ]
+                }),
+                /customOpts\/0\/value.*should NOT be shorter than 1 characters/
+            ));
+
+            it('should not allow instrumentationKey when useManagedIdentity is true', () => assert.isRejected(
+                validateMinimal({
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: 'somewhere-void',
+                    useManagedIdentity: true
+                }),
+                /dependencies\/instrumentationKey.*useManagedIdentity\/const.*allowedValue":false/
+            ));
+
+            it('should not require instrumentationKey when useManagedIdentity is false', () => validateMinimal(
+                {
+                    type: 'Azure_Application_Insights',
+                    useManagedIdentity: true
+                },
+                {
+                    type: 'Azure_Application_Insights',
+                    useManagedIdentity: true,
+                    maxBatchIntervalMs: 5000,
+                    maxBatchSize: 250
+                }
+            ));
+
+            it('should allow appInsightsResourceName when useManagedIdentity is true', () => validateMinimal(
+                {
+                    type: 'Azure_Application_Insights',
+                    useManagedIdentity: true,
+                    appInsightsResourceName: 'app.*pattern',
+                    maxBatchSize: 10
+                },
+                {
+                    type: 'Azure_Application_Insights',
+                    useManagedIdentity: true,
+                    maxBatchIntervalMs: 5000,
+                    maxBatchSize: 10,
+                    appInsightsResourceName: 'app.*pattern'
+                }
+            ));
+
+            it('should not allow appInsightsResourceName when instrumentationKey is present', () => assert.isRejected(
+                validateMinimal({
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: 'test-app1-instr-key',
+                    appInsightsResourceName: 'test-app-1'
+                }),
+                /dependencies\/instrumentationKey\/allOf\/1\/not/
+            ));
+        });
+
+        describe('ElasticSearch', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'ElasticSearch',
+                    host: 'host',
+                    index: 'index'
+                },
+                {
+                    type: 'ElasticSearch',
+                    host: 'host',
+                    index: 'index',
+                    dataType: 'f5.telemetry',
+                    port: 9200,
+                    protocol: 'https'
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'ElasticSearch',
+                    host: 'host',
+                    protocol: 'http',
+                    port: 8080,
+                    path: 'path',
+                    index: 'index',
+                    username: 'username',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    },
+                    apiVersion: '1.0',
+                    dataType: 'dataType'
+                },
+                {
+                    type: 'ElasticSearch',
+                    host: 'host',
+                    protocol: 'http',
+                    port: 8080,
+                    path: 'path',
+                    index: 'index',
+                    username: 'username',
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    },
+                    apiVersion: '1.0',
+                    dataType: 'dataType'
+                }
+            ));
+        });
+
+        describe('Generic_HTTP', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'Generic_HTTP',
+                    host: 'host'
+                },
+                {
+                    type: 'Generic_HTTP',
+                    host: 'host',
+                    protocol: 'https',
+                    port: 443,
+                    path: '/',
+                    method: 'POST'
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'Generic_HTTP',
+                    host: 'host',
+                    protocol: 'http',
+                    port: 80,
+                    path: '/path',
+                    method: 'PUT',
+                    headers: [
+                        {
+                            name: 'headerName',
+                            value: 'headerValue'
+                        }
+                    ],
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                {
+                    type: 'Generic_HTTP',
+                    host: 'host',
+                    protocol: 'http',
+                    port: 80,
+                    path: '/path',
+                    method: 'PUT',
+                    headers: [
+                        {
+                            name: 'headerName',
+                            value: 'headerValue'
+                        }
+                    ],
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+        });
+
+        describe('Google_Cloud_Monitoring', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'Google_Cloud_Monitoring',
+                    projectId: 'projectId',
+                    privateKeyId: 'privateKeyId',
+                    privateKey: {
+                        cipherText: 'privateKey'
+                    },
+                    serviceEmail: 'serviceEmail'
+                },
+                {
+                    type: 'Google_Cloud_Monitoring',
+                    projectId: 'projectId',
+                    privateKeyId: 'privateKeyId',
+                    privateKey: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    },
+                    serviceEmail: 'serviceEmail'
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'Google_Cloud_Monitoring',
+                    projectId: 'projectId',
+                    privateKeyId: 'privateKeyId',
+                    privateKey: {
+                        cipherText: 'privateKey'
+                    },
+                    serviceEmail: 'serviceEmail'
+                },
+                {
+                    type: 'Google_Cloud_Monitoring',
+                    projectId: 'projectId',
+                    privateKeyId: 'privateKeyId',
+                    privateKey: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    },
+                    serviceEmail: 'serviceEmail'
+                }
+            ));
+
+            it('should allow backward compatibility with StackDriver reference', () => validateMinimal(
+                {
+                    type: 'Google_StackDriver',
+                    projectId: 'projectId',
+                    privateKeyId: 'privateKeyId',
+                    privateKey: {
+                        cipherText: 'privateKey'
+                    },
+                    serviceEmail: 'serviceEmail'
+                },
+                {
+                    type: 'Google_StackDriver',
+                    projectId: 'projectId',
+                    privateKeyId: 'privateKeyId',
+                    privateKey: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    },
+                    serviceEmail: 'serviceEmail'
+                }
+            ));
+        });
+
+        describe('Graphite', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'Graphite',
+                    host: 'host'
+                },
+                {
+                    type: 'Graphite',
+                    host: 'host',
+                    protocol: 'https',
+                    port: 443,
+                    path: '/events/'
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'Graphite',
+                    host: 'host',
+                    protocol: 'http',
+                    port: 80,
+                    path: 'path'
+                },
+                {
+                    type: 'Graphite',
+                    host: 'host',
+                    protocol: 'http',
+                    port: 80,
+                    path: 'path'
+                }
+            ));
+        });
+
+        describe('Kafka', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'Kafka',
+                    host: 'host',
+                    topic: 'topic'
+                },
+                {
+                    type: 'Kafka',
+                    host: 'host',
+                    topic: 'topic',
+                    authenticationProtocol: 'None',
+                    protocol: 'binaryTcpTls',
+                    port: 9092
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'Kafka',
+                    host: 'host',
+                    topic: 'topic',
+                    port: 80,
+                    protocol: 'binaryTcp',
+                    authenticationProtocol: 'SASL-PLAIN',
+                    username: 'username',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                {
+                    type: 'Kafka',
+                    host: 'host',
+                    topic: 'topic',
+                    port: 80,
+                    protocol: 'binaryTcp',
+                    authenticationProtocol: 'SASL-PLAIN',
+                    username: 'username',
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+        });
+
+        describe('Splunk', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'Splunk',
+                    host: 'host',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                {
+                    type: 'Splunk',
+                    host: 'host',
+                    protocol: 'https',
+                    port: 8088,
+                    format: 'default',
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'Splunk',
+                    host: 'host',
+                    protocol: 'http',
+                    port: 80,
+                    format: 'legacy',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                {
+                    type: 'Splunk',
+                    host: 'host',
+                    protocol: 'http',
+                    port: 80,
+                    format: 'legacy',
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+        });
+
+        describe('Statsd', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'Statsd',
+                    host: 'host'
+                },
+                {
+                    type: 'Statsd',
+                    host: 'host',
+                    protocol: 'udp',
+                    port: 8125
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'Statsd',
+                    host: 'host',
+                    protocol: 'tcp',
+                    port: 80
+                },
+                {
+                    type: 'Statsd',
+                    host: 'host',
+                    protocol: 'tcp',
+                    port: 80
+                }
+            ));
+        });
+
+        describe('Sumo_Logic', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'Sumo_Logic',
+                    host: 'host',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                {
+                    type: 'Sumo_Logic',
+                    host: 'host',
+                    protocol: 'https',
+                    port: 443,
+                    path: '/receiver/v1/http/',
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'Sumo_Logic',
+                    host: 'host',
+                    protocol: 'http',
+                    port: 80,
+                    path: 'path',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                {
+                    type: 'Sumo_Logic',
+                    host: 'host',
+                    protocol: 'http',
+                    port: 80,
+                    path: 'path',
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+        });
+    });
+
+    describe('Telemetry_Pull_Consumer', () => {
+        let minimalDeclaration;
+        let minimalExpected;
+        let fullDeclaration;
+        let fullExpected;
+
+        const validate = (targetDeclaration, consumerProps, expectedTarget, expectedProps, addtlContext) => {
+            let context;
+            Object.assign(targetDeclaration.My_Pull_Consumer, consumerProps);
+            Object.assign(expectedTarget || {}, expectedProps || {});
+            if (addtlContext) {
+                context = { expand: true };
+                targetDeclaration.Shared = {
+                    class: 'Shared',
+                    constants: {
+                        class: 'Constants'
+                    }
+                };
+                Object.assign(targetDeclaration.Shared.constants, addtlContext.constants);
+            }
+            return config.validate(targetDeclaration, context)
+                .then((validConfig) => {
+                    assert.deepStrictEqual(validConfig.My_Pull_Consumer, expectedTarget);
+                });
+        };
+
+        const validateMinimal = (consumerProps, expectedProps, addtlContext) => validate(
+            minimalDeclaration,
+            consumerProps,
+            minimalExpected,
+            expectedProps,
+            addtlContext
+        );
+
+        const validateFull = (consumerProps, expectedProps, addtlContext) => validate(
+            fullDeclaration,
+            consumerProps,
+            fullExpected,
+            expectedProps,
+            addtlContext
+        );
+
+        beforeEach(() => {
+            minimalDeclaration = {
+                class: 'Telemetry',
+                My_System: {
+                    class: 'Telemetry_System',
+                    systemPoller: ['My_Poller']
+                },
+                My_Poller: {
+                    class: 'Telemetry_System_Poller'
+                },
+                My_Pull_Consumer: {
+                    class: 'Telemetry_Pull_Consumer',
+                    type: 'default',
+                    systemPoller: 'My_Poller'
+                }
+            };
+            minimalExpected = {
+                class: 'Telemetry_Pull_Consumer',
+                type: 'default',
+                systemPoller: 'My_Poller',
+                enable: true,
+                trace: false
+            };
+            fullDeclaration = {
+                class: 'Telemetry',
+                My_System: {
+                    class: 'Telemetry_System',
+                    systemPoller: ['My_Poller']
+                },
+                My_Poller: {
+                    class: 'Telemetry_System_Poller'
+                },
+                My_Other_Poller: {
+                    class: 'Telemetry_System_Poller'
+                },
+                My_Pull_Consumer: {
+                    class: 'Telemetry_Pull_Consumer',
+                    type: 'default',
+                    enable: false,
+                    trace: true,
+                    systemPoller: ['My_Poller', 'My_Other_Poller']
+                }
+            };
+            fullExpected = {
+                class: 'Telemetry_Pull_Consumer',
+                type: 'default',
+                enable: false,
+                trace: true,
+                systemPoller: ['My_Poller', 'My_Other_Poller']
+            };
+        });
+
+        // use 'default' consumer because it has no additional properties
+        it('should pass minimal declaration', () => validateMinimal({}, {}));
+        it('should allow full declaration', () => validateFull({}, {}));
+        it('should not allow additional properties', () => assert.isRejected(
+            validateMinimal({ someKey: 'someValue' }),
+            /My_Pull_Consumer.*someKey.*should NOT have additional properties/
+        ));
     });
 });

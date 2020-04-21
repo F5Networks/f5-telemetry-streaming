@@ -194,7 +194,13 @@ function applyConfig(originalConfig) {
                 TRACER_CLASS_NAME, pollerConfig.name, pollerConfig
             );
             const baseMsg = `system poller ${pollerConfig.name}. Interval = ${pollerConfig.interval} sec.`;
-            if (currPollerIDs[pollerConfig.name]) {
+            if (pollerConfig.interval === 0) {
+                logger.info(`Configuring non-polling ${baseMsg}`);
+                if (currPollerIDs[pollerConfig.name]) {
+                    util.stop(currPollerIDs[pollerConfig.name]);
+                }
+                currPollerIDs[pollerConfig.name] = undefined;
+            } else if (currPollerIDs[pollerConfig.name]) {
                 logger.info(`Updating ${baseMsg}`);
                 currPollerIDs[pollerConfig.name] = util.update(
                     currPollerIDs[pollerConfig.name], module.exports.safeProcess, pollerConfig, pollerConfig.interval
@@ -323,11 +329,44 @@ function processClientRequest(restOperation) {
         }
     }))
         .then(() => configWorker.getConfig())
-        .then((config) => {
-            // config was copied by getConfig already
-            // before calling normalizeConfig we have to create custom config
+        .then(config => fetchPollerData(config, objName, { subObjName, includeDisabled: true }))
+        .then((dataCtx) => {
+            util.restOperationResponder(restOperation, 200, dataCtx.map(d => d.data));
+        })
+        .catch((error) => {
+            let message;
+            let code;
+
+            if (error.responseCode !== undefined) {
+                code = error.responseCode;
+                message = `${error}`;
+            } else {
+                message = `${error}`;
+                code = 500;
+                logger.exception('poller request ended up with error', error);
+            }
+            util.restOperationResponder(restOperation, code, { code, message });
+        });
+}
+
+/**
+ * Fetch data from a given System or System Poller, given the provided configuration
+ *
+ * @param {Object}  currentConfig               - current TS configuration
+ * @param {String}  objName                     - Sytem or System Poller name
+ * @param {Object}  [options]                   - optional values
+ * @param {String}  [options.subObjName]        - (optional) Sub Object (System Poller) name
+ * @param {Boolean} [options.includeDisabled]   - (optional) Whether to include disabled Pollers. Default=false
+ *
+ * @returns {Promise} Promise which is resolved with data from the Sytem(s) or System Poller(s)
+ */
+function fetchPollerData(currentConfig, objName, options) {
+    options = options || {};
+    const includeDisabled = (typeof options.includeDisabled === 'undefined') ? false : options.includeDisabled;
+    return Promise.resolve()
+        .then(() => {
             try {
-                return module.exports.createCustomConfig(config.parsed, objName, subObjName);
+                return module.exports.createCustomConfig(currentConfig.parsed, objName, options.subObjName);
             } catch (err) {
                 err.responseCode = 404;
                 return Promise.reject(err);
@@ -343,26 +382,9 @@ function processClientRequest(restOperation) {
                 return Promise.reject(err);
             }
 
-            const pollers = module.exports.getEnabledPollerConfigs(system, false, true)
+            const pollers = module.exports.getEnabledPollerConfigs(system, false, includeDisabled)
                 .map(pollerConfig => module.exports.safeProcess(pollerConfig, { requestFromUser: true }));
             return Promise.all(pollers);
-        })
-        .then((dataCtx) => {
-            util.restOperationResponder(restOperation, 200, dataCtx.map(d => d.data));
-        })
-        .catch((error) => {
-            let message;
-            let code;
-
-            if (error.responseCode !== undefined) {
-                code = error.responseCode;
-                message = `${error}`;
-            } else {
-                message = `${error}`;
-                code = 500;
-                logger.exception(`poller request ended up with error: ${message}`, error);
-            }
-            util.restOperationResponder(restOperation, code, { code, message });
         });
 }
 
@@ -385,6 +407,7 @@ module.exports = {
     applyConfig,
     createCustomConfig,
     createPollerConfig,
+    fetchPollerData,
     getEnabledPollerConfigs,
     getPollerTimers,
     getTraceValue,

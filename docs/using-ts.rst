@@ -12,6 +12,7 @@ Using Telemetry Streaming Index
 
    telemetry-system
    setting-up-consumer
+   pull-consumers
    event-listener
    avr
    validate
@@ -19,3 +20,4 @@ Using Telemetry Streaming Index
    http-methods
    rest-api-endpoints
    advanced-options
+   deleting-ts-config

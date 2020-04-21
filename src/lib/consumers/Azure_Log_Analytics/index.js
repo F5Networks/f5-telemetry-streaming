@@ -8,28 +8,15 @@
 
 'use strict';
 
-const request = require('request');
-const crypto = require('crypto');
+const util = require('../../util');
+const azureUtil = require('./../shared/azureUtil');
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
-
-function makeRequest(requestOptions) {
-    return new Promise((resolve, reject) => {
-        request.post(requestOptions, (error, response, body) => {
-            if (error) {
-                reject(error);
-            } else if (response.statusCode === 200) {
-                resolve();
-            } else {
-                reject(new Error(`response: ${response.statusCode} ${response.statusMessage} ${body}`));
-            }
-        });
-    });
-}
 
 /**
  * See {@link ../README.md#context} for documentation
  */
 module.exports = function (context) {
+    let fullURI;
     const workspaceId = context.config.workspaceId;
     const sharedKey = context.config.passphrase;
     const logType = context.config.logType || 'F5Telemetry';
@@ -42,65 +29,68 @@ module.exports = function (context) {
         context.event.data[context.event.type] = copyData;
     }
 
-    const promises = [];
-    const tracerMsg = [];
-    Object.keys(context.event.data).forEach((type) => {
-        let data = context.event.data[type];
-        if (typeof data !== 'object') {
-            data = { value: data }; // make data an object
-        }
-        // rename/prefix certain reserved keywords, this is necessary because Azure LA
-        // will accept messages and then silently drop them in post-processing if
-        // they contain certain top-level keys such as 'tenant'
-        const reserved = ['tenant'];
-        reserved.forEach((item) => {
-            if (Object.keys(data).indexOf(item) !== -1) {
-                data[`f5${item}`] = data[item];
-                delete data[item];
+    return azureUtil.getApiUrl(context, 'opinsights')
+        .then((url) => {
+            fullURI = url;
+            return sharedKey ? Promise.resolve(sharedKey) : azureUtil.getSharedKey(context);
+        })
+        .then((keyToUse) => {
+            const promises = [];
+            const tracerMsg = [];
+            Object.keys(context.event.data).forEach((type) => {
+                let data = context.event.data[type];
+                if (typeof data !== 'object') {
+                    data = { value: data }; // make data an object
+                }
+                // rename/prefix certain reserved keywords, this is necessary because Azure LA
+                // will accept messages and then silently drop them in post-processing if
+                // they contain certain top-level keys such as 'tenant'
+                const reserved = ['tenant'];
+                reserved.forEach((item) => {
+                    if (Object.keys(data).indexOf(item) !== -1) {
+                        data[`f5${item}`] = data[item];
+                        delete data[item];
+                    }
+                });
+
+                const date = new Date().toUTCString();
+                data = [data]; // place in array per API spec
+                const bodyString = JSON.stringify(data);
+                const signedKey = azureUtil.signSharedKey(keyToUse, date, bodyString);
+
+                const requestOptions = {
+                    method: 'POST',
+                    fullURI,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-ms-date': date,
+                        'Log-Type': `${logType}_${type}`,
+                        Authorization: `SharedKey ${workspaceId}:${signedKey}`
+                    },
+                    body: data,
+                    allowSelfSignedCert: context.config.allowSelfSignedCert
+                };
+
+                if (context.tracer) {
+                    // deep copy and parse body, otherwise it will be stringified again
+                    const requestOptionsCopy = util.deepCopy(requestOptions);
+                    // redact secrets in Authorization header
+                    requestOptionsCopy.headers.Authorization = '*****';
+                    tracerMsg.push(requestOptionsCopy);
+                }
+
+                promises.push(util.makeRequest(requestOptions));
+            });
+
+            if (context.tracer) {
+                context.tracer.write(JSON.stringify(tracerMsg, null, 4));
             }
-        });
-
-        const date = new Date().toUTCString();
-        data = [data]; // place in array per API spec
-        const httpBody = JSON.stringify(data);
-        const contentLength = Buffer.byteLength(httpBody, 'utf8');
-        const stringToSign = `POST\n${contentLength}\napplication/json\nx-ms-date:${date}\n/api/logs`;
-        const signature = crypto.createHmac('sha256', Buffer.from(sharedKey, 'base64')).update(stringToSign, 'utf-8').digest('base64');
-        const authorization = `SharedKey ${workspaceId}:${signature}`;
-
-        const requestOptions = {
-            url: `https://${workspaceId}.ods.opinsights.azure.com/api/logs?api-version=2016-04-01`,
-            headers: {
-                'Content-Type': 'application/json',
-                'x-ms-date': date,
-                'Log-Type': `${logType}_${type}`,
-                Authorization: authorization
-            },
-            body: httpBody,
-            strictSSL: !context.config.allowSelfSignedCert
-        };
-
-        if (context.tracer) {
-            // deep copy and parse body, otherwise it will be stringified again
-            const requestOptionsCopy = JSON.parse(JSON.stringify(requestOptions));
-            requestOptionsCopy.body = JSON.parse(requestOptionsCopy.body);
-            // redact secrets in Authorization header
-            requestOptionsCopy.headers.Authorization = '*****';
-            tracerMsg.push(requestOptionsCopy);
-        }
-
-        promises.push(makeRequest(requestOptions));
-    });
-
-    if (context.tracer) {
-        context.tracer.write(JSON.stringify(tracerMsg, null, 4));
-    }
-
-    return Promise.all(promises)
+            return Promise.all(promises);
+        })
         .then(() => {
             context.logger.debug('success');
         })
         .catch((error) => {
-            context.logger.error(`error: ${error.message || error}`);
+            context.logger.exception('Unable to forward to Azure Log Analytics consumer.', error);
         });
 };

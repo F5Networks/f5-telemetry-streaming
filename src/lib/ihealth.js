@@ -138,7 +138,7 @@ function processClientRequest(restOperation) {
 
             if (ihInstance) {
                 respCode = 202;
-                respMessage = 'iHealth Poller instance is runnnig already';
+                respMessage = 'iHealth Poller instance is running already';
             } else {
                 respCode = 201;
                 respMessage = 'iHealth poller created. See logs for current progress.';
@@ -147,7 +147,7 @@ function processClientRequest(restOperation) {
                 ihInstance.dataCallback = safeProcess;
                 ihInstance.process()
                     .catch((err) => {
-                        logger.exception(`processClientRequest: iHealthPoller.process error: ${err}`, err);
+                        logger.exception('processClientRequest: iHealthPoller.process error', err);
                         return ihInstance.removeAllData();
                     });
             }
@@ -224,7 +224,7 @@ configWorker.on('change', (config) => {
     });
 
     iHealthPoller.updateStorage({});
-    // start polles
+    // start pollers
     Object.keys(pollers).forEach(key => pollers[key].process());
 
     // all testOnly instances will be removed due possible config changes!

@@ -158,6 +158,8 @@ Telemetry Consumer class
 ````````````````````````
 The next lines of the declaration sets the Consumer, which accepts all telemetry information from whatever systems you configure it to. The consumer provides the tools to process that information. To see examples of configurations for consumers like Splunk, Azure Log Analytics, AWS CloudWatch, AWS S3, Graphite, and others, see the :ref:`settingupconsumer-ref` section of this guide.
 
+.. NOTE:: TS 1.11 adds support for the Pull Consumer class.  See :doc:`pull-consumers`. 
+
 .. code-block:: javascript
    :linenos:
    :lineno-start: 17

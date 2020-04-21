@@ -36,12 +36,16 @@
 * Update [SUPPORT.md](SUPPORT.md) if not yet done (or at least check that everything looks valid):
   * add new version to the list of `Currently supported versions` with appropriate dates
   * remove no longer supported versions from `Currently supported versions` and add it to `Versions no longer supported`
+* Would be good to remove local `node_modules` directory and `package-lock.json` and do `npm run install-test`. Ideally `package-lock.json` will be the same as before. If not then it probably means that someone forgot to update it.
 * Push all changes to GitLab
 * Get build artifacts (`.rpm` and `.sha256` checksum) from latest build and:
   * Check `.rpm` size, ideally it should not exceed 10 MB.:
     * 1.4.0 - 8.6 MB
     * 1.7.0 - 8.6 MB
     * 1.8.0 - 9.5 MB
+    * 1.9.0 - 9.5 MB
+    * 1.10.0 - 9.5 MB
+    * 1.11.0 - 9.5 MB
   * Install build to BIG-IP, navigate to folder `/var/config/rest/iapps/f5-telemetry/` and check following:
     * Run `du -sh` and check that folder's size (shouldn't be much greater than previous versions):
       * 1.4.0 - 65 MB
@@ -49,6 +53,9 @@
       * 1.6.0 - 66 MB
       * 1.7.0 - 66 MB
       * 1.8.0 - 73 MB
+      * 1.9.0 - 73 MB
+      * 1.10.0 - 76 MB
+      * 1.11.0 - 75 MB
     * Check `nodejs/node_modules` folder - if you see `eslint`, `mocha` or something else from [package.json](package.json) `devDependencies` section - something wrong with build process. Probably some `npm` flags are work as not expected and it MUST BE FIXED before publishing.
 * Ensure that all tests (unit tests and functional tests passed)
 * Create pre-release tag and push it to GitLab:
@@ -56,15 +63,16 @@
   * git push origin
   * git push origin --tags
 * Check pipeline for artifactory URL to package (or browse in artifactory)
-* Create and send release candidate email with features, bugs, artifactory URL
+* Send release candidate email with features, bugs, artifactory URL
 
 ## Release process
 
 * Create new branch from `master`, e.g. `rc-master-branch`. It will be easier to merge branches and resolve conflicts without any following up issues.
-* Merge RC branch into RC master branch - squash to avoid commits leaking sensitive url's, etc.
+* Merge RC branch into RC master branch - squash to avoid leaking sensitive URLs, etc. through commits
   * git checkout rc-master-branch
   * git merge --squash vX.Y.Z
   * git push origin
+* Would be good to remove local `node_modules` directory and `package-lock.json` and do `npm run install-test`. Ideally `package-lock.json` will be the same as before. If not then it probably means that someone forgot to update it.
 * Ideally it will be good to run functional and unit testing
 * After that merge `rc-master-branch` to `master` branch:
   * git checkout master
@@ -89,5 +97,6 @@
   * Navigate to the latest release, select `edit` and upload artifacts:
     * `.rpm` file
     * `.sha256` file
+* Remove all RC tags and branches and other stale branches that were used for release or RC process
 
 # ATTENTION: DO NOT FORGET TO MERGE 'MASTER' BRANCH INTO 'DEVELOP' WHEN YOU ARE DONE WITH RELEASE PROCESS

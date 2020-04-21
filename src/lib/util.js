@@ -18,6 +18,46 @@ const logger = require('./logger');
 
 /** @module util */
 
+/**
+ * ModuleLoader class - reusable functions for loading/unloading Node packages
+ *
+ * @class
+ */
+function ModuleLoader() {}
+
+/**
+* Load a module from the given path
+*
+* @param {String} modulePath - path to module
+*
+* @returns {Object|null} module or null when failed to load module
+*/
+ModuleLoader.load = function (modulePath) {
+    logger.debug(`Loading module ${modulePath}`);
+
+    let module = null;
+    try {
+        module = require(modulePath); // eslint-disable-line
+    } catch (err) {
+        logger.exception(`Unable to load module ${modulePath}`, err);
+    }
+    return module;
+};
+
+/**
+ * Unload a module from a given path
+ *
+ * @param {String} modulePath - path to module
+ */
+ModuleLoader.unload = function (modulePath) {
+    try {
+        delete require.cache[require.resolve(modulePath)];
+        logger.debug(`Module '${modulePath}' was unloaded`);
+    } catch (err) {
+        logger.exception(`Exception on attempt to unload '${modulePath}' from cache`, err);
+    }
+};
+
 /** Note: no 'class' usage to support v12.x, prototype only */
 /**
  * Tracer class - useful for debug to dump streams of data.
@@ -160,7 +200,7 @@ Tracer.prototype._updateInode = function () {
  *
  * @async
  * @private
- * @returns {Promise} Promise resolved when destination file re-opene or opened already
+ * @returns {Promise} Promise resolved when destination file re-opened or opened already
  */
 Tracer.prototype._reopenIfNeeded = function () {
     // if stream is not ready then skip check
@@ -221,7 +261,7 @@ Tracer.prototype._reopenIfNeeded = function () {
                 }
             });
         })
-        .catch(err => logger.exception(`tracer._reopenIfNeeded exception: ${err}`, err));
+        .catch(err => logger.exception('tracer._reopenIfNeeded exception', err));
 };
 
 /**
@@ -292,7 +332,7 @@ Tracer.prototype._open = function () {
                 logger.error(`tracer.error: tracer '${this.name}' stream to file '${this.path}': ${err}`);
                 this.close();
             });
-            // resolving here, because it is more simplier and reliable
+            // resolving here, because it is more simpler and reliable
             // than wait inside 'open'
             return Promise.resolve();
         })
@@ -584,7 +624,7 @@ function retryPromise(fn, opts) {
                 opts.tries += 1;
                 let delay = opts.delay || 0;
 
-                // applying backof after the second try only
+                // applying backoff after the second try only
                 if (opts.backoff && opts.tries > 1) {
                     /* eslint-disable no-restricted-properties */
                     delay += opts.backoff * Math.pow(2, opts.tries - 1);
@@ -1050,38 +1090,11 @@ module.exports = {
             });
         }
     },
-
-    /**
-     * Count the number of each consumer type.
-     *
-     * @param {Object} declaration - the declaration to search through
-     *
-     * @returns {Object} Consumer types with a count for each
-     */
-    getConsumerClasses(declaration) {
-        if (!declaration) {
-            throw new Error('No declaration was provided for consumer counting');
-        }
-
-        const consumers = { consumers: {} };
-        function countConsumerTypes(subDecl) {
-            if (subDecl.class && subDecl.class === 'Telemetry_Consumer') {
-                consumers.consumers[subDecl.type] = !consumers.consumers[subDecl.type]
-                    ? 1 : consumers.consumers[subDecl.type] + 1;
-            }
-
-            Object.keys(subDecl)
-                .map(prop => subDecl[prop])
-                .filter(value => typeof value === 'object')
-                .forEach(value => countConsumerTypes(value));
-        }
-
-        countConsumerTypes(declaration);
-        return consumers;
-    },
-
     /** @see Tracer */
     tracer: Tracer,
+
+    /** @see ModuleLoader */
+    moduleLoader: ModuleLoader,
 
     retryPromise
 };

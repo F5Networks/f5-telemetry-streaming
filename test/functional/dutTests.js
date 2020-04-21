@@ -17,7 +17,6 @@ const readline = require('readline');
 const util = require('./shared/util');
 const constants = require('./shared/constants');
 
-const baseILXUri = '/mgmt/shared/telemetry';
 const duts = util.getHosts('BIGIP');
 const packageDetails = util.getPackageDetails();
 
@@ -35,23 +34,8 @@ const packageDetails = util.getPackageDetails();
  * @returns {Object} Promise resolved when request succeed
  */
 function postDeclarationToDUT(dut, declaration) {
-    const uri = `${baseILXUri}/declare`;
-    const host = dut.ip;
-    const user = dut.username;
-    const password = dut.password;
-
     util.logger.info(`Going to send following declaration to host ${dut.hostname}`, declaration);
-    return util.getAuthToken(host, user, password)
-        .then((data) => {
-            const postOptions = {
-                method: 'POST',
-                headers: {
-                    'x-f5-auth-token': data.token
-                },
-                body: declaration
-            };
-            return util.makeRequest(host, uri, postOptions);
-        })
+    return util.postDeclaration(dut, declaration)
         .then((data) => {
             assert.strictEqual(data.message, 'success');
         });
@@ -114,6 +98,25 @@ function sendDataToEventListeners(callback, numOfMsg, delay) {
     return Promise.all(duts.map(dut => sendDataToEventListener(dut, callback(dut), { numOfMsg, delay })));
 }
 
+
+function getPullConsumerData(dut, pullConsumerName) {
+    const uri = `${constants.BASE_ILX_URI}/pullconsumer/${pullConsumerName}`;
+    const host = dut.ip;
+    const user = dut.username;
+    const password = dut.password;
+
+    return util.getAuthToken(host, user, password)
+        .then((data) => {
+            const postOptions = {
+                method: 'GET',
+                headers: {
+                    'x-f5-auth-token': data.token
+                }
+            };
+            return util.makeRequest(host, uri, postOptions);
+        });
+}
+
 /**
  * Fetch System Poller data from DUT
  *
@@ -125,7 +128,7 @@ function sendDataToEventListeners(callback, numOfMsg, delay) {
  * @returns {Object} Promise resolved when request succeed
  */
 function getSystemPollerData(dut, sysPollerName) {
-    const uri = `${baseILXUri}/systempoller/${sysPollerName}`;
+    const uri = `${constants.BASE_ILX_URI}/systempoller/${sysPollerName}`;
     const host = dut.ip;
     const user = dut.username;
     const password = dut.password;
@@ -166,7 +169,7 @@ function getSystemPollersData(callback) {
  * @returns Promise resolved once TS packages removed from F5 device
  */
 function uninstallAllTSpackages(host, authToken, options) {
-    const uri = `${baseILXUri}/info`;
+    const uri = `${constants.BASE_ILX_URI}/info`;
     let error;
     let data;
 
@@ -225,7 +228,7 @@ function setup() {
             });
 
             it('should remove pre-existing TS declaration', () => {
-                const uri = `${baseILXUri}/declare`;
+                const uri = `${constants.BASE_ILX_URI}/declare`;
                 const postOptions = {
                     method: 'POST',
                     headers: options.headers,
@@ -277,7 +280,7 @@ function setup() {
             });
 
             it('should verify installation', () => {
-                const uri = `${baseILXUri}/info`;
+                const uri = `${constants.BASE_ILX_URI}/info`;
 
                 return new Promise(resolve => setTimeout(resolve, 5000))
                     .then(() => util.makeRequest(host, uri, options))
@@ -425,7 +428,7 @@ function test() {
             });
 
             it('should post same configuration twice and get it after', () => {
-                let uri = `${baseILXUri}/declare`;
+                let uri = `${constants.BASE_ILX_URI}/declare`;
                 const postOptions = Object.assign(util.deepCopy(options), {
                     method: 'POST',
                     body: declaration
@@ -449,7 +452,7 @@ function test() {
                         checkPassphraseObject(data);
                         postResponses.push(data);
 
-                        uri = `${baseILXUri}/declare`;
+                        uri = `${constants.BASE_ILX_URI}/declare`;
                         return util.makeRequest(host, uri, util.deepCopy(options));
                     })
                     .then((data) => {
@@ -468,7 +471,7 @@ function test() {
             });
 
             it('should get response from systempoller endpoint', () => {
-                const uri = `${baseILXUri}/systempoller/${constants.DECL.SYSTEM_NAME}`;
+                const uri = `${constants.BASE_ILX_URI}/systempoller/${constants.DECL.SYSTEM_NAME}`;
 
                 return util.makeRequest(host, uri, options)
                     .then((data) => {
@@ -502,7 +505,7 @@ function test() {
             });
 
             it('should apply configuration containing system poller filtering', () => {
-                let uri = `${baseILXUri}/declare`;
+                let uri = `${constants.BASE_ILX_URI}/declare`;
                 const postOptions = Object.assign(util.deepCopy(options), {
                     method: 'POST',
                     body: fs.readFileSync(constants.DECL.FILTER_EXAMPLE).toString()
@@ -513,7 +516,7 @@ function test() {
                         util.logger.info('Declaration response:', { host, data });
                         assert.strictEqual(data.message, 'success');
 
-                        uri = `${baseILXUri}/systempoller/${constants.DECL.SYSTEM_NAME}`;
+                        uri = `${constants.BASE_ILX_URI}/systempoller/${constants.DECL.SYSTEM_NAME}`;
                         return util.makeRequest(host, uri, util.deepCopy(options));
                     })
                     .then((data) => {
@@ -532,7 +535,7 @@ function test() {
             });
 
             it('should apply configuration containing chained system poller actions', () => {
-                let uri = `${baseILXUri}/declare`;
+                let uri = `${constants.BASE_ILX_URI}/declare`;
                 const postOptions = Object.assign(util.deepCopy(options), {
                     method: 'POST',
                     body: fs.readFileSync(constants.DECL.ACTION_CHAINING_EXAMPLE).toString()
@@ -543,7 +546,7 @@ function test() {
                         util.logger.info('Declaration response:', { host, data });
                         assert.strictEqual(data.message, 'success');
 
-                        uri = `${baseILXUri}/systempoller/${constants.DECL.SYSTEM_NAME}`;
+                        uri = `${constants.BASE_ILX_URI}/systempoller/${constants.DECL.SYSTEM_NAME}`;
                         return util.makeRequest(host, uri, util.deepCopy(options));
                     })
                     .then((data) => {
@@ -562,7 +565,7 @@ function test() {
             });
 
             it('should apply configuration containing filters with ifAnyMatch', () => {
-                let uri = `${baseILXUri}/declare`;
+                let uri = `${constants.BASE_ILX_URI}/declare`;
                 const postOptions = Object.assign(util.deepCopy(options), {
                     method: 'POST',
                     body: fs.readFileSync(constants.DECL.FILTERING_WITH_MATCHING_EXAMPLE).toString()
@@ -573,7 +576,7 @@ function test() {
                         util.logger.info('Declaration response:', { host, data });
                         assert.strictEqual(data.message, 'success');
 
-                        uri = `${baseILXUri}/systempoller/${constants.DECL.SYSTEM_NAME}`;
+                        uri = `${constants.BASE_ILX_URI}/systempoller/${constants.DECL.SYSTEM_NAME}`;
                         return util.makeRequest(host, uri, util.deepCopy(options));
                     })
                     .then((data) => {
@@ -591,7 +594,7 @@ function test() {
             });
 
             it('should apply configuration containing multiple system pollers and endpointList', () => {
-                let uri = `${baseILXUri}/declare`;
+                let uri = `${constants.BASE_ILX_URI}/declare`;
                 const postOptions = Object.assign(util.deepCopy(options), {
                     method: 'POST',
                     body: fs.readFileSync(constants.DECL.ENDPOINTLIST_EXAMPLE).toString()
@@ -602,7 +605,7 @@ function test() {
                         util.logger.info('Declaration response:', { host, data });
                         assert.strictEqual(data.message, 'success');
 
-                        uri = `${baseILXUri}/systempoller/${constants.DECL.SYSTEM_NAME}`;
+                        uri = `${constants.BASE_ILX_URI}/systempoller/${constants.DECL.SYSTEM_NAME}`;
                         return util.makeRequest(host, uri, util.deepCopy(options));
                     })
                     .then((data) => {
@@ -706,6 +709,7 @@ module.exports = {
     test,
     teardown,
     utils: {
+        getPullConsumerData,
         getSystemPollerData,
         getSystemPollersData,
         postDeclarationToDUT,

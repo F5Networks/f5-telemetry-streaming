@@ -33,7 +33,7 @@ class Logger {
     }
 }
 
-// these defaults could be placed in a seperate file as they will change over time
+// these defaults could be placed in a separate file as they will change over time
 const DEFAULT_INTEGER = 0;
 const DEFAULT_TIMESTAMP = '2019-01-01T01:01:01Z'; // different formats?
 const TIMESTAMP_KEYS = ['systemTimestamp', 'expirationString', 'cycleStart', 'cycleEnd'];

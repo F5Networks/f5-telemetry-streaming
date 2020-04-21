@@ -87,7 +87,7 @@ function process(dataCtx, options) {
                 promise = promise.then(() => {
                     // detach forwarding process from here
                     forwarder.forward(dataCtx)
-                        .catch(err => logger.exception(`Error on attempt to forward data to consumers: ${err}`, err));
+                        .catch(err => logger.exception('Error on attempt to forward data to consumers', err));
                 });
             }
         }

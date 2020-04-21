@@ -1,16 +1,16 @@
 .. _settingupconsumer-ref:
 
-Consumer class
+Push Consumers
 ==============
 
-Use this section to find example declarations and notes for supported consumers. 
+Use this section to find example declarations and notes for supported push-based consumers. See :doc:`pull-consumers` for pull-based consumers.
 
 .. IMPORTANT:: Each of the following examples shows only the **Consumer** class of a declaration and must be included with the rest of the base declaration (see :ref:`components`).
 
 .. _splunk-ref:
 
 Splunk
-~~~~~~
+------
 |splunk_img|
 
 Required information:
@@ -27,7 +27,7 @@ Example Declaration:
 .. _splunk-legacy:
 
 Splunk Legacy format
-^^^^^^^^^^^^^^^^^^^^
+--------------------
 The **format** property can be set to **legacy** for Splunk users who wish to convert the stats output similar to the |splunk app|. To see more information, see |Analytics|. To see more information about using the HEC, see |HEC|.  See the following example.
 
 .. NOTE:: To poll for any data involving **tmstats** you must have a Splunk consumer with the legacy format as described in this section.  This includes GET requests to the SystemPoller API because the data is not pulled unless it is a legacy Splunk consumer. |br| |br| Telemetry Streaming 1.7.0 and later gathers additional data from tmstats tables to improve compatibility with Splunk Legacy consumers.
@@ -50,14 +50,31 @@ Example Declaration for Legacy (including facility):
 .. _azure-ref:
 
 Microsoft Azure Log Analytics
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------
 |azure_img|
 
 Required Information:
  - Workspace ID: Navigate to :guilabel:`Log Analytics workspace > Advanced Settings > Connected Sources`.
  - Shared Key: Navigate to :guilabel:`Log Analytics workspace > Advanced Settings > Connected Sources` and use the primary key.
 
-.. NOTE:: To see more information about sending data to Log Analytics, see |HTTP Data Collector API|.
+To see more information about sending data to Log Analytics, see |HTTP Data Collector API|.
+
+.. NOTE:: The following example has been updated with the **useManagedIdentity** and **region** properties. |br| See :ref:`mi` following the example for information about using Azure Managed Identities and Telemetry Streaming. 
+
+Region property
+^^^^^^^^^^^^^^^
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+   Support for the **region** property is available in Telemetry Streaming 1.11 and later. 
+
+Telemetry Streaming v1.11 adds the **region** property for Azure Log Analytics and Application Insights. This is in part to support the Azure Government regions.
+
+- This optional property is used to determine cloud type (public/commercial, govcloud) so that the correct API URLs can be used (example values: westeurope, japanwest, centralus, usgovvirginia, and so on).  
+- If you do not provide a region, Telemetry Streaming attempts to look it up from the instance metadata. 
+- If it is unable to extract metadata, TS defaults to public/commercial
+- Check the |azregion| for product/region compatibility for Azure Government.
+- See the Azure documentation for a valid list of regions (resource location), and :ref:`Region list<azreg>` for example values from the Azure CLI.
+
 
 Example Declaration:
 
@@ -71,12 +88,104 @@ The following is an example of the Azure dashboard with Telemetry Streaming data
 
 |azure_log_analytics_dashboard|
 
+| 
+
+.. _mi:
+
+Using Microsoft Managed Identities for Log Analytics
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Telemetry Streaming v1.11 adds support for sending data to Azure Log Analytics with an Azure Managed Identity. For specific information on Managed Identities, see |managedid|.
+
+**Important:** The managed identity assigned to the VM must have at the minimum, the following permissions (see the Azure documentation for detailed information):
+
+- List subscriptions
+- List workspaces for the subscription(s)
+- Log Analytics Contributor for the workspace (either at the Workspace resource level or inherited via resource group)
+
+Telemetry Streaming supports Managed Identities using a new **useManagedIdentity** property, set to **true**.  You cannot specify a passphrase when this property is set to true.  You must specify passphrase when this property is omitted or when value is **false**.  If you do not include this property at all, Telemetry Streaming behaves as though the value is false.
+
+Example Declaration:
+
+.. literalinclude:: ../examples/declarations/azure_log_analytics_mi.json
+    :language: json
+
+|
+
+.. _appinsight-ref:
+
+Microsoft Azure Application Insights
+------------------------------------
+|azure_img|
+
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+   Support for Azure Application Insights is available in Telemetry Streaming 1.11 and later. 
+
+Required Information:
+
+- **Instrumentation Key**: If provided, **Use Managed Identity** must be *false* or omitted (default). Navigate to :guilabel:`Application Insights > {AppinsightsName} > Overview`
+- **Use Managed Identity**: If true, Instrumentation Key must be omitted. See :ref:`miappin`.
+
+
+Optional Properties:
+
+- **MaxBatch Size**: The maximum number of telemetry items to include in a payload to the ingestion endpoint (default: 250)
+- **Max Batch Interval Ms**: The maximum amount of time to wait in milliseconds to for payload to reach maxBatchSize (default: 5000)
+- **App Insights Resource Name**: Name filter used to determine to which App Insights resource to send metrics. If not provided, TS will send metrics to App Insights in the subscription in which the managed identity has permissions. Note: To be used only when useManagedIdentity is true.
+- **customOpts**: Additional options for use by consumer client library. These are passthrough options (key value pair) to send to the Microsoft node client. 
+   
+   .. WARNING:: The customOpts options are not guaranteed to work and may change according to the client library API; you must use these options with caution. Refer to corresponding consumer library documentation for acceptable keys and values.
+
+To see more information about Azure Application Insights, see |appinsight|.
+
+.. _region:
+
+Region property
+^^^^^^^^^^^^^^^
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+   Support for the **region** property is available in Telemetry Streaming 1.11 and later. 
+
+Telemetry Streaming v1.11 adds the **region** property for Azure Log Analytics and Application Insights. This is in part to support the Azure Government regions.
+
+- This optional property is used to determine cloud type (public/commercial, govcloud) so that the correct API URLs can be used (example values: westeurope, japanwest, centralus, usgovvirginia, and so on).  
+- If you do not provide a region, Telemetry Streaming attempts to look it up from the instance metadata. 
+- If it is unable to extract metadata, TS defaults to public/commercial
+- Check the |azregion| for product/region compatibility for Azure Government.
+- See the Azure documentation for a valid list of regions (resource location), and :ref:`Region list<azreg>` for example values from the Azure CLI.
+
+
+Example Declaration:
+
+.. literalinclude:: ../examples/declarations/azure_application_insights.json
+    :language: json
+
+| 
+
+.. _miappin:
+
+Using Microsoft Managed Identities for Application Insights
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Telemetry Streaming v1.11 also adds support for sending data to Azure Application Insights with an Azure Managed Identity. For specific information on Managed Identities, see |managedid|.
+
+**Important:** The managed identity assigned to the VM must have at the minimum, the following permissions  (see the Azure documentation for detailed information):
+
+- List Microsoft.Insight components for subscription(s), for example the Monitoring Reader role
+- Push metrics to the App Insights resource, for example the Monitoring Metrics Publisher role
+
+Telemetry Streaming supports Managed Identities using a new **useManagedIdentity** property, set to **true**.  You cannot specify an instrumentationKey when this property is set to true. You must specify instrumentationKey when this property is omitted or when the value is false. If you do not include this property at all, Telemetry Streaming behaves as though the value is false. You can optionally provide an appInsightsResourceName to limit which App Insights resource(s) to send metrics to. Without the filter, metrics will be sent to all App Insights resources to which the managed identity has permissions. 
+
+Example Declaration:
+
+.. literalinclude:: ../examples/declarations/azure_application_insights_mi.json
+    :language: json
+
 |
 
 .. _awscloud-ref:
 
 AWS CloudWatch
-~~~~~~~~~~~~~~~
+--------------
 |aws_img|   
 
 Required information:
@@ -100,7 +209,7 @@ Example Declaration:
 .. _awss3-ref:
 
 AWS S3
-~~~~~~
+------
 |aws_s3|
 
 Required Information:
@@ -121,7 +230,7 @@ Example Declaration:
 .. _graphite-ref:
 
 Graphite
-~~~~~~~~
+--------
 |graphite|
 
 Required Information:
@@ -139,7 +248,7 @@ Required Information:
 .. _kafka-ref:
 
 Kafka
-~~~~~
+-----
 |Kafka|
 
 Required Information:
@@ -161,7 +270,7 @@ Required Information:
 .. _elasticsearch-ref:
 
 ElasticSearch
-~~~~~~~~~~~~~
+-------------
 |ElasticSearch|
 
 Required Information:
@@ -188,7 +297,7 @@ Optional Parameters:
 .. _sumologic-ref:
 
 Sumo Logic
-~~~~~~~~~~
+----------
 |Sumo Logic|
 
 Required Information:
@@ -208,7 +317,7 @@ Required Information:
 .. _statsd-ref:
 
 StatsD
-~~~~~~
+------
 |StatsD|
 
 Required Information:
@@ -226,7 +335,7 @@ Required Information:
 .. _http-ref:
 
 Generic HTTP
-~~~~~~~~~~~~
+------------
 
 Required Information:
  - Host: The address of the system.
@@ -253,7 +362,7 @@ Example with multiple passphrases:
 .. _fluentd-ref:
 
 Fluentd
-~~~~~~~
+-------
 |Fluentd|
 
 Required Information:
@@ -267,15 +376,19 @@ Required Information:
 .. literalinclude:: ../examples/declarations/fluentd.json
     :language: json
 
+|
+
 .. _stackdrive:
 
-Google StackDriver
-~~~~~~~~~~~~~~~~~~
-|stackd|
+Google Cloud Operations Suite's Cloud Monitoring
+------------------------------------------------
+|Google Cloud|
 
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-   Support for Google StackDriver is available in TS 1.8.0 and later.  
+   Support for Google StackDriver/Cloud Monitoring is available in TS 1.8.0 and later.  
+
+.. NOTE:: Google recently changed the name of their StackDriver product to Cloud Operations Suite with the monitoring product named *Cloud Monitoring*.
 
 Required Information:
  - projectId: The ID of the GCP project.
@@ -283,24 +396,146 @@ Required Information:
  - privateKeyId: The ID of the private key that the user created for the Service Account (if you do not have a key, from the account page, click **Create Key** with a type of **JSON**. The Private key is in the file that was created when making the account).
  - privateKey: The private key given to the user when a private key was added to the service account.
 
-For complete information on deploying StackDriver, see |sddocs|.
+For complete information on deploying Google Cloud Operations Suite, see |sddocs|.
 
 **Finding the Data**  |br|
-Once you have configured the StackDriver consumer and sent a Telemetry Streaming declaration, Telemetry Streaming creates custom MetricDescriptors to which it sends metrics.  These metrics can be found under a path such as **custom/system/cpu**. To make it easier to find data that is relevant to a specific device,TS uses the **Generic Node** resource type, and assigns machine ID to the **node_id** label to identify which device the data is from.
+Once you have configured the Google Cloud Monitoring consumer and sent a Telemetry Streaming declaration, Telemetry Streaming creates custom MetricDescriptors to which it sends metrics.  These metrics can be found under a path such as **custom/system/cpu**. To make it easier to find data that is relevant to a specific device, TS uses the **Generic Node** resource type, and assigns machine ID to the **node_id** label to identify which device the data is from.
 
-.. IMPORTANT:: There is a quota of 500 custom MetricDescriptors for StackDriver Monitoring. Telemetry Streaming creates these MetricDescriptors, and if this quota is ever reached, you must delete some of these MetricDescriptors.
+.. IMPORTANT:: There is a quota of 500 custom MetricDescriptors for Google Cloud Monitoring. Telemetry Streaming creates these MetricDescriptors, and if this quota is ever reached, you must delete some of these MetricDescriptors.
 
-.. literalinclude:: ../examples/declarations/stackdriver.json
+.. literalinclude:: ../examples/declarations/google_cloud_monitoring.json
     :language: json
+
+
+|
+
+|
+
+.. _azreg:
+
+Azure Regions
+-------------
+The following table shows an example table when listing regions from the Azure CLI using the command ``az account list-locations -o table``.  Note to list Azure Government Regions, you must use ``az cloud set --name AzureUsGovernment`` before running the list-locations command.
+
+.. IMPORTANT:: This list is just a static example, we strongly recommend running the commands yourself to retrieve the current list. |br| The **Name** column on the right is the value to use in your Telemetry Streaming declaration
+
+
+``az account list-locations -o table``
+
++----------------------+------------+------------+--------------------+
+| DisplayName          |  Latitude  |  Longitude |  **Name**          |
++======================+============+============+====================+
+| East Asia            |  22.267    | 114.188    |  eastasia          |
++----------------------+------------+------------+--------------------+
+| Southeast Asia       |  1.283     | 103.833    |  southeastasia     |
++----------------------+------------+------------+--------------------+
+| Central US           |  41.5908   | -93.6208   |  centralus         |
++----------------------+------------+------------+--------------------+
+| East US              |  37.3719   | -79.8164   | eastus             |
++----------------------+------------+------------+--------------------+
+| East US 2            |  36.6681   | -78.3889   | eastus2            |
++----------------------+------------+------------+--------------------+
+| West US              |  37.783    | -122.417   | westus             |
++----------------------+------------+------------+--------------------+
+| North Central US     |  41.8819   | -87.6278   | northcentralus     |
++----------------------+------------+------------+--------------------+
+| South Central US     |  29.4167   | -98.5      | southcentralus     |
++----------------------+------------+------------+--------------------+
+| North Europe         |  53.3478   | -6.2597    | northeurope        |
++----------------------+------------+------------+--------------------+
+| West Europe          |  52.3667   | 4.9        | westeurope         |
++----------------------+------------+------------+--------------------+
+| Japan West           |  34.6939   | 135.5022   | japanwest          |
++----------------------+------------+------------+--------------------+
+| Japan East           |  35.68     | 139.77     | japaneast          |
++----------------------+------------+------------+--------------------+
+| Brazil South         |  -23.55    | -46.633    | brazilsouth        |
++----------------------+------------+------------+--------------------+
+| Australia East       |  -33.86    | 151.2094   | australiaeast      |
++----------------------+------------+------------+--------------------+
+| Australia Southeast  |  -37.8136  | 144.9631   | australiasoutheast |
++----------------------+------------+------------+--------------------+
+| South India          |  12.9822   | 80.1636    | southindia         |
++----------------------+------------+------------+--------------------+
+| Central India        |  18.5822   | 73.9197    | centralindia       |
++----------------------+------------+------------+--------------------+
+| West India           |  19.088    | 72.868     | westindia          |
++----------------------+------------+------------+--------------------+
+| Canada Central       | 43.653     | -79.383    | canadacentral      |
++----------------------+------------+------------+--------------------+
+| Canada East          | 46.817     | -71.217    | canadaeast         |
++----------------------+------------+------------+--------------------+
+| UK South             | 50.941     | -0.799     | uksouth            |
++----------------------+------------+------------+--------------------+
+| UK West              | 53.427     | -3.084     | ukwest             |
++----------------------+------------+------------+--------------------+
+| West Central US      | 40.890     | -110.234   | westcentralus      |
++----------------------+------------+------------+--------------------+
+| West US 2            | 47.233     | -119.852   | westus2            |
++----------------------+------------+------------+--------------------+
+| Korea Central        | 37.5665    | 126.9780   | koreacentral       |
++----------------------+------------+------------+--------------------+
+| Korea South          | 35.1796    | 129.0756   | koreasouth         |
++----------------------+------------+------------+--------------------+
+| France Central       | 46.3772    | 2.3730     | francecentral      |
++----------------------+------------+------------+--------------------+
+| France South         | 43.8345    | 2.1972     | francesouth        |
++----------------------+------------+------------+--------------------+
+| Australia Central    | -35.3075   | 149.1244   | australiacentral   |
++----------------------+------------+------------+--------------------+
+| Australia Central 2  | -35.3075   | 149.1244   | australiacentral2  |
++----------------------+------------+------------+--------------------+
+| UAE Central          | 24.466667  | 54.366669  | uaecentral         |
++----------------------+------------+------------+--------------------+
+| UAE North            | 25.266666  |  55.316666 | uaenorth           |
++----------------------+------------+------------+--------------------+
+| South Africa North   | -25.731340 | 28.218370  | southafricanorth   |
++----------------------+------------+------------+--------------------+
+| South Africa West    | -34.075691 | 18.843266  | southafricawest    |
++----------------------+------------+------------+--------------------+
+| Switzerland North    | 47.451542  | 8.564572   | switzerlandnorth   |
++----------------------+------------+------------+--------------------+
+| Switzerland West     | 46.204391  | 6.143158   | switzerlandwest    |
++----------------------+------------+------------+--------------------+
+| Germany North        | 53.073635  | 8.806422   | germanynorth       |
++----------------------+------------+------------+--------------------+
+| Germany West Central | 50.110924  | 8.682127   | germanywestcentral |
++----------------------+------------+------------+--------------------+
+| Norway West          | 58.969975  | 5.733107   | norwaywest         |
++----------------------+------------+------------+--------------------+
+| Norway East          | 59.913868  | 10.752245  | norwayeast         |
++----------------------+------------+------------+--------------------+
+
+
+|
+
+In the following table, we list the Azure Government regions.
+
+``az cloud set --name AzureUsGovernment`` |br|
+``az account list-locations -o table``
+
++----------------------+------------+------------+--------------------+
+| DisplayName          |  Latitude  |  Longitude |  **Name**          |
++======================+============+============+====================+
+| USGov Virginia       |  37.3719   | -79.8164   |  usgovvirginia     |
++----------------------+------------+------------+--------------------+
+| USGov Iowa           |  41.5908   | -93.6208   |  usgoviowa         |
++----------------------+------------+------------+--------------------+
+| USDoD East           |  36.6676   | -78.3875   |  usdodeast         |
++----------------------+------------+------------+--------------------+
+| USDoD Central        |  41.6005   | -93.6091   |  usdodcentral      |
++----------------------+------------+------------+--------------------+
+| USGov Texas          |  29.4241   | -98.4936   |  usgovtexas        |
++----------------------+------------+------------+--------------------+
+| USGov Arizona        |  33.4484   | -112.0740  | usgovarizona       |
++----------------------+------------+------------+--------------------+
+
+
 
 
 .. |splunk_img| image:: /images/splunk_logo.png
    :target: https://www.splunk.com
    :alt: Splunk
-
-.. |stackd| image:: /images/stackdriver_logo.png
-   :target: https://cloud.google.com/stackdriver/
-   :alt: Google StackDriver
 
 .. |azure_img| image:: /images/azure_logo.png
    :target: https://docs.microsoft.com/en-us/azure/azure-monitor/log-query/log-query-overview
@@ -343,6 +578,10 @@ Once you have configured the StackDriver consumer and sent a Telemetry Streaming
 .. |Fluentd| image:: /images/fluentd.png
    :target: https://www.fluentd.org/
    :alt: fluentd
+
+.. |Google Cloud| image:: /images/google_logo.png
+   :target: https://cloud.google.com/products/operations
+   :alt: Google Cloud
 
    
 .. |Azure documentation| raw:: html
@@ -407,9 +646,30 @@ Once you have configured the StackDriver consumer and sent a Telemetry Streaming
 
 .. |sddocs| raw:: html
 
-   <a href="https://cloud.google.com/stackdriver/" target="_blank">StackDriver documentation</a>
-
+   <a href="https://cloud.google.com/products/operations" target="_blank">Google Operations suite documentation</a>
 
 .. |br| raw:: html
    
    <br />
+
+.. |managedid| raw:: html
+
+   <a href="https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview" target="_blank">Microsoft documentation</a>
+
+
+.. |appinsight| raw:: html
+
+   <a href="https://docs.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview" target="_blank">Microsoft documentation</a>
+
+
+.. |azregion| raw:: html
+
+   <a href="https://azure.microsoft.com/en-us/global-infrastructure/services/?products=monitor&regions=non-regional,usgov-non-regional,us-dod-central,us-dod-east,usgov-arizona,usgov-iowa,usgov-texas,usgov-virginia" target="_blank">Azure Products Available by Region</a>
+
+
+
+
+
+
+
+

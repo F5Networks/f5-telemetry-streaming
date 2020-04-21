@@ -30,7 +30,7 @@ describe('Splunk', () => {
 
     beforeEach(() => {
         // Fake the clock to get consistent in Event Data output's 'time' variable
-        clock = sinon.useFakeTimers();
+        clock = sinon.useFakeTimers(0);
     });
 
     afterEach(() => {
@@ -221,6 +221,38 @@ describe('Splunk', () => {
             });
 
             splunkIndex(context);
+        });
+
+        it('should ignore events from Event Listener in legacy format', () => {
+            // enable event loop to use setTimeout
+            clock.restore();
+
+            const logMessages = {
+                debug: [],
+                error: []
+            };
+            const context = testUtil.buildConsumerContext({
+                eventType: 'AVR',
+                config: defaultConsumerConfig
+            });
+            context.config.format = 'legacy';
+            context.logger = {
+                debug: msg => logMessages.debug.push(msg),
+                error: msg => logMessages.error.push(msg),
+                exception: msg => logMessages.error.push(msg)
+            };
+            // error will be logged if method called
+            const requestStub = sinon.stub(request, 'post');
+            requestStub.throws(new Error('err message'));
+
+            splunkIndex(context);
+            return (new Promise(resolve => setTimeout(resolve, 100)))
+                .then(() => {
+                    assert.strictEqual(requestStub.notCalled, true, 'should not call request.post');
+                    assert.strictEqual(logMessages.error.length, 0, 'should have no error messages');
+                    assert.notStrictEqual(logMessages.debug.length, 0, 'should have debug messages');
+                    assert.ok(/No data to forward/.test(logMessages.debug[logMessages.debug.length - 1]));
+                });
         });
 
         describe('tmstats', () => {

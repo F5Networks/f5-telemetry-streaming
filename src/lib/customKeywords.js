@@ -14,12 +14,13 @@ const constants = require('./constants');
 const util = require('./util');
 const deviceUtil = require('./deviceUtil');
 
-const textNamedKey = 'plainText';
 const base64NamedKey = 'plainBase64';
 const secureVaultNamedKey = 'SecureVault';
 const secureVaultCipherPrefix = '$M$';
 
-
+/**
+ * Helpers block start
+ */
 /**
  * Resolve pointer
  *
@@ -176,22 +177,28 @@ function expandPointers(str, origin, srcPointer) {
 
     return ret;
 }
+/**
+ * Helpers block end
+ */
 
 /**
- * Validate path
- *
- * @param {Object} origin            - origin object
- * @param {String} srcPath           - path to follow
- * @param {Object} options           - options
- * @param {String} options.path      - base path that starts with class name
- * @param {Integer} options.partsNum - number of parts the value should consist of. 0 - no limits
+ * Validators block start
  */
-function validateDeclarationPath(origin, srcPath, options) {
+/**
+ * Check that reference has proper class and property exists
+ *
+ * @throws {Error} when reference is invalid
+ * @returns {Boolean} true if reference is valid
+ */
+function declarationClassPropCheck(schemaObj, dataObj) {
     // Given sample obj
     // {
     //   class: "The_Class",
     //   collProp: { { key1: val1 }, { key2: val2 } }
     // }
+    const origin = dataObj.rootData;
+    const srcPath = dataObj.data;
+    const options = schemaObj.schema;
 
     // remove leading and trailing '/'
     const trimPath = val => val.substring(
@@ -229,271 +236,357 @@ function validateDeclarationPath(origin, srcPath, options) {
         const resolvedPath = `${classInstanceName}/${pathParts.join('/')}`;
         throw new Error(`Unable to find "${resolvedPath}"`);
     }
+    return true;
 }
 
+/**
+ * Encrypt secret
+ *
+ * @throws {Error} when secret is invalid
+ * @returns {Boolean|Function} true if secret is valid and doesn't require encryption
+ *      or function that returns {Promise} resolved once secret encrypted
+ */
+function f5secretCheck(schemaObj, dataObj) {
+    /**
+     * we handle a number of passphrase object in this function,
+     * the following describes each of them:
+     * - 'cipherText': this means we plan to store a plain text secret locally,
+     *   which requires we encrypt it first. This also assumes that we are
+     *   running on a BIG-IP where we have the means to do so.
+     * - 'environmentVar': undefined
+     */
+    const data = dataObj.data;
 
-const keywords = {
-    f5secret: {
-        type: 'object',
-        errors: true,
-        modifying: true,
-        async: true,
-        metaSchema: {
-            type: 'boolean'
-        },
-        // eslint-disable-next-line no-unused-vars
-        compile(schema, parentSchema) {
-            // eslint-disable-next-line no-unused-vars
-            return function (data, dataPath, parentData, propertyName, rootData) {
-                return Promise.resolve()
-                    .then(() => {
-                        /**
-                         * we handle a number of passphrase object in this function,
-                         * the following describes each of them:
-                         * - 'cipherText': this means we plan to store a plain text secret locally,
-                         *   which requires we encrypt it first. This also assumes that we are
-                         *   running on a BIG-IP where we have the means to do so.
-                         * - 'environmentVar': undefined
-                         */
-                        if (typeof data[constants.PASSPHRASE_ENVIRONMENT_VAR] !== 'undefined') {
-                            return Promise.resolve(true);
-                        }
-                        if (typeof data[constants.PASSPHRASE_CIPHER_TEXT] === 'undefined') {
-                            return Promise.reject(new Error(`missing ${constants.PASSPHRASE_CIPHER_TEXT} or ${constants.PASSPHRASE_ENVIRONMENT_VAR}`));
-                        }
-                        if (data.protected === secureVaultNamedKey) {
-                            if (data[constants.PASSPHRASE_CIPHER_TEXT].startsWith(secureVaultCipherPrefix)) {
-                                return Promise.resolve(true);
-                            }
-                            return Promise.reject(new Error(`'${constants.PASSPHRASE_CIPHER_TEXT}' should be encrypted by ${constants.DEVICE_TYPE.BIG_IP} when 'protected' is '${secureVaultNamedKey}'`));
-                        }
-                        if (data.protected === base64NamedKey) {
-                            data[constants.PASSPHRASE_CIPHER_TEXT] = util.base64('decode', data[constants.PASSPHRASE_CIPHER_TEXT]);
-                            data.protected = textNamedKey;
-                        }
-
-                        return deviceUtil.getDeviceType()
-                            .then((deviceType) => {
-                                if (deviceType !== constants.DEVICE_TYPE.BIG_IP) {
-                                    return Promise.reject(new Error(`Specifying '${constants.PASSPHRASE_CIPHER_TEXT}' requires running on ${constants.DEVICE_TYPE.BIG_IP}`));
-                                }
-                                return deviceUtil.encryptSecret(data[constants.PASSPHRASE_CIPHER_TEXT]);
-                            })
-                            .then((secret) => {
-                                data[constants.PASSPHRASE_CIPHER_TEXT] = secret;
-                                data.protected = secureVaultNamedKey;
-                                return true;
-                            });
-                    })
-                    .catch(e => Promise.reject(new Ajv.ValidationError([{ keyword: 'f5secret', message: e.message || e.toString(), params: {} }])));
-            };
+    if (typeof data[constants.PASSPHRASE_ENVIRONMENT_VAR] !== 'undefined') {
+        return true;
+    }
+    if (typeof data[constants.PASSPHRASE_CIPHER_TEXT] === 'undefined') {
+        throw new Error(`missing ${constants.PASSPHRASE_CIPHER_TEXT} or ${constants.PASSPHRASE_ENVIRONMENT_VAR}`);
+    }
+    if (data.protected === secureVaultNamedKey) {
+        if (data[constants.PASSPHRASE_CIPHER_TEXT].startsWith(secureVaultCipherPrefix)) {
+            return true;
         }
-    },
-    hostConnectivityCheck: {
-        type: 'string',
-        errors: true,
-        modifying: true,
-        async: true,
-        metaSchema: {
-            type: 'boolean'
-        },
-        // eslint-disable-next-line no-unused-vars
-        compile(schema, parentSchema) {
-            // eslint-disable-next-line no-unused-vars
-            return function (data, dataPath, parentData, propertyName, rootData) {
-                parentData = parentData || {};
-                const ajvErrors = [];
-
-                // enable host connectivity check with this property - return otherwise
-                if (parentData.enableHostConnectivityCheck !== true) return Promise.resolve(true);
-
-                // port required - schema should validate this
-                if (!parentData.port) return Promise.resolve(true);
-
-                return util.networkCheck(data, parentData.port)
-                    .then(() => true)
-                    .catch((e) => {
-                        ajvErrors.push({ keyword: 'hostConnectivityCheck', message: e.message, params: {} });
-                        throw new Ajv.ValidationError(ajvErrors);
-                    });
-            };
+        throw new Error(`'${constants.PASSPHRASE_CIPHER_TEXT}' should be encrypted by ${constants.DEVICE_TYPE.BIG_IP} when 'protected' is '${secureVaultNamedKey}'`);
+    }
+    let secret = data[constants.PASSPHRASE_CIPHER_TEXT];
+    if (data.protected === base64NamedKey) {
+        try {
+            secret = util.base64('decode', data[constants.PASSPHRASE_CIPHER_TEXT]);
+        } catch (e) {
+            throw new Error(`Unable to decode base64 data: ${e}`);
         }
-    },
-    timeWindowMinSize: {
-        type: 'object',
-        errors: true,
-        modifying: true,
-        async: true,
-        metaSchema: {
-            type: 'integer',
-            minimum: 1,
-            maximum: 1439,
-            description: 'Time window size in minutes. From 1m to 23h 59m.'
-        },
-        // eslint-disable-next-line no-unused-vars
-        compile(schema, parentSchema) {
-            // eslint-disable-next-line no-unused-vars
-            return function (data, dataPath, parentData, propertyName, rootData) {
-                // start/end required - schema should validate this
-                if (!(data.start && data.end)) return Promise.resolve(true);
+    }
+    return () => deviceUtil.getDeviceType()
+        .then((deviceType) => {
+            if (deviceType !== constants.DEVICE_TYPE.BIG_IP) {
+                return Promise.reject(new Error(`Specifying '${constants.PASSPHRASE_CIPHER_TEXT}' requires running on ${constants.DEVICE_TYPE.BIG_IP}`));
+            }
+            return deviceUtil.encryptSecret(secret);
+        })
+        .then((encryptedSecret) => {
+            data[constants.PASSPHRASE_CIPHER_TEXT] = encryptedSecret;
+            data.protected = secureVaultNamedKey;
+        });
+}
 
-                function timeStrToMinutes(timeStr) {
-                    const parts = timeStr.split(':');
-                    const hour = parts[0];
-                    const minute = parts[1];
-                    return parseInt(hour, 10) * 60 + parseInt(minute, 10);
-                }
+/**
+ * Check connectivity to host
+ *
+ * @returns {Boolean|Function} true if port not specified or verification not required
+ *      or function that returns {Promise} resolved once host is reachable
+ */
+function hostConnectivityCheck(schemaObj, dataObj) {
+    const parentData = dataObj.parentData || {};
+    // enable host connectivity check with this property - return otherwise
+    if (parentData.enableHostConnectivityCheck !== true || typeof parentData.port === 'undefined') {
+        return true;
+    }
+    return () => util.networkCheck(dataObj.data, dataObj.parentData.port);
+}
 
-                const minWindowSize = schema;
-                // at that point we rely on schema validation - strings should be valid
-                const timeStart = timeStrToMinutes(data.start);
-                let timeEnd = timeStrToMinutes(data.end);
-                // if timeEnd < timeStart that move clock forward for 1 day - 1440 minutes.
-                timeEnd = timeStart > timeEnd ? timeEnd + 1440 : timeEnd;
+/**
+ * Check if path exists in filesystem
+ *
+ * @returns {Function} that returns {Promise} resolved once path is valid
+ */
+function fsPathExistsCheck(schemaObj, dataObj) {
+    return () => new Promise((resolve, reject) => {
+        fs.access(dataObj.data, (fs.constants || fs).R_OK, (err) => {
+            if (err) {
+                reject(new Error(`Unable to access path "${dataObj.data}": ${err}`));
+            } else {
+                resolve(true);
+            }
+        });
+    });
+}
 
-                if (timeStart === timeEnd || (timeEnd - timeStart < minWindowSize)) {
-                    return Promise.reject(new Ajv.ValidationError([{
-                        keyword: 'time',
-                        message: `specify window with size of a ${minWindowSize} minutes or more`,
-                        params: {}
-                    }]));
-                }
-                return Promise.resolve(true);
-            };
-        }
-    },
-    declarationClass: {
-        type: 'string',
-        errors: true,
-        modifying: true,
-        async: true,
-        metaSchema: {
-            type: 'string',
-            description: 'Check if declaration with provided name and class exists'
-        },
-        // eslint-disable-next-line no-unused-vars
-        compile(schema, parentSchema) {
-            // eslint-disable-next-line no-unused-vars
-            return function (data, dataPath, parentData, propertyName, rootData) {
-                if (typeof data === 'string') {
-                    const declarationClass = schema;
-                    const objectInstance = rootData[data];
-                    if (typeof objectInstance !== 'object' || objectInstance.class !== declarationClass) {
-                        return Promise.reject(new Ajv.ValidationError([{
-                            keyword: 'declarationClass',
-                            message: `declaration with name "${data}" and class "${declarationClass}" doesn't exist`,
-                            params: {}
-                        }]));
-                    }
-                }
-                return Promise.resolve(true);
-            };
-        }
-    },
-    declarationClassProp: {
-        type: 'string',
-        errors: true,
-        modifying: true,
-        async: true,
-        metaSchema: {
+/**
+ * Check time window size
+ *
+ * @throws {Error} when time window is invalid
+ * @returns {Boolean} true if time window is valid
+ */
+function timeWindowSizeCheck(schemaObj, dataObj) {
+    const data = dataObj.data;
+    // start/end required - schema should validate this
+    if (!(data.start && data.end)) {
+        return true;
+    }
+
+    function timeStrToMinutes(timeStr) {
+        const parts = timeStr.split(':');
+        const hour = parts[0];
+        const minute = parts[1];
+        return parseInt(hour, 10) * 60 + parseInt(minute, 10);
+    }
+
+    const minWindowSize = schemaObj.schema;
+    // at that point we rely on schema validation - strings should be valid
+    const timeStart = timeStrToMinutes(data.start);
+    let timeEnd = timeStrToMinutes(data.end);
+    // if timeEnd < timeStart that move clock forward for 1 day - 1440 minutes.
+    timeEnd = timeStart > timeEnd ? timeEnd + 1440 : timeEnd;
+
+    if (timeStart === timeEnd || (timeEnd - timeStart < minWindowSize)) {
+        throw new Error(`specify window with size of a ${minWindowSize} minutes or more`);
+    }
+    return true;
+}
+
+/**
+ * Check that reference has proper class
+ *
+ * @throws {Error} when reference is invalid
+ * @returns {Boolean} true if reference is valid
+ */
+function declarationClassCheck(schemaObj, dataObj) {
+    const declarationClass = schemaObj.schema;
+    const objectInstance = dataObj.rootData[dataObj.data];
+    if (typeof objectInstance !== 'object' || objectInstance.class !== declarationClass) {
+        throw new Error(`declaration with name "${dataObj.data}" and class "${declarationClass}" doesn't exist`);
+    }
+    return true;
+}
+
+/**
+ * Expand JSON pointer
+ *
+ * @throws {Error} when unable to expand JSON pointer
+ * @returns {Boolean} true if JSON pointer was expanded
+ */
+function f5expandCheck(schemaObj, dataObj) {
+    if (!(this.expand === true)) {
+        return true;
+    }
+    if (typeof dataObj.data !== 'string') {
+        // keyword may be applied to objects that support multiple types for
+        // idempotency - so simply return if data is not a string
+        return true;
+    }
+
+    dataObj.parentData[dataObj.propertyName] = expandPointers(dataObj.data, dataObj.rootData, dataObj.dataPath);
+    return true;
+}
+/**
+ * Validators block end
+ */
+
+/**
+ * Validation runner block start
+ */
+/**
+ * Convert error to Ajv.ValidationError
+ *
+ * @param {Error} err        - error object
+ * @param {Object} schemaObj - schema info
+ * @param {Object} dataObj   - data info
+ *
+ * @returns {Error}
+ */
+function getValidationError(err, schemaObj, dataObj) {
+    return new Ajv.ValidationError([{
+        dataPath: dataObj.dataPath,
+        propertyName: dataObj.propertyName,
+        keyword: schemaObj.keyword,
+        message: err.message || err.toString(),
+        params: {}
+    }]);
+}
+
+/**
+ * Run validation function
+ *
+ * @param {Object}   this    - ajv instance of context if passed to ajv.validator function
+ * @param {Function} func    - validation function
+ * @param {Object} schemaObj - schema info
+ * @param {Object} dataObj   - data info
+ *
+ * @returns {Boolean|Function} returns true/false if validation passed/failed or
+ *      function (deferred operation) that returns {Promise}
+ *      to execute once global validation process done and succeed
+ */
+function runValidationFunction(func, schemaObj, dataObj) {
+    try {
+        return func.call(this, schemaObj, dataObj);
+    } catch (err) {
+        schemaObj.validateFn.errors = schemaObj.validateFn.errors || [];
+        schemaObj.validateFn.errors.push(getValidationError(err, schemaObj, dataObj));
+        return false;
+    }
+}
+
+/**
+ * Wrap deferred async function to catch errors correctly
+ *
+ * @param {Object}   this    - ajv instance of context if passed to ajv.validator function
+ * @param {Function} func    - validation function
+ * @param {Object} schemaObj - schema info
+ * @param {Object} dataObj   - data info
+ *
+ * @returns {Function}
+ */
+function wrapAsyncValidationFunction(func, schemaObj, dataObj) {
+    return () => func()
+        .catch(err => Promise.reject(getValidationError(err, schemaObj, dataObj)));
+}
+
+/**
+ * Run validation process
+ *
+ * @param {Object}   this    - ajv instance of context if passed to ajv.validator function
+ * @param {Function} func    - validation function
+ * @param {Object} schemaObj - schema info
+ * @param {Object} dataObj   - data info
+ *
+ * @returns {Boolean} false when validation failed or true if validation succeed or requires
+ *      execution of deferred function if global validation process succeed
+ */
+function validate(func, schemaObj, dataObj) {
+    let result = runValidationFunction.call(this, func, schemaObj, dataObj);
+    if (typeof result === 'function') {
+        this.deferred[schemaObj.keyword] = this.deferred[schemaObj.keyword] || [];
+        this.deferred[schemaObj.keyword].push(wrapAsyncValidationFunction.call(this, result, schemaObj, dataObj));
+        result = true;
+    }
+    return result;
+}
+
+/**
+ * Create validation function for custom keyword
+ *
+ * @param {String}   keyword - keyword
+ * @param {Function} func    - validation function
+ *
+ * @returns {Function} custom keyword validation function
+ */
+function createValidationFunction(keyword, func) {
+    return function _validate(schema, data, parentSchema, dataPath, parentData, propertyName, rootData) {
+        return validate.call(
+            this,
+            func,
+            {
+                schema, parentSchema, keyword, validateFn: _validate
+            },
+            {
+                data, dataPath, parentData, propertyName, rootData
+            }
+        );
+    };
+}
+/**
+ * Validation runner block end
+ */
+
+module.exports = {
+    asyncOrder: [
+        ['hostConnectivityCheck', 'pathExists'],
+        ['f5secret']
+    ],
+    keywords: {
+        f5secret: {
             type: 'object',
-            description: 'Automatically resolve a path with given {declarationClass}/{propLevel_1}/...{propLevel_n}',
-            properties: {
-                partsNum: {
-                    description: 'Expected number of parts the value should consist of. 0 - no limits',
-                    type: 'integer',
-                    minimum: 0,
-                    maximum: 100,
-                    default: 0
-                },
-                path: {
-                    description: '{declarationClass}/{propLevel_1}/...{propLevel_n}',
-                    type: 'string',
-                    minLength: 1
-                }
-            }
+            errors: true,
+            modifying: true,
+            metaSchema: {
+                type: 'boolean'
+            },
+            validate: createValidationFunction('f5secret', f5secretCheck)
         },
-        // eslint-disable-next-line no-unused-vars
-        compile(schema, parentSchema) {
-            return function (data, dataPath, parentData, propertyName, rootData) {
-                if (typeof data === 'string') {
-                    try {
-                        validateDeclarationPath(rootData, data, schema);
-                    } catch (err) {
-                        return Promise.reject(new Ajv.ValidationError([{
-                            keyword: 'declarationClassProp',
-                            message: `${err}`,
-                            params: {}
-                        }]));
+        hostConnectivityCheck: {
+            type: 'string',
+            errors: true,
+            modifying: false,
+            metaSchema: {
+                type: 'boolean'
+            },
+            validate: createValidationFunction('hostConnectivityCheck', hostConnectivityCheck)
+        },
+        timeWindowMinSize: {
+            type: 'object',
+            errors: true,
+            modifying: false,
+            metaSchema: {
+                type: 'integer',
+                minimum: 1,
+                maximum: 1439,
+                description: 'Time window size in minutes. From 1m to 23h 59m.'
+            },
+            validate: createValidationFunction('timeWindowMinSize', timeWindowSizeCheck)
+        },
+        declarationClass: {
+            type: 'string',
+            errors: true,
+            modifying: false,
+            metaSchema: {
+                type: 'string',
+                description: 'Check if declaration with provided name and class exists'
+            },
+            validate: createValidationFunction('declarationClass', declarationClassCheck)
+        },
+        declarationClassProp: {
+            type: 'string',
+            errors: true,
+            modifying: false,
+            metaSchema: {
+                type: 'object',
+                description: 'Automatically resolve a path with given {declarationClass}/{propLevel_1}/...{propLevel_n}',
+                properties: {
+                    partsNum: {
+                        description: 'Expected number of parts the value should consist of. 0 - no limits',
+                        type: 'integer',
+                        minimum: 0,
+                        maximum: 100,
+                        default: 0
+                    },
+                    path: {
+                        description: '{declarationClass}/{propLevel_1}/...{propLevel_n}',
+                        type: 'string',
+                        minLength: 1
                     }
                 }
-                return Promise.resolve(true);
-            };
-        }
-    },
-    pathExists: {
-        type: 'string',
-        errors: true,
-        modifying: true,
-        async: true,
-        metaSchema: {
-            type: 'boolean',
-            description: 'Check that path exists'
+            },
+            validate: createValidationFunction('declarationClassProp', declarationClassPropCheck)
         },
-        // eslint-disable-next-line no-unused-vars
-        validate(schema, data, parentSchema, dataPath, parentData, propertyName, rootData) {
-            // looks like instance is configured as default
-            if (typeof data === 'string') {
-                return new Promise((resolve, reject) => {
-                    fs.access(data, (fs.constants || fs).R_OK, (accessErr) => {
-                        if (accessErr) {
-                            reject(accessErr);
-                        } else {
-                            resolve(true);
-                        }
-                    });
-                })
-                    .catch(err => Promise.reject(new Ajv.ValidationError([
-                        { keyword: propertyName, message: `Unable to access path "${data}": ${err}`, params: {} }
-                    ])));
-            }
-            return Promise.resolve(true);
-        }
-    },
-    f5expand: {
-        // type: 'string',
-        errors: true,
-        modifying: true,
-        async: false,
-        metaSchema: {
-            type: 'boolean'
+        pathExists: {
+            type: 'string',
+            errors: true,
+            modifying: true,
+            metaSchema: {
+                type: 'boolean',
+                description: 'Check that path exists'
+            },
+            validate: createValidationFunction('pathExists', fsPathExistsCheck)
         },
-        // eslint-disable-next-line no-unused-vars
-        compile(schema, parentSchema) {
-            // eslint-disable-next-line no-unused-vars
-            return function (data, dataPath, parentData, propertyName, rootData) {
-                const ajvErrors = [];
-
-                // only process if root contains scratch.expand:true
-                if (!(rootData.scratch && rootData.scratch.expand === true)) {
-                    return true;
-                }
-                if (typeof data !== 'string') {
-                    // keyword may be applied to objects that support multiple types for
-                    // idempotency - so simply return if data is not a string
-                    return true;
-                }
-
-                try {
-                    parentData[propertyName] = expandPointers(data, rootData, dataPath);
-                } catch (e) {
-                    ajvErrors.push({ keyword: 'f5expand', message: e.message, params: {} });
-                    throw new Ajv.ValidationError(ajvErrors);
-                }
-                return true;
-            };
+        f5expand: {
+            type: 'string',
+            errors: true,
+            modifying: true,
+            metaSchema: {
+                type: 'boolean'
+            },
+            validate: createValidationFunction('f5expand', f5expandCheck)
         }
     }
 };
-
-module.exports = keywords;

@@ -1,0 +1,19 @@
+{
+    "class": "Telemetry",
+    "My_Poller": {
+        "class": "Telemetry_System_Poller",
+        "enable": true,
+        "trace": false,
+        "interval": 0
+    },
+    "My_System": {
+        "class": "Telemetry_System",
+        "enable": "true",
+        "systemPoller": "My_Poller"
+    },
+    "My_Pull_Consumer": {
+        "class": "Telemetry_Pull_Consumer",
+        "type": "default",
+        "systemPoller": ["My_Poller"]
+    }
+}
