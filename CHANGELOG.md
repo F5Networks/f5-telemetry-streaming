@@ -1,6 +1,13 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.12.0
+### Added
+- AUTOTOOL-1449: Add information about inlined pollers (System Poller and iHealthPoller) to TEEM report
+### Fixed
+### Changed
+### Removed
+
 ## 1.11.0
 ### Added
 - AUTOTOOL-1448: Introduce new Pull Consumer class, Pull Consumer API, and 'default' Pull Consumer
