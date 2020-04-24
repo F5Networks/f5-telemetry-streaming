@@ -3,6 +3,7 @@ Changes to this project are documented in this file. More detail and links can b
 
 ## 1.12.0
 ### Added
+- AUTOTOOL-1169: [GitHub #9](https://github.com/F5Networks/f5-telemetry-streaming/issues/9): Add new Prometheus Pull Consumer
 - AUTOTOOL-1449: Add information about inlined pollers (System Poller and iHealthPoller) to TEEM report
 ### Fixed
 ### Changed

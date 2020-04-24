@@ -555,6 +555,97 @@ describe('Util', () => {
         });
     });
 
+    describe('.mergeObjectArray', () => {
+        it('should merge 2 basic objects containing arrays', () => {
+            const input = [
+                { a: 12, b: 13, c: [17, 18] },
+                { b: 14, c: [78, 79], d: 11 }
+            ];
+            const expectedOutput = {
+                a: 12, b: 14, c: [17, 18, 78, 79], d: 11
+            };
+            const mergedData = util.mergeObjectArray(input);
+            assert.deepStrictEqual(mergedData, expectedOutput);
+        });
+
+        it('should accept an array with a single object', () => {
+            const x = util.mergeObjectArray([{ a: 1 }]);
+            assert.deepStrictEqual(x, { a: 1 });
+        });
+
+        it('should not process primitives or arrays that are root-level keys', () => {
+            const input = [
+                { a: 12 },
+                { b: 14 },
+                'myString',
+                12,
+                ['array1'],
+                ['array2']
+            ];
+            const expectedOutput = { a: 12, b: 14 };
+            const mergedData = util.mergeObjectArray(input);
+            assert.deepStrictEqual(mergedData, expectedOutput);
+        });
+
+        it('should merge 3 Objects, with nested arrays and objects', () => {
+            const input = [
+                {
+                    name1: {
+                        arr: ['values'],
+                        vals: [{ value: 12 }]
+                    },
+                    name2: {
+                        arr: ['valuez'],
+                        vals: [{ value: 22 }]
+                    }
+                },
+                {
+                    name2: {
+                        arr: ['valuez2'],
+                        vals: [{ value: 33, another: 24 }]
+                    }
+                },
+                {
+                    name4: {
+                        arr: ['values'],
+                        vals: [{ value: 52 }]
+                    }
+                }
+            ];
+            const expectedOutput = {
+                name1: {
+                    arr: ['values'],
+                    vals: [{ value: 12 }]
+                },
+                name2: {
+                    arr: ['valuez', 'valuez2'],
+                    vals: [
+                        { value: 22 },
+                        { value: 33, another: 24 }
+                    ]
+                },
+                name4: {
+                    arr: ['values'],
+                    vals: [{ value: 52 }]
+                }
+            };
+            const mergedData = util.mergeObjectArray(input);
+            assert.deepStrictEqual(mergedData, expectedOutput);
+        });
+
+        it('should not reject on empty array', () => {
+            const mergedData = util.mergeObjectArray([]);
+            assert.deepStrictEqual(mergedData, {});
+        });
+
+        it('should throw an error if the input is not an array', () => {
+            assert.throws(
+                () => util.mergeObjectArray('not an array'),
+                /Expected input of Array/
+            );
+        });
+    });
+
     describe('.copy()', () => {
         it('should make copy of object', () => {
             const src = { schedule: { frequency: 'daily', time: { start: '04:20', end: '6:00' } } };
