@@ -3836,6 +3836,7 @@ describe('Declarations', () => {
                     systemPoller: 'My_Poller'
                 }
             };
+
             minimalExpected = {
                 class: 'Telemetry_Pull_Consumer',
                 type: 'default',
@@ -3843,6 +3844,7 @@ describe('Declarations', () => {
                 enable: true,
                 trace: false
             };
+
             fullDeclaration = {
                 class: 'Telemetry',
                 My_System: {
@@ -3863,6 +3865,7 @@ describe('Declarations', () => {
                     systemPoller: ['My_Poller', 'My_Other_Poller']
                 }
             };
+
             fullExpected = {
                 class: 'Telemetry_Pull_Consumer',
                 type: 'default',
@@ -3879,5 +3882,17 @@ describe('Declarations', () => {
             validateMinimal({ someKey: 'someValue' }),
             /My_Pull_Consumer.*someKey.*should NOT have additional properties/
         ));
+
+        describe('Prometheus', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                { type: 'Prometheus' },
+                { type: 'Prometheus' }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                { type: 'Prometheus' },
+                { type: 'Prometheus' }
+            ));
+        });
     });
 });

@@ -41,7 +41,8 @@
                         "description": "" ,
                         "type": "string",
                         "enum": [
-                            "default"
+                            "default",
+                            "Prometheus"
                         ]
                     },
                     "systemPoller": {
@@ -78,6 +79,14 @@
                     },
                     {
                         "if": { "properties": { "type": { "const": "default" } } },
+                        "then": {
+                            "required": [],
+                            "properties": {}
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "Prometheus" } } },
                         "then": {
                             "required": [],
                             "properties": {}

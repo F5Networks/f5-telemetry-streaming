@@ -45,6 +45,7 @@
         "lodash": "^4.17.15",
         "mustache": "^4.0.0",
         "node-statsd": "0.1.1",
+        "prom-client": "11.0.0",
         "request": "^2.88.2"
     },
     "devDependencies": {
