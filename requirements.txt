@@ -4,3 +4,4 @@ f5-sphinx-theme>=2.0.1
 recommonmark
 sphinxjp.themes.basicstrap
 cloud_sptheme
+sphinx_copybutton
