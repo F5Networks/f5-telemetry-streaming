@@ -16,11 +16,21 @@ stages:
 #                                                            #
 ##############################################################
 .install_unittest_packages_cmd: &install_unittest_packages_cmd
-- echo "Node.js version - $(node --version)"
-- if node -e "process.exit(process.version.startsWith('v4.')?0:1);"; then
-- npm install --global npm@5.10.0
+- nodeFullVer=$(node --version)
+- echo "Node.js version - $nodeFullVer"
+- ver=$(echo $nodeFullVer | head -c 3)
+- if [[ "$ver" == "v4." ]]; then
+-   npm install --global npm@5.10.0
+-   npm run install-test
+-   npm install mocha@5.2.0 --no-optional
+-   echo "**** Using mocha 5.2.0 ****"
+- elif [[ "$ver" == "v6." ]]; then
+-   npm run install-test
+-   npm install mocha@6.2.2 --no-optional
+-   echo "**** Using mocha 6.2.2 ****"
+- else
+-   npm run install-test
 - fi
-- npm run install-test
 
 .run_unittest_cmd: &run_unittest_cmd
 - npm run test-only
