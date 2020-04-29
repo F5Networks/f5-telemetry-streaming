@@ -41,6 +41,33 @@ Example declaration:
 .. literalinclude:: ../examples/declarations/default_pull_consumer.json
     :language: json
 
+|
+
+.. _prometheus:
+
+Prometheus Pull Consumer
+------------------------
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+   Support for the Prometheus pull consumer is available in TS 1.12.0 and later. 
+
+|prometheus_img|
+
+This example shows how to use the Prometheus pull consumer introduced in TS 1.12.  
+
+For the default pull consumer, the type must be **Prometheus** in the Pull Consumer class as shown.
+
+See |pullref| in the Schema Reference for usage information.
+
+
+URL format: **/mgmt/shared/telemetry/pullconsumer/<pull_consumer_name>**
+
+Example CURL call: **GET /mgmt/shared/telemetry/pullconsumer/My_Pull_Consumer**
+
+Example declaration:
+
+.. literalinclude:: ../examples/declarations/default_pull_consumer.json
+    :language: json
 
 .. |br| raw:: html
    
@@ -49,3 +76,9 @@ Example declaration:
 .. |pullref| raw:: html
 
    <a href="https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/schema-reference.html#telemetry-pull-consumer" target="_blank">Telemetry_Pull_Consumer</a>
+
+
+.. |prometheus_img| image:: /images/prometheus.png
+   :target: https://prometheus.io/
+   :alt: Prometheus
+
