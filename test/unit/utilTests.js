@@ -429,6 +429,28 @@ describe('Util', () => {
                 return assert.isFulfilled(util.makeRequest.apply(util, testConf.args));
             });
         });
+
+        [
+            {
+                name: 'timeout',
+                opts: { timeout: 100 },
+                expected: { timeout: 100 }
+            }
+        ].forEach((testConf) => {
+            it(`should pass through any pass-through options: ${testConf.name}`, () => {
+                let passedOpts;
+                sinon.stub(request, 'get').callsFake((opts, cb) => {
+                    passedOpts = opts;
+                    cb(null, { statusCode: 200, statusMessage: '' }, {});
+                });
+                return util.makeRequest('host', testConf.opts)
+                    .then(() => {
+                        Object.keys(testConf.expected).forEach((expectedOpt) => {
+                            assert.deepStrictEqual(passedOpts[expectedOpt], testConf.expected[expectedOpt]);
+                        });
+                    });
+            });
+        });
     });
 
     describe('.base64()', () => {
