@@ -8,6 +8,7 @@ Changes to this project are documented in this file. More detail and links can b
 ### Fixed
 - AUTOTOOL-1506: Added a timeout to Azure metadata service HTTP requests
 ### Changed
+- AUTOTOOL-1432: Update npm packages (aws-sdk from v2.659 to v2.664 and default mocha from v5.2.0 to v7.1.2)
 ### Removed
 
 ## 1.11.0
