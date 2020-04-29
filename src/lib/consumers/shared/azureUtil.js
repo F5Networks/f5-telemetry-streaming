@@ -30,7 +30,8 @@ function getInstanceMetadata(context) {
         headers: {
             Metadata: true
         },
-        allowSelfSignedCert: context.config.allowSelfSignedCert
+        allowSelfSignedCert: context.config.allowSelfSignedCert,
+        timeout: 5 * 1000 // Only wait 5s for Metadata Service response
     };
 
     return util.makeRequest(metadataOpts)

@@ -938,6 +938,8 @@ module.exports = {
      *                                                   by default false
      * @param {Boolean} [options.includeResponseObject] - return [body, responseObject], by default false
      * @param {Array<Integer>|Integer} [options.expectedResponseCode]  - expected response code, by default 200
+     * @param {Integer} [options.timeout]               - Milliseconds to wait for a socket timeout. Option
+     *                                                    'passes through' to 'request' library
      *
      * @returns {Promise.<?any>} Returns promise resolved with response
      */
