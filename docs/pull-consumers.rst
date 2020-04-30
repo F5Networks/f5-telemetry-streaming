@@ -84,15 +84,17 @@ Prometheus Pull Consumer
 
 |prometheus_img|
 
-This example shows how to use the Prometheus pull consumer. For the default pull consumer, the type must be **Prometheus** in the Pull Consumer class as shown.
+This example shows how to use the Prometheus pull consumer. For this pull consumer, the type must be **Prometheus** in the Pull Consumer class as shown.
 
 The Prometheus Pull Consumer outputs the telemetry data according to the Prometheus data model specification. For more information about the Prometheus data model, see https://prometheus.io/docs/concepts/data_model/.
 
 
 Example declaration:
 
-.. literalinclude:: ../examples/declarations/default_pull_consumer.json
+.. literalinclude:: ../examples/declarations/prometheus_pull_consumer.json
     :language: json
+
+
 
 .. |br| raw:: html
    
