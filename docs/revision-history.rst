@@ -11,6 +11,10 @@ Document Revision History
         - Description
         - Date
 
+      * - 1.12.0
+        - Updated the documentation for Telemetry Streaming v1.11.0. This release contains the following changes: |br| * Added a new consumer for Prometheus (see :ref:`prometheus`) |br| * Updated the Pull Consumer page and added an example for using push and pull consumers in the same declaration (see :doc:`pull-consumers`) |br| *   |br| |br| Issues Resolved: |br| * Added a timeout to Azure metadata service HTTP requests to fix an issue where the Azure Consumer was slow when running in a non-Azure environment
+        - 04-21-20
+
       * - Unreleased
         - Documentation only update. This update contains the following change: |br| * Added an important note to the ElasticSearch consumer section stating TS currently does not support sending data to ElasticSearch 7 (see :ref:`elasticsearch-ref`).
         - 04-24-20
