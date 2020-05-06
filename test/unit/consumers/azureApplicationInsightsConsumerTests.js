@@ -207,24 +207,24 @@ describe('Azure_Application_Insights', () => {
 
         it('should configure internal logging behavior from controls log level', () => {
             const logRequests = [];
+            // Build context with default logLevel=debug
             const context = testUtil.buildConsumerContext({
                 eventType: 'systemInfo',
                 config: {
                     instrumentationKey: 'logging-debug-true-guid'
-                }
+                },
+                loggerOpts: { logLevel: 'debug' }
             });
             context.event.data = { num: 9.0 };
             // First call - simulate logLevel: debug
-            sinon.stub(context.logger, 'getLevelName').returns('debug');
             sinon.stub(appInsights.Configuration, 'setInternalLogging').callsFake((debug, warn) => {
                 logRequests.push({ debug, warn });
             });
 
             return azureAppInsightsIndex(context)
                 .then(() => {
-                    context.logger.getLevelName.restore();
                     // Second call - simulate logLevel: info
-                    sinon.stub(context.logger, 'getLevelName').returns('info');
+                    context.logger.setLogLevel('info');
                     return azureAppInsightsIndex(context);
                 })
                 .then(() => assert.deepStrictEqual(logRequests,

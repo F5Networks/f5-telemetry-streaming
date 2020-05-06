@@ -30,9 +30,6 @@ describe('Prometheus Pull Consumer', () => {
         config: {}
     });
     context.event = [[{}]];
-    context.tracer = {
-        write() {}
-    };
 
     afterEach(() => {
         sinon.restore();
