@@ -84,7 +84,6 @@ describe('Generic_HTTP', () => {
         });
 
         it('should trace data with secrets redacted', (done) => {
-            let traceData;
             const context = testUtil.buildConsumerContext({
                 config: {
                     method: 'POST',
@@ -100,14 +99,10 @@ describe('Generic_HTTP', () => {
                     ]
                 }
             });
-            context.tracer = {
-                write: (input) => {
-                    traceData = JSON.parse(input);
-                }
-            };
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
+                    const traceData = JSON.parse(context.tracer.write.firstCall.args[0]);
                     assert.deepStrictEqual(traceData.headers, { Authorization: '*****' });
                     assert.deepStrictEqual(opts.headers, { Authorization: 'Basic ABC123' });
                     done();
