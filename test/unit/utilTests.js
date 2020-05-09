@@ -123,7 +123,14 @@ describe('Util', () => {
         it('should stringify object', () => {
             assert.strictEqual(
                 util.stringify({ foo: 'bar' }),
-                JSON.stringify({ foo: 'bar' })
+                '{"foo":"bar"}'
+            );
+        });
+
+        it('should prettify format when specified', () => {
+            assert.strictEqual(
+                util.stringify({ test: 'abc' }, true),
+                '{\n    "test": "abc"\n}'
             );
         });
 

@@ -833,16 +833,16 @@ module.exports = {
     },
 
     /**
-     * Stringify a message
+     * Stringify a message with option to pretty format
      *
      * @param {Object|String} msg - message to stringify
-     *
+     * @param {Boolean} prettyFormat - format JSON string to make it easier to read
      * @returns {Object} Stringified message
      */
-    stringify(msg) {
+    stringify(msg, pretty) {
         if (typeof msg === 'object') {
             try {
-                msg = JSON.stringify(msg);
+                msg = pretty ? JSON.stringify(msg, null, 4) : JSON.stringify(msg);
             } catch (e) {
                 // just leave original message intact
             }

@@ -100,6 +100,32 @@ stages:
     stage: teardown
     when: always
 
+.base_aws: &base_aws
+    tags:
+        - docker-executor
+    only:
+        variables:
+            - $RUN_AWS_TESTS == "true"
+
+.deploy_cloud: &deploy_cloud
+    image: ${ARTIFACTORY_SERVER}/${DEPLOYMENT_TOOL_IMG}
+    stage: deploy
+
+.test_cloud: &test_cloud
+    stage: functional test
+    artifacts:
+        name: ${CI_JOB_NAME}_functests_artifacts
+        paths:
+            - test/artifacts
+            - env_metadata
+        when: always
+        expire_in: 4 days
+
+.teardown_cloud: &teardown_cloud
+    image: ${ARTIFACTORY_SERVER}/${DEPLOYMENT_TOOL_IMG}
+    stage: teardown
+    when: always
+
 ##############################################################
 #                                                            #
 # Jobs                                                       #
@@ -209,6 +235,10 @@ build_docs:
             - docs/_build/html
         expire_in: 1 month
 
+##############################################################
+# BEGIN VIO                                                  #
+##############################################################
+
 deploy_env:
     extends:
         - .harness_deployment_definition
@@ -260,6 +290,15 @@ teardown_env:
             - $REQ_DEVICE_PIPELINE == "true"
     script:
         - $SHELL ./scripts/functional_testing/vio/teardown.sh
+
+##############################################################
+# END VIO                                                    #
+##############################################################
+
+
+##############################################################
+# BEGIN CLOUD                                                #
+##############################################################
 
 # Azure Public
 deploy_env_azure:
@@ -318,6 +357,40 @@ teardown_env_azure_gov:
         - .teardown_azure
     script:
         - source ./scripts/functional_testing/azure/teardown_env.sh 'gov'
+
+
+deploy_env_aws:
+    extends:
+        - .base_aws
+        - .deploy_cloud
+    script:
+        - source ./scripts/functional_testing/aws/deploy_env.sh
+    artifacts:
+        paths:
+            - env_metadata
+        when: always
+
+test_functional_aws:
+    extends:
+        - .base_aws
+        - .test_cloud
+    stage: functional test
+    script:
+        - source ./env_metadata/aws.sh
+        - *install_unittest_packages_cmd
+        - npm install mocha@7.1.0
+        - npm run test-functional-cloud-aws
+
+teardown_env_aws:
+    extends:
+        - .base_aws
+        - .teardown_cloud
+    script:
+        - source ./scripts/functional_testing/aws/teardown_env.sh
+
+##############################################################
+# END CLOUD                                                  #
+##############################################################
 
 # Publish to internal artifactory
 # Note: Will publish when new tags are pushed and use the current build in dist directory

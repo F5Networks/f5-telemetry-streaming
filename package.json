@@ -13,6 +13,7 @@
         "lint": "eslint src test",
         "test-functional": "mocha \"./test/functional/testRunner.js\" --opts ./test/functional/.mocha.opts",
         "test-functional-cloud-azure": "mocha \"./test/functional/cloud/azureTests.js\" --opts ./test/functional/.mocha.opts",
+        "test-functional-cloud-aws": "mocha \"./test/functional/cloud/awsTests.js\" --opts ./test/functional/.mocha.opts",
         "test-only": "mocha --opts ./test/unit/.mocha.opts",
         "test": "nyc --all npm run test-only",
         "build": "./scripts/build/buildRpm.sh"
