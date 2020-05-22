@@ -3736,6 +3736,15 @@ describe('Declarations', () => {
                     port: 80
                 }
             ));
+
+            it('should only accept valid protocols', () => assert.isRejected(validateFull(
+                {
+                    type: 'Statsd',
+                    host: 'host',
+                    protocol: 'https',
+                    port: 80
+                }
+            ), /should be equal to one of the allowed values/));
         });
 
         describe('Sumo_Logic', () => {
