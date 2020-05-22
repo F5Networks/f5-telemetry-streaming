@@ -8,13 +8,13 @@
 
 'use strict';
 
-// hot-shots fork is preferred to node-statsd, but it only supports node 6.x+
-// node-statsd does not support tcp, only udp - which is default statsd protocol
-// node-statsd client.close() does not wait for events to be sent
+// updated to use 'statsd-client' (supports tcp+udp, and works on node 4.x) instead of 'node-statsd'
 // note: considering the statsd protocol is just a simple key/value/type format over
 // udp/tcp it might be simpler to just implement net module directly for this use case
-const StatsD = require('node-statsd');
+
+const StatsD = require('statsd-client');
 const deepDiff = require('deep-diff');
+const net = require('net');
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 
 const stripMetrics = (data) => {
@@ -34,6 +34,8 @@ module.exports = function (context) {
     const data = context.event.data;
     const host = context.config.host;
     const port = context.config.port;
+    const protocol = context.config.protocol;
+    const useTcp = protocol === 'tcp';
 
     // statsd does not process just any data - focus on metrics
     // so only process system poller info
@@ -42,56 +44,57 @@ module.exports = function (context) {
         return Promise.resolve();
     }
 
-    // instantiate client
-    const client = new StatsD(host, port);
-    // handle socket errors
-    client.socket.on('error', (error) => {
-        const msg = error && error.message ? error.message : error;
-        context.logger.error(msg);
-    });
-    // copy, strip, diff - returns list of metrics and nested path
-    const copyData = JSON.parse(JSON.stringify(data));
-    stripMetrics(copyData);
-    const diff = deepDiff(copyData, data) || [];
-
-    // add prefixes to support multiple BIG-IP(s) in a single statsd instance
-    const basePrefix = 'f5telemetry';
-    let hostnamePrefix = 'base.bigip.com';
-    try {
-        // if this consumer processes other events besides system info
-        // in the future, this will always fail
-        hostnamePrefix = data.system.hostname;
-    } catch (error) {
-        context.logger.error(error);
-    }
-    const promises = [];
-    diff.forEach((item) => {
-        // account for item in path having '.' or '/'
-        const path = [basePrefix, hostnamePrefix].concat(item.path).map(i => i.replace(/\.|\/|:/g, '-'));
-        const metricName = path.join('.');
-        const metricValue = item.rhs;
-        promises.push(new Promise((resolve, reject) => {
-            if (context.tracer) {
-                context.tracer.write(`${metricName}: ${metricValue}\n`);
-            }
-            // eslint-disable-next-line no-unused-vars
-            client.gauge(metricName, metricValue, (error, bytes) => {
-                if (error) {
-                    reject(error);
-                } else {
-                    resolve();
-                }
+    const tcpCheck = new Promise((resolve, reject) => {
+        if (useTcp) {
+            const socket = net.Socket({ type: 'tcp4' });
+            socket.on('error', (err) => {
+                socket.destroy();
+                reject(err);
             });
-        }));
+            socket.connect(port, host, () => {
+                socket.end();
+                resolve();
+            });
+        } else {
+            resolve();
+        }
     });
 
-    return Promise.all(promises)
+    return tcpCheck
         .then(() => {
-            // now close socket
+            // copy, strip, diff - returns list of metrics and nested path
+            const copyData = JSON.parse(JSON.stringify(data));
+            stripMetrics(copyData);
+            const diff = deepDiff(copyData, data) || [];
+
+            // add prefixes to support multiple BIG-IP(s) in a single statsd instance
+            const basePrefix = 'f5telemetry';
+            let hostnamePrefix = 'base.bigip.com';
+            try {
+                // if this consumer processes other events besides system info
+                // in the future, this will always fail
+                hostnamePrefix = data.system.hostname;
+            } catch (error) {
+                context.logger.error(error);
+            }
+
+            // instantiate client
+            const client = new StatsD({ host, port, tcp: useTcp });
+            diff.forEach((item) => {
+                // account for item in path having '.' or '/'
+                const path = [basePrefix, hostnamePrefix].concat(item.path).map(i => i.replace(/\.|\/|:/g, '-'));
+                const metricName = path.join('.');
+                const metricValue = item.rhs;
+
+                if (context.tracer) {
+                    context.tracer.write(`${metricName}: ${metricValue}\n`);
+                }
+                client.gauge(metricName, metricValue);
+            });
+
+            // Force a close(), which will force buffer to flush (aka: send metrics)
             client.close();
             context.logger.debug('success');
         })
-        .catch((error) => {
-            context.logger.error(`error: ${error.message || error}`);
-        });
+        .catch(err => context.logger.exception('Unable to forward to statsd client', err));
 };
