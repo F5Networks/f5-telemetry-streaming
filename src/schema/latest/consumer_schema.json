@@ -546,15 +546,17 @@
                         "then": {
                             "required": [
                                 "region",
-                                "bucket",
-                                "username",
-                                "passphrase"
+                                "bucket"
                             ],
                             "properties": {
                                 "region": { "$ref": "#/definitions/region" },
                                 "bucket": { "$ref": "#/definitions/bucket" },
                                 "username": { "$ref": "#/definitions/username" },
                                 "passphrase": { "$ref": "base_schema.json#/definitions/secret" }
+                            },
+                            "dependencies": {
+                                "passphrase": [ "username" ],
+                                "username":[ "passphrase" ]
                             }
                         },
                         "else": {}
@@ -654,7 +656,12 @@
                             ],
                             "properties": {
                                 "host": { "$ref": "#/definitions/host" },
-                                "protocol": { "$ref": "#/definitions/protocols", "default": "udp" },
+                                "protocol": {
+                                    "title": "Protocol",
+                                    "type": "string",
+                                    "enum": [ "tcp", "udp" ],
+                                    "default": "udp"
+                                },
                                 "port": { "$ref": "#/definitions/port", "default": 8125 }
                             }
                         },

@@ -12,7 +12,6 @@ function check_env_vars() {
 
     # Required Environment Variables:
     checkEnvVariable AZURE_PIPELINE_RESOURCE_GROUP
-    checkEnvVariable AZURE_TEMPLATE_URI
     checkEnvVariable AZURE_VM_PWD
 
     if [[ "$cloudType" == "gov" ]]; then
@@ -58,8 +57,8 @@ function login() {
 function deploy() {
     echo "Creating deployment from template"
     az group deployment create -g $AZURE_PIPELINE_RESOURCE_GROUP \
-    --name "pipeline.${CI_PIPELINE_ID}" --template-uri $AZURE_TEMPLATE_URI \
-    --parameters adminPasswordOrKey=$AZURE_VM_PWD dnsLabel=tsbigip imageName=Good25Mbps allowUsageAnalytics=No instanceName=$instanceName
+    --name "pipeline.${CI_PIPELINE_ID}" --template-file ./scripts/functional_testing/azure/azure_1nic_byol_deploy.json \
+    --parameters adminPasswordOrKey=$AZURE_VM_PWD dnsLabel=tsbigip imageName=AllTwoBootLocations allowUsageAnalytics=No instanceName=$instanceName
 }
 
 function assign_mi() {

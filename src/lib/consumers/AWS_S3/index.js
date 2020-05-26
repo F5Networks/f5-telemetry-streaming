@@ -9,52 +9,72 @@
 'use strict';
 
 const AWS = require('aws-sdk');
-
+const util = require('../../util');
 /**
  * See {@link ../README.md#context} for documentation
  */
 module.exports = function (context) {
-    const region = context.config.region;
-    const bucket = context.config.bucket || context.config.host; // fallback to host
-    const httpBody = JSON.stringify(context.event.data);
+    let s3;
 
-    // place file in folder(s) by date
-    const date = new Date();
-    const dateString = date.toISOString();
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const day = date.getDay();
-    const file = `${year}/${month}/${day}/${dateString}.log`;
-
-    AWS.config.update({
-        region,
-        credentials: new AWS.Credentials({
-            accessKeyId: context.config.username,
-            secretAccessKey: context.config.passphrase
-        })
-    });
-    const s3 = new AWS.S3({ apiVersion: '2006-03-01' });
-
-    const params = {
-        Bucket: bucket,
-        Key: file,
-        Body: httpBody,
-        ContentType: 'application/json',
-        Metadata: {
-            f5telemetry: 'true'
-        }
+    const getFileName = () => {
+        // place file in folder(s) by date
+        const date = new Date();
+        const dateString = date.toISOString();
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        const day = date.getDay();
+        return `${year}/${month}/${day}/${dateString}.log`;
     };
 
-    if (context.tracer) {
-        context.tracer.write(JSON.stringify({ Bucket: bucket, Key: file, Body: JSON.parse(httpBody) }, null, 4));
-    }
-
-    // eslint-disable-next-line no-unused-vars
-    s3.putObject(params, (error, body) => {
-        if (error) {
-            context.logger.error(`error: ${error.message ? error.message : error}`);
-        } else {
-            context.logger.debug('success');
+    const setupPromise = new Promise((resolve, reject) => {
+        try {
+            const awsConfig = { region: context.config.region };
+            if (context.config.username && context.config.passphrase) {
+                awsConfig.credentials = new AWS.Credentials({
+                    accessKeyId: context.config.username,
+                    secretAccessKey: context.config.passphrase
+                });
+            }
+            AWS.config.update(awsConfig);
+            s3 = new AWS.S3({ apiVersion: '2006-03-01' });
+            resolve();
+        } catch (err) {
+            reject(err);
         }
     });
+
+    return setupPromise
+        .then(() => {
+            const params = {
+                // fallback to host if no bucket
+                Bucket: context.config.bucket || context.config.host,
+                Key: getFileName(),
+                Body: context.event.data,
+                ContentType: 'application/json',
+                Metadata: {
+                    f5telemetry: 'true'
+                }
+            };
+
+            if (context.tracer) {
+                context.tracer.write(util.stringify(params, true));
+            }
+
+            return new Promise((resolve, reject) => {
+                params.Body = util.stringify(params.Body);
+                s3.putObject(params, (error, data) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(data);
+                    }
+                });
+            });
+        })
+        .then(() => {
+            context.logger.debug('success');
+        })
+        .catch((err) => {
+            context.logger.exception('Error encountered while processing for AWS S3', err);
+        });
 };
