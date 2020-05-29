@@ -218,7 +218,7 @@ Required Information:
  - Access Key: Navigate to :guilabel:`IAM > Users`
  - Secret Key: Navigate to :guilabel:`IAM > Users`
 
-.. NOTE:: To see more information about creating and using IAM roles, see |IAM roles|.
+To see more information about creating and using IAM roles, see |IAM roles|.
 
 .. IMPORTANT:: In TS 1.12.0 and later, the **username** and **passphrase** for S3 are optional.  This is because a user can send data from a BIG-IP that has an appropriate IAM role in AWS to AWS S3 without a username and passphrase.
 
