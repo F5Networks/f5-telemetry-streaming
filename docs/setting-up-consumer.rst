@@ -192,8 +192,8 @@ Required information:
  - Region: AWS region of the CloudWatch resource.
  - Log Group: Navigate to :guilabel:`CloudWatch > Logs`
  - Log Stream: Navigate to :guilabel:`CloudWatch > Logs > Your_Log_Group_Name`
- - Access Key: Navigate to :guilabel:`IAM > Users`
- - Secret Key: Navigate to :guilabel:`IAM > Users`
+ - Username: Navigate to :guilabel:`IAM > Users`
+ - Passphrase: Navigate to :guilabel:`IAM > Users`
 
 To see more information about creating and using IAM roles, see the |IAM roles|.
 
@@ -215,8 +215,8 @@ AWS S3
 Required Information:
  - Region: AWS region of the S3 bucket.
  - Bucket: Navigate to S3 to find the name of the bucket.
- - Access Key: Navigate to :guilabel:`IAM > Users`
- - Secret Key: Navigate to :guilabel:`IAM > Users`
+ - Username: Navigate to :guilabel:`IAM > Users`
+ - Passphrase: Navigate to :guilabel:`IAM > Users`
 
 To see more information about creating and using IAM roles, see the |IAM roles|.
 
