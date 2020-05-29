@@ -273,8 +273,6 @@ ElasticSearch
 -------------
 |ElasticSearch|
 
-.. IMPORTANT:: TS currently does not support sending data to ElasticSearch 7.
-
 Required Information:
  - Host: The address of the ElasticSearch system.
  - Index: The index where data should go within the ElasticSearch system.
@@ -322,9 +320,13 @@ StatsD
 ------
 |StatsD|
 
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+  TCP support to the StatsD consumer is available in TS 1.12 and later.
+
 Required Information:
  - Host: The address of the StatsD instance.
- - Protocol: The protocol of the StatsD instance. The default is UDP.
+ - Protocol: The protocol of the StatsD instance. Options: TCP (TS 1.12+) or UDP. The default is UDP.
  - Port: The port of the Statsd instance
 
 .. NOTE:: To see more information about installing StatsD, see |StatsDWiki|.
@@ -407,6 +409,7 @@ Once you have configured the Google Cloud Monitoring consumer and sent a Telemet
 
 .. literalinclude:: ../examples/declarations/google_cloud_monitoring.json
     :language: json
+
 
 |
 
@@ -530,9 +533,6 @@ In the following table, we list the Azure Government regions.
 +----------------------+------------+------------+--------------------+
 | USGov Arizona        |  33.4484   | -112.0740  | usgovarizona       |
 +----------------------+------------+------------+--------------------+
-
-
-
 
 
 
@@ -669,11 +669,3 @@ In the following table, we list the Azure Government regions.
 .. |azregion| raw:: html
 
    <a href="https://azure.microsoft.com/en-us/global-infrastructure/services/?products=monitor&regions=non-regional,usgov-non-regional,us-dod-central,us-dod-east,usgov-arizona,usgov-iowa,usgov-texas,usgov-virginia" target="_blank">Azure Products Available by Region</a>
-
-
-
-
-
-
-
-
