@@ -12,7 +12,7 @@ Document Revision History
         - Date
 
       * - 1.12.0
-        - Updated the documentation for Telemetry Streaming v1.11.0. This release contains the following changes: |br| * Added a new consumer for Prometheus (see :ref:`prometheus`) |br| * Updated the Pull Consumer page and added an example for using push and pull consumers in the same declaration (see :doc:`pull-consumers`) |br| *   |br| |br| Issues Resolved: |br| * Added a timeout to Azure metadata service HTTP requests to fix an issue where the Azure Consumer was slow when running in a non-Azure environment
+        - Updated the documentation for Telemetry Streaming v1.11.0. This release contains the following changes: |br| * Added a new consumer for Prometheus (see :ref:`prometheus`) |br| * Updated the Pull Consumer page and added an example for using push and pull consumers in the same declaration (see :doc:`pull-consumers`) |br| * Added TCP support to the StatsD consumer (see :ref:`statsd-ref`)  |br| |br| Issues Resolved: |br| * Added a timeout to Azure metadata service HTTP requests to fix an issue where the Azure Consumer was slow when running in a non-Azure environment |br| * Fixed renameKeys for networkInterfaces with multiple digits
         - 04-21-20
 
       * - Unreleased
