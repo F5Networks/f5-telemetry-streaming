@@ -33,7 +33,6 @@ A resource group containing:
     export AZURE_LOG_KEY="service-principal-password"
     export AZURE_TENANT="tenant-guid"
     export AZURE_MANAGED_IDENTITY_ID="/subscriptions/{sub-guid}/resourceGroups/{rg-name}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identity-name}"
-    export AZURE_TEMPLATE_URI="https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/master/supported/standalone/1nic/new-stack/payg/azuredeploy.json"
     export AZURE_VM_PWD="vm-password"
     export AZURE_PIPELINE_RESOURCE_GROUP="resource-group-to-use-for-deployment-name"
     export AZURE_CLIENT_ID="client-id-for-log-reader"

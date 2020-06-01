@@ -361,6 +361,30 @@ module.exports = {
                                 'counters.bitsOut': 0,
                                 name: '1.1',
                                 status: 'up'
+                            },
+                            1.2: {
+                                'counters.bitsIn': 3,
+                                'counters.bitsOut': 4,
+                                name: '1.2',
+                                status: 'uninit'
+                            },
+                            '1.10': {
+                                'counters.bitsIn': 5,
+                                'counters.bitsOut': 6,
+                                name: '1.10',
+                                status: 'down'
+                            },
+                            11.2349: {
+                                'counters.bitsIn': 7,
+                                'counters.bitsOut': 8,
+                                name: '11.2349',
+                                status: 'pend'
+                            },
+                            2.1: {
+                                'counters.bitsIn': 44,
+                                'counters.bitsOut': 55,
+                                name: '2.1',
+                                status: 'up'
                             }
                         },
                         provisioning: {
@@ -544,6 +568,82 @@ module.exports = {
                                             },
                                             'counters.bitsOut': {
                                                 value: 0
+                                            },
+                                            // just to be sure that filterKeys works
+                                            'counters.dropsAll': {
+                                                value: 5504272
+                                            },
+                                            status: {
+                                                description: 'up'
+                                            }
+                                        }
+                                    }
+                                },
+                                'https://localhost/mgmt/tm/net/interface/1.2/stats': {
+                                    nestedStats: {
+                                        entries: {
+                                            'counters.bitsIn': {
+                                                value: 3
+                                            },
+                                            'counters.bitsOut': {
+                                                value: 4
+                                            },
+                                            // just to be sure that filterKeys works
+                                            'counters.dropsAll': {
+                                                value: 5504272
+                                            },
+                                            status: {
+                                                description: 'uninit'
+                                            }
+                                        }
+                                    }
+                                },
+                                'https://localhost/mgmt/tm/net/interface/1.10/stats': {
+                                    nestedStats: {
+                                        entries: {
+                                            'counters.bitsIn': {
+                                                value: 5
+                                            },
+                                            'counters.bitsOut': {
+                                                value: 6
+                                            },
+                                            // just to be sure that filterKeys works
+                                            'counters.dropsAll': {
+                                                value: 5504272
+                                            },
+                                            status: {
+                                                description: 'down'
+                                            }
+                                        }
+                                    }
+                                },
+                                'https://localhost/mgmt/tm/net/interface/11.2349/stats': {
+                                    nestedStats: {
+                                        entries: {
+                                            'counters.bitsIn': {
+                                                value: 7
+                                            },
+                                            'counters.bitsOut': {
+                                                value: 8
+                                            },
+                                            // just to be sure that filterKeys works
+                                            'counters.dropsAll': {
+                                                value: 5504272
+                                            },
+                                            status: {
+                                                description: 'pend'
+                                            }
+                                        }
+                                    }
+                                },
+                                'https://localhost/mgmt/tm/net/interface/2.1/stats': {
+                                    nestedStats: {
+                                        entries: {
+                                            'counters.bitsIn': {
+                                                value: 44
+                                            },
+                                            'counters.bitsOut': {
+                                                value: 55
                                             },
                                             // just to be sure that filterKeys works
                                             'counters.dropsAll': {

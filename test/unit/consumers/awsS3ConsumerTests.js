@@ -58,7 +58,7 @@ describe('AWS_S3', () => {
         sinon.restore();
     });
 
-    it('should configure AWS access', () => {
+    it('should configure AWS access when credentials present', () => {
         let optionsParam;
         awsConfigUpdate.callsFake((options) => {
             optionsParam = options;
@@ -67,10 +67,31 @@ describe('AWS_S3', () => {
             config: defaultConsumerConfig
         });
 
-        awsS3Index(context);
-        assert.strictEqual(optionsParam.region, 'us-west-1');
-        assert.deepStrictEqual(optionsParam.credentials,
-            new AWS.Credentials({ accessKeyId: 'awsuser', secretAccessKey: 'awssecret' }));
+        return awsS3Index(context)
+            .then(() => {
+                assert.strictEqual(optionsParam.region, 'us-west-1');
+                assert.deepStrictEqual(optionsParam.credentials,
+                    new AWS.Credentials({ accessKeyId: 'awsuser', secretAccessKey: 'awssecret' }));
+            });
+    });
+
+    it('should configure AWS access without credentials (IAM role-based permissions)', () => {
+        let optionsParam;
+        awsConfigUpdate.callsFake((options) => {
+            optionsParam = options;
+        });
+        const context = testUtil.buildConsumerContext({
+            config: {
+                region: 'us-east-1',
+                bucket: 'dataBucket'
+            }
+        });
+
+        return awsS3Index(context)
+            .then(() => {
+                assert.strictEqual(optionsParam.region, 'us-east-1');
+                assert.strictEqual(optionsParam.credentials, undefined);
+            });
     });
 
     describe('process', () => {
@@ -91,8 +112,8 @@ describe('AWS_S3', () => {
             });
             expectedParams.Body = JSON.stringify(testUtil.deepCopy(context.event.data));
 
-            awsS3Index(context);
-            assert.deepStrictEqual(s3PutObjectParams, expectedParams);
+            return awsS3Index(context)
+                .then(() => assert.deepStrictEqual(s3PutObjectParams, expectedParams));
         });
 
         it('should process event data', () => {
@@ -102,8 +123,25 @@ describe('AWS_S3', () => {
             });
             expectedParams.Body = JSON.stringify(testUtil.deepCopy(context.event.data));
 
-            awsS3Index(context);
-            assert.deepStrictEqual(s3PutObjectParams, expectedParams);
+            return awsS3Index(context)
+                .then(() => assert.deepStrictEqual(s3PutObjectParams, expectedParams));
+        });
+
+        it('should log error when encountered and not reject', () => {
+            const context = testUtil.buildConsumerContext(defaultConsumerConfig);
+            const error = new Error('simulated error');
+            AWS.S3.restore();
+            sinon.stub(AWS, 'S3').returns({
+                putObject: (params, cb) => {
+                    s3PutObjectParams = params;
+                    cb(error, '');
+                }
+            });
+            return awsS3Index(context)
+                .then(() => assert.deepStrictEqual(
+                    context.logger.exception.args[0],
+                    ['Error encountered while processing for AWS S3', error]
+                ));
         });
     });
 });

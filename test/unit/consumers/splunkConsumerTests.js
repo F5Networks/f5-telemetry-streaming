@@ -109,7 +109,6 @@ describe('Splunk', () => {
         });
 
         it('should trace data with secrets redacted', (done) => {
-            let traceData;
             const context = testUtil.buildConsumerContext({
                 config: {
                     protocol: 'http',
@@ -119,14 +118,10 @@ describe('Splunk', () => {
                     gzip: false
                 }
             });
-            context.tracer = {
-                write: (input) => {
-                    traceData = JSON.parse(input);
-                }
-            };
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
+                    const traceData = JSON.parse(context.tracer.write.firstCall.args[0]);
                     assert.deepStrictEqual(opts.headers, {
                         Authorization: 'Splunk superSecret',
                         'Content-Length': 92
@@ -226,21 +221,11 @@ describe('Splunk', () => {
         it('should ignore events from Event Listener in legacy format', () => {
             // enable event loop to use setTimeout
             clock.restore();
-
-            const logMessages = {
-                debug: [],
-                error: []
-            };
             const context = testUtil.buildConsumerContext({
                 eventType: 'AVR',
                 config: defaultConsumerConfig
             });
             context.config.format = 'legacy';
-            context.logger = {
-                debug: msg => logMessages.debug.push(msg),
-                error: msg => logMessages.error.push(msg),
-                exception: msg => logMessages.error.push(msg)
-            };
             // error will be logged if method called
             const requestStub = sinon.stub(request, 'post');
             requestStub.throws(new Error('err message'));
@@ -249,9 +234,9 @@ describe('Splunk', () => {
             return (new Promise(resolve => setTimeout(resolve, 100)))
                 .then(() => {
                     assert.strictEqual(requestStub.notCalled, true, 'should not call request.post');
-                    assert.strictEqual(logMessages.error.length, 0, 'should have no error messages');
-                    assert.notStrictEqual(logMessages.debug.length, 0, 'should have debug messages');
-                    assert.ok(/No data to forward/.test(logMessages.debug[logMessages.debug.length - 1]));
+                    assert.strictEqual(context.logger.error.callCount, 0, 'should have no error messages');
+                    assert.notStrictEqual(context.logger.debug.callCount, 0, 'should have debug messages');
+                    assert.ok(/No data to forward/.test(context.logger.debug.lastCall.args[0]));
                 });
         });
 

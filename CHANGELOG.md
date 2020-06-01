@@ -1,6 +1,20 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.12.0
+### Added
+- AUTOTOOL-1169: [GitHub #9](https://github.com/F5Networks/f5-telemetry-streaming/issues/9): Add new Prometheus Pull Consumer
+- AUTOTOOL-1449: Add information about inlined pollers (System Poller and iHealthPoller) to TEEM report
+- AUTOTOOL-1340: [GitHub #41](https://github.com/F5Networks/f5-telemetry-streaming/issues/41): Add support for IAM Roles with AWS_S3 Consumer
+- AUTOTOOL-1538: Add TCP support to StatsD consumer
+### Fixed
+- AUTOTOOL-1506: Added a timeout to Azure metadata service HTTP requests
+- AUTOTOOL-557: [GitHub #18](https://github.com/F5Networks/f5-telemetry-streaming/issues/18) Fix renameKeys for networkInterfaces with multiple digits
+### Changed
+- AUTOTOOL-1432: Update npm packages (aws-sdk from v2.659 to v2.664 and default mocha from v5.2.0 to v7.1.2)
+- Updated @f5devcentral/f5-teem package dependency to 1.4.6
+### Removed
+
 ## 1.11.0
 ### Added
 - AUTOTOOL-1448: Introduce new Pull Consumer class, Pull Consumer API, and 'default' Pull Consumer

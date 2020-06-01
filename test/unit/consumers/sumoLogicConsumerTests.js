@@ -84,7 +84,6 @@ describe('Sumo_Logic', () => {
         });
 
         it('should trace data with secrets redacted', (done) => {
-            let traceData;
             const context = testUtil.buildConsumerContext({
                 config: {
                     host: 'localhost',
@@ -95,14 +94,10 @@ describe('Sumo_Logic', () => {
                     allowSelfSignedCert: true
                 }
             });
-            context.tracer = {
-                write: (input) => {
-                    traceData = JSON.parse(input);
-                }
-            };
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
+                    const traceData = JSON.parse(context.tracer.write.firstCall.args[0]);
                     assert.notStrictEqual(traceData.url.indexOf('*****'), -1);
                     assert.strictEqual(opts.url, 'http://localhost:80/receiver/v1/http/mySecret');
                     done();

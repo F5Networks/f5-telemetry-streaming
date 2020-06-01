@@ -1,0 +1,2242 @@
+{
+    "system": {
+        "data": {
+            "system": {
+                "hostname": "bigip1",
+                "machineId": "7fc8d53d-a59a-4f00-ae7a-a24618012a6e",
+                "version": "14.1.0.3",
+                "versionBuild": "0.0.6",
+                "location": "missing data",
+                "description": "missing data",
+                "marketingName": "BIG-IP Virtual Edition",
+                "platformId": "Z100",
+                "chassisId": "422512e1-ea55-9149-9621ea8c47ba",
+                "baseMac": "FA:16:3E:A4:84:5B",
+                "callBackUrl": "https://10.145.73.144",
+                "configReady": "yes",
+                "licenseReady": "yes",
+                "provisionReady": "yes",
+                "syncMode": "standalone",
+                "syncColor": "green",
+                "syncStatus": "Standalone",
+                "syncSummary": " ",
+                "failoverStatus": "ACTIVE",
+                "failoverColor": "green",
+                "systemTimestamp": "2020-04-16T16:33:07.000Z",
+                "cpu": 7,
+                "memory": 57,
+                "tmmCpu": 3,
+                "tmmMemory": 17,
+                "tmmTraffic": {
+                    "clientSideTraffic.bitsIn": 60258692504,
+                    "clientSideTraffic.bitsOut": 1274995760,
+                    "serverSideTraffic.bitsIn": 8458221624,
+                    "serverSideTraffic.bitsOut": 862169712
+                },
+                "diskStorage": {
+                    "/": {
+                        "1024-blocks": "428150",
+                        "Capacity": "48%",
+                        "name": "/"
+                    },
+                    "/dev": {
+                        "1024-blocks": "8208412",
+                        "Capacity": "1%",
+                        "name": "/dev"
+                    },
+                    "/dev/shm": {
+                        "1024-blocks": "8217452",
+                        "Capacity": "7%",
+                        "name": "/dev/shm"
+                    },
+                    "/run": {
+                        "1024-blocks": "8217452",
+                        "Capacity": "1%",
+                        "name": "/run"
+                    },
+                    "/sys/fs/cgroup": {
+                        "1024-blocks": "8217452",
+                        "Capacity": "0%",
+                        "name": "/sys/fs/cgroup"
+                    },
+                    "/usr": {
+                        "1024-blocks": "5186648",
+                        "Capacity": "84%",
+                        "name": "/usr"
+                    },
+                    "/shared": {
+                        "1024-blocks": "15350768",
+                        "Capacity": "4%",
+                        "name": "/shared"
+                    },
+                    "/shared/rrd.1.2": {
+                        "1024-blocks": "8217452",
+                        "Capacity": "1%",
+                        "name": "/shared/rrd.1.2"
+                    },
+                    "/config": {
+                        "1024-blocks": "2171984",
+                        "Capacity": "9%",
+                        "name": "/config"
+                    },
+                    "/var": {
+                        "1024-blocks": "3030800",
+                        "Capacity": "29%",
+                        "name": "/var"
+                    },
+                    "/var/prompt": {
+                        "1024-blocks": "4096",
+                        "Capacity": "1%",
+                        "name": "/var/prompt"
+                    },
+                    "/var/tmstat": {
+                        "1024-blocks": "8217452",
+                        "Capacity": "1%",
+                        "name": "/var/tmstat"
+                    },
+                    "/var/log": {
+                        "1024-blocks": "2958224",
+                        "Capacity": "15%",
+                        "name": "/var/log"
+                    },
+                    "/appdata": {
+                        "1024-blocks": "25717852",
+                        "Capacity": "5%",
+                        "name": "/appdata"
+                    },
+                    "/var/loipc": {
+                        "1024-blocks": "8217452",
+                        "Capacity": "0%",
+                        "name": "/var/loipc"
+                    },
+                    "/var/apm/mount/apmclients-7180.2019.119.331-4683.0.iso": {
+                        "1024-blocks": "304366",
+                        "Capacity": "100%",
+                        "name": "/var/apm/mount/apmclients-7180.2019.119.331-4683.0.iso"
+                    },
+                    "/run/user/91": {
+                        "1024-blocks": "1643492",
+                        "Capacity": "0%",
+                        "name": "/run/user/91"
+                    },
+                    "/mnt/sshplugin_tempfs": {
+                        "1024-blocks": "8217452",
+                        "Capacity": "0%",
+                        "name": "/mnt/sshplugin_tempfs"
+                    }
+                },
+                "diskLatency": {
+                    "sda": {
+                        "r/s": "1.05",
+                        "w/s": "7.41",
+                        "%util": "1.36",
+                        "name": "sda"
+                    },
+                    "dm-0": {
+                        "r/s": "0.00",
+                        "w/s": "0.00",
+                        "%util": "0.00",
+                        "name": "dm-0"
+                    },
+                    "dm-1": {
+                        "r/s": "0.00",
+                        "w/s": "3.16",
+                        "%util": "0.25",
+                        "name": "dm-1"
+                    },
+                    "dm-2": {
+                        "r/s": "0.01",
+                        "w/s": "4.48",
+                        "%util": "0.31",
+                        "name": "dm-2"
+                    },
+                    "dm-3": {
+                        "r/s": "0.01",
+                        "w/s": "2.66",
+                        "%util": "0.24",
+                        "name": "dm-3"
+                    },
+                    "dm-4": {
+                        "r/s": "0.00",
+                        "w/s": "0.01",
+                        "%util": "0.00",
+                        "name": "dm-4"
+                    },
+                    "dm-5": {
+                        "r/s": "0.00",
+                        "w/s": "0.81",
+                        "%util": "0.09",
+                        "name": "dm-5"
+                    },
+                    "dm-6": {
+                        "r/s": "0.03",
+                        "w/s": "0.00",
+                        "%util": "0.00",
+                        "name": "dm-6"
+                    },
+                    "dm-7": {
+                        "r/s": "0.00",
+                        "w/s": "0.16",
+                        "%util": "0.01",
+                        "name": "dm-7"
+                    },
+                    "dm-8": {
+                        "r/s": "0.01",
+                        "w/s": "3.83",
+                        "%util": "0.31",
+                        "name": "dm-8"
+                    }
+                },
+                "networkInterfaces": {
+                    "1.0": {
+                        "counters.bitsIn": 13619749722248,
+                        "counters.bitsOut": 9802738696,
+                        "status": "up",
+                        "name": "1.0"
+                    },
+                    "mgmt": {
+                        "counters.bitsIn": 28643376254552,
+                        "counters.bitsOut": 12929625080,
+                        "status": "up",
+                        "name": "mgmt"
+                    }
+                },
+                "provisioning": {
+                    "afm": {
+                        "name": "afm",
+                        "level": "nominal"
+                    },
+                    "am": {
+                        "name": "am",
+                        "level": "none"
+                    },
+                    "apm": {
+                        "name": "apm",
+                        "level": "nominal"
+                    },
+                    "asm": {
+                        "name": "asm",
+                        "level": "nominal"
+                    },
+                    "avr": {
+                        "name": "avr",
+                        "level": "nominal"
+                    },
+                    "dos": {
+                        "name": "dos",
+                        "level": "none"
+                    },
+                    "fps": {
+                        "name": "fps",
+                        "level": "none"
+                    },
+                    "gtm": {
+                        "name": "gtm",
+                        "level": "nominal"
+                    },
+                    "ilx": {
+                        "name": "ilx",
+                        "level": "none"
+                    },
+                    "lc": {
+                        "name": "lc",
+                        "level": "none"
+                    },
+                    "ltm": {
+                        "name": "ltm",
+                        "level": "nominal"
+                    },
+                    "pem": {
+                        "name": "pem",
+                        "level": "nominal"
+                    },
+                    "sslo": {
+                        "name": "sslo",
+                        "level": "none"
+                    },
+                    "swg": {
+                        "name": "swg",
+                        "level": "none"
+                    },
+                    "urldb": {
+                        "name": "urldb",
+                        "level": "none"
+                    }
+                },
+                "asmState": "Policies Consistent",
+                "afmState": "quiescent",
+                "lastAfmDeploy": "2020-03-12T16:27:58.000Z",
+                "ltmConfigTime": "2020-04-15T21:45:30.000Z",
+                "gtmConfigTime": "2020-03-06T08:02:56.000Z"
+            }
+        }
+    },
+    "pools": {
+        "data": {
+            "pools": {
+                "/Common/h.4": {
+                    "activeMemberCnt": 0,
+                    "curPriogrp": 0,
+                    "highestPriogrp": 0,
+                    "lowestPriogrp": 0,
+                    "serverside.bitsIn": 0,
+                    "serverside.bitsOut": 0,
+                    "serverside.curConns": 0,
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
+                    "name": "/Common/h.4",
+                    "members": {}
+                },
+                "/Sample_01/A1/web_pool": {
+                    "activeMemberCnt": 0,
+                    "curPriogrp": 0,
+                    "highestPriogrp": 0,
+                    "lowestPriogrp": 0,
+                    "serverside.bitsIn": 0,
+                    "serverside.bitsOut": 0,
+                    "serverside.curConns": 0,
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
+                    "name": "/Sample_01/A1/web_pool",
+                    "members": {
+                        "/Sample_01/192.0.1.10:80": {
+                            "addr": "192.0.1.10",
+                            "port": 80,
+                            "serverside.bitsIn": 0,
+                            "serverside.bitsOut": 0,
+                            "serverside.curConns": 0,
+                            "availabilityState": "offline",
+                            "enabledState": "enabled"
+                        },
+                        "/Sample_01/192.0.1.11:80": {
+                            "addr": "192.0.1.11",
+                            "port": 80,
+                            "serverside.bitsIn": 0,
+                            "serverside.bitsOut": 0,
+                            "serverside.curConns": 0,
+                            "availabilityState": "offline",
+                            "enabledState": "enabled"
+                        }
+                    }
+                },
+                "/Sample_01/A1/web_pool1": {
+                    "activeMemberCnt": 0,
+                    "curPriogrp": 0,
+                    "highestPriogrp": 0,
+                    "lowestPriogrp": 0,
+                    "serverside.bitsIn": 0,
+                    "serverside.bitsOut": 0,
+                    "serverside.curConns": 0,
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
+                    "name": "/Sample_01/A1/web_pool1",
+                    "members": {
+                        "/Sample_01/192.0.1.12:80": {
+                            "addr": "192.0.1.12",
+                            "port": 80,
+                            "serverside.bitsIn": 0,
+                            "serverside.bitsOut": 0,
+                            "serverside.curConns": 0,
+                            "availabilityState": "offline",
+                            "enabledState": "enabled"
+                        },
+                        "/Sample_01/192.0.1.13:80": {
+                            "addr": "192.0.1.13",
+                            "port": 80,
+                            "serverside.bitsIn": 0,
+                            "serverside.bitsOut": 0,
+                            "serverside.curConns": 0,
+                            "availabilityState": "offline",
+                            "enabledState": "enabled"
+                        }
+                    }
+                },
+                "/Sample_02/A1/web_pool": {
+                    "activeMemberCnt": 0,
+                    "curPriogrp": 0,
+                    "highestPriogrp": 0,
+                    "lowestPriogrp": 0,
+                    "serverside.bitsIn": 0,
+                    "serverside.bitsOut": 0,
+                    "serverside.curConns": 0,
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
+                    "name": "/Sample_02/A1/web_pool",
+                    "members": {
+                        "/Sample_02/192.0.2.10:80": {
+                            "addr": "192.0.2.10",
+                            "port": 80,
+                            "serverside.bitsIn": 0,
+                            "serverside.bitsOut": 0,
+                            "serverside.curConns": 0,
+                            "availabilityState": "offline",
+                            "enabledState": "enabled"
+                        },
+                        "/Sample_02/192.0.2.11:80": {
+                            "addr": "192.0.2.11",
+                            "port": 80,
+                            "serverside.bitsIn": 0,
+                            "serverside.bitsOut": 0,
+                            "serverside.curConns": 0,
+                            "availabilityState": "offline",
+                            "enabledState": "enabled"
+                        }
+                    }
+                },
+                "/Sample_02/A1/web_pool1": {
+                    "activeMemberCnt": 0,
+                    "curPriogrp": 0,
+                    "highestPriogrp": 0,
+                    "lowestPriogrp": 0,
+                    "serverside.bitsIn": 0,
+                    "serverside.bitsOut": 0,
+                    "serverside.curConns": 0,
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
+                    "name": "/Sample_02/A1/web_pool1",
+                    "members": {
+                        "/Sample_02/192.0.2.12:80": {
+                            "addr": "192.0.2.12",
+                            "port": 80,
+                            "serverside.bitsIn": 0,
+                            "serverside.bitsOut": 0,
+                            "serverside.curConns": 0,
+                            "availabilityState": "offline",
+                            "enabledState": "enabled"
+                        },
+                        "/Sample_02/192.0.2.13:80": {
+                            "addr": "192.0.2.13",
+                            "port": 80,
+                            "serverside.bitsIn": 0,
+                            "serverside.bitsOut": 0,
+                            "serverside.curConns": 0,
+                            "availabilityState": "offline",
+                            "enabledState": "enabled"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "virtualServers": {
+        "data": {
+            "virtualServers": {
+                "/Common/shared": {
+                    "clientside.bitsIn": 5504,
+                    "clientside.bitsOut": 3072,
+                    "clientside.curConns": 0,
+                    "destination": "10.145.73.144:8080",
+                    "availabilityState": "unknown",
+                    "enabledState": "enabled",
+                    "name": "/Common/shared",
+                    "ipProtocol": "tcp",
+                    "mask": "255.255.255.255",
+                    "profiles": {
+                        "/Common/tcp": {
+                            "name": "/Common/tcp"
+                        }
+                    }
+                },
+                "/Sample_01/A1/serviceMain": {
+                    "clientside.bitsIn": 52896,
+                    "clientside.bitsOut": 32480,
+                    "clientside.curConns": 0,
+                    "destination": "10.145.73.144:7890",
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
+                    "name": "/Sample_01/A1/serviceMain",
+                    "ipProtocol": "tcp",
+                    "mask": "255.255.255.255",
+                    "pool": "/Sample_01/A1/web_pool",
+                    "profiles": {
+                        "/Common/f5-tcp-progressive": {
+                            "name": "/Common/f5-tcp-progressive"
+                        },
+                        "/Common/http": {
+                            "name": "/Common/http"
+                        }
+                    }
+                },
+                "/Sample_02/A1/serviceMain": {
+                    "clientside.bitsIn": 227168,
+                    "clientside.bitsOut": 139360,
+                    "clientside.curConns": 0,
+                    "destination": "10.145.73.144:7891",
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
+                    "name": "/Sample_02/A1/serviceMain",
+                    "ipProtocol": "tcp",
+                    "mask": "255.255.255.255",
+                    "pool": "/Sample_02/A1/web_pool",
+                    "profiles": {
+                        "/Common/f5-tcp-progressive": {
+                            "name": "/Common/f5-tcp-progressive"
+                        },
+                        "/Common/http": {
+                            "name": "/Common/http"
+                        }
+                    }
+                },
+                "/Sample_02/another": {
+                    "clientside.bitsIn": 31504,
+                    "clientside.bitsOut": 17856,
+                    "clientside.curConns": 0,
+                    "destination": "10.145.73.144:7892",
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
+                    "name": "/Sample_02/another",
+                    "ipProtocol": "tcp",
+                    "mask": "255.255.255.255",
+                    "pool": "/Sample_02/A1/web_pool",
+                    "profiles": {
+                        "/Common/tcp": {
+                            "name": "/Common/tcp"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "unfiltered": {
+        "data": {
+            "system": {
+                "hostname": "bigip1",
+                "machineId": "7fc8d53d-a59a-4f00-ae7a-a24618012a6e",
+                "version": "14.1.0.3",
+                "versionBuild": "0.0.6",
+                "location": "missing data",
+                "description": "missing data",
+                "marketingName": "BIG-IP Virtual Edition",
+                "platformId": "Z100",
+                "chassisId": "422512e1-ea55-9149-9621ea8c47ba",
+                "baseMac": "FA:16:3E:A4:84:5B",
+                "callBackUrl": "https://10.145.73.144",
+                "configReady": "yes",
+                "licenseReady": "yes",
+                "provisionReady": "yes",
+                "syncMode": "standalone",
+                "syncColor": "green",
+                "syncStatus": "Standalone",
+                "syncSummary": " ",
+                "failoverStatus": "ACTIVE",
+                "failoverColor": "green",
+                "systemTimestamp": "2020-04-16T16:33:07.000Z",
+                "cpu": 7,
+                "memory": 57,
+                "tmmCpu": 3,
+                "tmmMemory": 17,
+                "tmmTraffic": {
+                    "clientSideTraffic.bitsIn": 60258692504,
+                    "clientSideTraffic.bitsOut": 1274995760,
+                    "serverSideTraffic.bitsIn": 8458221624,
+                    "serverSideTraffic.bitsOut": 862169712
+                },
+                "diskStorage": {
+                    "/": {
+                        "1024-blocks": "428150",
+                        "Capacity": "48%",
+                        "name": "/"
+                    },
+                    "/dev": {
+                        "1024-blocks": "8208412",
+                        "Capacity": "1%",
+                        "name": "/dev"
+                    },
+                    "/dev/shm": {
+                        "1024-blocks": "8217452",
+                        "Capacity": "7%",
+                        "name": "/dev/shm"
+                    },
+                    "/run": {
+                        "1024-blocks": "8217452",
+                        "Capacity": "1%",
+                        "name": "/run"
+                    },
+                    "/sys/fs/cgroup": {
+                        "1024-blocks": "8217452",
+                        "Capacity": "0%",
+                        "name": "/sys/fs/cgroup"
+                    },
+                    "/usr": {
+                        "1024-blocks": "5186648",
+                        "Capacity": "84%",
+                        "name": "/usr"
+                    },
+                    "/shared": {
+                        "1024-blocks": "15350768",
+                        "Capacity": "4%",
+                        "name": "/shared"
+                    },
+                    "/shared/rrd.1.2": {
+                        "1024-blocks": "8217452",
+                        "Capacity": "1%",
+                        "name": "/shared/rrd.1.2"
+                    },
+                    "/config": {
+                        "1024-blocks": "2171984",
+                        "Capacity": "9%",
+                        "name": "/config"
+                    },
+                    "/var": {
+                        "1024-blocks": "3030800",
+                        "Capacity": "29%",
+                        "name": "/var"
+                    },
+                    "/var/prompt": {
+                        "1024-blocks": "4096",
+                        "Capacity": "1%",
+                        "name": "/var/prompt"
+                    },
+                    "/var/tmstat": {
+                        "1024-blocks": "8217452",
+                        "Capacity": "1%",
+                        "name": "/var/tmstat"
+                    },
+                    "/var/log": {
+                        "1024-blocks": "2958224",
+                        "Capacity": "15%",
+                        "name": "/var/log"
+                    },
+                    "/appdata": {
+                        "1024-blocks": "25717852",
+                        "Capacity": "5%",
+                        "name": "/appdata"
+                    },
+                    "/var/loipc": {
+                        "1024-blocks": "8217452",
+                        "Capacity": "0%",
+                        "name": "/var/loipc"
+                    },
+                    "/var/apm/mount/apmclients-7180.2019.119.331-4683.0.iso": {
+                        "1024-blocks": "304366",
+                        "Capacity": "100%",
+                        "name": "/var/apm/mount/apmclients-7180.2019.119.331-4683.0.iso"
+                    },
+                    "/run/user/91": {
+                        "1024-blocks": "1643492",
+                        "Capacity": "0%",
+                        "name": "/run/user/91"
+                    },
+                    "/mnt/sshplugin_tempfs": {
+                        "1024-blocks": "8217452",
+                        "Capacity": "0%",
+                        "name": "/mnt/sshplugin_tempfs"
+                    }
+                },
+                "diskLatency": {
+                    "sda": {
+                        "r/s": "1.05",
+                        "w/s": "7.41",
+                        "%util": "1.36",
+                        "name": "sda"
+                    },
+                    "dm-0": {
+                        "r/s": "0.00",
+                        "w/s": "0.00",
+                        "%util": "0.00",
+                        "name": "dm-0"
+                    },
+                    "dm-1": {
+                        "r/s": "0.00",
+                        "w/s": "3.16",
+                        "%util": "0.25",
+                        "name": "dm-1"
+                    },
+                    "dm-2": {
+                        "r/s": "0.01",
+                        "w/s": "4.48",
+                        "%util": "0.31",
+                        "name": "dm-2"
+                    },
+                    "dm-3": {
+                        "r/s": "0.01",
+                        "w/s": "2.66",
+                        "%util": "0.24",
+                        "name": "dm-3"
+                    },
+                    "dm-4": {
+                        "r/s": "0.00",
+                        "w/s": "0.01",
+                        "%util": "0.00",
+                        "name": "dm-4"
+                    },
+                    "dm-5": {
+                        "r/s": "0.00",
+                        "w/s": "0.81",
+                        "%util": "0.09",
+                        "name": "dm-5"
+                    },
+                    "dm-6": {
+                        "r/s": "0.03",
+                        "w/s": "0.00",
+                        "%util": "0.00",
+                        "name": "dm-6"
+                    },
+                    "dm-7": {
+                        "r/s": "0.00",
+                        "w/s": "0.16",
+                        "%util": "0.01",
+                        "name": "dm-7"
+                    },
+                    "dm-8": {
+                        "r/s": "0.01",
+                        "w/s": "3.83",
+                        "%util": "0.31",
+                        "name": "dm-8"
+                    }
+                },
+                "networkInterfaces": {
+                    "1.0": {
+                        "counters.bitsIn": 13619749722248,
+                        "counters.bitsOut": 9802738696,
+                        "status": "up",
+                        "name": "1.0"
+                    },
+                    "mgmt": {
+                        "counters.bitsIn": 28643376254552,
+                        "counters.bitsOut": 12929625080,
+                        "status": "up",
+                        "name": "mgmt"
+                    }
+                },
+                "provisioning": {
+                    "afm": {
+                        "name": "afm",
+                        "level": "nominal"
+                    },
+                    "am": {
+                        "name": "am",
+                        "level": "none"
+                    },
+                    "apm": {
+                        "name": "apm",
+                        "level": "nominal"
+                    },
+                    "asm": {
+                        "name": "asm",
+                        "level": "nominal"
+                    },
+                    "avr": {
+                        "name": "avr",
+                        "level": "nominal"
+                    },
+                    "dos": {
+                        "name": "dos",
+                        "level": "none"
+                    },
+                    "fps": {
+                        "name": "fps",
+                        "level": "none"
+                    },
+                    "gtm": {
+                        "name": "gtm",
+                        "level": "nominal"
+                    },
+                    "ilx": {
+                        "name": "ilx",
+                        "level": "none"
+                    },
+                    "lc": {
+                        "name": "lc",
+                        "level": "none"
+                    },
+                    "ltm": {
+                        "name": "ltm",
+                        "level": "nominal"
+                    },
+                    "pem": {
+                        "name": "pem",
+                        "level": "nominal"
+                    },
+                    "sslo": {
+                        "name": "sslo",
+                        "level": "none"
+                    },
+                    "swg": {
+                        "name": "swg",
+                        "level": "none"
+                    },
+                    "urldb": {
+                        "name": "urldb",
+                        "level": "none"
+                    }
+                },
+                "asmState": "Policies Consistent",
+                "afmState": "quiescent",
+                "lastAfmDeploy": "2020-03-12T16:27:58.000Z",
+                "ltmConfigTime": "2020-04-15T21:45:30.000Z",
+                "gtmConfigTime": "2020-03-06T08:02:56.000Z"
+            },
+            "aWideIps": {
+                "/Common/awideip.example.com": {
+                    "alternate": 0,
+                    "cnameResolutions": 0,
+                    "dropped": 0,
+                    "fallback": 0,
+                    "persisted": 0,
+                    "preferred": 0,
+                    "rcode": 0,
+                    "requests": 0,
+                    "resolutions": 0,
+                    "returnFromDns": 0,
+                    "returnToDns": 0,
+                    "status.availabilityState": "offline",
+                    "status.enabledState": "enabled",
+                    "status.statusReason": "No enabled pools available",
+                    "wipType": "A",
+                    "name": "/Common/awideip.example.com",
+                    "partition": "Common",
+                    "enabled": true,
+                    "failureRcode": "noerror",
+                    "failureRcodeResponse": "disabled",
+                    "failureRcodeTtl": 0,
+                    "lastResortPool": "",
+                    "minimalResponse": "enabled",
+                    "persistCidrIpv4": 32,
+                    "persistCidrIpv6": 128,
+                    "persistence": "disabled",
+                    "poolLbMode": "round-robin",
+                    "topologyPreferEdns0ClientSubnet": "disabled",
+                    "ttlPersistence": 3600,
+                    "pools": [
+                        "/Common/aPool"
+                    ],
+                    "tenant": "Common"
+                }
+            },
+            "aaaaWideIps": {
+                "/Common/aaawideip.example.com": {
+                    "alternate": 0,
+                    "cnameResolutions": 0,
+                    "dropped": 0,
+                    "fallback": 0,
+                    "persisted": 0,
+                    "preferred": 0,
+                    "rcode": 0,
+                    "requests": 0,
+                    "resolutions": 0,
+                    "returnFromDns": 0,
+                    "returnToDns": 0,
+                    "status.availabilityState": "offline",
+                    "status.enabledState": "enabled",
+                    "status.statusReason": "No enabled pools available",
+                    "wipType": "AAAA",
+                    "name": "/Common/aaawideip.example.com",
+                    "partition": "Common",
+                    "enabled": true,
+                    "failureRcode": "noerror",
+                    "failureRcodeResponse": "disabled",
+                    "failureRcodeTtl": 0,
+                    "lastResortPool": "",
+                    "minimalResponse": "enabled",
+                    "persistCidrIpv4": 32,
+                    "persistCidrIpv6": 128,
+                    "persistence": "disabled",
+                    "poolLbMode": "round-robin",
+                    "topologyPreferEdns0ClientSubnet": "disabled",
+                    "ttlPersistence": 3600,
+                    "pools": [
+                        "/Common/aaaPool"
+                    ],
+                    "tenant": "Common"
+                }
+            },
+            "cnameWideIps": {
+                "/Common/cnamewideip.example.com": {
+                    "alternate": 0,
+                    "cnameResolutions": 0,
+                    "dropped": 0,
+                    "fallback": 0,
+                    "persisted": 0,
+                    "preferred": 0,
+                    "rcode": 0,
+                    "requests": 0,
+                    "resolutions": 0,
+                    "returnFromDns": 0,
+                    "returnToDns": 0,
+                    "status.availabilityState": "offline",
+                    "status.enabledState": "enabled",
+                    "status.statusReason": "No enabled pools available",
+                    "wipType": "CNAME",
+                    "name": "cnamewideip.example.com",
+                    "partition": "Common",
+                    "enabled": true,
+                    "failureRcode": "noerror",
+                    "failureRcodeResponse": "disabled",
+                    "failureRcodeTtl": 0,
+                    "lastResortPool": "",
+                    "minimalResponse": "enabled",
+                    "persistCidrIpv4": 32,
+                    "persistCidrIpv6": 128,
+                    "persistence": "disabled",
+                    "poolLbMode": "round-robin",
+                    "topologyPreferEdns0ClientSubnet": "disabled",
+                    "ttlPersistence": 3600,
+                    "pools": [
+                        "/Common/cnamePool"
+                    ],
+                    "tenant": "Common"
+                }
+            },
+            "mxWideIps": {
+                "/Common/mxwideip.example.com": {
+                    "alternate": 0,
+                    "cnameResolutions": 0,
+                    "dropped": 0,
+                    "fallback": 0,
+                    "persisted": 0,
+                    "preferred": 0,
+                    "rcode": 0,
+                    "requests": 0,
+                    "resolutions": 0,
+                    "returnFromDns": 0,
+                    "returnToDns": 0,
+                    "status.availabilityState": "offline",
+                    "status.enabledState": "enabled",
+                    "status.statusReason": "No enabled pools available",
+                    "wipType": "MX",
+                    "name": "/Common/mxwideip.example.com",
+                    "partition": "Common",
+                    "enabled": true,
+                    "failureRcode": "noerror",
+                    "failureRcodeResponse": "disabled",
+                    "failureRcodeTtl": 0,
+                    "lastResortPool": "",
+                    "minimalResponse": "enabled",
+                    "persistCidrIpv4": 32,
+                    "persistCidrIpv6": 128,
+                    "persistence": "disabled",
+                    "poolLbMode": "round-robin",
+                    "topologyPreferEdns0ClientSubnet": "disabled",
+                    "ttlPersistence": 3600,
+                    "pools": [
+                        "/Common/mxPool"
+                    ],
+                    "tenant": "Common"
+                }
+            },
+            "naptrWideIps": {
+                "/Common/naptrwideip.example.com": {
+                    "alternate": 0,
+                    "cnameResolutions": 0,
+                    "dropped": 0,
+                    "fallback": 0,
+                    "persisted": 0,
+                    "preferred": 0,
+                    "rcode": 0,
+                    "requests": 0,
+                    "resolutions": 0,
+                    "returnFromDns": 0,
+                    "returnToDns": 0,
+                    "status.availabilityState": "offline",
+                    "status.enabledState": "enabled",
+                    "status.statusReason": "No enabled pools available",
+                    "wipType": "NAPTR",
+                    "name": "/Common/naptrwideip.example.com",
+                    "partition": "Common",
+                    "enabled": true,
+                    "failureRcode": "noerror",
+                    "failureRcodeResponse": "disabled",
+                    "failureRcodeTtl": 0,
+                    "lastResortPool": "",
+                    "minimalResponse": "enabled",
+                    "persistCidrIpv4": 32,
+                    "persistCidrIpv6": 128,
+                    "persistence": "disabled",
+                    "poolLbMode": "round-robin",
+                    "topologyPreferEdns0ClientSubnet": "disabled",
+                    "ttlPersistence": 3600,
+                    "pools": [
+                        "/Common/NPool"
+                    ],
+                    "tenant": "Common"
+                }
+            },
+            "srvWideIps": {
+                "/Common/srvwideip.example.com": {
+                    "alternate": 0,
+                    "cnameResolutions": 0,
+                    "dropped": 0,
+                    "fallback": 0,
+                    "persisted": 0,
+                    "preferred": 0,
+                    "rcode": 0,
+                    "requests": 0,
+                    "resolutions": 0,
+                    "returnFromDns": 0,
+                    "returnToDns": 0,
+                    "status.availabilityState": "offline",
+                    "status.enabledState": "enabled",
+                    "status.statusReason": "No enabled pools available",
+                    "wipType": "SRV",
+                    "name": "/Common/srvwideip.example.com",
+                    "partition": "Common",
+                    "enabled": true,
+                    "failureRcode": "noerror",
+                    "failureRcodeResponse": "disabled",
+                    "failureRcodeTtl": 0,
+                    "lastResortPool": "",
+                    "minimalResponse": "enabled",
+                    "persistCidrIpv4": 32,
+                    "persistCidrIpv6": 128,
+                    "persistence": "disabled",
+                    "poolLbMode": "round-robin",
+                    "topologyPreferEdns0ClientSubnet": "disabled",
+                    "ttlPersistence": 3600,
+                    "pools": [
+                        "/Common/srvPool"
+                    ],
+                    "tenant": "Common"
+                }
+            },
+            "aPools": {
+                "/Common/aPool": {
+                    "alternate": 0,
+                    "dropped": 0,
+                    "fallback": 0,
+                    "poolType": "A",
+                    "preferred": 0,
+                    "returnFromDns": 0,
+                    "returnToDns": 0,
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
+                    "status.statusReason": "No enabled pool members available",
+                    "name": "/Common/aPool",
+                    "partition": "Common",
+                    "alternateMode": "round-robin",
+                    "dynamicRatio": "disabled",
+                    "enabled": true,
+                    "fallbackIp": "any",
+                    "fallbackMode": "return-to-dns",
+                    "limitMaxBps": 0,
+                    "limitMaxBpsStatus": "disabled",
+                    "limitMaxConnections": 0,
+                    "limitMaxConnectionsStatus": "disabled",
+                    "limitMaxPps": 0,
+                    "limitMaxPpsStatus": "disabled",
+                    "loadBalancingMode": "round-robin",
+                    "manualResume": "disabled",
+                    "maxAnswersReturned": 1,
+                    "monitor": "default",
+                    "qosHitRatio": 5,
+                    "qosHops": 0,
+                    "qosKilobytesSecond": 3,
+                    "qosLcs": 30,
+                    "qosPacketRate": 1,
+                    "qosRtt": 50,
+                    "qosTopology": 0,
+                    "qosVsCapacity": 0,
+                    "qosVsScore": 0,
+                    "ttl": 30,
+                    "verifyMemberAvailability": "enabled",
+                    "members": {},
+                    "tenant": "Common"
+                }
+            },
+            "aaaaPools": {
+                "/Common/aaaPool": {
+                    "alternate": 0,
+                    "dropped": 0,
+                    "fallback": 0,
+                    "poolType": "AAAA",
+                    "preferred": 0,
+                    "returnFromDns": 0,
+                    "returnToDns": 0,
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
+                    "status.statusReason": "No enabled pool members available",
+                    "name": "/Common/aaaPool",
+                    "partition": "Common",
+                    "alternateMode": "round-robin",
+                    "dynamicRatio": "disabled",
+                    "enabled": true,
+                    "fallbackIp": "any",
+                    "fallbackMode": "return-to-dns",
+                    "limitMaxBps": 0,
+                    "limitMaxBpsStatus": "disabled",
+                    "limitMaxConnections": 0,
+                    "limitMaxConnectionsStatus": "disabled",
+                    "limitMaxPps": 0,
+                    "limitMaxPpsStatus": "disabled",
+                    "loadBalancingMode": "round-robin",
+                    "manualResume": "disabled",
+                    "maxAnswersReturned": 1,
+                    "monitor": "default",
+                    "qosHitRatio": 5,
+                    "qosHops": 0,
+                    "qosKilobytesSecond": 3,
+                    "qosLcs": 30,
+                    "qosPacketRate": 1,
+                    "qosRtt": 50,
+                    "qosTopology": 0,
+                    "qosVsCapacity": 0,
+                    "qosVsScore": 0,
+                    "ttl": 30,
+                    "verifyMemberAvailability": "enabled",
+                    "members": {},
+                    "tenant": "Common"
+                }
+            },
+            "cnamePools": {
+                "/Common/cnamePool": {
+                    "alternate": 0,
+                    "dropped": 0,
+                    "fallback": 0,
+                    "poolType": "CNAME",
+                    "preferred": 0,
+                    "returnFromDns": 0,
+                    "returnToDns": 0,
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
+                    "status.statusReason": "No enabled pool members available",
+                    "name": "cnamePool",
+                    "partition": "Common",
+                    "alternateMode": "round-robin",
+                    "dynamicRatio": "disabled",
+                    "enabled": true,
+                    "fallbackMode": "return-to-dns",
+                    "loadBalancingMode": "round-robin",
+                    "manualResume": "disabled",
+                    "qosHitRatio": 5,
+                    "qosHops": 0,
+                    "qosKilobytesSecond": 3,
+                    "qosLcs": 30,
+                    "qosPacketRate": 1,
+                    "qosRtt": 50,
+                    "qosTopology": 0,
+                    "qosVsCapacity": 0,
+                    "qosVsScore": 0,
+                    "ttl": 30,
+                    "verifyMemberAvailability": "enabled",
+                    "members": {},
+                    "tenant": "Common"
+                }
+            },
+            "mxPools": {
+                "/Common/mxPool": {
+                    "alternate": 0,
+                    "dropped": 0,
+                    "fallback": 0,
+                    "poolType": "MX",
+                    "preferred": 0,
+                    "returnFromDns": 0,
+                    "returnToDns": 0,
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
+                    "status.statusReason": "No enabled pool members available",
+                    "name": "/Common/mxPool",
+                    "partition": "Common",
+                    "alternateMode": "round-robin",
+                    "dynamicRatio": "disabled",
+                    "enabled": true,
+                    "fallbackMode": "return-to-dns",
+                    "loadBalancingMode": "round-robin",
+                    "manualResume": "disabled",
+                    "maxAnswersReturned": 1,
+                    "qosHitRatio": 5,
+                    "qosHops": 0,
+                    "qosKilobytesSecond": 3,
+                    "qosLcs": 30,
+                    "qosPacketRate": 1,
+                    "qosRtt": 50,
+                    "qosTopology": 0,
+                    "qosVsCapacity": 0,
+                    "qosVsScore": 0,
+                    "ttl": 30,
+                    "verifyMemberAvailability": "enabled",
+                    "members": {},
+                    "tenant": "Common"
+                }
+            },
+            "naptrPools": {
+                "/Common/NPool": {
+                    "alternate": 0,
+                    "dropped": 0,
+                    "fallback": 0,
+                    "poolType": "NAPTR",
+                    "preferred": 0,
+                    "returnFromDns": 0,
+                    "returnToDns": 0,
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
+                    "status.statusReason": "No enabled pool members available",
+                    "name": "/Common/NPool",
+                    "partition": "Common",
+                    "alternateMode": "round-robin",
+                    "dynamicRatio": "disabled",
+                    "enabled": true,
+                    "fallbackMode": "return-to-dns",
+                    "loadBalancingMode": "round-robin",
+                    "manualResume": "disabled",
+                    "maxAnswersReturned": 1,
+                    "qosHitRatio": 5,
+                    "qosHops": 0,
+                    "qosKilobytesSecond": 3,
+                    "qosLcs": 30,
+                    "qosPacketRate": 1,
+                    "qosRtt": 50,
+                    "qosTopology": 0,
+                    "qosVsCapacity": 0,
+                    "qosVsScore": 0,
+                    "ttl": 30,
+                    "verifyMemberAvailability": "enabled",
+                    "members": {},
+                    "tenant": "Common"
+                }
+            },
+            "srvPools": {
+                "/Common/srvPool": {
+                    "alternate": 0,
+                    "dropped": 0,
+                    "fallback": 0,
+                    "poolType": "SRV",
+                    "preferred": 0,
+                    "returnFromDns": 0,
+                    "returnToDns": 0,
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
+                    "status.statusReason": "No enabled pool members available",
+                    "name": "/Common/srvPool",
+                    "partition": "Common",
+                    "alternateMode": "round-robin",
+                    "dynamicRatio": "disabled",
+                    "enabled": true,
+                    "fallbackMode": "return-to-dns",
+                    "loadBalancingMode": "round-robin",
+                    "manualResume": "disabled",
+                    "maxAnswersReturned": 1,
+                    "qosHitRatio": 5,
+                    "qosHops": 0,
+                    "qosKilobytesSecond": 3,
+                    "qosLcs": 30,
+                    "qosPacketRate": 1,
+                    "qosRtt": 50,
+                    "qosTopology": 0,
+                    "qosVsCapacity": 0,
+                    "qosVsScore": 0,
+                    "ttl": 30,
+                    "verifyMemberAvailability": "enabled",
+                    "members": {},
+                    "tenant": "Common"
+                }
+            },
+            "virtualServers": {
+                "/Common/shared": {
+                    "clientside.bitsIn": 5504,
+                    "clientside.bitsOut": 3072,
+                    "clientside.curConns": 0,
+                    "destination": "10.145.73.144:8080",
+                    "availabilityState": "unknown",
+                    "enabledState": "enabled",
+                    "name": "/Common/shared",
+                    "ipProtocol": "tcp",
+                    "mask": "255.255.255.255",
+                    "profiles": {
+                        "/Common/tcp": {
+                            "name": "/Common/tcp"
+                        }
+                    },
+                    "tenant": "Common"
+                },
+                "/Sample_01/A1/serviceMain": {
+                    "clientside.bitsIn": 52896,
+                    "clientside.bitsOut": 32480,
+                    "clientside.curConns": 0,
+                    "destination": "10.145.73.144:7890",
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
+                    "name": "/Sample_01/A1/serviceMain",
+                    "ipProtocol": "tcp",
+                    "mask": "255.255.255.255",
+                    "pool": "/Sample_01/A1/web_pool",
+                    "profiles": {
+                        "/Common/f5-tcp-progressive": {
+                            "name": "/Common/f5-tcp-progressive"
+                        },
+                        "/Common/http": {
+                            "name": "/Common/http"
+                        }
+                    },
+                    "tenant": "Sample_01",
+                    "application": "A1"
+                },
+                "/Sample_02/A1/serviceMain": {
+                    "clientside.bitsIn": 227168,
+                    "clientside.bitsOut": 139360,
+                    "clientside.curConns": 0,
+                    "destination": "10.145.73.144:7891",
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
+                    "name": "/Sample_02/A1/serviceMain",
+                    "ipProtocol": "tcp",
+                    "mask": "255.255.255.255",
+                    "pool": "/Sample_02/A1/web_pool",
+                    "profiles": {
+                        "/Common/f5-tcp-progressive": {
+                            "name": "/Common/f5-tcp-progressive"
+                        },
+                        "/Common/http": {
+                            "name": "/Common/http"
+                        }
+                    },
+                    "tenant": "Sample_02",
+                    "application": "A1"
+                },
+                "/Sample_02/another": {
+                    "clientside.bitsIn": 31504,
+                    "clientside.bitsOut": 17856,
+                    "clientside.curConns": 0,
+                    "destination": "10.145.73.144:7892",
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
+                    "name": "/Sample_02/another",
+                    "ipProtocol": "tcp",
+                    "mask": "255.255.255.255",
+                    "pool": "/Sample_02/A1/web_pool",
+                    "profiles": {
+                        "/Common/tcp": {
+                            "name": "/Common/tcp"
+                        }
+                    },
+                    "tenant": "Sample_02"
+                }
+            },
+            "pools": {
+                "/Common/h.4": {
+                    "activeMemberCnt": 0,
+                    "curPriogrp": 0,
+                    "highestPriogrp": 0,
+                    "lowestPriogrp": 0,
+                    "serverside.bitsIn": 0,
+                    "serverside.bitsOut": 0,
+                    "serverside.curConns": 0,
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
+                    "name": "/Common/h.4",
+                    "members": {},
+                    "tenant": "Common"
+                },
+                "/Sample_01/A1/web_pool": {
+                    "activeMemberCnt": 0,
+                    "curPriogrp": 0,
+                    "highestPriogrp": 0,
+                    "lowestPriogrp": 0,
+                    "serverside.bitsIn": 0,
+                    "serverside.bitsOut": 0,
+                    "serverside.curConns": 0,
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
+                    "name": "/Sample_01/A1/web_pool",
+                    "members": {
+                        "/Sample_01/192.0.1.10:80": {
+                            "addr": "192.0.1.10",
+                            "port": 80,
+                            "serverside.bitsIn": 0,
+                            "serverside.bitsOut": 0,
+                            "serverside.curConns": 0,
+                            "availabilityState": "offline",
+                            "enabledState": "enabled"
+                        },
+                        "/Sample_01/192.0.1.11:80": {
+                            "addr": "192.0.1.11",
+                            "port": 80,
+                            "serverside.bitsIn": 0,
+                            "serverside.bitsOut": 0,
+                            "serverside.curConns": 0,
+                            "availabilityState": "offline",
+                            "enabledState": "enabled"
+                        }
+                    },
+                    "tenant": "Sample_01",
+                    "application": "A1"
+                },
+                "/Sample_01/A1/web_pool1": {
+                    "activeMemberCnt": 0,
+                    "curPriogrp": 0,
+                    "highestPriogrp": 0,
+                    "lowestPriogrp": 0,
+                    "serverside.bitsIn": 0,
+                    "serverside.bitsOut": 0,
+                    "serverside.curConns": 0,
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
+                    "name": "/Sample_01/A1/web_pool1",
+                    "members": {
+                        "/Sample_01/192.0.1.12:80": {
+                            "addr": "192.0.1.12",
+                            "port": 80,
+                            "serverside.bitsIn": 0,
+                            "serverside.bitsOut": 0,
+                            "serverside.curConns": 0,
+                            "availabilityState": "offline",
+                            "enabledState": "enabled"
+                        },
+                        "/Sample_01/192.0.1.13:80": {
+                            "addr": "192.0.1.13",
+                            "port": 80,
+                            "serverside.bitsIn": 0,
+                            "serverside.bitsOut": 0,
+                            "serverside.curConns": 0,
+                            "availabilityState": "offline",
+                            "enabledState": "enabled"
+                        }
+                    },
+                    "tenant": "Sample_01",
+                    "application": "A1"
+                },
+                "/Sample_02/A1/web_pool": {
+                    "activeMemberCnt": 0,
+                    "curPriogrp": 0,
+                    "highestPriogrp": 0,
+                    "lowestPriogrp": 0,
+                    "serverside.bitsIn": 0,
+                    "serverside.bitsOut": 0,
+                    "serverside.curConns": 0,
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
+                    "name": "/Sample_02/A1/web_pool",
+                    "members": {
+                        "/Sample_02/192.0.2.10:80": {
+                            "addr": "192.0.2.10",
+                            "port": 80,
+                            "serverside.bitsIn": 0,
+                            "serverside.bitsOut": 0,
+                            "serverside.curConns": 0,
+                            "availabilityState": "offline",
+                            "enabledState": "enabled"
+                        },
+                        "/Sample_02/192.0.2.11:80": {
+                            "addr": "192.0.2.11",
+                            "port": 80,
+                            "serverside.bitsIn": 0,
+                            "serverside.bitsOut": 0,
+                            "serverside.curConns": 0,
+                            "availabilityState": "offline",
+                            "enabledState": "enabled"
+                        }
+                    },
+                    "tenant": "Sample_02",
+                    "application": "A1"
+                },
+                "/Sample_02/A1/web_pool1": {
+                    "activeMemberCnt": 0,
+                    "curPriogrp": 0,
+                    "highestPriogrp": 0,
+                    "lowestPriogrp": 0,
+                    "serverside.bitsIn": 0,
+                    "serverside.bitsOut": 0,
+                    "serverside.curConns": 0,
+                    "availabilityState": "offline",
+                    "enabledState": "enabled",
+                    "name": "/Sample_02/A1/web_pool1",
+                    "members": {
+                        "/Sample_02/192.0.2.12:80": {
+                            "addr": "192.0.2.12",
+                            "port": 80,
+                            "serverside.bitsIn": 0,
+                            "serverside.bitsOut": 0,
+                            "serverside.curConns": 0,
+                            "availabilityState": "offline",
+                            "enabledState": "enabled"
+                        },
+                        "/Sample_02/192.0.2.13:80": {
+                            "addr": "192.0.2.13",
+                            "port": 80,
+                            "serverside.bitsIn": 0,
+                            "serverside.bitsOut": 0,
+                            "serverside.curConns": 0,
+                            "availabilityState": "offline",
+                            "enabledState": "enabled"
+                        }
+                    },
+                    "tenant": "Sample_02",
+                    "application": "A1"
+                }
+            },
+            "ltmPolicies": {},
+            "httpProfiles": {
+                "/Common/http": {
+                    "cookiePersistInserts": 0,
+                    "getReqs": 152,
+                    "maxKeepaliveReq": 1,
+                    "numberReqs": 152,
+                    "postReqs": 0,
+                    "2xxResp": 0,
+                    "3xxResp": 0,
+                    "4xxResp": 0,
+                    "5xxResp": 0,
+                    "respLessThan2m": 0,
+                    "respGreaterThan2m": 0,
+                    "v10Reqs": 0,
+                    "v10Resp": 0,
+                    "v11Reqs": 152,
+                    "v11Resp": 0,
+                    "v9Reqs": 0,
+                    "v9Resp": 0,
+                    "name": "/Common/http",
+                    "tenant": "Common"
+                },
+                "/Common/http-explicit": {
+                    "cookiePersistInserts": 0,
+                    "getReqs": 0,
+                    "maxKeepaliveReq": 0,
+                    "numberReqs": 0,
+                    "postReqs": 0,
+                    "2xxResp": 0,
+                    "3xxResp": 0,
+                    "4xxResp": 0,
+                    "5xxResp": 0,
+                    "respLessThan2m": 0,
+                    "respGreaterThan2m": 0,
+                    "v10Reqs": 0,
+                    "v10Resp": 0,
+                    "v11Reqs": 0,
+                    "v11Resp": 0,
+                    "v9Reqs": 0,
+                    "v9Resp": 0,
+                    "name": "/Common/http-explicit",
+                    "tenant": "Common"
+                },
+                "/Common/http-transparent": {
+                    "cookiePersistInserts": 0,
+                    "getReqs": 0,
+                    "maxKeepaliveReq": 0,
+                    "numberReqs": 0,
+                    "postReqs": 0,
+                    "2xxResp": 0,
+                    "3xxResp": 0,
+                    "4xxResp": 0,
+                    "5xxResp": 0,
+                    "respLessThan2m": 0,
+                    "respGreaterThan2m": 0,
+                    "v10Reqs": 0,
+                    "v10Resp": 0,
+                    "v11Reqs": 0,
+                    "v11Resp": 0,
+                    "v9Reqs": 0,
+                    "v9Resp": 0,
+                    "name": "/Common/http-transparent",
+                    "tenant": "Common"
+                }
+            },
+            "clientSslProfiles": {
+                "/Common/clientssl": {
+                    "activeHandshakeRejected": 0,
+                    "cipherUses.chacha20Poly1305Bulk": 0,
+                    "currentCompatibleConnections": 0,
+                    "currentConnections": 0,
+                    "currentNativeConnections": 0,
+                    "currentActiveHandshakes": 0,
+                    "decryptedBytesIn": 0,
+                    "decryptedBytesOut": 0,
+                    "encryptedBytesIn": 0,
+                    "encryptedBytesOut": 0,
+                    "fatalAlerts": 0,
+                    "handshakeFailures": 0,
+                    "peercertInvalid": 0,
+                    "peercertNone": 0,
+                    "peercertValid": 0,
+                    "protocolUses.dtlsv1": 0,
+                    "protocolUses.sslv2": 0,
+                    "protocolUses.sslv3": 0,
+                    "protocolUses.tlsv1": 0,
+                    "protocolUses.tlsv1_1": 0,
+                    "protocolUses.tlsv1_2": 0,
+                    "protocolUses.tlsv1_3": 0,
+                    "recordsIn": 0,
+                    "recordsOut": 0,
+                    "sniRejects": 0,
+                    "name": "/Common/clientssl",
+                    "tenant": "Common"
+                },
+                "/Common/clientssl-insecure-compatible": {
+                    "activeHandshakeRejected": 0,
+                    "cipherUses.chacha20Poly1305Bulk": 0,
+                    "currentCompatibleConnections": 0,
+                    "currentConnections": 0,
+                    "currentNativeConnections": 0,
+                    "currentActiveHandshakes": 0,
+                    "decryptedBytesIn": 0,
+                    "decryptedBytesOut": 0,
+                    "encryptedBytesIn": 0,
+                    "encryptedBytesOut": 0,
+                    "fatalAlerts": 0,
+                    "handshakeFailures": 0,
+                    "peercertInvalid": 0,
+                    "peercertNone": 0,
+                    "peercertValid": 0,
+                    "protocolUses.dtlsv1": 0,
+                    "protocolUses.sslv2": 0,
+                    "protocolUses.sslv3": 0,
+                    "protocolUses.tlsv1": 0,
+                    "protocolUses.tlsv1_1": 0,
+                    "protocolUses.tlsv1_2": 0,
+                    "protocolUses.tlsv1_3": 0,
+                    "recordsIn": 0,
+                    "recordsOut": 0,
+                    "sniRejects": 0,
+                    "name": "/Common/clientssl-insecure-compatible",
+                    "tenant": "Common"
+                },
+                "/Common/clientssl-secure": {
+                    "activeHandshakeRejected": 0,
+                    "cipherUses.chacha20Poly1305Bulk": 0,
+                    "currentCompatibleConnections": 0,
+                    "currentConnections": 0,
+                    "currentNativeConnections": 0,
+                    "currentActiveHandshakes": 0,
+                    "decryptedBytesIn": 0,
+                    "decryptedBytesOut": 0,
+                    "encryptedBytesIn": 0,
+                    "encryptedBytesOut": 0,
+                    "fatalAlerts": 0,
+                    "handshakeFailures": 0,
+                    "peercertInvalid": 0,
+                    "peercertNone": 0,
+                    "peercertValid": 0,
+                    "protocolUses.dtlsv1": 0,
+                    "protocolUses.sslv2": 0,
+                    "protocolUses.sslv3": 0,
+                    "protocolUses.tlsv1": 0,
+                    "protocolUses.tlsv1_1": 0,
+                    "protocolUses.tlsv1_2": 0,
+                    "protocolUses.tlsv1_3": 0,
+                    "recordsIn": 0,
+                    "recordsOut": 0,
+                    "sniRejects": 0,
+                    "name": "/Common/clientssl-secure",
+                    "tenant": "Common"
+                },
+                "/Common/crypto-server-default-clientssl": {
+                    "activeHandshakeRejected": 0,
+                    "cipherUses.chacha20Poly1305Bulk": 0,
+                    "currentCompatibleConnections": 0,
+                    "currentConnections": 0,
+                    "currentNativeConnections": 0,
+                    "currentActiveHandshakes": 0,
+                    "decryptedBytesIn": 0,
+                    "decryptedBytesOut": 0,
+                    "encryptedBytesIn": 0,
+                    "encryptedBytesOut": 0,
+                    "fatalAlerts": 0,
+                    "handshakeFailures": 0,
+                    "peercertInvalid": 0,
+                    "peercertNone": 0,
+                    "peercertValid": 0,
+                    "protocolUses.dtlsv1": 0,
+                    "protocolUses.sslv2": 0,
+                    "protocolUses.sslv3": 0,
+                    "protocolUses.tlsv1": 0,
+                    "protocolUses.tlsv1_1": 0,
+                    "protocolUses.tlsv1_2": 0,
+                    "protocolUses.tlsv1_3": 0,
+                    "recordsIn": 0,
+                    "recordsOut": 0,
+                    "sniRejects": 0,
+                    "name": "/Common/crypto-server-default-clientssl",
+                    "tenant": "Common"
+                },
+                "/Common/splitsession-default-clientssl": {
+                    "activeHandshakeRejected": 0,
+                    "cipherUses.chacha20Poly1305Bulk": 0,
+                    "currentCompatibleConnections": 0,
+                    "currentConnections": 0,
+                    "currentNativeConnections": 0,
+                    "currentActiveHandshakes": 0,
+                    "decryptedBytesIn": 0,
+                    "decryptedBytesOut": 0,
+                    "encryptedBytesIn": 0,
+                    "encryptedBytesOut": 0,
+                    "fatalAlerts": 0,
+                    "handshakeFailures": 0,
+                    "peercertInvalid": 0,
+                    "peercertNone": 0,
+                    "peercertValid": 0,
+                    "protocolUses.dtlsv1": 0,
+                    "protocolUses.sslv2": 0,
+                    "protocolUses.sslv3": 0,
+                    "protocolUses.tlsv1": 0,
+                    "protocolUses.tlsv1_1": 0,
+                    "protocolUses.tlsv1_2": 0,
+                    "protocolUses.tlsv1_3": 0,
+                    "recordsIn": 0,
+                    "recordsOut": 0,
+                    "sniRejects": 0,
+                    "name": "/Common/splitsession-default-clientssl",
+                    "tenant": "Common"
+                },
+                "/Common/wom-default-clientssl": {
+                    "activeHandshakeRejected": 0,
+                    "cipherUses.chacha20Poly1305Bulk": 0,
+                    "currentCompatibleConnections": 0,
+                    "currentConnections": 0,
+                    "currentNativeConnections": 0,
+                    "currentActiveHandshakes": 0,
+                    "decryptedBytesIn": 0,
+                    "decryptedBytesOut": 0,
+                    "encryptedBytesIn": 0,
+                    "encryptedBytesOut": 0,
+                    "fatalAlerts": 0,
+                    "handshakeFailures": 0,
+                    "peercertInvalid": 0,
+                    "peercertNone": 0,
+                    "peercertValid": 0,
+                    "protocolUses.dtlsv1": 0,
+                    "protocolUses.sslv2": 0,
+                    "protocolUses.sslv3": 0,
+                    "protocolUses.tlsv1": 0,
+                    "protocolUses.tlsv1_1": 0,
+                    "protocolUses.tlsv1_2": 0,
+                    "protocolUses.tlsv1_3": 0,
+                    "recordsIn": 0,
+                    "recordsOut": 0,
+                    "sniRejects": 0,
+                    "name": "/Common/wom-default-clientssl",
+                    "tenant": "Common"
+                }
+            },
+            "serverSslProfiles": {
+                "/Common/apm-default-serverssl": {
+                    "activeHandshakeRejected": 0,
+                    "cipherUses.chacha20Poly1305Bulk": 0,
+                    "currentCompatibleConnections": 0,
+                    "currentConnections": 0,
+                    "currentNativeConnections": 0,
+                    "currentActiveHandshakes": 0,
+                    "decryptedBytesIn": 0,
+                    "decryptedBytesOut": 0,
+                    "encryptedBytesIn": 0,
+                    "encryptedBytesOut": 0,
+                    "fatalAlerts": 0,
+                    "handshakeFailures": 0,
+                    "peercertInvalid": 0,
+                    "peercertNone": 0,
+                    "peercertValid": 0,
+                    "protocolUses.dtlsv1": 0,
+                    "protocolUses.sslv2": 0,
+                    "protocolUses.sslv3": 0,
+                    "protocolUses.tlsv1": 0,
+                    "protocolUses.tlsv1_1": 0,
+                    "protocolUses.tlsv1_2": 0,
+                    "protocolUses.tlsv1_3": 0,
+                    "recordsIn": 0,
+                    "recordsOut": 0,
+                    "name": "/Common/apm-default-serverssl",
+                    "tenant": "Common"
+                },
+                "/Common/crypto-client-default-serverssl": {
+                    "activeHandshakeRejected": 0,
+                    "cipherUses.chacha20Poly1305Bulk": 0,
+                    "currentCompatibleConnections": 0,
+                    "currentConnections": 0,
+                    "currentNativeConnections": 0,
+                    "currentActiveHandshakes": 0,
+                    "decryptedBytesIn": 0,
+                    "decryptedBytesOut": 0,
+                    "encryptedBytesIn": 0,
+                    "encryptedBytesOut": 0,
+                    "fatalAlerts": 0,
+                    "handshakeFailures": 0,
+                    "peercertInvalid": 0,
+                    "peercertNone": 0,
+                    "peercertValid": 0,
+                    "protocolUses.dtlsv1": 0,
+                    "protocolUses.sslv2": 0,
+                    "protocolUses.sslv3": 0,
+                    "protocolUses.tlsv1": 0,
+                    "protocolUses.tlsv1_1": 0,
+                    "protocolUses.tlsv1_2": 0,
+                    "protocolUses.tlsv1_3": 0,
+                    "recordsIn": 0,
+                    "recordsOut": 0,
+                    "name": "/Common/crypto-client-default-serverssl",
+                    "tenant": "Common"
+                },
+                "/Common/pcoip-default-serverssl": {
+                    "activeHandshakeRejected": 0,
+                    "cipherUses.chacha20Poly1305Bulk": 0,
+                    "currentCompatibleConnections": 0,
+                    "currentConnections": 0,
+                    "currentNativeConnections": 0,
+                    "currentActiveHandshakes": 0,
+                    "decryptedBytesIn": 0,
+                    "decryptedBytesOut": 0,
+                    "encryptedBytesIn": 0,
+                    "encryptedBytesOut": 0,
+                    "fatalAlerts": 0,
+                    "handshakeFailures": 0,
+                    "peercertInvalid": 0,
+                    "peercertNone": 0,
+                    "peercertValid": 0,
+                    "protocolUses.dtlsv1": 0,
+                    "protocolUses.sslv2": 0,
+                    "protocolUses.sslv3": 0,
+                    "protocolUses.tlsv1": 0,
+                    "protocolUses.tlsv1_1": 0,
+                    "protocolUses.tlsv1_2": 0,
+                    "protocolUses.tlsv1_3": 0,
+                    "recordsIn": 0,
+                    "recordsOut": 0,
+                    "name": "/Common/pcoip-default-serverssl",
+                    "tenant": "Common"
+                },
+                "/Common/serverssl": {
+                    "activeHandshakeRejected": 0,
+                    "cipherUses.chacha20Poly1305Bulk": 0,
+                    "currentCompatibleConnections": 0,
+                    "currentConnections": 0,
+                    "currentNativeConnections": 0,
+                    "currentActiveHandshakes": 0,
+                    "decryptedBytesIn": 0,
+                    "decryptedBytesOut": 0,
+                    "encryptedBytesIn": 0,
+                    "encryptedBytesOut": 0,
+                    "fatalAlerts": 0,
+                    "handshakeFailures": 0,
+                    "peercertInvalid": 0,
+                    "peercertNone": 0,
+                    "peercertValid": 0,
+                    "protocolUses.dtlsv1": 0,
+                    "protocolUses.sslv2": 0,
+                    "protocolUses.sslv3": 0,
+                    "protocolUses.tlsv1": 0,
+                    "protocolUses.tlsv1_1": 0,
+                    "protocolUses.tlsv1_2": 0,
+                    "protocolUses.tlsv1_3": 0,
+                    "recordsIn": 0,
+                    "recordsOut": 0,
+                    "name": "/Common/serverssl",
+                    "tenant": "Common"
+                },
+                "/Common/serverssl-insecure-compatible": {
+                    "activeHandshakeRejected": 0,
+                    "cipherUses.chacha20Poly1305Bulk": 0,
+                    "currentCompatibleConnections": 0,
+                    "currentConnections": 0,
+                    "currentNativeConnections": 0,
+                    "currentActiveHandshakes": 0,
+                    "decryptedBytesIn": 0,
+                    "decryptedBytesOut": 0,
+                    "encryptedBytesIn": 0,
+                    "encryptedBytesOut": 0,
+                    "fatalAlerts": 0,
+                    "handshakeFailures": 0,
+                    "peercertInvalid": 0,
+                    "peercertNone": 0,
+                    "peercertValid": 0,
+                    "protocolUses.dtlsv1": 0,
+                    "protocolUses.sslv2": 0,
+                    "protocolUses.sslv3": 0,
+                    "protocolUses.tlsv1": 0,
+                    "protocolUses.tlsv1_1": 0,
+                    "protocolUses.tlsv1_2": 0,
+                    "protocolUses.tlsv1_3": 0,
+                    "recordsIn": 0,
+                    "recordsOut": 0,
+                    "name": "/Common/serverssl-insecure-compatible",
+                    "tenant": "Common"
+                },
+                "/Common/splitsession-default-serverssl": {
+                    "activeHandshakeRejected": 0,
+                    "cipherUses.chacha20Poly1305Bulk": 0,
+                    "currentCompatibleConnections": 0,
+                    "currentConnections": 0,
+                    "currentNativeConnections": 0,
+                    "currentActiveHandshakes": 0,
+                    "decryptedBytesIn": 0,
+                    "decryptedBytesOut": 0,
+                    "encryptedBytesIn": 0,
+                    "encryptedBytesOut": 0,
+                    "fatalAlerts": 0,
+                    "handshakeFailures": 0,
+                    "peercertInvalid": 0,
+                    "peercertNone": 0,
+                    "peercertValid": 0,
+                    "protocolUses.dtlsv1": 0,
+                    "protocolUses.sslv2": 0,
+                    "protocolUses.sslv3": 0,
+                    "protocolUses.tlsv1": 0,
+                    "protocolUses.tlsv1_1": 0,
+                    "protocolUses.tlsv1_2": 0,
+                    "protocolUses.tlsv1_3": 0,
+                    "recordsIn": 0,
+                    "recordsOut": 0,
+                    "name": "/Common/splitsession-default-serverssl",
+                    "tenant": "Common"
+                },
+                "/Common/wom-default-serverssl": {
+                    "activeHandshakeRejected": 0,
+                    "cipherUses.chacha20Poly1305Bulk": 0,
+                    "currentCompatibleConnections": 0,
+                    "currentConnections": 0,
+                    "currentNativeConnections": 0,
+                    "currentActiveHandshakes": 0,
+                    "decryptedBytesIn": 0,
+                    "decryptedBytesOut": 0,
+                    "encryptedBytesIn": 0,
+                    "encryptedBytesOut": 0,
+                    "fatalAlerts": 0,
+                    "handshakeFailures": 0,
+                    "peercertInvalid": 0,
+                    "peercertNone": 0,
+                    "peercertValid": 0,
+                    "protocolUses.dtlsv1": 0,
+                    "protocolUses.sslv2": 0,
+                    "protocolUses.sslv3": 0,
+                    "protocolUses.tlsv1": 0,
+                    "protocolUses.tlsv1_1": 0,
+                    "protocolUses.tlsv1_2": 0,
+                    "protocolUses.tlsv1_3": 0,
+                    "recordsIn": 0,
+                    "recordsOut": 0,
+                    "name": "/Common/wom-default-serverssl",
+                    "tenant": "Common"
+                }
+            },
+            "sslCerts": {
+                "ca-bundle.crt": {
+                    "expirationDate": 1893455999,
+                    "expirationString": "2029-12-31T23:59:59.000Z",
+                    "issuer": "CN=Starfield Services Root Certificate Authority,OU=http://certificates.starfieldtech.com/repository/,O=Starfield Technologies, Inc.,L=Scottsdale,ST=Arizona,C=US",
+                    "subject": "CN=Starfield Services Root Certificate Authority,OU=http://certificates.starfieldtech.com/repository/,O=Starfield Technologies, Inc.,L=Scottsdale,ST=Arizona,C=US",
+                    "name": "ca-bundle.crt"
+                },
+                "default.crt": {
+                    "email": "root@localhost.localdomain",
+                    "expirationDate": 1893790681,
+                    "expirationString": "2030-01-04T20:58:01.000Z",
+                    "issuer": "emailAddress=root@localhost.localdomain,CN=localhost.localdomain,OU=IT,O=MyCompany,L=Seattle,ST=WA,C=US",
+                    "subject": "emailAddress=root@localhost.localdomain,CN=localhost.localdomain,OU=IT,O=MyCompany,L=Seattle,ST=WA,C=US",
+                    "name": "default.crt"
+                },
+                "f5-ca-bundle.crt": {
+                    "expirationDate": 1922896554,
+                    "expirationString": "2030-12-07T17:55:54.000Z",
+                    "issuer": "CN=Entrust Root Certification Authority - G2,OU=(c) 2009 Entrust, Inc. - for authorized use only,OU=See www.entrust.net/legal-terms,O=Entrust, Inc.,C=US",
+                    "subject": "CN=Entrust Root Certification Authority - G2,OU=(c) 2009 Entrust, Inc. - for authorized use only,OU=See www.entrust.net/legal-terms,O=Entrust, Inc.,C=US",
+                    "name": "f5-ca-bundle.crt"
+                },
+                "f5-irule.crt": {
+                    "email": "support@f5.com",
+                    "expirationDate": 1815944413,
+                    "expirationString": "2027-07-18T21:00:13.000Z",
+                    "issuer": "emailAddress=support@f5.com,CN=support.f5.com,OU=Product Development,O=F5 Networks,L=Seattle,ST=Washington,C=US",
+                    "subject": "emailAddress=support@f5.com,CN=support.f5.com,OU=Product Development,O=F5 Networks,L=Seattle,ST=Washington,C=US",
+                    "name": "f5-irule.crt"
+                }
+            },
+            "networkTunnels": {
+                "/Common/http-tunnel": {
+                    "hcInBroadcastPkts": 0,
+                    "hcInMulticastPkts": 0,
+                    "hcInOctets": 0,
+                    "hcInUcastPkts": 0,
+                    "hcOutBroadcastPkts": 0,
+                    "hcOutMulticastPkts": 0,
+                    "hcOutOctets": 0,
+                    "hcOutUcastPkts": 0,
+                    "inDiscards": 0,
+                    "inErrors": 0,
+                    "inUnknownProtos": 0,
+                    "outDiscards": 0,
+                    "outErrors": 0,
+                    "name": "/Common/http-tunnel",
+                    "tenant": "Common"
+                },
+                "/Common/socks-tunnel": {
+                    "hcInBroadcastPkts": 0,
+                    "hcInMulticastPkts": 0,
+                    "hcInOctets": 0,
+                    "hcInUcastPkts": 0,
+                    "hcOutBroadcastPkts": 0,
+                    "hcOutMulticastPkts": 0,
+                    "hcOutOctets": 0,
+                    "hcOutUcastPkts": 0,
+                    "inDiscards": 0,
+                    "inErrors": 0,
+                    "inUnknownProtos": 0,
+                    "outDiscards": 0,
+                    "outErrors": 0,
+                    "name": "/Common/socks-tunnel",
+                    "tenant": "Common"
+                }
+            },
+            "deviceGroups": {
+                "/Common/datasync-device-bigip1-dg": {
+                    "commitIdTime": "2020-04-16T03:33:11.000Z",
+                    "lssTime": "-",
+                    "timeSinceLastSync": "-",
+                    "name": "/Common/datasync-device-bigip1-dg",
+                    "type": "sync-only",
+                    "tenant": "Common"
+                },
+                "/Common/datasync-global-dg": {
+                    "commitIdTime": "2020-04-07T04:51:48.000Z",
+                    "lssTime": "-",
+                    "timeSinceLastSync": "-",
+                    "name": "/Common/datasync-global-dg",
+                    "type": "sync-only",
+                    "tenant": "Common"
+                },
+                "/Common/device_trust_group": {
+                    "commitIdTime": "2020-04-07T04:51:48.000Z",
+                    "lssTime": "-",
+                    "timeSinceLastSync": "-",
+                    "name": "/Common/device_trust_group",
+                    "type": "sync-only",
+                    "tenant": "Common"
+                },
+                "/Common/dos-global-dg": {
+                    "commitIdTime": "2020-04-07T04:51:48.000Z",
+                    "lssTime": "-",
+                    "timeSinceLastSync": "-",
+                    "name": "/Common/dos-global-dg",
+                    "type": "sync-only",
+                    "tenant": "Common"
+                },
+                "/Common/gtm": {
+                    "commitIdTime": "2020-04-16T01:59:01.000Z",
+                    "lssTime": "-",
+                    "timeSinceLastSync": "-",
+                    "name": "/Common/gtm",
+                    "type": "sync-only",
+                    "tenant": "Common"
+                }
+            },
+            "iRules": {
+                "/Common/_sys_APM_ExchangeSupport_OA_BasicAuth": {
+                    "events": {
+                        "RULE_INIT": {
+                            "aborts": 0,
+                            "avgCycles": 40577,
+                            "failures": 0,
+                            "maxCycles": 40577,
+                            "minCycles": 11518,
+                            "priority": 500,
+                            "totalExecutions": 4
+                        }
+                    },
+                    "name": "/Common/_sys_APM_ExchangeSupport_OA_BasicAuth",
+                    "tenant": "Common"
+                },
+                "/Common/_sys_APM_ExchangeSupport_OA_NtlmAuth": {
+                    "events": {
+                        "RULE_INIT": {
+                            "aborts": 0,
+                            "avgCycles": 40467,
+                            "failures": 0,
+                            "maxCycles": 40467,
+                            "minCycles": 36591,
+                            "priority": 500,
+                            "totalExecutions": 4
+                        }
+                    },
+                    "name": "/Common/_sys_APM_ExchangeSupport_OA_NtlmAuth",
+                    "tenant": "Common"
+                },
+                "/Common/_sys_APM_ExchangeSupport_helper": {
+                    "events": {
+                        "HTTP_REQUEST_DATA": {
+                            "aborts": 0,
+                            "avgCycles": 0,
+                            "failures": 0,
+                            "maxCycles": 0,
+                            "minCycles": 0,
+                            "priority": 500,
+                            "totalExecutions": 0
+                        }
+                    },
+                    "name": "/Common/_sys_APM_ExchangeSupport_helper",
+                    "tenant": "Common"
+                },
+                "/Common/_sys_APM_ExchangeSupport_main": {
+                    "events": {
+                        "RULE_INIT": {
+                            "aborts": 0,
+                            "avgCycles": 53953,
+                            "failures": 0,
+                            "maxCycles": 53953,
+                            "minCycles": 32254,
+                            "priority": 500,
+                            "totalExecutions": 4
+                        }
+                    },
+                    "name": "/Common/_sys_APM_ExchangeSupport_main",
+                    "tenant": "Common"
+                },
+                "/Common/_sys_APM_MS_Office_OFBA_Support": {
+                    "events": {
+                        "RULE_INIT": {
+                            "aborts": 0,
+                            "avgCycles": 31414,
+                            "failures": 0,
+                            "maxCycles": 31414,
+                            "minCycles": 14959,
+                            "priority": 500,
+                            "totalExecutions": 4
+                        }
+                    },
+                    "name": "/Common/_sys_APM_MS_Office_OFBA_Support",
+                    "tenant": "Common"
+                },
+                "/Common/_sys_APM_Office365_SAML_BasicAuth": {
+                    "events": {
+                        "RULE_INIT": {
+                            "aborts": 0,
+                            "avgCycles": 5154,
+                            "failures": 0,
+                            "maxCycles": 5154,
+                            "minCycles": 2640,
+                            "priority": 500,
+                            "totalExecutions": 4
+                        }
+                    },
+                    "name": "/Common/_sys_APM_Office365_SAML_BasicAuth",
+                    "tenant": "Common"
+                },
+                "/Common/_sys_APM_activesync": {
+                    "events": {
+                        "RULE_INIT": {
+                            "aborts": 0,
+                            "avgCycles": 51596,
+                            "failures": 0,
+                            "maxCycles": 51596,
+                            "minCycles": 11006,
+                            "priority": 500,
+                            "totalExecutions": 4
+                        }
+                    },
+                    "name": "/Common/_sys_APM_activesync",
+                    "tenant": "Common"
+                },
+                "/Common/_sys_auth_krbdelegate": {
+                    "events": {
+                        "HTTP_RESPONSE": {
+                            "aborts": 0,
+                            "avgCycles": 0,
+                            "failures": 0,
+                            "maxCycles": 0,
+                            "minCycles": 0,
+                            "priority": 500,
+                            "totalExecutions": 0
+                        }
+                    },
+                    "name": "/Common/_sys_auth_krbdelegate",
+                    "tenant": "Common"
+                },
+                "/Common/_sys_auth_ldap": {
+                    "events": {
+                        "HTTP_REQUEST": {
+                            "aborts": 0,
+                            "avgCycles": 0,
+                            "failures": 0,
+                            "maxCycles": 0,
+                            "minCycles": 0,
+                            "priority": 500,
+                            "totalExecutions": 0
+                        }
+                    },
+                    "name": "/Common/_sys_auth_ldap",
+                    "tenant": "Common"
+                },
+                "/Common/_sys_auth_radius": {
+                    "events": {
+                        "HTTP_REQUEST": {
+                            "aborts": 0,
+                            "avgCycles": 0,
+                            "failures": 0,
+                            "maxCycles": 0,
+                            "minCycles": 0,
+                            "priority": 500,
+                            "totalExecutions": 0
+                        }
+                    },
+                    "name": "/Common/_sys_auth_radius",
+                    "tenant": "Common"
+                },
+                "/Common/_sys_auth_ssl_cc_ldap": {
+                    "events": {
+                        "CLIENT_ACCEPTED": {
+                            "aborts": 0,
+                            "avgCycles": 0,
+                            "failures": 0,
+                            "maxCycles": 0,
+                            "minCycles": 0,
+                            "priority": 500,
+                            "totalExecutions": 0
+                        }
+                    },
+                    "name": "/Common/_sys_auth_ssl_cc_ldap",
+                    "tenant": "Common"
+                },
+                "/Common/_sys_auth_ssl_crldp": {
+                    "events": {
+                        "CLIENT_ACCEPTED": {
+                            "aborts": 0,
+                            "avgCycles": 0,
+                            "failures": 0,
+                            "maxCycles": 0,
+                            "minCycles": 0,
+                            "priority": 500,
+                            "totalExecutions": 0
+                        }
+                    },
+                    "name": "/Common/_sys_auth_ssl_crldp",
+                    "tenant": "Common"
+                },
+                "/Common/_sys_auth_ssl_ocsp": {
+                    "events": {
+                        "CLIENT_ACCEPTED": {
+                            "aborts": 0,
+                            "avgCycles": 0,
+                            "failures": 0,
+                            "maxCycles": 0,
+                            "minCycles": 0,
+                            "priority": 500,
+                            "totalExecutions": 0
+                        }
+                    },
+                    "name": "/Common/_sys_auth_ssl_ocsp",
+                    "tenant": "Common"
+                },
+                "/Common/_sys_auth_tacacs": {
+                    "events": {
+                        "HTTP_REQUEST": {
+                            "aborts": 0,
+                            "avgCycles": 0,
+                            "failures": 0,
+                            "maxCycles": 0,
+                            "minCycles": 0,
+                            "priority": 500,
+                            "totalExecutions": 0
+                        }
+                    },
+                    "name": "/Common/_sys_auth_tacacs",
+                    "tenant": "Common"
+                },
+                "/Common/_sys_https_redirect": {
+                    "events": {
+                        "HTTP_REQUEST": {
+                            "aborts": 0,
+                            "avgCycles": 0,
+                            "failures": 0,
+                            "maxCycles": 0,
+                            "minCycles": 0,
+                            "priority": 500,
+                            "totalExecutions": 0
+                        }
+                    },
+                    "name": "/Common/_sys_https_redirect",
+                    "tenant": "Common"
+                }
+            },
+            "tmstats": {},
+            "telemetryServiceInfo": {
+                "pollingInterval": 0,
+                "cycleStart": "2020-04-16T16:33:06.639Z",
+                "cycleEnd": "2020-04-16T16:33:11.952Z"
+            },
+            "telemetryEventCategory": "systemInfo"
+        }
+    }
+}

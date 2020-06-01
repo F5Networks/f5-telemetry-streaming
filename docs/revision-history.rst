@@ -11,6 +11,18 @@ Document Revision History
         - Description
         - Date
 
+      * - 1.12.0
+        - Updated the documentation for Telemetry Streaming v1.11.0. This release contains the following changes: |br| * Added a new consumer for Prometheus (see :ref:`prometheus`) |br| * Updated the Pull Consumer page and added an example for using push and pull consumers in the same declaration (see :doc:`pull-consumers`) |br| *   |br| |br| Issues Resolved: |br| * Added a timeout to Azure metadata service HTTP requests to fix an issue where the Azure Consumer was slow when running in a non-Azure environment
+        - 04-21-20
+
+      * - Unreleased
+        - Documentation only update. This update contains the following change: |br| * Added an important note to the ElasticSearch consumer section stating TS currently does not support sending data to ElasticSearch 7 (see :ref:`elasticsearch-ref`).
+        - 04-24-20
+
+      * - 1.11.0
+        - Updated the documentation for Telemetry Streaming v1.11.0. This release contains the following changes: |br| * Added a new consumer for Azure Application Insights (see :ref:`appinsight-ref`) |br| * Added support for Azure Managed Identities for :ref:`Azure Log Analytics<mi>` and :ref:`Azure Application Insights<miappin>` |br| * Added support for AzureGov for Azure consumers using an optional region property (see :ref:`region`) |br| * Added a new page for the Pull consumer (see :ref:`pullconsumer-ref`) and renamed the original Consumer page to Push consumer |br| * Added a new page detailing how to delete the configuration produced by TS (see :doc:`deleting-ts-config`) |br| * Renamed Google StackDriver to Google Cloud Monitoring |br| |br| Issues Resolved: |br| * Fixed `Regular Expression Denial of Service vulnerability <https://www.npmjs.com/advisories/1488>`_ and improved start up time on node v4.x and v6.x |br| * Fixed error when Splunk consumer (configured with 'legacy' format) tries to forward event from Event Listener (`GitHub #30 <https://github.com/F5Networks/f5-telemetry-streaming/issues/30>`_) |br| * Fixed crash in Kafka consumer on attempt to close idle connections to brokers (`GitHub #17 <https://github.com/F5Networks/f5-telemetry-streaming/issues/17>`_) 
+        - 04-21-20
+
       * - 1.10.0
         - Updated the documentation for Telemetry Streaming v1.10.0. This release contains the following changes: |br| * Added a feature (currently EXPERIMENTAL) for configuring custom endpoints (see :doc:`custom-endpoints`) |br| * Added **ifAnyMatch** functionality to the existing value-based matching logic (see :ref:`valuebased`) |br| * Added support for F5 devices with multiple hosts (see the :ref:`FAQ<viprion>`)  |br| |br| Issues Resolved: |br| * Event Listener unable to classify AFM DoS event |br| * Splunk legacy tmstats - include last_cycle_count |br| * Splunk legacy tmstats - add tenant and application data |br| * Declarations with large secrets may timeout |br| * Passphrases should be obfuscated in consumer trace files |br| * Add 'profiles' data (profiles attached to Virtual Server) to 'virtualServers' |br| * Use baseMac instead of hostname to fetch CM device (`GitHub Issue 26 <https://github.com/F5Networks/f5-telemetry-streaming/pull/26>`_) |br| * cipherText validation when protected by SecureVault |br| * Caching data about the host device to speed up declaration processing
         - 03-10-20

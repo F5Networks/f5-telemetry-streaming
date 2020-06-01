@@ -114,7 +114,6 @@ describe('Azure_Log_Analytics', () => {
         });
 
         it('should trace data with secrets redacted', () => {
-            let traceData;
             const context = testUtil.buildConsumerContext({
                 eventType: 'systemInfo',
                 config: {
@@ -126,11 +125,6 @@ describe('Azure_Log_Analytics', () => {
             context.event.data = {
                 new: 'data'
             };
-            context.tracer = {
-                write: (input) => {
-                    traceData = JSON.parse(input);
-                }
-            };
 
             return azureAnalyticsIndex(context)
                 .then(() => {
@@ -141,6 +135,7 @@ describe('Azure_Log_Analytics', () => {
                         'Log-Type': 'customLogType_new',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
                     });
+                    const traceData = JSON.parse(context.tracer.write.firstCall.args[0]);
                     assert.strictEqual(traceData[0].headers.Authorization, '*****');
                 });
         });

@@ -1,9 +1,9 @@
 .. _settingupconsumer-ref:
 
-Consumer class
+Push Consumers
 ==============
 
-Use this section to find example declarations and notes for supported consumers. 
+Use this section to find example declarations and notes for supported push-based consumers. See :doc:`pull-consumers` for pull-based consumers.
 
 .. IMPORTANT:: Each of the following examples shows only the **Consumer** class of a declaration and must be included with the rest of the base declaration (see :ref:`components`).
 
@@ -138,6 +138,8 @@ Optional Properties:
 
 To see more information about Azure Application Insights, see |appinsight|.
 
+.. _region:
+
 Region property
 ^^^^^^^^^^^^^^^
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
@@ -270,6 +272,8 @@ Required Information:
 ElasticSearch
 -------------
 |ElasticSearch|
+
+.. IMPORTANT:: TS currently does not support sending data to ElasticSearch 7.
 
 Required Information:
  - Host: The address of the ElasticSearch system.
@@ -530,6 +534,9 @@ In the following table, we list the Azure Government regions.
 
 
 
+
+
+
 .. |splunk_img| image:: /images/splunk_logo.png
    :target: https://www.splunk.com
    :alt: Splunk
@@ -662,5 +669,11 @@ In the following table, we list the Azure Government regions.
 .. |azregion| raw:: html
 
    <a href="https://azure.microsoft.com/en-us/global-infrastructure/services/?products=monitor&regions=non-regional,usgov-non-regional,us-dod-central,us-dod-east,usgov-arizona,usgov-iowa,usgov-texas,usgov-virginia" target="_blank">Azure Products Available by Region</a>
+
+
+
+
+
+
 
 
