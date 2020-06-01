@@ -9,10 +9,10 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-1538: Add TCP support to StatsD consumer
 ### Fixed
 - AUTOTOOL-1506: Added a timeout to Azure metadata service HTTP requests
-- AUTOTOOL-557: [GitHub #18] Fix renameKeys for networkInterfaces with multiple digits
-
+- AUTOTOOL-557: [GitHub #18](https://github.com/F5Networks/f5-telemetry-streaming/issues/18) Fix renameKeys for networkInterfaces with multiple digits
 ### Changed
 - AUTOTOOL-1432: Update npm packages (aws-sdk from v2.659 to v2.664 and default mocha from v5.2.0 to v7.1.2)
+- Updated @f5devcentral/f5-teem package dependency to 1.4.6
 ### Removed
 
 ## 1.11.0
