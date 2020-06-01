@@ -28,6 +28,8 @@ See |pullref| in the Schema Reference for usage information.
 
 |
 
+.. _pushpull:
+
 Using Pull Consumers and Push Consumers
 ---------------------------------------
 A Telemetry Streaming declaration may contain multiple System Pollers, as well as both Push Consumer(s) and Pull Consumer(s).
