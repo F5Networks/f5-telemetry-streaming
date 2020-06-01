@@ -34,6 +34,8 @@ The **format** property can be set to **legacy** for Splunk users who wish to co
 
 In Telemetry Streaming v1.6.0 and later, you must use the **facility** parameter with the legacy format to specify a Splunk facility in your declarations.  The facility parameter is for identification of location/facility in which the BIG-IP is located (such as 'Main Data Center', 'AWS', or 'NYC'). 
 
+.. IMPORTANT:: If a Splunk Consumer is configured with the legacy format, then it ignores events from Event Listener.
+
 Required information for **facility**: 
   - The facility parameter must be inside of **actions** and then **setTag** as shown in the example.
   - The value for **facility** is arbitrary, but must be a string.
