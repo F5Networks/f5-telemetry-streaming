@@ -8,7 +8,10 @@
 
 'use strict';
 
+const assert = require('assert');
+const cloneDeep = require('lodash/cloneDeep');
 const nock = require('nock');
+const sinon = require('sinon');
 
 const systemPollerData = require('../consumers/data/systemPollerData.json');
 const avrData = require('../consumers/data/avrData.json');
@@ -31,6 +34,34 @@ MockRestOperation.prototype.setStatusCode = function (code) { this.statusCode = 
 MockRestOperation.prototype.getUri = function () { return this.uri; };
 MockRestOperation.prototype.complete = function () { };
 
+/**
+ * Logger mock object
+ *
+ * @param {Object} [options]          - options when setting up logger mock
+ * @param {String} [options.logLevel] - log level to use. Default=info.
+ */
+function MockLogger(options) {
+    const opts = options || {};
+    this.logLevel = opts.logLevel || 'info';
+
+    this.setLogLevel = function (newLevel) {
+        this.logLevel = newLevel;
+    };
+    // Stubbed functions
+    this.error = sinon.stub();
+    this.debug = sinon.stub();
+    this.info = sinon.stub();
+    this.exception = sinon.stub();
+    // returns() returns the value passed at initialization - callsFake() uses CURRENT value
+    this.getLevelName = sinon.stub().callsFake(() => this.logLevel);
+}
+
+/**
+ * Tracer mock object
+ */
+function MockTracer() {
+    this.write = sinon.stub();
+}
 
 module.exports = {
     MockRestOperation,
@@ -43,15 +74,16 @@ module.exports = {
      * @returns {any} deep copy of source object
      */
     deepCopy(obj) {
-        return JSON.parse(JSON.stringify(obj));
+        return cloneDeep(obj);
     },
 
     /**
      * Generates a consumer config
      *
-     * @param {Object} [options]           - options to pass to context builder
-     * @param {String} [options.eventType] - which event type to return
-     * @param {Object} [options.config]    - optional config to inject into context
+     * @param {Object} [options]                     - options to pass to context builder
+     * @param {String} [options.eventType]           - which event type to return
+     * @param {Object} [options.config]              - optional config to inject into context
+     * @param {String} [options.loggerOpts.logLevel] - log level to initialize Logger with
      *
      * @returns {Object} Returns object representing consumer config
      */
@@ -75,13 +107,8 @@ module.exports = {
                 data,
                 type: opts.eventType || ''
             },
-            logger: {
-                error: () => { },
-                debug: () => { },
-                info: () => { },
-                exception: () => { },
-                getLevelName: () => { }
-            }
+            logger: new MockLogger(opts.loggerOpts),
+            tracer: new MockTracer()
         };
         return context;
     },
@@ -178,13 +205,32 @@ module.exports = {
      * Check if nock has unused mocks and raise assertion error if so
      *
      * @param {Object} nockInstance - instance of nock library
-     * @param {Object} assertInstance - instance of assert library
      */
-    checkNockActiveMocks(nockInstance, assertInstance) {
+    checkNockActiveMocks(nockInstance) {
         const activeMocks = nockInstance.activeMocks().join('\n');
-        assertInstance.ok(
+        assert.ok(
             activeMocks.length === 0,
             `nock should have no active mocks after the test, instead mocks are still active:\n${activeMocks}\n`
         );
+    },
+
+    /**
+     * Create validator to validate if data was spoiled.
+     *
+     * @param {Any} source - source data
+     *
+     * @throws {AssertionError} when data not equal to it's original state
+     * @returns {Function} that returns 'true' if data was not spoiled
+     */
+    getSpoiledDataValidator() {
+        const getValidator = (idx, copy, src) => () => {
+            assert.deepStrictEqual(src, copy, `Original data at index ${idx} was spoiled...`);
+            return true;
+        };
+        const validators = [];
+        for (let i = 0; i < arguments.length; i += 1) {
+            validators.push(getValidator(i, this.deepCopy(arguments[i]), arguments[i]));
+        }
+        return () => validators.every(validator => validator());
     }
 };

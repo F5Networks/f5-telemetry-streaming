@@ -158,7 +158,7 @@ function createPollerConfig(systemConfig, pollerConfig, fetchTMStats) {
             actions: pollerConfig.actions,
             noTMStats: !fetchTMStats
         },
-        endpointList: pollerConfig.endpointList
+        endpoints: pollerConfig.endpoints
     };
 }
 

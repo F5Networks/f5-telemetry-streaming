@@ -2970,27 +2970,37 @@ describe('Declarations', () => {
         });
 
         describe('AWS_S3', () => {
-            it('should pass declaration', () => validateMinimal(
+            it('should pass minimal declaration (IAM enabled, no creds required)', () => validateMinimal(
                 {
                     type: 'AWS_S3',
                     region: 'region',
-                    bucket: 'bucket',
-                    username: 'username',
-                    passphrase: {
-                        cipherText: 'cipherText'
-                    }
+                    bucket: 'bucket'
                 },
                 {
                     type: 'AWS_S3',
                     region: 'region',
-                    bucket: 'bucket',
-                    username: 'username',
-                    passphrase: {
-                        class: 'Secret',
-                        protected: 'SecureVault',
-                        cipherText: '$M$foo'
-                    }
+                    bucket: 'bucket'
                 }
+            ));
+
+            it('should require passphrase when username is specified', () => assert.isRejected(
+                validateMinimal({
+                    type: 'AWS_S3',
+                    region: 'region',
+                    bucket: 'bucket',
+                    username: 'chilibeans'
+                }),
+                /should have property passphrase when property username is present/
+            ));
+
+            it('should require username when passphrase is specified', () => assert.isRejected(
+                validateMinimal({
+                    type: 'AWS_S3',
+                    region: 'region',
+                    bucket: 'bucket',
+                    passphrase: { cipherText: 'locomoco' }
+                }),
+                /should have property username when property passphrase is present/
             ));
 
             it('should allow full declaration', () => validateFull(
@@ -3726,6 +3736,15 @@ describe('Declarations', () => {
                     port: 80
                 }
             ));
+
+            it('should only accept valid protocols', () => assert.isRejected(validateFull(
+                {
+                    type: 'Statsd',
+                    host: 'host',
+                    protocol: 'https',
+                    port: 80
+                }
+            ), /should be equal to one of the allowed values/));
         });
 
         describe('Sumo_Logic', () => {
@@ -3836,6 +3855,7 @@ describe('Declarations', () => {
                     systemPoller: 'My_Poller'
                 }
             };
+
             minimalExpected = {
                 class: 'Telemetry_Pull_Consumer',
                 type: 'default',
@@ -3843,6 +3863,7 @@ describe('Declarations', () => {
                 enable: true,
                 trace: false
             };
+
             fullDeclaration = {
                 class: 'Telemetry',
                 My_System: {
@@ -3863,6 +3884,7 @@ describe('Declarations', () => {
                     systemPoller: ['My_Poller', 'My_Other_Poller']
                 }
             };
+
             fullExpected = {
                 class: 'Telemetry_Pull_Consumer',
                 type: 'default',
@@ -3879,5 +3901,17 @@ describe('Declarations', () => {
             validateMinimal({ someKey: 'someValue' }),
             /My_Pull_Consumer.*someKey.*should NOT have additional properties/
         ));
+
+        describe('Prometheus', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                { type: 'Prometheus' },
+                { type: 'Prometheus' }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                { type: 'Prometheus' },
+                { type: 'Prometheus' }
+            ));
+        });
     });
 });

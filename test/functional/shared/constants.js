@@ -39,6 +39,9 @@ module.exports = {
         PULL_CONSUMER_HARNESS: {
             TYPE_REGEX: 'PULL_CONSUMER_TYPE_REGEX'
         },
+        CLOUD: {
+            FILE: 'CLOUD_ENV_FILE'
+        },
         AZURE: {
             WORKSPACE_MI: 'AZURE_WORKSPACE_MI',
             WORKSPACE: 'AZURE_WORKSPACE',
@@ -55,6 +58,16 @@ module.exports = {
             APPINS_API_KEY: 'AZURE_APPINS_API_KEY',
             APPINS_APP_ID: 'AZURE_APPINS_APP_ID',
             CLOUD_TYPE: 'AZURE_CLOUD_TYPE'
+        },
+        AWS: {
+            VM_PORT: 'AWS_VM_PORT',
+            VM_IP: 'AWS_VM_IP',
+            VM_USER: 'AWS_VM_USER',
+            VM_PWD: 'AWS_VM_PWD',
+            BUCKET: 'AWS_BUCKET',
+            REGION: 'AWS_REGION',
+            ACCESS_KEY_ID: 'AWS_ACCESS_KEY_ID',
+            ACCESS_KEY_SECRET: 'AWS_SECRET_ACCESS_KEY'
         },
         TEST_CONTROLS: {
             REUSE_INSTALLED_PACKAGE: 'REUSE_INSTALLED_PACKAGE',

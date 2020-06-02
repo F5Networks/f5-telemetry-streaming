@@ -23,15 +23,15 @@ chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe('System Stats Utils', () => {
-    describe('._resolveConditional()', () => {
-        systemStatsUtilTestsData._resolveConditional.forEach((testConf) => {
+    describe('.renderProperty()', () => {
+        systemStatsUtilTestsData.renderProperty.forEach((testConf) => {
             testUtil.getCallableIt(testConf)(testConf.name, () => {
+                const contextStateValidator = testUtil.getSpoiledDataValidator(testConf.contextData);
+                const propertyCopy = testUtil.deepCopy(testConf.propertyData);
+
                 const promise = new Promise((resolve, reject) => {
                     try {
-                        resolve(systemStatsUtil._resolveConditional(
-                            testUtil.deepCopy(testConf.contextData),
-                            testUtil.deepCopy(testConf.conditionalBlock)
-                        ));
+                        resolve(systemStatsUtil.renderProperty(testConf.contextData, propertyCopy));
                     } catch (err) {
                         reject(err);
                     }
@@ -39,43 +39,20 @@ describe('System Stats Utils', () => {
                 if (testConf.errorMessage) {
                     return assert.isRejected(promise, testConf.errorMessage);
                 }
-                return assert.becomes(promise, testConf.expectedData);
+                return promise.then((result) => {
+                    assert.deepStrictEqual(result, testConf.expectedData, 'should match expected data');
+                    assert.deepStrictEqual(result, propertyCopy, 'should modify property in place');
+                    contextStateValidator();
+                });
             });
         });
     });
 
-    describe('._preprocessProperty()', () => {
-        systemStatsUtilTestsData._preprocessProperty.forEach((testConf) => {
+    describe('.splitKey()', () => {
+        systemStatsUtilTestsData.splitKey.forEach((testConf) => {
             testUtil.getCallableIt(testConf)(testConf.name, () => assert.deepStrictEqual(
-                systemStatsUtil._preprocessProperty(
-                    testUtil.deepCopy(testConf.contextData),
-                    testUtil.deepCopy(testConf.propertyData)
-                ),
-                testConf.expectedData
-            ));
-        });
-    });
-
-    describe('._renderTemplate()', () => {
-        systemStatsUtilTestsData._renderTemplate.forEach((testConf) => {
-            testUtil.getCallableIt(testConf)(testConf.name, () => assert.deepStrictEqual(
-                systemStatsUtil._renderTemplate(
-                    testUtil.deepCopy(testConf.contextData),
-                    testUtil.deepCopy(testConf.propertyData)
-                ),
-                testConf.expectedData
-            ));
-        });
-    });
-
-    describe('.renderProperty()', () => {
-        systemStatsUtilTestsData.renderProperty.forEach((testConf) => {
-            testUtil.getCallableIt(testConf)(testConf.name, () => assert.deepStrictEqual(
-                systemStatsUtil.renderProperty(
-                    testUtil.deepCopy(testConf.contextData),
-                    testUtil.deepCopy(testConf.propertyData)
-                ),
-                testConf.expectedData
+                systemStatsUtil.splitKey(testConf.key),
+                testConf.expected
             ));
         });
     });

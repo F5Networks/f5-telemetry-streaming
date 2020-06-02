@@ -20,53 +20,73 @@ module.exports = {
      * Following options available:
      * - only (bool) - run this test only (it.only)
      * */
-    _resolveConditional: [
+    renderProperty: [
         {
             name: 'should fail when unknown function in conditional block',
             contextData: {},
-            conditionalBlock: {
-                unknownFunction: 'something'
+            propertyData: {
+                if: {
+                    unknownFunction: 'something'
+                }
             },
             errorMessage: /Unknown property 'unknownFunction' in conditional block/
         },
         {
             name: 'should fail when no deviceVersion in contextData',
             contextData: {},
-            conditionalBlock: {
-                deviceVersionGreaterOrEqual: '11.0'
+            propertyData: {
+                if: {
+                    deviceVersionGreaterOrEqual: '11.0'
+                }
             },
             errorMessage: /deviceVersionGreaterOrEqual: context has no property 'deviceVersion'/
         },
         {
             name: 'should fail when no provisioning in contextData',
             contextData: {},
-            conditionalBlock: {
-                isModuleProvisioned: 'afm'
+            propertyData: {
+                if: {
+                    isModuleProvisioned: 'afm'
+                }
             },
             errorMessage: /isModuleProvisioned: context has no property 'provisioning'/
         },
         {
-            name: 'should return true when device version is greater or equal',
+            name: 'should resolve conditional when device version is greater or equal',
             contextData: {
                 deviceVersion: '11.6.5'
             },
-            conditionalBlock: {
-                deviceVersionGreaterOrEqual: '11.6.0'
+            propertyData: {
+                if: {
+                    deviceVersionGreaterOrEqual: '11.6.0'
+                },
+                then: {
+                    truth: true
+                }
             },
-            expectedData: true
+            expectedData: {
+                truth: true
+            }
         },
         {
-            name: 'should return false when device version is not greater or equal',
+            name: 'should resolve conditional when device version is not greater or equal',
             contextData: {
                 deviceVersion: '11.6.5'
             },
-            conditionalBlock: {
-                deviceVersionGreaterOrEqual: '14.1.0'
+            propertyData: {
+                if: {
+                    deviceVersionGreaterOrEqual: '14.1.0'
+                },
+                else: {
+                    truth: false
+                }
             },
-            expectedData: false
+            expectedData: {
+                truth: false
+            }
         },
         {
-            name: 'should return true when module provisioned',
+            name: 'should resolve conditional when module provisioned',
             contextData: {
                 provisioning: {
                     afm: {
@@ -74,13 +94,20 @@ module.exports = {
                     }
                 }
             },
-            conditionalBlock: {
-                isModuleProvisioned: 'afm'
+            propertyData: {
+                if: {
+                    isModuleProvisioned: 'afm'
+                },
+                then: {
+                    truth: true
+                }
             },
-            expectedData: true
+            expectedData: {
+                truth: true
+            }
         },
         {
-            name: 'should return false when module not provisioned',
+            name: 'should resolve conditional when module not provisioned',
             contextData: {
                 provisioning: {
                     afm: {
@@ -88,13 +115,20 @@ module.exports = {
                     }
                 }
             },
-            conditionalBlock: {
-                isModuleProvisioned: 'afm'
+            propertyData: {
+                if: {
+                    isModuleProvisioned: 'afm'
+                },
+                else: {
+                    truth: false
+                }
             },
-            expectedData: false
+            expectedData: {
+                truth: false
+            }
         },
         {
-            name: 'should return false when module absent',
+            name: 'should resolve conditional when module absent',
             contextData: {
                 provisioning: {
                     ltm: {
@@ -102,13 +136,18 @@ module.exports = {
                     }
                 }
             },
-            conditionalBlock: {
-                isModuleProvisioned: 'afm'
+            propertyData: {
+                if: {
+                    isModuleProvisioned: 'afm'
+                },
+                else: {
+                    truth: false
+                }
             },
-            expectedData: false
-        }
-    ],
-    _preprocessProperty: [
+            expectedData: {
+                truth: false
+            }
+        },
         {
             name: 'should process property without conditional blocks',
             contextData: {},
@@ -289,9 +328,7 @@ module.exports = {
                     ]
                 }
             }
-        }
-    ],
-    _renderTemplate: [
+        },
         {
             name: 'should return string as is when no template',
             contextData: {},
@@ -373,9 +410,7 @@ module.exports = {
                     key: 'something'
                 }
             }
-        }
-    ],
-    renderProperty: [
+        },
         {
             name: 'should render property without template and conditionals',
             contextData: {},
@@ -437,6 +472,39 @@ module.exports = {
                 obj2: {
                     foo: 'bar'
                 }
+            }
+        }
+    ],
+    splitKey: [
+        {
+            name: 'should return rootKey only',
+            key: 'rootKey',
+            expected: {
+                rootKey: 'rootKey'
+            }
+        },
+        {
+            name: 'should return rootKey and childKey',
+            key: 'rootKey::childKey',
+            expected: {
+                rootKey: 'rootKey',
+                childKey: 'childKey'
+            }
+        },
+        {
+            name: 'should return rootKey and childKey (multiple separators)',
+            key: 'rootKey::childKey1::childKey2',
+            expected: {
+                rootKey: 'rootKey',
+                childKey: 'childKey1::childKey2'
+            }
+        },
+        {
+            name: 'should return empty childKey',
+            key: 'rootKey::',
+            expected: {
+                rootKey: 'rootKey',
+                childKey: ''
             }
         }
     ]

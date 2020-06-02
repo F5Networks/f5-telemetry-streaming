@@ -8,6 +8,10 @@
 
 'use strict';
 
+const assignDefaults = require('lodash/defaultsDeep');
+const cloneDeep = require('lodash/cloneDeep');
+const clone = require('lodash/clone');
+const mergeWith = require('lodash/mergeWith');
 const fs = require('fs');
 const net = require('net');
 const path = require('path');
@@ -658,25 +662,14 @@ const VERSION_COMPARATORS = ['==', '===', '<', '<=', '>', '>=', '!=', '!=='];
 
 module.exports = {
     /**
-     * Assign defaults to object
+     * Assign defaults to object (uses lodash.defaultsDeep under the hood)
      *
      * @param {Object} obj      - object to assign defaults to
-     * @param {Object} defaults - defaults to assign to object
+     * @param {...Object} defaults - defaults to assign to object
      *
      * @returns {Object}
      */
-    assignDefaults(obj, defaults) {
-        // from docs: if the value is null or undefined, it will create and return an empty object
-        // otherwise, it will return an object of a Type that corresponds to the given value.
-        // If the value is an object already, it will return the value.
-        obj = Object(obj);
-        Object.keys(defaults).forEach((key) => {
-            if (!Object.prototype.hasOwnProperty.call(obj, key)) {
-                obj[key] = defaults[key];
-            }
-        });
-        return obj;
-    },
+    assignDefaults,
 
     /**
      * Check if object has any data or not
@@ -700,15 +693,69 @@ module.exports = {
         }
         return true;
     },
+
     /**
-     * Deep copy
+     * Copy object (uses lodash.clone under the hood)
+     *
+     * @param {any} obj - object to copy
+     *
+     * @returns {any} copy of source object
+     */
+    copy(obj) {
+        return clone(obj);
+    },
+
+    /**
+     * Deep Copy (uses lodash.cloneDeep under the hood).
+     * Same as `copy` but copies entire object recursively
      *
      * @param {any} obj - object to copy
      *
      * @returns {any} deep copy of source object
      */
     deepCopy(obj) {
-        return JSON.parse(JSON.stringify(obj));
+        return cloneDeep(obj);
+    },
+
+
+    /**
+     * Merges an Array of Objects into a single Object (uses lodash.mergeWith under the hood).
+     * Note: Nested Arrays are concatenated, not overwritten.
+     * Note: Passed data gets *spoiled* - copy if you need the original data
+     *
+     * @param {Array} collection - Array of Objects to be merged.
+     *
+     * @returns {Object} Object after being merged will all other Objects in the passed Array, or empty object
+     *
+     * Example:
+     *  collection: [
+     *      { a: 12, b: 13, c: [17, 18] },
+     *      { b: 14, c: [78, 79], d: 11 }
+     *  ]
+     *  will return:
+     *  {
+     *      a: 12, b: 14, c: [17, 18, 78, 79], d: 11
+     *  }
+     */
+    mergeObjectArray(collection) {
+        if (!Array.isArray(collection)) {
+            throw new Error('Expected input of Array');
+        }
+        // eslint-disable-next-line consistent-return
+        function concatArrays(objValue, srcValue) {
+            if (Array.isArray(objValue)) {
+                return objValue.concat(srcValue);
+            }
+        }
+
+        for (let i = 1; i < collection.length; i += 1) {
+            // only process elements that are Objects
+            if (typeof collection[i] === 'object' && !Array.isArray(collection[i])) {
+                mergeWith(collection[0], collection[i], concatArrays);
+            }
+        }
+        // First Object in array has been merged with all other Objects - it has the complete data set.
+        return collection[0] || {};
     },
 
     /**
@@ -786,16 +833,16 @@ module.exports = {
     },
 
     /**
-     * Stringify a message
+     * Stringify a message with option to pretty format
      *
      * @param {Object|String} msg - message to stringify
-     *
+     * @param {Boolean} prettyFormat - format JSON string to make it easier to read
      * @returns {Object} Stringified message
      */
-    stringify(msg) {
+    stringify(msg, pretty) {
         if (typeof msg === 'object') {
             try {
-                msg = JSON.stringify(msg);
+                msg = pretty ? JSON.stringify(msg, null, 4) : JSON.stringify(msg);
             } catch (e) {
                 // just leave original message intact
             }
@@ -891,6 +938,8 @@ module.exports = {
      *                                                   by default false
      * @param {Boolean} [options.includeResponseObject] - return [body, responseObject], by default false
      * @param {Array<Integer>|Integer} [options.expectedResponseCode]  - expected response code, by default 200
+     * @param {Integer} [options.timeout]               - Milliseconds to wait for a socket timeout. Option
+     *                                                    'passes through' to 'request' library
      *
      * @returns {Promise.<?any>} Returns promise resolved with response
      */

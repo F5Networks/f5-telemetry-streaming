@@ -16,9 +16,12 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 const TeemRecord = require('@f5devcentral/f5-teem').Record;
-const TeemReporter = require('../../src/lib/teemReporter').TeemReporter;
-const VERSION = require('../../src/lib/constants').VERSION;
 
+const config = require('../../src/lib/config');
+const constants = require('../../src/lib/constants');
+const deviceUtil = require('../../src/lib/deviceUtil');
+const TeemReporter = require('../../src/lib/teemReporter').TeemReporter;
+const util = require('../../src/lib/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -27,10 +30,17 @@ describe('TeemReporter', () => {
     afterEach(() => {
         sinon.restore();
     });
+
     describe('constructor', () => {
-        it('should use correct TS version when generating asset info', () => {
+        it('should use application version and name from \'constants\' when generating asset info', () => {
+            const expectedAppName = 'expectedAppName';
+            const expectedVersion = 'expectedVersion';
+            sinon.stub(constants, 'APP_NAME').value(expectedAppName);
+            sinon.stub(constants, 'VERSION').value(expectedVersion);
+
             const teemReporter = new TeemReporter();
-            assert.strictEqual(teemReporter.assetInfo.version, VERSION);
+            assert.strictEqual(teemReporter.assetInfo.name, expectedAppName);
+            assert.strictEqual(teemReporter.assetInfo.version, expectedVersion);
         });
     });
 
@@ -53,12 +63,14 @@ describe('TeemReporter', () => {
             ];
             const teemSpies = methods.map(m => ({ name: m, instance: sinon.spy(TeemRecord.prototype, m) }));
 
-            sinon.stub(teemDevice, 'reportRecord').callsFake((record) => {
+            const reportRecordStub = sinon.stub(teemDevice, 'reportRecord');
+            reportRecordStub.callsFake((record) => {
                 recordSent = record;
             });
 
-            return assert.isFulfilled(teemReporter.process(decl))
+            return teemReporter.process(decl)
                 .then(() => {
+                    assert.isTrue(reportRecordStub.calledOnce, 'Expected method reportRecord() to be called once');
                     teemSpies.forEach((spy) => {
                         assert.isTrue(spy.instance.calledOnce, `Expected method ${spy.name}() to be called once`);
                     });
@@ -77,59 +89,129 @@ describe('TeemReporter', () => {
     });
 
 
-    describe('._getCountByClassTypes()', () => {
+    describe('.fetchExtraData()', () => {
         const teemReporter = new TeemReporter();
-        it('should return empty consumer object', () => {
-            const result = teemReporter._getCountByClassTypes({}, 'Telemetry_Consumer', 'consumers');
-            assert.deepStrictEqual(result, { consumers: {} });
+        const validate = (decl, expectedExtraData) => config.validate(decl)
+            .then((validConfig) => {
+                const extraData = teemReporter.fetchExtraData(validConfig);
+                assert.deepStrictEqual(extraData, expectedExtraData);
+            });
+
+        beforeEach(() => {
+            sinon.stub(deviceUtil, 'encryptSecret').resolves('$M$foo');
+            sinon.stub(deviceUtil, 'getDeviceType').resolves(constants.DEVICE_TYPE.BIG_IP);
+            sinon.stub(util, 'networkCheck').resolves();
         });
 
-        it('should return object with count of consumer classes', () => {
+        it('should process empty object', () => {
+            const result = teemReporter.fetchExtraData({});
+            assert.deepStrictEqual(result, {
+                consumers: {},
+                inlineIHealthPollers: 0,
+                inlineSystemPollers: 0
+            });
+        });
+
+        it('should process empty declaration', () => {
+            const expectedExtraData = {
+                consumers: {},
+                inlineIHealthPollers: 0,
+                inlineSystemPollers: 0
+            };
             const declaration = {
-                class1: {
+                class: 'Telemetry',
+                schemaVersion: '1.11.0'
+            };
+            return validate(declaration, expectedExtraData);
+        });
+
+        it('should return object with counters calculated from declaration', () => {
+            const declaration = {
+                class: 'Telemetry',
+                schemaVersion: '1.11.0',
+                consumer1: {
                     class: 'Telemetry_Consumer',
-                    type: 'Generic_HTTP'
+                    type: 'Generic_HTTP',
+                    host: 'x.x.x.x'
                 },
-                class2: {
+                consumer2: {
                     class: 'Telemetry_Consumer',
-                    type: 'Splunk'
+                    type: 'Splunk',
+                    host: 'x.x.x.x',
+                    passphrase: { cipherText: 'text' }
                 },
-                class3: {
+                consumer3: {
                     class: 'Telemetry_Consumer',
-                    type: 'Azure_Log_Analytics'
+                    type: 'Azure_Log_Analytics',
+                    workspaceId: 'workspaceId',
+                    passphrase: { cipherText: 'text' }
                 },
-                class4: {
+                consumer4: {
                     class: 'Telemetry_Consumer',
-                    type: 'Graphite'
+                    type: 'Graphite',
+                    host: 'x.x.x.x'
                 },
-                class5: {
+                consumer5: {
                     class: 'Telemetry_Consumer',
-                    type: 'Kafka'
+                    type: 'Kafka',
+                    host: 'x.x.x.x',
+                    topic: 'topic'
                 },
-                class6: {
+                consumer6: {
                     class: 'Telemetry_Consumer',
-                    type: 'ElasticSearch'
+                    type: 'ElasticSearch',
+                    host: 'x.x.x.x',
+                    index: 'index'
                 },
-                class7: {
+                consumer7: {
                     class: 'Telemetry_Consumer',
-                    type: 'Generic_HTTP'
+                    type: 'Generic_HTTP',
+                    host: 'x.x.x.x'
                 },
-                class8: {
+                consumer8: {
                     class: 'Telemetry_Consumer',
-                    type: 'Azure_Log_Analytics'
+                    type: 'Azure_Log_Analytics',
+                    workspaceId: 'workspaceId',
+                    passphrase: { cipherText: 'text' }
                 },
-                class9: {
+                consumer9: {
                     class: 'Telemetry_Consumer',
-                    type: 'Azure_Log_Analytics'
+                    type: 'Azure_Log_Analytics',
+                    workspaceId: 'workspaceId',
+                    passphrase: { cipherText: 'text' }
                 },
-                class10: {
-                    class: 'Telemetry_System'
+                system1: {
+                    class: 'Telemetry_System',
+                    systemPoller: [
+                        { interval: 300 },
+                        { interval: 300 },
+                        'systemPoller1'
+                    ],
+                    iHealthPoller: {
+                        username: 'username',
+                        passphrase: {
+                            cipherText: 'passphrase'
+                        },
+                        interval: {
+                            timeWindow: {
+                                start: '23:15',
+                                end: '02:15'
+                            },
+                            frequency: 'daily'
+                        }
+                    }
                 },
-                class11: {
+                systemPoller1: {
                     class: 'Telemetry_System_Poller'
+                },
+                system2: {
+                    class: 'Telemetry_System',
+                    systemPoller: {
+                        interval: 100
+                    }
                 }
             };
-            const expected = {
+            const expectedExtraData = {
                 consumers: {
                     Generic_HTTP: 2,
                     Splunk: 1,
@@ -137,10 +219,11 @@ describe('TeemReporter', () => {
                     Graphite: 1,
                     Kafka: 1,
                     ElasticSearch: 1
-                }
+                },
+                inlineIHealthPollers: 1,
+                inlineSystemPollers: 3
             };
-            const result = teemReporter._getCountByClassTypes(declaration, 'Telemetry_Consumer', 'consumers');
-            assert.deepStrictEqual(result, expected);
+            return validate(declaration, expectedExtraData);
         });
     });
 });

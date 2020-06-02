@@ -34,6 +34,8 @@ The **format** property can be set to **legacy** for Splunk users who wish to co
 
 In Telemetry Streaming v1.6.0 and later, you must use the **facility** parameter with the legacy format to specify a Splunk facility in your declarations.  The facility parameter is for identification of location/facility in which the BIG-IP is located (such as 'Main Data Center', 'AWS', or 'NYC'). 
 
+.. IMPORTANT:: If a Splunk Consumer is configured with the legacy format, then it ignores events from Event Listener.
+
 Required information for **facility**: 
   - The facility parameter must be inside of **actions** and then **setTag** as shown in the example.
   - The value for **facility** is arbitrary, but must be a string.
@@ -192,10 +194,10 @@ Required information:
  - Region: AWS region of the CloudWatch resource.
  - Log Group: Navigate to :guilabel:`CloudWatch > Logs`
  - Log Stream: Navigate to :guilabel:`CloudWatch > Logs > Your_Log_Group_Name`
- - Access Key: Navigate to :guilabel:`IAM > Users`
- - Secret Key: Navigate to :guilabel:`IAM > Users`
+ - Username: Navigate to :guilabel:`IAM > Users`
+ - Passphrase: Navigate to :guilabel:`IAM > Users`
 
-To see more information about creating and using IAM roles, see |IAM roles|.
+To see more information about creating and using IAM roles, see the |IAM roles|.
 
 .. IMPORTANT:: In TS 1.9.0 and later, the **username** and **passphrase** for CloudWatch are optional.  This is because a user can send data from a BIG-IP that has an appropriate IAM role in AWS to AWS CloudWatch without a username and passphrase.
 
@@ -215,10 +217,12 @@ AWS S3
 Required Information:
  - Region: AWS region of the S3 bucket.
  - Bucket: Navigate to S3 to find the name of the bucket.
- - Access Key: Navigate to :guilabel:`IAM > Users`
- - Secret Key: Navigate to :guilabel:`IAM > Users`
+ - Username: Navigate to :guilabel:`IAM > Users`
+ - Passphrase: Navigate to :guilabel:`IAM > Users`
 
-.. NOTE:: To see more information about creating and using IAM roles, see |IAM roles|.
+To see more information about creating and using IAM roles, see the |IAM roles|.
+
+.. IMPORTANT:: In TS 1.12.0 and later, the **username** and **passphrase** for S3 are optional.  This is because a user can send data from a BIG-IP that has an appropriate IAM role in AWS to AWS S3 without a username and passphrase.
 
 Example Declaration:
 
@@ -322,9 +326,13 @@ StatsD
 ------
 |StatsD|
 
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+  TCP support to the StatsD consumer is available in TS 1.12 and later.
+
 Required Information:
  - Host: The address of the StatsD instance.
- - Protocol: The protocol of the StatsD instance. The default is UDP.
+ - Protocol: The protocol of the StatsD instance. Options: TCP (TS 1.12+) or UDP. The default is UDP.
  - Port: The port of the Statsd instance
 
 .. NOTE:: To see more information about installing StatsD, see |StatsDWiki|.
@@ -667,11 +675,3 @@ In the following table, we list the Azure Government regions.
 .. |azregion| raw:: html
 
    <a href="https://azure.microsoft.com/en-us/global-infrastructure/services/?products=monitor&regions=non-regional,usgov-non-regional,us-dod-central,us-dod-east,usgov-arizona,usgov-iowa,usgov-texas,usgov-virginia" target="_blank">Azure Products Available by Region</a>
-
-
-
-
-
-
-
-

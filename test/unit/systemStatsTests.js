@@ -24,13 +24,11 @@ const testUtil = require('./shared/util');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
-describe('System Stats', () => {
-    // global vars - to avoid problems with 'before(Each)'
-    let allProperties = testUtil.deepCopy(defaultProperties);
+const defaultPropertiesStateValidator = testUtil.getSpoiledDataValidator(defaultProperties);
 
-    beforeEach(() => {
-        // do copy before each test to avoid modifications
-        allProperties = testUtil.deepCopy(defaultProperties);
+describe('System Stats', () => {
+    afterEach(() => {
+        defaultPropertiesStateValidator();
     });
 
     describe('.processData', () => {
@@ -143,38 +141,80 @@ describe('System Stats', () => {
                     name: 'tenant/app/something'
                 }
             };
+
             const result = sysStats._processData(property, data, key);
             assert.deepStrictEqual(result, expected);
+        });
+
+        it('should not apply default normalization to custom property', () => {
+            const property = {
+                key: 'propKey',
+                isCustom: true
+            };
+            const data = {
+                'tenant~app~something': {
+                    prop: 'value',
+                    kind: 'dataKind',
+                    selfLink: '/link/to/self'
+                }
+            };
+            const key = 'keyValue';
+            const expected = {
+                'tenant~app~something': {
+                    prop: 'value',
+                    kind: 'dataKind',
+                    selfLink: '/link/to/self'
+                }
+            };
+            const dataStateValidator = testUtil.getSpoiledDataValidator(property);
+
+            const result = sysStats._processData(property, data, key);
+            assert.deepStrictEqual(result, expected);
+            dataStateValidator();
         });
     });
 
     describe('._filterStats', () => {
         systemStatsTestsData._filterStats.forEach((testConf) => {
             testUtil.getCallableIt(testConf)(testConf.name, () => {
-                const systemStats = new SystemStats({ dataOpts: { noTMstats: true, actions: testConf.actions } });
-                systemStats._filterStats();
-                const statsKeys = Object.keys(systemStats.stats);
+                const stats = typeof testConf.customEndpoints !== 'undefined' ? testConf.customEndpoints : defaultProperties.stats;
+                const dataStateValidator = testUtil.getSpoiledDataValidator(stats);
 
-                // not strict, just verifies that properties are presented
+                const systemStats = new SystemStats({
+                    dataOpts: {
+                        actions: testConf.actions,
+                        noTMStats: testConf.skipTMStats
+                    },
+                    endpoints: testConf.customEndpoints
+                });
+                systemStats._filterStats();
+
+                const activeStats = Object.keys(systemStats.isCustom ? systemStats.endpoints : systemStats.stats);
+
+                // not strict, just verifies that properties are not in skip list
+                // so, if property in skip list -> it is an error
                 const shouldKeep = (testConf.shouldKeep || testConf.shouldKeepOnly || []).filter(
-                    statKey => statsKeys.indexOf(statKey) === -1
+                    statKey => activeStats.indexOf(statKey) === -1
                 );
                 assert.strictEqual(shouldKeep.length, 0,
                     `[shouldKeep] should keep following properties - '${JSON.stringify(shouldKeep)}'`);
 
-                // not strict, just verifies that properties are removed
+                // not strict, just verifies that properties are in skip list
+                // so, if property not in skip list -> it is an error
                 const shouldRemove = (testConf.shouldRemove || testConf.shouldRemoveOnly || []).filter(
-                    statKey => statsKeys.indexOf(statKey) !== -1
+                    // stats key SHOULD be in skip list
+                    statKey => activeStats.indexOf(statKey) !== -1
                 );
                 assert.strictEqual(shouldRemove.length, 0,
                     `[shouldRemove] should remove following properties - '${JSON.stringify(shouldRemove)}'`);
 
-                // strict, verifies only that properties are presented.
+                // strict, that only certain properties are presented.
                 // [] (empty array) - means 'keep nothing'
                 let notRemoved = [];
                 if (testConf.shouldKeepOnly) {
-                    notRemoved = statsKeys.filter(
-                        statKey => testConf.shouldKeepOnly.indexOf(statKey) === -1
+                    notRemoved = Object.keys(stats).filter(
+                        statKey => activeStats.indexOf(statKey) !== -1
+                            && testConf.shouldKeepOnly.indexOf(statKey) === -1
                     );
                 }
                 assert.strictEqual(notRemoved.length, 0,
@@ -184,40 +224,30 @@ describe('System Stats', () => {
                 // [] (empty array) - means 'remove nothing'
                 let notKept = [];
                 if (testConf.shouldRemoveOnly) {
-                    const defaultKeys = Object.keys(allProperties.stats);
-                    notKept = defaultKeys.filter(
-                        statKey => statsKeys.indexOf(statKey) === -1
-                                    && testConf.shouldRemoveOnly.indexOf(statKey) === -1
+                    notKept = Object.keys(stats).filter(
+                        statKey => activeStats.indexOf(statKey) === -1
+                            && testConf.shouldRemoveOnly.indexOf(statKey) === -1
                     );
                 }
                 assert.strictEqual(notKept.length, 0,
                     `[shouldRemoveOnly] should keep following properties - '${JSON.stringify(notKept)}'`);
+
+                dataStateValidator();
             });
         });
     });
 
     describe('._processProperty()', () => {
-        it('should return empty promise when noTmstats is true', () => {
-            const systemStats = new SystemStats({ dataOpts: { noTMStats: true } });
-            const property = {
-                structure: {
-                    parentKey: 'tmstats'
-                }
-            };
-            return systemStats._processProperty('', property)
-                .then(() => {
-                    assert.deepStrictEqual(systemStats.collectedData, {});
-                });
-        });
-
         it('should return empty promise when disabled', () => {
             const systemStats = new SystemStats({ dataOpts: { noTMStats: true } });
             const property = {
                 disabled: true
             };
+            const dataStateValidator = testUtil.getSpoiledDataValidator(property);
             return systemStats._processProperty('', property)
                 .then(() => {
                     assert.deepStrictEqual(systemStats.collectedData, {});
+                    dataStateValidator();
                 });
         });
 
@@ -228,9 +258,11 @@ describe('System Stats', () => {
                     folder: true
                 }
             };
+            const dataStateValidator = testUtil.getSpoiledDataValidator(property);
             return systemStats._processProperty('theKey', property)
                 .then(() => {
                     assert.deepStrictEqual(systemStats.collectedData.theKey, {});
+                    dataStateValidator();
                 });
         });
 
@@ -245,9 +277,11 @@ describe('System Stats', () => {
                 }
             };
             sinon.stub(systemStats, '_loadData').resolves(property);
+            const dataStateValidator = testUtil.getSpoiledDataValidator(property);
             return systemStats._processProperty('theKey', property)
                 .then(() => {
                     assert.deepStrictEqual(systemStats.collectedData, expected);
+                    dataStateValidator();
                 });
         });
     });
