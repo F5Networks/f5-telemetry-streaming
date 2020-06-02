@@ -12,8 +12,8 @@ Document Revision History
         - Date
 
       * - 1.12.0
-        - Updated the documentation for Telemetry Streaming v1.11.0. This release contains the following changes: |br| * Added a new consumer for Prometheus (see :ref:`prometheus`) |br| * Updated the Pull Consumer page and added an example for using push and pull consumers in the same declaration (see :doc:`pull-consumers`) |br| *   |br| |br| Issues Resolved: |br| * Added a timeout to Azure metadata service HTTP requests to fix an issue where the Azure Consumer was slow when running in a non-Azure environment
-        - 04-21-20
+        - Updated the documentation for Telemetry Streaming v1.11.0. This release contains the following changes: |br| * Added a new consumer for Prometheus (see :ref:`prometheus`) |br| * Updated the Pull Consumer page and added an example for using push and pull consumers in the same declaration (see :doc:`pull-consumers`) |br| * Added support for IAM Roles with AWS_S3 Consumer (see :ref:`awss3-ref`) |br| * Added TCP support to the StatsD consumer (see :ref:`statsd-ref`) |br| * Added a note to :ref:`splunk-legacy` stating if the legacy format is used, it ignores events from the Event Listener |br| |br| Issues Resolved: |br| * Added a timeout to Azure metadata service HTTP requests to fix an issue where the Azure Consumer was slow when running in a non-Azure environment |br| * Fixed renameKeys for networkInterfaces with multiple digits (`GitHub #18 <https://github.com/F5Networks/f5-telemetry-streaming/issues/18>`_)
+        - 06-02-20
 
       * - Unreleased
         - Documentation only update. This update contains the following change: |br| * Added an important note to the ElasticSearch consumer section stating TS currently does not support sending data to ElasticSearch 7 (see :ref:`elasticsearch-ref`).
