@@ -6,6 +6,8 @@
  * the software product on devcentral.f5.com.
  */
 
+/* jshint ignore: start */
+
 'use strict';
 
 const http = require('http');
