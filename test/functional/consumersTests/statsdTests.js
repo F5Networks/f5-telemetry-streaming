@@ -18,7 +18,7 @@ const constants = require('../shared/constants');
 const dutUtils = require('../dutTests').utils;
 
 // module requirements
-const MODULE_REQUIREMENTS = { DOCKER: true };
+const MODULE_REQUIREMENTS = { DOCKER: true, AT1637: true };
 
 const DUTS = util.getHosts('BIGIP');
 const CONSUMER_HOST = util.getHosts('CONSUMER')[0]; // only expect one
@@ -70,8 +70,8 @@ function test() {
 
                 };
 
-                // splunk container takes about 30 seconds to come up
-                return new Promise(resolve => setTimeout(resolve, 3000))
+                // splunk container takes about 15 seconds to come up
+                return new Promise(resolve => setTimeout(resolve, 1500))
                     .then(() => util.makeRequest(CONSUMER_HOST.ip, uri, options))
                     .then((data) => {
                         util.logger.info('Statsd response:', data);
