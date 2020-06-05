@@ -179,10 +179,10 @@ function test() {
                              * Reasons for retry:
                              * - indexing is strill in process
                              * - system poller not sent data yet
-                             * Sleep for 15 second(s) and return Promise.reject to allow retry
+                             * Sleep for 30 second(s) and return Promise.reject to allow retry
                              */
                             util.logger.info('Waiting for data to be indexed...');
-                            return new Promise(resolveTimer => setTimeout(resolveTimer, 15000))
+                            return new Promise(resolveTimer => setTimeout(resolveTimer, 30000))
                                 .then(() => Promise.reject(new Error('Metrics are empty / not indexed')));
                         });
                 };
