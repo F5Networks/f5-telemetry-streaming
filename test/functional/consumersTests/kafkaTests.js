@@ -121,8 +121,8 @@ function test() {
 
 function teardown() {
     describe('Consumer Teardown: Kafka', () => {
-        it('should remove containers', () => runRemoteCmd(`docker container rm -f ${ZOOKEEPER_NAME}`)
-            .then(() => runRemoteCmd(`docker container rm -f ${KAFKA_NAME}`)));
+        it(`should remove ${ZOOKEEPER_NAME} container`, () => runRemoteCmd(`docker container rm -f ${ZOOKEEPER_NAME}`));
+        it(`should remove ${KAFKA_NAME} container`, () => runRemoteCmd(`docker container rm -f ${KAFKA_NAME}`));
     });
 }
 
