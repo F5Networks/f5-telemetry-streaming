@@ -3492,6 +3492,7 @@ module.exports = {
                             mask: '255.255.255.255',
                             name: '/Common/app/test_vs_0',
                             pool: '/Common/test_pool_0',
+                            'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
                             tenant: 'Common',
                             application: 'app'
                         }
@@ -3674,6 +3675,7 @@ module.exports = {
                     virtualServers: {
                         '/Common/test_vs_0': {
                             tenant: 'Common',
+                            'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
                             availabilityState: 'unknown',
                             'clientside.bitsIn': 0,
                             'clientside.bitsOut': 0,
@@ -3921,7 +3923,8 @@ module.exports = {
                             mask: '255.255.255.255',
                             name: '/Common/test_vs_0',
                             pool: '/Common/test_pool_0',
-                            profiles: {}
+                            profiles: {},
+                            'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet'
                         }
                     }
                 },
@@ -4124,7 +4127,8 @@ module.exports = {
                             mask: '255.255.255.255',
                             name: '/Common/test_vs_0',
                             pool: '/Common/test_pool_0',
-                            profiles: {}
+                            profiles: {},
+                            'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet'
                         }
                     }
                 },
@@ -4376,16 +4380,19 @@ module.exports = {
                                     addr: '10.10.0.2',
                                     availabilityState: 'unknown',
                                     enabledState: 'enabled',
+                                    monitorStatus: 'unchecked',
                                     port: 80,
                                     'serverside.bitsIn': 0,
                                     'serverside.bitsOut': 0,
-                                    'serverside.curConns': 0
+                                    'serverside.curConns': 0,
+                                    'status.statusReason': 'Pool member does not have service checking enabled'
                                 }
                             },
                             name: '/Common/test_pool_0',
                             'serverside.bitsIn': 0,
                             'serverside.bitsOut': 0,
-                            'serverside.curConns': 0
+                            'serverside.curConns': 0,
+                            'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet'
                         }
                     }
                 },

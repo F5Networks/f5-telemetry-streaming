@@ -1,6 +1,13 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.13.0
+### Added
+- AUTOTOOL-1640: Add statusReason and monitorStatus fields to System Poller output for BIG-IQ Analytics
+### Fixed
+### Changed
+### Removed
+
 ## 1.12.0
 ### Added
 - AUTOTOOL-1169: [GitHub #9](https://github.com/F5Networks/f5-telemetry-streaming/issues/9): Add new Prometheus Pull Consumer
