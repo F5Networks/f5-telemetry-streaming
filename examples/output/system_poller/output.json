@@ -274,6 +274,7 @@
             "destination": "10.5.6.7:80",
             "availabilityState": "offline",
             "enabledState": "enabled",
+            "status.statusReason": "The virtual server is available",
             "mask": "255.255.255.255",
             "name": "/Common/foofoo.app/foofoo_vs",
             "appService": "/Common/foofoo.app/foofoo",
@@ -301,6 +302,7 @@
             "destination": "192.0.2.11:443",
             "availabilityState": "offline",
             "enabledState": "enabled",
+            "status.statusReason": "The children pool member(s) either don't have service checking enabled, or service check results are not available yet",
             "mask": "255.255.255.0",
             "name": "/Example_Tenant/A1/serviceMain",
             "ipProtocol": "tcp",
@@ -316,6 +318,7 @@
             "destination": "192.0.2.11:80",
             "availabilityState": "unknown",
             "enabledState": "enabled",
+            "status.statusReason": "The children pool member(s) either don't have service checking enabled, or service check results are not available yet",
             "name": "/Example_Tenant/A1/serviceMain-Redirect",
             "tenant": "Example_Tenant",
             "application": "A1",
@@ -340,16 +343,19 @@
             "serverside.curConns": 0,
             "availabilityState": "available",
             "enabledState": "enabled",
+            "status.statusReason": "The pool is available",
             "name": "/Common/app.app/app_pool",
             "members": {
                 "/Common/10.0.3.5:80": {
                     "addr": "10.0.3.5",
+                    "monitorStatus": "up",
                     "port": 0,
                     "serverside.bitsIn": 0,
                     "serverside.bitsOut": 0,
                     "serverside.curConns": 0,
                     "availabilityState": "available",
-                    "enabledState": "enabled"
+                    "enabledState": "enabled",
+                    "status.statusReason": "Pool member is available"
                 }
             },
             "tenant": "Common",
@@ -362,16 +368,19 @@
             "serverside.curConns": 0,
             "availabilityState": "available",
             "enabledState": "enabled",
+            "status.statusReason": "The pool is available",
             "name": "/Common/telemetry-local",
             "members": {
                 "/Common/10.0.1.100:6514": {
                     "addr": "10.0.1.100",
+                    "monitorStatus": "down",
                     "port": 0,
                     "serverside.bitsIn": 0,
                     "serverside.bitsOut": 0,
                     "serverside.curConns": 0,
                     "availabilityState": "available",
-                    "enabledState": "enabled"
+                    "enabledState": "enabled",
+                    "status.statusReason": "Pool member has been marked down by a monitor"
                 }
             },
             "tenant": "Common",
@@ -384,16 +393,19 @@
             "serverside.curConns": 0,
             "availabilityState": "offline",
             "enabledState": "enabled",
+            "status.statusReason": "The pool is available",
             "name": "/Example_Tenant/A1/hsl_pool",
             "members": {
                 "/Example_Tenant/192.168.120.6:514": {
                     "addr": "192.168.120.6",
+                    "monitorStatus": "up",
                     "port": 0,
                     "serverside.bitsIn": 0,
                     "serverside.bitsOut": 0,
                     "serverside.curConns": 0,
                     "availabilityState": "offline",
-                    "enabledState": "enabled"
+                    "enabledState": "enabled",
+                    "status.statusReason": "Pool member is available"
                 }
             },
             "tenant": "Example_Tenant",
@@ -406,25 +418,30 @@
             "serverside.curConns": 0,
             "availabilityState": "offline",
             "enabledState": "enabled",
+            "status.statusReason": "The pool is available",
             "name": "/Example_Tenant/A1/web_pool",
             "members": {
                 "/Example_Tenant/192.0.2.12:80": {
                     "addr": "192.0.2.12",
+                    "monitorStatus": "up",
                     "port": 0,
                     "serverside.bitsIn": 0,
                     "serverside.bitsOut": 0,
                     "serverside.curConns": 0,
                     "availabilityState": "offline",
-                    "enabledState": "enabled"
+                    "enabledState": "enabled",
+                    "status.statusReason": "Pool member is available"
                 },
                 "/Example_Tenant/192.0.2.13:80": {
                     "addr": "192.0.2.13",
+                    "monitorStatus": "up",
                     "port": 0,
                     "serverside.bitsIn": 0,
                     "serverside.bitsOut": 0,
                     "serverside.curConns": 0,
                     "availabilityState": "offline",
-                    "enabledState": "enabled"
+                    "enabledState": "enabled",
+                    "status.statusReason": "Pool member is available"
                 }
             },
             "tenant": "Example_Tenant",
