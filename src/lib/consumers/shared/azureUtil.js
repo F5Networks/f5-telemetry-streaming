@@ -31,11 +31,15 @@ function getInstanceMetadata(context) {
             Metadata: true
         },
         allowSelfSignedCert: context.config.allowSelfSignedCert,
+        // by default request lib will reuse connections
+        // which is problematic when instance is not on cloud and no metadata
+        // ECONNRESETs happen and sockets not managed correctly resulting in memory leak
+        // apparent when we process event listener data due to volume and number of calls
+        agentOptions: { keepAlive: false },
         timeout: 5 * 1000 // Only wait 5s for Metadata Service response
     };
 
-    return util.makeRequest(metadataOpts)
-        .then(resp => resp);
+    return util.makeRequest(metadataOpts);
 }
 
 function getInstanceRegion(context) {
