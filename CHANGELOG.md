@@ -7,6 +7,7 @@ Changes to this project are documented in this file. More detail and links can b
 ### Fixed
 - AUTOTOOL-1639: Fix Azure consumer memory leak when calling metadata service on an instance where it is unavailable
 ### Changed
+- AUTOTOOL-1547: aws-sdk updated to 2.704.0
 ### Removed
 
 ## 1.12.0

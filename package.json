@@ -37,7 +37,7 @@
         "@f5devcentral/f5-teem": "^1.4.6",
         "ajv": "^6.12.2",
         "applicationinsights": "^1.7.3",
-        "aws-sdk": "^2.664.0",
+        "aws-sdk": "^2.704.0",
         "commander": "^2.19.0",
         "deep-diff": "^1.0.2",
         "elasticsearch": "^15.3.0",
