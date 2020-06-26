@@ -18,7 +18,7 @@ const constants = require('../shared/constants');
 const dutUtils = require('../dutTests').utils;
 
 // module requirements
-const MODULE_REQUIREMENTS = { DOCKER: true, AT1637: true };
+const MODULE_REQUIREMENTS = { DOCKER: true };
 
 const DUTS = util.getHosts('BIGIP');
 const CONSUMER_HOST = util.getHosts('CONSUMER')[0]; // only expect one
@@ -49,8 +49,9 @@ function test() {
         const containerName = `${STATSD_CONTAINER_NAME}-${protocol}`;
         describe('Consumer Test: Statsd - Configure Service', () => {
             it('should start container', () => {
-                const portArgs = `-p ${STATSD_HTTP_PORT}:${STATSD_HTTP_PORT} -p ${STATSD_DATA_PORT}:${STATSD_DATA_PORT}/${protocol} -e STATSD_INTERFACE=${protocol}`;
-                const cmd = `docker run -d --restart=always --name ${containerName} ${portArgs} ${STATSD_IMAGE_NAME}`;
+                const envVars = `-e STATSD_INTERFACE=${protocol} -e GOCARBON=1`;
+                const portArgs = `-p ${STATSD_HTTP_PORT}:${STATSD_HTTP_PORT} -p ${STATSD_DATA_PORT}:${STATSD_DATA_PORT}/${protocol}`;
+                const cmd = `docker run -d --restart=always --name ${containerName} ${portArgs} ${envVars} ${STATSD_IMAGE_NAME}`;
 
                 // simple check to see if container already exists
                 return runRemoteCmd(`docker ps | grep ${containerName}`)
