@@ -626,5 +626,17 @@ module.exports = {
             });
         }
         return data;
+    },
+
+    /**
+     * Convert empty data to empty Object
+     *
+     * @param {Object} args               - args object
+     * @param {Object} [args.data]        - data to process (always included)
+     *
+     * @returns {Object} original data or empty object
+     */
+    convertEmptyToObject(args) {
+        return util.isObjectEmpty(args.data) ? {} : args.data;
     }
 };
