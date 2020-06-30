@@ -697,4 +697,33 @@ describe('Normalize Util', () => {
             assert.deepStrictEqual(normalizeUtil.restructureVirtualServerProfiles({ data }), expected);
         });
     });
+
+    describe('.convertEmptyToObject()', () => {
+        it('should convert empty data to object', () => {
+            let actual = normalizeUtil.convertEmptyToObject({ data: [] });
+            assert.deepStrictEqual(actual, {}, 'should return empty object when array has no items');
+
+            actual = normalizeUtil.convertEmptyToObject({ data: {} });
+            assert.deepStrictEqual(actual, {}, 'should return empty object when data is empty object');
+
+            actual = normalizeUtil.convertEmptyToObject({});
+            assert.deepStrictEqual(actual, {}, 'should return empty object when data is not defined');
+        });
+
+        it('should return same data if not empty (not a copy)', () => {
+            const data = {
+                a: 1,
+                b: {
+                    c: 1
+                }
+            };
+
+            const actual = normalizeUtil.convertEmptyToObject({ data });
+            assert.deepStrictEqual(actual, data, 'should return the same data');
+
+            // check that it is not a copy
+            data.b.c = 10;
+            assert.deepStrictEqual(actual, data, 'should return the same data and not a copy');
+        });
+    });
 });

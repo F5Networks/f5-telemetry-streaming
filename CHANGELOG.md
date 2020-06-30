@@ -5,6 +5,7 @@ Changes to this project are documented in this file. More detail and links can b
 ### Added
 - AUTOTOOL-1640: Add statusReason and monitorStatus fields to System Poller output for BIG-IQ Analytics
 ### Fixed
+- AUTOTOOL-1192: Fix inconsistency in GSLB output: return empty object instead of 'undefined'
 - AUTOTOOL-1639: Fix Azure consumer memory leak when calling metadata service on an instance where it is unavailable
 ### Changed
 ### Removed

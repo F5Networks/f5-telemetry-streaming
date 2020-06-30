@@ -404,6 +404,9 @@
                         "filterKeys": { "exclude": [ "fullPath", "generation", "wipName", "rulesReference", "nameReference" ] }
                     },
                     {
+                        "runFunctions": [ { "name": "convertEmptyToObject" } ]
+                    },
+                    {
                         "runFunctions": [ { "name": "restructureGslbWideIp" } ]
                     },
                     {
@@ -430,6 +433,9 @@
                     },
                     {
                         "filterKeys": { "exclude": [ "fullPath", "generation", "wipName", "rulesReference", "nameReference" ] }
+                    },
+                    {
+                        "runFunctions": [ { "name": "convertEmptyToObject" } ]
                     },
                     {
                         "runFunctions": [ { "name": "restructureGslbWideIp" } ]
@@ -460,6 +466,9 @@
                         "filterKeys": { "exclude": [ "fullPath", "generation", "wipName", "rulesReference", "nameReference" ] }
                     },
                     {
+                        "runFunctions": [ { "name": "convertEmptyToObject" } ]
+                    },
+                    {
                         "runFunctions": [ { "name": "restructureGslbWideIp" } ]
                     },
                     {
@@ -486,6 +495,9 @@
                     },
                     {
                         "filterKeys": { "exclude": [ "fullPath", "generation", "wipName", "rulesReference", "nameReference" ] }
+                    },
+                    {
+                        "runFunctions": [ { "name": "convertEmptyToObject" } ]
                     },
                     {
                         "runFunctions": [ { "name": "restructureGslbWideIp" } ]
@@ -516,6 +528,9 @@
                         "filterKeys": { "exclude": [ "fullPath", "generation", "wipName", "rulesReference", "nameReference" ] }
                     },
                     {
+                        "runFunctions": [ { "name": "convertEmptyToObject" } ]
+                    },
+                    {
                         "runFunctions": [ { "name": "restructureGslbWideIp" } ]
                     },
                     {
@@ -542,6 +557,9 @@
                     },
                     {
                         "filterKeys": { "exclude": [ "fullPath", "generation", "wipName", "rulesReference", "nameReference" ] }
+                    },
+                    {
+                        "runFunctions": [ { "name": "convertEmptyToObject" } ]
                     },
                     {
                         "runFunctions": [ { "name": "restructureGslbWideIp" } ]
