@@ -7,6 +7,7 @@ Changes to this project are documented in this file. More detail and links can b
 ### Fixed
 - AUTOTOOL-1192: Fix inconsistency in GSLB output: return empty object instead of 'undefined'
 - AUTOTOOL-1639: Fix Azure consumer memory leak when calling metadata service on an instance where it is unavailable
+- AUTOTOOL-1503: [GitHub #39](https://github.com/F5Networks/f5-telemetry-streaming/issues/39): Update Azure Log Analytics dashboard example
 ### Changed
 - AUTOTOOL-1547: aws-sdk updated to 2.704.0
 ### Removed
