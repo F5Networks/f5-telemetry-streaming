@@ -2,7 +2,6 @@
 
 Event Listener class
 ====================
-
 The Telemetry Streaming Event Listener collects event logs it receives on the specified port from configured BIG-IP sources, including LTM, ASM, AFM, APM, and AVR.
 
 To use the Event Listener, you must:
@@ -12,7 +11,7 @@ To use the Event Listener, you must:
 2. Post a telemetry declaration with the Telemetry_Listener class, as shown in the following minimal example of an Event Listner:
 
 
-.. code-block:: json
+.. code-block:: bash
 
    "My_Listener": {
       "class": "Telemetry_Listener",
@@ -167,6 +166,7 @@ In this section, you configure the remaining objects for logging, no matter whic
 Sample virtual server definition:
 
    .. code-block:: bash
+
        create ltm virtual some_service destination 192.168.10.11:443 mask 255.255.255.255
 
 
@@ -293,7 +293,7 @@ Example output from Telemetry Streaming:
 ASM Log
 ^^^^^^^
 
-1. Create a Security Log Profile using either TMSH or :ref:`configurelogpubas3-ref`:
+1. Create a Security Log Profile using either TMSH or :ref:`as3logging-ref`:
 
    .. code-block:: python
     

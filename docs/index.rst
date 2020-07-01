@@ -79,7 +79,6 @@ You can click the following links to go directly to a specific :doc:`setting-up-
    prereqs
    faq
    quick-start
-   components
    installation
    using-ts
    declarations
