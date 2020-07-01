@@ -5,45 +5,48 @@ Event Listener class
 
 The Telemetry Streaming Event Listener collects event logs it receives on the specified port from configured BIG-IP sources, including LTM, ASM, AFM, APM, and AVR.
 
-To use the event listener, you must:
+To use the Event Listener, you must:
 
 1. Configure the sources of log/event data. You can do this by either POSTing a single AS3 declaration or you can use TMSH or the GUI to configure individual modules.
 
-2. Post a telemetry declaration with the Telemetry_Listener class, as shown in the following example:
+2. Post a telemetry declaration with the Telemetry_Listener class, as shown in the following minimal example of an Event Listner:
 
-Minimal Event Listener example:
+
 .. code-block:: json
+
    "My_Listener": {
       "class": "Telemetry_Listener",
       "port": 6514
    }
 
+
 IMPORTANT:
 
-- The following configuration examples assume that TS is running on the same BIG-IP that is being monitored and that the listener is using default port 6514.
+- The following configuration examples assume that TS is running on the same BIG-IP that is being monitored, and that the listener is using default port 6514.
 - When TS is not a local listener, the corresponding configurations should be adjusted to reflect remote addresses.
 
 
-// TODO: update the refs names like this next line
 
-.. _configurelogpub-ref:
+.. _logsrc-ref:
 
 Configuring Logging Sources
---------------------------------------
+---------------------------
 General workflow to configure a logging source:
 
-- Define a local virtual address and specify the event listener port (this enables TS to act as a local, on-box listener)
+- Define a local virtual address and specify the Event Listener port (this enables TS to act as a local, on-box listener)
 - Define a pool of logging servers
 - Create an unformatted high speed logging destination that references the pool
 - Create a formatted destination
 - Create a log publisher which is referenced by a logging profile
 - Associate the logging profile with the relevant virtual server
 
-The following diagram shows the relationship or the objects that are configured.
-//TODO: insert diagram here from https://techdocs.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-external-monitoring-implementations-13-0-0/1.html--- 
+The following diagram shows the relationship of the objects that are configured:
+
+|logging-png|
+ 
 
 
-.. _configurelogpubas3-ref:
+.. _as3logging-ref:
 
 Configure Logging Using AS3
 ---------------------------
@@ -415,6 +418,8 @@ The following shows the input sent as different buffers, and the resulting outpu
 
 
 
+.. |logging-png| image:: /images/high-speed-logging.png
+   :alt: High Speed Logging
 
 
 .. |as3docs| raw:: html
