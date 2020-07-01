@@ -445,7 +445,7 @@ pages:
             - public
     only:
         # only update on designated, stable branch
-        # - develop
+        - develop
         - doc-release-branch
 
 # Publish docs to clouddocs.f5networks.net
