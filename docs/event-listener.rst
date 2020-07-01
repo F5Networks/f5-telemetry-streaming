@@ -66,8 +66,13 @@ You can also configure logging using TMSH, see :ref:`configuretmsh`.
 
 Configure Logging Using TMSH
 ----------------------------
-The first steps depend on which type of BIG-IP system you are using: a standard BIG-IP system or a Per-App BIG-IP VE (Virtual Edition). Use only one of the following procedures for the initial configuration.
+This section describes how to configuring logging using TMSH.
 
+The first steps depend on which type of BIG-IP system you are using: a :ref:`standard BIG-IP system<standard>` or a :ref:`Per-App BIG-IP VE (Virtual Edition)<perapp>`. 
+
+Use only one of the following procedures for the initial configuration.
+
+.. _perapp:
 
 Initial configuration for Per-App BIG-IP VE
 ```````````````````````````````````````````
@@ -75,14 +80,22 @@ The configuration for a Per-App VE is different because it limits the number of 
   
 If you are using a Per-App VE, to avoid creating the virtual server for the local listener, you can point the pool directly at the TMM link-local IPv6 address, using the following guidance:
 
-#. From the BIG-IP Command line, type the following command ``ip -6 a s tmm scope link``.  |br| You see the system return something similar to the following: |br| ``tmm: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 state UP qlen 1000`` |br| ``inet6 fe80::298:76ff:fe54:3210/64 scope link`` |br| ``valid_lft forever preferred_lft forever``
+#. From the BIG-IP Command line, type the following command: ``ip -6 a s tmm scope link``.  |br| You see the system return something similar to the following: |br| 
+   
+   .. code-block:: bash
+   
+     tmm: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 state UP qlen 1000
+     inet6 fe80::298:76ff:fe54:3210/64 scope link
+     valid_lft forever preferred_lft forever
 
-#. Copy the IPv6 address starting after inet6, beginning with fe80, and without any mask. In our example, we copy **fe80::298:76ff:fe54:3210**
 
-#. Create a pool using the following command: |br| ``tmsh create ltm pool telemetry members replace-all-with { fe80::298:76ff:fe54:3210.6514 }``  (replace the IPv6 link-local address with the one returned from the BIG-IP in the first step)
+#. Copy the IPv6 address starting after **inet6**, beginning with **fe80**, and without any mask. In our example, we copy **fe80::298:76ff:fe54:3210**
+
+#. Create a pool using the following command (replace the IPv6 link-local address with the one returned from the BIG-IP in the first step): |br| ``tmsh create ltm pool telemetry members replace-all-with { fe80::298:76ff:fe54:3210.6514 }``  
 
 #. Continue with :ref:`restlogpub`.
 
+.. _standard:
 
 Initial configuration for a standard BIG-IP system
 ``````````````````````````````````````````````````
@@ -120,11 +133,12 @@ If you are using a standard BIG-IP system (one that does not have restrictions o
 
 #. Continue with :ref:`restlogpub`.
 
+|
+
 .. _restlogpub:
 
 Configuring the rest of the Logging Components
-`````````````````````````````````````````
-
+``````````````````````````````````````````````
 In this section, you configure the remaining objects for logging, no matter which initial configuration method you used.
 
 
@@ -148,22 +162,37 @@ In this section, you configure the remaining objects for logging, no matter whic
 
         create sys log-config publisher telemetry_publisher destinations replace-all-with { telemetry_formatted }
 
-#. Create the Log Profile(s) then attach to the appropriate virtual server:
+#. Create the Log Profile(s) then attach to the appropriate virtual server (see :ref:`loggingprofiles` for the options):
 
 Sample virtual server definition:
 
    .. code-block:: bash
        create ltm virtual some_service destination 192.168.10.11:443 mask 255.255.255.255
 
-// TODO: the steps for different log profiles should be under here or linked from here
-
 
 |
+
+
+.. _loggingprofiles: 
+
+Logging Profiles
+````````````````
+You can use the following procedures to create different types of logging profiles.
+
+- :ref:`requestlog`
+- :ref:`cgnat`
+- :ref:`afm`
+- :ref:`asm`
+- :ref:`apm`
+- :ref:`avrbasic-ref`
+- :ref:`systemlog`
+
 |
 
+.. _requestlog:
 
 LTM Request Log profile
-```````````````````````
+^^^^^^^^^^^^^^^^^^^^^^^
 The Request Logging profile gives you the ability to configure data within a log file for HTTP requests and responses, in accordance with specified parameters.
 
 To configure an LTM request profile, use the following TMSH commands:
@@ -190,11 +219,12 @@ Example Output from Telemetry Streaming:
 .. literalinclude:: ../examples/output/request_logs/ltm_request_log.json
     :language: json
 
+|
 
 .. _cgnat:
 
 Configuring CGNAT logging
-`````````````````````````
+^^^^^^^^^^^^^^^^^^^^^^^^^
 To configure carrier-grade network address translation (CGNAT), use the following guidance.  For more information on CGNAT, see |cgnatdoc|. 
 
 .. NOTE:: You must have Carrier Grade NAT licensed and enabled to use CGNAT features.
@@ -230,8 +260,10 @@ Example output:
 
 |
 
+.. _afm:
+
 AFM Request Log profile
-```````````````````````
+^^^^^^^^^^^^^^^^^^^^^^^
 
 1. Create a Security Log Profile.
 
@@ -256,9 +288,10 @@ Example output from Telemetry Streaming:
 
 |
 
+.. _asm:
 
 ASM Log
-```````
+^^^^^^^
 
 1. Create a Security Log Profile using either TMSH or :ref:`configurelogpubas3-ref`:
 
@@ -283,8 +316,10 @@ Example Output from Telemetry Streaming:
 
 |
 
+.. _apm:
+
 APM Log
-```````
+^^^^^^^
 
 1. Create an APM Log Profile. For example:
 
@@ -313,13 +348,15 @@ Example Output from Telemetry Streaming:
 .. _avrbasic-ref:
 
 AVR Log
-```````
+^^^^^^^
 For information, see :ref:`avr-ref`. 
 
+|
 
+.. _systemlog:
 
 System Log
-``````````
+^^^^^^^^^^
 
 1. Modify the system syslog configuration by adding a destination, using the following TMSH command:
 
@@ -345,7 +382,7 @@ Example output:
     }
 
 
-
+|
 
 
 
