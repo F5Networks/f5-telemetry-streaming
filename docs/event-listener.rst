@@ -3,22 +3,59 @@
 Event Listener class
 ====================
 
-The Telemetry Streaming Event Listener collects event logs from all BIG-IP sources, including LTM, ASM, AFM, APM, and AVR. You can configure all of these by POSTing a single AS3 declaration or you can use TMSH or the GUI to configure individual modules. Below you will find an example AS3 declaration as well as instructions for configuring each module.
+The Telemetry Streaming Event Listener collects event logs it receives on the specified port from configured BIG-IP sources, including LTM, ASM, AFM, APM, and AVR.
+
+To use the event listener, you must:
+
+1. Configure the sources of log/event data. You can do this by either POSTing a single AS3 declaration or you can use TMSH or the GUI to configure individual modules.
+
+2. Post a telemetry declaration with the Telemetry_Listener class, as shown in the following example:
+
+Minimal Event Listener example:
+.. code-block:: json
+   "My_Listener": {
+      "class": "Telemetry_Listener",
+      "port": 6514
+   }
+
+IMPORTANT:
+
+- The following configuration examples assume that TS is running on the same BIG-IP that is being monitored and that the listener is using default port 6514.
+- When TS is not a local listener, the corresponding configurations should be adjusted to reflect remote addresses.
+
+
+// TODO: update the refs names like this next line
+
+.. _configurelogpub-ref:
+
+Configuring Logging Sources
+--------------------------------------
+General workflow to configure a logging source:
+
+- Define a local virtual address and specify the event listener port (this enables TS to act as a local, on-box listener)
+- Define a pool of logging servers
+- Create an unformatted high speed logging destination that references the pool
+- Create a formatted destination
+- Create a log publisher which is referenced by a logging profile
+- Associate the logging profile with the relevant virtual server
+
+The following diagram shows the relationship or the objects that are configured.
+//TODO: insert diagram here from https://techdocs.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip-external-monitoring-implementations-13-0-0/1.html--- 
 
 
 .. _configurelogpubas3-ref:
 
-Configure Logging using AS3
+Configure Logging Using AS3
 ---------------------------
 
-You can use the following declaration with Application Services Extension (AS3) 3.10.0 or later. For more information, see |as3docs|.  For configuring logging using the BIG-IP TMSH interface, see :ref:`configuretmsh`.
+You can use the following declaration with Application Services Extension (AS3) 3.10.0 or later for a standard BIG-IP system. For more information, see |as3docs|.
 
 .. literalinclude:: ../examples/misc/application_services_3/all_log_profile.json
     :language: json
 
+NOTE:
 
-
-The Request Logging profile gives you the ability to configure data within a log file for HTTP requests and responses, in accordance with specified parameters.
+Some profiles are not supported in AS3 and therefore must be configured using TMSH.
 
 |
 
@@ -26,32 +63,118 @@ The Request Logging profile gives you the ability to configure data within a log
 
 Configure Logging Using TMSH
 ----------------------------
-The following sections show how to configure logging using TMSH
+The first steps depend on which type of BIG-IP system you are using: a standard BIG-IP system or a Per-App BIG-IP VE (Virtual Edition). Use only one of the following procedures for initial configuration.
+
+Initial configuration for Per-App BIG-IP VE
+```````````````````````````````````````````
+
+The configuration for a Per-App VE is different because it limits the number of virtual servers (one virtual IP address and three virtual servers). 
+  
+If you are using a Per-App VE, to avoid creating the virtual server for the local listener, you can point the pool directly at the TMM link-local IPv6 address, using the following guidance:
+
+#. From the BIG-IP Command line, type the following command ``ip -6 a s tmm scope link``.  |br| You see the system return something similar to the following: |br| ``tmm: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 state UP qlen 1000`` |br| ``inet6 fe80::298:76ff:fe54:3210/64 scope link`` |br| ``valid_lft forever preferred_lft forever``
+
+#. Copy the IPv6 address starting after inet6, beginning with fe80, and without any mask. In our example, we copy **fe80::298:76ff:fe54:3210**
+
+#. Create a pool using the following command: |br| ``tmsh create ltm pool telemetry members replace-all-with { fe80::298:76ff:fe54:3210.6514 }``  (replace the IPv6 link-local address with the one returned from the BIG-IP in the first step)
+
+#. Continue with :ref:`restlogpub`.
+
+
+Initial configuration for a standard BIG-IP system
+``````````````````````````````````````````````````
+
+If you are using a standard BIG-IP system (one that does not have restrictions on the number of virtual servers like the Per-App VE), use the following guidance to initially configure the system.
+
+
+#. Create an iRule (localhost forwarder).
+
+   .. code-block:: bash
+
+        create ltm rule telemetry_local_rule
+
+   And insert the following iRule code:
+
+   .. code-block:: bash
+    
+        when CLIENT_ACCEPTED {
+            node 127.0.0.1 6514
+        }
+
+
+#. Create the virtual server for the local listener.
+
+   .. code-block:: bash
+
+        create ltm virtual telemetry_local destination 255.255.255.254:6514 rules { telemetry_local_rule }
+
+
+#. Create the pool.
+
+   .. code-block:: bash
+
+        create ltm pool telemetry monitor tcp members replace-all-with { 255.255.255.254:6514 }
+
+#. Continue with :ref:`restlogpub`.
+
+.. _restlogpub:
+
+Configuring the rest of the Logging Components
+`````````````````````````````````````````
+
+In this section, you configure the remaining objects for logging, no matter which initial configuration method you used.
+
+
+#. Create the Log Destination (Remote HSL):
+
+   .. code-block:: python
+
+        create sys log-config destination remote-high-speed-log telemetry_hsl protocol tcp pool-name telemetry
+
+
+#. Create the Log Destination (Format):
+
+   .. code-block:: python
+
+        create sys log-config destination splunk telemetry_formatted forward-to telemetry_hsl
+
+
+#. Create the Log Publisher:
+
+   .. code-block:: python
+
+        create sys log-config publisher telemetry_publisher destinations replace-all-with { telemetry_formatted }
+
+#. Create the Log Profile(s) then attach to the appropriate virtual server:
+
+Sample virtual server definition:
+
+   .. code-block:: bash
+       create ltm virtual some_service destination 192.168.10.11:443 mask 255.255.255.255
+
+// TODO: the steps for different log profiles should be under here or linked from here
+
+
+|
+|
 
 
 LTM Request Log profile
 ```````````````````````
+The Request Logging profile gives you the ability to configure data within a log file for HTTP requests and responses, in accordance with specified parameters.
 
 To configure an LTM request profile, use the following TMSH commands:
 
 .. NOTE:: All keys should be in lower case to enable classification (tenant/application).
 
-1. Create a pool in TMSH: 
+
+1. Create an LTM Request Log Profile using the following TMSH command. Note: If you are creating the profile in the user interface, the ``\`` are not required. 
 
    .. code-block:: bash
 
-        create ltm pool telemetry-local monitor tcp members replace-all-with { 192.0.2.1:6514 }
+       create ltm profile request-log telemetry_traffic_log_profile request-log-pool telemetry request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\",event_timestamp=\"$DATE_HTTP\" request-logging enabled
 
-    
-   Replace the example address with a valid Telemetry Streaming listener address, for example the management IP address.
-
-2. Create an LTM Request Log Profile using the following TMSH command. Note: If you are creating the profile in the user interface, the ``\`` are not required. 
-
-   .. code-block:: bash
-
-       create ltm profile request-log telemetry request-log-pool telemetry-local request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\",event_timestamp=\"$DATE_HTTP\" request-logging enabled
-
-3. Attach the profile to the virtual server, for example: 
+2. Attach the profile to the virtual server, for example: 
 
    .. code-block:: bash
     
@@ -73,9 +196,7 @@ To configure carrier-grade network address translation (CGNAT), use the followin
 
 .. NOTE:: You must have Carrier Grade NAT licensed and enabled to use CGNAT features.
 
-1. Create a basic Telemetry Streaming configuration (such as :ref:`configurelogpubas3-ref`).
-
-2. Configure the BIG-IP to send log messages about CGNAT processes.  For instructions, see the CGNAT Implementations guide chapter on logging for your BIG-IP version.  For example, for BIG-IP 14.0, see |cgnatdocs|.  Make sure of the following:
+1. Configure the BIG-IP to send log messages about CGNAT processes.  For instructions, see the CGNAT Implementations guide chapter on logging for your BIG-IP version.  For example, for BIG-IP 14.0, see |cgnatdocs|.  Make sure of the following:
 
    - The Large Scale NAT (LSN) Pool must use the Telemetry Streaming Log Publisher you created (**telemetry_publisher** if you used the AS3 example to configure TS logging).  |br| If you have an existing pool, update the pool to use the TS Log Publisher:
 
@@ -109,20 +230,18 @@ Example output:
 AFM Request Log profile
 ```````````````````````
 
-1. Create and :ref:`configurelogpub-ref`.
-
-2. Create a Security Log Profile using TMSH or :ref:`configurelogpubas3-ref`:
+1. Create a Security Log Profile.
 
    .. code-block:: bash
     
-        create security log profile telemetry network replace-all-with { telemetry { filter { log-acl-match-drop enabled log-acl-match-reject enabled } publisher telemetry_publisher } }
+         create security log profile telemetry_afm_security_log_profile network replace-all-with { telemetry { filter { log-acl-match-drop enabled log-acl-match-reject enabled log-ip-errors enabled log-tcp-errors enabled log-tcp-events enabled } publisher telemetry_publisher } } application add { telemetry { servers add { 255.255.255.254:6514 } filter add { request-type { values add { illegal-including-staged-signatures } } } local-storage disabled logger-type remote remote-storage splunk protocol tcp } }
 
 
-3. Attach the profile to the virtual server, for example: 
+2. Attach the profile to the virtual server, for example: 
 
    .. code-block:: bash
     
-      modify ltm virtual <VIRTUAL_SERVER_NAME> profiles add { telemetry { context all } }
+      modify ltm virtual some_service security-log-profiles add { telemetry_afm_security_log_profile }
 
 
 |
@@ -142,13 +261,13 @@ ASM Log
 
    .. code-block:: python
     
-      create security log profile telemetry application replace-all-with { telemetry { filter replace-all-with { request-type { values replace-all-with { all } } } logger-type remote remote-storage splunk servers replace-all-with { 255.255.255.254:6514 {} } } }
+      create security log profile telemetry_asm_security_log_profile  application replace-all-with { telemetry { filter replace-all-with { request-type { values replace-all-with { all } } } logger-type remote remote-storage splunk servers replace-all-with { 255.255.255.254:6514 {} } } }
 
 2. Attach the profile to the virtual server, for example: 
 
    .. code-block:: bash
     
-      modify ltm virtual <VIRTUAL_SERVER_NAME> profiles add { telemetry { context all } }
+      modify ltm virtual some_service security-log-profiles add { telemetry_asm_security_log_profile }
 
 
 |
@@ -164,13 +283,11 @@ Example Output from Telemetry Streaming:
 APM Log
 ```````
 
-1. Create and :ref:`configurelogpub-ref` or :ref:`configurelogpubas3-ref`.
-
-2. Create an APM Log Profile. For example:
+1. Create an APM Log Profile. For example:
 
    .. code-block:: bash
     
-        create apm log-setting telemetry access replace-all-with { access { publisher telemetry-publisher } }
+        create apm log-setting telemetry access replace-all-with { access { publisher telemetry_publisher } }
 
 3. Attach the profile to the APM policy.
 
@@ -179,7 +296,6 @@ APM Log
    .. code-block:: bash
     
       modify ltm virtual <VIRTUAL_SERVER_NAME> profiles add { telemetry { context all } }
-
 
 |
 
@@ -227,100 +343,7 @@ Example output:
 
 
 
-.. _configurelogpub-ref:
 
-Configure the Log Publisher using TMSH
---------------------------------------
-
-Note the following:
-
-- Examples assume the TS listener is using port 6514.
-- Additional objects are required for BIG-IP configurations pointing to a local on-box listener (configuration notes included in the following procedure).
-
-The first steps depend on which type of BIG-IP system you are using: a standard BIG-IP system or a Per-App BIG-IP VE (Virtual Edition). Use only one of the following procedures for initial configuration.
-
-Initial configuration for Per-App BIG-IP VE
-```````````````````````````````````````````
-
-The configuration for a Per-App VE is different because it limits the number of virtual servers (one virtual IP address and three virtual servers). 
-  
-If you are using a Per-App VE, to avoid creating the virtual server you can point the pool directly at the TMM link-local IPv6 address, using the following guidance:
-
-#. From the BIG-IP Command line, type the following command ``ip -6 a s tmm scope link``.  |br| You see the system return something similar to the following: |br| ``tmm: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 state UP qlen 1000`` |br| ``inet6 fe80::298:76ff:fe54:3210/64 scope link`` |br| ``valid_lft forever preferred_lft forever``
-
-#. Copy the IPv6 address starting after inet6, beginning with fe80, and without any mask. In our example, we copy **fe80::298:76ff:fe54:3210**
-
-#. Create a pool using the following command: |br| ``tmsh create ltm pool telemetry members replace-all-with { fe80::298:76ff:fe54:3210.6514 }``  (replace the IPv6 link-local address with the one returned from the BIG-IP in the first step)
-
-#. Continue with :ref:`restlogpub`.
-
-
-Initial configuration for a standard BIG-IP system
-``````````````````````````````````````````````````
-
-If you are using a standard BIG-IP system (one that does not have restrictions on the number of virtual servers like the Per-App VE), use the following guidance to initially configure the system.
-
-
-#. Create an iRule (localhost forwarder). **This is only required when TS is a local listener**.
-
-   .. code-block:: bash
-
-        create ltm rule telemetry_local_rule
-
-   And insert the following iRule code:
-
-   .. code-block:: bash
-    
-        when CLIENT_ACCEPTED {
-            node 127.0.0.1 6514
-        }
-
-
-#. Create the virtual server. **This is only required when TS is a local listener**.
-
-   .. code-block:: bash
-
-        create ltm virtual telemetry_local destination 255.255.255.254:6514 rules { telemetry_local_rule }
-
-
-#. Create the pool. When TS is not a local listener, the member should be the listener's remote address.
-
-   .. code-block:: bash
-
-        create ltm pool telemetry monitor tcp members replace-all-with { 255.255.255.254:6514 }
-
-#. Continue with :ref:`restlogpub`.
-
-.. _restlogpub:
-
-Configuring the rest of the Log Publisher
-`````````````````````````````````````````
-
-In this section, you configure the remaining objects for the Log Publisher, no matter which initial configuration method you used.
-
-
-#. Create the Log Destination (Remote HSL):
-
-   .. code-block:: python
-
-        create sys log-config destination remote-high-speed-log telemetry_hsl protocol tcp pool-name telemetry
-
-
-#. Create the Log Destination (Format):
-
-   .. code-block:: python
-
-        create sys log-config destination splunk telemetry_formatted forward-to telemetry_hsl
-
-
-#. Create the Log Publisher:
-
-   .. code-block:: python
-
-        create sys log-config publisher telemetry_publisher destinations replace-all-with { telemetry_formatted }
-
-|
-|
 
 
 .. _char-encoding:

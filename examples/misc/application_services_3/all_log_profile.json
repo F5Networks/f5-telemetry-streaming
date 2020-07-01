@@ -3,6 +3,7 @@
     "schemaVersion": "3.10.0",
     "remark": "Example depicting creation of BIG-IP module log profiles",
     "Common": {
+    	"class": "Tenant",
         "Shared": {
             "class": "Application",
             "template": "shared",
@@ -10,6 +11,25 @@
                 "remark": "Only required when TS is a local listener",
                 "class": "iRule",
                 "iRule": "when CLIENT_ACCEPTED {\n  node 127.0.0.1 6514\n}"
+            },
+            "some_service": {
+                "class": "Service_Generic",
+                "remark": "Sample service to monitor",
+                "virtualAddresses": [
+                    "192.168.10.11"
+                ],
+                "virtualPort": 443,
+                "profileTrafficLog": {
+                    "use": "telemetry_traffic_log_profile"
+                },
+                "securityLogProfiles": [
+                    {
+                        "use": "telemetry_asm_security_log_profile"
+                    },
+                    {
+                        "use": "telemetry_afm_security_log_profile"
+                    }
+                ]
             },
             "telemetry_local": {
                 "remark": "Only required when TS is a local listener",
@@ -73,7 +93,7 @@
                     "requestTemplate": "event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\",event_timestamp=\"$DATE_HTTP\""
                 }
             },
-            "telemetry_security_log_profile": {
+            "telemetry_afm_security_log_profile": {
                 "class": "Security_Log_Profile",
                 "application": {
                     "localStorage": false,
@@ -99,6 +119,22 @@
                     "logIpErrors": true,
                     "logTcpErrors": true,
                     "logTcpEvents": true
+                }
+            },
+            "telemetry_asm_security_log_profile": {
+                "class": "Security_Log_Profile",
+                "application": {
+                    "localStorage": false,
+                    "remoteStorage": "splunk",
+                    "servers": [
+                        {
+                            "address": "255.255.255.254",
+                            "port": "6514"
+                        }
+                    ],
+                    "storageFilter": {
+                        "requestType": "all"
+                    }
                 }
             }
         }
