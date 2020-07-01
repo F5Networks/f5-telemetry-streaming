@@ -53,12 +53,12 @@ Configure Logging Using AS3
 
 You can use the following declaration with Application Services Extension (AS3) 3.10.0 or later for a standard BIG-IP system. For more information, see |as3docs|.
 
+You can also configure logging using TMSH, see :ref:`configuretmsh`. 
+
+.. NOTE:: Some profiles are not supported in AS3 and therefore must be configured using TMSH.
+
 .. literalinclude:: ../examples/misc/application_services_3/all_log_profile.json
     :language: json
-
-NOTE:
-
-Some profiles are not supported in AS3 and therefore must be configured using TMSH.
 
 |
 
@@ -66,11 +66,11 @@ Some profiles are not supported in AS3 and therefore must be configured using TM
 
 Configure Logging Using TMSH
 ----------------------------
-The first steps depend on which type of BIG-IP system you are using: a standard BIG-IP system or a Per-App BIG-IP VE (Virtual Edition). Use only one of the following procedures for initial configuration.
+The first steps depend on which type of BIG-IP system you are using: a standard BIG-IP system or a Per-App BIG-IP VE (Virtual Edition). Use only one of the following procedures for the initial configuration.
+
 
 Initial configuration for Per-App BIG-IP VE
 ```````````````````````````````````````````
-
 The configuration for a Per-App VE is different because it limits the number of virtual servers (one virtual IP address and three virtual servers). 
   
 If you are using a Per-App VE, to avoid creating the virtual server for the local listener, you can point the pool directly at the TMM link-local IPv6 address, using the following guidance:
