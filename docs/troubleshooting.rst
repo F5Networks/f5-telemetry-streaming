@@ -105,7 +105,7 @@ If data is not appearing in your consumer, use the following troubleshooting adv
 
 If you are using the :ref:`Event Listener<eventlistener-ref>` to publish events and/or logs to a Consumer, first check the configuration required for the Event Listener to function successfully. There are three individual configuration tasks that need to occur:
 
-#. Ensure the Telemetry Streaming declaration has a **Telemetry_Listener** class defined, and that the declaration successfully succeeds.
+#. Ensure the Telemetry Streaming declaration has a **Telemetry_Listener** class defined, and that when you submit the declaration, it succeeds.
 #. Ensure you have completed the base configuration of the BIG-IP, which enables logs and/or events to be published to Telemetry Streaming. See :doc:`event-listener`. |br|    
 
    .. IMPORTANT:: The BIG-IP documentation references a port number used as a part of publishing logs. The port number you use in this configuration must be the same as the port number in the **port** property of the Telemetry_Listener class in your Telemetry Streaming declaration. The BIG-IP publishes events and/or logs to the IP:PORT defined in the configuration, and Telemetry Streaming listens for events on this port.
