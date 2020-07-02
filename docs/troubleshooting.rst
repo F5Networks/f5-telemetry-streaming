@@ -106,11 +106,11 @@ If data is not appearing in your consumer, use the following troubleshooting adv
 If you are using the :ref:`Event Listener<eventlistener-ref>` to publish events and/or logs to a Consumer, first check the configuration required for the Event Listener to function successfully. There are three individual configuration tasks that need to occur:
 
 #. Ensure the Telemetry Streaming declaration has a **Telemetry_Listener** class defined, and that when you submit the declaration, it succeeds.
-#. Ensure you have completed the base configuration of the BIG-IP, which enables logs and/or events to be published to Telemetry Streaming. See :doc:`event-listener`. |br|    
+#. Ensure you have completed the base configuration of the BIG-IP, which enables logs and/or events to be published to Telemetry Streaming. See :ref:`logsrc-ref`. |br|    
 
    .. IMPORTANT:: The BIG-IP documentation references a port number used as a part of publishing logs. The port number you use in this configuration must be the same as the port number in the **port** property of the Telemetry_Listener class in your Telemetry Streaming declaration. The BIG-IP publishes events and/or logs to the IP:PORT defined in the configuration, and Telemetry Streaming listens for events on this port.
 
-#.	Ensure the profiles (AFM/ASM Security Log profiles, or the LTM Request profiles) are attached to the Virtual Servers that should be monitored. Only Virtual Servers that have logging profiles attached publish logs to Telemetry Streaming.
+#.	Ensure the profiles (AFM/ASM Security Log profiles, or the LTM Request profiles) are attached to the Virtual Servers that should be monitored. Only Virtual Servers that have logging profiles attached publish logs to Telemetry Streaming. See :ref:`loggingprofiles`.
  
 |
 
@@ -152,7 +152,8 @@ When the log level is set to **debug**, many more events are logged to the restn
 
   .. code-block:: bash
 
-     Wed, 01 Jul 2020 21:48:59 GMT - finest: [telemetry] Pipeline processed data of type: ASM Wed, 01 Jul 2020 21:48:59 GMT - finest: [telemetry] Pipeline processed data of type: LTM
+     Wed, 01 Jul 2020 21:48:59 GMT - finest: [telemetry] Pipeline processed data of type: ASM 
+     Wed, 01 Jul 2020 21:48:59 GMT - finest: [telemetry] Pipeline processed data of type: LTM
      Wed, 01 Jul 2020 21:48:59 GMT - finest: [telemetry.Generic_HTTP.Fluent_Consumer] success
      Wed, 01 Jul 2020 21:48:59 GMT - finest: [telemetry.Generic_HTTP.Fluent_Consumer] success
 
