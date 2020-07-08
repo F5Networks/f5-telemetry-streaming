@@ -195,11 +195,15 @@ describe('Splunk', () => {
             // - we generating output in predictable order
             // - Object.keys() returns the same array on different node versions
             const expectedData = splunkData.legacySystemData[0].expectedData;
+
             const context = testUtil.buildConsumerContext({
                 eventType: 'systemInfo',
                 config: defaultConsumerConfig
             });
             context.config.format = 'legacy';
+            // though not required explicity through schema, the app dashboard requires facility value
+            // this is set through actions setTag and creates a property under system
+            context.event.data.system.facility = 'myFacility';
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
@@ -340,6 +344,71 @@ describe('Splunk', () => {
                     } catch (err) {
                         // done() with parameter is treated as an error.
                         // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
+                        done(err);
+                    }
+                });
+
+                splunkIndex(context);
+            });
+
+            it('should replace name and format ips for poolMemberStat', (done) => {
+                const context = testUtil.buildConsumerContext({
+                    eventType: 'systemInfo',
+                    config: defaultConsumerConfig
+                });
+                context.config.format = 'legacy';
+                context.event.data = {
+                    system: {
+                        systemTimestamp: '2020-01-17T18:02:51.000Z'
+                    },
+                    tmstats: {
+                        poolMemberStat: [
+                            {
+                                name: 'Test/test-net.1-test_00:00:00:00:00:00:00:00:00:00:FF:FF:0A:0A:01:01:00:00:00:00_8080',
+                                addr: '00:00:00:00:00:00:00:00:00:00:FF:FF:0A:0A:01:01:00:00:00:00',
+                                port: '8080',
+                                pool_name: 'Test/test-net.1-test'
+                            },
+                            {
+                                name: 'Test/test-net.1-test_00:00:00:00:00:00:00:00:00:00:FF:FF:0A:09:08:64:00:00:00:00_443',
+                                addr: '00:00:00:00:00:00:00:00:00:00:FF:FF:0A:09:08:64:00:00:00:00',
+                                port: '443',
+                                pool_name: 'Test/test-net.1-test'
+                            },
+                            {
+                                name: 'Test/test-net.1-test_FE:80:00:00:00:00:00:00:02:01:23:FF:FE:45:67:01:00:00:00:00_8080',
+                                addr: 'FE:80:00:00:00:00:00:00:02:01:23:FF:FE:45:67:01:00:00:00:00',
+                                port: '8080',
+                                pool_name: 'Test/test-net.1-test'
+                            }
+                        ]
+                    },
+                    telemetryServiceInfo: context.event.data.telemetryServiceInfo,
+                    telemetryEventCategory: context.event.data.telemetryEventCategory
+                };
+                sinon.stub(request, 'post').callsFake((opts) => {
+                    try {
+                        const output = zlib.gunzipSync(opts.body).toString().split('}{');
+                        const membersInOutput = output.map((o) => {
+                            if (o.indexOf('bigip.tmstats.pool_member_stat') > -1) {
+                                return JSON.parse(`{${o}}`);
+                            }
+                            return undefined;
+                        }).filter(m => m !== undefined);
+                        assert.notStrictEqual(
+                            membersInOutput.find(m => m.event.name === '10.10.1.1:8080' && m.event.addr === '10.10.1.1'),
+                            undefined, 'output should include poolMember 10.10.1.1:8080'
+                        );
+                        assert.notStrictEqual(
+                            membersInOutput.find(m => m.event.name === '10.9.8.100:443' && m.event.addr === '10.9.8.100'),
+                            undefined, 'output should include poolMember 10.9.8.100:443'
+                        );
+                        assert.notStrictEqual(
+                            membersInOutput.find(m => m.event.name === 'FE80:0000:0000:0000:0201:23FF:FE45:6701:8080' && m.event.addr === 'FE80:0000:0000:0000:0201:23FF:FE45:6701'),
+                            undefined, 'output should include poolMember with addr 10.10.1.3'
+                        );
+                        done();
+                    } catch (err) {
                         done(err);
                     }
                 });

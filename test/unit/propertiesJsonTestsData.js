@@ -6632,7 +6632,9 @@ module.exports = {
                                 b: '2',
                                 c: 'spam',
                                 pool_name: '/Tenant/app/test',
-                                name: '/Tenant/app/test',
+                                addr: '1.2.3.4',
+                                port: '8080',
+                                name: '/Tenant/app/test_1.2.3.4_8080',
                                 tenant: 'Tenant',
                                 application: 'app'
                             },
@@ -6641,7 +6643,9 @@ module.exports = {
                                 b: '4',
                                 c: 'eggs',
                                 pool_name: '/Tenant/test',
-                                name: '/Tenant/test',
+                                addr: '5.6.7.8',
+                                port: '8080',
+                                name: '/Tenant/test_5.6.7.8_8080',
                                 tenant: 'Tenant'
                             }
                         ],
@@ -7046,6 +7050,16 @@ module.exports = {
                                 throw new Error(`Unable to find stat for ${tmctlTable}`);
                             }
                             const mapKey = tmctlStat.normalization[0].runFunctions[0].args.mapKey;
+                            if (Array.isArray(mapKey)) {
+                                return {
+                                    kind: 'tm:util:bash:runstate',
+                                    commandResult: [
+                                        ['a', 'b', 'c', mapKey[0], mapKey[1], mapKey[2]],
+                                        [1, 2, 'spam', '/Tenant/app/test', '1.2.3.4', 8080],
+                                        [3, 4, 'eggs', '/Tenant/test', '5.6.7.8', 8080]
+                                    ].join('\n')
+                                };
+                            }
                             return {
                                 kind: 'tm:util:bash:runstate',
                                 commandResult: [

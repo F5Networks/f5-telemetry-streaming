@@ -21,7 +21,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         version: '14.1.0.6',
                         build: '0.0.9',
                         location: 'missing data',
@@ -52,7 +52,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         interface_name: '1.0',
                         interface_status: 'up'
                     }
@@ -66,7 +66,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         interface_name: 'mgmt',
                         interface_status: 'up'
                     }
@@ -84,7 +84,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -100,7 +100,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -116,7 +116,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -132,7 +132,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -148,7 +148,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -164,7 +164,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -180,7 +180,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -196,7 +196,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -212,7 +212,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -228,7 +228,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -244,7 +244,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -260,7 +260,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -276,7 +276,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -292,7 +292,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -308,7 +308,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -324,7 +324,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -341,7 +341,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -358,7 +358,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -375,7 +375,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -392,7 +392,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -409,7 +409,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -426,7 +426,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -443,7 +443,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -460,7 +460,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -477,7 +477,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -494,7 +494,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: ''
+                        facility: 'myFacility'
                     }
                 },
                 {
@@ -506,7 +506,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         cert_name: 'ca-bundle.crt',
                         cert_subject: 'CN=Starfield Services Root Certificate Authority,OU=http://certificates.starfieldtech.com/repository/,O=Starfield Technologies, Inc.,L=Scottsdale,ST=Arizona,C=US',
                         cert_expiration_date: 1893455999
@@ -521,7 +521,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         cert_name: 'default.crt',
                         cert_subject: 'emailAddress=root@localhost.localdomain,CN=localhost.localdomain,OU=IT,O=MyCompany,L=Seattle,ST=WA,C=US',
                         cert_expiration_date: 1887142817
@@ -536,7 +536,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         cert_name: 'f5-ca-bundle.crt',
                         cert_subject: 'CN=Entrust Root Certification Authority - G2,OU=(c) 2009 Entrust, Inc. - for authorized use only,OU=See www.entrust.net/legal-terms,O=Entrust, Inc.,C=US',
                         cert_expiration_date: 1922896554
@@ -551,7 +551,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         cert_name: 'f5-irule.crt',
                         cert_subject: 'emailAddress=support@f5.com,CN=support.f5.com,OU=Product Development,O=F5 Networks,L=Seattle,ST=Washington,C=US',
                         cert_expiration_date: 1815944413
@@ -566,7 +566,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         virtual_name: '/Common/Shared/telemetry_local',
                         app: 'Shared',
                         appComponent: '',
@@ -585,7 +585,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         virtual_name: '/Common/something',
                         appComponent: '',
                         tenant: 'Common',
@@ -603,7 +603,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         virtual_name: '/Common/telemetry_gjd',
                         appComponent: '',
                         tenant: 'Common',
@@ -621,7 +621,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         virtual_name: '/Common/testvs',
                         appComponent: '',
                         tenant: 'Common',
@@ -639,7 +639,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         virtual_name: '/Common/Shared/telemetry_local',
                         app: 'Shared',
                         appComponent: '',
@@ -660,7 +660,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         virtual_name: '/Common/something',
                         appComponent: '',
                         tenant: 'Common',
@@ -679,7 +679,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         virtual_name: '/Common/telemetry_gjd',
                         appComponent: '',
                         tenant: 'Common',
@@ -698,7 +698,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         virtual_name: '/Common/testvs',
                         appComponent: '',
                         tenant: 'Common',
@@ -717,7 +717,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         virtual_name: '/Common/Shared/telemetry_local',
                         profile_name: '/Common/tcp',
                         profile_type: 'profile',
@@ -735,7 +735,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         virtual_name: '/Common/Shared/telemetry_local',
                         profile_name: '/Common/app/http',
                         profile_type: 'profile',
@@ -753,7 +753,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         virtual_name: '/Common/something',
                         profile_name: '/Common/tcpCustom',
                         profile_type: 'profile',
@@ -770,7 +770,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         virtual_name: '/Common/something',
                         profile_name: '/Common/app/http',
                         profile_type: 'profile',
@@ -787,7 +787,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         virtual_name: '/Common/something',
                         appComponent: '',
                         tenant: 'Common',
@@ -803,7 +803,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         virtual_name: '/Common/testvs',
                         appComponent: '',
                         tenant: 'Common',
@@ -819,7 +819,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         pool_name: '/Common/Shared/telemetry',
                         pool_member_name: '/Common/Shared/255.255.255.254:6514',
                         callbackurl: '',
@@ -839,7 +839,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         pool_name: '/Common/static',
                         pool_member_name: '/Common/192.0.2.0:8081',
                         callbackurl: '',
@@ -859,7 +859,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         pool_name: '/Common/telemetry-local',
                         pool_member_name: '/Common/192.0.2.1:6514',
                         callbackurl: '',
@@ -879,7 +879,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         pool_name: '/Sample_01/A1/web_pool',
                         pool_member_name: '/Sample_01/192.0.1.10:80',
                         callbackurl: '',
@@ -899,7 +899,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         pool_name: '/Sample_01/A1/web_pool',
                         pool_member_name: '/Sample_01/192.0.1.11:80',
                         callbackurl: '',
@@ -919,7 +919,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         pool_name: '/Sample_01/A1/web_pool',
                         pool_member_name: '/Sample_01/192.0.1.12:80',
                         callbackurl: '',
@@ -939,7 +939,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         pool_name: '/Sample_01/A1/web_pool',
                         pool_member_name: '/Sample_01/192.0.1.13:80',
                         callbackurl: '',
@@ -959,7 +959,7 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         pool_name: '/Sample_event_sd/My_app/My_pool',
                         pool_member_name: '/Sample_event_sd/192.0.2.6:80',
                         callbackurl: '',
@@ -979,9 +979,9 @@ module.exports = {
                         aggr_period: 60,
                         device_base_mac: 'fa:16:3e:da:e9:7b',
                         devicegroup: 'bigip1',
-                        facility: '',
+                        facility: 'myFacility',
                         files_sent: 1,
-                        bytes_transfered: 19197
+                        bytes_transfered: 19747
                     }
                 }
             ]
