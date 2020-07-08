@@ -193,7 +193,8 @@ You can use the following procedures to create different types of logging profil
 
 .. _requestlog:
 
-**LTM Request Log profile**
+LTM Request Log profile
+~~~~~~~~~~~~~~~~~~~~~~~
 
 The Request Logging profile gives you the ability to configure data within a log file for HTTP requests and responses, in accordance with specified parameters.
 
@@ -226,7 +227,7 @@ Example Output from Telemetry Streaming:
 .. _cgnat:
 
 Configuring CGNAT logging
-"""""""""""""""""""""""""
+~~~~~~~~~~~~~~~~~~~~~~~~~
 To configure carrier-grade network address translation (CGNAT), use the following guidance.  For more information on CGNAT, see |cgnatdoc|. 
 
 .. NOTE:: You must have Carrier Grade NAT licensed and enabled to use CGNAT features.
@@ -265,7 +266,7 @@ Example output:
 .. _afm:
 
 AFM Request Log profile
-"""""""""""""""""""""""
+~~~~~~~~~~~~~~~~~~~~~~~
 
 1. Create a Security Log Profile.
 
@@ -293,7 +294,7 @@ Example output from Telemetry Streaming:
 .. _asm:
 
 ASM Log
-"""""""
+~~~~~~~
 
 1. Create a Security Log Profile:
 
@@ -321,7 +322,7 @@ Example Output from Telemetry Streaming:
 .. _apm:
 
 APM Log
-"""""""
+~~~~~~~
 
 1. Create an APM Log Profile. For example:
 
@@ -350,7 +351,7 @@ Example Output from Telemetry Streaming:
 .. _avrbasic-ref:
 
 AVR Log
-"""""""
+~~~~~~~
 For information, see :ref:`avr-ref`. 
 
 |
@@ -358,7 +359,7 @@ For information, see :ref:`avr-ref`.
 .. _systemlog:
 
 System Log
-""""""""""
+~~~~~~~~~~
 
 1. Modify the system syslog configuration by adding a destination, using the following TMSH command:
 
