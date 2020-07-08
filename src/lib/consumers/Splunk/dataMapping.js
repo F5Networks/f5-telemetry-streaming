@@ -449,11 +449,16 @@ const stats = [
                 if (key === 'monitorInstanceStat' && newData.event.ip_address) {
                     newData.event.ip_address = newData.event.ip_address.replace(IPV6_V4_PREFIX_REGEXP, '');
                 }
+
                 hexIpProps.forEach((hexProp) => {
                     if (newData.event[hexProp]) {
                         newData.event[hexProp] = formatHexIP(newData.event[hexProp]);
                     }
                 });
+
+                if (key === 'poolMemberStat') {
+                    newData.event.name = `${newData.event.addr}:${newData.event.port}`;
+                }
 
                 output.push(newData);
             });

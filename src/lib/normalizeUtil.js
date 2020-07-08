@@ -39,11 +39,12 @@ module.exports = {
      * Convert array to map using provided options
      *
      * @param {Object} data                - data
-     * @param {String} key                 - key in array containing value to use as key in map
+     * @param {String|Array} key           - one or more fields to use as the keyName for the map
      * @param {Object} options             - optional arguments
      * @param {String} [options.keyNamePrefix] - prefix for key
      * @param {Boolean} [options.skipWhenKeyMissing] - skip conversion when key does not exist
-     *
+     * @param {String} [options.keyNamesSeparator] - default underscore - character used to concatenate keyNames
+     *                                          when there is more than one key to use (compound key)
      * @returns {Object} Converted data
      */
     _convertArrayToMap(data, key, options) {
@@ -53,9 +54,23 @@ module.exports = {
 
         const ret = {};
         options = options || {};
-
+        const keyNamesSeparator = options.keyNamesSeparator ? options.keyNamesSeparator : '_';
+        const isCompoundKey = Array.isArray(key);
         data.forEach((i) => {
-            const keyName = options.keyNamePrefix ? `${options.keyNamePrefix}${i[key]}` : i[key];
+            let keyName = '';
+            if (isCompoundKey) {
+                key.forEach((k) => {
+                    keyName += `${keyNamesSeparator}${i[k]}`;
+                });
+                // remove separator from beginning
+                keyName = keyName.substring(1);
+                if (options.keyNamePrefix) {
+                    keyName = `${options.keyNamePrefix}${keyName}`;
+                }
+            } else {
+                keyName = options.keyNamePrefix ? `${options.keyNamePrefix}${i[key]}` : i[key];
+            }
+
             ret[keyName] = i;
         });
         return ret;

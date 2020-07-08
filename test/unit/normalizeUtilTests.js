@@ -22,7 +22,7 @@ const assert = chai.assert;
 
 describe('Normalize Util', () => {
     describe('._convertArrayToMap()', () => {
-        it('should convert array to map', () => {
+        it('should convert array to map with single key', () => {
             const array = [
                 {
                     name: 'foo'
@@ -37,7 +37,51 @@ describe('Normalize Util', () => {
             assert.deepStrictEqual(actualMap, expectedMap);
         });
 
-        it('should fail to convert array to map', () => assert.throws(
+        it('should convert array to map when mapKey is an array (compound key)', () => {
+            const array = [
+                {
+                    name: 'foo',
+                    key1: 'ok',
+                    key2: 'yes',
+                    nonKey: 'maybe'
+                }
+            ];
+            const expectedMap = {
+                ok_yes: {
+                    name: 'foo',
+                    key1: 'ok',
+                    key2: 'yes',
+                    nonKey: 'maybe'
+                }
+            };
+            const actualMap = normalizeUtil._convertArrayToMap(array, ['key1', 'key2']);
+            assert.deepStrictEqual(actualMap, expectedMap);
+        });
+
+        it('should convert array to map when mapKey is an array (compound key) and separator specified', () => {
+            const array = [
+                {
+                    name: 'foo',
+                    key1: 'ok',
+                    key2: 'yes',
+                    key3: 'sure',
+                    nonKey: 'maybe'
+                }
+            ];
+            const expectedMap = {
+                'ok-yes-sure': {
+                    name: 'foo',
+                    key1: 'ok',
+                    key2: 'yes',
+                    key3: 'sure',
+                    nonKey: 'maybe'
+                }
+            };
+            const actualMap = normalizeUtil._convertArrayToMap(array, ['key1', 'key2', 'key3'], { keyNamesSeparator: '-' });
+            assert.deepStrictEqual(actualMap, expectedMap);
+        });
+
+        it('should fail to convert array to map when data is not array', () => assert.throws(
             () => normalizeUtil._convertArrayToMap({}, 'name'),
             /array required/
         ));
@@ -279,6 +323,7 @@ describe('Normalize Util', () => {
             assert.deepStrictEqual(result, expectedResult);
         });
 
+
         it('should format as json and filter/rename', () => {
             const data = 'named_key,key1,key2,key3\nname,value,value,value';
             const expectedResult = {
@@ -326,6 +371,20 @@ describe('Normalize Util', () => {
                 const msg = err.message || err;
                 assert.notStrictEqual(msg.indexOf('Unsupported type'), -1);
             }
+        });
+
+        it('should format as json when mapKey is an array (compound key)', () => {
+            const data = 'pool_name,addr,port\nthePool,1.2.3.4,8080';
+            const expectedResult = {
+                'thePool_1.2.3.4_8080': {
+                    pool_name: 'thePool',
+                    addr: '1.2.3.4',
+                    port: '8080'
+                }
+            };
+
+            const result = normalizeUtil.formatAsJson({ data, type: 'csv', mapKey: ['pool_name', 'addr', 'port'] });
+            assert.deepStrictEqual(result, expectedResult);
         });
     });
 

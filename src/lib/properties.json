@@ -1176,7 +1176,7 @@
             "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c pool_member_stat" } },
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "pool_name" } }]
+                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": [ "pool_name", "addr", "port"] } }]
                 },
                 {
                     "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
