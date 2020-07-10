@@ -4,7 +4,6 @@ Changes to this project are documented in this file. More detail and links can b
 ## 1.13.0
 ### Added
 - AUTOTOOL-1640: Add statusReason and monitorStatus fields to System Poller output for BIG-IQ Analytics
-- AUTOTOOL-1616: Add EventListener unit tests
 ### Fixed
 - AUTOTOOL-1192: Fix inconsistency in GSLB output: return empty object instead of 'undefined'
 - AUTOTOOL-1639: Fix Azure consumer memory leak when calling metadata service on an instance where it is unavailable
@@ -13,6 +12,7 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-1694: Fix Splunk legacy format missing poolMemberStat data
 ### Changed
 - AUTOTOOL-1547: aws-sdk updated to 2.704.0
+- AUTOTOOL-1616: Increased code coverage: Event Listener unit tests
 ### Removed
 
 ## 1.12.0
