@@ -33,8 +33,11 @@ const MAX_BUFFER_SIZE = 16 * 1024; // 16k chars
 const MAX_BUFFER_TIMEOUTS = 5;
 const MAX_BUFFER_TIMEOUT = 1 * 1000; // 1 sec
 
-const listeners = {};
+const LISTENERS = {};
 const protocols = ['tcp', 'udp'];
+
+
+/** @module EventListener */
 
 // LTM request log (example)
 // eslint-disable-next-line max-len
@@ -99,6 +102,15 @@ EventListener.prototype.getServerOptions = function () {
 };
 
 /**
+ * Returns current listeners
+ *
+ * @returns {Object}
+ */
+EventListener.prototype.getListeners = function () {
+    return LISTENERS;
+};
+
+/**
  * Start Event listener
  */
 EventListener.prototype.start = function () {
@@ -129,7 +141,6 @@ EventListener.prototype._listen = function () {
 EventListener.prototype._start = function () {
     // TODO: investigate constraining listener when running on local BIG-IP, however
     // for now cannot until a valid address is found - loopback address not allowed for LTM objects
-
     if (protocols.indexOf(this.protocol) === -1) throw new Error(`Protocol unexpected: ${this.protocol}`);
 
     if (this.protocol === 'tcp') {
@@ -398,14 +409,14 @@ configWorker.on('change', (config) => {
     eventListeners = eventListeners || {};
     // gather all keys together to iterate over them
     const keys = new Set(Object.keys(eventListeners));
-    Object.keys(listeners).forEach(key => keys.add(key));
+    Object.keys(LISTENERS).forEach(key => keys.add(key));
 
     // timestamp to find out-dated tracers
     const tracersTimestamp = new Date().getTime();
 
     keys.forEach((lKey) => {
         const lConfig = eventListeners[lKey];
-        const listener = listeners[lKey];
+        const listener = LISTENERS[lKey];
         // no listener's config or it was disabled - remove it
         if (!lConfig || lConfig.enable === false) {
             if (listener) {
@@ -415,7 +426,7 @@ configWorker.on('change', (config) => {
                         protocolListener.stop();
                     }
                 });
-                delete listeners[lKey];
+                delete LISTENERS[lKey];
             }
             return;
         }
@@ -447,13 +458,15 @@ configWorker.on('change', (config) => {
                 }
                 protocolListener = new EventListener(lKey, port, opts);
                 protocolListener.start();
-                listeners[lKey] = listeners[lKey] || {};
-                listeners[lKey][protocol] = protocolListener;
+                LISTENERS[lKey] = LISTENERS[lKey] || {};
+                LISTENERS[lKey][protocol] = protocolListener;
             }
         });
     });
 
-    logger.debug(`${Object.keys(listeners).length} event listener(s) listening`);
+    logger.debug(`${Object.keys(LISTENERS).length} event listener(s) listening`);
     tracers.remove(tracer => tracer.name.startsWith(CLASS_NAME)
         && tracer.lastGetTouch < tracersTimestamp);
 });
+
+module.exports = EventListener;
