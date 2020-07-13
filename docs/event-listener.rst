@@ -2,6 +2,7 @@
 
 Event Listener class
 ====================
+
 The Telemetry Streaming Event Listener collects event logs it receives on the specified port from configured BIG-IP sources, including LTM, ASM, AFM, APM, and AVR.
 
 To use the Event Listener, you must:
@@ -48,7 +49,7 @@ The following diagram shows the relationship of the objects that are configured:
 .. _as3logging-ref:
 
 Configure Logging Using AS3
----------------------------
+```````````````````````````
 
 You can use the following declaration with Application Services Extension (AS3) 3.10.0 or later for a standard BIG-IP system. For more information, see |as3docs|.
 
@@ -64,7 +65,7 @@ You can also configure logging using TMSH, see :ref:`configuretmsh`.
 .. _configuretmsh:
 
 Configure Logging Using TMSH
-----------------------------
+````````````````````````````
 This section describes how to configuring logging using TMSH.
 
 The first steps depend on which type of BIG-IP system you are using: a :ref:`standard BIG-IP system<standard>` or a :ref:`Per-App BIG-IP VE (Virtual Edition)<perapp>`. 
@@ -74,7 +75,7 @@ Use only one of the following procedures for the initial configuration.
 .. _perapp:
 
 Initial configuration for Per-App BIG-IP VE
-```````````````````````````````````````````
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The configuration for a Per-App VE is different because it limits the number of virtual servers (one virtual IP address and three virtual servers). 
   
 If you are using a Per-App VE, to avoid creating the virtual server for the local listener, you can point the pool directly at the TMM link-local IPv6 address, using the following guidance:
@@ -97,7 +98,7 @@ If you are using a Per-App VE, to avoid creating the virtual server for the loca
 .. _standard:
 
 Initial configuration for a standard BIG-IP system
-``````````````````````````````````````````````````
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you are using a standard BIG-IP system (one that does not have restrictions on the number of virtual servers like the Per-App VE), use the following guidance to initially configure the system.
 
@@ -136,8 +137,8 @@ If you are using a standard BIG-IP system (one that does not have restrictions o
 
 .. _restlogpub:
 
-Configuring the rest of the Logging Components
-``````````````````````````````````````````````
+Configuring the rest of the logging components
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 In this section, you configure the remaining objects for logging, no matter which initial configuration method you used.
 
 
@@ -177,10 +178,10 @@ Example virtual server definition:
 .. _loggingprofiles: 
 
 Logging Profiles
-^^^^^^^^^^^^^^^^
+""""""""""""""""
 You can use the following procedures to create different types of logging profiles.
 
-- :ref:`requestlog`
+- :ref:`LTM Request Log profile<requestlog>`
 - :ref:`cgnat`
 - :ref:`afm`
 - :ref:`asm`
@@ -193,7 +194,8 @@ You can use the following procedures to create different types of logging profil
 .. _requestlog:
 
 LTM Request Log profile
-"""""""""""""""""""""""
+~~~~~~~~~~~~~~~~~~~~~~~
+
 The Request Logging profile gives you the ability to configure data within a log file for HTTP requests and responses, in accordance with specified parameters.
 
 To configure an LTM request profile, use the following TMSH commands:
@@ -225,7 +227,7 @@ Example Output from Telemetry Streaming:
 .. _cgnat:
 
 Configuring CGNAT logging
-"""""""""""""""""""""""""
+~~~~~~~~~~~~~~~~~~~~~~~~~
 To configure carrier-grade network address translation (CGNAT), use the following guidance.  For more information on CGNAT, see |cgnatdoc|. 
 
 .. NOTE:: You must have Carrier Grade NAT licensed and enabled to use CGNAT features.
@@ -264,7 +266,7 @@ Example output:
 .. _afm:
 
 AFM Request Log profile
-"""""""""""""""""""""""
+~~~~~~~~~~~~~~~~~~~~~~~
 
 1. Create a Security Log Profile.
 
@@ -292,7 +294,7 @@ Example output from Telemetry Streaming:
 .. _asm:
 
 ASM Log
-"""""""
+~~~~~~~
 
 1. Create a Security Log Profile:
 
@@ -320,7 +322,7 @@ Example Output from Telemetry Streaming:
 .. _apm:
 
 APM Log
-"""""""
+~~~~~~~
 
 1. Create an APM Log Profile. For example:
 
@@ -349,7 +351,7 @@ Example Output from Telemetry Streaming:
 .. _avrbasic-ref:
 
 AVR Log
-"""""""
+~~~~~~~
 For information, see :ref:`avr-ref`. 
 
 |
@@ -357,7 +359,7 @@ For information, see :ref:`avr-ref`.
 .. _systemlog:
 
 System Log
-""""""""""
+~~~~~~~~~~
 
 1. Modify the system syslog configuration by adding a destination, using the following TMSH command:
 
