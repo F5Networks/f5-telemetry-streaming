@@ -59,6 +59,8 @@ Required Information:
  - Workspace ID: Navigate to :guilabel:`Log Analytics workspace > Advanced Settings > Connected Sources`.
  - Shared Key: Navigate to :guilabel:`Log Analytics workspace > Advanced Settings > Connected Sources` and use the primary key.
 
+.. IMPORTANT:: The Azure Log Analytics Consumer only supports sending 500 items. Each configuration item (such as virtual server, pool, node) uses part of this limit.
+
 To see more information about sending data to Log Analytics, see |HTTP Data Collector API|.
 
 .. NOTE:: The following example has been updated with the **useManagedIdentity** and **region** properties. |br| See :ref:`mi` following the example for information about using Azure Managed Identities and Telemetry Streaming. 

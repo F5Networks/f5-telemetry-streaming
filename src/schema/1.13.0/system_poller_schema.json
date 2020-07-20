@@ -1,0 +1,248 @@
+{
+    "$id": "system_poller_schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry Streaming system poller schema",
+    "description": "",
+    "type": "object",
+    "definitions": {
+        "systemPoller": {
+            "$comment": "system_schema.json should be updated when new property added",
+            "title": "System Poller",
+            "description": "",
+            "type": "object",
+            "properties": {
+                "enable": {
+                    "default": true,
+                    "allOf": [
+                        {
+                            "$ref": "base_schema.json#/definitions/enable"
+                        }
+                    ]
+                },
+                "interval": {
+                    "title": "Collection interval (in seconds)",
+                    "description": "If endpointList is specified, minimum=1. Without endpointList, minimum=60 and maximum=60000. Allows setting interval=0 to not poll on an interval.",
+                    "type": "integer",
+                    "default": 300
+                },
+                "trace": {
+                    "$ref": "base_schema.json#/definitions/trace"
+                },
+                "tag": {
+                    "$comment": "Deprecated! Use actions with a setTag action.",
+                    "allOf": [
+                        {
+                            "$ref": "base_schema.json#/definitions/tag"
+                        }
+                    ]
+                },
+                "actions": {
+                    "title": "Actions",
+                    "description": "Actions to be performed on the systemPoller.",
+                    "type": "array",
+                    "items": {
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/action"
+                            }
+                        ]
+                    },
+                    "default": [
+                        {
+                            "setTag": {
+                                "tenant": "`T`",
+                                "application": "`A`"
+                            }
+                        }
+                    ]
+                },
+                "endpointList": {
+                    "title": "Endpoint List",
+                    "description": "List of endpoints to use in data collection",
+                    "oneOf": [
+                        {
+                            "type": "array",
+                            "items": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "endpoints_schema.json#/definitions/endpointsPointerRef"
+                                    },
+                                    {
+                                        "$ref": "endpoints_schema.json#/definitions/endpointsItemPointerRef"
+                                    },
+                                    {
+                                        "if": { "required": [ "items" ]},
+                                        "then": {
+                                            "$ref": "endpoints_schema.json#/definitions/endpointsObjectRef"
+                                        },
+                                        "else": {
+                                            "$ref": "endpoints_schema.json#/definitions/endpointObjectRef"
+                                        }
+                                    }
+
+                                ]
+                            },
+                            "minItems": 1
+                        },
+                        {
+                            "$ref": "endpoints_schema.json#/definitions/endpointsPointerRef"
+                        },
+                        {
+                            "$ref": "endpoints_schema.json#/definitions/endpointsObjectRef"
+                        }
+                    ]
+                }
+            },
+            "oneOf": [
+                {
+                    "allOf": [
+                        {
+                            "if": { "required": [ "endpointList" ] },
+                            "then": {
+                                "properties": {
+                                    "interval": {
+                                        "minimum": 1
+                                    }
+                                }
+                            },
+                            "else": {
+                                "properties":{
+                                    "interval": {
+                                        "minimum": 60,
+                                        "maximum": 6000
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "interval": {
+                                    "enum": [0]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        "systemPollerPointerRef": {
+            "type": "string",
+            "declarationClass": "Telemetry_System_Poller"
+        },
+        "systemPollerObjectRef": {
+            "allOf": [
+                {
+                    "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a separate block",
+                    "properties": {
+                        "enable": {},
+                        "trace": {},
+                        "interval": {},
+                        "tag": {},
+                        "actions": {},
+                        "endpointList": {}
+                    },
+                    "additionalProperties": false
+                },
+                {
+                    "$ref": "#/definitions/systemPoller"
+                }
+            ]
+        }
+    },
+    "allOf": [
+        {
+            "if": { "properties": { "class": { "const": "Telemetry_System_Poller" } } },
+            "then": {
+                "required": [
+                    "class"
+                ],
+                "properties": {
+                    "class": {
+                        "title": "Class",
+                        "description": "Telemetry Streaming System Poller class",
+                        "type": "string",
+                        "enum": [ "Telemetry_System_Poller" ]
+                    },
+                    "host": {
+                        "$comment": "Deprecated! Use Telemetry_System to define target device",
+                        "default": "localhost",
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/host"
+                            }
+                        ]
+                    },
+                    "port": {
+                        "$comment": "Deprecated! Use Telemetry_System to define target device",
+                        "default": 8100,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/port"
+                            }
+                        ]
+                    },
+                    "protocol": {
+                        "$comment": "Deprecated! Use Telemetry_System to define target device",
+                        "default": "http",
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/protocol"
+                            }
+                        ]
+                    },
+                    "allowSelfSignedCert": {
+                        "$comment": "Deprecated! Use Telemetry_System to define target device",
+                        "title": "Allow Self-Signed Certificate",
+                        "default": false,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/allowSelfSignedCert"
+                            }
+                        ]
+                    },
+                    "enableHostConnectivityCheck": {
+                        "$comment": "Deprecated! Use Telemetry_System to define target device",
+                        "$ref": "base_schema.json#/definitions/enableHostConnectivityCheck"
+                    },
+                    "username": {
+                        "$comment": "Deprecated! Use Telemetry_System to define target device",
+                        "$ref": "base_schema.json#/definitions/username"
+                    },
+                    "passphrase": {
+                        "$comment": "Deprecated! Use Telemetry_System to define target device",
+                        "$ref": "base_schema.json#/definitions/secret"
+                    }
+                },
+                "allOf": [
+                    {
+                        "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a separate block",
+                        "properties": {
+                            "class": {},
+                            "enable": {},
+                            "trace": {},
+                            "interval": {},
+                            "tag": {},
+                            "host": {},
+                            "port": {},
+                            "protocol": {},
+                            "allowSelfSignedCert": {},
+                            "enableHostConnectivityCheck": {},
+                            "username": {},
+                            "passphrase": {},
+                            "actions": {},
+                            "endpointList": {}
+                        },
+                        "additionalProperties": false
+                    },
+                    {
+                        "$ref": "#/definitions/systemPoller"
+                    }
+                ]
+            }
+        }
+    ]
+}

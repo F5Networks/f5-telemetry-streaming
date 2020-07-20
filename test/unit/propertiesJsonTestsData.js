@@ -1868,6 +1868,12 @@ module.exports = {
                 ],
                 contextToCollect: ['provisioning'],
                 expectedData: {
+                    aWideIps: {},
+                    aaaaWideIps: {},
+                    cnameWideIps: {},
+                    mxWideIps: {},
+                    naptrWideIps: {},
+                    srvWideIps: {},
                     aPools: {},
                     aaaaPools: {},
                     cnamePools: {},
@@ -1937,6 +1943,12 @@ module.exports = {
                 ],
                 contextToCollect: ['provisioning'],
                 expectedData: {
+                    aWideIps: {},
+                    aaaaWideIps: {},
+                    cnameWideIps: {},
+                    mxWideIps: {},
+                    naptrWideIps: {},
+                    srvWideIps: {},
                     aPools: {},
                     aaaaPools: {},
                     cnamePools: {},
@@ -3492,6 +3504,7 @@ module.exports = {
                             mask: '255.255.255.255',
                             name: '/Common/app/test_vs_0',
                             pool: '/Common/test_pool_0',
+                            'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
                             tenant: 'Common',
                             application: 'app'
                         }
@@ -3674,6 +3687,7 @@ module.exports = {
                     virtualServers: {
                         '/Common/test_vs_0': {
                             tenant: 'Common',
+                            'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
                             availabilityState: 'unknown',
                             'clientside.bitsIn': 0,
                             'clientside.bitsOut': 0,
@@ -3921,7 +3935,8 @@ module.exports = {
                             mask: '255.255.255.255',
                             name: '/Common/test_vs_0',
                             pool: '/Common/test_pool_0',
-                            profiles: {}
+                            profiles: {},
+                            'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet'
                         }
                     }
                 },
@@ -4124,7 +4139,8 @@ module.exports = {
                             mask: '255.255.255.255',
                             name: '/Common/test_vs_0',
                             pool: '/Common/test_pool_0',
-                            profiles: {}
+                            profiles: {},
+                            'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet'
                         }
                     }
                 },
@@ -4376,16 +4392,19 @@ module.exports = {
                                     addr: '10.10.0.2',
                                     availabilityState: 'unknown',
                                     enabledState: 'enabled',
+                                    monitorStatus: 'unchecked',
                                     port: 80,
                                     'serverside.bitsIn': 0,
                                     'serverside.bitsOut': 0,
-                                    'serverside.curConns': 0
+                                    'serverside.curConns': 0,
+                                    'status.statusReason': 'Pool member does not have service checking enabled'
                                 }
                             },
                             name: '/Common/test_pool_0',
                             'serverside.bitsIn': 0,
                             'serverside.bitsOut': 0,
-                            'serverside.curConns': 0
+                            'serverside.curConns': 0,
+                            'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet'
                         }
                     }
                 },
@@ -6613,7 +6632,9 @@ module.exports = {
                                 b: '2',
                                 c: 'spam',
                                 pool_name: '/Tenant/app/test',
-                                name: '/Tenant/app/test',
+                                addr: '1.2.3.4',
+                                port: '8080',
+                                name: '/Tenant/app/test_1.2.3.4_8080',
                                 tenant: 'Tenant',
                                 application: 'app'
                             },
@@ -6622,7 +6643,9 @@ module.exports = {
                                 b: '4',
                                 c: 'eggs',
                                 pool_name: '/Tenant/test',
-                                name: '/Tenant/test',
+                                addr: '5.6.7.8',
+                                port: '8080',
+                                name: '/Tenant/test_5.6.7.8_8080',
                                 tenant: 'Tenant'
                             }
                         ],
@@ -7027,6 +7050,16 @@ module.exports = {
                                 throw new Error(`Unable to find stat for ${tmctlTable}`);
                             }
                             const mapKey = tmctlStat.normalization[0].runFunctions[0].args.mapKey;
+                            if (Array.isArray(mapKey)) {
+                                return {
+                                    kind: 'tm:util:bash:runstate',
+                                    commandResult: [
+                                        ['a', 'b', 'c', mapKey[0], mapKey[1], mapKey[2]],
+                                        [1, 2, 'spam', '/Tenant/app/test', '1.2.3.4', 8080],
+                                        [3, 4, 'eggs', '/Tenant/test', '5.6.7.8', 8080]
+                                    ].join('\n')
+                                };
+                            }
                             return {
                                 kind: 'tm:util:bash:runstate',
                                 commandResult: [

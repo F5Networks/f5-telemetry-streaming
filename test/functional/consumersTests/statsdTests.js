@@ -49,8 +49,9 @@ function test() {
         const containerName = `${STATSD_CONTAINER_NAME}-${protocol}`;
         describe('Consumer Test: Statsd - Configure Service', () => {
             it('should start container', () => {
-                const portArgs = `-p ${STATSD_HTTP_PORT}:${STATSD_HTTP_PORT} -p ${STATSD_DATA_PORT}:${STATSD_DATA_PORT}/${protocol} -e STATSD_INTERFACE=${protocol}`;
-                const cmd = `docker run -d --restart=always --name ${containerName} ${portArgs} ${STATSD_IMAGE_NAME}`;
+                const envVars = `-e STATSD_INTERFACE=${protocol} -e GOCARBON=1`;
+                const portArgs = `-p ${STATSD_HTTP_PORT}:${STATSD_HTTP_PORT} -p ${STATSD_DATA_PORT}:${STATSD_DATA_PORT}/${protocol}`;
+                const cmd = `docker run -d --restart=always --name ${containerName} ${portArgs} ${envVars} ${STATSD_IMAGE_NAME}`;
 
                 // simple check to see if container already exists
                 return runRemoteCmd(`docker ps | grep ${containerName}`)
@@ -70,8 +71,8 @@ function test() {
 
                 };
 
-                // splunk container takes about 30 seconds to come up
-                return new Promise(resolve => setTimeout(resolve, 3000))
+                // splunk container takes about 15 seconds to come up
+                return new Promise(resolve => setTimeout(resolve, 1500))
                     .then(() => util.makeRequest(CONSUMER_HOST.ip, uri, options))
                     .then((data) => {
                         util.logger.info('Statsd response:', data);
@@ -179,10 +180,10 @@ function test() {
                              * Reasons for retry:
                              * - indexing is strill in process
                              * - system poller not sent data yet
-                             * Sleep for 15 second(s) and return Promise.reject to allow retry
+                             * Sleep for 30 second(s) and return Promise.reject to allow retry
                              */
                             util.logger.info('Waiting for data to be indexed...');
-                            return new Promise(resolveTimer => setTimeout(resolveTimer, 15000))
+                            return new Promise(resolveTimer => setTimeout(resolveTimer, 30000))
                                 .then(() => Promise.reject(new Error('Metrics are empty / not indexed')));
                         });
                 };

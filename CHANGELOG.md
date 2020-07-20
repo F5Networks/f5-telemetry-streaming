@@ -1,6 +1,20 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.13.0
+### Added
+- AUTOTOOL-1640: Add statusReason and monitorStatus fields to System Poller output for BIG-IQ Analytics
+### Fixed
+- AUTOTOOL-1192: Fix inconsistency in GSLB output: return empty object instead of 'undefined'
+- AUTOTOOL-1639: Fix Azure consumer memory leak when calling metadata service on an instance where it is unavailable
+- AUTOTOOL-1503: [GitHub #39](https://github.com/F5Networks/f5-telemetry-streaming/issues/39): Update Azure Log Analytics dashboard example
+- AUTOTOOL-1695: Fix lodash [Prototype Pollution vulnerability](https://www.npmjs.com/advisories/1523)
+- AUTOTOOL-1694: Fix Splunk legacy format missing poolMemberStat data
+### Changed
+- AUTOTOOL-1547: aws-sdk updated to 2.704.0
+- AUTOTOOL-1616: Increased code coverage: Event Listener unit tests
+### Removed
+
 ## 1.12.0
 ### Added
 - AUTOTOOL-1169: [GitHub #9](https://github.com/F5Networks/f5-telemetry-streaming/issues/9): Add new Prometheus Pull Consumer
@@ -10,9 +24,9 @@ Changes to this project are documented in this file. More detail and links can b
 ### Fixed
 - AUTOTOOL-1506: Added a timeout to Azure metadata service HTTP requests
 - AUTOTOOL-557: [GitHub #18](https://github.com/F5Networks/f5-telemetry-streaming/issues/18) Fix renameKeys for networkInterfaces with multiple digits
-
 ### Changed
 - AUTOTOOL-1432: Update npm packages (aws-sdk from v2.659 to v2.664 and default mocha from v5.2.0 to v7.1.2)
+- Updated @f5devcentral/f5-teem package dependency to 1.4.6
 ### Removed
 
 ## 1.11.0

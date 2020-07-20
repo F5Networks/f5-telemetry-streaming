@@ -404,6 +404,9 @@
                         "filterKeys": { "exclude": [ "fullPath", "generation", "wipName", "rulesReference", "nameReference" ] }
                     },
                     {
+                        "runFunctions": [ { "name": "convertEmptyToObject" } ]
+                    },
+                    {
                         "runFunctions": [ { "name": "restructureGslbWideIp" } ]
                     },
                     {
@@ -430,6 +433,9 @@
                     },
                     {
                         "filterKeys": { "exclude": [ "fullPath", "generation", "wipName", "rulesReference", "nameReference" ] }
+                    },
+                    {
+                        "runFunctions": [ { "name": "convertEmptyToObject" } ]
                     },
                     {
                         "runFunctions": [ { "name": "restructureGslbWideIp" } ]
@@ -460,6 +466,9 @@
                         "filterKeys": { "exclude": [ "fullPath", "generation", "wipName", "rulesReference", "nameReference" ] }
                     },
                     {
+                        "runFunctions": [ { "name": "convertEmptyToObject" } ]
+                    },
+                    {
                         "runFunctions": [ { "name": "restructureGslbWideIp" } ]
                     },
                     {
@@ -486,6 +495,9 @@
                     },
                     {
                         "filterKeys": { "exclude": [ "fullPath", "generation", "wipName", "rulesReference", "nameReference" ] }
+                    },
+                    {
+                        "runFunctions": [ { "name": "convertEmptyToObject" } ]
                     },
                     {
                         "runFunctions": [ { "name": "restructureGslbWideIp" } ]
@@ -516,6 +528,9 @@
                         "filterKeys": { "exclude": [ "fullPath", "generation", "wipName", "rulesReference", "nameReference" ] }
                     },
                     {
+                        "runFunctions": [ { "name": "convertEmptyToObject" } ]
+                    },
+                    {
                         "runFunctions": [ { "name": "restructureGslbWideIp" } ]
                     },
                     {
@@ -542,6 +557,9 @@
                     },
                     {
                         "filterKeys": { "exclude": [ "fullPath", "generation", "wipName", "rulesReference", "nameReference" ] }
+                    },
+                    {
+                        "runFunctions": [ { "name": "convertEmptyToObject" } ]
                     },
                     {
                         "runFunctions": [ { "name": "restructureGslbWideIp" } ]
@@ -733,7 +751,7 @@
                     "includeFirstEntry": { "pattern": "/stats"}
                 },
                 {
-                    "filterKeys": { "exclude": [ "fullPath", "generation", "appServiceReference", "tmName", "status.statusReason", "cmpEnabled", "cmpEnableMode", "csMaxConnDur", "csMeanConnDur", "csMinConnDur", "totRequests", "oneMinAvgUsageRatio", "clientside.pktsIn", "clientside.pktsOut", "clientside.evictedConns", "clientside.slowKilled", "clientside.maxConns", "clientside.totConns", "ephemeral.bitsIn", "ephemeral.bitsOut", "ephemeral.curConns", "ephemeral.evictedConns", "ephemeral.maxConns", "ephemeral.pktsIn", "ephemeral.pktsOut", "ephemeral.slowKilled", "ephemeral.totConns", "fiveSecAvgUsageRatio", "fiveMinAvgUsageRatio", "syncookieStatus", "syncookie.accepts", "syncookie.hwAccepts", "syncookie.hwSyncookies", "syncookie.rejects", "syncookie.hwsyncookieInstance", "syncookie.swsyncookieInstance", "syncookie.syncacheCurr", "syncookie.syncacheOver", "syncookie.syncookies", "syncookie.syncacheOver", "poolReference" ] }
+                    "filterKeys": { "exclude": [ "fullPath", "generation", "appServiceReference", "tmName", "cmpEnabled", "cmpEnableMode", "csMaxConnDur", "csMeanConnDur", "csMinConnDur", "totRequests", "oneMinAvgUsageRatio", "clientside.pktsIn", "clientside.pktsOut", "clientside.evictedConns", "clientside.slowKilled", "clientside.maxConns", "clientside.totConns", "ephemeral.bitsIn", "ephemeral.bitsOut", "ephemeral.curConns", "ephemeral.evictedConns", "ephemeral.maxConns", "ephemeral.pktsIn", "ephemeral.pktsOut", "ephemeral.slowKilled", "ephemeral.totConns", "fiveSecAvgUsageRatio", "fiveMinAvgUsageRatio", "syncookieStatus", "syncookie.accepts", "syncookie.hwAccepts", "syncookie.hwSyncookies", "syncookie.rejects", "syncookie.hwsyncookieInstance", "syncookie.swsyncookieInstance", "syncookie.syncacheCurr", "syncookie.syncacheOver", "syncookie.syncookies", "syncookie.syncacheOver", "poolReference" ] }
                 },
                 {
                     "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/virtual": { "pattern": "virtual\/(.*)\/", "group": 1 }, "profilesReference": "profiles" } }
@@ -758,7 +776,7 @@
                     "includeFirstEntry": { "pattern": "/stats", "excludePattern": "/members/" }
                 },
                 {
-                    "filterKeys": { "exclude": [ "tmName", "availableMemberCnt", "sessionStatus", "status.statusReason", "connqAll.ageEdm", "connqAll.ageEma", "connqAll.ageHead", "connqAll.ageMax", "connqAll.depth", "connqAll.serviced", "connq.ageEdm", "connq.ageEma", "connq.ageHead", "connq.ageMax", "connq.depth", "connq.serviced", "curSessions", "memberCnt", "minActiveMembers", "monitorRule", "serverside.pktsIn", "serverside.pktsOut", "serverside.maxConns", "serverside.totConns", "totRequests", "ipTosToServer", "minUpMembersAction", "appService", "appServiceReference", "minUpMembersChecking", "kind","ignorePersistedWeight", "fullPath", "partition", "linkQosToClient", "linkQosToServer", "ipTosToClient", "generation", "serviceDownAction", "queueDepthLimit", "queueTimeLimit", "allowNat", "reselectTries", "minUpMembers", "monitorStatus", "nodeName", "poolName", "allowSnat", "monitor", "selfLink", "subPath", "queueOnConnectionLimit", "loadBalancingMode", "slowRampTime" ] }
+                    "filterKeys": { "exclude": [ "tmName", "availableMemberCnt", "sessionStatus", "connqAll.ageEdm", "connqAll.ageEma", "connqAll.ageHead", "connqAll.ageMax", "connqAll.depth", "connqAll.serviced", "connq.ageEdm", "connq.ageEma", "connq.ageHead", "connq.ageMax", "connq.depth", "connq.serviced", "curSessions", "memberCnt", "minActiveMembers", "monitorRule", "serverside.pktsIn", "serverside.pktsOut", "serverside.maxConns", "serverside.totConns", "totRequests", "ipTosToServer", "minUpMembersAction", "appService", "appServiceReference", "minUpMembersChecking", "kind","ignorePersistedWeight", "fullPath", "partition", "linkQosToClient", "linkQosToServer", "ipTosToClient", "generation", "serviceDownAction", "queueDepthLimit", "queueTimeLimit", "allowNat", "reselectTries", "minUpMembers", "nodeName", "poolName", "allowSnat", "monitor", "selfLink", "subPath", "queueOnConnectionLimit", "loadBalancingMode", "slowRampTime" ] }
                 },
                 {
                     "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "ltm/pool/": { "pattern": "pool\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members" } }
@@ -1158,7 +1176,7 @@
             "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c pool_member_stat" } },
             "normalization": [
                 {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "pool_name" } }]
+                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": [ "pool_name", "addr", "port"] } }]
                 },
                 {
                     "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }

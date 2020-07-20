@@ -63,7 +63,7 @@
                                                 "Subtitle": ""
                                             },
                                             "LineChart": {
-                                                "Query": "F5Telemetry_event_CL | where isnotempty(attack_type_s)",
+                                                "Query": "F5Telemetry_ASM_CL | where isnotempty(attack_type_s)",
                                                 "yAxis": {
                                                     "isLogarithmic": false,
                                                     "units": {
@@ -82,7 +82,7 @@
                                                 "Subtitle": ""
                                             },
                                             "LineChart": {
-                                                "Query": "F5Telemetry_event_CL | where event_source_s == \"request_logging\"",
+                                                "Query": "F5Telemetry_LTM_CL | where event_source_s == \"request_logging\"",
                                                 "yAxis": {
                                                     "isLogarithmic": false,
                                                     "units": {
@@ -129,12 +129,12 @@
                                         "useIcon": false
                                     },
                                     "Tile": {
-                                        "Query": "F5Telemetry_event_CL | where isnotempty(attack_type_s) | summarize AggregatedValue = count() by ip_client_s | count",
+                                        "Query": "F5Telemetry_ASM_CL | where isnotempty(attack_type_s) | summarize AggregatedValue = count() by ip_client_s | count",
                                         "Legend": "Count of Unique Source IP's",
                                         "NavigationSelect": {}
                                     },
                                     "List": {
-                                        "Query": "F5Telemetry_event_CL | where isnotempty(attack_type_s) | summarize AggregatedValue = count() by ip_client_s | sort by AggregatedValue desc",
+                                        "Query": "F5Telemetry_ASM_CL | where isnotempty(attack_type_s) | summarize AggregatedValue = count() by ip_client_s | sort by AggregatedValue desc",
                                         "HideGraph": false,
                                         "enableSparklines": false,
                                         "operation": "Summary",
@@ -186,12 +186,12 @@
                                         "useIcon": false
                                     },
                                     "Tile": {
-                                        "Query": "F5Telemetry_event_CL | where isnotempty(attack_type_s) | summarize AggregatedValue = count() by attack_type_s | count",
+                                        "Query": "F5Telemetry_ASM_CL | where isnotempty(attack_type_s) | summarize AggregatedValue = count() by attack_type_s | count",
                                         "Legend": "Count of attack types",
                                         "NavigationSelect": {}
                                     },
                                     "List": {
-                                        "Query": "F5Telemetry_event_CL | where isnotempty(attack_type_s) | summarize AggregatedValue = count() by attack_type_s | sort by AggregatedValue desc",
+                                        "Query": "F5Telemetry_ASM_CL | where isnotempty(attack_type_s) | summarize AggregatedValue = count() by attack_type_s | sort by AggregatedValue desc",
                                         "HideGraph": false,
                                         "enableSparklines": false,
                                         "operation": "Summary",
