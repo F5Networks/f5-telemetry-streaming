@@ -1,6 +1,14 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.14.0
+### Added
+- AUTOTOOL-1648: Added ability to specify fallback hosts for Generic HTTP consumer (experimental feature)
+### Fixed
+### Changed
+### Removed
+
+
 ## 1.13.0
 ### Added
 - AUTOTOOL-1640: Add statusReason and monitorStatus fields to System Poller output for BIG-IQ Analytics
