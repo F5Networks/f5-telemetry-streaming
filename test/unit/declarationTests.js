@@ -1003,6 +1003,40 @@ describe('Declarations', () => {
                     });
             });
 
+            it('should pass host network check when multiple hosts specified', () => {
+                const expected = [
+                    '192.0.2.1',
+                    '192.0.2.2',
+                    '192.0.2.3',
+                    '192.0.2.4'
+                ];
+
+                const called = [];
+                networkCheckStub.callsFake((host) => {
+                    called.push(host);
+                    return Promise.resolve();
+                });
+
+                const data = {
+                    class: 'Telemetry',
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: expected[0],
+                        fallbackHosts: expected.slice(1),
+                        enableHostConnectivityCheck: true
+                    }
+                };
+                return config.validate(data)
+                    .then(() => {
+                        // sort just in case
+                        called.sort();
+                        expected.sort();
+                        assert.ok(called.length > 0, 'should be called at least once');
+                        assert.deepStrictEqual(called, expected);
+                    });
+            });
+
             it('should fail host network check', () => {
                 const errMsg = 'failed network check';
                 networkCheckStub.rejects(new Error(errMsg));
@@ -3472,6 +3506,11 @@ describe('Declarations', () => {
                 {
                     type: 'Generic_HTTP',
                     host: 'host',
+                    fallbackHosts: [
+                        'host1',
+                        'host2',
+                        'host3'
+                    ],
                     protocol: 'http',
                     port: 80,
                     path: '/path',
@@ -3489,6 +3528,11 @@ describe('Declarations', () => {
                 {
                     type: 'Generic_HTTP',
                     host: 'host',
+                    fallbackHosts: [
+                        'host1',
+                        'host2',
+                        'host3'
+                    ],
                     protocol: 'http',
                     port: 80,
                     path: '/path',
