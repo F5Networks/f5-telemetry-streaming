@@ -358,13 +358,13 @@ Required Information:
 
 .. NOTE:: Since this consumer is designed to be generic and flexible, how authentication is performed is left up to the web service. To ensure the secrets are encrypted within Telemetry Streaming please note the use of JSON pointers. The secret to protect should be stored inside ``passphrase`` and referenced in the desired destination property, such as an API token in a header as shown in this example. 
 
-.. literalinclude:: ../examples/declarations/generic_http.json
-    :language: json
-
-
 To see an example of Generic HTTP with multiple passphrases, see :ref:`multiple`.
 
 To see an example of the EXPERIMENTAL feature where you can specify fallback IP address(es) for the Generic HTTP consumer, see :ref:`fallback`.
+
+.. literalinclude:: ../examples/declarations/generic_http.json
+    :language: json
+
 
 |
 
