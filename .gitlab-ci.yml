@@ -8,7 +8,7 @@ stages:
     - deploy
     - functional test
     - teardown
-    # - publish
+    - publish
 
 ##############################################################
 #                                                            #
@@ -396,14 +396,14 @@ teardown_env_aws:
 # Note: Will publish when new tags are pushed and use the current build in dist directory
 # with the assumption being the rpm has been updated. However even if it hasn't the upload
 # will simply update the existing rpm version/release in artifactory
-#publish_rpm_to_artifactory:
-#    stage: publish
-#    only:
-#        - tags
-#    tags:
-#        - docker-executor
-#    script:
-#        - source ./scripts/build/publishRpm.sh
+publish_rpm_to_artifactory:
+    stage: publish
+    only:
+        - tags
+    tags:
+        - docker-executor
+    script:
+        - source ./scripts/build/publishRpm.sh
 
 # Publish docs to internal pages - note: this job name MUST be 'pages'
 pages:
