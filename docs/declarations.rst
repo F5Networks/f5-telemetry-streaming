@@ -109,3 +109,25 @@ Example 7: Value-based matching
 :ref:`Back to top<examples>`
 
 |
+
+Example 8: Generic HTTP with multiple passphrases
+-------------------------------------------------
+If you require multiple secrets for the Generic HTTP consumer, TS supports defining an additional secret within ``Shared`` and referencing it using pointers as shown in this example. 
+
+For more details about pointers see the section on :ref:`pointersyntax`.
+
+.. literalinclude:: ../examples/declarations/multiple_passphrases.json
+    :language: json
+
+|
+
+.. _fallback:
+
+Example 9: Specifying fallback hosts for Generic HTTP consumers
+---------------------------------------------------------------
+.. IMPORTANT:: Configuring fallback hosts for Generic HTTP consumers is currently EXPERIMENTAL and is available in TS v1.14 and later. 
+
+This example shows how you can use the experimental **fallbackHosts** property to specify fallback IP address(es) for a consumer.
+
+.. literalinclude:: ../examples/declarations/generic_http_fallback.json
+    :language: json

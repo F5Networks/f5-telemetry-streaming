@@ -361,13 +361,12 @@ Required Information:
 .. literalinclude:: ../examples/declarations/generic_http.json
     :language: json
 
-.. NOTE::  If multiple secrets are required, defining an additional secret within ``Shared`` and referencing it using pointers is supported. For more details about pointers see the section on :ref:`pointersyntax`.
 
-Example with multiple passphrases:
+To see an example of Generic HTTP with multiple passphrases, see :ref:`multiple`.
 
-.. literalinclude:: ../examples/declarations/multiple_passphrases.json
-    :language: json
+To see an example of the EXPERIMENTAL feature where you can specify fallback IP address(es) for the Generic HTTP consumer, see :ref:`fallback`.
 
+|
 
 .. _fluentd-ref:
 
