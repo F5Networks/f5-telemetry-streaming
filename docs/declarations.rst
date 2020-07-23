@@ -110,6 +110,8 @@ Example 7: Value-based matching
 
 |
 
+.. _multiple:
+
 Example 8: Generic HTTP with multiple passphrases
 -------------------------------------------------
 If you require multiple secrets for the Generic HTTP consumer, TS supports defining an additional secret within ``Shared`` and referencing it using pointers as shown in this example. 
