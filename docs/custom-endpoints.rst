@@ -1,16 +1,15 @@
 Appendix B: Configuring Custom Endpoints
 ========================================
 
-.. WARNING:: Configuring custom Endpoints and multiple System poller support is currently an EXPERIMENTAL feature, and the associated API could change based on testing and user feedback.
+.. WARNING:: Configuring custom Endpoints and multiple System poller support is currently an EXPERIMENTAL feature, and the associated API could change based on testing and user feedback. |br| Custom endpoints are currently for BIG-IP only. 
 
-.. NOTE:: Custom endpoints are currently for BIG-IP only. 
-
-Telemetry Streaming v1.10 allows you to define a list of Custom Endpoints that reference iControlRequest paths in a new **Telemetry_Endpoints** class.
+Telemetry Streaming v1.10 and later allows you to define a list of Custom Endpoints that reference iControlRequest paths in a new **Telemetry_Endpoints** class.
 The Custom Endpoints defined within a Telemetry Streaming declaration must then be attached to a Telemetry Streaming System Poller, where the System Poller will query the defined endpoints.
-**Note:** Custom Endpoints *replace* the endpoints that a Telemetry Streaming System Poller queries by default - once a System Poller references a collection of Custom Endpoints, that System Poller will *only* query the Custom Endpoints.
 
-Telemetry Streaming v1.10 also includes the ability to define multiple system pollers within a single declaration.
-Using multiple system pollers within a single declaration allows for a configuration where one system poller can pull data from the default endpoints, and another system poller will pull data only from the its, referenced, Custom Endpoints. 
+.. NOTE:: Custom Endpoints *replace* the endpoints that a Telemetry Streaming System Poller queries by default - once a System Poller references a collection of Custom Endpoints, that System Poller will *only* query the Custom Endpoints.
+
+Telemetry Streaming v1.10+ also includes the ability to define multiple system pollers within a single declaration.
+Using multiple system pollers within a single declaration allows for a configuration where one system poller can pull data from the default endpoints, and another system poller pulls data only from its referenced, Custom Endpoints. 
 
 Using the Telemetry_Endpoints class
 -----------------------------------
@@ -37,7 +36,7 @@ The Telemetry_Endpoints class is where you define your endpoints and their paths
 
 For example, your declaration could add the following snippet, which contains endpoints for profiles, and for total connections for a virtual:
 
-.. code-block:: json
+.. code-block:: bash
 
    {
        ...
@@ -79,27 +78,28 @@ EndpointList is simply a list of endpoints to use in data collection, and can in
 
 * **Array** |br| When using an array, the item in the array must be one of the following: |br| |br|
 
-  1. Name of an existing Telemetry_Endpoints object (for example, ``Endpoints_Profiles``) 
-  2. Name of an existing Telemetry_Endpoints object and the endpoint object key (``Endpoints_Profiles/radiusProfiles``)
-  3. An in-line Telemetry_Endpoint object (name is required).  For example:
+  #. Name of an existing Telemetry_Endpoints object (for example, ``Endpoints_Profiles``) 
+  #. Name of an existing Telemetry_Endpoints object and the endpoint object key (``Endpoints_Profiles/radiusProfiles``)
+  #. An in-line Telemetry_Endpoint object (name is required).  For example:
+  
+     .. code-block:: json
 
-        .. code-block:: json
-        
-            {
-                "path": "mgmt/tm/net/vlan/stats",
-                "name": "requiredWhenInline"
-            }
+      {
+         "path": "mgmt/tm/net/vlan/stats",
+         "name": "requiredWhenInline"
+      }
 
-  4. A Telemetry_Endpoints definition
+  #. A Telemetry_Endpoints definition
 
 * **String** |br| The name of an existing Telemetry_Endpoints object
 
 * **Object** |br| An object that conforms to the definition of the Telemetry_Endpoints class.
 
 The following snippet demonstrates how Custom Endpoint(s) can be attached to System Pollers, by:
-* referencing the entire ``Endpoints_Profiles`` Telemetry_Endpoints object from the previous snippet
-* referencing the single ``clientside.totConns`` custom endpoint from the ``Endpoints_Misc`` Telemetry_Endpoints object from the previous snippet
-* creating an in-line custom endpoint, named ``requiredWhenInline``
+
+* Referencing the entire ``Endpoints_Profiles`` Telemetry_Endpoints object from the previous snippet
+* Referencing the single ``clientside.totConns`` custom endpoint from the ``Endpoints_Misc`` Telemetry_Endpoints object from the previous snippet
+* Creating an in-line custom endpoint, named ``requiredWhenInline``
 
 .. code-block:: json
 
@@ -136,10 +136,10 @@ The following example contains an example declaration for Telemetry Streaming, w
 |
 
 Example output from the system pollers
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The following is output from the system pollers in the examples above.
 
-``Custom_System_Poller1``:
+**Custom_System_Poller1**:
 
 .. code-block:: json
   
@@ -200,7 +200,7 @@ The following is output from the system pollers in the examples above.
 
 |
 
-``Custom_System_Poller2``
+**Custom_System_Poller2**
 
 .. code-block:: json
 
