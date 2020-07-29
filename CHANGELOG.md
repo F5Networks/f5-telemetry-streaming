@@ -4,6 +4,7 @@ Changes to this project are documented in this file. More detail and links can b
 ## 1.14.0
 ### Added
 - AUTOTOOL-1648: Added ability to specify fallback hosts for Generic HTTP consumer (experimental feature)
+- AUTOTOOL-1679: Added 'cipherUses' stats for Client and Server SSL profiles
 ### Fixed
 ### Changed
 ### Removed
