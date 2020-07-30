@@ -159,6 +159,18 @@ test_node8:
         - .run_unittest
     image: node:8
 
+# Node 10 LTS (active, maintenance)
+test_node10:
+    extends:
+        - .run_unittest
+    image: node:10
+
+# Node 12 LTS (active, maintenance)
+test_node12:
+    extends:
+        - .run_unittest
+    image: node:12
+
 # mostly for containers, unittests only (without coverage check)
 test_node_latest:
     extends:
