@@ -6,6 +6,7 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-1648: Added ability to specify fallback hosts for Generic HTTP consumer (experimental feature)
 - AUTOTOOL-1679: Added 'cipherUses' stats for Client and Server SSL profiles
 ### Fixed
+- AUTOTOOL-810: Fixed Event Listener parsing when received multiple events
 ### Changed
 ### Removed
 
