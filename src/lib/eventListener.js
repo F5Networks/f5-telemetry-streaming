@@ -36,7 +36,6 @@ const MAX_BUFFER_TIMEOUT = 1 * 1000; // 1 sec
 const LISTENERS = {};
 const protocols = ['tcp', 'udp'];
 
-
 /** @module EventListener */
 
 // LTM request log (example)
@@ -257,7 +256,7 @@ EventListener.prototype.processRawData = function (data, connInfo) {
             // reset counter due we have valid data to process now
             bufferInfo.timeoutNo = 0;
         }
-        this.processEvent(data);
+        this.processData(data);
     }
     // if we have incomplete data to buffer
     if (incompleteData) {
@@ -269,7 +268,7 @@ EventListener.prototype.processRawData = function (data, connInfo) {
         bufferInfo.timeoutNo += 1;
         bufferInfo.timeoutID = setTimeout(() => {
             delete this._connDataBuffers[key];
-            this.processEvent(bufferInfo.data);
+            this.processData(bufferInfo.data);
         }, MAX_BUFFER_TIMEOUT);
     } else {
         delete this._connDataBuffers[key];
@@ -312,29 +311,30 @@ EventListener.prototype.stop = function () {
 };
 
 /**
- * Process event
+ * Process data
  *
  * @param {String} data - data
  *
- * @returns {Void}
+ * @returns {Promise} resolved once data processed
  */
-EventListener.prototype.processEvent = function (data) {
+EventListener.prototype.processData = function (data) {
     try {
-        this._processEvent(data);
+        return this._processData(data);
     } catch (err) {
-        this.logger.exception('EventListener:processEvent unexpected error', err);
+        this.logger.exception('EventListener:processData unexpected error', err);
     }
+    return Promise.resolve();
 };
 
 /**
- * Process event
+ * Process data
  *
  * @private
  * @param {String} data - data
  *
- * @returns {Void}
+ * @returns {Promise} resolved once data processed
  */
-EventListener.prototype._processEvent = function (data) {
+EventListener.prototype._processData = function (data) {
     // normalize and send to data pipeline
     // note: addKeysByTag uses regex for default tags parsing (tenant/app)
     const options = {
@@ -349,12 +349,20 @@ EventListener.prototype._processEvent = function (data) {
         formatTimestamps: global.formatTimestamps.keys,
         classifyEventByKeys: events.classifyCategoryByKeys
     };
-    data = String(data).trim();
+    const promises = [];
 
     // note: data may contain multiple events separated by newline
     // however newline chars may also show up inside a given event
-    // so split only on newline with preceding double quote
-    data.split(/"\n|\r\n/).forEach((line) => {
+    // so split only on newline with preceding double quote.
+    // Expected behavior is that every channel (TCP connection)
+    // has only particular type of events and not mix of different types.
+    // Note: if OneConnect profile will be used for pool then there might be an issue
+    // with different event types in single channel but not sure.
+    normalize.splitEvents(data).forEach((line) => {
+        line = line.trim();
+        if (line.length === 0) {
+            return;
+        }
         // lets normalize the data
         const normalizedData = normalize.event(line, options);
 
@@ -364,10 +372,14 @@ EventListener.prototype._processEvent = function (data) {
                 data: normalizedData,
                 type: normalizedData.telemetryEventCategory || constants.EVENT_TYPES.EVENT_LISTENER
             };
-            dataPipeline.process(dataCtx, { tracer: this.tracer, actions: this.actions })
-                .catch(err => this.logger.exception('EventListener:_processEvent unexpected error from dataPipeline:process', err));
+            const p = dataPipeline.process(dataCtx, { tracer: this.tracer, actions: this.actions })
+                .catch(err => this.logger.exception('EventListener:_processData unexpected error from dataPipeline:process', err));
+            promises.push(p);
         }
     });
+
+    return Promise.all(promises)
+        .catch(err => this.logger.exception('EventListener:_processData unexpected error:', err));
 };
 
 /**
