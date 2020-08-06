@@ -22,6 +22,7 @@ function set_vars() {
     source "${outputFile}"
 }
 
+# Uses the Automation SDK 'deployment tool': automation-sdk/deployment-tool
 function deploy() {
     sed -i ':a;N;$!ba;s/,\n        "license.*}"\n        }//' /deployment-tool/plans/aws_byol/do_template.json
     /deployment-tool/deploy.sh --deployment-plan aws_byol --action create --output-folder env_metadata/aws_byol --deployment-vars "license_key:${LICENSE_KEY}"
