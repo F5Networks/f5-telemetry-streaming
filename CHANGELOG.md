@@ -8,6 +8,7 @@ Changes to this project are documented in this file. More detail and links can b
 ### Fixed
 - AUTOTOOL-810: Fixed Event Listener parsing when received multiple events
 ### Changed
+- AUTOTOOL-1680: Update npm packages (ajv from v6.12.2 to v6.12.3, aplicationinsights from v1.8.0 to v1.8.5, aws-sdk from v.2.704.0 to 2.728.0, statsd-client from v0.4.4 to v0.4.5)
 ### Removed
 
 
