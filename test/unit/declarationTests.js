@@ -2962,45 +2962,194 @@ describe('Declarations', () => {
         ));
 
         describe('AWS_CloudWatch', () => {
-            it('should pass minimal declaration', () => validateMinimal(
-                {
-                    type: 'AWS_CloudWatch',
-                    region: 'region',
-                    logGroup: 'logGroup',
-                    logStream: 'logStream'
-                },
-                {
-                    type: 'AWS_CloudWatch',
-                    region: 'region',
-                    logGroup: 'logGroup',
-                    logStream: 'logStream'
-                }
-            ));
+            describe('dataType', () => {
+                it('should not allow invalid value', () => assert.isRejected(
+                    validateMinimal({
+                        type: 'AWS_CloudWatch',
+                        dataType: 'newlyInvented',
+                        region: 'region'
+                    }),
+                    /enum.*dataType.*("allowedValues":\["logs",null\]|"allowedValues":\["metrics"])/
+                ));
 
-            it('should allow full declaration', () => validateFull(
-                {
-                    type: 'AWS_CloudWatch',
-                    region: 'region',
-                    logGroup: 'logGroup',
-                    logStream: 'logStream',
-                    username: 'username',
-                    passphrase: {
-                        cipherText: 'cipherText'
+                it('should not allow empty string for dataType', () => assert.isRejected(
+                    validateMinimal({
+                        type: 'AWS_CloudWatch',
+                        dataType: '',
+                        region: 'region'
+                    }),
+                    /enum.*dataType.*("allowedValues":\["logs",null\]|"allowedValues":\["metrics"])/
+                ));
+            });
+
+            describe('username and passphrase', () => {
+                it('should require passphrase when username is specified', () => assert.isRejected(
+                    validateMinimal({
+                        type: 'AWS_CloudWatch',
+                        dataType: 'metrics',
+                        region: 'region',
+                        username: 'nopassphrase'
+                    }),
+                    /should NOT be valid/
+                ));
+
+                it('should require username when passphrase is specified', () => assert.isRejected(
+                    validateMinimal({
+                        type: 'AWS_CloudWatch',
+                        dataType: 'metrics',
+                        region: 'region',
+                        passphrase: {
+                            cipherText: 'nousername'
+                        }
+                    }),
+                    /should NOT be valid/
+                ));
+            });
+            describe('Logs (default)', () => {
+                it('should pass minimal declaration', () => validateMinimal(
+                    {
+                        type: 'AWS_CloudWatch',
+                        region: 'region',
+                        logGroup: 'logGroup',
+                        logStream: 'logStream'
+                    },
+                    {
+                        type: 'AWS_CloudWatch',
+                        region: 'region',
+                        logGroup: 'logGroup',
+                        logStream: 'logStream',
+                        dataType: 'logs'
                     }
-                },
-                {
-                    type: 'AWS_CloudWatch',
-                    region: 'region',
-                    logGroup: 'logGroup',
-                    logStream: 'logStream',
-                    username: 'username',
-                    passphrase: {
-                        class: 'Secret',
-                        protected: 'SecureVault',
-                        cipherText: '$M$foo'
+                ));
+
+                it('should allow full declaration', () => validateFull(
+                    {
+                        type: 'AWS_CloudWatch',
+                        region: 'region',
+                        logGroup: 'logGroup',
+                        logStream: 'logStream',
+                        username: 'username',
+                        passphrase: {
+                            cipherText: 'cipherText'
+                        },
+                        dataType: 'logs'
+                    },
+                    {
+                        type: 'AWS_CloudWatch',
+                        region: 'region',
+                        logGroup: 'logGroup',
+                        logStream: 'logStream',
+                        username: 'username',
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$foo'
+                        },
+                        dataType: 'logs'
                     }
-                }
-            ));
+                ));
+
+                it('should require logGroup', () => assert.isRejected(
+                    validateMinimal({
+                        type: 'AWS_CloudWatch',
+                        region: 'regionThingee',
+                        logStream: 'streamThingee'
+                    }),
+                    /should have required property 'logGroup'/
+                ));
+
+                it('should require logStream', () => assert.isRejected(
+                    validateMinimal({
+                        type: 'AWS_CloudWatch',
+                        region: 'regionThingee',
+                        logGroup: 'logGroupThingee'
+                    }),
+                    /should have required property 'logStream'/
+                ));
+
+                it('should not allow non-log related properties', () => assert.isRejected(
+                    validateMinimal({
+                        type: 'AWS_CloudWatch',
+                        region: 'regionThingee',
+                        logStream: 'logStreamThingee',
+                        logGroup: 'logGroupThingee',
+                        metricNamespace: 'oddOneOut'
+                    }),
+                    /should match exactly one schema in oneOf/
+                ));
+            });
+            describe('Metrics', () => {
+                it('should pass minimal declaration', () => validateMinimal(
+                    {
+                        type: 'AWS_CloudWatch',
+                        region: 'region',
+                        dataType: 'metrics',
+                        metricNamespace: 'metricsThingee'
+                    },
+                    {
+                        type: 'AWS_CloudWatch',
+                        region: 'region',
+                        dataType: 'metrics',
+                        metricNamespace: 'metricsThingee'
+                    }
+                ));
+
+                it('should allow full declaration', () => validateFull(
+                    {
+                        type: 'AWS_CloudWatch',
+                        region: 'region',
+                        dataType: 'metrics',
+                        metricNamespace: 'metricsThingee',
+                        username: 'username',
+                        passphrase: {
+                            cipherText: 'cipherText'
+                        }
+                    },
+                    {
+                        type: 'AWS_CloudWatch',
+                        region: 'region',
+                        dataType: 'metrics',
+                        metricNamespace: 'metricsThingee',
+                        username: 'username',
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$foo'
+                        }
+                    }
+                ));
+
+                it('should require metricNamespace', () => assert.isRejected(
+                    validateMinimal({
+                        type: 'AWS_CloudWatch',
+                        dataType: 'metrics',
+                        region: 'region'
+                    }),
+                    /should have required property 'metricNamespace'/
+                ));
+
+                it('should not allow empty string for metricNamespace', () => assert.isRejected(
+                    validateMinimal({
+                        type: 'AWS_CloudWatch',
+                        dataType: 'metrics',
+                        region: 'region',
+                        metricNamespace: ''
+                    }),
+                    /metricNamespace\/minLength.*should NOT be shorter than 1 characters/
+                ));
+
+                it('should not allow non-metrics properties', () => assert.isRejected(
+                    validateMinimal({
+                        type: 'AWS_CloudWatch',
+                        dataType: 'metrics',
+                        region: 'region',
+                        metricNamespace: 'metricsThingee',
+                        logStream: 'extraOne',
+                        logGroup: 'extraTwo'
+                    }),
+                    /should match exactly one schema in oneOf/
+                ));
+            });
         });
 
         describe('AWS_S3', () => {
