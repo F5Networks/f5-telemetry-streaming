@@ -13,6 +13,7 @@ const assert = require('assert');
 const AWS = require('aws-sdk');
 const constants = require('./../shared/constants');
 const testUtil = require('./../shared/util');
+const awsUtil = require('../../../src/lib/consumers/AWS_CloudWatch/awsUtil');
 
 const ENV_FILE = process.env[constants.ENV_VARS.CLOUD.FILE];
 const ENV_INFO = JSON.parse(fs.readFileSync(ENV_FILE));
@@ -22,6 +23,7 @@ const VM_USER = ENV_INFO.instances[0].admin_username;
 const VM_PWD = ENV_INFO.instances[0].admin_password;
 const BUCKET = ENV_INFO.bucket;
 const REGION = ENV_INFO.region;
+const METRIC_NAMESPACE = process.env[constants.ENV_VARS.AWS.METRIC_NAMESPACE];
 
 const CLIENT_SECRET = process.env[constants.ENV_VARS.AWS.ACCESS_KEY_SECRET];
 const CLIENT_ID = process.env[constants.ENV_VARS.AWS.ACCESS_KEY_ID];
@@ -29,6 +31,7 @@ const CLIENT_ID = process.env[constants.ENV_VARS.AWS.ACCESS_KEY_ID];
 describe('AWS Cloud-based Tests', function () {
     this.timeout(600000);
     let s3;
+    let cloudWatch;
     let options = {};
     let vmAuthToken;
 
@@ -63,6 +66,7 @@ describe('AWS Cloud-based Tests', function () {
                     secretAccessKey: CLIENT_SECRET
                 });
                 s3 = new AWS.S3({ apiVersion: '2006-03-01' });
+                cloudWatch = new AWS.CloudWatch({ apiVersion: '2010-08-01' });
 
                 done();
             })
@@ -139,6 +143,87 @@ describe('AWS Cloud-based Tests', function () {
                             resolve();
                         });
                     }));
+            });
+
+            it('should remove configuration', () => {
+                const declaration = {
+                    class: 'Telemetry'
+                };
+                return assertPost(declaration);
+            });
+        });
+
+        describe('AWS_CloudWatch_Metrics', () => {
+            it('should post systemPoller declaration without credentials', () => {
+                const declaration = {
+                    class: 'Telemetry',
+                    controls: {
+                        class: 'Controls',
+                        debug: true,
+                        logLevel: 'debug'
+                    },
+                    My_System: {
+                        class: 'Telemetry_System',
+                        systemPoller: {
+                            interval: 60
+                        }
+                    },
+                    My_IAM_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'AWS_CloudWatch',
+                        dataType: 'metrics',
+                        metricNamespace: METRIC_NAMESPACE,
+                        region: REGION
+                    }
+                };
+                return assertPost(declaration);
+            });
+
+            it('should retrieve systemPoller info from metric namespace', function () {
+                this.timeout(300000);
+
+                const startTime = new Date().toISOString();
+                // metrics take around 2-3 minutes to show up
+                return new Promise(resolve => setTimeout(resolve, 180000))
+                    .then(() => {
+                        // get system poller data
+                        const uri = `${constants.BASE_ILX_URI}/systempoller/My_System`;
+                        return testUtil.makeRequest(VM_IP, uri, options);
+                    })
+                    .then((sysPollerData) => {
+                        const defDimensions = awsUtil.getDefaultDimensions(sysPollerData[0]);
+                        const endTime = new Date().toISOString();
+                        const getOpts = {
+                            MaxDatapoints: 10,
+                            StartTime: startTime,
+                            EndTime: endTime,
+                            // API requires all dimension values if present for the results to appear
+                            // you can't match with just one or no dimension value
+                            MetricDataQueries: [
+                                {
+                                    Id: 'm1',
+                                    MetricStat: {
+                                        Metric: {
+                                            Namespace: METRIC_NAMESPACE,
+                                            MetricName: 'F5_system_cpu',
+                                            Dimensions: defDimensions
+                                        },
+                                        Period: 300,
+                                        Stat: 'Average'
+                                    }
+                                }
+
+                            ]
+                        };
+                        return cloudWatch.getMetricData(getOpts).promise();
+                    })
+                    .then((data) => {
+                        // if no match, result = null
+                        assert.notStrictEqual(data, null);
+                        const metricDataRes = data.MetricDataResults;
+                        assert.notDeepStrictEqual(metricDataRes, []);
+                        assert.notStrictEqual(metricDataRes[0].Values.length, 0);
+                    });
             });
 
             it('should remove configuration', () => {
