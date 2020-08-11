@@ -31,6 +31,7 @@ const ES_CONSUMER_NAME = 'Consumer_ElasticSearch';
 const ES_API_VERSION = '6.5';
 const ES_DOCKER_TAG = '6.7.2';
 const ES_IMAGE_NAME = `docker.elastic.co/elasticsearch/elasticsearch:${ES_DOCKER_TAG}`;
+const ES_MAX_FIELDS = 5000;
 
 function runRemoteCmd(cmd) {
     return util.performRemoteCmd(CONSUMER_HOST.ip, CONSUMER_HOST.username, cmd, { password: CONSUMER_HOST.password });
@@ -62,7 +63,7 @@ function test() {
 
                 describe('Consumer service setup', () => {
                     it('should start container', () => {
-                        const portArgs = `-p ${ES_HTTP_PORT}:${ES_HTTP_PORT} -p ${ES_TRANSPORT_PORT}:${ES_TRANSPORT_PORT} -e "discovery.type=single-node"`;
+                        const portArgs = `-p ${ES_HTTP_PORT}:${ES_HTTP_PORT} -p ${ES_TRANSPORT_PORT}:${ES_TRANSPORT_PORT} -e "discovery.type=single-node" -e "indices.query.bool.max_clause_count=${ES_MAX_FIELDS}"`;
                         const cmd = `docker run -d --restart=always --name ${ES_CONTAINER_NAME} ${portArgs} ${ES_IMAGE_NAME}`;
 
                         return runRemoteCmd(`docker ps | grep ${ES_CONTAINER_NAME}`)
@@ -101,7 +102,7 @@ function test() {
                             },
                             body: {
                                 settings: {
-                                    'index.mapping.total_fields.limit': 2000
+                                    'index.mapping.total_fields.limit': ES_MAX_FIELDS
                                 }
                             }
                         };
