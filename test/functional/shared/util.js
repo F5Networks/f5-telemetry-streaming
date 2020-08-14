@@ -490,5 +490,16 @@ module.exports = {
                 };
                 return this.makeRequest(host, uri, postOptions);
             });
+    },
+
+    /**
+     * Sleep for N milliseconds
+     *
+     * @param {Integer} sleepTime - number of ms.
+     *
+     * @returns {Promise}
+     */
+    sleep(sleepTime) {
+        return new Promise(resolve => setTimeout(resolve, sleepTime));
     }
 };
