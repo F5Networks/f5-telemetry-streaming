@@ -192,6 +192,11 @@ AWS CloudWatch
 --------------
 |aws_img|   
 
+AWS CloudWatch has two consumers, CloudWatch Logs, and :ref:`cw-metrics` (new in TS 1.14).  If you do not use the new **dataType** property, the system defaults to CloudWatch Logs.
+
+AWS CloudWatch Logs (default)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 Required information:
  - Region: AWS region of the CloudWatch resource.
  - Log Group: Navigate to :guilabel:`CloudWatch > Logs`
@@ -205,10 +210,33 @@ To see more information about creating and using IAM roles, see the |IAM roles|.
 
 Example Declaration:
 
-.. literalinclude:: ../examples/declarations/aws_cloudwatch.json
+.. literalinclude:: ../examples/declarations/aws_cloudwatch_logs.json
     :language: json
 
 |
+
+.. _cw-metrics:
+
+AWS CloudWatch Metrics
+^^^^^^^^^^^^^^^^^^^^^^
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+   Support for CloudWatch Metrics is available in Telemetry Streaming 1.14 and later.
+
+Telemetry Streaming 1.14 introduced support for AWS CloudWatch Metrics.  To specify CloudWatch Metrics, use the new **dataType** property with a value of **metrics** as shown in the example.
+
+Notes for CloudWatch Metrics:
+ - It can take up to 15 minutes for metrics to appear if they do not exist and AWS has to create them.
+ - You must use the **dataType** property with a value of **metrics**, if you do not specify metrics, the system defaults to Logs. 
+ - Some properties are restricted so that you cannot use them with the wrong dataType (for example, you cannot use **logStream** when **dataType: "metrics"**)
+
+Example Declaration:
+
+.. literalinclude:: ../examples/declarations/aws_cloudwatch_metrics.json
+    :language: json
+
+|
+
 
 .. _awss3-ref:
 
