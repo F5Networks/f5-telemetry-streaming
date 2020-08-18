@@ -230,6 +230,15 @@ Notes for CloudWatch Metrics:
  - You must use the **dataType** property with a value of **metrics**, if you do not specify metrics, the system defaults to Logs. 
  - Some properties are restricted so that you cannot use them with the wrong dataType (for example, you cannot use **logStream** when **dataType: "metrics"**)
 
+
+Required Information:
+ - Region: AWS region of the CloudWatch resource.
+ - MetricNamespace: Namespace for the metrics. :guilabel:`Navigate to CloudWatch > Metrics > All metrics > Custom Namespaces`
+ - DataType: Value should be **metrics**
+ - Username: Navigate to :guilabel:`IAM > Users`
+ - Passphrase: Navigate to :guilabel:`IAM > Users`
+
+
 Example Declaration:
 
 .. literalinclude:: ../examples/declarations/aws_cloudwatch_metrics.json
