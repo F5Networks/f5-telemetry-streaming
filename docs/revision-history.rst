@@ -12,7 +12,7 @@ Document Revision History
         - Date
 
       * - 1.14.0
-        - Updated the documentation for Telemetry Streaming v1.14.0. This release contains the following changes: |br| * Added an EXPERIMENTAL feature to specify fallback hosts for generic HTTP consumers (see :ref:`fallback`) |br| *  |br| * Added **cipherUses** stats for Client and Server SSL profiles (see the cipherUses lines in :ref:`sysinfo`)  |br| |br| Issues Resolved: |br| * Fixed Event Listener parsing when receiving multiple events |br| *
+        - Updated the documentation for Telemetry Streaming v1.14.0. This release contains the following changes: |br| * Added support for AWS CloudWatch Metrics (see :ref:`cw-metrics`) |br| * Added an EXPERIMENTAL feature to specify fallback hosts for generic HTTP consumers (see :ref:`fallback`) |br| *  |br| * Added **cipherUses** stats for Client and Server SSL profiles (see the cipherUses lines in :ref:`sysinfo`)  |br| |br| Issues Resolved: |br| * Fixed Event Listener parsing when receiving multiple events |br| *
         - 09-01-20
 
       * - 1.13.0

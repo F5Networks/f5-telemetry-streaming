@@ -192,7 +192,7 @@ AWS CloudWatch
 --------------
 |aws_img|   
 
-AWS CloudWatch has two consumers, CloudWatch Logs, and :ref:`cw-metrics` (new in TS 1.14).  If you do not use the new **dataType** property, the system defaults to CloudWatch Logs.
+AWS CloudWatch has two consumers: CloudWatch Logs, and :ref:`cw-metrics` (new in TS 1.14).  If you do not use the new **dataType** property, the system defaults to CloudWatch Logs.
 
 AWS CloudWatch Logs (default)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
