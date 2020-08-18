@@ -194,6 +194,8 @@ AWS CloudWatch
 
 AWS CloudWatch has two consumers: CloudWatch Logs, and :ref:`cw-metrics` (new in TS 1.14).  If you do not use the new **dataType** property, the system defaults to CloudWatch Logs.
 
+.. IMPORTANT:: In TS 1.9.0 and later, the **username** and **passphrase** for CloudWatch are optional.  This is because a user can send data from a BIG-IP that has an appropriate IAM role in AWS to AWS CloudWatch without a username and passphrase.
+
 AWS CloudWatch Logs (default)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -205,8 +207,6 @@ Required information:
  - Passphrase: Navigate to :guilabel:`IAM > Users`
 
 To see more information about creating and using IAM roles, see the |IAM roles|.
-
-.. IMPORTANT:: In TS 1.9.0 and later, the **username** and **passphrase** for CloudWatch are optional.  This is because a user can send data from a BIG-IP that has an appropriate IAM role in AWS to AWS CloudWatch without a username and passphrase.
 
 Example Declaration:
 
