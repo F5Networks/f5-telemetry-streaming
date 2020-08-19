@@ -18,7 +18,7 @@ const dataUtil = require('./dataUtil');
  */
 function DataFilter(consumerConfig) {
     this._consumerConfig = util.deepCopy(consumerConfig);
-    this.blacklist = {};
+    this.excludeList = {};
 
     this._applyGlobalFilters();
 }
@@ -35,7 +35,7 @@ function DataFilter(consumerConfig) {
 DataFilter.prototype.apply = function (dataCtx) {
     const dataCtxCopy = util.deepCopy(dataCtx);
 
-    this._applyBlacklist(dataCtxCopy.data);
+    this._applyExcludeList(dataCtxCopy.data);
 
     return dataCtxCopy;
 };
@@ -48,17 +48,17 @@ DataFilter.prototype.apply = function (dataCtx) {
 DataFilter.prototype._applyGlobalFilters = function () {
     // tmstats is only supported by Splunk legacy until users can specify desired tables
     if (this._consumerConfig.type !== 'Splunk' || this._consumerConfig.config.format !== 'legacy') {
-        this.blacklist = Object.assign(this.blacklist, { tmstats: true });
+        this.excludeList = Object.assign(this.excludeList, { tmstats: true });
     }
 };
 
 /**
- * Removes properties from data object based on blacklist
+ * Removes properties from data object based on excludeList
  *
  * @returns {void}
  */
-DataFilter.prototype._applyBlacklist = function (data) {
-    const matches = dataUtil.getDeepMatches(data, this.blacklist);
+DataFilter.prototype._applyExcludeList = function (data) {
+    const matches = dataUtil.getDeepMatches(data, this.excludeList);
     // Delete matching property. Can be performed on array but must avoid reindexing until all
     // matches are removed
     matches.forEach((match) => {
