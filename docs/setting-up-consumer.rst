@@ -402,6 +402,25 @@ To see an example of the EXPERIMENTAL feature where you can specify fallback IP 
 .. literalinclude:: ../examples/declarations/generic_http.json
     :language: json
 
+F5 Beacon
+^^^^^^^^^
+F5 Beacon, a SaaS offering, provides visibility and actionable insights into the health and performance of applications. 
+
+F5 Beacon uses the generic HTTP consumer.
+
+Required Information:
+ - See |beacon| for information on how to add Telemetry Streaming as a source to Beacon.
+ - Host: The address of the system.
+ - Protocol: The protocol of the system. Options: ``https`` or ``http``. Default is ``https``.
+ - Port: The port of the system. Default is ``443``.
+ - Path: The path of the system. Default is ``/``.
+ - Method: The method of the system. Options: ``POST``, ``PUT``, ``GET``. Default is ``POST``.
+ - Headers: The headers of the system.
+ - Passphrase: The secret to use when sending data to the system, for example an API key to be used in an HTTP header.
+
+.. literalinclude:: ../examples/declarations/f5_beacon.json
+    :language: json
+
 
 |
 
@@ -711,3 +730,8 @@ In the following table, we list the Azure Government regions.
 .. |azregion| raw:: html
 
    <a href="https://azure.microsoft.com/en-us/global-infrastructure/services/?products=monitor&regions=non-regional,usgov-non-regional,us-dod-central,us-dod-east,usgov-arizona,usgov-iowa,usgov-texas,usgov-virginia" target="_blank">Azure Products Available by Region</a>
+
+.. |beacon| raw:: html
+
+   <a href="https://clouddocs.f5.com/cloud-services/latest/f5-cloud-services-Beacon-WorkWith.html#adding-a-new-source" target="_blank">Beacon documentation</a>
+
