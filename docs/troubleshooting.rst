@@ -188,10 +188,6 @@ Increase the memory allocated for the restjavad daemon (e.g. 2 GB), by running t
 
    <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html" target="_blank">ElasticSearch mapping documentation</a>
 
-.. |br| raw:: html
-   
-   <br />
-
 .. |release| raw:: html
 
    <a href="https://github.com/F5Networks/f5-telemetry-streaming/releases" target="_blank">GitHub Release</a>
