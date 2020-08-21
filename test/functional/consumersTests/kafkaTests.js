@@ -23,6 +23,7 @@ const MODULE_REQUIREMENTS = { DOCKER: true };
 const DUTS = util.getHosts('BIGIP');
 const CONSUMER_HOST = util.getHosts('CONSUMER')[0]; // only expect one
 const KAFKA_IMAGE_NAME = 'bitnami/kafka:latest';
+const ZOOKEEPER_IMAGE_NAME = 'bitnami/zookeeper:latest';
 const ZOOKEEPER_NAME = 'zookeeper-server';
 const KAFKA_NAME = 'kafka-server';
 const KAFKA_HOST = CONSUMER_HOST.ip;
@@ -42,13 +43,15 @@ function runRemoteCmd(cmd) {
 
 function setup() {
     describe('Consumer Setup: Kafka', () => {
-        it('should pull bitnami docker image', () => runRemoteCmd(`docker pull ${KAFKA_IMAGE_NAME}`));
+        [KAFKA_IMAGE_NAME, ZOOKEEPER_IMAGE_NAME].forEach(
+            imageName => it(`should pull ${imageName} docker image`, () => runRemoteCmd(`docker pull ${imageName}`))
+        );
 
         it('should start Zookeeper and Kafka docker containers', () => {
             const zookeeperParams = '-e ALLOW_ANONYMOUS_LOGIN=yes -e ZOOKEEPER_CLIENT_PORT:2181 -p 2181:2181';
-            const cmdZookeeper = `docker run -d ${zookeeperParams} --name ${ZOOKEEPER_NAME} bitnami/zookeeper:latest`;
+            const cmdZookeeper = `docker run -d ${zookeeperParams} --name ${ZOOKEEPER_NAME} ${ZOOKEEPER_IMAGE_NAME}`;
             const kafkaParams = `-e ALLOW_PLAINTEXT_LISTENER=yes -e KAFKA_ZOOKEEPER_CONNECT=${KAFKA_HOST}:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://${KAFKA_HOST}:${KAFKA_PORT} -p ${KAFKA_PORT}:${KAFKA_PORT}`;
-            const cmdKafka = `docker run -d ${kafkaParams} --name ${KAFKA_NAME} bitnami/kafka:latest`;
+            const cmdKafka = `docker run -d ${kafkaParams} --name ${KAFKA_NAME} ${KAFKA_IMAGE_NAME}`;
 
             // simple check to see if zookeeper already exists
             return runRemoteCmd(`docker ps | grep ${ZOOKEEPER_NAME}`)
