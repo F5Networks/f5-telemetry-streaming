@@ -402,6 +402,8 @@ To see an example of the EXPERIMENTAL feature where you can specify fallback IP 
 .. literalinclude:: ../examples/declarations/generic_http.json
     :language: json
 
+.. _beacon-ref:
+
 F5 Beacon
 ^^^^^^^^^
 F5 Beacon, a SaaS offering, provides visibility and actionable insights into the health and performance of applications. 
