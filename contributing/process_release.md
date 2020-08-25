@@ -62,10 +62,14 @@
       * 1.13.0 - 81 MB
     * Check `nodejs/node_modules` folder - if you see `eslint`, `mocha` or something else from [package.json](package.json) `devDependencies` section - something wrong with build process. Probably some `npm` flags are work as not expected and it MUST BE FIXED before publishing.
 * Ensure that all tests (unit tests and functional tests passed)
+* Optional: Ensure that your local tags match remote. If not, remove all and re-fetch:
+  * git tag -l -n
+  * git tag | xargs -n1 git tag -d
+  * git fetch --tags
 * Create pre-release tag and push it to GitLab:
   * git tag -m 'Release candidate X.Y.Z-#' vX.Y.Z-#
   * git push origin
-  * git push origin --tags
+  * git push origin tag vX.Y.Z-#
 * Check pipeline for artifactory URL to package (or browse in artifactory)
 * Send release candidate email with features, bugs, artifactory URL
 
@@ -82,10 +86,14 @@
   * git checkout master
   * git merge --squash rc-master-branch
   * git push origin
+* Optional: Ensure that your local tags match remote. If not, remove all and re-fetch:
+  * git tag -l -n
+  * git tag | xargs -n1 git tag -d
+  * git fetch --tags
 * Create tag in master branch:
   * git checkout master
   * git tag -m 'Release X.Y.Z' vX.Y.Z
-  * git push origin --tags
+  * git push origin tag vX.Y.Z
 * Push to GitHub master:
   * Create the GitHub remote (as needed):
     * git remote add github https://github.com/f5networks/f5-telemetry-streaming.git
