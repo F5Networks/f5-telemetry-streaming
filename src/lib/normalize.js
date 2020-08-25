@@ -23,7 +23,7 @@ const SYSLOG_REGEX = new RegExp([
     /([0-9]{2}):/, // hours
     /([0-9]{2}):/, // minutes
     /([0-9]{2})/, // seconds
-    /\s+([\w\-.0-9]+)?/, // host
+    /\s+([\w\-.0-9/]+)?/, // host
     /\s+(?:([\w\-().0-9/]+)\s+)?/, // severity
     /([\w\-().0-9/]+)/, // process
     /(?:\[([a-z0-9-.]+)\])?:/, // pid

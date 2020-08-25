@@ -155,6 +155,15 @@ module.exports = {
                 hostname: 'bigip14.1.2.3.test',
                 telemetryEventCategory: EVENT_TYPES.SYSLOG_EVENT
             }
+        },
+        {
+            name: 'valid syslog event on a vcmp host',
+            data: '<133>Aug 12 12:22:41 slot1/TSGuest1.localdomain notice root[22149]: 01420002:5: AUDIT test mumble grumble syslog entry',
+            expectedData: {
+                data: '<133>Aug 12 12:22:41 slot1/TSGuest1.localdomain notice root[22149]: 01420002:5: AUDIT test mumble grumble syslog entry',
+                hostname: 'slot1/TSGuest1.localdomain',
+                telemetryEventCategory: EVENT_TYPES.SYSLOG_EVENT
+            }
         }
     ],
     splitEventsData: [

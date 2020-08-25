@@ -4,6 +4,7 @@ Changes to this project are documented in this file. More detail and links can b
 ## 1.15.0
 ### Added
 ### Fixed
+- AUTOTOOL-1790: Fixed syslog event hostname parsing for VCMP hosts
 ### Changed
 ### Removed
 
