@@ -643,7 +643,7 @@ In the following table, we list the Azure Government regions.
    :target: https://cloud.google.com/products/operations
    :alt: Google Cloud
 
-.. |beaconlogo| image:: /images/beacon_logo.png
+.. |beaconlogo| image:: /images/beacon-logo.png
    :target: https://www.f5.com/products/beacon-visibility-and-analytics
    :alt: F5 Beacon
 
