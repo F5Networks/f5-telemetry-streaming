@@ -17,11 +17,13 @@ function set_vars() {
     # remapping (renamed to avoid docs conflicts)
     printf "export AWS_ACCESS_KEY_ID=%s \n" "${AWS_IAM_ACCESS_KEY_ID}" > "${outputFile}"
     printf "export AWS_SECRET_ACCESS_KEY=%s \n" "${AWS_IAM_ACCESS_KEY}" >> "${outputFile}"
-    printf "export F5_DISABLE_SSL_WARNINGS=true \n" "${AWS_IAM_ACCESS_KEY}" >> "${outputFile}"
+    printf "export AWS_METRIC_NAMESPACE=%s \n" "${AWS_METRIC_NAMESPACE}" >> "${outputFile}"
+    printf "export F5_DISABLE_SSL_WARNINGS=true \n" >> "${outputFile}"
     printf "export CLOUD_ENV_FILE=env_metadata/aws_byol/deployment_info.json \n" >> "${outputFile}"
     source "${outputFile}"
 }
 
+# Uses the Automation SDK 'deployment tool': automation-sdk/deployment-tool
 function deploy() {
     sed -i ':a;N;$!ba;s/,\n        "license.*}"\n        }//' /deployment-tool/plans/aws_byol/do_template.json
     /deployment-tool/deploy.sh --deployment-plan aws_byol --action create --output-folder env_metadata/aws_byol --deployment-vars "license_key:${LICENSE_KEY}"

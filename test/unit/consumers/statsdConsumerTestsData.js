@@ -585,7 +585,87 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl.cipherUses-adhKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl.cipherUses-aesBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl.cipherUses-aesGcmBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl.cipherUses-camelliaBulk',
+                    metricValue: 0
+                },
+                {
                     metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl.cipherUses-chacha20Poly1305Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl.cipherUses-desBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl.cipherUses-dhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl.cipherUses-dheDssKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl.cipherUses-ecdhEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl.cipherUses-ecdhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl.cipherUses-ecdheEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl.cipherUses-ecdheRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl.cipherUses-edhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl.cipherUses-ideaBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl.cipherUses-md5Digest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl.cipherUses-nullBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl.cipherUses-nullDigest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl.cipherUses-rc2Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl.cipherUses-rc4Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl.cipherUses-rsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl.cipherUses-shaDigest',
                     metricValue: 0
                 },
                 {
@@ -685,7 +765,87 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-insecure-compatible.cipherUses-adhKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-insecure-compatible.cipherUses-aesBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-insecure-compatible.cipherUses-aesGcmBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-insecure-compatible.cipherUses-camelliaBulk',
+                    metricValue: 0
+                },
+                {
                     metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-insecure-compatible.cipherUses-chacha20Poly1305Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-insecure-compatible.cipherUses-desBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-insecure-compatible.cipherUses-dhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-insecure-compatible.cipherUses-dheDssKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-insecure-compatible.cipherUses-ecdhEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-insecure-compatible.cipherUses-ecdhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-insecure-compatible.cipherUses-ecdheEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-insecure-compatible.cipherUses-ecdheRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-insecure-compatible.cipherUses-edhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-insecure-compatible.cipherUses-ideaBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-insecure-compatible.cipherUses-md5Digest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-insecure-compatible.cipherUses-nullBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-insecure-compatible.cipherUses-nullDigest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-insecure-compatible.cipherUses-rc2Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-insecure-compatible.cipherUses-rc4Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-insecure-compatible.cipherUses-rsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-insecure-compatible.cipherUses-shaDigest',
                     metricValue: 0
                 },
                 {
@@ -785,7 +945,87 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-secure.cipherUses-adhKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-secure.cipherUses-aesBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-secure.cipherUses-aesGcmBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-secure.cipherUses-camelliaBulk',
+                    metricValue: 0
+                },
+                {
                     metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-secure.cipherUses-chacha20Poly1305Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-secure.cipherUses-desBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-secure.cipherUses-dhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-secure.cipherUses-dheDssKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-secure.cipherUses-ecdhEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-secure.cipherUses-ecdhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-secure.cipherUses-ecdheEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-secure.cipherUses-ecdheRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-secure.cipherUses-edhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-secure.cipherUses-ideaBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-secure.cipherUses-md5Digest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-secure.cipherUses-nullBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-secure.cipherUses-nullDigest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-secure.cipherUses-rc2Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-secure.cipherUses-rc4Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-secure.cipherUses-rsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-clientssl-secure.cipherUses-shaDigest',
                     metricValue: 0
                 },
                 {
@@ -885,7 +1125,87 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-crypto-server-default-clientssl.cipherUses-adhKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-crypto-server-default-clientssl.cipherUses-aesBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-crypto-server-default-clientssl.cipherUses-aesGcmBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-crypto-server-default-clientssl.cipherUses-camelliaBulk',
+                    metricValue: 0
+                },
+                {
                     metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-crypto-server-default-clientssl.cipherUses-chacha20Poly1305Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-crypto-server-default-clientssl.cipherUses-desBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-crypto-server-default-clientssl.cipherUses-dhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-crypto-server-default-clientssl.cipherUses-dheDssKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-crypto-server-default-clientssl.cipherUses-ecdhEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-crypto-server-default-clientssl.cipherUses-ecdhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-crypto-server-default-clientssl.cipherUses-ecdheEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-crypto-server-default-clientssl.cipherUses-ecdheRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-crypto-server-default-clientssl.cipherUses-edhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-crypto-server-default-clientssl.cipherUses-ideaBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-crypto-server-default-clientssl.cipherUses-md5Digest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-crypto-server-default-clientssl.cipherUses-nullBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-crypto-server-default-clientssl.cipherUses-nullDigest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-crypto-server-default-clientssl.cipherUses-rc2Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-crypto-server-default-clientssl.cipherUses-rc4Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-crypto-server-default-clientssl.cipherUses-rsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-crypto-server-default-clientssl.cipherUses-shaDigest',
                     metricValue: 0
                 },
                 {
@@ -985,7 +1305,87 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-splitsession-default-clientssl.cipherUses-adhKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-splitsession-default-clientssl.cipherUses-aesBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-splitsession-default-clientssl.cipherUses-aesGcmBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-splitsession-default-clientssl.cipherUses-camelliaBulk',
+                    metricValue: 0
+                },
+                {
                     metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-splitsession-default-clientssl.cipherUses-chacha20Poly1305Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-splitsession-default-clientssl.cipherUses-desBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-splitsession-default-clientssl.cipherUses-dhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-splitsession-default-clientssl.cipherUses-dheDssKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-splitsession-default-clientssl.cipherUses-ecdhEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-splitsession-default-clientssl.cipherUses-ecdhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-splitsession-default-clientssl.cipherUses-ecdheEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-splitsession-default-clientssl.cipherUses-ecdheRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-splitsession-default-clientssl.cipherUses-edhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-splitsession-default-clientssl.cipherUses-ideaBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-splitsession-default-clientssl.cipherUses-md5Digest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-splitsession-default-clientssl.cipherUses-nullBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-splitsession-default-clientssl.cipherUses-nullDigest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-splitsession-default-clientssl.cipherUses-rc2Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-splitsession-default-clientssl.cipherUses-rc4Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-splitsession-default-clientssl.cipherUses-rsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-splitsession-default-clientssl.cipherUses-shaDigest',
                     metricValue: 0
                 },
                 {
@@ -1085,7 +1485,87 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-wom-default-clientssl.cipherUses-adhKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-wom-default-clientssl.cipherUses-aesBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-wom-default-clientssl.cipherUses-aesGcmBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-wom-default-clientssl.cipherUses-camelliaBulk',
+                    metricValue: 0
+                },
+                {
                     metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-wom-default-clientssl.cipherUses-chacha20Poly1305Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-wom-default-clientssl.cipherUses-desBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-wom-default-clientssl.cipherUses-dhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-wom-default-clientssl.cipherUses-dheDssKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-wom-default-clientssl.cipherUses-ecdhEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-wom-default-clientssl.cipherUses-ecdhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-wom-default-clientssl.cipherUses-ecdheEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-wom-default-clientssl.cipherUses-ecdheRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-wom-default-clientssl.cipherUses-edhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-wom-default-clientssl.cipherUses-ideaBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-wom-default-clientssl.cipherUses-md5Digest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-wom-default-clientssl.cipherUses-nullBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-wom-default-clientssl.cipherUses-nullDigest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-wom-default-clientssl.cipherUses-rc2Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-wom-default-clientssl.cipherUses-rc4Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-wom-default-clientssl.cipherUses-rsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.clientSslProfiles.-Common-wom-default-clientssl.cipherUses-shaDigest',
                     metricValue: 0
                 },
                 {
@@ -1185,7 +1665,87 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-apm-default-serverssl.cipherUses-adhKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-apm-default-serverssl.cipherUses-aesBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-apm-default-serverssl.cipherUses-aesGcmBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-apm-default-serverssl.cipherUses-camelliaBulk',
+                    metricValue: 0
+                },
+                {
                     metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-apm-default-serverssl.cipherUses-chacha20Poly1305Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-apm-default-serverssl.cipherUses-desBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-apm-default-serverssl.cipherUses-dhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-apm-default-serverssl.cipherUses-dheDssKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-apm-default-serverssl.cipherUses-ecdhEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-apm-default-serverssl.cipherUses-ecdhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-apm-default-serverssl.cipherUses-ecdheEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-apm-default-serverssl.cipherUses-ecdheRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-apm-default-serverssl.cipherUses-edhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-apm-default-serverssl.cipherUses-ideaBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-apm-default-serverssl.cipherUses-md5Digest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-apm-default-serverssl.cipherUses-nullBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-apm-default-serverssl.cipherUses-nullDigest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-apm-default-serverssl.cipherUses-rc2Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-apm-default-serverssl.cipherUses-rc4Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-apm-default-serverssl.cipherUses-rsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-apm-default-serverssl.cipherUses-shaDigest',
                     metricValue: 0
                 },
                 {
@@ -1281,7 +1841,87 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-crypto-client-default-serverssl.cipherUses-adhKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-crypto-client-default-serverssl.cipherUses-aesBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-crypto-client-default-serverssl.cipherUses-aesGcmBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-crypto-client-default-serverssl.cipherUses-camelliaBulk',
+                    metricValue: 0
+                },
+                {
                     metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-crypto-client-default-serverssl.cipherUses-chacha20Poly1305Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-crypto-client-default-serverssl.cipherUses-desBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-crypto-client-default-serverssl.cipherUses-dhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-crypto-client-default-serverssl.cipherUses-dheDssKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-crypto-client-default-serverssl.cipherUses-ecdhEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-crypto-client-default-serverssl.cipherUses-ecdhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-crypto-client-default-serverssl.cipherUses-ecdheEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-crypto-client-default-serverssl.cipherUses-ecdheRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-crypto-client-default-serverssl.cipherUses-edhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-crypto-client-default-serverssl.cipherUses-ideaBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-crypto-client-default-serverssl.cipherUses-md5Digest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-crypto-client-default-serverssl.cipherUses-nullBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-crypto-client-default-serverssl.cipherUses-nullDigest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-crypto-client-default-serverssl.cipherUses-rc2Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-crypto-client-default-serverssl.cipherUses-rc4Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-crypto-client-default-serverssl.cipherUses-rsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-crypto-client-default-serverssl.cipherUses-shaDigest',
                     metricValue: 0
                 },
                 {
@@ -1377,7 +2017,87 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-pcoip-default-serverssl.cipherUses-adhKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-pcoip-default-serverssl.cipherUses-aesBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-pcoip-default-serverssl.cipherUses-aesGcmBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-pcoip-default-serverssl.cipherUses-camelliaBulk',
+                    metricValue: 0
+                },
+                {
                     metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-pcoip-default-serverssl.cipherUses-chacha20Poly1305Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-pcoip-default-serverssl.cipherUses-desBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-pcoip-default-serverssl.cipherUses-dhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-pcoip-default-serverssl.cipherUses-dheDssKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-pcoip-default-serverssl.cipherUses-ecdhEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-pcoip-default-serverssl.cipherUses-ecdhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-pcoip-default-serverssl.cipherUses-ecdheEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-pcoip-default-serverssl.cipherUses-ecdheRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-pcoip-default-serverssl.cipherUses-edhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-pcoip-default-serverssl.cipherUses-ideaBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-pcoip-default-serverssl.cipherUses-md5Digest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-pcoip-default-serverssl.cipherUses-nullBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-pcoip-default-serverssl.cipherUses-nullDigest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-pcoip-default-serverssl.cipherUses-rc2Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-pcoip-default-serverssl.cipherUses-rc4Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-pcoip-default-serverssl.cipherUses-rsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-pcoip-default-serverssl.cipherUses-shaDigest',
                     metricValue: 0
                 },
                 {
@@ -1473,7 +2193,87 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl.cipherUses-adhKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl.cipherUses-aesBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl.cipherUses-aesGcmBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl.cipherUses-camelliaBulk',
+                    metricValue: 0
+                },
+                {
                     metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl.cipherUses-chacha20Poly1305Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl.cipherUses-desBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl.cipherUses-dhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl.cipherUses-dheDssKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl.cipherUses-ecdhEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl.cipherUses-ecdhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl.cipherUses-ecdheEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl.cipherUses-ecdheRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl.cipherUses-edhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl.cipherUses-ideaBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl.cipherUses-md5Digest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl.cipherUses-nullBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl.cipherUses-nullDigest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl.cipherUses-rc2Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl.cipherUses-rc4Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl.cipherUses-rsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl.cipherUses-shaDigest',
                     metricValue: 0
                 },
                 {
@@ -1569,7 +2369,87 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl-insecure-compatible.cipherUses-adhKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl-insecure-compatible.cipherUses-aesBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl-insecure-compatible.cipherUses-aesGcmBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl-insecure-compatible.cipherUses-camelliaBulk',
+                    metricValue: 0
+                },
+                {
                     metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl-insecure-compatible.cipherUses-chacha20Poly1305Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl-insecure-compatible.cipherUses-desBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl-insecure-compatible.cipherUses-dhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl-insecure-compatible.cipherUses-dheDssKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl-insecure-compatible.cipherUses-ecdhEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl-insecure-compatible.cipherUses-ecdhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl-insecure-compatible.cipherUses-ecdheEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl-insecure-compatible.cipherUses-ecdheRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl-insecure-compatible.cipherUses-edhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl-insecure-compatible.cipherUses-ideaBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl-insecure-compatible.cipherUses-md5Digest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl-insecure-compatible.cipherUses-nullBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl-insecure-compatible.cipherUses-nullDigest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl-insecure-compatible.cipherUses-rc2Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl-insecure-compatible.cipherUses-rc4Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl-insecure-compatible.cipherUses-rsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-serverssl-insecure-compatible.cipherUses-shaDigest',
                     metricValue: 0
                 },
                 {
@@ -1665,7 +2545,87 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-splitsession-default-serverssl.cipherUses-adhKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-splitsession-default-serverssl.cipherUses-aesBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-splitsession-default-serverssl.cipherUses-aesGcmBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-splitsession-default-serverssl.cipherUses-camelliaBulk',
+                    metricValue: 0
+                },
+                {
                     metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-splitsession-default-serverssl.cipherUses-chacha20Poly1305Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-splitsession-default-serverssl.cipherUses-desBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-splitsession-default-serverssl.cipherUses-dhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-splitsession-default-serverssl.cipherUses-dheDssKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-splitsession-default-serverssl.cipherUses-ecdhEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-splitsession-default-serverssl.cipherUses-ecdhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-splitsession-default-serverssl.cipherUses-ecdheEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-splitsession-default-serverssl.cipherUses-ecdheRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-splitsession-default-serverssl.cipherUses-edhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-splitsession-default-serverssl.cipherUses-ideaBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-splitsession-default-serverssl.cipherUses-md5Digest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-splitsession-default-serverssl.cipherUses-nullBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-splitsession-default-serverssl.cipherUses-nullDigest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-splitsession-default-serverssl.cipherUses-rc2Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-splitsession-default-serverssl.cipherUses-rc4Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-splitsession-default-serverssl.cipherUses-rsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-splitsession-default-serverssl.cipherUses-shaDigest',
                     metricValue: 0
                 },
                 {
@@ -1761,7 +2721,87 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-wom-default-serverssl.cipherUses-adhKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-wom-default-serverssl.cipherUses-aesBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-wom-default-serverssl.cipherUses-aesGcmBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-wom-default-serverssl.cipherUses-camelliaBulk',
+                    metricValue: 0
+                },
+                {
                     metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-wom-default-serverssl.cipherUses-chacha20Poly1305Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-wom-default-serverssl.cipherUses-desBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-wom-default-serverssl.cipherUses-dhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-wom-default-serverssl.cipherUses-dheDssKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-wom-default-serverssl.cipherUses-ecdhEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-wom-default-serverssl.cipherUses-ecdhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-wom-default-serverssl.cipherUses-ecdheEcdsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-wom-default-serverssl.cipherUses-ecdheRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-wom-default-serverssl.cipherUses-edhRsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-wom-default-serverssl.cipherUses-ideaBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-wom-default-serverssl.cipherUses-md5Digest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-wom-default-serverssl.cipherUses-nullBulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-wom-default-serverssl.cipherUses-nullDigest',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-wom-default-serverssl.cipherUses-rc2Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-wom-default-serverssl.cipherUses-rc4Bulk',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-wom-default-serverssl.cipherUses-rsaKeyxchg',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.bigip1.serverSslProfiles.-Common-wom-default-serverssl.cipherUses-shaDigest',
                     metricValue: 0
                 },
                 {

@@ -11,8 +11,12 @@ Document Revision History
         - Description
         - Date
 
+      * - 1.14.0
+        - Updated the documentation for Telemetry Streaming v1.14.0. This release contains the following changes: |br| * Added support for AWS CloudWatch Metrics (see :ref:`cw-metrics`) |br| * Added an EXPERIMENTAL feature to specify fallback hosts for generic HTTP consumers (see :ref:`fallback`) |br| * Added F5 Beacon as a Generic HTTP consumer (see :ref:`beacon-ref`) |br| *  |br| * Added **cipherUses** stats for Client and Server SSL profiles (see the cipherUses lines in :ref:`sysinfo`)  |br| |br| Issues Resolved: |br| * Fixed Event Listener parsing when receiving multiple events
+        - 09-01-20
+
       * - 1.13.0
-        - Updated the documentation for Telemetry Streaming v1.13.0. This release contains the following changes: |br| * Added **statusReason** and **monitorStatus** fields to System Poller output for BIG-IQ Analytics (see :ref:`sysinfo`) |br| |br| Issues Resolved: |br| * Fixed inconsistency in GSLB output: return empty object instead of 'undefined' |br| * Fixed Azure consumer memory leak when calling metadata service on an instance where it is unavailable |br| * Updated Azure Log Analytics dashboard example (`GitHub #39 <https://github.com/F5Networks/f5-telemetry-streaming/issues/39>`_) |br| * Fixed lodash `Prototype Pollution vulnerability <https://www.npmjs.com/advisories/1523>`_ |br| * Fixed Splunk legacy format missing poolMemberStat data
+        - Updated the documentation for Telemetry Streaming v1.13.0. This release contains the following changes: |br| * Added **statusReason** and **monitorStatus** fields to System Poller output for BIG-IQ Analytics (see :ref:`sysinfo`) |br| * Added comprehensive troubleshooting entry for why data may not be showing up in a consumer (see :ref:`Troubleshooting<nodata>`) |br| * Updated the Event Listener page (see :doc:`event-listener`) |br| |br| Issues Resolved: |br| * Fixed inconsistency in GSLB output: return empty object instead of 'undefined' |br| * Fixed Azure consumer memory leak when calling metadata service on an instance where it is unavailable |br| * Updated Azure Log Analytics dashboard example (`GitHub #39 <https://github.com/F5Networks/f5-telemetry-streaming/issues/39>`_) |br| * Fixed lodash `Prototype Pollution vulnerability <https://www.npmjs.com/advisories/1523>`_ |br| * Fixed Splunk legacy format missing poolMemberStat data
         - 07-21-20
 
       * - 1.12.0

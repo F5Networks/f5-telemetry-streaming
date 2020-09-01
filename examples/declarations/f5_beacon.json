@@ -1,0 +1,23 @@
+{ 
+    "class":"Telemetry",
+    "Beacon_Consumer":{ 
+       "class":"Telemetry_Consumer",
+       "type":"Generic_HTTP",
+       "host":"ingestion.ovr.prd.f5aas.com",
+       "protocol":"https",
+       "port":50443,
+       "path":"/beacon/v1/ingest-telemetry-streaming",
+       "method":"POST",
+       "enable":true,
+       "trace":false,
+       "headers":[ 
+          { 
+             "name":"grpc-metadata-x-f5-ingestion-token",
+             "value":"`>@/passphrase`"
+          }
+       ],
+       "passphrase":{ 
+          "cipherText":"F5 Beacon Access Token"
+       }
+    }
+ }
