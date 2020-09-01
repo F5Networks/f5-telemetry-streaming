@@ -1,6 +1,18 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.14.0
+### Added
+- AUTOTOOL-1648: Added ability to specify fallback hosts for Generic HTTP consumer (experimental feature)
+- AUTOTOOL-1627: Add support for AWS CloudWatch Metrics
+- AUTOTOOL-1679: Added 'cipherUses' stats for Client and Server SSL profiles
+### Fixed
+- AUTOTOOL-810: Fixed Event Listener parsing when received multiple events
+### Changed
+- AUTOTOOL-1680: Update npm packages (ajv from v6.12.2 to v6.12.3, aplicationinsights from v1.8.0 to v1.8.5, aws-sdk from v.2.704.0 to 2.728.0, statsd-client from v0.4.4 to v0.4.5)
+### Removed
+
+
 ## 1.13.0
 ### Added
 - AUTOTOOL-1640: Add statusReason and monitorStatus fields to System Poller output for BIG-IQ Analytics

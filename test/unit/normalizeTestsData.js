@@ -123,9 +123,187 @@ module.exports = {
             }
         },
         {
+            name: 'valid event with escaped delimiter (3)',
+            data: 'key1="value",key2="value\",value",key3="value3',
+            expectedData: {
+                key1: 'value',
+                key2: 'value\",value',
+                key3: 'value3',
+                telemetryEventCategory: EVENT_TYPES.LTM_EVENT
+            }
+        },
+        {
+            name: 'valid event with escaped delimiter (4)',
+            data: 'key1="value",key2="value\\",value",key3="value3',
+            expectedData: {
+                key1: 'value',
+                key2: 'value\\",value',
+                key3: 'value3',
+                telemetryEventCategory: EVENT_TYPES.LTM_EVENT
+            }
+        },
+        {
             name: 'valid CGNAT keys',
             data: 'lsn_event="LSN_DELETE",start="1562092616047",cli="X.X.X.X",nat="Y.Y.Y.Y",duration="8080",pem_subscriber_id="No-lookup"',
             category: EVENT_TYPES.CGNAT_EVENT
+        },
+        {
+            name: 'valid syslog event with double quotes in it',
+            data: '<134>Jul  6 22:37:49 bigip14.1.2.3.test info httpd(pam_audit)[13810]: 01070417:6: AUDIT - user admin - RAW: httpd(pam_audit): user=admin(admin) partition=[All] level=Administrator tty=(unknown) host=172.18.5.167 attempts=1 start="Mon Jul  6 22:37:49 2020" end="Mon Jul  6 22:37:49 2020"',
+            expectedData: {
+                data: '<134>Jul  6 22:37:49 bigip14.1.2.3.test info httpd(pam_audit)[13810]: 01070417:6: AUDIT - user admin - RAW: httpd(pam_audit): user=admin(admin) partition=[All] level=Administrator tty=(unknown) host=172.18.5.167 attempts=1 start="Mon Jul  6 22:37:49 2020" end="Mon Jul  6 22:37:49 2020"',
+                hostname: 'bigip14.1.2.3.test',
+                telemetryEventCategory: EVENT_TYPES.SYSLOG_EVENT
+            }
+        }
+    ],
+    splitEventsData: [
+        {
+            name: 'empty string',
+            data: '',
+            expectedData: []
+        },
+        {
+            name: 'empty line with line separator',
+            data: '{sep}',
+            expectedData: [
+                ''
+            ]
+        },
+        {
+            name: 'empty lines with line separator',
+            data: '{sep}{sep}{sep}{sep}',
+            expectedData: [
+                '', '', '', ''
+            ]
+        },
+        {
+            name: 'line with trailing spaces',
+            data: '{sep}{sep}{sep}{sep}  ',
+            expectedData: [
+                '', '', '', '', '  '
+            ]
+        },
+        {
+            name: 'ignore escaped separators',
+            data: '\\n \\r\\n',
+            expectedData: [
+                '\\n \\r\\n'
+            ]
+        },
+        {
+            name: 'process escaped sequences correctly',
+            data: 'line1\\\\\\nstill line 1\\\\{sep}line2\\\\{sep}',
+            expectedData: [
+                'line1\\\\\\nstill line 1\\\\',
+                'line2\\\\'
+            ]
+        },
+        {
+            name: 'ignore double quoted line separators (\\n)',
+            data: 'line1"\\\\\\nstill line 1\\\\\n"line2\\\\{sep}',
+            expectedData: [
+                'line1"\\\\\\nstill line 1\\\\\n"line2\\\\'
+            ]
+        },
+        {
+            name: 'ignore double quoted line separators (\\r\\n)',
+            data: 'line1"\\\\\\nstill line 1\\\\\r\n"line2\\\\{sep}',
+            expectedData: [
+                'line1"\\\\\\nstill line 1\\\\\r\n"line2\\\\'
+            ]
+        },
+        {
+            name: 'ignore single quoted line separators (\\n)',
+            data: 'line1\'\\\\\\nstill line 1\\\\\n\'line2\\\\{sep}',
+            expectedData: [
+                'line1\'\\\\\\nstill line 1\\\\\n\'line2\\\\'
+            ]
+        },
+        {
+            name: 'ignore single quoted line separators (\\r\\n)',
+            data: 'line1\'\\\\\\nstill line 1\\\\\r\n\'line2\\\\{sep}',
+            expectedData: [
+                'line1\'\\\\\\nstill line 1\\\\\r\n\'line2\\\\'
+            ]
+        },
+        {
+            name: 'ignore escaped single quoted line separators',
+            data: 'line1\\\'\\\\\\nstill line 1\\\\{sep}\'line2\\\\\n',
+            expectedData: [
+                'line1\\\'\\\\\\nstill line 1\\\\',
+                '\'line2\\\\',
+                ''
+            ]
+        },
+        {
+            name: 'ignore escaped double quoted line separators',
+            data: 'line1\\"\\\\\\nstill line 1\\\\{sep}"line2\\\\\n',
+            expectedData: [
+                'line1\\"\\\\\\nstill line 1\\\\',
+                '"line2\\\\',
+                ''
+            ]
+        },
+        {
+            name: 'process correctly not closed quotes (last line, leading quote)',
+            data: 'line1{sep}"{sep}line3{sep}',
+            expectedData: [
+                'line1',
+                '"',
+                'line3',
+                ''
+            ]
+        },
+        {
+            name: 'process correctly not closed quotes (last line, trailing quote)',
+            data: 'line1{sep}line2"',
+            expectedData: [
+                'line1',
+                'line2"'
+            ]
+        },
+        {
+            name: 'process correctly single line with opened quote (first line, leading quote)',
+            data: '"line1{sep}line2',
+            expectedData: [
+                '"line1',
+                'line2'
+            ]
+        },
+        {
+            name: 'process correctly single line with opened quote (first line, trailing quote)',
+            data: 'line1"{sep}line2',
+            expectedData: [
+                'line1"',
+                'line2'
+            ]
+        },
+        {
+            name: 'process combination of complete and incomplete quotes',
+            data: '\'foo"bar""\none\'\n\'two""thr\nee"',
+            expectedData: [
+                '\'foo"bar""\none\'',
+                '\'two""thr',
+                'ee"'
+            ]
+        },
+        {
+            name: 'process combination of single and double quotes',
+            data: '\'line_1"still_line_1"\n\'\n"line_2"',
+            expectedData: [
+                '\'line_1"still_line_1"\n\'',
+                '"line_2"'
+            ]
+        },
+        {
+            name: 'process combination of single and double quotes without any data in it',
+            data: 'key1=""\'\'\nkey2=\'\'\nkey3=""',
+            expectedData: [
+                'key1=""\'\'',
+                'key2=\'\'',
+                'key3=""'
+            ]
         }
     ]
 };

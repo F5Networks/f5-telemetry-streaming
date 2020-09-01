@@ -37,9 +37,10 @@ const USELESS_MESSAGE_PREFIX = /^((?:BigIP|ASM):)/;
 
 
 module.exports = {
-
     /**
      * Format as JSON - assume data looks similar to this: KEY1="value",KEY2="value"
+     *
+     * Note: no whitespace chars allowed in keys
      *
      * @param {Object} data - data
      *
@@ -47,7 +48,7 @@ module.exports = {
      */
     _formatAsJson(data) {
         const defaultKey = 'data';
-        const ret = {};
+        let ret = {};
         // place in try/catch in case this event is malformed
         try {
             const dataToFormat = data.trim(); // remove new line char or whitespace from end of line
@@ -91,6 +92,13 @@ module.exports = {
                             val = item.slice(0, idx);
                             nextKey = item.slice(idx + sep.length);
                         }
+                    }
+                    if (/\s/.test(key)) {
+                        // key SHOULD NOT have whitespace chars
+                        ret = {
+                            [defaultKey]: dataToFormat
+                        };
+                        break;
                     }
                     ret[key] = val;
                     key = nextKey;
@@ -460,6 +468,77 @@ module.exports = {
             ret.hostname = hostname;
         }
         return ret;
+    },
+
+    /**
+     * Split data received by Event Listener into events
+     *
+     * Valid separators are:
+     * - \n
+     * - \r\n
+     * If line separator(s) enclosed with quotes then it will be ignored.
+     * If last line has line separator(s) and opened quote but no closing quote then
+     * this line will be splitted into multiple lines
+     *
+     * @param {String} data - data
+     *
+     * @returns {Array<String>} array of events/chunks
+     */
+    splitEvents(data) {
+        let backSlashed = false;
+        let char;
+        let idx = 0;
+        let openQuotePos;
+        let quoted = '';
+        let startIdx = 0;
+        const lines = [];
+
+        for (;idx < data.length; idx += 1) {
+            char = data[idx];
+            if (char === '\\') {
+                backSlashed = !backSlashed;
+                // eslint-disable-next-line no-continue
+                continue;
+            } else if (char === '"' || char === '\'') {
+                if (backSlashed) {
+                    backSlashed = false;
+                    // eslint-disable-next-line no-continue
+                    continue;
+                }
+                if (!quoted) {
+                    quoted = char;
+                    openQuotePos = idx;
+                } else if (quoted === char) {
+                    quoted = '';
+                    openQuotePos = null;
+                }
+            } else if (char === '\n' || (char === '\r' && data[idx + 1] === '\n')) {
+                if (!quoted) {
+                    lines.push(data.slice(startIdx, idx));
+                    idx = char === '\r' ? (idx + 1) : idx;
+                    startIdx = idx + 1;
+                }
+            }
+            backSlashed = false;
+        }
+        // idx > startIdx - EOL reached earlier
+        // idx <= startIdx - EOL reached and line separator was found
+        if (startIdx < data.length && idx > startIdx) {
+            // looks like EOL reached, so we have to check last line
+            const lastLine = data.slice(startIdx);
+            if (openQuotePos === null) {
+                lines.push(lastLine);
+            } else {
+                // quote was opened and not closed
+                // might worth to check if there are new line separators
+                openQuotePos -= startIdx;
+                const leftPart = lastLine.slice(0, openQuotePos);
+                const rightParts = lastLine.slice(openQuotePos).split(/\n|\r\n/);
+                lines.push(leftPart + rightParts[0]);
+                rightParts.forEach((elem, elemId) => elemId && lines.push(elem));
+            }
+        }
+        return lines;
     },
 
     /**

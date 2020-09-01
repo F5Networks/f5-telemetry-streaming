@@ -22,8 +22,8 @@ function upload {
     fi
 }
 
-
-RPM_FILE=$(ls dist/*.rpm)
+cd dist
+RPM_FILE=$(ls *.rpm)
 RPM_NAME=$(basename "$RPM_FILE")
 
 SHA_FILE="${RPM_FILE}.sha256.txt"

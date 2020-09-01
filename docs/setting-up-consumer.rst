@@ -192,6 +192,13 @@ AWS CloudWatch
 --------------
 |aws_img|   
 
+AWS CloudWatch has two consumers: CloudWatch Logs, and :ref:`cw-metrics` (new in TS 1.14).  If you do not use the new **dataType** property, the system defaults to CloudWatch Logs.
+
+.. IMPORTANT:: In TS 1.9.0 and later, the **username** and **passphrase** for CloudWatch are optional.  This is because a user can send data from a BIG-IP that has an appropriate IAM role in AWS to AWS CloudWatch without a username and passphrase.
+
+AWS CloudWatch Logs (default)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 Required information:
  - Region: AWS region of the CloudWatch resource.
  - Log Group: Navigate to :guilabel:`CloudWatch > Logs`
@@ -201,14 +208,44 @@ Required information:
 
 To see more information about creating and using IAM roles, see the |IAM roles|.
 
-.. IMPORTANT:: In TS 1.9.0 and later, the **username** and **passphrase** for CloudWatch are optional.  This is because a user can send data from a BIG-IP that has an appropriate IAM role in AWS to AWS CloudWatch without a username and passphrase.
-
 Example Declaration:
 
-.. literalinclude:: ../examples/declarations/aws_cloudwatch.json
+.. literalinclude:: ../examples/declarations/aws_cloudwatch_logs.json
     :language: json
 
 |
+
+.. _cw-metrics:
+
+AWS CloudWatch Metrics
+^^^^^^^^^^^^^^^^^^^^^^
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+   Support for CloudWatch Metrics is available in Telemetry Streaming 1.14 and later.
+
+Telemetry Streaming 1.14 introduced support for AWS CloudWatch Metrics.  To specify CloudWatch Metrics, use the new **dataType** property with a value of **metrics** as shown in the example.
+
+Notes for CloudWatch Metrics:
+ - It can take up to 15 minutes for metrics to appear if they do not exist and AWS has to create them.
+ - You must use the **dataType** property with a value of **metrics**, if you do not specify metrics, the system defaults to Logs. 
+ - Some properties are restricted so that you cannot use them with the wrong dataType (for example, you cannot use **logStream** when **dataType: "metrics"**)
+
+
+Required Information:
+ - Region: AWS region of the CloudWatch resource.
+ - MetricNamespace: Namespace for the metrics. :guilabel:`Navigate to CloudWatch > Metrics > All metrics > Custom Namespaces`
+ - DataType: Value should be **metrics**
+ - Username: Navigate to :guilabel:`IAM > Users`
+ - Passphrase: Navigate to :guilabel:`IAM > Users`
+
+
+Example Declaration:
+
+.. literalinclude:: ../examples/declarations/aws_cloudwatch_metrics.json
+    :language: json
+
+|
+
 
 .. _awss3-ref:
 
@@ -358,16 +395,34 @@ Required Information:
 
 .. NOTE:: Since this consumer is designed to be generic and flexible, how authentication is performed is left up to the web service. To ensure the secrets are encrypted within Telemetry Streaming please note the use of JSON pointers. The secret to protect should be stored inside ``passphrase`` and referenced in the desired destination property, such as an API token in a header as shown in this example. 
 
+To see an example of Generic HTTP with multiple passphrases, see :ref:`multiple`.
+
+To see an example of the EXPERIMENTAL feature where you can specify fallback IP address(es) for the Generic HTTP consumer, see :ref:`fallback`.
+
 .. literalinclude:: ../examples/declarations/generic_http.json
     :language: json
 
-.. NOTE::  If multiple secrets are required, defining an additional secret within ``Shared`` and referencing it using pointers is supported. For more details about pointers see the section on :ref:`pointersyntax`.
+F5 Beacon
+^^^^^^^^^
+F5 Beacon, a SaaS offering, provides visibility and actionable insights into the health and performance of applications. 
 
-Example with multiple passphrases:
+F5 Beacon uses the generic HTTP consumer.
 
-.. literalinclude:: ../examples/declarations/multiple_passphrases.json
+Required Information:
+ - See |beacon| for information on how to add Telemetry Streaming as a source to Beacon.
+ - Host: The address of the system.
+ - Protocol: The protocol of the system. Options: ``https`` or ``http``. Default is ``https``.
+ - Port: The port of the system. Default is ``443``.
+ - Path: The path of the system. Default is ``/``.
+ - Method: The method of the system. Options: ``POST``, ``PUT``, ``GET``. Default is ``POST``.
+ - Headers: The headers of the system.
+ - Passphrase: The secret to use when sending data to the system, for example an API key to be used in an HTTP header.
+
+.. literalinclude:: ../examples/declarations/f5_beacon.json
     :language: json
 
+
+|
 
 .. _fluentd-ref:
 
@@ -675,3 +730,8 @@ In the following table, we list the Azure Government regions.
 .. |azregion| raw:: html
 
    <a href="https://azure.microsoft.com/en-us/global-infrastructure/services/?products=monitor&regions=non-regional,usgov-non-regional,us-dod-central,us-dod-east,usgov-arizona,usgov-iowa,usgov-texas,usgov-virginia" target="_blank">Azure Products Available by Region</a>
+
+.. |beacon| raw:: html
+
+   <a href="https://clouddocs.f5.com/cloud-services/latest/f5-cloud-services-Beacon-WorkWith.html#adding-a-new-source" target="_blank">Beacon documentation</a>
+

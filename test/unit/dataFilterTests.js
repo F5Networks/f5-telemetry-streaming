@@ -24,7 +24,7 @@ const assert = chai.assert;
 
 describe('Data Filter', () => {
     describe('DataFilter', () => {
-        it('should blacklist tmstats if consumer is not Splunk legacy', () => {
+        it('should ignore tmstats if consumer is not Splunk legacy', () => {
             const consumerConfig = {
                 type: 'Kafka'
             };
@@ -38,11 +38,11 @@ describe('Data Filter', () => {
             const filter = new dataFilter.DataFilter(consumerConfig);
             const filteredData = filter.apply(data);
 
-            assert.deepStrictEqual(filter.blacklist, expected);
+            assert.deepStrictEqual(filter.excludeList, expected);
             assert.deepStrictEqual(filteredData, { data: {} });
         });
 
-        it('should not blacklist tmstats if consumer is Splunk legacy', () => {
+        it('should not ignore tmstats if consumer is Splunk legacy', () => {
             const consumerConfig = {
                 type: 'Splunk',
                 config: {
@@ -58,7 +58,7 @@ describe('Data Filter', () => {
             const filter = new dataFilter.DataFilter(consumerConfig);
             const filteredData = filter.apply(data);
 
-            assert.deepStrictEqual(filter.blacklist, expected);
+            assert.deepStrictEqual(filter.excludeList, expected);
             assert.deepStrictEqual(filteredData, data);
         });
     });
