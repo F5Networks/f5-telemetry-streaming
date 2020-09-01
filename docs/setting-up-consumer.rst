@@ -316,10 +316,6 @@ ElasticSearch
 -------------
 |ElasticSearch|
 
-<<<<<<< HEAD
-=======
-
->>>>>>> doc-release-branch
 .. IMPORTANT:: TS currently does not support sending data to ElasticSearch 7.
 
 Required Information:
