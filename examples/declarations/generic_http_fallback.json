@@ -1,0 +1,30 @@
+{
+    "class": "Telemetry",
+    "Consumer_With_Fallback_Hosts": {
+        "class": "Telemetry_Consumer",
+        "type": "Generic_HTTP",
+        "host": "192.0.2.1",
+        "fallbackHosts": [
+            "192.0.2.2",
+            "192.0.2.3",
+            "192.0.2.4"
+        ],
+        "protocol": "https",
+        "port": 443,
+        "path": "/",
+        "method": "POST",
+        "headers": [
+            {
+                "name": "content-type",
+                "value": "application/json"
+            },
+            {
+                "name": "x-api-key",
+                "value": "`>@/passphrase`"
+            }
+        ],
+        "passphrase": {
+            "cipherText": "apikey"
+        }
+    }
+}

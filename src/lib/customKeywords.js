@@ -99,7 +99,7 @@ function resolvePointer(origin, pointer, srcPointer, options) {
  * @param {String} str        - string to expand per pointer syntax
  * @param {Object} origin     - origin object of which str is descendant
  * @param {String} srcPointer - pointer to property in origin from which str came
- *                              note: assumes jsonPointers:true resulting in pointer like '/root/ptr'
+ *                              note: assumes Ajv opts has jsonPointers:true resulting in pointer like '/root/ptr'
  *
  * @returns {String} fully expanded string
  */
@@ -297,12 +297,16 @@ function f5secretCheck(schemaObj, dataObj) {
  *      or function that returns {Promise} resolved once host is reachable
  */
 function hostConnectivityCheck(schemaObj, dataObj) {
-    const parentData = dataObj.parentData || {};
+    let parentData = dataObj.parentData || {};
+    if (Array.isArray(parentData)) {
+        // probably list of hosts (e.g. Generic_HTTP consumer), then better to fetch parent object explicitly
+        parentData = expandPointers('`>@`', dataObj.rootData, dataObj.dataPath);
+    }
     // enable host connectivity check with this property - return otherwise
     if (parentData.enableHostConnectivityCheck !== true || typeof parentData.port === 'undefined') {
         return true;
     }
-    return () => util.networkCheck(dataObj.data, dataObj.parentData.port);
+    return () => util.networkCheck(dataObj.data, parentData.port);
 }
 
 /**
@@ -377,7 +381,8 @@ function declarationClassCheck(schemaObj, dataObj) {
  * @returns {Boolean} true if JSON pointer was expanded
  */
 function f5expandCheck(schemaObj, dataObj) {
-    if (!(this.expand === true)) {
+    if (this.expand !== true) {
+        // don't need to expand pointers
         return true;
     }
     if (typeof dataObj.data !== 'string') {

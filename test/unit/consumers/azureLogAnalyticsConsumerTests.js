@@ -148,7 +148,12 @@ describe('Azure_Log_Analytics', () => {
             const expectedData = azureLogData.systemData[0].expectedData;
 
             return azureAnalyticsIndex(context)
-                .then(() => assert.deepStrictEqual(getAllOpsInsightsReqs(), expectedData));
+                .then(() => {
+                    const actualData = getAllOpsInsightsReqs();
+                    actualData.forEach((data, idx) => {
+                        assert.deepStrictEqual(data, expectedData[idx], `should match data set at index ${idx}`);
+                    });
+                });
         });
 
         it('should process event data', () => {

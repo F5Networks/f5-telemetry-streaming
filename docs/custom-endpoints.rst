@@ -1,12 +1,15 @@
 Appendix B: Configuring Custom Endpoints
 ========================================
 
-.. WARNING:: Configuring custom Endpoints and multiple System poller support is currently an EXPERIMENTAL feature, and the associated API could change based on testing and user feedback.
+.. WARNING:: Configuring custom Endpoints and multiple System poller support is currently an EXPERIMENTAL feature, and the associated API could change based on testing and user feedback. |br| Custom endpoints are currently for BIG-IP only. 
 
-.. NOTE:: Custom endpoints are currently for BIG-IP only. 
+Telemetry Streaming v1.10 and later allows you to define a list of Custom Endpoints that reference iControlRequest paths in a new **Telemetry_Endpoints** class.
+The Custom Endpoints defined within a Telemetry Streaming declaration must then be attached to a Telemetry Streaming System Poller, where the System Poller will query the defined endpoints.
 
-Telemetry Streaming v1.10 allows you to define a list of named endpoints with paths in a new **Telemetry_Endpoints** class, and includes the ability to define multiple system pollers that can fetch specific custom endpoint(s).   
+.. NOTE:: Custom Endpoints *replace* the endpoints that a Telemetry Streaming System Poller queries by default - once a System Poller references a collection of Custom Endpoints, that System Poller will *only* query the Custom Endpoints.
 
+Telemetry Streaming v1.10+ also includes the ability to define multiple system pollers within a single declaration.
+Using multiple system pollers within a single declaration allows for a configuration where one system poller can pull data from the default endpoints, and another system poller pulls data only from its referenced, Custom Endpoints. 
 
 Using the Telemetry_Endpoints class
 -----------------------------------
@@ -31,11 +34,12 @@ The Telemetry_Endpoints class is where you define your endpoints and their paths
 +--------------------+------------+---------------------------------------------------------------------------------------------------------+
 
 
-For example, your declaration could include the following snippet, which contains endpoints for profiles, and for total connections for a virtual:
+For example, your declaration could add the following snippet, which contains endpoints for profiles, and for total connections for a virtual:
 
-.. code-block:: json
+.. code-block:: bash
 
    {
+       ...
         "Endpoints_Profiles": {
             "class": "Telemetry_Endpoints",
             "basePath": "/mgmt/tm/ltm/profile",
@@ -55,7 +59,7 @@ For example, your declaration could include the following snippet, which contain
             "items": {
                 "clientside.totConns": {
                     "name": "virtualTotConns",
-                    "path": "/mgmt/ltm/virtual/stats?$select=clientside.totConns"
+                    "path": "/mgmt/tm/ltm/virtual/stats?$select=clientside.totConns"
                 },
                 "virtualAddress": {
                     "path": "/mgmt/tm/ltm/virtual-address/stats"
@@ -74,24 +78,28 @@ EndpointList is simply a list of endpoints to use in data collection, and can in
 
 * **Array** |br| When using an array, the item in the array must be one of the following: |br| |br|
 
-  1. Name of the Telemetry_Endpoints object (for example, ``Endpoints_Profiles``) 
-  2. Name of Telemetry_Endpoints object and the endpoint object key (``Endpoints_Profiles/radiusProfiles``)
-  3. A Telemetry_Endpoint (name is required).  For example:
+  #. Name of an existing Telemetry_Endpoints object (for example, ``Endpoints_Profiles``) 
+  #. Name of an existing Telemetry_Endpoints object and the endpoint object key (``Endpoints_Profiles/radiusProfiles``)
+  #. An in-line Telemetry_Endpoint object (name is required).  For example:
+  
+     .. code-block:: json
 
-        .. code-block:: json
-        
-            {
-                "path": "mgmt/tm/net/vlan/stats",
-                "name": "requiredWhenInline"
-            }
+      {
+         "path": "mgmt/tm/net/vlan/stats",
+         "name": "requiredWhenInline"
+      }
 
-  4. A Telemetry_Endpoints definition
+  #. A Telemetry_Endpoints definition
 
-* **String** |br| The name of the Telemetry_Endpoints object
+* **String** |br| The name of an existing Telemetry_Endpoints object
 
-* **Object** An object that conforms to the definition of the Telemetry_Endpoints class.
+* **Object** |br| An object that conforms to the definition of the Telemetry_Endpoints class.
 
-The following is an example the system pollers, which correspond to the preceding Telemetry_Endpoints example:
+The following snippet demonstrates how Custom Endpoint(s) can be attached to System Pollers, by:
+
+* Referencing the entire ``Endpoints_Profiles`` Telemetry_Endpoints object from the previous snippet
+* Referencing the single ``clientside.totConns`` custom endpoint from the ``Endpoints_Misc`` Telemetry_Endpoints object from the previous snippet
+* Creating an in-line custom endpoint, named ``requiredWhenInline``
 
 .. code-block:: json
 
@@ -99,14 +107,11 @@ The following is an example the system pollers, which correspond to the precedin
         "Custom_System_Poller1": {
             "class": "Telemetry_System_Poller",
             "interval": 60,
-            "enable": false,
-            "endpointList": "Endpoints_Profiles",
-            "trace": true
+            "endpointList": "Endpoints_Profiles"
         },
         "Custom_System_Poller2": {
             "class": "Telemetry_System_Poller",
             "interval": 720,
-            "enable": true,
             "endpointList": [
                 "Endpoints_Misc/clientside.totConns",
                 {
@@ -122,194 +127,109 @@ The following is an example the system pollers, which correspond to the precedin
 
 Example declaration for using custom Endpoints with specific pollers
 --------------------------------------------------------------------
-The following example contains a complete example declaration for Telemetry Streaming, which includes the snippets in the examples above.
+The following example contains an example declaration for Telemetry Streaming, which includes the snippets in the examples above.
+**Note:** The example below does not define a Telemetry Consumer, and a consumer of your choice must be added to the example declaration in order to receive the Telemetry Streaming data.
 
 .. literalinclude:: ../examples/declarations/system_custom_endpoints.json
     :language: json
 
 |
 
-Example output from the pollers
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The following is output from the pollers when using custom Endpoints.
+Example output from the system pollers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The following is output from the system pollers in the examples above.
 
-
-From: ``GET /mgmt/shared/telemetry/systempoller/Custom_System/Custom_System_Poller1``
+**Custom_System_Poller1**:
 
 .. code-block:: json
   
    {
         "radiusProfiles":{
-        "/Common/radiusLB/stats":{
-            "accepts":0,
-            "acctRequests":0,
-            "acctResponses":0,
-            "challenges":0,
-            "drops":0,
-            "tmName":"/Common/radiusLB",
-            "other":0,
-            "rejects":0,
-            "requests":0,
-            "typeId":"ltm profile radius",
-            "vsName":"N/A",
-            "name":"/Common/radiusLB/stats"
-        },
-        "/Common/radiusLB-subscriber-aware/stats":{
-            "accepts":0,
-            "acctRequests":0,
-            "acctResponses":0,
-            "challenges":0,
-            "drops":0,
-            "tmName":"/Common/radiusLB-subscriber-aware",
-            "other":0,
-            "rejects":0,
-            "requests":0,
-            "typeId":"ltm profile radius",
-            "vsName":"N/A",
-            "name":"/Common/radiusLB-subscriber-aware/stats"
-        }
+            "/Common/radiusLB/stats":{
+                "accepts":0,
+                "acctRequests":0,
+                "acctResponses":0,
+                "challenges":0,
+                "drops":0,
+                "tmName":"/Common/radiusLB",
+                "other":0,
+                "rejects":0,
+                "requests":0,
+                "typeId":"ltm profile radius",
+                "vsName":"N/A",
+                "name":"/Common/radiusLB/stats"
+            },
+            "/Common/radiusLB-subscriber-aware/stats":{
+                "accepts":0,
+                "acctRequests":0,
+                "acctResponses":0,
+                "challenges":0,
+                "drops":0,
+                "tmName":"/Common/radiusLB-subscriber-aware",
+                "other":0,
+                "rejects":0,
+                "requests":0,
+                "typeId":"ltm profile radius",
+                "vsName":"N/A",
+                "name":"/Common/radiusLB-subscriber-aware/stats"
+            }
         },
         "ipOtherProfiles":{
-        "/Common/ipother/stats":{
-            "accepts":0,
-            "connects":0,
-            "expires":0,
-            "tmName":"/Common/ipother",
-            "open":0,
-            "rxbaddgram":0,
-            "rxdgram":0,
-            "rxunreach":0,
-            "txdgram":0,
-            "typeId":"ltm profile ipother",
-            "vsName":"N/A",
-            "name":"/Common/ipother/stats"
-        }
+            "/Common/ipother/stats":{
+                "accepts":0,
+                "connects":0,
+                "expires":0,
+                "tmName":"/Common/ipother",
+                "open":0,
+                "rxbaddgram":0,
+                "rxdgram":0,
+                "rxunreach":0,
+                "txdgram":0,
+                "typeId":"ltm profile ipother",
+                "vsName":"N/A",
+                "name":"/Common/ipother/stats"
+            }
         },
         "telemetryServiceInfo":{
-        "pollingInterval":60,
-        "cycleStart":"2020-02-11T20:48:42.094Z",
-        "cycleEnd":"2020-02-11T20:48:42.161Z"
+            "pollingInterval":60,
+            "cycleStart":"2020-02-11T20:48:42.094Z",
+            "cycleEnd":"2020-02-11T20:48:42.161Z"
         },
         "telemetryEventCategory":"systemInfo"
     }
 
 |
 
-From: ``GET /mgmt/shared/telemetry/systempoller/Custom_System/Custom_System_Poller2``
+**Custom_System_Poller2**
 
 .. code-block:: json
 
    {
-    "ipOtherProfiles":{
-        "/Common/ipother/stats":{
-            "accepts":0,
-            "connects":0,
-            "expires":0,
-            "tmName":"/Common/ipother",
-            "open":0,
-            "rxbaddgram":0,
-            "rxdgram":0,
-            "rxunreach":0,
-            "txdgram":0,
-            "typeId":"ltm profile ipother",
-            "vsName":"N/A",
-            "name":"/Common/ipother/stats"
-        }
-    },
-    "telemetryServiceInfo":{
-        "pollingInterval":120,
-        "cycleStart":"2020-02-11T20:50:18.218Z",
-        "cycleEnd":"2020-02-11T20:50:18.277Z"
-    },
-    "telemetryEventCategory":"systemInfo"
+        "ipOtherProfiles":{
+            "/Common/ipother/stats":{
+                "accepts":0,
+                "connects":0,
+                "expires":0,
+                "tmName":"/Common/ipother",
+                "open":0,
+                "rxbaddgram":0,
+                "rxdgram":0,
+                "rxunreach":0,
+                "txdgram":0,
+                "typeId":"ltm profile ipother",
+                "vsName":"N/A",
+                "name":"/Common/ipother/stats"
+            }
+        },
+        "telemetryServiceInfo":{
+            "pollingInterval":120,
+            "cycleStart":"2020-02-11T20:50:18.218Z",
+            "cycleEnd":"2020-02-11T20:50:18.277Z"
+        },
+        "telemetryEventCategory":"systemInfo"
     }
 
 |
-
-From: ``GET /mgmt/shared/telemetry/systempoller/Custom_System``
-
-.. code-block:: json
-
-   [
-        {
-            "radiusProfiles":{
-                "/Common/radiusLB/stats":{
-                    "accepts":0,
-                    "acctRequests":0,
-                    "acctResponses":0,
-                    "challenges":0,
-                    "drops":0,
-                    "tmName":"/Common/radiusLB",
-                    "other":0,
-                    "rejects":0,
-                    "requests":0,
-                    "typeId":"ltm profile radius",
-                    "vsName":"N/A",
-                    "name":"/Common/radiusLB/stats"
-                },
-                "/Common/radiusLB-subscriber-aware/stats":{
-                    "accepts":0,
-                    "acctRequests":0,
-                    "acctResponses":0,
-                    "challenges":0,
-                    "drops":0,
-                    "tmName":"/Common/radiusLB-subscriber-aware",
-                    "other":0,
-                    "rejects":0,
-                    "requests":0,
-                    "typeId":"ltm profile radius",
-                    "vsName":"N/A",
-                    "name":"/Common/radiusLB-subscriber-aware/stats"
-                }
-            },
-            "ipOtherProfiles":{
-                "/Common/ipother/stats":{
-                    "accepts":0,
-                    "connects":0,
-                    "expires":0,
-                    "tmName":"/Common/ipother",
-                    "open":0,
-                    "rxbaddgram":0,
-                    "rxdgram":0,
-                    "rxunreach":0,
-                    "txdgram":0,
-                    "typeId":"ltm profile ipother",
-                    "vsName":"N/A",
-                    "name":"/Common/ipother/stats"
-                }
-            },
-            "telemetryServiceInfo":{
-                "pollingInterval":60,
-                "cycleStart":"2020-02-11T22:29:07.317Z",
-                "cycleEnd":"2020-02-11T22:29:07.441Z"
-            },
-            "telemetryEventCategory":"systemInfo"
-        },
-        {
-            "ipOtherProfiles":{
-                "/Common/ipother/stats":{
-                    "accepts":0,
-                    "connects":0,
-                    "expires":0,
-                    "tmName":"/Common/ipother",
-                    "open":0,
-                    "rxbaddgram":0,
-                    "rxdgram":0,
-                    "rxunreach":0,
-                    "txdgram":0,
-                    "typeId":"ltm profile ipother",
-                    "vsName":"N/A",
-                    "name":"/Common/ipother/stats"
-                }
-            },
-            "telemetryServiceInfo":{
-                "pollingInterval":120,
-                "cycleStart":"2020-02-11T22:29:07.318Z",
-                "cycleEnd":"2020-02-11T22:29:07.423Z"
-            },
-            "telemetryEventCategory":"systemInfo"
-        }
-    ]
 
 
 .. |br| raw:: html

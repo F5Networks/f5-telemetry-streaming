@@ -21,6 +21,7 @@ const normalize = require('../../src/lib/normalize');
 const normalizeUtil = require('../../src/lib/normalizeUtil');
 const EVENT_TYPES = require('../../src/lib/constants').EVENT_TYPES;
 const dataExamples = require('./normalizeTestsData');
+const testUtil = require('./shared/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -62,6 +63,18 @@ describe('Normalize', () => {
     };
 
     describe('event', () => {
+        describe('.splitEvents()', () => {
+            dataExamples.splitEventsData.forEach((eventDataExample) => {
+                testUtil.getCallableIt(eventDataExample)(`should split events - ${eventDataExample.name}`, () => {
+                    ['\n', '\r\n'].forEach((lineSep) => {
+                        const data = eventDataExample.data.replace(/\{sep\}/g, lineSep);
+                        const result = normalize.splitEvents(data);
+                        assert.deepStrictEqual(result, eventDataExample.expectedData);
+                    });
+                });
+            });
+        });
+
         const eventNormalizeOptions = {
             renameKeysByPattern: properties.global.renameKeys,
             addKeysByTag: {
@@ -76,7 +89,7 @@ describe('Normalize', () => {
         };
 
         dataExamples.normalizeEventData.forEach((eventDataExample) => {
-            it(`should normalize event - ${eventDataExample.name}`, () => {
+            testUtil.getCallableIt(eventDataExample)(`should normalize event - ${eventDataExample.name}`, () => {
                 const result = normalize.event(eventDataExample.data, eventNormalizeOptions);
                 if (eventDataExample.category !== undefined) {
                     assert.strictEqual(result.telemetryEventCategory, eventDataExample.category);

@@ -70,7 +70,7 @@ describe('Event Listener', () => {
         });
     });
 
-    describe('.processEvent', () => {
+    describe('.processData', () => {
         let actualData;
         let loggerSpy;
         beforeEach(() => {
@@ -81,13 +81,8 @@ describe('Event Listener', () => {
             });
             loggerSpy = sinon.spy(eventListener.logger, 'exception');
         });
-        eventListenerTestData.processEvent.forEach((testSet) => {
-            testUtil.getCallableIt(testSet)(testSet.name, () => Promise.resolve()
-                .then(() => {
-                    eventListener.processEvent(testSet.rawData);
-                    // should be enough time to process and log exception
-                    return new Promise(resolve => setTimeout(resolve, 1000));
-                })
+        eventListenerTestData.processData.forEach((testSet) => {
+            testUtil.getCallableIt(testSet)(testSet.name, () => eventListener.processData(testSet.rawData)
                 .then(() => {
                     assert.isTrue(loggerSpy.notCalled);
                     assert.deepStrictEqual(actualData, testSet.expectedData);
@@ -101,7 +96,7 @@ describe('Event Listener', () => {
         const connInfo = { address: '127.0.0.1', port: '5555' };
         beforeEach(() => {
             actualData = [];
-            sinon.stub(eventListener, 'processEvent').callsFake((data) => {
+            sinon.stub(eventListener, 'processData').callsFake((data) => {
                 actualData.push(data);
                 return Promise.resolve();
             });
@@ -121,7 +116,28 @@ describe('Event Listener', () => {
                     assert.deepStrictEqual(actualData, testSet.expectedData);
                 }));
         });
+
+        it('should flush all data immediately once number of timeouts reached maximum', () => {
+            // max number of timeouts is 5, see source code for more details
+            const maxTimeouts = 5;
+            for (let i = 0; i < maxTimeouts + 1; i += 1) {
+                eventListener.processRawData(i.toString(), connInfo);
+            }
+            assert.deepStrictEqual(eventListener._connDataBuffers, {}, 'should have no connection records once data flushed');
+            assert.deepStrictEqual(actualData, ['012345']);
+        });
+
+        it('should flush all data immediately once number of timeouts reached maximum (twice more than number of max timeouts)', () => {
+            // max number of timeouts is 5, see source code for more details
+            const maxTimeouts = 5 * 2;
+            for (let i = 0; i < maxTimeouts + 2; i += 1) {
+                eventListener.processRawData(i.toString(), connInfo);
+            }
+            assert.deepStrictEqual(eventListener._connDataBuffers, {}, 'should have no connection records once data flushed');
+            assert.deepStrictEqual(actualData, ['012345', '67891011']);
+        });
     });
+
     describe('tcp listener', () => {
         function MockClientSocket() {
             EventEmitter.call(this);

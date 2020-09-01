@@ -254,7 +254,7 @@ function setup() {
                         }
                         assert.strictEqual(data.message, 'success');
                         // wait for 5 secs while declaration will be saved to storage
-                        return new Promise(resolve => setTimeout(resolve, 5000));
+                        return util.sleep(5000);
                     });
             });
 
@@ -428,7 +428,7 @@ function test() {
             });
 
             it('should post same configuration twice and get it after', () => {
-                let uri = `${constants.BASE_ILX_URI}/declare`;
+                const uri = `${constants.BASE_ILX_URI}/declare`;
                 const postOptions = Object.assign(util.deepCopy(options), {
                     method: 'POST',
                     body: declaration
@@ -442,9 +442,10 @@ function test() {
 
                         checkPassphraseObject(data);
                         postResponses.push(data);
-
-                        return util.makeRequest(host, uri, util.deepCopy(postOptions));
+                        // wait for 2 secs while declaration will be applied and saved to storage
+                        return util.sleep(2000);
                     })
+                    .then(() => util.makeRequest(host, uri, util.deepCopy(postOptions)))
                     .then((data) => {
                         util.logger.info('POST request #2: Declaration response:', { host, data });
                         assert.strictEqual(data.message, 'success');
@@ -452,9 +453,10 @@ function test() {
                         checkPassphraseObject(data);
                         postResponses.push(data);
 
-                        uri = `${constants.BASE_ILX_URI}/declare`;
-                        return util.makeRequest(host, uri, util.deepCopy(options));
+                        // wait for 2 secs while declaration will be applied and saved to storage
+                        return util.sleep(2000);
                     })
+                    .then(() => util.makeRequest(host, uri, util.deepCopy(options)))
                     .then((data) => {
                         util.logger.info('GET request: Declaration response:', { host, data });
                         assert.strictEqual(data.message, 'success');
@@ -472,8 +474,9 @@ function test() {
 
             it('should get response from systempoller endpoint', () => {
                 const uri = `${constants.BASE_ILX_URI}/systempoller/${constants.DECL.SYSTEM_NAME}`;
-
-                return util.makeRequest(host, uri, options)
+                // wait 500ms in case if config was not applied yet
+                return util.sleep(500)
+                    .then(() => util.makeRequest(host, uri, options))
                     .then((data) => {
                         data = data || [];
                         util.logger.info(`SystemPoller response (${uri}):`, { host, data });
@@ -490,18 +493,19 @@ function test() {
 
             it('should ensure event listener is up', () => {
                 const port = constants.EVENT_LISTENER_PORT;
-
-                return new Promise((resolve, reject) => {
-                    const client = net.createConnection({ host, port }, () => {
-                        client.end();
-                    });
-                    client.on('end', () => {
-                        resolve();
-                    });
-                    client.on('error', (err) => {
-                        reject(err);
-                    });
-                });
+                // wait 500ms in case if config was not applied yet
+                return util.sleep(500)
+                    .then(() => new Promise((resolve, reject) => {
+                        const client = net.createConnection({ host, port }, () => {
+                            client.end();
+                        });
+                        client.on('end', () => {
+                            resolve();
+                        });
+                        client.on('error', (err) => {
+                            reject(err);
+                        });
+                    }));
             });
 
             it('should apply configuration containing system poller filtering', () => {
@@ -515,7 +519,10 @@ function test() {
                     .then((data) => {
                         util.logger.info('Declaration response:', { host, data });
                         assert.strictEqual(data.message, 'success');
-
+                        // wait 2s in case if config was not applied yet
+                        return util.sleep(2000);
+                    })
+                    .then(() => {
                         uri = `${constants.BASE_ILX_URI}/systempoller/${constants.DECL.SYSTEM_NAME}`;
                         return util.makeRequest(host, uri, util.deepCopy(options));
                     })
@@ -545,7 +552,10 @@ function test() {
                     .then((data) => {
                         util.logger.info('Declaration response:', { host, data });
                         assert.strictEqual(data.message, 'success');
-
+                        // wait 2s in case if config was not applied yet
+                        return util.sleep(2000);
+                    })
+                    .then(() => {
                         uri = `${constants.BASE_ILX_URI}/systempoller/${constants.DECL.SYSTEM_NAME}`;
                         return util.makeRequest(host, uri, util.deepCopy(options));
                     })
@@ -575,7 +585,10 @@ function test() {
                     .then((data) => {
                         util.logger.info('Declaration response:', { host, data });
                         assert.strictEqual(data.message, 'success');
-
+                        // wait 2s in case if config was not applied yet
+                        return util.sleep(2000);
+                    })
+                    .then(() => {
                         uri = `${constants.BASE_ILX_URI}/systempoller/${constants.DECL.SYSTEM_NAME}`;
                         return util.makeRequest(host, uri, util.deepCopy(options));
                     })
@@ -604,7 +617,10 @@ function test() {
                     .then((data) => {
                         util.logger.info('Declaration response:', { host, data });
                         assert.strictEqual(data.message, 'success');
-
+                        // wait 2s in case if config was not applied yet
+                        return util.sleep(2000);
+                    })
+                    .then(() => {
                         uri = `${constants.BASE_ILX_URI}/systempoller/${constants.DECL.SYSTEM_NAME}`;
                         return util.makeRequest(host, uri, util.deepCopy(options));
                     })

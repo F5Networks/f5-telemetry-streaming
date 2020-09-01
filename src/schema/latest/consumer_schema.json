@@ -168,6 +168,14 @@
             "type": "string",
             "f5expand": true
         },
+        "metricNamespace": {
+            "$comment": "Required for certain consumers: AWS_CloudWatch",
+            "title": "Metric Name",
+            "description": "The namespace for the metrics" ,
+            "type": "string",
+            "f5expand": true,
+            "minLength": 1
+        },
         "workspaceId": {
             "$comment": "Required for certain consumers: Azure_Log_Analytics",
             "title": "Workspace ID",
@@ -247,8 +255,8 @@
             "f5expand": true
         },
         "dataType": {
-            "$comment": "Required for certain consumers: ElasticSearch",
-            "title": "Index/Data type",
+            "$comment": "Required for certain consumers: AWS_CloudWatch, ElasticSearch",
+            "title": "Data type",
             "description": "" ,
             "type": "string",
             "f5expand": true
@@ -379,6 +387,7 @@
                             "region": {},
                             "logGroup": {},
                             "logStream": {},
+                            "metricNamespace": {},
                             "bucket": {},
                             "topic": {},
                             "apiVersion": {},
@@ -388,7 +397,8 @@
                             "projectId": {},
                             "serviceEmail": {},
                             "privateKey": {},
-                            "privateKeyId": {}
+                            "privateKeyId": {},
+                            "fallbackHosts": {}
                         },
                         "additionalProperties": false
                     },
@@ -408,6 +418,16 @@
                             ],
                             "properties": {
                                 "host": { "$ref": "#/definitions/host" },
+                                "fallbackHosts": {
+                                    "type": "array",
+                                    "description": "List FQDNs or IP addresses to be used as fallback hosts" ,
+                                    "minItems": 1,
+                                    "items": {
+                                        "allOf": [{
+                                            "$ref": "#/definitions/host"
+                                        }]
+                                    }
+                                },
                                 "protocol": { "$ref": "#/definitions/protocols", "default": "https" },
                                 "port": { "$ref": "#/definitions/port", "default": 443 },
                                 "path": { "$ref": "#/definitions/path", "default": "/" },
@@ -528,16 +548,59 @@
                         "then": {
                             "required": [
                                 "region",
-                                "logGroup",
-                                "logStream"
+                                "dataType"
                             ],
                             "properties": {
                                 "region": { "$ref": "#/definitions/region" },
-                                "logGroup": { "$ref": "#/definitions/logGroup" },
-                                "logStream": { "$ref": "#/definitions/logStream" },
+                                "dataType": { "$ref": "#/definitions/dataType", "default": "logs" },
                                 "username": { "$ref": "#/definitions/username" },
                                 "passphrase": { "$ref": "base_schema.json#/definitions/secret" }
-                            }
+                            },
+                            "allOf": [
+                                { "not": { "required": ["username"], "not": { "required": ["passphrase"] }}},
+                                { "not": { "required": ["passphrase"], "not": { "required": ["username"] }}},
+                                { "oneOf":
+                                    [
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "properties": {
+                                                        "logGroup": { "$ref": "#/definitions/logGroup" },
+                                                        "logStream": { "$ref": "#/definitions/logStream" },
+                                                        "dataType": {
+                                                            "allOf":
+                                                            [
+                                                                { "$ref": "#/definitions/dataType"},
+                                                                { "enum": ["logs", null] }
+                                                            ]
+                                                        }
+                                                    }
+                                                },
+                                                { "required":[ "logGroup", "logStream" ] },
+                                                { "not": { "required": ["metricNamespace"] }}
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "properties": {
+                                                        "metricNamespace": { "$ref": "#/definitions/metricNamespace" },
+                                                        "dataType": {
+                                                            "allOf": [
+                                                                { "$ref": "#/definitions/dataType"},
+                                                                { "enum": ["metrics"] }
+                                                            ]
+                                                        }
+                                                    }
+                                                },
+                                                { "required":[ "metricNamespace" ] },
+                                                { "not": { "required":[ "logStream" ] }},
+                                                { "not": { "required": [ "logGroup" ] }}
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
                         },
                         "else": {}
                     },

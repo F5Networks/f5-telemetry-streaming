@@ -9,7 +9,7 @@
 'use strict';
 
 module.exports = {
-    processEvent: [
+    processData: [
         {
             name: 'should process data as single event without newline',
             rawData: '<0>Jul  6 22:37:15 bigip14.1.2.3.test BigIP:EOCtimestamp="1594100235",Microtimestamp="1594100235358418",errdefs_msgno="22327305",Hostname="bigip14.1.2.3.test",SlotId="0",globalBigiqConf="N/A",ObjectTagsList="N/A",pool_name="/Common/Shared/telemetry",errdefs_msg_name="pool modified",state="enabled",pool_description="",status_reason="",min_active_members="1",availability_state="offline",available_members="0",up_members="0"',
@@ -40,13 +40,14 @@ module.exports = {
             rawData: '<134>Jul  6 22:37:49 bigip14.1.2.3.test info httpd(pam_audit)[13810]: 01070417:6: AUDIT - user admin - RAW: httpd(pam_audit): user=admin(admin) partition=[All] level=Administrator tty=(unknown) host=172.18.5.167 attempts=1 start="Mon Jul  6 22:37:49 2020" end="Mon Jul  6 22:37:49 2020"\n <87>Jul  6 22:37:49 bigip14.1.2.3.test debug httpd[13810]: pam_bigip_authz: pam_sm_acct_mgmt returning status SUCCESS\n',
             expectedData: [
                 {
-                    '01070417:6: AUDIT - user admin - RAW: httpd(pam_audit): user=admin(admin) partition=[All] level=Administrator tty=(unknown) host=172.18.5.167 attempts=1 start': 'Mon Jul  6 22:37:49 2020',
-                    telemetryEventCategory: 'LTM',
+                    data: '<134>Jul  6 22:37:49 bigip14.1.2.3.test info httpd(pam_audit)[13810]: 01070417:6: AUDIT - user admin - RAW: httpd(pam_audit): user=admin(admin) partition=[All] level=Administrator tty=(unknown) host=172.18.5.167 attempts=1 start="Mon Jul  6 22:37:49 2020" end="Mon Jul  6 22:37:49 2020"',
+                    telemetryEventCategory: 'syslog',
                     hostname: 'bigip14.1.2.3.test'
                 },
                 {
-                    data: ' <87>Jul  6 22:37:49 bigip14.1.2.3.test debug httpd[13810]: pam_bigip_authz: pam_sm_acct_mgmt returning status SUCCESS',
-                    telemetryEventCategory: 'event'
+                    data: '<87>Jul  6 22:37:49 bigip14.1.2.3.test debug httpd[13810]: pam_bigip_authz: pam_sm_acct_mgmt returning status SUCCESS',
+                    hostname: 'bigip14.1.2.3.test',
+                    telemetryEventCategory: 'syslog'
                 }
             ]
         },
@@ -94,6 +95,82 @@ module.exports = {
                     available_members: '0',
                     up_members: '0',
                     telemetryEventCategory: 'AVR'
+                }
+            ]
+        },
+        {
+            name: 'should process data as single event when newline quoted (double quotes)',
+            rawData: '<30>Jul  6 22:37:26 bigip14.1.2.3.test info dhclient[4079]: XMT: Solicit on mgmt, interval 112580ms."\n <30>Jul  6 22:37:35 bigip14.1.2.3.test info systemd[1]: getty@tty0\x20ttyS0.service has no holdoff time, scheduling restart. \n<30>Jul  6 22:37:35 bigip14.1.2.3.test info systemd[1]: getty@tty0\x20ttyS0.service has no holdoff time, scheduling restart."\n ',
+            expectedData: [
+                {
+                    data: '<30>Jul  6 22:37:26 bigip14.1.2.3.test info dhclient[4079]: XMT: Solicit on mgmt, interval 112580ms."\n <30>Jul  6 22:37:35 bigip14.1.2.3.test info systemd[1]: getty@tty0\x20ttyS0.service has no holdoff time, scheduling restart. \n<30>Jul  6 22:37:35 bigip14.1.2.3.test info systemd[1]: getty@tty0\x20ttyS0.service has no holdoff time, scheduling restart."',
+                    hostname: 'bigip14.1.2.3.test',
+                    telemetryEventCategory: 'syslog'
+                }
+            ]
+        },
+        {
+            name: 'should process data as single event when newline quoted (single quotes)',
+            rawData: '<30>Jul  6 22:37:26 bigip14.1.2.3.test info dhclient[4079]: XMT: Solicit on mgmt, interval 112580ms.\'\n <30>Jul  6 22:37:35 bigip14.1.2.3.test info systemd[1]: getty@tty0\x20ttyS0.service has no holdoff time, scheduling restart. \n<30>Jul  6 22:37:35 bigip14.1.2.3.test info systemd[1]: getty@tty0\x20ttyS0.service has no holdoff time, scheduling restart.\'\n ',
+            expectedData: [
+                {
+                    data: '<30>Jul  6 22:37:26 bigip14.1.2.3.test info dhclient[4079]: XMT: Solicit on mgmt, interval 112580ms.\'\n <30>Jul  6 22:37:35 bigip14.1.2.3.test info systemd[1]: getty@tty0\x20ttyS0.service has no holdoff time, scheduling restart. \n<30>Jul  6 22:37:35 bigip14.1.2.3.test info systemd[1]: getty@tty0\x20ttyS0.service has no holdoff time, scheduling restart.\'',
+                    hostname: 'bigip14.1.2.3.test',
+                    telemetryEventCategory: 'syslog'
+                }
+            ]
+        },
+        {
+            name: 'should omit empty lines',
+            rawData: 'line1\n    \n   line3\n    \n line5',
+            expectedData: [
+                {
+                    data: 'line1',
+                    telemetryEventCategory: 'event'
+                },
+                {
+                    data: 'line3',
+                    telemetryEventCategory: 'event'
+                },
+                {
+                    data: 'line5',
+                    telemetryEventCategory: 'event'
+                }
+            ]
+        },
+        {
+            name: 'should process data when mixed new line chars in data',
+            rawData: 'line1\r\nline2\nline3\r\nline4',
+            expectedData: [
+                {
+                    data: 'line1',
+                    telemetryEventCategory: 'event'
+                },
+                {
+                    data: 'line2',
+                    telemetryEventCategory: 'event'
+                },
+                {
+                    data: 'line3',
+                    telemetryEventCategory: 'event'
+                },
+                {
+                    data: 'line4',
+                    telemetryEventCategory: 'event'
+                }
+            ]
+        },
+        {
+            name: 'should process data when mixed event separators',
+            rawData: 'key1="value\n"\nkey2=\\"value\n',
+            expectedData: [
+                {
+                    key1: 'value\n',
+                    telemetryEventCategory: 'LTM'
+                },
+                {
+                    data: 'key2=\\"value',
+                    telemetryEventCategory: 'event'
                 }
             ]
         }

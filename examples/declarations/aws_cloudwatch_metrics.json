@@ -1,0 +1,14 @@
+{
+    "class": "Telemetry",
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "AWS_CloudWatch",
+        "dataType": "metrics",
+        "metricNamespace": "a-custom_namespace",
+        "region": "us-west-1",
+        "username": "accesskey",
+        "passphrase": {
+            "cipherText": "secretkey"
+        }
+    }
+}

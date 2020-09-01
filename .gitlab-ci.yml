@@ -47,7 +47,7 @@ stages:
 .harness_deployment_definition: &harness_deployment_definition
     image: ${CICD_CONTAINER_DEPLOY}
     tags:
-        - cm-official-docker-executor
+        - atg-ts-firehose-docker
  
 .run_unittest:
     extends:
@@ -159,6 +159,18 @@ test_node8:
         - .run_unittest
     image: node:8
 
+# Node 10 LTS (active, maintenance)
+test_node10:
+    extends:
+        - .run_unittest
+    image: node:10
+
+# Node 12 LTS (active, maintenance)
+test_node12:
+    extends:
+        - .run_unittest
+    image: node:12
+
 # mostly for containers, unittests only (without coverage check)
 test_node_latest:
     extends:
@@ -266,7 +278,7 @@ test_functional:
         when: always
         expire_in: 4 days
     tags:
-        - cm-official-docker-executor
+        - atg-ts-firehose-docker
     only:
         variables:
             # enable this job
@@ -448,22 +460,6 @@ pages:
         - develop
         - doc-release-branch
 
-# Publish docs to clouddocs.f5networks.net
-publish_docs_to_staging:
-    image: ${CONTAINTHEDOCS_IMAGE}
-    stage: doc
-    environment:
-        name: staging
-        url: https://clouddocs.f5networks.net/products/extensions/f5-telemetry-streaming/latest
-    tags:
-        - cm-official-docker-executor
-    only:
-        - docs-staging@automation-toolchain/f5-telemetry
-    script:
-        - aws s3 sync docs/_build/html s3://clouddocs.f5networks.net/products/extensions/f5-telemetry-streaming/latest
-        # - aws s3 cp versions.json s3://clouddocs.f5networks.net/products/extensions/f5-telemetry-streaming/versions.json
-        # create invalidation to clear cloudfront cache
-        - aws cloudfront create-invalidation --distribution-id $AWS_DIST --paths /products/extensions/f5-telemetry-streaming/latest
 
 # Publish docs to clouddocs.f5.com
 publish_docs_to_production:

@@ -19,7 +19,7 @@
         "items": {
             "clientside.totConns": {
                 "name": "virtualTotConns",
-                "path": "/mgmt/ltm/virtual/stats?$select=clientside.totConns"
+                "path": "/mgmt/tm/ltm/virtual/stats?$select=clientside.totConns"
             },
             "virtualAddress": {
                 "path": "/mgmt/tm/ltm/virtual-address/stats"
@@ -34,25 +34,20 @@
             {
                 "interval": 60
             }
-        ],
-        "enable": true,
-        "trace": true
+        ]
     },
     "Custom_System_Poller1": {
     	"class": "Telemetry_System_Poller",
         "interval": 60,
-        "enable": false,
-        "endpointList": "Endpoints_Profiles",
-        "trace": true
+        "endpointList": "Endpoints_Profiles"
     },
     "Custom_System_Poller2": {
     	"class": "Telemetry_System_Poller",
         "interval": 720,
-        "enable": true,
         "endpointList": [
             "Endpoints_Misc/clientside.totConns",
             {
-                "path": "mgmt/tm/net/vlan/stats",
+                "path": "/mgmt/tm/net/vlan/stats",
                 "name": "requiredWhenInline"
             }
         ]
