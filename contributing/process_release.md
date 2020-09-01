@@ -90,25 +90,29 @@
   * git tag -l -n
   * git tag | xargs -n1 git tag -d
   * git fetch --tags
+* Check master history
+  * commits should be squashed
+  * check for any sensitive info in remaining commit messages
 * Create tag in master branch:
   * git checkout master
   * git tag -m 'Release X.Y.Z' vX.Y.Z
   * git push origin tag vX.Y.Z
-* Push to GitHub master:
-  * Create the GitHub remote (as needed):
-    * git remote add github https://github.com/f5networks/f5-telemetry-streaming.git
-  * git push github master
-  * git push github --tags
 * Merge GitLab master back into develop:
   * git checkout develop
   * git merge master
   * git push origin
   * Now you can remove RC branch
-* Do not forget to clean up stale branches, e.g. RC branches
+* Remove all RC tags and branches and other stale branches that were used for release or RC process
+
+### GitHub Publishing
+* Push to GitHub master:
+  * Create the GitHub remote (as needed):
+    * git remote add github https://github.com/f5networks/f5-telemetry-streaming.git
+  * git push github master
+  * git push github --tags
 * Create GitHub release - [GitHub Releases](https://github.com/f5networks/f5-telemetry-streaming/releases)
   * Navigate to the latest release, select `edit` and upload artifacts:
     * `.rpm` file
     * `.sha256` file
-* Remove all RC tags and branches and other stale branches that were used for release or RC process
 
 # ATTENTION: DO NOT FORGET TO MERGE 'MASTER' BRANCH INTO 'DEVELOP' WHEN YOU ARE DONE WITH RELEASE PROCESS
