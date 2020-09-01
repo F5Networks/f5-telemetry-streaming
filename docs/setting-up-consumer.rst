@@ -316,6 +316,9 @@ ElasticSearch
 -------------
 |ElasticSearch|
 
+
+.. IMPORTANT:: TS currently does not support sending data to ElasticSearch 7.
+
 Required Information:
  - Host: The address of the ElasticSearch system.
  - Index: The index where data should go within the ElasticSearch system.
