@@ -109,7 +109,7 @@
   * Create the GitHub remote (as needed):
     * git remote add github https://github.com/f5networks/f5-telemetry-streaming.git
   * git push github master
-  * git push github --tags
+  * git push github tag vX.Y.Z
 * Create GitHub release - [GitHub Releases](https://github.com/f5networks/f5-telemetry-streaming/releases)
   * Navigate to the latest release, select `edit` and upload artifacts:
     * `.rpm` file
