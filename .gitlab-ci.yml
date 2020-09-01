@@ -457,7 +457,7 @@ pages:
             - public
     only:
         # only update on designated, stable branch
-        # - develop
+        - develop
         - doc-release-branch
 
 
