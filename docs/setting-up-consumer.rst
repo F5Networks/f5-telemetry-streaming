@@ -404,16 +404,21 @@ To see an example of the EXPERIMENTAL feature where you can specify fallback IP 
 .. literalinclude:: ../examples/declarations/generic_http.json
     :language: json
 
-.. _beacon-ref:
-
 F5 Beacon
 ^^^^^^^^^
-|beaconlogo|
+F5 Beacon, a SaaS offering, provides visibility and actionable insights into the health and performance of applications. 
 
-F5 Beacon, a SaaS offering, provides visibility and actionable insights into the health and performance of applications. See |beacon| for information on how to add Telemetry Streaming as a source to Beacon.
+F5 Beacon uses the generic HTTP consumer.
 
-F5 Beacon uses the generic HTTP consumer.  You can use the following example declaration without any changes other than the **passphrase**.
-
+Required Information:
+ - See |beacon| for information on how to add Telemetry Streaming as a source to Beacon.
+ - Host: The address of the system.
+ - Protocol: The protocol of the system. Options: ``https`` or ``http``. Default is ``https``.
+ - Port: The port of the system. Default is ``443``.
+ - Path: The path of the system. Default is ``/``.
+ - Method: The method of the system. Options: ``POST``, ``PUT``, ``GET``. Default is ``POST``.
+ - Headers: The headers of the system.
+ - Passphrase: The secret to use when sending data to the system, for example an API key to be used in an HTTP header.
 
 .. literalinclude:: ../examples/declarations/f5_beacon.json
     :language: json
