@@ -65,6 +65,8 @@ function MockTracer() {
 
 module.exports = {
     MockRestOperation,
+    MockLogger,
+    MockTracer,
 
     /**
      * Deep copy

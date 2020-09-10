@@ -8,84 +8,87 @@
 
 'use strict';
 
-const elasticsearch = require('elasticsearch');
+const requestUtil = require('./../shared/requestUtil');
 const util = require('../../util');
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 
-
-function elasticLogger(logger, tracer) {
-    return function () {
-        const childLogger = logger.getChild('lib');
-        this.error = childLogger.error.bind(childLogger);
-        this.warning = childLogger.info.bind(childLogger);
-        this.info = childLogger.info.bind(childLogger);
-        this.debug = childLogger.debug.bind(childLogger);
-        this.close = function () {};
-        this.trace = function (method, requestUrl, body, responseBody, responseStatus) {
-            if (tracer) {
-                tracer.write(JSON.stringify({
-                    method,
-                    requestUrl,
-                    body,
-                    responseBody,
-                    responseStatus
-                }, null, 4));
-            }
-        };
-    };
-}
-
+/**
+ * Returns the appropriate http URI, given the consumer's context.
+ * NOTE: This function does not conform to ElasticSearch 7 REST APIs.
+ *
+ * @param {Object} config - Consumer configuration
+ *
+ * @returns {String}    URI to use in ElasticSearch REST call
+ */
+const formatURI = (config) => {
+    const path = util.trimString(config.path || '', '/');
+    const index = util.trimString(config.index, '/');
+    return `/${path.length ? `${path}/` : ''}${index}/${config.dataType}`;
+};
 
 /**
  * See {@link ../README.md#context} for documentation
  */
 module.exports = function (context) {
     const config = context.config;
-    const clientConfig = {
-        host: {
-            log: elasticLogger(context.logger, context.tracer),
-            host: config.host,
-            protocol: config.protocol,
-            port: config.port,
-            path: config.path
-        },
-        ssl: {
-            rejectUnauthorized: !config.allowSelfSignedCert
-        }
+    const host = config.host;
+    const port = `:${config.port}`;
+    const protocol = config.protocol;
+    const method = 'POST';
+    const strictSSL = !config.allowSelfSignedCert;
+    const headers = {
+        'Content-Type': 'application/json'
     };
-    if (config.username) {
-        clientConfig.httpAuth = config.username;
-        if (config.passphrase) {
-            clientConfig.httpAuth = `${clientConfig.httpAuth}:${config.passphrase}`;
-        }
+    const uri = formatURI(config);
+
+    // Handle Basic Auth
+    if (config.username && config.passphrase) {
+        const auth = Buffer.from(`${config.username}:${config.passphrase}`).toString('base64');
+        headers.Authorization = `Basic ${auth}`;
     }
-    if (config.apiVersion) {
-        clientConfig.apiVersion = config.apiVersion;
-    }
+
     util.renameKeys(context.event.data, /([.])+\1/g, '.'); // remove consecutive periods from TMOS names
-    const payload = {
-        index: config.index,
-        type: config.dataType
-    };
+    let payload;
     if (context.event.type === EVENT_TYPES.SYSTEM_POLLER || context.event.type === EVENT_TYPES.IHEALTH_POLLER) {
-        payload.body = context.event.data;
+        payload = context.event.data;
     } else {
-        // event listener data
-        payload.body = {
+        payload = {
             data: context.event.data,
             telemetryEventCategory: context.event.type
         };
-        delete payload.body.data.telemetryEventCategory;
+        delete payload.data.telemetryEventCategory;
     }
+
     if (context.tracer) {
-        context.tracer.write(JSON.stringify(payload, null, 4));
+        let tracedHeaders = headers;
+        // redact Basic Auth passphrase, if provided
+        if (Object.keys(headers).indexOf('Authorization') > -1) {
+            tracedHeaders = JSON.parse(JSON.stringify(headers));
+            tracedHeaders.Authorization = '*****';
+        }
+        context.tracer.write(JSON.stringify({
+            body: payload,
+            host,
+            headers: tracedHeaders,
+            method,
+            port,
+            protocol,
+            strictSSL,
+            uri
+        }, null, 4));
     }
-    const client = new elasticsearch.Client(clientConfig);
-    client.index(payload)
-        .then(() => {
-            context.logger.debug('success');
-        })
-        .catch((error) => {
-            context.logger.error(`error: ${error.message ? error.message : error}`);
-        });
+
+    return requestUtil.sendToConsumer({
+        body: JSON.stringify(payload),
+        hosts: [host], // Do not yet use fallback with ElasticSearch
+        headers,
+        logger: context.logger,
+        method,
+        port,
+        protocol,
+        strictSSL,
+        uri
+    }).catch((err) => {
+        context.logger.exception(`Unexpected error: ${err}`, err);
+    });
 };
