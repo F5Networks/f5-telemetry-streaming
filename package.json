@@ -40,7 +40,6 @@
         "aws-sdk": "^2.749.0",
         "commander": "^2.20.3",
         "deep-diff": "^1.0.2",
-        "elasticsearch": "^15.5.0",
         "jsonwebtoken": "^8.5.1",
         "kafka-node": "^2.6.1",
         "lodash": "^4.17.20",

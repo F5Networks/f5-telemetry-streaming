@@ -14,9 +14,9 @@ require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
-const elastic = require('elasticsearch');
 const sinon = require('sinon');
 
+const requestUtil = require('../../../src/lib/consumers/shared/requestUtil');
 const elasticSearchIndex = require('../../../src/lib/consumers/ElasticSearch/index');
 const util = require('../../../src/lib/util');
 const testUtil = require('../shared/util');
@@ -24,55 +24,55 @@ const testUtil = require('../shared/util');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+let sendToConsumerMock;
+
 describe('ElasticSearch', () => {
-    let passedPayload;
-    let passedClientConfig;
+    beforeEach(() => {
+        sendToConsumerMock = sinon.stub(requestUtil, 'sendToConsumer').resolves();
+    });
 
     const defaultConsumerConfig = {
         host: 'localhost',
         port: '9200',
-        path: '/path/to/post/data',
+        path: '/espath/',
         index: 'ts_elasticsearch_consumer',
         dataType: 'f5telemetry',
         allowSelfSignedCert: true,
         protocol: 'http'
     };
 
-    beforeEach(() => {
-        sinon.stub(elastic, 'Client').callsFake((config) => {
-            passedClientConfig = config;
-            return {
-                index: (payload) => {
-                    passedPayload = payload;
-                    return Promise.resolve();
-                }
-            };
-        });
-    });
-
     afterEach(() => {
         sinon.restore();
     });
 
     describe('process', () => {
-        it('should configure ESClient with default options', () => {
+        it('should send data to ElasticSearch with default options', () => {
             const context = testUtil.buildConsumerContext({
                 config: defaultConsumerConfig
             });
 
-            elasticSearchIndex(context);
-            assert.strictEqual(passedClientConfig.host.host, 'localhost');
-            assert.strictEqual(passedClientConfig.host.path, '/path/to/post/data');
-            assert.strictEqual(passedClientConfig.host.port, '9200');
-            assert.strictEqual(passedClientConfig.host.protocol, 'http');
+            return elasticSearchIndex(context)
+                .then(() => {
+                    const passedConfig = sendToConsumerMock.firstCall.args[0];
+                    delete passedConfig.logger;
+                    assert.deepStrictEqual(passedConfig, {
+                        body: '{"data":{},"telemetryEventCategory":""}',
+                        headers: { 'Content-Type': 'application/json' },
+                        hosts: ['localhost'],
+                        method: 'POST',
+                        port: ':9200',
+                        protocol: 'http',
+                        strictSSL: false,
+                        uri: '/espath/ts_elasticsearch_consumer/f5telemetry'
+                    });
+                });
         });
 
-        it('should configure ESClient with default options', () => {
+        it('should send data to ElasticSearch when using optional configuration', () => {
             const context = testUtil.buildConsumerContext({
                 config: {
                     host: 'localhost',
                     port: '9200',
-                    path: '/path/to/post/data',
                     index: 'ts_elasticsearch_consumer',
                     dataType: 'f5telemetry',
                     allowSelfSignedCert: true,
@@ -83,9 +83,14 @@ describe('ElasticSearch', () => {
                 }
             });
 
-            elasticSearchIndex(context);
-            assert.strictEqual(passedClientConfig.httpAuth, 'myUser:myPassword');
-            assert.strictEqual(passedClientConfig.apiVersion, '12');
+            return elasticSearchIndex(context)
+                .then(() => {
+                    const passedConfig = sendToConsumerMock.firstCall.args[0];
+                    assert.deepStrictEqual(passedConfig.headers, {
+                        Authorization: `Basic ${Buffer.from('myUser:myPassword').toString('base64')}`,
+                        'Content-Type': 'application/json'
+                    });
+                });
         });
 
         it('should process systemInfo data', () => {
@@ -94,13 +99,13 @@ describe('ElasticSearch', () => {
                 config: defaultConsumerConfig
             });
 
-            const expectedPayload = {
-                body: testUtil.deepCopy(context.event.data),
-                index: 'ts_elasticsearch_consumer',
-                type: 'f5telemetry'
-            };
-            elasticSearchIndex(context);
-            assert.deepStrictEqual(passedPayload, expectedPayload);
+            const expectedPayload = testUtil.deepCopy(context.event.data);
+
+            return elasticSearchIndex(context)
+                .then(() => {
+                    const passedConfig = sendToConsumerMock.firstCall.args[0];
+                    assert.deepStrictEqual(passedConfig.body, JSON.stringify(expectedPayload));
+                });
         });
 
         it('should process event data', () => {
@@ -112,16 +117,46 @@ describe('ElasticSearch', () => {
             const expectedData = testUtil.deepCopy(context.event.data);
             delete expectedData.telemetryEventCategory;
             const expectedPayload = {
-                body: {
-                    data: expectedData,
-                    telemetryEventCategory: 'AVR'
-                },
-                index: 'ts_elasticsearch_consumer',
-                type: 'f5telemetry'
+                data: expectedData,
+                telemetryEventCategory: 'AVR'
             };
 
-            elasticSearchIndex(context);
-            assert.deepStrictEqual(passedPayload, expectedPayload);
+            return elasticSearchIndex(context)
+                .then(() => {
+                    const passedConfig = sendToConsumerMock.firstCall.args[0];
+                    assert.deepStrictEqual(passedConfig.body, JSON.stringify(expectedPayload));
+                });
+        });
+
+        it('should trace data, and redact secrets', () => {
+            const context = testUtil.buildConsumerContext({
+                config: {
+                    host: 'localhost',
+                    port: '9200',
+                    index: 'ts_elasticsearch_consumer',
+                    dataType: 'f5telemetry',
+                    allowSelfSignedCert: true,
+                    protocol: 'http',
+                    username: 'myUser',
+                    passphrase: 'myPassword',
+                    apiVersion: '12'
+                }
+            });
+
+            return elasticSearchIndex(context)
+                .then(() => {
+                    const traceData = JSON.parse(context.tracer.write.firstCall.args[0]);
+
+                    assert.strictEqual(traceData.uri, '/ts_elasticsearch_consumer/f5telemetry');
+                    assert.deepStrictEqual(traceData.body, {
+                        data: {},
+                        telemetryEventCategory: ''
+                    });
+                    assert.deepStrictEqual(traceData.headers, {
+                        Authorization: '*****',
+                        'Content-Type': 'application/json'
+                    });
+                });
         });
     });
 });
