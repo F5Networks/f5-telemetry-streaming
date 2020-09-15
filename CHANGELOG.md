@@ -7,7 +7,7 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-1790: Fixed syslog event hostname parsing for VCMP hosts
 - AUTOTOOL-1768: Resolve memory leak in ElasticSearch consumer, by replacing 'elasticsearch' library with 'request' library
 ### Changed
-- AUTOTOOL-1747: Update npm packages (ajv from v6.12.3 to v6.12.4, aplicationinsights from v1.8.5 to v1.8.6, aws-sdk from v2.728.0 to 2.749.0, lodash from v4.7.19 to 4.7.20)
+- AUTOTOOL-1747: Update npm packages (ajv from v6.12.3 to v6.12.4, applicationinsights from v1.8.5 to v1.8.6, aws-sdk from v2.728.0 to 2.749.0, lodash from v4.7.19 to 4.7.20)
 ### Removed
 
 ## 1.14.0
@@ -18,7 +18,7 @@ Changes to this project are documented in this file. More detail and links can b
 ### Fixed
 - AUTOTOOL-810: Fixed Event Listener parsing when received multiple events
 ### Changed
-- AUTOTOOL-1680: Update npm packages (ajv from v6.12.2 to v6.12.3, aplicationinsights from v1.8.0 to v1.8.5, aws-sdk from v.2.704.0 to 2.728.0, statsd-client from v0.4.4 to v0.4.5)
+- AUTOTOOL-1680: Update npm packages (ajv from v6.12.2 to v6.12.3, applicationinsights from v1.8.0 to v1.8.5, aws-sdk from v.2.704.0 to 2.728.0, statsd-client from v0.4.4 to v0.4.5)
 ### Removed
 
 
