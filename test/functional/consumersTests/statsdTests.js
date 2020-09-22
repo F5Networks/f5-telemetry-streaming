@@ -15,6 +15,7 @@ const fs = require('fs');
 const deepDiff = require('deep-diff');
 const util = require('../shared/util');
 const constants = require('../shared/constants');
+const { DEFAULT_HOSTNAME } = require('../../../src/lib/constants');
 const dutUtils = require('../dutTests').utils;
 
 // module requirements
@@ -131,14 +132,8 @@ function test() {
 
                 // add prefixes to support multiple BIG-IP(s) in a single statsd instance
                 const basePrefix = 'f5telemetry';
-                let hostnamePrefix = 'base.bigip.com';
-                try {
-                    // if this consumer processes other events besides system info
-                    // in the future, this will always fail
-                    hostnamePrefix = data.system.hostname;
-                } catch (error) {
-                    // leave it as is
-                }
+                const hostnamePrefix = data.system ? data.system.hostname : DEFAULT_HOSTNAME;
+
                 // account for item in path having '.' or '/'
                 return diff.map(item => [
                     basePrefix,
@@ -178,7 +173,7 @@ function test() {
                             }
                             /**
                              * Reasons for retry:
-                             * - indexing is strill in process
+                             * - indexing is still in process
                              * - system poller not sent data yet
                              * Sleep for 30 second(s) and return Promise.reject to allow retry
                              */

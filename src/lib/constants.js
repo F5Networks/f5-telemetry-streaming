@@ -96,6 +96,7 @@ module.exports = {
         CONTAINER: 'Container'
     },
     DEFAULT_EVENT_LISTENER_PORT: 6514,
+    DEFAULT_HOSTNAME: 'hostname.unknown',
     EVENT_TYPES: {
         DEFAULT: 'event',
         AVR_EVENT: 'AVR',
