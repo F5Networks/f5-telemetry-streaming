@@ -111,6 +111,32 @@ describe('Statsd', () => {
                 .then(() => assert.deepStrictEqual(metrics, expectedData));
         });
 
+        it('should process systemInfo data with default hostname value if missing from systemInfo', () => {
+            const context = testUtil.buildConsumerContext({
+                eventType: 'systemInfo',
+                config: defaultConsumerConfig
+            });
+            context.event.data = {
+                customStats: {
+                    'clientSideTraffic.bitsIn': 111111030,
+                    'clientSideTraffic.bitsOut': 22222204949
+                }
+            };
+            const expectedData = [
+                {
+                    metricName: 'f5telemetry.hostname-unknown.customStats.clientSideTraffic-bitsIn',
+                    metricValue: 111111030
+                },
+                {
+                    metricName: 'f5telemetry.hostname-unknown.customStats.clientSideTraffic-bitsOut',
+                    metricValue: 22222204949
+                }
+            ];
+
+            return statsDIndex(context)
+                .then(() => assert.deepStrictEqual(metrics, expectedData));
+        });
+
         it('should NOT process event data', () => {
             const context = testUtil.buildConsumerContext({
                 eventType: 'AVR',

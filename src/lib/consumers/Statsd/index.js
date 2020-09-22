@@ -15,7 +15,7 @@
 const StatsD = require('statsd-client');
 const deepDiff = require('deep-diff');
 const net = require('net');
-const EVENT_TYPES = require('../../constants').EVENT_TYPES;
+const constants = require('../../constants');
 
 const stripMetrics = (data) => {
     Object.keys(data).forEach((item) => {
@@ -39,7 +39,7 @@ module.exports = function (context) {
 
     // statsd does not process just any data - focus on metrics
     // so only process system poller info
-    if (context.event.type !== EVENT_TYPES.SYSTEM_POLLER) {
+    if (context.event.type !== constants.EVENT_TYPES.SYSTEM_POLLER) {
         context.logger.debug('Event is not systemInfo, skipping');
         return Promise.resolve();
     }
@@ -69,7 +69,7 @@ module.exports = function (context) {
 
             // add prefixes to support multiple BIG-IP(s) in a single statsd instance
             const basePrefix = 'f5telemetry';
-            let hostnamePrefix = 'base.bigip.com';
+            let hostnamePrefix = constants.DEFAULT_HOSTNAME;
             try {
                 // if this consumer processes other events besides system info
                 // in the future, this will always fail

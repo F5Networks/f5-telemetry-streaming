@@ -8,6 +8,8 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-1768: Resolve memory leak in ElasticSearch consumer, by replacing 'elasticsearch' library with 'request' library
 ### Changed
 - AUTOTOOL-1747: Update npm packages (ajv from v6.12.3 to v6.12.4, applicationinsights from v1.8.5 to v1.8.6, aws-sdk from v2.728.0 to 2.749.0, lodash from v4.7.19 to 4.7.20)
+- AUTOTOOL-1894: Update default hostname for StatsD consumer
+
 ### Removed
 
 ## 1.14.0
