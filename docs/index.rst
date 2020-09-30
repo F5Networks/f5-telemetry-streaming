@@ -90,9 +90,9 @@ You can click the following links to go directly to a specific :doc:`setting-up-
    output-example
    data-modification
    troubleshooting
-   revision-history
    schema-reference
    custom-endpoints
+   revision-history
 
 
 
