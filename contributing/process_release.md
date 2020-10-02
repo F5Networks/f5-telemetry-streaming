@@ -7,6 +7,7 @@
   * RPM sha256 checksum
 * RPM is built in every pipeline run, and is kept in GitLab for one week
 * On a Git tag, RPM is published to Artifactory (f5-telemetry-streaming-rpm)
+* The atg-build project pushes TS RPM builds to Artifactory (f5-automation-toolchain-generic/f5-telemetry)
 * On a release, artifacts are copied from Artifactory to GitHub
 
 ## Release Notes
@@ -68,12 +69,15 @@
   * git tag -l -n
   * git tag | xargs -n1 git tag -d
   * git fetch --tags
-* Create pre-release tag and push it to GitLab:
-  * git tag -m 'Release candidate X.Y.Z-#' vX.Y.Z-#
-  * git push origin
-  * git push origin tag vX.Y.Z-#
-* Check pipeline for artifactory URL to package (or browse in artifactory)
-* Send release candidate email with features, bugs, artifactory URL
+
+**In the atg-build repository:**
+* Update the `TS` CI Schedule, updating the `gitBranch` CI variable to point to the release candidate branch in the `TS` repo (ex: "vX.Y.Z")
+* Run the `TS` schedule. The `TS` schedule will run a pipeline that will programmatically:
+  * run unit tests in the `TS` repository
+  * git tag the next version
+  * update the git tags in the `TS` repository
+  * push the new build artifacts to the 'f5-automation-toolchain-generic/f5-telemetry' Artifactory repository
+  * send the release candidate email with features, bugs, artifactory URL
 
 ## Release process
 
