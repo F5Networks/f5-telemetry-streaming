@@ -12,8 +12,8 @@ Document Revision History
         - Date
 
       * - 1.15.0
-        - Updated the documentation for Telemetry Streaming v1.15.0. This release contains the following changes: |br| * Updated the default hostname for the StatsD consumer (see the important note in :ref:`statsd-ref`) |br| |br| Issues Resolved: |br| * - Fixed syslog event hostname parsing for VCMP hosts |br| * Resolve memory leak in ElasticSearch consumer, by replacing 'elasticsearch' library with 'request' library
-        - 09-01-20
+        - Updated the documentation for Telemetry Streaming v1.15.0. This release contains the following changes: |br| * Updated the default hostname for the StatsD consumer (see the Important note in :ref:`statsd-ref`) |br| |br| Issues Resolved: |br| * Fixed syslog event hostname parsing for VCMP hosts |br| * Resolve memory leak in ElasticSearch consumer, by replacing 'elasticsearch' library with 'request' library
+        - 10-13-20
 
       * - 1.14.0
         - Updated the documentation for Telemetry Streaming v1.14.0. This release contains the following changes: |br| * Added support for AWS CloudWatch Metrics (see :ref:`cw-metrics`) |br| * Added an EXPERIMENTAL feature to specify fallback hosts for generic HTTP consumers (see :ref:`fallback`) |br| * Added F5 Beacon as a Generic HTTP consumer (see :ref:`beacon-ref`)  |br| * Added **cipherUses** stats for Client and Server SSL profiles (see the cipherUses lines in :ref:`sysinfo`) |br| * Added a troubleshooting entry for a restjavad issue (see :ref:`restjavad`) |br| * Added a note to the :doc:`avr` page about AVR caveats with TS and BIG-IQ (see the :ref:`AVR note<avr-note>`) |br| * Updated the introduction for the experimental :doc:`custom-endpoints` |br| * Added support for BIG-IP 16.0  |br| |br| Issues Resolved: |br| * Fixed Event Listener parsing when receiving multiple events
