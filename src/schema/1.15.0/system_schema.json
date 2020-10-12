@@ -1,0 +1,121 @@
+{
+    "$id": "system_schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry Streaming System schema",
+    "description": "",
+    "type": "object",
+    "allOf": [
+        {
+            "if": { "properties": { "class": { "const": "Telemetry_System" } } },
+            "then": {
+                "required": [
+                    "class"
+                ],
+                "properties": {
+                    "class": {
+                        "title": "Class",
+                        "description": "Telemetry Streaming System class",
+                        "type": "string",
+                        "enum": [ "Telemetry_System" ]
+                    },
+                    "enable": {
+                        "title": "Enable all pollers attached to device",
+                        "default": true,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/enable"
+                            }
+                        ]
+                    },
+                    "trace": {
+                        "$ref": "base_schema.json#/definitions/trace"
+                    },
+                    "host": {
+                        "title": "System connection address",
+                        "default": "localhost",
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/host"
+                            }
+                        ]
+                    },
+                    "port": {
+                        "title": "System connection port",
+                        "default": 8100,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/port"
+                            }
+                        ]
+                    },
+                    "protocol": {
+                        "title": "System connection protocol",
+                        "default": "http",
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/protocol"
+                            }
+                        ]
+                    },
+                    "allowSelfSignedCert": {
+                        "title": "Allow Self-Signed Certificate",
+                        "default": false,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/allowSelfSignedCert"
+                            }
+                        ]
+                    },
+                    "enableHostConnectivityCheck": {
+                        "$ref": "base_schema.json#/definitions/enableHostConnectivityCheck"
+                    },
+                    "username": {
+                        "title": "System Username",
+                        "$ref": "base_schema.json#/definitions/username"
+                    },
+                    "passphrase": {
+                        "title": "System Passphrase",
+                        "$ref": "base_schema.json#/definitions/secret"
+                    },
+                    "systemPoller": {
+                        "title": "System Poller declaration",
+                        "oneOf": [
+                            {
+                                "$ref": "system_poller_schema.json#/definitions/systemPollerPointerRef"
+                            },
+                            {
+                                "$ref": "system_poller_schema.json#/definitions/systemPollerObjectRef"
+                            },
+                            {
+                                "type": "array",
+                                "items": {
+                                    "anyOf": [
+                                        {
+                                            "$ref": "system_poller_schema.json#/definitions/systemPollerObjectRef"
+                                        },
+                                        {
+                                            "$ref": "system_poller_schema.json#/definitions/systemPollerPointerRef"
+                                        }
+                                    ]
+                                },
+                                "minItems": 1
+                            }
+                        ]
+                    },
+                    "iHealthPoller": {
+                        "title": "iHealth Poller declaration",
+                        "oneOf": [
+                            {
+                                "$ref": "ihealth_poller_schema.json#/definitions/iHealthPollerPointerRef"
+                            },
+                            {
+                                "$ref": "ihealth_poller_schema.json#/definitions/iHealthPollerObjectRef"
+                            }
+                        ]
+                    }
+                },
+                "additionalProperties": false
+            }
+        }
+    ]
+}

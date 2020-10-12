@@ -12,6 +12,7 @@ const assignDefaults = require('lodash/defaultsDeep');
 const cloneDeep = require('lodash/cloneDeep');
 const clone = require('lodash/clone');
 const mergeWith = require('lodash/mergeWith');
+const trim = require('lodash/trim');
 const fs = require('fs');
 const net = require('net');
 const path = require('path');
@@ -1139,6 +1140,19 @@ module.exports = {
             });
         }
     },
+
+    /**
+     * Trim a specific character or string from the beginning or end of a string
+     *
+     * @param {String}  string      - The full string to be trimmed
+     * @param {String}  toRemove    - The character or string to remove
+     *
+     * @returns {String}    The trimmed string
+     */
+    trimString(string, toRemove) {
+        return trim(string, toRemove);
+    },
+
     /** @see Tracer */
     tracer: Tracer,
 

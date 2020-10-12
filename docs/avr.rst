@@ -10,8 +10,13 @@ As of TS version 1.3.0, you can now export AVR data. The TS declaration will be 
 - AVR should be configured to send data to TS
 - The Analytics profile for HTTP or TCP should be configured and assigned to the virtual server
 
-.. NOTE:: To see more information on AVR, see the |analytics|.
+To see more information on AVR, see the |analytics|.
 
+.. _avr-note:
+
+.. NOTE:: It is currently not possible to configure AVR to publish data to both Telemetry Streaming and BIG-IQ concurrently. Additionally, if a BIG-IP is managed by a BIG-IQ, and has Statistics Collection enabled, the entire AVR configuration of the BIG-IP will be overwritten to publish only to the BIG-IQ.
+
+|
 
 Modify system logging configuration to update what gets logged by running the following commands in TMSH:
 

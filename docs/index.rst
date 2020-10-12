@@ -2,7 +2,9 @@ F5 Telemetry Streaming
 ======================
 
 Welcome to the F5 Telemetry Streaming User Guide.
-To provide feedback on this documentation, you can file a GitHub Issue, or email us at solutionsfeedback@f5.com.
+To provide feedback on this documentation, you can file a GitHub Issue, or email us at solutionsfeedback@f5.com.  
+
+For information on supported versions of Telemetry Streaming, see |supportmd|.
 
 Introduction
 ------------
@@ -59,6 +61,9 @@ You can click the following links to go directly to a specific :doc:`setting-up-
       * - :ref:`http-ref`
         - 
 
+      * - :ref:`beacon-ref`
+        - 
+
       * - :ref:`fluentd-ref`
         - 
 
@@ -85,14 +90,17 @@ You can click the following links to go directly to a specific :doc:`setting-up-
    output-example
    data-modification
    troubleshooting
-   revision-history
    schema-reference
    custom-endpoints
+   revision-history
 
 
 
 .. |video| raw:: html
 
-
-
     <iframe width="560" height="315" src="https://www.youtube.com/embed/YeEAovBvUkY" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+
+.. |supportmd| raw:: html
+
+   <a href="https://github.com/F5Networks/f5-telemetry-streaming/blob/master/SUPPORT.md" target="_blank">Support information on GitHub</a>

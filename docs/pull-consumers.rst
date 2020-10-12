@@ -90,6 +90,21 @@ This example shows how to use the Prometheus pull consumer. For this pull consum
 
 The Prometheus Pull Consumer outputs the telemetry data according to the Prometheus data model specification. For more information about the Prometheus data model, see https://prometheus.io/docs/concepts/data_model/.
 
+**NOTE**: To access the consumer endpoint with a user other than **admin**, refer to |dcarticle|. When you create the resource group while following this guide, you will need a resource group similar to the following:
+
+.. code-block:: json
+
+   {
+      "name": "prometheusResourceGrup",
+      "resources": [
+         {
+               "restMethod": "GET",
+               "resourceMask": "/mgmt/shared/telemetry/pullconsumer/My_Pull_Consumer"
+         }
+      ]
+   }
+
+|
 
 Example declaration:
 
@@ -110,4 +125,9 @@ Example declaration:
 .. |prometheus_img| image:: /images/prometheus.png
    :target: https://prometheus.io/
    :alt: Prometheus
+
+.. |dcarticle| raw:: html
+
+   <a href="https://devcentral.f5.com/s/articles/icontrol-rest-fine-grained-role-based-access-control-30773" target="_blank">this article on DevCentral</a>
+
 

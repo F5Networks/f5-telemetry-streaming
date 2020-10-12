@@ -978,6 +978,53 @@ describe('Util', () => {
         });
     });
 
+    describe('.trimString', () => {
+        const expected = 'hello';
+        const tests = [
+            {
+                name: 'should trim start and end of string',
+                input: ['/hello/', '/'],
+                expected
+            },
+            {
+                name: 'should not trim the character in the middle of the string',
+                input: ['he/llo', '/'],
+                expected: 'he/llo'
+            },
+            {
+                name: 'should be able to trim just the end of the string',
+                input: ['hello/', '/'],
+                expected
+            },
+            {
+                name: 'should be able to trim just the start of the string',
+                input: ['/hello', '/'],
+                expected
+            },
+            {
+                name: 'should be able to remove a string',
+                input: ['revHELLOrev', 'rev'],
+                expected: 'HELLO'
+            },
+            {
+                name: 'it should not fail on empty string',
+                input: ['', '/'],
+                expected: ''
+            },
+            {
+                name: 'it should trim all occurrences of character at both ends of string',
+                input: ['///hello///', '/'],
+                expected
+            }
+        ];
+        tests.forEach((test) => {
+            it(test.name, () => {
+                const result = util.trimString.apply(null, test.input);
+                assert.strictEqual(result, test.expected);
+            });
+        });
+    });
+
     describe('Tracer', () => {
         const tracerDir = `${os.tmpdir()}/telemetry`; // os.tmpdir for windows + linux
         const tracerFile = `${tracerDir}/tracerTest`;

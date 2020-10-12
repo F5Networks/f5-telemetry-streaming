@@ -124,6 +124,14 @@ As of January 2020, no breaking changes have been made to AS3, Declarative Onboa
  
 Beginning with TS v1.10.0, you can use Telemetry Streaming on F5 devices with multiple hosts, such as the Viprion platform and vCMP systems.  In versions prior to v1.10, devices with multiple hosts were not supported.
 
+|
+
+.. _poolstats:
+
+**Why am I seeing a decrease in some pool level metrics?**
+
+The BIG-IP system tracks pool level metrics by aggregating node metrics. If a node is deleted, you will see a decrease in some pool metrics, such as the bits in and out.
+
 
 .. |intro| raw:: html
 

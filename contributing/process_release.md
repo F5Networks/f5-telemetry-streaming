@@ -7,6 +7,7 @@
   * RPM sha256 checksum
 * RPM is built in every pipeline run, and is kept in GitLab for one week
 * On a Git tag, RPM is published to Artifactory (f5-telemetry-streaming-rpm)
+* The atg-build project pushes TS RPM builds to Artifactory (f5-automation-toolchain-generic/f5-telemetry)
 * On a release, artifacts are copied from Artifactory to GitHub
 
 ## Release Notes
@@ -49,6 +50,7 @@
     * 1.12.0 - 10.3 MB
     * 1.13.0 - 11 MB
     * 1.14.0 - 11.2 MB
+    * 1.15.0 - 10.9 MB
   * Install build to BIG-IP, navigate to folder `/var/config/rest/iapps/f5-telemetry/` and check following:
     * Run `du -sh` and check that folder's size (shouldn't be much greater than previous versions):
       * 1.4.0 - 65 MB
@@ -62,14 +64,22 @@
       * 1.12.0 - 80 MB
       * 1.13.0 - 81 MB
       * 1.14.0 - 82 MB
+      * 1.15.0 - 79 MB
     * Check `nodejs/node_modules` folder - if you see `eslint`, `mocha` or something else from [package.json](package.json) `devDependencies` section - something wrong with build process. Probably some `npm` flags are work as not expected and it MUST BE FIXED before publishing.
 * Ensure that all tests (unit tests and functional tests passed)
-* Create pre-release tag and push it to GitLab:
-  * git tag -m 'Release candidate X.Y.Z-#' vX.Y.Z-#
-  * git push origin
-  * git push origin --tags
-* Check pipeline for artifactory URL to package (or browse in artifactory)
-* Send release candidate email with features, bugs, artifactory URL
+* Optional: Ensure that your local tags match remote. If not, remove all and re-fetch:
+  * git tag -l -n
+  * git tag | xargs -n1 git tag -d
+  * git fetch --tags
+
+**In the atg-build repository:**
+* Update the `TS` CI Schedule, updating the `gitBranch` CI variable to point to the release candidate branch in the `TS` repo (ex: "vX.Y.Z")
+* Run the `TS` schedule. The `TS` schedule will run a pipeline that will programmatically:
+  * run unit tests in the `TS` repository
+  * git tag the next version
+  * update the git tags in the `TS` repository
+  * push the new build artifacts to the 'f5-automation-toolchain-generic/f5-telemetry' Artifactory repository
+  * send the release candidate email with features, bugs, artifactory URL
 
 ## Release process
 
@@ -84,25 +94,33 @@
   * git checkout master
   * git merge --squash rc-master-branch
   * git push origin
+* Optional: Ensure that your local tags match remote. If not, remove all and re-fetch:
+  * git tag -l -n
+  * git tag | xargs -n1 git tag -d
+  * git fetch --tags
+* Check master history
+  * commits should be squashed
+  * check for any sensitive info in remaining commit messages
 * Create tag in master branch:
   * git checkout master
   * git tag -m 'Release X.Y.Z' vX.Y.Z
-  * git push origin --tags
-* Push to GitHub master:
-  * Create the GitHub remote (as needed):
-    * git remote add github https://github.com/f5networks/f5-telemetry-streaming.git
-  * git push github master
-  * git push github --tags
+  * git push origin tag vX.Y.Z
 * Merge GitLab master back into develop:
   * git checkout develop
   * git merge master
   * git push origin
   * Now you can remove RC branch
-* Do not forget to clean up stale branches, e.g. RC branches
+* Remove all RC tags and branches and other stale branches that were used for release or RC process
+
+### GitHub Publishing
+* Push to GitHub master:
+  * Create the GitHub remote (as needed):
+    * git remote add github https://github.com/f5networks/f5-telemetry-streaming.git
+  * git push github master
+  * git push github tag vX.Y.Z
 * Create GitHub release - [GitHub Releases](https://github.com/f5networks/f5-telemetry-streaming/releases)
   * Navigate to the latest release, select `edit` and upload artifacts:
     * `.rpm` file
     * `.sha256` file
-* Remove all RC tags and branches and other stale branches that were used for release or RC process
 
 # ATTENTION: DO NOT FORGET TO MERGE 'MASTER' BRANCH INTO 'DEVELOP' WHEN YOU ARE DONE WITH RELEASE PROCESS

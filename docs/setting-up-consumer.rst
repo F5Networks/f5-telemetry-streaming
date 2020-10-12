@@ -138,7 +138,7 @@ Optional Properties:
 - **App Insights Resource Name**: Name filter used to determine to which App Insights resource to send metrics. If not provided, TS will send metrics to App Insights in the subscription in which the managed identity has permissions. Note: To be used only when useManagedIdentity is true.
 - **customOpts**: Additional options for use by consumer client library. These are passthrough options (key value pair) to send to the Microsoft node client. 
    
-   .. WARNING:: The customOpts options are not guaranteed to work and may change according to the client library API; you must use these options with caution. Refer to corresponding consumer library documentation for acceptable keys and values.
+.. WARNING:: The **customOpts** options are not guaranteed to work and may change according to the client library API; you must use these options with caution. Refer to corresponding consumer library documentation for acceptable keys and values.
 
 To see more information about Azure Application Insights, see |appinsight|.
 
@@ -316,6 +316,8 @@ ElasticSearch
 -------------
 |ElasticSearch|
 
+.. IMPORTANT:: TS currently does not support sending data to ElasticSearch 7.
+
 Required Information:
  - Host: The address of the ElasticSearch system.
  - Index: The index where data should go within the ElasticSearch system.
@@ -372,7 +374,10 @@ Required Information:
  - Protocol: The protocol of the StatsD instance. Options: TCP (TS 1.12+) or UDP. The default is UDP.
  - Port: The port of the Statsd instance
 
-.. NOTE:: To see more information about installing StatsD, see |StatsDWiki|.
+.. IMPORTANT:: In TS v1.15 and later, if Telemetry Streaming is unable to locate the hostname in the systemPoller data, it sends the metric with hostname value **host.unknown**. This gets transformed to **hostname-unknown** as required by StatsD. This is because StatsD uses a **.** as a delimiter, and TS automatically replaces it with a **-**. For example: |br| |bold| { |br| |sp| |sp| |sp| metricName: 'f5telemetry.hostname-unknown.customStats.clientSideTraffic-bitsIn', |br| |sp| |sp| |sp| metricValue: 111111030 |br| } |boldclose|
+
+
+To see more information about installing StatsD, see |StatsDWiki|.
 
 .. literalinclude:: ../examples/declarations/statsd.json
     :language: json
@@ -401,6 +406,8 @@ To see an example of the EXPERIMENTAL feature where you can specify fallback IP 
 
 .. literalinclude:: ../examples/declarations/generic_http.json
     :language: json
+
+.. _beacon-ref:
 
 F5 Beacon
 ^^^^^^^^^
@@ -648,6 +655,10 @@ In the following table, we list the Azure Government regions.
    :target: https://cloud.google.com/products/operations
    :alt: Google Cloud
 
+.. |beaconlogo| image:: /images/beacon-logo.png
+   :target: https://www.f5.com/products/beacon-visibility-and-analytics
+   :alt: F5 Beacon
+
    
 .. |Azure documentation| raw:: html
 
@@ -716,6 +727,18 @@ In the following table, we list the Azure Government regions.
 .. |br| raw:: html
    
    <br />
+
+.. |sp| raw:: html
+
+   &nbsp;
+
+.. |bold| raw:: html
+
+   <strong>
+
+.. |boldclose| raw:: html
+
+   </strong>
 
 .. |managedid| raw:: html
 
