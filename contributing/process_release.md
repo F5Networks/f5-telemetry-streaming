@@ -111,6 +111,14 @@
   * git push origin
   * Now you can remove RC branch
 * Remove all RC tags and branches and other stale branches that were used for release or RC process
+* Setup `develop` branch for next TS Version
+  * Update the version number to X.Y.0-0 in the following files:
+    * [package.json](package.json)
+    * [package-lock.json](package-lock.json)
+    * [src/schema/latest/base_schema.json](src/schema/latest/base_schema.json)
+    * [contributing/README.md](contributing/README.md) (example of response, optional)
+    * [docs/conf.py](docs/conf.py)
+  * Add a new version section to [CHANGELOG.md](CHANGELOG.md)
 
 ### GitHub Publishing
 * Push to GitHub master:

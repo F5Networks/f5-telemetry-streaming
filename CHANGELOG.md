@@ -1,6 +1,12 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.16.0
+### Added
+### Fixed
+### Changed
+### Removed
+
 ## 1.15.0
 ### Added
 ### Fixed
@@ -9,7 +15,6 @@ Changes to this project are documented in this file. More detail and links can b
 ### Changed
 - AUTOTOOL-1747: Update npm packages (ajv from v6.12.3 to v6.12.4, applicationinsights from v1.8.5 to v1.8.6, aws-sdk from v2.728.0 to 2.749.0, lodash from v4.7.19 to 4.7.20)
 - AUTOTOOL-1894: Update default hostname for StatsD consumer
-
 ### Removed
 
 ## 1.14.0
