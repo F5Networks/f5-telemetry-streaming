@@ -411,6 +411,8 @@ To see an example of the EXPERIMENTAL feature where you can specify fallback IP 
 
 F5 Beacon
 ^^^^^^^^^
+|beaconlogo|
+
 F5 Beacon, a SaaS offering, provides visibility and actionable insights into the health and performance of applications. 
 
 F5 Beacon uses the generic HTTP consumer.
