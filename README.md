@@ -16,7 +16,7 @@ For the documentation on Telemetry Streaming, including download, installation, 
 
 ### Example Telemetry Streaming declarations
 
-The Telemetry Streaming documentation contains a variety of example declarations you can use directly or modify to suit your needs. See the [Consumers](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/userguide/setting-up-consumer.html) and [Example Declarations](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/declarations.html) pages.
+The Telemetry Streaming documentation contains a variety of example declarations you can use directly or modify to suit your needs. See the [Consumers](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/setting-up-consumer.html) and [Example Declarations](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/declarations.html) pages.
 
 ## Filing Issues and Getting Help
 
