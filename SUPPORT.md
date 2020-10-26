@@ -39,4 +39,4 @@ Versions no longer supported:
 | TS 1.12.0        | Feature       |  02-Jun-2020        | 02-Sep-2020     |
 
 
-See the [Release notes](https://github.com/F5Networks/f5-telemetry-streaming/releases) and [Telemetry Streaming documentation](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/userguide/revision-history.html) for new features and issues resolved for each release.
+See the [Release notes](https://github.com/F5Networks/f5-telemetry-streaming/releases) and [Telemetry Streaming documentation](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html) for new features and issues resolved for each release.
