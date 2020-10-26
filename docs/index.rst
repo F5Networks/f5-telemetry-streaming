@@ -1,15 +1,14 @@
 F5 Telemetry Streaming
 ======================
 
-Welcome to the F5 Telemetry Streaming User Guide.
-To provide feedback on this documentation, you can file a GitHub Issue, or email us at solutionsfeedback@f5.com.  
+Welcome to the F5 Telemetry Streaming User Guide. To provide feedback on this documentation, you can file a GitHub Issue, or email us at solutionsfeedback@f5.com. |br|
 
 For information on supported versions of Telemetry Streaming, see |supportmd|.
 
 Introduction
 ------------
 
-Telemetry Streaming (TS) is an iControl LX Extension delivered as a TMOS-independent RPM file. Installing the TS Extension on BIG-IP enables you to declaratively aggregate, normalize, and forward statistics and events from the BIG-IP to a consumer application by POSTing a single TS JSON declaration to TS's declarative REST API endpoint. Telemetry Streaming uses a declarative model, meaning you provide a JSON declaration rather than a set of imperative commands.
+Telemetry Streaming (TS) enables you to declaratively aggregate, normalize, and forward statistics and events from the BIG-IP to a consumer application. Telemetry Streaming is an iControl LX Extension delivered as a TMOS-independent RPM file, and uses a declarative model, meaning you provide a JSON declaration rather than a set of imperative commands.  To use Telemetry Streaming, you POST a single JSON declaration to Telemetry Streaming's declarative REST API endpoint. 
 
 See our Telemetry Streaming overview video:
 
@@ -104,3 +103,7 @@ You can click the following links to go directly to a specific :doc:`setting-up-
 .. |supportmd| raw:: html
 
    <a href="https://github.com/F5Networks/f5-telemetry-streaming/blob/master/SUPPORT.md" target="_blank">Support information on GitHub</a>
+
+.. |br| raw:: html
+   
+   <br />
