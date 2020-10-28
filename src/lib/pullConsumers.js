@@ -9,53 +9,38 @@
 'use strict';
 
 const path = require('path');
+
 const configWorker = require('./config');
 const constants = require('./constants');
-const util = require('./util');
-const systemPoller = require('./systemPoller');
+const errors = require('./errors');
 const logger = require('./logger');
+const systemPoller = require('./systemPoller');
+const util = require('./util');
 
 const PULL_CONSUMERS_DIR = constants.PULL_CONSUMERS_DIR;
 const CLASS_NAME = constants.CONFIG_CLASSES.PULL_CONSUMER_CLASS_NAME;
 let PULL_CONSUMERS = {};
 
-/**
- * Process client's request via REST API
- *
- * @param {Object} restOperation - request object
- */
-function processClientRequest(restOperation) {
-    // Only GET requests are allowed
-    // URL structure:
-    // - /shared/telemetry/pullconsumer/My_Pull_Consumer
-    const parts = restOperation.getUri().pathname.split('/');
-    const consumerName = (parts[4] || '').trim();
+class ModuleNotLoadedError extends errors.ConfigLookupError {}
+class DisabledError extends errors.ConfigLookupError {}
 
+/**
+ * Get data for Pull Consumer
+ *
+ * @param {String} consumerName - consumer name
+ */
+function getData(consumerName) {
     let config; // to pass to systemPoller
     let consumerConfig;
 
-    (new Promise((resolve, reject) => {
-        if (consumerName === '') {
-            const err = new Error('Bad Request. Name for Pull Consumer was not specified.');
-            err.responseCode = 400;
-            reject(err);
-        } else {
-            resolve();
-        }
-    }))
-        .then(() => configWorker.getConfig())
+    return configWorker.getConfig()
         .then((curConfig) => {
             // config was copied by getConfig already
             config = curConfig;
-            try {
-                consumerConfig = getConsumerConfig(config.parsed, consumerName);
-                // Don't bother collecting stats if requested Consumer Type is not loaded
-                if (typeof PULL_CONSUMERS[consumerConfig.type] === 'undefined') {
-                    throw new Error(`Pull Consumer of type '${consumerConfig.type}' is not loaded`);
-                }
-            } catch (err) {
-                err.responseCode = 404;
-                return Promise.reject(err);
+            consumerConfig = getConsumerConfig(config.parsed, consumerName);
+            // Don't bother collecting stats if requested Consumer Type is not loaded
+            if (typeof PULL_CONSUMERS[consumerConfig.type] === 'undefined') {
+                throw new ModuleNotLoadedError(`Pull Consumer of type '${consumerConfig.type}' is not loaded`);
             }
             let pollers = consumerConfig.systemPoller;
             if (!Array.isArray(pollers)) {
@@ -63,37 +48,12 @@ function processClientRequest(restOperation) {
             }
             return pollers;
         })
-        .then((consumersPollers) => {
-            // deepCopy our config, since fetchPollerData() will 'spoil' the passed config
-            const pollers = consumersPollers.map(
-                poller => systemPoller.fetchPollerData(util.deepCopy(config), poller, { includeDisabled: false })
-            );
-            return Promise.all(pollers);
-        })
-        .then((results) => {
-            // systemPoller.fetchPollerData() returns an array of Poller responses.
-            // Since the Pull Consumer queries a specific Poller, will only have 1 Poller result in the array response.
-            // Calling map() to hoist nested Poller object into the top-level array
-            const dataCtxs = results.map(d => d[0]);
-            return invokeConsumer(consumerConfig, dataCtxs);
-        })
-        .then((data) => {
-            util.restOperationResponder(restOperation, 200, data);
-        })
-        .catch((error) => {
-            let message;
-            let code;
-
-            if (error.responseCode !== undefined) {
-                code = error.responseCode;
-                message = `${error}`;
-            } else {
-                message = `${error}`;
-                code = 500;
-                logger.exception('pull consumer request ended up with error', error);
-            }
-            util.restOperationResponder(restOperation, code, { code, message });
-        });
+        .then(consumerPollers => Promise.all(consumerPollers.map(
+            poller => systemPoller.getPollersConfig(poller, { includeDisabled: false })
+        )))
+        .then(pollerConfigs => pollerConfigs.reduce((p, c) => p.concat(c), []))
+        .then(systemPoller.fetchPollersData.bind(systemPoller))
+        .then(dataCtxs => invokeConsumer(consumerConfig, dataCtxs));
 }
 
 /**
@@ -122,10 +82,10 @@ function getConsumerConfig(config, consumerName) {
     const configuredConsumers = config[CLASS_NAME] || {};
     const consumer = configuredConsumers[consumerName];
     if (util.isObjectEmpty(consumer)) {
-        throw new Error(`Pull Consumer with name '${consumerName}' doesn't exist`);
+        throw new errors.ObjectNotFoundInConfigError(`Pull Consumer with name '${consumerName}' doesn't exist`);
     }
     if (consumer.enable === false) {
-        throw new Error(`Pull Consumer with name '${consumerName}' is disabled`);
+        throw new DisabledError(`Pull Consumer with name '${consumerName}' is disabled`);
     }
     consumer.name = consumerName;
     return consumer;
@@ -250,6 +210,9 @@ configWorker.on('change', (config) => {
 });
 
 module.exports = {
-    processClientRequest,
+    ModuleNotLoadedError,
+    DisabledError,
+
+    getData,
     getConsumers: () => PULL_CONSUMERS // expose for testing
 };

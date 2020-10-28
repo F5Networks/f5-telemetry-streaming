@@ -123,71 +123,98 @@ describe('System Poller', () => {
         });
     });
 
-    describe('.processClientRequest()', () => {
+    describe('.getPollersConfig', () => {
         let declaration;
-        let returnCtx;
+        let createPollerConfigMock;
 
         beforeEach(() => {
-            returnCtx = null;
-
             sinon.stub(configWorker, 'getConfig').callsFake(() => configWorker.validate(declaration)
                 .then(validated => Promise.resolve(util.formatConfig(validated)))
                 .then(validated => Promise.resolve({ parsed: validated })));
 
-            sinon.stub(systemPoller, 'process').callsFake((config) => {
-                if (returnCtx) {
-                    return returnCtx();
-                }
-                return Promise.resolve({ data: { poller: config.name } });
-            });
+            createPollerConfigMock = sinon.stub(systemPoller, 'createPollerConfig')
+                .callsFake((sysObj, pollerObj) => ({
+                    name: `${sysObj.name}::${pollerObj.name}`
+                }));
         });
         /* eslint-disable implicit-arrow-linebreak */
-        systemPollerConfigTestsData.processClientRequest.forEach(testConf =>
+        systemPollerConfigTestsData.getPollersConfig.forEach(testConf =>
             testUtil.getCallableIt(testConf)(testConf.name, () => {
-                declaration = testConf.declaration;
-                const restOpMock = new testUtil.MockRestOperation(testConf.requestOpts);
-
-                if (typeof testConf.returnCtx !== 'undefined') {
-                    returnCtx = testConf.returnCtx;
+                if (testConf.mockConfigCreation === false) {
+                    createPollerConfigMock.restore();
                 }
-                return new Promise((resolve) => {
-                    restOpMock.complete = function () {
-                        resolve();
-                    };
-                    systemPoller.processClientRequest(restOpMock);
-                })
-                    .then(() => {
-                        assert.deepStrictEqual(
-                            { body: restOpMock.body, code: restOpMock.statusCode },
-                            testConf.expectedResponse
-                        );
+                declaration = testConf.declaration;
+                return systemPoller.getPollersConfig(testConf.systemName, testConf.funcOptions)
+                    .then((pollersConfig) => {
+                        assert.deepStrictEqual(pollersConfig, testConf.expectedConfig);
+                    })
+                    .catch((error) => {
+                        if (testConf.errorRegExp) {
+                            return assert.match(error, testConf.errorRegExp, 'should match expected error message');
+                        }
+                        return Promise.reject(error);
                     });
             }));
     });
 
-    describe('.fetchPollerData', () => {
-        let returnCtx;
-
+    describe('.fetchPollersData', () => {
+        let processStub;
         beforeEach(() => {
-            returnCtx = null;
-            sinon.stub(systemPoller, 'process').callsFake((config) => {
-                if (returnCtx) {
-                    return returnCtx();
-                }
-                return Promise.resolve({ data: { poller: config.name } });
-            });
+            processStub = sinon.stub(systemPoller, 'process');
+            processStub.callsFake(config => Promise.resolve({ data: { poller: config.name } }));
         });
-        /* eslint-disable implicit-arrow-linebreak */
-        systemPollerConfigTestsData.fetchPollerData.forEach(testConf =>
-            testUtil.getCallableIt(testConf)(testConf.name, () => {
-                if (typeof testConf.returnCtx !== 'undefined') {
-                    returnCtx = testConf.returnCtx;
+
+        it('should return empty array when no config passed', () => {
+            const pollerConfigs = [];
+            const expected = [];
+            return assert.becomes(systemPoller.fetchPollersData(pollerConfigs), expected);
+        });
+
+        it('should fetch data using poller config', () => {
+            const pollerConfigs = [
+                {
+                    name: 'my_poller'
                 }
-                return systemPoller.fetchPollerData(testConf.config, testConf.objName, testConf.options)
-                    .then((response) => {
-                        assert.deepStrictEqual(response, testConf.expectedResponse);
-                    });
-            }));
+            ];
+            const expected = [
+                {
+                    data: {
+                        poller: 'my_poller'
+                    }
+                }
+            ];
+            return assert.becomes(systemPoller.fetchPollersData(pollerConfigs), expected);
+        });
+
+        it('should fetch data using multiple poller configs', () => {
+            const pollerConfigs = [
+                {
+                    name: 'my_poller'
+                },
+                {
+                    name: 'my_super_poller'
+                }
+            ];
+            const expected = [
+                {
+                    data: {
+                        poller: 'my_poller'
+                    }
+                },
+                {
+                    data: {
+                        poller: 'my_super_poller'
+                    }
+                }
+            ];
+            return assert.becomes(systemPoller.fetchPollersData(pollerConfigs), expected);
+        });
+
+        it('should reject when unable to fetch data', () => {
+            const pollerConfigs = [{ name: 'my_poller' }];
+            processStub.rejects(new Error('testError'));
+            return assert.isRejected(systemPoller.fetchPollersData(pollerConfigs), 'testError');
+        });
     });
 
     describe('.getTraceValue()', () => {
@@ -520,6 +547,27 @@ describe('System Poller', () => {
                         },
                         endpoints: undefined
                     });
+                });
+        });
+
+        it('should fetch TMStats', () => {
+            const newDeclaration = testUtil.deepCopy(defaultDeclaration);
+            newDeclaration.My_Consumer = {
+                class: 'Telemetry_Consumer',
+                type: 'Splunk',
+                host: '192.0.2.1',
+                protocol: 'https',
+                port: 8088,
+                format: 'legacy',
+                passphrase: {
+                    cipherText: 'apikey'
+                }
+            };
+            return validateAndFormat(newDeclaration)
+                .then((config) => {
+                    // expecting the code responsible for 'change' event to be synchronous
+                    configWorker.emit('change', config);
+                    assert.strictEqual(utilStub.update[0].args.dataOpts.noTMStats, false, 'should enable TMStats');
                 });
         });
 

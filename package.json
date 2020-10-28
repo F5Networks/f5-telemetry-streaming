@@ -46,7 +46,8 @@
         "mustache": "^4.0.0",
         "prom-client": "11.0.0",
         "request": "^2.88.2",
-        "statsd-client": "^0.4.5"
+        "statsd-client": "^0.4.5",
+        "tiny-request-router": "^1.2.2"
     },
     "devDependencies": {
         "@f5devcentral/eslint-config-f5-atg": "latest",

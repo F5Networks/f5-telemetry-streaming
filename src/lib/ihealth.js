@@ -8,7 +8,8 @@
 
 'use strict';
 
-const logger = require('./logger'); // eslint-disable-line no-unused-vars
+const errors = require('./errors');
+const logger = require('./logger');
 const constants = require('./constants');
 const util = require('./util');
 const configWorker = require('./config');
@@ -19,7 +20,6 @@ const properties = require('./properties.json').ihealth;
 
 const SYSTEM_CLASS_NAME = constants.CONFIG_CLASSES.SYSTEM_CLASS_NAME;
 const IHEALTH_POLLER_CLASS_NAME = constants.CONFIG_CLASSES.IHEALTH_POLLER_CLASS_NAME;
-
 
 /** @module ihealth */
 
@@ -81,69 +81,51 @@ function safeProcess() {
 }
 
 /**
- * Process client's request via REST API
- *
- * @param {Object} restOperation - request object
+ * Get current state of running pollers
  */
-function processClientRequest(restOperation) {
-    // allowed URIs:
-    // - shared/telemetry/ihealthpoller/systemName
-    // - shared/telemetry/ihealthpoller/systemName/iHealthPollerName
-    const parts = restOperation.getUri().pathname.split('/');
-    const objName = parts[4];
-    const subObjName = parts[5];
-    const method = restOperation.getMethod().toUpperCase();
-
-    if (!objName && method === 'GET') {
-        const retData = [];
-        Object.keys(iHealthPoller.instances).forEach((key) => {
-            const instance = iHealthPoller.instances[key];
-            const fireDate = instance.getNextFireDate();
-            retData.push({
-                systemDeclName: instance.sysName,
-                iHealthDeclName: instance.ihName || undefined,
-                state: instance.getState(),
-                testOnly: instance.isTestOnly() ? true : undefined,
-                nextFireDate: fireDate ? fireDate.toISOString() : undefined,
-                timeBeforeNextFire: fireDate ? instance.timeBeforeFire() : undefined
-            });
+function getCurrentState() {
+    const retData = [];
+    Object.keys(iHealthPoller.instances).forEach((key) => {
+        const instance = iHealthPoller.instances[key];
+        const fireDate = instance.getNextFireDate();
+        retData.push({
+            systemDeclName: instance.sysName,
+            iHealthDeclName: instance.ihName || undefined,
+            state: instance.getState(),
+            testOnly: instance.isTestOnly() ? true : undefined,
+            nextFireDate: fireDate ? fireDate.toISOString() : undefined,
+            timeBeforeNextFire: fireDate ? instance.timeBeforeFire() : undefined
         });
-        util.restOperationResponder(restOperation, 200,
-            { code: 200, message: retData });
-        return;
-    }
+    });
+    return retData;
+}
 
-    if (!objName) {
-        util.restOperationResponder(restOperation, 400,
-            { code: 400, message: 'Bad Request. System\'s name not specified.' });
-        return;
-    }
-
-    configWorker.getConfig()
+/**
+ * Process client's request via REST API
+ */
+function startPoller(systemName, pollerName) {
+    return configWorker.getConfig()
         .then((config) => {
             config = config.parsed || {};
-            const searchRet = iHealthPoller.getConfig(config, objName, subObjName);
+            const searchRet = iHealthPoller.getConfig(config, systemName, pollerName);
             const system = searchRet[0];
             const ihPoller = searchRet[1];
 
             if (!(system && ihPoller)) {
-                const error = new Error('iHealth Poller declaration not found.');
-                error.responseCode = 404;
-                return Promise.reject(error);
+                throw new errors.ObjectNotFoundInConfigError('iHealth Poller declaration not found.');
             }
 
-            let respCode;
-            let respMessage;
-            let ihInstance = iHealthPoller.get(objName, subObjName, true);
+            const state = {};
+            let ihInstance = iHealthPoller.get(systemName, pollerName, true);
 
             if (ihInstance) {
-                respCode = 202;
-                respMessage = 'iHealth Poller instance is running already';
+                state.runningAlready = true;
+                state.message = 'iHealth Poller instance is running already';
             } else {
-                respCode = 201;
-                respMessage = 'iHealth poller created. See logs for current progress.';
+                state.created = true;
+                state.message = 'iHealth poller created. See logs for current progress.';
 
-                ihInstance = iHealthPoller.create(objName, subObjName, true);
+                ihInstance = iHealthPoller.create(systemName, pollerName, true);
                 ihInstance.dataCallback = safeProcess;
                 ihInstance.process()
                     .catch((err) => {
@@ -152,27 +134,9 @@ function processClientRequest(restOperation) {
                     });
             }
 
-            util.restOperationResponder(restOperation, respCode, {
-                code: respCode,
-                systemDeclName: objName,
-                iHealthDeclName: subObjName || undefined,
-                message: respMessage
-            });
-            return Promise.resolve();
-        })
-        .catch((error) => {
-            let message;
-            let code;
-
-            if (error.responseCode !== undefined) {
-                code = error.responseCode;
-                message = `${error}`;
-            } else {
-                logger.error(`poller request ended up with error: ${error}`);
-                code = 500;
-                message = `iHealthPoller.process error: ${error}`;
-            }
-            util.restOperationResponder(restOperation, code, { code, message });
+            state.systemDeclName = systemName;
+            state.iHealthDeclName = pollerName || undefined;
+            return state;
         });
 }
 
@@ -249,5 +213,6 @@ configWorker.on('change', (config) => {
 
 
 module.exports = {
-    processClientRequest
+    getCurrentState,
+    startPoller
 };

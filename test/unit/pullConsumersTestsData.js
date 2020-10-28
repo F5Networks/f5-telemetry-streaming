@@ -18,7 +18,7 @@ module.exports = {
      * Following options available:
      * - only (bool) - run this test only (it.only)
      * */
-    processClientRequest: [
+    getData: [
         // TEST RELATED DATA STARTS HERE
         {
             name: 'should retrieve data with the minimal declaration',
@@ -37,15 +37,8 @@ module.exports = {
                     systemPoller: ['My_System_Poller']
                 }
             },
-            requestOpts: {
-                uri: '/shared/telemetry/pullconsumer/My_Pull_Consumer'
-            },
-            expectedResponse: {
-                code: 200,
-                body: [
-                    { mockedResponse: { pollerName: 'My_System_Poller' } }
-                ]
-            }
+            consumerName: 'My_Pull_Consumer',
+            expectedResponse: [{ mockedResponse: { pollerName: 'My_System_Poller::My_System_Poller' } }]
         },
         // TEST RELATED DATA STARTS HERE
         {
@@ -68,16 +61,34 @@ module.exports = {
                     systemPoller: ['My_System_Poller', 'My_Second_System_Poller']
                 }
             },
-            requestOpts: {
-                uri: '/shared/telemetry/pullconsumer/My_Pull_Consumer'
+            consumerName: 'My_Pull_Consumer',
+            expectedResponse: [
+                { mockedResponse: { pollerName: 'My_System_Poller::My_System_Poller' } },
+                { mockedResponse: { pollerName: 'My_Second_System_Poller::My_Second_System_Poller' } }
+            ]
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should retrieve data when declaration associates Pull Consumer with single System Poller',
+            declaration: {
+                class: 'Telemetry',
+                My_System_Poller: {
+                    class: 'Telemetry_System_Poller'
+                },
+                My_System: {
+                    class: 'Telemetry_System',
+                    systemPoller: ['My_System_Poller']
+                },
+                My_Pull_Consumer: {
+                    class: 'Telemetry_Pull_Consumer',
+                    type: 'default',
+                    systemPoller: 'My_System_Poller'
+                }
             },
-            expectedResponse: {
-                code: 200,
-                body: [
-                    { mockedResponse: { pollerName: 'My_System_Poller' } },
-                    { mockedResponse: { pollerName: 'My_Second_System_Poller' } }
-                ]
-            }
+            consumerName: 'My_Pull_Consumer',
+            expectedResponse: [
+                { mockedResponse: { pollerName: 'My_System_Poller::My_System_Poller' } }
+            ]
         },
         // TEST RELATED DATA STARTS HERE
         {
@@ -101,21 +112,10 @@ module.exports = {
                     systemPoller: ['My_System_Poller', 'My_Second_System_Poller']
                 }
             },
-            returnCtx: (config, poller) => {
-                if (config.parsed.Telemetry_System_Poller[poller].enable === true) {
-                    return Promise.resolve([{ data: { poller } }]);
-                }
-                return Promise.resolve([[]]);
-            },
-            requestOpts: {
-                uri: '/shared/telemetry/pullconsumer/My_Pull_Consumer'
-            },
-            expectedResponse: {
-                code: 200,
-                body: [
-                    { poller: 'My_Second_System_Poller' }
-                ]
-            }
+            consumerName: 'My_Pull_Consumer',
+            expectedResponse: [
+                { mockedResponse: { pollerName: 'My_Second_System_Poller::My_Second_System_Poller' } }
+            ]
         },
         // TEST RELATED DATA STARTS HERE
         {
@@ -130,16 +130,8 @@ module.exports = {
                     systemPoller: ['My_System_Poller']
                 }
             },
-            requestOpts: {
-                uri: '/shared/telemetry/pullconsumer/My_Pull_Consumer'
-            },
-            expectedResponse: {
-                code: 404,
-                body: {
-                    code: 404,
-                    message: 'Error: Pull Consumer with name \'My_Pull_Consumer\' doesn\'t exist'
-                }
-            }
+            consumerName: 'My_Pull_Consumer',
+            errorRegExp: /Pull Consumer with name 'My_Pull_Consumer' doesn't exist/
         },
         // TEST RELATED DATA STARTS HERE
         {
@@ -149,7 +141,7 @@ module.exports = {
                 My_Pull_Consumer: {
                     class: 'Telemetry_Pull_Consumer',
                     type: 'default',
-                    enable: 'false',
+                    enable: false,
                     systemPoller: ['My_System_Poller']
                 },
                 My_System_Poller: {
@@ -160,45 +152,8 @@ module.exports = {
                     systemPoller: ['My_System_Poller']
                 }
             },
-            requestOpts: {
-                uri: '/shared/telemetry/pullconsumer/My_Pull_Consumer'
-            },
-            expectedResponse: {
-                code: 404,
-                body: {
-                    code: 404,
-                    message: 'Error: Pull Consumer with name \'My_Pull_Consumer\' is disabled'
-                }
-            }
-        },
-        // TEST RELATED DATA STARTS HERE
-        {
-            name: 'should fail if no Pull Consumer name is specified',
-            declaration: {
-                class: 'Telemetry',
-                My_Pull_Consumer: {
-                    class: 'Telemetry_Pull_Consumer',
-                    type: 'default',
-                    systemPoller: ['My_System_Poller']
-                },
-                My_System_Poller: {
-                    class: 'Telemetry_System_Poller'
-                },
-                My_System: {
-                    class: 'Telemetry_System',
-                    systemPoller: ['My_System_Poller']
-                }
-            },
-            requestOpts: {
-                uri: '/shared/telemetry/pullconsumer'
-            },
-            expectedResponse: {
-                code: 400,
-                body: {
-                    code: 400,
-                    message: 'Error: Bad Request. Name for Pull Consumer was not specified.'
-                }
-            }
+            consumerName: 'My_Pull_Consumer',
+            errorRegExp: /Error: Pull Consumer with name 'My_Pull_Consumer' is disabled/
         }
     ]
 };

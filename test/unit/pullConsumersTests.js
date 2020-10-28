@@ -78,24 +78,28 @@ describe('Pull Consumers', () => {
         });
     });
 
-    describe('.processClientRequest()', () => {
+    describe('.getData()', () => {
         let declaration;
         let returnCtx;
 
         beforeEach(() => {
             returnCtx = null;
 
-            sinon.stub(configWorker, 'getConfig').callsFake(() => configWorker.validate(declaration)
+            sinon.stub(configWorker, 'getConfig').callsFake(() => configWorker.validate(testUtil.deepCopy(declaration))
                 .then(validated => Promise.resolve(util.formatConfig(validated)))
                 .then(validated => Promise.resolve({ parsed: validated })));
 
-            sinon.stub(systemPoller, 'fetchPollerData').callsFake((conf, poller) => {
+            sinon.stub(systemPoller, 'fetchPollersData').callsFake((pollers) => {
                 if (returnCtx) {
-                    return returnCtx(conf, poller);
+                    return returnCtx(pollers);
                 }
-                return Promise.resolve([
-                    { data: { mockedResponse: { pollerName: poller } } }
-                ]);
+                return Promise.resolve(pollers.map(poller => ({
+                    data: {
+                        mockedResponse: {
+                            pollerName: poller.name
+                        }
+                    }
+                })));
             });
 
             // Load Pull Consumer config, with default consumer
@@ -111,25 +115,21 @@ describe('Pull Consumers', () => {
         });
 
         /* eslint-disable implicit-arrow-linebreak */
-        pullConsumersTestsData.processClientRequest.forEach(testConf =>
+        pullConsumersTestsData.getData.forEach(testConf =>
             testUtil.getCallableIt(testConf)(testConf.name, () => {
                 declaration = testConf.declaration;
-                const restOpMock = new testUtil.MockRestOperation(testConf.requestOpts);
-
                 if (typeof testConf.returnCtx !== 'undefined') {
                     returnCtx = testConf.returnCtx;
                 }
-                return new Promise((resolve) => {
-                    restOpMock.complete = function () {
-                        resolve();
-                    };
-                    pullConsumers.processClientRequest(restOpMock);
-                })
-                    .then(() => {
-                        assert.deepStrictEqual(
-                            { body: restOpMock.body, code: restOpMock.statusCode },
-                            testConf.expectedResponse
-                        );
+                return pullConsumers.getData(testConf.consumerName)
+                    .then((data) => {
+                        assert.deepStrictEqual(data, testConf.expectedResponse);
+                    })
+                    .catch((err) => {
+                        if (testConf.errorRegExp) {
+                            return assert.match(err, testConf.errorRegExp, 'should match error reg exp');
+                        }
+                        return Promise.reject(err);
                     });
             }));
     });
