@@ -12,6 +12,7 @@ const assert = require('assert');
 const cloneDeep = require('lodash/cloneDeep');
 const nock = require('nock');
 const sinon = require('sinon');
+const urllib = require('url');
 
 const systemPollerData = require('../consumers/data/systemPollerData.json');
 const avrData = require('../consumers/data/avrData.json');
@@ -20,6 +21,7 @@ const avrData = require('../consumers/data/avrData.json');
 function MockRestOperation(opts) {
     opts = opts || {};
     this.method = opts.method || 'GET';
+    this.contentType = opts.contentType || '';
     this.body = opts.body;
     this.statusCode = null;
     this.uri = {};
@@ -27,6 +29,8 @@ function MockRestOperation(opts) {
 }
 MockRestOperation.prototype.getBody = function () { return this.body; };
 MockRestOperation.prototype.setBody = function (body) { this.body = body; };
+MockRestOperation.prototype.getContentType = function () { return this.contentType; };
+MockRestOperation.prototype.setContentType = function (ct) { this.contentType = ct; };
 MockRestOperation.prototype.getMethod = function () { return this.method; };
 MockRestOperation.prototype.setMethod = function (method) { this.method = method; };
 MockRestOperation.prototype.getStatusCode = function () { return this.statusCode; };
@@ -234,5 +238,12 @@ module.exports = {
             validators.push(getValidator(i, this.deepCopy(arguments[i]), arguments[i]));
         }
         return () => validators.every(validator => validator());
-    }
+    },
+
+    parseURL: (function () {
+        if (process.versions.node.startsWith('4.')) {
+            return urllib.parse;
+        }
+        return url => new urllib.URL(url);
+    }())
 };

@@ -20,8 +20,6 @@ const config = require('../../src/lib/config');
 const constants = require('../../src/lib/constants');
 const deviceUtil = require('../../src/lib/deviceUtil');
 const psModule = require('../../src/lib/persistentStorage');
-const util = require('../../src/lib/util');
-const MockRestOperation = require('./shared/util').MockRestOperation;
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -112,86 +110,6 @@ describe('Config', () => {
                     const consumer = savedConfig.parsed.Telemetry_Consumer.My_Consumer;
                     assert.strictEqual(consumer.path, '/foo');
                 });
-        });
-    });
-
-    describe('.processClientRequest()', () => {
-        it('should process client POST request', () => {
-            const mockRestOperation = new MockRestOperation({ method: 'POST' });
-            mockRestOperation.setBody({
-                class: 'Telemetry'
-            });
-            const actualResponseBody = {
-                message: 'success',
-                declaration: {
-                    class: 'Telemetry',
-                    schemaVersion: constants.VERSION
-                }
-            };
-            return assert.isFulfilled(config.processClientRequest(mockRestOperation)
-                .then(() => {
-                    assert.strictEqual(mockRestOperation.statusCode, 200);
-                    assert.deepStrictEqual(mockRestOperation.body, actualResponseBody);
-                }));
-        });
-
-        it('should process client GET request - no configuration', () => {
-            const actualResponseBody = {
-                message: 'success',
-                declaration: {}
-            };
-            const mockRestOperation = new MockRestOperation({ method: 'GET' });
-            mockRestOperation.setBody({});
-
-            return assert.isFulfilled(config.processClientRequest(mockRestOperation)
-                .then(() => {
-                    assert.strictEqual(mockRestOperation.statusCode, 200);
-                    assert.deepStrictEqual(mockRestOperation.body, actualResponseBody);
-                }));
-        });
-
-        it('should process client GET request - existing config', () => {
-            const mockRestOperationPOST = new MockRestOperation({ method: 'POST' });
-            mockRestOperationPOST.setBody({
-                class: 'Telemetry'
-            });
-            const mockRestOperationGET = new MockRestOperation({ method: 'GET' });
-            mockRestOperationGET.setBody({});
-
-            return assert.isFulfilled(config.processClientRequest(mockRestOperationPOST)
-                .then(() => {
-                    assert.strictEqual(mockRestOperationPOST.statusCode, 200);
-                    return config.processClientRequest(mockRestOperationGET);
-                })
-                .then(() => {
-                    assert.strictEqual(mockRestOperationGET.statusCode, 200);
-                    assert.deepStrictEqual(mockRestOperationGET.body, mockRestOperationPOST.body);
-                }));
-        });
-
-        it('should fail to validate client request', () => {
-            const mockRestOperation = new MockRestOperation({ method: 'POST' });
-            mockRestOperation.setBody({
-                class: 'foo'
-            });
-            return assert.isFulfilled(config.processClientRequest(mockRestOperation)
-                .then(() => {
-                    assert.strictEqual(mockRestOperation.statusCode, 422);
-                    assert.strictEqual(mockRestOperation.body.message, 'Unprocessable entity');
-                }));
-        });
-
-        it('should fail to process client request', () => {
-            sinon.stub(util, 'formatConfig').throws(new Error('foo'));
-            const mockRestOperation = new MockRestOperation({ method: 'POST' });
-            mockRestOperation.setBody({
-                class: 'Telemetry'
-            });
-            return assert.isFulfilled(config.processClientRequest(mockRestOperation)
-                .then(() => {
-                    assert.strictEqual(mockRestOperation.statusCode, 500);
-                    assert.strictEqual(mockRestOperation.body.message, 'Internal Server Error');
-                }));
         });
     });
 

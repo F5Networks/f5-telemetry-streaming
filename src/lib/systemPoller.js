@@ -12,7 +12,8 @@ const constants = require('./constants');
 const configWorker = require('./config');
 const dataPipeline = require('./dataPipeline');
 const deviceUtil = require('./deviceUtil');
-const logger = require('./logger'); // eslint-disable-line no-unused-vars
+const errors = require('./errors');
+const logger = require('./logger');
 const normalizeConfig = require('./normalizeConfig');
 const SystemStats = require('./systemStats');
 const util = require('./util');
@@ -25,6 +26,8 @@ const CONFIG_CLASSES = constants.CONFIG_CLASSES;
 const TRACER_CLASS_NAME = CONFIG_CLASSES.SYSTEM_POLLER_CLASS_NAME;
 // key - poller name, value - timer ID
 const POLLER_TIMERS = {};
+
+class NoPollersError extends errors.ConfigLookupError {}
 
 function getPollerTimers() {
     return POLLER_TIMERS;
@@ -66,21 +69,19 @@ function createCustomConfig(originalConfig, sysOrPollerName, pollerName) {
     const systemFound = !util.isObjectEmpty(system);
     const pollerFound = !util.isObjectEmpty(poller);
     // check for errors at first
-    if (!systemFound || !pollerFound) {
+    if (!(systemFound && pollerFound)) {
         if (pollerName) {
             // sysOrPollerName and pollerName both passed to the function
             if (!systemFound) {
-                throw new Error(`System with name '${sysOrPollerName}' doesn't exist`);
+                throw new errors.ObjectNotFoundInConfigError(`System with name '${sysOrPollerName}' doesn't exist`);
             }
-            if (!pollerFound) {
-                throw new Error(`System Poller with name '${pollerName}' doesn't exist`);
-            }
+            throw new errors.ObjectNotFoundInConfigError(`System Poller with name '${pollerName}' doesn't exist`);
         }
         if (!(systemFound || pollerFound)) {
-            throw new Error(`System or System Poller with name '${sysOrPollerName}' doesn't exist`);
+            throw new errors.ObjectNotFoundInConfigError(`System or System Poller with name '${sysOrPollerName}' doesn't exist`);
         }
         if (systemFound && util.isObjectEmpty(system.systemPoller)) {
-            throw new Error(`System with name '${sysOrPollerName}' has no System Poller configured`);
+            throw new NoPollersError(`System with name '${sysOrPollerName}' has no System Poller configured`);
         }
     }
     // error check passed and now we have valid objects to continue with
@@ -305,86 +306,51 @@ function safeProcess() {
 }
 
 /**
- * Process client's request via REST API
+ * Get System Poller config if exists
  *
- * @param {Object} restOperation - request object
+ * @param {String} system - system name or poller name
+ * @param {Object}  [options] - optional values
+ * @param {String}  [options.pollerName] - poller name
+ * @param {Boolean} [options.includeDisabled = false] - whether to include disabled pollers
+ *
+ * @returns {Promise<Object>} resolved with poller's config
  */
-function processClientRequest(restOperation) {
-    // only GET requests allowed
-    // allowed URIs:
-    // - shared/telemetry/systempoller/systemName
-    // - shared/telemetry/systempoller/systemPollerName
-    // - shared/telemetry/systempoller/systemName/systemPollerName
-    const parts = restOperation.getUri().pathname.split('/');
-    const objName = (parts[4] || '').trim();
-    const subObjName = (parts[5] || '').trim();
-
-    (new Promise((resolve, reject) => {
-        if (objName === '') {
-            const err = new Error('Bad Request. Name for System or System Poller was not specified.');
-            err.responseCode = 400;
-            reject(err);
-        } else {
-            resolve();
-        }
-    }))
-        .then(() => configWorker.getConfig())
-        .then(config => fetchPollerData(config, objName, { subObjName, includeDisabled: true }))
-        .then((dataCtx) => {
-            util.restOperationResponder(restOperation, 200, dataCtx.map(d => d.data));
-        })
-        .catch((error) => {
-            let message;
-            let code;
-
-            if (error.responseCode !== undefined) {
-                code = error.responseCode;
-                message = `${error}`;
-            } else {
-                message = `${error}`;
-                code = 500;
-                logger.exception('poller request ended up with error', error);
+function getPollersConfig(systemName, options) {
+    options = options || {};
+    const includeDisabled = (typeof options.includeDisabled === 'undefined') ? false : options.includeDisabled;
+    return configWorker.getConfig()
+        .then(config => module.exports.createCustomConfig(config.parsed, systemName, options.pollerName))
+        .then(config => deviceUtil.decryptAllSecrets(config))
+        .then((config) => {
+            const system = getTelemetrySystems(normalizeConfig(config))[systemName];
+            if (util.isObjectEmpty(system.systemPollers)) {
+                // almost impossible to hit but let's keep it for safety and debugging issues
+                throw new NoPollersError(`System '${systemName}' has no System Poller(s) configured`);
             }
-            util.restOperationResponder(restOperation, code, { code, message });
+            return module.exports.getEnabledPollerConfigs(system, false, includeDisabled);
         });
 }
 
 /**
  * Fetch data from a given System or System Poller, given the provided configuration
  *
- * @param {Object}  currentConfig               - current TS configuration
- * @param {String}  objName                     - Sytem or System Poller name
- * @param {Object}  [options]                   - optional values
- * @param {String}  [options.subObjName]        - (optional) Sub Object (System Poller) name
- * @param {Boolean} [options.includeDisabled]   - (optional) Whether to include disabled Pollers. Default=false
+ * @param {Array<Object>} pollers - pollers configs
  *
- * @returns {Promise} Promise which is resolved with data from the Sytem(s) or System Poller(s)
+ * @returns {Promise<Array<Object>>} Promise which is resolved with data from the System(s) or System Poller(s)
  */
-function fetchPollerData(currentConfig, objName, options) {
-    options = options || {};
-    const includeDisabled = (typeof options.includeDisabled === 'undefined') ? false : options.includeDisabled;
-    return Promise.resolve()
-        .then(() => {
-            try {
-                return module.exports.createCustomConfig(currentConfig.parsed, objName, options.subObjName);
-            } catch (err) {
-                err.responseCode = 404;
-                return Promise.reject(err);
+function fetchPollersData(pollers) {
+    // need to wrap with catch to avoid situations when one of the promises was rejected
+    // and another one left in unknown state
+    const caughtErrors = [];
+    return Promise.all(pollers.map(
+        pollerConfig => module.exports.safeProcess(pollerConfig, { requestFromUser: true })
+            .catch(err => caughtErrors.push(err))
+    ))
+        .then((data) => {
+            if (caughtErrors.length > 0) {
+                return Promise.reject(caughtErrors[0]);
             }
-        })
-        .then(config => deviceUtil.decryptAllSecrets(config))
-        .then((config) => {
-            const system = getTelemetrySystems(normalizeConfig(config))[objName];
-            if (util.isObjectEmpty(system.systemPollers)) {
-                // unexpected, something went wrong
-                const err = new Error(`System '${objName}' has no System Poller(s) configured`);
-                err.responseCode = 404;
-                return Promise.reject(err);
-            }
-
-            const pollers = module.exports.getEnabledPollerConfigs(system, false, includeDisabled)
-                .map(pollerConfig => module.exports.safeProcess(pollerConfig, { requestFromUser: true }));
-            return Promise.all(pollers);
+            return Promise.resolve(data);
         });
 }
 
@@ -404,14 +370,16 @@ configWorker.on('change', (config) => {
 
 
 module.exports = {
+    NoPollersError,
+
     applyConfig,
     createCustomConfig,
     createPollerConfig,
-    fetchPollerData,
+    fetchPollersData,
     getEnabledPollerConfigs,
+    getPollersConfig,
     getPollerTimers,
     getTraceValue,
     process,
-    processClientRequest,
     safeProcess
 };

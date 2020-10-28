@@ -189,59 +189,19 @@ ConfigWorker.prototype.validateAndApply = function (data) {
         .then((config) => {
             // propagate config change
             this.setConfig(config);
+            this.teemReporter.process(validatedConfig);
             return validatedConfig;
         })
         .catch(error => Promise.reject(error));
 };
 
 /**
- * Handles all client's requests.
+ * Get raw (origin) config
  *
- * @public
- * @param {Object} restOperation
- *
- * @returns {void}
+ * @returns {Promise<Object>} resolved with raw (origin) config
  */
-ConfigWorker.prototype.processClientRequest = function (restOperation) {
-    const method = restOperation.getMethod().toUpperCase();
-    let actionName;
-    let promise;
-    let sendAnalytics = false;
-
-    if (method === 'POST') {
-        // try to validate new config
-        actionName = 'validateAndApply';
-        sendAnalytics = true;
-        promise = this.validateAndApply(restOperation.getBody());
-    } else {
-        actionName = 'getDeclaration';
-        promise = this.getConfig().then(config => Promise.resolve((config && config.raw) || {}));
-    }
-
-    return promise.then((config) => {
-        util.restOperationResponder(restOperation, 200,
-            { message: 'success', declaration: config });
-        return config;
-    })
-        .then((config) => {
-            if (sendAnalytics) {
-                this.teemReporter.process(config);
-            }
-        })
-        .catch((err) => {
-            const errObj = {};
-            if (err.code === 'ValidationError') {
-                errObj.code = 422;
-                errObj.message = 'Unprocessable entity';
-                errObj.error = err.message;
-            } else {
-                errObj.code = 500;
-                errObj.message = 'Internal Server Error';
-                errObj.error = `${err.message ? err.message : err}`;
-            }
-            logger.exception(`config.${actionName} error`, err);
-            util.restOperationResponder(restOperation, errObj.code, errObj);
-        });
+ConfigWorker.prototype.getRawConfig = function () {
+    return this.getConfig().then(config => Promise.resolve((config && config.raw) || {}));
 };
 
 // initialize singleton
