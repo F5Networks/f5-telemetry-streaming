@@ -19,8 +19,8 @@
 ## Release candidate process
 
 * Check that all `feature` and `docs` branches targeted to the current release were merged to `develop` branch
-* Choose the right commit in `develop` branch and create separate branch from it for release candidate with name "vX.Y.Z"
-* Make sure RC branch has actual release version and build numbers in following files, do corrections if needed:
+* For first release candidate: Choose the right commit in `develop` branch and create separate branch from it for release candidate with name "vX.Y.Z". For subsequent release candidates: Merge the commit(s) from develop to the release branch.
+* Make sure RC branch has actual release version and build numbers. **Note:** atg-build bumps the build number (e.g. to get first build vX.Y.Z-1, you must set package and package-lock to vX.Y.Z-0). Check the following files and do corrections if needed:
   * [package.json](package.json)
   * [package-lock.json](package-lock.json)
   * [project.spec](project.spec) (not required starting from 1.5)
@@ -33,7 +33,6 @@
   * There should be exact same files across following directories:
     * [src/schema/latest](src/schema/latest)
     * `src/schema/X.Y.Z` - where X.Y.Z is release version
-* Update release version and build numbers in `develop` branch using list of the files above.
 * Update [SUPPORT.md](SUPPORT.md) if not yet done (or at least check that everything looks valid):
   * add new version to the list of `Currently supported versions` with appropriate dates
   * remove no longer supported versions from `Currently supported versions` and add it to `Versions no longer supported`
