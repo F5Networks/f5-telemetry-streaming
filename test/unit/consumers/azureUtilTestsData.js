@@ -29,6 +29,15 @@ module.exports = {
                 expected: 'https://management.usgovcloudapi.net'
             },
             {
+                name: 'should return management URL based on metadata available if no region in config',
+                config: {},
+                metadata: {
+                    compute: { location: 'usdodcentral' }
+                },
+                apiType: 'management',
+                expected: 'https://management.usgovcloudapi.net'
+            },
+            {
                 name: 'should return opinsights URL - public cloud',
                 config: {
                     region: 'USEast',
@@ -45,51 +54,83 @@ module.exports = {
                 },
                 apiType: 'opinsights',
                 expected: 'https://gov-cloud-workspace-id.ods.opinsights.azure.us/api/logs?api-version=2016-04-01'
+            },
+            {
+                name: 'should return opinsights URL based on metadata available if no region in config',
+                config: {
+                    workspaceId: 'public-cloud-workspace-id'
+                },
+                metadata: {
+                    compute: { location: 'centralus' }
+                },
+                apiType: 'opinsights',
+                expected: 'https://public-cloud-workspace-id.ods.opinsights.azure.com/api/logs?api-version=2016-04-01'
             }
         ]
     },
-    getApiUrlWithRegionFromMetadata: {
-        name: '.getApiUrl - region from metadata',
+    getApiUrlWithRegionFromContextMetadata: {
+        name: '.getApiUrl - region from context.metadata',
         tests: [
             {
                 name: 'should return management URL - public cloud',
-                stub: { compute: { location: 'germanynorth' } },
+                metadata: { compute: { location: 'germanynorth' } },
                 config: {},
                 apiType: 'management',
                 expected: 'https://management.azure.com'
             },
             {
                 name: 'should return management URL - gov cloud',
-                stub: { compute: { location: 'UsGovVirginia' } },
+                metadata: { compute: { location: 'UsGovVirginia' } },
                 config: {},
                 apiType: 'management',
                 expected: 'https://management.usgovcloudapi.net'
             },
             {
-                name: 'should return default management URL when unable to retrieve region from metadata',
+                name: 'should return default management URL when unable to retrieve region from context.metadata',
                 config: {},
                 apiType: 'management',
                 expected: 'https://management.azure.com'
             },
             {
                 name: 'should return opinsights URL - public cloud',
-                stub: { compute: { location: 'centralus' } },
+                metadata: { compute: { location: 'centralus' } },
                 config: { workspaceId: 'metadata-pub-cloud1' },
                 apiType: 'opinsights',
                 expected: 'https://metadata-pub-cloud1.ods.opinsights.azure.com/api/logs?api-version=2016-04-01'
             },
             {
                 name: 'should return opinsights URL - gov cloud',
-                stub: { compute: { location: 'usgovarizona' } },
+                metadata: { compute: { location: 'usgovarizona' } },
                 config: { workspaceId: 'metadata-gov-cloud1' },
                 apiType: 'opinsights',
                 expected: 'https://metadata-gov-cloud1.ods.opinsights.azure.us/api/logs?api-version=2016-04-01'
             },
             {
-                name: 'should return default opinsights URL when unable to retrieve region from metadata',
+                name: 'should return default opinsights URL when unable to retrieve region from context.metadata',
                 config: { workspaceId: 'metadata-pub-cloud2' },
                 apiType: 'opinsights',
                 expected: 'https://metadata-pub-cloud2.ods.opinsights.azure.com/api/logs?api-version=2016-04-01'
+            }
+        ]
+    },
+    getApiUrlNoRegionNoMetadata: {
+        name: '.getApiUrl - no region from config or context.metadata',
+        tests: [
+            {
+                name: 'should return default management URL - public cloud',
+                metadata: {},
+                config: {},
+                apiType: 'management',
+                expected: 'https://management.azure.com'
+            },
+            {
+                name: 'should return opinsights URL - public cloud',
+                config: {
+                    workspaceId: 'public-cloud-workspace-id'
+                },
+                metadata: {},
+                apiType: 'opinsights',
+                expected: 'https://public-cloud-workspace-id.ods.opinsights.azure.com/api/logs?api-version=2016-04-01'
             }
         ]
     }

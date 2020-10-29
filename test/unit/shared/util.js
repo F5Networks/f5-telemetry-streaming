@@ -114,7 +114,8 @@ module.exports = {
                 type: opts.eventType || ''
             },
             logger: new MockLogger(opts.loggerOpts),
-            tracer: new MockTracer()
+            tracer: new MockTracer(),
+            metadata: opts.metadata
         };
         return context;
     },
