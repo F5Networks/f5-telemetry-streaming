@@ -9,10 +9,9 @@
 'use strict';
 
 const path = require('path');
-const logger = require('./logger'); // eslint-disable-line no-unused-vars
-const deepCopy = require('./util').deepCopy;
-const tracers = require('./util').tracer;
-const moduleLoader = require('./util').moduleLoader;
+const logger = require('./logger');
+const util = require('./util');
+const metadataUtil = require('./metadataUtil');
 const constants = require('./constants');
 const configWorker = require('./config');
 const DataFilter = require('./dataFilter').DataFilter;
@@ -57,21 +56,28 @@ function loadConsumers(config) {
             const consumerDir = './'.concat(path.join(CONSUMERS_DIR, consumerType));
 
             logger.debug(`Loading consumer ${consumerType} plug-in from ${consumerDir}`);
-            const consumerModule = moduleLoader.load(consumerDir);
+            const consumerModule = util.moduleLoader.load(consumerDir);
             if (consumerModule === null) {
                 resolve(undefined);
             } else {
                 const consumer = {
                     name: consumerConfig.name,
-                    config: deepCopy(consumerConfig.config),
+                    config: util.deepCopy(consumerConfig.config),
                     consumer: consumerModule,
-                    tracer: tracers.createFromConfig(CLASS_NAME, consumerConfig.name, consumerConfig.config),
+                    tracer: util.tracer.createFromConfig(CLASS_NAME, consumerConfig.name, consumerConfig.config),
                     filter: new DataFilter(consumerConfig)
                 };
                 consumer.config.allowSelfSignedCert = consumer.config.allowSelfSignedCert === undefined
                     ? !constants.STRICT_TLS_REQUIRED : consumer.config.allowSelfSignedCert;
-                // copy consumer's data
-                resolve(consumer);
+
+                metadataUtil.getInstanceMetadata(consumer)
+                    .then((metadata) => {
+                        if (!util.isObjectEmpty(metadata)) {
+                            consumer.metadata = metadata;
+                        }
+                        // copy consumer's data
+                        resolve(consumer);
+                    });
             }
         });
     }))
@@ -105,7 +111,7 @@ function unloadUnusedModules(before) {
             logger.debug(`Unloading Consumer module '${consumerType}'`);
             const consumerDir = './'.concat(path.join(CONSUMERS_DIR, consumerType));
 
-            moduleLoader.unload(consumerDir);
+            util.moduleLoader.unload(consumerDir);
         }
     });
 }
@@ -144,7 +150,7 @@ configWorker.on('change', (config) => {
         })
         .then(() => {
             unloadUnusedModules(typesBefore);
-            tracers.remove(tracer => tracer.name.startsWith(CLASS_NAME)
+            util.tracer.remove(tracer => tracer.name.startsWith(CLASS_NAME)
                 && tracer.lastGetTouch < tracersTimestamp);
         });
 });

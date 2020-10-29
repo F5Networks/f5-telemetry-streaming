@@ -16,7 +16,7 @@ const EVENT_TYPES = require('../../constants').EVENT_TYPES;
  * See {@link ../README.md#context} for documentation
  */
 module.exports = function (context) {
-    let fullURI;
+    const fullURI = azureUtil.getApiUrl(context, 'opinsights');
     const workspaceId = context.config.workspaceId;
     const sharedKey = context.config.passphrase;
     const logType = context.config.logType || 'F5Telemetry';
@@ -29,11 +29,8 @@ module.exports = function (context) {
         context.event.data[context.event.type] = copyData;
     }
 
-    return azureUtil.getApiUrl(context, 'opinsights')
-        .then((url) => {
-            fullURI = url;
-            return sharedKey ? Promise.resolve(sharedKey) : azureUtil.getSharedKey(context);
-        })
+    return Promise.resolve()
+        .then(() => (sharedKey ? Promise.resolve(sharedKey) : azureUtil.getSharedKey(context)))
         .then((keyToUse) => {
             const promises = [];
             const tracerMsg = [];
@@ -70,6 +67,11 @@ module.exports = function (context) {
                     body: data,
                     allowSelfSignedCert: context.config.allowSelfSignedCert
                 };
+
+
+                if (context.metadata && context.metadata.compute && context.metadata.compute.resourceId) {
+                    requestOptions.headers['x-ms-AzureResourceId'] = context.metadata.compute.resourceId;
+                }
 
                 if (context.tracer) {
                     // deep copy and parse body, otherwise it will be stringified again

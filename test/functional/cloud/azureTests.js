@@ -112,9 +112,10 @@ describe('Azure Cloud-based Tests', function () {
 
             it('should retrieve systemPoller info from Log Analytics workspace', function () {
                 this.timeout(120000);
+                const resourceIdMatch = VM_HOSTNAME.substring(0, VM_HOSTNAME.indexOf('.'));
                 const queryString = [
                     'F5Telemetry_system_CL',
-                    `where hostname_s == "${VM_HOSTNAME}"`,
+                    `where hostname_s == "${VM_HOSTNAME}" and _ResourceId contains "${resourceIdMatch}"`,
                     'where TimeGenerated > ago(5m)'
                 ].join(' | ');
 

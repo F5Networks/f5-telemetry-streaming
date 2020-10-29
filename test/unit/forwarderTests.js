@@ -29,6 +29,7 @@ describe('Forwarder', () => {
     };
     const type = 'dataType';
     const data = { foo: 'bar' };
+    const metadata = { compute: { onlyWhenAvailable: true } };
 
     afterEach(() => {
         sinon.restore();
@@ -43,13 +44,16 @@ describe('Forwarder', () => {
                 },
                 config,
                 tracer: null,
-                filter: new DataFilter({})
+                filter: new DataFilter({}),
+                logger: {},
+                metadata
             }
         ]);
         return assert.isFulfilled(forwarder.forward({ type, data })
             .then(() => {
                 assert.deepStrictEqual(actualContext.event.data, data);
                 assert.deepStrictEqual(actualContext.config, config);
+                assert.deepStrictEqual(actualContext.metadata, metadata);
             }));
     });
 
@@ -66,7 +70,9 @@ describe('Forwarder', () => {
                 },
                 config,
                 tracer: null,
-                filter: new DataFilter({})
+                filter: new DataFilter({}),
+                logger: {},
+                metadata: {}
             }
         ]);
         return assert.isFulfilled(forwarder.forward({ type, data }));
