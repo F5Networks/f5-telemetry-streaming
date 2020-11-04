@@ -9,7 +9,7 @@ This section shows how you can export data from the Application Visibility and R
 The prerequisites for using TS with AVR include:
  
 - The AVR module must be provisioned 
-- You must have an Event Listener, including an an existing Log Publisher (see :ref:`eventlistener-ref` for instructions)
+- You must have an Event Listener, including an existing Log Publisher (see :ref:`eventlistener-ref` for instructions)
 - The Analytics profile for HTTP or TCP should be configured and assigned to the virtual server
 
 .. _avr-note:
