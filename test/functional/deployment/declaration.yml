@@ -26,23 +26,9 @@ request:
       flavor: F5-BIGIP-small
     - harness:
         _copy: request/hypervisor
-      name: bigip_14_0
-      software:
-        _copy: request/software/bigip_14_0
-      type: bigip
-      flavor: F5-BIGIP-small
-    - harness:
-        _copy: request/hypervisor
       name: bigip_14_1
       software:
         _copy: request/software/bigip_14_1
-      type: bigip
-      flavor: F5-BIGIP-small
-    - harness:
-        _copy: request/hypervisor
-      name: bigip_15_0
-      software:
-        _copy: request/software/bigip_15_0
       type: bigip
       flavor: F5-BIGIP-small
     - harness:
@@ -67,51 +53,33 @@ request:
         image: BIGIP-13.0.0.0.0.1650
       desired:
         branch: ''
-        build: 0.0.4
+        build: 0.0.5
         iso_file: ''
-        version: 13.1.1.4
-    bigip_14_0:
-      default:
-        force: false
-        image: BIGIP-13.0.0.0.0.1650
-      desired:
-        branch: ''
-        build: 0.0.3
-        iso_file: ''
-        version: 14.0.0.5
+        version: 13.1.3.4
     bigip_14_1:
       default:
         force: false
         image: BIGIP-13.0.0.0.0.1650
       desired:
         branch: ''
-        build: 0.0.2
+        build: 0.0.7
         iso_file: ''
-        version: 14.1.2.6
-    bigip_15_0:
-      default:
-        force: false
-        image: BIGIP-13.0.0.0.0.1650
-      desired:
-        branch: ''
-        build: 0.0.11
-        iso_file: ''
-        version: 15.0.1
+        version: 14.1.2.8
     bigip_15_1:
       default:
         force: false
         image: BIGIP-13.0.0.0.0.1650
       desired:
         branch: ''
-        build: 0.0.9
+        build: 0.0.6
         iso_file: ''
-        version: 15.1.0.2
+        version: 15.1.1
     bigip_16_0:
       default:
         force: false
         image: BIGIP-16.0.0-0.0.12
       desired:
         branch: ''
-        build: 0.0.12
+        build: 0.0.3
         iso_file: ''
-        version: 16.0.0
+        version: 16.0.0.1
