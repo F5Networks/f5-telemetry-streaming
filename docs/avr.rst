@@ -2,15 +2,15 @@
 
 Exporting data from AVR
 =======================
+This section shows how you can export data from the Application Visibility and Reporting (AVR) module to Telemetry Streaming.  To see more information on AVR, see the |analytics|.
 
-As of TS version 1.3.0, you can now export AVR data. The TS declaration will be the same but the Event Listener needs to be configured to allow TS to receive AVR data from the BIG-IP system. At a high level the prerequisites include:
+.. NOTE:: For Telemetry Streaming 1.17, we modified the configuration on this page to use an existing Telemetry Streaming *Log Publisher* as opposed to a static IP address. We also added a new, optional section for TS and AVR in a fanout configuration.
+
+The prerequisites for using TS with AVR include:
  
-- AVR module should be provisioned 
-- TS should have the Event Listener configured
-- AVR should be configured to send data to TS
+- The AVR module must be provisioned 
+- You must have an Event Listener, including an an existing Log Publisher (see :ref:`eventlistener-ref` for instructions)
 - The Analytics profile for HTTP or TCP should be configured and assigned to the virtual server
-
-To see more information on AVR, see the |analytics|.
 
 .. _avr-note:
 
@@ -18,22 +18,18 @@ To see more information on AVR, see the |analytics|.
 
 |
 
-Modify system logging configuration to update what gets logged by running the following commands in TMSH:
+Modifying AVR configuration to use the Log Publisher
+----------------------------------------------------
+To use AVR with Telemetry Streaming, you must modify the AVR logging configuration to point to the existing Log Publisher. If you do not have an existing log publisher, see :ref:`logsrc-ref` for guidance on creating one.
 
-For BIG-IP version 13.X: 
+Use the following TMSH command, but be sure to change **telemetry_publisher** to the name of your Log Publisher if your publisher has a different name.
+
 
 .. code-block:: bash
 
-    modify analytics global-settings { ecm-address 127.0.0.1 ecm-port 6514 use-ecm enabled use-offbox enabled }
-
-.. NOTE:: You may need to run the command ``bigstart restart avrds`` after running this command on BIG-IP version 13.X.
+    modify analytics global-settings { external-logging-publisher /Common/Shared/telemetry_publisher offbox-protocol hsl use-offbox enabled  }
 
 
-For BIG-IP version 14.X: 
-
-.. code-block:: bash
-
-    modify analytics global-settings { offbox-protocol tcp offbox-tcp-addresses add { 127.0.0.1 } offbox-tcp-port 6514 use-offbox enabled }
 
 |
 
@@ -44,6 +40,17 @@ Example output of AVR basic data:
 
 | 
 
+Optional: Configuring AVR and Telemetry Streaming in a fanout scenario
+``````````````````````````````````````````````````````````````````````
+If you want to configure AVR and Telemetry Streaming in a fanout configuration (where AVR can send to multiple destinations using the TS Log Publisher), you can add new Log Destinations to the existing Log Publisher.  For more information, see |hsldocs| in the AVR documentation. This includes configuration instructions using the BIG-IP Configuration utility. Note the Log Destination type must be **Remote High-Speed Log**.  The TS :ref:`Event Listener page<eventlistener-ref>` shows how to configure Log Destinations with AS3 and TMSH.
+
+If you need to add a Log Destination to an existing AS3 declaration (see :ref:`as3logging-ref`), you can simply add the new destination to the existing Log Publisher's **Destination** array (named **telemetry_publisher** in our example, and the AS3 declaration.
+
+|
+
+Collecting data
+---------------
+Use the following sections for instructions on collecting specific types of data.
 
 
 Collect HTTP data
@@ -170,8 +177,6 @@ Example AVR output for AFM:
 
     
 
-
-
 .. |analytics| raw:: html
 
    <a href="https://support.f5.com/kb/en-us/products/big-ip_analytics/manuals/product/analytics-implementations-13-1-0.html" target="_blank">BIG-IP Analytics Implementations guide</a>
@@ -185,4 +190,8 @@ Example AVR output for AFM:
 .. |afmpolicy| raw:: html
 
    <a href="https://techdocs.f5.com/kb/en-us/products/big-ip-afm/manuals/product/dos-firewall-implementations-13-1-0/4.html" target="_blank">BIG-IP AFM: Detecting and Preventing DNS DoS Attacks on a Virtual Server</a>
+
+.. |hsldocs| raw:: html
+
+   <a href="https://techdocs.f5.com/en-us/bigip-14-0-0/external-monitoring-of-big-ip-systems-implementations-14-0-0/configuring-remote-high-speed-logging.html" target="_blank">Configuring Remote High Speed Logging</a>
 
