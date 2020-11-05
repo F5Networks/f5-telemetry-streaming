@@ -4,7 +4,7 @@ Exporting data from AVR
 =======================
 This section shows how you can export data from the Application Visibility and Reporting (AVR) module to Telemetry Streaming.  To see more information on AVR, see the |analytics|.
 
-.. NOTE:: For Telemetry Streaming 1.17, we modified the configuration on this page to use an existing Telemetry Streaming *Log Publisher* as opposed to a static IP address. We also added a new, optional section for TS and AVR in a fanout configuration.
+.. NOTE:: The configuration on this page was modified to use an existing Telemetry Streaming *Log Publisher* as opposed to a static IP address. There is also a new, optional section for TS and AVR in a fanout configuration. This documentation change was made in Telemetry Streaming 1.16, but the configuration can be used with any TS version.
 
 The prerequisites for using TS with AVR include:
  
@@ -14,7 +14,7 @@ The prerequisites for using TS with AVR include:
 
 .. _avr-note:
 
-.. NOTE:: It is currently not possible to configure AVR to publish data to both Telemetry Streaming and BIG-IQ concurrently. Additionally, if a BIG-IP is managed by a BIG-IQ, and has Statistics Collection enabled, the entire AVR configuration of the BIG-IP will be overwritten to publish only to the BIG-IQ.
+.. IMPORTANT:: It is currently not possible to configure AVR to publish data to both Telemetry Streaming and BIG-IQ concurrently. Additionally, if a BIG-IP is managed by a BIG-IQ, and has Statistics Collection enabled, the entire AVR configuration of the BIG-IP will be overwritten to publish only to the BIG-IQ.
 
 |
 
