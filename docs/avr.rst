@@ -44,7 +44,7 @@ Optional: Configuring AVR and Telemetry Streaming in a fanout scenario
 ``````````````````````````````````````````````````````````````````````
 If you want to configure AVR and Telemetry Streaming in a fanout configuration (where AVR can send to multiple destinations using the TS Log Publisher), you can add new Log Destinations to the existing Log Publisher.  For more information, see |hsldocs| in the AVR documentation. This includes configuration instructions using the BIG-IP Configuration utility. Note the Log Destination type must be **Remote High-Speed Log**.  The TS :ref:`Event Listener page<eventlistener-ref>` shows how to configure Log Destinations with AS3 and TMSH.
 
-If you need to add a Log Destination to an existing AS3 declaration (see :ref:`as3logging-ref`), you can simply add the new destination to the existing Log Publisher's **Destination** array (named **telemetry_publisher** in our example, and the AS3 declaration.
+If you need to add a Log Destination to an existing AS3 declaration (see :ref:`as3logging-ref`), you can simply add the new destination to the existing Log Publisher's **Destination** array (named **telemetry_publisher** in our example), and the AS3 declaration.
 
 |
 
