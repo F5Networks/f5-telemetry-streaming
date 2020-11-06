@@ -14,6 +14,7 @@ const util = require('./util');
 const metadataUtil = require('./metadataUtil');
 const constants = require('./constants');
 const configWorker = require('./config');
+const configUtil = require('./configUtil');
 const DataFilter = require('./dataFilter').DataFilter;
 
 const CONSUMERS_DIR = constants.CONSUMERS_DIR;
@@ -38,50 +39,50 @@ let CONSUMERS = null;
                     ]
 */
 function loadConsumers(config) {
-    if (!Array.isArray(config)) {
+    if (config.length === 0) {
         logger.info('No consumer(s) to load, define in configuration first');
         return Promise.resolve([]);
     }
 
+    const enabledConsumers = config.filter(c => c.enable);
+    if (enabledConsumers.length === 0) {
+        logger.debug('No enabled consumer(s) to load');
+        return Promise.resolve([]);
+    }
+
     logger.debug(`Loading consumer specific plug-ins from ${CONSUMERS_DIR}`);
-    // eslint-disable-next-line
-    return Promise.all(config.map((consumerConfig) => {
-        if (consumerConfig.config.enable === false) {
-            return Promise.resolve(undefined);
+    const loadPromises = enabledConsumers.map(consumerConfig => new Promise((resolve) => {
+        const consumerType = consumerConfig.type;
+        // path.join removes './' from string, so we need to
+        // prepend it manually
+        const consumerDir = './'.concat(path.join(CONSUMERS_DIR, consumerType));
+        logger.debug(`Loading consumer ${consumerType} plug-in from ${consumerDir}`);
+        const consumerModule = util.moduleLoader.load(consumerDir);
+        if (consumerModule === null) {
+            resolve(undefined);
+        } else {
+            const consumer = {
+                name: consumerConfig.name,
+                id: consumerConfig.id,
+                config: util.deepCopy(consumerConfig),
+                consumer: consumerModule,
+                tracer: util.tracer.createFromConfig(CLASS_NAME, consumerConfig.traceName, consumerConfig),
+                filter: new DataFilter(consumerConfig)
+            };
+            consumer.config.allowSelfSignedCert = consumer.config.allowSelfSignedCert === undefined
+                ? !constants.STRICT_TLS_REQUIRED : consumer.config.allowSelfSignedCert;
+            metadataUtil.getInstanceMetadata(consumer)
+                .then((metadata) => {
+                    if (!util.isObjectEmpty(metadata)) {
+                        consumer.metadata = metadata;
+                    }
+                    // copy consumer's data
+                    resolve(consumer);
+                });
         }
-        return new Promise((resolve) => {
-            const consumerType = consumerConfig.type;
-            // path.join removes './' from string, so we need to
-            // prepend it manually
-            const consumerDir = './'.concat(path.join(CONSUMERS_DIR, consumerType));
-
-            logger.debug(`Loading consumer ${consumerType} plug-in from ${consumerDir}`);
-            const consumerModule = util.moduleLoader.load(consumerDir);
-            if (consumerModule === null) {
-                resolve(undefined);
-            } else {
-                const consumer = {
-                    name: consumerConfig.name,
-                    config: util.deepCopy(consumerConfig.config),
-                    consumer: consumerModule,
-                    tracer: util.tracer.createFromConfig(CLASS_NAME, consumerConfig.name, consumerConfig.config),
-                    filter: new DataFilter(consumerConfig)
-                };
-                consumer.config.allowSelfSignedCert = consumer.config.allowSelfSignedCert === undefined
-                    ? !constants.STRICT_TLS_REQUIRED : consumer.config.allowSelfSignedCert;
-
-                metadataUtil.getInstanceMetadata(consumer)
-                    .then((metadata) => {
-                        if (!util.isObjectEmpty(metadata)) {
-                            consumer.metadata = metadata;
-                        }
-                        // copy consumer's data
-                        resolve(consumer);
-                    });
-            }
-        });
-    }))
-        .then(consumers => consumers.filter(consumer => consumer !== undefined));
+    }));
+    return Promise.all(loadPromises)
+        .then(loadedConsumers => loadedConsumers.filter(c => c !== undefined));
 }
 
 /**
@@ -90,7 +91,7 @@ function loadConsumers(config) {
  * @returns {Set} set with loaded Consumers' types
  */
 function getLoadedConsumerTypes() {
-    if (CONSUMERS) {
+    if (CONSUMERS && CONSUMERS.length > 0) {
         return new Set(CONSUMERS.map(consumer => consumer.config.type));
     }
     return new Set();
@@ -118,27 +119,13 @@ function unloadUnusedModules(before) {
 
 // config worker change event
 configWorker.on('change', (config) => {
-    logger.debug('configWorker change event in consumers'); // helpful debug
-    let consumersConfig;
-    if (config && config[CLASS_NAME]) {
-        consumersConfig = config[CLASS_NAME];
-    }
+    logger.debug('configWorker change event in consumers');
+
+    const consumersToLoad = config.normalized ? configUtil.getTelemetryConsumers(config.normalized) : [];
 
     // timestamp to filed out-dated tracers
     const tracersTimestamp = new Date().getTime();
 
-    let consumersToLoad = [];
-    if (!consumersConfig) {
-        consumersToLoad = null;
-    } else {
-        Object.keys(consumersConfig).forEach((k) => {
-            consumersToLoad.push({
-                name: k,
-                type: consumersConfig[k].type,
-                config: consumersConfig[k]
-            });
-        });
-    }
     const typesBefore = getLoadedConsumerTypes();
     return loadConsumers(consumersToLoad)
         .then((consumers) => {

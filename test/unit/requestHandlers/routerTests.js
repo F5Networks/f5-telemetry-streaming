@@ -325,20 +325,31 @@ describe('Requests Router', () => {
         const spy = sinon.spy();
         requestRouter.on('register', spy);
         configWorker.emit('change', {
-            Controls: {
-                controls: {
-                    debug: true
-                }
+            normalized: {
+                components: [
+                    {
+                        id: 'uuid1',
+                        name: 'Controls',
+                        namespace: 'f5telemetry_default',
+                        class: 'Controls',
+                        debug: true
+                    }
+                ]
             }
         });
         assert.ok(spy.args[0][0] === requestRouter, 'should pass router instance');
         assert.strictEqual(spy.args[0][1], true, 'should pass debug state');
-
         configWorker.emit('change', {
-            Controls: {
-                controls: {
-                    debug: false
-                }
+            normalized: {
+                components: [
+                    {
+                        id: 'uuid1',
+                        name: 'Controls',
+                        namespace: 'f5telemetry_default',
+                        class: 'Controls',
+                        debug: false
+                    }
+                ]
             }
         });
         assert.ok(spy.args[1][0] === requestRouter, 'should pass router instance');

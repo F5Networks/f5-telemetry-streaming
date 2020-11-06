@@ -47,6 +47,7 @@
         "prom-client": "11.0.0",
         "request": "^2.88.2",
         "statsd-client": "^0.4.5",
+        "uuid": "^3.4.0",
         "tiny-request-router": "^1.2.2"
     },
     "devDependencies": {
@@ -69,6 +70,9 @@
         }
     },
     "comments": {
+        "dependencies": {
+            "uuid": "This package dropped support for older node versions starting v7.0.0. Their policy is supported node versions + one legacy version."
+        },
         "devDependencies": {
             "mocha": "This package dropped support for older node versions. Use v5.2.0 for Node v4 and v6.2.2 for Node v6."
         }

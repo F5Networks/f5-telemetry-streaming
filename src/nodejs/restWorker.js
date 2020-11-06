@@ -21,14 +21,27 @@ const deviceUtil = require('../lib/deviceUtil');
 const retryPromise = require('../lib/util').retryPromise;
 const persistentStorage = require('../lib/persistentStorage');
 const configWorker = require('../lib/config');
-const eventListener = require('../lib/eventListener'); // eslint-disable-line no-unused-vars
-const consumers = require('../lib/consumers'); // eslint-disable-line no-unused-vars
-const pullConsumers = require('../lib/pullConsumers'); // eslint-disable-line no-unused-vars
-const systemPoller = require('../lib/systemPoller'); // eslint-disable-line no-unused-vars
-const iHealthPoller = require('../lib/ihealth'); // eslint-disable-line no-unused-vars
+
+const configListenerModulesToLoad = [
+    '../lib/eventListener',
+    '../lib/consumers',
+    '../pullConsumers',
+    '../lib/systemPoller',
+    '../lib/ihealth'
+];
+
+configListenerModulesToLoad.forEach((module) => {
+    try {
+        // eslint-disable-next-line
+        require(module);
+    } catch (err) {
+        logger.exception('Unable to load required module', err);
+    }
+});
 
 const requestRouter = require('../lib/requestHandlers/router');
 require('../lib/requestHandlers/connections');
+
 
 /**
  * Rest Worker class processes user's requests and responsible for

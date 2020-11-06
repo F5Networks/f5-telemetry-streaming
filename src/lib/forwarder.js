@@ -34,7 +34,7 @@ function forwardData(dataCtx) {
                 event: consumer.filter.apply(dataCtx),
                 config: consumer.config,
                 tracer: consumer.tracer,
-                logger: logger.getChild(`${consumer.config.type}.${consumer.name}`),
+                logger: logger.getChild(`${consumer.config.type}.${consumer.traceName}`),
                 metadata: consumer.metadata
             };
             // place in try/catch

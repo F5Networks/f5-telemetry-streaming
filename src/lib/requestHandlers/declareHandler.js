@@ -51,7 +51,7 @@ DeclareEndpointHandler.prototype.getBody = function () {
 DeclareEndpointHandler.prototype.process = function () {
     let promise;
     if (this.getMethod() === 'POST') {
-        promise = configWorker.validateAndApply(this.restOperation.getBody());
+        promise = configWorker.processDeclaration(this.restOperation.getBody());
     } else if (this.getMethod() === 'GET') {
         promise = configWorker.getRawConfig();
     }

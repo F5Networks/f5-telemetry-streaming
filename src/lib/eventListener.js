@@ -16,6 +16,7 @@ const constants = require('./constants');
 const normalize = require('./normalize');
 const dataPipeline = require('./dataPipeline');
 const configWorker = require('./config');
+const configUtil = require('./configUtil');
 const properties = require('./properties.json');
 
 const tracers = require('./util').tracer;
@@ -26,7 +27,6 @@ const global = properties.global;
 const events = properties.events;
 const definitions = properties.definitions;
 
-const DEFAULT_PORT = constants.DEFAULT_EVENT_LISTENER_PORT;
 const CLASS_NAME = constants.CONFIG_CLASSES.EVENT_LISTENER_CLASS_NAME;
 
 const MAX_BUFFER_SIZE = 16 * 1024; // 16k chars
@@ -81,9 +81,11 @@ function EventListener(name, port, opts) {
  */
 EventListener.prototype.updateConfig = function (config) {
     this.tracer = config.tracer;
-    this.tags = config.tags || {};
+    this.tags = config.tags;
     this.filterFunc = config.filterFunc;
-    this.actions = config.actions || [];
+    this.actions = config.actions;
+    this.id = config.id;
+    this.destinationIds = config.destinationIds;
 };
 
 /**
@@ -370,7 +372,9 @@ EventListener.prototype._processData = function (data) {
         if (!this.filterFunc || this.filterFunc(normalizedData)) {
             const dataCtx = {
                 data: normalizedData,
-                type: normalizedData.telemetryEventCategory || constants.EVENT_TYPES.EVENT_LISTENER
+                type: normalizedData.telemetryEventCategory || constants.EVENT_TYPES.EVENT_LISTENER,
+                sourceId: this.id,
+                destinationIds: this.destinationIds
             };
             const p = dataPipeline.process(dataCtx, { tracer: this.tracer, actions: this.actions })
                 .catch(err => this.logger.exception('EventListener:_processData unexpected error from dataPipeline:process', err));
@@ -409,69 +413,68 @@ function buildFilterFunc(config) {
     };
 }
 
+function removeListener(listener, name) {
+    protocols.forEach((protocol) => {
+        const protocolListener = listener[protocol];
+        if (protocolListener) {
+            protocolListener.stop();
+        }
+    });
+    delete LISTENERS[name];
+}
+
 // config worker change event
 configWorker.on('change', (config) => {
     logger.debug('configWorker change event in eventListener'); // helpful debug
-
-    let eventListeners;
-    if (config && config[CLASS_NAME]) {
-        eventListeners = config[CLASS_NAME];
-    }
-    // in case when no listeners were declared
-    eventListeners = eventListeners || {};
-    // gather all keys together to iterate over them
-    const keys = new Set(Object.keys(eventListeners));
-    Object.keys(LISTENERS).forEach(key => keys.add(key));
-
+    config = config.normalized;
     // timestamp to find out-dated tracers
     const tracersTimestamp = new Date().getTime();
 
-    keys.forEach((lKey) => {
-        const lConfig = eventListeners[lKey];
-        const listener = LISTENERS[lKey];
+    const eventListeners = configUtil.getTelemetryListeners(config);
+    // remove listeners not defined in config
+    Object.keys(LISTENERS).forEach((key) => {
+        const existingListener = LISTENERS[key];
+        const configMatch = eventListeners.find(n => n.traceName === key);
+        if (!configMatch) {
+            removeListener(existingListener, key);
+        }
+    });
+
+    eventListeners.forEach((listenerFromConfig) => {
+        // use name (prefixed if namespace is present)
+        const name = listenerFromConfig.traceName;
+        const existingListener = LISTENERS[name];
         // no listener's config or it was disabled - remove it
-        if (!lConfig || lConfig.enable === false) {
-            if (listener) {
-                protocols.forEach((protocol) => {
-                    const protocolListener = listener[protocol];
-                    if (protocolListener) {
-                        protocolListener.stop();
-                    }
-                });
-                delete LISTENERS[lKey];
-            }
+        if (listenerFromConfig.enable === false && existingListener) {
+            removeListener(existingListener, name);
             return;
         }
-        // pre-create all variables
-        const port = lConfig.port || DEFAULT_PORT;
-        const tags = lConfig.tag || {};
-        const actions = lConfig.actions || [];
-        const tracer = tracers.createFromConfig(CLASS_NAME, lKey, lConfig);
-        const filterFunc = buildFilterFunc(lConfig);
 
         protocols.forEach((protocol) => {
-            let protocolListener = listener ? listener[protocol] : undefined;
+            let listenerInstance = existingListener ? existingListener[protocol] : undefined;
             const opts = {
                 protocol,
-                tags,
-                actions,
-                tracer,
-                filterFunc
+                tags: listenerFromConfig.tag,
+                actions: listenerFromConfig.actions,
+                tracer: tracers.createFromConfig(CLASS_NAME, name, listenerFromConfig),
+                filterFunc: buildFilterFunc(listenerFromConfig),
+                id: listenerFromConfig.id,
+                destinationIds: config.mappings[listenerFromConfig.id]
             };
 
             // when port is the same - no sense to restart listener and drop connections
-            if (protocolListener && protocolListener.port === port) {
-                logger.debug(`Updating event listener '${lKey}' protocol '${protocol}'`);
-                protocolListener.updateConfig(opts);
+            if (listenerInstance && listenerInstance.port === listenerFromConfig.port) {
+                logger.debug(`Updating event listener '${name}' protocol '${protocol}'`);
+                listenerInstance.updateConfig(opts);
             } else {
                 // stop existing listener to free the port
-                if (protocolListener) {
-                    protocolListener.stop();
+                if (listenerInstance) {
+                    listenerInstance.stop();
                 }
-                protocolListener = new EventListener(lKey, port, opts);
-                protocolListener.start();
-                LISTENERS[lKey] = LISTENERS[lKey] || {};
-                LISTENERS[lKey][protocol] = protocolListener;
+                listenerInstance = new EventListener(name, listenerFromConfig.port, opts);
+                listenerInstance.start();
+                LISTENERS[name] = LISTENERS[name] || {};
+                LISTENERS[name][protocol] = listenerInstance;
             }
         });
     });

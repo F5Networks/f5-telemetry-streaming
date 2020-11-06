@@ -58,7 +58,7 @@ describe('DeclareHandler', () => {
         restOpMock.method = 'POST';
         restOpMock.body = { class: 'Telemetry' };
 
-        sinon.stub(configWorker, 'validateAndApply').resolves(testUtil.deepCopy(expectedConfig));
+        sinon.stub(configWorker, 'processDeclaration').resolves(testUtil.deepCopy(expectedConfig));
         return requestHandler.process()
             .then((handler) => {
                 assert.ok(handler === requestHandler, 'should return reference to origin instance');

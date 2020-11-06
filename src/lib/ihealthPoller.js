@@ -16,8 +16,8 @@ const deviceUtil = require('./deviceUtil');
 const ihUtil = require('./ihealthUtil');
 const persistentStorage = require('./persistentStorage').persistentStorage;
 const configWorker = require('./config');
+const configUtil = require('./configUtil');
 
-const SYSTEM_CLASS_NAME = constants.CONFIG_CLASSES.SYSTEM_CLASS_NAME;
 const IHEALTH_POLLER_CLASS_NAME = constants.CONFIG_CLASSES.IHEALTH_POLLER_CLASS_NAME;
 const PERSISTENT_STORAGE_KEY = 'ihealth';
 
@@ -80,21 +80,25 @@ function isQkviewValid(qkview) {
  *
  * @class
  *
- * @param {String}  sysName      - System declaration name
- * @param {String}  [ihName]     - iHealth Poller declaration name
- * @param {Boolean} [testOnly]   - 'true' to test pipeline only
+ * @param {String}  namespaceName       - Namespace name
+ * @param {String}  sysName             - System declaration name
+ * @param {String}  [ihName]            - iHealth Poller declaration name
+ * @param {Boolean} [testOnly]          - 'true' to test pipeline only
  *
- * @property {String}  sysName   - System declaration name
- * @property {String}  ihName    - iHealth Poller declaration name
- * @property {Object}  config    - config
- * @property {String}  state     - current state
+ * @property {String}  sysName          - System declaration name
+ * @property {String}  ihName           - iHealth Poller declaration name
+ * @property {String}  namespaceName    - Namespace name
+ * @property {Object}  config           - config
+ * @property {String}  state            - current state
  * @property {IHealthPoller~dataCallback} dataCallback - data callback
  */
-function IHealthPoller(sysName, ihName, testOnly) {
+function IHealthPoller(namespaceName, sysName, ihName, testOnly) {
     this.sysName = sysName;
     this.ihName = ihName;
+    this.namespace = namespaceName;
     this.config = null;
     this.dataCallback = null;
+    this.destinationIds = null;
 
     this._isTestOnly = testOnly === undefined ? false : testOnly;
     this._timerID = null;
@@ -220,7 +224,7 @@ IHealthPoller.prototype._saveStorageState = function () {
  * @returns {String} instance key
  */
 IHealthPoller.prototype.getKey = function () {
-    return IHealthPoller.getKey(this.sysName, this.ihName, this.isTestOnly());
+    return IHealthPoller.getKey(this.namespace, this.sysName, this.ihName, this.isTestOnly());
 };
 
 /**
@@ -379,22 +383,23 @@ IHealthPoller.prototype.fetchConfigs = function () {
 
     return configWorker.getConfig()
         .then((config) => {
-            config = config.parsed || {};
-            const searchRet = IHealthPoller.getConfig(config, this.sysName, this.ihName);
-            const system = searchRet[0];
-            const ihPoller = searchRet[1];
-
-            if (util.isObjectEmpty(system) || util.isObjectEmpty(ihPoller)) {
+            config = config.normalized || {};
+            // System name is required.
+            // iHealthPoller name is optional.
+            // TODO: Update to also filter on Namespaces
+            const filteredConfigs = configUtil.getTelemetryIHealthPollers(config).filter(
+                ih => ih.system.name === this.sysName
+            );
+            if (this.ihName) {
+                filteredConfigs.filter(s => s.iHealth.name === this.ihName);
+            }
+            if (util.isObjectEmpty(filteredConfigs)) {
                 return Promise.reject(new Error('System or iHealth Poller declaration not found'));
             }
-
-            return Promise.all([
-                deviceUtil.decryptAllSecrets(system),
-                deviceUtil.decryptAllSecrets(ihPoller)
-            ]);
+            return deviceUtil.decryptAllSecrets(filteredConfigs[0]);
         })
-        .then((configs) => {
-            this.config = IHealthPoller.mergeConfigs(configs[0], configs[1]);
+        .then((decryptedConfig) => {
+            this.config = decryptedConfig;
         })
         .catch((err) => {
             throw new Error(`fetchConfigs: ${err}`);
@@ -886,18 +891,24 @@ IHealthPoller.instances = {};
  *
  * @private
  *
- * @param {String} sysName     - System declaration name
- * @param {String} ihName      - iHealth declaration name
- * @param {Boolean} [testOnly] - 'true' to test pipeline only
+ * @param {String} namespace    - Namespace
+ * @param {String} sysName      - System declaration name
+ * @param {String} [ihName]     - iHealth declaration name
+ * @param {Boolean} [testOnly]  - 'true' to test pipeline only
  *
  * @returns {String} iHealth poller key
  */
-IHealthPoller.getKey = function (sysName, ihName, testOnly) {
+IHealthPoller.getKey = function (namespace, sysName, ihName, testOnly) {
     ihName = ihName || '';
+    namespace = namespace || '';
     if (ihName) {
         sysName = `${sysName}.${ihName}`;
     }
-    const key = `${sysName}_ihp${sysName.length}${ihName.length}`;
+    let namespacePrefix = '';
+    if (namespace && namespace !== constants.DEFAULT_UNNAMED_NAMESPACE) {
+        namespacePrefix = `${namespace}::`;
+    }
+    const key = `${namespacePrefix}${sysName}_ihp${sysName.length}${ihName.length}`;
     const suffix = testOnly ? '_test' : '';
     return `${key}${suffix}`;
 };
@@ -905,6 +916,7 @@ IHealthPoller.getKey = function (sysName, ihName, testOnly) {
 /**
  * Get iHealth poller
  *
+ * @param {String} namespace   - Namespace name
  * @param {String} sysName     - System declaration name
  * @param {String} ihName      - iHealth declaration name
  * @param {Boolean} [testOnly] - 'true' to test pipeline only
@@ -912,21 +924,22 @@ IHealthPoller.getKey = function (sysName, ihName, testOnly) {
  * @returns {module:ihealth~IHealthPoller | undefined} iHealth Poller instance
  *     if exists else undefined
  */
-IHealthPoller.get = function (sysName, ihName, testOnly) {
-    return IHealthPoller.instances[IHealthPoller.getKey(sysName, ihName, testOnly)];
+IHealthPoller.get = function (namespace, sysName, ihName, testOnly) {
+    return IHealthPoller.instances[IHealthPoller.getKey(namespace, sysName, ihName, testOnly)];
 };
 
 /**
  * Create new iHealth poller
  *
- * @param {String} sysName     - System declaration name
- * @param {String} ihName      - iHealth declaration name
- * @param {Boolean} [testOnly] - 'true' to test pipeline only
+ * @param {String} namespaceName    - Namespace name
+ * @param {String} sysName          - System declaration name
+ * @param {String} [ihName]         - iHealth declaration name
+ * @param {Boolean} [testOnly]      - 'true' to test pipeline only
  *
  * @returns {module:ihealth~IHealthPoller} iHealth Poller instance
  */
-IHealthPoller.create = function (sysName, ihName, testOnly) {
-    const poller = new IHealthPoller(sysName, ihName, testOnly);
+IHealthPoller.create = function (namespaceName, sysName, ihName, testOnly) {
+    const poller = new IHealthPoller(namespaceName, sysName, ihName, testOnly);
     IHealthPoller.instances[poller.getKey()] = poller;
     return poller;
 };
@@ -937,90 +950,6 @@ IHealthPoller.create = function (sysName, ihName, testOnly) {
  */
 IHealthPoller.remove = function (poller) {
     delete IHealthPoller.instances[poller.getKey()];
-};
-
-/**
- * Merge System and iHealthPoller configs
- *
- * @param {Object} system        - System declaration
- * @param {Object} ihPoller - iHealth Poller declaration
- *
- * @returns {Object} config
- */
-IHealthPoller.mergeConfigs = function (system, ihPoller) {
-    const config = {
-        enable: Boolean(system.enable && ihPoller.enable),
-        trace: Boolean(system.trace && ihPoller.trace),
-        system: {
-            host: system.host,
-            connection: {
-                port: system.port,
-                protocol: system.protocol,
-                allowSelfSignedCert: system.allowSelfSignedCert
-            },
-            credentials: {
-                username: system.username,
-                passphrase: system.passphrase
-            }
-        },
-        iHealth: {
-            credentials: {
-                username: ihPoller.username,
-                passphrase: ihPoller.passphrase
-            },
-            downloadFolder: ihPoller.downloadFolder,
-            interval: {
-                timeWindow: {
-                    start: ihPoller.interval.timeWindow.start,
-                    end: ihPoller.interval.timeWindow.end
-                },
-                frequency: ihPoller.interval.frequency,
-                day: ihPoller.interval.day
-            }
-        }
-    };
-    const ihProxy = ihPoller.proxy || {};
-    config.iHealth.proxy = {
-        connection: {
-            host: ihProxy.host,
-            port: ihProxy.port,
-            protocol: ihProxy.protocol,
-            allowSelfSignedCert: ihProxy.allowSelfSignedCert
-        },
-        credentials: {
-            username: ihProxy.username,
-            passphrase: ihProxy.passphrase
-        }
-    };
-    return config;
-};
-
-/**
-* Get System and iHealth Poller configs
-*
-* @param {Object} config         - parsed and formatted config
-* @param {Object} sysName        - System declaration name
-* @param {Object} [ihPollerName] - iHealth Poller declaration name
-*
-* @returns {Object} config
-*/
-IHealthPoller.getConfig = function (config, sysName, ihPollerName) {
-    config = config || {};
-    const systems = config[SYSTEM_CLASS_NAME] || {};
-    const ihPollers = config[IHEALTH_POLLER_CLASS_NAME] || {};
-    const system = systems[sysName];
-    let ihPoller;
-
-    if (!util.isObjectEmpty(system)) {
-        if (ihPollerName) {
-            ihPoller = ihPollers[ihPollerName];
-        } else if (typeof system.iHealthPoller === 'string') {
-            ihPoller = ihPollers[system.iHealthPoller];
-        } else {
-            ihPoller = system.iHealthPoller;
-        }
-    }
-    return [system, ihPoller];
 };
 
 /**

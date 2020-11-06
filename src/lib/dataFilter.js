@@ -47,7 +47,7 @@ DataFilter.prototype.apply = function (dataCtx) {
  */
 DataFilter.prototype._applyGlobalFilters = function () {
     // tmstats is only supported by Splunk legacy until users can specify desired tables
-    if (this._consumerConfig.type !== 'Splunk' || this._consumerConfig.config.format !== 'legacy') {
+    if (this._consumerConfig.type !== 'Splunk' || this._consumerConfig.format !== 'legacy') {
         this.excludeList = Object.assign(this.excludeList, { tmstats: true });
     }
 };

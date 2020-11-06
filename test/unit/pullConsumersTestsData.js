@@ -38,7 +38,7 @@ module.exports = {
                 }
             },
             consumerName: 'My_Pull_Consumer',
-            expectedResponse: [{ mockedResponse: { pollerName: 'My_System_Poller::My_System_Poller' } }]
+            expectedResponse: [{ mockedResponse: { pollerName: 'My_System_Poller' } }]
         },
         // TEST RELATED DATA STARTS HERE
         {
@@ -63,8 +63,8 @@ module.exports = {
             },
             consumerName: 'My_Pull_Consumer',
             expectedResponse: [
-                { mockedResponse: { pollerName: 'My_System_Poller::My_System_Poller' } },
-                { mockedResponse: { pollerName: 'My_Second_System_Poller::My_Second_System_Poller' } }
+                { mockedResponse: { pollerName: 'My_Second_System_Poller' } },
+                { mockedResponse: { pollerName: 'My_System_Poller' } }
             ]
         },
         // TEST RELATED DATA STARTS HERE
@@ -87,7 +87,7 @@ module.exports = {
             },
             consumerName: 'My_Pull_Consumer',
             expectedResponse: [
-                { mockedResponse: { pollerName: 'My_System_Poller::My_System_Poller' } }
+                { mockedResponse: { pollerName: 'My_System_Poller' } }
             ]
         },
         // TEST RELATED DATA STARTS HERE
@@ -114,8 +114,24 @@ module.exports = {
             },
             consumerName: 'My_Pull_Consumer',
             expectedResponse: [
-                { mockedResponse: { pollerName: 'My_Second_System_Poller::My_Second_System_Poller' } }
+                { mockedResponse: { pollerName: 'My_Second_System_Poller' } }
             ]
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should fail if there is no configured pull consumer',
+            declaration: {
+                class: 'Telemetry',
+                My_System_Poller: {
+                    class: 'Telemetry_System_Poller'
+                },
+                My_System: {
+                    class: 'Telemetry_System',
+                    systemPoller: ['My_System_Poller']
+                }
+            },
+            consumerName: 'My_Pull_Consumer',
+            errorRegExp: /No configured Pull Consumers found/
         },
         // TEST RELATED DATA STARTS HERE
         {
@@ -128,10 +144,15 @@ module.exports = {
                 My_System: {
                     class: 'Telemetry_System',
                     systemPoller: ['My_System_Poller']
+                },
+                My_Pull_Consumer: {
+                    class: 'Telemetry_Pull_Consumer',
+                    type: 'default',
+                    systemPoller: 'My_System_Poller'
                 }
             },
-            consumerName: 'My_Pull_Consumer',
-            errorRegExp: /Pull Consumer with name 'My_Pull_Consumer' doesn't exist/
+            consumerName: 'Cannot_Find_Consumer',
+            errorRegExp: /Pull Consumer with name 'Cannot_Find_Consumer' doesn't exist/
         },
         // TEST RELATED DATA STARTS HERE
         {

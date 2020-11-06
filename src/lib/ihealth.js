@@ -12,13 +12,14 @@ const errors = require('./errors');
 const logger = require('./logger');
 const constants = require('./constants');
 const util = require('./util');
+const configUtil = require('./configUtil');
+const deviceUtil = require('./deviceUtil');
 const configWorker = require('./config');
 const iHealthPoller = require('./ihealthPoller');
 const dataPipeline = require('./dataPipeline');
 const normalize = require('./normalize');
 const properties = require('./properties.json').ihealth;
 
-const SYSTEM_CLASS_NAME = constants.CONFIG_CLASSES.SYSTEM_CLASS_NAME;
 const IHEALTH_POLLER_CLASS_NAME = constants.CONFIG_CLASSES.IHEALTH_POLLER_CLASS_NAME;
 
 /** @module ihealth */
@@ -49,6 +50,9 @@ function process(poller, data, other) {
     normalized.telemetryEventCategory = constants.EVENT_TYPES.IHEALTH_POLLER;
     // end inject service data
 
+    // inject mapping IDs
+    normalized.sourceId = poller.config.id;
+    normalized.destinationIds = poller.config.destinationIds;
     const tracer = poller.getTracer();
     if (tracer) {
         tracer.write(JSON.stringify(normalized, null, 4));
@@ -106,17 +110,16 @@ function getCurrentState() {
 function startPoller(systemName, pollerName) {
     return configWorker.getConfig()
         .then((config) => {
-            config = config.parsed || {};
-            const searchRet = iHealthPoller.getConfig(config, systemName, pollerName);
-            const system = searchRet[0];
-            const ihPoller = searchRet[1];
+            config = config.normalized || {};
 
-            if (!(system && ihPoller)) {
+            // Check if requested components exist
+            const ihPollerConfig = getRequestedIHealthPoller(config, systemName, pollerName);
+            if (util.isObjectEmpty(ihPollerConfig)) {
                 throw new errors.ObjectNotFoundInConfigError('iHealth Poller declaration not found.');
             }
-
             const state = {};
-            let ihInstance = iHealthPoller.get(systemName, pollerName, true);
+            const namespaceName = undefined; // TODO: Update once Namespacing is available
+            let ihInstance = iHealthPoller.get(namespaceName, systemName, pollerName, true);
 
             if (ihInstance) {
                 state.runningAlready = true;
@@ -125,10 +128,14 @@ function startPoller(systemName, pollerName) {
                 state.created = true;
                 state.message = 'iHealth poller created. See logs for current progress.';
 
-                ihInstance = iHealthPoller.create(systemName, pollerName, true);
+                ihInstance = iHealthPoller.create(config.namespace, systemName, pollerName, true);
+                // can decrypt here
                 ihInstance.dataCallback = safeProcess;
-                ihInstance.process()
-                    .catch((err) => {
+                deviceUtil.decryptAllSecrets(ihInstance.config)
+                    .then((decryptedConf) => {
+                        ihInstance.config = decryptedConf;
+                        ihInstance.process();
+                    }).catch((err) => {
                         logger.exception('processClientRequest: iHealthPoller.process error', err);
                         return ihInstance.removeAllData();
                     });
@@ -138,6 +145,40 @@ function startPoller(systemName, pollerName) {
             state.iHealthDeclName = pollerName || undefined;
             return state;
         });
+}
+
+function getEnabledPollerConfigs(originalConfig, includeDisabled) {
+    const pollers = configUtil.getTelemetryIHealthPollers(originalConfig);
+    if (includeDisabled) {
+        return pollers;
+    }
+    return pollers.filter(p => p.enable);
+}
+
+/**
+ * Fetches the requested iHealthPoller config
+ *
+ * @param {Object} originalConfig   - Saved configuration
+ * @param {String} systemName       - System name
+ * @param {String} [pollerName]     - iHealthPoller name
+ *
+ * @returns {Object} IHealthPoller configuration, or empty object
+ */
+function getRequestedIHealthPoller(originalConfig, systemName, pollerName) {
+    const iHealthPollers = configUtil.getTelemetryIHealthPollers(originalConfig);
+    // Check if Poller and System name provided first
+    if (pollerName) {
+        // Check if exists, and associated
+        const ihPoller = iHealthPollers.find(ih => ih.iHealth.name === pollerName);
+        if (ihPoller && ihPoller.system.name === systemName) {
+            return ihPoller;
+        }
+    }
+    // Locate the IHealthPoller from the System
+    const system = configUtil.getTelemetrySystems(originalConfig).find(
+        s => s.name === systemName
+    ) || {};
+    return iHealthPollers.find(ihp => ihp.id === system.iHealthPoller) || {};
 }
 
 // config worker change event
@@ -150,24 +191,15 @@ configWorker.on('change', (config) => {
     // timestamp to find out-dated tracers
     const tracersTimestamp = new Date().getTime();
 
-    config = config || {};
-    const systems = config[SYSTEM_CLASS_NAME] || {};
+    // TODO: once 'normalized' is the only config emitted, update 'config.normalized' -> 'config'
+    config = (config.normalized || {});
+    const iHealthPollers = getEnabledPollerConfigs(config);
 
-    Object.keys(systems).forEach((sysKey) => {
-        const searchRet = iHealthPoller.getConfig(config, sysKey);
-        const sysConf = searchRet[0];
-        const ihConf = searchRet[1];
-
-        if (util.isObjectEmpty(ihConf)) {
-            return;
-        }
-        const pollerConf = iHealthPoller.mergeConfigs(sysConf, ihConf);
-        if (!pollerConf.enable) {
-            return;
-        }
-
-        let baseMsg = `iHealth Poller for System "${sysKey}"`;
-        let ihInstance = iHealthPoller.get(sysKey);
+    iHealthPollers.forEach((iHealthPollerConfig) => {
+        const system = iHealthPollerConfig.system;
+        let baseMsg = `iHealth Poller for System "${system.name}"`;
+        const namespaceName = undefined; // TODO: Update once Namespacing is available
+        let ihInstance = iHealthPoller.get(namespaceName, system.name);
 
         if (ihInstance) {
             baseMsg = `Updating ${baseMsg}`;
@@ -180,8 +212,9 @@ configWorker.on('change', (config) => {
 
         logger.info(baseMsg);
 
-        ihInstance = iHealthPoller.create(sysKey);
-        ihInstance.config = pollerConf;
+        ihInstance = iHealthPoller.create(iHealthPollerConfig.namespace, system.name);
+        ihInstance.config = iHealthPollerConfig;
+        ihInstance.destinationIds = config.mappings[iHealthPollerConfig.id];
         ihInstance.dataCallback = safeProcess;
         ihInstance.getTracer();
         pollers[ihInstance.getKey()] = ihInstance;

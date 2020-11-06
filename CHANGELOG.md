@@ -7,6 +7,7 @@ Changes to this project are documented in this file. More detail and links can b
 ### Changed
 - AUTOTOOL-1874: Update npm packages (ajv from v6.12.4 to v6.12.6, applicationinsights from v1.8.6 to v1.8.7, aws-sdk from v2.749.0 to 2.775.0)
 - AUTOTOOL-1961: Include _ResourceId if available for Azure Log Analytics consumer. Also, metadata calls are now only happening upon consumer(s) load.
+- AUTOTOOL-1833 and AUTOTOOL-1908: Update declaration config parsing to use new normalized configs for components
 ### Removed
 
 ## 1.15.0
