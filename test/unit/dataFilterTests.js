@@ -45,9 +45,7 @@ describe('Data Filter', () => {
         it('should not ignore tmstats if consumer is Splunk legacy', () => {
             const consumerConfig = {
                 type: 'Splunk',
-                config: {
-                    format: 'legacy'
-                }
+                format: 'legacy'
             };
             const data = {
                 data: {

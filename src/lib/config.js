@@ -11,20 +11,18 @@
 const EventEmitter = require('events');
 const nodeUtil = require('util');
 
-const declValidator = require('./declarationValidator');
 const deviceUtil = require('./deviceUtil');
 const logger = require('./logger');
 const persistentStorage = require('./persistentStorage').persistentStorage;
 const util = require('./util');
+const configUtil = require('./configUtil');
 const TeemReporter = require('./teemReporter').TeemReporter;
-
-const CONTROLS_CLASS_NAME = require('./constants').CONFIG_CLASSES.CONTROLS_CLASS_NAME;
-const CONTROLS_PROPERTY_NAME = require('./constants').CONTROLS_PROPERTY_NAME;
 
 const PERSISTENT_STORAGE_KEY = 'config';
 const BASE_CONFIG = {
     raw: {},
-    parsed: {}
+    parsed: {},
+    normalized: { components: [], mappings: {} }
 };
 
 /**
@@ -35,7 +33,7 @@ const BASE_CONFIG = {
  * @event change - config was validated and can be propagated
  */
 function ConfigWorker() {
-    this.validator = declValidator.getValidator();
+    this.validator = configUtil.getValidator();
     this.teemReporter = new TeemReporter();
 }
 
@@ -48,7 +46,38 @@ nodeUtil.inherits(ConfigWorker, EventEmitter);
  * @param {Object} newConfig - new config
  */
 ConfigWorker.prototype.setConfig = function (newConfig) {
-    return this._notifyConfigChange(newConfig);
+    return this.upgradeConfiguration(newConfig)
+        .then(upgradedConfig => this._notifyConfigChange(upgradedConfig));
+};
+
+/**
+ * TS 1.16.0 introduced the 'normalized' property on the configuration object.
+ * Configurations saved prior to 1.16.0 will need to have this property set. Ensure it is set.
+ *
+ * @param {Object} config           - Configuration object
+ * @param {Object} [config.parsed]  - Parsed configuration
+ *
+ * @returns {Promise} Promise resolved with upgraded config
+ */
+ConfigWorker.prototype.upgradeConfiguration = function (config) {
+    if (util.isObjectEmpty(config)) {
+        return Promise.resolve(util.deepCopy(BASE_CONFIG));
+    }
+
+    if (config.normalized) {
+        return Promise.resolve(config);
+    }
+
+    return this.expandConfig(util.deepCopy(config.raw))
+        .then(expandedConfig => configUtil.normalizeConfig(expandedConfig))
+        .then((normalizedConfig) => {
+            config.normalized = normalizedConfig;
+            return this.saveConfig(config);
+        })
+        .then(() => {
+            logger.debug('Upgraded saved configuration to have \'normalized\' configuration');
+            return this.getConfig();
+        });
 };
 
 /**
@@ -60,18 +89,23 @@ ConfigWorker.prototype.setConfig = function (newConfig) {
  * @emits ConfigWorker#change
  */
 ConfigWorker.prototype._notifyConfigChange = function (newConfig) {
-    // deep copy parsed config
-    let parsedConfig;
-    if (newConfig && newConfig.parsed) {
-        parsedConfig = util.deepCopy(newConfig.parsed);
-    } else {
-        throw new Error('_notifyConfigChange() Missing parsed config.');
+    if (!newConfig || !newConfig.parsed || !newConfig.normalized) {
+        throw new Error('_notifyConfigChange() Missing required config.');
     }
+    // use copy of parsed config
     // handle passphrases first - decrypt, download, etc.
-    return deviceUtil.decryptAllSecrets(parsedConfig)
-        .then((config) => {
+    return Promise.all([
+        deviceUtil.decryptAllSecrets(newConfig.parsed),
+        deviceUtil.decryptAllSecrets(newConfig.normalized)
+    ])
+        .then((decryptedConfig) => {
             // copy config to avoid changes from listeners
-            this.emit('change', util.deepCopy(config));
+            // Emit 'parsed' and 'normalized' until all components can accept 'normalized' version of config
+            // TODO: once all components accept 'normalized' version of config, only emit 'normalized' config
+            this.emit('change', {
+                parsed: decryptedConfig[0],
+                normalized: decryptedConfig[1]
+            });
         })
         .catch((err) => {
             logger.error(`notifyConfigChange error: ${err}`);
@@ -85,9 +119,9 @@ ConfigWorker.prototype._notifyConfigChange = function (newConfig) {
  */
 ConfigWorker.prototype.loadConfig = function () {
     return this.getConfig()
-        .then((config) => {
+        .then(config => this.setConfig(config))
+        .then(() => {
             logger.info('Application config loaded');
-            return this.setConfig(config).then(() => config);
         })
         .catch((err) => {
             logger.exception('Unexpected error on attempt to load application state', err);
@@ -121,12 +155,44 @@ ConfigWorker.prototype.getConfig = function () {
     // persistentStorage.get returns data copy
     return persistentStorage.get(PERSISTENT_STORAGE_KEY)
         .then((data) => {
+            let config = util.deepCopy(BASE_CONFIG);
+
             if (typeof data === 'undefined') {
                 logger.debug(`persistentStorage did not have a value for ${PERSISTENT_STORAGE_KEY}`);
+            } else if (!util.isObjectEmpty(data.raw)) {
+                // NOTE: data.parsed would only be available for legacy format (< v1.16 )
+                // starting 1.16, data.parsed is replaced by data.normalized
+                config = data;
             }
-            return (typeof data === 'undefined'
-                || typeof data.parsed === 'undefined') ? util.deepCopy(BASE_CONFIG) : data;
+            return config;
         });
+};
+
+/**
+ * Format config (legacy) for easier consumption
+ * Formats data by class
+ *
+ * @param {Object} data - data to format
+ *
+ * @returns {Object} Returns the formatted config
+ */
+ConfigWorker.prototype.formatConfig = function (data) {
+    const ret = {};
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+        // assuming a flat declaration where each object contains a class
+        // if that assumption changes this will need to be modified
+        Object.keys(data).forEach((k) => {
+            const v = data[k];
+            // check if value for v is an object that contains a class
+            if (typeof v === 'object' && v.class) {
+                if (!ret[v.class]) {
+                    ret[v.class] = {};
+                }
+                ret[v.class][k] = v;
+            }
+        });
+    }
+    return ret;
 };
 
 /**
@@ -140,7 +206,7 @@ ConfigWorker.prototype.getConfig = function () {
  */
 ConfigWorker.prototype.validate = function (data, context) {
     if (this.validator) {
-        return declValidator.validate(this.validator, data, context)
+        return configUtil.validate(this.validator, data, context)
             .catch((err) => {
                 err.code = 'ValidationError';
                 return Promise.reject(err);
@@ -150,19 +216,34 @@ ConfigWorker.prototype.validate = function (data, context) {
 };
 
 /**
- * Validate JSON data against config schema and apply it to current app
+ * Performs additional processing for config and returns an expanded version
+ * (e.g. assign property defaults)
+ *
+ * @private
+ * @param {Object} rawConfig     - config to expand
+ *
+ * @returns {Object} Promise which is resolved with the expanded config
+ */
+ConfigWorker.prototype.expandConfig = function (rawConfig) {
+    return this.validate(rawConfig, { expand: true }); // set flag for additional decl processing
+};
+
+/**
+ * Process incoming, user provided declaration
+ * Validate JSON data against config schema, parse it and apply it to current app
  *
  * @public
  * @param {Object} data - data to validate against config schema
  *
- * @returns {Object} Promise with validate config resolved on success
+ * @returns {Object} Promise with validated config (not the parsed one) resolved on success
  */
-ConfigWorker.prototype.validateAndApply = function (data) {
+ConfigWorker.prototype.processDeclaration = function (data) {
     data = data || {};
     let validatedConfig = {};
     const configToSave = {
         raw: {},
-        parsed: {}
+        parsed: {},
+        normalized: {}
     };
     logger.debug(`Configuration to process: ${util.stringify(data)}`);
 
@@ -173,16 +254,22 @@ ConfigWorker.prototype.validateAndApply = function (data) {
         .then((config) => {
             validatedConfig = config;
             configToSave.raw = util.deepCopy(validatedConfig);
-
             logger.debug('Expanding configuration');
-            return this.validate(data, { expand: true }); // set flag for additional decl processing
+            return this.expandConfig(data);
         })
         .then((expandedConfig) => {
-            configToSave.parsed = util.formatConfig(expandedConfig);
-
             logger.debug('Configuration successfully validated');
+            configToSave.parsed = this.formatConfig(expandedConfig);
+            return configUtil.normalizeConfig(util.deepCopy(expandedConfig));
+        })
+        .then((normalizedConfig) => {
+            // config.normalized that we save is a config that is
+            // - validated against schema decl
+            // - expanded with schema defaults
+            // - polymorphic components like poller, systems and endpoints are normalized
+            // - converted to the format with ids for lookup
+            configToSave.normalized = normalizedConfig;
             logger.debug(`Configuration to save: ${util.stringify(configToSave)}`);
-
             return this.saveConfig(configToSave);
         })
         .then(() => this.getConfig())
@@ -216,7 +303,7 @@ try {
 
 // config worker change event, should be first in the handlers chain
 configWorker.on('change', (config) => {
-    const settings = util.getDeclarationByName(config, CONTROLS_CLASS_NAME, CONTROLS_PROPERTY_NAME);
+    const settings = configUtil.getControls(config);
     if (util.isObjectEmpty(settings)) {
         return;
     }

@@ -13,10 +13,13 @@ const cloneDeep = require('lodash/cloneDeep');
 const clone = require('lodash/clone');
 const mergeWith = require('lodash/mergeWith');
 const trim = require('lodash/trim');
+const objectGet = require('lodash/get');
 const fs = require('fs');
 const net = require('net');
 const path = require('path');
 const request = require('request');
+// deep require support is deprecated for versions 7+ (requires node8+)
+const uuidv4 = require('uuid/v4');
 
 const constants = require('./constants');
 const logger = require('./logger');
@@ -664,6 +667,7 @@ const VERSION_COMPARATORS = ['==', '===', '<', '<=', '>', '>=', '!=', '!=='];
 module.exports = {
     /**
      * Assign defaults to object (uses lodash.defaultsDeep under the hood)
+     * Note: check when working with arrays, as values may be merged incorrectly
      *
      * @param {Object} obj      - object to assign defaults to
      * @param {...Object} defaults - defaults to assign to object
@@ -849,57 +853,6 @@ module.exports = {
             }
         }
         return msg;
-    },
-
-    /**
-     * Format data by class
-     *
-     * @param {Object} data - data to format
-     *
-     * @returns {Object} Returns the data formatted by class
-     */
-    formatDataByClass(data) {
-        const ret = {};
-        if (data && typeof data === 'object' && !Array.isArray(data)) {
-            // assuming a flat declaration where each object contains a class
-            // if that assumption changes this will need to be modified
-            Object.keys(data).forEach((k) => {
-                const v = data[k];
-                // check if value for v is an object that contains a class
-                if (typeof v === 'object' && v.class) {
-                    if (!ret[v.class]) {
-                        ret[v.class] = {};
-                    }
-                    ret[v.class][k] = v;
-                }
-            });
-        }
-        return ret;
-    },
-
-    /**
-     * Format config for easier consumption
-     *
-     * @param {Object} data - data to format
-     *
-     * @returns {Object} Returns the formatted config
-     */
-    formatConfig(data) {
-        // for now just format by class
-        return this.formatDataByClass(data);
-    },
-
-    /**
-     * Get declaration from the parsed and formatted config by name
-     *
-     * @param {Object} config - parsed and formatted config
-     * @param {String} dClass - declaration class
-     * @param {String} dName  - declaration name
-     *
-     * @returns {Object} Returns the declaration
-     */
-    getDeclarationByName(config, dClass, dName) {
-        return (config[dClass] || {})[dName];
     },
 
     /**
@@ -1151,6 +1104,30 @@ module.exports = {
      */
     trimString(string, toRemove) {
         return trim(string, toRemove);
+    },
+
+    /**
+     * Generate a random UUID (v4 RFC4122)
+     * Uses uuid.v4 under the hood
+     *
+     * @returns {String}    The UUID value
+     */
+    generateUuid() {
+        return uuidv4();
+    },
+
+    /**
+     * Convenience method to get value of property on an object given a path
+     * Uses lodash.get under the hood
+     *
+     * @param {Object}  object              - the object to query
+     * @param {Array|String}  propertyPath  - property path (e.g. child1.prop1[0].child2)
+     * @param {*} defaultValue              - the value to return if property not found. default is undefined
+     *
+     * @returns {*}    Resolved value of the object property
+     */
+    getProperty(object, propertyPath, defaultValue) {
+        return objectGet(object, propertyPath, defaultValue);
     },
 
     /** @see Tracer */
