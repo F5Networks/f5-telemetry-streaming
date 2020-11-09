@@ -121,7 +121,7 @@ function unloadUnusedModules(before) {
 configWorker.on('change', (config) => {
     logger.debug('configWorker change event in consumers');
 
-    const consumersToLoad = config.normalized ? configUtil.getTelemetryConsumers(config.normalized) : [];
+    const consumersToLoad = configUtil.getTelemetryConsumers(config);
 
     // timestamp to filed out-dated tracers
     const tracersTimestamp = new Date().getTime();

@@ -142,21 +142,6 @@ describe('Config Util', () => {
     });
 
     describe('.getControls', () => {
-        it('should return controls from old config format (parsed)', () => {
-            const rawDecl = {
-                class: 'Telemetry',
-                controls: {
-                    class: 'Controls',
-                    logLevel: 'debug'
-                }
-            };
-
-            const formattedConfig = {
-                parsed: configWorker.formatConfig(rawDecl)
-            };
-            assert.deepStrictEqual(configUtil.getControls(formattedConfig), { class: 'Controls', logLevel: 'debug' });
-        });
-
         it('should return controls from new config format (normalized)', () => {
             const rawDecl = {
                 class: 'Telemetry',
@@ -168,10 +153,7 @@ describe('Config Util', () => {
 
             return configUtil.componentizeConfig(rawDecl)
                 .then((convertedConfig) => {
-                    const converted = {
-                        normalized: convertedConfig
-                    };
-                    assert.deepStrictEqual(configUtil.getControls(converted),
+                    assert.deepStrictEqual(configUtil.getControls(convertedConfig),
                         {
                             class: 'Controls',
                             name: 'controls',

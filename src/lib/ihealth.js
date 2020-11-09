@@ -191,8 +191,6 @@ configWorker.on('change', (config) => {
     // timestamp to find out-dated tracers
     const tracersTimestamp = new Date().getTime();
 
-    // TODO: once 'normalized' is the only config emitted, update 'config.normalized' -> 'config'
-    config = (config.normalized || {});
     const iHealthPollers = getEnabledPollerConfigs(config);
 
     iHealthPollers.forEach((iHealthPollerConfig) => {

@@ -68,7 +68,7 @@ describe('Pull Consumers', () => {
             return validateAndNormalize(exampleConfig)
                 .then((normalized) => {
                     // emit change event, then wait a short period
-                    configWorker.emit('change', { normalized });
+                    configWorker.emit('change', normalized);
                     return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
                 })
                 .then(() => {
@@ -93,7 +93,7 @@ describe('Pull Consumers', () => {
             return validateAndNormalize(exampleConfig)
                 .then((normalized) => {
                     // emit change event, then wait a short period
-                    configWorker.emit('change', { normalized });
+                    configWorker.emit('change', normalized);
                     return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
                 })
                 .then(() => {
@@ -144,13 +144,13 @@ describe('Pull Consumers', () => {
             return validateAndNormalize(priorConfig)
                 .then((normalized) => {
                     // emit change event, then wait a short period
-                    configWorker.emit('change', { normalized });
+                    configWorker.emit('change', normalized);
                     return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
                 })
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
                     assert.deepEqual(Object.keys(loadedConsumers), ['default'], 'should load default consumer');
-                    configWorker.emit('change', { normalized: {} });
+                    configWorker.emit('change', {});
                     return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
                 })
                 .then(() => {
@@ -189,7 +189,7 @@ describe('Pull Consumers', () => {
             };
             return validateAndNormalize(defaultConfig)
                 .then((normalized) => {
-                    configWorker.emit('change', { normalized });
+                    configWorker.emit('change', normalized);
                     return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
                 });
         });

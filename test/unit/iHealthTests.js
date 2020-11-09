@@ -155,7 +155,7 @@ describe('iHealth', () => {
             return validateAndNormalize(newDeclaration)
                 .then((normalized) => {
                     // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', { normalized });
+                    configWorker.emit('change', normalized);
                     assert.strictEqual(ihealthPollerInstanceStub.getKey(), 'f5telemetry_default::My_System');
                     assert.deepEqual(ihealthPollerInstanceStub.config, expectedOutput);
                 });
@@ -173,7 +173,7 @@ describe('iHealth', () => {
             return validateAndNormalize(newDeclaration)
                 .then((normalized) => {
                     // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', { normalized });
+                    configWorker.emit('change', normalized);
                     assert.strictEqual(ihealthPollerInstanceStub.getKey(), 'f5telemetry_default::My_System');
                     assert.deepEqual(ihealthPollerInstanceStub.config, testExpectedOutput);
                 });

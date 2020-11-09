@@ -21,7 +21,6 @@ const TeemReporter = require('./teemReporter').TeemReporter;
 const PERSISTENT_STORAGE_KEY = 'config';
 const BASE_CONFIG = {
     raw: {},
-    parsed: {},
     normalized: { components: [], mappings: {} }
 };
 
@@ -72,6 +71,8 @@ ConfigWorker.prototype.upgradeConfiguration = function (config) {
         .then(expandedConfig => configUtil.normalizeConfig(expandedConfig))
         .then((normalizedConfig) => {
             config.normalized = normalizedConfig;
+            // Remove unnecessary config.parsed property
+            delete config.parsed;
             return this.saveConfig(config);
         })
         .then(() => {
@@ -89,23 +90,16 @@ ConfigWorker.prototype.upgradeConfiguration = function (config) {
  * @emits ConfigWorker#change
  */
 ConfigWorker.prototype._notifyConfigChange = function (newConfig) {
-    if (!newConfig || !newConfig.parsed || !newConfig.normalized) {
+    if (!newConfig || !newConfig.normalized) {
         throw new Error('_notifyConfigChange() Missing required config.');
     }
-    // use copy of parsed config
     // handle passphrases first - decrypt, download, etc.
-    return Promise.all([
-        deviceUtil.decryptAllSecrets(newConfig.parsed),
-        deviceUtil.decryptAllSecrets(newConfig.normalized)
-    ])
+    return deviceUtil.decryptAllSecrets(newConfig.normalized)
         .then((decryptedConfig) => {
-            // copy config to avoid changes from listeners
-            // Emit 'parsed' and 'normalized' until all components can accept 'normalized' version of config
-            // TODO: once all components accept 'normalized' version of config, only emit 'normalized' config
-            this.emit('change', {
-                parsed: decryptedConfig[0],
-                normalized: decryptedConfig[1]
-            });
+            // deepCopy the emitted config
+            // HOWEVER: the copy is passed by reference to each Listener.
+            // Any listener that modifies the config must make its own local copy.
+            this.emit('change', util.deepCopy(decryptedConfig));
         })
         .catch((err) => {
             logger.error(`notifyConfigChange error: ${err}`);
@@ -169,33 +163,6 @@ ConfigWorker.prototype.getConfig = function () {
 };
 
 /**
- * Format config (legacy) for easier consumption
- * Formats data by class
- *
- * @param {Object} data - data to format
- *
- * @returns {Object} Returns the formatted config
- */
-ConfigWorker.prototype.formatConfig = function (data) {
-    const ret = {};
-    if (data && typeof data === 'object' && !Array.isArray(data)) {
-        // assuming a flat declaration where each object contains a class
-        // if that assumption changes this will need to be modified
-        Object.keys(data).forEach((k) => {
-            const v = data[k];
-            // check if value for v is an object that contains a class
-            if (typeof v === 'object' && v.class) {
-                if (!ret[v.class]) {
-                    ret[v.class] = {};
-                }
-                ret[v.class][k] = v;
-            }
-        });
-    }
-    return ret;
-};
-
-/**
  * Validate JSON data against config schema
  *
  * @public
@@ -242,7 +209,6 @@ ConfigWorker.prototype.processDeclaration = function (data) {
     let validatedConfig = {};
     const configToSave = {
         raw: {},
-        parsed: {},
         normalized: {}
     };
     logger.debug(`Configuration to process: ${util.stringify(data)}`);
@@ -252,15 +218,15 @@ ConfigWorker.prototype.processDeclaration = function (data) {
     // note: ?show=expanded could return config to user with this processing done (later)
     return this.validate(data)
         .then((config) => {
-            validatedConfig = config;
-            configToSave.raw = util.deepCopy(validatedConfig);
+            // Ensure that 'validatedConfig' is a copy
+            validatedConfig = util.deepCopy(config);
+            configToSave.raw = validatedConfig;
             logger.debug('Expanding configuration');
             return this.expandConfig(data);
         })
         .then((expandedConfig) => {
             logger.debug('Configuration successfully validated');
-            configToSave.parsed = this.formatConfig(expandedConfig);
-            return configUtil.normalizeConfig(util.deepCopy(expandedConfig));
+            return configUtil.normalizeConfig(expandedConfig);
         })
         .then((normalizedConfig) => {
             // config.normalized that we save is a config that is
@@ -284,6 +250,9 @@ ConfigWorker.prototype.processDeclaration = function (data) {
 
 /**
  * Get raw (origin) config
+ *
+ * @public
+ * @param {Object} restOperation
  *
  * @returns {Promise<Object>} resolved with raw (origin) config
  */
