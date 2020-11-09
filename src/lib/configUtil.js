@@ -62,23 +62,20 @@ function validate(validator, data, context) {
  * Get controls object from config
  *
  * @public
- * @param config     - the config to lookup the controls from
+ * @param normalizedConfig  - the config to lookup the controls from
  *
  * @returns {Object} The controls object if exists, otherwise {}
  */
-function getControls(config) {
-    if (!config.normalized) {
-        return util.getProperty(config.parsed, `${CLASSES.CONTROLS_CLASS_NAME}.controls`, {});
-    }
-    if (config.normalized.components) {
-        const controls = config.normalized.components.find(c => c.class === CLASSES.CONTROLS_CLASS_NAME);
+function getControls(normalizedConfig) {
+    if (normalizedConfig.components) {
+        const controls = normalizedConfig.components.find(c => c.class === CLASSES.CONTROLS_CLASS_NAME);
         return controls || {};
     }
     return {};
 }
 
 function getComponents(config, className, namespace) {
-    if (!config.components) {
+    if (!config || !config.components) {
         return [];
     }
     if (namespace) {

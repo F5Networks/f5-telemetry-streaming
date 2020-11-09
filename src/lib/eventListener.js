@@ -426,7 +426,6 @@ function removeListener(listener, name) {
 // config worker change event
 configWorker.on('change', (config) => {
     logger.debug('configWorker change event in eventListener'); // helpful debug
-    config = config.normalized;
     // timestamp to find out-dated tracers
     const tracersTimestamp = new Date().getTime();
 

@@ -809,7 +809,6 @@ module.exports = {
         },
         // TEST RELATED DATA STARTS HERE
         {
-
             name: 'it should locate a nested poller using the auto generated System Poller name',
             rawConfig: {
                 class: 'Telemetry',

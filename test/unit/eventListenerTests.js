@@ -285,7 +285,7 @@ describe('Event Listener', () => {
 
             return validateAndNormalize(origDecl)
                 .then((normalized) => {
-                    configWorker.emit('change', { normalized });
+                    configWorker.emit('change', normalized);
                     return new Promise(resolve => setTimeout(resolve, 500));
                 })
                 .then(() => {
@@ -308,7 +308,7 @@ describe('Event Listener', () => {
         });
 
         afterEach(() => {
-            configWorker.emit('change', { normalized: { components: [], mappings: {} } });
+            configWorker.emit('change', { components: [], mappings: {} });
             return new Promise(resolve => setTimeout(resolve, 500))
                 .then(() => {
                     const listeners = eventListener.getListeners();
@@ -326,7 +326,7 @@ describe('Event Listener', () => {
 
             return validateAndNormalize(newDecl)
                 .then((normalized) => {
-                    configWorker.emit('change', { normalized });
+                    configWorker.emit('change', normalized);
                     return new Promise(resolve => setTimeout(resolve, 500));
                 })
                 .then(() => {
@@ -347,7 +347,7 @@ describe('Event Listener', () => {
 
         it('should stop existing listener(s) when removed from config', () => Promise.resolve()
             .then(() => {
-                configWorker.emit('change', { normalized: { components: [], mappings: {} } });
+                configWorker.emit('change', { components: [], mappings: {} });
                 return new Promise(resolve => setTimeout(resolve, 500));
             })
             .then(() => {
@@ -365,7 +365,7 @@ describe('Event Listener', () => {
             const updateSpy = sinon.stub(EventListener.prototype, 'updateConfig');
             return validateAndNormalize(newDecl)
                 .then((normalized) => {
-                    configWorker.emit('change', { normalized });
+                    configWorker.emit('change', normalized);
                     return new Promise(resolve => setTimeout(resolve, 500));
                 })
                 .then(() => {

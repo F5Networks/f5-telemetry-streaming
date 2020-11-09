@@ -275,9 +275,8 @@ configWorker.on('change', (config) => {
     logger.debug('configWorker change event in systemPoller');
     // timestamp to find out-dated tracers
     const tracersTimestamp = new Date().getTime();
-    // TODO: once 'normalized' is the only config emitted, update 'config.normalized' -> 'config'
-    // copy and apply config
-    applyConfig(util.deepCopy(config.normalized || {}));
+
+    applyConfig(util.deepCopy(config));
     // remove tracers that were not touched
     util.tracer.remove(tracer => tracer.name.startsWith(TRACER_CLASS_NAME)
         && tracer.lastGetTouch < tracersTimestamp);

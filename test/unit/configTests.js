@@ -35,7 +35,6 @@ describe('Config', () => {
         _data_: {
             config: {
                 raw: {},
-                parsed: {},
                 normalized: { components: [], mappings: {} }
             }
         }
@@ -121,10 +120,6 @@ describe('Config', () => {
             };
             return config.processDeclaration(data)
                 .then(() => {
-                    // TODO: remove test for legacy format as part of AUTOTOOL-1972
-                    const parsedConsumer = savedConfig.parsed.Telemetry_Consumer.My_Consumer;
-                    assert.strictEqual(parsedConsumer.path, '/foo');
-
                     assert.deepStrictEqual(
                         savedConfig.normalized,
                         {
@@ -174,31 +169,31 @@ describe('Config', () => {
         it('should return BASE_CONFIG if data is undefined', () => {
             sinon.stub(persistentStorage, 'get').resolves(undefined);
             return assert.becomes(config.getConfig(),
-                { raw: {}, parsed: {}, normalized: { components: [], mappings: {} } });
+                { raw: {}, normalized: { components: [], mappings: {} } });
         });
 
         it('should return BASE_CONFIG if data is {}', () => {
             sinon.stub(persistentStorage, 'get').resolves({});
             return assert.becomes(config.getConfig(),
-                { raw: {}, parsed: {}, normalized: { components: [], mappings: {} } });
+                { raw: {}, normalized: { components: [], mappings: {} } });
         });
 
 
-        it('should return BASE_CONFIG if data.parsed is {}', () => {
+        it('should return BASE_CONFIG even if data.parsed is {}, and remove parsed property', () => {
             sinon.stub(persistentStorage, 'get').resolves({ raw: {}, parsed: {} });
             return assert.becomes(config.getConfig(),
-                { raw: {}, parsed: {}, normalized: { components: [], mappings: {} } });
+                { raw: {}, normalized: { components: [], mappings: {} } });
         });
 
-        it('should return data if data.parsed is set', () => {
-            sinon.stub(persistentStorage, 'get').resolves({ raw: { value: 'Hello World' }, parsed: { value: 'Hello World' } });
-            return assert.becomes(config.getConfig(), { raw: { value: 'Hello World' }, parsed: { value: 'Hello World' } });
+        it('should return data if data.normalized is set', () => {
+            sinon.stub(persistentStorage, 'get').resolves({ raw: { value: 'Hello World' }, normalized: { value: 'Hello World' } });
+            return assert.becomes(config.getConfig(), { raw: { value: 'Hello World' }, normalized: { value: 'Hello World' } });
         });
 
         it('should return BASE_CONFIG if data.raw is {}', () => {
             sinon.stub(persistentStorage, 'get').resolves({ raw: {} });
             return assert.becomes(config.getConfig(),
-                { raw: {}, parsed: {}, normalized: { components: [], mappings: {} } });
+                { raw: {}, normalized: { components: [], mappings: {} } });
         });
         it('should return data if data.raw is set', () => {
             sinon.stub(persistentStorage, 'get').resolves({ raw: { value: 'Hello World' }, normalized: { components: [{ value: 'Hello World' }] } });
@@ -226,7 +221,7 @@ describe('Config', () => {
             return config.loadConfig()
                 .then(() => {
                     assert.deepStrictEqual(configChangeMock.firstCall.args[0],
-                        { raw: {}, parsed: {}, normalized: { components: [], mappings: {} } });
+                        { raw: {}, normalized: { components: [], mappings: {} } });
                 });
         });
 
@@ -235,7 +230,7 @@ describe('Config', () => {
             return config.loadConfig()
                 .then(() => {
                     assert.deepStrictEqual(configChangeMock.firstCall.args[0],
-                        { raw: {}, parsed: {}, normalized: { components: [], mappings: {} } });
+                        { raw: {}, normalized: { components: [], mappings: {} } });
                 });
         });
 
@@ -252,7 +247,7 @@ describe('Config', () => {
                 .then(() => {
                     assert.deepStrictEqual(
                         configChangeMock.firstCall.args[0],
-                        { raw: { class: 'Telemetry' }, parsed: { class: 'Telemetry' }, normalized: { components: [], mappings: {} } }
+                        { raw: { class: 'Telemetry' }, normalized: { components: [], mappings: {} } }
                     );
                 });
         });
@@ -278,7 +273,6 @@ describe('Config', () => {
                         _notifyConfigChangeMock.firstCall.args[0],
                         {
                             raw: { class: 'Telemetry', listener: { class: 'Telemetry_Listener' } },
-                            parsed: { value: 'some old format' },
                             normalized: {
                                 components: [
                                     {
@@ -319,7 +313,6 @@ describe('Config', () => {
             // Stub saveConfig(), since normalizeConfig is problematic to stub
             const saveConfigMock = sinon.stub(config, 'saveConfig').rejects();
             const curConfig = {
-                parsed: { value: 'aword' },
                 normalized: { value: 'aword' }
             };
 
@@ -327,7 +320,6 @@ describe('Config', () => {
                 .then(() => {
                     assert.strictEqual(saveConfigMock.called, false);
                     assert.deepStrictEqual(_notifyConfigChangeMock.firstCall.args[0], {
-                        parsed: { value: 'aword' },
                         normalized: { value: 'aword' }
                     });
                 });
@@ -372,19 +364,6 @@ describe('Config', () => {
                     },
                     theListener: {
                         class: 'Telemetry_Listener'
-                    }
-                },
-                parsed: {
-                    Telemetry_Consumer: {
-                        theConsumer: {
-                            class: 'Telemetry_Consumer',
-                            type: 'default'
-                        }
-                    },
-                    Telemetry_Listener: {
-                        theListener: {
-                            class: 'Telemetry_Listener'
-                        }
                     }
                 },
                 normalized: {
@@ -433,11 +412,22 @@ describe('Config', () => {
             upgradeConfigurationMock.restore();
             sinon.stub(config, 'saveConfig').rejects(new Error('Should not have been called'));
             const curConfig = {
-                parsed: { value: 'yourwords' },
-                normalized: { description: 'not a valid normalized class, but it is present so we are leaving as is' }
+                normalized: {
+                    components: [{
+                        id: 'uuid1',
+                        name: 'theConsumer',
+                        type: 'default',
+                        class: 'Telemetry_Consumer',
+                        traceName: 'theConsumer',
+                        namespace: constants.DEFAULT_UNNAMED_NAMESPACE,
+                        allowSelfSignedCert: false,
+                        enable: true,
+                        trace: false
+                    }],
+                    mappings: {}
+                }
             };
-            // if normalized was called, it would be in format { components: [], mappings: {}};
-            return assert.becomes(config.upgradeConfiguration(curConfig), curConfig);
+            return assert.becomes(config.upgradeConfiguration(util.deepCopy(curConfig)), curConfig);
         });
 
         it('should not fail on empty config', () => {
@@ -445,39 +435,9 @@ describe('Config', () => {
 
             const curConfig = {};
             return assert.becomes(config.upgradeConfiguration(curConfig), {
-                parsed: {},
                 raw: {},
                 normalized: { components: [], mappings: {} }
             });
-        });
-    });
-
-    describe('.formatConfig()', () => {
-        it('should return empty object when no declaration', () => {
-            assert.deepStrictEqual(config.formatConfig(), {});
-        });
-
-
-        it('should not fail on null', () => {
-            // typeof null === 'object'
-            assert.deepStrictEqual(config.formatConfig(null), {});
-        });
-
-        it('should format config by class', () => {
-            const obj = {
-                my_item: {
-                    class: 'Consumer'
-                }
-            };
-            const expectedObj = {
-                Consumer: {
-                    my_item: {
-                        class: 'Consumer'
-                    }
-                }
-            };
-            const formattedObj = config.formatConfig(obj);
-            assert.deepStrictEqual(formattedObj, expectedObj);
         });
     });
 });

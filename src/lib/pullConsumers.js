@@ -78,7 +78,6 @@ function getEnabledPollersForConsumer(config, consumerId) {
     return config.components.filter(c => pollerIds.indexOf(c.id) > -1 && c.enable);
 }
 
-
 function getConsumerConfig(config, consumerName) {
     const consumers = configUtil.getTelemetryPullConsumers(config);
     // TODO: update when we support namespace in path
@@ -178,9 +177,7 @@ function unloadUnusedModules(before) {
 configWorker.on('change', (config) => {
     logger.debug('configWorker change event in Pull Consumers');
 
-    // TODO: once Pull Consumers can accept 'normalized' configuration, update
-    // (where config will just be the normalized config)
-    const consumersToLoad = configUtil.getTelemetryPullConsumers(config.normalized);
+    const consumersToLoad = configUtil.getTelemetryPullConsumers(config);
     // timestamp to filed out-dated tracers
     const tracersTimestamp = new Date().getTime();
 

@@ -13,7 +13,7 @@ const constants = require('../../src/lib/constants');
 module.exports = {
     componentizeConfig: [
         {
-            name: 'it should parse simple config with only the default namespace (unnamed, top level)',
+            name: 'it should normalize simple config with only the default namespace (unnamed, top level)',
             inputDecl: {
                 Consumer1: {
                     class: 'Telemetry_Consumer'
@@ -55,7 +55,7 @@ module.exports = {
             }
         },
         {
-            name: 'should parse config with namespaces (no default)',
+            name: 'should normalize config with namespaces (no default)',
             inputDecl: {
                 Namespace1: {
                     class: 'Telemetry_Namespace',
@@ -101,7 +101,7 @@ module.exports = {
             }
         },
         {
-            name: 'should parse config with mixed namespaces (default and named)',
+            name: 'should normalize config with mixed namespaces (default and named)',
             inputDecl: {
                 Controls: {
                     class: 'Controls'
@@ -172,7 +172,7 @@ module.exports = {
             }
         },
         {
-            name: 'should parse config with pull consumer',
+            name: 'should normalize config with pull consumer',
             inputDecl: {
                 Namespace1: {
                     class: 'Telemetry_Namespace',
@@ -210,7 +210,7 @@ module.exports = {
             }
         },
         {
-            name: 'it should parse config with both system poller and system',
+            name: 'it should normalize config with both system poller and system',
             inputDecl: {
                 class: 'Telemetry',
                 Consumer1: {
