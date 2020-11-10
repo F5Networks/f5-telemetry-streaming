@@ -22,7 +22,7 @@ const SystemStats = require('../../src/lib/systemStats');
 const util = require('../../src/lib/util');
 const deviceUtil = require('../../src/lib/deviceUtil');
 
-const systemPollerConfigTestsData = require('./systemPollerTestsData');
+const systemPollerConfigTestsData = require('./data/systemPollerTestsData');
 const testUtil = require('./shared/util');
 const configUtil = require('../../src/lib/configUtil');
 

@@ -8,7 +8,7 @@
 
 'use strict';
 
-const constants = require('../../src/lib/constants');
+const constants = require('../../../src/lib/constants');
 
 module.exports = {
     componentizeConfig: [

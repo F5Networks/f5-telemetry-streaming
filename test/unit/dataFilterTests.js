@@ -15,7 +15,7 @@ require('./shared/restoreCache')();
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 
-const dataFilterTestsData = require('./dataFilterTestsData');
+const dataFilterTestsData = require('./data/dataFilterTestsData');
 const dataFilter = require('../../src/lib/dataFilter');
 const testUtil = require('./shared/util');
 

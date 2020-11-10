@@ -22,7 +22,7 @@ const deviceUtil = require('../../src/lib/deviceUtil');
 const configUtil = require('../../src/lib/configUtil');
 const util = require('../../src/lib/util');
 
-const configUtilTestData = require('./configUtilTestsData');
+const configUtilTestData = require('./data/configUtilTestsData');
 const testUtil = require('./shared/util');
 
 chai.use(chaiAsPromised);

@@ -17,7 +17,7 @@ const assert = require('assert');
 const testUtil = require('./../shared/util');
 const util = require('./../../../src/lib/util');
 const azureUtil = require('./../../../src/lib/consumers/shared/azureUtil');
-const azureUtilTestsData = require('./azureUtilTestsData');
+const azureUtilTestsData = require('./data/azureUtilTestsData');
 
 describe('Azure Util Tests', () => {
     describe('Managed Identities', () => {

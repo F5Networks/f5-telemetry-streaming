@@ -14,7 +14,7 @@ const nock = require('nock');
 
 const testUtil = require('./shared/util');
 const SystemStats = require('../../src/lib/systemStats');
-const customEndptsTestsData = require('./customEndpointsTestsData');
+const customEndptsTestsData = require('./data/customEndpointsTestsData');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;

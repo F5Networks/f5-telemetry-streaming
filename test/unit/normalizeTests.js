@@ -20,7 +20,7 @@ const properties = require('../../src/lib/properties.json');
 const normalize = require('../../src/lib/normalize');
 const normalizeUtil = require('../../src/lib/normalizeUtil');
 const EVENT_TYPES = require('../../src/lib/constants').EVENT_TYPES;
-const dataExamples = require('./normalizeTestsData');
+const dataExamples = require('./data/normalizeTestsData');
 const testUtil = require('./shared/util');
 
 chai.use(chaiAsPromised);
