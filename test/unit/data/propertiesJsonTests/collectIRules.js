@@ -72,6 +72,30 @@ module.exports = {
                         },
                         tenant: 'Common',
                         name: '/Common/_sys_APM_ExchangeSupport_OA_BasicAuth'
+                    },
+                    '/Common/_sys_auth_tacacs': {
+                        events: {
+                            AUTH_RESULT: {
+                                aborts: 0,
+                                avgCycles: 0,
+                                failures: 0,
+                                maxCycles: 0,
+                                minCycles: 0,
+                                priority: 500,
+                                totalExecutions: 0
+                            },
+                            HTTP_REQUEST: {
+                                aborts: 0,
+                                avgCycles: 0,
+                                failures: 0,
+                                maxCycles: 0,
+                                minCycles: 0,
+                                priority: 500,
+                                totalExecutions: 0
+                            }
+                        },
+                        tenant: 'Common',
+                        name: '/Common/_sys_auth_tacacs'
                     }
                 }
             },
@@ -107,6 +131,76 @@ module.exports = {
                                         },
                                         tmName: {
                                             description: '/Common/_sys_APM_ExchangeSupport_OA_BasicAuth'
+                                        },
+                                        priority: {
+                                            value: 500
+                                        },
+                                        totalExecutions: {
+                                            value: 0
+                                        }
+                                    }
+                                }
+                            },
+                            'https://localhost/mgmt/tm/ltm/rule/~Common~_sys_auth_tacacs:AUTH_RESULT/stats': {
+                                nestedStats: {
+                                    kind: 'tm:ltm:rule:rulestats',
+                                    selfLink: 'https://localhost/mgmt/tm/ltm/rule/~Common~_sys_auth_tacacs:AUTH_RESULT/stats?ver=13.1.0',
+                                    entries: {
+                                        aborts: {
+                                            value: 0
+                                        },
+                                        avgCycles: {
+                                            value: 0
+                                        },
+                                        eventType: {
+                                            description: 'AUTH_RESULT'
+                                        },
+                                        failures: {
+                                            value: 0
+                                        },
+                                        maxCycles: {
+                                            value: 0
+                                        },
+                                        minCycles: {
+                                            value: 0
+                                        },
+                                        tmName: {
+                                            description: '/Common/_sys_auth_tacacs'
+                                        },
+                                        priority: {
+                                            value: 500
+                                        },
+                                        totalExecutions: {
+                                            value: 0
+                                        }
+                                    }
+                                }
+                            },
+                            'https://localhost/mgmt/tm/ltm/rule/~Common~_sys_auth_tacacs:HTTP_REQUEST/stats': {
+                                nestedStats: {
+                                    kind: 'tm:ltm:rule:rulestats',
+                                    selfLink: 'https://localhost/mgmt/tm/ltm/rule/~Common~_sys_auth_tacacs:HTTP_REQUEST/stats?ver=13.1.0',
+                                    entries: {
+                                        aborts: {
+                                            value: 0
+                                        },
+                                        avgCycles: {
+                                            value: 0
+                                        },
+                                        eventType: {
+                                            description: 'HTTP_REQUEST'
+                                        },
+                                        failures: {
+                                            value: 0
+                                        },
+                                        maxCycles: {
+                                            value: 0
+                                        },
+                                        minCycles: {
+                                            value: 0
+                                        },
+                                        tmName: {
+                                            description: '/Common/_sys_auth_tacacs'
                                         },
                                         priority: {
                                             value: 500
