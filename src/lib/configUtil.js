@@ -156,9 +156,6 @@ function getPollerTraceValue(systemTrace, pollerTrace) {
             // preserve system's value
             pollerTrace = systemTrace;
         }
-        // TODO: verify that this is correct
-        // kind of odd - it's not clear when system is supposed to override
-        // if pollerTrace = false, and systemTrace = true, pollerTrace becomes false
     }
     return pollerTrace;
 }

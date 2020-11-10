@@ -249,6 +249,14 @@ function getPollersConfig(sysOrPollerName, options) {
         });
 }
 
+/**
+ * Get System Poller data for each provided configuration
+ *
+ * @param {Array<Object>} pollerConfigs - array of poller configurations
+ * @param {Boolean} [decryptSecrets = false] - whether decryption of secrets is needed
+ *
+ * @returns {Promise<Array>} resolved with pollers data
+ */
 function fetchPollersData(pollerConfigs, decryptSecrets) {
     // need to wrap with catch to avoid situations when one of the promises was rejected
     // and another one left in unknown state
