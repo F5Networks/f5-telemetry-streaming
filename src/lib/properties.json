@@ -894,15 +894,15 @@
             "key": "iRules",
             "normalization": [
                 {
-                    "filterKeys": { "exclude": ["kind", "selfLink", "tmName"] }
-                },
-                {
-                    "renameKeys": { "patterns": { "ltm/rule/": { "pattern": "rule\/(.*):", "group": 1 } } }
+                    "filterKeys": { "exclude": ["kind", "selfLink"] }
                 },
                 {
                     "runFunctions": [
                         { "name": "restructureRules" }
                     ]
+                },
+                {
+                    "filterKeys": { "exclude": ["tmName", "eventType"] }
                 },
                 {
                     "addKeysByTag": { "skip": ["events"] }

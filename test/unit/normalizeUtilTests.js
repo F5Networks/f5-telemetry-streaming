@@ -392,7 +392,7 @@ describe('Normalize Util', () => {
         it('should restructure rules', () => {
             const args = {
                 data: {
-                    '/Common/_sys_APM_ExchangeSupport_OA_BasicAuth': {
+                    '/Common/_sys_APM_ExchangeSupport_OA_BasicAuth:RULE_INIT': {
                         aborts: 0,
                         avgCycles: 30660,
                         eventType: 'RULE_INIT',
@@ -400,9 +400,10 @@ describe('Normalize Util', () => {
                         maxCycles: 30660,
                         minCycles: 23832,
                         priority: 500,
+                        tmName: '/Common/_sys_APM_ExchangeSupport_OA_BasicAuth',
                         totalExecutions: 4
                     },
-                    '/Common/_sys_APM_ExchangeSupport_OA_NtlmAuth': {
+                    '/Common/_sys_APM_ExchangeSupport_OA_NtlmAuth:RULE_INIT': {
                         aborts: 0,
                         avgCycles: 26028,
                         eventType: 'RULE_INIT',
@@ -410,6 +411,18 @@ describe('Normalize Util', () => {
                         maxCycles: 26028,
                         minCycles: 23876,
                         priority: 500,
+                        tmName: '/Common/_sys_APM_ExchangeSupport_OA_NtlmAuth',
+                        totalExecutions: 4
+                    },
+                    '/Common/_sys_APM_ExchangeSupport_OA_NtlmAuth:HTTP_REQUEST': {
+                        aborts: 0,
+                        avgCycles: 26028,
+                        eventType: 'HTTP_REQUEST',
+                        failures: 0,
+                        maxCycles: 9999,
+                        minCycles: 23876,
+                        priority: 500,
+                        tmName: '/Common/_sys_APM_ExchangeSupport_OA_NtlmAuth',
                         totalExecutions: 4
                     }
                 }
@@ -420,10 +433,12 @@ describe('Normalize Util', () => {
                         RULE_INIT: {
                             aborts: 0,
                             avgCycles: 30660,
+                            eventType: 'RULE_INIT',
                             failures: 0,
                             maxCycles: 30660,
                             minCycles: 23832,
                             priority: 500,
+                            tmName: '/Common/_sys_APM_ExchangeSupport_OA_BasicAuth',
                             totalExecutions: 4
                         }
                     }
@@ -433,10 +448,23 @@ describe('Normalize Util', () => {
                         RULE_INIT: {
                             aborts: 0,
                             avgCycles: 26028,
+                            eventType: 'RULE_INIT',
                             failures: 0,
                             maxCycles: 26028,
                             minCycles: 23876,
                             priority: 500,
+                            tmName: '/Common/_sys_APM_ExchangeSupport_OA_NtlmAuth',
+                            totalExecutions: 4
+                        },
+                        HTTP_REQUEST: {
+                            aborts: 0,
+                            avgCycles: 26028,
+                            eventType: 'HTTP_REQUEST',
+                            failures: 0,
+                            maxCycles: 9999,
+                            minCycles: 23876,
+                            priority: 500,
+                            tmName: '/Common/_sys_APM_ExchangeSupport_OA_NtlmAuth',
                             totalExecutions: 4
                         }
                     }
