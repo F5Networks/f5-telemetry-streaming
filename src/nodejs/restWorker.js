@@ -25,7 +25,7 @@ const configWorker = require('../lib/config');
 const configListenerModulesToLoad = [
     '../lib/eventListener',
     '../lib/consumers',
-    '../pullConsumers',
+    '../lib/pullConsumers',
     '../lib/systemPoller',
     '../lib/ihealth'
 ];
@@ -36,6 +36,7 @@ configListenerModulesToLoad.forEach((module) => {
         require(module);
     } catch (err) {
         logger.exception('Unable to load required module', err);
+        throw err;
     }
 });
 
