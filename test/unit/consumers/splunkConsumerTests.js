@@ -19,7 +19,7 @@ const sinon = require('sinon');
 const zlib = require('zlib');
 
 const splunkIndex = require('../../../src/lib/consumers/Splunk/index');
-const splunkData = require('./splunkConsumerTestsData');
+const splunkData = require('./data/splunkConsumerTestsData');
 const testUtil = require('../shared/util');
 
 chai.use(chaiAsPromised);

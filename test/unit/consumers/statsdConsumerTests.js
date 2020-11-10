@@ -18,7 +18,7 @@ const proxyquire = require('proxyquire');
 const sinon = require('sinon');
 const net = require('net');
 
-const statsdExpectedData = require('./statsdConsumerTestsData');
+const statsdExpectedData = require('./data/statsdConsumerTestsData');
 const testUtil = require('../shared/util');
 
 chai.use(chaiAsPromised);

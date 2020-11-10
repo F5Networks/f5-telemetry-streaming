@@ -8,7 +8,7 @@
 
 'use strict';
 
-const EVENT_TYPES = require('../../src/lib/constants').EVENT_TYPES;
+const EVENT_TYPES = require('../../../src/lib/constants').EVENT_TYPES;
 
 /* eslint-disable no-useless-escape */
 

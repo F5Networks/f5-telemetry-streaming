@@ -21,7 +21,7 @@ const systemPoller = require('../../src/lib/systemPoller');
 const pullConsumers = require('../../src/lib/pullConsumers');
 const CONFIG_CLASSES = require('../../src/lib/constants').CONFIG_CLASSES;
 
-const pullConsumersTestsData = require('./pullConsumersTestsData');
+const pullConsumersTestsData = require('./data/pullConsumersTestsData');
 const testUtil = require('./shared/util');
 const util = require('../../src/lib/util');
 const configUtil = require('../../src/lib/configUtil');
