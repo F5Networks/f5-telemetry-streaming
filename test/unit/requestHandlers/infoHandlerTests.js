@@ -56,7 +56,7 @@ describe('InfoHandler', () => {
 
         return requestHandler.process()
             .then((handler) => {
-                assert.ok(handler === requestHandler, 'should return reference to origin instance');
+                assert.ok(handler === requestHandler, 'should return a reference to original handler');
                 assert.strictEqual(requestHandler.getCode(), 200, 'should return expected code');
                 assert.deepStrictEqual(requestHandler.getBody(), {
                     nodeVersion: 'NODE_VERSION',
@@ -70,7 +70,7 @@ describe('InfoHandler', () => {
 
     it('should return info data on GET request (real data)', () => requestHandler.process()
         .then((handler) => {
-            assert.ok(handler === requestHandler, 'should return reference to origin instance');
+            assert.ok(handler === requestHandler, 'should return a reference to original handler');
             assert.strictEqual(requestHandler.getCode(), 200, 'should return expected code');
             assert.deepStrictEqual(requestHandler.getBody(), {
                 nodeVersion: process.version,

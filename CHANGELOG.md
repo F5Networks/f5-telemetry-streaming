@@ -3,6 +3,7 @@ Changes to this project are documented in this file. More detail and links can b
 
 ## 1.16.0
 ### Added
+AUTOTOOL-1830: Added new Namespace PullConsumer endpoint (/namespace/$namespace/pullconsumer/$consumer)
 ### Fixed
 - AUTOTOOL-1967: Fix bug when TS incorrectly processing iRule stats with multiple events
 ### Changed

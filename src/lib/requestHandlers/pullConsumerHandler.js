@@ -16,7 +16,7 @@ const pullConsumers = require('../pullConsumers');
 const router = require('./router');
 
 /**
- * /systempoller endpoint handler
+ * /pullconsumer endpoint handler
  *
  * @param {Object} restOperation
  */
@@ -50,13 +50,12 @@ PullConsumerEndpointHandler.prototype.getBody = function () {
  *      once request processed
  */
 PullConsumerEndpointHandler.prototype.process = function () {
-    return pullConsumers.getData(this.params.consumer)
+    return pullConsumers.getData(this.params.consumer, this.params.namespace)
         .then((data) => {
             this.code = 200;
             this.body = data;
             return this;
-        })
-        .catch((error) => {
+        }).catch((error) => {
             if (error instanceof errors.ConfigLookupError) {
                 this.code = 404;
                 this.body = {
@@ -69,6 +68,9 @@ PullConsumerEndpointHandler.prototype.process = function () {
         });
 };
 
-router.on('register', routerInst => routerInst.register('GET', '/pullconsumer/:consumer', PullConsumerEndpointHandler));
+router.on('register', (routerInst) => {
+    routerInst.register('GET', '/pullconsumer/:consumer', PullConsumerEndpointHandler);
+    routerInst.register('GET', '/namespace/:namespace/pullconsumer/:consumer', PullConsumerEndpointHandler);
+});
 
 module.exports = PullConsumerEndpointHandler;

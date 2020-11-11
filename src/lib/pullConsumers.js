@@ -29,8 +29,9 @@ class DisabledError extends errors.ConfigLookupError {}
  * Get data for Pull Consumer
  *
  * @param {String} consumerName - consumer name
+ * @param {String} namespace - optional namespace
  */
-function getData(consumerName) {
+function getData(consumerName, namespace) {
     let config; // to pass to systemPoller
     let consumerConfig;
 
@@ -39,12 +40,12 @@ function getData(consumerName) {
             // config was copied by getConfig already
             config = curConfig;
 
-            consumerConfig = getConsumerConfig(config.normalized, consumerName);
+            consumerConfig = getConsumerConfig(config.normalized, consumerName, namespace);
             // Don't bother collecting stats if requested Consumer Type is not loaded
             if (typeof PULL_CONSUMERS[consumerConfig.type] === 'undefined') {
                 throw new ModuleNotLoadedError(`Pull Consumer of type '${consumerConfig.type}' is not loaded`);
             }
-            // TODO: again need to update when namespace is supported in path
+
             const pollerConfigs = getEnabledPollersForConsumer(config.normalized, consumerConfig.id);
             return systemPoller.fetchPollersData(util.deepCopy(pollerConfigs), true);
         })
@@ -78,21 +79,21 @@ function getEnabledPollersForConsumer(config, consumerId) {
     return config.components.filter(c => pollerIds.indexOf(c.id) > -1 && c.enable);
 }
 
-function getConsumerConfig(config, consumerName) {
-    const consumers = configUtil.getTelemetryPullConsumers(config);
-    // TODO: update when we support namespace in path
+function getConsumerConfig(config, consumerName, namespace) {
+    const consumers = configUtil.getTelemetryPullConsumers(config, namespace);
+    const namespaceInfo = namespace ? ` (namespace: ${namespace})` : '';
     if (consumers.length > 0) {
         const consumer = consumers.find(c => c.name === consumerName);
         if (util.isObjectEmpty(consumer)) {
-            throw new errors.ObjectNotFoundInConfigError(`Pull Consumer with name '${consumerName}' doesn't exist`);
+            throw new errors.ObjectNotFoundInConfigError(`Pull Consumer with name '${consumerName}' doesn't exist${namespaceInfo}`);
         }
         if (consumer.enable === false) {
-            throw new DisabledError(`Pull Consumer with name '${consumerName}' is disabled`);
+            throw new DisabledError(`Pull Consumer with name '${consumerName}' is disabled${namespaceInfo}`);
         }
         return consumer;
     }
 
-    throw new errors.ObjectNotFoundInConfigError('No configured Pull Consumers found');
+    throw new errors.ObjectNotFoundInConfigError(`No configured Pull Consumers found${namespaceInfo}`);
 }
 
 /**

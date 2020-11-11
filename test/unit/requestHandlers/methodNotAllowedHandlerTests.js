@@ -45,6 +45,6 @@ describe('MethodNotAllowedHandler', () => {
 
     it('should return self as result of process', () => requestHandler.process()
         .then((handler) => {
-            assert.ok(handler === requestHandler, 'should return reference to origin instance');
+            assert.ok(handler === requestHandler, 'should return a reference to original handler');
         }));
 });

@@ -99,8 +99,9 @@ function sendDataToEventListeners(callback, numOfMsg, delay) {
 }
 
 
-function getPullConsumerData(dut, pullConsumerName) {
-    const uri = `${constants.BASE_ILX_URI}/pullconsumer/${pullConsumerName}`;
+function getPullConsumerData(dut, pullConsumerName, namespace) {
+    const namespacePath = namespace ? `/namespace/${namespace}` : '';
+    const uri = `${constants.BASE_ILX_URI}${namespacePath}/pullconsumer/${pullConsumerName}`;
     const host = dut.ip;
     const user = dut.username;
     const password = dut.password;
