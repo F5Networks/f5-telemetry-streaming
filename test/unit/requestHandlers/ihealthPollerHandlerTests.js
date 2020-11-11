@@ -47,7 +47,7 @@ describe('SystemPollerHandler', () => {
 
         return requestHandler.process()
             .then((handler) => {
-                assert.ok(handler === requestHandler, 'should return reference to origin instance');
+                assert.ok(handler === requestHandler, 'should return a reference to original handler');
                 assert.strictEqual(requestHandler.getCode(), 200, 'should return expected code');
                 assert.deepStrictEqual(requestHandler.getBody(), {
                     code: 200,
@@ -68,7 +68,7 @@ describe('SystemPollerHandler', () => {
 
         return requestHandler.process()
             .then((handler) => {
-                assert.ok(handler === requestHandler, 'should return reference to origin instance');
+                assert.ok(handler === requestHandler, 'should return a reference to original handler');
                 assert.strictEqual(requestHandler.getCode(), 201, 'should return expected code');
                 assert.deepStrictEqual(requestHandler.getBody(), {
                     code: 201,
@@ -89,7 +89,7 @@ describe('SystemPollerHandler', () => {
 
         return requestHandler.process()
             .then((handler) => {
-                assert.ok(handler === requestHandler, 'should return reference to origin instance');
+                assert.ok(handler === requestHandler, 'should return a reference to original handler');
                 assert.strictEqual(requestHandler.getCode(), 202, 'should return expected code');
                 assert.deepStrictEqual(requestHandler.getBody(), {
                     code: 202,
@@ -105,7 +105,7 @@ describe('SystemPollerHandler', () => {
         sinon.stub(ihealh, 'startPoller').rejects(new errors.ConfigLookupError('expectedError'));
         return requestHandler.process()
             .then((handler) => {
-                assert.ok(handler === requestHandler, 'should return reference to origin instance');
+                assert.ok(handler === requestHandler, 'should return a reference to original handler');
                 assert.strictEqual(requestHandler.getCode(), 404, 'should return expected code');
                 assert.deepStrictEqual(requestHandler.getBody(), {
                     code: 404,

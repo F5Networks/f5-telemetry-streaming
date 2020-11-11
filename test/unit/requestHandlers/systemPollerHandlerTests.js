@@ -54,7 +54,7 @@ describe('SystemPollerHandler', () => {
 
         return requestHandler.process()
             .then((handler) => {
-                assert.ok(handler === requestHandler, 'should return reference to origin instance');
+                assert.ok(handler === requestHandler, 'should return a reference to original handler');
                 assert.strictEqual(requestHandler.getCode(), 200, 'should return expected code');
                 assert.deepStrictEqual(requestHandler.getBody(), ['expectedData'], 'should return expected body');
                 assert.strictEqual(systemNameFromRequest, 'system', 'should match system name from request');
@@ -68,7 +68,7 @@ describe('SystemPollerHandler', () => {
         sinon.stub(systemPoller, 'getPollersConfig').rejects(new errors.ConfigLookupError('expectedError'));
         return requestHandler.process()
             .then((handler) => {
-                assert.ok(handler === requestHandler, 'should return reference to origin instance');
+                assert.ok(handler === requestHandler, 'should return a reference to original handler');
                 assert.strictEqual(requestHandler.getCode(), 404, 'should return expected code');
                 assert.deepStrictEqual(requestHandler.getBody(), {
                     code: 404,

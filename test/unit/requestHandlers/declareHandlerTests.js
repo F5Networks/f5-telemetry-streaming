@@ -43,7 +43,7 @@ describe('DeclareHandler', () => {
         sinon.stub(configWorker, 'getRawConfig').resolves(testUtil.deepCopy(expectedConfig));
         return requestHandler.process()
             .then((handler) => {
-                assert.ok(handler === requestHandler, 'should return reference to origin instance');
+                assert.ok(handler === requestHandler, 'should return a reference to original handler');
                 assert.strictEqual(requestHandler.getCode(), 200, 'should return expected code');
                 assert.deepStrictEqual(requestHandler.getBody(), {
                     message: 'success',
@@ -61,7 +61,7 @@ describe('DeclareHandler', () => {
         sinon.stub(configWorker, 'processDeclaration').resolves(testUtil.deepCopy(expectedConfig));
         return requestHandler.process()
             .then((handler) => {
-                assert.ok(handler === requestHandler, 'should return reference to origin instance');
+                assert.ok(handler === requestHandler, 'should return a reference to original handler');
                 assert.strictEqual(requestHandler.getCode(), 200, 'should return expected code');
                 assert.deepStrictEqual(requestHandler.getBody(), {
                     message: 'success',
@@ -76,7 +76,7 @@ describe('DeclareHandler', () => {
 
         return requestHandler.process()
             .then((handler) => {
-                assert.ok(handler === requestHandler, 'should return reference to origin instance');
+                assert.ok(handler === requestHandler, 'should return a reference to original handler');
                 assert.strictEqual(requestHandler.getCode(), 422, 'should return expected code');
                 assert.strictEqual(requestHandler.getBody().code, 422, 'should return expected code');
                 assert.strictEqual(requestHandler.getBody().message, 'Unprocessable entity', 'should return expected message');

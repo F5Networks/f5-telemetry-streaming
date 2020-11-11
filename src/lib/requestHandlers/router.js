@@ -155,6 +155,7 @@ RequestRouter.prototype.findRequestHandler = function (restOperation, uriPrefix)
         allowed.sort();
         return new MethodNotAllowedHandler(restOperation, allowed);
     }
+
     const handler = new RequestHandler(restOperation, match.params);
     return handler;
 };
