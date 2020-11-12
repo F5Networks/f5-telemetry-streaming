@@ -184,14 +184,7 @@ function expandPointers(str, origin, srcPointer) {
  * @param {String} dataPath - Path to the object
  * @param {Object} rootData - Full declaration
  *
- * @returns {Object} Object containing the name, data and dataPath to object in Namespace.
- *
- * Returned object:
- *  {
- *      name: '',
- *      scopedData: {},
- *      dataPath: ''
- *  }
+ * @returns {NamespaceCtx} object containing the name, data and dataPath to object in Namespace
  */
 function getNamespacedObject(dataPath, rootData) {
     // Assumption: Namespace name can only be a top-level key of the Declaration.
@@ -231,19 +224,22 @@ function getNamespacedObject(dataPath, rootData) {
 /**
  * Check that reference has proper class and property exists
  *
+ * @param {SchemaCtx} schemaCtx - schema context
+ * @param {DataCtx} dataCtx - data context
+ *
  * @throws {Error} when reference is invalid
  * @returns {Boolean} true if reference is valid
  */
-function declarationClassPropCheck(schemaObj, dataObj) {
+function declarationClassPropCheck(schemaCtx, dataCtx) {
     // Given sample obj
     // {
     //   class: "The_Class",
     //   collProp: { { key1: val1 }, { key2: val2 } }
     // }
     // Perform lookups against objects in the Namespace
-    const origin = dataObj.namespace.scopedData;
-    const srcPath = dataObj.data;
-    const options = schemaObj.schema;
+    const origin = dataCtx.namespace.scopedData;
+    const srcPath = dataCtx.data;
+    const options = schemaCtx.schema;
 
     // remove leading and trailing '/'
     const trimPath = val => val.substring(
@@ -287,11 +283,14 @@ function declarationClassPropCheck(schemaObj, dataObj) {
 /**
  * Encrypt secret
  *
+ * @param {SchemaCtx} schemaCtx - schema context
+ * @param {DataCtx} dataCtx - data context
+ *
  * @throws {Error} when secret is invalid
  * @returns {Boolean|Function} true if secret is valid and doesn't require encryption
  *      or function that returns {Promise} resolved once secret encrypted
  */
-function f5secretCheck(schemaObj, dataObj) {
+function f5secretCheck(schemaCtx, dataCtx) {
     /**
      * we handle a number of passphrase object in this function,
      * the following describes each of them:
@@ -300,7 +299,7 @@ function f5secretCheck(schemaObj, dataObj) {
      *   running on a BIG-IP where we have the means to do so.
      * - 'environmentVar': undefined
      */
-    const data = dataObj.data;
+    const data = dataCtx.data;
 
     if (typeof data[constants.PASSPHRASE_ENVIRONMENT_VAR] !== 'undefined') {
         return true;
@@ -338,32 +337,38 @@ function f5secretCheck(schemaObj, dataObj) {
 /**
  * Check connectivity to host
  *
+ * @param {SchemaCtx} schemaCtx - schema context
+ * @param {DataCtx} dataCtx - data context
+ *
  * @returns {Boolean|Function} true if port not specified or verification not required
  *      or function that returns {Promise} resolved once host is reachable
  */
-function hostConnectivityCheck(schemaObj, dataObj) {
-    let parentData = dataObj.parentData || {};
+function hostConnectivityCheck(schemaCtx, dataCtx) {
+    let parentData = dataCtx.parentData || {};
     if (Array.isArray(parentData)) {
         // probably list of hosts (e.g. Generic_HTTP consumer), then better to fetch parent object explicitly
-        parentData = expandPointers('`>@`', dataObj.namespace.scopedData, dataObj.namespace.dataPath);
+        parentData = expandPointers('`>@`', dataCtx.namespace.scopedData, dataCtx.namespace.dataPath);
     }
     // enable host connectivity check with this property - return otherwise
     if (parentData.enableHostConnectivityCheck !== true || typeof parentData.port === 'undefined') {
         return true;
     }
-    return () => util.networkCheck(dataObj.data, parentData.port);
+    return () => util.networkCheck(dataCtx.data, parentData.port);
 }
 
 /**
  * Check if path exists in filesystem
  *
+ * @param {SchemaCtx} schemaCtx - schema context
+ * @param {DataCtx} dataCtx - data context
+ *
  * @returns {Function} that returns {Promise} resolved once path is valid
  */
-function fsPathExistsCheck(schemaObj, dataObj) {
+function fsPathExistsCheck(schemaCtx, dataCtx) {
     return () => new Promise((resolve, reject) => {
-        fs.access(dataObj.data, (fs.constants || fs).R_OK, (err) => {
+        fs.access(dataCtx.data, (fs.constants || fs).R_OK, (err) => {
             if (err) {
-                reject(new Error(`Unable to access path "${dataObj.data}": ${err}`));
+                reject(new Error(`Unable to access path "${dataCtx.data}": ${err}`));
             } else {
                 resolve(true);
             }
@@ -374,11 +379,14 @@ function fsPathExistsCheck(schemaObj, dataObj) {
 /**
  * Check time window size
  *
+ * @param {SchemaCtx} schemaCtx - schema context
+ * @param {DataCtx} dataCtx - data context
+ *
  * @throws {Error} when time window is invalid
  * @returns {Boolean} true if time window is valid
  */
-function timeWindowSizeCheck(schemaObj, dataObj) {
-    const data = dataObj.data;
+function timeWindowSizeCheck(schemaCtx, dataCtx) {
+    const data = dataCtx.data;
     // start/end required - schema should validate this
     if (!(data.start && data.end)) {
         return true;
@@ -391,7 +399,7 @@ function timeWindowSizeCheck(schemaObj, dataObj) {
         return parseInt(hour, 10) * 60 + parseInt(minute, 10);
     }
 
-    const minWindowSize = schemaObj.schema;
+    const minWindowSize = schemaCtx.schema;
     // at that point we rely on schema validation - strings should be valid
     const timeStart = timeStrToMinutes(data.start);
     let timeEnd = timeStrToMinutes(data.end);
@@ -407,14 +415,17 @@ function timeWindowSizeCheck(schemaObj, dataObj) {
 /**
  * Check that reference has proper class
  *
+ * @param {SchemaCtx} schemaCtx - schema context
+ * @param {DataCtx} dataCtx - data context
+ *
  * @throws {Error} when reference is invalid
  * @returns {Boolean} true if reference is valid
  */
-function declarationClassCheck(schemaObj, dataObj) {
-    const declarationClass = schemaObj.schema;
-    const objectInstance = dataObj.namespace.scopedData[dataObj.data];
+function declarationClassCheck(schemaCtx, dataCtx) {
+    const declarationClass = schemaCtx.schema;
+    const objectInstance = dataCtx.namespace.scopedData[dataCtx.data];
     if (typeof objectInstance !== 'object' || objectInstance.class !== declarationClass) {
-        throw new Error(`declaration with name "${dataObj.data}" and class "${declarationClass}" doesn't exist`);
+        throw new Error(`declaration with name "${dataCtx.data}" and class "${declarationClass}" doesn't exist`);
     }
     return true;
 }
@@ -422,22 +433,25 @@ function declarationClassCheck(schemaObj, dataObj) {
 /**
  * Expand JSON pointer
  *
+ * @param {SchemaCtx} schemaCtx - schema context
+ * @param {DataCtx} dataCtx - data context
+ *
  * @throws {Error} when unable to expand JSON pointer
  * @returns {Boolean} true if JSON pointer was expanded
  */
-function f5expandCheck(schemaObj, dataObj) {
+function f5expandCheck(schemaCtx, dataCtx) {
     if (this.expand !== true) {
         // don't need to expand pointers
         return true;
     }
-    if (typeof dataObj.data !== 'string') {
+    if (typeof dataCtx.data !== 'string') {
         // keyword may be applied to objects that support multiple types for
         // idempotency - so simply return if data is not a string
         return true;
     }
 
-    const namespace = dataObj.namespace;
-    dataObj.parentData[dataObj.propertyName] = expandPointers(dataObj.data, namespace.scopedData, namespace.dataPath);
+    const namespace = dataCtx.namespace;
+    dataCtx.parentData[dataCtx.propertyName] = expandPointers(dataCtx.data, namespace.scopedData, namespace.dataPath);
     return true;
 }
 /**
@@ -450,17 +464,17 @@ function f5expandCheck(schemaObj, dataObj) {
 /**
  * Convert error to Ajv.ValidationError
  *
- * @param {Error} err        - error object
- * @param {Object} schemaObj - schema info
- * @param {Object} dataObj   - data info
+ * @param {Error} err - error object
+ * @param {SchemaCtx} schemaCtx - schema context
+ * @param {DataCtx} dataCtx - data context
  *
  * @returns {Error}
  */
-function getValidationError(err, schemaObj, dataObj) {
+function getValidationError(err, schemaCtx, dataCtx) {
     return new Ajv.ValidationError([{
-        dataPath: dataObj.dataPath,
-        propertyName: dataObj.propertyName,
-        keyword: schemaObj.keyword,
+        dataPath: dataCtx.dataPath,
+        propertyName: dataCtx.propertyName,
+        keyword: schemaCtx.keyword,
         message: err.message || err.toString(),
         params: {}
     }]);
@@ -469,21 +483,21 @@ function getValidationError(err, schemaObj, dataObj) {
 /**
  * Run validation function
  *
- * @param {Object}   this    - ajv instance of context if passed to ajv.validator function
- * @param {Function} func    - validation function
- * @param {Object} schemaObj - schema info
- * @param {Object} dataObj   - data info
+ * @param {Object} this - ajv instance of context if passed to ajv.validator function
+ * @param {Function} func - validation function
+ * @param {SchemaCtx} schemaCtx - schema context
+ * @param {DataCtx} dataCtx - data context
  *
  * @returns {Boolean|Function} returns true/false if validation passed/failed or
  *      function (deferred operation) that returns {Promise}
  *      to execute once global validation process done and succeed
  */
-function runValidationFunction(func, schemaObj, dataObj) {
+function runValidationFunction(func, schemaCtx, dataCtx) {
     try {
-        return func.call(this, schemaObj, dataObj);
+        return func.call(this, schemaCtx, dataCtx);
     } catch (err) {
-        schemaObj.validateFn.errors = schemaObj.validateFn.errors || [];
-        schemaObj.validateFn.errors.push(getValidationError(err, schemaObj, dataObj));
+        schemaCtx.validateFn.errors = schemaCtx.validateFn.errors || [];
+        schemaCtx.validateFn.errors.push(getValidationError(err, schemaCtx, dataCtx));
         return false;
     }
 }
@@ -491,34 +505,34 @@ function runValidationFunction(func, schemaObj, dataObj) {
 /**
  * Wrap deferred async function to catch errors correctly
  *
- * @param {Object}   this    - ajv instance of context if passed to ajv.validator function
- * @param {Function} func    - validation function
- * @param {Object} schemaObj - schema info
- * @param {Object} dataObj   - data info
+ * @param {Object} this - ajv instance of context if passed to ajv.validator function
+ * @param {Function} func - validation function
+ * @param {SchemaCtx} schemaCtx - schema context
+ * @param {DataCtx} dataCtx - data context
  *
  * @returns {Function}
  */
-function wrapAsyncValidationFunction(func, schemaObj, dataObj) {
+function wrapAsyncValidationFunction(func, schemaCtx, dataCtx) {
     return () => func()
-        .catch(err => Promise.reject(getValidationError(err, schemaObj, dataObj)));
+        .catch(err => Promise.reject(getValidationError(err, schemaCtx, dataCtx)));
 }
 
 /**
  * Run validation process
  *
- * @param {Object}   this    - ajv instance of context if passed to ajv.validator function
- * @param {Function} func    - validation function
- * @param {Object} schemaObj - schema info
- * @param {Object} dataObj   - data info
+ * @param {Object} this - ajv instance of context if passed to ajv.validator function
+ * @param {Function} func - validation function
+ * @param {SchemaCtx} schemaCtx - schema context
+ * @param {DataCtx} dataCtx - data context
  *
  * @returns {Boolean} false when validation failed or true if validation succeed or requires
  *      execution of deferred function if global validation process succeed
  */
-function validate(func, schemaObj, dataObj) {
-    let result = runValidationFunction.call(this, func, schemaObj, dataObj);
+function validate(func, schemaCtx, dataCtx) {
+    let result = runValidationFunction.call(this, func, schemaCtx, dataCtx);
     if (typeof result === 'function') {
-        this.deferred[schemaObj.keyword] = this.deferred[schemaObj.keyword] || [];
-        this.deferred[schemaObj.keyword].push(wrapAsyncValidationFunction.call(this, result, schemaObj, dataObj));
+        this.deferred[schemaCtx.keyword] = this.deferred[schemaCtx.keyword] || [];
+        this.deferred[schemaCtx.keyword].push(wrapAsyncValidationFunction.call(this, result, schemaCtx, dataCtx));
         result = true;
     }
     return result;
@@ -527,8 +541,8 @@ function validate(func, schemaObj, dataObj) {
 /**
  * Create validation function for custom keyword
  *
- * @param {String}   keyword - keyword
- * @param {Function} func    - validation function
+ * @param {String} keyword - keyword
+ * @param {Function} func - validation function
  *
  * @returns {Function} custom keyword validation function
  */
@@ -642,3 +656,35 @@ module.exports = {
         }
     }
 };
+
+/**
+ * Namespace Context for validation
+ *
+ * @typedef NamespaceCtx
+ * @type {Object}
+ * @property {String} dataPath - relative path to data inside of a namespace
+ * @property {String} name - name of a namespace
+ * @property {Object} scopedData - data that belongs to a namespace
+ */
+/**
+ * Schema Context for validation
+ *
+ * @typedef SchemaCtx
+ * @type {Object}
+ * @property {String} keyword - name of a keyword
+ * @property {Object} parentSchema - parent schema
+ * @property {Object} schema - schema
+ * @property {Function} validateFn - validation function
+ */
+/**
+ * Data Context for validation
+ *
+ * @typedef DataCtx
+ * @type {Object}
+ * @property {Any} data - data
+ * @property {String} dataPath - current data path
+ * @property {NamespaceCtx} namespace
+ * @property {Object} parentData - parent data object
+ * @property {String} propertyName - the property name in the parent data object
+ * @property {Object} rootData - the root data
+ */
