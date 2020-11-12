@@ -90,7 +90,6 @@ describe('Config Util', () => {
     });
 
     describe('.normalizeComponents', () => {
-        // TODO: once namespace is in schema, add some tests with named namespace
         const parseDeclaration = function (declaration) {
             return configWorker.validate(declaration)
                 .then(validated => configUtil.componentizeConfig(validated));
