@@ -78,7 +78,8 @@ module.exports = {
         EVENT_LISTENER_CLASS_NAME: 'Telemetry_Listener',
         IHEALTH_POLLER_CLASS_NAME: 'Telemetry_iHealth_Poller',
         SYSTEM_CLASS_NAME: 'Telemetry_System',
-        SYSTEM_POLLER_CLASS_NAME: 'Telemetry_System_Poller'
+        SYSTEM_POLLER_CLASS_NAME: 'Telemetry_System_Poller',
+        NAMESPACE_CLASS_NAME: 'Telemetry_Namespace'
     },
     CONSUMERS_DIR: './consumers',
     DAY_NAME_TO_WEEKDAY,

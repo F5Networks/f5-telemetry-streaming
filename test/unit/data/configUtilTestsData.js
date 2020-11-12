@@ -803,6 +803,102 @@ module.exports = {
                     }
                 },
                 {
+                    name: 'should normalize ihealth poller in a Namespace',
+                    declaration: {
+                        class: 'Telemetry',
+                        My_Namespace: {
+                            class: 'Telemetry_Namespace',
+                            My_iHealth_Poller: {
+                                class: 'Telemetry_iHealth_Poller',
+                                username: 'IHEALTH_ACCOUNT_USERNAME',
+                                passphrase: {
+                                    cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE'
+                                },
+                                interval: {
+                                    timeWindow: {
+                                        start: '23:15',
+                                        end: '02:15'
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    expected: {
+                        mappings: {
+                            uuid1: []
+                        },
+                        components: [
+                            {
+                                class: 'Telemetry_iHealth_Poller',
+                                enable: true,
+                                trace: false,
+                                iHealth: {
+                                    name: 'My_iHealth_Poller',
+                                    credentials: {
+                                        username: 'IHEALTH_ACCOUNT_USERNAME',
+                                        passphrase: {
+                                            cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE',
+                                            class: 'Secret',
+                                            protected: 'SecureVault'
+                                        }
+                                    },
+                                    downloadFolder: undefined,
+                                    interval: {
+                                        day: undefined,
+                                        frequency: 'daily',
+                                        timeWindow: {
+                                            start: '23:15',
+                                            end: '02:15'
+                                        }
+                                    },
+                                    proxy: {
+                                        connection: {
+                                            host: undefined,
+                                            port: undefined,
+                                            protocol: undefined,
+                                            allowSelfSignedCert: undefined
+                                        },
+                                        credentials: {
+                                            username: undefined,
+                                            passphrase: undefined
+                                        }
+                                    }
+                                },
+                                system: {
+                                    host: 'localhost',
+                                    name: 'My_iHealth_Poller_System',
+                                    connection: {
+                                        port: 8100,
+                                        protocol: 'http',
+                                        allowSelfSignedCert: false
+                                    },
+                                    credentials: {
+                                        username: undefined,
+                                        passphrase: undefined
+                                    }
+                                },
+                                id: 'uuid1',
+                                name: 'My_iHealth_Poller',
+                                namespace: 'My_Namespace'
+                            },
+                            {
+                                class: 'Telemetry_System',
+                                enable: true,
+                                trace: false,
+                                host: 'localhost',
+                                port: 8100,
+                                protocol: 'http',
+                                allowSelfSignedCert: false,
+                                name: 'My_iHealth_Poller_System',
+                                id: 'uuid2',
+                                namespace: 'My_Namespace',
+                                systemPollers: [],
+                                iHealthPoller: 'uuid1'
+                            }
+                        ]
+                    }
+                },
+                {
                     name: 'should assign correct mappings',
                     declaration: {
                         class: 'Telemetry',
@@ -1072,6 +1168,139 @@ module.exports = {
                                 namespace: constants.DEFAULT_UNNAMED_NAMESPACE,
                                 trace: false,
                                 type: 'default'
+                            }
+                        ]
+                    }
+                },
+                {
+                    name: 'should process listener in a Namespace',
+                    declaration: {
+                        class: 'Telemetry',
+                        My_Namespace: {
+                            class: 'Telemetry_Namespace',
+                            My_Listener_1: {
+                                class: 'Telemetry_Listener'
+                            }
+                        }
+                    },
+                    expected: {
+                        mappings: {
+                            uuid1: []
+                        },
+                        components: [
+                            {
+                                id: 'uuid1',
+                                name: 'My_Listener_1',
+                                namespace: 'My_Namespace',
+                                traceName: 'My_Namespace::My_Listener_1',
+                                class: 'Telemetry_Listener',
+                                port: 6514,
+                                enable: true,
+                                trace: false,
+                                match: '',
+                                tag: {},
+                                actions: [
+                                    {
+                                        enable: true,
+                                        setTag: {
+                                            application: '`A`',
+                                            tenant: '`T`'
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    name: 'should process listeners multiple Namespaces',
+                    declaration: {
+                        class: 'Telemetry',
+                        Listener_With_Same_Name: {
+                            class: 'Telemetry_Listener'
+                        },
+                        My_Namespace_1: {
+                            class: 'Telemetry_Namespace',
+                            Listener_With_Same_Name: {
+                                class: 'Telemetry_Listener'
+                            }
+                        },
+                        My_Namespace_2: {
+                            class: 'Telemetry_Namespace',
+                            My_Listener: {
+                                class: 'Telemetry_Listener'
+                            }
+                        }
+                    },
+                    expected: {
+                        mappings: {
+                            uuid1: [],
+                            uuid2: [],
+                            uuid3: []
+                        },
+                        components: [
+                            {
+                                id: 'uuid1',
+                                name: 'Listener_With_Same_Name',
+                                namespace: constants.DEFAULT_UNNAMED_NAMESPACE,
+                                traceName: 'Listener_With_Same_Name',
+                                class: 'Telemetry_Listener',
+                                port: 6514,
+                                enable: true,
+                                trace: false,
+                                match: '',
+                                tag: {},
+                                actions: [
+                                    {
+                                        enable: true,
+                                        setTag: {
+                                            application: '`A`',
+                                            tenant: '`T`'
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                id: 'uuid2',
+                                name: 'Listener_With_Same_Name',
+                                namespace: 'My_Namespace_1',
+                                traceName: 'My_Namespace_1::Listener_With_Same_Name',
+                                class: 'Telemetry_Listener',
+                                port: 6514,
+                                enable: true,
+                                trace: false,
+                                match: '',
+                                tag: {},
+                                actions: [
+                                    {
+                                        enable: true,
+                                        setTag: {
+                                            application: '`A`',
+                                            tenant: '`T`'
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                id: 'uuid3',
+                                name: 'My_Listener',
+                                namespace: 'My_Namespace_2',
+                                traceName: 'My_Namespace_2::My_Listener',
+                                class: 'Telemetry_Listener',
+                                port: 6514,
+                                enable: true,
+                                trace: false,
+                                match: '',
+                                tag: {},
+                                actions: [
+                                    {
+                                        enable: true,
+                                        setTag: {
+                                            application: '`A`',
+                                            tenant: '`T`'
+                                        }
+                                    }
+                                ]
                             }
                         ]
                     }
@@ -1723,6 +1952,263 @@ module.exports = {
                                 id: 'uuid2',
                                 namespace: 'f5telemetry_default',
                                 traceName: 'My_System::SystemPoller_1',
+                                connection: {
+                                    host: 'localhost',
+                                    port: 8100,
+                                    protocol: 'http',
+                                    allowSelfSignedCert: false
+                                },
+                                dataOpts: {
+                                    tags: undefined,
+                                    actions: [
+                                        {
+                                            enable: true,
+                                            setTag: {
+                                                application: '`A`',
+                                                tenant: '`T`'
+                                            }
+                                        }
+
+                                    ],
+                                    noTMStats: true
+                                },
+                                credentials: {
+                                    username: undefined,
+                                    passphrase: undefined
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    name: 'should normalize poller in a Namespace',
+                    declaration: {
+                        class: 'Telemetry',
+                        My_Namespace: {
+                            class: 'Telemetry_Namespace',
+                            My_System: {
+                                class: 'Telemetry_System',
+                                enable: true,
+                                systemPoller: {
+                                    interval: 456
+                                }
+                            }
+                        }
+                    },
+                    expected: {
+                        mappings: {
+                            uuid2: []
+                        },
+                        components: [
+                            {
+                                class: 'Telemetry_System',
+                                enable: true,
+                                host: 'localhost',
+                                port: 8100,
+                                protocol: 'http',
+                                allowSelfSignedCert: false,
+                                name: 'My_System',
+                                id: 'uuid1',
+                                namespace: 'My_Namespace',
+                                systemPollers: [
+                                    'uuid2'
+                                ]
+                            },
+                            {
+                                class: 'Telemetry_System_Poller',
+                                enable: true,
+                                trace: false,
+                                interval: 456,
+                                name: 'SystemPoller_1',
+                                id: 'uuid2',
+                                namespace: 'My_Namespace',
+                                traceName: 'My_Namespace::My_System::SystemPoller_1',
+                                connection: {
+                                    host: 'localhost',
+                                    port: 8100,
+                                    protocol: 'http',
+                                    allowSelfSignedCert: false
+                                },
+                                dataOpts: {
+                                    tags: undefined,
+                                    actions: [
+                                        {
+                                            enable: true,
+                                            setTag: {
+                                                application: '`A`',
+                                                tenant: '`T`'
+                                            }
+                                        }
+
+                                    ],
+                                    noTMStats: true
+                                },
+                                credentials: {
+                                    username: undefined,
+                                    passphrase: undefined
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    name: 'should normalize pollers in different Namespaces',
+                    declaration: {
+                        class: 'Telemetry',
+                        My_Same_Name_System: {
+                            class: 'Telemetry_System',
+                            enable: true,
+                            systemPoller: {
+                                interval: 123
+                            }
+                        },
+                        My_Namespace_1: {
+                            class: 'Telemetry_Namespace',
+                            My_Same_Name_System: {
+                                class: 'Telemetry_System',
+                                enable: true,
+                                systemPoller: {
+                                    interval: 456
+                                }
+                            }
+                        },
+                        My_Namespace_2: {
+                            class: 'Telemetry_Namespace',
+                            My_System: {
+                                class: 'Telemetry_System',
+                                enable: true,
+                                systemPoller: {
+                                    interval: 789
+                                }
+                            }
+                        }
+                    },
+                    expected: {
+                        mappings: {
+                            uuid4: [],
+                            uuid5: [],
+                            uuid6: []
+                        },
+                        components: [
+                            {
+                                class: 'Telemetry_System',
+                                enable: true,
+                                host: 'localhost',
+                                port: 8100,
+                                protocol: 'http',
+                                allowSelfSignedCert: false,
+                                name: 'My_Same_Name_System',
+                                id: 'uuid1',
+                                namespace: constants.DEFAULT_UNNAMED_NAMESPACE,
+                                systemPollers: [
+                                    'uuid4'
+                                ]
+                            },
+                            {
+                                class: 'Telemetry_System',
+                                enable: true,
+                                host: 'localhost',
+                                port: 8100,
+                                protocol: 'http',
+                                allowSelfSignedCert: false,
+                                name: 'My_Same_Name_System',
+                                id: 'uuid2',
+                                namespace: 'My_Namespace_1',
+                                systemPollers: [
+                                    'uuid5'
+                                ]
+                            },
+                            {
+                                class: 'Telemetry_System',
+                                enable: true,
+                                host: 'localhost',
+                                port: 8100,
+                                protocol: 'http',
+                                allowSelfSignedCert: false,
+                                name: 'My_System',
+                                id: 'uuid3',
+                                namespace: 'My_Namespace_2',
+                                systemPollers: [
+                                    'uuid6'
+                                ]
+                            },
+                            {
+                                class: 'Telemetry_System_Poller',
+                                enable: true,
+                                trace: false,
+                                interval: 123,
+                                name: 'SystemPoller_1',
+                                id: 'uuid4',
+                                namespace: constants.DEFAULT_UNNAMED_NAMESPACE,
+                                traceName: 'My_Same_Name_System::SystemPoller_1',
+                                connection: {
+                                    host: 'localhost',
+                                    port: 8100,
+                                    protocol: 'http',
+                                    allowSelfSignedCert: false
+                                },
+                                dataOpts: {
+                                    tags: undefined,
+                                    actions: [
+                                        {
+                                            enable: true,
+                                            setTag: {
+                                                application: '`A`',
+                                                tenant: '`T`'
+                                            }
+                                        }
+
+                                    ],
+                                    noTMStats: true
+                                },
+                                credentials: {
+                                    username: undefined,
+                                    passphrase: undefined
+                                }
+                            },
+                            {
+                                class: 'Telemetry_System_Poller',
+                                enable: true,
+                                trace: false,
+                                interval: 456,
+                                name: 'SystemPoller_1',
+                                id: 'uuid5',
+                                namespace: 'My_Namespace_1',
+                                traceName: 'My_Namespace_1::My_Same_Name_System::SystemPoller_1',
+                                connection: {
+                                    host: 'localhost',
+                                    port: 8100,
+                                    protocol: 'http',
+                                    allowSelfSignedCert: false
+                                },
+                                dataOpts: {
+                                    tags: undefined,
+                                    actions: [
+                                        {
+                                            enable: true,
+                                            setTag: {
+                                                application: '`A`',
+                                                tenant: '`T`'
+                                            }
+                                        }
+
+                                    ],
+                                    noTMStats: true
+                                },
+                                credentials: {
+                                    username: undefined,
+                                    passphrase: undefined
+                                }
+                            },
+                            {
+                                class: 'Telemetry_System_Poller',
+                                enable: true,
+                                trace: false,
+                                interval: 789,
+                                name: 'SystemPoller_1',
+                                id: 'uuid6',
+                                namespace: 'My_Namespace_2',
+                                traceName: 'My_Namespace_2::My_System::SystemPoller_1',
                                 connection: {
                                     host: 'localhost',
                                     port: 8100,
@@ -2613,6 +3099,124 @@ module.exports = {
                             }
                         ]
                     }
+                },
+                {
+                    name: 'should normalize system in a Namespace',
+                    declaration: {
+                        class: 'Telemetry',
+                        My_Namespace: {
+                            class: 'Telemetry_Namespace',
+                            My_System_1: {
+                                class: 'Telemetry_System',
+                                trace: false
+                            }
+                        }
+                    },
+                    expected: {
+                        mappings: {
+                        },
+                        components: [
+                            {
+                                name: 'My_System_1',
+                                id: 'uuid1',
+                                namespace: 'My_Namespace',
+                                class: 'Telemetry_System',
+                                enable: true,
+                                systemPollers: [],
+                                allowSelfSignedCert: false,
+                                host: 'localhost',
+                                port: 8100,
+                                protocol: 'http',
+                                trace: false
+                            }
+                        ]
+                    }
+                },
+                {
+                    name: 'should normalize systems in multiple Namespaces',
+                    declaration: {
+                        class: 'Telemetry',
+                        My_Same_Name_System: {
+                            class: 'Telemetry_System',
+                            trace: false
+                        },
+                        My_Namespace_1: {
+                            class: 'Telemetry_Namespace',
+                            My_Same_Name_System: {
+                                class: 'Telemetry_System',
+                                trace: true
+                            },
+                            My_System_2: {
+                                class: 'Telemetry_System',
+                                trace: false
+                            }
+                        },
+                        My_Namespace_2: {
+                            class: 'Telemetry_Namespace',
+                            My_System: {
+                                class: 'Telemetry_System',
+                                trace: true
+                            }
+                        }
+                    },
+                    expected: {
+                        mappings: {
+                        },
+                        components: [
+                            {
+                                name: 'My_Same_Name_System',
+                                id: 'uuid1',
+                                namespace: constants.DEFAULT_UNNAMED_NAMESPACE,
+                                class: 'Telemetry_System',
+                                enable: true,
+                                systemPollers: [],
+                                allowSelfSignedCert: false,
+                                host: 'localhost',
+                                port: 8100,
+                                protocol: 'http',
+                                trace: false
+                            },
+                            {
+                                name: 'My_Same_Name_System',
+                                id: 'uuid2',
+                                namespace: 'My_Namespace_1',
+                                class: 'Telemetry_System',
+                                enable: true,
+                                systemPollers: [],
+                                allowSelfSignedCert: false,
+                                host: 'localhost',
+                                port: 8100,
+                                protocol: 'http',
+                                trace: true
+                            },
+                            {
+                                name: 'My_System_2',
+                                id: 'uuid3',
+                                namespace: 'My_Namespace_1',
+                                class: 'Telemetry_System',
+                                enable: true,
+                                systemPollers: [],
+                                allowSelfSignedCert: false,
+                                host: 'localhost',
+                                port: 8100,
+                                protocol: 'http',
+                                trace: false
+                            },
+                            {
+                                name: 'My_System',
+                                id: 'uuid4',
+                                namespace: 'My_Namespace_2',
+                                class: 'Telemetry_System',
+                                enable: true,
+                                systemPollers: [],
+                                allowSelfSignedCert: false,
+                                host: 'localhost',
+                                port: 8100,
+                                protocol: 'http',
+                                trace: true
+                            }
+                        ]
+                    }
                 }
             ]
         },
@@ -3110,6 +3714,269 @@ module.exports = {
                                         path: '/basePath2/enabledEndpoint2',
                                         enable: true,
                                         name: 'enabledEndpoint2'
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    name: 'should normalize inline definitions within Namespace',
+                    declaration: {
+                        class: 'Telemetry',
+                        My_Namespace: {
+                            class: 'Telemetry_Namespace',
+                            My_System: {
+                                class: 'Telemetry_System',
+                                systemPoller: {
+                                    endpointList: {
+                                        enable: false,
+                                        basePath: 'mgmt',
+                                        items: {
+                                            endpoint1: {
+                                                path: 'endpoint1'
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    expected: {
+                        mappings: {
+                            uuid2: []
+                        },
+                        components: [
+                            {
+                                class: 'Telemetry_System',
+                                enable: true,
+                                host: 'localhost',
+                                port: 8100,
+                                protocol: 'http',
+                                allowSelfSignedCert: false,
+                                name: 'My_System',
+                                id: 'uuid1',
+                                namespace: 'My_Namespace',
+                                systemPollers: [
+                                    'uuid2'
+                                ]
+                            },
+                            {
+                                enable: true,
+                                interval: 300,
+                                class: 'Telemetry_System_Poller',
+                                id: 'uuid2',
+                                name: 'SystemPoller_1',
+                                namespace: 'My_Namespace',
+                                traceName: 'My_Namespace::My_System::SystemPoller_1',
+                                trace: false,
+                                connection: {
+                                    host: 'localhost',
+                                    port: 8100,
+                                    protocol: 'http',
+                                    allowSelfSignedCert: false
+                                },
+                                dataOpts: {
+                                    actions: [
+                                        {
+                                            setTag: {
+                                                tenant: '`T`',
+                                                application: '`A`'
+                                            },
+                                            enable: true
+                                        }
+                                    ],
+                                    noTMStats: true,
+                                    tags: undefined
+                                },
+                                credentials: {
+                                    username: undefined,
+                                    passphrase: undefined
+                                },
+                                endpoints: {}
+                            }
+                        ]
+                    }
+                },
+                {
+                    name: 'should expand references within Namespaces',
+                    declaration: {
+                        class: 'Telemetry',
+                        Endpoints: {
+                            class: 'Telemetry_Endpoints',
+                            enable: true,
+                            basePath: 'basePath/',
+                            items: {
+                                endpoint: {
+                                    path: 'defaultEndpoint'
+                                }
+                            }
+                        },
+                        My_System_1: {
+                            class: 'Telemetry_System',
+                            systemPoller: {
+                                endpointList: 'Endpoints'
+                            }
+                        },
+                        My_Namespace: {
+                            class: 'Telemetry_Namespace',
+                            Endpoints: {
+                                class: 'Telemetry_Endpoints',
+                                enable: true,
+                                basePath: 'basePath/',
+                                items: {
+                                    endpoint: {
+                                        path: 'namespacedEndpoint'
+                                    }
+                                }
+                            },
+                            My_System_2: {
+                                class: 'Telemetry_System',
+                                systemPoller: {
+                                    endpointList: 'Endpoints'
+                                }
+                            }
+                        }
+                    },
+                    expected: {
+                        mappings: {
+                            uuid5: [],
+                            uuid6: []
+                        },
+                        components: [
+                            {
+                                class: 'Telemetry_Endpoints',
+                                enable: true,
+                                basePath: '/basePath',
+                                items: {
+                                    endpoint: {
+                                        path: 'defaultEndpoint',
+                                        enable: true
+                                    }
+                                },
+                                name: 'Endpoints',
+                                id: 'uuid1',
+                                namespace: constants.DEFAULT_UNNAMED_NAMESPACE
+                            },
+                            {
+                                class: 'Telemetry_System',
+                                enable: true,
+                                host: 'localhost',
+                                port: 8100,
+                                protocol: 'http',
+                                allowSelfSignedCert: false,
+                                name: 'My_System_1',
+                                id: 'uuid2',
+                                namespace: constants.DEFAULT_UNNAMED_NAMESPACE,
+                                systemPollers: [
+                                    'uuid5'
+                                ]
+                            },
+                            {
+                                class: 'Telemetry_Endpoints',
+                                enable: true,
+                                basePath: '/basePath',
+                                items: {
+                                    endpoint: {
+                                        path: 'namespacedEndpoint',
+                                        enable: true
+                                    }
+                                },
+                                name: 'Endpoints',
+                                id: 'uuid3',
+                                namespace: 'My_Namespace'
+                            },
+                            {
+                                class: 'Telemetry_System',
+                                enable: true,
+                                host: 'localhost',
+                                port: 8100,
+                                protocol: 'http',
+                                allowSelfSignedCert: false,
+                                name: 'My_System_2',
+                                id: 'uuid4',
+                                namespace: 'My_Namespace',
+                                systemPollers: [
+                                    'uuid6'
+                                ]
+                            },
+                            {
+                                enable: true,
+                                interval: 300,
+                                class: 'Telemetry_System_Poller',
+                                id: 'uuid5',
+                                name: 'SystemPoller_1',
+                                namespace: constants.DEFAULT_UNNAMED_NAMESPACE,
+                                traceName: 'My_System_1::SystemPoller_1',
+                                trace: false,
+                                connection: {
+                                    host: 'localhost',
+                                    port: 8100,
+                                    protocol: 'http',
+                                    allowSelfSignedCert: false
+                                },
+                                dataOpts: {
+                                    actions: [
+                                        {
+                                            setTag: {
+                                                tenant: '`T`',
+                                                application: '`A`'
+                                            },
+                                            enable: true
+                                        }
+                                    ],
+                                    noTMStats: true,
+                                    tags: undefined
+                                },
+                                credentials: {
+                                    username: undefined,
+                                    passphrase: undefined
+                                },
+                                endpoints: {
+                                    endpoint: {
+                                        path: '/basePath/defaultEndpoint',
+                                        enable: true,
+                                        name: 'endpoint'
+                                    }
+                                }
+                            },
+                            {
+                                enable: true,
+                                interval: 300,
+                                class: 'Telemetry_System_Poller',
+                                id: 'uuid6',
+                                name: 'SystemPoller_1',
+                                namespace: 'My_Namespace',
+                                traceName: 'My_Namespace::My_System_2::SystemPoller_1',
+                                trace: false,
+                                connection: {
+                                    host: 'localhost',
+                                    port: 8100,
+                                    protocol: 'http',
+                                    allowSelfSignedCert: false
+                                },
+                                dataOpts: {
+                                    actions: [
+                                        {
+                                            setTag: {
+                                                tenant: '`T`',
+                                                application: '`A`'
+                                            },
+                                            enable: true
+                                        }
+                                    ],
+                                    noTMStats: true,
+                                    tags: undefined
+                                },
+                                credentials: {
+                                    username: undefined,
+                                    passphrase: undefined
+                                },
+                                endpoints: {
+                                    endpoint: {
+                                        path: '/basePath/namespacedEndpoint',
+                                        enable: true,
+                                        name: 'endpoint'
                                     }
                                 }
                             }

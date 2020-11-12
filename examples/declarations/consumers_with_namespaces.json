@@ -1,0 +1,32 @@
+{
+    "class": "Telemetry",
+    "My_System": {
+        "class": "Telemetry_System",
+        "systemPoller": {
+            "interval": 60
+        }
+    },
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Generic_HTTP",
+        "host": "192.0.2.1",
+        "protocol": "http",
+        "port": 9880
+    },
+    "My_Namespace": {
+        "class": "Telemetry_Namespace",
+        "Namespaced_System": {
+            "class": "Telemetry_System",
+            "systemPoller": {
+                "interval": 60
+            }
+        },
+        "My_Consumer": {
+            "class": "Telemetry_Consumer",
+            "type": "Generic_HTTP",
+            "host": "192.0.2.2",
+            "protocol": "http",
+            "port": 9880
+        }
+    }
+}

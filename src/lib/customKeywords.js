@@ -177,6 +177,50 @@ function expandPointers(str, origin, srcPointer) {
 
     return ret;
 }
+
+/**
+ * Returns an object containing the Namespace-scoped data, along with the Namespaced-scoped dataPath.
+ *
+ * @param {String} dataPath - Path to the object
+ * @param {Object} rootData - Full declaration
+ *
+ * @returns {Object} Object containing the name, data and dataPath to object in Namespace.
+ *
+ * Returned object:
+ *  {
+ *      name: '',
+ *      scopedData: {},
+ *      dataPath: ''
+ *  }
+ */
+function getNamespacedObject(dataPath, rootData) {
+    // Assumption: Namespace name can only be a top-level key of the Declaration.
+    const possibleNamespace = dataPath.split('/')[1];
+    // If the first key in the dataPath references a Telemetry_Namespace object, assuming the object is a namespace
+    const isUserDefinedNamespace = rootData[possibleNamespace].class === constants.CONFIG_CLASSES.NAMESPACE_CLASS_NAME;
+    if (isUserDefinedNamespace) {
+        return {
+            name: possibleNamespace,
+            scopedData: rootData[possibleNamespace],
+            dataPath: `/${dataPath.split('/').slice(2).join('/')}`
+        };
+    }
+
+    const defaultNamespace = {};
+    // Scope 'data' to just the objects in the default namespace
+    // Iterate over each key in the raw declaration, and filter out any keys that are User-Defined Namespaces
+    Object.keys(rootData).forEach((key) => {
+        if (rootData[key].class !== constants.CONFIG_CLASSES.NAMESPACE_CLASS_NAME) {
+            defaultNamespace[key] = rootData[key];
+        }
+    });
+    return {
+        name: constants.DEFAULT_UNNAMED_NAMESPACE,
+        scopedData: defaultNamespace,
+        dataPath
+    };
+}
+
 /**
  * Helpers block end
  */
@@ -196,7 +240,8 @@ function declarationClassPropCheck(schemaObj, dataObj) {
     //   class: "The_Class",
     //   collProp: { { key1: val1 }, { key2: val2 } }
     // }
-    const origin = dataObj.rootData;
+    // Perform lookups against objects in the Namespace
+    const origin = dataObj.namespace.scopedData;
     const srcPath = dataObj.data;
     const options = schemaObj.schema;
 
@@ -300,7 +345,7 @@ function hostConnectivityCheck(schemaObj, dataObj) {
     let parentData = dataObj.parentData || {};
     if (Array.isArray(parentData)) {
         // probably list of hosts (e.g. Generic_HTTP consumer), then better to fetch parent object explicitly
-        parentData = expandPointers('`>@`', dataObj.rootData, dataObj.dataPath);
+        parentData = expandPointers('`>@`', dataObj.namespace.scopedData, dataObj.namespace.dataPath);
     }
     // enable host connectivity check with this property - return otherwise
     if (parentData.enableHostConnectivityCheck !== true || typeof parentData.port === 'undefined') {
@@ -367,7 +412,7 @@ function timeWindowSizeCheck(schemaObj, dataObj) {
  */
 function declarationClassCheck(schemaObj, dataObj) {
     const declarationClass = schemaObj.schema;
-    const objectInstance = dataObj.rootData[dataObj.data];
+    const objectInstance = dataObj.namespace.scopedData[dataObj.data];
     if (typeof objectInstance !== 'object' || objectInstance.class !== declarationClass) {
         throw new Error(`declaration with name "${dataObj.data}" and class "${declarationClass}" doesn't exist`);
     }
@@ -391,7 +436,8 @@ function f5expandCheck(schemaObj, dataObj) {
         return true;
     }
 
-    dataObj.parentData[dataObj.propertyName] = expandPointers(dataObj.data, dataObj.rootData, dataObj.dataPath);
+    const namespace = dataObj.namespace;
+    dataObj.parentData[dataObj.propertyName] = expandPointers(dataObj.data, namespace.scopedData, namespace.dataPath);
     return true;
 }
 /**
@@ -488,14 +534,15 @@ function validate(func, schemaObj, dataObj) {
  */
 function createValidationFunction(keyword, func) {
     return function _validate(schema, data, parentSchema, dataPath, parentData, propertyName, rootData) {
+        const namespace = getNamespacedObject(dataPath, rootData);
         return validate.call(
             this,
             func,
             {
-                schema, parentSchema, keyword, validateFn: _validate
+                schema, parentSchema, keyword, validateFn: _validate // schemaObj
             },
             {
-                data, dataPath, parentData, propertyName, rootData
+                data, dataPath, parentData, propertyName, rootData, namespace // dataObj
             }
         );
     };
