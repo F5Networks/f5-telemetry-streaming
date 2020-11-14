@@ -19,7 +19,7 @@ const dutUtils = require('../dutTests').utils;
 
 const DUTS = testUtil.getHosts('BIGIP');
 
-const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC_EXAMPLE));
+const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
 /**
  * Should look like:
  * [
@@ -79,7 +79,7 @@ function test() {
             instrumentationKey: null,
             maxBatchIntervalMs: 2000
         };
-        DUTS.forEach(dut => it(`should configure TS - ${dut.hostname}`, () => {
+        DUTS.forEach(dut => it(`should configure TS - ${dut.hostalias}`, () => {
             const declaration = testUtil.deepCopy(referenceDeclaration);
             const apiInfo = getAppInsightAPIInfo(dut.ip);
             declaration.My_Consumer.instrumentationKey = apiInfo.instrKey;
@@ -97,7 +97,7 @@ function test() {
         DUTS.forEach((dut) => {
             let triedWithoutAddtlDelay = false;
 
-            it(`should check for system poller data from - ${dut.hostname}`, () => {
+            it(`should check for system poller data from:${dut.hostalias}`, () => {
                 const apiInfo = getAppInsightAPIInfo(dut.ip);
                 return Promise.resolve()
                     .then(() => {

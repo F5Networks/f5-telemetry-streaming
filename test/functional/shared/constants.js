@@ -12,14 +12,17 @@ const fs = require('fs');
 
 module.exports = {
     DECL: {
-        BASIC_EXAMPLE: `${__dirname}/basic.json`,
-        FILTER_EXAMPLE: `${__dirname}/filter_system_poller.json`,
-        ACTION_CHAINING_EXAMPLE: `${__dirname}/system_poller_chained_actions.json`,
-        FILTERING_WITH_MATCHING_EXAMPLE: `${__dirname}/system_poller_matched_filtering.json`,
-        ENDPOINTLIST_EXAMPLE: `${__dirname}/system_poller_endpointlist.json`,
-        BASIC_PULL_CONSUMER_EXAMPLE: `${__dirname}/basic_pull_consumer.json`,
+        BASIC: `${__dirname}/basic.json`,
+        BASIC_NAMESPACE: `${__dirname}/basic_namespace.json`,
+        FILTER: `${__dirname}/filter_system_poller.json`,
+        ACTION_CHAINING: `${__dirname}/system_poller_chained_actions.json`,
+        FILTERING_WITH_MATCHING: `${__dirname}/system_poller_matched_filtering.json`,
+        ENDPOINTLIST: `${__dirname}/system_poller_endpointlist.json`,
+        PULL_CONSUMER_BASIC: `${__dirname}/pull_consumer_basic.json`,
+        PULL_CONSUMER_WITH_NAMESPACE: `${__dirname}/pull_consumer_with_namespace.json`,
         CONSUMER_NAME: 'My_Consumer',
         SYSTEM_NAME: 'My_System',
+        NAMESPACE_NAME: 'My_Namespace',
         SYSTEM_POLLER_SCHEMA: fs.realpathSync(`${__dirname}/../../../shared/output_schemas/system_poller_schema.json`)
     },
     ENV_VARS: {

@@ -393,7 +393,8 @@ module.exports = {
                         ip: item.admin_ip,
                         username: item.f5_rest_user.username,
                         password: item.f5_rest_user.password,
-                        hostname: item.f5_hostname
+                        hostname: item.f5_hostname,
+                        hostalias: item.f5_hostname.substring(item.f5_hostname.indexOf('bigip'), item.f5_hostname.indexOf('.'))
                     };
                 } else {
                     item = {

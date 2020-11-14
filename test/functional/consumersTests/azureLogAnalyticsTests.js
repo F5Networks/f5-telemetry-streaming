@@ -19,7 +19,7 @@ const dutUtils = require('../dutTests').utils;
 
 const DUTS = util.getHosts('BIGIP');
 
-const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC_EXAMPLE));
+const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
 const PASSPHRASE = process.env[constants.ENV_VARS.AZURE.PASSPHRASE];
 const WORKSPACE_ID = process.env[constants.ENV_VARS.AZURE.WORKSPACE];
 const TENANT_ID = process.env[constants.ENV_VARS.AZURE.TENANT];
@@ -58,7 +58,7 @@ function test() {
             }
         };
         DUTS.forEach(dut => it(
-            `should configure TS - ${dut.hostname}`,
+            `should configure TS - ${dut.hostalias}`,
             () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(consumerDeclaration))
         ));
 
@@ -70,7 +70,7 @@ function test() {
 
     describe('Consumer Test: Azure Log Analytics - Test', () => {
         DUTS.forEach((dut) => {
-            it(`should check for system poller data from - ${dut.hostname}`, () => {
+            it(`should check for system poller data from:${dut.hostalias}`, () => {
                 // system poller is on an interval, so space out the retries
                 // NOTE: need to determine mechanism to shorten the minimum interval
                 // for a system poller cycle to reduce the test time here
@@ -89,7 +89,7 @@ function test() {
                     });
             });
 
-            it(`should check for event listener data from - ${dut.hostname}`, () => {
+            it(`should check for event listener data from:${dut.hostalias}`, () => {
                 const queryString = [
                     'F5Telemetry_LTM_CL',
                     `where hostname_s == "${dut.hostname}"`,
