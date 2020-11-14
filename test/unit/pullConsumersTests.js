@@ -16,6 +16,7 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
+const constants = require('../../src/lib/constants');
 const configWorker = require('../../src/lib/config');
 const systemPoller = require('../../src/lib/systemPoller');
 const pullConsumers = require('../../src/lib/pullConsumers');
@@ -194,23 +195,85 @@ describe('Pull Consumers', () => {
                 });
         });
 
-        /* eslint-disable implicit-arrow-linebreak */
-        pullConsumersTestsData.getData.forEach(testConf =>
-            testUtil.getCallableIt(testConf)(testConf.name, () => {
-                declaration = testConf.declaration;
-                if (typeof testConf.returnCtx !== 'undefined') {
-                    returnCtx = testConf.returnCtx;
-                }
-                return pullConsumers.getData(testConf.consumerName)
-                    .then((data) => {
-                        assert.deepStrictEqual(data, testConf.expectedResponse);
-                    })
-                    .catch((err) => {
-                        if (testConf.errorRegExp) {
-                            return assert.match(err, testConf.errorRegExp, 'should match error reg exp');
-                        }
-                        return Promise.reject(err);
-                    });
+        const runTestCase = testConf => testUtil.getCallableIt(testConf)(testConf.name, () => {
+            declaration = testConf.declaration;
+            if (typeof testConf.returnCtx !== 'undefined') {
+                returnCtx = testConf.returnCtx;
+            }
+            return pullConsumers.getData(testConf.consumerName, testConf.namespace)
+                .then((data) => {
+                    assert.deepStrictEqual(data, testConf.expectedResponse);
+                })
+                .catch((err) => {
+                    if (testConf.errorRegExp) {
+                        return assert.match(err, testConf.errorRegExp, 'should match error reg exp');
+                    }
+                    return Promise.reject(err);
+                });
+        });
+
+        describe('default (no namespace)', () => pullConsumersTestsData.getData.forEach(testConf => runTestCase(testConf)));
+
+        describe('default (no namespace), lookup using f5telemetry_default name',
+            () => pullConsumersTestsData.getData.forEach((testConf) => {
+                testConf.namespace = constants.DEFAULT_UNNAMED_NAMESPACE;
+                runTestCase(testConf);
             }));
+
+        describe('with namespace only', () => {
+            const namespaceOnlyTestsData = util.deepCopy(pullConsumersTestsData.getData);
+            namespaceOnlyTestsData.forEach((testConf) => {
+                testConf.declaration = {
+                    class: 'Telemetry',
+                    Namespace_Only: testConf.declaration
+                };
+                testConf.declaration.Namespace_Only.class = 'Telemetry_Namespace';
+                testConf.namespace = 'Namespace_Only';
+                return runTestCase(testConf);
+            });
+        });
+
+        describe('mix - default (no namespace) and with namespaces', () => {
+            const namespaceOnlyTestsData = util.deepCopy(pullConsumersTestsData.getData);
+            namespaceOnlyTestsData.forEach((testConf) => {
+                testConf.declaration.Wanted_Namespace = util.deepCopy(testConf.declaration);
+                testConf.declaration.Wanted_Namespace.class = 'Telemetry_Namespace';
+                testConf.declaration.Extra_Namespace = {
+                    class: 'Telemetry_Namespace',
+                    A_System_Poller: {
+                        class: 'Telemetry_System_Poller'
+                    }
+                };
+                testConf.namespace = 'Wanted_Namespace';
+                return runTestCase(testConf);
+            });
+
+            it('should return an error if consumer exists in namespace but no namespace provided', () => {
+                declaration = {
+                    class: 'Telemetry',
+                    Some_System_Poller: {
+                        class: 'Telemetry_System_Poller'
+                    },
+                    Some_Consumer: {
+                        class: 'Telemetry_Pull_Consumer',
+                        type: 'default',
+                        systemPoller: 'Some_System_Poller'
+                    },
+                    Wanted_Namespace: {
+                        class: 'Telemetry_Namespace',
+                        Wanted_Poller: {
+                            class: 'Telemetry_System_Poller'
+                        },
+                        Wanted_Consumer: {
+                            class: 'Telemetry_Pull_Consumer',
+                            type: 'default',
+                            systemPoller: 'Wanted_Poller'
+                        }
+                    }
+                };
+                return assert.isRejected(pullConsumers.getData('Wanted_Consumer'),
+                    'Pull Consumer with name \'Wanted_Consumer\' doesn\'t exist (namespace: f5telemetry_default)');
+            });
+        });
     });
 });

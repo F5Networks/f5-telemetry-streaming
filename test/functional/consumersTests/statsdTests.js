@@ -32,7 +32,7 @@ const STATSD_CONSUMER_NAME = 'StatsD_Consumer';
 const STATSD_PROTOCOLS = ['tcp', 'udp'];
 
 // read in example config
-const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC_EXAMPLE));
+const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
 
 
 function runRemoteCmd(cmd) {
@@ -93,7 +93,7 @@ function test() {
                 port: STATSD_DATA_PORT
             };
             DUTS.forEach(dut => it(
-                `should configure TS - ${dut.hostname}`,
+                `should configure TS - ${dut.hostalias}`,
                 () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(consumerDeclaration))
             ));
         });
@@ -195,10 +195,10 @@ function test() {
 
             DUTS.forEach((dut) => {
                 // at first we need to retrieve list of metrics to poll
-                it(`should check for system poller data from - ${dut.hostname}`, () => {
+                it(`should check for system poller data from:${dut.hostalias}`, () => {
                     const metrics = sysPollerMetricsData[dut.hostname];
                     if (!metrics) {
-                        throw new Error(`No System Poller Metrics data for ${dut.hostname} !`);
+                        throw new Error(`No System Poller Metrics data for ${dut.hostalias} !`);
                     }
                     // all metrics should be non-empty array - it means they were added to index
                     return verifyMetrics(metrics);

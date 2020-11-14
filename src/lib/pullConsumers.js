@@ -34,7 +34,7 @@ class DisabledError extends errors.ConfigLookupError {}
 function getData(consumerName, namespace) {
     let config; // to pass to systemPoller
     let consumerConfig;
-
+    namespace = namespace || constants.DEFAULT_UNNAMED_NAMESPACE;
     return configWorker.getConfig()
         .then((curConfig) => {
             // config was copied by getConfig already

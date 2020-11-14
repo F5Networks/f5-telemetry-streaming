@@ -32,7 +32,7 @@ const SPLUNK_SVC_PORT = 8089;
 const SPLUNK_CONSUMER_NAME = 'Splunk_Consumer';
 
 // read in example config
-const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC_EXAMPLE));
+const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
 
 
 function runRemoteCmd(cmd) {
@@ -142,7 +142,7 @@ function test() {
         });
 
         DUTS.forEach(dut => it(
-            `should configure TS - ${dut.hostname}`,
+            `should configure TS - ${dut.hostalias}`,
             () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(consumerDeclaration))
         ));
 
@@ -206,7 +206,7 @@ function test() {
             const searchQuerySP = `search source=f5.telemetry | search "system.hostname"="${dut.hostname}" | head 1`;
             const searchQueryEL = `search source=f5.telemetry | spath testType | search testType=${SPLUNK_CONSUMER_NAME} | search hostname="${dut.hostname}" | search testDataTimestamp="${testDataTimestamp}" | head 1`;
 
-            it(`should check for system poller data from - ${dut.hostname}`, () => new Promise(resolve => setTimeout(resolve, 30000))
+            it(`should check for system poller data from:${dut.hostalias}`, () => new Promise(resolve => setTimeout(resolve, 30000))
                 .then(() => {
                     util.logger.info(`Splunk search query for system poller data: ${searchQuerySP}`);
                     return query(searchQuerySP);
@@ -231,7 +231,7 @@ function test() {
                     assert.strictEqual(result.sourcetype, splunkSourceTypeStr);
                 }));
 
-            it(`should check for event listener data from - ${dut.hostname}`, () => new Promise(resolve => setTimeout(resolve, 30000))
+            it(`should check for event listener data from:${dut.hostalias}`, () => new Promise(resolve => setTimeout(resolve, 30000))
                 .then(() => {
                     util.logger.info(`Splunk search query for event listener data: ${searchQueryEL}`);
                     return query(searchQueryEL);
