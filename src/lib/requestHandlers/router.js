@@ -14,12 +14,12 @@ const TinyRequestRouter = require('tiny-request-router').Router;
 
 const BadURLHandler = require('./badUrlHandler');
 const configWorker = require('../config');
-const constants = require('../constants');
 const InternalServerErrorHandler = require('./internalServerErrorHandler');
 const logger = require('../logger');
 const MethodNotAllowedHandler = require('./methodNotAllowedHandler');
 const UnsupportedMediaTypeHandler = require('./unsupportedMediaTypeHandler');
 const util = require('../util');
+const configUtil = require('../configUtil');
 
 /**
  * Simple router to route incoming requests to REST API.
@@ -155,6 +155,7 @@ RequestRouter.prototype.findRequestHandler = function (restOperation, uriPrefix)
         allowed.sort();
         return new MethodNotAllowedHandler(restOperation, allowed);
     }
+
     const handler = new RequestHandler(restOperation, match.params);
     return handler;
 };
@@ -177,12 +178,8 @@ RequestRouter.prototype.registerAllHandlers = function (enableDebug) {
 RequestRouter.prototype.onConfigChange = function (config) {
     logger.debug('configWorker change event in RequestRouter'); // helpful debug
 
-    const settings = util.getDeclarationByName(
-        config, constants.CONFIG_CLASSES.CONTROLS_CLASS_NAME, constants.CONTROLS_PROPERTY_NAME
-    ) || {};
-
     this.removeAllHandlers();
-    this.registerAllHandlers(settings.debug);
+    this.registerAllHandlers(configUtil.getControls(config).debug);
 };
 
 const defaultRouter = new RequestRouter();

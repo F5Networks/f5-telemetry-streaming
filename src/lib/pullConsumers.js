@@ -12,10 +12,11 @@ const path = require('path');
 
 const configWorker = require('./config');
 const constants = require('./constants');
+const util = require('./util');
+const systemPoller = require('./systemPoller');
 const errors = require('./errors');
 const logger = require('./logger');
-const systemPoller = require('./systemPoller');
-const util = require('./util');
+const configUtil = require('./configUtil');
 
 const PULL_CONSUMERS_DIR = constants.PULL_CONSUMERS_DIR;
 const CLASS_NAME = constants.CONFIG_CLASSES.PULL_CONSUMER_CLASS_NAME;
@@ -28,32 +29,27 @@ class DisabledError extends errors.ConfigLookupError {}
  * Get data for Pull Consumer
  *
  * @param {String} consumerName - consumer name
+ * @param {String} namespace - optional namespace
  */
-function getData(consumerName) {
+function getData(consumerName, namespace) {
     let config; // to pass to systemPoller
     let consumerConfig;
-
+    namespace = namespace || constants.DEFAULT_UNNAMED_NAMESPACE;
     return configWorker.getConfig()
         .then((curConfig) => {
             // config was copied by getConfig already
             config = curConfig;
-            consumerConfig = getConsumerConfig(config.parsed, consumerName);
+
+            consumerConfig = getConsumerConfig(config.normalized, consumerName, namespace);
             // Don't bother collecting stats if requested Consumer Type is not loaded
             if (typeof PULL_CONSUMERS[consumerConfig.type] === 'undefined') {
                 throw new ModuleNotLoadedError(`Pull Consumer of type '${consumerConfig.type}' is not loaded`);
             }
-            let pollers = consumerConfig.systemPoller;
-            if (!Array.isArray(pollers)) {
-                pollers = [pollers];
-            }
-            return pollers;
+
+            const pollerConfigs = getEnabledPollersForConsumer(config.normalized, consumerConfig.id);
+            return systemPoller.fetchPollersData(util.deepCopy(pollerConfigs), true);
         })
-        .then(consumerPollers => Promise.all(consumerPollers.map(
-            poller => systemPoller.getPollersConfig(poller, { includeDisabled: false })
-        )))
-        .then(pollerConfigs => pollerConfigs.reduce((p, c) => p.concat(c), []))
-        .then(systemPoller.fetchPollersData.bind(systemPoller))
-        .then(dataCtxs => invokeConsumer(consumerConfig, dataCtxs));
+        .then(pollerData => invokeConsumer(consumerConfig, pollerData));
 }
 
 /**
@@ -78,17 +74,26 @@ function invokeConsumer(consumerConfig, dataCtxs) {
     return consumer.consumer(context);
 }
 
-function getConsumerConfig(config, consumerName) {
-    const configuredConsumers = config[CLASS_NAME] || {};
-    const consumer = configuredConsumers[consumerName];
-    if (util.isObjectEmpty(consumer)) {
-        throw new errors.ObjectNotFoundInConfigError(`Pull Consumer with name '${consumerName}' doesn't exist`);
+function getEnabledPollersForConsumer(config, consumerId) {
+    const pollerIds = config.mappings[consumerId];
+    return config.components.filter(c => pollerIds.indexOf(c.id) > -1 && c.enable);
+}
+
+function getConsumerConfig(config, consumerName, namespace) {
+    const consumers = configUtil.getTelemetryPullConsumers(config, namespace);
+    const namespaceInfo = namespace ? ` (namespace: ${namespace})` : '';
+    if (consumers.length > 0) {
+        const consumer = consumers.find(c => c.name === consumerName);
+        if (util.isObjectEmpty(consumer)) {
+            throw new errors.ObjectNotFoundInConfigError(`Pull Consumer with name '${consumerName}' doesn't exist${namespaceInfo}`);
+        }
+        if (consumer.enable === false) {
+            throw new DisabledError(`Pull Consumer with name '${consumerName}' is disabled${namespaceInfo}`);
+        }
+        return consumer;
     }
-    if (consumer.enable === false) {
-        throw new DisabledError(`Pull Consumer with name '${consumerName}' is disabled`);
-    }
-    consumer.name = consumerName;
-    return consumer;
+
+    throw new errors.ObjectNotFoundInConfigError(`No configured Pull Consumers found${namespaceInfo}`);
 }
 
 /**
@@ -109,41 +114,43 @@ function getConsumerConfig(config, consumerName) {
                     ]
 */
 function loadConsumers(config) {
-    if (!Array.isArray(config)) {
+    if (config.length === 0) {
         logger.info('No pull consumer(s) to load, define in configuration first');
+        return Promise.resolve([]);
+    }
+    const enabledConsumers = config.filter(c => c.enable);
+    if (enabledConsumers.length === 0) {
+        logger.debug('No enabled pull consumer(s) to load');
         return Promise.resolve([]);
     }
 
     logger.debug(`Loading pull consumer specific plug-ins from ${PULL_CONSUMERS_DIR}`);
-    // eslint-disable-next-line
-    return Promise.all(config.map((consumerConfig) => {
-        if (consumerConfig.config.enable === false) {
-            return Promise.resolve(undefined);
-        }
-        return new Promise((resolve) => {
-            const consumerType = consumerConfig.type;
-            // path.join removes './' from string, so we need to
-            // prepend it manually
-            const consumerDir = './'.concat(path.join(PULL_CONSUMERS_DIR, consumerType));
 
-            logger.debug(`Loading pull consumer ${consumerType} plug-in from ${consumerDir}`);
-            const consumerModule = util.moduleLoader.load(consumerDir);
-            if (consumerModule === null) {
-                resolve(undefined);
-            } else {
-                const consumer = {
-                    name: consumerConfig.name,
-                    config: util.deepCopy(consumerConfig.config),
-                    consumer: consumerModule,
-                    logger: logger.getChild(`${consumerConfig.type}.${consumerConfig.name}`),
-                    tracer: util.tracer.createFromConfig(CLASS_NAME, consumerConfig.name, consumerConfig.config)
-                };
-                // copy consumer's data
-                resolve(consumer);
-            }
-        });
-    }))
-        .then(consumers => consumers.filter(consumer => consumer !== undefined));
+    const loadPromises = enabledConsumers.map(consumerConfig => new Promise((resolve) => {
+        const consumerType = consumerConfig.type;
+        // path.join removes './' from string, so we need to
+        // prepend it manually
+        const consumerDir = './'.concat(path.join(PULL_CONSUMERS_DIR, consumerType));
+
+        logger.debug(`Loading pull consumer ${consumerType} plug-in from ${consumerDir}`);
+        const consumerModule = util.moduleLoader.load(consumerDir);
+        if (consumerModule === null) {
+            resolve(undefined);
+        } else {
+            const consumer = {
+                name: consumerConfig.name,
+                config: util.deepCopy(consumerConfig),
+                consumer: consumerModule,
+                logger: logger.getChild(`${consumerType}.${consumerConfig.traceName}`),
+                tracer: util.tracer.createFromConfig(CLASS_NAME, consumerConfig.traceName, consumerConfig)
+            };
+            // copy consumer's data
+            resolve(consumer);
+        }
+    }));
+
+    return Promise.all(loadPromises)
+        .then(loadedConsumers => loadedConsumers.filter(c => c !== undefined));
 }
 
 /**
@@ -170,22 +177,8 @@ function unloadUnusedModules(before) {
 // config worker change event
 configWorker.on('change', (config) => {
     logger.debug('configWorker change event in Pull Consumers');
-    let consumersConfig;
-    if (config && config[CLASS_NAME]) {
-        consumersConfig = config[CLASS_NAME];
-    }
-    let consumersToLoad = [];
-    if (!consumersConfig) {
-        consumersToLoad = null;
-    } else {
-        Object.keys(consumersConfig).forEach((k) => {
-            consumersToLoad.push({
-                name: k,
-                type: consumersConfig[k].type,
-                config: consumersConfig[k]
-            });
-        });
-    }
+
+    const consumersToLoad = configUtil.getTelemetryPullConsumers(config);
     // timestamp to filed out-dated tracers
     const tracersTimestamp = new Date().getTime();
 
@@ -212,7 +205,6 @@ configWorker.on('change', (config) => {
 module.exports = {
     ModuleNotLoadedError,
     DisabledError,
-
     getData,
     getConsumers: () => PULL_CONSUMERS // expose for testing
 };

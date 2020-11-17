@@ -16,9 +16,12 @@ const net = require('net');
 const readline = require('readline');
 const util = require('./shared/util');
 const constants = require('./shared/constants');
+const DEFAULT_UNNAMED_NAMESPACE = require('../../src/lib/constants').DEFAULT_UNNAMED_NAMESPACE;
 
 const duts = util.getHosts('BIGIP');
 const packageDetails = util.getPackageDetails();
+const basicDeclaration = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
+const namespaceDeclaration = JSON.parse(fs.readFileSync(constants.DECL.BASIC_NAMESPACE));
 
 
 /**
@@ -99,8 +102,9 @@ function sendDataToEventListeners(callback, numOfMsg, delay) {
 }
 
 
-function getPullConsumerData(dut, pullConsumerName) {
-    const uri = `${constants.BASE_ILX_URI}/pullconsumer/${pullConsumerName}`;
+function getPullConsumerData(dut, pullConsumerName, namespace) {
+    const namespacePath = namespace ? `/namespace/${namespace}` : '';
+    const uri = `${constants.BASE_ILX_URI}${namespacePath}/pullconsumer/${pullConsumerName}`;
     const host = dut.ip;
     const user = dut.username;
     const password = dut.password;
@@ -367,8 +371,46 @@ function setup() {
 }
 
 function test() {
-    // read in example config
-    const declaration = fs.readFileSync(constants.DECL.BASIC_EXAMPLE).toString();
+    const tests = [
+        {
+            name: 'basic declaration - default (no namespace)'
+        },
+        {
+            name: 'basic declaration with namespace',
+            namespace: constants.DECL.NAMESPACE_NAME
+        },
+        {
+            name: 'mixed declaration (default and namespace), verify default (no namespace)'
+        },
+        {
+            name: 'mixed declaration (default and namespace), verify namespace',
+            namespace: constants.DECL.NAMESPACE_NAME
+        }
+        // TODO: enable tests to verify namespace:f5telemetry_default when namespace poller endpoints are supported
+        // {
+        //     name: 'basic declaration - default (no namespace), verify by "f5telemetry_default"',
+        //     namespace: DEFAULT_UNNAMED_NAMESPACE
+        // },
+        // {
+        //     name: 'mixed declaration (default and namespace), verify default (no namespace) by "f5telemetry_default"'
+        //     namespace: DEFAULT_UNNAMED_NAMESPACE
+        // },
+    ];
+
+    function getDeclToUse(testSetup) {
+        let declaration = util.deepCopy(basicDeclaration);
+        if (testSetup.name.startsWith('mixed')) {
+            declaration.My_Namespace = namespaceDeclaration.My_Namespace;
+        } else if (testSetup.namespace && testSetup.namespace !== DEFAULT_UNNAMED_NAMESPACE) {
+            declaration = namespaceDeclaration;
+        }
+        return declaration;
+    }
+
+    // some tests cannot be run as we don't support the endpoints yet
+    function ifSupportedIt(title, testSetup, testFunc) {
+        return testSetup.namespace ? it.skip(title, testFunc) : it(title, testFunc);
+    }
 
     function searchCipherTexts(data, cb) {
         const stack = [data];
@@ -404,236 +446,251 @@ function test() {
         searchCipherTexts(data, () => 'replacedSecret');
     }
 
-    // account for 1+ DUTs
-    duts.forEach((item) => {
-        describe(`DUT test - ${item.hostname}`, () => {
-            const host = item.ip;
-            const user = item.username;
-            const password = item.password;
+    tests.forEach((testSetup) => {
+        describe(`${testSetup.name}`, () => {
+            const namespacePath = testSetup.namespace ? `/namespace/${testSetup.namespace}` : '';
 
-            let authToken = null;
-            let options = {};
+            duts.forEach((item) => {
+                describe(`DUT test - ${item.hostname}`, () => {
+                    const host = item.ip;
+                    const user = item.username;
+                    const password = item.password;
 
-            before(() => util.getAuthToken(host, user, password)
-                .then((data) => {
-                    authToken = data.token;
-                }));
+                    let authToken = null;
+                    let options = {};
 
-            beforeEach(() => {
-                options = {
-                    headers: {
-                        'x-f5-auth-token': authToken
-                    }
-                };
-            });
+                    before(() => util.getAuthToken(host, user, password)
+                        .then((data) => {
+                            authToken = data.token;
+                        }));
 
-            it('should post same configuration twice and get it after', () => {
-                const uri = `${constants.BASE_ILX_URI}/declare`;
-                const postOptions = Object.assign(util.deepCopy(options), {
-                    method: 'POST',
-                    body: declaration
-                });
-                let postResponses = [];
-
-                return util.makeRequest(host, uri, util.deepCopy(postOptions))
-                    .then((data) => {
-                        util.logger.info('POST request #1: Declaration response:', { host, data });
-                        assert.strictEqual(data.message, 'success');
-
-                        checkPassphraseObject(data);
-                        postResponses.push(data);
-                        // wait for 2 secs while declaration will be applied and saved to storage
-                        return util.sleep(2000);
-                    })
-                    .then(() => util.makeRequest(host, uri, util.deepCopy(postOptions)))
-                    .then((data) => {
-                        util.logger.info('POST request #2: Declaration response:', { host, data });
-                        assert.strictEqual(data.message, 'success');
-
-                        checkPassphraseObject(data);
-                        postResponses.push(data);
-
-                        // wait for 2 secs while declaration will be applied and saved to storage
-                        return util.sleep(2000);
-                    })
-                    .then(() => util.makeRequest(host, uri, util.deepCopy(options)))
-                    .then((data) => {
-                        util.logger.info('GET request: Declaration response:', { host, data });
-                        assert.strictEqual(data.message, 'success');
-
-                        checkPassphraseObject(data);
-                        postResponses.push(data);
-
-                        // compare GET to recent POST
-                        assert.deepStrictEqual(postResponses[2], postResponses[1]);
-                        // lest compare first POST to second POST (only one difference is secrets)
-                        postResponses = postResponses.map(removeCipherTexts);
-                        assert.deepStrictEqual(postResponses[0], postResponses[1]);
+                    beforeEach(() => {
+                        options = {
+                            headers: {
+                                'x-f5-auth-token': authToken
+                            }
+                        };
                     });
-            });
 
-            it('should get response from systempoller endpoint', () => {
-                const uri = `${constants.BASE_ILX_URI}/systempoller/${constants.DECL.SYSTEM_NAME}`;
-                // wait 500ms in case if config was not applied yet
-                return util.sleep(500)
-                    .then(() => util.makeRequest(host, uri, options))
-                    .then((data) => {
-                        data = data || [];
-                        util.logger.info(`SystemPoller response (${uri}):`, { host, data });
-                        assert.strictEqual(data.length, 1);
-                        // read schema and validate data
-                        data = data[0];
-                        const schema = JSON.parse(fs.readFileSync(constants.DECL.SYSTEM_POLLER_SCHEMA));
-                        const valid = util.validateAgainstSchema(data, schema);
-                        if (valid !== true) {
-                            assert.fail(`output is not valid: ${JSON.stringify(valid.errors)}`);
-                        }
-                    });
-            });
-
-            it('should ensure event listener is up', () => {
-                const port = constants.EVENT_LISTENER_PORT;
-                // wait 500ms in case if config was not applied yet
-                return util.sleep(500)
-                    .then(() => new Promise((resolve, reject) => {
-                        const client = net.createConnection({ host, port }, () => {
-                            client.end();
+                    it('should post same configuration twice and get it after', () => {
+                        const uri = `${constants.BASE_ILX_URI}/declare`;
+                        const postOptions = Object.assign(util.deepCopy(options), {
+                            method: 'POST',
+                            body: getDeclToUse(testSetup)
                         });
-                        client.on('end', () => {
-                            resolve();
+                        let postResponses = [];
+
+                        // wait 2s to buffer consecutive POSTs
+                        return util.sleep(2000)
+                            .then(() => util.makeRequest(host, uri, util.deepCopy(postOptions)))
+                            .then((data) => {
+                                util.logger.info('POST request #1: Declaration response:', { host, data });
+                                assert.strictEqual(data.message, 'success');
+
+                                checkPassphraseObject(data);
+                                postResponses.push(data);
+                                // wait for 5 secs while declaration will be applied and saved to storage
+                                return util.sleep(5000);
+                            })
+                            .then(() => util.makeRequest(host, uri, util.deepCopy(postOptions)))
+                            .then((data) => {
+                                util.logger.info('POST request #2: Declaration response:', { host, data });
+                                assert.strictEqual(data.message, 'success');
+
+                                checkPassphraseObject(data);
+                                postResponses.push(data);
+
+                                // wait for 5 secs while declaration will be applied and saved to storage
+                                return util.sleep(5000);
+                            })
+                            .then(() => util.makeRequest(host, uri, util.deepCopy(options)))
+                            .then((data) => {
+                                util.logger.info('GET request: Declaration response:', { host, data });
+                                assert.strictEqual(data.message, 'success');
+
+                                checkPassphraseObject(data);
+                                postResponses.push(data);
+
+                                // compare GET to recent POST
+                                assert.deepStrictEqual(postResponses[2], postResponses[1]);
+                                // lest compare first POST to second POST (only one difference is secrets)
+                                postResponses = postResponses.map(removeCipherTexts);
+                                assert.deepStrictEqual(postResponses[0], postResponses[1]);
+                            });
+                    });
+
+                    ifSupportedIt('should get response from systempoller endpoint', testSetup, () => {
+                        const uri = `${constants.BASE_ILX_URI}${namespacePath}/systempoller/${constants.DECL.SYSTEM_NAME}`;
+                        // wait 500ms in case if config was not applied yet
+                        return util.sleep(500)
+                            .then(() => util.makeRequest(host, uri, options))
+                            .then((data) => {
+                                data = data || [];
+                                util.logger.info(`SystemPoller response (${uri}):`, { host, data });
+                                assert.strictEqual(data.length, 1);
+                                // read schema and validate data
+                                data = data[0];
+                                const schema = JSON.parse(fs.readFileSync(constants.DECL.SYSTEM_POLLER_SCHEMA));
+                                const valid = util.validateAgainstSchema(data, schema);
+                                if (valid !== true) {
+                                    assert.fail(`output is not valid: ${JSON.stringify(valid.errors)}`);
+                                }
+                            });
+                    });
+
+                    it('should ensure event listener is up', () => {
+                        const port = constants.EVENT_LISTENER_PORT;
+                        // wait 500ms in case if config was not applied yet
+                        return util.sleep(500)
+                            .then(() => new Promise((resolve, reject) => {
+                                const client = net.createConnection({ host, port }, () => {
+                                    client.end();
+                                });
+                                client.on('end', () => {
+                                    resolve();
+                                });
+                                client.on('error', (err) => {
+                                    reject(err);
+                                });
+                            }));
+                    });
+
+                    ifSupportedIt('should apply configuration containing system poller filtering', testSetup, () => {
+                        let uri = `${constants.BASE_ILX_URI}/declare`;
+                        const postOptions = Object.assign(util.deepCopy(options), {
+                            method: 'POST',
+                            body: fs.readFileSync(constants.DECL.FILTER).toString()
                         });
-                        client.on('error', (err) => {
-                            reject(err);
+
+                        // wait 2s to buffer consecutive POSTs
+                        return util.sleep(2000)
+                            .then(() => util.makeRequest(host, uri, postOptions))
+                            .then((data) => {
+                                util.logger.info('Declaration response:', { host, data });
+                                assert.strictEqual(data.message, 'success');
+                                // wait 5s in case if config was not applied yet
+                                return util.sleep(5000);
+                            })
+                            .then(() => {
+                                uri = `${constants.BASE_ILX_URI}${namespacePath}/systempoller/${constants.DECL.SYSTEM_NAME}`;
+                                return util.makeRequest(host, uri, util.deepCopy(options));
+                            })
+                            .then((data) => {
+                                data = data || [];
+                                util.logger.info(`Filtered SystemPoller response (${uri}):`, { host, data });
+
+                                assert.strictEqual(data.length, 1);
+                                // verify that certain data was filtered out, while other data was preserved
+                                data = data[0];
+                                assert.strictEqual(Object.keys(data.system).indexOf('provisioning'), -1);
+                                assert.strictEqual(Object.keys(data.system.diskStorage).indexOf('/usr'), -1);
+                                assert.notStrictEqual(Object.keys(data.system.diskStorage).indexOf('/'), -1);
+                                assert.notStrictEqual(Object.keys(data.system).indexOf('version'), -1);
+                                assert.notStrictEqual(Object.keys(data.system).indexOf('hostname'), -1);
+                            });
+                    });
+
+                    ifSupportedIt('should apply configuration containing chained system poller actions', testSetup, () => {
+                        let uri = `${constants.BASE_ILX_URI}/declare`;
+                        const postOptions = Object.assign(util.deepCopy(options), {
+                            method: 'POST',
+                            body: fs.readFileSync(constants.DECL.ACTION_CHAINING).toString()
                         });
-                    }));
-            });
 
-            it('should apply configuration containing system poller filtering', () => {
-                let uri = `${constants.BASE_ILX_URI}/declare`;
-                const postOptions = Object.assign(util.deepCopy(options), {
-                    method: 'POST',
-                    body: fs.readFileSync(constants.DECL.FILTER_EXAMPLE).toString()
-                });
+                        // wait 2s to buffer consecutive POSTs
+                        return util.sleep(2000)
+                            .then(() => util.makeRequest(host, uri, postOptions))
+                            .then((data) => {
+                                util.logger.info('Declaration response:', { host, data });
+                                assert.strictEqual(data.message, 'success');
+                                // wait 5s in case if config was not applied yet
+                                return util.sleep(5000);
+                            })
+                            .then(() => {
+                                uri = `${constants.BASE_ILX_URI}${namespacePath}/systempoller/${constants.DECL.SYSTEM_NAME}`;
+                                return util.makeRequest(host, uri, util.deepCopy(options));
+                            })
+                            .then((data) => {
+                                data = data || {};
+                                util.logger.info(`Filtered SystemPoller response (${uri}):`, { host, data });
 
-                return util.makeRequest(host, uri, postOptions)
-                    .then((data) => {
-                        util.logger.info('Declaration response:', { host, data });
-                        assert.strictEqual(data.message, 'success');
-                        // wait 2s in case if config was not applied yet
-                        return util.sleep(2000);
-                    })
-                    .then(() => {
-                        uri = `${constants.BASE_ILX_URI}/systempoller/${constants.DECL.SYSTEM_NAME}`;
-                        return util.makeRequest(host, uri, util.deepCopy(options));
-                    })
-                    .then((data) => {
-                        data = data || [];
-                        util.logger.info(`Filtered SystemPoller response (${uri}):`, { host, data });
-
-                        assert.strictEqual(data.length, 1);
-                        // verify that certain data was filtered out, while other data was preserved
-                        data = data[0];
-                        assert.strictEqual(Object.keys(data.system).indexOf('provisioning'), -1);
-                        assert.strictEqual(Object.keys(data.system.diskStorage).indexOf('/usr'), -1);
-                        assert.notStrictEqual(Object.keys(data.system.diskStorage).indexOf('/'), -1);
-                        assert.notStrictEqual(Object.keys(data.system).indexOf('version'), -1);
-                        assert.notStrictEqual(Object.keys(data.system).indexOf('hostname'), -1);
+                                assert.strictEqual(data.length, 1);
+                                data = data[0];
+                                // verify /var is included with, with 1_tagB removed
+                                assert.notStrictEqual(Object.keys(data.system.diskStorage).indexOf('/var'), -1);
+                                assert.deepEqual(data.system.diskStorage['/var']['1_tagB'], { '1_valueB_1': 'value1' });
+                                // verify /var/log is included with, with 1_tagB included
+                                assert.strictEqual(Object.keys(data.system.diskStorage['/var/log']).indexOf('1_tagB'), -1);
+                                assert.deepEqual(data.system.diskStorage['/var/log']['1_tagA'], 'myTag');
+                            });
                     });
-            });
 
-            it('should apply configuration containing chained system poller actions', () => {
-                let uri = `${constants.BASE_ILX_URI}/declare`;
-                const postOptions = Object.assign(util.deepCopy(options), {
-                    method: 'POST',
-                    body: fs.readFileSync(constants.DECL.ACTION_CHAINING_EXAMPLE).toString()
-                });
+                    ifSupportedIt('should apply configuration containing filters with ifAnyMatch', testSetup, () => {
+                        let uri = `${constants.BASE_ILX_URI}/declare`;
+                        const postOptions = Object.assign(util.deepCopy(options), {
+                            method: 'POST',
+                            body: fs.readFileSync(constants.DECL.FILTERING_WITH_MATCHING).toString()
+                        });
 
-                return util.makeRequest(host, uri, postOptions)
-                    .then((data) => {
-                        util.logger.info('Declaration response:', { host, data });
-                        assert.strictEqual(data.message, 'success');
-                        // wait 2s in case if config was not applied yet
-                        return util.sleep(2000);
-                    })
-                    .then(() => {
-                        uri = `${constants.BASE_ILX_URI}/systempoller/${constants.DECL.SYSTEM_NAME}`;
-                        return util.makeRequest(host, uri, util.deepCopy(options));
-                    })
-                    .then((data) => {
-                        data = data || {};
-                        util.logger.info(`Filtered SystemPoller response (${uri}):`, { host, data });
+                        // wait 2s to buffer consecutive POSTs
+                        return util.sleep(2000)
+                            .then(() => util.makeRequest(host, uri, postOptions))
+                            .then((data) => {
+                                util.logger.info('Declaration response:', { host, data });
+                                assert.strictEqual(data.message, 'success');
+                                // wait 5s in case if config was not applied yet
+                                return util.sleep(5000);
+                            })
+                            .then(() => {
+                                uri = `${constants.BASE_ILX_URI}${namespacePath}/systempoller/${constants.DECL.SYSTEM_NAME}`;
+                                return util.makeRequest(host, uri, util.deepCopy(options));
+                            })
+                            .then((data) => {
+                                data = data || {};
+                                util.logger.info(`Filtered and Matched SystemPoller response (${uri}):`, { host, data });
 
-                        assert.strictEqual(data.length, 1);
-                        data = data[0];
-                        // verify /var is included with, with 1_tagB removed
-                        assert.notStrictEqual(Object.keys(data.system.diskStorage).indexOf('/var'), -1);
-                        assert.deepEqual(data.system.diskStorage['/var']['1_tagB'], { '1_valueB_1': 'value1' });
-                        // verify /var/log is included with, with 1_tagB included
-                        assert.strictEqual(Object.keys(data.system.diskStorage['/var/log']).indexOf('1_tagB'), -1);
-                        assert.deepEqual(data.system.diskStorage['/var/log']['1_tagA'], 'myTag');
+                                assert.strictEqual(data.length, 1);
+                                data = data[0];
+                                // verify that 'system' key and child objects are included
+                                assert.deepEqual(Object.keys(data), ['system']);
+                                assert.ok(Object.keys(data.system).length > 1);
+                                // verify that 'system.diskStorage' is NOT excluded
+                                assert.notStrictEqual(Object.keys(data.system).indexOf('diskStorage'), -1);
+                            });
                     });
-            });
 
-            it('should apply configuration containing filters with ifAnyMatch', () => {
-                let uri = `${constants.BASE_ILX_URI}/declare`;
-                const postOptions = Object.assign(util.deepCopy(options), {
-                    method: 'POST',
-                    body: fs.readFileSync(constants.DECL.FILTERING_WITH_MATCHING_EXAMPLE).toString()
-                });
+                    ifSupportedIt('should apply configuration containing multiple system pollers and endpointList', testSetup, () => {
+                        let uri = `${constants.BASE_ILX_URI}/declare`;
+                        const postOptions = Object.assign(util.deepCopy(options), {
+                            method: 'POST',
+                            body: fs.readFileSync(constants.DECL.ENDPOINTLIST).toString()
+                        });
 
-                return util.makeRequest(host, uri, postOptions)
-                    .then((data) => {
-                        util.logger.info('Declaration response:', { host, data });
-                        assert.strictEqual(data.message, 'success');
-                        // wait 2s in case if config was not applied yet
-                        return util.sleep(2000);
-                    })
-                    .then(() => {
-                        uri = `${constants.BASE_ILX_URI}/systempoller/${constants.DECL.SYSTEM_NAME}`;
-                        return util.makeRequest(host, uri, util.deepCopy(options));
-                    })
-                    .then((data) => {
-                        data = data || {};
-                        util.logger.info(`Filtered and Matched SystemPoller response (${uri}):`, { host, data });
+                        // wait 2s to buffer consecutive POSTs
+                        return util.sleep(2000)
+                            .then(() => util.makeRequest(host, uri, postOptions))
+                            .then((data) => {
+                                util.logger.info('Declaration response:', { host, data });
+                                assert.strictEqual(data.message, 'success');
+                                // wait 2s in case if config was not applied yet
+                                return util.sleep(2000);
+                            })
+                            .then(() => {
+                                uri = `${constants.BASE_ILX_URI}${namespacePath}/systempoller/${constants.DECL.SYSTEM_NAME}`;
+                                return util.makeRequest(host, uri, util.deepCopy(options));
+                            })
+                            .then((data) => {
+                                util.logger.info(`System Poller with endpointList response (${uri}):`, { host, data });
+                                assert.ok(Array.isArray(data));
 
-                        assert.strictEqual(data.length, 1);
-                        data = data[0];
-                        // verify that 'system' key and child objects are included
-                        assert.deepEqual(Object.keys(data), ['system']);
-                        assert.ok(Object.keys(data.system).length > 1);
-                        // verify that 'system.diskStorage' is NOT excluded
-                        assert.notStrictEqual(Object.keys(data.system).indexOf('diskStorage'), -1);
+                                const pollerOneData = data[0];
+                                const pollerTwoData = data[1];
+                                assert.notStrictEqual(pollerOneData.custom_ipOther, undefined);
+                                assert.notStrictEqual(pollerOneData.custom_dns, undefined);
+                                assert.ok(pollerTwoData.custom_provisioning.items.length > 0);
+                            });
                     });
-            });
-
-            it('should apply configuration containing multiple system pollers and endpointList', () => {
-                let uri = `${constants.BASE_ILX_URI}/declare`;
-                const postOptions = Object.assign(util.deepCopy(options), {
-                    method: 'POST',
-                    body: fs.readFileSync(constants.DECL.ENDPOINTLIST_EXAMPLE).toString()
                 });
-
-                return util.makeRequest(host, uri, postOptions)
-                    .then((data) => {
-                        util.logger.info('Declaration response:', { host, data });
-                        assert.strictEqual(data.message, 'success');
-                        // wait 2s in case if config was not applied yet
-                        return util.sleep(2000);
-                    })
-                    .then(() => {
-                        uri = `${constants.BASE_ILX_URI}/systempoller/${constants.DECL.SYSTEM_NAME}`;
-                        return util.makeRequest(host, uri, util.deepCopy(options));
-                    })
-                    .then((data) => {
-                        util.logger.info(`System Poller with endpointList response (${uri}):`, { host, data });
-                        assert.ok(Array.isArray(data));
-
-                        const pollerOneData = data[0];
-                        const pollerTwoData = data[1];
-                        assert.notStrictEqual(pollerOneData.custom_ipOther, undefined);
-                        assert.notStrictEqual(pollerOneData.custom_dns, undefined);
-                        assert.ok(pollerTwoData.custom_provisioning.items.length > 0);
-                    });
             });
         });
     });

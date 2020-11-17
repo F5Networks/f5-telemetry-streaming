@@ -24,6 +24,11 @@ Best practices:
 - Keep the folder structure flat, this project is not that large or complex.
 - Monitor and enforce coverage, but avoid writing tests simply to increase coverage when there is no other perceived value.
 - With that being said, **enforce coverage** in automated test.
+- When setting up tests with large number of input variations, use testUtil's getCallableDescribe and/or getCallableIt.
+  - These support sets of data to check actual and expected results only. If you need some additional check feel free to add additionalproperty or write separate tests.
+  - You can specify 'testOpts' property on the same level as 'name'. The following options available:
+    - only (bool) - run this test only (it.only)
+
 
 ## Functional
 

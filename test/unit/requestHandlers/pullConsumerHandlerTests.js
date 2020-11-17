@@ -29,47 +29,84 @@ describe('PullConsumerHandler', () => {
     let restOpMock;
     let requestHandler;
 
-    beforeEach(() => {
-        restOpMock = new testUtil.MockRestOperation({ method: 'GET' });
-        restOpMock.uri = testUtil.parseURL('http://localhost:8100/mgmt/shared/telemetry/pullconsumer/consumer');
-        requestHandler = new PullConsumerHandler(restOpMock, { consumer: 'consumer' });
-    });
-
     afterEach(() => {
         sinon.restore();
     });
 
-    it('should return 200 on GET request', () => {
-        let consumerNameFromRequest;
-        const expectedData = { pullconsumer: 'pullconsumer' };
-        sinon.stub(pullConsumers, 'getData').callsFake((consumerName) => {
-            consumerNameFromRequest = consumerName;
-            return Promise.resolve(testUtil.deepCopy(expectedData));
-        });
-        return requestHandler.process()
-            .then((handler) => {
-                assert.ok(handler === requestHandler, 'should return reference to origin instance');
-                assert.strictEqual(requestHandler.getCode(), 200, 'should return expected code');
-                assert.deepStrictEqual(requestHandler.getBody(), expectedData, 'should return expected body');
-                assert.strictEqual(consumerNameFromRequest, 'consumer', 'should match name from request');
-            });
-    });
+    const assertUnknownError = () => {
+        sinon.stub(pullConsumers, 'getData').rejects(new Error('expectedError'));
+        return assert.isRejected(requestHandler.process(), 'expectedError');
+    };
 
-    it('should return 404 when unable to make config lookup', () => {
+    const assertConfigLookupError = () => {
         sinon.stub(pullConsumers, 'getData').rejects(new errors.ConfigLookupError('expectedError'));
         return requestHandler.process()
             .then((handler) => {
-                assert.ok(handler === requestHandler, 'should return reference to origin instance');
+                assert.ok(handler === requestHandler, 'should return a reference to original handler');
                 assert.strictEqual(requestHandler.getCode(), 404, 'should return expected code');
                 assert.deepStrictEqual(requestHandler.getBody(), {
                     code: 404,
                     message: 'expectedError'
                 }, 'should return expected body');
             });
+    };
+
+    describe('/pullconsumer/:consumer', () => {
+        beforeEach(() => {
+            restOpMock = new testUtil.MockRestOperation({ method: 'GET' });
+            restOpMock.uri = testUtil.parseURL('http://localhost:8100/mgmt/shared/telemetry/pullconsumer/consumer');
+            requestHandler = new PullConsumerHandler(restOpMock, { consumer: 'consumer' });
+        });
+
+        it('should return 200 on GET request', () => {
+            let consumerNameFromRequest;
+            const expectedData = { pullconsumer: 'pullconsumer' };
+            sinon.stub(pullConsumers, 'getData').callsFake((consumerName) => {
+                consumerNameFromRequest = consumerName;
+                return Promise.resolve(testUtil.deepCopy(expectedData));
+            });
+            return requestHandler.process()
+                .then((handler) => {
+                    assert.ok(handler === requestHandler, 'should return a reference to original handler');
+                    assert.strictEqual(requestHandler.getCode(), 200, 'should return expected code');
+                    assert.deepStrictEqual(requestHandler.getBody(), expectedData, 'should return expected body');
+                    assert.strictEqual(consumerNameFromRequest, 'consumer', 'should match name from request');
+                });
+        });
+
+        it('should return 404 when unable to make config lookup', assertConfigLookupError);
+
+        it('should reject when caught unknown error', assertUnknownError);
     });
 
-    it('should reject when caught unknown error', () => {
-        sinon.stub(pullConsumers, 'getData').rejects(new Error('expectedError'));
-        return assert.isRejected(requestHandler.process(), 'expectedError');
+    describe('/namespace/:namespace/pullconsumer/:consumer', () => {
+        beforeEach(() => {
+            restOpMock = new testUtil.MockRestOperation({ method: 'GET' });
+            restOpMock.uri = testUtil.parseURL('http://localhost:8100/mgmt/shared/telemetry/namespace/somenamespace/pullconsumer/consumer');
+            requestHandler = new PullConsumerHandler(restOpMock, { consumer: 'consumer', namespace: 'somenamespace' });
+        });
+
+        it('should return 200 on GET request (with namespace in path)', () => {
+            let consumerNameFromRequest;
+            let namespaceFromRequest;
+            const expectedData = { name: 'consumer', namespace: 'somenamespace' };
+            sinon.stub(pullConsumers, 'getData').callsFake((consumerName, namespace) => {
+                consumerNameFromRequest = consumerName;
+                namespaceFromRequest = namespace;
+                return Promise.resolve(testUtil.deepCopy(expectedData));
+            });
+            return requestHandler.process()
+                .then((handler) => {
+                    assert.ok(handler === requestHandler, 'should return a reference to original handler');
+                    assert.strictEqual(requestHandler.getCode(), 200, 'should return expected code');
+                    assert.deepStrictEqual(requestHandler.getBody(), expectedData, 'should return expected body');
+                    assert.strictEqual(consumerNameFromRequest, 'consumer', 'should match consumer name from request');
+                    assert.strictEqual(namespaceFromRequest, 'somenamespace', 'should match namespace from request');
+                });
+        });
+
+        it('should return 404 when unable to make config lookup', assertConfigLookupError);
+
+        it('should reject when caught unknown error', assertUnknownError);
     });
 });

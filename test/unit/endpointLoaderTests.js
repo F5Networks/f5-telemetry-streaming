@@ -19,7 +19,7 @@ const sinon = require('sinon');
 
 const EndpointLoader = require('../../src/lib/endpointLoader');
 const deviceUtil = require('../../src/lib/deviceUtil');
-const endpointLoaderTestsData = require('./endpointLoaderTestsData');
+const endpointLoaderTestsData = require('./data/endpointLoaderTestsData');
 const testUtil = require('./shared/util');
 
 chai.use(chaiAsPromised);

@@ -21,10 +21,11 @@ const consumersHndlr = require('./consumers');
 * @returns {Void} Promise object resolved with undefined
 */
 function forwardData(dataCtx) {
-    const consumers = consumersHndlr.getConsumers();
+    let consumers = consumersHndlr.getConsumers();
     if (!Array.isArray(consumers)) {
         return Promise.resolve();
     }
+    consumers = consumers.filter(c => dataCtx.destinationIds.indexOf(c.id) > -1);
     // don't rely on plugins' code, wrap consumer's call to Promise
     // eslint-disable-next-line
     return Promise.all(consumers.map((consumer) => {
@@ -34,10 +35,10 @@ function forwardData(dataCtx) {
                 event: consumer.filter.apply(dataCtx),
                 config: consumer.config,
                 tracer: consumer.tracer,
-                logger: logger.getChild(`${consumer.config.type}.${consumer.name}`),
+                logger: logger.getChild(`${consumer.config.type}.${consumer.config.traceName}`),
                 metadata: consumer.metadata
             };
-            // place in try/catch
+            // forwarding not guaranteed to succeed, but we will not throw error if attempt failed
             try {
                 consumer.consumer(context);
             } catch (err) {

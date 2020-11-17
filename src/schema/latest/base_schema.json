@@ -365,6 +365,7 @@
                     "Telemetry_Pull_Consumer",
                     "Telemetry_iHealth_Poller",
                     "Telemetry_Endpoints",
+                    "Telemetry_Namespace",
                     "Controls",
                     "Shared"
                 ]
@@ -397,6 +398,9 @@
             },
             {
                 "$ref": "shared_schema.json#"
+            },
+            {
+                "$ref": "namespace_schema.json#"
             }
         ]
     },

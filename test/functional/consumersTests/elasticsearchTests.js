@@ -21,7 +21,7 @@ const MODULE_REQUIREMENTS = { DOCKER: true };
 
 const DUTS = util.getHosts('BIGIP');
 const CONSUMER_HOST = util.getHosts('CONSUMER')[0];
-const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC_EXAMPLE));
+const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
 
 const ES_CONTAINER_NAME = 'ts_elasticsearch_consumer';
 const ES_PROTOCOL = 'http';
@@ -58,7 +58,7 @@ function test() {
 
     describe('Consumer Test: ElasticSearch - Configure Service', () => {
         DUTS.forEach((dut) => {
-            describe(`Device Under Test - ${dut.hostname}`, () => {
+            describe(`Device Under Test - ${dut.hostalias}`, () => {
                 let systemPollerData;
 
                 describe('Consumer service setup', () => {

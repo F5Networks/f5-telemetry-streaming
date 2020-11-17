@@ -25,7 +25,7 @@ const urllib = require('url');
 
 const constants = require('../../src/lib/constants');
 const deviceUtil = require('../../src/lib/deviceUtil');
-const deviceUtilTestsData = require('./deviceUtilTestsData');
+const deviceUtilTestsData = require('./data/deviceUtilTestsData');
 const testUtil = require('./shared/util');
 
 chai.use(chaiAsPromised);

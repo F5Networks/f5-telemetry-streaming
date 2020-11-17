@@ -34,7 +34,7 @@ describe('restWorker', () => {
         _data_: {
             config: {
                 raw: {},
-                parsed: {}
+                normalized: {}
             }
         }
     };

@@ -19,7 +19,7 @@ const aws = require('aws-sdk');
 
 const testUtil = require('./../shared/util');
 const awsUtil = require('../../../src/lib/consumers/AWS_CloudWatch/awsUtil');
-const awsUtilTestsData = require('./awsUtilTestsData');
+const awsUtilTestsData = require('./data/awsUtilTestsData');
 
 
 chai.use(chaiAsPromised);
