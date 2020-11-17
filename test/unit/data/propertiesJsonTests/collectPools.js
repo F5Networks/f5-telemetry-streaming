@@ -97,14 +97,24 @@ module.exports = {
                                 'serverside.bitsIn': 0,
                                 'serverside.bitsOut': 0,
                                 'serverside.curConns': 0,
-                                'status.statusReason': 'Pool member does not have service checking enabled'
+                                'serverside.maxConns': 0,
+                                'serverside.pktsIn': 0,
+                                'serverside.pktsOut': 0,
+                                'serverside.totConns': 0,
+                                'status.statusReason': 'Pool member does not have service checking enabled',
+                                totRequests: 0
                             }
                         },
                         name: '/Common/test_pool_0',
                         'serverside.bitsIn': 0,
                         'serverside.bitsOut': 0,
                         'serverside.curConns': 0,
-                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet'
+                        'serverside.maxConns': 0,
+                        'serverside.pktsIn': 0,
+                        'serverside.pktsOut': 0,
+                        'serverside.totConns': 0,
+                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
+                        totRequests: 0
                     }
                 }
             },
