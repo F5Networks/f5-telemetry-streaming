@@ -539,9 +539,7 @@ function test() {
                     });
 
                     it('should ensure event listener is up', () => {
-                        const port = constants.EVENT_LISTENER_PORT;
-                        // wait 500ms in case if config was not applied yet
-                        return util.sleep(500)
+                        const connectToEventListener = port => util.sleep(500)
                             .then(() => new Promise((resolve, reject) => {
                                 const client = net.createConnection({ host, port }, () => {
                                     client.end();
@@ -553,6 +551,18 @@ function test() {
                                     reject(err);
                                 });
                             }));
+                        const decl = JSON.stringify(getDeclToUse(testSetup));
+
+                        const promises = [
+                            constants.EVENT_LISTENER_PORT,
+                            constants.EVENT_LISTENER_NAMESPACE_PORT
+                        ].map((portToCheck) => {
+                            if (decl.indexOf(portToCheck)) {
+                                return connectToEventListener(portToCheck);
+                            }
+                            return Promise.resolve();
+                        });
+                        return Promise.all(promises);
                     });
 
                     ifSupportedIt('should apply configuration containing system poller filtering', testSetup, () => {
