@@ -400,9 +400,9 @@ function test() {
     function getDeclToUse(testSetup) {
         let declaration = util.deepCopy(basicDeclaration);
         if (testSetup.name.startsWith('mixed')) {
-            declaration.My_Namespace = namespaceDeclaration.My_Namespace;
+            declaration.My_Namespace = util.deepCopy(namespaceDeclaration.My_Namespace);
         } else if (testSetup.namespace && testSetup.namespace !== DEFAULT_UNNAMED_NAMESPACE) {
-            declaration = namespaceDeclaration;
+            declaration = util.deepCopy(namespaceDeclaration);
         }
         return declaration;
     }
