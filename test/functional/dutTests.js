@@ -348,6 +348,9 @@ function setup() {
                                 ports: [
                                     {
                                         name: String(constants.EVENT_LISTENER_PORT)
+                                    },
+                                    {
+                                        name: String(constants.EVENT_LISTENER_NAMESPACE_PORT)
                                     }
                                 ]
                             }
