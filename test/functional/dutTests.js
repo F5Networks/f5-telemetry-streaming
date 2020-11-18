@@ -557,7 +557,7 @@ function test() {
                             constants.EVENT_LISTENER_PORT,
                             constants.EVENT_LISTENER_NAMESPACE_PORT
                         ].map((portToCheck) => {
-                            if (decl.indexOf(portToCheck)) {
+                            if (decl.indexOf(portToCheck) !== -1) {
                                 return connectToEventListener(portToCheck);
                             }
                             return Promise.resolve();
