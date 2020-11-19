@@ -1,5 +1,7 @@
-Telemetry Streaming Namespaces
-==============================
+Appendix B: Telemetry Streaming Namespaces
+==========================================
+.. IMPORTANT:: Using Telemetry Streaming Namespaces is currently an EXPERIMENTAL feature. 
+
 Telemetry Streaming v1.16 introduces the concept of *namespaces*, which is a grouping of Telemetry components.  With namespaces, you can declare separate configurations to allow better control of data forwarding. Any System Pollers or Event Listeners defined within a namespace will only forward data to the Consumers within that same Namespace.
 
 Namespaces are declared in the new **Telemetry_Namespace** class, which acts as the container for the namespace.
