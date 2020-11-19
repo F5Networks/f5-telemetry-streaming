@@ -85,6 +85,7 @@ You can click the following links to go directly to a specific :doc:`setting-up-
    quick-start
    installation
    using-ts
+   namespaces
    declarations
    output-example
    data-modification
