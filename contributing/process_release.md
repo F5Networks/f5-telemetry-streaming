@@ -19,8 +19,8 @@
 ## Release candidate process
 
 * Check that all `feature` and `docs` branches targeted to the current release were merged to `develop` branch
-* Choose the right commit in `develop` branch and create separate branch from it for release candidate with name "vX.Y.Z"
-* Make sure RC branch has actual release version and build numbers in following files, do corrections if needed:
+* For first release candidate: Choose the right commit in `develop` branch and create separate branch from it for release candidate with name "vX.Y.Z". For subsequent release candidates: Merge the commit(s) from develop to the release branch.
+* Make sure RC branch has actual release version and build numbers. **Note:** atg-build bumps the build number (e.g. to get first build vX.Y.Z-1, you must set package and package-lock to vX.Y.Z-0). Check the following files and do corrections if needed:
   * [package.json](package.json)
   * [package-lock.json](package-lock.json)
   * [project.spec](project.spec) (not required starting from 1.5)
@@ -33,7 +33,6 @@
   * There should be exact same files across following directories:
     * [src/schema/latest](src/schema/latest)
     * `src/schema/X.Y.Z` - where X.Y.Z is release version
-* Update release version and build numbers in `develop` branch using list of the files above.
 * Update [SUPPORT.md](SUPPORT.md) if not yet done (or at least check that everything looks valid):
   * add new version to the list of `Currently supported versions` with appropriate dates
   * remove no longer supported versions from `Currently supported versions` and add it to `Versions no longer supported`
@@ -51,6 +50,7 @@
     * 1.13.0 - 11 MB
     * 1.14.0 - 11.2 MB
     * 1.15.0 - 10.9 MB
+    * 1.16.0 - 11.3 MB
   * Install build to BIG-IP, navigate to folder `/var/config/rest/iapps/f5-telemetry/` and check following:
     * Run `du -sh` and check that folder's size (shouldn't be much greater than previous versions):
       * 1.4.0 - 65 MB
@@ -65,6 +65,7 @@
       * 1.13.0 - 81 MB
       * 1.14.0 - 82 MB
       * 1.15.0 - 79 MB
+      * 1.16.0 - 82 MB
     * Check `nodejs/node_modules` folder - if you see `eslint`, `mocha` or something else from [package.json](package.json) `devDependencies` section - something wrong with build process. Probably some `npm` flags are work as not expected and it MUST BE FIXED before publishing.
 * Ensure that all tests (unit tests and functional tests passed)
 * Optional: Ensure that your local tags match remote. If not, remove all and re-fetch:
@@ -111,6 +112,16 @@
   * git push origin
   * Now you can remove RC branch
 * Remove all RC tags and branches and other stale branches that were used for release or RC process
+* Setup `develop` branch for next TS Version
+  * Update the version number to in the following files:
+    * to X.Y.0-0
+      * [package.json](package.json)
+      * [package-lock.json](package-lock.json)
+    * to X.Y.0
+      * [src/schema/latest/base_schema.json](src/schema/latest/base_schema.json)
+      * [contributing/README.md](contributing/README.md) (example of response, optional)
+      * [docs/conf.py](docs/conf.py)
+  * Add a new version section to [CHANGELOG.md](CHANGELOG.md)
 
 ### GitHub Publishing
 * Push to GitHub master:

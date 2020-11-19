@@ -1,0 +1,57 @@
+{
+    "class": "Telemetry",
+    "My_Poller": {
+        "class": "Telemetry_System_Poller",
+        "enable": true,
+        "trace": false,
+        "interval": 0
+    },
+    "My_System": {
+        "class": "Telemetry_System",
+        "enable": "true",
+        "systemPoller": "My_Poller"
+    },
+    "My_Pull_Consumer": {
+        "class": "Telemetry_Pull_Consumer",
+        "type": "default",
+        "systemPoller": ["My_Poller"]
+    },
+    "First_Namespace": {
+        "class": "Telemetry_Namespace",
+        "My_Poller": {
+            "class": "Telemetry_System_Poller",
+            "enable": false,
+            "trace": false,
+            "interval": 0
+        },
+        "My_System": {
+            "class": "Telemetry_System",
+            "enable": "true",
+            "systemPoller": "My_Poller"
+        },
+        "My_Pull_Consumer": {
+            "class": "Telemetry_Pull_Consumer",
+            "type": "default",
+            "systemPoller": ["My_Poller"]
+        }
+    },
+    "Second_Namespace": {
+        "class": "Telemetry_Namespace",
+        "Poller": {
+            "class": "Telemetry_System_Poller",
+            "enable": true,
+            "trace": false,
+            "interval": 0
+        },
+        "System": {
+            "class": "Telemetry_System",
+            "enable": "true",
+            "systemPoller": "Poller"
+        },
+        "Pull_Consumer": {
+            "class": "Telemetry_Pull_Consumer",
+            "type": "default",
+            "systemPoller": ["Poller"]
+        }
+    }
+}

@@ -19,7 +19,7 @@ const sinon = require('sinon');
 const prometheusConsumer = require('../../../src/lib/pullConsumers/Prometheus');
 const testUtil = require('../shared/util');
 
-const EXPECTED_DATA = require('./prometheusPullConsumerTestsData').expectedData;
+const EXPECTED_DATA = require('./data/prometheusPullConsumerTestsData').expectedData;
 const SYSTEM_POLLER_DATA = require('./data/system_poller_datasets.json');
 
 chai.use(chaiAsPromised);

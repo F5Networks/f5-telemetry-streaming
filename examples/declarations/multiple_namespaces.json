@@ -1,0 +1,53 @@
+{
+    "class": "Telemetry",
+    "controls": {
+        "class": "Controls",
+        "logLevel": "debug",
+        "debug": true
+    },
+    "NamespaceForEvents": {
+        "class": "Telemetry_Namespace",
+        "My_Listener": {
+            "class": "Telemetry_Listener",
+            "port": 6514,
+            "trace": true
+        },
+        "Elastic": { 
+            "class": "Telemetry_Consumer",
+            "type": "ElasticSearch",
+            "host": "192.168.10.10",
+            "protocol": "http",
+            "port": "9200",
+            "apiVersion": "6.5",
+            "index": "eventdata",
+            "enable": true,
+            "trace": true
+        }
+    },
+    "NamespaceForStats": {
+        "class": "Telemetry_Namespace",
+        "My_Poller": {
+            "class": "Telemetry_System_Poller",
+            "interval": 60,
+            "actions": [
+                {
+                    "includeData": {},
+                    "locations": {
+                        "system": true
+                    }
+                }
+            ]
+        },
+        "Elastic": { 
+            "class": "Telemetry_Consumer",
+            "type": "ElasticSearch",
+            "host": "192.168.10.10",
+            "protocol": "http",
+            "port": "9200",
+            "apiVersion": "6.5",
+            "index": "pollerdata",
+            "enable": true,
+            "trace": true
+        }
+    }
+}

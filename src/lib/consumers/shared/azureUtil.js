@@ -26,7 +26,7 @@ const METADATA_URL = 'http://169.254.169.254/metadata';
 
 function getInstanceMetadata(context) {
     const metadataOpts = {
-        fullURI: `${METADATA_URL}/instance?api-version=2017-08-01`,
+        fullURI: `${METADATA_URL}/instance?api-version=2019-03-11`,
         headers: {
             Metadata: true
         },
@@ -44,17 +44,12 @@ function getInstanceMetadata(context) {
 
 function getInstanceRegion(context) {
     if (context.config.region) {
-        return Promise.resolve(context.config.region.toLowerCase());
+        return context.config.region.toLowerCase();
     }
-    return getInstanceMetadata(context)
-        .then(metadata => (metadata.compute ? metadata.compute.location.toLowerCase() : ''))
-        .catch((e) => {
-            // we're trying to get region because azure has different endpoints accdg to cloud type
-            // if user did not provide region or metadata failed, we'll just assume to use default endpoints
-            // so we're not going to rejecting here
-            context.logger.debug(`Unable to retrieve instance region. ${e.message}`);
-            return '';
-        });
+    if (context.metadata && context.metadata.compute) {
+        return context.metadata.compute.location.toLowerCase();
+    }
+    return '';
 }
 
 function isGovCloud(region) {
@@ -75,14 +70,12 @@ function getApiDomain(region, apiType) {
 }
 
 function getApiUrl(context, apiType) {
-    return getInstanceRegion(context)
-        .then((region) => {
-            const domain = getApiDomain(region, apiType);
-            if (apiType === AZURE_API_TYPES.OPINSIGHTS) {
-                return `https://${context.config.workspaceId}.ods.opinsights.${domain}/api/logs?api-version=2016-04-01`;
-            }
-            return `https://management.${domain}`;
-        });
+    const region = getInstanceRegion(context);
+    const domain = getApiDomain(region, apiType);
+    if (apiType === AZURE_API_TYPES.OPINSIGHTS) {
+        return `https://${context.config.workspaceId}.ods.opinsights.${domain}/api/logs?api-version=2016-04-01`;
+    }
+    return `https://management.${domain}`;
 }
 
 /**
@@ -128,12 +121,9 @@ function listSubscriptions(accessToken, url) {
 
 
 function listWorkspaces(context, accessToken) {
-    let mgmtUrl;
-    return getApiUrl(context, AZURE_API_TYPES.MGMT)
-        .then((url) => {
-            mgmtUrl = url;
-            return listSubscriptions(accessToken, mgmtUrl);
-        })
+    const mgmtUrl = getApiUrl(context, AZURE_API_TYPES.MGMT);
+
+    return listSubscriptions(accessToken, mgmtUrl)
         .then((resp) => {
             const listWorkspaceBySubOpts = resp.value.map(v => ({
                 fullURI: `${mgmtUrl}/subscriptions/${v.subscriptionId}/providers/Microsoft.OperationalInsights/workspaces?api-version=2015-11-01-preview`,
@@ -185,12 +175,9 @@ function getWorkspaceResourceId(context, accessToken) {
  */
 function getSharedKey(context) {
     let accessToken;
-    let mgmtUrl;
-    return getApiUrl(context, AZURE_API_TYPES.MGMT)
-        .then((url) => {
-            mgmtUrl = url;
-            return getAccessTokenFromMetadata(context, mgmtUrl);
-        })
+    const mgmtUrl = getApiUrl(context, AZURE_API_TYPES.MGMT);
+
+    return getAccessTokenFromMetadata(context, mgmtUrl)
         .then((resp) => {
             accessToken = resp;
             return getWorkspaceResourceId(context, accessToken);
@@ -273,8 +260,9 @@ function buildAppInsConnString(instrKey, region) {
  */
 function getInstrumentationKeys(context) {
     if (!context.config.useManagedIdentity) {
-        return getInstanceRegion(context)
-            .then((region) => {
+        return Promise.resolve()
+            .then(() => {
+                const region = getInstanceRegion(context);
                 let keys;
                 if (Array.isArray(context.config.instrumentationKey)) {
                     keys = context.config.instrumentationKey.map(iKey => ({
@@ -293,13 +281,9 @@ function getInstrumentationKeys(context) {
 
     const aiNamePattern = context.config.appInsightsResourceName;
     let accessToken;
-    let mgmtUrl;
+    const mgmtUrl = getApiUrl(context, AZURE_API_TYPES.MGMT);
 
-    return getApiUrl(context, AZURE_API_TYPES.MGMT)
-        .then((url) => {
-            mgmtUrl = url;
-            return getAccessTokenFromMetadata(context, mgmtUrl);
-        })
+    return getAccessTokenFromMetadata(context, mgmtUrl)
         .then((resp) => {
             accessToken = resp;
             return listSubscriptions(accessToken, mgmtUrl);
@@ -343,5 +327,6 @@ module.exports = {
     getSharedKey,
     getMetrics,
     getInstrumentationKeys,
-    getApiUrl
+    getApiUrl,
+    getInstanceMetadata
 };

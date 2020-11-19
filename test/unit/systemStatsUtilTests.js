@@ -16,7 +16,7 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 
 const systemStatsUtil = require('../../src/lib/systemStatsUtil');
-const systemStatsUtilTestsData = require('./systemStatsUtilTestsData');
+const systemStatsUtilTestsData = require('./data/systemStatsUtilTestsData');
 const testUtil = require('./shared/util');
 
 chai.use(chaiAsPromised);

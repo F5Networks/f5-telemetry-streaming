@@ -15,7 +15,7 @@ require('./shared/restoreCache')();
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 
-const dataFilterTestsData = require('./dataFilterTestsData');
+const dataFilterTestsData = require('./data/dataFilterTestsData');
 const dataFilter = require('../../src/lib/dataFilter');
 const testUtil = require('./shared/util');
 
@@ -45,9 +45,7 @@ describe('Data Filter', () => {
         it('should not ignore tmstats if consumer is Splunk legacy', () => {
             const consumerConfig = {
                 type: 'Splunk',
-                config: {
-                    format: 'legacy'
-                }
+                format: 'legacy'
             };
             const data = {
                 data: {

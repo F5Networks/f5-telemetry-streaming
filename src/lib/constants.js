@@ -78,10 +78,10 @@ module.exports = {
         EVENT_LISTENER_CLASS_NAME: 'Telemetry_Listener',
         IHEALTH_POLLER_CLASS_NAME: 'Telemetry_iHealth_Poller',
         SYSTEM_CLASS_NAME: 'Telemetry_System',
-        SYSTEM_POLLER_CLASS_NAME: 'Telemetry_System_Poller'
+        SYSTEM_POLLER_CLASS_NAME: 'Telemetry_System_Poller',
+        NAMESPACE_CLASS_NAME: 'Telemetry_Namespace'
     },
     CONSUMERS_DIR: './consumers',
-    CONTROLS_PROPERTY_NAME: 'controls',
     DAY_NAME_TO_WEEKDAY,
     DEVICE_DEFAULT_PORT: 8100,
     DEVICE_DEFAULT_PROTOCOL: 'http',
@@ -96,6 +96,7 @@ module.exports = {
         CONTAINER: 'Container'
     },
     DEFAULT_EVENT_LISTENER_PORT: 6514,
+    DEFAULT_UNNAMED_NAMESPACE: 'f5telemetry_default',
     DEFAULT_HOSTNAME: 'hostname.unknown',
     EVENT_TYPES: {
         DEFAULT: 'event',

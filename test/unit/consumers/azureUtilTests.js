@@ -17,7 +17,7 @@ const assert = require('assert');
 const testUtil = require('./../shared/util');
 const util = require('./../../../src/lib/util');
 const azureUtil = require('./../../../src/lib/consumers/shared/azureUtil');
-const azureUtilTestsData = require('./azureUtilTestsData');
+const azureUtilTestsData = require('./data/azureUtilTestsData');
 
 describe('Azure Util Tests', () => {
     describe('Managed Identities', () => {
@@ -325,10 +325,11 @@ describe('Azure Util Tests', () => {
             const testSet = azureUtilTestsData[testSetKey];
             testUtil.getCallableDescribe(testSet)(testSet.name, () => {
                 testSet.tests.forEach(testConf => testUtil.getCallableIt(testConf)(testConf.name, () => {
-                    sinon.stub(util, 'makeRequest').resolves(testConf.stub || {});
-                    const context = testUtil.buildConsumerContext({ config: testConf.config });
-                    return azureUtil.getApiUrl(context, testConf.apiType)
-                        .then(url => assert.strictEqual(url, testConf.expected));
+                    const context = testUtil.buildConsumerContext({
+                        config: testConf.config, metadata: testConf.metadata
+                    });
+                    const actualUrl = azureUtil.getApiUrl(context, testConf.apiType);
+                    assert.strictEqual(actualUrl, testConf.expected);
                 }));
             });
         });

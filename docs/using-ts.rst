@@ -15,6 +15,7 @@ Using Telemetry Streaming Index
    pull-consumers
    event-listener
    avr
+   custom-endpoints
    validate
    logging
    http-methods

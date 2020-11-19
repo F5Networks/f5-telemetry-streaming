@@ -1,6 +1,6 @@
 {
     "name": "f5-telemetry",
-    "version": "1.15.0-4",
+    "version": "1.16.0-3",
     "author": "F5 Networks",
     "license": "Apache-2.0",
     "repository": {
@@ -35,9 +35,9 @@
     },
     "dependencies": {
         "@f5devcentral/f5-teem": "^1.4.6",
-        "ajv": "^6.12.4",
-        "applicationinsights": "^1.8.6",
-        "aws-sdk": "^2.749.0",
+        "ajv": "^6.12.6",
+        "applicationinsights": "^1.8.7",
+        "aws-sdk": "^2.775.0",
         "commander": "^2.20.3",
         "deep-diff": "^1.0.2",
         "jsonwebtoken": "^8.5.1",
@@ -46,7 +46,9 @@
         "mustache": "^4.0.0",
         "prom-client": "11.0.0",
         "request": "^2.88.2",
-        "statsd-client": "^0.4.5"
+        "statsd-client": "^0.4.5",
+        "uuid": "^3.4.0",
+        "tiny-request-router": "^1.2.2"
     },
     "devDependencies": {
         "@f5devcentral/eslint-config-f5-atg": "latest",
@@ -68,6 +70,9 @@
         }
     },
     "comments": {
+        "dependencies": {
+            "uuid": "This package dropped support for older node versions starting v7.0.0. Their policy is supported node versions + one legacy version."
+        },
         "devDependencies": {
             "mocha": "This package dropped support for older node versions. Use v5.2.0 for Node v4 and v6.2.2 for Node v6."
         }

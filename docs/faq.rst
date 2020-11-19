@@ -126,7 +126,7 @@ Beginning with TS v1.10.0, you can use Telemetry Streaming on F5 devices with mu
 
 |
 
-.. _poolstats:
+.. _pool-stats:
 
 **Why am I seeing a decrease in some pool level metrics?**
 

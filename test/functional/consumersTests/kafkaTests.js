@@ -34,7 +34,7 @@ const KAFKA_AUTH_PROTOCOL = 'None';
 const KAFKA_CONSUMER_NAME = 'Consumer_Kafka';
 
 // read in example config
-const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC_EXAMPLE));
+const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
 
 
 function runRemoteCmd(cmd) {
@@ -88,7 +88,7 @@ function test() {
             authenticationProtocol: KAFKA_AUTH_PROTOCOL
         };
         DUTS.forEach(dut => it(
-            `should configure TS - ${dut.hostname}`,
+            `should configure TS - ${dut.hostalias}`,
             () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(consumerDeclaration))
         ));
 

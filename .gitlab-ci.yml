@@ -1,4 +1,4 @@
-image: node:8
+image: ${ARTIFACTORY_DOCKER_HUB}/node:8
 
 stages:
     - lint
@@ -135,7 +135,7 @@ stages:
 lint:
     extends:
         - .test_job_definition
-    image: node:8
+    image: ${ARTIFACTORY_DOCKER_HUB}/node:8
     stage: lint
     script:
         - *install_unittest_packages_cmd
@@ -145,37 +145,37 @@ lint:
 test_node4:
     extends:
         - .run_unittest
-    image: node:4
+    image: ${ARTIFACTORY_DOCKER_HUB}/node:4
 
 # just in case, unittests only (without coverage check)
 test_node6:
     extends:
         - .run_unittest
-    image: node:6
+    image: ${ARTIFACTORY_DOCKER_HUB}/node:6
 
 # BIG-IP 14.1+, unittests only (without coverage check)
 test_node8:
     extends:
         - .run_unittest
-    image: node:8
+    image: ${ARTIFACTORY_DOCKER_HUB}/node:8
 
 # Node 10 LTS (active, maintenance)
 test_node10:
     extends:
         - .run_unittest
-    image: node:10
+    image: ${ARTIFACTORY_DOCKER_HUB}/node:10
 
 # Node 12 LTS (active, maintenance)
 test_node12:
     extends:
         - .run_unittest
-    image: node:12
+    image: ${ARTIFACTORY_DOCKER_HUB}/node:12
 
 # mostly for containers, unittests only (without coverage check)
 test_node_latest:
     extends:
         - .run_unittest
-    image: node:latest
+    image: ${ARTIFACTORY_DOCKER_HUB}/node:latest
 
 # packages audit
 npm_audit:
@@ -209,7 +209,7 @@ coverage:
             - coverage
 
 build_rpm:
-    image: f5devcentral/containthedocs:rpmbuild
+    image: ${ARTIFACTORY_DOCKER_HUB}/f5devcentral/containthedocs:rpmbuild
     stage: build
     script:
         - echo 'CI BUILD'
