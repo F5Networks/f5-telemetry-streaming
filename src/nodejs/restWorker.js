@@ -17,113 +17,31 @@ const constants = require('../lib/constants');
 const logger = require('../lib/logger');
 const util = require('../lib/util');
 
-const baseSchema = require('../schema/latest/base_schema.json');
 const deviceUtil = require('../lib/deviceUtil');
 const retryPromise = require('../lib/util').retryPromise;
 const persistentStorage = require('../lib/persistentStorage');
 const configWorker = require('../lib/config');
-const eventListener = require('../lib/eventListener'); // eslint-disable-line no-unused-vars
-const consumers = require('../lib/consumers'); // eslint-disable-line no-unused-vars
-const pullConsumers = require('../lib/pullConsumers');
-const systemPoller = require('../lib/systemPoller');
-const iHealthPoller = require('../lib/ihealth'); // eslint-disable-line no-unused-vars
 
-/** @module restWorkers */
+const configListenerModulesToLoad = [
+    '../lib/eventListener',
+    '../lib/consumers',
+    '../lib/pullConsumers',
+    '../lib/systemPoller',
+    '../lib/ihealth'
+];
 
-/**
- * Simple router to route incoming requests to REST API.
- *
- * @class
- *
- * @property {Object} routes - mapping /path/to/resource to handler
- */
-function SimpleRouter() {
-    this.routes = {};
-}
-
-/**
- * This callback is displayed as part of the Requester class.
- *
- * @callback SimpleRouter~requestCallback
- * @param {Object} restOperation - request object
- */
-
-/**
- * Register request handler.
- *
- * @public
- * @param {String | String[]} method              - HTTP method (POST, GET, etc.), could be array
- * @param {String} endpointURI                    - URI path, string should be alphanumeric only
- * @param {SimpleRouter~requestCallback} callback - request handler
- */
-SimpleRouter.prototype.register = function (method, endpointURI, callback) {
-    if (typeof this.routes[endpointURI] === 'undefined') {
-        this.routes[endpointURI] = {};
-    }
-    if (Array.isArray(method)) {
-        method.forEach((methodItem) => {
-            this.routes[endpointURI][methodItem] = callback;
-        });
-    } else {
-        this.routes[endpointURI][method] = callback;
-    }
-};
-
-/**
- * Remove all registered handlers
- */
-SimpleRouter.prototype.removeAllHandlers = function () {
-    this.routes = {};
-};
-
-/**
- * Process request.
- *
- * @public
- * @param {Object} restOperation - request object
- */
-SimpleRouter.prototype.processRestOperation = function (restOperation) {
+configListenerModulesToLoad.forEach((module) => {
     try {
-        this._processRestOperation(restOperation);
+        // eslint-disable-next-line
+        require(module);
     } catch (err) {
-        logger.exception('restOperation processing error', err);
-        util.restOperationResponder(restOperation, 500,
-            { code: 500, message: 'Internal Server Error' });
+        logger.exception('Unable to load required module', err);
+        throw err;
     }
-};
+});
 
-/**
- * Process request, private method.
- *
- * @private
- * @param {Object} restOperation - request object
- */
-SimpleRouter.prototype._processRestOperation = function (restOperation) {
-    const urlPath = restOperation.getUri().href;
-    const method = restOperation.getMethod().toUpperCase();
-    logger.info(`'${method}' operation ${urlPath}`);
-
-    // Somehow we need to respond to such requests.
-    // When Content-Type === application/json then getBody() tries to
-    // evaluate data as JSON and returns code 500 on failure.
-    // Don't know how to re-define this behavior.
-    if (restOperation.getBody() && restOperation.getContentType().toLowerCase() !== 'application/json') {
-        util.restOperationResponder(restOperation, 415,
-            { code: 415, message: 'Unsupported Media Type', accept: ['application/json'] });
-        return;
-    }
-
-    const endpointURI = restOperation.getUri().pathname.split('/')[3];
-    if (!this.routes[endpointURI]) {
-        util.restOperationResponder(restOperation, 400, `Bad URL: ${urlPath}`);
-    } else if (!this.routes[endpointURI][method]) {
-        const allowedMethods = Object.keys(this.routes[endpointURI]).map(item => item.toUpperCase());
-        util.restOperationResponder(restOperation, 405,
-            { code: 405, message: 'Method Not Allowed', allow: allowedMethods });
-    } else {
-        this.routes[endpointURI][method](restOperation);
-    }
-};
+const requestRouter = require('../lib/requestHandlers/router');
+require('../lib/requestHandlers/connections');
 
 
 /**
@@ -145,7 +63,7 @@ function RestWorker() {
  * @param {Function} success - callback to indicate successful startup
  * @param {Function} failure - callback to indicate startup failure
  *
- * @returns {undefined}
+ * @returns {void}
  */
 // eslint-disable-next-line no-unused-vars
 RestWorker.prototype.onStart = function (success, failure) {
@@ -191,15 +109,12 @@ RestWorker.prototype._initializeApplication = function (success, failure) {
     logger.debug(`Node version: ${process.version}`);
 
     // register REST endpoints
-    this.router = new SimpleRouter();
-    this.registerRestEndpoints(false);
+    this.router = requestRouter;
+    this.router.registerAllHandlers(false);
 
     // configure global socket maximum
     http.globalAgent.maxSockets = 5;
     https.globalAgent.maxSockets = 5;
-
-    // config worker change event
-    configWorker.on('change', config => this.configChangeHandler(config));
 
     // try to load pre-existing configuration
     const ps = persistentStorage.persistentStorage;
@@ -258,61 +173,7 @@ RestWorker.prototype.onGet = function (restOperation) {
  * @returns {void}
  */
 RestWorker.prototype.onPost = function (restOperation) {
-    this.router.processRestOperation(restOperation);
-};
-
-/**
- * Handler for /info endpoint
- *
- * @param {Object} restOperation
- *
- * @returns {void}
- */
-RestWorker.prototype.processInfoRequest = function (restOperation) {
-    const schemaVersionEnum = baseSchema.properties.schemaVersion.enum;
-    util.restOperationResponder(restOperation, 200, {
-        nodeVersion: process.version,
-        version: constants.VERSION,
-        release: constants.RELEASE,
-        schemaCurrent: schemaVersionEnum[0],
-        schemaMinimum: schemaVersionEnum[schemaVersionEnum.length - 1]
-    });
-};
-
-/**
- * Register REST API endpoint handlers
- */
-RestWorker.prototype.registerRestEndpoints = function (enableDebug) {
-    this.router.register('GET', 'info',
-        restOperation => this.processInfoRequest(restOperation));
-
-    this.router.register(['GET', 'POST'], 'declare',
-        restOperation => configWorker.processClientRequest(restOperation));
-
-    this.router.register('GET', 'pullconsumer',
-        restOperation => pullConsumers.processClientRequest(restOperation));
-
-    if (enableDebug) {
-        this.router.register('GET', 'systempoller',
-            restOperation => systemPoller.processClientRequest(restOperation));
-
-        this.router.register('GET', 'ihealthpoller',
-            restOperation => iHealthPoller.processClientRequest(restOperation));
-    }
-};
-
-/**
- * Handle for config changes
- */
-RestWorker.prototype.configChangeHandler = function (config) {
-    logger.debug('configWorker change event in restWorker'); // helpful debug
-
-    const settings = util.getDeclarationByName(
-        config, constants.CONFIG_CLASSES.CONTROLS_CLASS_NAME, constants.CONTROLS_PROPERTY_NAME
-    ) || {};
-
-    this.router.removeAllHandlers();
-    this.registerRestEndpoints(settings.debug);
+    this.router.processRestOperation(restOperation, this.WORKER_URI_PATH);
 };
 
 module.exports = RestWorker;

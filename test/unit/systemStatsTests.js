@@ -17,7 +17,7 @@ const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
 const defaultProperties = require('../../src/lib/properties.json');
-const systemStatsTestsData = require('./systemStatsTestsData');
+const systemStatsTestsData = require('./data/systemStatsTestsData');
 const SystemStats = require('../../src/lib/systemStats');
 const testUtil = require('./shared/util');
 

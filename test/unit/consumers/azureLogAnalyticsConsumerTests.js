@@ -18,7 +18,7 @@ const sinon = require('sinon');
 const util = require('../../../src/lib/util');
 
 const azureAnalyticsIndex = require('../../../src/lib/consumers/Azure_Log_Analytics/index');
-const azureLogData = require('./azureLogAnalyticsConsumerTestsData');
+const azureLogData = require('./data/azureLogAnalyticsConsumerTestsData');
 const azureUtil = require('../../../src/lib/consumers/shared/azureUtil');
 const testUtil = require('../shared/util');
 
@@ -82,6 +82,35 @@ describe('Azure_Log_Analytics', () => {
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_new',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
+                    });
+                });
+        });
+
+        it('should configure request options with resourceId if available from context metadata', () => {
+            const context = testUtil.buildConsumerContext({
+                eventType: 'systemInfo',
+                config: defaultConsumerConfig
+            });
+            context.event.data = {
+                new: 'data'
+            };
+            context.metadata = {
+                compute: {
+                    location: 'outerspace',
+                    resourceId: 'a-galaxy-far-away',
+                    someOtherProp: 'made up'
+                }
+            };
+
+            return azureAnalyticsIndex(context)
+                .then(() => {
+                    const opInsightsReq = getOpsInsightsReq();
+                    assert.deepStrictEqual(opInsightsReq.headers, {
+                        Authorization: 'SharedKey myWorkspace:MGiiWY+WTAxB35tyZ1YljyfwMM5QCqr4ge+giSjcgfI=',
+                        'Content-Type': 'application/json',
+                        'Log-Type': 'F5Telemetry_new',
+                        'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT',
+                        'x-ms-AzureResourceId': 'a-galaxy-far-away'
                     });
                 });
         });

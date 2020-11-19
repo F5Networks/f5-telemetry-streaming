@@ -1,8 +1,5 @@
-Appendix B: Configuring Custom Endpoints
-========================================
-
-.. WARNING:: Configuring custom Endpoints and multiple System poller support is currently an EXPERIMENTAL feature, and the associated API could change based on testing and user feedback. |br| Custom endpoints are currently for BIG-IP only. 
-
+Configuring Custom Endpoints
+----------------------------
 Telemetry Streaming v1.10 and later allows you to define a list of Custom Endpoints that reference iControlRequest paths in a new **Telemetry_Endpoints** class.
 The Custom Endpoints defined within a Telemetry Streaming declaration must then be attached to a Telemetry Streaming System Poller, where the System Poller will query the defined endpoints.
 
@@ -10,6 +7,8 @@ The Custom Endpoints defined within a Telemetry Streaming declaration must then 
 
 Telemetry Streaming v1.10+ also includes the ability to define multiple system pollers within a single declaration.
 Using multiple system pollers within a single declaration allows for a configuration where one system poller can pull data from the default endpoints, and another system poller pulls data only from its referenced, Custom Endpoints. 
+
+.. NOTE::  Custom endpoints are currently for BIG-IP only. 
 
 Using the Telemetry_Endpoints class
 -----------------------------------

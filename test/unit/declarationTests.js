@@ -815,6 +815,47 @@ describe('Declarations', () => {
                     });
             });
 
+            it('should expand pointer (absolute) within Namespace', () => {
+                const data = {
+                    class: 'Telemetry',
+                    Shared: {
+                        class: 'Shared',
+                        constants: {
+                            class: 'Constants',
+                            path: '/upperfoo'
+                        }
+                    },
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.1',
+                        path: '`=/Shared/constants/path`'
+                    },
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace',
+                        Shared: {
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/nsfoo'
+                            }
+                        },
+                        My_NS_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '`=/Shared/constants/path`'
+                        }
+                    }
+                };
+
+                return config.validate(data, { expand: true })
+                    .then((validated) => {
+                        assert.strictEqual(validated.My_Namespace.My_NS_Consumer.path, '/nsfoo');
+                        assert.strictEqual(validated.My_Consumer.path, '/upperfoo');
+                    });
+            });
+
             it('should expand pointer (relative)', () => {
                 const data = {
                     class: 'Telemetry',
@@ -829,6 +870,26 @@ describe('Declarations', () => {
                 return config.validate(data, { expand: true })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Consumer.path, '192.0.2.1');
+                    });
+            });
+
+            it('should expand pointer (relative) for Namespaced object', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace',
+                        My_NS_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '`=host`'
+                        }
+                    }
+                };
+
+                return config.validate(data, { expand: true })
+                    .then((validated) => {
+                        assert.strictEqual(validated.My_Namespace.My_NS_Consumer.path, '192.0.2.1');
                     });
             });
 
@@ -852,6 +913,32 @@ describe('Declarations', () => {
                 return config.validate(data, { expand: true })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Consumer.headers[0].value, '192.0.2.1');
+                    });
+            });
+
+            it('should expand pointer (relative to class) for Namespaced object', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace',
+                        My_NS_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '/',
+                            headers: [
+                                {
+                                    name: 'foo',
+                                    value: '`=@/host`'
+                                }
+                            ]
+                        }
+                    }
+                };
+
+                return config.validate(data, { expand: true })
+                    .then((validated) => {
+                        assert.strictEqual(validated.My_Namespace.My_NS_Consumer.headers[0].value, '192.0.2.1');
                     });
             });
 
@@ -978,6 +1065,52 @@ describe('Declarations', () => {
                 };
                 return assert.isRejected(config.validate(data, { expand: true }), /requires pointers root to be 'Shared'/);
             });
+
+            it('should fail expanding pointer (absolute) outside of Namespace', () => {
+                const data = {
+                    class: 'Telemetry',
+                    Shared: {
+                        class: 'Shared',
+                        constants: {
+                            class: 'Constants',
+                            path: '/badfoo'
+                        }
+                    },
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace',
+                        My_NS_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '`=/Shared/constants/path`'
+                        }
+                    }
+                };
+                return assert.isRejected(config.validate(data, { expand: true }), /Cannot read property 'constants' of undefined/);
+            });
+
+            it('should fail with correct dataPath when pointer is outside of Namespace', () => {
+                const data = {
+                    class: 'Telemetry',
+                    Shared: {
+                        class: 'Shared',
+                        constants: {
+                            class: 'Constants',
+                            path: '/badfoo'
+                        }
+                    },
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace',
+                        My_NS_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '`=/Shared/constants/path`'
+                        }
+                    }
+                };
+                return assert.isRejected(config.validate(data, { expand: true }), /dataPath":"\/My_Namespace\/My_NS_Consumer\/path/);
+            });
         });
 
         describe('hostConnectivityCheck', () => {
@@ -1037,6 +1170,55 @@ describe('Declarations', () => {
                     });
             });
 
+            it('should expand parent objects successfully when multiple hosts specified in a Namespace', () => {
+                const hostList = [
+                    '192.0.2.1',
+                    '192.0.2.2',
+                    '192.0.2.3',
+                    '192.0.2.4'
+                ];
+
+                const expected = [
+                    { host: '192.0.2.1', port: 443 }, // My_Consumer host
+                    { host: '192.0.2.3', port: 443 }, // My_Consumer fallback[0]
+                    { host: '192.0.2.4', port: 443 }, // My_Consumer fallback[0]
+                    { host: '192.0.2.2', port: 443 }, // My_NS_Consumer host
+                    { host: '192.0.2.4', port: 443 } // My_NS_Consumer fallback[0]
+                ];
+
+                const called = [];
+
+                networkCheckStub.callsFake((host, port) => {
+                    called.push({ host, port });
+                    return Promise.resolve();
+                });
+
+                const data = {
+                    class: 'Telemetry',
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: hostList[0],
+                        fallbackHosts: hostList.slice(2),
+                        enableHostConnectivityCheck: true
+                    },
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace',
+                        My_NS_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: hostList[1],
+                            fallbackHosts: hostList.slice(3),
+                            enableHostConnectivityCheck: true
+                        }
+                    }
+                };
+                return config.validate(data)
+                    .then(() => {
+                        assert.deepStrictEqual(called, expected);
+                    });
+            });
+
             it('should fail host network check', () => {
                 const errMsg = 'failed network check';
                 networkCheckStub.rejects(new Error(errMsg));
@@ -1078,6 +1260,34 @@ describe('Declarations', () => {
                             endpointList: [
                                 'My_Endpoints/a'
                             ]
+                        }
+                    }
+                };
+                return assert.isFulfilled(config.validate(data));
+            });
+
+            it('should resolve full item in Namespace', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace',
+                        My_Endpoints: {
+                            class: 'Telemetry_Endpoints',
+                            items: {
+                                a: {
+                                    name: 'a',
+                                    path: 'something/a'
+                                }
+                            }
+                        },
+                        My_System: {
+                            class: 'Telemetry_System',
+                            systemPoller: {
+                                interval: 100,
+                                endpointList: [
+                                    'My_Endpoints/a'
+                                ]
+                            }
                         }
                     }
                 };
@@ -1186,6 +1396,93 @@ describe('Declarations', () => {
                 return assert.isRejected(config.validate(data), errMsg);
             });
 
+            it('should return error when object referenced is not in the named Namespace', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Endpoints: {
+                        class: 'Telemetry_Endpoints',
+                        items: {
+                            a: {
+                                name: 'a',
+                                path: 'something/a'
+                            }
+                        }
+                    },
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace',
+                        My_System: {
+                            class: 'Telemetry_System',
+                            systemPoller: {
+                                interval: 100,
+                                endpointList: [
+                                    'My_Endpoints/a'
+                                ]
+                            }
+                        }
+                    }
+                };
+                const errMsg = '\\"My_Endpoints\\" must be of object type and class \\"Telemetry_Endpoints\\"';
+                return assert.isRejected(config.validate(data), errMsg);
+            });
+
+            it('should return error when object referenced is not in the default Namespace', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_System: {
+                        class: 'Telemetry_System',
+                        systemPoller: {
+                            interval: 100,
+                            endpointList: [
+                                'My_Endpoints/a'
+                            ]
+                        }
+                    },
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace',
+                        My_Endpoints: {
+                            class: 'Telemetry_Endpoints',
+                            items: {
+                                a: {
+                                    name: 'a',
+                                    path: 'something/a'
+                                }
+                            }
+                        }
+                    }
+                };
+                const errMsg = '\\"My_Endpoints\\" must be of object type and class \\"Telemetry_Endpoints\\"';
+                return assert.isRejected(config.validate(data), errMsg);
+            });
+
+            it('should return error when object referenced is not in the default Namespace, even when using Namespace prefix', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_System: {
+                        class: 'Telemetry_System',
+                        systemPoller: {
+                            interval: 100,
+                            endpointList: [
+                                'My_Namespace/My_Endpoints/a'
+                            ]
+                        }
+                    },
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace',
+                        My_Endpoints: {
+                            class: 'Telemetry_Endpoints',
+                            items: {
+                                a: {
+                                    name: 'a',
+                                    path: 'something/a'
+                                }
+                            }
+                        }
+                    }
+                };
+                const errMsg = '\\"My_Namespace/My_Endpoints/a\\" does not follow format \\"ObjectName/key1\\"';
+                return assert.isRejected(config.validate(data), errMsg);
+            });
+
             it('should fail to resolve when instance property matches class property', () => {
                 // TODO: this behavior should be fixed in future releases
                 const declaration = {
@@ -1229,6 +1526,99 @@ describe('Declarations', () => {
                     }
                 };
                 return assert.isFulfilled(config.validate(data));
+            });
+
+            it('should pass when object only exists in user-defined Namespace', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace',
+                        My_Poller: {
+                            class: 'Telemetry_System_Poller'
+                        },
+                        My_System: {
+                            class: 'Telemetry_System',
+                            systemPoller: 'My_Poller'
+                        }
+                    }
+                };
+                return assert.isFulfilled(config.validate(data));
+            });
+
+            it('should pass when object exists in multiple Namespaces', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Namespace_One: {
+                        class: 'Telemetry_Namespace',
+                        My_Poller_One: {
+                            class: 'Telemetry_System_Poller'
+                        },
+                        My_System: {
+                            class: 'Telemetry_System',
+                            systemPoller: 'My_Poller_One'
+                        }
+                    },
+                    My_Namespace_Two: {
+                        class: 'Telemetry_Namespace',
+                        My_Poller_Two: {
+                            class: 'Telemetry_System_Poller'
+                        },
+                        My_System: {
+                            class: 'Telemetry_System',
+                            systemPoller: 'My_Poller_Two'
+                        }
+                    }
+                };
+                return assert.isFulfilled(config.validate(data));
+            });
+
+            it('should return error when object referenced is in a different Namespace', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Namespace_One: {
+                        class: 'Telemetry_Namespace',
+                        My_Poller_One: {
+                            class: 'Telemetry_System_Poller'
+                        },
+                        My_System: {
+                            class: 'Telemetry_System',
+                            systemPoller: 'My_Poller_Two'
+                        }
+                    },
+                    My_Namespace_Two: {
+                        class: 'Telemetry_Namespace',
+                        My_Poller_Two: {
+                            class: 'Telemetry_System_Poller'
+                        },
+                        My_System: {
+                            class: 'Telemetry_System',
+                            systemPoller: 'My_Poller_Two'
+                        }
+                    }
+                };
+                const errMsg = 'declaration with name \\"My_Poller_Two\\" and class \\"Telemetry_System_Poller\\" doesn\'t exist';
+                return assert.isRejected(config.validate(data), errMsg);
+            });
+
+            it('should return return correct dataPath in error when object referenced is in a different Namespace', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Namespace_One: {
+                        class: 'Telemetry_Namespace',
+                        My_System: {
+                            class: 'Telemetry_System',
+                            systemPoller: 'My_Poller_Two'
+                        }
+                    },
+                    My_Namespace_Two: {
+                        class: 'Telemetry_Namespace',
+                        My_Poller_Two: {
+                            class: 'Telemetry_System_Poller'
+                        }
+                    }
+                };
+                const errMsg = /dataPath":"\/My_Namespace_One\/My_System\/systemPoller/;
+                return assert.isRejected(config.validate(data), errMsg);
             });
 
             it('should return error when object referenced is not correct class', () => {
@@ -4106,5 +4496,156 @@ describe('Declarations', () => {
                 { type: 'Prometheus' }
             ));
         });
+    });
+
+    describe('Telemetry_Namespace', () => {
+        let minimalDeclaration;
+        let minimalExpected;
+        let fullDeclaration;
+        let fullExpected;
+
+        const validate = (targetDeclaration, namespaceProps, expectedTarget, expectedProps, addtlContext) => {
+            let context;
+            Object.assign(targetDeclaration.My_Namespace, namespaceProps);
+            Object.assign(expectedTarget || {}, expectedProps || {});
+            if (addtlContext) {
+                context = { expand: true };
+                targetDeclaration.Shared = {
+                    class: 'Shared',
+                    constants: {
+                        class: 'Constants'
+                    }
+                };
+                Object.assign(targetDeclaration.Shared.constants, addtlContext.constants);
+            }
+            return config.validate(targetDeclaration, context)
+                .then((validConfig) => {
+                    assert.deepStrictEqual(validConfig.My_Namespace, expectedTarget);
+                });
+        };
+
+        const validateMinimal = (namespaceProps, expectedProps, addtlContext) => validate(
+            minimalDeclaration,
+            namespaceProps,
+            minimalExpected,
+            expectedProps,
+            addtlContext
+        );
+
+        const validateFull = (namespaceProps, expectedProps, addtlContext) => validate(
+            fullDeclaration,
+            namespaceProps,
+            fullExpected,
+            expectedProps,
+            addtlContext
+        );
+
+        beforeEach(() => {
+            minimalDeclaration = {
+                class: 'Telemetry',
+                My_Namespace: {
+                    class: 'Telemetry_Namespace',
+                    My_System: {
+                        class: 'Telemetry_System'
+                    }
+                }
+            };
+
+            minimalExpected = {
+                class: 'Telemetry_Namespace',
+                My_System: {
+                    class: 'Telemetry_System',
+                    allowSelfSignedCert: false,
+                    enable: true,
+                    host: 'localhost',
+                    port: 8100,
+                    protocol: 'http'
+                }
+            };
+
+            fullDeclaration = {
+                class: 'Telemetry',
+                My_System: {
+                    class: 'Telemetry_System',
+                    systemPoller: {
+                        interval: 60
+                    }
+                },
+                My_Consumer: {
+                    class: 'Telemetry_Consumer',
+                    type: 'default'
+                },
+                My_Namespace: {
+                    class: 'Telemetry_Namespace',
+                    My_NS_System: {
+                        class: 'Telemetry_System',
+                        systemPoller: ['My_NS_Poller']
+                    },
+                    My_NS_Poller: {
+                        class: 'Telemetry_System_Poller',
+                        interval: 60
+                    },
+                    My_NS_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '1.2.3.4',
+                        protocol: 'http',
+                        port: 8080
+                    }
+                }
+            };
+
+            fullExpected = {
+                class: 'Telemetry_Namespace',
+                My_NS_System: {
+                    class: 'Telemetry_System',
+                    allowSelfSignedCert: false,
+                    enable: true,
+                    host: 'localhost',
+                    port: 8100,
+                    protocol: 'http',
+                    systemPoller: ['My_NS_Poller']
+                },
+                My_NS_Poller: {
+                    class: 'Telemetry_System_Poller',
+                    actions: [{
+                        enable: true,
+                        setTag: {
+                            application: '`A`',
+                            tenant: '`T`'
+                        }
+                    }],
+                    allowSelfSignedCert: false,
+                    enable: true,
+                    host: 'localhost',
+                    port: 8100,
+                    protocol: 'http',
+                    interval: 60
+                },
+                My_NS_Consumer: {
+                    class: 'Telemetry_Consumer',
+                    allowSelfSignedCert: false,
+                    enable: true,
+                    method: 'POST',
+                    path: '/',
+                    trace: false,
+                    type: 'Generic_HTTP',
+                    host: '1.2.3.4',
+                    protocol: 'http',
+                    port: 8080
+                }
+            };
+        });
+
+        it('should pass minimal declaration', () => validateMinimal({}, {}));
+        it('should allow full declaration', () => validateFull({}, {}));
+        it('should not allow nested Namespace', () => assert.isRejected(
+            validateMinimal({
+                nestedNamespace: {
+                    class: 'Telemetry_Namespace'
+                }
+            }),
+            /should be equal to one of the allowed values/
+        ));
     });
 });

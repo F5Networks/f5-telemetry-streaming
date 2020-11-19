@@ -18,7 +18,6 @@ const nock = require('nock');
 
 const defaultPaths = require('../../src/lib/paths.json');
 const defaultProperties = require('../../src/lib/properties.json');
-const propertiesTestsData = require('./propertiesJsonTestsData');
 const SystemStats = require('../../src/lib/systemStats');
 const testUtil = require('./shared/util');
 
@@ -27,6 +26,7 @@ const assert = chai.assert;
 
 const pathsStateValidator = testUtil.getSpoiledDataValidator(defaultPaths);
 const propertiesStateValidator = testUtil.getSpoiledDataValidator(defaultProperties);
+const testsDataPath = './data/propertiesJsonTests';
 
 describe('properties.json', () => {
     const TOTAL_ATTEMPTS = 10;
@@ -58,9 +58,9 @@ describe('properties.json', () => {
         return ret;
     };
 
-    Object.keys(propertiesTestsData).forEach((testSetKey) => {
-        const testSet = propertiesTestsData[testSetKey];
-
+    const loadedTestsData = testUtil.loadModules(testsDataPath, __dirname);
+    Object.keys(loadedTestsData).forEach((fileName) => {
+        const testSet = loadedTestsData[fileName];
         testUtil.getCallableDescribe(testSet)(testSet.name, () => {
             afterEach(() => {
                 nock.cleanAll();

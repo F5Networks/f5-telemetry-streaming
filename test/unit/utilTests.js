@@ -102,23 +102,6 @@ describe('Util', () => {
         });
     });
 
-    describe('.getDeclarationByName()', () => {
-        it('should get object by name', () => {
-            const obj = {
-                my_item: {
-                    class: 'Consumer'
-                }
-            };
-            const formattedObj = util.formatConfig(obj);
-            assert.deepStrictEqual(
-                util.getDeclarationByName(formattedObj, 'Consumer', 'my_item'),
-                {
-                    class: 'Consumer'
-                }
-            );
-        });
-    });
-
     describe('.stringify()', () => {
         it('should stringify object', () => {
             assert.strictEqual(
@@ -142,70 +125,6 @@ describe('Util', () => {
             const obj = { a: 1 };
             obj.b = obj;
             util.stringify(obj);
-        });
-    });
-
-    describe('.formatDataByClass()', () => {
-        it('should return empty object when no declaration', () => {
-            assert.deepStrictEqual(util.formatDataByClass(), {});
-        });
-
-        it('should not fail on null', () => {
-            // typeof null === 'object'
-            assert.deepStrictEqual(util.formatDataByClass(), {});
-        });
-
-        it('should format data by class', () => {
-            const obj = {
-                my_item: {
-                    class: 'Consumer'
-                }
-            };
-            const expectedObj = {
-                Consumer: {
-                    my_item: {
-                        class: 'Consumer'
-                    }
-                }
-            };
-            const formattedObj = util.formatDataByClass(obj);
-            assert.deepStrictEqual(formattedObj, expectedObj);
-        });
-
-        it('should format data by class', () => {
-            const obj = {
-                my_item: {
-                    class: 'Consumer'
-                }
-            };
-            const expectedObj = {
-                Consumer: {
-                    my_item: {
-                        class: 'Consumer'
-                    }
-                }
-            };
-            const formattedObj = util.formatDataByClass(obj);
-            assert.deepStrictEqual(formattedObj, expectedObj);
-        });
-    });
-
-    describe('.formatConfig()', () => {
-        it('should format config', () => {
-            const obj = {
-                my_item: {
-                    class: 'Consumer'
-                }
-            };
-            const expectedObj = {
-                Consumer: {
-                    my_item: {
-                        class: 'Consumer'
-                    }
-                }
-            };
-            const formattedObj = util.formatConfig(obj);
-            assert.deepStrictEqual(formattedObj, expectedObj);
         });
     });
 
@@ -1195,5 +1114,64 @@ describe('Util', () => {
                     assert.strictEqual(fs.existsSync(fileName), true, 'file should exists after re-creation');
                 }));
         }).timeout(10000);
+    });
+
+    describe('.generateUuid', () => {
+        it('should return valid and unique values with multiple/consecutive calls', () => {
+            const v4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+            const uuids = [
+                util.generateUuid(),
+                util.generateUuid(),
+                util.generateUuid()
+            ];
+            uuids.forEach((uuid) => {
+                assert.ok(v4Regex.test(uuid));
+            });
+            assert.isTrue(new Set(uuids).size === uuids.length);
+        });
+    });
+
+    describe('.getProperty', () => {
+        const obj = {
+            child1: {
+                prop1: true,
+                prop2: {
+                    child1: {
+                        prop1: 234
+                    }
+                }
+            },
+            child2: [
+                { prop1: 'crimson' },
+                { prop2: 'viridian' }
+            ]
+        };
+
+        it('should return correct property value (primitive)', () => {
+            assert.strictEqual(util.getProperty(obj, 'child1.prop1'), true);
+        });
+
+
+        it('should return correct property value (object)', () => {
+            assert.deepStrictEqual(
+                util.getProperty(obj, 'child1.prop2'),
+                { child1: { prop1: 234 } }
+            );
+        });
+
+        it('should return correct property value using array path', () => {
+            assert.strictEqual(
+                util.getProperty(obj, ['child2', '1', 'prop2']),
+                'viridian'
+            );
+        });
+
+        it('should return undefined if property not found', () => {
+            assert.strictEqual(util.getProperty(obj, 'child2.prop1'), undefined);
+        });
+
+        it('should return defaultValue specified if property not found', () => {
+            assert.strictEqual(util.getProperty(obj, ['child2', 'prop3', '0'], 'wrong tree'), 'wrong tree');
+        });
     });
 });

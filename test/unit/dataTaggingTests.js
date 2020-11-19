@@ -16,7 +16,7 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 
 const dataTagging = require('../../src/lib/dataTagging');
-const dataTaggingTestsData = require('./dataTaggingTestsData');
+const dataTaggingTestsData = require('./data/dataTaggingTestsData');
 const testUtil = require('./shared/util');
 
 chai.use(chaiAsPromised);

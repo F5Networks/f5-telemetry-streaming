@@ -13,35 +13,70 @@
 const fs = require('fs');
 const assert = require('assert');
 const constants = require('../shared/constants');
+const DEFAULT_UNNAMED_NAMESPACE = require('../../../src/lib/constants').DEFAULT_UNNAMED_NAMESPACE;
 const util = require('../shared/util');
 const dutUtils = require('../dutTests').utils;
 
 const DUTS = util.getHosts('BIGIP');
 
-// read in example config
-const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC_PULL_CONSUMER_EXAMPLE));
-const PULL_CONSUMER_NAME = 'My_Pull_Consumer';
+// read in example configs
+const BASIC_DECL = JSON.parse(fs.readFileSync(constants.DECL.PULL_CONSUMER_BASIC));
+const NAMESPACE_DECL = JSON.parse(fs.readFileSync(constants.DECL.PULL_CONSUMER_WITH_NAMESPACE));
 
 function test() {
-    describe('Pull Consumer Test: default - Configure TS', () => {
-        DUTS.forEach(dut => it(
-            `should configure TS - ${dut.hostname}`,
-            () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(DECLARATION))
-        ));
+    const verifyResponseData = (response) => {
+        assert.strictEqual(response.length, 1);
+        assert.notStrictEqual(
+            Object.keys(response[0].system).indexOf('hostname'),
+            -1,
+            'should have \'hostname\' in expected data position'
+        );
+    };
+
+    describe('Pull Consumer Test: default consumer type - no namespace', () => {
+        describe('default - Configure TS', () => {
+            DUTS.forEach(dut => it(
+                `should configure TS - ${dut.hostalias}`,
+                () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(BASIC_DECL))
+            ));
+        });
+
+        describe('default - Tests', () => {
+            const pullConsumerName = 'My_Pull_Consumer';
+            DUTS.forEach((dut) => {
+                it(`should get the Pull Consumer's formatted data from: ${dut.hostalias}`,
+                    () => dutUtils.getPullConsumerData(dut, pullConsumerName)
+                        .then((response) => {
+                            verifyResponseData(response);
+                        }));
+
+                it(`should get the Pull Consumer's formatted data from: ${dut.hostalias} (using namespace endpoint)`,
+                    () => dutUtils.getPullConsumerData(dut, pullConsumerName, DEFAULT_UNNAMED_NAMESPACE)
+                        .then((response) => {
+                            verifyResponseData(response);
+                        }));
+            });
+        });
     });
 
-    describe('Pull Consumer Test: default - Tests', () => {
-        DUTS.forEach((dut) => {
-            it(`should the Pull Consumer's formatted data from: ${dut.hostname}`,
-                () => dutUtils.getPullConsumerData(dut, PULL_CONSUMER_NAME)
-                    .then((response) => {
-                        assert.strictEqual(response.length, 1);
-                        assert.notStrictEqual(
-                            Object.keys(response[0].system).indexOf('hostname'),
-                            -1,
-                            'should have \'hostname\' in expected data position'
-                        );
-                    }));
+    describe('Pull Consumer Test: default consumer type - with namespace', () => {
+        describe('default with namespace - Configure TS', () => {
+            DUTS.forEach(dut => it(
+                `should configure TS - ${dut.hostalias}`,
+                () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(NAMESPACE_DECL))
+            ));
+        });
+
+        describe('default with namespace - Tests', () => {
+            const pullConsumerName = 'Pull_Consumer';
+            const namespace = 'Second_Namespace';
+            DUTS.forEach((dut) => {
+                it(`should get the Pull Consumer's formatted data from: ${dut.hostalias}`,
+                    () => dutUtils.getPullConsumerData(dut, pullConsumerName, namespace)
+                        .then((response) => {
+                            verifyResponseData(response);
+                        }));
+            });
         });
     });
 }

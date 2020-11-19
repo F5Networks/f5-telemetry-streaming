@@ -29,33 +29,66 @@ describe('Forwarder', () => {
     };
     const type = 'dataType';
     const data = { foo: 'bar' };
+    const metadata = { compute: { onlyWhenAvailable: true } };
 
     afterEach(() => {
         sinon.restore();
     });
 
-    it('should forward to consumer', () => {
+    it('should forward to correct consumers', () => {
         let actualContext;
+        const consumersCalled = [];
         sinon.stub(consumers, 'getConsumers').returns([
             {
                 consumer: (context) => {
                     actualContext = context;
+                    consumersCalled.push('uuid1');
                 },
+                id: 'uuid1',
                 config,
                 tracer: null,
-                filter: new DataFilter({})
+                filter: new DataFilter({}),
+                logger: {},
+                metadata
+            },
+            {
+                consumer: (context) => {
+                    actualContext = { orig: context, modified: true };
+                    consumersCalled.push('uuid2');
+                },
+                id: 'uuid2',
+                config,
+                tracer: null,
+                filter: new DataFilter({}),
+                logger: {},
+                metadata
+            },
+            {
+                consumer: (context) => {
+                    actualContext = context;
+                    consumersCalled.push('uuid3');
+                },
+                id: 'uuid3',
+                config,
+                tracer: null,
+                filter: new DataFilter({}),
+                logger: {},
+                metadata
             }
         ]);
-        return assert.isFulfilled(forwarder.forward({ type, data })
+        const mockContext = { type, data, destinationIds: ['uuid1', 'uuid3'] };
+        return assert.isFulfilled(forwarder.forward(mockContext)
             .then(() => {
                 assert.deepStrictEqual(actualContext.event.data, data);
                 assert.deepStrictEqual(actualContext.config, config);
+                assert.deepStrictEqual(actualContext.metadata, metadata);
+                assert.deepStrictEqual(consumersCalled, ['uuid1', 'uuid3']);
             }));
     });
 
     it('should resolve with no consumers', () => {
         sinon.stub(consumers, 'getConsumers').returns(null);
-        return assert.isFulfilled(forwarder.forward({ type, data }));
+        return assert.isFulfilled(forwarder.forward({ type, data, destinationIds: [] }));
     });
 
     it('should resolve on consumer error', () => {
@@ -65,10 +98,13 @@ describe('Forwarder', () => {
                     throw new Error('foo');
                 },
                 config,
+                id: 'uuid123',
                 tracer: null,
-                filter: new DataFilter({})
+                filter: new DataFilter({}),
+                logger: {},
+                metadata: {}
             }
         ]);
-        return assert.isFulfilled(forwarder.forward({ type, data }));
+        return assert.isFulfilled(forwarder.forward({ type, data, destinationIds: [] }));
     });
 });

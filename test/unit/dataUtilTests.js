@@ -16,7 +16,7 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 
 const dataUtil = require('../../src/lib/dataUtil');
-const dataUtilTestsData = require('./dataUtilTestsData');
+const dataUtilTestsData = require('./data/dataUtilTestsData');
 const testUtil = require('./shared/util');
 
 chai.use(chaiAsPromised);
