@@ -1,6 +1,6 @@
 Telemetry Streaming Namespaces
 ==============================
-Telemetry Streaming v1.16 introduces the concept of of *namespaces*, which is a grouping of Telemetry components.  With namespaces, you can declare separate configurations to allow better control of data forwarding. Namespaces are declared in the new **Telemetry_Namespace** class, which acts as the container for the namespace.
+Telemetry Streaming v1.16 introduces the concept of *namespaces*, which is a grouping of Telemetry components.  With namespaces, you can declare separate configurations to allow better control of data forwarding. Namespaces are declared in the new **Telemetry_Namespace** class, which acts as the container for the namespace.
 
 The following are important notes about namespaces.
 
@@ -8,7 +8,7 @@ The following are important notes about namespaces.
 - Each namespace works separately from another and cannot share configuration or object references. 
 - While each namespace must have a unique name, the components in a namespace can share the same name as the components in another namespace. 
 - Namespaces are not tied in any way to RBAC. 
-- Currently, Telemetry Streaming only only supports a full declaration sent to **/telemetry/declare**. If there are multiple namespaces, they must all be declared in the POST body. 
+- Currently, Telemetry Streaming only supports a full declaration sent to **/telemetry/declare**. If there are multiple namespaces, they must all be declared in the POST body. 
 - All namespaces inherit the top level **controls** object. 
 - For pull consumers: If a pull consumer is declared under a namespace, the URI to get the data should specify the namespace in path, for example **/mgmt/shared/telemetry/namespace/${namespaceName} pullconsumer/${pullConsumerName}**
 
