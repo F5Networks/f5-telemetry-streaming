@@ -12,7 +12,7 @@
             "port": 6514,
             "trace": true
         },
-        "Elastic": { // note same name
+        "Elastic": { 
             "class": "Telemetry_Consumer",
             "type": "ElasticSearch",
             "host": "192.168.10.10",
@@ -38,7 +38,7 @@
                 }
             ]
         },
-        "Elastic": { // note same name
+        "Elastic": { 
             "class": "Telemetry_Consumer",
             "type": "ElasticSearch",
             "host": "192.168.10.10",
