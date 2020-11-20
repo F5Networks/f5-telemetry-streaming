@@ -32,10 +32,12 @@ function getPollerTimers() {
     return POLLER_TIMERS;
 }
 
-function findSystemOrPollerConfigs(originalConfig, sysOrPollerName, pollerName) {
-    // TODO: update this when we're supporting namespace in path
-    const systems = configUtil.getTelemetrySystems(originalConfig);
-    const systemPollers = configUtil.getTelemetrySystemPollers(originalConfig);
+function findSystemOrPollerConfigs(originalConfig, sysOrPollerName, pollerName, namespace) {
+    // If namespace is undefined, assumption is we're querying for objects in the 'default namespace'
+    const namespaceInfo = namespace ? ` in Namespace '${namespace}'` : '';
+    namespace = namespace || constants.DEFAULT_UNNAMED_NAMESPACE;
+    const systems = configUtil.getTelemetrySystems(originalConfig, namespace);
+    const systemPollers = configUtil.getTelemetrySystemPollers(originalConfig, namespace);
     let poller;
 
     const system = systems.find(s => s.name === sysOrPollerName);
@@ -56,21 +58,21 @@ function findSystemOrPollerConfigs(originalConfig, sysOrPollerName, pollerName) 
         if (pollerName) {
             // sysOrPollerName and pollerName both passed to the function
             if (!systemFound) {
-                throw new errors.ObjectNotFoundInConfigError(`System with name '${sysOrPollerName}' doesn't exist`);
+                throw new errors.ObjectNotFoundInConfigError(`System with name '${sysOrPollerName}' doesn't exist${namespaceInfo}`);
             }
 
             if (!pollerFound) {
-                throw new errors.ObjectNotFoundInConfigError(`System Poller with name '${pollerName}' doesn't exist in System '${sysOrPollerName}'`);
+                throw new errors.ObjectNotFoundInConfigError(`System Poller with name '${pollerName}' doesn't exist in System '${sysOrPollerName}'${namespaceInfo}`);
             }
 
-            throw new errors.ObjectNotFoundInConfigError(`System Poller with name '${pollerName}' doesn't exist`);
+            throw new errors.ObjectNotFoundInConfigError(`System Poller with name '${pollerName}' doesn't exist${namespaceInfo}`);
         }
         if (!(systemFound || pollerFound)) {
-            throw new errors.ObjectNotFoundInConfigError(`System or System Poller with name '${sysOrPollerName}' doesn't exist`);
+            throw new errors.ObjectNotFoundInConfigError(`System or System Poller with name '${sysOrPollerName}' doesn't exist${namespaceInfo}`);
         }
 
         if (systemFound && system.systemPollers.length === 0) {
-            throw new NoPollersError(`System with name '${sysOrPollerName}' has no System Poller configured`);
+            throw new NoPollersError(`System with name '${sysOrPollerName}' has no System Poller configured${namespaceInfo}`);
         }
     }
     // error check passed and now we have valid objects to continue with
@@ -226,10 +228,11 @@ function safeProcess() {
 /**
  * Get System Poller config if exists
  *
- * @param {String} sysOrPollerName - system name or poller name
- * @param {Object}  [options] - optional values
- * @param {String}  [options.pollerName] - poller name
- * @param {Boolean} [options.includeDisabled = false] - whether to include disabled pollers
+ * @param {String}  sysOrPollerName                     - system name or poller name
+ * @param {Object}  [options]                           - optional values
+ * @param {String}  [options.pollerName]                - poller name
+ * @param {String}  [options.namespace]                 - namespace name
+ * @param {Boolean} [options.includeDisabled = false]   - whether to include disabled pollers
  *
  * @returns {Promise<Object>} resolved with poller's config
  */
@@ -237,7 +240,9 @@ function getPollersConfig(sysOrPollerName, options) {
     options = options || {};
     const includeDisabled = (typeof options.includeDisabled === 'undefined') ? false : options.includeDisabled;
     return configWorker.getConfig()
-        .then(currentConfig => findSystemOrPollerConfigs(currentConfig.normalized, sysOrPollerName, options.pollerName))
+        .then(currentConfig => findSystemOrPollerConfigs(
+            currentConfig.normalized, sysOrPollerName, options.pollerName, options.namespace
+        ))
         .then(config => deviceUtil.decryptAllSecrets(config))
         .then((configs) => {
             if (configs.length === 0) {

@@ -388,16 +388,15 @@ function test() {
         {
             name: 'mixed declaration (default and namespace), verify namespace',
             namespace: constants.DECL.NAMESPACE_NAME
+        },
+        {
+            name: 'basic declaration - default (no namespace), verify default by "f5telemetry_default"',
+            namespace: DEFAULT_UNNAMED_NAMESPACE
+        },
+        {
+            name: 'mixed declaration (default and namespace), verify default by "f5telemetry_default"',
+            namespace: DEFAULT_UNNAMED_NAMESPACE
         }
-        // TODO: enable tests to verify namespace:f5telemetry_default when namespace poller endpoints are supported
-        // {
-        //     name: 'basic declaration - default (no namespace), verify by "f5telemetry_default"',
-        //     namespace: DEFAULT_UNNAMED_NAMESPACE
-        // },
-        // {
-        //     name: 'mixed declaration (default and namespace), verify default (no namespace) by "f5telemetry_default"'
-        //     namespace: DEFAULT_UNNAMED_NAMESPACE
-        // },
     ];
 
     function getDeclToUse(testSetup) {
@@ -410,8 +409,9 @@ function test() {
         return declaration;
     }
 
-    // some tests cannot be run as we don't support the endpoints yet
-    function ifSupportedIt(title, testSetup, testFunc) {
+    // Selectively skip tests if the testSetup uses Namespaces
+    // Tests that validate more complex SystemPoller logic can be skipped when only testing Namespace logic
+    function ifNoNamespaceIt(title, testSetup, testFunc) {
         return testSetup.namespace ? it.skip(title, testFunc) : it(title, testFunc);
     }
 
@@ -522,7 +522,7 @@ function test() {
                             });
                     });
 
-                    ifSupportedIt('should get response from systempoller endpoint', testSetup, () => {
+                    it('should get response from systempoller endpoint', () => {
                         const uri = `${constants.BASE_ILX_URI}${namespacePath}/systempoller/${constants.DECL.SYSTEM_NAME}`;
                         // wait 500ms in case if config was not applied yet
                         return util.sleep(500)
@@ -568,7 +568,7 @@ function test() {
                         return Promise.all(promises);
                     });
 
-                    ifSupportedIt('should apply configuration containing system poller filtering', testSetup, () => {
+                    ifNoNamespaceIt('should apply configuration containing system poller filtering', testSetup, () => {
                         let uri = `${constants.BASE_ILX_URI}/declare`;
                         const postOptions = Object.assign(util.deepCopy(options), {
                             method: 'POST',
@@ -603,7 +603,7 @@ function test() {
                             });
                     });
 
-                    ifSupportedIt('should apply configuration containing chained system poller actions', testSetup, () => {
+                    ifNoNamespaceIt('should apply configuration containing chained system poller actions', testSetup, () => {
                         let uri = `${constants.BASE_ILX_URI}/declare`;
                         const postOptions = Object.assign(util.deepCopy(options), {
                             method: 'POST',
@@ -638,7 +638,7 @@ function test() {
                             });
                     });
 
-                    ifSupportedIt('should apply configuration containing filters with ifAnyMatch', testSetup, () => {
+                    ifNoNamespaceIt('should apply configuration containing filters with ifAnyMatch', testSetup, () => {
                         let uri = `${constants.BASE_ILX_URI}/declare`;
                         const postOptions = Object.assign(util.deepCopy(options), {
                             method: 'POST',
@@ -672,7 +672,7 @@ function test() {
                             });
                     });
 
-                    ifSupportedIt('should apply configuration containing multiple system pollers and endpointList', testSetup, () => {
+                    ifNoNamespaceIt('should apply configuration containing multiple system pollers and endpointList', testSetup, () => {
                         let uri = `${constants.BASE_ILX_URI}/declare`;
                         const postOptions = Object.assign(util.deepCopy(options), {
                             method: 'POST',
