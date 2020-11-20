@@ -1,6 +1,10 @@
 {
     "name": "f5-telemetry",
+<<<<<<< HEAD
     "version": "1.17.0-0",
+=======
+    "version": "1.16.0-3",
+>>>>>>> docs-latest
     "author": "F5 Networks",
     "license": "Apache-2.0",
     "repository": {
