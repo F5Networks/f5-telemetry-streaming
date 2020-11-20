@@ -167,7 +167,7 @@ describe('System Poller', () => {
                     let actual;
                     try {
                         actual = systemPoller.findSystemOrPollerConfigs(
-                            normalizedConfig, testConf.sysOrPollerName, testConf.pollerName
+                            normalizedConfig, testConf.sysOrPollerName, testConf.pollerName, testConf.namespaceName
                         );
                     } catch (err) {
                         actual = err.message;
