@@ -348,6 +348,9 @@ function setup() {
                                 ports: [
                                     {
                                         name: String(constants.EVENT_LISTENER_PORT)
+                                    },
+                                    {
+                                        name: String(constants.EVENT_LISTENER_NAMESPACE_PORT)
                                     }
                                 ]
                             }
@@ -400,9 +403,9 @@ function test() {
     function getDeclToUse(testSetup) {
         let declaration = util.deepCopy(basicDeclaration);
         if (testSetup.name.startsWith('mixed')) {
-            declaration.My_Namespace = namespaceDeclaration.My_Namespace;
+            declaration.My_Namespace = util.deepCopy(namespaceDeclaration.My_Namespace);
         } else if (testSetup.namespace && testSetup.namespace !== DEFAULT_UNNAMED_NAMESPACE) {
-            declaration = namespaceDeclaration;
+            declaration = util.deepCopy(namespaceDeclaration);
         }
         return declaration;
     }
@@ -539,9 +542,7 @@ function test() {
                     });
 
                     it('should ensure event listener is up', () => {
-                        const port = constants.EVENT_LISTENER_PORT;
-                        // wait 500ms in case if config was not applied yet
-                        return util.sleep(500)
+                        const connectToEventListener = port => util.sleep(500)
                             .then(() => new Promise((resolve, reject) => {
                                 const client = net.createConnection({ host, port }, () => {
                                     client.end();
@@ -553,6 +554,18 @@ function test() {
                                     reject(err);
                                 });
                             }));
+                        const decl = JSON.stringify(getDeclToUse(testSetup));
+
+                        const promises = [
+                            constants.EVENT_LISTENER_PORT,
+                            constants.EVENT_LISTENER_NAMESPACE_PORT
+                        ].map((portToCheck) => {
+                            if (decl.indexOf(portToCheck) !== -1) {
+                                return connectToEventListener(portToCheck);
+                            }
+                            return Promise.resolve();
+                        });
+                        return Promise.all(promises);
                     });
 
                     ifSupportedIt('should apply configuration containing system poller filtering', testSetup, () => {

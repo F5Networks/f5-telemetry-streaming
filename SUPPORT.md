@@ -5,8 +5,8 @@ Maintenance and F5 Technical Support of this F5 code is provided only if the sof
 Support will only be provided to customers who have an existing BIG-IP support contract associated with a valid BIG-IP serial number. 
 For information about support policies, see http://www.f5.com/about/guidelines-policies/ and http://askf5.com.
 
-
 **TS Extension (TS) Software Lifecycle**:
+
 * TS releases are intended to be delivered on a 6-week basis
 * There will be 2 stability releases per year (focused on bug-fixing, infra improvements, and so on)
 * Stability (LTS) releases are supported for 1 year
@@ -14,7 +14,7 @@ For information about support policies, see http://www.f5.com/about/guidelines-p
 * "End of Support" = End of Software Development (EOSD) + End of Technical Support (EOTS)
 
 Currently supported versions:
- 
+
 | Software Version | Release Type  | First Customer Ship | End of Support  |
 |------------------|---------------|---------------------|-----------------|
 | TS 1.14.0        | Feature       |  01-Sep-2020        | 01-Dec-2020     |

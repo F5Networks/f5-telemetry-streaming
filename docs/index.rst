@@ -91,7 +91,7 @@ You can click the following links to go directly to a specific :doc:`setting-up-
    data-modification
    troubleshooting
    schema-reference
-   custom-endpoints
+   namespaces
    revision-history
 
 

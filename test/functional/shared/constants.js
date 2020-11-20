@@ -85,6 +85,7 @@ module.exports = {
         GCP_SERVICE_EMAIL: 'GCP_SERVICE_EMAIL'
     },
     EVENT_LISTENER_PORT: 6514,
+    EVENT_LISTENER_NAMESPACE_PORT: 6515,
     REQUEST: {
         PORT: 443,
         PROTOCOL: 'https'

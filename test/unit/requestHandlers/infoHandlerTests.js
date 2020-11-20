@@ -20,6 +20,8 @@ const sinon = require('sinon');
 const constants = require('../../../src/lib/constants');
 const InfoHandler = require('../../../src/lib/requestHandlers/infoHandler');
 const testUtil = require('../shared/util');
+const packageJson = require('../../../package.json');
+const schemaJson = require('../../../src/schema/latest/base_schema.json');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -72,12 +74,15 @@ describe('InfoHandler', () => {
         .then((handler) => {
             assert.ok(handler === requestHandler, 'should return a reference to original handler');
             assert.strictEqual(requestHandler.getCode(), 200, 'should return expected code');
+
+            const pkgInfo = packageJson.version.split('-');
+            const schemaInfo = schemaJson.properties.schemaVersion.enum;
             assert.deepStrictEqual(requestHandler.getBody(), {
                 nodeVersion: process.version,
-                version: '1.16.0',
-                release: '0',
-                schemaCurrent: '1.16.0',
-                schemaMinimum: '0.9.0'
+                version: pkgInfo[0],
+                release: pkgInfo[1],
+                schemaCurrent: schemaInfo[0],
+                schemaMinimum: schemaInfo[schemaInfo.length - 1]
             }, 'should return expected body');
         }));
 
