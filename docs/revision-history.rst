@@ -11,6 +11,10 @@ Document Revision History
         - Description
         - Date
 
+      * - 1.16.0
+        - Updated the documentation for Telemetry Streaming v1.16.0. This release contains the following changes: |br| * Added support for the Telemetry_Namespace class in declarations posted to the /declare endpoint (see :doc:`namespaces`) |br| * Added new Namespace PullConsumer endpoint (see :doc:`namespaces`) |br| * Added support for Custom Endpoints.  Moved the Custom Endpoint page from an Appendix to Using Telemetry Streaming (see :doc:`custom-endpoints`) |br| * TS now includes _ResourceId if available for Azure Log Analytics consumer, and metadata calls are now only happening upon consumer(s) load  |br| |br| Issues Resolved: |br| * Fixed issue when TS incorrectly processing iRule stats with multiple events
+        - 11-20-20
+
       * - 1.15.0
         - Updated the documentation for Telemetry Streaming v1.15.0. This release contains the following changes: |br| * Updated the default hostname for the StatsD consumer (see the Important note in :ref:`statsd-ref`) |br| * Added a note to the :ref:`prometheus` consumer on how to access the consumer endpoint with a user other than **admin** |br| * Added a new FAQ entry on why you may see a decrease in some pool statistics (see :ref:`Pool Statistics<pool-stats>`)  |br| |br| Issues Resolved: |br| * Fixed syslog event hostname parsing for VCMP hosts |br| * Resolve memory leak in ElasticSearch consumer, by replacing 'elasticsearch' library with 'request' library
         - 10-13-20

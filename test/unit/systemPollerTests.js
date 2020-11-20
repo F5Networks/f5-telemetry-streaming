@@ -17,33 +17,38 @@ const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
 const configWorker = require('../../src/lib/config');
-const constants = require('../../src/lib/constants');
-const deviceUtil = require('../../src/lib/deviceUtil');
 const systemPoller = require('../../src/lib/systemPoller');
 const SystemStats = require('../../src/lib/systemStats');
 const util = require('../../src/lib/util');
+const deviceUtil = require('../../src/lib/deviceUtil');
 
-const systemPollerConfigTestsData = require('./systemPollerTestsData');
+const systemPollerConfigTestsData = require('./data/systemPollerTestsData');
 const testUtil = require('./shared/util');
+const configUtil = require('../../src/lib/configUtil');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe('System Poller', () => {
-    const validateAndFormat = function (declaration) {
-        return configWorker.validate(declaration)
-            .then(validated => Promise.resolve(util.formatConfig(validated)))
-            .then(validated => deviceUtil.decryptAllSecrets(validated));
+    let uuidCounter = 0;
+    let decryptSecretStub;
+
+    const validateAndNormalize = function (declaration) {
+        return configWorker.validate(util.deepCopy(declaration))
+            .then(validated => Promise.resolve(configUtil.normalizeConfig(validated)));
     };
 
     beforeEach(() => {
-        sinon.stub(deviceUtil, 'encryptSecret').resolvesArg(0);
-        sinon.stub(deviceUtil, 'decryptSecret').resolvesArg(0);
-        sinon.stub(deviceUtil, 'getDeviceType').resolves(constants.DEVICE_TYPE.BIG_IP);
         sinon.stub(util, 'networkCheck').resolves();
+        sinon.stub(util, 'generateUuid').callsFake(() => {
+            uuidCounter += 1;
+            return `uuid${uuidCounter}`;
+        });
+        decryptSecretStub = sinon.stub(deviceUtil, 'decryptAllSecrets').callsFake(data => Promise.resolve(data));
     });
 
     afterEach(() => {
+        uuidCounter = 0;
         sinon.restore();
     });
 
@@ -58,7 +63,9 @@ describe('System Poller', () => {
                 dataOpts: {
                     actions: []
                 },
-                interval: 100
+                interval: 100,
+                id: 'mockId',
+                destinationIds: ['mockDestId']
             };
             returnCtx = null;
 
@@ -117,97 +124,149 @@ describe('System Poller', () => {
                         }
                     },
                     isCustom: undefined,
-                    type: 'systemInfo'
+                    type: 'systemInfo',
+                    sourceId: 'mockId',
+                    destinationIds: ['mockDestId']
                 }
             );
         });
     });
 
-    describe('.processClientRequest()', () => {
+    describe('.getPollersConfig', () => {
         let declaration;
-        let returnCtx;
 
         beforeEach(() => {
-            returnCtx = null;
-
-            sinon.stub(configWorker, 'getConfig').callsFake(() => configWorker.validate(declaration)
-                .then(validated => Promise.resolve(util.formatConfig(validated)))
-                .then(validated => Promise.resolve({ parsed: validated })));
-
-            sinon.stub(systemPoller, 'process').callsFake((config) => {
-                if (returnCtx) {
-                    return returnCtx();
-                }
-                return Promise.resolve({ data: { poller: config.name } });
-            });
+            sinon.stub(configWorker, 'getConfig').callsFake(() => validateAndNormalize(declaration)
+                .then(normalized => Promise.resolve({ normalized })));
         });
         /* eslint-disable implicit-arrow-linebreak */
-        systemPollerConfigTestsData.processClientRequest.forEach(testConf =>
+        systemPollerConfigTestsData.getPollersConfig.forEach(testConf =>
             testUtil.getCallableIt(testConf)(testConf.name, () => {
                 declaration = testConf.declaration;
-                const restOpMock = new testUtil.MockRestOperation(testConf.requestOpts);
-
-                if (typeof testConf.returnCtx !== 'undefined') {
-                    returnCtx = testConf.returnCtx;
-                }
-                return new Promise((resolve) => {
-                    restOpMock.complete = function () {
-                        resolve();
-                    };
-                    systemPoller.processClientRequest(restOpMock);
-                })
-                    .then(() => {
-                        assert.deepStrictEqual(
-                            { body: restOpMock.body, code: restOpMock.statusCode },
-                            testConf.expectedResponse
-                        );
+                return systemPoller.getPollersConfig(testConf.sysOrPollerName, testConf.funcOptions)
+                    .then((pollersConfig) => {
+                        // console.log(JSON.stringify(pollersConfig, null, 4));
+                        pollersConfig = pollersConfig.map(p => ({ name: p.traceName }));
+                        assert.deepStrictEqual(pollersConfig, testConf.expectedConfig);
+                        assert.isTrue(decryptSecretStub.called);
+                    })
+                    .catch((error) => {
+                        if (testConf.errorRegExp) {
+                            return assert.match(error, testConf.errorRegExp, 'should match expected error message');
+                        }
+                        return Promise.reject(error);
                     });
             }));
     });
 
-    describe('.fetchPollerData', () => {
-        let returnCtx;
-
-        beforeEach(() => {
-            returnCtx = null;
-            sinon.stub(systemPoller, 'process').callsFake((config) => {
-                if (returnCtx) {
-                    return returnCtx();
-                }
-                return Promise.resolve({ data: { poller: config.name } });
-            });
-        });
+    describe('.findSystemOrPollerConfigs', () => {
         /* eslint-disable implicit-arrow-linebreak */
-        systemPollerConfigTestsData.fetchPollerData.forEach(testConf =>
-            testUtil.getCallableIt(testConf)(testConf.name, () => {
-                if (typeof testConf.returnCtx !== 'undefined') {
-                    returnCtx = testConf.returnCtx;
-                }
-                return systemPoller.fetchPollerData(testConf.config, testConf.objName, testConf.options)
-                    .then((response) => {
-                        assert.deepStrictEqual(response, testConf.expectedResponse);
-                    });
-            }));
+        systemPollerConfigTestsData.findSystemOrPollerConfigs.forEach(testConf =>
+            testUtil.getCallableIt(testConf)(testConf.name, () => validateAndNormalize(testConf.rawConfig)
+                .then((normalizedConfig) => {
+                    let actual;
+                    try {
+                        actual = systemPoller.findSystemOrPollerConfigs(
+                            normalizedConfig, testConf.sysOrPollerName, testConf.pollerName
+                        );
+                    } catch (err) {
+                        actual = err.message;
+                    }
+
+                    assert.deepStrictEqual(actual, testConf.expected);
+                })));
     });
 
-    describe('.getTraceValue()', () => {
-        it('should preserve trace config', () => {
-            const matrix = systemPollerConfigTestsData.getTraceValue;
-            const systemTraceValues = matrix[0];
+    describe('.fetchPollersData', () => {
+        let processStub;
+        beforeEach(() => {
+            processStub = sinon.stub(systemPoller, 'process');
+            processStub.callsFake(config => Promise.resolve({ data: { poller: config.name } }));
+        });
 
-            for (let i = 1; i < matrix.length; i += 1) {
-                const pollerTrace = matrix[i][0];
+        it('should return empty array when no config passed', () => {
+            const pollerConfigs = [];
+            const expected = [];
+            return assert.becomes(systemPoller.fetchPollersData(pollerConfigs), expected);
+        });
 
-                for (let j = 1; j < systemTraceValues.length; j += 1) {
-                    const systemTrace = systemTraceValues[j];
-                    const expectedTrace = matrix[i][j];
-                    assert.strictEqual(
-                        systemPoller.getTraceValue(systemTrace, pollerTrace),
-                        expectedTrace,
-                        `Expected to be ${expectedTrace} when systemTrace=${systemTrace} and pollerTrace=${pollerTrace}`
-                    );
+        it('should fetch data using poller config', () => {
+            const pollerConfigs = [
+                {
+                    name: 'my_poller'
                 }
-            }
+            ];
+            const expected = [
+                {
+                    data: {
+                        poller: 'my_poller'
+                    }
+                }
+            ];
+            return assert.becomes(systemPoller.fetchPollersData(pollerConfigs), expected);
+        });
+
+
+        it('should fetch data using multiple poller configs', () => {
+            const pollerConfigs = [
+                {
+                    name: 'my_poller'
+                },
+                {
+                    name: 'my_super_poller'
+                }
+            ];
+            const expected = [
+                {
+                    data: {
+                        poller: 'my_poller'
+                    }
+                },
+                {
+                    data: {
+                        poller: 'my_super_poller'
+                    }
+                }
+            ];
+            return assert.becomes(systemPoller.fetchPollersData(pollerConfigs), expected);
+        });
+
+        it('should reject when unable to fetch data', () => {
+            const pollerConfigs = [{ name: 'my_poller' }];
+            processStub.rejects(new Error('testError'));
+            return assert.isRejected(systemPoller.fetchPollersData(pollerConfigs), 'testError');
+        });
+
+        it('should NOT decrypt secrets when decryptSecrets is not specified', () => {
+            const pollerConfigs = [
+                {
+                    name: 'i_dont_remember'
+                }
+            ];
+            return systemPoller.fetchPollersData(pollerConfigs)
+                .then(() => assert.isFalse(decryptSecretStub.called));
+        });
+        it('should decrypt secrets when decryptSecrets=true', () => {
+            const pollerConfigs = [
+                {
+                    name: 'my_poller'
+                },
+                {
+                    name: 'my_other_poller'
+                }
+            ];
+            return systemPoller.fetchPollersData(pollerConfigs, true)
+                .then(() => assert.isTrue(decryptSecretStub.called));
+        });
+
+        it('should NOT decrypt secrets when decryptSecrets=false', () => {
+            const pollerConfigs = [
+                {
+                    name: 'poller_alone'
+                }
+            ];
+            return systemPoller.fetchPollersData(pollerConfigs, false)
+                .then(() => assert.isFalse(decryptSecretStub.called));
         });
     });
 
@@ -253,10 +312,10 @@ describe('System Poller', () => {
             });
             sinon.stub(systemPoller, 'getPollerTimers').returns(pollerTimers);
 
-            return validateAndFormat(defaultDeclaration)
-                .then((config) => {
+            return validateAndNormalize(defaultDeclaration)
+                .then((normalizedConfig) => {
                     // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', config);
+                    configWorker.emit('change', normalizedConfig);
                     assert.strictEqual(pollerTimers['My_System::SystemPoller_1'], 180);
                     assert.strictEqual(allTracersStub.length, 1);
                     assert.strictEqual(activeTracersStub.length, 1);
@@ -267,12 +326,15 @@ describe('System Poller', () => {
                     utilStub = { start: [], stop: [], update: [] };
                     allTracersStub = [];
                     activeTracersStub = [];
+                })
+                .then(() => {
+                    uuidCounter = 0;
                 });
         });
 
-        it('should stop existing poller(s)', () => {
+        it('should stop existing poller(s) when removed from config', () => {
             // expecting the code responsible for 'change' event to be synchronous
-            configWorker.emit('change', {});
+            configWorker.emit('change', { components: [], mappings: {} });
             assert.deepStrictEqual(pollerTimers, {});
             assert.strictEqual(allTracersStub.length, 0);
             assert.strictEqual(activeTracersStub.length, 0);
@@ -285,10 +347,10 @@ describe('System Poller', () => {
             const newDeclaration = testUtil.deepCopy(defaultDeclaration);
             newDeclaration.My_System.systemPoller.interval = 500;
             newDeclaration.My_System.systemPoller.trace = true;
-            return validateAndFormat(newDeclaration)
-                .then((config) => {
+            return validateAndNormalize(newDeclaration)
+                .then((normalizedConfig) => {
                     // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', config);
+                    configWorker.emit('change', normalizedConfig);
                     assert.strictEqual(allTracersStub.length, 1);
                     assert.strictEqual(activeTracersStub.length, 1);
                     assert.strictEqual(utilStub.start.length, 0);
@@ -296,7 +358,11 @@ describe('System Poller', () => {
                     assert.strictEqual(utilStub.stop.length, 0);
                     assert.deepStrictEqual(pollerTimers, { 'My_System::SystemPoller_1': 500 });
                     assert.deepStrictEqual(utilStub.update[0].args, {
-                        name: 'My_System::SystemPoller_1',
+                        name: 'SystemPoller_1',
+                        traceName: 'My_System::SystemPoller_1',
+                        id: 'uuid2',
+                        namespace: 'f5telemetry_default',
+                        class: 'Telemetry_System_Poller',
                         enable: true,
                         interval: 500,
                         trace: true,
@@ -324,7 +390,7 @@ describe('System Poller', () => {
                                 }
                             ]
                         },
-                        endpoints: undefined
+                        destinationIds: []
                     });
                 });
         });
@@ -332,10 +398,10 @@ describe('System Poller', () => {
         it('should ignore disabled pollers (existing poller)', () => {
             const newDeclaration = testUtil.deepCopy(defaultDeclaration);
             newDeclaration.My_System.enable = false;
-            return validateAndFormat(newDeclaration)
-                .then((config) => {
+            return validateAndNormalize(newDeclaration)
+                .then((normalizedConfig) => {
                     // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', config);
+                    configWorker.emit('change', normalizedConfig);
                     assert.deepStrictEqual(pollerTimers, {});
                     assert.strictEqual(allTracersStub.length, 0);
                     assert.strictEqual(activeTracersStub.length, 0);
@@ -349,10 +415,10 @@ describe('System Poller', () => {
             const newDeclaration = testUtil.deepCopy(defaultDeclaration);
             newDeclaration.My_System_New = testUtil.deepCopy(newDeclaration.My_System);
             newDeclaration.My_System_New.enable = false;
-            return validateAndFormat(newDeclaration)
-                .then((config) => {
+            return validateAndNormalize(newDeclaration)
+                .then((normalizedConfig) => {
                     // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', config);
+                    configWorker.emit('change', normalizedConfig);
                     assert.deepStrictEqual(pollerTimers, { 'My_System::SystemPoller_1': 180 });
                     assert.strictEqual(allTracersStub.length, 1);
                     assert.strictEqual(activeTracersStub.length, 1);
@@ -362,13 +428,13 @@ describe('System Poller', () => {
                 });
         });
 
-        it('should ignore System without poller (existing poller)', () => {
+        it('should stop poller removed from System (existing poller with same system)', () => {
             const newDeclaration = testUtil.deepCopy(defaultDeclaration);
             delete newDeclaration.My_System.systemPoller;
-            return validateAndFormat(newDeclaration)
-                .then((config) => {
+            return validateAndNormalize(newDeclaration)
+                .then((normalizedConfig) => {
                     // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', config);
+                    configWorker.emit('change', normalizedConfig);
                     assert.deepStrictEqual(pollerTimers, {});
                     assert.strictEqual(allTracersStub.length, 0);
                     assert.strictEqual(activeTracersStub.length, 0);
@@ -382,10 +448,10 @@ describe('System Poller', () => {
             const newDeclaration = testUtil.deepCopy(defaultDeclaration);
             newDeclaration.My_System_New = testUtil.deepCopy(newDeclaration.My_System);
             delete newDeclaration.My_System_New.systemPoller;
-            return validateAndFormat(newDeclaration)
-                .then((config) => {
+            return validateAndNormalize(newDeclaration)
+                .then((normalizedConfig) => {
                     // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', config);
+                    configWorker.emit('change', normalizedConfig);
                     assert.deepStrictEqual(pollerTimers, { 'My_System::SystemPoller_1': 180 });
                     assert.strictEqual(allTracersStub.length, 1);
                     assert.strictEqual(activeTracersStub.length, 1);
@@ -400,13 +466,13 @@ describe('System Poller', () => {
             newDeclaration.My_System_New = testUtil.deepCopy(newDeclaration.My_System);
             newDeclaration.My_System_New.trace = false;
             newDeclaration.My_System_New.systemPoller.interval = 500;
-            return validateAndFormat(newDeclaration)
-                .then((config) => {
+            return validateAndNormalize(newDeclaration)
+                .then((normalizedConfig) => {
                     // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', config);
+                    configWorker.emit('change', normalizedConfig);
                     assert.deepStrictEqual(pollerTimers, {
                         'My_System::SystemPoller_1': 180,
-                        'My_System_New::SystemPoller_1': 500
+                        'My_System_New::SystemPoller_2': 500
                     });
                     assert.strictEqual(allTracersStub.length, 2);
                     assert.strictEqual(activeTracersStub.length, 1);
@@ -438,13 +504,21 @@ describe('System Poller', () => {
                 trace: true,
                 interval: 500
             };
-            return validateAndFormat(newDeclaration)
-                .then((config) => {
+            // components:
+            // declared ones go first
+            // - My_System: uuid1
+            // - My_System_New: uuid2
+            // - My_Poller: uuid3
+            // nested and auto-generated ones:
+            // - My_System::System_Poller1: uuid4
+            // - My_System::System_Poller2: uuid5
+            return validateAndNormalize(newDeclaration)
+                .then((normalizedConfig) => {
                     // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', config);
+                    configWorker.emit('change', normalizedConfig);
                     assert.deepStrictEqual(pollerTimers, {
                         'My_System::SystemPoller_1': 180,
-                        'My_System_New::SystemPoller_1': 10,
+                        'My_System_New::SystemPoller_2': 10,
                         'My_System_New::My_Poller': 500
                     });
                     assert.strictEqual(allTracersStub.length, 3);
@@ -453,11 +527,50 @@ describe('System Poller', () => {
                     assert.strictEqual(utilStub.update.length, 1);
                     assert.strictEqual(utilStub.stop.length, 0);
                     assert.deepStrictEqual(utilStub.start[0].args, {
-                        name: 'My_System_New::SystemPoller_1',
+                        id: 'uuid3',
+                        name: 'My_Poller',
+                        namespace: 'f5telemetry_default',
+                        class: 'Telemetry_System_Poller',
+                        traceName: 'My_System_New::My_Poller',
+                        enable: true,
+                        interval: 500,
+                        trace: true,
+                        tracer: null,
+                        credentials: {
+                            username: undefined,
+                            passphrase: undefined
+                        },
+                        connection: {
+                            allowSelfSignedCert: false,
+                            host: 'localhost',
+                            port: 8100,
+                            protocol: 'http'
+                        },
+                        dataOpts: {
+                            noTMStats: true,
+                            tags: undefined,
+                            actions: [
+                                {
+                                    enable: true,
+                                    setTag: {
+                                        application: '`A`',
+                                        tenant: '`T`'
+                                    }
+                                }
+                            ]
+                        },
+                        destinationIds: []
+                    });
+                    assert.deepStrictEqual(utilStub.start[1].args, {
+                        name: 'SystemPoller_2',
+                        id: 'uuid5',
+                        namespace: 'f5telemetry_default',
+                        class: 'Telemetry_System_Poller',
                         enable: true,
                         interval: 10,
                         trace: true,
                         tracer: null,
+                        traceName: 'My_System_New::SystemPoller_2',
                         credentials: {
                             username: undefined,
                             passphrase: undefined
@@ -487,49 +600,42 @@ describe('System Poller', () => {
                                 name: 'endpoint1',
                                 path: '/mgmt/ltm/pool'
                             }
-                        }
+                        },
+                        destinationIds: []
                     });
-                    assert.deepStrictEqual(utilStub.start[1].args, {
-                        name: 'My_System_New::My_Poller',
-                        enable: true,
-                        interval: 500,
-                        trace: true,
-                        tracer: null,
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
-                        },
-                        connection: {
-                            allowSelfSignedCert: false,
-                            host: 'localhost',
-                            port: 8100,
-                            protocol: 'http'
-                        },
-                        dataOpts: {
-                            noTMStats: true,
-                            tags: undefined,
-                            actions: [
-                                {
-                                    enable: true,
-                                    setTag: {
-                                        application: '`A`',
-                                        tenant: '`T`'
-                                    }
-                                }
-                            ]
-                        },
-                        endpoints: undefined
-                    });
+                });
+        });
+
+        it('should fetch TMStats', () => {
+            const newDeclaration = testUtil.deepCopy(defaultDeclaration);
+            newDeclaration.My_Consumer = {
+                class: 'Telemetry_Consumer',
+                type: 'Splunk',
+                host: '192.0.2.1',
+                protocol: 'https',
+                port: 8088,
+                format: 'legacy',
+                passphrase: {
+                    cipherText: '$M$Q7$xYs5xGCgf6Hlxsjd5AScwQ==',
+                    class: 'Secret',
+                    protected: 'SecureVault'
+                }
+            };
+            return validateAndNormalize(newDeclaration)
+                .then((normalizedConfig) => {
+                    // expecting the code responsible for 'change' event to be synchronous
+                    configWorker.emit('change', normalizedConfig);
+                    assert.strictEqual(utilStub.update[0].args.dataOpts.noTMStats, false, 'should enable TMStats');
                 });
         });
 
         it('should clear existing interval when declaration has interval=0', () => {
             const newDeclaration = testUtil.deepCopy(defaultDeclaration);
             newDeclaration.My_System.systemPoller.interval = 0;
-            return validateAndFormat(newDeclaration)
-                .then((config) => {
+            return validateAndNormalize(newDeclaration)
+                .then((normalizedConfig) => {
                     // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', config);
+                    configWorker.emit('change', normalizedConfig);
                     assert.strictEqual(utilStub.start.length, 0);
                     assert.strictEqual(utilStub.update.length, 0);
                     assert.strictEqual(utilStub.stop.length, 1);
@@ -540,10 +646,10 @@ describe('System Poller', () => {
         it('should update non-scheduled, enabled, System Pollers, when setting interval', () => {
             const newDeclaration = testUtil.deepCopy(defaultDeclaration);
             newDeclaration.My_System.systemPoller.interval = 200;
-            return validateAndFormat(newDeclaration)
-                .then((config) => {
+            return validateAndNormalize(newDeclaration)
+                .then((normalizedConfig) => {
                     // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', config);
+                    configWorker.emit('change', normalizedConfig);
                     assert.strictEqual(utilStub.start.length, 0);
                     assert.strictEqual(utilStub.update.length, 1);
                     assert.strictEqual(utilStub.stop.length, 0);

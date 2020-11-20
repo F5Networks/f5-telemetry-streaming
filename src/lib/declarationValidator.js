@@ -23,6 +23,7 @@ const consumerSchema = require('../schema/latest/consumer_schema.json');
 const pullConsumerSchema = require('../schema/latest/pull_consumer_schema.json');
 const iHealthPollerSchema = require('../schema/latest/ihealth_poller_schema.json');
 const endpointsSchema = require('../schema/latest/endpoints_schema.json');
+const namespaceSchema = require('../schema/latest/namespace_schema.json');
 
 /**
  * Process errors
@@ -67,6 +68,7 @@ module.exports = {
             pullConsumer: pullConsumerSchema,
             controls: controlsSchema,
             endpoints: endpointsSchema,
+            namespaces: namespaceSchema,
             iHealthPoller: iHealthPollerSchema,
             listener: listenerSchema,
             shared: sharedSchema,

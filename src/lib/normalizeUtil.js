@@ -438,16 +438,12 @@ module.exports = {
      */
     restructureRules(args) {
         const newRules = {};
-
         Object.keys(args.data).forEach((key) => {
-            newRules[key] = {};
-            newRules[key].events = {};
-            newRules[key].events[args.data[key].eventType] = {};
-            Object.keys(args.data[key]).forEach((k) => {
-                if (k !== 'eventType') {
-                    newRules[key].events[args.data[key].eventType][k] = args.data[key][k];
-                }
-            });
+            const ruleItem = args.data[key];
+            const tmName = ruleItem.tmName;
+            newRules[tmName] = newRules[tmName] || {};
+            newRules[tmName].events = newRules[tmName].events || {};
+            newRules[tmName].events[ruleItem.eventType] = ruleItem;
         });
         return newRules;
     },

@@ -42,7 +42,7 @@ const FLUENTD_CONF = `<source>
 </match>`;
 
 // read in example config
-const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC_EXAMPLE));
+const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
 
 
 function runRemoteCmd(cmd) {
@@ -91,7 +91,7 @@ function test() {
             ]
         };
         DUTS.forEach(dut => it(
-            `should configure TS - ${dut.hostname}`,
+            `should configure TS - ${dut.hostalias}`,
             () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(consumerDeclaration))
         ));
 
@@ -127,12 +127,12 @@ function test() {
             }));
 
         DUTS.forEach((dut) => {
-            it(`should have system poller config for - ${dut.hostname}`, () => {
+            it(`should have system poller config for - ${dut.hostalias}`, () => {
                 const hostname = systemPollerData[dut.hostname];
                 assert.notStrictEqual(hostname, undefined);
             });
 
-            it(`should check fluentd for event listener data for - ${dut.hostname}`, () => {
+            it(`should check fluentd for event listener data for - ${dut.hostalias}`, () => {
                 let found = false;
                 fluentLogs.forEach((logEntry) => {
                     if (logEntry.test === 'true' && logEntry.hostname === dut.hostname) {
@@ -147,7 +147,7 @@ function test() {
                 return Promise.resolve();
             });
 
-            it(`should check fluentd for system poller data for - ${dut.hostname}`, () => {
+            it(`should check fluentd for system poller data for - ${dut.hostalias}`, () => {
                 let found = false;
                 fluentLogs.forEach((logEntry) => {
                     if (logEntry.system && logEntry.system.hostname === dut.hostname) {

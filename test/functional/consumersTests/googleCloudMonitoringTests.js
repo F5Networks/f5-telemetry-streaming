@@ -18,7 +18,7 @@ const util = require('../../../src/lib/util');
 
 const DUTS = sharedUtil.getHosts('BIGIP');
 
-const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC_EXAMPLE));
+const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
 const PROJECT_ID = process.env[constants.ENV_VARS.GCP_PROJECT_ID];
 const PRIVATE_KEY_ID = process.env[constants.ENV_VARS.GCP_PRIVATE_KEY_ID];
 const PRIVATE_KEY = process.env[constants.ENV_VARS.GCP_PRIVATE_KEY].replace(/REPLACE/g, '\n');
@@ -85,7 +85,7 @@ function test() {
             privateKeyId: PRIVATE_KEY_ID
         };
         DUTS.forEach(dut => it(
-            `should configure TS - ${dut.hostname}`,
+            `should configure TS - ${dut.hostalias}`,
             () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(consumerDeclaration))
         ));
     });
@@ -102,7 +102,7 @@ function test() {
         };
 
         DUTS.forEach((dut) => {
-            it(`should check for system poller data from - ${dut.hostname}`, () => {
+            it(`should check for system poller data from:${dut.hostalias}`, () => {
                 let timeStart = new Date();
                 let timeEnd = new Date();
                 timeStart.setMinutes(timeEnd.getMinutes() - 5);

@@ -10,8 +10,11 @@
 
 const assert = require('assert');
 const cloneDeep = require('lodash/cloneDeep');
+const fsUtil = require('fs');
 const nock = require('nock');
+const pathUtil = require('path');
 const sinon = require('sinon');
+const urllib = require('url');
 
 const systemPollerData = require('../consumers/data/systemPollerData.json');
 const avrData = require('../consumers/data/avrData.json');
@@ -20,6 +23,7 @@ const avrData = require('../consumers/data/avrData.json');
 function MockRestOperation(opts) {
     opts = opts || {};
     this.method = opts.method || 'GET';
+    this.contentType = opts.contentType || '';
     this.body = opts.body;
     this.statusCode = null;
     this.uri = {};
@@ -27,6 +31,8 @@ function MockRestOperation(opts) {
 }
 MockRestOperation.prototype.getBody = function () { return this.body; };
 MockRestOperation.prototype.setBody = function (body) { this.body = body; };
+MockRestOperation.prototype.getContentType = function () { return this.contentType; };
+MockRestOperation.prototype.setContentType = function (ct) { this.contentType = ct; };
 MockRestOperation.prototype.getMethod = function () { return this.method; };
 MockRestOperation.prototype.setMethod = function (method) { this.method = method; };
 MockRestOperation.prototype.getStatusCode = function () { return this.statusCode; };
@@ -110,7 +116,8 @@ module.exports = {
                 type: opts.eventType || ''
             },
             logger: new MockLogger(opts.loggerOpts),
-            tracer: new MockTracer()
+            tracer: new MockTracer(),
+            metadata: opts.metadata
         };
         return context;
     },
@@ -234,5 +241,62 @@ module.exports = {
             validators.push(getValidator(i, this.deepCopy(arguments[i]), arguments[i]));
         }
         return () => validators.every(validator => validator());
+    },
+
+    /**
+     * Get function to parse URL according to node.js version
+     *
+     * @returns {Function(url)} function to parse URL into URL object
+     */
+    parseURL: (function () {
+        if (process.versions.node.startsWith('4.')) {
+            return urllib.parse;
+        }
+        return url => new urllib.URL(url);
+    }()),
+
+    /**
+     * Load modules from folder (or file)
+     *
+     * @param {String | Array<String>} paths - path(s) to load
+     * @param {String} [dirname] - dirname to use to compute relative paths
+     * @param {Object} [options] - options
+     * @param {Boolean} [options.recursive] - walk through paths recursively
+     *
+     * @returns {Object} object with loaded data where key is path to file and value is loaded module
+     */
+    loadModules(paths, dirname, options) {
+        options = options || {};
+        const loadedFiles = {};
+        const stack = Array.isArray(paths) ? paths : [paths];
+
+        while (stack.length > 0) {
+            const path = stack.shift();
+            const relativePath = pathUtil.join(dirname, path);
+            // - if folder then trying to load index.js
+            // - if file then trying to load file itself
+            try {
+                // eslint-disable-next-line import/no-dynamic-require, global-require
+                loadedFiles[path] = require(relativePath);
+                // eslint-disable-next-line no-continue
+                continue;
+            } catch (loadError) {
+                const stat = fsUtil.statSync(relativePath);
+                if (stat.isFile() || !stat.isDirectory()) {
+                    throw loadError;
+                }
+            }
+            // it is directory, let's walk through it
+            fsUtil.readdirSync(relativePath).forEach((childPath) => {
+                if (!options.recursive) {
+                    const stat = fsUtil.statSync(pathUtil.join(relativePath, childPath));
+                    if (stat.isDirectory()) {
+                        return;
+                    }
+                }
+                stack.push(pathUtil.join(path, childPath));
+            });
+        }
+        return loadedFiles;
     }
 };

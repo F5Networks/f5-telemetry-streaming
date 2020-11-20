@@ -18,25 +18,38 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const util = require('util');
+const nodeUtil = require('util');
 const EventEmitter = require('events').EventEmitter;
 const EventListener = require('../../src/lib/eventListener');
 const dataPipeline = require('../../src/lib/dataPipeline');
 const testUtil = require('./shared/util');
-const eventListenerTestData = require('./eventListenerTestsData');
+const eventListenerTestData = require('./data/eventListenerTestsData');
 const configWorker = require('../../src/lib/config');
+const configUtil = require('../../src/lib/configUtil');
+const util = require('../../src/lib/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe('Event Listener', () => {
     let eventListener;
+    let uuidCounter = 0;
+
+    const validateAndNormalize = function (declaration) {
+        return configWorker.validate(util.deepCopy(declaration))
+            .then(validated => Promise.resolve(configUtil.normalizeConfig(validated)));
+    };
 
     beforeEach(() => {
+        sinon.stub(util, 'generateUuid').callsFake(() => {
+            uuidCounter += 1;
+            return `uuid${uuidCounter}`;
+        });
         eventListener = new EventListener('TestEventListener', 6514, {});
     });
 
     afterEach(() => {
+        uuidCounter = 0;
         sinon.restore();
     });
 
@@ -142,7 +155,7 @@ describe('Event Listener', () => {
         function MockClientSocket() {
             EventEmitter.call(this);
         }
-        util.inherits(MockClientSocket, EventEmitter);
+        nodeUtil.inherits(MockClientSocket, EventEmitter);
 
         function MockTcpServer(connCb) {
             EventEmitter.call(this);
@@ -152,7 +165,7 @@ describe('Event Listener', () => {
                 this.emit('connection');
             };
         }
-        util.inherits(MockTcpServer, EventEmitter);
+        nodeUtil.inherits(MockTcpServer, EventEmitter);
 
         let logExceptionSpy;
         let processRawDataSpy;
@@ -193,7 +206,7 @@ describe('Event Listener', () => {
                 assert.deepStrictEqual(opts, 6543);
             };
         }
-        util.inherits(MockUdpSocket, EventEmitter);
+        nodeUtil.inherits(MockUdpSocket, EventEmitter);
 
         beforeEach(() => {
             mockUdpSocket = new MockUdpSocket();
@@ -220,42 +233,152 @@ describe('Event Listener', () => {
     });
 
     describe('config change', () => {
-        beforeEach(() => {
-            sinon.stub(EventListener.prototype, 'start').returns();
-        });
-        it('should create listeners with default and custom opts on config change event', () => {
-            const config = {
-                Telemetry_Listener: {
-                    Listener1: {
-                        port: 1234,
-                        tag: {
-                            tenant: '`T`',
-                            application: '`A`'
-                        }
-                    },
-                    Listener2: {
-                        match:
-                        'somePattern'
-                    }
-                }
-            };
+        let listenerStub;
+        let allTracersStub;
+        let activeTracersStub;
 
-            return Promise.resolve()
-                .then(() => {
-                    configWorker.emit('change', config);
+        const origDecl = {
+            class: 'Telemetry',
+            Listener1: {
+                class: 'Telemetry_Listener',
+                port: 1234,
+                tag: {
+                    tenant: '`T`',
+                    application: '`A`'
+                }
+            }
+        };
+
+        const assertListener = function (actualListener, expListener) {
+            const protocols = ['tcp', 'udp'];
+            protocols.forEach((p) => {
+                assert.deepStrictEqual(actualListener[p].port, expListener.port);
+                assert.deepStrictEqual(actualListener[p].id, expListener.id);
+                assert.deepStrictEqual(actualListener[p].tags, expListener.tags);
+                if (expListener.hasFilterFunc) {
+                    assert.isNotNull(actualListener[p].filterFunc);
+                } else {
+                    assert.isNull(actualListener[p].filterFunc);
+                }
+            });
+        };
+
+        beforeEach(() => {
+            activeTracersStub = [];
+            allTracersStub = [];
+            listenerStub = { start: 0, stop: 0 };
+
+            sinon.stub(EventListener.prototype, 'start').callsFake(() => {
+                listenerStub.start += 1;
+            });
+            sinon.stub(EventListener.prototype, 'stop').callsFake(() => {
+                listenerStub.stop += 1;
+            });
+
+            sinon.stub(util.tracer, 'createFromConfig').callsFake((className, objName, config) => {
+                allTracersStub.push(objName);
+                if (config.trace) {
+                    activeTracersStub.push(objName);
+                }
+                return null;
+            });
+
+            return validateAndNormalize(origDecl)
+                .then((normalized) => {
+                    configWorker.emit('change', normalized);
                     return new Promise(resolve => setTimeout(resolve, 500));
                 })
                 .then(() => {
                     const listeners = eventListener.getListeners();
-                    assert.strictEqual(listeners.Listener1.tcp.port, 1234);
-                    assert.strictEqual(listeners.Listener1.udp.port, 1234);
-                    assert.deepStrictEqual(listeners.Listener1.tcp.tags, { tenant: '`T`', application: '`A`' });
-                    assert.deepStrictEqual(listeners.Listener1.udp.tags, { tenant: '`T`', application: '`A`' });
+                    assert.strictEqual(Object.keys(listeners).length, 1);
+                    assertListener(listeners.Listener1, {
+                        port: 1234, id: 'uuid1', tags: { tenant: '`T`', application: '`A`' }
+                    });
+                    assert.deepStrictEqual(listenerStub, { start: 2, stop: 0 });
+                    assert.strictEqual(allTracersStub.length, 2);
+                    assert.strictEqual(activeTracersStub.length, 0);
+                })
+                .then(() => {
+                    // reset counts
+                    activeTracersStub = [];
+                    allTracersStub = [];
+                    listenerStub = { start: 0, stop: 0 };
+                    uuidCounter = 0;
+                });
+        });
 
-                    assert.strictEqual(listeners.Listener2.tcp.port, 6514);
-                    assert.strictEqual(listeners.Listener2.udp.port, 6514);
-                    assert.isNotNull(listeners.Listener2.tcp.filterFunc);
-                    assert.isNotNull(listeners.Listener2.udp.filterFunc);
+        afterEach(() => {
+            configWorker.emit('change', { components: [], mappings: {} });
+            return new Promise(resolve => setTimeout(resolve, 500))
+                .then(() => {
+                    const listeners = eventListener.getListeners();
+                    assert.strictEqual(Object.keys(listeners).length, 0);
+                });
+        });
+
+        it('should create listeners with default and custom opts on config change event (no prior config)', () => {
+            const newDecl = util.deepCopy(origDecl);
+            newDecl.Listener2 = {
+                class: 'Telemetry_Listener',
+                match: 'somePattern',
+                trace: true
+            };
+
+            return validateAndNormalize(newDecl)
+                .then((normalized) => {
+                    configWorker.emit('change', normalized);
+                    return new Promise(resolve => setTimeout(resolve, 500));
+                })
+                .then(() => {
+                    // only start Listener2, 2 has been started from the orig config
+                    assert.deepStrictEqual(listenerStub, { start: 2, stop: 0 });
+                    assert.strictEqual(activeTracersStub.length, 2);
+                    assert.strictEqual(allTracersStub.length, 4);
+
+                    const listeners = eventListener.getListeners();
+                    assertListener(listeners.Listener1, {
+                        port: 1234, id: 'uuid1', tags: { tenant: '`T`', application: '`A`' }
+                    });
+                    assertListener(listeners.Listener2, {
+                        port: 6514, id: 'uuid2', tags: {}, hasFilterFunc: true
+                    });
+                });
+        });
+
+        it('should stop existing listener(s) when removed from config', () => Promise.resolve()
+            .then(() => {
+                configWorker.emit('change', { components: [], mappings: {} });
+                return new Promise(resolve => setTimeout(resolve, 500));
+            })
+            .then(() => {
+                assert.deepStrictEqual(listenerStub, { start: 0, stop: 2 });
+                assert.strictEqual(activeTracersStub.length, 0);
+                assert.strictEqual(allTracersStub.length, 0);
+
+                const listeners = eventListener.getListeners();
+                assert.strictEqual(Object.keys(listeners).length, 0);
+            }));
+
+        it('should update existing listener(s) without restarting', () => {
+            const newDecl = util.deepCopy(origDecl);
+            newDecl.Listener1.trace = true;
+            const updateSpy = sinon.stub(EventListener.prototype, 'updateConfig');
+            return validateAndNormalize(newDecl)
+                .then((normalized) => {
+                    configWorker.emit('change', normalized);
+                    return new Promise(resolve => setTimeout(resolve, 500));
+                })
+                .then(() => {
+                    assert.deepStrictEqual(listenerStub, { start: 0, stop: 0 });
+                    assert.strictEqual(activeTracersStub.length, 2);
+                    assert.strictEqual(allTracersStub.length, 2);
+
+                    const listeners = eventListener.getListeners();
+                    assertListener(listeners.Listener1, {
+                        port: 1234, id: 'uuid1', tags: { tenant: '`T`', application: '`A`' }
+                    });
+                    // one for each protocol
+                    assert.isTrue(updateSpy.calledTwice);
                 });
         });
     });
