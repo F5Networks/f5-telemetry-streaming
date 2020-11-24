@@ -16,7 +16,7 @@ const pathUtil = require('path');
 const sinon = require('sinon');
 const urllib = require('url');
 
-const systemPollerData = require('../consumers/data/systemPollerData.json');
+const systemPollerData = require('../../../examples/output/system_poller/output.json');
 const avrData = require('../consumers/data/avrData.json');
 
 

@@ -3,6 +3,7 @@ Changes to this project are documented in this file. More detail and links can b
 
 ## 1.17.0
 ### Added
+- AUTOTOOL-1847: Added 'multiMetric' format for Splunk consumer (v8+ only) (experimental feature)
 - AUTOTOOL-1988: Added new Namespace SystemPoller endpoint (/namespace/$namespace/systempoller/$systemOrPoller/$poller?)
 ### Fixed
 ### Changed

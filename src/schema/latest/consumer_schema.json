@@ -127,11 +127,11 @@
             "minItems": 1
         },
         "format": {
-            "$comment": "Required for certain consumers: standard property",
+            "$comment": "Required for certain consumers: Splunk",
             "title": "Format (informs consumer additional formatting may be required)",
             "description": "",
             "type": "string",
-            "enum": [ "default", "legacy" ]
+            "enum": [ "default", "legacy", "multiMetric" ]
         },
         "username": {
             "$comment": "Required for certain consumers: standard property",

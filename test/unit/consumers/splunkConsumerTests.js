@@ -41,7 +41,7 @@ describe('Splunk', () => {
     describe('process', () => {
         const expectedDataTemplate = {
             time: 0,
-            host: 'bigip1',
+            host: 'telemetry.bigip.com',
             source: 'f5.telemetry',
             sourcetype: 'f5:telemetry:json',
             event: {}
@@ -149,13 +149,13 @@ describe('Splunk', () => {
                 config: defaultConsumerConfig
             });
             const expectedData = testUtil.deepCopy(expectedDataTemplate);
-            expectedData.time = 1576001615000;
+            expectedData.time = Date.parse(context.event.data.telemetryServiceInfo.cycleStart);
             expectedData.event = testUtil.deepCopy(context.event.data);
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
                     const output = zlib.gunzipSync(opts.body).toString();
-                    assert.deepStrictEqual(output, JSON.stringify(expectedData));
+                    assert.deepStrictEqual(JSON.parse(output), expectedData);
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
@@ -191,11 +191,6 @@ describe('Splunk', () => {
         });
 
         it('should process systemInfo in legacy format', (done) => {
-            // test works correctly while:
-            // - we generating output in predictable order
-            // - Object.keys() returns the same array on different node versions
-            const expectedData = splunkData.legacySystemData[0].expectedData;
-
             const context = testUtil.buildConsumerContext({
                 eventType: 'systemInfo',
                 config: defaultConsumerConfig
@@ -208,9 +203,8 @@ describe('Splunk', () => {
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
                     let output = zlib.gunzipSync(opts.body).toString();
-                    output = output.replace(/}{"time/g, '},{"time');
-                    output = JSON.parse(`[${output}]`);
-                    assert.deepStrictEqual(output, expectedData);
+                    output = output.replace(/\}\{/g, '},{');
+                    assert.sameDeepMembers(JSON.parse(`[${output}]`), splunkData.legacySystemData[0].expectedData);
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
@@ -222,26 +216,74 @@ describe('Splunk', () => {
             splunkIndex(context);
         });
 
-        it('should ignore events from Event Listener in legacy format', () => {
-            // enable event loop to use setTimeout
-            clock.restore();
+        it('should process systemInfo in multiMetric format', (done) => {
             const context = testUtil.buildConsumerContext({
-                eventType: 'AVR',
+                eventType: 'systemInfo',
                 config: defaultConsumerConfig
             });
-            context.config.format = 'legacy';
-            // error will be logged if method called
-            const requestStub = sinon.stub(request, 'post');
-            requestStub.throws(new Error('err message'));
+            context.config.format = 'multiMetric';
+
+            sinon.stub(request, 'post').callsFake((opts) => {
+                try {
+                    let output = zlib.gunzipSync(opts.body).toString();
+                    output = output.replace(/\}\{/g, '},{');
+                    assert.sameDeepMembers(JSON.parse(`[${output}]`), splunkData.multiMetricSystemData[0].expectedData);
+                    done();
+                } catch (err) {
+                    // done() with parameter is treated as an error.
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
+                    done(err);
+                }
+            });
 
             splunkIndex(context);
-            return (new Promise(resolve => setTimeout(resolve, 100)))
-                .then(() => {
-                    assert.strictEqual(requestStub.notCalled, true, 'should not call request.post');
-                    assert.strictEqual(context.logger.error.callCount, 0, 'should have no error messages');
-                    assert.notStrictEqual(context.logger.debug.callCount, 0, 'should have debug messages');
-                    assert.ok(/No data to forward/.test(context.logger.debug.lastCall.args[0]));
+        });
+
+        ['legacy', 'multiMetric'].forEach((format) => {
+            it(`should ignore events from Event Listener in ${format} format`, () => {
+                // enable event loop to use setTimeout
+                clock.restore();
+                const context = testUtil.buildConsumerContext({
+                    eventType: 'AVR',
+                    config: defaultConsumerConfig
                 });
+                context.config.format = format;
+                // error will be logged if method called
+                const requestStub = sinon.stub(request, 'post');
+                requestStub.throws(new Error('err message'));
+
+                splunkIndex(context);
+                return (new Promise(resolve => setTimeout(resolve, 100)))
+                    .then(() => {
+                        assert.strictEqual(requestStub.notCalled, true, 'should not call request.post');
+                        assert.strictEqual(context.logger.error.callCount, 0, 'should have no error messages');
+                        assert.notStrictEqual(context.logger.debug.callCount, 0, 'should have debug messages');
+                        assert.ok(/No data to forward/.test(context.logger.debug.lastCall.args[0]));
+                    });
+            });
+
+            it(`should ignore data from custom endpoints in ${format} format`, () => {
+                // enable event loop to use setTimeout
+                clock.restore();
+                const context = testUtil.buildConsumerContext({
+                    eventType: 'systemInfo',
+                    config: defaultConsumerConfig
+                });
+                context.config.format = format;
+                context.event.isCustom = true;
+                // error will be logged if method called
+                const requestStub = sinon.stub(request, 'post');
+                requestStub.throws(new Error('err message'));
+
+                splunkIndex(context);
+                return (new Promise(resolve => setTimeout(resolve, 100)))
+                    .then(() => {
+                        assert.strictEqual(requestStub.notCalled, true, 'should not call request.post');
+                        assert.strictEqual(context.logger.error.callCount, 0, 'should have no error messages');
+                        assert.notStrictEqual(context.logger.debug.callCount, 0, 'should have debug messages');
+                        assert.ok(/No data to forward/.test(context.logger.debug.lastCall.args[0]));
+                    });
+            });
         });
 
         describe('tmstats', () => {
