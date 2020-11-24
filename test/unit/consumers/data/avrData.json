@@ -1,5 +1,5 @@
 {
-    "hostname": "bigip1",
+    "hostname": "telemetry.bigip.com",
     "errdefs_msgno": "22282286",
     "Entity": "SystemMonitor",
     "AggrInterval": "300",

@@ -13,10 +13,17 @@ const zlib = require('zlib');
 
 const dataMapping = require('./dataMapping');
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
+const memConverter = require('./multiMetricEventConverter');
 
 const GZIP_DATA = true;
 const MAX_CHUNK_SIZE = 99000;
-const POST_DATA_URI = '/services/collector/event';
+const HEC_EVENTS_URI = '/services/collector/event';
+const HEC_METRICS_URI = '/services/collector';
+const DATA_FORMATS = {
+    DEFAULT: 'default',
+    LEGACY: 'legacy',
+    METRICS: 'multiMetric'
+};
 
 
 /**
@@ -49,6 +56,7 @@ function appendData(ctx, newData) {
     }
     results.translatedData.push(newDataStr);
 }
+
 /**
 * Transform data using provided callback
 *
@@ -72,6 +80,7 @@ function safeDataTransform(cb, ctx) {
         ctx.globalCtx.logger.exception('Splunk.safeDataTransform error', err);
     });
 }
+
 /**
  * Convert data to default format
  * @param {Object} ctx - context object
@@ -80,6 +89,18 @@ function safeDataTransform(cb, ctx) {
 function defaultDataFormat(ctx) {
     return Promise.resolve([JSON.stringify(dataMapping.defaultFormat(ctx))]);
 }
+
+/**
+ * Convert data to multi metric format
+ * @param {Object} ctx - context object
+ * @returns {Object} Promise resolved with (converted data)
+ */
+function multiMetricDataFormat(ctx) {
+    const events = [];
+    memConverter(ctx.event.data, event => events.push(JSON.stringify(event)));
+    return Promise.resolve(events);
+}
+
 /**
 * Transform incoming data
 *
@@ -88,7 +109,13 @@ function defaultDataFormat(ctx) {
 * @returns {Object} Promise resolved with transformed data
 */
 function transformData(globalCtx) {
-    if (globalCtx.config.format !== 'legacy') {
+    if (globalCtx.config.format === DATA_FORMATS.METRICS) {
+        if (globalCtx.event.type === EVENT_TYPES.SYSTEM_POLLER && !globalCtx.event.isCustom) {
+            return multiMetricDataFormat(globalCtx);
+        }
+        return Promise.resolve([]);
+    }
+    if (globalCtx.config.format !== DATA_FORMATS.LEGACY) {
         return defaultDataFormat(globalCtx);
     }
 
@@ -110,7 +137,7 @@ function transformData(globalCtx) {
         };
     }
     let p = null;
-    if (globalCtx.event.type === EVENT_TYPES.SYSTEM_POLLER) {
+    if (globalCtx.event.type === EVENT_TYPES.SYSTEM_POLLER && !globalCtx.event.isCustom) {
         requestCtx.cache.dataTimestamp = Date.parse(globalCtx.event.data.system.systemTimestamp);
         p = Promise.all(dataMapping.stats.map(func => safeDataTransform(func, requestCtx)));
         p.then(() => safeDataTransform(dataMapping.overall, requestCtx));
@@ -123,6 +150,7 @@ function transformData(globalCtx) {
     }
     return p.then(() => Promise.resolve(requestCtx.results.translatedData));
 }
+
 /**
 * Create default options for request
 *
@@ -133,11 +161,14 @@ function transformData(globalCtx) {
 function getDefaultRequestOpts(consumer) {
     // we should always get a protocol, but having a default here doesn't hurt
     const protocol = consumer.protocol ? consumer.protocol : 'https';
+    const collectorPath = consumer.format === DATA_FORMATS.METRICS ? HEC_METRICS_URI : HEC_EVENTS_URI;
     let baseURL = `${protocol}://${consumer.host}`;
+
     if (consumer.port) {
         baseURL = `${baseURL}:${consumer.port}`;
     }
-    baseURL = `${baseURL}${POST_DATA_URI}`;
+    baseURL = `${baseURL}${collectorPath}`;
+
     const defaults = {
         url: baseURL,
         headers: {
@@ -155,6 +186,7 @@ function getDefaultRequestOpts(consumer) {
     }
     return defaults;
 }
+
 /**
 * Send data to consumer
 *
@@ -208,6 +240,7 @@ function sendDataChunk(dataChunk, context) {
         });
     }));
 }
+
 /**
 * Forward data to consumer
 *

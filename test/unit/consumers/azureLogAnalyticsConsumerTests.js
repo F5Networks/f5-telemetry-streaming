@@ -32,7 +32,8 @@ describe('Azure_Log_Analytics', () => {
     const defaultConsumerConfig = {
         workspaceId: 'myWorkspace',
         passphrase: 'secret',
-        useManagedIdentity: false
+        useManagedIdentity: false,
+        allowSelfSignedCert: false
     };
 
     const getOpsInsightsReq = () => {
@@ -174,15 +175,8 @@ describe('Azure_Log_Analytics', () => {
                 eventType: 'systemInfo',
                 config: defaultConsumerConfig
             });
-            const expectedData = azureLogData.systemData[0].expectedData;
-
             return azureAnalyticsIndex(context)
-                .then(() => {
-                    const actualData = getAllOpsInsightsReqs();
-                    actualData.forEach((data, idx) => {
-                        assert.deepStrictEqual(data, expectedData[idx], `should match data set at index ${idx}`);
-                    });
-                });
+                .then(() => assert.sameDeepMembers(getAllOpsInsightsReqs(), azureLogData.systemData[0].expectedData));
         });
 
         it('should process event data', () => {

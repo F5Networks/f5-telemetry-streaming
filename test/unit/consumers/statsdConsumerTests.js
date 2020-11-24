@@ -105,10 +105,8 @@ describe('Statsd', () => {
                 eventType: 'systemInfo',
                 config: defaultConsumerConfig
             });
-            const expectedData = statsdExpectedData.systemData[0].expectedData;
-
             return statsDIndex(context)
-                .then(() => assert.deepStrictEqual(metrics, expectedData));
+                .then(() => assert.sameDeepMembers(metrics, statsdExpectedData.systemData[0].expectedData));
         });
 
         it('should process systemInfo data with default hostname value if missing from systemInfo', () => {
