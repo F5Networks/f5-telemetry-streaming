@@ -9,6 +9,7 @@
 'use strict';
 
 const requestUtil = require('./../shared/requestUtil');
+const util = require('../../util');
 
 /**
  * See {@link ../README.md#context} for documentation
@@ -22,7 +23,12 @@ module.exports = function (context) {
     const host = context.config.host;
     const fallbackHosts = context.config.fallbackHosts || [];
     const headers = requestUtil.processHeaders(context.config.headers); // no defaults - provide all headers needed
-    const strictSSL = !context.config.allowSelfSignedCert;
+    let strictSSL = !context.config.allowSelfSignedCert;
+    if (!util.isObjectEmpty(context.config.proxy) && typeof context.config.proxy.allowSelfSignedCert !== 'undefined') {
+        strictSSL = !context.config.proxy.allowSelfSignedCert;
+    }
+
+    const proxy = context.config.proxy;
 
     if (context.tracer) {
         let tracedHeaders = headers;
@@ -31,6 +37,13 @@ module.exports = function (context) {
             tracedHeaders = JSON.parse(JSON.stringify(headers));
             tracedHeaders.Authorization = '*****';
         }
+
+        let tracedProxy;
+        if (!util.isObjectEmpty(proxy)) {
+            tracedProxy = util.deepCopy(proxy);
+            tracedProxy.passphrase = '*****';
+        }
+
         context.tracer.write(JSON.stringify({
             body: JSON.parse(body),
             host,
@@ -40,7 +53,8 @@ module.exports = function (context) {
             port,
             protocol,
             strictSSL,
-            uri
+            uri,
+            proxy: tracedProxy
         }, null, 4));
     }
     return requestUtil.sendToConsumer({
@@ -52,7 +66,8 @@ module.exports = function (context) {
         port,
         protocol,
         strictSSL,
-        uri
+        uri,
+        proxy
     }).catch((err) => {
         context.logger.exception(`Unexpected error: ${err}`, err);
     });

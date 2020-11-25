@@ -19,6 +19,7 @@ const sinon = require('sinon');
 
 const genericHttpIndex = require('../../../src/lib/consumers/Generic_HTTP/index');
 const testUtil = require('../shared/util');
+const requestUtil = require('../../../src/lib/consumers/shared/requestUtil');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -254,6 +255,61 @@ describe('Generic_HTTP', () => {
             nock('http://fallbackHost2').get('/').reply(400);
 
             return genericHttpIndex(context);
+        });
+    });
+
+    describe('proxy options', () => {
+        let requestUtilSpy;
+
+        beforeEach(() => {
+            requestUtilSpy = sinon.spy(requestUtil, 'sendToConsumer');
+        });
+
+        it('should pass basic proxy options', () => {
+            const context = testUtil.buildConsumerContext({
+                config: {
+                    method: 'GET',
+                    protocol: 'http',
+                    port: '80',
+                    host: 'targetHost',
+                    proxy: {
+                        host: 'proxyServer',
+                        port: 8080
+                    }
+                }
+            });
+            return genericHttpIndex(context)
+                .then(() => {
+                    const reqOpt = requestUtilSpy.getCalls()[0].args[0];
+                    assert.deepStrictEqual(reqOpt.proxy, { host: 'proxyServer', port: 8080 });
+                    assert.deepStrictEqual(reqOpt.strictSSL, true);
+                });
+        });
+
+        it('should pass proxy options with strictSSL', () => {
+            const context = testUtil.buildConsumerContext({
+                config: {
+                    method: 'GET',
+                    protocol: 'http',
+                    port: '80',
+                    host: 'targetHost',
+                    proxy: {
+                        host: 'proxyServer',
+                        port: 8080,
+                        username: 'test',
+                        passphrase: 'test',
+                        allowSelfSignedCert: true
+                    }
+                }
+            });
+            return genericHttpIndex(context)
+                .then(() => {
+                    const reqOpt = requestUtilSpy.getCalls()[0].args[0];
+                    assert.deepStrictEqual(reqOpt.proxy, {
+                        host: 'proxyServer', port: 8080, username: 'test', passphrase: 'test', allowSelfSignedCert: true
+                    });
+                    assert.deepStrictEqual(reqOpt.strictSSL, false);
+                });
         });
     });
 });

@@ -18,6 +18,8 @@ const nock = require('nock');
 const util = require('../../../src/lib/util');
 const testUtil = require('../shared/util');
 const requestUtil = require('./../../../src/lib/consumers/shared/requestUtil');
+const request = require('request');
+const sinon = require('sinon');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -26,6 +28,7 @@ describe('Request Util Tests', () => {
     afterEach(() => {
         testUtil.checkNockActiveMocks(nock);
         nock.cleanAll();
+        sinon.restore();
     });
 
     describe('.processHeaders', () => {
@@ -74,7 +77,7 @@ describe('Request Util Tests', () => {
 
         it('should be able to perform a basic POST', () => {
             nock('https://localhost:80').post('/').reply(200);
-            return requestUtil.sendToConsumer(buildDefaultConfig());
+            return assert.isFulfilled(requestUtil.sendToConsumer(buildDefaultConfig(), true));
         });
 
         it('should be able to POST a JSON string', () => {
@@ -95,7 +98,7 @@ describe('Request Util Tests', () => {
                         myKey: 'myValue'
                     });
                 });
-            return requestUtil.sendToConsumer(config);
+            return assert.isFulfilled(requestUtil.sendToConsumer(config, true));
         });
 
         it('should properly format the URL', () => {
@@ -108,7 +111,66 @@ describe('Request Util Tests', () => {
             nock('http://192.0.0.1:8080')
                 .post('/path/to/resource')
                 .reply(200);
-            return requestUtil.sendToConsumer(config);
+            return assert.isFulfilled(requestUtil.sendToConsumer(config, true));
+        });
+
+        describe('Proxy options', () => {
+            it('should support proxy options - no creds', (done) => {
+                const config = buildDefaultConfig({
+                    hosts: ['destServer'],
+                    protocol: 'http',
+                    proxy: {
+                        host: 'proxyServer',
+                        port: 8888,
+                        protocol: 'http',
+                        strictSSL: false
+                    }
+                });
+                sinon.stub(request, 'post').callsFake((reqOpts) => {
+                    try {
+                        assert.deepStrictEqual(reqOpts, {
+                            body: '',
+                            headers: {},
+                            proxy: 'http://proxyServer:8888',
+                            strictSSL: false,
+                            url: 'http://destServer:80/'
+                        });
+                        done();
+                    } catch (err) {
+                        done(err);
+                    }
+                });
+                assert.isFulfilled(requestUtil.sendToConsumer(config, true));
+            });
+
+            it('should support proxy options - with creds', (done) => {
+                const config = buildDefaultConfig({
+                    hosts: ['destServer'],
+                    port: ':443',
+                    proxy: {
+                        host: 'proxyServer',
+                        port: 443,
+                        protocol: 'https',
+                        username: 'auser',
+                        passphrase: 'asecret'
+                    }
+                });
+                sinon.stub(request, 'post').callsFake((reqOpts) => {
+                    try {
+                        assert.deepStrictEqual(reqOpts, {
+                            body: '',
+                            headers: {},
+                            proxy: 'https://auser:asecret@proxyServer:443',
+                            strictSSL: false,
+                            url: 'https://destServer:443/'
+                        });
+                        done();
+                    } catch (err) {
+                        done(err);
+                    }
+                });
+                assert.isFulfilled(requestUtil.sendToConsumer(config, true));
+            });
         });
 
         describe('HTTP code handling', () => {
