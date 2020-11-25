@@ -894,6 +894,7 @@ module.exports = {
      * @param {Array<Integer>|Integer} [options.expectedResponseCode]  - expected response code, by default 200
      * @param {Integer} [options.timeout]               - Milliseconds to wait for a socket timeout. Option
      *                                                    'passes through' to 'request' library
+     * @param {String} [options.proxy]                  - Proxy URI
      *
      * @returns {Promise.<?any>} Returns promise resolved with response
      */

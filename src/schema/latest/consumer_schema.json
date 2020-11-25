@@ -398,7 +398,8 @@
                             "serviceEmail": {},
                             "privateKey": {},
                             "privateKeyId": {},
-                            "fallbackHosts": {}
+                            "fallbackHosts": {},
+                            "proxy": {}
                         },
                         "additionalProperties": false
                     },
@@ -433,7 +434,8 @@
                                 "path": { "$ref": "#/definitions/path", "default": "/" },
                                 "method": { "$ref": "#/definitions/method", "default": "POST" },
                                 "headers": { "$ref": "#/definitions/headers" },
-                                "passphrase": { "$ref": "base_schema.json#/definitions/secret" }
+                                "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
+                                "proxy": { "$ref": "base_schema.json#/definitions/proxy"}
                             }
                         },
                         "else": {}

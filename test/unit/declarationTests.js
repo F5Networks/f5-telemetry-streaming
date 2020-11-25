@@ -4062,6 +4062,19 @@ describe('Declarations', () => {
                     ],
                     passphrase: {
                         cipherText: 'cipherText'
+                    },
+                    allowSelfSignedCert: true,
+                    enableHostConnectivityCheck: true,
+                    proxy: {
+                        host: 'localhost',
+                        protocol: 'http',
+                        port: 80,
+                        allowSelfSignedCert: true,
+                        enableHostConnectivityCheck: false,
+                        username: 'username',
+                        passphrase: {
+                            cipherText: 'passphrase'
+                        }
                     }
                 },
                 {
@@ -4072,6 +4085,7 @@ describe('Declarations', () => {
                         'host2',
                         'host3'
                     ],
+                    allowSelfSignedCert: true,
                     protocol: 'http',
                     port: 80,
                     path: '/path',
@@ -4086,6 +4100,19 @@ describe('Declarations', () => {
                         class: 'Secret',
                         protected: 'SecureVault',
                         cipherText: '$M$foo'
+                    },
+                    proxy: {
+                        host: 'localhost',
+                        protocol: 'http',
+                        port: 80,
+                        allowSelfSignedCert: true,
+                        enableHostConnectivityCheck: false,
+                        username: 'username',
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$foo'
+                        }
                     }
                 }
             ));

@@ -9,6 +9,7 @@
 'use strict';
 
 const request = require('request');
+const util = require('../../util');
 
 /**
  * Process request headers
@@ -27,6 +28,23 @@ function processHeaders(headers) {
         });
     }
     return ret;
+}
+
+function getProxyUrl(proxyOpts) {
+    let proxy;
+    if (!util.isObjectEmpty(proxyOpts)) {
+        let auth;
+        if (proxyOpts.username) {
+            auth = proxyOpts.username;
+            if (proxyOpts.passphrase) {
+                auth = `${auth}:${proxyOpts.passphrase}`;
+            }
+        }
+        auth = auth ? `${auth}@` : '';
+        const port = proxyOpts.port ? `:${proxyOpts.port}` : '';
+        proxy = `${proxyOpts.protocol}://${auth}${proxyOpts.host}${port}`;
+    }
+    return proxy;
 }
 
 /**
@@ -56,17 +74,20 @@ function makeRequest(method, requestOptions) {
  * @param {String} config.protocol      - http or https
  * @param {Boolean} config.strictSSL    - allow non-signed certs or not
  * @param {String} config.uri           - URI
+ * @param {Object} config.proxy         - proxy settings
+ * @param {Boolean} rejectOnError       - reject when error response is received
  *
  * @returns {Promise} resolved once data was sent or no hosts left
  */
-function sendToConsumer(config) {
+function sendToConsumer(config, rejectOnError) {
     const hostIdx = config.hostIdx || 0;
     const host = config.hosts[hostIdx];
     const requestOptions = {
         url: `${config.protocol}://${host}${config.port}${config.uri}`,
         headers: config.headers,
         body: config.body,
-        strictSSL: config.strictSSL
+        strictSSL: config.strictSSL,
+        proxy: getProxyUrl(config.proxy)
     };
 
     return makeRequest(config.method, requestOptions)
@@ -86,6 +107,9 @@ function sendToConsumer(config) {
                     config.logger.debug(`Trying next host - ${config.hosts[nextHostIdx]}`);
                     config.hostIdx = nextHostIdx;
                     return sendToConsumer(config);
+                }
+                if (rejectOnError) {
+                    return Promise.reject(ret.error);
                 }
             } else if (httpSuccessCodes.indexOf(ret.response.statusCode) > -1) {
                 config.logger.debug('success');
