@@ -1,0 +1,158 @@
+{
+    "$id": "endpoints_schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry Streaming Endpoints schema",
+    "description": "",
+    "type": "object",
+    "definitions": {
+        "endpoint": {
+            "title": "Telemetry Endpoint",
+            "description": "",
+            "type": "object",
+            "properties": {
+                "enable": {
+                    "title": "Enable endpoint",
+                    "default": true,
+                    "allOf": [
+                        {
+                            "$ref": "base_schema.json#/definitions/enable"
+                        }
+                    ]
+                },
+                "name": {
+                    "title": "Endpoint name",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "path": {
+                    "title": "Path to query data from",
+                    "type": "string",
+                    "minLength": 1
+                }
+            },
+            "additionalProperties": false
+        },
+        "endpoints": {
+            "title": "Telemetry Endpoints",
+            "description": "",
+            "type": "object",
+            "properties": {
+                "enable": {
+                    "title": "Enable endpoints",
+                    "default": true,
+                    "allOf": [
+                        {
+                            "$ref": "base_schema.json#/definitions/enable"
+                        }
+                    ]
+                },
+                "basePath": {
+                    "title": "Base Path",
+                    "description": "Optional base path value to prepend to each individual endpoint paths",
+                    "type": "string",
+                    "default": ""
+                },
+                "items": {
+                    "title": "Items",
+                    "description": "Object with each property an endpoint with their own properties",
+                    "type": "object",
+                    "additionalProperties": {
+                        "allOf": [
+                            {
+                                "$ref": "#/definitions/endpoint"
+                            },
+                            { 
+                                "required": [ "path" ]
+                            }
+                        ]
+                    },
+                    "minProperties": 1
+                }
+            }
+        },
+        "endpointsObjectRef": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/endpoints"
+                },
+                {
+                    "properties": {
+                        "enable": {},
+                        "basePath": {},
+                        "items": {}
+                    },
+                    "required": [ "items" ],
+                    "additionalProperties": false
+                }
+            ]
+        },
+        "endpointObjectRef": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/endpoint"
+                },
+                {
+                    "properties": {
+                        "enable": {},
+                        "name": {},
+                        "path": {}
+                    },
+                    "required": [ "name", "path" ],
+                    "additionalProperties": false
+                }
+            ]
+        },
+        "endpointsPointerRef": {
+            "title": "Telemetry_Endpoints Name",
+            "description": "Name of the Telemetry_Endpoints object",
+            "type": "string",
+            "declarationClass": "Telemetry_Endpoints",
+            "minLength": 1
+        },
+        "endpointsItemPointerRef": {
+            "title": "Telemetry_Endpoints Name and Item Key",
+            "description": "Name of the Telemetry_Endpoints object and the endpoint item key, e.g endpointsA/item1",
+            "type": "string",
+            "declarationClassProp": {
+                "path" :"Telemetry_Endpoints/items",
+                "partsNum": 2
+            },
+            "minLength": 1
+        }
+    },
+    "allOf": [
+        {
+            "if": { "properties": { "class": { "const": "Telemetry_Endpoints" } } },
+            "then": {
+                "required": [
+                    "class",
+                    "items"
+                ],
+                "properties": {
+                    "class": {
+                        "title": "Class",
+                        "description": "Telemetry Streaming Endpoints class",
+                        "type": "string",
+                        "enum": [ "Telemetry_Endpoints" ]
+                    }
+                },
+                "allOf": [
+                    {
+                        "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a separate block",
+                        "properties": {
+                            "class": {},
+                            "enable": {},
+                            "basePath": {},
+                            "items": {}
+                        },
+                        "additionalProperties": false
+                    },
+                    {
+                        "$ref": "#/definitions/endpoints"
+                    }
+                ]
+            },
+            "else": {}
+        }
+    ]
+}
