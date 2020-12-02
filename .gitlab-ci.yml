@@ -233,9 +233,10 @@ build_docs:
         - node scripts/schema-build.js
         # - node scripts/schema-check.js
         - node scripts/schema-to-rst.js
-        - if [ "$CI_COMMIT_REF_NAME" = "docs-staging" ] || [ "$CI_COMMIT_REF_NAME" = "docs-latest" ]; then
-        -   rm -rf docs/_templates
-        - fi
+        - node scripts/default-output-doc-gen.js
+        # - if [ "$CI_COMMIT_REF_NAME" = "docs-staging" ] || [ "$CI_COMMIT_REF_NAME" = "docs-latest" ]; then
+        # -   rm -rf docs/_templates
+        # - fi
         - make html
         - vale --glob='*.{md,rst}' .
         #  - make linkcheck
@@ -442,10 +443,10 @@ pages:
     artifacts:
         paths:
             - public
-    only:
+    # only:
         # only update on designated, stable branch
-        - develop
-        - doc-release-branch
+        # - develop
+        # - doc-release-branch
 
 
 # Publish docs to clouddocs.f5.com
