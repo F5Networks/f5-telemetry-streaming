@@ -160,6 +160,7 @@ function buildMap() {
  *
  * @returns {String} markdown document
  */
+// eslint-disable-next-line no-unused-vars
 function generateMarkdown(map, level) {
     if (arguments.length < 2) {
         level = 2;
@@ -202,12 +203,15 @@ function generateRestructuredText(map) {
     function asSubTitle(title) {
         return '-'.repeat(title.length);
     }
+    function asSmallTitle(title) {
+        return '`'.repeat(title.length);
+    }
     function indent(data, num, char) {
         num = num || 0;
         char = char || ' ';
         return splitLines(data).map(line => char.repeat(num) + line).join('\n');
     }
-    const mainTitle =  'Appendix B: Telemetry Streaming Default Output Reference';
+    const mainTitle = 'Appendix C: Telemetry Streaming Default Output Reference';
     const rstLines = [
         '.. _ts-output-reference:\n',
         mainTitle,
@@ -222,7 +226,11 @@ function generateRestructuredText(map) {
         dataKeys.forEach((key) => {
             const value = data[key];
             rstLines.push(key);
-            rstLines.push(asSubTitle(key));
+            if (parent) {
+                rstLines.push(asSmallTitle(key));
+            } else {
+                rstLines.push(asSubTitle(key));
+            }
             if (value.folder) {
                 _generate(value.stats, key);
             } else {
@@ -239,6 +247,7 @@ function generateRestructuredText(map) {
                     rstLines.push(':Body:');
                     rstLines.push(indent('.. code-block:: json', spaceIndent));
                     rstLines.push(indent(':linenos:', spaceIndent * 2));
+                    rstLines.push('');
                     rstLines.push(indent(JSON.stringify(value.body, null, 2), spaceIndent * 2));
                 }
             }
@@ -250,6 +259,7 @@ function generateRestructuredText(map) {
 }
 
 function main() {
+    // eslint-disable-next-line no-console
     console.log(`Building ${outputRst} for Reference section`);
     fs.writeFileSync(outputRst, generateRestructuredText(buildMap()));
 }
