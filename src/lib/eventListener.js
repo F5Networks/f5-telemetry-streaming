@@ -349,7 +349,8 @@ EventListener.prototype._processData = function (data) {
             }
         },
         formatTimestamps: global.formatTimestamps.keys,
-        classifyEventByKeys: events.classifyCategoryByKeys
+        classifyEventByKeys: events.classifyCategoryByKeys,
+        addTimestampForCategories: events.addTimestampForCategories
     };
     const promises = [];
 

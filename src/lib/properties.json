@@ -1496,7 +1496,8 @@
                 { "required": [ "dos_attack_id" ], "optional": [ "flow_id", "action", "errdefs_msg_name" ] }
             ]},
             "CGNAT": { "keys": [ { "required": [ "lsn_event" ], "optional": [ "lsn_client", "lsn_pb", "start" ] } ] }
-       }
+        },
+        "addTimestampForCategories": [ "APM" ]
     },
     "ihealth": {
         "filterKeys": { "exclude": [ "name", "output", "match" ] },

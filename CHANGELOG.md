@@ -3,11 +3,13 @@ Changes to this project are documented in this file. More detail and links can b
 
 ## 1.17.0
 ### Added
+- AUTOTOOL-2027 [GitHub #91](https://github.com/F5Networks/f5-telemetry-streaming/issues/91): Add custom timestamp for APM Events
 - AUTOTOOL-2043: [GitHub #92](https://github.com/F5Networks/f5-telemetry-streaming/issues/92) Add support for Generic_HTTP proxy options
 - AUTOTOOL-1847: Added 'multiMetric' format for Splunk consumer (v8+ only) (experimental feature)
 - AUTOTOOL-1988: Added new Namespace SystemPoller endpoint (/namespace/$namespace/systempoller/$systemOrPoller/$poller?)
 - AUTOTOOL-2056 [GitHub #93](https://github.com/F5Networks/f5-telemetry-streaming/issues/93): Add additional traffic stats for virtual servers and pools
 - New consumer: DEOS Consumer
+
 ### Fixed
 ### Changed
 - AUTOTOOL-1983: No major updates for npm packages (package-lock.json updates only).
