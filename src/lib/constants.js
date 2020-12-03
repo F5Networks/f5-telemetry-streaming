@@ -96,8 +96,9 @@ module.exports = {
         CONTAINER: 'Container'
     },
     DEFAULT_EVENT_LISTENER_PORT: 6514,
-    DEFAULT_UNNAMED_NAMESPACE: 'f5telemetry_default',
     DEFAULT_HOSTNAME: 'hostname.unknown',
+    DEFAULT_UNNAMED_NAMESPACE: 'f5telemetry_default',
+    EVENT_CUSTOM_TIMESTAMP_KEY: 'f5telemetry_timestamp',
     EVENT_TYPES: {
         DEFAULT: 'event',
         AVR_EVENT: 'AVR',

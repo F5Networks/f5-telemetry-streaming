@@ -75,6 +75,16 @@ describe('Normalize', () => {
             });
         });
 
+        let clock;
+        beforeEach(() => {
+            // stub clock for categories that need timestamp
+            clock = sinon.useFakeTimers(new Date('2020-12-03T21:56:38.308Z'));
+        });
+
+        afterEach(() => {
+            clock.restore();
+        });
+
         const eventNormalizeOptions = {
             renameKeysByPattern: properties.global.renameKeys,
             addKeysByTag: {
@@ -85,7 +95,8 @@ describe('Normalize', () => {
                 }
             },
             formatTimestamps: properties.global.formatTimestamps.keys,
-            classifyEventByKeys: properties.events.classifyCategoryByKeys
+            classifyEventByKeys: properties.events.classifyCategoryByKeys,
+            addTimestampForCategories: properties.events.addTimestampForCategories
         };
 
         dataExamples.normalizeEventData.forEach((eventDataExample) => {
