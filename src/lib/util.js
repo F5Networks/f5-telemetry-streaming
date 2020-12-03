@@ -805,6 +805,21 @@ module.exports = {
     },
 
     /**
+     * Return Node version without 'v'
+     */
+    getRuntimeInfo() {
+        return { nodeVersion: process.version.substring(1) };
+    },
+
+    /**
+     * Convert a string from camelCase to underscoreCase
+     * Returns converted string
+     */
+    camelCaseToUnderscoreCase(str) {
+        return str.split(/(?=[A-Z])/).join('_').toLowerCase();
+    },
+
+    /**
      * Compare version strings
      *
      * @param {String} version1   - version to compare
