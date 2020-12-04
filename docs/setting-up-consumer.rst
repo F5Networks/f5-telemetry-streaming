@@ -403,6 +403,8 @@ Required Information:
 
 To see an example of Generic HTTP with multiple passphrases, see :ref:`multiple`.
 
+To see an example of Generic HTTP with proxy settings, see :ref:`proxy`.
+
 To see an example of the EXPERIMENTAL feature where you can specify fallback IP address(es) for the Generic HTTP consumer, see :ref:`fallback`.
 
 .. literalinclude:: ../examples/declarations/generic_http.json
@@ -416,7 +418,7 @@ F5 Beacon
 
 F5 Beacon, a SaaS offering, provides visibility and actionable insights into the health and performance of applications. 
 
-F5 Beacon uses the generic HTTP consumer.
+F5 Beacon uses the generic HTTP consumer.  To see an example of Generic HTTP with proxy settings, see :ref:`proxy`.
 
 Required Information:
  - See |beacon| for information on how to add Telemetry Streaming as a source to Beacon.
