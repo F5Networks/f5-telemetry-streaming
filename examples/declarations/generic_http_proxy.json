@@ -14,30 +14,19 @@
         "HTTP": {
             "class": "Telemetry_Consumer",
             "type": "Generic_HTTP",
-            "host": "192.0.2.31",
+            "host": "192.0.1.100",
             "protocol": "https",
-            "allowSelfSignedCert": true,
-            "headers": [
-            { "name": "Authorization",
-                "value": "Basic bWU6bXlzZWxm" },
-                {
-                    "name": "Accept",
-                    "value": "text/plain"
-                }
-            ],
             "port": "443",
             "proxy": {
-                "host": "10.145.68.224",
+                "host": "10.10.14.14",
                 "port": 5053,
                 "protocol": "http",
-                "username": "me",
+                "username": "someuser",
                 "passphrase": {
-                    "cipherText": "myself"
+                    "cipherText": "somepassphrase"
                 },
                 "allowSelfSignedCert": true
-            },
-            "trace": true,
-            "enable": true
+            }
         }
     },
     "With_Proxy_HTTP_Target": {
@@ -49,16 +38,14 @@
         "HTTP": {
             "class": "Telemetry_Consumer",
             "type": "Generic_HTTP",
-            "host": "192.0.2.31",
+            "host": "192.0.10.100",
             "protocol": "http",
             "port": "8080",
             "proxy": {
-                "host": "10.145.68.224",
-                "port": 5053,
+                "host": "10.10.14.15",
+                "port": 5054,
                 "protocol": "http"
-            },
-            "trace": true,
-            "enable": true
+            }
         }
     }
 }
