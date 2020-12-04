@@ -1,4 +1,10 @@
 {
+    "class": "Telemetry",
+    "controls": {
+        "class": "Controls",
+        "logLevel": "debug",
+        "debug": true
+    },
     "With_Proxy_HTTPS_target": {
         "class": "Telemetry_Namespace",
         "Poller": {
