@@ -132,7 +132,7 @@ This example shows how you can configure proxy settings for Generic HTTP consume
 
 For usage options, see |proxy| in the Schema Reference.
 
-The following example also uses :doc:`namespaces`.  The proxy lines are highlighted in the example.
+The following example also uses :doc:`Telemetry Streaming Namespaces<namespaces>`.  The proxy lines are highlighted in the example.
 
 
 .. literalinclude:: ../examples/declarations/generic_http_proxy.json
