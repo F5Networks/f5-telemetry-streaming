@@ -137,7 +137,7 @@ The following example also uses :doc:`Telemetry Streaming Namespaces<namespaces>
 
 .. literalinclude:: ../examples/declarations/generic_http_proxy.json
     :language: json
-    :emphasize-lines: 23-32
+    :emphasize-lines: 29-38
 
 
 |
