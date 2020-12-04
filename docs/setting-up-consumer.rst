@@ -69,7 +69,7 @@ To use this feature, the **format** of the Splunk Telemetry_Consumer must be set
 
 Example Declaration for Splunk multi-metric:
 
-.. literalinclude:: ../examples/declarations/splunk_multi-metric.json
+.. literalinclude:: ../examples/declarations/splunk_multi_metric.json
     :language: json
 
 |
