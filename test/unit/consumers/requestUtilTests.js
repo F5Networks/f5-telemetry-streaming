@@ -15,11 +15,13 @@ require('../shared/restoreCache')();
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
-const util = require('../../../src/lib/util');
-const testUtil = require('../shared/util');
-const requestUtil = require('./../../../src/lib/consumers/shared/requestUtil');
 const request = require('request');
 const sinon = require('sinon');
+
+const constants = require('./../../../src/lib/constants');
+const requestUtil = require('./../../../src/lib/consumers/shared/requestUtil');
+const testUtil = require('../shared/util');
+const util = require('../../../src/lib/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -65,11 +67,12 @@ describe('Request Util Tests', () => {
                 body: '',
                 hosts: ['localhost'],
                 headers: {},
+                json: false,
                 logger: new testUtil.MockLogger(),
                 method: 'POST',
-                port: ':80',
+                port: '80',
                 protocol: 'https',
-                strictSSL: false,
+                allowSelfSignedCert: false,
                 uri: '/'
             };
             return util.assignDefaults(opts, defaultConfig);
@@ -77,7 +80,29 @@ describe('Request Util Tests', () => {
 
         it('should be able to perform a basic POST', () => {
             nock('https://localhost:80').post('/').reply(200);
-            return assert.isFulfilled(requestUtil.sendToConsumer(buildDefaultConfig(), true));
+            return assert.isFulfilled(requestUtil.sendToConsumer(buildDefaultConfig()));
+        });
+
+        it('should be able to POST a JSON data', () => {
+            const config = buildDefaultConfig({
+                body: {
+                    myKey: 'myValue',
+                    key2: 'forFun'
+                },
+                json: true,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            nock('https://localhost:80')
+                .post('/')
+                .reply(200, (_, body) => {
+                    assert.deepStrictEqual(body, {
+                        key2: 'forFun',
+                        myKey: 'myValue'
+                    });
+                });
+            return assert.isFulfilled(requestUtil.sendToConsumer(config));
         });
 
         it('should be able to POST a JSON string', () => {
@@ -98,20 +123,114 @@ describe('Request Util Tests', () => {
                         myKey: 'myValue'
                     });
                 });
-            return assert.isFulfilled(requestUtil.sendToConsumer(config, true));
+            return assert.isFulfilled(requestUtil.sendToConsumer(config));
         });
 
         it('should properly format the URL', () => {
             const config = buildDefaultConfig({
                 protocol: 'http',
                 hosts: ['192.0.0.1'],
-                port: ':8080',
+                port: '8080',
                 uri: '/path/to/resource'
             });
             nock('http://192.0.0.1:8080')
                 .post('/path/to/resource')
                 .reply(200);
-            return assert.isFulfilled(requestUtil.sendToConsumer(config, true));
+            return assert.isFulfilled(requestUtil.sendToConsumer(config));
+        });
+
+        describe('fallback', () => {
+            it('should work with single host in fallback array (reachable)', () => {
+                const config = buildDefaultConfig({
+                    hosts: ['primaryHost']
+                });
+                nock('https://primaryHost:80').post('/').reply(200);
+                return assert.isFulfilled(requestUtil.sendToConsumer(config));
+            });
+
+            it('should proceed to next host in fallback array when current one is not available', () => {
+                const config = buildDefaultConfig({
+                    hosts: [
+                        'fallbackHost1',
+                        'fallbackHost2',
+                        'primaryHost'
+                    ]
+                });
+                // all hosts will be unavailable
+                nock('https://primaryHost:80').post('/').reply(500);
+                nock('https://fallbackHost1:80').post('/').reply(500);
+                nock('https://fallbackHost2:80').post('/').reply(500);
+                return assert.isRejected(requestUtil.sendToConsumer(config), /Bad status code/);
+            });
+
+            it('should stop fallback once got reply (HTTP 200)', () => {
+                const config = buildDefaultConfig({
+                    hosts: [
+                        'fallbackHost2',
+                        'fallbackHost1',
+                        'primaryHost'
+                    ]
+                });
+                let called = 0;
+                const replyHandler = () => { called += 1; };
+
+                // all hosts will be unavailable
+                nock('https://primaryHost:80').post('/').reply(500, replyHandler);
+                nock('https://fallbackHost1:80').post('/').reply(200, replyHandler);
+                nock('https://fallbackHost2:80').post('/').reply(500, replyHandler);
+
+                return requestUtil.sendToConsumer(config)
+                    .then(() => {
+                        // force nock cleanup because not all mocks were used
+                        nock.cleanAll();
+                        assert.strictEqual(called, 2, 'should stop on fallbackHost1');
+                    });
+            });
+
+            it('should stop fallback once got reply (HTTP 400)', () => {
+                const config = buildDefaultConfig({
+                    hosts: [
+                        'fallbackHost2',
+                        'fallbackHost1',
+                        'primaryHost'
+                    ]
+                });
+                let called = 0;
+                const replyHandler = () => { called += 1; };
+
+                // all hosts will be unavailable
+                nock('https://primaryHost:80').post('/').reply(500, replyHandler);
+                nock('https://fallbackHost1:80').post('/').reply(400, replyHandler);
+                nock('https://fallbackHost2:80').post('/').reply(500, replyHandler);
+
+                return requestUtil.sendToConsumer(config)
+                    .then(() => {
+                        // force nock cleanup because not all mocks were used
+                        nock.cleanAll();
+                        assert.strictEqual(called, 2, 'should stop on fallbackHost1');
+                    });
+            });
+
+            it('should fallback to next host when got connection error', () => {
+                const config = buildDefaultConfig({
+                    hosts: [
+                        'fallbackHost1',
+                        'primaryHost',
+                        'fallbackHost2'
+                    ]
+                });
+
+                // all hosts will be unavailable
+                nock('https://primaryHost:80').post('/').replyWithError({
+                    message: 'expectedError'
+                });
+                nock('https://fallbackHost1:80').post('/').replyWithError({
+                    message: 'expectedError'
+                });
+                nock('https://fallbackHost2:80').post('/').reply(400);
+
+                return assert.isFulfilled(requestUtil.sendToConsumer(config));
+            });
         });
 
         describe('Proxy options', () => {
@@ -123,17 +242,20 @@ describe('Request Util Tests', () => {
                         host: 'proxyServer',
                         port: 8888,
                         protocol: 'http',
-                        strictSSL: false
+                        allowSelfSignedCert: false
                     }
                 });
                 sinon.stub(request, 'post').callsFake((reqOpts) => {
                     try {
                         assert.deepStrictEqual(reqOpts, {
                             body: '',
-                            headers: {},
+                            method: 'POST',
+                            headers: {
+                                'User-Agent': constants.USER_AGENT
+                            },
                             proxy: 'http://proxyServer:8888',
-                            strictSSL: false,
-                            url: 'http://destServer:80/'
+                            strictSSL: true,
+                            uri: 'http://destServer:80/'
                         });
                         done();
                     } catch (err) {
@@ -146,7 +268,7 @@ describe('Request Util Tests', () => {
             it('should support proxy options - with creds', (done) => {
                 const config = buildDefaultConfig({
                     hosts: ['destServer'],
-                    port: ':443',
+                    port: 443,
                     proxy: {
                         host: 'proxyServer',
                         port: 443,
@@ -159,10 +281,13 @@ describe('Request Util Tests', () => {
                     try {
                         assert.deepStrictEqual(reqOpts, {
                             body: '',
-                            headers: {},
+                            method: 'POST',
+                            headers: {
+                                'User-Agent': constants.USER_AGENT
+                            },
                             proxy: 'https://auser:asecret@proxyServer:443',
-                            strictSSL: false,
-                            url: 'https://destServer:443/'
+                            strictSSL: true,
+                            uri: 'https://destServer:443/'
                         });
                         done();
                     } catch (err) {
@@ -170,49 +295,6 @@ describe('Request Util Tests', () => {
                     }
                 });
                 assert.isFulfilled(requestUtil.sendToConsumer(config, true));
-            });
-        });
-
-        describe('HTTP code handling', () => {
-            describe('success codes', () => {
-                [200, 201, 202].forEach((statusCode) => {
-                    it(`should treat an HTTP ${statusCode} status code as a success`, () => {
-                        const config = buildDefaultConfig();
-                        nock('https://localhost:80').post('/').reply(statusCode);
-                        return requestUtil.sendToConsumer(config)
-                            .then(() => {
-                                assert.deepStrictEqual(config.logger.debug.firstCall.args, ['success']);
-                                assert.strictEqual(config.logger.error.callCount, 0);
-                            });
-                    });
-                });
-            });
-
-            it('should log an error if error is present in HTTP response', () => {
-                const config = buildDefaultConfig();
-                nock('https://localhost:80').post('/').replyWithError({
-                    message: 'expectedError'
-                });
-                return requestUtil.sendToConsumer(config)
-                    .then(() => {
-                        assert.deepStrictEqual(config.logger.error.firstCall.args, ['error: expectedError']);
-                        assert.notStrictEqual(config.logger.error.callCount, 0);
-                    });
-            });
-
-            it('should handle HTTP codes that are not success or failures', () => {
-                const config = buildDefaultConfig();
-                nock('https://localhost:80')
-                    .post('/')
-                    .reply(401, 'Auth required');
-                return requestUtil.sendToConsumer(config)
-                    .then(() => {
-                        assert.strictEqual(config.logger.error.callCount, 0);
-                        assert.deepStrictEqual(config.logger.info.args, [
-                            ['response: 401 null'],
-                            ['response body: Auth required']
-                        ]);
-                    });
             });
         });
     });

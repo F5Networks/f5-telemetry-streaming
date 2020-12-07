@@ -8,12 +8,12 @@
 
 'use strict';
 
-const request = require('request');
 const zlib = require('zlib');
 
 const dataMapping = require('./dataMapping');
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 const memConverter = require('./multiMetricEventConverter');
+const requestUtil = require('./../shared/requestUtil');
 
 const GZIP_DATA = true;
 const MAX_CHUNK_SIZE = 99000;
@@ -156,35 +156,36 @@ function transformData(globalCtx) {
 *
 * @param {Object} consumer - consumer's config object
 *
-* @returns {Object} default options for request
+* @returns {Object} options for requestUtil
 */
-function getDefaultRequestOpts(consumer) {
-    // we should always get a protocol, but having a default here doesn't hurt
-    const protocol = consumer.protocol ? consumer.protocol : 'https';
-    const collectorPath = consumer.format === DATA_FORMATS.METRICS ? HEC_METRICS_URI : HEC_EVENTS_URI;
-    let baseURL = `${protocol}://${consumer.host}`;
-
-    if (consumer.port) {
-        baseURL = `${baseURL}:${consumer.port}`;
-    }
-    baseURL = `${baseURL}${collectorPath}`;
-
-    const defaults = {
-        url: baseURL,
+function getRequestOptions(consumer) {
+    const requestOpts = {
+        allowSelfSignedCert: consumer.allowSelfSignedCert,
+        // yeah, we don't have GZIP option in the schema
+        // but it is easier to debug if you can configure it
+        gzip: typeof consumer.gzip !== 'undefined' ? consumer.gzip : GZIP_DATA,
         headers: {
             Authorization: `Splunk ${consumer.passphrase}`
         },
-        strictSSL: !consumer.allowSelfSignedCert
+        hosts: [consumer.host],
+        json: false,
+        method: 'POST',
+        port: consumer.port,
+        protocol: consumer.protocol ? consumer.protocol : 'https',
+        proxy: consumer.proxy,
+        uri: consumer.format === DATA_FORMATS.METRICS ? HEC_METRICS_URI : HEC_EVENTS_URI
     };
     // easier for debug to turn it off
-    if (consumer.gzip !== undefined ? consumer.gzip : GZIP_DATA) {
-        defaults.gzip = true;
-        Object.assign(defaults.headers, {
+    if (requestOpts.gzip) {
+        Object.assign(requestOpts.headers, {
             'Accept-Encoding': 'gzip',
             'Content-Encoding': 'gzip'
         });
     }
-    return defaults;
+    if (requestOpts.proxy && typeof requestOpts.proxy.allowSelfSignedCert !== 'undefined') {
+        requestOpts.allowSelfSignedCert = requestOpts.proxy.allowSelfSignedCert;
+    }
+    return requestOpts;
 }
 
 /**
@@ -216,29 +217,17 @@ function sendDataChunk(dataChunk, context) {
         } else {
             resolve(data);
         }
-    }).then(data => new Promise((resolve, reject) => {
+    }).then((data) => {
         logger.debug(`sending data - ${data.length} bytes`);
 
-        const opts = {
-            body: data,
-            headers: {
-                'Content-Length': data.length
-            }
-        };
-        context.request.post(opts, (error, response, body) => {
-            if (error || !response || response.statusCode >= 300) {
-                const errMsg = JSON.stringify({
-                    error,
-                    body,
-                    statusCode: response ? response.statusCode : undefined
-                }, null, 2);
-                logger.error(`sendDataChunk::response error:\n${errMsg}`);
-                reject(new Error('badResponse'));
-            } else {
-                resolve(response.statusCode);
-            }
+        const opts = Object.assign({ body: data, logger }, context.requestOpts);
+        opts.headers = Object.assign(opts.headers, {
+            'Content-Length': data.length
         });
-    }));
+
+        return requestUtil.sendToConsumer(opts)
+            .then(response => response[1].statusCode);
+    });
 }
 
 /**
@@ -257,24 +246,30 @@ function forwardData(dataToSend, globalCtx) {
     return new Promise((resolve) => {
         const context = {
             globalCtx,
-            requestOpts: getDefaultRequestOpts(globalCtx.config),
+            requestOpts: getRequestOptions(globalCtx.config),
             consumer: globalCtx.config
         };
-        context.request = request.defaults(context.requestOpts);
 
         if (globalCtx.tracer) {
             // redact passphrase in consumer config
             const tracedConsumerCtx = JSON.parse(JSON.stringify(context.consumer));
             tracedConsumerCtx.passphrase = '*****';
-
+            // redact passphrase in proxy config
+            if (tracedConsumerCtx.proxy && tracedConsumerCtx.proxy.passphrase) {
+                tracedConsumerCtx.proxy.passphrase = '*****';
+            }
             // redact passphrase in request options
-            const traceRequestOpts = JSON.parse(JSON.stringify(context.requestOpts));
-            traceRequestOpts.headers.Authorization = '*****';
+            const tracedRequestOpts = JSON.parse(JSON.stringify(context.requestOpts));
+            tracedRequestOpts.headers.Authorization = '*****';
+            // redact passphrase in proxy config
+            if (tracedRequestOpts.proxy && tracedRequestOpts.proxy.passphrase) {
+                tracedRequestOpts.proxy.passphrase = '*****';
+            }
 
             globalCtx.tracer.write(JSON.stringify({
                 dataToSend,
                 consumer: tracedConsumerCtx,
-                requestOpts: traceRequestOpts
+                requestOpts: tracedRequestOpts
             }, null, 2));
         }
 

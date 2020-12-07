@@ -488,7 +488,6 @@
                             "class": {},
                             "enable": {},
                             "trace": {},
-                            "trace": {},
                             "type": {},
                             "enableHostConnectivityCheck": {},
                             "allowSelfSignedCert": {},
@@ -563,7 +562,7 @@
                                 "method": { "$ref": "#/definitions/method", "default": "POST" },
                                 "headers": { "$ref": "#/definitions/headers" },
                                 "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
-                                "proxy": { "$ref": "base_schema.json#/definitions/proxy"}
+                                "proxy": { "$ref": "base_schema.json#/definitions/proxy" }
                             }
                         },
                         "else": {}
@@ -580,7 +579,8 @@
                                 "protocol": { "$ref": "#/definitions/protocols", "default": "https" },
                                 "port": { "$ref": "#/definitions/port", "default": 8088 },
                                 "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
-                                "format": { "$ref": "#/definitions/format", "default": "default"  }
+                                "format": { "$ref": "#/definitions/format", "default": "default" },
+                                "proxy": { "$ref": "base_schema.json#/definitions/proxy" }
                             }
                         },
                         "else": {}
