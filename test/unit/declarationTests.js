@@ -4339,6 +4339,17 @@ describe('Declarations', () => {
                     format: 'legacy',
                     passphrase: {
                         cipherText: 'cipherText'
+                    },
+                    proxy: {
+                        host: 'localhost',
+                        protocol: 'http',
+                        port: 80,
+                        allowSelfSignedCert: true,
+                        enableHostConnectivityCheck: false,
+                        username: 'username',
+                        passphrase: {
+                            cipherText: 'passphrase'
+                        }
                     }
                 },
                 {
@@ -4351,6 +4362,19 @@ describe('Declarations', () => {
                         class: 'Secret',
                         protected: 'SecureVault',
                         cipherText: '$M$foo'
+                    },
+                    proxy: {
+                        host: 'localhost',
+                        protocol: 'http',
+                        port: 80,
+                        allowSelfSignedCert: true,
+                        enableHostConnectivityCheck: false,
+                        username: 'username',
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$foo'
+                        }
                     }
                 }
             ));
