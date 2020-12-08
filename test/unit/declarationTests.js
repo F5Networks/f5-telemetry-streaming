@@ -4305,6 +4305,125 @@ describe('Declarations', () => {
                     }
                 }
             ));
+
+            it('should pass minimal declaration with TLS client auth', () => validateMinimal(
+                {
+                    type: 'Kafka',
+                    host: 'host',
+                    topic: 'topic',
+                    authenticationProtocol: 'TLS',
+                    privateKey: {
+                        cipherText: 'privateKey'
+                    },
+                    clientCertificate: {
+                        cipherText: 'clientCertificate'
+                    }
+                },
+                {
+                    type: 'Kafka',
+                    host: 'host',
+                    topic: 'topic',
+                    authenticationProtocol: 'TLS',
+                    protocol: 'binaryTcpTls',
+                    port: 9092,
+                    privateKey: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    },
+                    clientCertificate: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+
+            it('should pass full declaration with TLS client auth', () => validateFull(
+                {
+                    type: 'Kafka',
+                    host: 'host',
+                    topic: 'topic',
+                    protocol: 'binaryTcpTls',
+                    port: 90,
+                    authenticationProtocol: 'TLS',
+                    privateKey: {
+                        cipherText: 'privateKey'
+                    },
+                    clientCertificate: {
+                        cipherText: 'clientCertificate'
+                    },
+                    rootCertificate: {
+                        cipherText: 'rootCertificate'
+                    }
+                },
+                {
+                    type: 'Kafka',
+                    host: 'host',
+                    topic: 'topic',
+                    authenticationProtocol: 'TLS',
+                    protocol: 'binaryTcpTls',
+                    port: 90,
+                    privateKey: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    },
+                    clientCertificate: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    },
+                    rootCertificate: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+
+            it('should require privateKey when using TLS client auth', () => assert.isRejected(validateFull(
+                {
+                    type: 'Kafka',
+                    host: 'host',
+                    topic: 'topic',
+                    authenticationProtocol: 'TLS'
+                }
+            ), /should have required property 'privateKey'/));
+
+            it('should require protocol=binaryTcpTls when using TLS client auth', () => assert.isRejected(validateFull(
+                {
+                    type: 'Kafka',
+                    host: 'host',
+                    topic: 'topic',
+                    authenticationProtocol: 'TLS',
+                    protocol: 'binaryTcp',
+                    privateKey: {
+                        cipherText: 'privateKey'
+                    },
+                    clientCertificate: {
+                        cipherText: 'clientCertificate'
+                    }
+                }
+            ), /should be equal to constant/));
+
+            it('should not allow username and password when using TLS client auth', () => assert.isRejected(validateFull(
+                {
+                    type: 'Kafka',
+                    host: 'host',
+                    topic: 'topic',
+                    authenticationProtocol: 'TLS',
+                    protocol: 'binaryTcpTls',
+                    username: 'myUser',
+                    passphrase: 'myPass',
+                    privateKey: {
+                        cipherText: 'privateKey'
+                    },
+                    clientCertificate: {
+                        cipherText: 'clientCertificate'
+                    }
+                }
+            ), /should NOT be valid/));
         });
 
         describe('Splunk', () => {
