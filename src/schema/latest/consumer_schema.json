@@ -269,7 +269,32 @@
             "f5expand": true,
             "enum": [
                 "SASL-PLAIN",
+                "TLS",
                 "None"
+            ]
+        },
+        "clientCertificate": {
+            "$comment": "Required for certain consumers: Kafka",
+            "title": "Client Certificate",
+            "description": "Certificate(s) to use when connecting to a secured endpoint.",
+            "type": "object",
+            "f5expand": true,
+            "allOf": [
+                {
+                    "$ref": "base_schema.json#/definitions/secret"
+                }
+            ]
+        },
+        "rootCertificate": {
+            "$comment": "Required for certain consumers: Kafka",
+            "title": "Root Certificate",
+            "description": "Certificate Authority root certificate, used to validate certificate chains.",
+            "type": "object",
+            "f5expand": true,
+            "allOf": [
+                {
+                    "$ref": "base_schema.json#/definitions/secret"
+                }
             ]
         },
         "projectId": {
@@ -292,6 +317,18 @@
             "description": "The private key ID.",
             "type": "string",
             "f5expand": true
+        },
+        "privateKey": {
+            "$comment": "Required for certain consumers: Kafka",
+            "title": "Private Key",
+            "description": "Private Key",
+            "type": "object",
+            "f5expand": true,
+            "allOf": [
+                {
+                    "$ref": "base_schema.json#/definitions/secret"
+                }
+            ]
         },
         "f5csTenantId": {
             "$comment": "Required for certain consumers: Deos",
@@ -521,6 +558,8 @@
                             "serviceEmail": {},
                             "privateKey": {},
                             "privateKeyId": {},
+                            "clientCertificate": {},
+                            "rootCertificate": {},
                             "fallbackHosts": {},
                             "f5csTenantId": {},
                             "serviceAccount": {},
@@ -797,7 +836,28 @@
                                         "dependencies": {
                                             "passphrase": [ "username" ]
                                         }
-                                    }
+                                    },
+                                    "else": {}
+                                },
+                                {
+                                    "if": { "properties": { "authenticationProtocol": { "const": "TLS" } } },
+                                    "then": {
+                                        "required": [
+                                            "privateKey",
+                                            "clientCertificate"
+                                        ],
+                                        "allOf": [
+                                            { "not": { "required": [ "username" ] } },
+                                            { "not": { "required": [ "passphrase" ] } }
+                                        ],
+                                        "properties": {
+                                            "privateKey": { "$ref": "#/definitions/privateKey" },
+                                            "clientCertificate": { "$ref": "#/definitions/clientCertificate" },
+                                            "rootCertificate": { "$ref": "#/definitions/rootCertificate" },
+                                            "protocol": { "const": "binaryTcpTls" }
+                                        }
+                                    },
+                                    "else": {}
                                 }
                             ]
                         },

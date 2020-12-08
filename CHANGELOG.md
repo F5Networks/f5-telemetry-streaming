@@ -10,7 +10,7 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-2056 [GitHub #93](https://github.com/F5Networks/f5-telemetry-streaming/issues/93): Add additional traffic stats for virtual servers and pools
 - AUTOTOOL-1984 [GitHub #85](https://github.com/F5Networks/f5-telemetry-streaming/issues/85): Add support for Splunk proxy options
 - New consumer: DEOS Consumer
-
+- AUTOTOOL-2028 [GitHub #90](https://github.com/F5Networks/f5-telemetry-streaming/issues/90): Add support for Kafka TLS client authentication
 ### Fixed
 ### Changed
 - AUTOTOOL-1983: No major updates for npm packages (package-lock.json updates only).
