@@ -351,7 +351,6 @@ describe('Util', () => {
                     assert.strictEqual(opts.uri, testConf.expected);
                     cb(null, { statusCode: 200, statusMessage: 'message' }, {});
                 });
-                /* eslint-disable-next-line prefer-spread */
                 return assert.isFulfilled(util.makeRequest.apply(util, testConf.args));
             });
         });
@@ -967,9 +966,12 @@ describe('Util', () => {
     describe('Tracer', () => {
         const tracerDir = `${os.tmpdir()}/telemetry`; // os.tmpdir for windows + linux
         const tracerFile = `${tracerDir}/tracerTest`;
+        const fakeDate = new Date();
+        let clock;
         let config;
         let tracer;
 
+        const readTraceFile = filePath => JSON.parse(fs.readFileSync(filePath, 'utf8'));
         const emptyDir = (dirPath) => {
             fs.readdirSync(dirPath).forEach((item) => {
                 item = path.join(dirPath, item);
@@ -981,70 +983,144 @@ describe('Util', () => {
                 }
             });
         };
-
         const removeDir = (dirPath) => {
             if (fs.existsSync(dirPath)) {
                 emptyDir(dirPath);
                 fs.rmdirSync(dirPath);
             }
         };
+        const addTimestamps = data => data.map(item => ({ data: item, timestamp: new Date().toISOString() }));
 
         beforeEach(() => {
             if (fs.existsSync(tracerDir)) {
                 emptyDir(tracerDir);
             }
-
             config = {
                 trace: tracerFile
             };
             tracer = util.tracer.createFromConfig('class', 'obj', config);
+            clock = sinon.useFakeTimers(fakeDate);
         });
 
         afterEach(() => {
-            Object.keys(util.tracer.instances).forEach((tracerName) => {
-                util.tracer.remove(tracerName);
-            });
             sinon.restore();
+            clock.restore();
+            return util.tracer.remove(() => true);
         });
 
         after(() => {
             removeDir(tracerDir);
         });
 
-        it('should create tracer using default location', () => {
-            sinon.stub(constants, 'TRACER_DIR').value(tracerDir);
+        it('should create tracer using default location and write data to it', () => {
+            sinon.stub(constants.TRACER, 'DIR').value(tracerDir);
             tracer = util.tracer.createFromConfig('class2', 'obj2', { trace: true });
-            return assert.isFulfilled(
-                tracer.write('foobar')
-                    .then(() => {
-                        assert.strictEqual(fs.readFileSync(`${tracerDir}/class2.obj2`, 'utf8'), 'foobar');
-                    })
-            );
+            return tracer.write('foobar')
+                .then(() => {
+                    assert.deepStrictEqual(
+                        readTraceFile(`${tracerDir}/class2.obj2`),
+                        addTimestamps(['foobar'])
+                    );
+                });
         });
 
-        it('should write data to same file (2 tracers)', () => {
-            // due to implementation of Tracer it is hard to verify output
-            // so, just verify it is not fails
-            const filePath = path.join(tracerDir, 'output');
-            const tracer1 = util.tracer.createFromConfig('class2', 'obj2', { trace: filePath });
-            const tracer2 = util.tracer.createFromConfig('class2', 'obj3', { trace: filePath });
-            return assert.isFulfilled(Promise.all([
-                tracer1.write('tracer1'),
-                tracer2.write('tracer2')
-            ])
-                .then(() => {
-                    assert.ok(/tracer[12]/.test(fs.readFileSync(filePath, 'utf8')));
-                }));
-        });
+        it(`should write max ${constants.TRACER.LIST_SIZE} items`, () => {
+            let totalRecords = 0;
+            let allWrittenData = [];
 
-        it('should write data to file', () => assert.isFulfilled(
-            tracer.write('foobar')
-                .then(() => {
-                    assert.strictEqual(fs.readFileSync(tracerFile, 'utf8'), 'foobar');
+            const writeNumbersToTracer = (num) => {
+                const promises = [];
+                const writtenData = [];
+                for (let i = 0; i < num; i += 1) {
+                    totalRecords += 1;
+                    promises.push(tracer.write(totalRecords));
+                    writtenData.push(totalRecords);
+                }
+                return Promise.all(promises).then(() => writtenData);
+            };
+            const getExpectedData = data => addTimestamps(data.slice(data.length - constants.TRACER.LIST_SIZE));
+            const validateTracerData = (writtenData) => {
+                allWrittenData = allWrittenData.concat(writtenData);
+                const data = readTraceFile(tracerFile);
+                assert.strictEqual(data.length, constants.TRACER.LIST_SIZE);
+                assert.deepStrictEqual(data, getExpectedData(allWrittenData));
+            };
+
+            return writeNumbersToTracer(constants.TRACER.LIST_SIZE * 2)
+                .then((writtenData) => {
+                    validateTracerData(writtenData);
+                    return writeNumbersToTracer(Math.floor(constants.TRACER.LIST_SIZE / 2));
                 })
-        ));
+                .then((writtenData) => {
+                    validateTracerData(writtenData);
+                    return writeNumbersToTracer(Math.floor(constants.TRACER.LIST_SIZE));
+                })
+                .then((writtenData) => {
+                    validateTracerData(writtenData);
+                });
+        });
 
-        it('should accept no data', () => assert.isFulfilled(tracer.write(null)));
+        it('should merge new data with existing data', () => tracer.write('item1')
+            .then(() => {
+                assert.deepStrictEqual(
+                    readTraceFile(tracerFile),
+                    addTimestamps(['item1'])
+                );
+                return tracer.write('item2');
+            })
+            .then(() => {
+                assert.deepStrictEqual(
+                    readTraceFile(tracerFile),
+                    addTimestamps(['item1', 'item2'])
+                );
+            }));
+
+        it('should not fail if unable to parse existing data', () => tracer.write('item1')
+            .then(() => {
+                fs.truncateSync(tracerFile, 0);
+                fs.writeFileSync(tracerFile, '{test');
+                return tracer.write('item1');
+            })
+            .then(() => {
+                assert.deepStrictEqual(
+                    readTraceFile(tracerFile),
+                    addTimestamps(['item1'])
+                );
+            }));
+
+        it('should write not more data when disabled', () => tracer.write('item1')
+            .then(() => tracer.stop())
+            .then(() => tracer.write('item2'))
+            .then(() => {
+                assert.deepStrictEqual(
+                    readTraceFile(tracerFile),
+                    addTimestamps(['item1'])
+                );
+            }));
+
+        it('should complete scheduled operations before stop', () => {
+            tracer.write('item1');
+            return tracer.stop()
+                .then(() => {
+                    assert.deepStrictEqual(
+                        readTraceFile(tracerFile),
+                        addTimestamps(['item1'])
+                    );
+                });
+        });
+
+        it('should write object to tracer', () => {
+            const expectedObject = {
+                test: 'test'
+            };
+            return tracer.write(util.deepCopy(expectedObject))
+                .then(() => {
+                    assert.deepStrictEqual(
+                        readTraceFile(tracerFile),
+                        addTimestamps([expectedObject])
+                    );
+                });
+        });
 
         it('should remove tracer', () => {
             util.tracer.remove(tracer);
@@ -1069,71 +1145,10 @@ describe('Util', () => {
                         .then(() => Promise.resolve(sameTracer));
                 })
                 .then((sameTracer) => {
-                    assert.strictEqual(sameTracer.inode, tracer.inode, 'inode should be the sane');
-                    assert.strictEqual(sameTracer.stream.fd, tracer.stream.fd, 'fd should be the same');
+                    assert.notStrictEqual(sameTracer.fd, undefined, 'should set fd');
+                    assert.strictEqual(sameTracer.fd, tracer.fd, 'fd should be the sane');
                 })
         ));
-
-        it('should truncate file', () => assert.isFulfilled(
-            tracer.write('expectedData')
-                .then(() => {
-                    assert.strictEqual(fs.readFileSync(tracerFile, 'utf8'), 'expectedData');
-                    return tracer._truncate();
-                }).then(() => {
-                    assert.strictEqual(fs.readFileSync(tracerFile, 'utf8'), '');
-                    return tracer.write('expectedData');
-                })
-                .then(() => {
-                    assert.strictEqual(fs.readFileSync(tracerFile, 'utf8'), 'expectedData');
-                })
-        ));
-
-        it('should recreate file and dir when deleted', () => {
-            const fileName = `${tracerDir}/telemetryTmpDir/telemetry`; // os.tmpdir for windows + linux
-            const dirName = path.dirname(fileName);
-            const tracerConfig = {
-                trace: fileName
-            };
-            const oldInode = tracer.inode;
-
-            if (fs.existsSync(fileName)) {
-                fs.truncateSync(fileName);
-            }
-
-            tracer = util.tracer.createFromConfig('class2', 'obj2', tracerConfig);
-            util.tracer.REOPEN_INTERVAL = 500;
-
-            return assert.isFulfilled(tracer.write('expectedData')
-                .then(() => {
-                    assert.strictEqual(fs.readFileSync(fileName, 'utf8'), 'expectedData');
-                    // remove file and directory
-                    removeDir(dirName);
-                    if (fs.existsSync(fileName)) {
-                        assert.fail('should remove file');
-                    }
-                    if (fs.existsSync(dirName)) {
-                        assert.fail('should remove directory');
-                    }
-                })
-                // re-open should be scheduled in next 1sec
-                .then(() => new Promise((resolve) => {
-                    function check() {
-                        fs.exists(fileName, (exists) => {
-                            if (exists) {
-                                resolve(exists);
-                            } else {
-                                setTimeout(check, 200);
-                            }
-                        });
-                    }
-                    check();
-                }))
-                .then(() => {
-                    assert.notStrictEqual(tracer.inode, oldInode, 'should have different inode');
-                    assert.strictEqual(fs.readFileSync(fileName, 'utf8'), '');
-                    assert.strictEqual(fs.existsSync(fileName), true, 'file should exists after re-creation');
-                }));
-        }).timeout(10000);
     });
 
     describe('.generateUuid', () => {

@@ -72,7 +72,8 @@
     "eslintConfig": {
         "extends": "@f5devcentral/eslint-config-f5-atg",
         "rules": {
-            "func-names": "off"
+            "func-names": "off",
+            "prefer-spread": "off"
         }
     },
     "comments": {

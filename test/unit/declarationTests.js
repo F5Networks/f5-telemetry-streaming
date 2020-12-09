@@ -52,7 +52,6 @@ describe('Declarations', () => {
                 if (path === 'example_download_folder') {
                     callback();
                 } else {
-                    /* eslint-disable prefer-spread */
                     originFsAccess.apply(null, arguments);
                 }
             });
