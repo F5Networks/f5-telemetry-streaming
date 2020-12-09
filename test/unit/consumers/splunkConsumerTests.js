@@ -18,6 +18,7 @@ const request = require('request');
 const sinon = require('sinon');
 const zlib = require('zlib');
 
+const constants = require('../../../src/lib/constants');
 const splunkIndex = require('../../../src/lib/consumers/Splunk/index');
 const splunkData = require('./data/splunkConsumerTestsData');
 const testUtil = require('../shared/util');
@@ -65,9 +66,10 @@ describe('Splunk', () => {
                         'Accept-Encoding': 'gzip',
                         Authorization: 'Splunk mySecret',
                         'Content-Encoding': 'gzip',
-                        'Content-Length': 90
+                        'Content-Length': 90,
+                        'User-Agent': constants.USER_AGENT
                     });
-                    assert.strictEqual(opts.url, 'https://localhost:80/services/collector/event');
+                    assert.strictEqual(opts.uri, 'https://localhost:80/services/collector/event');
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
@@ -94,9 +96,10 @@ describe('Splunk', () => {
                 try {
                     assert.deepStrictEqual(opts.headers, {
                         Authorization: 'Splunk superSecret',
-                        'Content-Length': 92
+                        'Content-Length': 92,
+                        'User-Agent': constants.USER_AGENT
                     });
-                    assert.strictEqual(opts.url, 'http://remoteSplunk:4567/services/collector/event');
+                    assert.strictEqual(opts.uri, 'http://remoteSplunk:4567/services/collector/event');
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
@@ -115,7 +118,15 @@ describe('Splunk', () => {
                     host: 'remoteSplunk',
                     port: '4567',
                     passphrase: 'superSecret',
-                    gzip: false
+                    gzip: false,
+                    proxy: {
+                        protocol: 'http',
+                        host: 'proxyServer',
+                        port: 8080,
+                        username: 'user',
+                        passphrase: 'pass',
+                        allowSelfSignedCert: true
+                    }
                 }
             });
 
@@ -124,14 +135,19 @@ describe('Splunk', () => {
                     const traceData = JSON.parse(context.tracer.write.firstCall.args[0]);
                     assert.deepStrictEqual(opts.headers, {
                         Authorization: 'Splunk superSecret',
-                        'Content-Length': 92
+                        'Content-Length': 92,
+                        'User-Agent': constants.USER_AGENT
                     });
                     assert.notStrictEqual(traceData.consumer.passphrase.indexOf('*****'), -1,
                         'consumer config passphrase should be redacted');
+                    assert.notStrictEqual(traceData.consumer.proxy.passphrase.indexOf('*****'), -1,
+                        'consumer proxy config passphrase should be redacted');
                     assert.notStrictEqual(traceData.requestOpts.headers.Authorization.indexOf('*****'), -1,
                         'passphrase in request headers should be redacted');
                     assert.strictEqual(JSON.stringify(traceData).indexOf('superSecret'), -1,
                         'passphrase should not be present anywhere in trace data');
+                    assert.notStrictEqual(traceData.requestOpts.proxy.passphrase.indexOf('*****'), -1,
+                        'consumer proxy config passphrase should be redacted');
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
@@ -583,6 +599,72 @@ describe('Splunk', () => {
                         assert.notStrictEqual(
                             output.indexOf('"last_cycle_count":"10"'), -1, 'output should include last_cycle_count'
                         );
+                        done();
+                    } catch (err) {
+                        // done() with parameter is treated as an error.
+                        // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
+                        done(err);
+                    }
+                });
+
+                splunkIndex(context);
+            });
+        });
+
+        describe('proxy options', () => {
+            it('should pass basic proxy options', (done) => {
+                const context = testUtil.buildConsumerContext({
+                    config: {
+                        port: 80,
+                        host: 'localhost',
+                        passphrase: 'mySecret',
+                        allowSelfSignedCert: true,
+                        proxy: {
+                            host: 'proxyServer',
+                            port: 8080
+                        }
+                    }
+                });
+
+                sinon.stub(request, 'post').callsFake((opts) => {
+                    try {
+                        assert.deepStrictEqual(opts.proxy, 'https://proxyServer:8080');
+                        assert.deepStrictEqual(opts.strictSSL, false);
+                        assert.strictEqual(opts.uri, 'https://localhost:80/services/collector/event');
+                        done();
+                    } catch (err) {
+                        // done() with parameter is treated as an error.
+                        // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
+                        done(err);
+                    }
+                });
+
+                splunkIndex(context);
+            });
+
+            it('should pass proxy options with allowSelfSignedCert', (done) => {
+                const context = testUtil.buildConsumerContext({
+                    config: {
+                        port: 80,
+                        host: 'localhost',
+                        passphrase: 'mySecret',
+                        allowSelfSignedCert: false,
+                        proxy: {
+                            protocol: 'http',
+                            host: 'proxyServer',
+                            port: 8080,
+                            username: 'user',
+                            passphrase: 'pass',
+                            allowSelfSignedCert: true
+                        }
+                    }
+                });
+
+                sinon.stub(request, 'post').callsFake((opts) => {
+                    try {
+                        assert.deepStrictEqual(opts.proxy, 'http://user:pass@proxyServer:8080');
+                        assert.deepStrictEqual(opts.strictSSL, false);
+                        assert.strictEqual(opts.uri, 'https://localhost:80/services/collector/event');
                         done();
                     } catch (err) {
                         // done() with parameter is treated as an error.

@@ -15,17 +15,18 @@ const util = require('../../util');
  * See {@link ../README.md#context} for documentation
  */
 module.exports = function (context) {
-    const body = JSON.stringify(context.event.data);
+    const body = context.event.data;
     const method = context.config.method || 'POST';
     const protocol = context.config.protocol || 'https';
-    const port = context.config.port ? `:${context.config.port}` : '';
+    const port = context.config.port || '';
     const uri = context.config.path || '/';
     const host = context.config.host;
     const fallbackHosts = context.config.fallbackHosts || [];
     const headers = requestUtil.processHeaders(context.config.headers); // no defaults - provide all headers needed
-    let strictSSL = !context.config.allowSelfSignedCert;
+
+    let allowSelfSignedCert = context.config.allowSelfSignedCert;
     if (!util.isObjectEmpty(context.config.proxy) && typeof context.config.proxy.allowSelfSignedCert !== 'undefined') {
-        strictSSL = !context.config.proxy.allowSelfSignedCert;
+        allowSelfSignedCert = context.config.proxy.allowSelfSignedCert;
     }
 
     const proxy = context.config.proxy;
@@ -33,8 +34,8 @@ module.exports = function (context) {
     if (context.tracer) {
         let tracedHeaders = headers;
         // redact Basic Auth passphrase, if provided
-        if (Object.keys(headers).indexOf('Authorization') > -1) {
-            tracedHeaders = JSON.parse(JSON.stringify(headers));
+        if (tracedHeaders.Authorization) {
+            tracedHeaders = JSON.parse(JSON.stringify(tracedHeaders));
             tracedHeaders.Authorization = '*****';
         }
 
@@ -45,29 +46,30 @@ module.exports = function (context) {
         }
 
         context.tracer.write(JSON.stringify({
-            body: JSON.parse(body),
+            allowSelfSignedCert,
+            body,
             host,
             fallbackHosts,
             headers: tracedHeaders,
             method,
             port,
             protocol,
-            strictSSL,
-            uri,
-            proxy: tracedProxy
+            proxy: tracedProxy,
+            uri
         }, null, 4));
     }
     return requestUtil.sendToConsumer({
+        allowSelfSignedCert,
         body,
         hosts: [host].concat(fallbackHosts),
         headers,
+        json: true, // for 'body' processing
         logger: context.logger,
         method,
         port,
         protocol,
-        strictSSL,
-        uri,
-        proxy
+        proxy,
+        uri
     }).catch((err) => {
         context.logger.exception(`Unexpected error: ${err}`, err);
     });
