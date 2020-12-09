@@ -12,7 +12,7 @@ Document Revision History
         - Date
 
       * - 1.17.0
-        - Updated the documentation for Telemetry Streaming v1.17.0. This release contains the following changes: |br| * Added support for configuring proxy settings on Generic HTTP consumers (see :ref:`proxy`) |br| * Added the ability to use the Splunk multi-metric format, currently EXPERIMENTAL (see :ref:`multi-metric`)  |br| |br| Issues Resolved: |br| * 
+        - Updated the documentation for Telemetry Streaming v1.17.0. This release contains the following changes: |br| * Added support for configuring proxy settings on Generic HTTP consumers (see :ref:`proxy`) |br| * Added a timestamp for APM Request Log output (see :ref:`APM Request Log<apm-rl>`) |br| * Added the ability to use the Splunk multi-metric format, currently EXPERIMENTAL (see :ref:`multi-metric`)  |br| |br| Issues Resolved: |br| * 
         - 11-20-20
 
       * - 1.16.0
