@@ -27,7 +27,7 @@ Example Declaration:
 .. _splunk-legacy:
 
 Splunk Legacy format
---------------------
+````````````````````
 The **format** property can be set to **legacy** for Splunk users who wish to convert the stats output similar to the |splunk app|. To see more information, see |Analytics|. To see more information about using the HEC, see |HEC|.  See the following example.
 
 .. NOTE:: To poll for any data involving **tmstats** you must have a Splunk consumer with the legacy format as described in this section.  This includes GET requests to the SystemPoller API because the data is not pulled unless it is a legacy Splunk consumer. |br| |br| Telemetry Streaming 1.7.0 and later gathers additional data from tmstats tables to improve compatibility with Splunk Legacy consumers.
@@ -45,6 +45,31 @@ Required information for **facility**:
 Example Declaration for Legacy (including facility):
 
 .. literalinclude:: ../examples/declarations/splunk_legacy.json
+    :language: json
+
+|
+
+.. _multi-metric:
+
+Splunk multi-metric format
+``````````````````````````
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+   Splunk multi-metric format is available in TS v1.17 and later
+
+.. WARNING:: Splunk multi-metric format is currently EXPERIMENTAL.  It requires Splunk version 8.0.0 or later.
+
+Telemetry Streaming 1.17 introduces the ability to use Splunk multi-metric format (currently experimental) for Splunk 8.0.0 and later.  Splunk multi-metric format allows each JSON object to contain measurements for multiple metrics, which generate multiple-measurement metric data points, taking up less space on disk and improving search performance.
+
+See the |splunkmm| for more information.
+
+.. IMPORTANT:: Only canonical (default) system poller output is supported
+
+To use this feature, the **format** of the Splunk Telemetry_Consumer must be set to **multiMetric** as shown in the example.
+
+Example Declaration for Splunk multi-metric:
+
+.. literalinclude:: ../examples/declarations/splunk_multi_metric.json
     :language: json
 
 |
@@ -403,6 +428,8 @@ Required Information:
 
 To see an example of Generic HTTP with multiple passphrases, see :ref:`multiple`.
 
+To see an example of Generic HTTP with proxy settings, see :ref:`proxy`.
+
 To see an example of the EXPERIMENTAL feature where you can specify fallback IP address(es) for the Generic HTTP consumer, see :ref:`fallback`.
 
 .. literalinclude:: ../examples/declarations/generic_http.json
@@ -416,7 +443,7 @@ F5 Beacon
 
 F5 Beacon, a SaaS offering, provides visibility and actionable insights into the health and performance of applications. 
 
-F5 Beacon uses the generic HTTP consumer.
+F5 Beacon uses the generic HTTP consumer.  To see an example of Generic HTTP with proxy settings, see :ref:`proxy`.
 
 Required Information:
  - See |beacon| for information on how to add Telemetry Streaming as a source to Beacon.
@@ -761,3 +788,6 @@ In the following table, we list the Azure Government regions.
 
    <a href="https://clouddocs.f5.com/cloud-services/latest/f5-cloud-services-Beacon-WorkWith.html#adding-a-new-source" target="_blank">Beacon documentation</a>
 
+.. |splunkmm| raw:: html
+
+   <a href="https://docs.splunk.com/Documentation/Splunk/8.1.0/Metrics/GetMetricsInOther#The_multiple-metric_JSON_format" target="_blank">Splunk documentation</a>

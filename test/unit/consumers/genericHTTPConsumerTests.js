@@ -137,7 +137,13 @@ describe('Generic_HTTP', () => {
     });
 
     describe('fallback', () => {
-        it('should work with single host in fallback array (reachable)', () => {
+        let sendToConsumerMock;
+
+        beforeEach(() => {
+            sendToConsumerMock = sinon.stub(requestUtil, 'sendToConsumer').resolves();
+        });
+
+        it('should be able to send data to primary host only', () => {
             const context = testUtil.buildConsumerContext({
                 config: {
                     method: 'GET',
@@ -146,63 +152,15 @@ describe('Generic_HTTP', () => {
                     host: 'primaryHost'
                 }
             });
-
-            nock('http://primaryHost').get('/').reply(200);
-            return genericHttpIndex(context);
-        });
-
-        it('should proceed to next host in fallback array when current one is not available', () => {
-            const context = testUtil.buildConsumerContext({
-                config: {
-                    method: 'GET',
-                    protocol: 'http',
-                    port: '80',
-                    host: 'primaryHost',
-                    fallbackHosts: [
-                        'fallbackHost1',
-                        'fallbackHost2'
-                    ]
-                }
-            });
-
-            // all hosts will be unavailable
-            nock('http://primaryHost').get('/').reply(500);
-            nock('http://fallbackHost1').get('/').reply(500);
-            nock('http://fallbackHost2').get('/').reply(500);
-
-            return genericHttpIndex(context);
-        });
-
-        it('should stop fallback once got reply (HTTP 200)', () => {
-            const context = testUtil.buildConsumerContext({
-                config: {
-                    method: 'GET',
-                    protocol: 'http',
-                    port: '80',
-                    host: 'primaryHost',
-                    fallbackHosts: [
-                        'fallbackHost1',
-                        'fallbackHost2'
-                    ]
-                }
-            });
-            let called = 0;
-            const replyHandler = () => { called += 1; };
-
-            // all hosts will be unavailable
-            nock('http://primaryHost').get('/').reply(500, replyHandler);
-            nock('http://fallbackHost1').get('/').reply(200, replyHandler);
-            nock('http://fallbackHost2').get('/').reply(500, replyHandler);
-
             return genericHttpIndex(context)
                 .then(() => {
-                    // force nock cleanup because not all mocks were used
-                    nock.cleanAll();
-                    assert.strictEqual(called, 2, 'should stop on fallbackHost1');
+                    assert.deepStrictEqual(sendToConsumerMock.firstCall.args[0].hosts, [
+                        'primaryHost'
+                    ]);
                 });
         });
 
-        it('should stop fallback once got reply (HTTP 400)', () => {
+        it('should be able to send data to fallback hosts too', () => {
             const context = testUtil.buildConsumerContext({
                 config: {
                     method: 'GET',
@@ -215,46 +173,14 @@ describe('Generic_HTTP', () => {
                     ]
                 }
             });
-            let called = 0;
-            const replyHandler = () => { called += 1; };
-
-            // all hosts will be unavailable
-            nock('http://primaryHost').get('/').reply(500, replyHandler);
-            nock('http://fallbackHost1').get('/').reply(400, replyHandler);
-            nock('http://fallbackHost2').get('/').reply(500, replyHandler);
-
             return genericHttpIndex(context)
                 .then(() => {
-                    // force nock cleanup because not all mocks were used
-                    nock.cleanAll();
-                    assert.strictEqual(called, 2, 'should stop on fallbackHost1');
-                });
-        });
-
-        it('should fallback to next host when got connection error', () => {
-            const context = testUtil.buildConsumerContext({
-                config: {
-                    method: 'GET',
-                    protocol: 'http',
-                    port: '80',
-                    host: 'primaryHost',
-                    fallbackHosts: [
+                    assert.deepStrictEqual(sendToConsumerMock.firstCall.args[0].hosts, [
+                        'primaryHost',
                         'fallbackHost1',
                         'fallbackHost2'
-                    ]
-                }
-            });
-
-            // all hosts will be unavailable
-            nock('http://primaryHost').get('/').replyWithError({
-                message: 'expectedError'
-            });
-            nock('http://fallbackHost1').get('/').replyWithError({
-                message: 'expectedError'
-            });
-            nock('http://fallbackHost2').get('/').reply(400);
-
-            return genericHttpIndex(context);
+                    ]);
+                });
         });
     });
 
@@ -262,7 +188,7 @@ describe('Generic_HTTP', () => {
         let requestUtilSpy;
 
         beforeEach(() => {
-            requestUtilSpy = sinon.spy(requestUtil, 'sendToConsumer');
+            requestUtilSpy = sinon.stub(requestUtil, 'sendToConsumer').resolves();
         });
 
         it('should pass basic proxy options', () => {
@@ -272,6 +198,7 @@ describe('Generic_HTTP', () => {
                     protocol: 'http',
                     port: '80',
                     host: 'targetHost',
+                    allowSelfSignedCert: true,
                     proxy: {
                         host: 'proxyServer',
                         port: 8080
@@ -280,19 +207,20 @@ describe('Generic_HTTP', () => {
             });
             return genericHttpIndex(context)
                 .then(() => {
-                    const reqOpt = requestUtilSpy.getCalls()[0].args[0];
+                    const reqOpt = requestUtilSpy.firstCall.args[0];
                     assert.deepStrictEqual(reqOpt.proxy, { host: 'proxyServer', port: 8080 });
-                    assert.deepStrictEqual(reqOpt.strictSSL, true);
+                    assert.deepStrictEqual(reqOpt.allowSelfSignedCert, true);
                 });
         });
 
-        it('should pass proxy options with strictSSL', () => {
+        it('should pass proxy options with allowSelfSignedCert', () => {
             const context = testUtil.buildConsumerContext({
                 config: {
                     method: 'GET',
                     protocol: 'http',
                     port: '80',
                     host: 'targetHost',
+                    allowSelfSignedCert: false,
                     proxy: {
                         host: 'proxyServer',
                         port: 8080,
@@ -304,11 +232,11 @@ describe('Generic_HTTP', () => {
             });
             return genericHttpIndex(context)
                 .then(() => {
-                    const reqOpt = requestUtilSpy.getCalls()[0].args[0];
+                    const reqOpt = requestUtilSpy.firstCall.args[0];
                     assert.deepStrictEqual(reqOpt.proxy, {
                         host: 'proxyServer', port: 8080, username: 'test', passphrase: 'test', allowSelfSignedCert: true
                     });
-                    assert.deepStrictEqual(reqOpt.strictSSL, false);
+                    assert.deepStrictEqual(reqOpt.allowSelfSignedCert, true);
                 });
         });
     });

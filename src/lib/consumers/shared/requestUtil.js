@@ -8,7 +8,6 @@
 
 'use strict';
 
-const request = require('request');
 const util = require('../../util');
 
 /**
@@ -42,84 +41,71 @@ function getProxyUrl(proxyOpts) {
         }
         auth = auth ? `${auth}@` : '';
         const port = proxyOpts.port ? `:${proxyOpts.port}` : '';
-        proxy = `${proxyOpts.protocol}://${auth}${proxyOpts.host}${port}`;
+        proxy = `${proxyOpts.protocol || 'https'}://${auth}${proxyOpts.host}${port}`;
     }
     return proxy;
 }
 
 /**
- * Send data via HTTP(s)
- *
- * @param {String} method - HTTP method
- * @param {Object} requestOptions - request options
- */
-function makeRequest(method, requestOptions) {
-    return new Promise((resolve) => {
-        request[method.toLowerCase()](requestOptions, (error, response, body) => {
-            resolve({ error, response, body });
-        });
-    });
-}
-
-/**
  * Send data to Consumer(s)
  *
- * @param {Object} config               - config
- * @param {String} config.body          - data to send
- * @param {Array<String>} config.hosts  - list of hosts
- * @param {Object} config.headers       - headers
- * @param {Logger} config.logger        - logger
- * @param {String} config.method        - HTTP method
- * @param {Integer} config.port         - port number
- * @param {String} config.protocol      - http or https
- * @param {Boolean} config.strictSSL    - allow non-signed certs or not
- * @param {String} config.uri           - URI
- * @param {Object} config.proxy         - proxy settings
- * @param {Boolean} rejectOnError       - reject when error response is received
+ * Note:
+ * - see util.makeRequest for available options
+ * - all options will be passed through directly to util.makeRequest except options below
+ * - request will be sent to the next host if response code is >= 500 or another error occurs
  *
- * @returns {Promise} resolved once data was sent or no hosts left
+ * @param {Object} config               - config
+ * @param {Array<String>} config.hosts  - list of hosts
+ * @param {Logger} config.logger        - logger
+ * @param {Object} [config.proxy]       - proxy settings
+ * @param {String} [config.uri]         - URI
+ *
+ * @returns {Promise<Array<Any, Object>} resolves with array of
+ *  2 items - response data and response object
  */
-function sendToConsumer(config, rejectOnError) {
+function sendToConsumer(config) {
     const hostIdx = config.hostIdx || 0;
     const host = config.hosts[hostIdx];
-    const requestOptions = {
-        url: `${config.protocol}://${host}${config.port}${config.uri}`,
-        headers: config.headers,
-        body: config.body,
-        strictSSL: config.strictSSL,
-        proxy: getProxyUrl(config.proxy)
-    };
+    const requestOptions = Object.assign({
+        continueOnErrorCode: true
+    }, config);
+    ['hosts', 'hostIdx', 'logger', 'proxy', 'uri'].forEach((prop) => {
+        delete requestOptions[prop];
+    });
+    requestOptions.proxy = getProxyUrl(config.proxy);
+    requestOptions.includeResponseObject = true;
 
-    return makeRequest(config.method, requestOptions)
+    let response;
+    let requestError;
+
+    return util.makeRequest(host, config.uri, requestOptions)
         .then((ret) => {
-            const httpSuccessCodes = [200, 201, 202];
-            if (ret.error || (ret.response && ret.response.statusCode >= 500)) {
-                if (ret.error) {
-                    config.logger.error(`error: ${ret.error.message ? ret.error.message : ret.error}`);
-                    if (ret.body) {
-                        config.logger.error(`response body: ${ret.body}`); // API may provide error text via body
-                    }
-                }
-
-                const nextHostIdx = hostIdx + 1;
-                if (nextHostIdx < config.hosts.length) {
-                    // fallback to next host
-                    config.logger.debug(`Trying next host - ${config.hosts[nextHostIdx]}`);
-                    config.hostIdx = nextHostIdx;
-                    return sendToConsumer(config);
-                }
-                if (rejectOnError) {
-                    return Promise.reject(ret.error);
-                }
-            } else if (httpSuccessCodes.indexOf(ret.response.statusCode) > -1) {
-                config.logger.debug('success');
-            } else {
-                config.logger.info(`response: ${ret.response.statusCode} ${ret.response.statusMessage}`);
-                if (ret.body) {
-                    config.logger.info(`response body: ${ret.body}`);
-                }
+            response = ret;
+            config.logger.debug(`request to '${host}${config.uri}' returned HTTP ${response[1].statusCode}`);
+            if (response[1].statusCode >= 500) {
+                requestError = new Error(`Bad status code: ${response[1].statusCode} ${response[1].statusMessage} for '${host}'`);
             }
-            return Promise.resolve();
+        })
+        .catch((err) => {
+            config.logger.exception(`Error caught on attempt to send request to '${host}${config.uri}'`, err);
+            requestError = err;
+        })
+        .then(() => {
+            if (!requestError) {
+                config.logger.debug(`response: ${response[1].statusCode} ${response[1].statusMessage}`);
+                if (response[0]) {
+                    config.logger.debug(`response body: ${response[0]}`);
+                }
+                return Promise.resolve(response);
+            }
+            const nextHostIdx = hostIdx + 1;
+            if (nextHostIdx < config.hosts.length) {
+                // fallback to next host
+                config.logger.debug(`Trying next host - ${config.hosts[nextHostIdx]}`);
+                config.hostIdx = nextHostIdx;
+                return sendToConsumer(config);
+            }
+            return Promise.reject(requestError);
         });
 }
 

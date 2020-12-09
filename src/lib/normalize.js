@@ -403,6 +403,7 @@ module.exports = {
      * @param {Array}  [options.addKeysByTag]        - add key to data based on tag(s)
      * @param {Array}  [options.formatTimestamps]    - array containing timestamp keys to format/normalize
      * @param {Object} [options.classifyEventByKeys] - classify event by keys
+     * @param {Object} [options.addTimestampForCategories] - array of categories for which we add custom timestamps for
      *
      * @returns {Object} Returns normalized event
      */
@@ -454,6 +455,10 @@ module.exports = {
             } else {
                 ret.telemetryEventCategory = constants.EVENT_TYPES.EVENT_LISTENER;
             }
+        }
+        if (options.addTimestampForCategories
+            && options.addTimestampForCategories.indexOf(ret.telemetryEventCategory) > -1) {
+            ret[constants.EVENT_CUSTOM_TIMESTAMP_KEY] = new Date().toISOString();
         }
         // format timestamps
         const nT = options.formatTimestamps;

@@ -465,6 +465,26 @@ describe('Util', () => {
         }).timeout(30);
     });
 
+    describe('.getRuntimeInfo()', () => {
+        beforeEach(() => {
+            sinon.stub(process, 'version').value('v14.5.1');
+        });
+        it('should return runtime info', () => {
+            const nodeVersion = process.version;
+            const returnValue = util.getRuntimeInfo().nodeVersion;
+            assert(returnValue === '14.5.1', 'getRuntimeInfo returns wrong value 1');
+            assert(returnValue === nodeVersion.substring(1), 'getRuntimeInfo returns wrong value 2');
+        });
+    });
+
+    describe('.camelCaseToUnderscoreCase()', () => {
+        it('should compare version strings', () => {
+            assert.strictEqual(util.camelCaseToUnderscoreCase('HelloFriend'), 'hello_friend');
+            assert.strictEqual(util.camelCaseToUnderscoreCase('whatIsUp'), 'what_is_up');
+            assert.strictEqual(util.camelCaseToUnderscoreCase('THISWorksLikeThis'), 't_h_i_s_works_like_this');
+        });
+    });
+
     describe('.compareVersionStrings()', () => {
         it('should compare version strings', () => {
             assert.throws(

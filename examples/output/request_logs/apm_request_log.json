@@ -9,5 +9,6 @@
     "Access_Policy_Result":"Logon_Deny",
     "tenant":"Common",
     "application":"",
-    "telemetryEventCategory":"APM"
+    "telemetryEventCategory":"APM",
+    "f5telemetry_timestamp": "2020-12-03T22:10:07.783Z"
 }

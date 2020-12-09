@@ -805,6 +805,21 @@ module.exports = {
     },
 
     /**
+     * Return Node version without 'v'
+     */
+    getRuntimeInfo() {
+        return { nodeVersion: process.version.substring(1) };
+    },
+
+    /**
+     * Convert a string from camelCase to underscoreCase
+     * Returns converted string
+     */
+    camelCaseToUnderscoreCase(str) {
+        return str.split(/(?=[A-Z])/).join('_').toLowerCase();
+    },
+
+    /**
      * Compare version strings
      *
      * @param {String} version1   - version to compare
@@ -892,9 +907,10 @@ module.exports = {
      *                                                   by default false
      * @param {Boolean} [options.includeResponseObject] - return [body, responseObject], by default false
      * @param {Array<Integer>|Integer} [options.expectedResponseCode]  - expected response code, by default 200
-     * @param {Integer} [options.timeout]               - Milliseconds to wait for a socket timeout. Option
+     * @param {Integer} [options.timeout]              - Milliseconds to wait for a socket timeout. Option
      *                                                    'passes through' to 'request' library
-     * @param {String} [options.proxy]                  - Proxy URI
+     * @param {String}  [options.proxy]                - proxy URI
+     * @param {Boolean} [config.gzip]                  - accept compressed content from the server
      *
      * @returns {Promise.<?any>} Returns promise resolved with response
      */
@@ -931,8 +947,12 @@ module.exports = {
             rawResponseBody: false
         });
         options.headers['User-Agent'] = options.headers['User-Agent'] || constants.USER_AGENT;
-        options.strictSSL = options.allowSelfSignedCert === undefined
+        options.strictSSL = typeof options.allowSelfSignedCert === 'undefined'
             ? constants.STRICT_TLS_REQUIRED : !options.allowSelfSignedCert;
+
+        if (options.gzip && !options.headers['Accept-Encoding']) {
+            options.headers['Accept-Encoding'] = 'gzip';
+        }
 
         if (options.rawResponseBody) {
             options.encoding = null;

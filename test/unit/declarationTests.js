@@ -56,6 +56,8 @@ describe('Declarations', () => {
                     originFsAccess.apply(null, arguments);
                 }
             });
+            // added for deos tests
+            sinon.stub(util, 'getRuntimeInfo').value(() => ({ nodeVersion: '8.12.0' }));
         });
         // first let's validate all example declarations
         const baseDir = `${__dirname}/../../examples/declarations`;
@@ -663,6 +665,42 @@ describe('Declarations', () => {
     });
 
     describe('AJV Custom Keywords', () => {
+        describe('nodeSupportVersion', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Consumer: {
+                    class: 'Telemetry_Consumer',
+                    type: 'Deos_Consumer',
+                    f5csTenantId: 'a-blabla-a',
+                    serviceAccount: {
+                        type: 'service_account',
+                        projectId: 'deos-dev',
+                        privateKeyId: '11111111111111111111111',
+                        privateKey: {
+                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                        },
+                        clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
+                        clientId: '1212121212121212121212',
+                        authUri: 'https://accounts.google.com/o/oauth2/auth',
+                        tokenUri: 'https://oauth2.googleapis.com/token',
+                        authProviderX509CertUrl: 'https://www.googleapis.com/oauth2/v1/certs',
+                        clientX509CertUrl: 'https://www.googleapis.com/robot/v1/metadata/x509/test%40deos-dev.iam.gserviceaccount.com'
+                    },
+                    targetAudience: 'deos-ingest'
+                }
+            };
+
+            it('should fail becuase node version too low', () => {
+                sinon.stub(util, 'getRuntimeInfo').value(() => ({ nodeVersion: '8.6.0' }));
+                return assert.isRejected(config.validate(data), 'requested node version');
+            });
+
+            it('should succeed becuase node version is higher then required', () => {
+                sinon.stub(util, 'getRuntimeInfo').value(() => ({ nodeVersion: '8.12.0' }));
+                return assert.isFulfilled(config.validate(data));
+            });
+        });
+
         describe('pathExists', () => {
             it('should fail to access directory from iHealth declaration', () => {
                 const data = {
@@ -4267,6 +4305,125 @@ describe('Declarations', () => {
                     }
                 }
             ));
+
+            it('should pass minimal declaration with TLS client auth', () => validateMinimal(
+                {
+                    type: 'Kafka',
+                    host: 'host',
+                    topic: 'topic',
+                    authenticationProtocol: 'TLS',
+                    privateKey: {
+                        cipherText: 'privateKey'
+                    },
+                    clientCertificate: {
+                        cipherText: 'clientCertificate'
+                    }
+                },
+                {
+                    type: 'Kafka',
+                    host: 'host',
+                    topic: 'topic',
+                    authenticationProtocol: 'TLS',
+                    protocol: 'binaryTcpTls',
+                    port: 9092,
+                    privateKey: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    },
+                    clientCertificate: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+
+            it('should pass full declaration with TLS client auth', () => validateFull(
+                {
+                    type: 'Kafka',
+                    host: 'host',
+                    topic: 'topic',
+                    protocol: 'binaryTcpTls',
+                    port: 90,
+                    authenticationProtocol: 'TLS',
+                    privateKey: {
+                        cipherText: 'privateKey'
+                    },
+                    clientCertificate: {
+                        cipherText: 'clientCertificate'
+                    },
+                    rootCertificate: {
+                        cipherText: 'rootCertificate'
+                    }
+                },
+                {
+                    type: 'Kafka',
+                    host: 'host',
+                    topic: 'topic',
+                    authenticationProtocol: 'TLS',
+                    protocol: 'binaryTcpTls',
+                    port: 90,
+                    privateKey: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    },
+                    clientCertificate: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    },
+                    rootCertificate: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    }
+                }
+            ));
+
+            it('should require privateKey when using TLS client auth', () => assert.isRejected(validateFull(
+                {
+                    type: 'Kafka',
+                    host: 'host',
+                    topic: 'topic',
+                    authenticationProtocol: 'TLS'
+                }
+            ), /should have required property 'privateKey'/));
+
+            it('should require protocol=binaryTcpTls when using TLS client auth', () => assert.isRejected(validateFull(
+                {
+                    type: 'Kafka',
+                    host: 'host',
+                    topic: 'topic',
+                    authenticationProtocol: 'TLS',
+                    protocol: 'binaryTcp',
+                    privateKey: {
+                        cipherText: 'privateKey'
+                    },
+                    clientCertificate: {
+                        cipherText: 'clientCertificate'
+                    }
+                }
+            ), /should be equal to constant/));
+
+            it('should not allow username and password when using TLS client auth', () => assert.isRejected(validateFull(
+                {
+                    type: 'Kafka',
+                    host: 'host',
+                    topic: 'topic',
+                    authenticationProtocol: 'TLS',
+                    protocol: 'binaryTcpTls',
+                    username: 'myUser',
+                    passphrase: 'myPass',
+                    privateKey: {
+                        cipherText: 'privateKey'
+                    },
+                    clientCertificate: {
+                        cipherText: 'clientCertificate'
+                    }
+                }
+            ), /should NOT be valid/));
         });
 
         describe('Splunk', () => {
@@ -4301,6 +4458,17 @@ describe('Declarations', () => {
                     format: 'legacy',
                     passphrase: {
                         cipherText: 'cipherText'
+                    },
+                    proxy: {
+                        host: 'localhost',
+                        protocol: 'http',
+                        port: 80,
+                        allowSelfSignedCert: true,
+                        enableHostConnectivityCheck: false,
+                        username: 'username',
+                        passphrase: {
+                            cipherText: 'passphrase'
+                        }
                     }
                 },
                 {
@@ -4313,6 +4481,19 @@ describe('Declarations', () => {
                         class: 'Secret',
                         protected: 'SecureVault',
                         cipherText: '$M$foo'
+                    },
+                    proxy: {
+                        host: 'localhost',
+                        protocol: 'http',
+                        port: 80,
+                        allowSelfSignedCert: true,
+                        enableHostConnectivityCheck: false,
+                        username: 'username',
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$foo'
+                        }
                     }
                 }
             ));
@@ -4402,6 +4583,192 @@ describe('Declarations', () => {
                         protected: 'SecureVault',
                         cipherText: '$M$foo'
                     }
+                }
+            ));
+        });
+
+        describe('Deos_Consumer', () => {
+            beforeEach(() => {
+                sinon.stub(util, 'getRuntimeInfo').value(() => ({ nodeVersion: '8.12.0' }));
+            });
+
+            it('should fail because authType is not valid', () => assert.isRejected(
+                validateMinimal({
+                    class: 'Telemetry_Consumer',
+                    type: 'Deos_Consumer',
+                    f5csTenantId: 'a-blabla-a',
+                    serviceAccount: {
+                        authType: 'goog',
+                        type: 'service_account',
+                        projectId: 'deos-dev',
+                        privateKeyId: '11111111111111111111111',
+                        privateKey: {
+                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                        },
+                        clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
+                        clientId: '1212121212121212121212',
+                        authUri: 'https://accounts.google.com/o/oauth2/auth',
+                        tokenUri: 'https://oauth2.googleapis.com/token',
+                        authProviderX509CertUrl: 'https://www.googleapis.com/oauth2/v1/certs',
+                        clientX509CertUrl: 'https://www.googleapis.com/robot/v1/metadata/x509/test%40deos-dev.iam.gserviceaccount.com'
+                    },
+                    targetAudience: 'deos-ingest'
+                }),
+                'should be equal to one of the allowed values'
+            ));
+
+            it('should require f5csTenantId property', () => assert.isRejected(
+                validateMinimal({
+                    class: 'Telemetry_Consumer',
+                    type: 'Deos_Consumer',
+                    serviceAccount: {
+                        authType: 'google-auth',
+                        type: 'service_account',
+                        projectId: 'deos-dev',
+                        privateKeyId: '11111111111111111111111',
+                        privateKey: {
+                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                        },
+                        clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
+                        clientId: '1212121212121212121212',
+                        authUri: 'https://accounts.google.com/o/oauth2/auth',
+                        tokenUri: 'https://oauth2.googleapis.com/token',
+                        authProviderX509CertUrl: 'https://www.googleapis.com/oauth2/v1/certs',
+                        clientX509CertUrl: 'https://www.googleapis.com/robot/v1/metadata/x509/test%40deos-dev.iam.gserviceaccount.com'
+                    },
+                    targetAudience: 'deos-ingest'
+                }),
+                /should have required property 'f5csTenantId'/
+            ));
+
+            it('should require privateKeyId property', () => assert.isRejected(
+                validateMinimal({
+                    class: 'Telemetry_Consumer',
+                    type: 'Deos_Consumer',
+                    f5csTenantId: 'a-blabla-a',
+                    serviceAccount: {
+                        authType: 'google-auth',
+                        type: 'service_account',
+                        projectId: 'deos-dev',
+                        privateKey: {
+                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                        },
+                        clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
+                        clientId: '1212121212121212121212',
+                        authUri: 'https://accounts.google.com/o/oauth2/auth',
+                        tokenUri: 'https://oauth2.googleapis.com/token',
+                        authProviderX509CertUrl: 'https://www.googleapis.com/oauth2/v1/certs',
+                        clientX509CertUrl: 'https://www.googleapis.com/robot/v1/metadata/x509/test%40deos-dev.iam.gserviceaccount.com'
+                    },
+                    targetAudience: 'deos-ingest'
+                }),
+                /should have required property 'privateKeyId'/
+            ));
+
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    class: 'Telemetry_Consumer',
+                    type: 'Deos_Consumer',
+                    f5csTenantId: 'a-blabla-a',
+                    serviceAccount: {
+                        authType: 'google-auth',
+                        type: 'service_account',
+                        projectId: 'deos-dev',
+                        privateKeyId: '11111111111111111111111',
+                        privateKey: {
+                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                        },
+                        clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
+                        clientId: '1212121212121212121212',
+                        authUri: 'https://accounts.google.com/o/oauth2/auth',
+                        tokenUri: 'https://oauth2.googleapis.com/token',
+                        authProviderX509CertUrl: 'https://www.googleapis.com/oauth2/v1/certs',
+                        clientX509CertUrl: 'https://www.googleapis.com/robot/v1/metadata/x509/test%40deos-dev.iam.gserviceaccount.com'
+                    },
+                    targetAudience: 'deos-ingest'
+                },
+                {
+                    allowSelfSignedCert: false,
+                    class: 'Telemetry_Consumer',
+                    enable: true,
+                    f5csTenantId: 'a-blabla-a',
+                    port: 443,
+                    useSSL: true,
+                    serviceAccount: {
+                        authType: 'google-auth',
+                        authProviderX509CertUrl: 'https://www.googleapis.com/oauth2/v1/certs',
+                        authUri: 'https://accounts.google.com/o/oauth2/auth',
+                        clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
+                        clientId: '1212121212121212121212',
+                        clientX509CertUrl: 'https://www.googleapis.com/robot/v1/metadata/x509/test%40deos-dev.iam.gserviceaccount.com',
+                        privateKey: {
+                            cipherText: '$M$foo',
+                            class: 'Secret',
+                            protected: 'SecureVault'
+                        },
+                        privateKeyId: '11111111111111111111111',
+                        projectId: 'deos-dev',
+                        tokenUri: 'https://oauth2.googleapis.com/token',
+                        type: 'service_account'
+                    },
+                    targetAudience: 'deos-ingest',
+                    trace: false,
+                    type: 'Deos_Consumer'
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    class: 'Telemetry_Consumer',
+                    type: 'Deos_Consumer',
+                    f5csTenantId: 'a-blabla-a',
+                    port: 500,
+                    useSSL: false,
+                    enable: true,
+                    allowSelfSignedCert: true,
+                    serviceAccount: {
+                        type: 'service_account',
+                        projectId: 'deos-dev',
+                        privateKeyId: '11111111111111111111111',
+                        privateKey: {
+                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                        },
+                        clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
+                        clientId: '1212121212121212121212',
+                        authUri: 'https://accounts.google.com/o/oauth2/auth',
+                        tokenUri: 'https://oauth2.googleapis.com/token',
+                        authProviderX509CertUrl: 'https://www.googleapis.com/oauth2/v1/certs',
+                        clientX509CertUrl: 'https://www.googleapis.com/robot/v1/metadata/x509/test%40deos-dev.iam.gserviceaccount.com'
+                    },
+                    targetAudience: 'deos-ingest',
+                    trace: true
+                },
+                {
+                    allowSelfSignedCert: true,
+                    class: 'Telemetry_Consumer',
+                    enable: true,
+                    f5csTenantId: 'a-blabla-a',
+                    port: 500,
+                    useSSL: false,
+                    serviceAccount: {
+                        authProviderX509CertUrl: 'https://www.googleapis.com/oauth2/v1/certs',
+                        authUri: 'https://accounts.google.com/o/oauth2/auth',
+                        clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
+                        clientId: '1212121212121212121212',
+                        clientX509CertUrl: 'https://www.googleapis.com/robot/v1/metadata/x509/test%40deos-dev.iam.gserviceaccount.com',
+                        privateKey: {
+                            cipherText: '$M$foo',
+                            class: 'Secret',
+                            protected: 'SecureVault'
+                        },
+                        privateKeyId: '11111111111111111111111',
+                        projectId: 'deos-dev',
+                        tokenUri: 'https://oauth2.googleapis.com/token',
+                        type: 'service_account'
+                    },
+                    targetAudience: 'deos-ingest',
+                    trace: true,
+                    type: 'Deos_Consumer'
                 }
             ));
         });

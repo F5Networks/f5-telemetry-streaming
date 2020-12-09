@@ -269,7 +269,32 @@
             "f5expand": true,
             "enum": [
                 "SASL-PLAIN",
+                "TLS",
                 "None"
+            ]
+        },
+        "clientCertificate": {
+            "$comment": "Required for certain consumers: Kafka",
+            "title": "Client Certificate",
+            "description": "Certificate(s) to use when connecting to a secured endpoint.",
+            "type": "object",
+            "f5expand": true,
+            "allOf": [
+                {
+                    "$ref": "base_schema.json#/definitions/secret"
+                }
+            ]
+        },
+        "rootCertificate": {
+            "$comment": "Required for certain consumers: Kafka",
+            "title": "Root Certificate",
+            "description": "Certificate Authority root certificate, used to validate certificate chains.",
+            "type": "object",
+            "f5expand": true,
+            "allOf": [
+                {
+                    "$ref": "base_schema.json#/definitions/secret"
+                }
             ]
         },
         "projectId": {
@@ -291,6 +316,140 @@
             "title": "Private Key ID",
             "description": "The private key ID.",
             "type": "string",
+            "f5expand": true
+        },
+        "privateKey": {
+            "$comment": "Required for certain consumers: Kafka",
+            "title": "Private Key",
+            "description": "Private Key",
+            "type": "object",
+            "f5expand": true,
+            "allOf": [
+                {
+                    "$ref": "base_schema.json#/definitions/secret"
+                }
+            ]
+        },
+        "f5csTenantId": {
+            "$comment": "Required for certain consumers: Deos",
+            "title": "F5CS Tenant ID",
+            "description": "" ,
+            "type": "string",
+            "f5expand": true
+        },
+        "serviceAccount": {
+            "$comment": "Required for certain consumers: Deos",
+            "title": "Service Account",
+            "description": "Service Account to authentication" ,
+            "type": "object",
+            "properties": {
+                    "authType": {
+                        "$comment": "Required for certain consumers: Deos",
+                        "title": "SA Type",
+                        "description": "" ,
+                        "type": "string",
+                        "enum": ["google-auth" ]
+                    },
+                    "type": {
+                        "$comment": "Required for certain consumers: Deos",
+                        "title": "SA Type",
+                        "description": "" ,
+                        "type": "string",
+                        "f5expand": true
+                    },
+                    "projectId": {
+                        "$comment": "Required for certain consumers: Deos",
+                        "title": "Project Id",
+                        "description": "" ,
+                        "type": "string",
+                        "f5expand": true
+                    },
+                    "privateKeyId": {
+                        "$comment": "Required for certain consumers: Deos",
+                        "title": "Private Key Id",
+                        "description": "" ,
+                        "type": "string",
+                        "f5expand": true
+                    },
+                    "privateKey": {
+                        "$ref": "base_schema.json#/definitions/secret"
+                    },
+                    "clientEmail": {
+                        "$comment": "Required for certain consumers: Deos",
+                        "title": "Client Email",
+                        "description": "" ,
+                        "type": "string",
+                        "f5expand": true
+                    },
+                    "clientId": {
+                        "$comment": "Required for certain consumers: Deos",
+                        "title": "Client Id",
+                        "description": "" ,
+                        "type": "string",
+                        "f5expand": true
+                    },
+                    "authUri": {
+                        "$comment": "Required for certain consumers: Deos",
+                        "title": "Auth Uri",
+                        "description": "" ,
+                        "type": "string",
+                        "f5expand": true
+                    },
+                    "tokenUri": {
+                        "$comment": "Required for certain consumers: Deos",
+                        "title": "Token Uri",
+                        "description": "" ,
+                        "type": "string",
+                        "f5expand": true
+                    },
+                    "authProviderX509CertUrl": {
+                        "$comment": "Required for certain consumers: Deos",
+                        "title": "Auth Provider X509 Cert Url",
+                        "description": "" ,
+                        "type": "string",
+                        "f5expand": true
+                    },
+                    "clientX509CertUrl": {
+                        "$comment": "Required for certain consumers: Deos",
+                        "title": "Client X509 Cert Url",
+                        "description": "" ,
+                        "type": "string",
+                        "f5expand": true
+                    }
+                },
+            "additionalProperties": false,
+            "allOf": [
+                {
+                    "if": { "properties": { "authType": { "const": "google-auth" } } },
+                    "then": {
+                        "required": [
+                            "type",
+                            "projectId",
+                            "privateKeyId",
+                            "privateKey",
+                            "clientEmail",
+                            "clientId",
+                            "authUri",
+                            "tokenUri",
+                            "authProviderX509CertUrl",
+                            "clientX509CertUrl"
+                        ]
+                    },
+                    "else": {}
+                }]
+        },
+        "targetAudience": {
+            "$comment": "Required for certain consumers: Deos",
+            "title": "Target Audience",
+            "description": "" ,
+            "type": "string",
+            "f5expand": true
+        },
+        "useSSL": {
+            "$comment": "Required for certain consumers: Deos",
+            "title": "useSSL",
+            "description": "To decide if GRPC connection should use SSL and then it is secured" ,
+            "type": "boolean",
             "f5expand": true
         }
     },
@@ -343,7 +502,8 @@
                             "Kafka",
                             "Splunk",
                             "Statsd",
-                            "Sumo_Logic"
+                            "Sumo_Logic",
+                            "Deos_Consumer"
                         ]
                     },
                     "enableHostConnectivityCheck": {
@@ -398,7 +558,13 @@
                             "serviceEmail": {},
                             "privateKey": {},
                             "privateKeyId": {},
+                            "clientCertificate": {},
+                            "rootCertificate": {},
                             "fallbackHosts": {},
+                            "f5csTenantId": {},
+                            "serviceAccount": {},
+                            "targetAudience": {},
+                            "useSSL": {},
                             "proxy": {}
                         },
                         "additionalProperties": false
@@ -435,7 +601,7 @@
                                 "method": { "$ref": "#/definitions/method", "default": "POST" },
                                 "headers": { "$ref": "#/definitions/headers" },
                                 "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
-                                "proxy": { "$ref": "base_schema.json#/definitions/proxy"}
+                                "proxy": { "$ref": "base_schema.json#/definitions/proxy" }
                             }
                         },
                         "else": {}
@@ -452,7 +618,8 @@
                                 "protocol": { "$ref": "#/definitions/protocols", "default": "https" },
                                 "port": { "$ref": "#/definitions/port", "default": 8088 },
                                 "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
-                                "format": { "$ref": "#/definitions/format", "default": "default"  }
+                                "format": { "$ref": "#/definitions/format", "default": "default" },
+                                "proxy": { "$ref": "base_schema.json#/definitions/proxy" }
                             }
                         },
                         "else": {}
@@ -669,7 +836,28 @@
                                         "dependencies": {
                                             "passphrase": [ "username" ]
                                         }
-                                    }
+                                    },
+                                    "else": {}
+                                },
+                                {
+                                    "if": { "properties": { "authenticationProtocol": { "const": "TLS" } } },
+                                    "then": {
+                                        "required": [
+                                            "privateKey",
+                                            "clientCertificate"
+                                        ],
+                                        "allOf": [
+                                            { "not": { "required": [ "username" ] } },
+                                            { "not": { "required": [ "passphrase" ] } }
+                                        ],
+                                        "properties": {
+                                            "privateKey": { "$ref": "#/definitions/privateKey" },
+                                            "clientCertificate": { "$ref": "#/definitions/clientCertificate" },
+                                            "rootCertificate": { "$ref": "#/definitions/rootCertificate" },
+                                            "protocol": { "const": "binaryTcpTls" }
+                                        }
+                                    },
+                                    "else": {}
                                 }
                             ]
                         },
@@ -749,6 +937,25 @@
                                 "privateKey": { "$ref": "base_schema.json#/definitions/secret" },
                                 "projectId": { "$ref": "#/definitions/projectId" }
                             }
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "Deos_Consumer" } } },
+                        "then": {
+                            "required": [
+                                "f5csTenantId",
+                                "serviceAccount",
+                                "targetAudience"
+                            ],
+                            "properties": {
+                                "port": { "$ref": "#/definitions/port", "default": 443 },
+                                "f5csTenantId": { "$ref": "#/definitions/f5csTenantId" },
+                                "serviceAccount": { "$ref": "#/definitions/serviceAccount" },
+                                "targetAudience": { "$ref": "#/definitions/targetAudience" },
+                                "useSSL": { "$ref": "#/definitions/useSSL", "default": true }
+                            },
+                            "nodeSupportVersion": "8.11.1"
                         },
                         "else": {}
                     }

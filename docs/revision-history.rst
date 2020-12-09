@@ -12,11 +12,7 @@ Document Revision History
         - Date
 
       * - 1.16.0
-<<<<<<< HEAD
         - Updated the documentation for Telemetry Streaming v1.16.0. This release contains the following changes: |br| * Added support for the Telemetry_Namespace class in declarations posted to the /declare endpoint (see :doc:`namespaces`) |br| * Added new Namespace PullConsumer endpoint (see :doc:`namespaces`) |br| * Added support for Custom Endpoints.  Moved the Custom Endpoint page from an Appendix to Using Telemetry Streaming (see :doc:`custom-endpoints`) |br| * TS now includes _ResourceId if available for Azure Log Analytics consumer, and metadata calls are now only happening upon consumer(s) load |br| *  |br| |br| Issues Resolved: |br| * Fixed issue when TS incorrectly processing iRule stats with multiple events
-=======
-        - Updated the documentation for Telemetry Streaming v1.16.0. This release contains the following changes: |br| * Added support for the Telemetry_Namespace class in declarations posted to the /declare endpoint (see :doc:`namespaces`) |br| * Added new Namespace PullConsumer endpoint (see :doc:`namespaces`) |br| * Added support for Custom Endpoints.  Moved the Custom Endpoint page from an Appendix to Using Telemetry Streaming (see :doc:`custom-endpoints`) |br| * TS now includes _ResourceId if available for Azure Log Analytics consumer, and metadata calls are now only happening upon consumer(s) load  |br| |br| Issues Resolved: |br| * Fixed issue when TS incorrectly processing iRule stats with multiple events
->>>>>>> docs-latest
         - 11-20-20
 
       * - 1.15.0

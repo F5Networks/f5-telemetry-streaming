@@ -24,9 +24,10 @@ const testUtil = require('../shared/util');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
-let sendToConsumerMock;
 
 describe('ElasticSearch', () => {
+    let sendToConsumerMock;
+
     beforeEach(() => {
         sendToConsumerMock = sinon.stub(requestUtil, 'sendToConsumer').resolves();
     });
@@ -56,13 +57,19 @@ describe('ElasticSearch', () => {
                     const passedConfig = sendToConsumerMock.firstCall.args[0];
                     delete passedConfig.logger;
                     assert.deepStrictEqual(passedConfig, {
-                        body: '{"data":{},"telemetryEventCategory":""}',
-                        headers: { 'Content-Type': 'application/json' },
+                        allowSelfSignedCert: true,
+                        body: {
+                            data: {},
+                            telemetryEventCategory: ''
+                        },
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
                         hosts: ['localhost'],
+                        json: true,
                         method: 'POST',
-                        port: ':9200',
+                        port: '9200',
                         protocol: 'http',
-                        strictSSL: false,
                         uri: '/espath/ts_elasticsearch_consumer/f5telemetry'
                     });
                 });
@@ -104,7 +111,7 @@ describe('ElasticSearch', () => {
             return elasticSearchIndex(context)
                 .then(() => {
                     const passedConfig = sendToConsumerMock.firstCall.args[0];
-                    assert.deepStrictEqual(passedConfig.body, JSON.stringify(expectedPayload));
+                    assert.deepStrictEqual(passedConfig.body, expectedPayload);
                 });
         });
 
@@ -124,7 +131,7 @@ describe('ElasticSearch', () => {
             return elasticSearchIndex(context)
                 .then(() => {
                     const passedConfig = sendToConsumerMock.firstCall.args[0];
-                    assert.deepStrictEqual(passedConfig.body, JSON.stringify(expectedPayload));
+                    assert.deepStrictEqual(passedConfig.body, expectedPayload);
                 });
         });
 
