@@ -127,7 +127,11 @@ module.exports = {
     QKVIEW_CMD_LOCAL_TIMEOUT: 1 * 60 * 60 * 1000, // 1 hour in milliseconds
     STATS_KEY_SEP: '::',
     STRICT_TLS_REQUIRED: true,
-    TRACER_DIR: '/var/tmp/telemetry',
+    TRACER: {
+        DIR: './telemetry',
+        ENCODING: 'utf8',
+        LIST_SIZE: 10
+    },
     USER_AGENT: `f5-telemetry/${VERSION}`,
     WEEKDAY_TO_DAY_NAME
 };

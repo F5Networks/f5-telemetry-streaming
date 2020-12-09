@@ -31,7 +31,7 @@ const logger = require('./logger');
  *
  * @class
  */
-function ModuleLoader() {}
+class ModuleLoader {}
 
 /**
 * Load a module from the given path
@@ -66,6 +66,37 @@ ModuleLoader.unload = function (modulePath) {
     }
 };
 
+
+/**
+ * Promisified FS module
+ */
+const fsPromisified = (function promisifyNodeFsModule(fsModule) {
+    function proxy(originFunc) {
+        return function () {
+            return new Promise((resolve, reject) => {
+                const args = Array.from(arguments);
+                args.push(function () {
+                    const cbArgs = Array.from(arguments);
+                    // error usually is first arg
+                    if (cbArgs[0]) {
+                        reject(cbArgs[0]);
+                    } else {
+                        resolve(cbArgs.slice(1));
+                    }
+                });
+                originFunc.apply(null, args);
+            });
+        };
+    }
+    const newFsModule = Object.create(fsModule);
+    Object.keys(fsModule).forEach((key) => {
+        if (typeof fsModule[`${key}Sync`] !== 'undefined') {
+            newFsModule[key] = proxy(fs[key]);
+        }
+    });
+    return newFsModule;
+}(fs));
+
 /** Note: no 'class' usage to support v12.x, prototype only */
 /**
  * Tracer class - useful for debug to dump streams of data.
@@ -77,432 +108,286 @@ ModuleLoader.unload = function (modulePath) {
  *
  * @property {String} name    - tracer's name
  * @property {String} path    - path to file
+ * @property {Number} fd      - file descriptor
+ * @property {Boolean} disabled - is tracer disabled
  */
-function Tracer(name, tracerPath) {
-    this.name = name;
-    this.path = tracerPath;
-    this.stream = undefined;
-    this.inode = undefined;
-    this.timeoutID = undefined;
-    this.isTruncated = false;
-    this.state = Tracer.STATE.NEW;
-    this.touch();
+class Tracer {
+    constructor(name, tracerPath) {
+        this.name = name;
+        this.path = tracerPath;
+        this.fd = undefined;
+        this.disabled = false;
+        this.touch();
+    }
+
+    /**
+     * Add data to cache
+     *
+     * @sync
+     * @private
+     * @param {Any} data - data to add (should be JSON serializable)
+     */
+    _cacheData(data) {
+        if (!this.cache) {
+            this.cache = [];
+        }
+        while (this.cache.length >= constants.TRACER.LIST_SIZE) {
+            this.cache.shift();
+        }
+        this.cache.push({ data, timestamp: new Date().toISOString() });
+    }
+
+    /**
+     * Close file
+     *
+     * @async
+     * @private
+     * @returns {Promise} resolved once file closed
+     */
+    _close() {
+        if (typeof this.fd === 'undefined') {
+            return Promise.resolve();
+        }
+        logger.debug(`Closing tracer '${this.name}' stream  to file '${this.path}'`);
+        return fsPromisified.close(this.fd)
+            .catch((closeErr) => {
+                logger.exception(`tracer._close unable to close file '${this.path}' with fd '${this.fd}'`, closeErr);
+            })
+            .then(() => {
+                this.fd = undefined;
+            });
+    }
+
+    /**
+     * Merge cached data and data from file
+     *
+     * @param {Array<Any>} data - parsed data from file
+     *
+     * @returns {Array<Any>} merged data
+     */
+    _mergeAndResetCache(data) {
+        if (this.cache) {
+            if (this.cache.length >= constants.TRACER.LIST_SIZE) {
+                data = this.cache.slice(this.cache.length - constants.TRACER.LIST_SIZE);
+            } else {
+                data = data.slice(data.length - constants.TRACER.LIST_SIZE + this.cache.length).concat(this.cache);
+            }
+        }
+        this.cache = [];
+        return data;
+    }
+
+    /**
+     * Create destination directory if needed
+     *
+     * @async
+     * @private
+     * @returns {Promise} resolved once destination directory created
+     */
+    _mkdir() {
+        const baseDir = path.dirname(this.path);
+        return fsPromisified.access(baseDir, (fs.constants || fs).R_OK)
+            .catch((accessErr) => {
+                logger.exception(`tracer._mkdir unable to access dir '${baseDir}'`, accessErr);
+                return true;
+            })
+            .then((needToCreate) => {
+                if (needToCreate !== true) {
+                    return Promise.resolve();
+                }
+                logger.debug(`Creating dir '${baseDir}' for tracer '${this.name}'`);
+                return fsPromisified.mkdir(baseDir);
+            });
+    }
+
+    /**
+     * Open tracer's stream
+     *
+     * @async
+     * @private
+     * @returns {Promise} Promise resolved when new stream created or exists already
+     */
+    _open() {
+        if (typeof this.fd !== 'undefined') {
+            return Promise.resolve();
+        }
+        logger.debug(`Creating file '${this.path}' for tracer '${this.name}'`);
+        return this._mkdir()
+            .then(() => fsPromisified.open(this.path, 'w+'))
+            .then((openRet) => {
+                this.fd = openRet[0];
+            });
+    }
+
+    /**
+     * Parse data from file
+     *
+     * @sync
+     * @private
+     * @param {String} data - data from file (empty string or JSON data)
+     *
+     * @returns {Array<Any>} parsed data
+     */
+    _parse(data) {
+        if (data) {
+            try {
+                data = JSON.parse(data);
+            } catch (_) {
+                data = undefined;
+            }
+        }
+        // ignore any data that is not an array
+        if (!Array.isArray(data)) {
+            data = [];
+        }
+        return data;
+    }
+
+    /**
+     * Read data from file
+     *
+     * @async
+     * @private
+     * @returns {Promise} resolved when data was read
+     */
+    _read() {
+        return fsPromisified.fstat(this.fd)
+            .then((statRet) => {
+                const fileSize = statRet[0].size;
+                if (!fileSize) {
+                    return Promise.resolve('');
+                }
+                return fsPromisified.read(this.fd, Buffer.alloc(fileSize), 0, fileSize, 0)
+                    .then((readRet) => {
+                        const buffer = readRet[1];
+                        const bytesRead = readRet[0];
+                        return buffer.slice(0, bytesRead).toString(constants.TRACER.ENCODING);
+                    });
+            });
+    }
+
+    /**
+     * Try to write cached data to file
+     *
+     * @async
+     * @private
+     * @returns {Promise} resolved once data written to file
+     */
+    _tryWriteData() {
+        this._cacheReset = false;
+        return this._open()
+            .then(() => {
+                // don't need to read and parse data when cache has a lot of data already
+                if (this.cache.length >= constants.TRACER.LIST_SIZE) {
+                    return [];
+                }
+                return this._read()
+                    .then(this._parse.bind(this));
+            })
+            .then((readData) => {
+                this._cacheReset = true;
+                return this._mergeAndResetCache(readData);
+            })
+            .then(data => JSON.stringify(data, null, 4))
+            .then(dataToWrite => fsPromisified.ftruncate(this.fd, 0)
+                .then(() => fsPromisified.write(this.fd, dataToWrite, 0, constants.TRACER.ENCODING)))
+            .catch((err) => {
+                // close trace, lost data
+                logger.exception(`tracer._tryWriteData unable to write data to '${this.path}' for tracer '${this.name}'`, err);
+                return this._close();
+            })
+            .then(() => {
+                this._tryWriteDataPromise = null;
+                this._cacheReset = false;
+                return this.disabled ? this._close() : Promise.resolve();
+            });
+    }
+
+    /**
+     * Schedule next attempt to write data
+     *
+     * @async
+     * @private
+     * @returns {Promise} resolved once data written to file
+     */
+    _write() {
+        if (this.disabled) {
+            return Promise.resolve();
+        }
+        let tryWriteDataPromise = this._tryWriteDataPromise;
+        if (!tryWriteDataPromise) {
+            // no one writing at this moment - need to create a new promise and store it
+            tryWriteDataPromise = this._tryWriteData();
+            this._tryWriteDataPromise = tryWriteDataPromise;
+        } else if (this._cacheReset) {
+            // too late, need to schedule next attempt right after current
+            tryWriteDataPromise = tryWriteDataPromise.then(this._write.bind(this));
+        }
+        // else (hidden block)
+        // if there is existing attempt to write data to file and cache not flushed yet
+        // it means we are still on time and we can resolve this promise once current attempt resolved
+
+        // create a new promise to avoid accidental chaining to internal promises responsible for data writing
+        return new Promise(resolve => tryWriteDataPromise.then(resolve));
+    }
+
+    /**
+     * Update last touch timestamp
+     */
+    touch() {
+        this.lastGetTouch = new Date().getTime();
+    }
+
+    /**
+     * Stop tracer permanently
+     *
+     * @async
+     * @public
+     * @returns {Promise} resolved once tracer stopped
+     */
+    stop() {
+        logger.debug(`Stop tracer '${this.name}' stream  to file '${this.path}'`);
+        this.disabled = true;
+        // schedule file closing right after last scheduled writing attempt
+        // but data that awaits for writing will be lost
+        return (this._tryWriteDataPromise ? this._tryWriteDataPromise : Promise.resolve())
+            .then(this._close.bind(this));
+    }
+
+    /**
+     * Write data to tracer
+     *
+     * @async
+     * @public
+     * @param {Any} data - data to write to tracer (should be JSON serializable)
+     *
+     * @returns {Promise} resolved once data written to file
+     */
+    write(data) {
+        if (this.disabled) {
+            return Promise.resolve();
+        }
+        this._cacheData(data);
+        return this._write();
+    }
 }
 
 /**
- * Interval to check if file needs to be reopened
+ * Remove registered tracer
  *
- * @member {Integer}
- */
-Tracer.REOPEN_INTERVAL = 15000;
-
-/**
- * Tracer states
+ * @param {Tracer} tracer - tracer instance to remove
  *
- * @private
+ * @returns {Promise} resolved once tracer stopped
  */
-Tracer.STATE = Object.freeze({
-    /** @private */
-    NEW: 'NEW',
-    /** @private */
-    INIT: 'INIT',
-    /** @private */
-    CREATED: 'CREATED',
-    /** @private */
-    READY: 'READY',
-    /** @private */
-    CLOSING: 'CLOSING',
-    /** @private */
-    CLOSED: 'CLOSED',
-    /** @private */
-    REOPEN: 'REOPEN',
-    /** @private */
-    STOP: 'STOP'
-});
-
-/**
- * Remove schedule 'reopen' function
- *
- * @private
- */
-Tracer.prototype.removeScheduledReopen = function () {
-    if (this.timeoutID) {
-        clearTimeout(this.timeoutID);
-        this.timeoutID = undefined;
+Tracer._remove = function (tracer) {
+    let promise = Promise.resolve();
+    if (tracer) {
+        // stop tracer to avoid re-using it
+        // new tracer will be created if needed
+        promise = tracer.stop();
+        delete Tracer.instances[tracer.name];
     }
-};
-
-/**
- * Set state
- *
- * @private
- * @param {String} newState - tracer's new state
- */
-Tracer.prototype._setState = function (newState) {
-    // reject any state if current is STOP
-    if (this.state === Tracer.STATE.STOP) {
-        return;
-    }
-    const oldState = this.state;
-    this.state = newState;
-    logger.debug(`Tracer '${this.name}' changed state from ${oldState} to ${newState}`);
-};
-
-/**
- * Mark tracer as ready
- *
- * @private
- */
-Tracer.prototype._setReady = function () {
-    this._updateInode();
-    this.reopenIfNeeded(true);
-    this._setState(Tracer.STATE.READY);
-};
-
-/**
- * Mark tracer as closed
- *
- * @private
- */
-Tracer.prototype._setClosed = function () {
-    this.removeScheduledReopen();
-    this.stream = undefined;
-    this.inode = undefined;
-    this._setState(Tracer.STATE.CLOSED);
-    logger.info(`Tracer '${this.name}' stream to file '${this.path}' closed`);
-};
-
-/**
- * Mark tracer as closing
- *
- * @private
- */
-Tracer.prototype._setClosing = function () {
-    logger.debug(`Closing tracer '${this.name}' stream to file '${this.path}'`);
-    if (this.stream) {
-        this.stream.end();
-        this.stream = undefined;
-    }
-    this._setState(Tracer.STATE.CLOSING);
-};
-
-/**
- * Update file's inode to handle situations when file was recreated outside.
- *
- * @private
- */
-Tracer.prototype._updateInode = function () {
-    fs.stat(this.path, (err, stats) => {
-        if (err) {
-            logger.error(`Unable to get stats for tracer '${this.name}'s file '${this.path}'`);
-            this.close();
-        } else {
-            this.inode = stats.ino;
-            logger.debug(`Tracer '${this.name}' file '${this.path}' inode=${this.inode}`);
-        }
-    });
-};
-
-/**
- * Re-open tracer if destination file doesn't exists
- *
- * @async
- * @private
- * @returns {Promise} Promise resolved when destination file re-opened or opened already
- */
-Tracer.prototype._reopenIfNeeded = function () {
-    // if stream is not ready then skip check
-    if (!this.isReady()) {
-        return Promise.resolve();
-    }
-    const self = this;
-    return new Promise((resolve) => {
-        // Resolve with true when stream still writing to same file
-        fs.stat(self.path, (err, stats) => {
-            let exists = false;
-            if (err) {
-                logger.error(`Unable to get stats for tracer '${self.name}' file '${self.path}': ${err}`);
-            } else {
-                exists = stats.ino === self.inode;
-            }
-            resolve(exists);
-        });
-    })
-        .then((exists) => {
-            if (exists || !self.isReady()) {
-                return Promise.resolve(false);
-            }
-            return self._mkdir().then(() => Promise.resolve(true));
-        })
-        .then((needReopen) => {
-            if (!(needReopen && self.isReady())) {
-                return Promise.resolve(undefined);
-            }
-            // if file doesn't exists then we need
-            // to re-open file and safely redirect stream to new FD
-            return new Promise((resolve) => {
-                self._setState(Tracer.STATE.REOPEN);
-                // first step - open new file and assign new FD to stream
-                // second step - close old file descriptor
-                fs.open(self.path, 'w', (openErr, fd) => {
-                    if (openErr) {
-                        logger.error(`Unable to re-open tracer '${self.name}' file '${self.path}': ${openErr}`);
-                        self.close();
-                    }
-                    resolve(fd);
-                });
-            });
-        })
-        .then((newFD) => {
-            if (!newFD) {
-                return;
-            }
-            // re-assign stream.fd
-            const oldFD = self.stream.fd;
-            self.stream.fd = newFD;
-            // update state
-            self._setReady();
-            // try close old FD
-            fs.close(oldFD, (closeErr) => {
-                if (closeErr) {
-                    logger.error(`Unable to close tracer '${self.name}' previous fd=${oldFD}: ${closeErr}`);
-                }
-            });
-        })
-        .catch(err => logger.exception('tracer._reopenIfNeeded exception', err));
-};
-
-/**
- * Create destination directory if needed
- *
- * @async
- * @private
- * @returns {Promise} Promise resolved when tracer is ready to continue
- */
-Tracer.prototype._mkdir = function () {
-    const baseDir = path.dirname(this.path);
-    const self = this;
-    return new Promise((resolve) => {
-        fs.access(baseDir, (fs.constants || fs).R_OK, (accessErr) => {
-            let exists = true;
-            if (accessErr) {
-                logger.error(`tracer._mkdir unable to access '${baseDir}': ${accessErr}`);
-                exists = false;
-            }
-            resolve(exists);
-        });
-    })
-        .then((dirExists) => {
-            if (dirExists) {
-                return Promise.resolve();
-            }
-            return new Promise((resolve, reject) => {
-                logger.info(`Creating dir '${baseDir}' for tracer '${self.name}'`);
-                fs.mkdir(baseDir, { recursive: true }, (mkdirErr) => {
-                    if (mkdirErr) {
-                        reject(mkdirErr);
-                    } else {
-                        resolve();
-                    }
-                });
-            });
-        });
-};
-
-/**
- * Open tracer's stream
- *
- * @async
- * @private
- * @returns {Promise} Promise resolved when new stream created or exists already
- */
-Tracer.prototype._open = function () {
-    if (!this.isNew()) {
-        return Promise.resolve();
-    }
-    logger.debug(`Creating new tracer '${this.name}' stream to file '${this.path}'`);
-    // prohibit to open many stream from single instance
-    this._setState(Tracer.STATE.INIT);
-
-    return this._mkdir()
-        .then(() => {
-            this.stream = fs.createWriteStream(this.path, { flags: 'w' });
-            this._setState(Tracer.STATE.CREATED);
-            // 'ready' event never fires - bug
-            this.stream.on('open', () => {
-                // now we are ready to process data
-                this._setReady();
-            });
-            this.stream.on('close', () => {
-                this._setClosed();
-            });
-            this.stream.on('error', (err) => {
-                logger.error(`tracer.error: tracer '${this.name}' stream to file '${this.path}': ${err}`);
-                this.close();
-            });
-            // resolving here, because it is more simpler and reliable
-            // than wait inside 'open'
-            return Promise.resolve();
-        })
-        .catch(err => Promise.reject(err));
-};
-
-/**
- * Truncate destination file if needed
- *
- * @async
- * @private
- * @returns {Promise} Promise resolved when file was truncated else rejected
- */
-Tracer.prototype._truncate = function () {
-    const self = this;
-    return new Promise((resolve, reject) => {
-        if (!self.isReady() || self.isTruncated) {
-            resolve();
-        } else {
-            /**
-             * marking file as truncated to avoid sequential calls.
-             * Ideally, stream will be flushed after every tick,
-             * so lets mark file as not truncated after every tick.
-             * Btw, side effect - despite on 'w' at stream creation,
-             * file will be truncated twice in any case.
-             * @ignore
-             */
-            self.isTruncated = true;
-            fs.ftruncate(self.stream.fd, 0, (err) => {
-                if (err) {
-                    reject(err);
-                    self.isTruncated = false;
-                } else {
-                    process.nextTick(() => {
-                        self.isTruncated = false;
-                    });
-                    // update stream's position
-                    self.stream.pos = 0;
-                    resolve();
-                }
-            });
-        }
-    });
-};
-
-/**
- * Write data to stream. If tracer is not available then
- * no data will be written to stream.
- *
- * @async
- * @private
- *
- * @param {String} data - data to write to stream
- *
- * @returns {Promise} Promise resolved when data was written
- */
-Tracer.prototype._write = function (data) {
-    const self = this;
-    return new Promise((resolve, reject) => {
-        // data will be buffered even if file in CREATED state
-        if (!self.isAvailable()) {
-            resolve();
-        } else {
-            self.stream.write(data, (err) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve();
-                }
-            });
-        }
-    });
-};
-
-/**
- * Check if tracer ready to process data
- *
- * @returns {Boolean} true if ready else false
- */
-Tracer.prototype.isReady = function () {
-    return this.state === Tracer.STATE.READY;
-};
-
-/**
- * Check if tracer is able to process/buffer data
- *
- * @returns {Boolean} true if ready else false
- */
-Tracer.prototype.isAvailable = function () {
-    return this.isReady()
-        || this.state === Tracer.STATE.CREATED
-        || this.state === Tracer.STATE.REOPEN;
-};
-
-/**
- * Check if tracer should be initialized
- *
- * @returns {Boolean} true if not initialized else false
- */
-Tracer.prototype.isNew = function () {
-    return this.state === Tracer.STATE.NEW
-        || this.state === Tracer.STATE.CLOSED;
-};
-
-/**
- * Update last touch timestamp
- */
-Tracer.prototype.touch = function () {
-    this.lastGetTouch = new Date().getTime();
-};
-
-/**
- * Reopen stream if needed
- *
- * @param {Boolean} schedule - true when need to schedule function
- */
-Tracer.prototype.reopenIfNeeded = function (schedule) {
-    this.removeScheduledReopen();
-    if (schedule) {
-        this.timeoutID = setTimeout(() => {
-            this.reopenIfNeeded();
-        }, Tracer.REOPEN_INTERVAL);
-    } else {
-        this._reopenIfNeeded().then(() => {
-            this.reopenIfNeeded(true);
-        });
-    }
-};
-
-/**
- * Close tracer's stream
- */
-Tracer.prototype.close = function () {
-    this._setClosing();
-};
-
-/**
- * Stop tracer permanently
- */
-Tracer.prototype.stop = function () {
-    logger.info(`Stop tracer '${this.name}' stream  to file '${this.path}'`);
-    this._setState(Tracer.STATE.STOP);
-    this.close();
-};
-
-/**
- * Write data to tracer
- *
- * @async
- * @param {String} data - data to write to tracer
- */
-Tracer.prototype.write = function (data) {
-    if (!data) {
-        return Promise.resolve();
-    }
-
-    return this._open()
-        .then(() => this._truncate())
-        .then(() => this._write(data))
-        .catch((err) => {
-            logger.error(`tracer.write error: ${err}`);
-        });
+    return promise;
 };
 
 /**
@@ -530,10 +415,6 @@ Tracer.get = function (name, tracerPath) {
         logger.debug(`Updating tracer instance - '${name}' file '${tracerPath}'`);
         tracer.path = tracerPath;
         tracer.touch();
-        // force tracer to check if we need to
-        // reopen destination file in case
-        // if file changed
-        tracer.reopenIfNeeded();
     }
     return tracer;
 };
@@ -554,25 +435,11 @@ Tracer.createFromConfig = function (className, objName, config) {
         objName = `${className}.${objName}`;
         let tracerPath = config.trace;
         if (config.trace === true) {
-            tracerPath = path.join(constants.TRACER_DIR, objName);
+            tracerPath = path.join(constants.TRACER.DIR, objName);
         }
         tracer = Tracer.get(objName, tracerPath);
     }
     return tracer;
-};
-
-/**
- * Remove registered tracer
- *
- * @param {Tracer} tracer - tracer instance to remove
- */
-Tracer.removeTracer = function (tracer) {
-    if (tracer) {
-        // stop tracer to avoid re-using it
-        // new tracer will be created if needed
-        tracer.stop();
-        delete Tracer.instances[tracer.name];
-    }
 };
 
 /**
@@ -587,21 +454,25 @@ Tracer.removeTracer = function (tracer) {
  *
  * @param {String | Tracer | Tracer~filterCallback} toRemove - tracer or tracer's name to remove
  *                                                             or filter function
+ *
+ * @returns {Promise} resolved once matched tracers stopped
  */
 Tracer.remove = function (toRemove) {
+    const promises = [];
     if (typeof toRemove === 'function') {
         Object.keys(Tracer.instances).forEach((tracerName) => {
             const tracer = Tracer.instances[tracerName];
             if (toRemove(tracer)) {
-                Tracer.removeTracer(tracer);
+                promises.push(Tracer._remove(tracer));
             }
         });
     } else {
         if (typeof toRemove !== 'string') {
             toRemove = toRemove.name;
         }
-        Tracer.removeTracer(Tracer.instances[toRemove]);
+        promises.push(Tracer._remove(Tracer.instances[toRemove]));
     }
+    return Promise.all(promises);
 };
 
 
@@ -1157,5 +1028,11 @@ module.exports = {
     /** @see ModuleLoader */
     moduleLoader: ModuleLoader,
 
-    retryPromise
+    /** @see retryPromise */
+    retryPromise,
+
+    /**
+     * @see fs
+     */
+    fs: fsPromisified
 };

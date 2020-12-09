@@ -14,6 +14,7 @@ Changes to this project are documented in this file. More detail and links can b
 ### Fixed
 ### Changed
 - AUTOTOOL-1983: No major updates for npm packages (package-lock.json updates only).
+- AUTOTOOL-1914: Store up to 10 items in trace file
 ### Removed
 
 ## 1.16.0
