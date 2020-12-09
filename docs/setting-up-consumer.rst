@@ -88,7 +88,7 @@ Required Information:
 
 To see more information about sending data to Log Analytics, see |HTTP Data Collector API|.
 
-.. NOTE:: The following example has been updated with the **useManagedIdentity** and **region** properties. |br| See :ref:`mi` following the example for information about using Azure Managed Identities and Telemetry Streaming. 
+.. NOTE:: The following example has been updated with the **useManagedIdentity** and **region** properties. |br| See :ref:`Using Managed Identities<mi>` following the example for information about using Azure Managed Identities and Telemetry Streaming. 
 
 Region property
 ^^^^^^^^^^^^^^^
@@ -153,7 +153,7 @@ Microsoft Azure Application Insights
 Required Information:
 
 - **Instrumentation Key**: If provided, **Use Managed Identity** must be *false* or omitted (default). Navigate to :guilabel:`Application Insights > {AppinsightsName} > Overview`
-- **Use Managed Identity**: If true, Instrumentation Key must be omitted. See :ref:`miappin`.
+- **Use Managed Identity**: If true, Instrumentation Key must be omitted. See :ref:`Managed Identities for App Insight<miappin>`.
 
 
 Optional Properties:
@@ -217,7 +217,7 @@ AWS CloudWatch
 --------------
 |aws_img|   
 
-AWS CloudWatch has two consumers: CloudWatch Logs, and :ref:`cw-metrics` (new in TS 1.14).  If you do not use the new **dataType** property, the system defaults to CloudWatch Logs.
+AWS CloudWatch has two consumers: CloudWatch Logs, and :ref:`CloudWatch Metrics<cw-metrics>` (new in TS 1.14).  If you do not use the new **dataType** property, the system defaults to CloudWatch Logs.
 
 .. IMPORTANT:: In TS 1.9.0 and later, the **username** and **passphrase** for CloudWatch are optional.  This is because a user can send data from a BIG-IP that has an appropriate IAM role in AWS to AWS CloudWatch without a username and passphrase.
 
