@@ -128,7 +128,7 @@ Specifying proxy settings for Generic HTTP consumers
 
    Support for configuring proxy settings is available in TS v1.17 and later
 
-This example shows how you can configure proxy settings for Generic HTTP consumers (including :ref:`beacon-ref`) in TS 1.17 and later. This allows you to send Telemetry Streaming data through a proxy.
+This example shows how you can configure proxy settings for Generic HTTP consumers (including :ref:`F5 Beacon<beacon-ref>`) in TS 1.17 and later. This allows you to send Telemetry Streaming data through a proxy.
 
 For usage options, see |proxy| in the Schema Reference.
 

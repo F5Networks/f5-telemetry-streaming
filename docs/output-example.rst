@@ -62,13 +62,17 @@ ASM Request Log
 
 :ref:`Back to top<outputexample-ref>`
 
+.. _apm-rl:
+
 APM Request Log
 ---------------
 .. NOTE:: Log streams from LTM, AFM, ASM, and APM are not configured by Telemetry Streaming, they must be configured with AS3 or another method.
 
+**New**: Telemetry Streaming 1.17 adds a timestamp, highlighted in yellow.  You will not see this output in versions prior to 1.17.
+
 .. literalinclude:: ../examples/output/request_logs/apm_request_log.json
     :language: json
- 
+    :emphasize-lines: 13
 
 :ref:`Back to top<outputexample-ref>`
 

@@ -11,6 +11,10 @@ Document Revision History
         - Description
         - Date
 
+      * - 1.17.0
+        - Updated the documentation for Telemetry Streaming v1.17.0. This release contains the following changes: |br| * Added support for configuring proxy settings on Generic HTTP consumers (see :ref:`proxy`) |br| * Added a timestamp for APM Request Log output (see :ref:`APM Request Log<apm-rl>`) |br| * Added support for TLS client authentication to the Kafka consumer (see :ref:`kafka-ref`) |br| * Added the ability to use the Splunk multi-metric format, currently EXPERIMENTAL (see :ref:`multi-metric`)  |br| |br| Issues Resolved: |br| * 
+        - 11-20-20
+
       * - 1.16.0
         - Updated the documentation for Telemetry Streaming v1.16.0. This release contains the following changes: |br| * Added support for the Telemetry_Namespace class in declarations posted to the /declare endpoint (see :doc:`namespaces`) |br| * Added new Namespace PullConsumer endpoint (see :doc:`namespaces`) |br| * Added support for Custom Endpoints.  Moved the Custom Endpoint page from an Appendix to Using Telemetry Streaming (see :doc:`custom-endpoints`) |br| * TS now includes _ResourceId if available for Azure Log Analytics consumer, and metadata calls are now only happening upon consumer(s) load |br| *  |br| |br| Issues Resolved: |br| * Fixed issue when TS incorrectly processing iRule stats with multiple events
         - 11-20-20
