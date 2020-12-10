@@ -330,7 +330,7 @@ Required Information:
 
 .. NOTE:: To see more information about installing Kafka, see |Installing Kafka|.
 
-NEW in TS 1.17
+New in TS 1.17
 ``````````````
 Telemetry Streaming 1.17 and later adds the ability to add TLS client authentication to the Kafka consumer using the **TLS** authentication protocol.  This protocol configures Telemetry Streaming to provide the required private key and certificate(s) when the Kafka broker is configured to use SSL/TLS Client authentication. 
 
