@@ -128,7 +128,7 @@ module.exports = {
     STATS_KEY_SEP: '::',
     STRICT_TLS_REQUIRED: true,
     TRACER: {
-        DIR: './telemetry',
+        DIR: '/var/tmp/telemetry',
         ENCODING: 'utf8',
         LIST_SIZE: 10
     },
