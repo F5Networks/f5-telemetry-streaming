@@ -20,10 +20,10 @@ chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe('Custom Endpoints (Telemetry_Endpoints)', () => {
-    const TOTAL_ATTEMPTS = 10;
+    const DEFAULT_TOTAL_ATTEMPTS = 10;
 
     const checkResponse = (endpointMock, response) => {
-        if (!response.kind) {
+        if (!response.kind && !endpointMock.skipCheckResponse) {
             throw new Error(`Endpoint '${endpointMock.endpoint}' has no property 'kind' in response`);
         }
     };
@@ -40,6 +40,8 @@ describe('Custom Endpoints (Telemetry_Endpoints)', () => {
                 testUtil.getCallableIt(testConf)(testConf.name, () => {
                     const endpointsStateValidator = testUtil.getSpoiledDataValidator(testConf.endpointList);
 
+                    const totalAttempts = testConf.totalAttempts || DEFAULT_TOTAL_ATTEMPTS;
+
                     const options = {
                         endpoints: testConf.endpointList
                     };
@@ -49,14 +51,14 @@ describe('Custom Endpoints (Telemetry_Endpoints)', () => {
                     const stats = new SystemStats(options);
 
                     let promise = Promise.resolve();
-                    for (let i = 1; i < TOTAL_ATTEMPTS + 1; i += 1) {
+                    for (let i = 1; i < totalAttempts + 1; i += 1) {
                         promise = promise.then(() => {
                             testUtil.mockEndpoints(testConf.endpoints || [], { responseChecker: checkResponse });
                             return getCollectedData(stats.collect(), stats);
                         })
                             .then((data) => {
-                                assert.deepStrictEqual(data, testConf.expectedData, `should match expected output (attempt #${i}`);
-                                assert.deepStrictEqual(stats.loader.cachedResponse, {}, `cache should be erased (attempt #${i}`);
+                                assert.deepStrictEqual(data, testConf.expectedData, `should match expected output (attempt #${i})`);
+                                assert.deepStrictEqual(stats.loader.cachedResponse, {}, `cache should be erased (attempt #${i})`);
                                 endpointsStateValidator();
                             });
                     }
