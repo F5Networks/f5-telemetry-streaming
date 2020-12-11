@@ -19,6 +19,8 @@ Required information:
  - Port: Default is 8088, this can be configured within the Global Settings section of the Splunk HEC.
  - API Key: An API key must be created and provided in the passphrase object of the declaration, refer to Splunk documentation for the correct way to create an HEC token.
 
+.. NOTE:: If you want to specify proxy settings for Splunk consumers in TS 1.17 and later, see the :ref:`Splunk Proxy<splunkproxy>` example.
+
 Example Declaration:
 
 .. literalinclude:: ../examples/declarations/splunk.json
@@ -330,7 +332,7 @@ Required Information:
 
 .. NOTE:: To see more information about installing Kafka, see |Installing Kafka|.
 
-NEW in TS 1.17
+New in TS 1.17
 ``````````````
 Telemetry Streaming 1.17 and later adds the ability to add TLS client authentication to the Kafka consumer using the **TLS** authentication protocol.  This protocol configures Telemetry Streaming to provide the required private key and certificate(s) when the Kafka broker is configured to use SSL/TLS Client authentication. 
 
@@ -450,11 +452,13 @@ Required Information:
 
 .. NOTE:: Since this consumer is designed to be generic and flexible, how authentication is performed is left up to the web service. To ensure the secrets are encrypted within Telemetry Streaming please note the use of JSON pointers. The secret to protect should be stored inside ``passphrase`` and referenced in the desired destination property, such as an API token in a header as shown in this example. 
 
-To see an example of Generic HTTP with multiple passphrases, see :ref:`multiple`.
+**Additional examples for Generic HTTP consumers:**
 
-To see an example of Generic HTTP with proxy settings, see :ref:`proxy`.
+- Generic HTTP with multiple passphrases, see :ref:`multiple`.
+- Generic HTTP with proxy settings in TS 1.17 and later, see :ref:`proxy`.
+- An EXPERIMENTAL feature where you can specify fallback IP address(es) for the Generic HTTP consumer, see :ref:`fallback`.
 
-To see an example of the EXPERIMENTAL feature where you can specify fallback IP address(es) for the Generic HTTP consumer, see :ref:`fallback`.
+|
 
 .. literalinclude:: ../examples/declarations/generic_http.json
     :language: json
