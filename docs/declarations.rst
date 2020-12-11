@@ -120,6 +120,19 @@ For more details about pointers see the section on :ref:`pointersyntax`.
 
 |
 
+.. _fallback:
+
+Specifying fallback hosts for Generic HTTP consumers
+----------------------------------------------------
+.. IMPORTANT:: Configuring fallback hosts for Generic HTTP consumers is currently EXPERIMENTAL and is available in TS v1.14 and later. 
+
+This example shows how you can use the experimental **fallbackHosts** property to specify fallback IP address(es) for a consumer.
+
+.. literalinclude:: ../examples/declarations/generic_http_fallback.json
+    :language: json
+
+|
+
 .. _proxy:
 
 Specifying proxy settings for Generic HTTP consumers
@@ -142,16 +155,27 @@ The following example also uses :doc:`Telemetry Streaming Namespaces<namespaces>
 
 |
 
-.. _fallback:
+.. _splunkproxy:
 
-Specifying fallback hosts for Generic HTTP consumers
-----------------------------------------------------
-.. IMPORTANT:: Configuring fallback hosts for Generic HTTP consumers is currently EXPERIMENTAL and is available in TS v1.14 and later. 
+Specifying proxy settings for Splunk consumers
+----------------------------------------------
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-This example shows how you can use the experimental **fallbackHosts** property to specify fallback IP address(es) for a consumer.
+   Support for configuring Splunk proxy settings is available in TS v1.17 and later
 
-.. literalinclude:: ../examples/declarations/generic_http_fallback.json
+This example shows how you can configure proxy settings for :ref:`Splunk consumers<splunk-ref>` in TS 1.17 and later. This allows you to send Telemetry Streaming data through a proxy.
+
+For usage options, see |proxy| in the Schema Reference.
+
+The following example also uses :doc:`Telemetry Streaming Namespaces<namespaces>`.  The proxy lines are highlighted in the example.
+
+
+.. literalinclude:: ../examples/declarations/splunk_proxy.json
     :language: json
+    :emphasize-lines: 23-35, 52-56
+
+
+|
 
 
 .. |proxy| raw:: html
