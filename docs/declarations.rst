@@ -172,7 +172,7 @@ The following example also uses :doc:`Telemetry Streaming Namespaces<namespaces>
 
 .. literalinclude:: ../examples/declarations/splunk_proxy.json
     :language: json
-    :emphasize-lines: 23-35, 52-56
+    :emphasize-lines: 23-32, 52-56
 
 
 |
