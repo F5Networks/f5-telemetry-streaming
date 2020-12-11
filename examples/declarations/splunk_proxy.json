@@ -3,7 +3,7 @@
     "controls": {
         "class": "Controls",
         "logLevel": "debug",
-        "debug": true
+        "debug": false
     },
     "With_Proxy_HTTPS_target": {
         "class": "Telemetry_Namespace",
@@ -23,14 +23,14 @@
             "proxy": {
                 "host": "10.10.14.14",
                 "port": 5053,
-                "protocol": "http",
+                "protocol": "https",
                 "username": "me",
                 "passphrase": {
                     "cipherText": "myself"
                 },
-                "allowSelfSignedCert": true
+                "allowSelfSignedCert": false
             },
-            "trace": true,
+            "trace": false,
             "enable": true
         }
     },
@@ -52,9 +52,9 @@
             "proxy": {
                 "host": "10.10.14.15",
                 "port": 5053,
-                "protocol": "http"
+                "protocol": "https"
             },
-            "trace": true,
+            "trace": false,
             "enable": true
         }
     }
