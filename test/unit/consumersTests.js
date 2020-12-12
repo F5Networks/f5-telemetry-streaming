@@ -149,5 +149,61 @@ describe('Consumers', () => {
                         'should not load invalid consumer type');
                 });
         });
+
+        it('should not reload existing consumer when skipUpdate = true', () => {
+            let existingComp;
+            let newComp;
+            const existingConfig = {
+                class: 'Telemetry',
+                FirstConsumer: {
+                    class: 'Telemetry_Consumer',
+                    type: 'default'
+                }
+            };
+
+            const newConfig = {
+                class: 'Telemetry',
+                FirstConsumer: {
+                    class: 'Telemetry_Consumer',
+                    type: 'default'
+                },
+                NewNamespace: {
+                    class: 'Telemetry_Namespace',
+                    SecondConsumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'default'
+                    }
+                }
+            };
+            const moduleLoaderSpy = sinon.spy(util.moduleLoader, 'load');
+            return validateAndNormalize(existingConfig)
+                .then((normalized) => {
+                    existingComp = normalized.components[0];
+                    // emit change event, then wait a short period
+                    configWorker.emit('change', normalized);
+                    return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
+                })
+                .then(() => {
+                    const loadedConsumers = consumers.getConsumers();
+                    assert.strictEqual(loadedConsumers.length, 1, 'should load default consumer');
+                    assert.isTrue(moduleLoaderSpy.calledOnce);
+                })
+                .then(() => validateAndNormalize(newConfig))
+                .then((normalized) => {
+                    newComp = normalized.components.find(c => c.class === 'Telemetry_Consumer' && c.namespace === 'NewNamespace');
+                    // simulate a namespace only declaration request
+                    // existing config unchanged, id the same
+                    existingComp.skipUpdate = true;
+                    normalized.components[0] = existingComp;
+                    configWorker.emit('change', normalized);
+                    return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
+                })
+                .then(() => {
+                    const loadedConsumers = consumers.getConsumers();
+                    assert.strictEqual(loadedConsumers[0].id, existingComp.id);
+                    assert.strictEqual(loadedConsumers[1].id, newComp.id);
+                    assert.isTrue(moduleLoaderSpy.calledTwice);
+                });
+        });
     });
 });

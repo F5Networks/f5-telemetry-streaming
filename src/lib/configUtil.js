@@ -757,6 +757,38 @@ function normalizeConfig(data) {
         .then(convertedConfig => normalizeComponents(convertedConfig));
 }
 
+/**
+ * Converts a namespace config to new normalized format
+ * and merges it with existing config
+ *
+ * @public
+ * @param {Object} namespaceConfig - the namespace config to normalize (declared components must already be expanded)
+ * @param {String} options.namespaceToUpdate - namespace name
+ * @param {Object} options.savedConfig - existing config to merge namespace config with
+ *
+ * @returns {Promise.<Object>} normalized config
+ */
+function mergeNamespaceConfig(namespaceConfig, options) {
+    const toNormalize = { [options.namespaceToUpdate]: namespaceConfig };
+
+    return this.normalizeConfig(toNormalize)
+        .then((namespaceNormalized) => {
+            const savedNormalized = options.savedConfig.normalized;
+            const removedIds = [];
+            savedNormalized.components.forEach((component) => {
+                if (component.namespace === options.namespaceToUpdate) {
+                    delete savedNormalized.mappings[component.id];
+                    removedIds.push(component.id);
+                }
+            });
+            savedNormalized.components = savedNormalized.components.filter(c => removedIds.indexOf(c.id) === -1);
+            const allNormalized = {
+                mappings: Object.assign(savedNormalized.mappings, namespaceNormalized.mappings),
+                components: savedNormalized.components.concat(namespaceNormalized.components)
+            };
+            return allNormalized;
+        });
+}
 
 module.exports = {
     getPollerTraceValue,
@@ -765,6 +797,7 @@ module.exports = {
     componentizeConfig,
     normalizeComponents,
     normalizeConfig,
+    mergeNamespaceConfig,
     getControls,
     getTelemetrySystems,
     getTelemetrySystemPollers,

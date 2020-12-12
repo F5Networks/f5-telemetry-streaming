@@ -43,10 +43,13 @@ nodeUtil.inherits(ConfigWorker, EventEmitter);
  *
  * @public
  * @param {Object} newConfig - new config
+ * @param {Object} options - options when setting config
+ * @param {String} options.namespaceToUpdate - namespace name of components
+ *               that are the only ones that need updating instead of all config
  */
-ConfigWorker.prototype.setConfig = function (newConfig) {
+ConfigWorker.prototype.setConfig = function (newConfig, options) {
     return this.upgradeConfiguration(newConfig)
-        .then(upgradedConfig => this._notifyConfigChange(upgradedConfig));
+        .then(upgradedConfig => this._notifyConfigChange(upgradedConfig, options));
 };
 
 /**
@@ -86,10 +89,13 @@ ConfigWorker.prototype.upgradeConfiguration = function (config) {
  *
  * @private
  * @param {Object} newConfig - new config
+ * @param {Object} options - options when setting config
+ * @param {String} options.namespaceToUpdate - namespace of components
+ *               that are the only ones that need updating instead of all config
  *
  * @emits ConfigWorker#change
  */
-ConfigWorker.prototype._notifyConfigChange = function (newConfig) {
+ConfigWorker.prototype._notifyConfigChange = function (newConfig, options) {
     if (!newConfig || !newConfig.normalized) {
         throw new Error('_notifyConfigChange() Missing required config.');
     }
@@ -99,7 +105,15 @@ ConfigWorker.prototype._notifyConfigChange = function (newConfig) {
             // deepCopy the emitted config
             // HOWEVER: the copy is passed by reference to each Listener.
             // Any listener that modifies the config must make its own local copy.
-            this.emit('change', util.deepCopy(decryptedConfig));
+            const configToEmit = util.deepCopy(decryptedConfig);
+            if (!util.isObjectEmpty(options) && typeof options.namespaceToUpdate !== 'undefined') {
+                configToEmit.components.forEach((component) => {
+                    if (component.namespace !== options.namespaceToUpdate) {
+                        component.skipUpdate = true;
+                    }
+                });
+            }
+            this.emit('change', configToEmit);
         })
         .catch((err) => {
             logger.error(`notifyConfigChange error: ${err}`);
@@ -196,23 +210,48 @@ ConfigWorker.prototype.expandConfig = function (rawConfig) {
 };
 
 /**
- * Process incoming, user provided declaration
+ * Process incoming, user provided declaration (namespace only)
+ *
+ * Merge namespace declaration with any existing config and then perform validation, parsing and application
+ *
+ * @public
+ * @param {Object} data - namespace-only data to process
+ * @param {String} options.namespace - namespace to which config belongs to
+ *
+ * @returns {Object} Promise resolved with copy of validated config resolved on success
+ */
+
+ConfigWorker.prototype.processNamespaceDeclaration = function (data, namespace) {
+    return this.getConfig()
+        .then((savedConfig) => {
+            const mergedDecl = util.isObjectEmpty(savedConfig.raw) ? { class: 'Telemetry' } : util.deepCopy(savedConfig.raw);
+            mergedDecl[namespace] = data;
+            return this.processDeclaration(mergedDecl, { savedConfig, namespaceToUpdate: namespace });
+        });
+};
+
+/**
+ * Process incoming, user provided declaration (full config)
+ *
  * Validate JSON data against config schema, parse it and apply it to current app
  *
  * @public
  * @param {Object} data - data to validate against config schema
+ * @param {Object} options - options when processing declaration config
+ * @param {String} options.namespaceToUpdate - only update this namespace config
+ * @param {Object} options.savedConfig - existing config to merge namespace config with
  *
- * @returns {Object} Promise with validated config (not the parsed one) resolved on success
+ * @returns {Object} Promise resolved with copy of validated config resolved on success
  */
-ConfigWorker.prototype.processDeclaration = function (data) {
+ConfigWorker.prototype.processDeclaration = function (data, options) {
     data = data || {};
     let validatedConfig = {};
     const configToSave = {
         raw: {},
         normalized: {}
     };
+    const setConfigOpts = {};
     logger.debug(`Configuration to process: ${util.stringify(data)}`);
-
     // validate declaration, then run it back through validator with scratch
     // property set for additional processing required prior to internal consumption
     // note: ?show=expanded could return config to user with this processing done (later)
@@ -226,6 +265,13 @@ ConfigWorker.prototype.processDeclaration = function (data) {
         })
         .then((expandedConfig) => {
             logger.debug('Configuration successfully validated');
+            if (!util.isObjectEmpty(options) && options.namespaceToUpdate) {
+                setConfigOpts.namespaceToUpdate = options.namespaceToUpdate;
+                // normalize the specified namespace config only
+                // keep the values for other namespaces if  they already exist
+                return configUtil.mergeNamespaceConfig(expandedConfig[options.namespaceToUpdate], options);
+            }
+            // normalize the whole config, will generate new UUIDs
             return configUtil.normalizeConfig(expandedConfig);
         })
         .then((normalizedConfig) => {
@@ -241,7 +287,7 @@ ConfigWorker.prototype.processDeclaration = function (data) {
         .then(() => this.getConfig())
         .then((config) => {
             // propagate config change
-            this.setConfig(config);
+            this.setConfig(config, setConfigOpts);
             this.teemReporter.process(validatedConfig);
             return validatedConfig;
         })
