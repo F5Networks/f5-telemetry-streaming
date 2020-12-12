@@ -359,7 +359,7 @@ describe('Event Listener', () => {
                 assert.strictEqual(Object.keys(listeners).length, 0);
             }));
 
-        it('should update existing listener(s) without restarting', () => {
+        it('should update existing listener(s) without restarting if port is the same', () => {
             const newDecl = util.deepCopy(origDecl);
             newDecl.Listener1.trace = true;
             const updateSpy = sinon.stub(EventListener.prototype, 'updateConfig');
@@ -378,6 +378,40 @@ describe('Event Listener', () => {
                         port: 1234, id: 'uuid1', tags: { tenant: '`T`', application: '`A`' }
                     });
                     // one for each protocol
+                    assert.isTrue(updateSpy.calledTwice);
+                });
+        });
+
+        it('should add a new listener without updating existing one when skipUpdate = true', () => {
+            const updateSpy = sinon.spy(EventListener.prototype, 'updateConfig');
+            const newDecl = util.deepCopy(origDecl);
+            newDecl.New = {
+                class: 'Telemetry_Namespace',
+                Listener1: {
+                    class: 'Telemetry_Listener',
+                    port: 2345,
+                    trace: true
+                }
+            };
+            return validateAndNormalize(newDecl)
+                .then((normalized) => {
+                    normalized.components[0].skipUpdate = true;
+                    configWorker.emit('change', normalized);
+                    return new Promise(resolve => setTimeout(resolve, 500));
+                })
+                .then(() => {
+                    assert.deepStrictEqual(listenerStub, { start: 2, stop: 0 });
+                    assert.strictEqual(activeTracersStub.length, 2);
+                    assert.strictEqual(allTracersStub.length, 2);
+
+                    const listeners = eventListener.getListeners();
+                    assertListener(listeners.Listener1, {
+                        port: 1234, id: 'uuid1', tags: { tenant: '`T`', application: '`A`' }
+                    });
+                    assertListener(listeners['New::Listener1'], {
+                        port: 2345, id: 'uuid2', tags: {}
+                    });
+                    // one for each protocol, called through constructor
                     assert.isTrue(updateSpy.calledTwice);
                 });
         });

@@ -21,6 +21,8 @@ const config = require('../../src/lib/config');
 const constants = require('../../src/lib/constants');
 const deviceUtil = require('../../src/lib/deviceUtil');
 const psModule = require('../../src/lib/persistentStorage');
+const configTestsData = require('./data/configTestsData');
+const testUtil = require('./shared/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -55,7 +57,6 @@ describe('Config', () => {
         });
         sinon.stub(persistentStorage, 'storage').value(restStorage);
         restStorage._cache = JSON.parse(JSON.stringify(baseState));
-
         // Stub upgradeConfiguration() to ensure no config side-effects
         upgradeConfigurationMock = sinon.stub(config, 'upgradeConfiguration').callsFake(c => Promise.resolve(c));
     });
@@ -83,6 +84,66 @@ describe('Config', () => {
     });
 
     describe('.processDeclaration()', () => {
+        let emitSpy;
+        let savedConfig;
+        const decl = {
+            class: 'Telemetry',
+            Shared: {
+                class: 'Shared',
+                constants: {
+                    class: 'Constants',
+                    path: '/foo'
+                }
+            },
+            My_Consumer: {
+                class: 'Telemetry_Consumer',
+                type: 'Generic_HTTP',
+                host: '192.0.2.1',
+                path: '`=/Shared/constants/path`'
+            }
+        };
+        const expectedNormalized = {
+            mappings: {},
+            components: [
+                {
+                    name: 'Shared',
+                    id: 'uuid1',
+                    class: 'Shared',
+                    constants: {
+                        class: 'Constants',
+                        path: '/foo'
+                    },
+                    namespace: constants.DEFAULT_UNNAMED_NAMESPACE
+                },
+                {
+                    name: 'My_Consumer',
+                    traceName: 'My_Consumer',
+                    id: 'uuid2',
+                    class: 'Telemetry_Consumer',
+                    type: 'Generic_HTTP',
+                    enable: true,
+                    method: 'POST',
+                    host: '192.0.2.1',
+                    path: '/foo',
+                    port: 443,
+                    protocol: 'https',
+                    trace: false,
+                    allowSelfSignedCert: false,
+                    namespace: constants.DEFAULT_UNNAMED_NAMESPACE
+                }
+            ]
+        };
+
+        beforeEach(() => {
+            emitSpy = sinon.spy(config, 'emit');
+            sinon.stub(config, 'saveConfig').callsFake((configToSave) => {
+                savedConfig = configToSave;
+                return Promise.resolve();
+            });
+            sinon.stub(config, 'getConfig').callsFake(() => Promise.resolve(savedConfig));
+            sinon.stub(deviceUtil, 'decryptAllSecrets').callsFake(data => Promise.resolve(data));
+        });
+
         it('should validate and apply basic declaration', () => {
             const obj = {
                 class: 'Telemetry'
@@ -94,68 +155,15 @@ describe('Config', () => {
             return assert.becomes(config.processDeclaration(obj), validatedObj);
         });
 
-        it('should expand config and save', () => {
-            let savedConfig;
-            sinon.stub(config, 'saveConfig').callsFake((configToSave) => {
-                savedConfig = configToSave;
-                return Promise.resolve();
-            });
-            sinon.stub(config, 'getConfig').callsFake(() => Promise.resolve(savedConfig));
+        it('should expand config and save', () => config.processDeclaration(decl)
+            .then(() => {
+                assert.deepStrictEqual(savedConfig.normalized, expectedNormalized);
+            }));
 
-            const data = {
-                class: 'Telemetry',
-                Shared: {
-                    class: 'Shared',
-                    constants: {
-                        class: 'Constants',
-                        path: '/foo'
-                    }
-                },
-                My_Consumer: {
-                    class: 'Telemetry_Consumer',
-                    type: 'Generic_HTTP',
-                    host: '192.0.2.1',
-                    path: '`=/Shared/constants/path`'
-                }
-            };
-            return config.processDeclaration(data)
-                .then(() => {
-                    assert.deepStrictEqual(
-                        savedConfig.normalized,
-                        {
-                            mappings: {},
-                            components: [
-                                {
-                                    name: 'Shared',
-                                    id: 'uuid1',
-                                    class: 'Shared',
-                                    constants: {
-                                        class: 'Constants',
-                                        path: '/foo'
-                                    },
-                                    namespace: constants.DEFAULT_UNNAMED_NAMESPACE
-                                },
-                                {
-                                    name: 'My_Consumer',
-                                    traceName: 'My_Consumer',
-                                    id: 'uuid2',
-                                    class: 'Telemetry_Consumer',
-                                    type: 'Generic_HTTP',
-                                    enable: true,
-                                    method: 'POST',
-                                    host: '192.0.2.1',
-                                    path: '/foo',
-                                    port: 443,
-                                    protocol: 'https',
-                                    trace: false,
-                                    allowSelfSignedCert: false,
-                                    namespace: constants.DEFAULT_UNNAMED_NAMESPACE
-                                }
-                            ]
-                        }
-                    );
-                });
-        });
+        it('should emit expected normalized config', () => config.processDeclaration(decl)
+            .then(() => {
+                assert.deepStrictEqual(emitSpy.firstCall.args[1], expectedNormalized);
+            }));
     });
 
     describe('.saveConfig()', () => {
@@ -326,7 +334,7 @@ describe('Config', () => {
         });
     });
 
-    describe('upgradeConfiguration', () => {
+    describe('.upgradeConfiguration', () => {
         it('should add normalized configuration to config object, if not present', () => {
             upgradeConfigurationMock.restore();
             const curConfig = {
@@ -438,6 +446,86 @@ describe('Config', () => {
                 raw: {},
                 normalized: { components: [], mappings: {} }
             });
+        });
+    });
+
+    describe('.processNamespaceDeclaration()', () => {
+        const testSet = configTestsData.processNamespaceDeclaration;
+        let savedConfig;
+        let emitSpy;
+
+        beforeEach(() => {
+            emitSpy = sinon.spy(config, 'emit');
+            sinon.stub(config, 'saveConfig').callsFake((configToSave) => {
+                savedConfig = configToSave;
+                return Promise.resolve();
+            });
+            sinon.stub(config, 'getConfig').callsFake(() => Promise.resolve(savedConfig));
+            sinon.stub(deviceUtil, 'decryptAllSecrets').callsFake(data => Promise.resolve(data));
+        });
+
+        testSet.forEach(testConf => testUtil.getCallableIt(testConf)(testConf.name, () => {
+            savedConfig = testConf.existingConfig;
+            return config.processNamespaceDeclaration(testConf.input.declaration, testConf.input.namespace)
+                .then(() => {
+                    assert.deepStrictEqual(savedConfig.normalized, testConf.expectedOutput);
+                });
+        }));
+
+        it('should emit expected normalized config (unchanged namespaces have skipUpdate = true)', () => {
+            const baseComp = {
+                name: 'My_System_1',
+                class: 'Telemetry_System',
+                enable: true,
+                systemPollers: [],
+                allowSelfSignedCert: false,
+                host: 'localhost',
+                port: 8100,
+                protocol: 'http'
+            };
+            const defComp = util.assignDefaults({ id: 'uuid-default', namespace: 'f5telemetry_default' }, util.deepCopy(baseComp));
+            const existingComp = util.assignDefaults({ id: 'uuid-namespace-was-here', namespace: 'NamespaceWasHere' }, util.deepCopy(baseComp));
+            const newComp = util.assignDefaults({ id: 'uuid1', namespace: 'NewbieNamespace' }, util.deepCopy(baseComp));
+
+            savedConfig = {
+                raw: {
+                    class: 'Telemetry',
+                    My_System_1: {
+                        class: 'Telemetry_System'
+                    },
+                    NamespaceWasHere: {
+                        class: 'Telemetry_Namespace',
+                        My_System_1: {
+                            class: 'Telemetry_System'
+                        }
+                    }
+                },
+                normalized: {
+                    mappings: {},
+                    components: [
+                        defComp,
+                        existingComp
+                    ]
+                }
+            };
+
+            const expectedNormalized = util.deepCopy(savedConfig.normalized);
+            expectedNormalized.components[0].skipUpdate = true;
+            expectedNormalized.components[1].skipUpdate = true;
+            expectedNormalized.components.push(newComp);
+
+            return config.processNamespaceDeclaration(
+                {
+                    class: 'Telemetry_Namespace',
+                    My_System_1: {
+                        class: 'Telemetry_System'
+                    }
+                },
+                'NewbieNamespace'
+            )
+                .then(() => {
+                    assert.deepStrictEqual(emitSpy.firstCall.args[1], expectedNormalized);
+                });
         });
     });
 });

@@ -145,7 +145,6 @@ describe('System Poller', () => {
                 declaration = testConf.declaration;
                 return systemPoller.getPollersConfig(testConf.sysOrPollerName, testConf.funcOptions)
                     .then((pollersConfig) => {
-                        // console.log(JSON.stringify(pollersConfig, null, 4));
                         pollersConfig = pollersConfig.map(p => ({ name: p.traceName }));
                         assert.deepStrictEqual(pollersConfig, testConf.expectedConfig);
                         assert.isTrue(decryptSecretStub.called);
@@ -654,6 +653,37 @@ describe('System Poller', () => {
                     assert.strictEqual(utilStub.update.length, 1);
                     assert.strictEqual(utilStub.stop.length, 0);
                     assert.deepStrictEqual(pollerTimers, { 'My_System::SystemPoller_1': 200 });
+                });
+        });
+
+        it('should start new poller without restarting existing one when skipUpdate = true)', () => {
+            const newDeclaration = testUtil.deepCopy(defaultDeclaration);
+            newDeclaration.NewNamespace = {
+                class: 'Telemetry_Namespace',
+                My_System: {
+                    class: 'Telemetry_System',
+                    trace: false,
+                    systemPoller: {
+                        interval: 500
+                    }
+                }
+            };
+            return validateAndNormalize(newDeclaration)
+                .then((normalizedConfig) => {
+                    const existingPollerIndex = normalizedConfig.components.findIndex(c => c.traceName === 'My_System::SystemPoller_1');
+                    // simulate a namespace only declaration request
+                    // existing config unchanged, id the same
+                    normalizedConfig.components[existingPollerIndex].skipUpdate = true;
+
+                    configWorker.emit('change', normalizedConfig);
+                    assert.deepStrictEqual(pollerTimers, {
+                        'My_System::SystemPoller_1': 180,
+                        'NewNamespace::My_System::SystemPoller_1': 500
+                    });
+
+                    assert.strictEqual(utilStub.start.length, 1);
+                    assert.strictEqual(utilStub.update.length, 0);
+                    assert.strictEqual(utilStub.stop.length, 0);
                 });
         });
     });

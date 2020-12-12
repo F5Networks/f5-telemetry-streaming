@@ -441,42 +441,44 @@ configWorker.on('change', (config) => {
     });
 
     eventListeners.forEach((listenerFromConfig) => {
-        // use name (prefixed if namespace is present)
-        const name = listenerFromConfig.traceName;
-        const existingListener = LISTENERS[name];
-        // no listener's config or it was disabled - remove it
-        if (listenerFromConfig.enable === false && existingListener) {
-            removeListener(existingListener, name);
-            return;
-        }
-
-        protocols.forEach((protocol) => {
-            let listenerInstance = existingListener ? existingListener[protocol] : undefined;
-            const opts = {
-                protocol,
-                tags: listenerFromConfig.tag,
-                actions: listenerFromConfig.actions,
-                tracer: tracers.createFromConfig(CLASS_NAME, name, listenerFromConfig),
-                filterFunc: buildFilterFunc(listenerFromConfig),
-                id: listenerFromConfig.id,
-                destinationIds: config.mappings[listenerFromConfig.id]
-            };
-
-            // when port is the same - no sense to restart listener and drop connections
-            if (listenerInstance && listenerInstance.port === listenerFromConfig.port) {
-                logger.debug(`Updating event listener '${name}' protocol '${protocol}'`);
-                listenerInstance.updateConfig(opts);
-            } else {
-                // stop existing listener to free the port
-                if (listenerInstance) {
-                    listenerInstance.stop();
-                }
-                listenerInstance = new EventListener(name, listenerFromConfig.port, opts);
-                listenerInstance.start();
-                LISTENERS[name] = LISTENERS[name] || {};
-                LISTENERS[name][protocol] = listenerInstance;
+        if (!listenerFromConfig.skipUpdate) {
+            // use name (prefixed if namespace is present)
+            const name = listenerFromConfig.traceName;
+            const existingListener = LISTENERS[name];
+            // no listener's config or it was disabled - remove it
+            if (listenerFromConfig.enable === false && existingListener) {
+                removeListener(existingListener, name);
+                return;
             }
-        });
+
+            protocols.forEach((protocol) => {
+                let listenerInstance = existingListener ? existingListener[protocol] : undefined;
+                const opts = {
+                    protocol,
+                    tags: listenerFromConfig.tag,
+                    actions: listenerFromConfig.actions,
+                    tracer: tracers.createFromConfig(CLASS_NAME, name, listenerFromConfig),
+                    filterFunc: buildFilterFunc(listenerFromConfig),
+                    id: listenerFromConfig.id,
+                    destinationIds: config.mappings[listenerFromConfig.id]
+                };
+
+                // when port is the same - no sense to restart listener and drop connections
+                if (listenerInstance && listenerInstance.port === listenerFromConfig.port) {
+                    logger.debug(`Updating event listener '${name}' protocol '${protocol}'`);
+                    listenerInstance.updateConfig(opts);
+                } else {
+                    // stop existing listener to free the port
+                    if (listenerInstance) {
+                        listenerInstance.stop();
+                    }
+                    listenerInstance = new EventListener(name, listenerFromConfig.port, opts);
+                    listenerInstance.start();
+                    LISTENERS[name] = LISTENERS[name] || {};
+                    LISTENERS[name][protocol] = listenerInstance;
+                }
+            });
+        }
     });
 
     logger.debug(`${Object.keys(LISTENERS).length} event listener(s) listening`);
