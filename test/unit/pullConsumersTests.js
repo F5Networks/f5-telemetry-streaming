@@ -74,7 +74,8 @@ describe('Pull Consumers', () => {
                 })
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
-                    assert.deepEqual(Object.keys(loadedConsumers), ['default'], 'should load default consumer');
+                    assert.deepStrictEqual(loadedConsumers.length, 1);
+                    assert.deepStrictEqual(loadedConsumers[0].config.type, 'default', 'should load default consumer');
                 });
         });
 
@@ -99,7 +100,7 @@ describe('Pull Consumers', () => {
                 })
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
-                    assert.deepStrictEqual(loadedConsumers, {}, 'should not load disabled consumer');
+                    assert.deepStrictEqual(loadedConsumers, [], 'should not load disabled consumer');
                 });
         });
 
@@ -150,15 +151,66 @@ describe('Pull Consumers', () => {
                 })
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
-                    assert.deepEqual(Object.keys(loadedConsumers), ['default'], 'should load default consumer');
+                    assert.deepEqual(loadedConsumers[0].config.type, 'default', 'should load default consumer');
                     configWorker.emit('change', {});
                     return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
                 })
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
-                    assert.deepStrictEqual(loadedConsumers, {}, 'should unload default consumer');
+                    assert.deepStrictEqual(loadedConsumers, [], 'should unload default consumer');
                 })
                 .catch(err => Promise.reject(err));
+        });
+
+        it('should not reload existing pull consumer when skipUpdate = true', () => {
+            let existingComp;
+            let newComp;
+            const priorConfig = {
+                class: 'Telemetry',
+                My_Consumer: {
+                    class: CONFIG_CLASSES.PULL_CONSUMER_CLASS_NAME,
+                    type: 'default',
+                    systemPoller: 'My_Poller'
+                },
+                My_Poller: {
+                    class: CONFIG_CLASSES.SYSTEM_POLLER_CLASS_NAME
+                }
+            };
+            const newConfig = util.deepCopy(priorConfig);
+            newConfig.NewNamespace = {
+                class: 'Telemetry_Namespace',
+                My_Consumer: util.deepCopy(priorConfig.My_Consumer),
+                My_Poller: util.deepCopy(priorConfig.My_Poller)
+            };
+            const moduleLoaderSpy = sinon.spy(util.moduleLoader, 'load');
+            return validateAndNormalize(priorConfig)
+                .then((normalized) => {
+                    existingComp = normalized.components.find(c => c.class === CONFIG_CLASSES.PULL_CONSUMER_CLASS_NAME);
+                    // emit change event, then wait a short period
+                    configWorker.emit('change', normalized);
+                    return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
+                })
+                .then(() => {
+                    const loadedConsumers = pullConsumers.getConsumers();
+                    assert.strictEqual(loadedConsumers.length, 1, 'should load default consumer');
+                    assert.isTrue(moduleLoaderSpy.calledOnce);
+                })
+                .then(() => validateAndNormalize(newConfig))
+                .then((normalized) => {
+                    newComp = normalized.components.find(c => c.class === CONFIG_CLASSES.PULL_CONSUMER_CLASS_NAME
+                        && c.namespace === 'NewNamespace');
+                    // simulate a namespace only declaration request
+                    // existing config unchanged, id the same
+                    normalized.components[0] = existingComp;
+                    existingComp.skipUpdate = true;
+                    configWorker.emit('change', normalized);
+                    return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
+                })
+                .then(() => {
+                    const loadedConsumerIds = pullConsumers.getConsumers().map(c => c.id);
+                    assert.deepStrictEqual(loadedConsumerIds, [existingComp.id, newComp.id]);
+                    assert.isTrue(moduleLoaderSpy.calledTwice);
+                });
         });
     });
 
@@ -174,25 +226,6 @@ describe('Pull Consumers', () => {
                 }
                 return Promise.resolve({ data: { mockedResponse: { pollerName: pollerConfig.name } } });
             });
-            sinon.stub(configWorker, 'getConfig').callsFake(() => validateAndNormalize(declaration)
-                .then(normalized => Promise.resolve({ normalized })));
-            // Load Pull Consumer config, with default consumer
-            const defaultConfig = {
-                class: 'Telemetry',
-                My_Consumer: {
-                    class: CONFIG_CLASSES.PULL_CONSUMER_CLASS_NAME,
-                    type: 'default',
-                    systemPoller: 'My_Poller'
-                },
-                My_Poller: {
-                    class: CONFIG_CLASSES.SYSTEM_POLLER_CLASS_NAME
-                }
-            };
-            return validateAndNormalize(defaultConfig)
-                .then((normalized) => {
-                    configWorker.emit('change', normalized);
-                    return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
-                });
         });
 
         const runTestCase = testConf => testUtil.getCallableIt(testConf)(testConf.name, () => {
@@ -200,7 +233,14 @@ describe('Pull Consumers', () => {
             if (typeof testConf.returnCtx !== 'undefined') {
                 returnCtx = testConf.returnCtx;
             }
-            return pullConsumers.getData(testConf.consumerName, testConf.namespace)
+
+            return validateAndNormalize(declaration)
+                .then((normalized) => {
+                    sinon.stub(configWorker, 'getConfig').resolves({ normalized });
+                    configWorker.emit('change', normalized);
+                    return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
+                })
+                .then(() => pullConsumers.getData(testConf.consumerName, testConf.namespace))
                 .then((data) => {
                     assert.deepStrictEqual(data, testConf.expectedResponse);
                 })
@@ -248,8 +288,9 @@ describe('Pull Consumers', () => {
                 return runTestCase(testConf);
             });
 
-            it('should return an error if consumer exists in namespace but no namespace provided', () => {
-                declaration = {
+            const addtlTest = {
+                name: 'should return an error if consumer exists in namespace but no namespace provided',
+                declaration: {
                     class: 'Telemetry',
                     Some_System_Poller: {
                         class: 'Telemetry_System_Poller'
@@ -270,10 +311,11 @@ describe('Pull Consumers', () => {
                             systemPoller: 'Wanted_Poller'
                         }
                     }
-                };
-                return assert.isRejected(pullConsumers.getData('Wanted_Consumer'),
-                    'Pull Consumer with name \'Wanted_Consumer\' doesn\'t exist (namespace: f5telemetry_default)');
-            });
+                },
+                consumerName: 'Wanted_Consumer',
+                errorRegExp: /Pull Consumer with name 'Wanted_Consumer' doesn't exist/
+            };
+            return runTestCase(addtlTest);
         });
     });
 });
