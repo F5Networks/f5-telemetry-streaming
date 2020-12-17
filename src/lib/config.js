@@ -8,7 +8,7 @@
 
 'use strict';
 
-const EventEmitter = require('events');
+const EventEmitter2 = require('eventemitter2');
 const nodeUtil = require('util');
 
 const deviceUtil = require('./deviceUtil');
@@ -36,7 +36,7 @@ function ConfigWorker() {
     this.teemReporter = new TeemReporter();
 }
 
-nodeUtil.inherits(ConfigWorker, EventEmitter);
+nodeUtil.inherits(ConfigWorker, EventEmitter2);
 
 /**
  * Setter for config
@@ -46,6 +46,8 @@ nodeUtil.inherits(ConfigWorker, EventEmitter);
  * @param {Object} options - options when setting config
  * @param {String} options.namespaceToUpdate - namespace name of components
  *               that are the only ones that need updating instead of all config
+ *
+ * @returns {Promise} resolve once config applied
  */
 ConfigWorker.prototype.setConfig = function (newConfig, options) {
     return this.upgradeConfiguration(newConfig)
@@ -94,6 +96,8 @@ ConfigWorker.prototype.upgradeConfiguration = function (config) {
  *               that are the only ones that need updating instead of all config
  *
  * @emits ConfigWorker#change
+ *
+ * @returns {Promise} resolved once all listeners received config and processed it
  */
 ConfigWorker.prototype._notifyConfigChange = function (newConfig, options) {
     if (!newConfig || !newConfig.normalized) {
@@ -113,7 +117,7 @@ ConfigWorker.prototype._notifyConfigChange = function (newConfig, options) {
                     }
                 });
             }
-            this.emit('change', configToEmit);
+            return this.emitAsync('change', configToEmit);
         })
         .catch((err) => {
             logger.error(`notifyConfigChange error: ${err}`);
@@ -285,9 +289,8 @@ ConfigWorker.prototype.processDeclaration = function (data, options) {
             return this.saveConfig(configToSave);
         })
         .then(() => this.getConfig())
-        .then((config) => {
-            // propagate config change
-            this.setConfig(config, setConfigOpts);
+        .then(config => this.setConfig(config, setConfigOpts))
+        .then(() => {
             this.teemReporter.process(validatedConfig);
             return validatedConfig;
         })
@@ -317,14 +320,14 @@ try {
 
 
 // config worker change event, should be first in the handlers chain
-configWorker.on('change', (config) => {
+configWorker.on('change', config => new Promise((resolve) => {
     const settings = configUtil.getControls(config);
-    if (util.isObjectEmpty(settings)) {
-        return;
+    if (!util.isObjectEmpty(settings)) {
+        // default value should be 'info'
+        logger.setLogLevel(settings.logLevel);
     }
-    // default value should be 'info'
-    logger.setLogLevel(settings.logLevel);
-});
+    resolve();
+}));
 
 // handle EventEmitter errors to avoid NodeJS crashing
 configWorker.on('error', (err) => {

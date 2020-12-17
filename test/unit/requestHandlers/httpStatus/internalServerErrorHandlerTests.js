@@ -10,35 +10,33 @@
 
 /* eslint-disable import/order */
 
-require('../shared/restoreCache')();
+require('../../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 
-const MethodNotAllowedHandler = require('../../../src/lib/requestHandlers/methodNotAllowedHandler');
-const MockRestOperation = require('../shared/util').MockRestOperation;
+const InternalServerErrorHandler = require('../../../../src/lib/requestHandlers/httpStatus/internalServerErrorHandler');
+const MockRestOperation = require('../../shared/util').MockRestOperation;
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 
-describe('MethodNotAllowedHandler', () => {
+describe('InternalServerErrorHandler', () => {
     let requestHandler;
-    const allowedMethods = ['GET', 'POST'];
 
     beforeEach(() => {
-        requestHandler = new MethodNotAllowedHandler(new MockRestOperation(), allowedMethods);
+        requestHandler = new InternalServerErrorHandler(new MockRestOperation());
     });
 
-    it('should return code 405', () => {
-        assert.strictEqual(requestHandler.getCode(), 405, 'should return expected code');
+    it('should return code 500', () => {
+        assert.strictEqual(requestHandler.getCode(), 500, 'should return expected code');
     });
 
     it('should return body with message', () => {
         const expectedBody = {
-            code: 405,
-            message: 'Method Not Allowed',
-            allow: ['GET', 'POST']
+            code: 500,
+            message: 'Internal Server Error'
         };
         assert.deepStrictEqual(requestHandler.getBody(), expectedBody, 'should match expected body');
     });

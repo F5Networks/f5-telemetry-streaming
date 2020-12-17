@@ -302,5 +302,14 @@ module.exports = {
             });
         }
         return loadedFiles;
+    },
+
+    /**
+     * Sleep for N ms.
+     *
+     * @returns {Promise} resolved once N .ms passed
+     */
+    sleep(sleepTime) {
+        return new Promise(resolve => setTimeout(resolve, sleepTime));
     }
 };

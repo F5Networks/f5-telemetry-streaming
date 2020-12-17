@@ -10,35 +10,35 @@
 
 /* eslint-disable import/order */
 
-require('../shared/restoreCache')();
+require('../../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 
-const InternalServerErrorHandler = require('../../../src/lib/requestHandlers/internalServerErrorHandler');
-const MockRestOperation = require('../shared/util').MockRestOperation;
+const BadUrlHandler = require('../../../../src/lib/requestHandlers/httpStatus/badUrlHandler');
+const MockRestOperation = require('../../shared/util').MockRestOperation;
+const parseURL = require('../../shared/util').parseURL;
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 
-describe('InternalServerErrorHandler', () => {
+describe('BadUrlHandler', () => {
     let requestHandler;
 
     beforeEach(() => {
-        requestHandler = new InternalServerErrorHandler(new MockRestOperation());
+        const restOpMock = new MockRestOperation();
+        restOpMock.uri = parseURL('http://localhost:8100/a/b/c/d');
+        requestHandler = new BadUrlHandler(restOpMock);
     });
 
-    it('should return code 500', () => {
-        assert.strictEqual(requestHandler.getCode(), 500, 'should return expected code');
+    it('should return code 400', () => {
+        assert.strictEqual(requestHandler.getCode(), 400, 'should return expected code');
     });
 
     it('should return body with message', () => {
-        const expectedBody = {
-            code: 500,
-            message: 'Internal Server Error'
-        };
-        assert.deepStrictEqual(requestHandler.getBody(), expectedBody, 'should match expected body');
+        const expectedBody = 'Bad URL: /a/b/c/d';
+        assert.strictEqual(requestHandler.getBody(), expectedBody, 'should match expected body');
     });
 
     it('should return self as result of process', () => requestHandler.process()

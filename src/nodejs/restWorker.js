@@ -21,13 +21,15 @@ const deviceUtil = require('../lib/deviceUtil');
 const retryPromise = require('../lib/util').retryPromise;
 const persistentStorage = require('../lib/persistentStorage');
 const configWorker = require('../lib/config');
+const requestRouter = require('../lib/requestHandlers/router');
 
 const configListenerModulesToLoad = [
     '../lib/eventListener',
     '../lib/consumers',
     '../lib/pullConsumers',
     '../lib/systemPoller',
-    '../lib/ihealth'
+    '../lib/ihealth',
+    '../lib/requestHandlers/connections'
 ];
 
 configListenerModulesToLoad.forEach((module) => {
@@ -39,9 +41,6 @@ configListenerModulesToLoad.forEach((module) => {
         throw err;
     }
 });
-
-const requestRouter = require('../lib/requestHandlers/router');
-require('../lib/requestHandlers/connections');
 
 
 /**

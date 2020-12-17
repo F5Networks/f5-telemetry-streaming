@@ -284,10 +284,7 @@ describe('Event Listener', () => {
             });
 
             return validateAndNormalize(origDecl)
-                .then((normalized) => {
-                    configWorker.emit('change', normalized);
-                    return new Promise(resolve => setTimeout(resolve, 500));
-                })
+                .then(normalized => configWorker.emitAsync('change', normalized))
                 .then(() => {
                     const listeners = eventListener.getListeners();
                     assert.strictEqual(Object.keys(listeners).length, 1);
@@ -307,14 +304,11 @@ describe('Event Listener', () => {
                 });
         });
 
-        afterEach(() => {
-            configWorker.emit('change', { components: [], mappings: {} });
-            return new Promise(resolve => setTimeout(resolve, 500))
-                .then(() => {
-                    const listeners = eventListener.getListeners();
-                    assert.strictEqual(Object.keys(listeners).length, 0);
-                });
-        });
+        afterEach(() => configWorker.emitAsync('change', { components: [], mappings: {} })
+            .then(() => {
+                const listeners = eventListener.getListeners();
+                assert.strictEqual(Object.keys(listeners).length, 0);
+            }));
 
         it('should create listeners with default and custom opts on config change event (no prior config)', () => {
             const newDecl = util.deepCopy(origDecl);
@@ -325,10 +319,7 @@ describe('Event Listener', () => {
             };
 
             return validateAndNormalize(newDecl)
-                .then((normalized) => {
-                    configWorker.emit('change', normalized);
-                    return new Promise(resolve => setTimeout(resolve, 500));
-                })
+                .then(normalized => configWorker.emitAsync('change', normalized))
                 .then(() => {
                     // only start Listener2, 2 has been started from the orig config
                     assert.deepStrictEqual(listenerStub, { start: 2, stop: 0 });
@@ -345,11 +336,7 @@ describe('Event Listener', () => {
                 });
         });
 
-        it('should stop existing listener(s) when removed from config', () => Promise.resolve()
-            .then(() => {
-                configWorker.emit('change', { components: [], mappings: {} });
-                return new Promise(resolve => setTimeout(resolve, 500));
-            })
+        it('should stop existing listener(s) when removed from config', () => configWorker.emitAsync('change', { components: [], mappings: {} })
             .then(() => {
                 assert.deepStrictEqual(listenerStub, { start: 0, stop: 2 });
                 assert.strictEqual(activeTracersStub.length, 0);
@@ -364,10 +351,7 @@ describe('Event Listener', () => {
             newDecl.Listener1.trace = true;
             const updateSpy = sinon.stub(EventListener.prototype, 'updateConfig');
             return validateAndNormalize(newDecl)
-                .then((normalized) => {
-                    configWorker.emit('change', normalized);
-                    return new Promise(resolve => setTimeout(resolve, 500));
-                })
+                .then(normalized => configWorker.emitAsync('change', normalized))
                 .then(() => {
                     assert.deepStrictEqual(listenerStub, { start: 0, stop: 0 });
                     assert.strictEqual(activeTracersStub.length, 2);
@@ -396,8 +380,7 @@ describe('Event Listener', () => {
             return validateAndNormalize(newDecl)
                 .then((normalized) => {
                     normalized.components[0].skipUpdate = true;
-                    configWorker.emit('change', normalized);
-                    return new Promise(resolve => setTimeout(resolve, 500));
+                    return configWorker.emitAsync('change', normalized);
                 })
                 .then(() => {
                     assert.deepStrictEqual(listenerStub, { start: 2, stop: 0 });

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2020. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -10,40 +10,39 @@
 
 /* eslint-disable import/order */
 
-require('../shared/restoreCache')();
+require('../../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 
-const UnsupportedMediaTypeHandler = require('../../../src/lib/requestHandlers/unsupportedMediaTypeHandler');
-const MockRestOperation = require('../shared/util').MockRestOperation;
+const ServiceUnavailableErrorHandler = require('../../../../src/lib/requestHandlers/httpStatus/serviceUnavailableErrorHandler');
+const MockRestOperation = require('../../shared/util').MockRestOperation;
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 
-describe('UnsupportedMediaTypeHandler', () => {
+describe('ServiceUnavailableErrorHandler', () => {
     let requestHandler;
 
     beforeEach(() => {
-        requestHandler = new UnsupportedMediaTypeHandler(new MockRestOperation());
+        requestHandler = new ServiceUnavailableErrorHandler(new MockRestOperation());
     });
 
-    it('should return code 415', () => {
-        assert.strictEqual(requestHandler.getCode(), 415, 'should return expected code');
+    it('should return code 503', () => {
+        assert.strictEqual(requestHandler.getCode(), 503, 'should return expected code');
     });
 
     it('should return body with message', () => {
         const expectedBody = {
-            code: 415,
-            message: 'Unsupported Media Type',
-            accept: ['application/json']
+            code: 503,
+            message: 'Service Unavailable'
         };
         assert.deepStrictEqual(requestHandler.getBody(), expectedBody, 'should match expected body');
     });
 
     it('should return self as result of process', () => requestHandler.process()
         .then((handler) => {
-            assert.ok(handler === requestHandler, 'should return a reference to original handler');
+            assert.ok(handler === requestHandler, 'should return reference to origin instance');
         }));
 });
