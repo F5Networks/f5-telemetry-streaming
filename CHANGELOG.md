@@ -15,6 +15,7 @@ Changes to this project are documented in this file. More detail and links can b
 ### Fixed
 - AUTOTOOL-2089: Fix error where unavailable Custom Endpoint would return HTTP 500
 ### Changed
+- AUTOTOOL-1832: telemetry/declare returns HTTP 503 on attempt to post declaration while previous one is still in processing
 - AUTOTOOL-1983: No major updates for npm packages (package-lock.json updates only).
 - AUTOTOOL-1914: Store up to 10 items in trace file
 ### Removed

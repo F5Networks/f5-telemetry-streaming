@@ -12,12 +12,12 @@ const EventEmitter = require('events');
 const nodeUtil = require('util');
 const TinyRequestRouter = require('tiny-request-router').Router;
 
-const BadURLHandler = require('./badUrlHandler');
+const BadURLHandler = require('./httpStatus/badUrlHandler');
 const configWorker = require('../config');
-const InternalServerErrorHandler = require('./internalServerErrorHandler');
+const InternalServerErrorHandler = require('./httpStatus/internalServerErrorHandler');
 const logger = require('../logger');
-const MethodNotAllowedHandler = require('./methodNotAllowedHandler');
-const UnsupportedMediaTypeHandler = require('./unsupportedMediaTypeHandler');
+const MethodNotAllowedHandler = require('./httpStatus/methodNotAllowedHandler');
+const UnsupportedMediaTypeHandler = require('./httpStatus/unsupportedMediaTypeHandler');
 const util = require('../util');
 const configUtil = require('../configUtil');
 
@@ -183,6 +183,9 @@ RequestRouter.prototype.onConfigChange = function (config) {
 };
 
 const defaultRouter = new RequestRouter();
-configWorker.on('change', defaultRouter.onConfigChange.bind(defaultRouter));
+configWorker.on('change', config => new Promise((resolve) => {
+    defaultRouter.onConfigChange(config);
+    resolve();
+}));
 
 module.exports = defaultRouter;

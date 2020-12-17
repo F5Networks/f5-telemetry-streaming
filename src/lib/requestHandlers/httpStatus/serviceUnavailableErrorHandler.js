@@ -9,25 +9,25 @@
 'use strict';
 
 const nodeUtil = require('util');
-const BaseRequestHandler = require('./baseHandler');
+const BaseRequestHandler = require('../baseHandler');
 
 /**
- * Bad URL Handler
+ * Service Unavailable Error Handler
  *
  * @param {Object} restOperation
  */
-function BadURLHandler() {
+function ServiceUnavailableErrorHandler() {
     BaseRequestHandler.apply(this, arguments);
 }
-nodeUtil.inherits(BadURLHandler, BaseRequestHandler);
+nodeUtil.inherits(ServiceUnavailableErrorHandler, BaseRequestHandler);
 
 /**
  * Get response code
  *
  * @returns {Integer} response code
  */
-BadURLHandler.prototype.getCode = function () {
-    return 400;
+ServiceUnavailableErrorHandler.prototype.getCode = function () {
+    return 503;
 };
 
 /**
@@ -35,8 +35,11 @@ BadURLHandler.prototype.getCode = function () {
  *
  * @returns {Any} response body
  */
-BadURLHandler.prototype.getBody = function () {
-    return `Bad URL: ${this.restOperation.getUri().pathname}`;
+ServiceUnavailableErrorHandler.prototype.getBody = function () {
+    return {
+        code: this.getCode(),
+        message: 'Service Unavailable'
+    };
 };
 
-module.exports = BadURLHandler;
+module.exports = ServiceUnavailableErrorHandler;

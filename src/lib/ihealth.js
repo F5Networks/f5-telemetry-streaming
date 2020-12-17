@@ -182,7 +182,7 @@ function getRequestedIHealthPoller(originalConfig, systemName, pollerName) {
 }
 
 // config worker change event
-configWorker.on('change', (config) => {
+configWorker.on('change', config => new Promise((resolve) => {
     logger.debug('configWorker change event in iHealthPoller'); // helpful debug
 
     // timestamp to filed out-dated tracers
@@ -240,7 +240,8 @@ configWorker.on('change', (config) => {
         && tracer.lastGetTouch < tracersTimestamp);
 
     logger.debug(`${Object.keys(pollers).length} iHealth poller(s) running`);
-});
+    resolve();
+}));
 
 
 module.exports = {

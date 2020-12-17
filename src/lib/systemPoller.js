@@ -284,7 +284,7 @@ function fetchPollersData(pollerConfigs, decryptSecrets) {
 }
 
 // config worker change event
-configWorker.on('change', (config) => {
+configWorker.on('change', config => new Promise((resolve) => {
     logger.debug('configWorker change event in systemPoller');
     // timestamp to find out-dated tracers
     const tracersTimestamp = new Date().getTime();
@@ -295,7 +295,8 @@ configWorker.on('change', (config) => {
         && tracer.lastGetTouch < tracersTimestamp);
 
     logger.debug(`${Object.keys(getPollerTimers()).length} system poller(s) running`);
-});
+    resolve();
+}));
 
 
 module.exports = {

@@ -84,7 +84,7 @@ describe('Config', () => {
     });
 
     describe('.processDeclaration()', () => {
-        let emitSpy;
+        let emitAsyncSpy;
         let savedConfig;
         const decl = {
             class: 'Telemetry',
@@ -135,7 +135,7 @@ describe('Config', () => {
         };
 
         beforeEach(() => {
-            emitSpy = sinon.spy(config, 'emit');
+            emitAsyncSpy = sinon.spy(config, 'emitAsync');
             sinon.stub(config, 'saveConfig').callsFake((configToSave) => {
                 savedConfig = configToSave;
                 return Promise.resolve();
@@ -162,7 +162,7 @@ describe('Config', () => {
 
         it('should emit expected normalized config', () => config.processDeclaration(decl)
             .then(() => {
-                assert.deepStrictEqual(emitSpy.firstCall.args[1], expectedNormalized);
+                assert.deepStrictEqual(emitAsyncSpy.firstCall.args[1], expectedNormalized);
             }));
     });
 
@@ -452,10 +452,10 @@ describe('Config', () => {
     describe('.processNamespaceDeclaration()', () => {
         const testSet = configTestsData.processNamespaceDeclaration;
         let savedConfig;
-        let emitSpy;
+        let emitAsyncSpy;
 
         beforeEach(() => {
-            emitSpy = sinon.spy(config, 'emit');
+            emitAsyncSpy = sinon.spy(config, 'emitAsync');
             sinon.stub(config, 'saveConfig').callsFake((configToSave) => {
                 savedConfig = configToSave;
                 return Promise.resolve();
@@ -524,7 +524,7 @@ describe('Config', () => {
                 'NewbieNamespace'
             )
                 .then(() => {
-                    assert.deepStrictEqual(emitSpy.firstCall.args[1], expectedNormalized);
+                    assert.deepStrictEqual(emitAsyncSpy.firstCall.args[1], expectedNormalized);
                 });
         });
     });

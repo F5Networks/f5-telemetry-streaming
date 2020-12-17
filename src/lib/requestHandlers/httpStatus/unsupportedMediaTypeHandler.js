@@ -9,26 +9,25 @@
 'use strict';
 
 const nodeUtil = require('util');
-const BaseRequestHandler = require('./baseHandler');
+const BaseRequestHandler = require('../baseHandler');
 
 /**
- * Method Not Allowed Handler
+ * Unsupported Media Type Handler
  *
  * @param {Object} restOperation
- * @param {Array} allowed - list of allowed methods
  */
-function MethodNotAllowedHandler() {
+function UnsupportedMediaTypeHandler() {
     BaseRequestHandler.apply(this, arguments);
 }
-nodeUtil.inherits(MethodNotAllowedHandler, BaseRequestHandler);
+nodeUtil.inherits(UnsupportedMediaTypeHandler, BaseRequestHandler);
 
 /**
  * Get response code
  *
  * @returns {Integer} response code
  */
-MethodNotAllowedHandler.prototype.getCode = function () {
-    return 405;
+UnsupportedMediaTypeHandler.prototype.getCode = function () {
+    return 415;
 };
 
 /**
@@ -36,12 +35,12 @@ MethodNotAllowedHandler.prototype.getCode = function () {
  *
  * @returns {Any} response body
  */
-MethodNotAllowedHandler.prototype.getBody = function () {
+UnsupportedMediaTypeHandler.prototype.getBody = function () {
     return {
         code: this.getCode(),
-        message: 'Method Not Allowed',
-        allow: this.params
+        message: 'Unsupported Media Type',
+        accept: ['application/json']
     };
 };
 
-module.exports = MethodNotAllowedHandler;
+module.exports = UnsupportedMediaTypeHandler;

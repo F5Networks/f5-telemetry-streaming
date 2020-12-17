@@ -312,9 +312,8 @@ describe('System Poller', () => {
             sinon.stub(systemPoller, 'getPollerTimers').returns(pollerTimers);
 
             return validateAndNormalize(defaultDeclaration)
-                .then((normalizedConfig) => {
-                    // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', normalizedConfig);
+                .then(normalizedConfig => configWorker.emitAsync('change', normalizedConfig))
+                .then(() => {
                     assert.strictEqual(pollerTimers['My_System::SystemPoller_1'], 180);
                     assert.strictEqual(allTracersStub.length, 1);
                     assert.strictEqual(activeTracersStub.length, 1);
@@ -331,25 +330,23 @@ describe('System Poller', () => {
                 });
         });
 
-        it('should stop existing poller(s) when removed from config', () => {
-            // expecting the code responsible for 'change' event to be synchronous
-            configWorker.emit('change', { components: [], mappings: {} });
-            assert.deepStrictEqual(pollerTimers, {});
-            assert.strictEqual(allTracersStub.length, 0);
-            assert.strictEqual(activeTracersStub.length, 0);
-            assert.strictEqual(utilStub.start.length, 0);
-            assert.strictEqual(utilStub.update.length, 0);
-            assert.strictEqual(utilStub.stop.length, 1);
-        });
+        it('should stop existing poller(s) when removed from config', () => configWorker.emitAsync('change', { components: [], mappings: {} })
+            .then(() => {
+                assert.deepStrictEqual(pollerTimers, {});
+                assert.strictEqual(allTracersStub.length, 0);
+                assert.strictEqual(activeTracersStub.length, 0);
+                assert.strictEqual(utilStub.start.length, 0);
+                assert.strictEqual(utilStub.update.length, 0);
+                assert.strictEqual(utilStub.stop.length, 1);
+            }));
 
         it('should update existing poller(s)', () => {
             const newDeclaration = testUtil.deepCopy(defaultDeclaration);
             newDeclaration.My_System.systemPoller.interval = 500;
             newDeclaration.My_System.systemPoller.trace = true;
             return validateAndNormalize(newDeclaration)
-                .then((normalizedConfig) => {
-                    // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', normalizedConfig);
+                .then(normalizedConfig => configWorker.emitAsync('change', normalizedConfig))
+                .then(() => {
                     assert.strictEqual(allTracersStub.length, 1);
                     assert.strictEqual(activeTracersStub.length, 1);
                     assert.strictEqual(utilStub.start.length, 0);
@@ -398,9 +395,8 @@ describe('System Poller', () => {
             const newDeclaration = testUtil.deepCopy(defaultDeclaration);
             newDeclaration.My_System.enable = false;
             return validateAndNormalize(newDeclaration)
-                .then((normalizedConfig) => {
-                    // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', normalizedConfig);
+                .then(normalizedConfig => configWorker.emitAsync('change', normalizedConfig))
+                .then(() => {
                     assert.deepStrictEqual(pollerTimers, {});
                     assert.strictEqual(allTracersStub.length, 0);
                     assert.strictEqual(activeTracersStub.length, 0);
@@ -415,9 +411,8 @@ describe('System Poller', () => {
             newDeclaration.My_System_New = testUtil.deepCopy(newDeclaration.My_System);
             newDeclaration.My_System_New.enable = false;
             return validateAndNormalize(newDeclaration)
-                .then((normalizedConfig) => {
-                    // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', normalizedConfig);
+                .then(normalizedConfig => configWorker.emitAsync('change', normalizedConfig))
+                .then(() => {
                     assert.deepStrictEqual(pollerTimers, { 'My_System::SystemPoller_1': 180 });
                     assert.strictEqual(allTracersStub.length, 1);
                     assert.strictEqual(activeTracersStub.length, 1);
@@ -431,9 +426,8 @@ describe('System Poller', () => {
             const newDeclaration = testUtil.deepCopy(defaultDeclaration);
             delete newDeclaration.My_System.systemPoller;
             return validateAndNormalize(newDeclaration)
-                .then((normalizedConfig) => {
-                    // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', normalizedConfig);
+                .then(normalizedConfig => configWorker.emitAsync('change', normalizedConfig))
+                .then(() => {
                     assert.deepStrictEqual(pollerTimers, {});
                     assert.strictEqual(allTracersStub.length, 0);
                     assert.strictEqual(activeTracersStub.length, 0);
@@ -448,9 +442,8 @@ describe('System Poller', () => {
             newDeclaration.My_System_New = testUtil.deepCopy(newDeclaration.My_System);
             delete newDeclaration.My_System_New.systemPoller;
             return validateAndNormalize(newDeclaration)
-                .then((normalizedConfig) => {
-                    // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', normalizedConfig);
+                .then(normalizedConfig => configWorker.emitAsync('change', normalizedConfig))
+                .then(() => {
                     assert.deepStrictEqual(pollerTimers, { 'My_System::SystemPoller_1': 180 });
                     assert.strictEqual(allTracersStub.length, 1);
                     assert.strictEqual(activeTracersStub.length, 1);
@@ -466,9 +459,8 @@ describe('System Poller', () => {
             newDeclaration.My_System_New.trace = false;
             newDeclaration.My_System_New.systemPoller.interval = 500;
             return validateAndNormalize(newDeclaration)
-                .then((normalizedConfig) => {
-                    // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', normalizedConfig);
+                .then(normalizedConfig => configWorker.emitAsync('change', normalizedConfig))
+                .then(() => {
                     assert.deepStrictEqual(pollerTimers, {
                         'My_System::SystemPoller_1': 180,
                         'My_System_New::SystemPoller_2': 500
@@ -512,9 +504,8 @@ describe('System Poller', () => {
             // - My_System::System_Poller1: uuid4
             // - My_System::System_Poller2: uuid5
             return validateAndNormalize(newDeclaration)
-                .then((normalizedConfig) => {
-                    // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', normalizedConfig);
+                .then(normalizedConfig => configWorker.emitAsync('change', normalizedConfig))
+                .then(() => {
                     assert.deepStrictEqual(pollerTimers, {
                         'My_System::SystemPoller_1': 180,
                         'My_System_New::SystemPoller_2': 10,
@@ -621,9 +612,8 @@ describe('System Poller', () => {
                 }
             };
             return validateAndNormalize(newDeclaration)
-                .then((normalizedConfig) => {
-                    // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', normalizedConfig);
+                .then(normalizedConfig => configWorker.emitAsync('change', normalizedConfig))
+                .then(() => {
                     assert.strictEqual(utilStub.update[0].args.dataOpts.noTMStats, false, 'should enable TMStats');
                 });
         });
@@ -632,9 +622,8 @@ describe('System Poller', () => {
             const newDeclaration = testUtil.deepCopy(defaultDeclaration);
             newDeclaration.My_System.systemPoller.interval = 0;
             return validateAndNormalize(newDeclaration)
-                .then((normalizedConfig) => {
-                    // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', normalizedConfig);
+                .then(normalizedConfig => configWorker.emitAsync('change', normalizedConfig))
+                .then(() => {
                     assert.strictEqual(utilStub.start.length, 0);
                     assert.strictEqual(utilStub.update.length, 0);
                     assert.strictEqual(utilStub.stop.length, 1);
@@ -646,9 +635,8 @@ describe('System Poller', () => {
             const newDeclaration = testUtil.deepCopy(defaultDeclaration);
             newDeclaration.My_System.systemPoller.interval = 200;
             return validateAndNormalize(newDeclaration)
-                .then((normalizedConfig) => {
-                    // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', normalizedConfig);
+                .then(normalizedConfig => configWorker.emitAsync('change', normalizedConfig))
+                .then(() => {
                     assert.strictEqual(utilStub.start.length, 0);
                     assert.strictEqual(utilStub.update.length, 1);
                     assert.strictEqual(utilStub.stop.length, 0);
@@ -675,15 +663,17 @@ describe('System Poller', () => {
                     // existing config unchanged, id the same
                     normalizedConfig.components[existingPollerIndex].skipUpdate = true;
 
-                    configWorker.emit('change', normalizedConfig);
-                    assert.deepStrictEqual(pollerTimers, {
-                        'My_System::SystemPoller_1': 180,
-                        'NewNamespace::My_System::SystemPoller_1': 500
-                    });
+                    return configWorker.emitAsync('change', normalizedConfig)
+                        .then(() => {
+                            assert.deepStrictEqual(pollerTimers, {
+                                'My_System::SystemPoller_1': 180,
+                                'NewNamespace::My_System::SystemPoller_1': 500
+                            });
 
-                    assert.strictEqual(utilStub.start.length, 1);
-                    assert.strictEqual(utilStub.update.length, 0);
-                    assert.strictEqual(utilStub.stop.length, 0);
+                            assert.strictEqual(utilStub.start.length, 1);
+                            assert.strictEqual(utilStub.update.length, 0);
+                            assert.strictEqual(utilStub.stop.length, 0);
+                        });
                 });
         });
     });
