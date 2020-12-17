@@ -67,11 +67,7 @@ describe('Pull Consumers', () => {
                 }
             };
             return validateAndNormalize(exampleConfig)
-                .then((normalized) => {
-                    // emit change event, then wait a short period
-                    configWorker.emit('change', normalized);
-                    return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
-                })
+                .then(normalized => configWorker.emitAsync('change', normalized))
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
                     assert.deepStrictEqual(loadedConsumers.length, 1);
@@ -93,11 +89,7 @@ describe('Pull Consumers', () => {
                 }
             };
             return validateAndNormalize(exampleConfig)
-                .then((normalized) => {
-                    // emit change event, then wait a short period
-                    configWorker.emit('change', normalized);
-                    return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
-                })
+                .then(normalized => configWorker.emitAsync('change', normalized))
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
                     assert.deepStrictEqual(loadedConsumers, [], 'should not load disabled consumer');
@@ -119,11 +111,7 @@ describe('Pull Consumers', () => {
             // config will not pass schema validation
             // but this test allows catching if consumer module/dir is not configured properly
             return configUtil.normalizeConfig(exampleConfig)
-                .then((normalized) => {
-                    // emit change event, then wait a short period
-                    configWorker.emit('change', { normalized });
-                    return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
-                })
+                .then(normalized => configWorker.emitAsync('change', { normalized }))
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
                     assert.strictEqual(Object.keys(loadedConsumers).indexOf('unknowntype'), -1,
@@ -144,16 +132,11 @@ describe('Pull Consumers', () => {
                 }
             };
             return validateAndNormalize(priorConfig)
-                .then((normalized) => {
-                    // emit change event, then wait a short period
-                    configWorker.emit('change', normalized);
-                    return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
-                })
+                .then(normalized => configWorker.emitAsync('change', normalized))
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
                     assert.deepEqual(loadedConsumers[0].config.type, 'default', 'should load default consumer');
-                    configWorker.emit('change', {});
-                    return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
+                    return configWorker.emitAsync('change', {});
                 })
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
@@ -187,8 +170,7 @@ describe('Pull Consumers', () => {
                 .then((normalized) => {
                     existingComp = normalized.components.find(c => c.class === CONFIG_CLASSES.PULL_CONSUMER_CLASS_NAME);
                     // emit change event, then wait a short period
-                    configWorker.emit('change', normalized);
-                    return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
+                    return configWorker.emitAsync('change', normalized);
                 })
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
@@ -203,8 +185,7 @@ describe('Pull Consumers', () => {
                     // existing config unchanged, id the same
                     normalized.components[0] = existingComp;
                     existingComp.skipUpdate = true;
-                    configWorker.emit('change', normalized);
-                    return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
+                    return configWorker.emitAsync('change', normalized);
                 })
                 .then(() => {
                     const loadedConsumerIds = pullConsumers.getConsumers().map(c => c.id);
@@ -237,8 +218,7 @@ describe('Pull Consumers', () => {
             return validateAndNormalize(declaration)
                 .then((normalized) => {
                     sinon.stub(configWorker, 'getConfig').resolves({ normalized });
-                    configWorker.emit('change', normalized);
-                    return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
+                    return configWorker.emitAsync('change', normalized);
                 })
                 .then(() => pullConsumers.getData(testConf.consumerName, testConf.namespace))
                 .then((data) => {

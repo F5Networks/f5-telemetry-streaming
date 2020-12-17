@@ -9,7 +9,7 @@
 'use strict';
 
 const nodeUtil = require('util');
-const BaseRequestHandler = require('./baseHandler');
+const BaseRequestHandler = require('../baseHandler');
 
 /**
  * Internal Server Error Handler

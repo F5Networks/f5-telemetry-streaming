@@ -10,35 +10,36 @@
 
 /* eslint-disable import/order */
 
-require('../shared/restoreCache')();
+require('../../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 
-const BadUrlHandler = require('../../../src/lib/requestHandlers/badUrlHandler');
-const MockRestOperation = require('../shared/util').MockRestOperation;
-const parseURL = require('../shared/util').parseURL;
+const UnsupportedMediaTypeHandler = require('../../../../src/lib/requestHandlers/httpStatus/unsupportedMediaTypeHandler');
+const MockRestOperation = require('../../shared/util').MockRestOperation;
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 
-describe('BadUrlHandler', () => {
+describe('UnsupportedMediaTypeHandler', () => {
     let requestHandler;
 
     beforeEach(() => {
-        const restOpMock = new MockRestOperation();
-        restOpMock.uri = parseURL('http://localhost:8100/a/b/c/d');
-        requestHandler = new BadUrlHandler(restOpMock);
+        requestHandler = new UnsupportedMediaTypeHandler(new MockRestOperation());
     });
 
-    it('should return code 400', () => {
-        assert.strictEqual(requestHandler.getCode(), 400, 'should return expected code');
+    it('should return code 415', () => {
+        assert.strictEqual(requestHandler.getCode(), 415, 'should return expected code');
     });
 
     it('should return body with message', () => {
-        const expectedBody = 'Bad URL: /a/b/c/d';
-        assert.strictEqual(requestHandler.getBody(), expectedBody, 'should match expected body');
+        const expectedBody = {
+            code: 415,
+            message: 'Unsupported Media Type',
+            accept: ['application/json']
+        };
+        assert.deepStrictEqual(requestHandler.getBody(), expectedBody, 'should match expected body');
     });
 
     it('should return self as result of process', () => requestHandler.process()

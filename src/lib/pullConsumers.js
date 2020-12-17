@@ -194,29 +194,30 @@ function unloadUnusedModules(before) {
 }
 
 // config worker change event
-configWorker.on('change', (config) => {
-    logger.debug('configWorker change event in Pull Consumers');
+configWorker.on('change', config => Promise.resolve()
+    .then(() => {
+        logger.debug('configWorker change event in Pull Consumers');
 
-    const consumersToLoad = configUtil.getTelemetryPullConsumers(config);
-    // timestamp to filed out-dated tracers
-    const tracersTimestamp = new Date().getTime();
+        const consumersToLoad = configUtil.getTelemetryPullConsumers(config);
+        // timestamp to filed out-dated tracers
+        const tracersTimestamp = new Date().getTime();
 
-    const typesBefore = getLoadedConsumerTypes();
+        const typesBefore = getLoadedConsumerTypes();
 
-    return loadConsumers(consumersToLoad)
-        .then((consumers) => {
-            PULL_CONSUMERS = consumers;
-            logger.info(`${PULL_CONSUMERS.length} pull consumer plug-in(s) loaded`);
-        })
-        .catch((err) => {
-            logger.exception('Unhandled exception when loading consumers', err);
-        })
-        .then(() => {
-            unloadUnusedModules(typesBefore);
-            util.tracer.remove(tracer => tracer.name.startsWith(CLASS_NAME)
-                && tracer.lastGetTouch < tracersTimestamp);
-        });
-});
+        return loadConsumers(consumersToLoad)
+            .then((consumers) => {
+                PULL_CONSUMERS = consumers;
+                logger.info(`${PULL_CONSUMERS.length} pull consumer plug-in(s) loaded`);
+            })
+            .catch((err) => {
+                logger.exception('Unhandled exception when loading consumers', err);
+            })
+            .then(() => {
+                unloadUnusedModules(typesBefore);
+                util.tracer.remove(tracer => tracer.name.startsWith(CLASS_NAME)
+                    && tracer.lastGetTouch < tracersTimestamp);
+            });
+    }));
 
 module.exports = {
     ModuleNotLoadedError,

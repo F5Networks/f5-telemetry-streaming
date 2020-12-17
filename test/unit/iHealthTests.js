@@ -153,9 +153,8 @@ describe('iHealth', () => {
         it('should build iHealthPoller instance', () => {
             const newDeclaration = testUtil.deepCopy(defaultDeclaration);
             return validateAndNormalize(newDeclaration)
-                .then((normalized) => {
-                    // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', normalized);
+                .then(normalized => configWorker.emitAsync('change', normalized))
+                .then(() => {
                     assert.strictEqual(ihealthPollerInstanceStub.getKey(), 'f5telemetry_default::My_System');
                     assert.deepEqual(ihealthPollerInstanceStub.config, expectedOutput);
                 });
@@ -171,9 +170,8 @@ describe('iHealth', () => {
             testExpectedOutput.iHealth.name = 'My_iHealth_Poller';
             testExpectedOutput.name = 'My_iHealth_Poller';
             return validateAndNormalize(newDeclaration)
-                .then((normalized) => {
-                    // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', normalized);
+                .then(normalized => configWorker.emitAsync('change', normalized))
+                .then(() => {
                     assert.strictEqual(ihealthPollerInstanceStub.getKey(), 'f5telemetry_default::My_System');
                     assert.deepEqual(ihealthPollerInstanceStub.config, testExpectedOutput);
                 });

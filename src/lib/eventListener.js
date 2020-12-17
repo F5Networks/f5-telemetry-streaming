@@ -425,7 +425,7 @@ function removeListener(listener, name) {
 }
 
 // config worker change event
-configWorker.on('change', (config) => {
+configWorker.on('change', config => new Promise((resolve) => {
     logger.debug('configWorker change event in eventListener'); // helpful debug
     // timestamp to find out-dated tracers
     const tracersTimestamp = new Date().getTime();
@@ -484,6 +484,8 @@ configWorker.on('change', (config) => {
     logger.debug(`${Object.keys(LISTENERS).length} event listener(s) listening`);
     tracers.remove(tracer => tracer.name.startsWith(CLASS_NAME)
         && tracer.lastGetTouch < tracersTimestamp);
-});
+
+    resolve();
+}));
 
 module.exports = EventListener;
