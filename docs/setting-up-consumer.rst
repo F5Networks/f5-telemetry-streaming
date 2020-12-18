@@ -32,7 +32,7 @@ Example Declaration:
 
 Splunk Legacy format (Deprecated)
 `````````````````````````````````
-.. IMPORTANT:: The Splunk Legacy format has been deprecated as of Telemetry Streaming 1.17, and has entered maintenance mode. This means there will be no further TS development for the Splunk Legacy format. |br| We recommend using the :ref:`splunk-ref` consumer, or :ref:`multi-metric` (currently experimental).
+.. IMPORTANT:: The Splunk Legacy format has been deprecated as of Telemetry Streaming 1.17, and has entered maintenance mode. This means there will be no further TS development for the Splunk Legacy format. |br| We recommend using the :ref:`Splunk default format<splunk-ref>`, or :ref:`multi-metric` (currently experimental).
 
 The **format** property can be set to **legacy** for Splunk users who wish to convert the stats output similar to the |splunk app|. To see more information, see |Analytics|. To see more information about using the HEC, see |HEC|.  See the following example.
 
