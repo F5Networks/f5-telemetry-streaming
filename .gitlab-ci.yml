@@ -447,6 +447,7 @@ pages:
         # only update on designated, stable branch
         - develop
         - doc-release-branch
+        - joes-ts-wip
 
 # Publish docs to clouddocs.f5.com
 publish_docs_to_production:
