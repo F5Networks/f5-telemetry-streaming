@@ -26,17 +26,21 @@ Example Declaration:
 .. literalinclude:: ../examples/declarations/splunk.json
     :language: json
 
+|
+
 .. _splunk-legacy:
 
-Splunk Legacy format
-````````````````````
+Splunk Legacy format (Deprecated)
+`````````````````````````````````
+.. IMPORTANT:: The Splunk Legacy format has been deprecated as of Telemetry Streaming 1.17, and has entered maintenance mode. This means there will be no further TS development for the Splunk Legacy format. |br| We recommend using the :ref:`splunk-ref` consumer, or :ref:`multi-metric` (currently experimental).
+
 The **format** property can be set to **legacy** for Splunk users who wish to convert the stats output similar to the |splunk app|. To see more information, see |Analytics|. To see more information about using the HEC, see |HEC|.  See the following example.
 
-.. NOTE:: To poll for any data involving **tmstats** you must have a Splunk consumer with the legacy format as described in this section.  This includes GET requests to the SystemPoller API because the data is not pulled unless it is a legacy Splunk consumer. |br| |br| Telemetry Streaming 1.7.0 and later gathers additional data from tmstats tables to improve compatibility with Splunk Legacy consumers.
+To poll for any data involving **tmstats** you must have a Splunk consumer with the legacy format as described in this section.  This includes GET requests to the SystemPoller API because the data is not pulled unless it is a legacy Splunk consumer. |br| |br| Telemetry Streaming 1.7.0 and later gathers additional data from tmstats tables to improve compatibility with Splunk Legacy consumers.
 
 In Telemetry Streaming v1.6.0 and later, you must use the **facility** parameter with the legacy format to specify a Splunk facility in your declarations.  The facility parameter is for identification of location/facility in which the BIG-IP is located (such as 'Main Data Center', 'AWS', or 'NYC'). 
 
-.. IMPORTANT:: If a Splunk Consumer is configured with the legacy format, then it ignores events from Event Listener.
+If a Splunk Consumer is configured with the legacy format, then it ignores events from Event Listener.
 
 Required information for **facility**: 
   - The facility parameter must be inside of **actions** and then **setTag** as shown in the example.
