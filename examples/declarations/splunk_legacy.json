@@ -25,6 +25,6 @@
           "passphrase": {
               "cipherText": "apikey"
           },
-                  "format": "legacy"
+          "format": "legacy"
       }
   }

@@ -129,7 +129,7 @@
         "format": {
             "$comment": "Required for certain consumers: Splunk",
             "title": "Format (informs consumer additional formatting may be required)",
-            "description": "",
+            "description": "Legacy format is deprecated",
             "type": "string",
             "enum": [ "default", "legacy", "multiMetric" ]
         },
