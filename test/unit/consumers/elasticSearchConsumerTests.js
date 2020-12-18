@@ -16,9 +16,9 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const requestUtil = require('../../../src/lib/consumers/shared/requestUtil');
+const httpUtil = require('../../../src/lib/consumers/shared/httpUtil');
 const elasticSearchIndex = require('../../../src/lib/consumers/ElasticSearch/index');
-const util = require('../../../src/lib/util');
+const util = require('../../../src/lib/utils/misc');
 const testUtil = require('../shared/util');
 
 chai.use(chaiAsPromised);
@@ -29,7 +29,7 @@ describe('ElasticSearch', () => {
     let sendToConsumerMock;
 
     beforeEach(() => {
-        sendToConsumerMock = sinon.stub(requestUtil, 'sendToConsumer').resolves();
+        sendToConsumerMock = sinon.stub(httpUtil, 'sendToConsumer').resolves();
     });
 
     const defaultConsumerConfig = {

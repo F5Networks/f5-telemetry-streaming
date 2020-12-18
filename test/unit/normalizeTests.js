@@ -18,7 +18,7 @@ const sinon = require('sinon');
 
 const properties = require('../../src/lib/properties.json');
 const normalize = require('../../src/lib/normalize');
-const normalizeUtil = require('../../src/lib/normalizeUtil');
+const normalizeUtil = require('../../src/lib/utils/normalize');
 const EVENT_TYPES = require('../../src/lib/constants').EVENT_TYPES;
 const dataExamples = require('./data/normalizeTestsData');
 const testUtil = require('./shared/util');

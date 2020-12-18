@@ -8,8 +8,8 @@
 
 'use strict';
 
-const util = require('./util');
-const dataUtil = require('./dataUtil');
+const util = require('./utils/misc');
+const dataUtil = require('./utils/data');
 
 /**
  * Data Filter Class

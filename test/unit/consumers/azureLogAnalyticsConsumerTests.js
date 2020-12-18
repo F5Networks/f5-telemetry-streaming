@@ -15,7 +15,8 @@ require('../shared/restoreCache')();
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
-const util = require('../../../src/lib/util');
+const util = require('../../../src/lib/utils/misc');
+const requestsUtil = require('../../../src/lib/utils/requests');
 
 const azureAnalyticsIndex = require('../../../src/lib/consumers/Azure_Log_Analytics/index');
 const azureLogData = require('./data/azureLogAnalyticsConsumerTestsData');
@@ -50,7 +51,7 @@ describe('Azure_Log_Analytics', () => {
 
     beforeEach(() => {
         requests = [];
-        sinon.stub(util, 'makeRequest').callsFake((opts) => {
+        sinon.stub(requestsUtil, 'makeRequest').callsFake((opts) => {
             requests.push(opts);
             return Promise.resolve({ statusCode: 200 });
         });

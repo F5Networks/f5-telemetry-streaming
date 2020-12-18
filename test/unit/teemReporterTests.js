@@ -19,9 +19,9 @@ const TeemRecord = require('@f5devcentral/f5-teem').Record;
 
 const config = require('../../src/lib/config');
 const constants = require('../../src/lib/constants');
-const deviceUtil = require('../../src/lib/deviceUtil');
+const deviceUtil = require('../../src/lib/utils/device');
 const TeemReporter = require('../../src/lib/teemReporter').TeemReporter;
-const util = require('../../src/lib/util');
+const util = require('../../src/lib/utils/misc');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;

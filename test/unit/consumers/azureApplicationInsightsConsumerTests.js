@@ -16,7 +16,7 @@ const assert = require('assert');
 const sinon = require('sinon');
 const appInsights = require('applicationinsights');
 
-const util = require('../../../src/lib/util');
+const requestsUtil = require('../../../src/lib/utils/requests');
 const azureAppInsightsIndex = require('../../../src/lib/consumers/Azure_Application_Insights/index');
 const azureUtil = require('../../../src/lib/consumers/shared/azureUtil');
 const testUtil = require('../shared/util');
@@ -31,7 +31,7 @@ describe('Azure_Application_Insights', () => {
             requests.push(metric);
         });
         // stub metadata calls
-        sinon.stub(util, 'makeRequest').resolves({});
+        sinon.stub(requestsUtil, 'makeRequest').resolves({});
     });
 
     afterEach(() => {

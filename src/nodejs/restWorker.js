@@ -15,10 +15,10 @@ const https = require('https');
 
 const constants = require('../lib/constants');
 const logger = require('../lib/logger');
-const util = require('../lib/util');
+const util = require('../lib/utils/misc');
 
-const deviceUtil = require('../lib/deviceUtil');
-const retryPromise = require('../lib/util').retryPromise;
+const deviceUtil = require('../lib/utils/device');
+const retryPromise = require('../lib/utils/misc').retryPromise;
 const persistentStorage = require('../lib/persistentStorage');
 const configWorker = require('../lib/config');
 const requestRouter = require('../lib/requestHandlers/router');

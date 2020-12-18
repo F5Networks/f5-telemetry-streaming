@@ -10,7 +10,7 @@
 
 /* eslint-disable import/order */
 
-require('./shared/restoreCache')();
+require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -23,10 +23,10 @@ const request = require('request');
 const sinon = require('sinon');
 const urllib = require('url');
 
-const constants = require('../../src/lib/constants');
-const deviceUtil = require('../../src/lib/deviceUtil');
-const deviceUtilTestsData = require('./data/deviceUtilTestsData');
-const testUtil = require('./shared/util');
+const constants = require('../../../src/lib/constants');
+const deviceUtil = require('../../../src/lib/utils/device');
+const deviceUtilTestsData = require('../data/deviceUtilTestsData');
+const testUtil = require('../shared/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;

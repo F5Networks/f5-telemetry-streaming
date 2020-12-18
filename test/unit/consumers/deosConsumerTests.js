@@ -16,7 +16,7 @@ const sinon = require('sinon');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const testUtil = require('../shared/util');
-const util = require('../../../src/lib/util');
+const util = require('../../../src/lib/utils/misc');
 
 let deosIndex;
 let google;

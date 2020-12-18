@@ -8,10 +8,10 @@
 
 'use strict';
 
-const constants = require('./constants');
-const declValidator = require('./declarationValidator');
-const logger = require('./logger');
-const util = require('./util');
+const constants = require('../constants');
+const declValidator = require('../declarationValidator');
+const logger = require('../logger');
+const util = require('./misc');
 
 const CLASSES = constants.CONFIG_CLASSES;
 const VALIDATOR = declValidator.getValidator();

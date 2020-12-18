@@ -18,8 +18,7 @@ const InternalServerErrorHandler = require('./httpStatus/internalServerErrorHand
 const logger = require('../logger');
 const MethodNotAllowedHandler = require('./httpStatus/methodNotAllowedHandler');
 const UnsupportedMediaTypeHandler = require('./httpStatus/unsupportedMediaTypeHandler');
-const util = require('../util');
-const configUtil = require('../configUtil');
+const configUtil = require('../utils/config');
 
 /**
  * Simple router to route incoming requests to REST API.
@@ -86,14 +85,29 @@ RequestRouter.prototype.processRestOperation = function (restOperation, uriPrefi
     })
         .then((handler) => {
             logger.info(`${handler.getCode()} ${restOperation.getMethod().toUpperCase()} ${restOperation.getUri().pathname}`);
-            util.restOperationResponder(restOperation, handler.getCode(), handler.getBody());
+            this._restOperationResponder(restOperation, handler.getCode(), handler.getBody());
         })
         .catch((fatalError) => {
             // in case if .then above failed
             logger.exception('restOperation processing fatal error', fatalError);
-            util.restOperationResponder(restOperation, 500, 'Internal Server Error');
+            this._restOperationResponder(restOperation, 500, 'Internal Server Error');
         });
 };
+
+/**
+ * LX rest operation responder
+ *
+ * @private
+ * @param {Object} restOperation  - restOperation to complete
+ * @param {String} status         - HTTP status
+ * @param {String} body           - HTTP body
+ */
+RequestRouter.prototype._restOperationResponder = function (restOperation, status, body) {
+    restOperation.setStatusCode(status);
+    restOperation.setBody(body);
+    restOperation.complete();
+};
+
 
 /**
  * Process request.

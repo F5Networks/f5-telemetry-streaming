@@ -8,8 +8,8 @@
 
 'use strict';
 
-const requestUtil = require('./../shared/requestUtil');
-const util = require('../../util');
+const httpUtil = require('./../shared/httpUtil');
+const util = require('../../utils/misc');
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 
 /**
@@ -76,7 +76,7 @@ module.exports = function (context) {
         }, null, 4));
     }
 
-    return requestUtil.sendToConsumer({
+    return httpUtil.sendToConsumer({
         allowSelfSignedCert: config.allowSelfSignedCert,
         body: payload,
         hosts: [config.host], // Do not yet use fallback with ElasticSearch

@@ -10,20 +10,20 @@
 
 /* eslint-disable import/order */
 
-require('./shared/restoreCache')();
+require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const configWorker = require('../../src/lib/config');
-const constants = require('../../src/lib/constants');
-const deviceUtil = require('../../src/lib/deviceUtil');
-const configUtil = require('../../src/lib/configUtil');
-const util = require('../../src/lib/util');
+const configWorker = require('../../../src/lib/config');
+const constants = require('../../../src/lib/constants');
+const deviceUtil = require('../../../src/lib/utils/device');
+const configUtil = require('../../../src/lib/utils/config');
+const util = require('../../../src/lib/utils/misc');
 
-const configUtilTestData = require('./data/configUtilTestsData');
-const testUtil = require('./shared/util');
+const configUtilTestData = require('../data/configUtilTestsData');
+const testUtil = require('../shared/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;

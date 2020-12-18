@@ -8,8 +8,8 @@
 
 'use strict';
 
-const logger = require('./logger');
-const util = require('./util');
+const logger = require('../logger');
+const util = require('./misc');
 
 /**
  * Checks the conditions against the data.
