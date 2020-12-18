@@ -17,13 +17,14 @@ const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
 const configWorker = require('../../src/lib/config');
-const configUtil = require('../../src/lib/configUtil');
+const configUtil = require('../../src/lib/utils/config');
+const tracers = require('../../src/lib/utils/tracer').Tracer;
 /* eslint-disable no-unused-vars */
 const ihealth = require('../../src/lib/ihealth');
 const ihealthPoller = require('../../src/lib/ihealthPoller');
 const constants = require('../../src/lib/constants');
-const util = require('../../src/lib/util');
-const deviceUtil = require('../../src/lib/deviceUtil');
+const util = require('../../src/lib/utils/misc');
+const deviceUtil = require('../../src/lib/utils/device');
 const testUtil = require('./shared/util');
 
 chai.use(chaiAsPromised);
@@ -128,7 +129,7 @@ describe('iHealth', () => {
             activeTracersStub = [];
             allTracersStub = [];
 
-            sinon.stub(util.tracer, 'createFromConfig').callsFake((className, objName, config) => {
+            sinon.stub(tracers, 'createFromConfig').callsFake((className, objName, config) => {
                 allTracersStub.push(objName);
                 if (config.trace) {
                     activeTracersStub.push(objName);

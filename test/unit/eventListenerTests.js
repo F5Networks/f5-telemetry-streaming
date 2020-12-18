@@ -25,8 +25,9 @@ const dataPipeline = require('../../src/lib/dataPipeline');
 const testUtil = require('./shared/util');
 const eventListenerTestData = require('./data/eventListenerTestsData');
 const configWorker = require('../../src/lib/config');
-const configUtil = require('../../src/lib/configUtil');
-const util = require('../../src/lib/util');
+const configUtil = require('../../src/lib/utils/config');
+const util = require('../../src/lib/utils/misc');
+const tracers = require('../../src/lib/utils/tracer').Tracer;
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -275,7 +276,7 @@ describe('Event Listener', () => {
                 listenerStub.stop += 1;
             });
 
-            sinon.stub(util.tracer, 'createFromConfig').callsFake((className, objName, config) => {
+            sinon.stub(tracers, 'createFromConfig').callsFake((className, objName, config) => {
                 allTracersStub.push(objName);
                 if (config.trace) {
                     activeTracersStub.push(objName);

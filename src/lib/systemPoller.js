@@ -11,12 +11,13 @@
 const constants = require('./constants');
 const configWorker = require('./config');
 const dataPipeline = require('./dataPipeline');
-const deviceUtil = require('./deviceUtil');
+const deviceUtil = require('./utils/device');
 const errors = require('./errors');
 const logger = require('./logger');
 const SystemStats = require('./systemStats');
-const util = require('./util');
-const configUtil = require('./configUtil');
+const util = require('./utils/misc');
+const configUtil = require('./utils/config');
+const tracers = require('./utils/tracer').Tracer;
 
 /** @module systemPoller */
 
@@ -106,7 +107,7 @@ function applyConfig(originalConfig) {
             newPollerIDs.push(pollerConfig.traceName);
         } else {
             newPollerIDs.push(pollerConfig.traceName);
-            pollerConfig.tracer = util.tracer.createFromConfig(
+            pollerConfig.tracer = tracers.createFromConfig(
                 TRACER_CLASS_NAME, pollerConfig.traceName, pollerConfig
             );
             const baseMsg = `system poller ${pollerConfig.traceName}. Interval = ${pollerConfig.interval} sec.`;
@@ -291,7 +292,7 @@ configWorker.on('change', config => new Promise((resolve) => {
 
     applyConfig(util.deepCopy(config));
     // remove tracers that were not touched
-    util.tracer.remove(tracer => tracer.name.startsWith(TRACER_CLASS_NAME)
+    tracers.remove(tracer => tracer.name.startsWith(TRACER_CLASS_NAME)
         && tracer.lastGetTouch < tracersTimestamp);
 
     logger.debug(`${Object.keys(getPollerTimers()).length} system poller(s) running`);

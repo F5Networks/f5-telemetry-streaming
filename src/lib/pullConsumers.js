@@ -12,13 +12,15 @@ const path = require('path');
 
 const configWorker = require('./config');
 const constants = require('./constants');
-const util = require('./util');
+const util = require('./utils/misc');
 const systemPoller = require('./systemPoller');
 const errors = require('./errors');
 const logger = require('./logger');
-const configUtil = require('./configUtil');
+const configUtil = require('./utils/config');
+const tracers = require('./utils/tracer').Tracer;
+const moduleLoader = require('./utils/moduleLoader').ModuleLoader;
 
-const PULL_CONSUMERS_DIR = constants.PULL_CONSUMERS_DIR;
+const PULL_CONSUMERS_DIR = '../pullConsumers';
 const CLASS_NAME = constants.CONFIG_CLASSES.PULL_CONSUMER_CLASS_NAME;
 let PULL_CONSUMERS = [];
 
@@ -132,12 +134,10 @@ function loadConsumers(config) {
             resolve(existingConsumer);
         } else {
             const consumerType = consumerConfig.type;
-            // path.join removes './' from string, so we need to
-            // prepend it manually
-            const consumerDir = './'.concat(path.join(PULL_CONSUMERS_DIR, consumerType));
+            const consumerDir = path.join(PULL_CONSUMERS_DIR, consumerType);
 
             logger.debug(`Loading pull consumer ${consumerType} plug-in from ${consumerDir}`);
-            const consumerModule = util.moduleLoader.load(consumerDir);
+            const consumerModule = moduleLoader.load(consumerDir);
             if (consumerModule === null) {
                 resolve(undefined);
             } else {
@@ -147,7 +147,7 @@ function loadConsumers(config) {
                     config: util.deepCopy(consumerConfig),
                     consumer: consumerModule,
                     logger: logger.getChild(`${consumerType}.${consumerConfig.traceName}`),
-                    tracer: util.tracer.createFromConfig(CLASS_NAME, consumerConfig.traceName, consumerConfig)
+                    tracer: tracers.createFromConfig(CLASS_NAME, consumerConfig.traceName, consumerConfig)
                 };
                 // copy consumer's data
                 resolve(consumer);
@@ -186,9 +186,9 @@ function unloadUnusedModules(before) {
     before.forEach((consumerType) => {
         if (!loadedTypes.has(consumerType)) {
             logger.debug(`Unloading Pull Consumer module '${consumerType}'`);
-            const consumerDir = './'.concat(path.join(PULL_CONSUMERS_DIR, consumerType));
+            const consumerDir = path.join(PULL_CONSUMERS_DIR, consumerType);
 
-            util.moduleLoader.unload(consumerDir);
+            moduleLoader.unload(consumerDir);
         }
     });
 }
@@ -214,7 +214,7 @@ configWorker.on('change', config => Promise.resolve()
             })
             .then(() => {
                 unloadUnusedModules(typesBefore);
-                util.tracer.remove(tracer => tracer.name.startsWith(CLASS_NAME)
+                tracers.remove(tracer => tracer.name.startsWith(CLASS_NAME)
                     && tracer.lastGetTouch < tracersTimestamp);
             });
     }));

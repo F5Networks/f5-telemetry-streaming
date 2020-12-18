@@ -14,7 +14,8 @@ const scp = require('node-scp');
 const constants = require('../shared/constants');
 const dutUtils = require('../dutTests').utils;
 const sharedUtil = require('../shared/util');
-const util = require('../../../src/lib/util');
+const util = require('../../../src/lib/utils/misc');
+const requestsUtil = require('../../../src/lib/utils/requests');
 const testUtil = require('../../unit/shared/util');
 
 const MODULE_REQUIREMENTS = { DOCKER: true };
@@ -143,7 +144,7 @@ function setup() {
                     }
                 }
             };
-            return util.makeRequest(options);
+            return requestsUtil.makeRequest(options);
         });
     });
 }
@@ -190,7 +191,7 @@ function test() {
                 headers: {}
             };
             const responseDataJSONList = [];
-            return util.makeRequest(options).then((responseList) => {
+            return requestsUtil.makeRequest(options).then((responseList) => {
                 if (responseList && responseList.length > 0) {
                     responseList.forEach((response) => {
                         assert(response.service === 'Ingestion', `Test Error: Incorrect service name, should be 'Ingestion', got '${response.service}'`);

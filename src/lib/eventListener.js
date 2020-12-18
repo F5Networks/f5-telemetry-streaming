@@ -16,12 +16,12 @@ const constants = require('./constants');
 const normalize = require('./normalize');
 const dataPipeline = require('./dataPipeline');
 const configWorker = require('./config');
-const configUtil = require('./configUtil');
+const configUtil = require('./utils/config');
 const properties = require('./properties.json');
 
-const tracers = require('./util').tracer;
-const stringify = require('./util').stringify;
-const isObjectEmpty = require('./util').isObjectEmpty;
+const tracers = require('./utils/tracer').Tracer;
+const stringify = require('./utils/misc').stringify;
+const isObjectEmpty = require('./utils/misc').isObjectEmpty;
 
 const global = properties.global;
 const events = properties.events;

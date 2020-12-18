@@ -13,7 +13,7 @@ const nodeUtil = require('util');
 const BaseRequestHandler = require('./baseHandler');
 const errors = require('../errors');
 const ihealth = require('../ihealth');
-const isObjectEmpty = require('../util').isObjectEmpty;
+const isObjectEmpty = require('../utils/misc').isObjectEmpty;
 const router = require('./router');
 
 /**

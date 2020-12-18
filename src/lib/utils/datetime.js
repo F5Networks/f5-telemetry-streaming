@@ -8,8 +8,8 @@
 
 'use strict';
 
-const constants = require('./constants');
-const util = require('./util');
+const constants = require('../constants');
+const util = require('./misc');
 
 
 /**

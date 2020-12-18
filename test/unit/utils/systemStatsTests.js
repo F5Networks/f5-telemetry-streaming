@@ -10,14 +10,14 @@
 
 /* eslint-disable import/order */
 
-require('./shared/restoreCache')();
+require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 
-const systemStatsUtil = require('../../src/lib/systemStatsUtil');
-const systemStatsUtilTestsData = require('./data/systemStatsUtilTestsData');
-const testUtil = require('./shared/util');
+const systemStatsUtil = require('../../../src/lib/utils/systemStats');
+const systemStatsUtilTestsData = require('../data/systemStatsUtilTestsData');
+const testUtil = require('../shared/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;

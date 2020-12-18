@@ -8,14 +8,14 @@
 
 'use strict';
 
-const util = require('./util');
+const util = require('./utils/misc');
 const normalize = require('./normalize');
 const defaultProperties = require('./properties.json');
 const defaultPaths = require('./paths.json');
 const logger = require('./logger');
 const EndpointLoader = require('./endpointLoader');
-const dataUtil = require('./dataUtil');
-const systemStatsUtil = require('./systemStatsUtil');
+const dataUtil = require('./utils/data');
+const systemStatsUtil = require('./utils/systemStats');
 
 /** @module systemStats */
 

@@ -13,9 +13,10 @@ const fs = require('fs');
 const crypto = require('crypto');
 const diff = require('deep-diff');
 
-const constants = require('./constants');
-const logger = require('./logger');
-const util = require('./util');
+const constants = require('../constants');
+const logger = require('../logger');
+const util = require('./misc');
+const requestsUtil = require('./requests');
 
 
 /**
@@ -851,7 +852,7 @@ module.exports = {
 
         options.protocol = options.protocol || constants.DEVICE_DEFAULT_PROTOCOL;
         options.port = options.port || constants.DEVICE_DEFAULT_PORT;
-        return util.makeRequest(host, uri, options);
+        return requestsUtil.makeRequest(host, uri, options);
     },
 
     /**

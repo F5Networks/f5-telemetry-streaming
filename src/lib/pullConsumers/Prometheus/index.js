@@ -9,8 +9,8 @@
 'use strict';
 
 const client = require('prom-client');
-const mergeObjectArray = require('../../util').mergeObjectArray;
-const deepCopy = require('../../util').deepCopy;
+const mergeObjectArray = require('../../utils/misc').mergeObjectArray;
+const deepCopy = require('../../utils/misc').deepCopy;
 
 const KEYS_TO_HOIST = {
     system: [

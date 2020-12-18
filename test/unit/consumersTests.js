@@ -17,9 +17,10 @@ const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
 const configWorker = require('../../src/lib/config');
-const configUtil = require('../../src/lib/configUtil');
-const util = require('../../src/lib/util');
+const configUtil = require('../../src/lib/utils/config');
+const util = require('../../src/lib/utils/misc');
 const consumers = require('../../src/lib/consumers');
+const moduleLoader = require('../../src/lib/utils/moduleLoader').ModuleLoader;
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -152,7 +153,7 @@ describe('Consumers', () => {
                     }
                 }
             };
-            const moduleLoaderSpy = sinon.spy(util.moduleLoader, 'load');
+            const moduleLoaderSpy = sinon.spy(moduleLoader, 'load');
             return validateAndNormalize(existingConfig)
                 .then((normalized) => {
                     existingComp = normalized.components[0];

@@ -11,8 +11,8 @@
 const Ajv = require('ajv');
 const fs = require('fs');
 const constants = require('./constants');
-const util = require('./util');
-const deviceUtil = require('./deviceUtil');
+const util = require('./utils/misc');
+const deviceUtil = require('./utils/device');
 
 const base64NamedKey = 'plainBase64';
 const secureVaultNamedKey = 'SecureVault';

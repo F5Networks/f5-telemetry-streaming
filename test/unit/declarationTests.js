@@ -19,8 +19,8 @@ const sinon = require('sinon');
 
 const config = require('../../src/lib/config');
 const constants = require('../../src/lib/constants');
-const deviceUtil = require('../../src/lib/deviceUtil');
-const util = require('../../src/lib/util');
+const deviceUtil = require('../../src/lib/utils/device');
+const util = require('../../src/lib/utils/misc');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;

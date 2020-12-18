@@ -18,15 +18,15 @@ const nock = require('nock');
 const request = require('request');
 const sinon = require('sinon');
 
-const constants = require('./../../../src/lib/constants');
-const requestUtil = require('./../../../src/lib/consumers/shared/requestUtil');
+const constants = require('../../../src/lib/constants');
+const httpUtil = require('../../../src/lib/consumers/shared/httpUtil');
 const testUtil = require('../shared/util');
-const util = require('../../../src/lib/util');
+const util = require('../../../src/lib/utils/misc');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
-describe('Request Util Tests', () => {
+describe('HTTP Util Tests', () => {
     afterEach(() => {
         testUtil.checkNockActiveMocks(nock);
         nock.cleanAll();
@@ -46,7 +46,7 @@ describe('Request Util Tests', () => {
                 }
             ];
             assert.deepStrictEqual(
-                requestUtil.processHeaders(headers),
+                httpUtil.processHeaders(headers),
                 {
                     foo: 'foo',
                     bar: 'baz'
@@ -56,7 +56,7 @@ describe('Request Util Tests', () => {
 
         it('should not fail on malformed input', () => {
             const input = 'name:foo,value:bar';
-            assert.deepStrictEqual(requestUtil.processHeaders(input), {});
+            assert.deepStrictEqual(httpUtil.processHeaders(input), {});
         });
     });
 
@@ -80,7 +80,7 @@ describe('Request Util Tests', () => {
 
         it('should be able to perform a basic POST', () => {
             nock('https://localhost:80').post('/').reply(200);
-            return assert.isFulfilled(requestUtil.sendToConsumer(buildDefaultConfig()));
+            return assert.isFulfilled(httpUtil.sendToConsumer(buildDefaultConfig()));
         });
 
         it('should be able to POST a JSON data', () => {
@@ -102,7 +102,7 @@ describe('Request Util Tests', () => {
                         myKey: 'myValue'
                     });
                 });
-            return assert.isFulfilled(requestUtil.sendToConsumer(config));
+            return assert.isFulfilled(httpUtil.sendToConsumer(config));
         });
 
         it('should be able to POST a JSON string', () => {
@@ -123,7 +123,7 @@ describe('Request Util Tests', () => {
                         myKey: 'myValue'
                     });
                 });
-            return assert.isFulfilled(requestUtil.sendToConsumer(config));
+            return assert.isFulfilled(httpUtil.sendToConsumer(config));
         });
 
         it('should properly format the URL', () => {
@@ -136,7 +136,7 @@ describe('Request Util Tests', () => {
             nock('http://192.0.0.1:8080')
                 .post('/path/to/resource')
                 .reply(200);
-            return assert.isFulfilled(requestUtil.sendToConsumer(config));
+            return assert.isFulfilled(httpUtil.sendToConsumer(config));
         });
 
         describe('fallback', () => {
@@ -145,7 +145,7 @@ describe('Request Util Tests', () => {
                     hosts: ['primaryHost']
                 });
                 nock('https://primaryHost:80').post('/').reply(200);
-                return assert.isFulfilled(requestUtil.sendToConsumer(config));
+                return assert.isFulfilled(httpUtil.sendToConsumer(config));
             });
 
             it('should proceed to next host in fallback array when current one is not available', () => {
@@ -160,7 +160,7 @@ describe('Request Util Tests', () => {
                 nock('https://primaryHost:80').post('/').reply(500);
                 nock('https://fallbackHost1:80').post('/').reply(500);
                 nock('https://fallbackHost2:80').post('/').reply(500);
-                return assert.isRejected(requestUtil.sendToConsumer(config), /Bad status code/);
+                return assert.isRejected(httpUtil.sendToConsumer(config), /Bad status code/);
             });
 
             it('should stop fallback once got reply (HTTP 200)', () => {
@@ -179,7 +179,7 @@ describe('Request Util Tests', () => {
                 nock('https://fallbackHost1:80').post('/').reply(200, replyHandler);
                 nock('https://fallbackHost2:80').post('/').reply(500, replyHandler);
 
-                return requestUtil.sendToConsumer(config)
+                return httpUtil.sendToConsumer(config)
                     .then(() => {
                         // force nock cleanup because not all mocks were used
                         nock.cleanAll();
@@ -203,7 +203,7 @@ describe('Request Util Tests', () => {
                 nock('https://fallbackHost1:80').post('/').reply(400, replyHandler);
                 nock('https://fallbackHost2:80').post('/').reply(500, replyHandler);
 
-                return requestUtil.sendToConsumer(config)
+                return httpUtil.sendToConsumer(config)
                     .then(() => {
                         // force nock cleanup because not all mocks were used
                         nock.cleanAll();
@@ -229,7 +229,7 @@ describe('Request Util Tests', () => {
                 });
                 nock('https://fallbackHost2:80').post('/').reply(400);
 
-                return assert.isFulfilled(requestUtil.sendToConsumer(config));
+                return assert.isFulfilled(httpUtil.sendToConsumer(config));
             });
         });
 
@@ -262,7 +262,7 @@ describe('Request Util Tests', () => {
                         done(err);
                     }
                 });
-                assert.isFulfilled(requestUtil.sendToConsumer(config, true));
+                assert.isFulfilled(httpUtil.sendToConsumer(config, true));
             });
 
             it('should support proxy options - with creds', (done) => {
@@ -294,7 +294,7 @@ describe('Request Util Tests', () => {
                         done(err);
                     }
                 });
-                assert.isFulfilled(requestUtil.sendToConsumer(config, true));
+                assert.isFulfilled(httpUtil.sendToConsumer(config, true));
             });
         });
     });

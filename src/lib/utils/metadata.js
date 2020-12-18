@@ -8,9 +8,9 @@
 
 'use strict';
 
-const util = require('./util');
-const azureUtil = require('./consumers/shared/azureUtil');
-const logger = require('./logger');
+const util = require('./misc');
+const azureUtil = require('../consumers/shared/azureUtil');
+const logger = require('../logger');
 
 /** @module metadataUtil */
 // provides a facade for metadata related methods based on instance environment
