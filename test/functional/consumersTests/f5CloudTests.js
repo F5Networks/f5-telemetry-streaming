@@ -22,9 +22,9 @@ const MODULE_REQUIREMENTS = { DOCKER: true };
 const CONSUMER_HOST = sharedUtil.getHosts('CONSUMER')[0]; // only expect one
 const DUTS = sharedUtil.getHosts('BIGIP');
 const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
-const DEOS_CONSUMER_NAME = 'GRPC_DEOS_Consumer';
+const F5_CLOUD_NAME = 'GRPC_F5_CLOUD';
 const MOCK_SERVER_NAME = 'grpc_mock_server';
-const PROTO_PATH = `${__dirname}/../../../src/lib/consumers/Deos_Consumer/deos.proto`;
+const PROTO_PATH = `${__dirname}/../../../src/lib/consumers/F5_Cloud/deos.proto`;
 const GRPC_MOCK_SERVER_DOCKER = `${process.env[constants.ENV_VARS.ARTIFACTORY_SERVER]}/f5-magneto-docker/grpc-mock-server:1.0.1`;
 const GRPC_MOCK_SENDING_PORT = 4770;
 const GRPC_MOCK_ADMIN_PORT = 4771;
@@ -74,8 +74,8 @@ function getBigipVersion(dut) {
  */
 
 function setup() {
-    const serviceAccount = process.env[constants.ENV_VARS.DEOS.DEOS_SERVICE_ACCOUNT];
-    assert.ok(serviceAccount, `should define env variable ${constants.ENV_VARS.DEOS.DEOS_SERVICE_ACCOUNT} with real service account`);
+    const serviceAccount = process.env[constants.ENV_VARS.F5_CLOUD.SERVICE_ACCOUNT];
+    assert.ok(serviceAccount, `should define env variable ${constants.ENV_VARS.F5_CLOUD.SERVICE_ACCOUNT} with real service account`);
     const parsedServiceAccount = JSON.parse(fs.readFileSync(serviceAccount));
     parsedServiceAccount.privateKey = {
         cipherText: parsedServiceAccount.privateKey
@@ -85,10 +85,10 @@ function setup() {
 
     describe('Consumer Setup Check: check bigip requirements', () => {
         DUTS.forEach(dut => it(
-            `get bigip version and check if version is good for DEOS consumer - ${dut.hostalias}`,
+            `get bigip version and check if version is good for F5 Cloud - ${dut.hostalias}`,
             () => getBigipVersion(dut)
                 .then((response) => {
-                    // Deos consumer should support bigip 14 and above
+                    // F5 Cloud should support bigip 14 and above
                     SHOULD_RUN_TESTS[dut.hostalias] = util.compareVersionStrings(response, '>=', '14.0.0');
                 })
         ));
@@ -151,20 +151,22 @@ function setup() {
 
 function test() {
     const testDataTimestamp = Date.now();
-    const msg = hostName => `hostname="${hostName}",testDataTimestamp="${testDataTimestamp}",test="true",testType="${DEOS_CONSUMER_NAME}"`;
-    describe('Consumer Test: deos Consumer - Configure TS', () => {
+    const msg = hostName => `hostname="${hostName}",testDataTimestamp="${testDataTimestamp}",test="true",testType="${F5_CLOUD_NAME}"`;
+    describe('Consumer Test: F5 Cloud - Configure TS', () => {
         DUTS.forEach(dut => it(`should configure TS - ${dut.hostalias}`, function () {
             if (!SHOULD_RUN_TESTS[dut.hostalias]) {
                 this.skip();
             }
             const consumerDeclaration = sharedUtil.deepCopy(DECLARATION);
-            consumerDeclaration[DEOS_CONSUMER_NAME] = {
+            consumerDeclaration[F5_CLOUD_NAME] = {
                 allowSelfSignedCert: true,
                 class: 'Telemetry_Consumer',
-                type: 'Deos_Consumer',
+                type: 'F5_Cloud',
                 enable: true,
                 trace: true,
                 f5csTenantId: 'a-blabla-a',
+                f5csSensorId: '12345',
+                payloadSchemaNid: 'f5',
                 serviceAccount: testUtil.deepCopy(VALID_SERVICE_ACCOUNT),
                 targetAudience: CONSUMER_HOST.ip,
                 useSSL: false,
@@ -180,7 +182,7 @@ function test() {
         }));
     });
 
-    describe('Consumer Test: deos Consumer - Test', () => {
+    describe('Consumer Test: F5 Cloud - Test', () => {
         DUTS.forEach(dut => it(`should find the right interactions on mock server - ${dut.hostalias}`, function () {
             if (!SHOULD_RUN_TESTS[dut.hostalias]) {
                 this.skip();
@@ -199,7 +201,7 @@ function test() {
                         assert(response.data.account_id === 'urn:f5_cs::account:a-blabla-a', `Test Error: Incorrect method name, should be 'urn:f5_cs::account:a-blabla-a', got '${response.data.account_id}'`);
                         const stringData = Buffer.from(response.data.payload, 'base64').toString(); // decode base64
                         const jsonData = JSON.parse(stringData);
-                        if (jsonData.testType === DEOS_CONSUMER_NAME) {
+                        if (jsonData.testType === F5_CLOUD_NAME) {
                             responseDataJSONList.push(jsonData);
                         }
                     });
