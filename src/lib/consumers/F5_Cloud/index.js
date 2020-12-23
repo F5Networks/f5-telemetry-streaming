@@ -62,7 +62,7 @@ module.exports = function (context) {
                 client = new deosProto.Ingestion(url, combinedCreds);
             }
 
-            let configSchema;
+            let configSchema = `${context.event.type}-event`;
             /**
              * adding the ability to create custom payload_schema using configuration
              * for example (notice "custom"):
@@ -98,23 +98,22 @@ module.exports = function (context) {
                     }
                 });
                 context.logger.debug(`custom name : ${configSchema}`);
-            } else {
-                configSchema = `${context.event.type}-event`;
             }
 
             const ingestionRequest = {
                 account_id: `urn:f5_cs::account:${context.config.f5csTenantId}`,
-                source_id: serviceAccount.private_key_id,
+                source_id: context.config.f5csSensorId,
                 compression_type: 0,
                 timestamp_usec: Date.now() * 1000,
                 signature_type: 0,
                 serialization_type: 1,
                 payload: Buffer.from(JSON.stringify(data), 'utf8'),
-                payload_schema: `urn:f5_magneto:big-ip:event-schema:${configSchema.toLowerCase()}:v1`
+                payload_schema: `urn:${context.config.payloadSchemaNid}:big-ip:event-schema:${configSchema.toLowerCase()}:v1`
             };
 
-            context.logger.debug(`account_id : urn:f5_cs::account:${context.config.f5csTenantId}`);
-            context.logger.debug(`payload_schema : urn:f5_magneto:big-ip:event-schema:${configSchema.toLowerCase()}:v1`);
+            context.logger.debug(`account_id : ${ingestionRequest.account_id}`);
+            context.logger.debug(`source_id : ${ingestionRequest.source_id}`);
+            context.logger.debug(`payload_schema : ${ingestionRequest.payload_schema}`);
             context.logger.debug(`data : ${JSON.stringify(data)}`);
 
             return new Promise((resolve) => {
