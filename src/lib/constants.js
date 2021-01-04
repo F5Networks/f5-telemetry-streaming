@@ -81,7 +81,6 @@ module.exports = {
         SYSTEM_POLLER_CLASS_NAME: 'Telemetry_System_Poller',
         NAMESPACE_CLASS_NAME: 'Telemetry_Namespace'
     },
-    CONSUMERS_DIR: './consumers',
     DAY_NAME_TO_WEEKDAY,
     DEVICE_DEFAULT_PORT: 8100,
     DEVICE_DEFAULT_PROTOCOL: 'http',
@@ -123,7 +122,6 @@ module.exports = {
     PASSPHRASE_ENVIRONMENT_VAR: 'environmentVar',
     PORT_TO_PROTO,
     PROTO_TO_PORT,
-    PULL_CONSUMERS_DIR: './pullConsumers',
     QKVIEW_CMD_LOCAL_TIMEOUT: 1 * 60 * 60 * 1000, // 1 hour in milliseconds
     STATS_KEY_SEP: '::',
     STRICT_TLS_REQUIRED: true,

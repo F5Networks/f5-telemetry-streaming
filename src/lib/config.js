@@ -11,11 +11,11 @@
 const EventEmitter2 = require('eventemitter2');
 const nodeUtil = require('util');
 
-const deviceUtil = require('./deviceUtil');
+const deviceUtil = require('./utils/device');
 const logger = require('./logger');
 const persistentStorage = require('./persistentStorage').persistentStorage;
-const util = require('./util');
-const configUtil = require('./configUtil');
+const util = require('./utils/misc');
+const configUtil = require('./utils/config');
 const TeemReporter = require('./teemReporter').TeemReporter;
 
 const PERSISTENT_STORAGE_KEY = 'config';

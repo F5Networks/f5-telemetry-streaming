@@ -19,12 +19,13 @@ const sinon = require('sinon');
 const configWorker = require('../../src/lib/config');
 const systemPoller = require('../../src/lib/systemPoller');
 const SystemStats = require('../../src/lib/systemStats');
-const util = require('../../src/lib/util');
-const deviceUtil = require('../../src/lib/deviceUtil');
+const util = require('../../src/lib/utils/misc');
+const deviceUtil = require('../../src/lib/utils/device');
+const tracers = require('../../src/lib/utils/tracer').Tracer;
 
 const systemPollerConfigTestsData = require('./data/systemPollerTestsData');
 const testUtil = require('./shared/util');
-const configUtil = require('../../src/lib/configUtil');
+const configUtil = require('../../src/lib/utils/config');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -302,7 +303,7 @@ describe('System Poller', () => {
             sinon.stub(util, 'stop').callsFake((arg) => {
                 utilStub.stop.push({ arg });
             });
-            sinon.stub(util.tracer, 'createFromConfig').callsFake((className, objName, config) => {
+            sinon.stub(tracers, 'createFromConfig').callsFake((className, objName, config) => {
                 allTracersStub.push(objName);
                 if (config.trace) {
                     activeTracersStub.push(objName);

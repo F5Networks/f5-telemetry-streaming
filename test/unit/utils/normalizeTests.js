@@ -10,12 +10,12 @@
 
 /* eslint-disable import/order */
 
-require('./shared/restoreCache')();
+require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 
-const normalizeUtil = require('../../src/lib/normalizeUtil');
+const normalizeUtil = require('../../../src/lib/utils/normalize');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;

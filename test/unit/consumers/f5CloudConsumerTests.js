@@ -16,36 +16,39 @@ const sinon = require('sinon');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const testUtil = require('../shared/util');
-const util = require('../../../src/lib/util');
+const util = require('../../../src/lib/utils/misc');
 
-let deosIndex;
+let f5CloudIndex;
 let google;
 let auth;
 try {
-    deosIndex = require('../../../src/lib/consumers/Deos_Consumer/index');
+    f5CloudIndex = require('../../../src/lib/consumers/F5_Cloud/index');
     google = require('google-auth-library');
     auth = google.auth;
 } catch (e) {
-    deosIndex = null;
+    f5CloudIndex = null;
+    google = null;
     google = null;
     auth = null;
 }
 chai.use(chaiAsPromised);
 const assert = chai.assert;
-const DEOS_NODE_SUPPORTED_VERSION = '8.11.1';
-const PROTO_PATH = `${__dirname}/../../../src/lib/consumers/Deos_Consumer/deos.proto`;
+const F5_CLOUD_NODE_SUPPORTED_VERSION = '8.11.1';
+const PROTO_PATH = `${__dirname}/../../../src/lib/consumers/F5_Cloud/deos.proto`;
 
-describe('Deos_Consumer', () => {
-    if (util.compareVersionStrings(process.version.substring(1), '<', DEOS_NODE_SUPPORTED_VERSION)) {
+describe('F5_Cloud', () => {
+    if (util.compareVersionStrings(process.version.substring(1), '<', F5_CLOUD_NODE_SUPPORTED_VERSION)) {
         return;
     }
     const DEFAULT_CONSUMER_CONFIG = {
         allowSelfSignedCert: true,
         class: 'Telemetry_Consumer',
-        type: 'Deos_Consumer',
+        type: 'F5_Cloud',
         enable: true,
         trace: true,
         f5csTenantId: 'a-blabla-a',
+        f5csSensorId: '12345',
+        payloadSchemaNid: 'f5',
         serviceAccount: { // mock
             authType: 'google-auth',
             type: 'service_account',
@@ -119,7 +122,7 @@ describe('Deos_Consumer', () => {
                 config: DEFAULT_CONSUMER_CONFIG,
                 eventType: 'systemInfo'
             });
-            return deosIndex(context)
+            return f5CloudIndex(context)
                 .then((client) => {
                     if (client) {
                         client.close();
@@ -133,7 +136,7 @@ describe('Deos_Consumer', () => {
                 eventType: 'systemInfo'
             });
             const expectedData = testUtil.deepCopy(context.event.data);
-            return deosIndex(context)
+            return f5CloudIndex(context)
                 .then((client) => {
                     if (client) {
                         const a = mockServer.getInteractionsOn('Post');
@@ -164,7 +167,7 @@ describe('Deos_Consumer', () => {
             });
             context.event.data = newObject;
             context.event.isCustom = true;
-            return deosIndex(context)
+            return f5CloudIndex(context)
                 .then((client) => {
                     if (client) {
                         const a = mockServer.getInteractionsOn('Post');
@@ -185,7 +188,7 @@ describe('Deos_Consumer', () => {
                 config: configCopy,
                 eventType: 'systemInfo'
             });
-            return deosIndex(context);
+            return f5CloudIndex(context);
         });
     });
 });

@@ -8,9 +8,9 @@
 
 'use strict';
 
-const logger = require('./logger'); // eslint-disable-line no-unused-vars
-const util = require('./util');
-const constants = require('./constants');
+const logger = require('../logger'); // eslint-disable-line no-unused-vars
+const util = require('./misc');
+const constants = require('../constants');
 
 
 module.exports = {

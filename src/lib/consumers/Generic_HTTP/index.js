@@ -8,8 +8,8 @@
 
 'use strict';
 
-const requestUtil = require('./../shared/requestUtil');
-const util = require('../../util');
+const httpUtil = require('./../shared/httpUtil');
+const util = require('../../utils/misc');
 
 /**
  * See {@link ../README.md#context} for documentation
@@ -22,7 +22,7 @@ module.exports = function (context) {
     const uri = context.config.path || '/';
     const host = context.config.host;
     const fallbackHosts = context.config.fallbackHosts || [];
-    const headers = requestUtil.processHeaders(context.config.headers); // no defaults - provide all headers needed
+    const headers = httpUtil.processHeaders(context.config.headers); // no defaults - provide all headers needed
 
     let allowSelfSignedCert = context.config.allowSelfSignedCert;
     if (!util.isObjectEmpty(context.config.proxy) && typeof context.config.proxy.allowSelfSignedCert !== 'undefined') {
@@ -58,7 +58,7 @@ module.exports = function (context) {
             uri
         }, null, 4));
     }
-    return requestUtil.sendToConsumer({
+    return httpUtil.sendToConsumer({
         allowSelfSignedCert,
         body,
         hosts: [host].concat(fallbackHosts),

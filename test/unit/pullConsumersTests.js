@@ -21,11 +21,12 @@ const configWorker = require('../../src/lib/config');
 const systemPoller = require('../../src/lib/systemPoller');
 const pullConsumers = require('../../src/lib/pullConsumers');
 const CONFIG_CLASSES = require('../../src/lib/constants').CONFIG_CLASSES;
+const moduleLoader = require('../../src/lib/utils/moduleLoader').ModuleLoader;
 
 const pullConsumersTestsData = require('./data/pullConsumersTestsData');
 const testUtil = require('./shared/util');
-const util = require('../../src/lib/util');
-const configUtil = require('../../src/lib/configUtil');
+const util = require('../../src/lib/utils/misc');
+const configUtil = require('../../src/lib/utils/config');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -165,7 +166,7 @@ describe('Pull Consumers', () => {
                 My_Consumer: util.deepCopy(priorConfig.My_Consumer),
                 My_Poller: util.deepCopy(priorConfig.My_Poller)
             };
-            const moduleLoaderSpy = sinon.spy(util.moduleLoader, 'load');
+            const moduleLoaderSpy = sinon.spy(moduleLoader, 'load');
             return validateAndNormalize(priorConfig)
                 .then((normalized) => {
                     existingComp = normalized.components.find(c => c.class === CONFIG_CLASSES.PULL_CONSUMER_CLASS_NAME);

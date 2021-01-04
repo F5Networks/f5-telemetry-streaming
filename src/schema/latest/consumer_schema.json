@@ -331,41 +331,55 @@
             ]
         },
         "f5csTenantId": {
-            "$comment": "Required for certain consumers: Deos",
+            "$comment": "Required for certain consumers: F5_Cloud",
             "title": "F5CS Tenant ID",
             "description": "" ,
             "type": "string",
             "f5expand": true
         },
+        "f5csSensorId": {
+            "$comment": "Required for certain consumers: F5_Cloud",
+            "title": "F5CS Sensor ID",
+            "description": "" ,
+            "type": "string",
+            "f5expand": true
+        },
+        "payloadSchemaNid": {
+            "$comment": "Required for certain consumers: F5_Cloud",
+            "title": "Namespace ID for payloadSchema",
+            "description": "" ,
+            "type": "string",
+            "f5expand": true
+        },
         "serviceAccount": {
-            "$comment": "Required for certain consumers: Deos",
+            "$comment": "Required for certain consumers: F5_Cloud",
             "title": "Service Account",
             "description": "Service Account to authentication" ,
             "type": "object",
             "properties": {
                     "authType": {
-                        "$comment": "Required for certain consumers: Deos",
+                        "$comment": "Required for certain consumers: F5_Cloud",
                         "title": "SA Type",
                         "description": "" ,
                         "type": "string",
                         "enum": ["google-auth" ]
                     },
                     "type": {
-                        "$comment": "Required for certain consumers: Deos",
+                        "$comment": "Required for certain consumers: F5_Cloud",
                         "title": "SA Type",
                         "description": "" ,
                         "type": "string",
                         "f5expand": true
                     },
                     "projectId": {
-                        "$comment": "Required for certain consumers: Deos",
+                        "$comment": "Required for certain consumers: F5_Cloud",
                         "title": "Project Id",
                         "description": "" ,
                         "type": "string",
                         "f5expand": true
                     },
                     "privateKeyId": {
-                        "$comment": "Required for certain consumers: Deos",
+                        "$comment": "Required for certain consumers: F5_Cloud",
                         "title": "Private Key Id",
                         "description": "" ,
                         "type": "string",
@@ -375,42 +389,42 @@
                         "$ref": "base_schema.json#/definitions/secret"
                     },
                     "clientEmail": {
-                        "$comment": "Required for certain consumers: Deos",
+                        "$comment": "Required for certain consumers: F5_Cloud",
                         "title": "Client Email",
                         "description": "" ,
                         "type": "string",
                         "f5expand": true
                     },
                     "clientId": {
-                        "$comment": "Required for certain consumers: Deos",
+                        "$comment": "Required for certain consumers: F5_Cloud",
                         "title": "Client Id",
                         "description": "" ,
                         "type": "string",
                         "f5expand": true
                     },
                     "authUri": {
-                        "$comment": "Required for certain consumers: Deos",
+                        "$comment": "Required for certain consumers: F5_Cloud",
                         "title": "Auth Uri",
                         "description": "" ,
                         "type": "string",
                         "f5expand": true
                     },
                     "tokenUri": {
-                        "$comment": "Required for certain consumers: Deos",
+                        "$comment": "Required for certain consumers: F5_Cloud",
                         "title": "Token Uri",
                         "description": "" ,
                         "type": "string",
                         "f5expand": true
                     },
                     "authProviderX509CertUrl": {
-                        "$comment": "Required for certain consumers: Deos",
+                        "$comment": "Required for certain consumers: F5_Cloud",
                         "title": "Auth Provider X509 Cert Url",
                         "description": "" ,
                         "type": "string",
                         "f5expand": true
                     },
                     "clientX509CertUrl": {
-                        "$comment": "Required for certain consumers: Deos",
+                        "$comment": "Required for certain consumers: F5_Cloud",
                         "title": "Client X509 Cert Url",
                         "description": "" ,
                         "type": "string",
@@ -439,14 +453,14 @@
                 }]
         },
         "targetAudience": {
-            "$comment": "Required for certain consumers: Deos",
+            "$comment": "Required for certain consumers: F5_Cloud",
             "title": "Target Audience",
             "description": "" ,
             "type": "string",
             "f5expand": true
         },
         "useSSL": {
-            "$comment": "Required for certain consumers: Deos",
+            "$comment": "Required for certain consumers: F5_Cloud",
             "title": "useSSL",
             "description": "To decide if GRPC connection should use SSL and then it is secured" ,
             "type": "boolean",
@@ -503,7 +517,7 @@
                             "Splunk",
                             "Statsd",
                             "Sumo_Logic",
-                            "Deos_Consumer"
+                            "F5_Cloud"
                         ]
                     },
                     "enableHostConnectivityCheck": {
@@ -562,6 +576,8 @@
                             "rootCertificate": {},
                             "fallbackHosts": {},
                             "f5csTenantId": {},
+                            "f5csSensorId": {},
+                            "payloadSchemaNid": {},
                             "serviceAccount": {},
                             "targetAudience": {},
                             "useSSL": {},
@@ -941,16 +957,20 @@
                         "else": {}
                     },
                     {
-                        "if": { "properties": { "type": { "const": "Deos_Consumer" } } },
+                        "if": { "properties": { "type": { "const": "F5_Cloud" } } },
                         "then": {
                             "required": [
                                 "f5csTenantId",
+                                "f5csSensorId",
+                                "payloadSchemaNid",
                                 "serviceAccount",
                                 "targetAudience"
                             ],
                             "properties": {
                                 "port": { "$ref": "#/definitions/port", "default": 443 },
                                 "f5csTenantId": { "$ref": "#/definitions/f5csTenantId" },
+                                "f5csSensorId": { "$ref": "#/definitions/f5csSensorId" },
+                                "payloadSchemaNid": { "$ref": "#/definitions/payloadSchemaNid" },
                                 "serviceAccount": { "$ref": "#/definitions/serviceAccount" },
                                 "targetAudience": { "$ref": "#/definitions/targetAudience" },
                                 "useSSL": { "$ref": "#/definitions/useSSL", "default": true }

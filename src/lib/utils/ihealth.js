@@ -13,10 +13,10 @@ const fs = require('fs');
 const path = require('path');
 const request = require('request');
 
-const logger = require('./logger');
-const constants = require('./constants');
-const util = require('./util');
-const deviceUtil = require('./deviceUtil');
+const logger = require('../logger');
+const constants = require('../constants');
+const util = require('./misc');
+const deviceUtil = require('./device');
 
 /** @module ihealthUtil */
 

@@ -11,7 +11,7 @@
 const jwt = require('jsonwebtoken');
 
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
-const util = require('../../util');
+const requestsUtil = require('../../utils/requests');
 
 function checkMetricDescriptors(data, descriptors, currentPath, metrics) {
     Object.keys(data).forEach((key) => {
@@ -70,7 +70,7 @@ module.exports = function (context) {
     };
     options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
 
-    return util.makeRequest(options)
+    return requestsUtil.makeRequest(options)
         .then((result) => {
             delete options.headers['Content-Type'];
             delete options.form;
@@ -78,7 +78,7 @@ module.exports = function (context) {
             options.headers.Authorization = Authorization;
             options.method = 'GET';
             options.fullURI = `${baseUri}/${projectId}/metricDescriptors`;
-            return util.makeRequest(options);
+            return requestsUtil.makeRequest(options);
         })
         .then((results) => {
             // Got a list of MetricDescriptors
@@ -104,7 +104,7 @@ module.exports = function (context) {
                         }
                     };
                     const promise = Promise.resolve()
-                        .then(() => util.makeRequest(promiseOptions));
+                        .then(() => requestsUtil.makeRequest(promiseOptions));
                     promises.push(promise);
                 }
             });
@@ -152,7 +152,7 @@ module.exports = function (context) {
             options.fullURI = `${baseUri}/${projectId}/timeSeries`;
             options.body = timeSeries;
             options.method = 'POST';
-            return util.makeRequest(options);
+            return requestsUtil.makeRequest(options);
         })
         .then(() => Promise.resolve())
         .catch((err) => {

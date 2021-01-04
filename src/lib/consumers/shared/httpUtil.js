@@ -8,8 +8,8 @@
 
 'use strict';
 
-const util = require('../../util');
-
+const util = require('../../utils/misc');
+const requestsUtil = require('../../utils/requests');
 /**
  * Process request headers
  *
@@ -50,8 +50,8 @@ function getProxyUrl(proxyOpts) {
  * Send data to Consumer(s)
  *
  * Note:
- * - see util.makeRequest for available options
- * - all options will be passed through directly to util.makeRequest except options below
+ * - see requestsUtil.makeRequest for available options
+ * - all options will be passed through directly to requestsUtil.makeRequest except options below
  * - request will be sent to the next host if response code is >= 500 or another error occurs
  *
  * @param {Object} config               - config
@@ -78,7 +78,7 @@ function sendToConsumer(config) {
     let response;
     let requestError;
 
-    return util.makeRequest(host, config.uri, requestOptions)
+    return requestsUtil.makeRequest(host, config.uri, requestOptions)
         .then((ret) => {
             response = ret;
             config.logger.debug(`request to '${host}${config.uri}' returned HTTP ${response[1].statusCode}`);

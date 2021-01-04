@@ -69,10 +69,12 @@
   "Magneto_Consumer": {
     "allowSelfSignedCert": true,
     "class": "Telemetry_Consumer",
-    "type": "Deos_Consumer",
+    "type": "F5_Cloud",
     "enable": true,
     "trace": true,
     "f5csTenantId": "a-blabla-a",
+    "f5csSensorId": "12345",
+    "payloadSchemaNid": "f5",
     "serviceAccount": {
       "authType": "google-auth",
       "type": "service_account",

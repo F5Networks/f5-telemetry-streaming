@@ -10,8 +10,8 @@
 
 const mustache = require('mustache');
 
-const constants = require('./constants');
-const util = require('./util');
+const constants = require('../constants');
+const util = require('./misc');
 
 /** @module systemStatsUtil */
 

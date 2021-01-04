@@ -52,8 +52,8 @@
         "prom-client": "11.0.0",
         "request": "^2.88.2",
         "statsd-client": "^0.4.5",
-        "uuid": "^3.4.0",
-        "tiny-request-router": "^1.2.2"
+        "tiny-request-router": "^1.2.2",
+        "uuid": "^3.4.0"
     },
     "devDependencies": {
         "@f5devcentral/eslint-config-f5-atg": "latest",

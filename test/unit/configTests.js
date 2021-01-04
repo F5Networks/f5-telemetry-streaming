@@ -16,10 +16,10 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const util = require('../../src/lib/util');
+const util = require('../../src/lib/utils/misc');
 const config = require('../../src/lib/config');
 const constants = require('../../src/lib/constants');
-const deviceUtil = require('../../src/lib/deviceUtil');
+const deviceUtil = require('../../src/lib/utils/device');
 const psModule = require('../../src/lib/persistentStorage');
 const configTestsData = require('./data/configTestsData');
 const testUtil = require('./shared/util');
