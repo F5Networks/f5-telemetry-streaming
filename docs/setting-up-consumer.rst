@@ -314,6 +314,8 @@ Required Information:
 
 .. NOTE:: To see more information about installing Graphite, see |Installing Graphite|. To see more information about Graphite events, see |Graphite Events|.
 
+Example Declaration:
+
 .. literalinclude:: ../examples/declarations/graphite.json
     :language: json
 
@@ -357,6 +359,7 @@ There are 3 new properties on the Kafka consumer:
 
 .. IMPORTANT:: The following declaration has been updated to include the new TLS authentication protocol introduced in TS 1.17.  If you attempt to use this declaration on a previous version, it will fail. To use this declaration on previous versions, remove the highlighted lines (and the comma from line 23).
 
+Example Declaration:
 
 .. literalinclude:: ../examples/declarations/kafka.json
     :language: json
@@ -389,6 +392,8 @@ Optional Parameters:
 
 .. NOTE:: To see more information about installing ElasticSearch, see |Installing ElasticSearch|.
 
+Example Declaration:
+
 .. literalinclude:: ../examples/declarations/elasticsearch.json
     :language: json
 
@@ -408,6 +413,8 @@ Required Information:
  - Secret: The protected portion of the HTTP path (the final portion of the path, sometimes called a system tenant).
 
 .. NOTE:: To see more information about installing Sumo Logic, see |Installing Sumo Logic|.
+
+Example Declaration:
 
 .. literalinclude:: ../examples/declarations/sumo_logic.json
     :language: json
@@ -434,6 +441,8 @@ Required Information:
 .. NOTE:: When using the :doc:`custom endpoints feature<custom-endpoints>`, be sure to include **/mgmt/tm/sys/global-settings** in your endpoints for Telemetry Streaming to be able to find the hostname. 
 
 To see more information about installing StatsD, see |StatsDWiki|.
+
+Example Declaration:
 
 .. literalinclude:: ../examples/declarations/statsd.json
     :language: json
@@ -464,6 +473,8 @@ Required Information:
 
 |
 
+Example Declaration:
+
 .. literalinclude:: ../examples/declarations/generic_http.json
     :language: json
 
@@ -487,6 +498,8 @@ Required Information:
  - Headers: The headers of the system.
  - Passphrase: The secret to use when sending data to the system, for example an API key to be used in an HTTP header.
 
+Example Declaration:
+
 .. literalinclude:: ../examples/declarations/f5_beacon.json
     :language: json
 
@@ -506,6 +519,8 @@ Required Information:
  - Path: The path of the system. This parameter corresponds to the **tag** of the event being sent to Fluentd (see |fluentdocs| for information) 
  - Method: The method of the system. This must be ``POST``.
  - Headers: The headers of the system.  **Important**: The **content-type = application/json** header as shown in the example is required.
+
+Example Declaration:
 
 .. literalinclude:: ../examples/declarations/fluentd.json
     :language: json
@@ -537,6 +552,8 @@ Once you have configured the Google Cloud Monitoring consumer and sent a Telemet
 
 .. IMPORTANT:: There is a quota of 500 custom MetricDescriptors for Google Cloud Monitoring. Telemetry Streaming creates these MetricDescriptors, and if this quota is ever reached, you must delete some of these MetricDescriptors.
 
+Example Declaration:
+
 .. literalinclude:: ../examples/declarations/google_cloud_monitoring.json
     :language: json
 
@@ -549,7 +566,10 @@ F5 Cloud Consumer (F5 Internal)
 -------------------------------
 The F5 Cloud Consumer is a part of F5's internal, digital experience operating system, a cloud-based analytics platform that helps organizations monitor, operate, and protect digital workflows and optimize their customer's digital experiences.  
 
-.. IMPORTANT:: This F5 Cloud consumer is for **F5 internal use only**, and its API is subject to change. We are including it on this page of Push consumers because you may see it in a response to a Telemetry Streaming GET request.
+.. IMPORTANT:: This F5 Cloud consumer is for **F5 internal use only**, and its API is subject to change. We are including it on this page of Push consumers because you may see it in a Telemetry Streaming declaration.
+
+Example Declaration:
+
 
 .. literalinclude:: ../examples/declarations/f5_cloud.json
     :language: json
