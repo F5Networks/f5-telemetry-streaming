@@ -543,6 +543,19 @@ Once you have configured the Google Cloud Monitoring consumer and sent a Telemet
 
 |
 
+.. _f5cloud:
+
+F5 Cloud Consumer (F5 Internal)
+-------------------------------
+The F5 Cloud Consumer is a part of F5's internal, digital experience operating system, a cloud-based analytics platform that helps organizations monitor, operate, and protect digital workflows and optimize their customer's digital experiences.  
+
+.. IMPORTANT:: This F5 Cloud consumer is for **F5 internal use only**, and its API is subject to change. We are including it on this page of Push consumers because you may see it in a response to a Telemetry Streaming GET request.
+
+.. literalinclude:: ../examples/declarations/f5_cloud.json
+    :language: json
+
+
+|
 |
 
 .. _azreg:
