@@ -14,7 +14,7 @@ const jwt = require('jsonwebtoken');
 const constants = require('../shared/constants');
 const dutUtils = require('../dutTests').utils;
 const sharedUtil = require('../shared/util');
-const util = require('../../../src/lib/util');
+const requestsUtil = require('../../../src/lib/utils/requests');
 
 const DUTS = sharedUtil.getHosts('BIGIP');
 
@@ -59,7 +59,7 @@ function setup() {
                 },
                 fullURI: 'https://oauth2.googleapis.com/token'
             };
-            return util.makeRequest(options)
+            return requestsUtil.makeRequest(options)
                 .then((result) => {
                     accessToken = result.access_token;
                 })
@@ -73,7 +73,7 @@ function setup() {
 
 function test() {
     describe('Consumer Test: Google Cloud Monitoring - Configure TS', () => {
-        const consumerDeclaration = util.deepCopy(DECLARATION);
+        const consumerDeclaration = sharedUtil.deepCopy(DECLARATION);
         consumerDeclaration[GOOGLE_SD_CONSUMER_NAME] = {
             class: 'Telemetry_Consumer',
             type: 'Google_Cloud_Monitoring',
@@ -86,7 +86,7 @@ function test() {
         };
         DUTS.forEach(dut => it(
             `should configure TS - ${dut.hostalias}`,
-            () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(consumerDeclaration))
+            () => dutUtils.postDeclarationToDUT(dut, sharedUtil.deepCopy(consumerDeclaration))
         ));
     });
 
@@ -98,7 +98,7 @@ function test() {
                     Authorization: `Bearer ${accessToken}`
                 }
             };
-            return util.makeRequest(options);
+            return requestsUtil.makeRequest(options);
         };
 
         DUTS.forEach((dut) => {

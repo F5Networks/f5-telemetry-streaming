@@ -11,12 +11,13 @@
 const constants = require('./constants');
 const configWorker = require('./config');
 const dataPipeline = require('./dataPipeline');
-const deviceUtil = require('./deviceUtil');
+const deviceUtil = require('./utils/device');
 const errors = require('./errors');
 const logger = require('./logger');
 const SystemStats = require('./systemStats');
-const util = require('./util');
-const configUtil = require('./configUtil');
+const util = require('./utils/misc');
+const configUtil = require('./utils/config');
+const tracers = require('./utils/tracer').Tracer;
 
 /** @module systemPoller */
 
@@ -101,34 +102,34 @@ function applyConfig(originalConfig) {
     const currPollerIDs = module.exports.getPollerTimers();
 
     systemPollers.forEach((pollerConfig) => {
-        // TODO: keep using traceName as ID for now
-        // tackle using IDs with AUTOTOOL-1834
-        // and see if there's a simple way to skip 'update' altogether
-        // if the exact same poller is configured and already running
-
-        newPollerIDs.push(pollerConfig.traceName);
-        pollerConfig.tracer = util.tracer.createFromConfig(
-            TRACER_CLASS_NAME, pollerConfig.traceName, pollerConfig
-        );
-        const baseMsg = `system poller ${pollerConfig.traceName}. Interval = ${pollerConfig.interval} sec.`;
-        // add to data context to track source poller config and destination(s)
-        pollerConfig.destinationIds = originalConfig.mappings[pollerConfig.id];
-        if (pollerConfig.interval === 0) {
-            logger.info(`Configuring non-polling ${baseMsg}`);
-            if (currPollerIDs[pollerConfig.traceName]) {
-                util.stop(currPollerIDs[pollerConfig.traceName]);
-            }
-            currPollerIDs[pollerConfig.traceName] = undefined;
-        } else if (currPollerIDs[pollerConfig.traceName]) {
-            logger.info(`Updating ${baseMsg}`);
-            currPollerIDs[pollerConfig.traceName] = util.update(
-                currPollerIDs[pollerConfig.traceName], safeProcess, pollerConfig, pollerConfig.interval
-            );
+        const existingPoller = currPollerIDs[pollerConfig.traceName];
+        if (pollerConfig.skipUpdate && existingPoller) {
+            newPollerIDs.push(pollerConfig.traceName);
         } else {
-            logger.info(`Starting ${baseMsg}`);
-            currPollerIDs[pollerConfig.traceName] = util.start(
-                safeProcess, pollerConfig, pollerConfig.interval
+            newPollerIDs.push(pollerConfig.traceName);
+            pollerConfig.tracer = tracers.createFromConfig(
+                TRACER_CLASS_NAME, pollerConfig.traceName, pollerConfig
             );
+            const baseMsg = `system poller ${pollerConfig.traceName}. Interval = ${pollerConfig.interval} sec.`;
+            // add to data context to track source poller config and destination(s)
+            pollerConfig.destinationIds = originalConfig.mappings[pollerConfig.id];
+            if (pollerConfig.interval === 0) {
+                logger.info(`Configuring non-polling ${baseMsg}`);
+                if (currPollerIDs[pollerConfig.traceName]) {
+                    util.stop(currPollerIDs[pollerConfig.traceName]);
+                }
+                currPollerIDs[pollerConfig.traceName] = undefined;
+            } else if (currPollerIDs[pollerConfig.traceName]) {
+                logger.info(`Updating ${baseMsg}`);
+                currPollerIDs[pollerConfig.traceName] = util.update(
+                    currPollerIDs[pollerConfig.traceName], safeProcess, pollerConfig, pollerConfig.interval
+                );
+            } else {
+                logger.info(`Starting ${baseMsg}`);
+                currPollerIDs[pollerConfig.traceName] = util.start(
+                    safeProcess, pollerConfig, pollerConfig.interval
+                );
+            }
         }
     });
 
@@ -284,18 +285,19 @@ function fetchPollersData(pollerConfigs, decryptSecrets) {
 }
 
 // config worker change event
-configWorker.on('change', (config) => {
+configWorker.on('change', config => new Promise((resolve) => {
     logger.debug('configWorker change event in systemPoller');
     // timestamp to find out-dated tracers
     const tracersTimestamp = new Date().getTime();
 
     applyConfig(util.deepCopy(config));
     // remove tracers that were not touched
-    util.tracer.remove(tracer => tracer.name.startsWith(TRACER_CLASS_NAME)
+    tracers.remove(tracer => tracer.name.startsWith(TRACER_CLASS_NAME)
         && tracer.lastGetTouch < tracersTimestamp);
 
     logger.debug(`${Object.keys(getPollerTimers()).length} system poller(s) running`);
-});
+    resolve();
+}));
 
 
 module.exports = {

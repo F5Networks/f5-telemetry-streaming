@@ -10,16 +10,18 @@
 
 const path = require('path');
 const logger = require('./logger');
-const util = require('./util');
-const metadataUtil = require('./metadataUtil');
+const util = require('./utils/misc');
+const tracers = require('./utils/tracer').Tracer;
+const moduleLoader = require('./utils/moduleLoader').ModuleLoader;
+const metadataUtil = require('./utils/metadata');
 const constants = require('./constants');
 const configWorker = require('./config');
-const configUtil = require('./configUtil');
+const configUtil = require('./utils/config');
 const DataFilter = require('./dataFilter').DataFilter;
 
-const CONSUMERS_DIR = constants.CONSUMERS_DIR;
+const CONSUMERS_DIR = '../consumers';
 const CLASS_NAME = constants.CONFIG_CLASSES.CONSUMER_CLASS_NAME;
-let CONSUMERS = null;
+let CONSUMERS = [];
 
 /**
 * Load plugins for requested consumers
@@ -52,33 +54,36 @@ function loadConsumers(config) {
 
     logger.debug(`Loading consumer specific plug-ins from ${CONSUMERS_DIR}`);
     const loadPromises = enabledConsumers.map(consumerConfig => new Promise((resolve) => {
-        const consumerType = consumerConfig.type;
-        // path.join removes './' from string, so we need to
-        // prepend it manually
-        const consumerDir = './'.concat(path.join(CONSUMERS_DIR, consumerType));
-        logger.debug(`Loading consumer ${consumerType} plug-in from ${consumerDir}`);
-        const consumerModule = util.moduleLoader.load(consumerDir);
-        if (consumerModule === null) {
-            resolve(undefined);
+        const existingConsumer = CONSUMERS.find(c => c.id === consumerConfig.id);
+        if (consumerConfig.skipUpdate && existingConsumer) {
+            resolve(existingConsumer);
         } else {
-            const consumer = {
-                name: consumerConfig.name,
-                id: consumerConfig.id,
-                config: util.deepCopy(consumerConfig),
-                consumer: consumerModule,
-                tracer: util.tracer.createFromConfig(CLASS_NAME, consumerConfig.traceName, consumerConfig),
-                filter: new DataFilter(consumerConfig)
-            };
-            consumer.config.allowSelfSignedCert = consumer.config.allowSelfSignedCert === undefined
-                ? !constants.STRICT_TLS_REQUIRED : consumer.config.allowSelfSignedCert;
-            metadataUtil.getInstanceMetadata(consumer)
-                .then((metadata) => {
-                    if (!util.isObjectEmpty(metadata)) {
-                        consumer.metadata = metadata;
-                    }
-                    // copy consumer's data
-                    resolve(consumer);
-                });
+            const consumerType = consumerConfig.type;
+            const consumerDir = (path.join(CONSUMERS_DIR, consumerType));
+            logger.debug(`Loading consumer ${consumerType} plug-in from ${consumerDir}`);
+            const consumerModule = moduleLoader.load(consumerDir);
+            if (consumerModule === null) {
+                resolve(undefined);
+            } else {
+                const consumer = {
+                    name: consumerConfig.name,
+                    id: consumerConfig.id,
+                    config: util.deepCopy(consumerConfig),
+                    consumer: consumerModule,
+                    tracer: tracers.createFromConfig(CLASS_NAME, consumerConfig.traceName, consumerConfig),
+                    filter: new DataFilter(consumerConfig)
+                };
+                consumer.config.allowSelfSignedCert = consumer.config.allowSelfSignedCert === undefined
+                    ? !constants.STRICT_TLS_REQUIRED : consumer.config.allowSelfSignedCert;
+                metadataUtil.getInstanceMetadata(consumer)
+                    .then((metadata) => {
+                        if (!util.isObjectEmpty(metadata)) {
+                            consumer.metadata = metadata;
+                        }
+                        // copy consumer's data
+                        resolve(consumer);
+                    });
+            }
         }
     }));
     return Promise.all(loadPromises)
@@ -91,7 +96,7 @@ function loadConsumers(config) {
  * @returns {Set} set with loaded Consumers' types
  */
 function getLoadedConsumerTypes() {
-    if (CONSUMERS && CONSUMERS.length > 0) {
+    if (CONSUMERS.length > 0) {
         return new Set(CONSUMERS.map(consumer => consumer.config.type));
     }
     return new Set();
@@ -110,37 +115,38 @@ function unloadUnusedModules(before) {
     before.forEach((consumerType) => {
         if (!loadedTypes.has(consumerType)) {
             logger.debug(`Unloading Consumer module '${consumerType}'`);
-            const consumerDir = './'.concat(path.join(CONSUMERS_DIR, consumerType));
+            const consumerDir = path.join(CONSUMERS_DIR, consumerType);
 
-            util.moduleLoader.unload(consumerDir);
+            moduleLoader.unload(consumerDir);
         }
     });
 }
 
 // config worker change event
-configWorker.on('change', (config) => {
-    logger.debug('configWorker change event in consumers');
+configWorker.on('change', config => Promise.resolve()
+    .then(() => {
+        logger.debug('configWorker change event in consumers');
 
-    const consumersToLoad = configUtil.getTelemetryConsumers(config);
+        const consumersToLoad = configUtil.getTelemetryConsumers(config);
 
-    // timestamp to filed out-dated tracers
-    const tracersTimestamp = new Date().getTime();
+        // timestamp to filed out-dated tracers
+        const tracersTimestamp = new Date().getTime();
 
-    const typesBefore = getLoadedConsumerTypes();
-    return loadConsumers(consumersToLoad)
-        .then((consumers) => {
-            CONSUMERS = consumers;
-            logger.info(`${CONSUMERS.length} consumer plug-in(s) loaded`);
-        })
-        .catch((err) => {
-            logger.exception('Unhandled exception when loading consumers', err);
-        })
-        .then(() => {
-            unloadUnusedModules(typesBefore);
-            util.tracer.remove(tracer => tracer.name.startsWith(CLASS_NAME)
-                && tracer.lastGetTouch < tracersTimestamp);
-        });
-});
+        const typesBefore = getLoadedConsumerTypes();
+        return loadConsumers(consumersToLoad)
+            .then((consumers) => {
+                CONSUMERS = consumers;
+                logger.info(`${CONSUMERS.length} consumer plug-in(s) loaded`);
+            })
+            .catch((err) => {
+                logger.exception('Unhandled exception when loading consumers', err);
+            })
+            .then(() => {
+                unloadUnusedModules(typesBefore);
+                tracers.remove(tracer => tracer.name.startsWith(CLASS_NAME)
+                    && tracer.lastGetTouch < tracersTimestamp);
+            });
+    }));
 
 
 module.exports = {

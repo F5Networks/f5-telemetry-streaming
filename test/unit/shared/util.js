@@ -188,6 +188,10 @@ module.exports = {
                 if (opts.times) {
                     apiMock = apiMock.times(opts.times);
                 }
+                // whether to persist nock scope interception until nock.cleanAll()
+                if (opts.persistScope === true) {
+                    hostMock.persist();
+                }
             }
             let response = endpointMock.response;
             if (typeof response === 'object') {
@@ -298,5 +302,14 @@ module.exports = {
             });
         }
         return loadedFiles;
+    },
+
+    /**
+     * Sleep for N ms.
+     *
+     * @returns {Promise} resolved once N .ms passed
+     */
+    sleep(sleepTime) {
+        return new Promise(resolve => setTimeout(resolve, sleepTime));
     }
 };

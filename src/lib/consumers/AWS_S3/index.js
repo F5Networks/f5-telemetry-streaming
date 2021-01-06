@@ -9,7 +9,7 @@
 'use strict';
 
 const AWS = require('aws-sdk');
-const util = require('../../util');
+const util = require('../../utils/misc');
 /**
  * See {@link ../README.md#context} for documentation
  */

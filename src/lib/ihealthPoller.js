@@ -10,13 +10,14 @@
 
 const logger = require('./logger'); // eslint-disable-line no-unused-vars
 const constants = require('./constants');
-const datetimeUtil = require('./datetimeUtil');
-const util = require('./util');
-const deviceUtil = require('./deviceUtil');
-const ihUtil = require('./ihealthUtil');
+const datetimeUtil = require('./utils/datetime');
+const util = require('./utils/misc');
+const deviceUtil = require('./utils/device');
+const ihUtil = require('./utils/ihealth');
 const persistentStorage = require('./persistentStorage').persistentStorage;
 const configWorker = require('./config');
-const configUtil = require('./configUtil');
+const configUtil = require('./utils/config');
+const tracers = require('./utils/tracer').Tracer;
 
 const IHEALTH_POLLER_CLASS_NAME = constants.CONFIG_CLASSES.IHEALTH_POLLER_CLASS_NAME;
 const PERSISTENT_STORAGE_KEY = 'ihealth';
@@ -752,7 +753,7 @@ IHealthPoller.prototype.process = function () {
  * @returns {module:util~Tracer} tracer instance
  */
 IHealthPoller.prototype.getTracer = function () {
-    return util.tracer.createFromConfig(IHEALTH_POLLER_CLASS_NAME, this.sysName, this.config);
+    return tracers.createFromConfig(IHEALTH_POLLER_CLASS_NAME, this.sysName, this.config);
 };
 
 /**

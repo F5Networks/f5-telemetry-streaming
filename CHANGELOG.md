@@ -5,15 +5,20 @@ Changes to this project are documented in this file. More detail and links can b
 ### Added
 - AUTOTOOL-2027 [GitHub #91](https://github.com/F5Networks/f5-telemetry-streaming/issues/91): Add custom timestamp for APM Events
 - AUTOTOOL-2043: [GitHub #92](https://github.com/F5Networks/f5-telemetry-streaming/issues/92) Add support for Generic_HTTP proxy options
+- AUTOTOOL-1834: Updated config diff handling for namespace endpoint support
 - AUTOTOOL-1847: Added 'multiMetric' format for Splunk consumer (v8+ only) (experimental feature)
 - AUTOTOOL-1988: Added new Namespace SystemPoller endpoint (/namespace/$namespace/systempoller/$systemOrPoller/$poller?)
 - AUTOTOOL-2056 [GitHub #93](https://github.com/F5Networks/f5-telemetry-streaming/issues/93): Add additional traffic stats for virtual servers and pools
 - AUTOTOOL-1984 [GitHub #85](https://github.com/F5Networks/f5-telemetry-streaming/issues/85): Add support for Splunk proxy options
-- New consumer: DEOS Consumer
+- AUTOTOOL-2134: New consumer: F5_Cloud
 - AUTOTOOL-2028 [GitHub #90](https://github.com/F5Networks/f5-telemetry-streaming/issues/90): Add support for Kafka TLS client authentication
 ### Fixed
+- AUTOTOOL-2089: Fix error where unavailable Custom Endpoint would return HTTP 500
 ### Changed
+- AUTOTOOL-1832: telemetry/declare returns HTTP 503 on attempt to post declaration while previous one is still in processing
 - AUTOTOOL-1983: No major updates for npm packages (package-lock.json updates only).
+- AUTOTOOL-1914: Store up to 10 items in trace file
+- AUTOTOOL-2086: Add deprecation notice for Splunk Legacy format 
 ### Removed
 
 ## 1.16.0

@@ -233,6 +233,7 @@ build_docs:
         - node scripts/schema-build.js
         # - node scripts/schema-check.js
         - node scripts/schema-to-rst.js
+        - node scripts/poller-default-output-doc-gen.js
         - if [ "$CI_COMMIT_REF_NAME" = "docs-staging" ] || [ "$CI_COMMIT_REF_NAME" = "docs-latest" ]; then
         -   rm -rf docs/_templates
         - fi
@@ -447,7 +448,6 @@ pages:
         - develop
         - doc-release-branch
         - joes-ts-wip
-
 
 # Publish docs to clouddocs.f5.com
 publish_docs_to_production:

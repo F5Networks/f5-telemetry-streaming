@@ -9,7 +9,7 @@
 'use strict';
 
 const logger = require('./logger');
-const util = require('./util');
+const util = require('./utils/misc');
 
 /** @module persistentStorage */
 

@@ -9,10 +9,10 @@
 'use strict';
 
 const properties = require('./properties.json');
-const normalizeUtil = require('./normalizeUtil');
-const dataUtil = require('./dataUtil');
-const util = require('./util');
-const systemStatsUtil = require('./systemStatsUtil');
+const normalizeUtil = require('./utils/normalize');
+const dataUtil = require('./utils/data');
+const util = require('./utils/misc');
+const systemStatsUtil = require('./utils/systemStats');
 const EVENT_TYPES = require('./constants').EVENT_TYPES;
 
 /**

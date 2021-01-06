@@ -19,8 +19,8 @@ const sinon = require('sinon');
 
 const config = require('../../src/lib/config');
 const constants = require('../../src/lib/constants');
-const deviceUtil = require('../../src/lib/deviceUtil');
-const util = require('../../src/lib/util');
+const deviceUtil = require('../../src/lib/utils/device');
+const util = require('../../src/lib/utils/misc');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -52,11 +52,10 @@ describe('Declarations', () => {
                 if (path === 'example_download_folder') {
                     callback();
                 } else {
-                    /* eslint-disable prefer-spread */
                     originFsAccess.apply(null, arguments);
                 }
             });
-            // added for deos tests
+            // added for F5_Cloud tests
             sinon.stub(util, 'getRuntimeInfo').value(() => ({ nodeVersion: '8.12.0' }));
         });
         // first let's validate all example declarations
@@ -670,8 +669,10 @@ describe('Declarations', () => {
                 class: 'Telemetry',
                 My_Consumer: {
                     class: 'Telemetry_Consumer',
-                    type: 'Deos_Consumer',
+                    type: 'F5_Cloud',
                     f5csTenantId: 'a-blabla-a',
+                    f5csSensorId: '12345',
+                    payloadSchemaNid: 'f5',
                     serviceAccount: {
                         type: 'service_account',
                         projectId: 'deos-dev',
@@ -4587,7 +4588,7 @@ describe('Declarations', () => {
             ));
         });
 
-        describe('Deos_Consumer', () => {
+        describe('F5_Cloud', () => {
             beforeEach(() => {
                 sinon.stub(util, 'getRuntimeInfo').value(() => ({ nodeVersion: '8.12.0' }));
             });
@@ -4595,8 +4596,10 @@ describe('Declarations', () => {
             it('should fail because authType is not valid', () => assert.isRejected(
                 validateMinimal({
                     class: 'Telemetry_Consumer',
-                    type: 'Deos_Consumer',
+                    type: 'F5_Cloud',
                     f5csTenantId: 'a-blabla-a',
+                    f5csSensorId: '12345',
+                    payloadSchemaNid: 'f5',
                     serviceAccount: {
                         authType: 'goog',
                         type: 'service_account',
@@ -4620,7 +4623,9 @@ describe('Declarations', () => {
             it('should require f5csTenantId property', () => assert.isRejected(
                 validateMinimal({
                     class: 'Telemetry_Consumer',
-                    type: 'Deos_Consumer',
+                    type: 'F5_Cloud',
+                    f5csSensorId: '12345',
+                    payloadSchemaNid: 'f5',
                     serviceAccount: {
                         authType: 'google-auth',
                         type: 'service_account',
@@ -4641,11 +4646,65 @@ describe('Declarations', () => {
                 /should have required property 'f5csTenantId'/
             ));
 
+            it('should require f5csSensorId property', () => assert.isRejected(
+                validateMinimal({
+                    class: 'Telemetry_Consumer',
+                    type: 'F5_Cloud',
+                    f5csTenantId: 'a-blabla-a',
+                    payloadSchemaNid: 'f5',
+                    serviceAccount: {
+                        authType: 'google-auth',
+                        type: 'service_account',
+                        projectId: 'deos-dev',
+                        privateKeyId: '11111111111111111111111',
+                        privateKey: {
+                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                        },
+                        clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
+                        clientId: '1212121212121212121212',
+                        authUri: 'https://accounts.google.com/o/oauth2/auth',
+                        tokenUri: 'https://oauth2.googleapis.com/token',
+                        authProviderX509CertUrl: 'https://www.googleapis.com/oauth2/v1/certs',
+                        clientX509CertUrl: 'https://www.googleapis.com/robot/v1/metadata/x509/test%40deos-dev.iam.gserviceaccount.com'
+                    },
+                    targetAudience: 'deos-ingest'
+                }),
+                /should have required property 'f5csSensorId'/
+            ));
+
+            it('should require payloadSchemaNid property', () => assert.isRejected(
+                validateMinimal({
+                    class: 'Telemetry_Consumer',
+                    type: 'F5_Cloud',
+                    f5csTenantId: 'a-blabla-a',
+                    f5csSensorId: '12345',
+                    serviceAccount: {
+                        authType: 'google-auth',
+                        type: 'service_account',
+                        projectId: 'deos-dev',
+                        privateKeyId: '11111111111111111111111',
+                        privateKey: {
+                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                        },
+                        clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
+                        clientId: '1212121212121212121212',
+                        authUri: 'https://accounts.google.com/o/oauth2/auth',
+                        tokenUri: 'https://oauth2.googleapis.com/token',
+                        authProviderX509CertUrl: 'https://www.googleapis.com/oauth2/v1/certs',
+                        clientX509CertUrl: 'https://www.googleapis.com/robot/v1/metadata/x509/test%40deos-dev.iam.gserviceaccount.com'
+                    },
+                    targetAudience: 'deos-ingest'
+                }),
+                /should have required property 'payloadSchemaNid'/
+            ));
+
             it('should require privateKeyId property', () => assert.isRejected(
                 validateMinimal({
                     class: 'Telemetry_Consumer',
-                    type: 'Deos_Consumer',
+                    type: 'F5_Cloud',
                     f5csTenantId: 'a-blabla-a',
+                    f5csSensorId: '12345',
+                    payloadSchemaNid: 'f5',
                     serviceAccount: {
                         authType: 'google-auth',
                         type: 'service_account',
@@ -4668,8 +4727,10 @@ describe('Declarations', () => {
             it('should pass minimal declaration', () => validateMinimal(
                 {
                     class: 'Telemetry_Consumer',
-                    type: 'Deos_Consumer',
+                    type: 'F5_Cloud',
                     f5csTenantId: 'a-blabla-a',
+                    f5csSensorId: '12345',
+                    payloadSchemaNid: 'f5',
                     serviceAccount: {
                         authType: 'google-auth',
                         type: 'service_account',
@@ -4692,6 +4753,8 @@ describe('Declarations', () => {
                     class: 'Telemetry_Consumer',
                     enable: true,
                     f5csTenantId: 'a-blabla-a',
+                    f5csSensorId: '12345',
+                    payloadSchemaNid: 'f5',
                     port: 443,
                     useSSL: true,
                     serviceAccount: {
@@ -4713,15 +4776,17 @@ describe('Declarations', () => {
                     },
                     targetAudience: 'deos-ingest',
                     trace: false,
-                    type: 'Deos_Consumer'
+                    type: 'F5_Cloud'
                 }
             ));
 
             it('should allow full declaration', () => validateFull(
                 {
                     class: 'Telemetry_Consumer',
-                    type: 'Deos_Consumer',
+                    type: 'F5_Cloud',
                     f5csTenantId: 'a-blabla-a',
+                    f5csSensorId: '12345',
+                    payloadSchemaNid: 'f5',
                     port: 500,
                     useSSL: false,
                     enable: true,
@@ -4748,6 +4813,8 @@ describe('Declarations', () => {
                     class: 'Telemetry_Consumer',
                     enable: true,
                     f5csTenantId: 'a-blabla-a',
+                    f5csSensorId: '12345',
+                    payloadSchemaNid: 'f5',
                     port: 500,
                     useSSL: false,
                     serviceAccount: {
@@ -4768,7 +4835,7 @@ describe('Declarations', () => {
                     },
                     targetAudience: 'deos-ingest',
                     trace: true,
-                    type: 'Deos_Consumer'
+                    type: 'F5_Cloud'
                 }
             ));
         });

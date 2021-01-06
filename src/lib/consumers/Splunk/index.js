@@ -13,7 +13,7 @@ const zlib = require('zlib');
 const dataMapping = require('./dataMapping');
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 const memConverter = require('./multiMetricEventConverter');
-const requestUtil = require('./../shared/requestUtil');
+const httpUtil = require('./../shared/httpUtil');
 
 const GZIP_DATA = true;
 const MAX_CHUNK_SIZE = 99000;
@@ -225,7 +225,7 @@ function sendDataChunk(dataChunk, context) {
             'Content-Length': data.length
         });
 
-        return requestUtil.sendToConsumer(opts)
+        return httpUtil.sendToConsumer(opts)
             .then(response => response[1].statusCode);
     });
 }

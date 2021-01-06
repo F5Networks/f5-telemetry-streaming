@@ -12,7 +12,9 @@ const nodeUtil = require('util');
 
 const BaseRequestHandler = require('./baseHandler');
 const configWorker = require('../config');
+const logger = require('../logger');
 const router = require('./router');
+const ServiceUnavailableErrorHandler = require('./httpStatus/serviceUnavailableErrorHandler');
 
 /**
  * /declare endpoint handler
@@ -51,8 +53,21 @@ DeclareEndpointHandler.prototype.getBody = function () {
 DeclareEndpointHandler.prototype.process = function () {
     let promise;
     if (this.getMethod() === 'POST') {
-        promise = configWorker.processDeclaration(this.restOperation.getBody());
-    } else if (this.getMethod() === 'GET') {
+        if (DeclareEndpointHandler.PROCESSING_DECLARATION_FLAG) {
+            logger.debug('Can\'t process new declaration while previous one is still in progress');
+            return Promise.resolve(new ServiceUnavailableErrorHandler(this.restOperation));
+        }
+        DeclareEndpointHandler.PROCESSING_DECLARATION_FLAG = true;
+        promise = configWorker.processDeclaration(this.restOperation.getBody())
+            .then((config) => {
+                DeclareEndpointHandler.PROCESSING_DECLARATION_FLAG = false;
+                return config;
+            })
+            .catch((err) => {
+                DeclareEndpointHandler.PROCESSING_DECLARATION_FLAG = false;
+                return Promise.reject(err);
+            });
+    } else {
         promise = configWorker.getRawConfig();
     }
     return promise.then((config) => {
@@ -76,6 +91,8 @@ DeclareEndpointHandler.prototype.process = function () {
             return Promise.reject(error);
         });
 };
+
+DeclareEndpointHandler.PROCESSING_DECLARATION_FLAG = false;
 
 router.on('register', (routerInst) => {
     routerInst.register('GET', '/declare', DeclareEndpointHandler);

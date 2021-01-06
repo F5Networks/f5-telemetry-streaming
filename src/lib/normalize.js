@@ -10,7 +10,7 @@
 
 const logger = require('./logger'); // eslint-disable-line no-unused-vars
 const constants = require('./constants');
-const normalizeUtil = require('./normalizeUtil');
+const normalizeUtil = require('./utils/normalize');
 
 
 /**

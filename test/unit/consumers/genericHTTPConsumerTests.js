@@ -19,7 +19,7 @@ const sinon = require('sinon');
 
 const genericHttpIndex = require('../../../src/lib/consumers/Generic_HTTP/index');
 const testUtil = require('../shared/util');
-const requestUtil = require('../../../src/lib/consumers/shared/requestUtil');
+const httpUtil = require('../../../src/lib/consumers/shared/httpUtil');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -140,7 +140,7 @@ describe('Generic_HTTP', () => {
         let sendToConsumerMock;
 
         beforeEach(() => {
-            sendToConsumerMock = sinon.stub(requestUtil, 'sendToConsumer').resolves();
+            sendToConsumerMock = sinon.stub(httpUtil, 'sendToConsumer').resolves();
         });
 
         it('should be able to send data to primary host only', () => {
@@ -188,7 +188,7 @@ describe('Generic_HTTP', () => {
         let requestUtilSpy;
 
         beforeEach(() => {
-            requestUtilSpy = sinon.stub(requestUtil, 'sendToConsumer').resolves();
+            requestUtilSpy = sinon.stub(httpUtil, 'sendToConsumer').resolves();
         });
 
         it('should pass basic proxy options', () => {

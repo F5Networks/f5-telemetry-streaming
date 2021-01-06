@@ -19,22 +19,28 @@ Required information:
  - Port: Default is 8088, this can be configured within the Global Settings section of the Splunk HEC.
  - API Key: An API key must be created and provided in the passphrase object of the declaration, refer to Splunk documentation for the correct way to create an HEC token.
 
+.. NOTE:: If you want to specify proxy settings for Splunk consumers in TS 1.17 and later, see the :ref:`Splunk Proxy<splunkproxy>` example.
+
 Example Declaration:
 
 .. literalinclude:: ../examples/declarations/splunk.json
     :language: json
 
+|
+
 .. _splunk-legacy:
 
-Splunk Legacy format
-````````````````````
+Splunk Legacy format (Deprecated)
+`````````````````````````````````
+.. IMPORTANT:: The Splunk Legacy format has been deprecated as of Telemetry Streaming 1.17, and has entered maintenance mode. This means there will be no further TS development for the Splunk Legacy format. |br| We recommend using the :ref:`Splunk default format<splunk-ref>`, or :ref:`multi-metric` (currently experimental).
+
 The **format** property can be set to **legacy** for Splunk users who wish to convert the stats output similar to the |splunk app|. To see more information, see |Analytics|. To see more information about using the HEC, see |HEC|.  See the following example.
 
-.. NOTE:: To poll for any data involving **tmstats** you must have a Splunk consumer with the legacy format as described in this section.  This includes GET requests to the SystemPoller API because the data is not pulled unless it is a legacy Splunk consumer. |br| |br| Telemetry Streaming 1.7.0 and later gathers additional data from tmstats tables to improve compatibility with Splunk Legacy consumers.
+To poll for any data involving **tmstats** you must have a Splunk consumer with the legacy format as described in this section.  This includes GET requests to the SystemPoller API because the data is not pulled unless it is a legacy Splunk consumer. |br| |br| Telemetry Streaming 1.7.0 and later gathers additional data from tmstats tables to improve compatibility with Splunk Legacy consumers.
 
 In Telemetry Streaming v1.6.0 and later, you must use the **facility** parameter with the legacy format to specify a Splunk facility in your declarations.  The facility parameter is for identification of location/facility in which the BIG-IP is located (such as 'Main Data Center', 'AWS', or 'NYC'). 
 
-.. IMPORTANT:: If a Splunk Consumer is configured with the legacy format, then it ignores events from Event Listener.
+If a Splunk Consumer is configured with the legacy format, then it ignores events from Event Listener.
 
 Required information for **facility**: 
   - The facility parameter must be inside of **actions** and then **setTag** as shown in the example.
@@ -88,10 +94,10 @@ Required Information:
 
 To see more information about sending data to Log Analytics, see |HTTP Data Collector API|.
 
-.. NOTE:: The following example has been updated with the **useManagedIdentity** and **region** properties. |br| See :ref:`mi` following the example for information about using Azure Managed Identities and Telemetry Streaming. 
+.. NOTE:: The following example has been updated with the **useManagedIdentity** and **region** properties. |br| See :ref:`Using Managed Identities<mi>` following the example for information about using Azure Managed Identities and Telemetry Streaming. 
 
 Region property
-^^^^^^^^^^^^^^^
+```````````````
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
    Support for the **region** property is available in Telemetry Streaming 1.11 and later. 
@@ -122,7 +128,7 @@ The following is an example of the Azure dashboard with Telemetry Streaming data
 .. _mi:
 
 Using Microsoft Managed Identities for Log Analytics
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+````````````````````````````````````````````````````
 Telemetry Streaming v1.11 adds support for sending data to Azure Log Analytics with an Azure Managed Identity. For specific information on Managed Identities, see |managedid|.
 
 **Important:** The managed identity assigned to the VM must have at the minimum, the following permissions (see the Azure documentation for detailed information):
@@ -153,7 +159,7 @@ Microsoft Azure Application Insights
 Required Information:
 
 - **Instrumentation Key**: If provided, **Use Managed Identity** must be *false* or omitted (default). Navigate to :guilabel:`Application Insights > {AppinsightsName} > Overview`
-- **Use Managed Identity**: If true, Instrumentation Key must be omitted. See :ref:`miappin`.
+- **Use Managed Identity**: If true, Instrumentation Key must be omitted. See :ref:`Managed Identities for App Insight<miappin>`.
 
 
 Optional Properties:
@@ -170,7 +176,7 @@ To see more information about Azure Application Insights, see |appinsight|.
 .. _region:
 
 Region property
-^^^^^^^^^^^^^^^
+```````````````
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
    Support for the **region** property is available in Telemetry Streaming 1.11 and later. 
@@ -194,7 +200,7 @@ Example Declaration:
 .. _miappin:
 
 Using Microsoft Managed Identities for Application Insights
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+```````````````````````````````````````````````````````````
 Telemetry Streaming v1.11 also adds support for sending data to Azure Application Insights with an Azure Managed Identity. For specific information on Managed Identities, see |managedid|.
 
 **Important:** The managed identity assigned to the VM must have at the minimum, the following permissions  (see the Azure documentation for detailed information):
@@ -217,12 +223,12 @@ AWS CloudWatch
 --------------
 |aws_img|   
 
-AWS CloudWatch has two consumers: CloudWatch Logs, and :ref:`cw-metrics` (new in TS 1.14).  If you do not use the new **dataType** property, the system defaults to CloudWatch Logs.
+AWS CloudWatch has two consumers: CloudWatch Logs, and :ref:`CloudWatch Metrics<cw-metrics>` (new in TS 1.14).  If you do not use the new **dataType** property, the system defaults to CloudWatch Logs.
 
 .. IMPORTANT:: In TS 1.9.0 and later, the **username** and **passphrase** for CloudWatch are optional.  This is because a user can send data from a BIG-IP that has an appropriate IAM role in AWS to AWS CloudWatch without a username and passphrase.
 
 AWS CloudWatch Logs (default)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+`````````````````````````````
 
 Required information:
  - Region: AWS region of the CloudWatch resource.
@@ -243,7 +249,7 @@ Example Declaration:
 .. _cw-metrics:
 
 AWS CloudWatch Metrics
-^^^^^^^^^^^^^^^^^^^^^^
+``````````````````````
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
    Support for CloudWatch Metrics is available in Telemetry Streaming 1.14 and later.
@@ -308,6 +314,8 @@ Required Information:
 
 .. NOTE:: To see more information about installing Graphite, see |Installing Graphite|. To see more information about Graphite events, see |Graphite Events|.
 
+Example Declaration:
+
 .. literalinclude:: ../examples/declarations/graphite.json
     :language: json
 
@@ -324,14 +332,39 @@ Required Information:
  - Port: The port of the Kafka system.
  - Topic: The topic where data should go within the Kafka system
  - Protocol: The port of the Kafka system. Options: binaryTcp or binaryTcpTls. Default is binaryTcpTls
- - Authentication Protocol: The protocol to use for authentication process. Options: SASL-PLAIN or None. Default is None.
+ - Authentication Protocol: The protocol to use for authentication process. Options: **SASL-PLAIN** and **None**, and **TLS** in TS 1.17 and later. Default is None.
  - Username: The username to use for authentication process.
  - Password: The password to use for authentication process.
 
 .. NOTE:: To see more information about installing Kafka, see |Installing Kafka|.
 
+New in TS 1.17
+``````````````
+Telemetry Streaming 1.17 and later adds the ability to add TLS client authentication to the Kafka consumer using the **TLS** authentication protocol.  This protocol configures Telemetry Streaming to provide the required private key and certificate(s) when the Kafka broker is configured to use SSL/TLS Client authentication. 
+
+You can find more information on Kafka's client authentication on the Confluent pages: https://docs.confluent.io/5.5.0/kafka/authentication_ssl.html.
+
+There are 3 new properties on the Kafka consumer:
+
++--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Property           | Description                                                                                                                                                                                                                                |
++====================+============================================================================================================================================================================================================================================+
+| privateKey         | The Private Key for the SSL certificate. Must be formatted as a 1-line string, with literal new line characters.                                                                                                                           |
++--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| clientCertificate  | The client certificate chain. Must be formatted as a 1-line string, with literal new line characters.                                                                                                                                      |
++--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| rootCertificate    | The Certificate Authority root certificate, used to validate the client certificate. Certificate verification can be disabled by setting allowSelfSignedCert=true. Must be formatted as a 1-line string, with literal new line characters. |
++--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+
+.. IMPORTANT:: The following declaration has been updated to include the new TLS authentication protocol introduced in TS 1.17.  If you attempt to use this declaration on a previous version, it will fail. To use this declaration on previous versions, remove the highlighted lines (and the comma from line 23).
+
+Example Declaration:
+
 .. literalinclude:: ../examples/declarations/kafka.json
     :language: json
+    :linenos:
+    :emphasize-lines: 24-41
 
 |
 
@@ -359,6 +392,8 @@ Optional Parameters:
 
 .. NOTE:: To see more information about installing ElasticSearch, see |Installing ElasticSearch|.
 
+Example Declaration:
+
 .. literalinclude:: ../examples/declarations/elasticsearch.json
     :language: json
 
@@ -378,6 +413,8 @@ Required Information:
  - Secret: The protected portion of the HTTP path (the final portion of the path, sometimes called a system tenant).
 
 .. NOTE:: To see more information about installing Sumo Logic, see |Installing Sumo Logic|.
+
+Example Declaration:
 
 .. literalinclude:: ../examples/declarations/sumo_logic.json
     :language: json
@@ -405,6 +442,8 @@ Required Information:
 
 To see more information about installing StatsD, see |StatsDWiki|.
 
+Example Declaration:
+
 .. literalinclude:: ../examples/declarations/statsd.json
     :language: json
 
@@ -426,11 +465,15 @@ Required Information:
 
 .. NOTE:: Since this consumer is designed to be generic and flexible, how authentication is performed is left up to the web service. To ensure the secrets are encrypted within Telemetry Streaming please note the use of JSON pointers. The secret to protect should be stored inside ``passphrase`` and referenced in the desired destination property, such as an API token in a header as shown in this example. 
 
-To see an example of Generic HTTP with multiple passphrases, see :ref:`multiple`.
+**Additional examples for Generic HTTP consumers:**
 
-To see an example of Generic HTTP with proxy settings, see :ref:`proxy`.
+- Generic HTTP with multiple passphrases, see :ref:`multiple`.
+- Generic HTTP with proxy settings in TS 1.17 and later, see :ref:`proxy`.
+- An EXPERIMENTAL feature where you can specify fallback IP address(es) for the Generic HTTP consumer, see :ref:`fallback`.
 
-To see an example of the EXPERIMENTAL feature where you can specify fallback IP address(es) for the Generic HTTP consumer, see :ref:`fallback`.
+|
+
+Example Declaration:
 
 .. literalinclude:: ../examples/declarations/generic_http.json
     :language: json
@@ -438,7 +481,7 @@ To see an example of the EXPERIMENTAL feature where you can specify fallback IP 
 .. _beacon-ref:
 
 F5 Beacon
-^^^^^^^^^
+`````````
 |beaconlogo|
 
 F5 Beacon, a SaaS offering, provides visibility and actionable insights into the health and performance of applications. 
@@ -454,6 +497,8 @@ Required Information:
  - Method: The method of the system. Options: ``POST``, ``PUT``, ``GET``. Default is ``POST``.
  - Headers: The headers of the system.
  - Passphrase: The secret to use when sending data to the system, for example an API key to be used in an HTTP header.
+
+Example Declaration:
 
 .. literalinclude:: ../examples/declarations/f5_beacon.json
     :language: json
@@ -474,6 +519,8 @@ Required Information:
  - Path: The path of the system. This parameter corresponds to the **tag** of the event being sent to Fluentd (see |fluentdocs| for information) 
  - Method: The method of the system. This must be ``POST``.
  - Headers: The headers of the system.  **Important**: The **content-type = application/json** header as shown in the example is required.
+
+Example Declaration:
 
 .. literalinclude:: ../examples/declarations/fluentd.json
     :language: json
@@ -505,12 +552,30 @@ Once you have configured the Google Cloud Monitoring consumer and sent a Telemet
 
 .. IMPORTANT:: There is a quota of 500 custom MetricDescriptors for Google Cloud Monitoring. Telemetry Streaming creates these MetricDescriptors, and if this quota is ever reached, you must delete some of these MetricDescriptors.
 
+Example Declaration:
+
 .. literalinclude:: ../examples/declarations/google_cloud_monitoring.json
     :language: json
 
 
 |
 
+.. _f5cloud:
+
+F5 Cloud Consumer (F5 Internal)
+-------------------------------
+The F5 Cloud Consumer is a part of F5's internal, digital experience operating system, a cloud-based analytics platform that helps organizations monitor, operate, and protect digital workflows and optimize their customer's digital experiences.  
+
+.. IMPORTANT:: This F5 Cloud consumer is for **F5 internal use only**, and its API is subject to change. We are including it on this page of Push consumers because you may see it in a Telemetry Streaming declaration.
+
+Example Declaration:
+
+
+.. literalinclude:: ../examples/declarations/f5_cloud.json
+    :language: json
+
+
+|
 |
 
 .. _azreg:

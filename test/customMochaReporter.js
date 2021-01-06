@@ -8,7 +8,6 @@
 
 'use strict';
 
-/* eslint-disable prefer-spread */
 /* eslint-disable no-console */
 
 const mocha = require('mocha');

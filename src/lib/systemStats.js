@@ -8,14 +8,14 @@
 
 'use strict';
 
-const util = require('./util');
+const util = require('./utils/misc');
 const normalize = require('./normalize');
 const defaultProperties = require('./properties.json');
 const defaultPaths = require('./paths.json');
 const logger = require('./logger');
 const EndpointLoader = require('./endpointLoader');
-const dataUtil = require('./dataUtil');
-const systemStatsUtil = require('./systemStatsUtil');
+const dataUtil = require('./utils/data');
+const systemStatsUtil = require('./utils/systemStats');
 
 /** @module systemStats */
 
@@ -261,6 +261,10 @@ SystemStats.prototype._processProperty = function (key, property) {
             }
         })
         .catch((err) => {
+            // For custom endpoints only, add an empty object to response, to show TS tried to load the endpoint
+            if (property.isCustom) {
+                this.collectedData[key] = {};
+            }
             this.logger.error(`Error: SystemStats._processProperty: ${key} (${property.key}): ${err}`);
             return Promise.reject(err);
         });
@@ -464,7 +468,7 @@ SystemStats.prototype.collectDefaultPathsProps = function () {
  * @returns {Object} Promise
  */
 SystemStats.prototype.collectCustomEndpoints = function () {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const endpKeys = Object.keys(this.endpoints);
 
         const processEndpoint = (idx) => {
@@ -477,14 +481,11 @@ SystemStats.prototype.collectCustomEndpoints = function () {
 
             return Promise.resolve()
                 .then(() => this._processProperty(keyName, this._convertToProperty(keyName, endpoint)))
-                .then(() => {
-                    processEndpoint(idx + 1);
-                })
                 .catch((err) => {
-                    const msg = `Error on attempt to load data from endpoint '${endpoint.name}[${endpoint.path}]': ${err}`;
-                    err.message = msg;
-                    reject(err);
-                });
+                    this.logger.error(`Error on attempt to load data from endpoint '${endpoint.name}[${endpoint.path}]': ${err}`);
+                })
+                // Process the next endpoint, even if error processing current endpoint
+                .then(() => processEndpoint(idx + 1));
         };
 
         processEndpoint(0);

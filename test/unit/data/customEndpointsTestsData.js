@@ -493,6 +493,85 @@ module.exports = {
                         }
                     }
                 ]
+            },
+            /**
+             * TEST DATA STARTS HERE
+             * */
+            {
+                name: 'should not error if individual custom endpoint path is invalid',
+                totalAttempts: 2,
+                endpointList: {
+                    test: {
+                        name: 'test',
+                        path: '/does/not/exist'
+                    }
+                },
+                expectedData: {
+                    test: {}
+                },
+                endpoints: [
+                    {
+                        endpoint: '/does/not/exist',
+                        reponse: 'Not found',
+                        skipCheckResponse: true,
+                        options: {
+                            persistScope: true
+                        },
+                        code: 404
+                    }
+                ]
+            },
+            /**
+             * TEST DATA STARTS HERE
+             * */
+            {
+                name: 'should return data for custom endpoints that it is able to',
+                totalAttempts: 2,
+                endpointList: {
+                    virtualServers: {
+                        name: 'virtualServers',
+                        path: '/mgmt/tm/ltm/virtual'
+                    },
+                    test: {
+                        name: 'test',
+                        path: '/does/not/exist'
+                    }
+                },
+                expectedData: {
+                    virtualServers: {
+                        items: [
+                            {
+                                kind: 'tm:ltm:virtual:virtualstate',
+                                name: 'default'
+                            }
+                        ]
+                    },
+                    test: {}
+                },
+                endpoints: [
+                    {
+                        endpoint: '/mgmt/tm/ltm/virtual',
+                        response: {
+                            kind: 'tm:ltm:virtual:virtualcollectionstate',
+                            selfLink: 'https://localhost/mgmt/tm/ltm/virtual?ver=13.1.1.4',
+                            items: [
+                                {
+                                    kind: 'tm:ltm:virtual:virtualstate',
+                                    name: 'default'
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        endpoint: '/does/not/exist',
+                        reponse: 'Not found',
+                        skipCheckResponse: true,
+                        options: {
+                            persistScope: true
+                        },
+                        code: 404
+                    }
+                ]
             }
         ]
     }

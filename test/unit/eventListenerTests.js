@@ -25,8 +25,9 @@ const dataPipeline = require('../../src/lib/dataPipeline');
 const testUtil = require('./shared/util');
 const eventListenerTestData = require('./data/eventListenerTestsData');
 const configWorker = require('../../src/lib/config');
-const configUtil = require('../../src/lib/configUtil');
-const util = require('../../src/lib/util');
+const configUtil = require('../../src/lib/utils/config');
+const util = require('../../src/lib/utils/misc');
+const tracers = require('../../src/lib/utils/tracer').Tracer;
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -275,7 +276,7 @@ describe('Event Listener', () => {
                 listenerStub.stop += 1;
             });
 
-            sinon.stub(util.tracer, 'createFromConfig').callsFake((className, objName, config) => {
+            sinon.stub(tracers, 'createFromConfig').callsFake((className, objName, config) => {
                 allTracersStub.push(objName);
                 if (config.trace) {
                     activeTracersStub.push(objName);
@@ -284,10 +285,7 @@ describe('Event Listener', () => {
             });
 
             return validateAndNormalize(origDecl)
-                .then((normalized) => {
-                    configWorker.emit('change', normalized);
-                    return new Promise(resolve => setTimeout(resolve, 500));
-                })
+                .then(normalized => configWorker.emitAsync('change', normalized))
                 .then(() => {
                     const listeners = eventListener.getListeners();
                     assert.strictEqual(Object.keys(listeners).length, 1);
@@ -307,14 +305,11 @@ describe('Event Listener', () => {
                 });
         });
 
-        afterEach(() => {
-            configWorker.emit('change', { components: [], mappings: {} });
-            return new Promise(resolve => setTimeout(resolve, 500))
-                .then(() => {
-                    const listeners = eventListener.getListeners();
-                    assert.strictEqual(Object.keys(listeners).length, 0);
-                });
-        });
+        afterEach(() => configWorker.emitAsync('change', { components: [], mappings: {} })
+            .then(() => {
+                const listeners = eventListener.getListeners();
+                assert.strictEqual(Object.keys(listeners).length, 0);
+            }));
 
         it('should create listeners with default and custom opts on config change event (no prior config)', () => {
             const newDecl = util.deepCopy(origDecl);
@@ -325,10 +320,7 @@ describe('Event Listener', () => {
             };
 
             return validateAndNormalize(newDecl)
-                .then((normalized) => {
-                    configWorker.emit('change', normalized);
-                    return new Promise(resolve => setTimeout(resolve, 500));
-                })
+                .then(normalized => configWorker.emitAsync('change', normalized))
                 .then(() => {
                     // only start Listener2, 2 has been started from the orig config
                     assert.deepStrictEqual(listenerStub, { start: 2, stop: 0 });
@@ -345,11 +337,7 @@ describe('Event Listener', () => {
                 });
         });
 
-        it('should stop existing listener(s) when removed from config', () => Promise.resolve()
-            .then(() => {
-                configWorker.emit('change', { components: [], mappings: {} });
-                return new Promise(resolve => setTimeout(resolve, 500));
-            })
+        it('should stop existing listener(s) when removed from config', () => configWorker.emitAsync('change', { components: [], mappings: {} })
             .then(() => {
                 assert.deepStrictEqual(listenerStub, { start: 0, stop: 2 });
                 assert.strictEqual(activeTracersStub.length, 0);
@@ -359,15 +347,12 @@ describe('Event Listener', () => {
                 assert.strictEqual(Object.keys(listeners).length, 0);
             }));
 
-        it('should update existing listener(s) without restarting', () => {
+        it('should update existing listener(s) without restarting if port is the same', () => {
             const newDecl = util.deepCopy(origDecl);
             newDecl.Listener1.trace = true;
             const updateSpy = sinon.stub(EventListener.prototype, 'updateConfig');
             return validateAndNormalize(newDecl)
-                .then((normalized) => {
-                    configWorker.emit('change', normalized);
-                    return new Promise(resolve => setTimeout(resolve, 500));
-                })
+                .then(normalized => configWorker.emitAsync('change', normalized))
                 .then(() => {
                     assert.deepStrictEqual(listenerStub, { start: 0, stop: 0 });
                     assert.strictEqual(activeTracersStub.length, 2);
@@ -378,6 +363,39 @@ describe('Event Listener', () => {
                         port: 1234, id: 'uuid1', tags: { tenant: '`T`', application: '`A`' }
                     });
                     // one for each protocol
+                    assert.isTrue(updateSpy.calledTwice);
+                });
+        });
+
+        it('should add a new listener without updating existing one when skipUpdate = true', () => {
+            const updateSpy = sinon.spy(EventListener.prototype, 'updateConfig');
+            const newDecl = util.deepCopy(origDecl);
+            newDecl.New = {
+                class: 'Telemetry_Namespace',
+                Listener1: {
+                    class: 'Telemetry_Listener',
+                    port: 2345,
+                    trace: true
+                }
+            };
+            return validateAndNormalize(newDecl)
+                .then((normalized) => {
+                    normalized.components[0].skipUpdate = true;
+                    return configWorker.emitAsync('change', normalized);
+                })
+                .then(() => {
+                    assert.deepStrictEqual(listenerStub, { start: 2, stop: 0 });
+                    assert.strictEqual(activeTracersStub.length, 2);
+                    assert.strictEqual(allTracersStub.length, 2);
+
+                    const listeners = eventListener.getListeners();
+                    assertListener(listeners.Listener1, {
+                        port: 1234, id: 'uuid1', tags: { tenant: '`T`', application: '`A`' }
+                    });
+                    assertListener(listeners['New::Listener1'], {
+                        port: 2345, id: 'uuid2', tags: {}
+                    });
+                    // one for each protocol, called through constructor
                     assert.isTrue(updateSpy.calledTwice);
                 });
         });

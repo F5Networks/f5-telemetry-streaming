@@ -15,19 +15,21 @@ const https = require('https');
 
 const constants = require('../lib/constants');
 const logger = require('../lib/logger');
-const util = require('../lib/util');
+const util = require('../lib/utils/misc');
 
-const deviceUtil = require('../lib/deviceUtil');
-const retryPromise = require('../lib/util').retryPromise;
+const deviceUtil = require('../lib/utils/device');
+const retryPromise = require('../lib/utils/misc').retryPromise;
 const persistentStorage = require('../lib/persistentStorage');
 const configWorker = require('../lib/config');
+const requestRouter = require('../lib/requestHandlers/router');
 
 const configListenerModulesToLoad = [
     '../lib/eventListener',
     '../lib/consumers',
     '../lib/pullConsumers',
     '../lib/systemPoller',
-    '../lib/ihealth'
+    '../lib/ihealth',
+    '../lib/requestHandlers/connections'
 ];
 
 configListenerModulesToLoad.forEach((module) => {
@@ -39,9 +41,6 @@ configListenerModulesToLoad.forEach((module) => {
         throw err;
     }
 });
-
-const requestRouter = require('../lib/requestHandlers/router');
-require('../lib/requestHandlers/connections');
 
 
 /**
