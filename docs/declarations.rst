@@ -81,7 +81,7 @@ This example shows referenced Pollers.
 
 Custom Endpoints
 ----------------
-.. IMPORTANT:: Configuring custom endpoints and multiple system pollers specific to those endpoints is currently EXPERIMENTAL and is available in TS v1.10.0 and later. See :doc:`custom-endpoints` for more information on this feature.
+See :doc:`custom-endpoints` for more information on this feature.
 
 |
 
