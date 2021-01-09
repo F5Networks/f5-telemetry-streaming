@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package deos.ingestion.v1alpa1;
+
+service Ingestion {
+    rpc Post(IngestionRequest) returns (IngestionResponse) {}
+}
+
+message IngestionRequest {
+    string account_id = 1;  // “urn:f5_cs::account:a-aaa”
+    string source_id = 2;   // “directory/b-XX”
+    CompressionType compression_type = 3;
+    uint64 timestamp_usec = 4;
+    SignatureType signature_type = 5;
+    string signature = 6;
+    SerializationType serialization_type = 7;
+    string payload_schema = 8;  // “urn:f5_beacon:synthetic-monitoring:http-monitor:v1”
+    bytes  payload = 9;
+}
+
+enum CompressionType {
+    NO_COMPRESSION = 0;
+    // ... more to come in the future
+}
+
+enum SignatureType {
+    NO_SIGNATURE = 0;
+    // ... more to come in the future
+}
+
+enum SerializationType {
+    JSON_ARRAY = 0;
+    JSON_OBJECT = 1;
+    // ... more to come
+}
+
+message IngestionResponse {
+}

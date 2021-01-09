@@ -12,14 +12,13 @@ const EventEmitter = require('events');
 const nodeUtil = require('util');
 const TinyRequestRouter = require('tiny-request-router').Router;
 
-const BadURLHandler = require('./badUrlHandler');
+const BadURLHandler = require('./httpStatus/badUrlHandler');
 const configWorker = require('../config');
-const InternalServerErrorHandler = require('./internalServerErrorHandler');
+const InternalServerErrorHandler = require('./httpStatus/internalServerErrorHandler');
 const logger = require('../logger');
-const MethodNotAllowedHandler = require('./methodNotAllowedHandler');
-const UnsupportedMediaTypeHandler = require('./unsupportedMediaTypeHandler');
-const util = require('../util');
-const configUtil = require('../configUtil');
+const MethodNotAllowedHandler = require('./httpStatus/methodNotAllowedHandler');
+const UnsupportedMediaTypeHandler = require('./httpStatus/unsupportedMediaTypeHandler');
+const configUtil = require('../utils/config');
 
 /**
  * Simple router to route incoming requests to REST API.
@@ -86,14 +85,29 @@ RequestRouter.prototype.processRestOperation = function (restOperation, uriPrefi
     })
         .then((handler) => {
             logger.info(`${handler.getCode()} ${restOperation.getMethod().toUpperCase()} ${restOperation.getUri().pathname}`);
-            util.restOperationResponder(restOperation, handler.getCode(), handler.getBody());
+            this._restOperationResponder(restOperation, handler.getCode(), handler.getBody());
         })
         .catch((fatalError) => {
             // in case if .then above failed
             logger.exception('restOperation processing fatal error', fatalError);
-            util.restOperationResponder(restOperation, 500, 'Internal Server Error');
+            this._restOperationResponder(restOperation, 500, 'Internal Server Error');
         });
 };
+
+/**
+ * LX rest operation responder
+ *
+ * @private
+ * @param {Object} restOperation  - restOperation to complete
+ * @param {String} status         - HTTP status
+ * @param {String} body           - HTTP body
+ */
+RequestRouter.prototype._restOperationResponder = function (restOperation, status, body) {
+    restOperation.setStatusCode(status);
+    restOperation.setBody(body);
+    restOperation.complete();
+};
+
 
 /**
  * Process request.
@@ -183,6 +197,9 @@ RequestRouter.prototype.onConfigChange = function (config) {
 };
 
 const defaultRouter = new RequestRouter();
-configWorker.on('change', defaultRouter.onConfigChange.bind(defaultRouter));
+configWorker.on('change', config => new Promise((resolve) => {
+    defaultRouter.onConfigChange(config);
+    resolve();
+}));
 
 module.exports = defaultRouter;

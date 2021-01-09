@@ -12,15 +12,17 @@ const path = require('path');
 
 const configWorker = require('./config');
 const constants = require('./constants');
-const util = require('./util');
+const util = require('./utils/misc');
 const systemPoller = require('./systemPoller');
 const errors = require('./errors');
 const logger = require('./logger');
-const configUtil = require('./configUtil');
+const configUtil = require('./utils/config');
+const tracers = require('./utils/tracer').Tracer;
+const moduleLoader = require('./utils/moduleLoader').ModuleLoader;
 
-const PULL_CONSUMERS_DIR = constants.PULL_CONSUMERS_DIR;
+const PULL_CONSUMERS_DIR = '../pullConsumers';
 const CLASS_NAME = constants.CONFIG_CLASSES.PULL_CONSUMER_CLASS_NAME;
-let PULL_CONSUMERS = {};
+let PULL_CONSUMERS = [];
 
 class ModuleNotLoadedError extends errors.ConfigLookupError {}
 class DisabledError extends errors.ConfigLookupError {}
@@ -42,7 +44,7 @@ function getData(consumerName, namespace) {
 
             consumerConfig = getConsumerConfig(config.normalized, consumerName, namespace);
             // Don't bother collecting stats if requested Consumer Type is not loaded
-            if (typeof PULL_CONSUMERS[consumerConfig.type] === 'undefined') {
+            if (!PULL_CONSUMERS.find(pc => pc.config.type === consumerConfig.type)) {
                 throw new ModuleNotLoadedError(`Pull Consumer of type '${consumerConfig.type}' is not loaded`);
             }
 
@@ -63,7 +65,7 @@ function getData(consumerName, namespace) {
  * @returns {Promise} Promise which is resolved with data formatted by the requested Pull Consumer
  */
 function invokeConsumer(consumerConfig, dataCtxs) {
-    const consumer = PULL_CONSUMERS[consumerConfig.type];
+    const consumer = PULL_CONSUMERS.find(pc => pc.id === consumerConfig.id);
 
     const context = {
         config: consumerConfig,
@@ -127,25 +129,29 @@ function loadConsumers(config) {
     logger.debug(`Loading pull consumer specific plug-ins from ${PULL_CONSUMERS_DIR}`);
 
     const loadPromises = enabledConsumers.map(consumerConfig => new Promise((resolve) => {
-        const consumerType = consumerConfig.type;
-        // path.join removes './' from string, so we need to
-        // prepend it manually
-        const consumerDir = './'.concat(path.join(PULL_CONSUMERS_DIR, consumerType));
-
-        logger.debug(`Loading pull consumer ${consumerType} plug-in from ${consumerDir}`);
-        const consumerModule = util.moduleLoader.load(consumerDir);
-        if (consumerModule === null) {
-            resolve(undefined);
+        const existingConsumer = PULL_CONSUMERS.find(c => c.id === consumerConfig.id);
+        if (consumerConfig.skipUpdate && existingConsumer) {
+            resolve(existingConsumer);
         } else {
-            const consumer = {
-                name: consumerConfig.name,
-                config: util.deepCopy(consumerConfig),
-                consumer: consumerModule,
-                logger: logger.getChild(`${consumerType}.${consumerConfig.traceName}`),
-                tracer: util.tracer.createFromConfig(CLASS_NAME, consumerConfig.traceName, consumerConfig)
-            };
-            // copy consumer's data
-            resolve(consumer);
+            const consumerType = consumerConfig.type;
+            const consumerDir = path.join(PULL_CONSUMERS_DIR, consumerType);
+
+            logger.debug(`Loading pull consumer ${consumerType} plug-in from ${consumerDir}`);
+            const consumerModule = moduleLoader.load(consumerDir);
+            if (consumerModule === null) {
+                resolve(undefined);
+            } else {
+                const consumer = {
+                    name: consumerConfig.name,
+                    id: consumerConfig.id,
+                    config: util.deepCopy(consumerConfig),
+                    consumer: consumerModule,
+                    logger: logger.getChild(`${consumerType}.${consumerConfig.traceName}`),
+                    tracer: tracers.createFromConfig(CLASS_NAME, consumerConfig.traceName, consumerConfig)
+                };
+                // copy consumer's data
+                resolve(consumer);
+            }
         }
     }));
 
@@ -154,53 +160,64 @@ function loadConsumers(config) {
 }
 
 /**
+ * Get set of loaded Consumers' types
+ *
+ * @returns {Set} set with loaded Consumers' types
+ */
+function getLoadedConsumerTypes() {
+    if (PULL_CONSUMERS.length > 0) {
+        return new Set(PULL_CONSUMERS.map(consumer => consumer.config.type));
+    }
+    return new Set();
+}
+
+
+/**
  * Unload unused modules from cache
  *
  * @param {Set} before - set of Consumers' types before
  */
 function unloadUnusedModules(before) {
-    const previousTypes = Object.keys(before);
-    if (previousTypes.length === 0) {
+    if (!before.size) {
         return;
     }
-    const currentPullConsumers = Object.keys(PULL_CONSUMERS);
-    previousTypes.forEach((consumerType) => {
-        if (currentPullConsumers.indexOf(consumerType) === -1) {
-            logger.debug(`Unloading Pull Consumer module '${consumerType}'`);
-            const consumerDir = './'.concat(path.join(PULL_CONSUMERS_DIR, consumerType));
 
-            util.moduleLoader.unload(consumerDir);
+    const loadedTypes = getLoadedConsumerTypes();
+    before.forEach((consumerType) => {
+        if (!loadedTypes.has(consumerType)) {
+            logger.debug(`Unloading Pull Consumer module '${consumerType}'`);
+            const consumerDir = path.join(PULL_CONSUMERS_DIR, consumerType);
+
+            moduleLoader.unload(consumerDir);
         }
     });
 }
 
 // config worker change event
-configWorker.on('change', (config) => {
-    logger.debug('configWorker change event in Pull Consumers');
+configWorker.on('change', config => Promise.resolve()
+    .then(() => {
+        logger.debug('configWorker change event in Pull Consumers');
 
-    const consumersToLoad = configUtil.getTelemetryPullConsumers(config);
-    // timestamp to filed out-dated tracers
-    const tracersTimestamp = new Date().getTime();
+        const consumersToLoad = configUtil.getTelemetryPullConsumers(config);
+        // timestamp to filed out-dated tracers
+        const tracersTimestamp = new Date().getTime();
 
-    const typesBefore = PULL_CONSUMERS;
+        const typesBefore = getLoadedConsumerTypes();
 
-    return loadConsumers(consumersToLoad)
-        .then((consumers) => {
-            PULL_CONSUMERS = {};
-            consumers.forEach((consumer) => {
-                PULL_CONSUMERS[consumer.config.type] = consumer;
+        return loadConsumers(consumersToLoad)
+            .then((consumers) => {
+                PULL_CONSUMERS = consumers;
+                logger.info(`${PULL_CONSUMERS.length} pull consumer plug-in(s) loaded`);
+            })
+            .catch((err) => {
+                logger.exception('Unhandled exception when loading consumers', err);
+            })
+            .then(() => {
+                unloadUnusedModules(typesBefore);
+                tracers.remove(tracer => tracer.name.startsWith(CLASS_NAME)
+                    && tracer.lastGetTouch < tracersTimestamp);
             });
-            logger.info(`${Object.keys(PULL_CONSUMERS).length} pull consumer plug-in(s) loaded`);
-        })
-        .catch((err) => {
-            logger.exception('Unhandled exception when loading consumers', err);
-        })
-        .then(() => {
-            unloadUnusedModules(typesBefore);
-            util.tracer.remove(tracer => tracer.name.startsWith(CLASS_NAME)
-                && tracer.lastGetTouch < tracersTimestamp);
-        });
-});
+    }));
 
 module.exports = {
     ModuleNotLoadedError,

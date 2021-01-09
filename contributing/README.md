@@ -108,7 +108,7 @@ How does the project handle a typical `POST` request?
             "trace": false,
             "format": "default"
         },
-        "schemaVersion": "1.16.0"
+        "schemaVersion": "1.17.0"
     }
 }
 ```
@@ -120,17 +120,23 @@ What happens in the system internals between request and response?
 
 - LX worker receives request which validates URI, etc.
     - ref: [restWorker.js](../src/nodejs/restWorker.js)
+- The appropriate handler processes the request
+    - ref: [router.js](../src/lib/requestHandlers/router.js)
 - Request is validated using JSON schema and AJV, config event fires
     - ref: [config.js](../src/lib/config.js)
 - System poller, event listener, etc. configures system resources
     - ref: [systemPoller.js](../src/lib/systemPoller.js), [eventListener.js](../src/lib/eventListener.js), etc.
 - Client response sent with validated config
-    - ref: [config.js](../src/lib/config.js)
+    - ref: [declareHandler](../src/lib/requestHandlers/declareHandler.js)
     ```javascript
         return promise.then((config) => {
-        util.restOperationResponder(restOperation, 200,
-            { message: 'success', declaration: config });
-    })
+            this.code = 200;
+            this.body = {
+                message: 'success',
+                declaration: config
+            };
+            return this;
+        })
     ```
 
 ---

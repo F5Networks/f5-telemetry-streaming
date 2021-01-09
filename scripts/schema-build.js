@@ -56,6 +56,11 @@ function combineSchemas() {
         .forEach((path) => {
             const schema = JSON.parse(fs.readFileSync(path, 'utf8'));
             assert.notStrictEqual(schema.$id, undefined, `Schema at path '${path}' should have $id property`);
+
+            if (schema.$id === 'base_schema.json') {
+                Object.assign(base, schema);
+            }
+
             schemaMap[schema.$id] = schema;
         });
 

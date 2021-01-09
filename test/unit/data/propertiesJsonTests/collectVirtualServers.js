@@ -84,6 +84,10 @@ module.exports = {
                         'clientside.bitsIn': 0,
                         'clientside.bitsOut': 0,
                         'clientside.curConns': 0,
+                        'clientside.maxConns': 0,
+                        'clientside.pktsIn': 0,
+                        'clientside.pktsOut': 0,
+                        'clientside.totConns': 0,
                         destination: '10.11.0.2:80',
                         enabledState: 'enabled',
                         ipProtocol: 'tcp',
@@ -92,7 +96,8 @@ module.exports = {
                         pool: '/Common/test_pool_0',
                         'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
                         tenant: 'Common',
-                        application: 'app'
+                        application: 'app',
+                        totRequests: 0
                     }
                 }
             },
@@ -278,6 +283,10 @@ module.exports = {
                         'clientside.bitsIn': 0,
                         'clientside.bitsOut': 0,
                         'clientside.curConns': 0,
+                        'clientside.maxConns': 0,
+                        'clientside.pktsIn': 0,
+                        'clientside.pktsOut': 0,
+                        'clientside.totConns': 0,
                         destination: '10.11.0.2:80',
                         enabledState: 'enabled',
                         ipProtocol: 'tcp',
@@ -301,7 +310,8 @@ module.exports = {
                                 name: '/Common/tcp',
                                 tenant: 'Common'
                             }
-                        }
+                        },
+                        totRequests: 0
                     }
                 }
             },
@@ -515,6 +525,10 @@ module.exports = {
                         'clientside.bitsIn': 0,
                         'clientside.bitsOut': 0,
                         'clientside.curConns': 0,
+                        'clientside.maxConns': 0,
+                        'clientside.pktsIn': 0,
+                        'clientside.pktsOut': 0,
+                        'clientside.totConns': 0,
                         destination: '10.11.0.2:80',
                         enabledState: 'enabled',
                         ipProtocol: 'tcp',
@@ -522,7 +536,8 @@ module.exports = {
                         name: '/Common/test_vs_0',
                         pool: '/Common/test_pool_0',
                         profiles: {},
-                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet'
+                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
+                        totRequests: 0
                     }
                 }
             },
@@ -719,6 +734,10 @@ module.exports = {
                         'clientside.bitsIn': 0,
                         'clientside.bitsOut': 0,
                         'clientside.curConns': 0,
+                        'clientside.maxConns': 0,
+                        'clientside.pktsIn': 0,
+                        'clientside.pktsOut': 0,
+                        'clientside.totConns': 0,
                         destination: '10.11.0.2:80',
                         enabledState: 'enabled',
                         ipProtocol: 'tcp',
@@ -726,7 +745,8 @@ module.exports = {
                         name: '/Common/test_vs_0',
                         pool: '/Common/test_pool_0',
                         profiles: {},
-                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet'
+                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
+                        totRequests: 0
                     }
                 }
             },

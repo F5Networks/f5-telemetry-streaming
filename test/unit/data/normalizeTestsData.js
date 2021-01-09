@@ -30,9 +30,16 @@ module.exports = {
             category: EVENT_TYPES.LTM_EVENT
         },
         {
-            name: 'valid APM event',
+            name: 'valid APM event (add custom timestamp)',
             data: 'Access_Profile="APM_ACCESS_PROFILE",key1="value",key2="value2"',
-            category: EVENT_TYPES.APM_EVENT
+            category: EVENT_TYPES.APM_EVENT,
+            expectedData: {
+                Access_Profile: 'APM_ACCESS_PROFILE',
+                key1: 'value',
+                key2: 'value2',
+                telemetryEventCategory: 'APM',
+                f5telemetry_timestamp: '2020-12-03T21:56:38.308Z'
+            }
         },
         {
             name: 'invalid APM event',

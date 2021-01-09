@@ -482,7 +482,7 @@ module.exports = {
     findSystemOrPollerConfigs: [
         // TEST RELATED DATA STARTS HERE
         {
-            name: 'it should locate by System Poller name',
+            name: 'it should locate by System Poller name (no namespaceName)',
             rawConfig: {
                 class: 'Telemetry',
                 My_System: {
@@ -530,7 +530,56 @@ module.exports = {
         },
         // TEST RELATED DATA STARTS HERE
         {
-            name: 'it should locate by System name',
+            name: 'it should locate by System Poller name (with namespaceName)',
+            rawConfig: {
+                class: 'Telemetry',
+                My_System_Poller: {
+                    class: 'Telemetry_System_Poller',
+                    actions: [],
+                    enable: true,
+                    interval: 60
+                },
+                My_Namespace: {
+                    class: 'Telemetry_Namespace',
+                    My_System_Poller: {
+                        class: 'Telemetry_System_Poller',
+                        actions: [],
+                        enable: true,
+                        interval: 90
+                    }
+                }
+            },
+            expected: [{
+                class: 'Telemetry_System_Poller',
+                enable: true,
+                interval: 90,
+                name: 'My_System_Poller',
+                id: 'uuid2',
+                namespace: 'My_Namespace',
+                traceName: 'My_Namespace::My_System_Poller_System::My_System_Poller',
+                trace: false,
+                connection: {
+                    host: 'localhost',
+                    port: 8100,
+                    protocol: 'http',
+                    allowSelfSignedCert: false
+                },
+                dataOpts: {
+                    actions: [],
+                    noTMStats: true,
+                    tags: undefined
+                },
+                credentials: {
+                    username: undefined,
+                    passphrase: undefined
+                }
+            }],
+            sysOrPollerName: 'My_System_Poller',
+            namespaceName: 'My_Namespace'
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'it should locate by System name (no namespaceName)',
             rawConfig: {
                 class: 'Telemetry',
                 My_System: {
@@ -578,7 +627,74 @@ module.exports = {
         },
         // TEST RELATED DATA STARTS HERE
         {
-            name: 'it should locate by both System and System Poller name',
+            name: 'it should locate by System name (with namespaceName)',
+            rawConfig: {
+                class: 'Telemetry',
+                My_System: {
+                    allowSelfSignedCert: false,
+                    class: 'Telemetry_System',
+                    enable: true,
+                    host: 'localhost',
+                    port: 8100,
+                    protocol: 'http',
+                    systemPoller: 'My_System_Poller'
+                },
+                My_System_Poller: {
+                    class: 'Telemetry_System_Poller',
+                    actions: [],
+                    enable: true,
+                    interval: 300
+                },
+                My_Namespace: {
+                    class: 'Telemetry_Namespace',
+                    My_System: {
+                        allowSelfSignedCert: false,
+                        class: 'Telemetry_System',
+                        enable: true,
+                        host: 'localhost',
+                        port: 8080,
+                        protocol: 'http',
+                        systemPoller: 'My_System_Poller'
+                    },
+                    My_System_Poller: {
+                        class: 'Telemetry_System_Poller',
+                        actions: [],
+                        enable: true,
+                        interval: 90
+                    }
+                }
+            },
+            expected: [{
+                class: 'Telemetry_System_Poller',
+                enable: true,
+                interval: 90,
+                name: 'My_System_Poller',
+                id: 'uuid4',
+                namespace: 'My_Namespace',
+                traceName: 'My_Namespace::My_System::My_System_Poller',
+                trace: false,
+                connection: {
+                    host: 'localhost',
+                    port: 8080,
+                    protocol: 'http',
+                    allowSelfSignedCert: false
+                },
+                dataOpts: {
+                    actions: [],
+                    noTMStats: true,
+                    tags: undefined
+                },
+                credentials: {
+                    username: undefined,
+                    passphrase: undefined
+                }
+            }],
+            sysOrPollerName: 'My_System',
+            namespaceName: 'My_Namespace'
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'it should locate by both System and System Poller name (no namespaceName)',
             rawConfig: {
                 class: 'Telemetry',
                 My_System: {
@@ -627,7 +743,75 @@ module.exports = {
         },
         // TEST RELATED DATA STARTS HERE
         {
-            name: 'it should locate a specific SystemPoller within an associated System',
+            name: 'it should locate by both System and System Poller name (with namespaceName)',
+            rawConfig: {
+                class: 'Telemetry',
+                My_System: {
+                    allowSelfSignedCert: false,
+                    class: 'Telemetry_System',
+                    enable: true,
+                    host: 'localhost',
+                    port: 8100,
+                    protocol: 'http',
+                    systemPoller: 'My_System_Poller'
+                },
+                My_System_Poller: {
+                    class: 'Telemetry_System_Poller',
+                    actions: [],
+                    enable: true,
+                    interval: 300
+                },
+                My_Namespace: {
+                    class: 'Telemetry_Namespace',
+                    My_System: {
+                        allowSelfSignedCert: false,
+                        class: 'Telemetry_System',
+                        enable: true,
+                        host: 'localhost',
+                        port: 8080,
+                        protocol: 'http',
+                        systemPoller: 'My_System_Poller'
+                    },
+                    My_System_Poller: {
+                        class: 'Telemetry_System_Poller',
+                        actions: [],
+                        enable: true,
+                        interval: 90
+                    }
+                }
+            },
+            expected: [{
+                class: 'Telemetry_System_Poller',
+                enable: true,
+                interval: 90,
+                name: 'My_System_Poller',
+                id: 'uuid4',
+                namespace: 'My_Namespace',
+                traceName: 'My_Namespace::My_System::My_System_Poller',
+                trace: false,
+                connection: {
+                    host: 'localhost',
+                    port: 8080,
+                    protocol: 'http',
+                    allowSelfSignedCert: false
+                },
+                dataOpts: {
+                    actions: [],
+                    noTMStats: true,
+                    tags: undefined
+                },
+                credentials: {
+                    username: undefined,
+                    passphrase: undefined
+                }
+            }],
+            sysOrPollerName: 'My_System',
+            pollerName: 'My_System_Poller',
+            namespaceName: 'My_Namespace'
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'it should locate a specific SystemPoller within an associated System (no namespaceName)',
             rawConfig: {
                 class: 'Telemetry',
                 My_System: {
@@ -685,7 +869,7 @@ module.exports = {
         },
         // TEST RELATED DATA STARTS HERE
         {
-            name: 'it should locate a specific SystemPoller without specifying a System',
+            name: 'it should locate a specific SystemPoller without specifying a System (no namespaceName)',
             rawConfig: {
                 class: 'Telemetry',
                 My_System: {
@@ -742,7 +926,7 @@ module.exports = {
         },
         // TEST RELATED DATA STARTS HERE
         {
-            name: 'it should not locate a System Poller if not attached to the requested System',
+            name: 'it should not locate a System Poller if not attached to the requested System (no namespaceName)',
             rawConfig: {
                 class: 'Telemetry',
                 My_System: {
@@ -787,7 +971,7 @@ module.exports = {
         },
         // TEST RELATED DATA STARTS HERE
         {
-            name: 'it should error if a System or Poller is not found',
+            name: 'it should error if a System or Poller is not found (no namespaceName)',
             rawConfig: {
                 class: 'Telemetry',
                 My_System: {
@@ -809,7 +993,7 @@ module.exports = {
         },
         // TEST RELATED DATA STARTS HERE
         {
-            name: 'it should locate a nested poller using the auto generated System Poller name',
+            name: 'it should locate a nested poller using the auto generated System Poller name (no namespaceName)',
             rawConfig: {
                 class: 'Telemetry',
                 My_System: {
@@ -852,6 +1036,160 @@ module.exports = {
                 }
             }],
             sysOrPollerName: 'SystemPoller_1'
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'it should locate correct system when there are multiple namespaces',
+            rawConfig: {
+                class: 'Telemetry',
+                My_Namespace_One: {
+                    class: 'Telemetry_Namespace',
+                    My_System: {
+                        allowSelfSignedCert: false,
+                        class: 'Telemetry_System',
+                        enable: true,
+                        host: 'localhost',
+                        port: 8100,
+                        protocol: 'http',
+                        systemPoller: {
+                            actions: [],
+                            enable: true,
+                            interval: 300
+                        }
+                    }
+                },
+                My_Namespace_Two: {
+                    class: 'Telemetry_Namespace',
+                    My_System: {
+                        allowSelfSignedCert: false,
+                        class: 'Telemetry_System',
+                        enable: true,
+                        host: 'localhost',
+                        port: 8080,
+                        protocol: 'http',
+                        systemPoller: {
+                            actions: [],
+                            enable: true,
+                            interval: 90
+                        }
+                    }
+                }
+            },
+            expected: [{
+                class: 'Telemetry_System_Poller',
+                enable: true,
+                interval: 90,
+                name: 'SystemPoller_1',
+                id: 'uuid4',
+                namespace: 'My_Namespace_Two',
+                traceName: 'My_Namespace_Two::My_System::SystemPoller_1',
+                trace: false,
+                connection: {
+                    host: 'localhost',
+                    port: 8080,
+                    protocol: 'http',
+                    allowSelfSignedCert: false
+                },
+                dataOpts: {
+                    actions: [],
+                    noTMStats: true,
+                    tags: undefined
+                },
+                credentials: {
+                    username: undefined,
+                    passphrase: undefined
+                }
+            }],
+            sysOrPollerName: 'My_System',
+            namespaceName: 'My_Namespace_Two'
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'it should error if requested System is in another namespace',
+            rawConfig: {
+                class: 'Telemetry',
+                My_Namespace_One: {
+                    class: 'Telemetry_Namespace',
+                    My_Desired_System: {
+                        allowSelfSignedCert: false,
+                        class: 'Telemetry_System',
+                        enable: true,
+                        host: 'localhost',
+                        port: 8100,
+                        protocol: 'http',
+                        systemPoller: [{
+                            actions: [],
+                            enable: true,
+                            interval: 300
+                        }]
+                    }
+                },
+                My_Namespace_Two: {
+                    class: 'Telemetry_Namespace'
+                }
+            },
+            expected: 'System or System Poller with name \'My_Desired_System\' doesn\'t exist in Namespace \'My_Namespace_Two\'',
+            sysOrPollerName: 'My_Desired_System',
+            namespaceName: 'My_Namespace_Two'
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'it should error if requested System is in the default namespace',
+            rawConfig: {
+                class: 'Telemetry',
+                My_Desired_System: {
+                    allowSelfSignedCert: false,
+                    class: 'Telemetry_System',
+                    enable: true,
+                    host: 'localhost',
+                    port: 8100,
+                    protocol: 'http',
+                    systemPoller: [{
+                        actions: [],
+                        enable: true,
+                        interval: 300
+                    }]
+                },
+                My_Namespace: {
+                    class: 'Telemetry_Namespace'
+                }
+            },
+            expected: 'System or System Poller with name \'My_Desired_System\' doesn\'t exist in Namespace \'My_Namespace\'',
+            sysOrPollerName: 'My_Desired_System',
+            namespaceName: 'My_Namespace'
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'it should error if requested System Poller is in the default namespace',
+            rawConfig: {
+                class: 'Telemetry',
+                My_System_Poller: {
+                    class: 'Telemetry_System_Poller',
+                    actions: [],
+                    enable: true,
+                    interval: 100
+                },
+                My_Namespace: {
+                    class: 'Telemetry_Namespace',
+                    My_Desired_System: {
+                        allowSelfSignedCert: false,
+                        class: 'Telemetry_System',
+                        enable: true,
+                        host: 'localhost',
+                        port: 8100,
+                        protocol: 'http',
+                        systemPoller: [{
+                            actions: [],
+                            enable: true,
+                            interval: 300
+                        }]
+                    }
+                }
+            },
+            expected: 'System Poller with name \'My_Desired_Poller\' doesn\'t exist in System \'My_Desired_System\' in Namespace \'My_Namespace\'',
+            sysOrPollerName: 'My_Desired_System',
+            pollerName: 'My_Desired_Poller',
+            namespaceName: 'My_Namespace'
         }
     ]
 };

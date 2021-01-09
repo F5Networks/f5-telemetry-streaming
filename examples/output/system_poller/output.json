@@ -796,6 +796,15 @@
                     "minCycles": 8804,
                     "priority": 500,
                     "totalExecutions": 4
+                },
+                "HTTP_REQUEST": {
+                    "aborts": 0,
+                    "avgCycles": 19014,
+                    "failures": 0,
+                    "maxCycles": 19014,
+                    "minCycles": 8804,
+                    "priority": 500,
+                    "totalExecutions": 4
                 }
             },
             "name": "/Common/_sys_APM_ExchangeSupport_OA_BasicAuth",
