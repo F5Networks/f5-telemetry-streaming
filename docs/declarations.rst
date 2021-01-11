@@ -79,13 +79,8 @@ This example shows referenced Pollers.
 
 .. _customendpoint:
 
-<<<<<<< HEAD
-Example 6: Custom Endpoints
----------------------------
-=======
 Custom Endpoints
 ----------------
->>>>>>> doc-release-branch
 See :doc:`custom-endpoints` for more information on this feature.
 
 |
