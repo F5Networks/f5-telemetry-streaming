@@ -12,7 +12,7 @@ const logger = require('./logger');
 const forwarder = require('./forwarder');
 const dataTagging = require('./dataTagging');
 const dataFilter = require('./dataFilter');
-const util = require('./util');
+const util = require('./utils/misc');
 const EVENT_TYPES = require('./constants').EVENT_TYPES;
 
 

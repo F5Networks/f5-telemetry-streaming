@@ -60,7 +60,7 @@ You can click the following links to go directly to a specific :doc:`setting-up-
       * - :ref:`http-ref`
         - 
 
-      * - :ref:`beacon-ref`
+      * - :ref:`F5 Beacon<beacon-ref>`
         - 
 
       * - :ref:`fluentd-ref`
@@ -91,6 +91,7 @@ You can click the following links to go directly to a specific :doc:`setting-up-
    troubleshooting
    schema-reference
    namespaces
+   poller-default-output-reference
    revision-history
 
 

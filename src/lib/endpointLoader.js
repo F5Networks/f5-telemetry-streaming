@@ -8,9 +8,9 @@
 
 'use strict';
 
-const deviceUtil = require('./deviceUtil');
+const deviceUtil = require('./utils/device');
 const constants = require('./constants');
-const util = require('./util');
+const util = require('./utils/misc');
 const logger = require('./logger');
 
 /** @module EndpointLoader */

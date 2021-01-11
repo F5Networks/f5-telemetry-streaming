@@ -41,7 +41,7 @@ module.exports = function (context) {
             rejectUnauthorized: !config.allowSelfSignedCert
         };
     }
-    // SASL auth options
+    // Auth options
     let saslOptions = null;
     if (config.authenticationProtocol === 'SASL-PLAIN') {
         saslOptions = {
@@ -49,6 +49,12 @@ module.exports = function (context) {
             username: config.username,
             password: config.passphrase
         };
+    } else if (config.authenticationProtocol === 'TLS') {
+        Object.assign(tlsOptions, {
+            key: config.privateKey,
+            cert: config.clientCertificate,
+            ca: config.rootCertificate || null
+        });
     }
 
     const clientOptions = {

@@ -90,7 +90,7 @@ describe('Kafka', () => {
             kafkaIndex(context);
         });
 
-        it('should configure Kafka Client client options with provided values', (done) => {
+        it('should configure Kafka Client client options with provided values (authenticationProtocol=SASL-PLAIN)', (done) => {
             const context = testUtil.buildConsumerContext({
                 config: {
                     host: 'kafka-second-host',
@@ -113,6 +113,46 @@ describe('Kafka', () => {
                 },
                 sslOptions: {
                     rejectUnauthorized: true
+                }
+            };
+
+            sendStub = () => {
+                try {
+                    assert.deepStrictEqual(passedClientOptions, expectedOptions);
+                    done();
+                } catch (err) {
+                    // done() with parameter is treated as an error.
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
+                    done(err);
+                }
+            };
+
+            kafkaIndex(context);
+        });
+
+        it('should configure Kafka Client client options with provided values (authenticationProtocol=TLS)', (done) => {
+            const context = testUtil.buildConsumerContext({
+                config: {
+                    host: 'kafka.example.com',
+                    port: '4545',
+                    topic: 'dataTopic',
+                    protocol: 'binaryTcpTls',
+                    authenticationProtocol: 'TLS',
+                    privateKey: 'privateKey',
+                    clientCertificate: 'certificate',
+                    rootCertificate: 'caCert'
+                }
+            });
+            const expectedOptions = {
+                connectTimeout: 3000,
+                kafkaHost: 'kafka.example.com:4545',
+                requestTimeout: 5000,
+                sasl: null,
+                sslOptions: {
+                    rejectUnauthorized: true,
+                    key: 'privateKey',
+                    cert: 'certificate',
+                    ca: 'caCert'
                 }
             };
 

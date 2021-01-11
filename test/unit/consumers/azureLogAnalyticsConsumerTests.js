@@ -15,7 +15,8 @@ require('../shared/restoreCache')();
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
-const util = require('../../../src/lib/util');
+const util = require('../../../src/lib/utils/misc');
+const requestsUtil = require('../../../src/lib/utils/requests');
 
 const azureAnalyticsIndex = require('../../../src/lib/consumers/Azure_Log_Analytics/index');
 const azureLogData = require('./data/azureLogAnalyticsConsumerTestsData');
@@ -32,7 +33,8 @@ describe('Azure_Log_Analytics', () => {
     const defaultConsumerConfig = {
         workspaceId: 'myWorkspace',
         passphrase: 'secret',
-        useManagedIdentity: false
+        useManagedIdentity: false,
+        allowSelfSignedCert: false
     };
 
     const getOpsInsightsReq = () => {
@@ -49,7 +51,7 @@ describe('Azure_Log_Analytics', () => {
 
     beforeEach(() => {
         requests = [];
-        sinon.stub(util, 'makeRequest').callsFake((opts) => {
+        sinon.stub(requestsUtil, 'makeRequest').callsFake((opts) => {
             requests.push(opts);
             return Promise.resolve({ statusCode: 200 });
         });
@@ -174,15 +176,8 @@ describe('Azure_Log_Analytics', () => {
                 eventType: 'systemInfo',
                 config: defaultConsumerConfig
             });
-            const expectedData = azureLogData.systemData[0].expectedData;
-
             return azureAnalyticsIndex(context)
-                .then(() => {
-                    const actualData = getAllOpsInsightsReqs();
-                    actualData.forEach((data, idx) => {
-                        assert.deepStrictEqual(data, expectedData[idx], `should match data set at index ${idx}`);
-                    });
-                });
+                .then(() => assert.sameDeepMembers(getAllOpsInsightsReqs(), azureLogData.systemData[0].expectedData));
         });
 
         it('should process event data', () => {

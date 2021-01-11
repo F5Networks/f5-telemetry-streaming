@@ -1,0 +1,71 @@
+{
+    "$id": "namespace_schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry Streaming Namespace schema",
+    "description": "",
+    "type": "object",
+    "allOf": [
+        {
+            "if": { "properties": { "class": { "const": "Telemetry_Namespace" } } },
+            "then": {
+                "required": [
+                    "class"
+                ],
+                "properties": {
+                    "class": {
+                        "title": "Class",
+                        "description": "Telemetry Streaming Namespace class",
+                        "type": "string",
+                        "enum": [ "Telemetry_Namespace" ]
+                    }
+                },
+                "additionalProperties": {
+                    "$comment": "All objects supported under a Telemetry Namespace",
+                    "properties": {
+                        "class": {
+                            "title": "Class",
+                            "type": "string",
+                            "enum": [
+                                "Telemetry_System",
+                                "Telemetry_System_Poller",
+                                "Telemetry_Listener",
+                                "Telemetry_Consumer",
+                                "Telemetry_Pull_Consumer",
+                                "Telemetry_iHealth_Poller",
+                                "Telemetry_Endpoints",
+                                "Shared"
+                            ]
+                        }
+                    },    
+                    "allOf": [
+                        {
+                            "$ref": "system_schema.json#"
+                        },
+                        {
+                            "$ref": "system_poller_schema.json#"
+                        },
+                        {
+                            "$ref": "listener_schema.json#"
+                        },
+                        {
+                            "$ref": "consumer_schema.json#"
+                        },
+                        {
+                            "$ref": "pull_consumer_schema.json#"
+                        },
+                        {
+                            "$ref": "ihealth_poller_schema.json#"
+                        },
+                        {
+                            "$ref": "endpoints_schema.json#"
+                        },
+                        {
+                            "$ref": "shared_schema.json#"
+                        }
+                    ]
+                }
+            },
+            "else": {}
+        }
+    ]
+}

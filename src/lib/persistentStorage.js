@@ -9,7 +9,7 @@
 'use strict';
 
 const logger = require('./logger');
-const util = require('./util');
+const util = require('./utils/misc');
 
 /** @module persistentStorage */
 
@@ -275,7 +275,7 @@ RestStorage.prototype._save = function () {
         this._savePromise = savePromise;
     } else if (this._inSaveProcess) {
         // try again to save later, because we are too late at that time
-        savePromise.then(() => this._save());
+        savePromise = savePromise.then(() => this._save());
     }
 
     return new Promise((resolve, reject) => {

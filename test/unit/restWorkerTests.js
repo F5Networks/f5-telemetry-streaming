@@ -17,7 +17,7 @@ const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
 const config = require('../../src/lib/config');
-const deviceUtil = require('../../src/lib/deviceUtil');
+const deviceUtil = require('../../src/lib/utils/device');
 const RestWorker = require('../../src/nodejs/restWorker');
 const requestRouter = require('../../src/lib/requestHandlers/router');
 const testUtil = require('./shared/util');

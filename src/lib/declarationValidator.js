@@ -11,7 +11,7 @@
 const Ajv = require('ajv');
 
 const customKeywords = require('./customKeywords');
-const util = require('./util');
+const util = require('./utils/misc');
 
 const baseSchema = require('../schema/latest/base_schema.json');
 const controlsSchema = require('../schema/latest/controls_schema.json');

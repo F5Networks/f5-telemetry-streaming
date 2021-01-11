@@ -18,7 +18,7 @@ const nock = require('nock');
 const sinon = require('sinon');
 
 const EndpointLoader = require('../../src/lib/endpointLoader');
-const deviceUtil = require('../../src/lib/deviceUtil');
+const deviceUtil = require('../../src/lib/utils/device');
 const endpointLoaderTestsData = require('./data/endpointLoaderTestsData');
 const testUtil = require('./shared/util');
 

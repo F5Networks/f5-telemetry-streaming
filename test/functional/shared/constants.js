@@ -26,6 +26,7 @@ module.exports = {
         SYSTEM_POLLER_SCHEMA: fs.realpathSync(`${__dirname}/../../../shared/output_schemas/system_poller_schema.json`)
     },
     ENV_VARS: {
+        ARTIFACTORY_SERVER: 'ARTIFACTORY_SERVER',
         TEST_HARNESS: {
             FILE: 'TEST_HARNESS_FILE',
             IP: 'TEST_HOSTS',
@@ -78,6 +79,9 @@ module.exports = {
             SKIP_DUT_TESTS: 'SKIP_DUT_TESTS',
             SKIP_CONSUMER_TESTS: 'SKIP_CONSUMER_TESTS',
             SKIP_PULL_CONSUMER_TESTS: 'SKIP_PULL_CONSUMER_TESTS'
+        },
+        F5_CLOUD: {
+            SERVICE_ACCOUNT: 'F5_CLOUD_GCP_SERVICE_ACCOUNT'
         },
         GCP_PROJECT_ID: 'GCP_PROJECT_ID',
         GCP_PRIVATE_KEY_ID: 'GCP_PRIVATE_KEY_ID',

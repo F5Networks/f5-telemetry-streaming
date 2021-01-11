@@ -8,8 +8,9 @@
 
 'use strict';
 
-const util = require('../../util');
+const util = require('../../utils/misc');
 const azureUtil = require('./../shared/azureUtil');
+const requestsUtil = require('../../utils/requests');
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 
 /**
@@ -81,7 +82,7 @@ module.exports = function (context) {
                     tracerMsg.push(requestOptionsCopy);
                 }
 
-                promises.push(util.makeRequest(requestOptions));
+                promises.push(requestsUtil.makeRequest(requestOptions));
             });
 
             if (context.tracer) {

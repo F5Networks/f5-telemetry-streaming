@@ -8,8 +8,8 @@
 
 'use strict';
 
-const requestUtil = require('./../shared/requestUtil');
-const util = require('../../util');
+const httpUtil = require('./../shared/httpUtil');
+const util = require('../../utils/misc');
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 
 /**
@@ -31,14 +31,12 @@ const formatURI = (config) => {
  */
 module.exports = function (context) {
     const config = context.config;
-    const host = config.host;
-    const port = `:${config.port}`;
-    const protocol = config.protocol;
     const method = 'POST';
-    const strictSSL = !config.allowSelfSignedCert;
     const headers = {
         'Content-Type': 'application/json'
     };
+    const port = context.config.port || '';
+    const protocol = context.config.protocol || 'https';
     const uri = formatURI(config);
 
     // Handle Basic Auth
@@ -62,31 +60,32 @@ module.exports = function (context) {
     if (context.tracer) {
         let tracedHeaders = headers;
         // redact Basic Auth passphrase, if provided
-        if (Object.keys(headers).indexOf('Authorization') > -1) {
-            tracedHeaders = JSON.parse(JSON.stringify(headers));
+        if (tracedHeaders.Authorization) {
+            tracedHeaders = JSON.parse(JSON.stringify(tracedHeaders));
             tracedHeaders.Authorization = '*****';
         }
         context.tracer.write(JSON.stringify({
             body: payload,
-            host,
+            host: config.host,
             headers: tracedHeaders,
             method,
             port,
             protocol,
-            strictSSL,
+            allowSelfSignedCert: config.allowSelfSignedCert,
             uri
         }, null, 4));
     }
 
-    return requestUtil.sendToConsumer({
-        body: JSON.stringify(payload),
-        hosts: [host], // Do not yet use fallback with ElasticSearch
+    return httpUtil.sendToConsumer({
+        allowSelfSignedCert: config.allowSelfSignedCert,
+        body: payload,
+        hosts: [config.host], // Do not yet use fallback with ElasticSearch
         headers,
+        json: true, // for 'body' processing
         logger: context.logger,
         method,
         port,
         protocol,
-        strictSSL,
         uri
     }).catch((err) => {
         context.logger.exception(`Unexpected error: ${err}`, err);

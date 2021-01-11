@@ -191,7 +191,7 @@ function objectTable(props, rstArray, defName, propName, type) {
 const defs = schema.definitions;
 defs.Telemetry = schema;
 
-console.log('Building schema-reference.rst for Reference section');
+console.log(`Building ${outputRst} for Reference section`);
 
 let rstBody = '.. _schema-reference:\n\n';
 rstBody += 'Appendix A: Schema Reference\n';

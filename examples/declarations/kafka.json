@@ -20,5 +20,23 @@
         "passphrase": {
         	"cipherText": "passphrase"
         }
+    },
+    "My_Consumer_TLS_client_auth": {
+        "class": "Telemetry_Consumer",
+        "type": "Kafka",
+        "host": "kafka.example.com",
+        "protocol": "binaryTcpTls",
+        "port": 9092,
+        "topic": "f5-telemetry",
+        "authenticationProtocol": "TLS",
+        "privateKey": {
+        	"cipherText": "-----BEGIN PRIVATE KEY-----\nMIIE...\n-----END PRIVATE KEY-----"
+        },
+        "clientCertificate": {
+            "cipherText": "-----BEGIN CERTIFICATE-----\nMIID...\n-----END CERTIFICATE-----"
+        },
+        "rootCertificate": {
+            "cipherText": "-----BEGIN CERTIFICATE-----\nMIID...\n-----END CERTIFICATE-----"
+        }
     }
 }
