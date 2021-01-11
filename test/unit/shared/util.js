@@ -16,7 +16,7 @@ const pathUtil = require('path');
 const sinon = require('sinon');
 const urllib = require('url');
 
-const systemPollerData = require('../consumers/data/systemPollerData.json');
+const systemPollerData = require('../../../examples/output/system_poller/output.json');
 const avrData = require('../consumers/data/avrData.json');
 
 
@@ -188,6 +188,10 @@ module.exports = {
                 if (opts.times) {
                     apiMock = apiMock.times(opts.times);
                 }
+                // whether to persist nock scope interception until nock.cleanAll()
+                if (opts.persistScope === true) {
+                    hostMock.persist();
+                }
             }
             let response = endpointMock.response;
             if (typeof response === 'object') {
@@ -298,5 +302,14 @@ module.exports = {
             });
         }
         return loadedFiles;
+    },
+
+    /**
+     * Sleep for N ms.
+     *
+     * @returns {Promise} resolved once N .ms passed
+     */
+    sleep(sleepTime) {
+        return new Promise(resolve => setTimeout(resolve, sleepTime));
     }
 };

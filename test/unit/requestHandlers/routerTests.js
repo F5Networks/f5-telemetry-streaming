@@ -19,7 +19,7 @@ const sinon = require('sinon');
 
 const BaseRequestHandler = require('../../../src/lib/requestHandlers/baseHandler');
 const configWorker = require('../../../src/lib/config');
-const InternalServerErrorHandler = require('../../../src/lib/requestHandlers/internalServerErrorHandler');
+const InternalServerErrorHandler = require('../../../src/lib/requestHandlers/httpStatus/internalServerErrorHandler');
 const requestRouter = require('../../../src/lib/requestHandlers/router');
 const testUtil = require('../shared/util');
 
@@ -324,7 +324,7 @@ describe('Requests Router', () => {
     it('should register handlers on config change event', () => {
         const spy = sinon.spy();
         requestRouter.on('register', spy);
-        configWorker.emit('change', {
+        return configWorker.emitAsync('change', {
             components: [
                 {
                     id: 'uuid1',
@@ -334,21 +334,25 @@ describe('Requests Router', () => {
                     debug: true
                 }
             ]
-        });
-        assert.ok(spy.args[0][0] === requestRouter, 'should pass router instance');
-        assert.strictEqual(spy.args[0][1], true, 'should pass debug state');
-        configWorker.emit('change', {
-            components: [
-                {
-                    id: 'uuid1',
-                    name: 'Controls',
-                    namespace: 'f5telemetry_default',
-                    class: 'Controls',
-                    debug: false
-                }
-            ]
-        });
-        assert.ok(spy.args[1][0] === requestRouter, 'should pass router instance');
-        assert.strictEqual(spy.args[1][1], false, 'should pass debug state');
+        })
+            .then(() => {
+                assert.ok(spy.args[0][0] === requestRouter, 'should pass router instance');
+                assert.strictEqual(spy.args[0][1], true, 'should pass debug state');
+                return configWorker.emitAsync('change', {
+                    components: [
+                        {
+                            id: 'uuid1',
+                            name: 'Controls',
+                            namespace: 'f5telemetry_default',
+                            class: 'Controls',
+                            debug: false
+                        }
+                    ]
+                });
+            })
+            .then(() => {
+                assert.ok(spy.args[1][0] === requestRouter, 'should pass router instance');
+                assert.strictEqual(spy.args[1][1], false, 'should pass debug state');
+            });
     });
 });

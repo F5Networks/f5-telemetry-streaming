@@ -11,8 +11,8 @@
 const Ajv = require('ajv');
 const fs = require('fs');
 const constants = require('./constants');
-const util = require('./util');
-const deviceUtil = require('./deviceUtil');
+const util = require('./utils/misc');
+const deviceUtil = require('./utils/device');
 
 const base64NamedKey = 'plainBase64';
 const secureVaultNamedKey = 'SecureVault';
@@ -431,6 +431,22 @@ function declarationClassCheck(schemaCtx, dataCtx) {
 }
 
 /**
+ * Checks the current node version and compares it to the field value
+ *
+ * @throws {Error} when reference is invalid
+ * @returns {Boolean} true if reference is valid
+ */
+function nodeSupportVersionCheck(schemaObj) {
+    const requestedNodeVersion = schemaObj.schema;
+    const currentNodeVersion = util.getRuntimeInfo().nodeVersion;
+    if (util.compareVersionStrings(currentNodeVersion, '<', requestedNodeVersion)) {
+        throw new Error(`requested node version: ${requestedNodeVersion} , current node version: ${currentNodeVersion}`);
+    }
+    return true;
+}
+
+
+/**
  * Expand JSON pointer
  *
  * @param {SchemaCtx} schemaCtx - schema context
@@ -653,6 +669,16 @@ module.exports = {
                 type: 'boolean'
             },
             validate: createValidationFunction('f5expand', f5expandCheck)
+        },
+        nodeSupportVersion: {
+            type: 'object',
+            errors: true,
+            modifying: false,
+            metaSchema: {
+                type: 'string',
+                description: 'The lowest node version supported'
+            },
+            validate: createValidationFunction('nodeSupportVersion', nodeSupportVersionCheck)
         }
     }
 };

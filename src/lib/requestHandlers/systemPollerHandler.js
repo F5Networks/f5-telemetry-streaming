@@ -52,6 +52,7 @@ SystemPollerEndpointHandler.prototype.getBody = function () {
 SystemPollerEndpointHandler.prototype.process = function () {
     return systemPoller.getPollersConfig(this.params.system, {
         pollerName: this.params.poller,
+        namespace: this.params.namespace,
         includeDisabled: true
     })
         .then(systemPoller.fetchPollersData.bind(systemPoller))
@@ -76,6 +77,7 @@ SystemPollerEndpointHandler.prototype.process = function () {
 router.on('register', (routerInst, enableDebug) => {
     if (enableDebug) {
         routerInst.register('GET', '/systempoller/:system/:poller?', SystemPollerEndpointHandler);
+        routerInst.register('GET', '/namespace/:namespace/systempoller/:system/:poller?', SystemPollerEndpointHandler);
     }
 });
 

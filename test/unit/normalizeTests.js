@@ -18,7 +18,7 @@ const sinon = require('sinon');
 
 const properties = require('../../src/lib/properties.json');
 const normalize = require('../../src/lib/normalize');
-const normalizeUtil = require('../../src/lib/normalizeUtil');
+const normalizeUtil = require('../../src/lib/utils/normalize');
 const EVENT_TYPES = require('../../src/lib/constants').EVENT_TYPES;
 const dataExamples = require('./data/normalizeTestsData');
 const testUtil = require('./shared/util');
@@ -75,6 +75,16 @@ describe('Normalize', () => {
             });
         });
 
+        let clock;
+        beforeEach(() => {
+            // stub clock for categories that need timestamp
+            clock = sinon.useFakeTimers(new Date('2020-12-03T21:56:38.308Z'));
+        });
+
+        afterEach(() => {
+            clock.restore();
+        });
+
         const eventNormalizeOptions = {
             renameKeysByPattern: properties.global.renameKeys,
             addKeysByTag: {
@@ -85,7 +95,8 @@ describe('Normalize', () => {
                 }
             },
             formatTimestamps: properties.global.formatTimestamps.keys,
-            classifyEventByKeys: properties.events.classifyCategoryByKeys
+            classifyEventByKeys: properties.events.classifyCategoryByKeys,
+            addTimestampForCategories: properties.events.addTimestampForCategories
         };
 
         dataExamples.normalizeEventData.forEach((eventDataExample) => {

@@ -11,14 +11,15 @@
 const errors = require('./errors');
 const logger = require('./logger');
 const constants = require('./constants');
-const util = require('./util');
-const configUtil = require('./configUtil');
-const deviceUtil = require('./deviceUtil');
+const util = require('./utils/misc');
+const configUtil = require('./utils/config');
+const deviceUtil = require('./utils/device');
 const configWorker = require('./config');
 const iHealthPoller = require('./ihealthPoller');
 const dataPipeline = require('./dataPipeline');
 const normalize = require('./normalize');
 const properties = require('./properties.json').ihealth;
+const tracers = require('./utils/tracer').Tracer;
 
 const IHEALTH_POLLER_CLASS_NAME = constants.CONFIG_CLASSES.IHEALTH_POLLER_CLASS_NAME;
 
@@ -182,7 +183,7 @@ function getRequestedIHealthPoller(originalConfig, systemName, pollerName) {
 }
 
 // config worker change event
-configWorker.on('change', (config) => {
+configWorker.on('change', config => new Promise((resolve) => {
     logger.debug('configWorker change event in iHealthPoller'); // helpful debug
 
     // timestamp to filed out-dated tracers
@@ -236,11 +237,12 @@ configWorker.on('change', (config) => {
         }
     });
 
-    util.tracer.remove(tracer => tracer.name.startsWith(IHEALTH_POLLER_CLASS_NAME)
+    tracers.remove(tracer => tracer.name.startsWith(IHEALTH_POLLER_CLASS_NAME)
         && tracer.lastGetTouch < tracersTimestamp);
 
     logger.debug(`${Object.keys(pollers).length} iHealth poller(s) running`);
-});
+    resolve();
+}));
 
 
 module.exports = {

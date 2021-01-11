@@ -9,8 +9,7 @@
 'use strict';
 
 const crypto = require('crypto');
-const util = require('../../util');
-
+const requestsUtil = require('../../utils/requests');
 
 /**
  * See {@link ../README.md#Azure} for documentation
@@ -39,7 +38,7 @@ function getInstanceMetadata(context) {
         timeout: 5 * 1000 // Only wait 5s for Metadata Service response
     };
 
-    return util.makeRequest(metadataOpts);
+    return requestsUtil.makeRequest(metadataOpts);
 }
 
 function getInstanceRegion(context) {
@@ -100,7 +99,7 @@ function getAccessTokenFromMetadata(context, mgmtUrl) {
         },
         allowSelfSignedCert: context.config.allowSelfSignedCert
     };
-    return util.makeRequest(accessTokenOpts)
+    return requestsUtil.makeRequest(accessTokenOpts)
         .then(resp => resp.access_token)
         .catch((err) => {
             context.logger.error(`Unable to generate access token. Error: ${err.message}`);
@@ -116,7 +115,7 @@ function listSubscriptions(accessToken, url) {
         }
     };
 
-    return util.makeRequest(listSubOpts);
+    return requestsUtil.makeRequest(listSubOpts);
 }
 
 
@@ -134,7 +133,7 @@ function listWorkspaces(context, accessToken) {
             }));
 
             const workspacePromises = listWorkspaceBySubOpts
-                .map(o => util.makeRequest(o)
+                .map(o => requestsUtil.makeRequest(o)
                     .then(items => items.value)
                     .catch((e) => {
                         context.logger.exception('Error when listing workspaces', e);
@@ -193,7 +192,7 @@ function getSharedKey(context) {
                 },
                 allowSelfSignedCert: context.config.allowSelfSignedCert
             };
-            return util.makeRequest(sharedKeysOpts)
+            return requestsUtil.makeRequest(sharedKeysOpts)
                 .then(response => response.primarySharedKey)
                 .catch((err) => {
                     context.logger.error(`Unable to get sharedKey. err: ${err.message}`);
@@ -298,7 +297,7 @@ function getInstrumentationKeys(context) {
             }));
 
             const aiResourcesPromises = listAppInsightsBySubOpts
-                .map(o => util.makeRequest(o)
+                .map(o => requestsUtil.makeRequest(o)
                     .then(items => items.value)
                     .catch((e) => {
                         context.logger.error(`Error when listing Application Insights resources: ${e.stack}`);

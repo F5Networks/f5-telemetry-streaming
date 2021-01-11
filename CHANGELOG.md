@@ -1,15 +1,35 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.17.0
+### Added
+- AUTOTOOL-2027 [GitHub #91](https://github.com/F5Networks/f5-telemetry-streaming/issues/91): Add custom timestamp for APM Events
+- AUTOTOOL-2043: [GitHub #92](https://github.com/F5Networks/f5-telemetry-streaming/issues/92) Add support for Generic_HTTP proxy options
+- AUTOTOOL-1834: Updated config diff handling for namespace endpoint support
+- AUTOTOOL-1847: Added 'multiMetric' format for Splunk consumer (v8+ only) (experimental feature)
+- AUTOTOOL-1988: Added new Namespace SystemPoller endpoint (/namespace/$namespace/systempoller/$systemOrPoller/$poller?)
+- AUTOTOOL-2056 [GitHub #93](https://github.com/F5Networks/f5-telemetry-streaming/issues/93): Add additional traffic stats for virtual servers and pools
+- AUTOTOOL-1984 [GitHub #85](https://github.com/F5Networks/f5-telemetry-streaming/issues/85): Add support for Splunk proxy options
+- AUTOTOOL-2134: New consumer: F5_Cloud
+- AUTOTOOL-2028 [GitHub #90](https://github.com/F5Networks/f5-telemetry-streaming/issues/90): Add support for Kafka TLS client authentication
+### Fixed
+- AUTOTOOL-2089: Fix error where unavailable Custom Endpoint would return HTTP 500
+### Changed
+- AUTOTOOL-1832: telemetry/declare returns HTTP 503 on attempt to post declaration while previous one is still in processing
+- AUTOTOOL-1983: No major updates for npm packages (package-lock.json updates only).
+- AUTOTOOL-1914: Store up to 10 items in trace file
+- AUTOTOOL-2086: Add deprecation notice for Splunk Legacy format 
+### Removed
+
 ## 1.16.0
 ### Added
 - AUTOTOOL-1829: Add support for the Telemetry_Namespace class in declarations posted to the /declare endpoint
 - AUTOTOOL-1830: Added new Namespace PullConsumer endpoint (/namespace/$namespace/pullconsumer/$consumer)
 ### Fixed
-- AUTOTOOL-1967: Fix bug when TS incorrectly processing iRule stats with multiple events
+- AUTOTOOL-1967 [GitHub #86](https://github.com/F5Networks/f5-telemetry-streaming/issues/86): Fix bug when TS incorrectly processing iRule stats with multiple events
 ### Changed
 - AUTOTOOL-1874: Update npm packages (ajv from v6.12.4 to v6.12.6, applicationinsights from v1.8.6 to v1.8.7, aws-sdk from v2.749.0 to 2.775.0)
-- AUTOTOOL-1961: Include _ResourceId if available for Azure Log Analytics consumer. Also, metadata calls are now only happening upon consumer(s) load.
+- AUTOTOOL-1961 [GitHub #84](https://github.com/F5Networks/f5-telemetry-streaming/issues/84): Include _ResourceId if available for Azure Log Analytics consumer. Also, metadata calls are now only happening upon consumer(s) load.
 - AUTOTOOL-1833 and AUTOTOOL-1908: Update declaration config parsing and use new normalized configs for components
 - AUTOTOOL-1831: Update forwarder to use destinationIds for consumer lookup
 ### Removed

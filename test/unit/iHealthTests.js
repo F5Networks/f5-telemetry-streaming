@@ -17,13 +17,14 @@ const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
 const configWorker = require('../../src/lib/config');
-const configUtil = require('../../src/lib/configUtil');
+const configUtil = require('../../src/lib/utils/config');
+const tracers = require('../../src/lib/utils/tracer').Tracer;
 /* eslint-disable no-unused-vars */
 const ihealth = require('../../src/lib/ihealth');
 const ihealthPoller = require('../../src/lib/ihealthPoller');
 const constants = require('../../src/lib/constants');
-const util = require('../../src/lib/util');
-const deviceUtil = require('../../src/lib/deviceUtil');
+const util = require('../../src/lib/utils/misc');
+const deviceUtil = require('../../src/lib/utils/device');
 const testUtil = require('./shared/util');
 
 chai.use(chaiAsPromised);
@@ -128,7 +129,7 @@ describe('iHealth', () => {
             activeTracersStub = [];
             allTracersStub = [];
 
-            sinon.stub(util.tracer, 'createFromConfig').callsFake((className, objName, config) => {
+            sinon.stub(tracers, 'createFromConfig').callsFake((className, objName, config) => {
                 allTracersStub.push(objName);
                 if (config.trace) {
                     activeTracersStub.push(objName);
@@ -153,9 +154,8 @@ describe('iHealth', () => {
         it('should build iHealthPoller instance', () => {
             const newDeclaration = testUtil.deepCopy(defaultDeclaration);
             return validateAndNormalize(newDeclaration)
-                .then((normalized) => {
-                    // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', normalized);
+                .then(normalized => configWorker.emitAsync('change', normalized))
+                .then(() => {
                     assert.strictEqual(ihealthPollerInstanceStub.getKey(), 'f5telemetry_default::My_System');
                     assert.deepEqual(ihealthPollerInstanceStub.config, expectedOutput);
                 });
@@ -171,9 +171,8 @@ describe('iHealth', () => {
             testExpectedOutput.iHealth.name = 'My_iHealth_Poller';
             testExpectedOutput.name = 'My_iHealth_Poller';
             return validateAndNormalize(newDeclaration)
-                .then((normalized) => {
-                    // expecting the code responsible for 'change' event to be synchronous
-                    configWorker.emit('change', normalized);
+                .then(normalized => configWorker.emitAsync('change', normalized))
+                .then(() => {
                     assert.strictEqual(ihealthPollerInstanceStub.getKey(), 'f5telemetry_default::My_System');
                     assert.deepEqual(ihealthPollerInstanceStub.config, testExpectedOutput);
                 });

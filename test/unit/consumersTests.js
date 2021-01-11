@@ -17,9 +17,10 @@ const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
 const configWorker = require('../../src/lib/config');
-const configUtil = require('../../src/lib/configUtil');
-const util = require('../../src/lib/util');
+const configUtil = require('../../src/lib/utils/config');
+const util = require('../../src/lib/utils/misc');
 const consumers = require('../../src/lib/consumers');
+const moduleLoader = require('../../src/lib/utils/moduleLoader').ModuleLoader;
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -55,11 +56,7 @@ describe('Consumers', () => {
             };
 
             return validateAndNormalize(exampleConfig)
-                .then((normalized) => {
-                    // emit change event, then wait a short period
-                    configWorker.emit('change', normalized);
-                    return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
-                })
+                .then(normalized => configWorker.emitAsync('change', normalized))
                 .then(() => {
                     const loadedConsumers = consumers.getConsumers();
                     assert.strictEqual(loadedConsumers.length, 1, 'should load default consumer');
@@ -77,27 +74,18 @@ describe('Consumers', () => {
             };
 
             return validateAndNormalize(exampleConfig)
-                .then((normalized) => {
-                    // emit change event, then wait a short period
-                    configWorker.emit('change', normalized);
-                    return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
-                })
+                .then(normalized => configWorker.emitAsync('change', normalized))
                 .then(() => {
                     const loadedConsumers = consumers.getConsumers();
                     assert.strictEqual(loadedConsumers.length, 0, 'should not load disabled consumer');
                 });
         });
 
-        it('should return empty list of consumers', () => {
-            configWorker.emit('change', {}); // emit change event, then wait a short period
-            return new Promise(resolve => setTimeout(() => { resolve(); }, 250))
-                .then(() => {
-                    const loadedConsumers = consumers.getConsumers();
-                    assert.strictEqual(loadedConsumers.length, 0);
-                })
-                .catch(err => Promise.reject(err));
-        });
-
+        it('should return empty list of consumers', () => configWorker.emitAsync('change', {})
+            .then(() => {
+                const loadedConsumers = consumers.getConsumers();
+                assert.strictEqual(loadedConsumers.length, 0);
+            }));
 
         it('should unload unrequired consumers', () => {
             const priorConfig = {
@@ -109,22 +97,16 @@ describe('Consumers', () => {
             };
 
             return validateAndNormalize(priorConfig)
-                .then((normalized) => {
-                    // emit change event, then wait a short period
-                    configWorker.emit('change', normalized);
-                    return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
-                })
+                .then(normalized => configWorker.emitAsync('change', normalized))
                 .then(() => {
                     const loadedConsumers = consumers.getConsumers();
                     assert.strictEqual(loadedConsumers.length, 1, 'should load default consumer');
-                    configWorker.emit('change', {});
-                    return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
+                    return configWorker.emitAsync('change', {});
                 })
                 .then(() => {
                     const loadedConsumers = consumers.getConsumers();
                     assert.strictEqual(Object.keys(loadedConsumers).length, 0, 'should unload default consumer');
-                })
-                .catch(err => Promise.reject(err));
+                });
         });
 
         it('should fail to load invalid pull consumer types (consumerType=unknowntype)', () => {
@@ -138,15 +120,65 @@ describe('Consumers', () => {
             // config will not pass schema validation
             // but this test allows catching if consumer module/dir is not configured properly
             return configUtil.normalizeConfig(exampleConfig)
-                .then((normalized) => {
-                    // emit change event, then wait a short period
-                    configWorker.emit('change', normalized);
-                    return new Promise(resolve => setTimeout(() => { resolve(); }, 250));
-                })
+                .then(normalized => configWorker.emitAsync('change', normalized))
                 .then(() => {
                     const loadedConsumers = consumers.getConsumers();
                     assert.strictEqual(Object.keys(loadedConsumers).indexOf('unknowntype'), -1,
                         'should not load invalid consumer type');
+                });
+        });
+
+        it('should not reload existing consumer when skipUpdate = true', () => {
+            let existingComp;
+            let newComp;
+            const existingConfig = {
+                class: 'Telemetry',
+                FirstConsumer: {
+                    class: 'Telemetry_Consumer',
+                    type: 'default'
+                }
+            };
+
+            const newConfig = {
+                class: 'Telemetry',
+                FirstConsumer: {
+                    class: 'Telemetry_Consumer',
+                    type: 'default'
+                },
+                NewNamespace: {
+                    class: 'Telemetry_Namespace',
+                    SecondConsumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'default'
+                    }
+                }
+            };
+            const moduleLoaderSpy = sinon.spy(moduleLoader, 'load');
+            return validateAndNormalize(existingConfig)
+                .then((normalized) => {
+                    existingComp = normalized.components[0];
+                    // emit change event, then wait a short period
+                    return configWorker.emitAsync('change', normalized);
+                })
+                .then(() => {
+                    const loadedConsumers = consumers.getConsumers();
+                    assert.strictEqual(loadedConsumers.length, 1, 'should load default consumer');
+                    assert.isTrue(moduleLoaderSpy.calledOnce);
+                })
+                .then(() => validateAndNormalize(newConfig))
+                .then((normalized) => {
+                    newComp = normalized.components.find(c => c.class === 'Telemetry_Consumer' && c.namespace === 'NewNamespace');
+                    // simulate a namespace only declaration request
+                    // existing config unchanged, id the same
+                    existingComp.skipUpdate = true;
+                    normalized.components[0] = existingComp;
+                    return configWorker.emitAsync('change', normalized);
+                })
+                .then(() => {
+                    const loadedConsumers = consumers.getConsumers();
+                    assert.strictEqual(loadedConsumers[0].id, existingComp.id);
+                    assert.strictEqual(loadedConsumers[1].id, newComp.id);
+                    assert.isTrue(moduleLoaderSpy.calledTwice);
                 });
         });
     });

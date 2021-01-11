@@ -75,7 +75,7 @@ Use the following guidance to collect HTTP data.
 
 Example AVR output for HTTP Analytics profile:
 
-.. literalinclude:: ../examples/output/avr/avr_basic_data.json
+.. literalinclude:: ../examples/output/avr/avr_http_data.json
     :language: json
 
 | 

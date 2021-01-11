@@ -15,6 +15,8 @@ The following shows the system information that Telemetry Streaming collects.
 
 .. NOTE:: For some of the output to appear, you must have the applicable BIG-IP module licensed and provisioned (for example, you must have BIG-IP DNS provisioned to get GSLB wide IP and Pool information).
 
+Telemetry Streaming 1.17 introduced additional pool and virtual server output, such as virtual server **clientside.pktsIn** and pools **serverside.totConns**.  These do not appear in earlier versions.
+
 .. literalinclude:: ../examples/output/system_poller/output.json
     :language: json
 
@@ -62,13 +64,17 @@ ASM Request Log
 
 :ref:`Back to top<outputexample-ref>`
 
+.. _apm-rl:
+
 APM Request Log
 ---------------
 .. NOTE:: Log streams from LTM, AFM, ASM, and APM are not configured by Telemetry Streaming, they must be configured with AS3 or another method.
 
+**New**: Telemetry Streaming 1.17 adds a timestamp, highlighted in yellow.  You will not see this output in versions prior to 1.17.
+
 .. literalinclude:: ../examples/output/request_logs/apm_request_log.json
     :language: json
- 
+    :emphasize-lines: 13
 
 :ref:`Back to top<outputexample-ref>`
 

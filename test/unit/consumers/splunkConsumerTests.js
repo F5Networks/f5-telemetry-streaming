@@ -18,6 +18,7 @@ const request = require('request');
 const sinon = require('sinon');
 const zlib = require('zlib');
 
+const constants = require('../../../src/lib/constants');
 const splunkIndex = require('../../../src/lib/consumers/Splunk/index');
 const splunkData = require('./data/splunkConsumerTestsData');
 const testUtil = require('../shared/util');
@@ -41,7 +42,7 @@ describe('Splunk', () => {
     describe('process', () => {
         const expectedDataTemplate = {
             time: 0,
-            host: 'bigip1',
+            host: 'telemetry.bigip.com',
             source: 'f5.telemetry',
             sourcetype: 'f5:telemetry:json',
             event: {}
@@ -65,9 +66,10 @@ describe('Splunk', () => {
                         'Accept-Encoding': 'gzip',
                         Authorization: 'Splunk mySecret',
                         'Content-Encoding': 'gzip',
-                        'Content-Length': 90
+                        'Content-Length': 90,
+                        'User-Agent': constants.USER_AGENT
                     });
-                    assert.strictEqual(opts.url, 'https://localhost:80/services/collector/event');
+                    assert.strictEqual(opts.uri, 'https://localhost:80/services/collector/event');
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
@@ -94,9 +96,10 @@ describe('Splunk', () => {
                 try {
                     assert.deepStrictEqual(opts.headers, {
                         Authorization: 'Splunk superSecret',
-                        'Content-Length': 92
+                        'Content-Length': 92,
+                        'User-Agent': constants.USER_AGENT
                     });
-                    assert.strictEqual(opts.url, 'http://remoteSplunk:4567/services/collector/event');
+                    assert.strictEqual(opts.uri, 'http://remoteSplunk:4567/services/collector/event');
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
@@ -115,7 +118,15 @@ describe('Splunk', () => {
                     host: 'remoteSplunk',
                     port: '4567',
                     passphrase: 'superSecret',
-                    gzip: false
+                    gzip: false,
+                    proxy: {
+                        protocol: 'http',
+                        host: 'proxyServer',
+                        port: 8080,
+                        username: 'user',
+                        passphrase: 'pass',
+                        allowSelfSignedCert: true
+                    }
                 }
             });
 
@@ -124,14 +135,19 @@ describe('Splunk', () => {
                     const traceData = JSON.parse(context.tracer.write.firstCall.args[0]);
                     assert.deepStrictEqual(opts.headers, {
                         Authorization: 'Splunk superSecret',
-                        'Content-Length': 92
+                        'Content-Length': 92,
+                        'User-Agent': constants.USER_AGENT
                     });
                     assert.notStrictEqual(traceData.consumer.passphrase.indexOf('*****'), -1,
                         'consumer config passphrase should be redacted');
+                    assert.notStrictEqual(traceData.consumer.proxy.passphrase.indexOf('*****'), -1,
+                        'consumer proxy config passphrase should be redacted');
                     assert.notStrictEqual(traceData.requestOpts.headers.Authorization.indexOf('*****'), -1,
                         'passphrase in request headers should be redacted');
                     assert.strictEqual(JSON.stringify(traceData).indexOf('superSecret'), -1,
                         'passphrase should not be present anywhere in trace data');
+                    assert.notStrictEqual(traceData.requestOpts.proxy.passphrase.indexOf('*****'), -1,
+                        'consumer proxy config passphrase should be redacted');
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
@@ -149,13 +165,13 @@ describe('Splunk', () => {
                 config: defaultConsumerConfig
             });
             const expectedData = testUtil.deepCopy(expectedDataTemplate);
-            expectedData.time = 1576001615000;
+            expectedData.time = Date.parse(context.event.data.telemetryServiceInfo.cycleStart);
             expectedData.event = testUtil.deepCopy(context.event.data);
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
                     const output = zlib.gunzipSync(opts.body).toString();
-                    assert.deepStrictEqual(output, JSON.stringify(expectedData));
+                    assert.deepStrictEqual(JSON.parse(output), expectedData);
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
@@ -191,11 +207,6 @@ describe('Splunk', () => {
         });
 
         it('should process systemInfo in legacy format', (done) => {
-            // test works correctly while:
-            // - we generating output in predictable order
-            // - Object.keys() returns the same array on different node versions
-            const expectedData = splunkData.legacySystemData[0].expectedData;
-
             const context = testUtil.buildConsumerContext({
                 eventType: 'systemInfo',
                 config: defaultConsumerConfig
@@ -208,9 +219,8 @@ describe('Splunk', () => {
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
                     let output = zlib.gunzipSync(opts.body).toString();
-                    output = output.replace(/}{"time/g, '},{"time');
-                    output = JSON.parse(`[${output}]`);
-                    assert.deepStrictEqual(output, expectedData);
+                    output = output.replace(/\}\{/g, '},{');
+                    assert.sameDeepMembers(JSON.parse(`[${output}]`), splunkData.legacySystemData[0].expectedData);
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
@@ -222,26 +232,74 @@ describe('Splunk', () => {
             splunkIndex(context);
         });
 
-        it('should ignore events from Event Listener in legacy format', () => {
-            // enable event loop to use setTimeout
-            clock.restore();
+        it('should process systemInfo in multiMetric format', (done) => {
             const context = testUtil.buildConsumerContext({
-                eventType: 'AVR',
+                eventType: 'systemInfo',
                 config: defaultConsumerConfig
             });
-            context.config.format = 'legacy';
-            // error will be logged if method called
-            const requestStub = sinon.stub(request, 'post');
-            requestStub.throws(new Error('err message'));
+            context.config.format = 'multiMetric';
+
+            sinon.stub(request, 'post').callsFake((opts) => {
+                try {
+                    let output = zlib.gunzipSync(opts.body).toString();
+                    output = output.replace(/\}\{/g, '},{');
+                    assert.sameDeepMembers(JSON.parse(`[${output}]`), splunkData.multiMetricSystemData[0].expectedData);
+                    done();
+                } catch (err) {
+                    // done() with parameter is treated as an error.
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
+                    done(err);
+                }
+            });
 
             splunkIndex(context);
-            return (new Promise(resolve => setTimeout(resolve, 100)))
-                .then(() => {
-                    assert.strictEqual(requestStub.notCalled, true, 'should not call request.post');
-                    assert.strictEqual(context.logger.error.callCount, 0, 'should have no error messages');
-                    assert.notStrictEqual(context.logger.debug.callCount, 0, 'should have debug messages');
-                    assert.ok(/No data to forward/.test(context.logger.debug.lastCall.args[0]));
+        });
+
+        ['legacy', 'multiMetric'].forEach((format) => {
+            it(`should ignore events from Event Listener in ${format} format`, () => {
+                // enable event loop to use setTimeout
+                clock.restore();
+                const context = testUtil.buildConsumerContext({
+                    eventType: 'AVR',
+                    config: defaultConsumerConfig
                 });
+                context.config.format = format;
+                // error will be logged if method called
+                const requestStub = sinon.stub(request, 'post');
+                requestStub.throws(new Error('err message'));
+
+                splunkIndex(context);
+                return (new Promise(resolve => setTimeout(resolve, 100)))
+                    .then(() => {
+                        assert.strictEqual(requestStub.notCalled, true, 'should not call request.post');
+                        assert.strictEqual(context.logger.error.callCount, 0, 'should have no error messages');
+                        assert.notStrictEqual(context.logger.debug.callCount, 0, 'should have debug messages');
+                        assert.ok(/No data to forward/.test(context.logger.debug.lastCall.args[0]));
+                    });
+            });
+
+            it(`should ignore data from custom endpoints in ${format} format`, () => {
+                // enable event loop to use setTimeout
+                clock.restore();
+                const context = testUtil.buildConsumerContext({
+                    eventType: 'systemInfo',
+                    config: defaultConsumerConfig
+                });
+                context.config.format = format;
+                context.event.isCustom = true;
+                // error will be logged if method called
+                const requestStub = sinon.stub(request, 'post');
+                requestStub.throws(new Error('err message'));
+
+                splunkIndex(context);
+                return (new Promise(resolve => setTimeout(resolve, 100)))
+                    .then(() => {
+                        assert.strictEqual(requestStub.notCalled, true, 'should not call request.post');
+                        assert.strictEqual(context.logger.error.callCount, 0, 'should have no error messages');
+                        assert.notStrictEqual(context.logger.debug.callCount, 0, 'should have debug messages');
+                        assert.ok(/No data to forward/.test(context.logger.debug.lastCall.args[0]));
+                    });
+            });
         });
 
         describe('tmstats', () => {
@@ -541,6 +599,72 @@ describe('Splunk', () => {
                         assert.notStrictEqual(
                             output.indexOf('"last_cycle_count":"10"'), -1, 'output should include last_cycle_count'
                         );
+                        done();
+                    } catch (err) {
+                        // done() with parameter is treated as an error.
+                        // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
+                        done(err);
+                    }
+                });
+
+                splunkIndex(context);
+            });
+        });
+
+        describe('proxy options', () => {
+            it('should pass basic proxy options', (done) => {
+                const context = testUtil.buildConsumerContext({
+                    config: {
+                        port: 80,
+                        host: 'localhost',
+                        passphrase: 'mySecret',
+                        allowSelfSignedCert: true,
+                        proxy: {
+                            host: 'proxyServer',
+                            port: 8080
+                        }
+                    }
+                });
+
+                sinon.stub(request, 'post').callsFake((opts) => {
+                    try {
+                        assert.deepStrictEqual(opts.proxy, 'https://proxyServer:8080');
+                        assert.deepStrictEqual(opts.strictSSL, false);
+                        assert.strictEqual(opts.uri, 'https://localhost:80/services/collector/event');
+                        done();
+                    } catch (err) {
+                        // done() with parameter is treated as an error.
+                        // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
+                        done(err);
+                    }
+                });
+
+                splunkIndex(context);
+            });
+
+            it('should pass proxy options with allowSelfSignedCert', (done) => {
+                const context = testUtil.buildConsumerContext({
+                    config: {
+                        port: 80,
+                        host: 'localhost',
+                        passphrase: 'mySecret',
+                        allowSelfSignedCert: false,
+                        proxy: {
+                            protocol: 'http',
+                            host: 'proxyServer',
+                            port: 8080,
+                            username: 'user',
+                            passphrase: 'pass',
+                            allowSelfSignedCert: true
+                        }
+                    }
+                });
+
+                sinon.stub(request, 'post').callsFake((opts) => {
+                    try {
+                        assert.deepStrictEqual(opts.proxy, 'http://user:pass@proxyServer:8080');
+                        assert.deepStrictEqual(opts.strictSSL, false);
+                        assert.strictEqual(opts.uri, 'https://localhost:80/services/collector/event');
                         done();
                     } catch (err) {
                         // done() with parameter is treated as an error.

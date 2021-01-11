@@ -9,7 +9,7 @@
 'use strict';
 
 const AWS = require('aws-sdk');
-const util = require('../../util');
+const util = require('../../utils/misc');
 
 const METRICS_BATCH_SIZE = 20;
 /**

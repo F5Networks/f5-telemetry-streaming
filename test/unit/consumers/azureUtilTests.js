@@ -15,14 +15,14 @@ require('../shared/restoreCache')();
 const sinon = require('sinon');
 const assert = require('assert');
 const testUtil = require('./../shared/util');
-const util = require('./../../../src/lib/util');
+const requestsUtil = require('./../../../src/lib/utils/requests');
 const azureUtil = require('./../../../src/lib/consumers/shared/azureUtil');
 const azureUtilTestsData = require('./data/azureUtilTestsData');
 
 describe('Azure Util Tests', () => {
     describe('Managed Identities', () => {
         before(() => {
-            sinon.stub(util, 'makeRequest').callsFake((reqOpts) => {
+            sinon.stub(requestsUtil, 'makeRequest').callsFake((reqOpts) => {
                 // metadata
                 if (reqOpts.fullURI.includes('metadata/instance')) {
                     return Promise.resolve({
