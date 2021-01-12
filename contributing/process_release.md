@@ -39,7 +39,7 @@
 * Would be good to remove local `node_modules` directory and `package-lock.json` and do `npm run install-test`. Ideally `package-lock.json` will be the same as before. If not then it probably means that someone forgot to update it.
 * Push all changes to GitLab
 * Get build artifacts (`.rpm` and `.sha256` checksum) from latest build and:
-  * Check `.rpm` size, ideally it should not exceed 10 MB.:
+  * Check `.rpm` size, ideally keep it small, and it should not change much from previous version:
     * 1.4.0 - 8.6 MB
     * 1.7.0 - 8.6 MB
     * 1.8.0 - 9.5 MB
@@ -51,7 +51,11 @@
     * 1.14.0 - 11.2 MB
     * 1.15.0 - 10.9 MB
     * 1.16.0 - 11.3 MB
+<<<<<<< HEAD
     * 1.17.0 - 12.9 MB
+=======
+    * 1.17.0 - 13.1 MB (NOTE: grpc module deps increase)
+>>>>>>> develop
   * Install build to BIG-IP, navigate to folder `/var/config/rest/iapps/f5-telemetry/` and check following:
     * Run `du -sh` and check that folder's size (shouldn't be much greater than previous versions):
       * 1.4.0 - 65 MB
@@ -67,7 +71,11 @@
       * 1.14.0 - 82 MB
       * 1.15.0 - 79 MB
       * 1.16.0 - 82 MB
+<<<<<<< HEAD
       * 1.17.0 - 97 MB
+=======
+      * 1.17.0 - 95 MB (NOTE: grpc module deps increase)
+>>>>>>> develop
     * Check `nodejs/node_modules` folder - if you see `eslint`, `mocha` or something else from [package.json](package.json) `devDependencies` section - something wrong with build process. Probably some `npm` flags are work as not expected and it MUST BE FIXED before publishing.
 * Ensure that all tests (unit tests and functional tests passed)
 * Optional: Ensure that your local tags match remote. If not, remove all and re-fetch:

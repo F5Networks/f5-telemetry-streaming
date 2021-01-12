@@ -1,6 +1,13 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.18.0
+### Added
+### Fixed
+- AUTOTOOL-1710: Fix Event Listener startup errors that might cause restnoded to crash
+### Changed
+### Removed
+
 ## 1.17.0
 ### Added
 - AUTOTOOL-2027 [GitHub #91](https://github.com/F5Networks/f5-telemetry-streaming/issues/91): Add custom timestamp for APM Events
