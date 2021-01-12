@@ -710,6 +710,180 @@ module.exports = {
                     }
                 },
                 {
+                    name: 'should create new Telemetry_System for each unbound iHealthPoller',
+                    declaration: {
+                        class: 'Telemetry',
+                        My_iHealth_Poller_1: {
+                            class: 'Telemetry_iHealth_Poller',
+                            username: 'IHEALTH_ACCOUNT_USERNAME',
+                            passphrase: {
+                                cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE'
+                            },
+                            interval: {
+                                timeWindow: {
+                                    start: '23:15',
+                                    end: '02:15'
+                                }
+                            }
+                        },
+                        My_iHealth_Poller_2: {
+                            class: 'Telemetry_iHealth_Poller',
+                            username: 'IHEALTH_ACCOUNT_USERNAME',
+                            passphrase: {
+                                cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE'
+                            },
+                            interval: {
+                                timeWindow: {
+                                    start: '23:15',
+                                    end: '02:15'
+                                }
+                            }
+                        }
+                    },
+                    expected: {
+                        mappings: {
+                            uuid1: [],
+                            uuid2: []
+                        },
+                        components: [
+                            {
+                                class: 'Telemetry_iHealth_Poller',
+                                enable: true,
+                                trace: false,
+                                iHealth: {
+                                    name: 'My_iHealth_Poller_1',
+                                    credentials: {
+                                        username: 'IHEALTH_ACCOUNT_USERNAME',
+                                        passphrase: {
+                                            cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE',
+                                            class: 'Secret',
+                                            protected: 'SecureVault'
+                                        }
+                                    },
+                                    downloadFolder: undefined,
+                                    interval: {
+                                        day: undefined,
+                                        frequency: 'daily',
+                                        timeWindow: {
+                                            start: '23:15',
+                                            end: '02:15'
+                                        }
+                                    },
+                                    proxy: {
+                                        connection: {
+                                            host: undefined,
+                                            port: undefined,
+                                            protocol: undefined,
+                                            allowSelfSignedCert: undefined
+                                        },
+                                        credentials: {
+                                            username: undefined,
+                                            passphrase: undefined
+                                        }
+                                    }
+                                },
+                                system: {
+                                    host: 'localhost',
+                                    name: 'My_iHealth_Poller_1_System',
+                                    connection: {
+                                        port: 8100,
+                                        protocol: 'http',
+                                        allowSelfSignedCert: false
+                                    },
+                                    credentials: {
+                                        username: undefined,
+                                        passphrase: undefined
+                                    }
+                                },
+                                id: 'uuid1',
+                                name: 'My_iHealth_Poller_1',
+                                namespace: 'f5telemetry_default'
+                            },
+                            {
+                                class: 'Telemetry_iHealth_Poller',
+                                enable: true,
+                                trace: false,
+                                iHealth: {
+                                    name: 'My_iHealth_Poller_2',
+                                    credentials: {
+                                        username: 'IHEALTH_ACCOUNT_USERNAME',
+                                        passphrase: {
+                                            cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE',
+                                            class: 'Secret',
+                                            protected: 'SecureVault'
+                                        }
+                                    },
+                                    downloadFolder: undefined,
+                                    interval: {
+                                        day: undefined,
+                                        frequency: 'daily',
+                                        timeWindow: {
+                                            start: '23:15',
+                                            end: '02:15'
+                                        }
+                                    },
+                                    proxy: {
+                                        connection: {
+                                            host: undefined,
+                                            port: undefined,
+                                            protocol: undefined,
+                                            allowSelfSignedCert: undefined
+                                        },
+                                        credentials: {
+                                            username: undefined,
+                                            passphrase: undefined
+                                        }
+                                    }
+                                },
+                                system: {
+                                    host: 'localhost',
+                                    name: 'My_iHealth_Poller_2_System',
+                                    connection: {
+                                        port: 8100,
+                                        protocol: 'http',
+                                        allowSelfSignedCert: false
+                                    },
+                                    credentials: {
+                                        username: undefined,
+                                        passphrase: undefined
+                                    }
+                                },
+                                id: 'uuid2',
+                                name: 'My_iHealth_Poller_2',
+                                namespace: 'f5telemetry_default'
+                            },
+                            {
+                                class: 'Telemetry_System',
+                                enable: true,
+                                trace: false,
+                                host: 'localhost',
+                                port: 8100,
+                                protocol: 'http',
+                                allowSelfSignedCert: false,
+                                name: 'My_iHealth_Poller_1_System',
+                                id: 'uuid3',
+                                namespace: 'f5telemetry_default',
+                                systemPollers: [],
+                                iHealthPoller: 'uuid1'
+                            },
+                            {
+                                class: 'Telemetry_System',
+                                enable: true,
+                                trace: false,
+                                host: 'localhost',
+                                port: 8100,
+                                protocol: 'http',
+                                allowSelfSignedCert: false,
+                                name: 'My_iHealth_Poller_2_System',
+                                id: 'uuid4',
+                                namespace: 'f5telemetry_default',
+                                systemPollers: [],
+                                iHealthPoller: 'uuid2'
+                            }
+                        ]
+                    }
+                },
+                {
                     name: 'should normalize ihealth poller without an explicit System',
                     declaration: {
                         class: 'Telemetry',
@@ -1310,6 +1484,174 @@ module.exports = {
         systemPollerNormalization: {
             name: 'Telemetry_System_Poller normalization',
             tests: [
+                {
+                    name: 'should create new Telemetry_System for each unbound Telemetry_System_Poller',
+                    declaration: {
+                        class: 'Telemetry',
+                        My_Poller_1: {
+                        // uuid1
+                            class: 'Telemetry_System_Poller',
+                            trace: true,
+                            interval: 500,
+                            port: 8101,
+                            enable: true,
+                            username: 'username1',
+                            passphrase: {
+                                cipherText: 'passphrase1'
+                            },
+                            tag: {
+                                tag: 'tag1'
+                            }
+                        },
+                        My_Poller_2: {
+                        // uuid2
+                            class: 'Telemetry_System_Poller',
+                            trace: true,
+                            interval: 600,
+                            port: 8102,
+                            enable: true,
+                            username: 'username2',
+                            passphrase: {
+                                cipherText: 'passphrase2'
+                            },
+                            tag: {
+                                tag: 'tag2'
+                            }
+                        }
+                    },
+                    expected: {
+                        mappings: {
+                            uuid1: [],
+                            uuid2: []
+                        },
+                        components: [
+                            {
+                                class: 'Telemetry_System_Poller',
+                                trace: true,
+                                interval: 500,
+                                enable: true,
+                                name: 'My_Poller_1',
+                                id: 'uuid1',
+                                namespace: 'f5telemetry_default',
+                                traceName: 'My_Poller_1_System::My_Poller_1',
+                                connection: {
+                                    host: 'localhost',
+                                    port: 8101,
+                                    protocol: 'http',
+                                    allowSelfSignedCert: false
+                                },
+                                dataOpts: {
+                                    actions: [
+                                        {
+                                            setTag: {
+                                                tenant: '`T`',
+                                                application: '`A`'
+                                            },
+                                            enable: true
+                                        }
+                                    ],
+                                    tags: {
+                                        tag: 'tag1'
+                                    },
+                                    noTMStats: true
+                                },
+                                credentials: {
+                                    username: 'username1',
+                                    passphrase: {
+                                        cipherText: 'passphrase1',
+                                        class: 'Secret',
+                                        protected: 'SecureVault'
+                                    }
+                                },
+                                tag: {
+                                    tag: 'tag1'
+                                }
+                            },
+                            {
+                                class: 'Telemetry_System_Poller',
+                                trace: true,
+                                interval: 600,
+                                enable: true,
+                                name: 'My_Poller_2',
+                                id: 'uuid2',
+                                namespace: 'f5telemetry_default',
+                                traceName: 'My_Poller_2_System::My_Poller_2',
+                                connection: {
+                                    host: 'localhost',
+                                    port: 8102,
+                                    protocol: 'http',
+                                    allowSelfSignedCert: false
+                                },
+                                dataOpts: {
+                                    actions: [
+                                        {
+                                            setTag: {
+                                                tenant: '`T`',
+                                                application: '`A`'
+                                            },
+                                            enable: true
+                                        }
+                                    ],
+                                    tags: {
+                                        tag: 'tag2'
+                                    },
+                                    noTMStats: true
+                                },
+                                credentials: {
+                                    username: 'username2',
+                                    passphrase: {
+                                        cipherText: 'passphrase2',
+                                        class: 'Secret',
+                                        protected: 'SecureVault'
+                                    }
+                                },
+                                tag: {
+                                    tag: 'tag2'
+                                }
+                            },
+                            {
+                                class: 'Telemetry_System',
+                                enable: true,
+                                host: 'localhost',
+                                port: 8101,
+                                protocol: 'http',
+                                allowSelfSignedCert: false,
+                                trace: true,
+                                id: 'uuid3',
+                                name: 'My_Poller_1_System',
+                                systemPollers: [
+                                    'uuid1'
+                                ],
+                                username: 'username1',
+                                passphrase: {
+                                    cipherText: 'passphrase1',
+                                    class: 'Secret',
+                                    protected: 'SecureVault'
+                                }
+                            },
+                            {
+                                class: 'Telemetry_System',
+                                enable: true,
+                                host: 'localhost',
+                                port: 8102,
+                                protocol: 'http',
+                                allowSelfSignedCert: false,
+                                trace: true,
+                                id: 'uuid4',
+                                name: 'My_Poller_2_System',
+                                systemPollers: [
+                                    'uuid2'
+                                ],
+                                username: 'username2',
+                                passphrase: {
+                                    cipherText: 'passphrase2',
+                                    class: 'Secret',
+                                    protected: 'SecureVault'
+                                }
+                            }
+                        ]
+                    }
+                },
                 {
                     name: 'should create new poller when same poller referenced by multiple systems',
                     declaration: {
