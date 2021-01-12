@@ -4,6 +4,7 @@ Changes to this project are documented in this file. More detail and links can b
 ## 1.18.0
 ### Added
 ### Fixed
+- AUTOTOOL-1710: Fix Event Listener startup errors that might cause restnoded to crash
 ### Changed
 ### Removed
 
