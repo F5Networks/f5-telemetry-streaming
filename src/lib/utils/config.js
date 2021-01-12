@@ -498,7 +498,7 @@ function normalizeTelemetrySystemPollers(originalConfig, componentDefaults) {
         .filter(poller => originalConfig.refdPollers.indexOf(poller.id) === -1);
 
     function createSystemFromSystemPoller(systemPoller) {
-        const newSystem = componentDefaults[CLASSES.SYSTEM_CLASS_NAME];
+        const newSystem = util.deepCopy(componentDefaults[CLASSES.SYSTEM_CLASS_NAME]);
         POLLER_KEYS.toCopyToMissingSystem.forEach((key) => {
             if (Object.prototype.hasOwnProperty.call(systemPoller, key)) {
                 newSystem[key] = systemPoller[key];
@@ -535,7 +535,7 @@ function normalizeTelemetryIHealthPollers(originalConfig, componentDefaults) {
         .filter(poller => originalConfig.refdPollers.indexOf(poller.id) === -1);
 
     function createSystemFromIHealthPoller(iHealthPoller) {
-        const newSystem = componentDefaults[CLASSES.SYSTEM_CLASS_NAME];
+        const newSystem = util.deepCopy(componentDefaults[CLASSES.SYSTEM_CLASS_NAME]);
         POLLER_KEYS.toCopyToMissingSystem.forEach((key) => {
             if (Object.prototype.hasOwnProperty.call(iHealthPoller, key)) {
                 newSystem[key] = iHealthPoller[key];
