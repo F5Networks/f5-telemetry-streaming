@@ -430,7 +430,7 @@ module.exports = {
      * @returns {Promise} Returns promise resolved on sent message
      */
     sendEvent(host, msg) {
-        const port = constants.EVENT_LISTENER_PORT;
+        const port = constants.EVENT_LISTENER_DEFAULT_PORT;
 
         return new Promise((resolve, reject) => {
             const client = net.createConnection({ host, port }, () => {

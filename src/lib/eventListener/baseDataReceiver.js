@@ -185,7 +185,9 @@ class BaseDataReceiver extends SafeEventEmitter {
     /**
      * Destroy receiver
      *
-     * Note: can't call 'restart', 'start' and 'stop' methods. Need to create new instance
+     * Note:
+     *  - can't call 'restart', 'start' and 'stop' methods any more. Need to create new instance
+     *  - all attached listeners will be removed once instance destroyed
      *
      * @public
      * @async

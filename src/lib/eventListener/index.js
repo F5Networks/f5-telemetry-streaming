@@ -68,6 +68,19 @@ class ReceiversManager {
     }
 
     /**
+     * Destroy all receivers
+     *
+     * @returns {Promise} resolved once all receivers destroyed
+     */
+    destroyAll() {
+        return promiseUtil.allSettled(this.getAll().map(receiver => receiver.destroy()))
+            .then((ret) => {
+                this.registered = {};
+                return ret;
+            });
+    }
+
+    /**
      * All registered receivers
      *
      * @returns {Array<Object>} registered receivers
@@ -103,7 +116,11 @@ class ReceiversManager {
                 receivers.push(receiver);
             }
         });
-        return promiseUtil.allSettled(receivers.map(r => r.start()))
+        return promiseUtil.allSettled(
+            receivers.map(r => r.restart({ attempts: 10 }) // without delay for now (REST API is sync)
+                .catch(err => r.stop() // stop to avoid resources leaking
+                    .then(() => Promise.reject(err))))
+        )
             .then(promiseUtil.getValues);
     }
 
@@ -123,7 +140,7 @@ class ReceiversManager {
                 }
             }
         });
-        return Promise.all(receivers.map(r => r.destroy()
+        return promiseUtil.allSettled(receivers.map(r => r.destroy()
             .catch(destroyErr => r.logger.exception('unable to stop and destroy receiver', destroyErr))));
     }
 }
@@ -349,5 +366,13 @@ configWorker.on('change', (config) => {
         .then(() => logger.debug(`${EventListener.getAll().length} event listener(s) listening`))
         .catch(err => logger.exception('Unable to start some (or all) of the event listeners', err));
 });
+
+function sendShutdownEvent() {
+    EventListener.getAll().map(EventListener.remove);
+    EventListener.receiversManager.destroyAll().then(() => logger.info('All Event Listeners and Data Receivers destroyed'));
+}
+process.on('SIGINT', sendShutdownEvent);
+process.on('SIGTERM', sendShutdownEvent);
+process.on('SIGHUP', sendShutdownEvent);
 
 module.exports = EventListener;

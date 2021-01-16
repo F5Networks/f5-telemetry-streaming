@@ -99,21 +99,30 @@ describe('TCP and UDP Receivers', () => {
             }
         }
 
-        let serverMock;
+        let createServerMockCb;
 
         beforeEach(() => {
-            serverMock = new MockServer();
             receiverInst = new tcpUdpDataReceiver.TCPDataReceiver(testPort, { address: testAddr });
             receiverInst.on('data', dataCallbackSpy);
 
             sinon.stub(net, 'createServer').callsFake(function () {
+                const serverMock = new MockServer();
                 serverMock.setInitArgs.apply(serverMock, arguments);
+                if (createServerMockCb) {
+                    createServerMockCb(serverMock);
+                }
                 return serverMock;
             });
         });
 
+        afterEach(() => {
+            createServerMockCb = null;
+        });
+
         describe('.callCallback()', () => {
             let socketId = 0;
+            let serverMock;
+
             const createMockSocket = () => {
                 socketId += 1;
                 const socketMock = new MockSocket();
@@ -123,11 +132,18 @@ describe('TCP and UDP Receivers', () => {
             };
 
             beforeEach(() => {
-                serverMock.on('listenMock', () => serverMock.emit('listening'));
-                serverMock.on('closeMock', (inst, args) => {
-                    serverMock.emit('close');
-                    args[0](); // call callback
-                });
+                createServerMockCb = (newServerMock) => {
+                    serverMock = newServerMock;
+                    serverMock.on('listenMock', () => serverMock.emit('listening'));
+                    serverMock.on('closeMock', (inst, args) => {
+                        serverMock.emit('close');
+                        args[0](); // call callback
+                    });
+                };
+            });
+
+            afterEach(() => {
+                serverMock = null;
             });
 
             it('should call callback when received data', () => {
@@ -165,10 +181,14 @@ describe('TCP and UDP Receivers', () => {
 
         describe('.start()', () => {
             it('should start receiver', () => {
-                serverMock.on('listenMock', (inst, args) => {
-                    assert.deepStrictEqual(args[0], { port: testPort, address: testAddr }, 'should match listen options');
-                    serverMock.emit('listening');
-                });
+                let serverMock;
+                createServerMockCb = (newServerMock) => {
+                    serverMock = newServerMock;
+                    serverMock.on('listenMock', (inst, args) => {
+                        assert.deepStrictEqual(args[0], { port: testPort, address: testAddr }, 'should match listen options');
+                        serverMock.emit('listening');
+                    });
+                };
                 return receiverInst.start()
                     .then(() => {
                         assert.isTrue(receiverInst.isRunning(), 'should be in running state');
@@ -177,9 +197,11 @@ describe('TCP and UDP Receivers', () => {
             });
 
             it('should fail to start when socket was closed before become active', () => {
-                serverMock.on('listenMock', () => {
-                    serverMock.emit('close');
-                });
+                createServerMockCb = (serverMock) => {
+                    serverMock.on('listenMock', () => {
+                        serverMock.emit('close');
+                    });
+                };
                 return assert.isRejected(receiverInst.start(), /socket closed before/)
                     .then(() => {
                         assert.isFalse(receiverInst.isRunning(), 'should not be in running state');
@@ -187,9 +209,11 @@ describe('TCP and UDP Receivers', () => {
             });
 
             it('should fail to start when error raised before socket become active', () => {
-                serverMock.on('listenMock', () => {
-                    serverMock.emit('error', new Error('test error'));
-                });
+                createServerMockCb = (serverMock) => {
+                    serverMock.on('listenMock', () => {
+                        serverMock.emit('error', new Error('test error'));
+                    });
+                };
                 return assert.isRejected(receiverInst.start(), /test error/)
                     .then(() => {
                         assert.isFalse(receiverInst.isRunning(), 'should not be in running state');
@@ -198,32 +222,34 @@ describe('TCP and UDP Receivers', () => {
 
             it('should restart receiver when caught error', () => {
                 const closeSpy = sinon.spy((inst, args) => {
-                    serverMock.emit('close');
+                    inst.emit('close');
                     args[0]();
                 });
-                const listenSpy = sinon.spy(() => {
-                    serverMock.emit('listening');
+                const listenSpy = sinon.spy((inst) => {
+                    inst.emit('listening');
                     setTimeout(() => {
-                        serverMock.emit('error', new Error('test error'));
+                        inst.emit('error', new Error('test error'));
                     }, 10);
                 });
-                serverMock.on('listenMock', listenSpy);
-                serverMock.on('closeMock', closeSpy);
+                createServerMockCb = (serverMock) => {
+                    serverMock.on('listenMock', listenSpy);
+                    serverMock.on('closeMock', closeSpy);
+                };
 
                 return new Promise((resolve, reject) => {
                     const originSafeRestart = receiverInst.safeRestart.bind(receiverInst);
                     sinon.stub(receiverInst, 'safeRestart')
-                        .callsFake(() => originSafeRestart())
+                        .callsFake(() => originSafeRestart()) // listen #2 and listen #3, close #1 and close #2
                         .onThirdCall().callsFake(() => {
-                            receiverInst.destroy().then(resolve).catch(reject);
+                            receiverInst.destroy().then(resolve).catch(reject); // close #3
                             return originSafeRestart();
                         });
-                    receiverInst.start()
+                    receiverInst.start() // listen #1
                         .catch(reject);
                 })
                     .then(() => {
-                        assert.strictEqual(closeSpy.callCount, 2, 'should call socket.close 2 times');
-                        assert.strictEqual(listenSpy.callCount, 2, 'should call socket.listen 2 times');
+                        assert.strictEqual(closeSpy.callCount, 3, 'should call socket.close 3 times');
+                        assert.strictEqual(listenSpy.callCount, 3, 'should call socket.listen 3 times');
                         assert.isFalse(receiverInst.isRunning(), 'should not be in running state');
                         assert.isTrue(receiverInst.hasState(tcpUdpDataReceiver.TCPDataReceiver.STATE.DESTROYED), 'should have DESTROYED state');
                     });
@@ -231,12 +257,21 @@ describe('TCP and UDP Receivers', () => {
         });
 
         describe('.stop()', () => {
+            let serverMock;
+
             beforeEach(() => {
-                serverMock.on('listenMock', () => serverMock.emit('listening'));
-                serverMock.on('closeMock', (inst, args) => {
-                    serverMock.emit('close');
-                    args[0](); // call callback
-                });
+                createServerMockCb = (newServerMock) => {
+                    serverMock = newServerMock;
+                    serverMock.on('listenMock', () => serverMock.emit('listening'));
+                    serverMock.on('closeMock', (inst, args) => {
+                        serverMock.emit('close');
+                        args[0](); // call callback
+                    });
+                };
+            });
+
+            afterEach(() => {
+                serverMock = null;
             });
 
             it('should be able to stop receiver without active socket', () => receiverInst.stop()
@@ -302,21 +337,30 @@ describe('TCP and UDP Receivers', () => {
             }
         }
 
-        let serverMock;
+        let createServerMockCb;
 
         beforeEach(() => {
-            serverMock = new MockServer();
             receiverInst = new tcpUdpDataReceiver.UDPDataReceiver(testPort, { address: testAddr });
             receiverInst.on('data', dataCallbackSpy);
 
             sinon.stub(udp, 'createSocket').callsFake(function () {
+                const serverMock = new MockServer();
                 serverMock.setInitArgs.apply(serverMock, arguments);
+                if (createServerMockCb) {
+                    createServerMockCb(serverMock);
+                }
                 return serverMock;
             });
         });
 
+        afterEach(() => {
+            createServerMockCb = null;
+        });
+
         describe('.callCallback()', () => {
             let socketId = 0;
+            let serverMock;
+
             const createSocketInfo = () => {
                 socketId += 1;
                 return {
@@ -326,11 +370,18 @@ describe('TCP and UDP Receivers', () => {
             };
 
             beforeEach(() => {
-                serverMock.on('listenMock', () => serverMock.emit('listening'));
-                serverMock.on('closeMock', (inst, args) => {
-                    serverMock.emit('close');
-                    args[0](); // call callback
-                });
+                createServerMockCb = (newServerMock) => {
+                    serverMock = newServerMock;
+                    serverMock.on('listenMock', () => serverMock.emit('listening'));
+                    serverMock.on('closeMock', (inst, args) => {
+                        serverMock.emit('close');
+                        args[0](); // call callback
+                    });
+                };
+            });
+
+            afterEach(() => {
+                serverMock = null;
             });
 
             it('should call callback when received data', () => {
@@ -366,34 +417,44 @@ describe('TCP and UDP Receivers', () => {
 
         describe('.start()', () => {
             it('should start receiver (udp4 by default)', () => {
-                serverMock.on('listenMock', (inst, args) => {
-                    assert.deepStrictEqual(args[0], { port: testPort, address: testAddr }, 'should match listen options');
-                    serverMock.emit('listening');
-                });
+                let serverMock;
+                createServerMockCb = (newServerMock) => {
+                    serverMock = newServerMock;
+                    serverMock.on('listenMock', (inst, args) => {
+                        assert.deepStrictEqual(args[0], { port: testPort, address: testAddr }, 'should match listen options');
+                        serverMock.emit('listening');
+                    });
+                };
                 return receiverInst.start()
                     .then(() => {
                         assert.isTrue(receiverInst.isRunning(), 'should be in running state');
-                        assert.deepStrictEqual(serverMock.opts, { type: 'udp4', ipv6Only: false }, 'should match server options');
+                        assert.deepStrictEqual(serverMock.opts, { type: 'udp4', ipv6Only: false, reuseAddr: true }, 'should match socket options');
                     });
             });
 
             it('should start receiver (udp6)', () => {
+                let serverMock;
+                createServerMockCb = (newServerMock) => {
+                    serverMock = newServerMock;
+                    serverMock.on('listenMock', (inst, args) => {
+                        assert.deepStrictEqual(args[0], { port: testPort, address: testAddr }, 'should match listen options');
+                        serverMock.emit('listening');
+                    });
+                };
                 receiverInst = new tcpUdpDataReceiver.UDPDataReceiver(testPort, { address: testAddr }, 'udp6');
-                serverMock.on('listenMock', (inst, args) => {
-                    assert.deepStrictEqual(args[0], { port: testPort, address: testAddr }, 'should match listen options');
-                    serverMock.emit('listening');
-                });
                 return receiverInst.start()
                     .then(() => {
                         assert.isTrue(receiverInst.isRunning(), 'should be in running state');
-                        assert.deepStrictEqual(serverMock.opts, { type: 'udp6', ipv6Only: true }, 'should match server options');
+                        assert.deepStrictEqual(serverMock.opts, { type: 'udp6', ipv6Only: true, reuseAddr: true }, 'should match socket options');
                     });
             });
 
             it('should fail to start when socket was closed before become active', () => {
-                serverMock.on('listenMock', () => {
-                    serverMock.emit('close');
-                });
+                createServerMockCb = (serverMock) => {
+                    serverMock.on('listenMock', () => {
+                        serverMock.emit('close');
+                    });
+                };
                 return assert.isRejected(receiverInst.start(), /socket closed before/)
                     .then(() => {
                         assert.isFalse(receiverInst.isRunning(), 'should not be in running state');
@@ -401,9 +462,11 @@ describe('TCP and UDP Receivers', () => {
             });
 
             it('should fail to start when error raised before socket become active', () => {
-                serverMock.on('listenMock', () => {
-                    serverMock.emit('error', new Error('test error'));
-                });
+                createServerMockCb = (serverMock) => {
+                    serverMock.on('listenMock', () => {
+                        serverMock.emit('error', new Error('test error'));
+                    });
+                };
                 return assert.isRejected(receiverInst.start(), /test error/)
                     .then(() => {
                         assert.isFalse(receiverInst.isRunning(), 'should not be in running state');
@@ -412,32 +475,34 @@ describe('TCP and UDP Receivers', () => {
 
             it('should restart receiver when caught error', () => {
                 const closeSpy = sinon.spy((inst, args) => {
-                    serverMock.emit('close');
+                    inst.emit('close');
                     args[0]();
                 });
-                const listenSpy = sinon.spy(() => {
-                    serverMock.emit('listening');
+                const listenSpy = sinon.spy((inst) => {
+                    inst.emit('listening');
                     setTimeout(() => {
-                        serverMock.emit('error', new Error('test error'));
+                        inst.emit('error', new Error('test error'));
                     }, 10);
                 });
-                serverMock.on('listenMock', listenSpy);
-                serverMock.on('closeMock', closeSpy);
+                createServerMockCb = (serverMock) => {
+                    serverMock.on('listenMock', listenSpy);
+                    serverMock.on('closeMock', closeSpy);
+                };
 
                 return new Promise((resolve, reject) => {
                     const originSafeRestart = receiverInst.safeRestart.bind(receiverInst);
                     sinon.stub(receiverInst, 'safeRestart')
-                        .callsFake(() => originSafeRestart())
+                        .callsFake(() => originSafeRestart()) // listen #2 and listen #3, close #1 and close #2
                         .onThirdCall().callsFake(() => {
-                            receiverInst.destroy().then(resolve).catch(reject);
+                            receiverInst.destroy().then(resolve).catch(reject); // close #3
                             return originSafeRestart();
                         });
-                    receiverInst.start()
+                    receiverInst.start() // listen #1
                         .catch(reject);
                 })
                     .then(() => {
-                        assert.strictEqual(closeSpy.callCount, 2, 'should call socket.close 2 times');
-                        assert.strictEqual(listenSpy.callCount, 2, 'should call socket.listen 2 times');
+                        assert.strictEqual(closeSpy.callCount, 3, 'should call socket.close 3 times');
+                        assert.strictEqual(listenSpy.callCount, 3, 'should call socket.listen 3 times');
                         assert.isFalse(receiverInst.isRunning(), 'should not be in running state');
                         assert.isTrue(receiverInst.hasState(tcpUdpDataReceiver.UDPDataReceiver.STATE.DESTROYED), 'should have DESTROYED state');
                     });
@@ -445,12 +510,21 @@ describe('TCP and UDP Receivers', () => {
         });
 
         describe('.stop()', () => {
+            let serverMock;
+
             beforeEach(() => {
-                serverMock.on('listenMock', () => serverMock.emit('listening'));
-                serverMock.on('closeMock', (inst, args) => {
-                    serverMock.emit('close');
-                    args[0](); // call callback
-                });
+                createServerMockCb = (newServerMock) => {
+                    serverMock = newServerMock;
+                    serverMock.on('listenMock', () => serverMock.emit('listening'));
+                    serverMock.on('closeMock', (inst, args) => {
+                        serverMock.emit('close');
+                        args[0](); // call callback
+                    });
+                };
+            });
+
+            afterEach(() => {
+                serverMock = null;
             });
 
             it('should be able to stop receiver without active socket', () => receiverInst.stop()

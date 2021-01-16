@@ -15,7 +15,7 @@
         },
         "My_Listener": {
             "class": "Telemetry_Listener",
-            "port": 6515
+            "port": 56516
         },
         "My_Consumer": {
             "class": "Telemetry_Consumer",
