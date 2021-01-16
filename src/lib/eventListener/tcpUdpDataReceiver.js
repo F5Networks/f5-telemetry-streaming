@@ -170,13 +170,10 @@ class TCPDataReceiver extends TcpUdpBaseDataReceiver {
      */
     connectionHandler(conn) {
         this._addConnection(conn);
-        conn.on('data', data => this.callCallback(data, conn));
-        conn.on('error', () => conn.destroy()); // destroy emits 'close' event
-        conn.on('close', () => this._removeConnection(conn));
-        conn.on('end', () => {
-            // allowHalfOpen is false by default
-            // so, don't need to call 'end' explicitly
-        });
+        conn.on('data', data => this.callCallback(data, conn))
+            .on('error', () => conn.destroy()) // destroy emits 'close' event
+            .on('close', () => this._removeConnection(conn))
+            .on('end', () => {}); // allowHalfOpen is false by default, no needs to call 'end' explicitlyq
     }
 
     /**
@@ -214,21 +211,22 @@ class TCPDataReceiver extends TcpUdpBaseDataReceiver {
                     } else {
                         reject(err);
                     }
-                });
-                this._socket.on('listening', () => {
-                    this.logger.debug('listening');
-                    if (!isStarted) {
-                        isStarted = true;
-                        resolve();
-                    }
-                });
-                this._socket.on('close', () => {
-                    this.logger.debug('closed');
-                    if (!isStarted) {
-                        reject(new TcpUdpDataReceiverError('socket closed before being ready'));
-                    }
-                });
-                this._socket.on('connection', this.connectionHandler.bind(this));
+                })
+                    .on('listening', () => {
+                        this.logger.debug('listening');
+                        if (!isStarted) {
+                            isStarted = true;
+                            resolve();
+                        }
+                    })
+                    .on('close', () => {
+                        this.logger.debug('closed');
+                        if (!isStarted) {
+                            reject(new TcpUdpDataReceiverError('socket closed before being ready'));
+                        }
+                    })
+                    .on('connection', this.connectionHandler.bind(this));
+
                 const options = this.getReceiverOptions();
                 this.logger.debug(`starting listen using following options ${JSON.stringify(options)}`);
                 this._socket.listen(options);
@@ -248,8 +246,11 @@ class TCPDataReceiver extends TcpUdpBaseDataReceiver {
                 resolve();
             } else {
                 this._closeAllConnections();
-                this._socket.close(resolve);
-                this._socket = null;
+                this._socket.close(() => {
+                    this._socket.removeAllListeners();
+                    this._socket = null;
+                    resolve();
+                });
             }
         });
     }
@@ -301,7 +302,11 @@ class UDPDataReceiver extends TcpUdpBaseDataReceiver {
             if (!this.hasState(this.constructor.STATE.STARTING)) {
                 reject(this.getStateTransitionError(this.constructor.STATE.STARTING));
             } else {
-                this._socket = dgram.createSocket({ type: this.family, ipv6Only: this.family === 'udp6' });
+                this._socket = dgram.createSocket({
+                    type: this.family,
+                    ipv6Only: this.family === 'udp6', // available starting from node 11+ only
+                    reuseAddr: true // allows UDPv6 and UDPv4 be bound to 0.0.0.0 and ::0 at the same time
+                });
                 this._socket.on('error', (err) => {
                     this.logger.exception('unexpected error', err);
                     if (isStarted) {
@@ -309,21 +314,22 @@ class UDPDataReceiver extends TcpUdpBaseDataReceiver {
                     } else {
                         reject(err);
                     }
-                });
-                this._socket.on('listening', () => {
-                    this.logger.debug('listening');
-                    if (!isStarted) {
-                        isStarted = true;
-                        resolve();
-                    }
-                });
-                this._socket.on('close', () => {
-                    this.logger.debug('closed');
-                    if (!isStarted) {
-                        reject(new TcpUdpDataReceiverError('socket closed before being ready'));
-                    }
-                });
-                this._socket.on('message', this.callCallback.bind(this));
+                })
+                    .on('listening', () => {
+                        this.logger.debug('listening');
+                        if (!isStarted) {
+                            isStarted = true;
+                            resolve();
+                        }
+                    })
+                    .on('close', () => {
+                        this.logger.debug('closed');
+                        if (!isStarted) {
+                            reject(new TcpUdpDataReceiverError('socket closed before being ready'));
+                        }
+                    })
+                    .on('message', this.callCallback.bind(this));
+
                 const options = this.getReceiverOptions();
                 this.logger.debug(`starting listen using following options ${JSON.stringify(options)}`);
                 this._socket.bind(options);
@@ -343,8 +349,11 @@ class UDPDataReceiver extends TcpUdpBaseDataReceiver {
             if (!this._socket) {
                 resolve();
             } else {
-                this._socket.close(resolve);
-                this._socket = null;
+                this._socket.close(() => {
+                    this._socket.removeAllListeners();
+                    this._socket = null;
+                    resolve();
+                });
             }
         });
     }
@@ -353,6 +362,8 @@ class UDPDataReceiver extends TcpUdpBaseDataReceiver {
 
 /**
  * Data Receiver over UDPv4 and UDPv6
+ *
+ * Note: this class is needed to support DualStack on node.js versions older than 11.x
  *
  * @see TcpUdpBaseDataReceiver
  */

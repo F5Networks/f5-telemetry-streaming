@@ -400,4 +400,47 @@ describe('Event Listener', () => {
                     }));
             });
     });
+
+    it('should try to restart data receiver 10 times', () => {
+        const msStartSpy = sinon.spy(messageStream.MessageStream.prototype, 'restart');
+        messageStream.MessageStream.prototype.startHandler.rejects(new Error('test error'));
+
+        const newDecl = util.deepCopy(origDecl);
+        newDecl.Listener1 = {
+            class: 'Telemetry_Listener',
+            port: 9999,
+            tag: {
+                tenant: 'Tenant',
+                application: 'Application'
+            },
+            trace: true,
+            match: 'test',
+            actions: [{
+                setTag: {
+                    application: '`B`',
+                    tenant: '`C`'
+                }
+            }]
+        };
+        return validateAndNormalizeEmit(util.deepCopy(newDecl))
+            .then(() => {
+                assert.strictEqual(msStartSpy.callCount, 10);
+            });
+    });
+
+    it('should destroy all registered data receivers', () => {
+        const receivers = [
+            EventListener.receiversManager.getMessageStream(6514),
+            EventListener.receiversManager.getMessageStream(6515)
+        ];
+        return Promise.all(receivers.map(r => r.start()))
+            .then(() => {
+                receivers.forEach(r => assert.isTrue(r.isRunning(), 'should be in running state'));
+                return EventListener.receiversManager.destroyAll();
+            })
+            .then(() => {
+                receivers.forEach(r => assert.isTrue(r.isDestroyed(), 'should be destroyed'));
+                assert.deepStrictEqual(EventListener.receiversManager.registered, {}, 'should have no registered receivers');
+            });
+    });
 });

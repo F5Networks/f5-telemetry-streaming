@@ -10,13 +10,17 @@
 
 'use strict';
 
-const assert = require('assert');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 const fs = require('fs');
 const net = require('net');
 const readline = require('readline');
 const util = require('./shared/util');
 const constants = require('./shared/constants');
 const DEFAULT_UNNAMED_NAMESPACE = require('../../src/lib/constants').DEFAULT_UNNAMED_NAMESPACE;
+
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
 const duts = util.getHosts('BIGIP');
 const packageDetails = util.getPackageDetails();
@@ -346,13 +350,11 @@ function setup() {
                             ipProtocol: 'tcp',
                             destination: {
                                 ports: [
-                                    {
-                                        name: String(constants.EVENT_LISTENER_PORT)
-                                    },
-                                    {
-                                        name: String(constants.EVENT_LISTENER_NAMESPACE_PORT)
-                                    }
-                                ]
+                                    constants.EVENT_LISTENER_DEFAULT_PORT,
+                                    constants.EVENT_LISTENER_SECONDARY_PORT,
+                                    constants.EVENT_LISTENER_NAMESPACE_PORT,
+                                    constants.EVENT_LISTENER_NAMESPACE_SECONDARY_PORT
+                                ].map(port => ({ name: String(port) }))
                             }
                         });
                         const postOptions = {
@@ -542,30 +544,123 @@ function test() {
                     });
 
                     it('should ensure event listener is up', () => {
-                        const connectToEventListener = port => util.sleep(500)
-                            .then(() => new Promise((resolve, reject) => {
-                                const client = net.createConnection({ host, port }, () => {
-                                    client.end();
-                                });
-                                client.on('end', () => {
-                                    resolve();
-                                });
-                                client.on('error', (err) => {
-                                    reject(err);
-                                });
-                            }));
-                        const decl = JSON.stringify(getDeclToUse(testSetup));
-
-                        const promises = [
-                            constants.EVENT_LISTENER_PORT,
-                            constants.EVENT_LISTENER_NAMESPACE_PORT
-                        ].map((portToCheck) => {
-                            if (decl.indexOf(portToCheck) !== -1) {
-                                return connectToEventListener(portToCheck);
-                            }
-                            return Promise.resolve();
+                        const connectToEventListener = port => new Promise((resolve, reject) => {
+                            const client = net.createConnection({ host, port }, () => {
+                                client.end();
+                            });
+                            client.on('end', () => {
+                                resolve();
+                            });
+                            client.on('error', (err) => {
+                                reject(new Error(`Can not connect to TCP port ${port}: ${err}`));
+                            });
                         });
-                        return Promise.all(promises);
+
+                        // ports = { opened: [], closed: [] }
+                        const checkPorts = ports => Promise.all(
+                            (ports.opened || []).map(
+                                openedPort => assert.isFulfilled(connectToEventListener(openedPort))
+                            ).concat(
+                                (ports.closed || []).map(
+                                    closedPort => connectToEventListener(closedPort)
+                                        .then(
+                                            () => Promise.reject(new Error(`Port ${closedPort} expected to be closed`)),
+                                            () => {} // do nothing on catch
+                                        )
+                                )
+                            )
+                        );
+
+                        const findListeners = (obj, cb) => {
+                            if (typeof obj === 'object') {
+                                if (obj.class === 'Telemetry_Listener') {
+                                    cb(obj);
+                                } else {
+                                    Object.keys(obj).forEach(key => findListeners(obj[key], cb));
+                                }
+                            }
+                        };
+
+                        const fetchListenerPorts = (decl) => {
+                            const ports = [];
+                            findListeners(decl, listener => ports.push(listener.port || 6514));
+                            return ports;
+                        };
+
+                        const allListenerPorts = [
+                            constants.EVENT_LISTENER_DEFAULT_PORT,
+                            constants.EVENT_LISTENER_SECONDARY_PORT,
+                            constants.EVENT_LISTENER_NAMESPACE_PORT,
+                            constants.EVENT_LISTENER_NAMESPACE_SECONDARY_PORT
+                        ];
+                        const newPorts = [
+                            constants.EVENT_LISTENER_SECONDARY_PORT,
+                            constants.EVENT_LISTENER_NAMESPACE_SECONDARY_PORT
+                        ];
+
+                        const uri = `${constants.BASE_ILX_URI}/declare`;
+                        const postOptions = Object.assign(util.deepCopy(options), {
+                            method: 'POST',
+                            body: { class: 'Telemetry' }
+                        });
+                        return util.makeRequest(host, uri, util.deepCopy(postOptions))
+                            .then(() => checkPorts({
+                                closed: util.deepCopy(allListenerPorts)
+                            }))
+                            .then(() => {
+                                postOptions.body = getDeclToUse(testSetup);
+                                return util.makeRequest(host, uri, util.deepCopy(postOptions));
+                            })
+                            .then(() => {
+                                const ports = { opened: fetchListenerPorts(postOptions.body) };
+                                ports.closed = allListenerPorts.filter(port => ports.opened.indexOf(port) === -1);
+                                return checkPorts(ports);
+                            })
+                            // post declaration again and check that listeners are still available
+                            .then(() => util.makeRequest(host, uri, util.deepCopy(postOptions)))
+                            .then(() => {
+                                const ports = { opened: fetchListenerPorts(postOptions.body) };
+                                ports.closed = allListenerPorts.filter(port => ports.opened.indexOf(port) === -1);
+                                return checkPorts(ports);
+                            })
+                            .then(() => {
+                                let idx = 0;
+                                // already a copy
+                                postOptions.body = getDeclToUse(testSetup);
+                                // disable all listeners
+                                findListeners(postOptions.body, (listener) => {
+                                    if (idx >= newPorts.length) {
+                                        throw new Error(`Expected ${newPorts.length} listeners only`);
+                                    }
+                                    listener.port = newPorts[idx];
+                                    idx += 1;
+                                });
+                                return util.makeRequest(host, uri, util.deepCopy(postOptions));
+                            })
+                            .then(() => {
+                                const ports = { opened: fetchListenerPorts(postOptions.body) };
+                                ports.closed = allListenerPorts.filter(port => ports.opened.indexOf(port) === -1);
+                                return checkPorts(ports);
+                            })
+                            // post declaration again and check that listeners are still available
+                            .then(() => util.makeRequest(host, uri, util.deepCopy(postOptions)))
+                            .then(() => {
+                                const ports = { opened: fetchListenerPorts(postOptions.body) };
+                                ports.closed = allListenerPorts.filter(port => ports.opened.indexOf(port) === -1);
+                                return checkPorts(ports);
+                            })
+                            .then(() => {
+                                // already a copy
+                                postOptions.body = getDeclToUse(testSetup);
+                                // disable all listeners
+                                findListeners(postOptions.body, (listener) => {
+                                    listener.enable = false;
+                                });
+                                return util.makeRequest(host, uri, util.deepCopy(postOptions));
+                            })
+                            .then(() => checkPorts({
+                                closed: util.deepCopy(allListenerPorts)
+                            }));
                     });
 
                     ifNoNamespaceIt('should apply configuration containing system poller filtering', testSetup, () => {
