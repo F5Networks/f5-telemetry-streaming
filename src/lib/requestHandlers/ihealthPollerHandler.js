@@ -11,7 +11,7 @@
 const nodeUtil = require('util');
 
 const BaseRequestHandler = require('./baseHandler');
-const errors = require('../errors');
+const ErrorHandler = require('./errorHandler');
 const ihealth = require('../ihealth');
 const isObjectEmpty = require('../utils/misc').isObjectEmpty;
 const router = require('./router');
@@ -73,17 +73,7 @@ IHealthPollerEndpointHandler.prototype.process = function () {
             };
             return this;
         })
-        .catch((error) => {
-            if (error instanceof errors.ConfigLookupError) {
-                this.code = 404;
-                this.body = {
-                    code: this.code,
-                    message: error.message
-                };
-                return this;
-            }
-            return Promise.reject(error);
-        });
+        .catch(error => new ErrorHandler(error).process());
 };
 
 router.on('register', (routerInst, enableDebug) => {

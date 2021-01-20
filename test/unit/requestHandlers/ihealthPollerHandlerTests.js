@@ -20,6 +20,7 @@ const errors = require('../../../src/lib/errors');
 const ihealh = require('../../../src/lib/ihealth');
 const IHealthPollerHandler = require('../../../src/lib/requestHandlers/ihealthPollerHandler');
 const testUtil = require('../shared/util');
+const ErrorHandler = require('../../../src/lib/requestHandlers/errorHandler');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -105,9 +106,9 @@ describe('SystemPollerHandler', () => {
         sinon.stub(ihealh, 'startPoller').rejects(new errors.ConfigLookupError('expectedError'));
         return requestHandler.process()
             .then((handler) => {
-                assert.ok(handler === requestHandler, 'should return a reference to original handler');
-                assert.strictEqual(requestHandler.getCode(), 404, 'should return expected code');
-                assert.deepStrictEqual(requestHandler.getBody(), {
+                assert.isTrue(handler instanceof ErrorHandler, 'should return a reference to error handler');
+                assert.strictEqual(handler.getCode(), 404, 'should return expected code');
+                assert.deepStrictEqual(handler.getBody(), {
                     code: 404,
                     message: 'expectedError'
                 }, 'should return expected body');

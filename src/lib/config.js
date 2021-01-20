@@ -10,6 +10,7 @@
 
 const EventEmitter2 = require('eventemitter2');
 const nodeUtil = require('util');
+const errors = require('./errors');
 
 const deviceUtil = require('./utils/device');
 const logger = require('./logger');
@@ -192,10 +193,7 @@ ConfigWorker.prototype.getConfig = function () {
 ConfigWorker.prototype.validate = function (data, context) {
     if (this.validator) {
         return configUtil.validate(this.validator, data, context)
-            .catch((err) => {
-                err.code = 'ValidationError';
-                return Promise.reject(err);
-            });
+            .catch(err => Promise.reject(new errors.ValidationError(err)));
     }
     return Promise.reject(new Error('Validator is not available'));
 };
@@ -220,17 +218,21 @@ ConfigWorker.prototype.expandConfig = function (rawConfig) {
  *
  * @public
  * @param {Object} data - namespace-only data to process
- * @param {String} options.namespace - namespace to which config belongs to
+ * @param {String} namespace - namespace to which config belongs to
  *
- * @returns {Object} Promise resolved with copy of validated config resolved on success
+ * @returns {Object} Promise resolved with copy of validated namespace config resolved on success
  */
 
 ConfigWorker.prototype.processNamespaceDeclaration = function (data, namespace) {
+    if (data.class !== 'Telemetry_Namespace') {
+        return Promise.reject(new errors.ValidationError('declaration should be of class \'Telemetry Namespace\''));
+    }
     return this.getConfig()
         .then((savedConfig) => {
             const mergedDecl = util.isObjectEmpty(savedConfig.raw) ? { class: 'Telemetry' } : util.deepCopy(savedConfig.raw);
             mergedDecl[namespace] = data;
-            return this.processDeclaration(mergedDecl, { savedConfig, namespaceToUpdate: namespace });
+            return this.processDeclaration(mergedDecl, { savedConfig, namespaceToUpdate: namespace })
+                .then(fullConfig => Promise.resolve(fullConfig[namespace] || {}));
         });
 };
 
@@ -298,16 +300,30 @@ ConfigWorker.prototype.processDeclaration = function (data, options) {
 };
 
 /**
- * Get raw (origin) config
+ * Get raw (original) config
  *
  * @public
- * @param {Object} restOperation
+ * @param {String} namespace - namespace name
  *
- * @returns {Promise<Object>} resolved with raw (origin) config
+ * @returns {Promise<Object>} resolved with raw (original) config
+ *                           - full declaration if namespace param provided,
+ *                             otherwise just the namespace config
  */
-ConfigWorker.prototype.getRawConfig = function () {
-    return this.getConfig().then(config => Promise.resolve((config && config.raw) || {}));
+ConfigWorker.prototype.getRawConfig = function (namespace) {
+    return this.getConfig()
+        .then(config => Promise.resolve((config && config.raw) || {}))
+        .then((fullConfig) => {
+            if (namespace) {
+                const namespaceConfig = fullConfig[namespace];
+                if (util.isObjectEmpty(namespaceConfig)) {
+                    return Promise.reject(new errors.ObjectNotFoundInConfigError(`Namespace with name '${namespace}' doesn't exist`));
+                }
+                return namespaceConfig;
+            }
+            return fullConfig;
+        });
 };
+
 
 // initialize singleton
 let configWorker;
