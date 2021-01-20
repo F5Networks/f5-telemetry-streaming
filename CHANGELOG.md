@@ -3,6 +3,7 @@ Changes to this project are documented in this file. More detail and links can b
 
 ## 1.18.0
 ### Added
+- AUTOTOOL-1987: Added new Namespace declare endpoint (/namespace/$namespace/declare) which supports POST and GET
 ### Fixed
 - AUTOTOOL-1710: Fix Event Listener startup errors that might cause restnoded to crash
 ### Changed

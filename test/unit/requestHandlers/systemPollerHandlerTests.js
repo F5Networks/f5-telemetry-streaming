@@ -19,6 +19,7 @@ const sinon = require('sinon');
 const errors = require('../../../src/lib/errors');
 const systemPoller = require('../../../src/lib/systemPoller');
 const SystemPollerHandler = require('../../../src/lib/requestHandlers/systemPollerHandler');
+const ErrorHandler = require('../../../src/lib/requestHandlers/errorHandler');
 const testUtil = require('../shared/util');
 
 chai.use(chaiAsPromised);
@@ -68,9 +69,9 @@ describe('SystemPollerHandler', () => {
         sinon.stub(systemPoller, 'getPollersConfig').rejects(new errors.ConfigLookupError('expectedError'));
         return requestHandler.process()
             .then((handler) => {
-                assert.ok(handler === requestHandler, 'should return a reference to original handler');
-                assert.strictEqual(requestHandler.getCode(), 404, 'should return expected code');
-                assert.deepStrictEqual(requestHandler.getBody(), {
+                assert.isTrue(handler instanceof ErrorHandler, 'should return a reference to error handler');
+                assert.strictEqual(handler.getCode(), 404, 'should return expected code');
+                assert.deepStrictEqual(handler.getBody(), {
                     code: 404,
                     message: 'expectedError'
                 }, 'should return expected body');

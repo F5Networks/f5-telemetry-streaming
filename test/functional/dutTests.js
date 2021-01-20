@@ -398,6 +398,11 @@ function test() {
         {
             name: 'mixed declaration (default and namespace), verify default by "f5telemetry_default"',
             namespace: DEFAULT_UNNAMED_NAMESPACE
+        },
+        {
+            name: 'basic declaration - namespace endpoint',
+            namespace: constants.DECL.NAMESPACE_NAME,
+            useNamespaceDeclare: true
         }
     ];
 
@@ -405,6 +410,8 @@ function test() {
         let declaration = util.deepCopy(basicDeclaration);
         if (testSetup.name.startsWith('mixed')) {
             declaration.My_Namespace = util.deepCopy(namespaceDeclaration.My_Namespace);
+        } else if (testSetup.useNamespaceDeclare) {
+            declaration = util.deepCopy(namespaceDeclaration.My_Namespace);
         } else if (testSetup.namespace && testSetup.namespace !== DEFAULT_UNNAMED_NAMESPACE) {
             declaration = util.deepCopy(namespaceDeclaration);
         }
@@ -477,326 +484,347 @@ function test() {
                         };
                     });
 
-                    it('should post same configuration twice and get it after', () => {
-                        const uri = `${constants.BASE_ILX_URI}/declare`;
-                        const postOptions = Object.assign(util.deepCopy(options), {
-                            method: 'POST',
-                            body: getDeclToUse(testSetup)
-                        });
-                        let postResponses = [];
-
-                        // wait 2s to buffer consecutive POSTs
-                        return util.sleep(2000)
-                            .then(() => util.makeRequest(host, uri, util.deepCopy(postOptions)))
-                            .then((data) => {
-                                util.logger.info('POST request #1: Declaration response:', { host, data });
-                                assert.strictEqual(data.message, 'success');
-
-                                checkPassphraseObject(data);
-                                postResponses.push(data);
-                                // wait for 5 secs while declaration will be applied and saved to storage
-                                return util.sleep(5000);
-                            })
-                            .then(() => util.makeRequest(host, uri, util.deepCopy(postOptions)))
-                            .then((data) => {
-                                util.logger.info('POST request #2: Declaration response:', { host, data });
-                                assert.strictEqual(data.message, 'success');
-
-                                checkPassphraseObject(data);
-                                postResponses.push(data);
-
-                                // wait for 5 secs while declaration will be applied and saved to storage
-                                return util.sleep(5000);
-                            })
-                            .then(() => util.makeRequest(host, uri, util.deepCopy(options)))
-                            .then((data) => {
-                                util.logger.info('GET request: Declaration response:', { host, data });
-                                assert.strictEqual(data.message, 'success');
-
-                                checkPassphraseObject(data);
-                                postResponses.push(data);
-
-                                // compare GET to recent POST
-                                assert.deepStrictEqual(postResponses[2], postResponses[1]);
-                                // lest compare first POST to second POST (only one difference is secrets)
-                                postResponses = postResponses.map(removeCipherTexts);
-                                assert.deepStrictEqual(postResponses[0], postResponses[1]);
+                    describe('basic checks', () => {
+                        it('should post same configuration twice and get it after', () => {
+                            const uri = testSetup.useNamespaceDeclare ? `${constants.BASE_ILX_URI}${namespacePath}/declare` : `${constants.BASE_ILX_URI}/declare`;
+                            const postOptions = Object.assign(util.deepCopy(options), {
+                                method: 'POST',
+                                body: getDeclToUse(testSetup)
                             });
-                    });
+                            let postResponses = [];
 
-                    it('should get response from systempoller endpoint', () => {
-                        const uri = `${constants.BASE_ILX_URI}${namespacePath}/systempoller/${constants.DECL.SYSTEM_NAME}`;
-                        // wait 500ms in case if config was not applied yet
-                        return util.sleep(500)
-                            .then(() => util.makeRequest(host, uri, options))
-                            .then((data) => {
-                                data = data || [];
-                                util.logger.info(`SystemPoller response (${uri}):`, { host, data });
-                                assert.strictEqual(data.length, 1);
-                                // read schema and validate data
-                                data = data[0];
-                                const schema = JSON.parse(fs.readFileSync(constants.DECL.SYSTEM_POLLER_SCHEMA));
-                                const valid = util.validateAgainstSchema(data, schema);
-                                if (valid !== true) {
-                                    assert.fail(`output is not valid: ${JSON.stringify(valid.errors)}`);
-                                }
-                            });
-                    });
+                            // wait 2s to buffer consecutive POSTs
+                            return util.sleep(2000)
+                                .then(() => util.makeRequest(host, uri, util.deepCopy(postOptions)))
+                                .then((data) => {
+                                    util.logger.info('POST request #1: Declaration response:', { host, data });
+                                    assert.strictEqual(data.message, 'success');
 
-                    it('should ensure event listener is up', () => {
-                        const connectToEventListener = port => new Promise((resolve, reject) => {
-                            const client = net.createConnection({ host, port }, () => {
-                                client.end();
-                            });
-                            client.on('end', () => {
-                                resolve();
-                            });
-                            client.on('error', (err) => {
-                                reject(new Error(`Can not connect to TCP port ${port}: ${err}`));
-                            });
-                        });
+                                    checkPassphraseObject(data);
+                                    postResponses.push(data);
+                                    // wait for 5 secs while declaration will be applied and saved to storage
+                                    return util.sleep(5000);
+                                })
+                                .then(() => util.makeRequest(host, uri, util.deepCopy(postOptions)))
+                                .then((data) => {
+                                    util.logger.info('POST request #2: Declaration response:', { host, data });
+                                    assert.strictEqual(data.message, 'success');
 
-                        // ports = { opened: [], closed: [] }
-                        const checkPorts = ports => Promise.all(
-                            (ports.opened || []).map(
-                                openedPort => assert.isFulfilled(connectToEventListener(openedPort))
-                            ).concat(
-                                (ports.closed || []).map(
-                                    closedPort => connectToEventListener(closedPort)
-                                        .then(
-                                            () => Promise.reject(new Error(`Port ${closedPort} expected to be closed`)),
-                                            () => {} // do nothing on catch
-                                        )
-                                )
-                            )
-                        );
+                                    checkPassphraseObject(data);
+                                    postResponses.push(data);
 
-                        const findListeners = (obj, cb) => {
-                            if (typeof obj === 'object') {
-                                if (obj.class === 'Telemetry_Listener') {
-                                    cb(obj);
-                                } else {
-                                    Object.keys(obj).forEach(key => findListeners(obj[key], cb));
-                                }
-                            }
-                        };
+                                    // wait for 5 secs while declaration will be applied and saved to storage
+                                    return util.sleep(5000);
+                                })
+                                .then(() => util.makeRequest(host, uri, util.deepCopy(options)))
+                                .then((data) => {
+                                    util.logger.info('GET request: Declaration response:', { host, data });
+                                    assert.strictEqual(data.message, 'success');
 
-                        const fetchListenerPorts = (decl) => {
-                            const ports = [];
-                            findListeners(decl, listener => ports.push(listener.port || 6514));
-                            return ports;
-                        };
+                                    checkPassphraseObject(data);
+                                    postResponses.push(data);
 
-                        const allListenerPorts = [
-                            constants.EVENT_LISTENER_DEFAULT_PORT,
-                            constants.EVENT_LISTENER_SECONDARY_PORT,
-                            constants.EVENT_LISTENER_NAMESPACE_PORT,
-                            constants.EVENT_LISTENER_NAMESPACE_SECONDARY_PORT
-                        ];
-                        const newPorts = [
-                            constants.EVENT_LISTENER_SECONDARY_PORT,
-                            constants.EVENT_LISTENER_NAMESPACE_SECONDARY_PORT
-                        ];
+                                    // compare GET to recent POST
+                                    assert.deepStrictEqual(postResponses[2], postResponses[1]);
+                                    // lest compare first POST to second POST (only one difference is secrets)
+                                    postResponses = postResponses.map(removeCipherTexts);
+                                    assert.deepStrictEqual(postResponses[0], postResponses[1]);
+                                })
+                                .then(() => {
+                                    if (testSetup.useNamespaceDeclare) {
+                                        util.logger.info('Additional test for namespace endpoint - verify full declaration');
+                                        const url = `${constants.BASE_ILX_URI}/declare`;
 
-                        const uri = `${constants.BASE_ILX_URI}/declare`;
-                        const postOptions = Object.assign(util.deepCopy(options), {
-                            method: 'POST',
-                            body: { class: 'Telemetry' }
-                        });
-                        return util.makeRequest(host, uri, util.deepCopy(postOptions))
-                            .then(() => checkPorts({
-                                closed: util.deepCopy(allListenerPorts)
-                            }))
-                            .then(() => {
-                                postOptions.body = getDeclToUse(testSetup);
-                                return util.makeRequest(host, uri, util.deepCopy(postOptions));
-                            })
-                            .then(() => {
-                                const ports = { opened: fetchListenerPorts(postOptions.body) };
-                                ports.closed = allListenerPorts.filter(port => ports.opened.indexOf(port) === -1);
-                                return checkPorts(ports);
-                            })
-                            // post declaration again and check that listeners are still available
-                            .then(() => util.makeRequest(host, uri, util.deepCopy(postOptions)))
-                            .then(() => {
-                                const ports = { opened: fetchListenerPorts(postOptions.body) };
-                                ports.closed = allListenerPorts.filter(port => ports.opened.indexOf(port) === -1);
-                                return checkPorts(ports);
-                            })
-                            .then(() => {
-                                let idx = 0;
-                                // already a copy
-                                postOptions.body = getDeclToUse(testSetup);
-                                // disable all listeners
-                                findListeners(postOptions.body, (listener) => {
-                                    if (idx >= newPorts.length) {
-                                        throw new Error(`Expected ${newPorts.length} listeners only`);
+                                        return util.makeRequest(host, url, util.deepCopy(options))
+                                            .then((data) => {
+                                                util.logger.info('GET request: Declaration response', { host, data });
+                                                assert.strictEqual(data.message, 'success');
+                                                // verify merged decl
+                                                assert.isTrue(typeof data.declaration[constants.DECL.NAMESPACE_NAME] !== 'undefined'); // named namespace
+                                                assert.isTrue(typeof data.declaration[constants.DECL.SYSTEM_NAME] !== 'undefined'); // default namespace
+                                            });
                                     }
-                                    listener.port = newPorts[idx];
-                                    idx += 1;
+                                    return Promise.resolve();
                                 });
-                                return util.makeRequest(host, uri, util.deepCopy(postOptions));
-                            })
-                            .then(() => {
-                                const ports = { opened: fetchListenerPorts(postOptions.body) };
-                                ports.closed = allListenerPorts.filter(port => ports.opened.indexOf(port) === -1);
-                                return checkPorts(ports);
-                            })
-                            // post declaration again and check that listeners are still available
-                            .then(() => util.makeRequest(host, uri, util.deepCopy(postOptions)))
-                            .then(() => {
-                                const ports = { opened: fetchListenerPorts(postOptions.body) };
-                                ports.closed = allListenerPorts.filter(port => ports.opened.indexOf(port) === -1);
-                                return checkPorts(ports);
-                            })
-                            .then(() => {
-                                // already a copy
-                                postOptions.body = getDeclToUse(testSetup);
-                                // disable all listeners
-                                findListeners(postOptions.body, (listener) => {
-                                    listener.enable = false;
+                        });
+
+
+                        it('should get response from systempoller endpoint', () => {
+                            const uri = `${constants.BASE_ILX_URI}${namespacePath}/systempoller/${constants.DECL.SYSTEM_NAME}`;
+                            // wait 500ms in case if config was not applied yet
+                            return util.sleep(500)
+                                .then(() => util.makeRequest(host, uri, options))
+                                .then((data) => {
+                                    data = data || [];
+                                    util.logger.info(`SystemPoller response (${uri}):`, { host, data });
+                                    assert.strictEqual(data.length, 1);
+                                    // read schema and validate data
+                                    data = data[0];
+                                    const schema = JSON.parse(fs.readFileSync(constants.DECL.SYSTEM_POLLER_SCHEMA));
+                                    const valid = util.validateAgainstSchema(data, schema);
+                                    if (valid !== true) {
+                                        assert.fail(`output is not valid: ${JSON.stringify(valid.errors)}`);
+                                    }
                                 });
-                                return util.makeRequest(host, uri, util.deepCopy(postOptions));
-                            })
-                            .then(() => checkPorts({
-                                closed: util.deepCopy(allListenerPorts)
-                            }));
-                    });
-
-                    ifNoNamespaceIt('should apply configuration containing system poller filtering', testSetup, () => {
-                        let uri = `${constants.BASE_ILX_URI}/declare`;
-                        const postOptions = Object.assign(util.deepCopy(options), {
-                            method: 'POST',
-                            body: fs.readFileSync(constants.DECL.FILTER).toString()
                         });
 
-                        // wait 2s to buffer consecutive POSTs
-                        return util.sleep(2000)
-                            .then(() => util.makeRequest(host, uri, postOptions))
-                            .then((data) => {
-                                util.logger.info('Declaration response:', { host, data });
-                                assert.strictEqual(data.message, 'success');
-                                // wait 5s in case if config was not applied yet
-                                return util.sleep(5000);
-                            })
-                            .then(() => {
-                                uri = `${constants.BASE_ILX_URI}${namespacePath}/systempoller/${constants.DECL.SYSTEM_NAME}`;
-                                return util.makeRequest(host, uri, util.deepCopy(options));
-                            })
-                            .then((data) => {
-                                data = data || [];
-                                util.logger.info(`Filtered SystemPoller response (${uri}):`, { host, data });
-
-                                assert.strictEqual(data.length, 1);
-                                // verify that certain data was filtered out, while other data was preserved
-                                data = data[0];
-                                assert.strictEqual(Object.keys(data.system).indexOf('provisioning'), -1);
-                                assert.strictEqual(Object.keys(data.system.diskStorage).indexOf('/usr'), -1);
-                                assert.notStrictEqual(Object.keys(data.system.diskStorage).indexOf('/'), -1);
-                                assert.notStrictEqual(Object.keys(data.system).indexOf('version'), -1);
-                                assert.notStrictEqual(Object.keys(data.system).indexOf('hostname'), -1);
+                        it('should ensure event listener is up', () => {
+                            const connectToEventListener = port => new Promise((resolve, reject) => {
+                                const client = net.createConnection({ host, port }, () => {
+                                    client.end();
+                                });
+                                client.on('end', () => {
+                                    resolve();
+                                });
+                                client.on('error', (err) => {
+                                    reject(new Error(`Can not connect to TCP port ${port}: ${err}`));
+                                });
                             });
+
+                            // ports = { opened: [], closed: [] }
+                            const checkPorts = ports => Promise.all(
+                                (ports.opened || []).map(
+                                    openedPort => assert.isFulfilled(connectToEventListener(openedPort))
+                                ).concat(
+                                    (ports.closed || []).map(
+                                        closedPort => connectToEventListener(closedPort)
+                                            .then(
+                                                () => Promise.reject(new Error(`Port ${closedPort} expected to be closed`)),
+                                                () => {} // do nothing on catch
+                                            )
+                                    )
+                                )
+                            );
+
+                            const findListeners = (obj, cb) => {
+                                if (typeof obj === 'object') {
+                                    if (obj.class === 'Telemetry_Listener') {
+                                        cb(obj);
+                                    } else {
+                                        Object.keys(obj).forEach(key => findListeners(obj[key], cb));
+                                    }
+                                }
+                            };
+
+                            const fetchListenerPorts = (decl) => {
+                                const ports = [];
+                                findListeners(decl, listener => ports.push(listener.port || 6514));
+                                return ports;
+                            };
+
+                            const allListenerPorts = [
+                                constants.EVENT_LISTENER_DEFAULT_PORT,
+                                constants.EVENT_LISTENER_SECONDARY_PORT,
+                                constants.EVENT_LISTENER_NAMESPACE_PORT,
+                                constants.EVENT_LISTENER_NAMESPACE_SECONDARY_PORT
+                            ];
+                            const newPorts = [
+                                constants.EVENT_LISTENER_SECONDARY_PORT,
+                                constants.EVENT_LISTENER_NAMESPACE_SECONDARY_PORT
+                            ];
+
+                            const uri = testSetup.useNamespaceDeclare ? `${constants.BASE_ILX_URI}${namespacePath}/declare` : `${constants.BASE_ILX_URI}/declare`;
+                            const postOptions = Object.assign(util.deepCopy(options), {
+                                method: 'POST',
+                                body: testSetup.useNamespaceDeclare ? { class: 'Telemetry_Namespace' } : { class: 'Telemetry' }
+                            });
+                            return util.makeRequest(host, uri, util.deepCopy(postOptions))
+                                .then(() => checkPorts({
+                                    closed: util.deepCopy(allListenerPorts)
+                                }))
+                                .then(() => {
+                                    postOptions.body = getDeclToUse(testSetup);
+                                    return util.makeRequest(host, uri, util.deepCopy(postOptions));
+                                })
+                                .then(() => {
+                                    const ports = { opened: fetchListenerPorts(postOptions.body) };
+                                    ports.closed = allListenerPorts.filter(port => ports.opened.indexOf(port) === -1);
+                                    return checkPorts(ports);
+                                })
+                                // post declaration again and check that listeners are still available
+                                .then(() => util.makeRequest(host, uri, util.deepCopy(postOptions)))
+                                .then(() => {
+                                    const ports = { opened: fetchListenerPorts(postOptions.body) };
+                                    ports.closed = allListenerPorts.filter(port => ports.opened.indexOf(port) === -1);
+                                    return checkPorts(ports);
+                                })
+                                .then(() => {
+                                    let idx = 0;
+                                    // already a copy
+                                    postOptions.body = getDeclToUse(testSetup);
+                                    // disable all listeners
+                                    findListeners(postOptions.body, (listener) => {
+                                        if (idx >= newPorts.length) {
+                                            throw new Error(`Expected ${newPorts.length} listeners only`);
+                                        }
+                                        listener.port = newPorts[idx];
+                                        idx += 1;
+                                    });
+                                    return util.makeRequest(host, uri, util.deepCopy(postOptions));
+                                })
+                                .then(() => {
+                                    const ports = { opened: fetchListenerPorts(postOptions.body) };
+                                    ports.closed = allListenerPorts.filter(port => ports.opened.indexOf(port) === -1);
+                                    return checkPorts(ports);
+                                })
+                                // post declaration again and check that listeners are still available
+                                .then(() => util.makeRequest(host, uri, util.deepCopy(postOptions)))
+                                .then(() => {
+                                    const ports = { opened: fetchListenerPorts(postOptions.body) };
+                                    ports.closed = allListenerPorts.filter(port => ports.opened.indexOf(port) === -1);
+                                    return checkPorts(ports);
+                                })
+                                .then(() => {
+                                    // already a copy
+                                    postOptions.body = getDeclToUse(testSetup);
+                                    // disable all listeners
+                                    findListeners(postOptions.body, (listener) => {
+                                        listener.enable = false;
+                                    });
+                                    return util.makeRequest(host, uri, util.deepCopy(postOptions));
+                                })
+                                .then(() => checkPorts({
+                                    closed: util.deepCopy(allListenerPorts)
+                                }));
+                        });
                     });
 
-                    ifNoNamespaceIt('should apply configuration containing chained system poller actions', testSetup, () => {
-                        let uri = `${constants.BASE_ILX_URI}/declare`;
-                        const postOptions = Object.assign(util.deepCopy(options), {
-                            method: 'POST',
-                            body: fs.readFileSync(constants.DECL.ACTION_CHAINING).toString()
+                    describe('advanced options', () => {
+                        ifNoNamespaceIt('should apply configuration containing system poller filtering', testSetup, () => {
+                            let uri = `${constants.BASE_ILX_URI}/declare`;
+                            const postOptions = Object.assign(util.deepCopy(options), {
+                                method: 'POST',
+                                body: fs.readFileSync(constants.DECL.FILTER).toString()
+                            });
+
+                            // wait 2s to buffer consecutive POSTs
+                            return util.sleep(2000)
+                                .then(() => util.makeRequest(host, uri, postOptions))
+                                .then((data) => {
+                                    util.logger.info('Declaration response:', { host, data });
+                                    assert.strictEqual(data.message, 'success');
+                                    // wait 5s in case if config was not applied yet
+                                    return util.sleep(5000);
+                                })
+                                .then(() => {
+                                    uri = `${constants.BASE_ILX_URI}${namespacePath}/systempoller/${constants.DECL.SYSTEM_NAME}`;
+                                    return util.makeRequest(host, uri, util.deepCopy(options));
+                                })
+                                .then((data) => {
+                                    data = data || [];
+                                    util.logger.info(`Filtered SystemPoller response (${uri}):`, { host, data });
+
+                                    assert.strictEqual(data.length, 1);
+                                    // verify that certain data was filtered out, while other data was preserved
+                                    data = data[0];
+                                    assert.strictEqual(Object.keys(data.system).indexOf('provisioning'), -1);
+                                    assert.strictEqual(Object.keys(data.system.diskStorage).indexOf('/usr'), -1);
+                                    assert.notStrictEqual(Object.keys(data.system.diskStorage).indexOf('/'), -1);
+                                    assert.notStrictEqual(Object.keys(data.system).indexOf('version'), -1);
+                                    assert.notStrictEqual(Object.keys(data.system).indexOf('hostname'), -1);
+                                });
                         });
 
-                        // wait 2s to buffer consecutive POSTs
-                        return util.sleep(2000)
-                            .then(() => util.makeRequest(host, uri, postOptions))
-                            .then((data) => {
-                                util.logger.info('Declaration response:', { host, data });
-                                assert.strictEqual(data.message, 'success');
-                                // wait 5s in case if config was not applied yet
-                                return util.sleep(5000);
-                            })
-                            .then(() => {
-                                uri = `${constants.BASE_ILX_URI}${namespacePath}/systempoller/${constants.DECL.SYSTEM_NAME}`;
-                                return util.makeRequest(host, uri, util.deepCopy(options));
-                            })
-                            .then((data) => {
-                                data = data || {};
-                                util.logger.info(`Filtered SystemPoller response (${uri}):`, { host, data });
-
-                                assert.strictEqual(data.length, 1);
-                                data = data[0];
-                                // verify /var is included with, with 1_tagB removed
-                                assert.notStrictEqual(Object.keys(data.system.diskStorage).indexOf('/var'), -1);
-                                assert.deepEqual(data.system.diskStorage['/var']['1_tagB'], { '1_valueB_1': 'value1' });
-                                // verify /var/log is included with, with 1_tagB included
-                                assert.strictEqual(Object.keys(data.system.diskStorage['/var/log']).indexOf('1_tagB'), -1);
-                                assert.deepEqual(data.system.diskStorage['/var/log']['1_tagA'], 'myTag');
+                        ifNoNamespaceIt('should apply configuration containing chained system poller actions', testSetup, () => {
+                            let uri = `${constants.BASE_ILX_URI}/declare`;
+                            const postOptions = Object.assign(util.deepCopy(options), {
+                                method: 'POST',
+                                body: fs.readFileSync(constants.DECL.ACTION_CHAINING).toString()
                             });
-                    });
 
-                    ifNoNamespaceIt('should apply configuration containing filters with ifAnyMatch', testSetup, () => {
-                        let uri = `${constants.BASE_ILX_URI}/declare`;
-                        const postOptions = Object.assign(util.deepCopy(options), {
-                            method: 'POST',
-                            body: fs.readFileSync(constants.DECL.FILTERING_WITH_MATCHING).toString()
+                            // wait 2s to buffer consecutive POSTs
+                            return util.sleep(2000)
+                                .then(() => util.makeRequest(host, uri, postOptions))
+                                .then((data) => {
+                                    util.logger.info('Declaration response:', { host, data });
+                                    assert.strictEqual(data.message, 'success');
+                                    // wait 5s in case if config was not applied yet
+                                    return util.sleep(5000);
+                                })
+                                .then(() => {
+                                    uri = `${constants.BASE_ILX_URI}${namespacePath}/systempoller/${constants.DECL.SYSTEM_NAME}`;
+                                    return util.makeRequest(host, uri, util.deepCopy(options));
+                                })
+                                .then((data) => {
+                                    data = data || {};
+                                    util.logger.info(`Filtered SystemPoller response (${uri}):`, { host, data });
+
+                                    assert.strictEqual(data.length, 1);
+                                    data = data[0];
+                                    // verify /var is included with, with 1_tagB removed
+                                    assert.notStrictEqual(Object.keys(data.system.diskStorage).indexOf('/var'), -1);
+                                    assert.deepEqual(data.system.diskStorage['/var']['1_tagB'], { '1_valueB_1': 'value1' });
+                                    // verify /var/log is included with, with 1_tagB included
+                                    assert.strictEqual(Object.keys(data.system.diskStorage['/var/log']).indexOf('1_tagB'), -1);
+                                    assert.deepEqual(data.system.diskStorage['/var/log']['1_tagA'], 'myTag');
+                                });
                         });
 
-                        // wait 2s to buffer consecutive POSTs
-                        return util.sleep(2000)
-                            .then(() => util.makeRequest(host, uri, postOptions))
-                            .then((data) => {
-                                util.logger.info('Declaration response:', { host, data });
-                                assert.strictEqual(data.message, 'success');
-                                // wait 5s in case if config was not applied yet
-                                return util.sleep(5000);
-                            })
-                            .then(() => {
-                                uri = `${constants.BASE_ILX_URI}${namespacePath}/systempoller/${constants.DECL.SYSTEM_NAME}`;
-                                return util.makeRequest(host, uri, util.deepCopy(options));
-                            })
-                            .then((data) => {
-                                data = data || {};
-                                util.logger.info(`Filtered and Matched SystemPoller response (${uri}):`, { host, data });
-
-                                assert.strictEqual(data.length, 1);
-                                data = data[0];
-                                // verify that 'system' key and child objects are included
-                                assert.deepEqual(Object.keys(data), ['system']);
-                                assert.ok(Object.keys(data.system).length > 1);
-                                // verify that 'system.diskStorage' is NOT excluded
-                                assert.notStrictEqual(Object.keys(data.system).indexOf('diskStorage'), -1);
+                        ifNoNamespaceIt('should apply configuration containing filters with ifAnyMatch', testSetup, () => {
+                            let uri = `${constants.BASE_ILX_URI}/declare`;
+                            const postOptions = Object.assign(util.deepCopy(options), {
+                                method: 'POST',
+                                body: fs.readFileSync(constants.DECL.FILTERING_WITH_MATCHING).toString()
                             });
-                    });
 
-                    ifNoNamespaceIt('should apply configuration containing multiple system pollers and endpointList', testSetup, () => {
-                        let uri = `${constants.BASE_ILX_URI}/declare`;
-                        const postOptions = Object.assign(util.deepCopy(options), {
-                            method: 'POST',
-                            body: fs.readFileSync(constants.DECL.ENDPOINTLIST).toString()
+                            // wait 2s to buffer consecutive POSTs
+                            return util.sleep(2000)
+                                .then(() => util.makeRequest(host, uri, postOptions))
+                                .then((data) => {
+                                    util.logger.info('Declaration response:', { host, data });
+                                    assert.strictEqual(data.message, 'success');
+                                    // wait 5s in case if config was not applied yet
+                                    return util.sleep(5000);
+                                })
+                                .then(() => {
+                                    uri = `${constants.BASE_ILX_URI}${namespacePath}/systempoller/${constants.DECL.SYSTEM_NAME}`;
+                                    return util.makeRequest(host, uri, util.deepCopy(options));
+                                })
+                                .then((data) => {
+                                    data = data || {};
+                                    util.logger.info(`Filtered and Matched SystemPoller response (${uri}):`, { host, data });
+
+                                    assert.strictEqual(data.length, 1);
+                                    data = data[0];
+                                    // verify that 'system' key and child objects are included
+                                    assert.deepEqual(Object.keys(data), ['system']);
+                                    assert.ok(Object.keys(data.system).length > 1);
+                                    // verify that 'system.diskStorage' is NOT excluded
+                                    assert.notStrictEqual(Object.keys(data.system).indexOf('diskStorage'), -1);
+                                });
                         });
 
-                        // wait 2s to buffer consecutive POSTs
-                        return util.sleep(2000)
-                            .then(() => util.makeRequest(host, uri, postOptions))
-                            .then((data) => {
-                                util.logger.info('Declaration response:', { host, data });
-                                assert.strictEqual(data.message, 'success');
-                                // wait 2s in case if config was not applied yet
-                                return util.sleep(2000);
-                            })
-                            .then(() => {
-                                uri = `${constants.BASE_ILX_URI}${namespacePath}/systempoller/${constants.DECL.SYSTEM_NAME}`;
-                                return util.makeRequest(host, uri, util.deepCopy(options));
-                            })
-                            .then((data) => {
-                                util.logger.info(`System Poller with endpointList response (${uri}):`, { host, data });
-                                assert.ok(Array.isArray(data));
-
-                                const pollerOneData = data[0];
-                                const pollerTwoData = data[1];
-                                assert.notStrictEqual(pollerOneData.custom_ipOther, undefined);
-                                assert.notStrictEqual(pollerOneData.custom_dns, undefined);
-                                assert.ok(pollerTwoData.custom_provisioning.items.length > 0);
+                        ifNoNamespaceIt('should apply configuration containing multiple system pollers and endpointList', testSetup, () => {
+                            let uri = `${constants.BASE_ILX_URI}/declare`;
+                            const postOptions = Object.assign(util.deepCopy(options), {
+                                method: 'POST',
+                                body: fs.readFileSync(constants.DECL.ENDPOINTLIST).toString()
                             });
+
+                            // wait 2s to buffer consecutive POSTs
+                            return util.sleep(2000)
+                                .then(() => util.makeRequest(host, uri, postOptions))
+                                .then((data) => {
+                                    util.logger.info('Declaration response:', { host, data });
+                                    assert.strictEqual(data.message, 'success');
+                                    // wait 2s in case if config was not applied yet
+                                    return util.sleep(2000);
+                                })
+                                .then(() => {
+                                    uri = `${constants.BASE_ILX_URI}${namespacePath}/systempoller/${constants.DECL.SYSTEM_NAME}`;
+                                    return util.makeRequest(host, uri, util.deepCopy(options));
+                                })
+                                .then((data) => {
+                                    util.logger.info(`System Poller with endpointList response (${uri}):`, { host, data });
+                                    assert.ok(Array.isArray(data));
+
+                                    const pollerOneData = data[0];
+                                    const pollerTwoData = data[1];
+                                    assert.notStrictEqual(pollerOneData.custom_ipOther, undefined);
+                                    assert.notStrictEqual(pollerOneData.custom_dns, undefined);
+                                    assert.ok(pollerTwoData.custom_provisioning.items.length > 0);
+                                });
+                        });
                     });
                 });
             });

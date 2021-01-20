@@ -467,10 +467,16 @@ describe('Config', () => {
         testSet.forEach(testConf => testUtil.getCallableIt(testConf)(testConf.name, () => {
             savedConfig = testConf.existingConfig;
             return config.processNamespaceDeclaration(testConf.input.declaration, testConf.input.namespace)
-                .then(() => {
-                    assert.deepStrictEqual(savedConfig.normalized, testConf.expectedOutput);
+                .then((result) => {
+                    assert.deepStrictEqual(savedConfig.normalized, testConf.expectedNormalized);
+                    assert.deepStrictEqual(result, testConf.expectedResult);
                 });
         }));
+
+        it('should reject when invalid namespace declaration is provided', () => assert.isRejected(
+            config.processNamespaceDeclaration({ class: 'Telemetry' }),
+            /declaration should be of class 'Telemetry Namespace'/
+        ));
 
         it('should emit expected normalized config (unchanged namespaces have skipUpdate = true)', () => {
             const baseComp = {

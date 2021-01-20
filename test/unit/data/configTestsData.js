@@ -27,7 +27,28 @@ module.exports = {
                     }
                 }
             },
-            expectedOutput: {
+            expectedResult: {
+                class: 'Telemetry_Namespace',
+                Poller: {
+                    class: 'Telemetry_System_Poller',
+                    enable: true,
+                    interval: 300,
+                    actions: [
+                        {
+                            setTag: {
+                                tenant: '`T`',
+                                application: '`A`'
+                            },
+                            enable: true
+                        }
+                    ],
+                    allowSelfSignedCert: false,
+                    host: 'localhost',
+                    port: 8100,
+                    protocol: 'http'
+                }
+            },
+            expectedNormalized: {
                 mappings: {
                     uuid1: []
                 },
@@ -119,7 +140,26 @@ module.exports = {
                     }
                 }
             },
-            expectedOutput: {
+            expectedResult: {
+                class: 'Telemetry_Namespace',
+                My_Listener_1: {
+                    class: 'Telemetry_Listener',
+                    enable: true,
+                    trace: false,
+                    port: 6514,
+                    match: '',
+                    actions: [
+                        {
+                            setTag: {
+                                tenant: '`T`',
+                                application: '`A`'
+                            },
+                            enable: true
+                        }
+                    ]
+                }
+            },
+            expectedNormalized: {
                 mappings: { uuid1: [] },
                 components: [
                     {
@@ -198,7 +238,18 @@ module.exports = {
                     }
                 }
             },
-            expectedOutput: {
+            expectedResult: {
+                class: 'Telemetry_Namespace',
+                My_System_1: {
+                    class: 'Telemetry_System',
+                    enable: true,
+                    allowSelfSignedCert: false,
+                    host: 'localhost',
+                    port: 8100,
+                    protocol: 'http'
+                }
+            },
+            expectedNormalized: {
                 mappings: {},
                 components: [
                     {
@@ -269,7 +320,19 @@ module.exports = {
                     }
                 }
             },
-            expectedOutput: {
+            expectedResult: {
+                class: 'Telemetry_Namespace',
+                My_System_1: {
+                    class: 'Telemetry_System',
+                    host: 'some.other.host',
+                    trace: true,
+                    enable: true,
+                    allowSelfSignedCert: false,
+                    port: 8100,
+                    protocol: 'http'
+                }
+            },
+            expectedNormalized: {
                 mappings: {},
                 components: [
                     {
@@ -327,7 +390,18 @@ module.exports = {
                     }
                 }
             },
-            expectedOutput: {
+            expectedResult: {
+                class: 'Telemetry_Namespace',
+                My_System_1: {
+                    class: 'Telemetry_System',
+                    enable: true,
+                    allowSelfSignedCert: false,
+                    host: 'localhost',
+                    port: 8100,
+                    protocol: 'http'
+                }
+            },
+            expectedNormalized: {
                 mappings: {},
                 components: [
                     {
@@ -341,6 +415,79 @@ module.exports = {
                         host: 'localhost',
                         port: 8100,
                         protocol: 'http'
+                    }
+                ]
+            }
+        },
+        {
+            name: 'should remove existing namespace config (empty declaration)',
+            existingConfig: {
+                raw: {
+                    class: 'Telemetry',
+                    My_System_1: {
+                        class: 'Telemetry_System',
+                        trace: false
+                    },
+                    SameNamespace: {
+                        class: 'Telemetry_Namespace',
+                        My_System_1: {
+                            class: 'Telemetry_System'
+                        }
+                    }
+                },
+                normalized: {
+                    mappings: {},
+                    components: [
+                        {
+                            name: 'My_System_1',
+                            id: 'uuid-abc',
+                            namespace: 'f5telemetry_default',
+                            class: 'Telemetry_System',
+                            enable: true,
+                            systemPollers: [],
+                            allowSelfSignedCert: false,
+                            host: 'localhost',
+                            port: 8100,
+                            protocol: 'http',
+                            trace: false
+                        },
+                        {
+                            name: 'My_System_1',
+                            id: 'uuid-same',
+                            namespace: 'SameNamespace',
+                            class: 'Telemetry_System',
+                            enable: true,
+                            systemPollers: [],
+                            allowSelfSignedCert: false,
+                            host: 'localhost',
+                            port: 8100,
+                            protocol: 'http'
+                        }
+                    ]
+                }
+            },
+            input: {
+                namespace: 'SameNamespace',
+                declaration: {
+                    class: 'Telemetry_Namespace'
+                }
+            },
+            expectedResult: { class: 'Telemetry_Namespace' },
+            expectedNormalized: {
+                mappings: {},
+                components: [
+                    {
+                        name: 'My_System_1',
+                        id: 'uuid-abc',
+                        namespace: 'f5telemetry_default',
+                        class: 'Telemetry_System',
+                        enable: true,
+                        systemPollers: [],
+                        allowSelfSignedCert: false,
+                        host: 'localhost',
+                        port: 8100,
+                        protocol: 'http',
+                        trace: false
                     }
                 ]
             }

@@ -27,8 +27,14 @@ class ConfigLookupError extends BaseError {}
  */
 class ObjectNotFoundInConfigError extends ConfigLookupError {}
 
+/**
+ * Validation error
+ */
+class ValidationError extends BaseError {}
+
 module.exports = {
     BaseError,
     ConfigLookupError,
-    ObjectNotFoundInConfigError
+    ObjectNotFoundInConfigError,
+    ValidationError
 };

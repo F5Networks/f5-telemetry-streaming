@@ -11,13 +11,10 @@
 const EventEmitter = require('events');
 const nodeUtil = require('util');
 const TinyRequestRouter = require('tiny-request-router').Router;
-
-const BadURLHandler = require('./httpStatus/badUrlHandler');
+const ErrorHandler = require('./errorHandler');
+const httpErrors = require('./httpErrors');
 const configWorker = require('../config');
-const InternalServerErrorHandler = require('./httpStatus/internalServerErrorHandler');
 const logger = require('../logger');
-const MethodNotAllowedHandler = require('./httpStatus/methodNotAllowedHandler');
-const UnsupportedMediaTypeHandler = require('./httpStatus/unsupportedMediaTypeHandler');
 const configUtil = require('../utils/config');
 
 /**
@@ -77,11 +74,11 @@ RequestRouter.prototype.processRestOperation = function (restOperation, uriPrefi
     } catch (err) {
         // in case if synchronous part of the code failed
         logger.exception('restOperation processing error', err);
-        responsePromise = (new InternalServerErrorHandler(restOperation)).process();
+        responsePromise = (new ErrorHandler(new httpErrors.InternalServerError())).process();
     }
     return responsePromise.catch((err) => {
         logger.exception('restOperation processing error', err);
-        return (new InternalServerErrorHandler(restOperation)).process();
+        return (new ErrorHandler(new httpErrors.InternalServerError())).process();
     })
         .then((handler) => {
             logger.info(`${handler.getCode()} ${restOperation.getMethod().toUpperCase()} ${restOperation.getUri().pathname}`);
@@ -144,7 +141,7 @@ RequestRouter.prototype.findRequestHandler = function (restOperation, uriPrefix)
     // evaluate data as JSON and returns code 500 on failure.
     // Don't know how to re-define this behavior.
     if (restOperation.getBody() && restOperation.getContentType().toLowerCase() !== 'application/json') {
-        return new UnsupportedMediaTypeHandler();
+        return new ErrorHandler(new httpErrors.UnsupportedMediaTypeError());
     }
 
     const requestURI = restOperation.getUri();
@@ -161,13 +158,13 @@ RequestRouter.prototype.findRequestHandler = function (restOperation, uriPrefix)
     }
     const match = this.router.match(requestMethod, normalizedPathname);
     if (!match) {
-        return new BadURLHandler(restOperation);
+        return new ErrorHandler(new httpErrors.BadURLError(requestPathname));
     }
     const RequestHandler = this.pathToMethod[match.path][requestMethod];
     if (!RequestHandler) {
         const allowed = Object.keys(this.pathToMethod[match.path]);
         allowed.sort();
-        return new MethodNotAllowedHandler(restOperation, allowed);
+        return new ErrorHandler(new httpErrors.MethodNotAllowedError(allowed));
     }
 
     const handler = new RequestHandler(restOperation, match.params);
