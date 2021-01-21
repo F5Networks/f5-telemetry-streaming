@@ -2,7 +2,7 @@
 
 Example Declarations
 ====================
-This section contains example Telemetry Streaming declarations.  Use the index on the left to go directly to a specific declaration.
+This section contains example Telemetry Streaming declarations.  Use the index on the right to go directly to a specific declaration.
 
 
 Base Declaration
