@@ -7,6 +7,7 @@ Changes to this project are documented in this file. More detail and links can b
 ### Fixed
 - AUTOTOOL-1710: Fix Event Listener startup errors that might cause restnoded to crash
 ### Changed
+- AUTOTOOL-2111: Update npm packages (applicationinsights from 1.8.7 to 1.8.9, aws-sdk from 2.775.0 to 2.830.0, google-auth-library from 6.1.1 to 6.1.4, mustache from 4.0.0 to 4.1.0)
 ### Removed
 
 ## 1.17.0
