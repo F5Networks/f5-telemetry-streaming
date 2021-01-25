@@ -18,6 +18,7 @@ const persistentStorage = require('./persistentStorage').persistentStorage;
 const util = require('./utils/misc');
 const configUtil = require('./utils/config');
 const TeemReporter = require('./teemReporter').TeemReporter;
+const CONFIG_CLASSES = require('./constants').CONFIG_CLASSES;
 
 const PERSISTENT_STORAGE_KEY = 'config';
 const BASE_CONFIG = {
@@ -33,7 +34,7 @@ const BASE_CONFIG = {
  * @event change - config was validated and can be propagated
  */
 function ConfigWorker() {
-    this.validator = configUtil.getValidator();
+    this.validators = configUtil.getValidators();
     this.teemReporter = new TeemReporter();
 }
 
@@ -185,16 +186,24 @@ ConfigWorker.prototype.getConfig = function () {
  * Validate JSON data against config schema
  *
  * @public
- * @param {Object} data      - data to validate against config schema
- * @param {Object} [context] - context to pass to validator
+ * @param {Object} data       - data to validate against config schema
+ * @param {Object} options    - optional validation settings
+ * @param {String} options.schemaType - type of schema to validate against. Defaults to full (whole schema)
+ * @param {Object} options.context - additional context to pass through to validator
  *
  * @returns {Object} Promise which is resolved with the validated schema
  */
-ConfigWorker.prototype.validate = function (data, context) {
-    if (this.validator) {
-        return configUtil.validate(this.validator, data, context)
-            .catch(err => Promise.reject(new errors.ValidationError(err)));
+ConfigWorker.prototype.validate = function (data, options) {
+    options = util.assignDefaults(options, { schemaType: 'full' });
+
+    if (!util.isObjectEmpty(this.validators)) {
+        const validatorFunc = this.validators[options.schemaType];
+        if (typeof validatorFunc !== 'undefined') {
+            return configUtil.validate(validatorFunc, data, options.context)
+                .catch(err => Promise.reject(new errors.ValidationError(err)));
+        }
     }
+
     return Promise.reject(new Error('Validator is not available'));
 };
 
@@ -208,7 +217,7 @@ ConfigWorker.prototype.validate = function (data, context) {
  * @returns {Object} Promise which is resolved with the expanded config
  */
 ConfigWorker.prototype.expandConfig = function (rawConfig) {
-    return this.validate(rawConfig, { expand: true }); // set flag for additional decl processing
+    return this.validate(rawConfig, { context: { expand: true } }); // set flag for additional decl processing
 };
 
 /**
@@ -224,10 +233,8 @@ ConfigWorker.prototype.expandConfig = function (rawConfig) {
  */
 
 ConfigWorker.prototype.processNamespaceDeclaration = function (data, namespace) {
-    if (data.class !== 'Telemetry_Namespace') {
-        return Promise.reject(new errors.ValidationError('declaration should be of class \'Telemetry Namespace\''));
-    }
-    return this.getConfig()
+    return this.validate(data, { schemaType: CONFIG_CLASSES.NAMESPACE_CLASS_NAME })
+        .then(() => this.getConfig())
         .then((savedConfig) => {
             const mergedDecl = util.isObjectEmpty(savedConfig.raw) ? { class: 'Telemetry' } : util.deepCopy(savedConfig.raw);
             mergedDecl[namespace] = data;

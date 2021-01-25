@@ -24,6 +24,7 @@ const pullConsumerSchema = require('../schema/latest/pull_consumer_schema.json')
 const iHealthPollerSchema = require('../schema/latest/ihealth_poller_schema.json');
 const endpointsSchema = require('../schema/latest/endpoints_schema.json');
 const namespaceSchema = require('../schema/latest/namespace_schema.json');
+const CLASSES = require('./constants').CONFIG_CLASSES;
 
 /**
  * Process errors
@@ -53,15 +54,14 @@ function processErrors(errors) {
     return errorsResp;
 }
 
-
 module.exports = {
     /**
      * Pre-compile schema
      *
      * @public
-     * @returns {Object} AJV validator function
+     * @returns {Object} AJV validator functions
      */
-    getValidator() {
+    getValidators() {
         const schemas = {
             base: baseSchema,
             consumer: consumerSchema,
@@ -94,7 +94,13 @@ module.exports = {
         Object.keys(customKeywords.keywords).forEach((k) => {
             ajv.addKeyword(k, customKeywords.keywords[k]);
         });
-        return ajv.compile(schemas.base);
+        const validators = {
+            full: ajv.compile(schemas.base)
+        };
+        // retrieve previously compiled schema
+        validators[CLASSES.NAMESPACE_CLASS_NAME] = ajv.getSchema(`${namespaceSchema.$id}#/definitions/namespace`);
+
+        return validators;
     },
 
     /**
