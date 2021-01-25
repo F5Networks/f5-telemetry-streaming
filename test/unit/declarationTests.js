@@ -848,7 +848,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return config.validate(data, { expand: true })
+                return config.validate(data, { context: { expand: true } })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Consumer.path, '/foo');
                     });
@@ -888,7 +888,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return config.validate(data, { expand: true })
+                return config.validate(data, { context: { expand: true } })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Namespace.My_NS_Consumer.path, '/nsfoo');
                         assert.strictEqual(validated.My_Consumer.path, '/upperfoo');
@@ -906,7 +906,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return config.validate(data, { expand: true })
+                return config.validate(data, { context: { expand: true } })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Consumer.path, '192.0.2.1');
                     });
@@ -926,7 +926,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return config.validate(data, { expand: true })
+                return config.validate(data, { context: { expand: true } })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Namespace.My_NS_Consumer.path, '192.0.2.1');
                     });
@@ -949,7 +949,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return config.validate(data, { expand: true })
+                return config.validate(data, { context: { expand: true } })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Consumer.headers[0].value, '192.0.2.1');
                     });
@@ -975,7 +975,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return config.validate(data, { expand: true })
+                return config.validate(data, { context: { expand: true } })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Namespace.My_NS_Consumer.headers[0].value, '192.0.2.1');
                     });
@@ -1000,7 +1000,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return config.validate(data, { expand: true })
+                return config.validate(data, { context: { expand: true } })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Consumer.path, '/foo/bar/baz');
                     });
@@ -1024,7 +1024,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return config.validate(data, { expand: true })
+                return config.validate(data, { context: { expand: true } })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Consumer.path, 'foo');
                     });
@@ -1066,7 +1066,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return config.validate(data, { expand: true })
+                return config.validate(data, { context: { expand: true } })
                     .then((validated) => {
                         assert.deepStrictEqual(validated.My_Consumer.path, expectedValue);
                         assert.deepStrictEqual(validated.My_Consumer.headers[0].value, expectedValue);
@@ -1089,7 +1089,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data, { expand: true }), /syntax requires single pointer/);
+                return assert.isRejected(config.validate(data, { context: { expand: true } }), /syntax requires single pointer/);
             });
 
             it('should fail pointer (absolute) outside \'Shared\'', () => {
@@ -1102,7 +1102,7 @@ describe('Declarations', () => {
                         path: '`=/class`'
                     }
                 };
-                return assert.isRejected(config.validate(data, { expand: true }), /requires pointers root to be 'Shared'/);
+                return assert.isRejected(config.validate(data, { context: { expand: true } }), /requires pointers root to be 'Shared'/);
             });
 
             it('should fail expanding pointer (absolute) outside of Namespace', () => {
@@ -1125,7 +1125,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data, { expand: true }), /Cannot read property 'constants' of undefined/);
+                return assert.isRejected(config.validate(data, { context: { expand: true } }), /Cannot read property 'constants' of undefined/);
             });
 
             it('should fail with correct dataPath when pointer is outside of Namespace', () => {
@@ -1148,7 +1148,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data, { expand: true }), /dataPath":"\/My_Namespace\/My_NS_Consumer\/path/);
+                return assert.isRejected(config.validate(data, { context: { expand: true } }), /dataPath":"\/My_Namespace\/My_NS_Consumer\/path/);
             });
         });
 
@@ -3324,7 +3324,7 @@ describe('Declarations', () => {
                 };
                 Object.assign(targetDeclaration.Shared.constants, addtlContext.constants);
             }
-            return config.validate(targetDeclaration, context)
+            return config.validate(targetDeclaration, { context })
                 .then((validConfig) => {
                     assert.deepStrictEqual(validConfig.My_Consumer, expectedTarget);
                 });
@@ -4861,7 +4861,7 @@ describe('Declarations', () => {
                 };
                 Object.assign(targetDeclaration.Shared.constants, addtlContext.constants);
             }
-            return config.validate(targetDeclaration, context)
+            return config.validate(targetDeclaration, { context })
                 .then((validConfig) => {
                     assert.deepStrictEqual(validConfig.My_Pull_Consumer, expectedTarget);
                 });
@@ -4979,7 +4979,7 @@ describe('Declarations', () => {
                 };
                 Object.assign(targetDeclaration.Shared.constants, addtlContext.constants);
             }
-            return config.validate(targetDeclaration, context)
+            return config.validate(targetDeclaration, { context })
                 .then((validConfig) => {
                     assert.deepStrictEqual(validConfig.My_Namespace, expectedTarget);
                 });

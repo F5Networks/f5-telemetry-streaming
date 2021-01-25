@@ -235,7 +235,7 @@ describe('DeclareHandler', () => {
                 body: {
                     code: 422,
                     message: 'Unprocessable entity',
-                    error: 'declaration should be of class \'Telemetry Namespace\''
+                    error: /"schemaPath":"#\/properties\/class\/enum","params":{"allowedValues":\["Telemetry_Namespace"\]/
                 }
             };
             sinon.stub(configWorker, 'getConfig').resolves({ raw: { class: 'Telemetry' } });

@@ -14,7 +14,8 @@ const logger = require('../logger');
 const util = require('./misc');
 
 const CLASSES = constants.CONFIG_CLASSES;
-const VALIDATOR = declValidator.getValidator();
+// trigger early compile of all schemas
+const VALIDATORS = declValidator.getValidators();
 const POLLER_KEYS = {
     toCopyToMissingSystem: [
         'allowSelfSignedCert', 'enable', 'enableHostConnectivityCheck', 'host',
@@ -34,21 +35,26 @@ const IHEALTH_POLLER_KEYS = {
 /** @module configUtil */
 
 /**
- * Gets the config validator
+ * Gets the config validators
  *
  * @public
  *
- * @returns {Object} An instance of the config validator
+ * @returns {Object} Available config validation functions
+ *
+ *          {
+ *              full : validationFuncForFullSchema,
+ *              $className: validationFuncForClassName
+ *          }
  */
-function getValidator() {
-    return VALIDATOR;
+function getValidators() {
+    return VALIDATORS;
 }
 
 /**
  * Validate JSON data against config schema
  *
  * @public
- * @param {Object} validator - the validator instance to use
+ * @param {Object} validator - the validator function to use
  * @param {Object} data      - data to validate against config schema
  * @param {Object} [context] - context to pass to validator
  *
@@ -129,7 +135,7 @@ function getComponentDefaults() {
         }
     };
 
-    return validate(VALIDATOR, defaultDecl, { expand: true });
+    return validate(getValidators().full, defaultDecl, { expand: true });
 }
 
 /**
@@ -792,7 +798,7 @@ function mergeNamespaceConfig(namespaceConfig, options) {
 
 module.exports = {
     getPollerTraceValue,
-    getValidator,
+    getValidators,
     validate,
     componentizeConfig,
     normalizeComponents,
