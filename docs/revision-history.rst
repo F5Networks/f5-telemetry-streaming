@@ -11,6 +11,10 @@ Document Revision History
         - Description
         - Date
 
+      * - 1.18.0
+        - Updated the documentation for Telemetry Streaming v1.18.0. This release contains the following changes: |br| *   |br| |br| Issues Resolved: |br| * 
+        - 2-23-20
+
       * - 1.17.0
         - Updated the documentation for Telemetry Streaming v1.17.0. This release contains the following changes: |br| * Added support for configuring proxy settings on Generic HTTP consumers, `GitHub #92 <https://github.com/F5Networks/f5-telemetry-streaming/issues/92>`_ (see :ref:`proxy`) |br| * Added support for configuring proxy settings on Splunk consumers, `GitHub #85 <https://github.com/F5Networks/f5-telemetry-streaming/issues/85>`_ (see :ref:`splunkproxy`) |br| * Added a timestamp for APM Request Log output, `GitHub #91 <https://github.com/F5Networks/f5-telemetry-streaming/issues/91>`_  (see :ref:`APM Request Log<apm-rl>`) |br| * Added support for TLS client authentication to the Kafka consumer, `GitHub #90 <https://github.com/F5Networks/f5-telemetry-streaming/issues/90>`_ (see :ref:`kafka-ref`) |br| * Added an F5 Internal Only push consumer for F5 Cloud (see :ref:`F5 Cloud<f5cloud>`) |br| * Added the ability to use the Splunk multi-metric format, currently EXPERIMENTAL (see :ref:`multi-metric`) |br| * Added a new reference for the Telemetry Streaming Default Output (see :ref:`Default Output Appendix<poller-default-output-reference>`) |br| * Tracefile now stores up to 10 items |br| * Added a note to the System Information output page stating there is new pool and virtual server information collected (see :ref:`System Information<sysinfo>`) |br| * Deprecated TS support for the :ref:`Splunk Legacy Format<splunk-legacy>` |br| * Posting a declaration while a previous declaration is still processing now returns an HTTP 503 status code |br| |br| Issues Resolved: |br| * Fixed error where unavailable Custom Endpoint would return HTTP 500
         - 1-12-20
