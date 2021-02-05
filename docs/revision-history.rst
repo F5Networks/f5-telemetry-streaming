@@ -12,7 +12,7 @@ Document Revision History
         - Date
 
       * - 1.18.0
-        - Updated the documentation for Telemetry Streaming v1.18.0. This release contains the following changes: |br| *   |br| |br| Issues Resolved: |br| * 
+        - Updated the documentation for Telemetry Streaming v1.18.0. This release contains the following changes: |br| *   |br| |br| Issues Resolved: |br| * Fix Event Listener startup errors that might cause restnoded to crash
         - 2-23-21
 
       * - 1.17.0
