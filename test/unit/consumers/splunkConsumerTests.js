@@ -220,7 +220,7 @@ describe('Splunk', () => {
                 try {
                     let output = zlib.gunzipSync(opts.body).toString();
                     output = output.replace(/\}\{/g, '},{');
-                    assert.sameDeepMembers(JSON.parse(`[${output}]`), splunkData.legacySystemData[0].expectedData);
+                    assert.sameDeepMembers(JSON.parse(`[${output}]`), splunkData.legacySystemData.exampleOfSystemPollerOutput.expectedData);
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.
@@ -243,7 +243,45 @@ describe('Splunk', () => {
                 try {
                     let output = zlib.gunzipSync(opts.body).toString();
                     output = output.replace(/\}\{/g, '},{');
-                    assert.sameDeepMembers(JSON.parse(`[${output}]`), splunkData.multiMetricSystemData[0].expectedData);
+                    assert.sameDeepMembers(JSON.parse(`[${output}]`), splunkData.multiMetricSystemData.exampleOfSystemPollerOutput.expectedData);
+                    done();
+                } catch (err) {
+                    // done() with parameter is treated as an error.
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
+                    done(err);
+                }
+            });
+
+            splunkIndex(context);
+        });
+
+        it('should ignore references in multiMetric format', (done) => {
+            const context = testUtil.buildConsumerContext({
+                eventType: 'systemInfo',
+                config: defaultConsumerConfig
+            });
+            context.config.format = 'multiMetric';
+            context.event.data = {
+                system: {
+                    hostname: context.event.data.system.hostname
+                },
+                telemetryServiceInfo: context.event.data.telemetryServiceInfo,
+                telemetryEventCategory: context.event.data.telemetryEventCategory,
+                pools: {
+                    pool1: {
+                        metric: 10,
+                        someReference: {
+                            link: 'linkToReference',
+                            name: 'someReference'
+                        }
+                    }
+                }
+            };
+            sinon.stub(request, 'post').callsFake((opts) => {
+                try {
+                    let output = zlib.gunzipSync(opts.body).toString();
+                    output = output.replace(/\}\{/g, '},{');
+                    assert.sameDeepMembers(JSON.parse(`[${output}]`), splunkData.multiMetricSystemData.systemPollerOutputWithReferences.expectedData);
                     done();
                 } catch (err) {
                     // done() with parameter is treated as an error.

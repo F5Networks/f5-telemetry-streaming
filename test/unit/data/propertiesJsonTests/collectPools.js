@@ -152,6 +152,10 @@ module.exports = {
                                 membersReference: {
                                     link: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members?ver=14.1.0',
                                     isSubcollection: true
+                                },
+                                gatewayFailsafeDeviceReference: {
+                                    link: 'https://localhost/mgmt/tm/cm/device/~Common~localhost?ver=14.1.0',
+                                    name: 'gatewayFailsafeDeviceReference'
                                 }
                             }
                         ]

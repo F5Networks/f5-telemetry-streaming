@@ -143,7 +143,7 @@ const processObject = function (data, options, cb) {
     cb(event);
 
     const subCollectionsOptions = options.subCollections || {};
-    const ignoreSubCollectionCb = options.ignoreSubCollectionsCb;
+    const ignoreSubCollectionCb = options.ignoreSubCollectionCb;
 
     Object.keys(data).forEach((key) => {
         let value = data[key];
@@ -235,10 +235,13 @@ const DEFAULT_CAST_CB = (key, value) => {
     return parseFloat(value);
 };
 
+// default options - will be used as default values
 const DEFAULT_OPTS = {
     handler: processCollectionOfObjects,
     keyName: 'name', // key to use to store object's name
     castCb: DEFAULT_CAST_CB,
+    // ignore References to sub collection
+    ignoreSubCollectionCb: (key, value) => key.endsWith('Reference') && value.link,
     skipCb: key => DEFAULT_PROPS_TO_SKIP.indexOf(key) !== -1
 };
 
@@ -426,7 +429,7 @@ module.exports = function (data, cb) {
  * @property {CastCb} [castCb] - callback to parse value to metric
  * @property {DeleteCb} [deleteCb] - callback to check if key has to be deleted
  * @property {Boolean} [enabled] - enable processing (should be set to 'false' explicitly to disable)
- * @property {SkipCb} [ignoreSubCollectionsCb] - callback to call if collection of data should be ignored
+ * @property {SkipCb} [ignoreSubCollectionCb] - callback to call if collection of data should be ignored
  * @property {String} [keyName] - key to use to store object's name
  * @property {HandlerCb} [handler] - handler to call to process data
  * @property {String} [objectName] - object's name
