@@ -51,3 +51,96 @@ The lines that are not highlighted in the example are all part of the default na
 .. literalinclude:: ../examples/declarations/default_and_custom_namespace.json
     :language: json
     :emphasize-lines: 24-37
+
+|
+
+.. _namespaceEP:
+
+Namespace-specific endpoints
+----------------------------
+Telemetry Streaming 1.18 and later introduced new endpoints specific to Namespaces. See the following table.
+
++------------------------------------------------------------+--------------+---------------------------------------------------------------------------------------------------+
+| URI                                                        | Request Type | Description                                                                                       |
++============================================================+==============+===================================================================================================+
+| /mgmt/shared/telemetry/namespace/${namespace_name}/declare | GET          | - Returns the single Telemetry Namespace object (configuration data), referenced by name          |
++                                                            +--------------+---------------------------------------------------------------------------------------------------+
+|                                                            | POST         | - Configures a single Telemetry Namespace class - accepts just a single Telemetry_Namespace class |
++                                                            |              | - Assumes defaults/existing configuration for Controls and Telemetry classes                      |
+|                                                            |              |                                                                                                   |
++------------------------------------------------------------+--------------+---------------------------------------------------------------------------------------------------+
+
+|
+
+For example, we use the new endpoint, and POST the following declaration to ``https://{{host}}/mgmt/shared/telemetry/namespace/NamespaceForEvents/declare``
+
+.. code-block:: json
+
+   {
+        "class": "Telemetry_Namespace",
+        "My_Listener": {
+            "class": "Telemetry_Listener",
+            "port": 6514,
+            "trace": true
+        },
+        "Elastic": {
+            "class": "Telemetry_Consumer",
+            "type": "ElasticSearch",
+            "host": "192.168.10.10",
+            "protocol": "http",
+            "port": "9200",
+            "apiVersion": "6.5",
+            "index": "eventdata",
+            "enable": true,
+            "trace": true
+        }
+    }
+
+|
+
+And we receive the following response:
+
+.. code-block:: json
+
+   {
+        "message": "success",
+        "declaration": {
+            "class": "Telemetry_Namespace",
+            "My_Listener": {
+                "class": "Telemetry_Listener",
+                "port": 6514,
+                "trace": true,
+                "enable": true,
+                "match": "",
+                "actions": [
+                    {
+                        "setTag": {
+                            "tenant": "`T`",
+                            "application": "`A`"
+                        },
+                        "enable": true
+                    }
+                ]
+            },
+            "Elastic": {
+                "class": "Telemetry_Consumer",
+                "type": "ElasticSearch",
+                "host": "192.168.10.10",
+                "protocol": "http",
+                "port": 9200,
+                "apiVersion": "6.5",
+                "index": "eventdata",
+                "enable": true,
+                "trace": true,
+                "allowSelfSignedCert": false,
+                "dataType": "f5.telemetry"
+            }
+        }
+    }
+
+|
+
+You receive the same output as response above when you send a GET request to ``https://{{host}}/mgmt/shared/telemetry/namespace/NamespaceForEvents/declare``.
+
+
+
