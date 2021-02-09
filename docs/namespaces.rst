@@ -12,9 +12,9 @@ The following are important notes about namespaces.
 - Each namespace works separately from another and cannot share configuration or object references. 
 - While each namespace must have a unique name, the components in a namespace can share the same name as the components in another namespace. 
 - Namespaces are not tied in any way to RBAC. 
-- Currently, Telemetry Streaming only supports a full declaration sent to **/telemetry/declare**. If there are multiple namespaces, they must all be declared in the POST body. 
+- You must send a full declaration to **/telemetry/declare**. If there are multiple namespaces, you must declare them all in the POST body, otherwise, they are omitted. To configure a single namespace, see :ref:`namespaceEP`.
 - All namespaces inherit the top level **controls** object. 
-- For pull consumers: If a pull consumer is declared under a namespace, the URI to get the data should specify the namespace in path, for example **/mgmt/shared/telemetry/namespace/${namespaceName} pullconsumer/${pullConsumerName}**
+- For pull consumers: If you declare a pull consumer under a namespace, the URI to get the data should specify the namespace in path, for example **/mgmt/shared/telemetry/namespace/${namespaceName}/pullconsumer/${pullConsumerName}**
 
 
 The following examples show how you can use namespaces in your Telemetry Streaming declarations.
@@ -22,6 +22,8 @@ The following examples show how you can use namespaces in your Telemetry Streami
 Basic declaration with namespace only
 -------------------------------------
 In this example, all objects are in the namespace named **My_Namespace**.  Because there is only one namespace, except for the name, this is essentially the same as if there were no namespace specified.
+
+This example uses the **/telemetry/declare** endpoint.
 
 .. literalinclude:: ../examples/declarations/basic_namespace.json
     :language: json
@@ -32,7 +34,7 @@ Multiple namespaces in a declaration
 ------------------------------------
 In this example, we show how you can use multiple namespaces in a declaration.  This shows how namespaces can be used to group components by function.
 
-Note that the Consumers in each namespace are using the same name (highlighted in the example).
+Note that the Consumers in each namespace are using the same name (highlighted in the example).  This example also uses the **/telemetry/declare** endpoint.
 
 
 .. literalinclude:: ../examples/declarations/multiple_namespaces.json
@@ -58,7 +60,9 @@ The lines that are not highlighted in the example are all part of the default na
 
 Namespace-specific endpoints
 ----------------------------
-Telemetry Streaming 1.18 and later introduced new endpoints specific to Namespaces. See the following table.
+Telemetry Streaming 1.18 and later introduced new endpoints specific to individual namespaces. Using this endpoint allows you to configure a specific namespace without needing to know about other namespaces. 
+
+The following table describes the endpoint and request types you can use.
 
 +------------------------------------------------------------+--------------+---------------------------------------------------------------------------------------------------+
 | URI                                                        | Request Type | Description                                                                                       |
