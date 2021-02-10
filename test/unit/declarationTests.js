@@ -4080,6 +4080,57 @@ describe('Declarations', () => {
                 }
             ));
 
+            it('should pass minimal declaration when using tls options', () => validateMinimal(
+                {
+                    type: 'Generic_HTTP',
+                    host: 'host',
+                    privateKey: {
+                        cipherText: 'myKey'
+                    },
+                    clientCertificate: {
+                        cipherText: 'myCert'
+                    }
+                },
+                {
+                    type: 'Generic_HTTP',
+                    host: 'host',
+                    protocol: 'https',
+                    port: 443,
+                    path: '/',
+                    method: 'POST',
+                    clientCertificate: {
+                        cipherText: '$M$foo',
+                        class: 'Secret',
+                        protected: 'SecureVault'
+                    },
+                    privateKey: {
+                        cipherText: '$M$foo',
+                        class: 'Secret',
+                        protected: 'SecureVault'
+                    }
+                }
+            ));
+
+            it('should require privateKey when client certificate is provided', () => assert.isRejected(validateFull(
+                {
+                    type: 'Generic_HTTP',
+                    host: 'host',
+                    clientCertificate: {
+                        cipherText: 'myCert'
+                    }
+                }
+            ), /should have required property 'privateKey'/));
+
+            it('should require client certificate when privateKey is provided', () => assert.isRejected(validateFull(
+                {
+                    type: 'Generic_HTTP',
+                    host: 'host',
+                    privateKey: {
+                        cipherText: 'myKey'
+                    }
+                }
+            ), /should have required property 'clientCertificate'/));
+
             it('should allow full declaration', () => validateFull(
                 {
                     type: 'Generic_HTTP',
@@ -4114,6 +4165,15 @@ describe('Declarations', () => {
                         passphrase: {
                             cipherText: 'passphrase'
                         }
+                    },
+                    privateKey: {
+                        cipherText: 'myKey'
+                    },
+                    clientCertificate: {
+                        cipherText: 'myCert'
+                    },
+                    rootCertificate: {
+                        cipherText: 'myCA'
                     }
                 },
                 {
@@ -4152,6 +4212,21 @@ describe('Declarations', () => {
                             protected: 'SecureVault',
                             cipherText: '$M$foo'
                         }
+                    },
+                    clientCertificate: {
+                        cipherText: '$M$foo',
+                        class: 'Secret',
+                        protected: 'SecureVault'
+                    },
+                    privateKey: {
+                        cipherText: '$M$foo',
+                        class: 'Secret',
+                        protected: 'SecureVault'
+                    },
+                    rootCertificate: {
+                        cipherText: '$M$foo',
+                        class: 'Secret',
+                        protected: 'SecureVault'
                     }
                 }
             ));

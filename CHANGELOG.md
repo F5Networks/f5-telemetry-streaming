@@ -4,6 +4,7 @@ Changes to this project are documented in this file. More detail and links can b
 ## 1.18.0
 ### Added
 - AUTOTOOL-1987: Added new Namespace declare endpoint (/namespace/$namespace/declare) which supports POST and GET
+- AUTOTOOL-2148 [GitHub #104](https://github.com/F5Networks/f5-telemetry-streaming/issues/104): Add support for TLS Client Authentication to Generic HTTP Consumer
 ### Fixed
 - AUTOTOOL-1710: Fix Event Listener startup errors that might cause restnoded to crash
 - AUTOTOOL-2227: Splunk multiEvent format should ignore 'References'
