@@ -23,26 +23,35 @@ module.exports = function (context) {
     const host = context.config.host;
     const fallbackHosts = context.config.fallbackHosts || [];
     const headers = httpUtil.processHeaders(context.config.headers); // no defaults - provide all headers needed
+    const key = context.config.privateKey || undefined;
+    const cert = context.config.clientCertificate || undefined;
+    const ca = context.config.rootCertificate || undefined;
 
     let allowSelfSignedCert = context.config.allowSelfSignedCert;
     if (!util.isObjectEmpty(context.config.proxy) && typeof context.config.proxy.allowSelfSignedCert !== 'undefined') {
         allowSelfSignedCert = context.config.proxy.allowSelfSignedCert;
     }
 
+    // If authenticating with certificates, do not allow self signed certs
+    if (!util.isObjectEmpty(cert) || !util.isObjectEmpty(ca)) {
+        allowSelfSignedCert = false;
+    }
+
     const proxy = context.config.proxy;
 
     if (context.tracer) {
+        const redactString = '*****';
         let tracedHeaders = headers;
         // redact Basic Auth passphrase, if provided
         if (tracedHeaders.Authorization) {
-            tracedHeaders = JSON.parse(JSON.stringify(tracedHeaders));
-            tracedHeaders.Authorization = '*****';
+            tracedHeaders = util.deepCopy(tracedHeaders);
+            tracedHeaders.Authorization = redactString;
         }
 
         let tracedProxy;
         if (!util.isObjectEmpty(proxy)) {
             tracedProxy = util.deepCopy(proxy);
-            tracedProxy.passphrase = '*****';
+            tracedProxy.passphrase = redactString;
         }
 
         context.tracer.write(JSON.stringify({
@@ -55,7 +64,10 @@ module.exports = function (context) {
             port,
             protocol,
             proxy: tracedProxy,
-            uri
+            uri,
+            privateKey: util.isObjectEmpty(key) ? undefined : redactString,
+            clientCertificate: util.isObjectEmpty(cert) ? undefined : redactString,
+            rootCertificate: util.isObjectEmpty(ca) ? undefined : redactString
         }, null, 4));
     }
     return httpUtil.sendToConsumer({
@@ -69,7 +81,10 @@ module.exports = function (context) {
         port,
         protocol,
         proxy,
-        uri
+        uri,
+        key,
+        cert,
+        ca
     }).catch((err) => {
         context.logger.exception(`Unexpected error: ${err}`, err);
     });

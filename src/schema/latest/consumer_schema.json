@@ -274,7 +274,7 @@
             ]
         },
         "clientCertificate": {
-            "$comment": "Required for certain consumers: Kafka",
+            "$comment": "Required for certain consumers: Kafka, Generic HTTP",
             "title": "Client Certificate",
             "description": "Certificate(s) to use when connecting to a secured endpoint.",
             "type": "object",
@@ -286,7 +286,7 @@
             ]
         },
         "rootCertificate": {
-            "$comment": "Required for certain consumers: Kafka",
+            "$comment": "Required for certain consumers: Kafka, Generic HTTP",
             "title": "Root Certificate",
             "description": "Certificate Authority root certificate, used to validate certificate chains.",
             "type": "object",
@@ -319,7 +319,7 @@
             "f5expand": true
         },
         "privateKey": {
-            "$comment": "Required for certain consumers: Kafka",
+            "$comment": "Required for certain consumers: Kafka, Generic HTTP",
             "title": "Private Key",
             "description": "Private Key",
             "type": "object",
@@ -617,8 +617,21 @@
                                 "method": { "$ref": "#/definitions/method", "default": "POST" },
                                 "headers": { "$ref": "#/definitions/headers" },
                                 "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
-                                "proxy": { "$ref": "base_schema.json#/definitions/proxy" }
-                            }
+                                "proxy": { "$ref": "base_schema.json#/definitions/proxy" },
+                                "privateKey": { "$ref": "#/definitions/privateKey" },
+                                "clientCertificate": { "$ref": "#/definitions/clientCertificate" },
+                                "rootCertificate": { "$ref": "#/definitions/rootCertificate" }
+                            },
+                            "allOf": [
+                                {
+                                    "if": { "required": [ "clientCertificate" ] },
+                                    "then": { "required": [ "privateKey" ] }
+                                },
+                                {
+                                    "if": { "required": [ "privateKey" ] },
+                                    "then": { "required": [ "clientCertificate" ] }
+                                }
+                            ]
                         },
                         "else": {}
                     },
