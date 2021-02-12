@@ -12,7 +12,7 @@ Document Revision History
         - Date
 
       * - 1.18.0
-        - Updated the documentation for Telemetry Streaming v1.18.0. This release contains the following changes: |br| * Added new endpoints for individual namespaces (see :ref:`Namespace endpoints<namespaceEP>`)  |br| |br| Issues Resolved: |br| * Fix Event Listener startup errors that might cause restnoded to crash
+        - Updated the documentation for Telemetry Streaming v1.18.0. This release contains the following changes: |br| * Added new endpoints for individual namespaces (see :ref:`Namespace endpoints<namespaceEP>`)  |br| |br| Issues Resolved: |br| * Fix Event Listener startup errors that might cause restnoded to crash |br| * Splunk multiEvent format should ignore 'References'
         - 2-23-21
 
       * - 1.17.0
