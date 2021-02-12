@@ -13,7 +13,7 @@ const assert = require('assert');
 const AWS = require('aws-sdk');
 const constants = require('./../shared/constants');
 const testUtil = require('./../shared/util');
-const awsUtil = require('../../../src/lib/consumers/AWS_CloudWatch/awsUtil');
+const awsUtil = require('../../../src/lib/consumers/shared/awsUtil');
 
 const ENV_FILE = process.env[constants.ENV_VARS.CLOUD.FILE];
 const ENV_INFO = JSON.parse(fs.readFileSync(ENV_FILE));

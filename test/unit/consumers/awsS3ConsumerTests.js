@@ -94,6 +94,21 @@ describe('AWS_S3', () => {
             });
     });
 
+    it('should configure AWS access with custom agent', () => {
+        let optionsParam;
+        awsConfigUpdate.callsFake((options) => {
+            optionsParam = options;
+        });
+        const context = testUtil.buildConsumerContext({
+            config: defaultConsumerConfig
+        });
+
+        return awsS3Index(context)
+            .then(() => {
+                assert.ok(optionsParam.httpOptions.agent.options, 'AWS should have custom Agent');
+            });
+    });
+
     describe('process', () => {
         const expectedParams = {
             Body: '',

@@ -8,7 +8,7 @@
 
 'use strict';
 
-const awsUtil = require('./awsUtil');
+const awsUtil = require('./../shared/awsUtil');
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 
 /**

@@ -16,9 +16,10 @@ const sinon = require('sinon');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const aws = require('aws-sdk');
+const https = require('https');
 
 const testUtil = require('./../shared/util');
-const awsUtil = require('../../../src/lib/consumers/AWS_CloudWatch/awsUtil');
+const awsUtil = require('../../../src/lib/consumers/shared/awsUtil');
 const awsUtilTestsData = require('./data/awsUtilTestsData');
 
 
@@ -63,8 +64,47 @@ describe('AWS Util Tests', () => {
             });
             return awsUtil.initializeConfig(context)
                 .then(() => {
-                    assert.deepStrictEqual(actualParams, { region: 'us-west-1' });
+                    assert.strictEqual(actualParams.region, 'us-west-1');
                 });
+        });
+
+        it('should initialize config with custom agent', () => {
+            const context = testUtil.buildConsumerContext({
+                config: {
+                    region: 'us-west-1'
+                }
+            });
+            return awsUtil.initializeConfig(context)
+                .then(() => {
+                    const agent = actualParams.httpOptions.agent;
+                    assert.ok(agent instanceof https.Agent, 'agent should be instance of https.Agent');
+                    assert.ok(agent.options.ca.length, 'should have atleast 1 certificate');
+                    assert.strictEqual(agent.options.rejectUnauthorized, true);
+                });
+        });
+
+        it('should initialize config with custom https agent', () => {
+            const context = testUtil.buildConsumerContext({
+                config: {
+                    region: 'us-west-1'
+                }
+            });
+            const configOptions = {
+                httpAgent: 'myAgent'
+            };
+            return awsUtil.initializeConfig(context, configOptions)
+                .then(() => {
+                    assert.deepStrictEqual(actualParams,
+                        { region: 'us-west-1', httpOptions: { agent: 'myAgent' } });
+                });
+        });
+
+        it('should return a valid array when getting AWS root certs', () => {
+            const certs = awsUtil.getAWSRootCerts();
+            assert.ok(Array.isArray(certs), 'certs should be a valid array');
+            assert.ok(certs.every(
+                i => i.startsWith('-----BEGIN CERTIFICATE-----')
+            ), 'certs should have \'BEGIN CERTIFICATE\' header');
         });
     });
 
