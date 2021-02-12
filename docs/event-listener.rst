@@ -5,8 +5,8 @@ Event Listener class
 
 The Telemetry Streaming Event Listener collects event logs it receives on the specified port from configured BIG-IP sources, including LTM, ASM, AFM, APM, and AVR.
 
-.. NOTE:: Each **Telemetry_Event_Listener** opens 3 ports: TCP (dual stack - IPv4 and IPv6), UDPv4, and UDPv6 |br|
-If two or more Event Listeners use same port, all of them receive same events, but you can still use filters for each listener individually.
+.. NOTE:: Each **Telemetry_Event_Listener** opens 3 ports: TCP (dual stack - IPv4 and IPv6), UDPv4, and UDPv6 |br| If two or more Event Listeners use same port, all of them receive same events, but you can still use filters for each listener individually.
+
 
 To use the Event Listener, you must:
 
