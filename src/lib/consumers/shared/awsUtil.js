@@ -9,7 +9,9 @@
 'use strict';
 
 const AWS = require('aws-sdk');
+const https = require('https');
 const util = require('../../utils/misc');
+const rootCerts = require('./awsRootCerts');
 
 const METRICS_BATCH_SIZE = 20;
 /**
@@ -17,10 +19,12 @@ const METRICS_BATCH_SIZE = 20;
  *
  * @param {Object} context Consumer context containing config and data
  *      See {@link ../../README.md#context}
+ * @param {Object} [options] Consumer options
+ * @param {Object} [options.httpAgent]  Custom HTTP(s) agent to pass to AWS config
  *
  * @returns {Promise} resolved upon completion
  */
-function initializeConfig(context) {
+function initializeConfig(context, options) {
     const awsConfig = { region: context.config.region };
     if (context.config.username && context.config.passphrase) {
         awsConfig.credentials = new AWS.Credentials({
@@ -29,10 +33,37 @@ function initializeConfig(context) {
         });
     }
 
+    let agent;
+    // Accept consumer specific HTTPs agents
+    if (options && options.httpAgent) {
+        agent = options.httpAgent;
+    } else {
+        // Use defaults in the aws-sdk, but with a subset of CA Certs
+        agent = new https.Agent({
+            rejectUnauthorized: true,
+            keepAlive: false,
+            maxSockets: 50,
+            ca: getAWSRootCerts()
+        });
+    }
+
+    awsConfig.httpOptions = {
+        agent
+    };
+
     return Promise.resolve()
         .then(() => {
             AWS.config.update(awsConfig);
         });
+}
+
+/**
+ * Gets Amazon Root Certificates
+ *
+ * @returns {Array} Array of certificate strings
+ */
+function getAWSRootCerts() {
+    return rootCerts;
 }
 
 /**
@@ -293,5 +324,6 @@ module.exports = {
     sendLogs,
     getDefaultDimensions,
     getMetrics,
-    sendMetrics
+    sendMetrics,
+    getAWSRootCerts
 };

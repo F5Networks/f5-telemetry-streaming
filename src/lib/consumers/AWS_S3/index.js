@@ -9,6 +9,7 @@
 'use strict';
 
 const AWS = require('aws-sdk');
+const awsUtil = require('./../shared/awsUtil');
 const util = require('../../utils/misc');
 /**
  * See {@link ../README.md#context} for documentation
@@ -26,25 +27,9 @@ module.exports = function (context) {
         return `${year}/${month}/${day}/${dateString}.log`;
     };
 
-    const setupPromise = new Promise((resolve, reject) => {
-        try {
-            const awsConfig = { region: context.config.region };
-            if (context.config.username && context.config.passphrase) {
-                awsConfig.credentials = new AWS.Credentials({
-                    accessKeyId: context.config.username,
-                    secretAccessKey: context.config.passphrase
-                });
-            }
-            AWS.config.update(awsConfig);
-            s3 = new AWS.S3({ apiVersion: '2006-03-01' });
-            resolve();
-        } catch (err) {
-            reject(err);
-        }
-    });
-
-    return setupPromise
+    return awsUtil.initializeConfig(context)
         .then(() => {
+            s3 = new AWS.S3({ apiVersion: '2006-03-01' });
             const params = {
                 // fallback to host if no bucket
                 Bucket: context.config.bucket || context.config.host,
