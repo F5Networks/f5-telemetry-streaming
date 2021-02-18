@@ -456,14 +456,39 @@ Generic HTTP
 
 Required Information:
  - Host: The address of the system.
+
+Optional Properties:
  - Protocol: The protocol of the system. Options: ``https`` or ``http``. Default is ``https``.
  - Port: The port of the system. Default is ``443``.
  - Path: The path of the system. Default is ``/``.
  - Method: The method of the system. Options: ``POST``, ``PUT``, ``GET``. Default is ``POST``.
  - Headers: The headers of the system.
  - Passphrase: The secret to use when sending data to the system, for example an API key to be used in an HTTP header.
+ - fallbackHosts: List FQDNs or IP addresses to be used as fallback hosts
+ - proxy: Proxy server configuration
+
 
 .. NOTE:: Since this consumer is designed to be generic and flexible, how authentication is performed is left up to the web service. To ensure the secrets are encrypted within Telemetry Streaming please note the use of JSON pointers. The secret to protect should be stored inside ``passphrase`` and referenced in the desired destination property, such as an API token in a header as shown in this example. 
+
+New in TS 1.18
+``````````````
+Telemetry Streaming 1.17 and later adds the ability to add TLS client authentication to the Generic HTTP consumer using the **TLS** authentication protocol.  This protocol configures Telemetry Streaming to provide the required private key and certificate(s) when the specified HTTP endpoint is configured to use SSL/TLS Client authentication. 
+
+You can find more information on Kafka's client authentication on the Confluent pages: https://docs.confluent.io/5.5.0/kafka/authentication_ssl.html.
+
+There are 3 new properties:
+
++--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Property           | Description                                                                                                                                                                                                                                |
++====================+============================================================================================================================================================================================================================================+
+| privateKey         | The Private Key for the SSL certificate. Must be formatted as a 1-line string, with literal new line characters.                                                                                                                           |
++--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| clientCertificate  | The client certificate chain. Must be formatted as a 1-line string, with literal new line characters.                                                                                                                                      |
++--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| rootCertificate    | The Certificate Authority root certificate, used to validate the client certificate. Certificate verification can be disabled by setting allowSelfSignedCert=true. Must be formatted as a 1-line string, with literal new line characters. |
++--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+|
 
 **Additional examples for Generic HTTP consumers:**
 
