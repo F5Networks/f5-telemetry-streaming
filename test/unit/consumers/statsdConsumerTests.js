@@ -169,5 +169,20 @@ describe('Statsd', () => {
                         ['Unable to forward to statsd client', 'Connection failure to server']);
                 });
         });
+
+        it('should trace full payload', () => {
+            const context = testUtil.buildConsumerContext({
+                eventType: 'systemInfo',
+                config: defaultConsumerConfig
+            });
+
+            return statsDIndex(context)
+                .then(() => {
+                    const traceData = context.tracer.write.firstCall.args[0];
+                    assert.ok(Array.isArray(traceData), 'should be formatted as an array');
+                    const expectedTraceLine = 'f5telemetry.telemetry-bigip-com.system.cpu: 0';
+                    assert.ok(traceData.find(d => d === expectedTraceLine), 'should find expected line in trace');
+                });
+        });
     });
 });

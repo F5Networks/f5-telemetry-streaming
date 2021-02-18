@@ -1,6 +1,13 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.19.0
+### Added
+### Fixed
+### Changed
+- AUTOTOOL-2091: Trace full payload sent to StatsD Consumer
+### Removed
+
 ## 1.18.0
 ### Added
 - AUTOTOOL-1987: Added new Namespace declare endpoint (/namespace/$namespace/declare) which supports POST and GET
