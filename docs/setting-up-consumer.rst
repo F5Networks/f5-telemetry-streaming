@@ -470,6 +470,7 @@ Required Information:
 - Generic HTTP with multiple passphrases, see :ref:`multiple`.
 - Generic HTTP with proxy settings in TS 1.17 and later, see :ref:`proxy`.
 - An EXPERIMENTAL feature where you can specify fallback IP address(es) for the Generic HTTP consumer, see :ref:`fallback`.
+- Generic HTTP with TLS authentication, see :ref:`httptls`.
 
 |
 
