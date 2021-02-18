@@ -227,6 +227,8 @@ AWS CloudWatch has two consumers: CloudWatch Logs, and :ref:`CloudWatch Metrics<
 
 .. IMPORTANT:: In TS 1.9.0 and later, the **username** and **passphrase** for CloudWatch are optional.  This is because a user can send data from a BIG-IP that has an appropriate IAM role in AWS to AWS CloudWatch without a username and passphrase.
 
+In TS 1.18 and later, the root certificates for AWS services are now embedded within Telemetry Streaming and are the only root certificates used in requests made to AWS services per AWS's move to its own Certificate Authority, noted in https://aws.amazon.com/blogs/security/how-to-prepare-for-aws-move-to-its-own-certificate-authority/.
+
 AWS CloudWatch Logs (default)
 `````````````````````````````
 
@@ -293,6 +295,8 @@ Required Information:
 To see more information about creating and using IAM roles, see the |IAM roles|.
 
 .. IMPORTANT:: In TS 1.12.0 and later, the **username** and **passphrase** for S3 are optional.  This is because a user can send data from a BIG-IP that has an appropriate IAM role in AWS to AWS S3 without a username and passphrase.
+
+In TS 1.18 and later, the root certificates for AWS services are now embedded within Telemetry Streaming and are the only root certificates used in requests made to AWS services per AWS's move to its own Certificate Authority, noted in https://aws.amazon.com/blogs/security/how-to-prepare-for-aws-move-to-its-own-certificate-authority/.
 
 Example Declaration:
 
