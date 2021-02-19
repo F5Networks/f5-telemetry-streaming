@@ -227,6 +227,8 @@ AWS CloudWatch has two consumers: CloudWatch Logs, and :ref:`CloudWatch Metrics<
 
 .. IMPORTANT:: In TS 1.9.0 and later, the **username** and **passphrase** for CloudWatch are optional.  This is because a user can send data from a BIG-IP that has an appropriate IAM role in AWS to AWS CloudWatch without a username and passphrase.
 
+In TS 1.18 and later, the root certificates for AWS services are now embedded within Telemetry Streaming and are the only root certificates used in requests made to AWS services per AWS's move to its own Certificate Authority, noted in https://aws.amazon.com/blogs/security/how-to-prepare-for-aws-move-to-its-own-certificate-authority/.
+
 AWS CloudWatch Logs (default)
 `````````````````````````````
 
@@ -293,6 +295,8 @@ Required Information:
 To see more information about creating and using IAM roles, see the |IAM roles|.
 
 .. IMPORTANT:: In TS 1.12.0 and later, the **username** and **passphrase** for S3 are optional.  This is because a user can send data from a BIG-IP that has an appropriate IAM role in AWS to AWS S3 without a username and passphrase.
+
+In TS 1.18 and later, the root certificates for AWS services are now embedded within Telemetry Streaming and are the only root certificates used in requests made to AWS services per AWS's move to its own Certificate Authority, noted in https://aws.amazon.com/blogs/security/how-to-prepare-for-aws-move-to-its-own-certificate-authority/.
 
 Example Declaration:
 
@@ -456,20 +460,46 @@ Generic HTTP
 
 Required Information:
  - Host: The address of the system.
+
+Optional Properties:
  - Protocol: The protocol of the system. Options: ``https`` or ``http``. Default is ``https``.
  - Port: The port of the system. Default is ``443``.
  - Path: The path of the system. Default is ``/``.
  - Method: The method of the system. Options: ``POST``, ``PUT``, ``GET``. Default is ``POST``.
  - Headers: The headers of the system.
  - Passphrase: The secret to use when sending data to the system, for example an API key to be used in an HTTP header.
+ - fallbackHosts: List FQDNs or IP addresses to be used as fallback hosts
+ - proxy: Proxy server configuration
+
 
 .. NOTE:: Since this consumer is designed to be generic and flexible, how authentication is performed is left up to the web service. To ensure the secrets are encrypted within Telemetry Streaming please note the use of JSON pointers. The secret to protect should be stored inside ``passphrase`` and referenced in the desired destination property, such as an API token in a header as shown in this example. 
+
+New in TS 1.18
+``````````````
+Telemetry Streaming 1.17 and later adds the ability to add TLS client authentication to the Generic HTTP consumer using the **TLS** authentication protocol.  This protocol configures Telemetry Streaming to provide the required private key and certificate(s) when the specified HTTP endpoint is configured to use SSL/TLS Client authentication. 
+
+You can find more information on Kafka's client authentication on the Confluent pages: https://docs.confluent.io/5.5.0/kafka/authentication_ssl.html.
+
+There are 3 new properties:
+
++--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Property           | Description                                                                                                                                                                                                                                |
++====================+============================================================================================================================================================================================================================================+
+| privateKey         | The Private Key for the SSL certificate. Must be formatted as a 1-line string, with literal new line characters.                                                                                                                           |
++--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| clientCertificate  | The client certificate chain. Must be formatted as a 1-line string, with literal new line characters.                                                                                                                                      |
++--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| rootCertificate    | The Certificate Authority root certificate, used to validate the client certificate. Certificate verification can be disabled by setting allowSelfSignedCert=true. Must be formatted as a 1-line string, with literal new line characters. |
++--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+|
 
 **Additional examples for Generic HTTP consumers:**
 
 - Generic HTTP with multiple passphrases, see :ref:`multiple`.
 - Generic HTTP with proxy settings in TS 1.17 and later, see :ref:`proxy`.
 - An EXPERIMENTAL feature where you can specify fallback IP address(es) for the Generic HTTP consumer, see :ref:`fallback`.
+- Generic HTTP with TLS authentication, see :ref:`httptls`.
 
 |
 

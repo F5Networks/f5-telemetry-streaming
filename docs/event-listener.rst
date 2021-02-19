@@ -60,8 +60,11 @@ You can also configure logging using TMSH, see :ref:`configuretmsh`.
 
 .. NOTE:: Some profiles are not supported in AS3 and therefore must be configured using TMSH.
 
+**IMPORTANT**: This declaration has been updated with the TS 1.18 release to include LTM response logging (highlighted in yellow).
+
 .. literalinclude:: ../examples/misc/application_services_3/all_log_profile.json
     :language: json
+    :emphasize-lines: 95-103
 
 |
 
@@ -199,18 +202,21 @@ You can use the following procedures to create different types of logging profil
 LTM Request Log profile
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-The Request Logging profile gives you the ability to configure data within a log file for HTTP requests and responses, in accordance with specified parameters.
+The Request Logging profile gives you the ability to configure data within a log file for HTTP requests and responses, in accordance with specified parameters. 
+
+.. NOTE:: Step 1 has been updated to include LTM response logging.
 
 To configure an LTM request profile, use the following TMSH commands:
 
 .. NOTE:: All keys should be in lower case to enable classification (tenant/application).
 
 
-1. Create an LTM Request Log Profile using the following TMSH command. Note: If you are creating the profile in the user interface, the ``\`` are not required. 
+
+1. Create an LTM Request Log Profile using the following TMSH command. Note: If you are creating the profile in the user interface, the ``\`` are not required. |br| IMPORTANT: This step has been updated with the TS 1.18 release to include LTM response logging.
 
    .. code-block:: bash
 
-       create ltm profile request-log telemetry_traffic_log_profile request-log-pool telemetry request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\",event_timestamp=\"$DATE_HTTP\" request-logging enabled
+       create ltm profile request-log telemetry_traffic_log_profile request-log-pool telemetry request-log-protocol mds-tcp request-log-template event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\",event_timestamp=\"$DATE_HTTP\" request-logging enabled response-log-pool telemetry response-log-protocol mds-tcp response-log-template event_source=\"response_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\",event_timestamp=\"$DATE_HTTP\",http_statcode=\"$HTTP_STATCODE\",http_status=\"$HTTP_STATUS\",response_ms=\"$RESPONSE_MSECS\" response-logging enabled
 
 2. Attach the profile to the virtual server, for example: 
 

@@ -12,7 +12,7 @@ Document Revision History
         - Date
 
       * - 1.18.0
-        - Updated the documentation for Telemetry Streaming v1.18.0. This release contains the following changes: |br| * Added new endpoints for individual namespaces (see :ref:`Namespace endpoints<namespaceEP>`)  |br| |br| Issues Resolved: |br| * Fix Event Listener startup errors that might cause restnoded to crash |br| * Splunk multiEvent format should ignore 'References'
+        - Updated the documentation for Telemetry Streaming v1.18.0. This release contains the following changes: |br| * Added new endpoints for individual namespaces (see :ref:`Namespace endpoints<namespaceEP>`) |br| * Added support for TLS client authentication for the Generic HTTP consumer (see the :ref:`TLS Client example<httptls>` and the :ref:`Generic HTTP consumer page<http-ref>`) |br| * Added a note to :ref:`awscloud-ref` and :ref:`awss3-ref` about root certificates for AWS services being embedded within Telemetry Streaming  |br| |br| Issues Resolved: |br| * Fix Event Listener startup errors that might cause restnoded to crash |br| * Splunk multiEvent format should ignore 'References'
         - 2-23-21
 
       * - 1.17.0
