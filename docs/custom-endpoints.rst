@@ -10,6 +10,17 @@ Using multiple system pollers within a single declaration allows for a configura
 
 .. NOTE::  Custom endpoints are currently for BIG-IP only. 
 
+Including hostname information
+``````````````````````````````
+In order to have hostname information available in the data sent to your consumer, F5 recommends you always include the following endpoint when using custom endpoints:
+
+.. code-block:: json
+
+    "system": {
+        "path": "sys/global-settings/?$select=hostname"
+    }
+
+
 Using the Telemetry_Endpoints class
 -----------------------------------
 The Telemetry_Endpoints class is where you define your endpoints and their paths.
