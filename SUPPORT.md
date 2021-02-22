@@ -19,6 +19,7 @@ Currently supported versions:
 |------------------|---------------|---------------------|-----------------|
 | TS 1.17.0        | Feature       |  12-Jan-2021        | 12-Apr-2021     |
 | TS 1.18.0        | Feature       |  23-Feb-2021        | 23-May-2021     |
+| TS 1.19.0        | Feature       |  xx-Mar-2021        | xx-Jun-2021     |
 
 Versions no longer supported:
 

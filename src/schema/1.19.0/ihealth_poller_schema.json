@@ -1,0 +1,236 @@
+{
+    "$id": "ihealth_poller_schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry Streaming iHealth Poller schema",
+    "description": "",
+    "type": "object",
+    "definitions": {
+        "time24hr": {
+            "title": "Time in HH:MM, 24hr",
+            "description": "",
+            "type": "string",
+            "pattern": "^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]?$"
+        },
+        "iHealthPoller": {
+            "$comment": "system_schema.json should be updated when new property added",
+            "title": "iHealth Poller",
+            "description": "",
+            "type": "object",
+            "required": [
+                "interval",
+                "username",
+                "passphrase"
+            ],
+            "properties": {
+                "enable": {
+                    "default": true,
+                    "allOf": [
+                        {
+                            "$ref": "base_schema.json#/definitions/enable"
+                        }
+                    ]
+                },
+                "trace": {
+                    "default": false,
+                    "allOf": [
+                        {
+                            "$ref": "base_schema.json#/definitions/trace"
+                        }
+                    ]
+                },
+                "proxy": { 
+                    "title": "Proxy configuration",
+                    "properties": {
+                        "port": {
+                            "default": 80
+                        },
+                        "protocol": {
+                            "default": "http"
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "$ref": "base_schema.json#/definitions/proxy"
+                        }
+                    ]
+                },
+                "username": {
+                    "title": "iHealth Username",
+                    "$ref": "base_schema.json#/definitions/username"
+                },
+                "passphrase": {
+                    "title": "iHealth Passphrase",
+                    "$ref": "base_schema.json#/definitions/secret"
+                },
+                "downloadFolder": {
+                    "title": "Directory to download Qkview to",
+                    "description": "",
+                    "type": "string",
+                    "minLength": 1,
+                    "pathExists": true
+                },
+                "interval": {
+                    "title": "Operating interval",
+                    "description": "" ,
+                    "type": "object",
+                    "properties": {
+                        "timeWindow": {
+                            "title": "Two or more hours window in 24hr format that iHealth data can be sent",
+                            "description": "",
+                            "type": "object",
+                            "properties": {
+                                "start": {
+                                    "title": "Time when the window starts",
+                                    "$ref": "#/definitions/time24hr"
+                                },
+                                "end": { 
+                                    "title": "Time when the window ends",
+                                    "$ref": "#/definitions/time24hr"
+                                }
+                            },
+                            "timeWindowMinSize": 120,
+                            "required": [ "start", "end" ],
+                            "additionalProperties": false
+                        },
+                        "frequency": {
+                            "title": "Interval frequency",
+                            "description": "",
+                            "type": "string",
+                            "default": "daily",
+                            "enum": [
+                                "daily",
+                                "weekly",
+                                "monthly"
+                            ]
+                        }
+
+                    },
+                    "required": [
+                        "timeWindow"
+                    ],
+                    "allOf": [
+                        { 
+                            "if": { "properties": { "frequency": { "const": "daily" } } },
+                            "then": {
+                                "properties": {
+                                    "timeWindow": {},
+                                    "frequency": {}
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        {
+                            "if": { "properties": { "frequency": { "const": "weekly" } } },
+                            "then": {
+                                "properties": {
+                                    "timeWindow": {},
+                                    "frequency": {},
+                                    "day": {
+                                        "title": "",
+                                        "description": "",
+                                        "oneOf": [
+                                            {
+                                                "type": "string",
+                                                "pattern": "^([mM]onday|[tT]uesday|[wW]ednesday|[tT]hursday|[fF]riday|[sS]aturday|[sS]unday)$"
+                                            },
+                                            {
+                                                "$comment": "0 and 7 eq. Sunday",
+                                                "type": "integer",
+                                                "minimum": 0,
+                                                "maximum": 7
+                                            }
+                                        ]
+                                    }
+                                },
+                                "required": [ "day" ],
+                                "additionalProperties": false
+                            }
+                        },
+                        {
+                            "if": { "properties": { "frequency": { "const": "monthly" } } },
+                            "then": {
+                                "properties": {
+                                    "timeWindow": {},
+                                    "frequency": {},
+                                    "day": {
+                                        "title": "",
+                                        "description": "",
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "maximum": 31
+                                    }
+                                },
+                                "required": [ "day" ],
+                                "additionalProperties": false
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "iHealthPollerPointerRef": {
+            "type": "string",
+            "declarationClass": "Telemetry_iHealth_Poller"
+        },
+        "iHealthPollerObjectRef": {
+            "allOf": [
+                {
+                    "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a separate block",
+                    "properties": {
+                        "enable": {},
+                        "trace": {},
+                        "interval": {},
+                        "proxy": {},
+                        "username": {},
+                        "passphrase": {},
+                        "downloadFolder": {}
+                    },
+                    "additionalProperties": false
+                },
+                {
+                    "$ref": "ihealth_poller_schema.json#/definitions/iHealthPoller"
+                }
+            ]
+        }
+    },
+    "allOf": [
+        {
+            "if": { "properties": { "class": { "const": "Telemetry_iHealth_Poller" } } },
+            "then": {
+                "required": [
+                    "class",
+                    "username",
+                    "passphrase"
+                ],
+                "properties": {
+                    "class": {
+                        "title": "Class",
+                        "description": "Telemetry Streaming iHealth Poller class",
+                        "type": "string",
+                        "enum": [ "Telemetry_iHealth_Poller" ]
+                    }
+                },
+                "allOf": [
+                    {
+                        "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a separate block",
+                        "properties": {
+                            "class": {},
+                            "enable": {},
+                            "trace": {},
+                            "interval": {},
+                            "proxy": {},
+                            "username": {},
+                            "passphrase": {},
+                            "downloadFolder": {}
+                        },
+                        "additionalProperties": false
+                    },
+                    {
+                        "$ref": "#/definitions/iHealthPoller"
+                    }
+                ]
+            },
+            "else": {}
+        }
+    ]
+}
