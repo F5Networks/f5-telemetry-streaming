@@ -5,6 +5,7 @@ Changes to this project are documented in this file. More detail and links can b
 ### Added
 - AUTOTOOL-2160: Added monitor checks for memory thresholds, which prevents restnoded from crashing on reaching memory limits (runs by default)
 ### Fixed
+- AUTOTOOL-2164: Fixed Route Domain ID handling for Virtual Server and Pool stats
 ### Changed
 - AUTOTOOL-2091: Trace full payload sent to StatsD Consumer
 ### Removed

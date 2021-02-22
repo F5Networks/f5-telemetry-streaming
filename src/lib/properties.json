@@ -646,7 +646,7 @@
                         "filterKeys": { "exclude": [ "fullPath", "generation", "tmName" ] }
                     },
                     {
-                        "renameKeys": { "patterns":  { "name/": { "pattern": "name\/(.*)", "group": 1 }, "%20:": { "pattern": "%20:(.*)/stats", "group": 1 }, "gtm/pool/cname/": { "pattern": "gtm\/pool\/cname\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members" } }
+                        "renameKeys": { "patterns":  { "name/": { "pattern": "name\/(.*)", "group": 1 }, " :": { "pattern": " :(.*)/stats", "group": 1 }, "gtm/pool/cname/": { "pattern": "gtm\/pool\/cname\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members" } }
                     },
                     {
                         "addKeysByTag": true
@@ -674,7 +674,7 @@
                         "filterKeys": { "exclude": [ "fullPath", "generation", "tmName" ] }
                     },
                     {
-                        "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "%20:": { "pattern": "%20:(.*)/stats", "group": 1 }, "gtm/pool/mx/": { "pattern": "gtm\/pool\/mx\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members" } }
+                        "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, " :": { "pattern": " :(.*)/stats", "group": 1 }, "gtm/pool/mx/": { "pattern": "gtm\/pool\/mx\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members" } }
                     },
                     {
                         "addKeysByTag": true
@@ -702,7 +702,7 @@
                         "filterKeys": { "exclude": [ "fullPath", "generation", "tmName" ] }
                     },
                     {
-                        "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "%20:": { "pattern": "%20:(.*)/stats", "group": 1 }, "gtm/pool/naptr/": { "pattern": "gtm\/pool\/naptr\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members" } }
+                        "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, " :": { "pattern": " :(.*)/stats", "group": 1 }, "gtm/pool/naptr/": { "pattern": "gtm\/pool\/naptr\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members" } }
                     },
                     {
                         "addKeysByTag": true
@@ -730,7 +730,7 @@
                         "filterKeys": { "exclude": [ "fullPath", "generation", "tmName" ] }
                     },
                     {
-                        "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, "%20:": { "pattern": "%20:(.*)/stats", "group": 1 }, "gtm/pool/srv/": { "pattern": "gtm\/pool\/srv\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members" } }
+                        "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 }, " :": { "pattern": " :(.*)/stats", "group": 1 }, "gtm/pool/srv/": { "pattern": "gtm\/pool\/srv\/(.*)\\?", "group": 1 } , "members/": { "pattern": "members\/(.*)\/", "group": 1 }, "membersReference": "members" } }
                     },
                     {
                         "addKeysByTag": true
