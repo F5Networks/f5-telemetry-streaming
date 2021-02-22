@@ -26,16 +26,19 @@ describe('Logger', () => {
         'notset',
         'debug',
         'info',
+        'warning',
         'error'
     ];
     const loggedMessages = {
         error: [],
         info: [],
+        warning: [],
         debug: []
     };
     const loggerMock = {
         severe(msg) { loggedMessages.error.push(msg); },
         info(msg) { loggedMessages.info.push(msg); },
+        warning(msg) { loggedMessages.warning.push(msg); },
         finest(msg) { loggedMessages.debug.push(msg); }
     };
 

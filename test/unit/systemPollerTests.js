@@ -26,6 +26,9 @@ const tracers = require('../../src/lib/utils/tracer').Tracer;
 const systemPollerConfigTestsData = require('./data/systemPollerTestsData');
 const testUtil = require('./shared/util');
 const configUtil = require('../../src/lib/utils/config');
+const constants = require('../../src/lib/constants');
+const monitor = require('../../src/lib/utils/monitor');
+
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -281,6 +284,7 @@ describe('System Poller', () => {
                 }
             }
         };
+
         let activeTracersStub;
         let allTracersStub;
         let pollerTimers;
@@ -315,7 +319,8 @@ describe('System Poller', () => {
             return validateAndNormalize(defaultDeclaration)
                 .then(normalizedConfig => configWorker.emitAsync('change', normalizedConfig))
                 .then(() => {
-                    assert.strictEqual(pollerTimers['My_System::SystemPoller_1'], 180);
+                    assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].timer, 180);
+                    assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].config.traceName, 'My_System::SystemPoller_1');
                     assert.strictEqual(allTracersStub.length, 1);
                     assert.strictEqual(activeTracersStub.length, 1);
                     assert.strictEqual(utilStub.start.length, 1);
@@ -331,6 +336,11 @@ describe('System Poller', () => {
                 });
         });
 
+        after(() => configWorker.emitAsync('change', { components: [], mappings: {} })
+            .then(() => {
+                assert.deepStrictEqual(systemPoller.getPollerTimers(), {});
+            }));
+
         it('should stop existing poller(s) when removed from config', () => configWorker.emitAsync('change', { components: [], mappings: {} })
             .then(() => {
                 assert.deepStrictEqual(pollerTimers, {});
@@ -345,6 +355,41 @@ describe('System Poller', () => {
             const newDeclaration = testUtil.deepCopy(defaultDeclaration);
             newDeclaration.My_System.systemPoller.interval = 500;
             newDeclaration.My_System.systemPoller.trace = true;
+            const expectedPollerConfig = {
+                name: 'SystemPoller_1',
+                traceName: 'My_System::SystemPoller_1',
+                id: 'uuid2',
+                namespace: 'f5telemetry_default',
+                class: 'Telemetry_System_Poller',
+                enable: true,
+                interval: 500,
+                trace: true,
+                tracer: null,
+                credentials: {
+                    username: undefined,
+                    passphrase: undefined
+                },
+                connection: {
+                    allowSelfSignedCert: false,
+                    host: 'localhost',
+                    port: 8100,
+                    protocol: 'http'
+                },
+                dataOpts: {
+                    noTMStats: true,
+                    tags: undefined,
+                    actions: [
+                        {
+                            enable: true,
+                            setTag: {
+                                application: '`A`',
+                                tenant: '`T`'
+                            }
+                        }
+                    ]
+                },
+                destinationIds: []
+            };
             return validateAndNormalize(newDeclaration)
                 .then(normalizedConfig => configWorker.emitAsync('change', normalizedConfig))
                 .then(() => {
@@ -353,42 +398,14 @@ describe('System Poller', () => {
                     assert.strictEqual(utilStub.start.length, 0);
                     assert.strictEqual(utilStub.update.length, 1);
                     assert.strictEqual(utilStub.stop.length, 0);
-                    assert.deepStrictEqual(pollerTimers, { 'My_System::SystemPoller_1': 500 });
-                    assert.deepStrictEqual(utilStub.update[0].args, {
-                        name: 'SystemPoller_1',
-                        traceName: 'My_System::SystemPoller_1',
-                        id: 'uuid2',
-                        namespace: 'f5telemetry_default',
-                        class: 'Telemetry_System_Poller',
-                        enable: true,
-                        interval: 500,
-                        trace: true,
-                        tracer: null,
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
-                        },
-                        connection: {
-                            allowSelfSignedCert: false,
-                            host: 'localhost',
-                            port: 8100,
-                            protocol: 'http'
-                        },
-                        dataOpts: {
-                            noTMStats: true,
-                            tags: undefined,
-                            actions: [
-                                {
-                                    enable: true,
-                                    setTag: {
-                                        application: '`A`',
-                                        tenant: '`T`'
-                                    }
-                                }
-                            ]
-                        },
-                        destinationIds: []
-                    });
+                    assert.deepStrictEqual(pollerTimers,
+                        {
+                            'My_System::SystemPoller_1': {
+                                timer: 500,
+                                config: expectedPollerConfig
+                            }
+                        });
+                    assert.deepStrictEqual(utilStub.update[0].args, expectedPollerConfig);
                 });
         });
 
@@ -414,7 +431,9 @@ describe('System Poller', () => {
             return validateAndNormalize(newDeclaration)
                 .then(normalizedConfig => configWorker.emitAsync('change', normalizedConfig))
                 .then(() => {
-                    assert.deepStrictEqual(pollerTimers, { 'My_System::SystemPoller_1': 180 });
+                    assert.strictEqual(Object.keys(pollerTimers).length, 1);
+                    assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].timer, 180);
+                    assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].config.traceName, 'My_System::SystemPoller_1');
                     assert.strictEqual(allTracersStub.length, 1);
                     assert.strictEqual(activeTracersStub.length, 1);
                     assert.strictEqual(utilStub.start.length, 0);
@@ -445,7 +464,9 @@ describe('System Poller', () => {
             return validateAndNormalize(newDeclaration)
                 .then(normalizedConfig => configWorker.emitAsync('change', normalizedConfig))
                 .then(() => {
-                    assert.deepStrictEqual(pollerTimers, { 'My_System::SystemPoller_1': 180 });
+                    assert.strictEqual(Object.keys(pollerTimers).length, 1);
+                    assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].timer, 180);
+                    assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].config.traceName, 'My_System::SystemPoller_1');
                     assert.strictEqual(allTracersStub.length, 1);
                     assert.strictEqual(activeTracersStub.length, 1);
                     assert.strictEqual(utilStub.start.length, 0);
@@ -462,10 +483,11 @@ describe('System Poller', () => {
             return validateAndNormalize(newDeclaration)
                 .then(normalizedConfig => configWorker.emitAsync('change', normalizedConfig))
                 .then(() => {
-                    assert.deepStrictEqual(pollerTimers, {
-                        'My_System::SystemPoller_1': 180,
-                        'My_System_New::SystemPoller_2': 500
-                    });
+                    assert.strictEqual(Object.keys(pollerTimers).length, 2);
+                    assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].timer, 180);
+                    assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].config.traceName, 'My_System::SystemPoller_1');
+                    assert.strictEqual(pollerTimers['My_System_New::SystemPoller_2'].timer, 500);
+                    assert.strictEqual(pollerTimers['My_System_New::SystemPoller_2'].config.traceName, 'My_System_New::SystemPoller_2');
                     assert.strictEqual(allTracersStub.length, 2);
                     assert.strictEqual(activeTracersStub.length, 1);
                     assert.strictEqual(utilStub.start.length, 1);
@@ -507,11 +529,10 @@ describe('System Poller', () => {
             return validateAndNormalize(newDeclaration)
                 .then(normalizedConfig => configWorker.emitAsync('change', normalizedConfig))
                 .then(() => {
-                    assert.deepStrictEqual(pollerTimers, {
-                        'My_System::SystemPoller_1': 180,
-                        'My_System_New::SystemPoller_2': 10,
-                        'My_System_New::My_Poller': 500
-                    });
+                    assert.strictEqual(Object.keys(pollerTimers).length, 3);
+                    assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].timer, 180);
+                    assert.strictEqual(pollerTimers['My_System_New::SystemPoller_2'].timer, 10);
+                    assert.strictEqual(pollerTimers['My_System_New::My_Poller'].timer, 500);
                     assert.strictEqual(allTracersStub.length, 3);
                     assert.strictEqual(activeTracersStub.length, 3);
                     assert.strictEqual(utilStub.start.length, 2);
@@ -641,7 +662,8 @@ describe('System Poller', () => {
                     assert.strictEqual(utilStub.start.length, 0);
                     assert.strictEqual(utilStub.update.length, 1);
                     assert.strictEqual(utilStub.stop.length, 0);
-                    assert.deepStrictEqual(pollerTimers, { 'My_System::SystemPoller_1': 200 });
+                    assert.strictEqual(Object.keys(pollerTimers).length, 1);
+                    assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].timer, 200);
                 });
         });
 
@@ -666,15 +688,101 @@ describe('System Poller', () => {
 
                     return configWorker.emitAsync('change', normalizedConfig)
                         .then(() => {
-                            assert.deepStrictEqual(pollerTimers, {
-                                'My_System::SystemPoller_1': 180,
-                                'NewNamespace::My_System::SystemPoller_1': 500
-                            });
+                            assert.strictEqual(Object.keys(pollerTimers).length, 2);
+                            assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].timer, 180);
+                            assert.strictEqual(pollerTimers['NewNamespace::My_System::SystemPoller_1'].timer, 500);
 
                             assert.strictEqual(utilStub.start.length, 1);
                             assert.strictEqual(utilStub.update.length, 0);
                             assert.strictEqual(utilStub.stop.length, 0);
                         });
+                });
+        });
+    });
+
+    describe('monitor "on check" event', () => {
+        let utilStub;
+
+        const enabledPollerTimers = {
+            poller1: {
+                timer: 111,
+                config: {
+                    interval: 111
+                }
+            },
+            poller2: {
+                timer: 222,
+                config: {
+                    interval: 222
+                }
+            },
+            // this is for poller with interval = 0
+            // should basically be ignored
+            poller3: undefined
+        };
+
+
+        const disabledPollerTimers = {
+            poller1: {
+                timer: null,
+                config: {
+                    interval: 111
+                }
+            },
+            poller2: {
+                timer: null,
+                config: {
+                    interval: 222
+                }
+            },
+            // this is for poller with interval = 0
+            // should basically be ignored
+            poller3: undefined
+        };
+
+
+        beforeEach(() => {
+            utilStub = { start: [], stop: [], update: [] };
+
+            sinon.stub(util, 'start').callsFake((func, args, interval) => {
+                utilStub.start.push({ args, interval });
+                return interval;
+            });
+            sinon.stub(util, 'update').callsFake((id, func, args, interval) => {
+                utilStub.update.push({ args, interval });
+                return interval;
+            });
+            sinon.stub(util, 'stop').callsFake((arg) => {
+                utilStub.stop.push({ arg });
+            });
+        });
+
+        it('should disable running pollers when thresholds not ok', () => {
+            sinon.stub(systemPoller, 'getPollerTimers').returns(testUtil.deepCopy(enabledPollerTimers));
+            return monitor.safeEmitAsync('check', constants.APP_THRESHOLDS.MEMORY.NOT_OK)
+                .then(() => {
+                    const pollerTimers = systemPoller.getPollerTimers();
+                    assert.deepStrictEqual(pollerTimers, disabledPollerTimers);
+                    assert.isFalse(systemPoller.isEnabled());
+                    assert.deepStrictEqual(utilStub.start, []);
+                    assert.deepStrictEqual(utilStub.update, []);
+                    assert.deepStrictEqual(utilStub.stop, [{ arg: 111 }, { arg: 222 }]);
+                });
+        });
+
+        it('should enable disabled pollers when thresholds become ok', () => {
+            sinon.stub(systemPoller, 'getPollerTimers').returns(testUtil.deepCopy(disabledPollerTimers));
+            return monitor.safeEmitAsync('check', constants.APP_THRESHOLDS.MEMORY.NOT_OK)
+                .then(() => monitor.safeEmitAsync('check', constants.APP_THRESHOLDS.MEMORY.OK))
+                .then(() => {
+                    const pollerTimers = systemPoller.getPollerTimers();
+                    assert.deepStrictEqual(pollerTimers, enabledPollerTimers);
+                    assert.isTrue(systemPoller.isEnabled());
+                    assert.deepStrictEqual(utilStub.start, []);
+                    assert.deepStrictEqual(utilStub.update, [
+                        { args: { interval: 111 }, interval: 111 },
+                        { args: { interval: 222 }, interval: 222 }
+                    ]);
                 });
         });
     });

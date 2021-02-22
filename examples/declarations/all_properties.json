@@ -3,7 +3,8 @@
     "controls": {
         "class": "Controls",
         "logLevel": "info",
-        "debug": false
+        "debug": false,
+        "memoryThresholdPercent": 90
     },
     "My_System": {
         "class": "Telemetry_System",

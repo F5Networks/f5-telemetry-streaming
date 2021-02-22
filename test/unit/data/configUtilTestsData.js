@@ -294,6 +294,7 @@ module.exports = {
                                 debug: true,
                                 name: 'controls',
                                 id: 'uuid1',
+                                memoryThresholdPercent: constants.APP_THRESHOLDS.MEMORY.DEFAULT_LIMIT_PERCENT,
                                 namespace: constants.DEFAULT_UNNAMED_NAMESPACE
                             }
                         ]

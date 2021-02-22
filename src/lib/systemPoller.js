@@ -18,19 +18,39 @@ const SystemStats = require('./systemStats');
 const util = require('./utils/misc');
 const configUtil = require('./utils/config');
 const tracers = require('./utils/tracer').Tracer;
+const APP_THRESHOLDS = require('./constants').APP_THRESHOLDS;
+const monitor = require('./utils/monitor');
 
 /** @module systemPoller */
 
 const CONFIG_CLASSES = constants.CONFIG_CLASSES;
 // use SYSTEM_POLLER_CLASS_NAME to keep compatibility with previous versions
 const TRACER_CLASS_NAME = CONFIG_CLASSES.SYSTEM_POLLER_CLASS_NAME;
-// key - poller name, value - timer ID
+// key - poller name, value - { timer, config }
 const POLLER_TIMERS = {};
+
+let processingEnabled = true;
 
 class NoPollersError extends errors.ConfigLookupError {}
 
+/**
+ * Returns tracked system pollers
+ *
+ * @returns {Object} - Object containing systemPollers ({ pollerTraceName: { timer, config } })
+ */
 function getPollerTimers() {
     return POLLER_TIMERS;
+}
+
+/**
+ * Check if systemPoller(s) are running
+ * Toggled by monitor checks
+ *
+ * @returns {Boolean} - whether or not processing is enabled
+ */
+
+function isEnabled() {
+    return processingEnabled;
 }
 
 function findSystemOrPollerConfigs(originalConfig, sysOrPollerName, pollerName, namespace) {
@@ -99,45 +119,79 @@ function applyConfig(originalConfig) {
     const systemPollers = getEnabledPollerConfigs(originalConfig);
 
     const newPollerIDs = [];
-    const currPollerIDs = module.exports.getPollerTimers();
+    const currPollers = module.exports.getPollerTimers();
 
     systemPollers.forEach((pollerConfig) => {
-        const existingPoller = currPollerIDs[pollerConfig.traceName];
-        if (pollerConfig.skipUpdate && existingPoller) {
-            newPollerIDs.push(pollerConfig.traceName);
-        } else {
-            newPollerIDs.push(pollerConfig.traceName);
+        const key = pollerConfig.traceName;
+        const existingPoller = currPollers[key];
+        newPollerIDs.push(key);
+        if (!pollerConfig.skipUpdate || !existingPoller) {
             pollerConfig.tracer = tracers.createFromConfig(
-                TRACER_CLASS_NAME, pollerConfig.traceName, pollerConfig
+                TRACER_CLASS_NAME, key, pollerConfig
             );
-            const baseMsg = `system poller ${pollerConfig.traceName}. Interval = ${pollerConfig.interval} sec.`;
+            const baseMsg = `system poller ${key}. Interval = ${pollerConfig.interval} sec.`;
             // add to data context to track source poller config and destination(s)
             pollerConfig.destinationIds = originalConfig.mappings[pollerConfig.id];
             if (pollerConfig.interval === 0) {
                 logger.info(`Configuring non-polling ${baseMsg}`);
-                if (currPollerIDs[pollerConfig.traceName]) {
-                    util.stop(currPollerIDs[pollerConfig.traceName]);
+                if (currPollers[key]) {
+                    util.stop(currPollers[key].timer || currPollers[key]);
                 }
-                currPollerIDs[pollerConfig.traceName] = undefined;
-            } else if (currPollerIDs[pollerConfig.traceName]) {
+                currPollers[key] = undefined;
+            } else if (currPollers[key]) {
                 logger.info(`Updating ${baseMsg}`);
-                currPollerIDs[pollerConfig.traceName] = util.update(
-                    currPollerIDs[pollerConfig.traceName], safeProcess, pollerConfig, pollerConfig.interval
-                );
+                currPollers[key] = {
+                    timer: util.update(
+                        currPollers[key].timer || currPollers[key], safeProcess, pollerConfig, pollerConfig.interval
+                    ),
+                    config: pollerConfig
+                };
             } else {
                 logger.info(`Starting ${baseMsg}`);
-                currPollerIDs[pollerConfig.traceName] = util.start(
-                    safeProcess, pollerConfig, pollerConfig.interval
-                );
+                currPollers[key] = {
+                    timer: util.start(
+                        safeProcess, pollerConfig, pollerConfig.interval
+                    ),
+                    config: pollerConfig
+                };
             }
         }
     });
 
-    Object.keys(currPollerIDs).forEach((key) => {
+    Object.keys(currPollers).forEach((key) => {
         if (newPollerIDs.indexOf(key) === -1) {
-            logger.info(`Disabling system poller ${key}`);
-            util.stop(currPollerIDs[key]);
-            delete currPollerIDs[key];
+            logger.info(`Disabling/removing system poller ${key}`);
+            // for pollers with interval=0, the key exists, but value is undefined
+            if (!util.isObjectEmpty(currPollers[key])) {
+                util.stop(currPollers[key].timer);
+            }
+            delete currPollers[key];
+        }
+    });
+}
+
+function enablePollers() {
+    const currentPollers = module.exports.getPollerTimers();
+    Object.keys(currentPollers).forEach((pollerKey) => {
+        const poller = currentPollers[pollerKey];
+        if (poller && poller.config && poller.config.interval > 0) {
+            logger.info(`Enabling system poller ${pollerKey}. Interval = ${poller.config.interval} sec.`);
+            // in case disable failed for some reason, ensure we stop any running timer
+            currentPollers[pollerKey].timer = util.update(
+                currentPollers[pollerKey].timer, safeProcess, poller.config, poller.config.interval
+            );
+        }
+    });
+}
+
+function disablePollers() {
+    const currentPollers = module.exports.getPollerTimers();
+    Object.keys(currentPollers).forEach((pollerKey) => {
+        const poller = currentPollers[pollerKey];
+        if (poller && poller.config && poller.config.interval > 0) {
+            logger.info(`Disabling system poller ${pollerKey}`);
+            util.stop(currentPollers[pollerKey].timer);
+            currentPollers[pollerKey].timer = null;
         }
     });
 }
@@ -295,10 +349,30 @@ configWorker.on('change', config => new Promise((resolve) => {
     tracers.remove(tracer => tracer.name.startsWith(TRACER_CLASS_NAME)
         && tracer.lastGetTouch < tracersTimestamp);
 
+    // reset for monitor check
+    processingEnabled = true;
+
     logger.debug(`${Object.keys(getPollerTimers()).length} system poller(s) running`);
     resolve();
 }));
 
+monitor.on('check', status => new Promise((resolve) => {
+    const monitorChecksOk = status === APP_THRESHOLDS.MEMORY.OK;
+    // only enable/disable when there is change in state
+    if (processingEnabled !== monitorChecksOk) {
+        // also only log here to minimize entries
+        logger.warning(`${status}. ${monitorChecksOk ? 'Re-enabling system poller(s).' : 'Temporarily disabling system poller(s).'}`);
+        if (monitorChecksOk) {
+            enablePollers();
+        } else {
+            disablePollers();
+        }
+    }
+    processingEnabled = monitorChecksOk;
+    resolve();
+}).catch((err) => {
+    logger.exception('Unexpected error in system poller (monitor check handler).', err);
+}));
 
 module.exports = {
     NoPollersError,
@@ -308,5 +382,6 @@ module.exports = {
     getPollersConfig,
     getPollerTimers,
     process,
-    safeProcess
+    safeProcess,
+    isEnabled
 };

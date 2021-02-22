@@ -46,11 +46,13 @@ describe('Device Util', () => {
         it('should gather device info', () => {
             sinon.stub(deviceUtil, 'getDeviceType').resolves(constants.DEVICE_TYPE.BIG_IP);
             sinon.stub(deviceUtil, 'getDeviceVersion').resolves({ version: '14.0.0' });
+            sinon.stub(deviceUtil, 'getDeviceNodeMemoryLimit').resolves(1888);
             return deviceUtil.gatherHostDeviceInfo()
                 .then(() => {
                     assert.deepStrictEqual(
                         deviceUtil.getHostDeviceInfo(),
                         {
+                            NODE_MEMORY_LIMIT: 1888,
                             TYPE: 'BIG-IP',
                             VERSION: { version: '14.0.0' },
                             RETRIEVE_SECRETS_FROM_TMSH: false
@@ -366,6 +368,72 @@ describe('Device Util', () => {
                 deviceUtil.getDeviceVersion(constants.LOCAL_HOST),
                 /getDeviceVersion:/
             );
+        });
+    });
+
+    describe('.getDeviceNodeMemoryLimit()', () => {
+        afterEach(() => {
+            nock.cleanAll();
+        });
+
+        it('should return default value when db variables NOT set', () => {
+            testUtil.mockEndpoints([{
+                endpoint: '/mgmt/tm/sys/db/provision.extramb',
+                response: {
+                    kind: 'tm:sys:db:dbstate',
+                    name: 'provision.extramb',
+                    value: '0',
+                    valueRange: 'integer min:0 max:8192'
+                }
+            },
+            {
+                endpoint: '/mgmt/tm/sys/db/restjavad.useextramb',
+                response: {
+                    kind: 'tm:sys:db:dbstate',
+                    name: 'restjavad.useextramb',
+                    value: 'false',
+                    valueRange: 'false true'
+                }
+            }]);
+            return assert.becomes(deviceUtil.getDeviceNodeMemoryLimit(constants.LOCAL_HOST),
+                constants.APP_THRESHOLDS.MEMORY.DEFAULT_MB);
+        });
+
+        it('should return db value when db variables set', () => {
+            testUtil.mockEndpoints([{
+                endpoint: '/mgmt/tm/sys/db/provision.extramb',
+                response: {
+                    kind: 'tm:sys:db:dbstate',
+                    name: 'provision.extramb',
+                    value: '2048',
+                    valueRange: 'integer min:0 max:8192'
+                }
+            },
+            {
+                endpoint: '/mgmt/tm/sys/db/restjavad.useextramb',
+                response: {
+                    kind: 'tm:sys:db:dbstate',
+                    name: 'restjavad.useextramb',
+                    value: 'true',
+                    valueRange: 'false true'
+                }
+            }]);
+            return assert.becomes(deviceUtil.getDeviceNodeMemoryLimit(constants.LOCAL_HOST), 2048);
+        });
+
+        it('should return default value when an error occurs during lookup', () => {
+            testUtil.mockEndpoints([{
+                endpoint: '/mgmt/tm/sys/db/restjavad.useextramb',
+                response: {
+                    kind: 'tm:sys:db:dbstate',
+                    name: 'restjavad.useextramb',
+                    value: 'true',
+                    valueRange: 'false true'
+                }
+                // no second mock to simulate failure to retrieve from provision.db endpoint
+            }]);
+            return assert.becomes(deviceUtil.getDeviceNodeMemoryLimit(constants.LOCAL_HOST),
+                constants.APP_THRESHOLDS.MEMORY.DEFAULT_MB);
         });
     });
 

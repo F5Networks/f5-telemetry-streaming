@@ -1701,6 +1701,129 @@ describe('Declarations', () => {
         });
     });
 
+    describe('Controls', () => {
+        describe('logLevel', () => {
+            [
+                {
+                    logLevel: 'debug',
+                    expectedToPass: true
+                },
+                {
+                    logLevel: 'info',
+                    expectedToPass: true
+                },
+                {
+                    logLevel: 'error',
+                    expectedToPass: true
+                },
+                {
+                    logLevel: 'invalidValue',
+                    expectedToPass: false
+                }
+            ].forEach((testCase) => {
+                it(`should ${testCase.expectedToPass ? '' : 'not '}allow to set "logLevel" to "${testCase.logLevel}"`, () => {
+                    const data = {
+                        class: 'Telemetry',
+                        Controls: {
+                            class: 'Controls',
+                            logLevel: testCase.logLevel
+                        }
+                    };
+                    if (testCase.expectedToPass) {
+                        return config.validate(data)
+                            .then((validConfig) => {
+                                assert.strictEqual(validConfig.Controls.logLevel, testCase.logLevel, `'should match "${testCase.logLevel}"`);
+                            });
+                    }
+                    return assert.isRejected(config.validate(data), /logLevel.*should be equal to one of the allowed value/);
+                });
+            });
+        });
+
+        describe('debug', () => {
+            [
+                {
+                    debug: true,
+                    expectedToPass: true
+                },
+                {
+                    debug: false,
+                    expectedToPass: true
+                },
+                {
+                    debug: 'invalidValue',
+                    expectedToPass: false
+                }
+            ].forEach((testCase) => {
+                it(`should ${testCase.expectedToPass ? '' : 'not '}allow to set "debug" to "${testCase.debug}"`, () => {
+                    const data = {
+                        class: 'Telemetry',
+                        Controls: {
+                            class: 'Controls',
+                            debug: testCase.debug
+                        }
+                    };
+                    if (testCase.expectedToPass) {
+                        return config.validate(data)
+                            .then((validConfig) => {
+                                assert.strictEqual(validConfig.Controls.debug, testCase.debug, `'should match "${testCase.debug}"`);
+                            });
+                    }
+                    return assert.isRejected(config.validate(data), /debug.*should be boolean/);
+                });
+            });
+        });
+
+        describe('memoryThresholdPercent', () => {
+            [
+                {
+                    memoryThresholdPercent: 1,
+                    expectedToPass: true
+                },
+                {
+                    memoryThresholdPercent: 100,
+                    expectedToPass: true
+                },
+                {
+                    memoryThresholdPercent: 50,
+                    expectedToPass: true
+                },
+                {
+                    memoryThresholdPercent: 101,
+                    expectedToPass: false,
+                    errorMsg: /memoryThresholdPercent.*should be <= 100/
+                },
+                {
+                    memoryThresholdPercent: 0,
+                    expectedToPass: false,
+                    errorMsg: /memoryThresholdPercent.*should be >= 1/
+                },
+                {
+                    memoryThresholdPercent: 'invalidValue',
+                    expectedToPass: false,
+                    errorMsg: /memoryThresholdPercent.*should be integer/
+                }
+            ].forEach((testCase) => {
+                it(`should ${testCase.expectedToPass ? '' : 'not '}allow to set "memoryThresholdPercent" to "${testCase.memoryThresholdPercent}"`, () => {
+                    const data = {
+                        class: 'Telemetry',
+                        Controls: {
+                            class: 'Controls',
+                            memoryThresholdPercent: testCase.memoryThresholdPercent
+                        }
+                    };
+                    if (testCase.expectedToPass) {
+                        return config.validate(data)
+                            .then((validConfig) => {
+                                assert.strictEqual(validConfig.Controls.memoryThresholdPercent, testCase.memoryThresholdPercent, `'should match "${testCase.memoryThresholdPercent}"`);
+                            });
+                    }
+                    return assert.isRejected(config.validate(data), testCase.errorMsg);
+                });
+            });
+        });
+    });
+
     describe('Telemetry_System_Poller', () => {
         it('should pass minimal declaration', () => {
             const data = {

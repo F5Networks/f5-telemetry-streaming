@@ -70,6 +70,18 @@ module.exports = {
     RELEASE,
     VERSION,
     APP_NAME: 'Telemetry Streaming',
+    APP_THRESHOLDS: {
+        MONITOR_DISABLED: 'MONITOR_DISABLED',
+        MEMORY: {
+            // node default max is 1.4 GB
+            // assume this is the default provisioning
+            // value can vary according to db variables, handled by restjavad
+            DEFAULT_MB: 1433,
+            DEFAULT_LIMIT_PERCENT: 90,
+            OK: 'MEMORY_USAGE_OK',
+            NOT_OK: 'MEMORY_USAGE_HIGH'
+        }
+    },
     CONFIG_CLASSES: {
         CONSUMER_CLASS_NAME: 'Telemetry_Consumer',
         PULL_CONSUMER_CLASS_NAME: 'Telemetry_Pull_Consumer',
