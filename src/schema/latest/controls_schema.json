@@ -37,7 +37,7 @@
                     },
                     "memoryThresholdPercent": {
                         "title": "Memory Usage Threshold (Percentage of Available Process Memory)",
-                        "description": "Once memory usage reaches this value, processing may temporarily until levels return below threshold. Defaults to 90%",
+                        "description": "Once memory usage reaches this value, processing may temporarily cease until levels return below threshold. Defaults to 90%",
                         "type": "integer",
                         "minimum": 1,
                         "maximum": 100,

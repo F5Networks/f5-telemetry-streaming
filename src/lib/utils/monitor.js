@@ -84,7 +84,7 @@ class Monitor extends SafeEventEmitter {
      * Starts the monitor timer
      *
      * @param {Number} memThresholdPercent - Memory threshold percent
-     *      (% of total memory usage that once reached, triggers an event)
+     *      (% of total memory usage that once reached, triggers an event).
      *       First run starts after 5 seconds, then interval auto-adjusts according to usage
      *
      * @returns {void}
