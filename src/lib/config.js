@@ -122,7 +122,7 @@ ConfigWorker.prototype._notifyConfigChange = function (newConfig, options) {
             return this.emitAsync('change', configToEmit);
         })
         .catch((err) => {
-            logger.error(`notifyConfigChange error: ${err}`);
+            logger.exception('notifyConfigChange error: ', err);
         });
 };
 /**

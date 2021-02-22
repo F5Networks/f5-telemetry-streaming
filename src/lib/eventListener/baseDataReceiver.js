@@ -7,10 +7,9 @@
 
 'use strict';
 
-const EventEmitter2 = require('eventemitter2');
-
 const errors = require('../errors');
 const mainLogger = require('../logger');
+const SafeEventEmitter = require('../utils/eventEmitter').SafeEventEmitter;
 
 /** @module BaseDataReceiver */
 
@@ -42,53 +41,6 @@ function callAndSetState(promise, successState, failState, options) {
         .then(() => (uncaughtErr ? Promise.reject(uncaughtErr) : Promise.resolve(originRet)));
 }
 
-/**
- * Log error
- *
- * @param {Error} error - error to log
- *
- * @returns {Error} error
- */
-function logSafeEmitException(error) {
-    if (this.logger) {
-        this.logger.exception(`${this.constructor.name}.safeEmit(Async) uncaught error`, error);
-    }
-    return error;
-}
-
-/**
- * Subclass of EventEmitter2 with safe 'emit'
- */
-class SafeEventEmitter extends EventEmitter2 {
-    /**
-     * Emit event
-     *
-     * @returns {Boolean | Error} true if the event had listeners, false otherwise or Error if caught one
-     */
-    safeEmit() {
-        try {
-            return this.emit.apply(this, arguments);
-        } catch (emitErr) {
-            return logSafeEmitException.call(this, emitErr);
-        }
-    }
-
-    /**
-     * Emit async event
-     *
-     * @async
-     * @returns {Promise<Array<any> | Error>} promise resolved with array of responses or
-     *      Error if caught one (no rejection)
-     */
-    safeEmitAsync() {
-        try {
-            return this.emitAsync.apply(this, arguments)
-                .catch(logSafeEmitException.bind(this));
-        } catch (emitErr) {
-            return Promise.resolve(logSafeEmitException.call(this, emitErr));
-        }
-    }
-}
 
 /**
  * Base class for Data Receivers (base on EventEmitter2)
@@ -436,7 +388,6 @@ BaseDataReceiver.STATE = {
 module.exports = {
     BaseDataReceiver,
     BaseDataReceiverError,
-    SafeEventEmitter,
     StateTransitionError
 };
 

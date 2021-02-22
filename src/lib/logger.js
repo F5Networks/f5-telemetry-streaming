@@ -23,12 +23,14 @@ try {
 const NOTSET = 0;
 const DEBUG = 10;
 const INFO = 20;
-const ERROR = 30;
+const WARNING = 30;
+const ERROR = 40;
 
 const logLevels = {
     notset: NOTSET,
     debug: DEBUG,
     info: INFO,
+    warning: WARNING,
     error: ERROR
 };
 Object.keys(logLevels).forEach((key) => {
@@ -119,6 +121,7 @@ function Logger(prefix) {
     || {
         severe() {},
         info() {},
+        warning() {},
         finest() {}
     };
     this.prefix = prefix || '';
@@ -143,6 +146,13 @@ Logger.prototype.info = function (msg) {
         this.logger.info(prepareMsg(this.prefix, msg));
     }
 };
+
+Logger.prototype.warning = function (msg) {
+    if (WARNING >= currentLogLevel) {
+        this.logger.warning(prepareMsg(this.prefix, msg));
+    }
+};
+
 Logger.prototype.debug = function (msg) {
     if (DEBUG >= currentLogLevel) {
         this.logger.finest(prepareMsg(this.prefix, msg));

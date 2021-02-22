@@ -15,8 +15,9 @@ const diff = require('deep-diff');
 
 const constants = require('../constants');
 const logger = require('../logger');
-const util = require('./misc');
+const promiseUtil = require('./promise');
 const requestsUtil = require('./requests');
+const util = require('./misc');
 
 
 /**
@@ -31,7 +32,8 @@ const HOST_DEVICE_CACHE = {};
 const HDC_KEYS = {
     TYPE: 'TYPE',
     VERSION: 'VERSION',
-    RETRIEVE_SECRETS_FROM_TMSH: 'RETRIEVE_SECRETS_FROM_TMSH'
+    RETRIEVE_SECRETS_FROM_TMSH: 'RETRIEVE_SECRETS_FROM_TMSH',
+    NODE_MEMORY_LIMIT: 'NODE_MEMORY_LIMIT'
 };
 
 /**
@@ -548,6 +550,10 @@ module.exports = {
                 this.setHostDeviceInfo(HDC_KEYS.VERSION, deviceVersion);
                 this.setHostDeviceInfo(HDC_KEYS.RETRIEVE_SECRETS_FROM_TMSH,
                     isVersionAffectedBySecretsBug(deviceVersion));
+                return this.getDeviceNodeMemoryLimit(constants.LOCAL_HOST);
+            })
+            .then((deviceNodeMemLimit) => {
+                this.setHostDeviceInfo(HDC_KEYS.NODE_MEMORY_LIMIT, deviceNodeMemLimit);
             });
     },
 
@@ -818,6 +824,51 @@ module.exports = {
             .catch((err) => {
                 const msg = `getDeviceVersion: ${err}`;
                 throw new Error(msg);
+            });
+    },
+
+    /**
+     * Returns a device's node memory limit in MB
+     *
+     * @param {String} host      - HTTP host
+     * @param {Object} [options] - function options, see 'makeDeviceRequest'
+     *
+     * @returns {Promise<Number>} A promise which is resolved with the max memory limit for device
+     *           If an error occurs, the node default of 1433 MB (1.4 GB) will be returned
+     */
+    getDeviceNodeMemoryLimit(host, options) {
+        const defaultMem = constants.APP_THRESHOLDS.MEMORY.DEFAULT_MB;
+        let provisionExtraMb;
+        let useExtraMb;
+
+        const uri = '/mgmt/tm/sys/db';
+        options = options || {};
+        options.method = 'GET';
+        options.includeResponseObject = false;
+        return promiseUtil.allSettled([
+            this.makeDeviceRequest(host, `${uri}/restjavad.useextramb`, util.copy(options)),
+            this.makeDeviceRequest(host, `${uri}/provision.extramb`, util.copy(options))
+        ])
+            .then((results) => {
+                results = promiseUtil.getValues(results);
+                useExtraMb = results[0];
+                provisionExtraMb = results[1];
+                if (!util.isObjectEmpty(useExtraMb) && (useExtraMb.value === 'true' || useExtraMb.value === true)
+                    && !util.isObjectEmpty(provisionExtraMb) && provisionExtraMb.value > defaultMem) {
+                    return provisionExtraMb.value;
+                }
+                return defaultMem;
+            })
+            .catch((err) => {
+                logger.warning(`Unable to retrieve memory provisioning. ${err.message}`);
+            })
+            .then((memLimit) => {
+                if (!memLimit) {
+                    logger.debug(`Memory provisioning: (default) ${defaultMem}`);
+                    return defaultMem;
+                }
+                logger.debug(`Memory provisioning: ${memLimit} | Sys db settings: restjavad.useextramb (${JSON.stringify(useExtraMb || {})}) | provision.extramb (${JSON.stringify(provisionExtraMb || {})})}`);
+                return Number(memLimit);
             });
     },
 

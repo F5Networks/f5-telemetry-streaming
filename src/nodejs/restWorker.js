@@ -29,7 +29,8 @@ const configListenerModulesToLoad = [
     '../lib/pullConsumers',
     '../lib/systemPoller',
     '../lib/ihealth',
-    '../lib/requestHandlers/connections'
+    '../lib/requestHandlers/connections',
+    '../lib/utils/monitor.js'
 ];
 
 configListenerModulesToLoad.forEach((module) => {

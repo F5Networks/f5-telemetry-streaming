@@ -3,6 +3,7 @@ Changes to this project are documented in this file. More detail and links can b
 
 ## 1.19.0
 ### Added
+- AUTOTOOL-2160: Added monitor checks for memory thresholds, which prevents restnoded from crashing on reaching memory limits (runs by default)
 ### Fixed
 ### Changed
 - AUTOTOOL-2091: Trace full payload sent to StatsD Consumer

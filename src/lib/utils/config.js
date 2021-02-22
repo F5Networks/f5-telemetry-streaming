@@ -90,6 +90,13 @@ function getComponents(config, className, namespace) {
     return config.components.filter(c => c.class === className);
 }
 
+function hasEnabledComponents(config) {
+    if (util.isObjectEmpty(config.components)) {
+        return false;
+    }
+    return config.components.some(c => c.class !== CLASSES.CONTROLS_CLASS_NAME && c.enable);
+}
+
 function getTelemetrySystems(config, namespace) {
     return getComponents(config, CLASSES.SYSTEM_CLASS_NAME, namespace);
 }
@@ -810,5 +817,6 @@ module.exports = {
     getTelemetryConsumers,
     getTelemetryPullConsumers,
     getTelemetryListeners,
-    getTelemetryIHealthPollers
+    getTelemetryIHealthPollers,
+    hasEnabledComponents
 };
