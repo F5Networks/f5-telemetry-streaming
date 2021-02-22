@@ -67,19 +67,34 @@ describe('Config', () => {
     });
 
     describe('.validate()', () => {
-        it('should validate basic declaration', () => {
+        it('should validate basic declaration (default = full schema)', () => {
             const obj = {
                 class: 'Telemetry'
             };
             return assert.isFulfilled(config.validate(obj));
         });
 
-        it('should throw error in validate function', () => {
+        it('should validate declaration for a subschema (schemaType = namespace)', () => {
+            const obj = {
+                class: 'Telemetry_Namespace'
+            };
+            return assert.isFulfilled(config.validate(obj, { schemaType: 'Telemetry_Namespace' }));
+        });
+
+        it('should throw error when no validators found', () => {
             const obj = {
                 class: 'Telemetry'
             };
-            sinon.stub(config, 'validator').value(null);
+            sinon.stub(config, 'validators').value(null);
             return assert.isRejected(config.validate(obj), 'Validator is not available');
+        });
+
+        it('should throw error when no specific validator found (default full schema type)', () => {
+            const obj = {
+                class: 'Telemetry_New'
+            };
+            sinon.stub(config, 'validators').value({ otherType: data => data });
+            return assert.isRejected(config.validate(obj, { schemaType: 'Telemetry_New' }), 'Validator is not available');
         });
     });
 
@@ -467,10 +482,27 @@ describe('Config', () => {
         testSet.forEach(testConf => testUtil.getCallableIt(testConf)(testConf.name, () => {
             savedConfig = testConf.existingConfig;
             return config.processNamespaceDeclaration(testConf.input.declaration, testConf.input.namespace)
-                .then(() => {
-                    assert.deepStrictEqual(savedConfig.normalized, testConf.expectedOutput);
+                .then((result) => {
+                    assert.deepStrictEqual(savedConfig.normalized, testConf.expectedNormalized);
+                    assert.deepStrictEqual(result, testConf.expectedResult);
                 });
         }));
+
+        it('should reject with invalid namespace declaration (class is not Telemetry_Namespace)', () => assert.isRejected(
+            config.processNamespaceDeclaration({ class: 'Telemetry' }),
+            /properties\/class\/enum.*"allowedValues":\["Telemetry_Namespace"\]/
+        ));
+
+        it('should reject with invalid namespace declaration (invalid property)', () => assert.isRejected(config.processNamespaceDeclaration(
+            {
+                class: 'Telemetry_Namespace',
+                My_System_1: {
+                    class: 'Telemetry_System'
+                },
+                additionalProp: { fake: true }
+            },
+            'NewbieNamespace'
+        ), /"additionalProperty":"fake".*should NOT have additional properties/));
 
         it('should emit expected normalized config (unchanged namespaces have skipUpdate = true)', () => {
             const baseComp = {

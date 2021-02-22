@@ -63,18 +63,6 @@ describe('Normalize', () => {
     };
 
     describe('event', () => {
-        describe('.splitEvents()', () => {
-            dataExamples.splitEventsData.forEach((eventDataExample) => {
-                testUtil.getCallableIt(eventDataExample)(`should split events - ${eventDataExample.name}`, () => {
-                    ['\n', '\r\n'].forEach((lineSep) => {
-                        const data = eventDataExample.data.replace(/\{sep\}/g, lineSep);
-                        const result = normalize.splitEvents(data);
-                        assert.deepStrictEqual(result, eventDataExample.expectedData);
-                    });
-                });
-            });
-        });
-
         let clock;
         beforeEach(() => {
             // stub clock for categories that need timestamp

@@ -1,6 +1,18 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.18.0
+### Added
+- AUTOTOOL-1987: Added new Namespace declare endpoint (/namespace/$namespace/declare) which supports POST and GET
+- AUTOTOOL-2148 [GitHub #104](https://github.com/F5Networks/f5-telemetry-streaming/issues/104): Add support for TLS Client Authentication to Generic HTTP Consumer
+### Fixed
+- AUTOTOOL-1710: Fix Event Listener startup errors that might cause restnoded to crash
+- AUTOTOOL-2227: Splunk multiEvent format should ignore 'References'
+### Changed
+- AUTOTOOL-2111: Update npm packages (applicationinsights from 1.8.7 to 1.8.9, aws-sdk from 2.775.0 to 2.830.0, google-auth-library from 6.1.1 to 6.1.4, mustache from 4.0.0 to 4.1.0)
+- AUTOTOOL-2212: Add AWS specific certificates to AWS Consumers
+### Removed
+
 ## 1.17.0
 ### Added
 - AUTOTOOL-2027 [GitHub #91](https://github.com/F5Networks/f5-telemetry-streaming/issues/91): Add custom timestamp for APM Events

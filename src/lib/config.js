@@ -10,6 +10,7 @@
 
 const EventEmitter2 = require('eventemitter2');
 const nodeUtil = require('util');
+const errors = require('./errors');
 
 const deviceUtil = require('./utils/device');
 const logger = require('./logger');
@@ -17,6 +18,7 @@ const persistentStorage = require('./persistentStorage').persistentStorage;
 const util = require('./utils/misc');
 const configUtil = require('./utils/config');
 const TeemReporter = require('./teemReporter').TeemReporter;
+const CONFIG_CLASSES = require('./constants').CONFIG_CLASSES;
 
 const PERSISTENT_STORAGE_KEY = 'config';
 const BASE_CONFIG = {
@@ -32,7 +34,7 @@ const BASE_CONFIG = {
  * @event change - config was validated and can be propagated
  */
 function ConfigWorker() {
-    this.validator = configUtil.getValidator();
+    this.validators = configUtil.getValidators();
     this.teemReporter = new TeemReporter();
 }
 
@@ -184,19 +186,24 @@ ConfigWorker.prototype.getConfig = function () {
  * Validate JSON data against config schema
  *
  * @public
- * @param {Object} data      - data to validate against config schema
- * @param {Object} [context] - context to pass to validator
+ * @param {Object} data       - data to validate against config schema
+ * @param {Object} options    - optional validation settings
+ * @param {String} options.schemaType - type of schema to validate against. Defaults to full (whole schema)
+ * @param {Object} options.context - additional context to pass through to validator
  *
  * @returns {Object} Promise which is resolved with the validated schema
  */
-ConfigWorker.prototype.validate = function (data, context) {
-    if (this.validator) {
-        return configUtil.validate(this.validator, data, context)
-            .catch((err) => {
-                err.code = 'ValidationError';
-                return Promise.reject(err);
-            });
+ConfigWorker.prototype.validate = function (data, options) {
+    options = util.assignDefaults(options, { schemaType: 'full' });
+
+    if (!util.isObjectEmpty(this.validators)) {
+        const validatorFunc = this.validators[options.schemaType];
+        if (typeof validatorFunc !== 'undefined') {
+            return configUtil.validate(validatorFunc, data, options.context)
+                .catch(err => Promise.reject(new errors.ValidationError(err)));
+        }
     }
+
     return Promise.reject(new Error('Validator is not available'));
 };
 
@@ -210,7 +217,7 @@ ConfigWorker.prototype.validate = function (data, context) {
  * @returns {Object} Promise which is resolved with the expanded config
  */
 ConfigWorker.prototype.expandConfig = function (rawConfig) {
-    return this.validate(rawConfig, { expand: true }); // set flag for additional decl processing
+    return this.validate(rawConfig, { context: { expand: true } }); // set flag for additional decl processing
 };
 
 /**
@@ -220,17 +227,19 @@ ConfigWorker.prototype.expandConfig = function (rawConfig) {
  *
  * @public
  * @param {Object} data - namespace-only data to process
- * @param {String} options.namespace - namespace to which config belongs to
+ * @param {String} namespace - namespace to which config belongs to
  *
- * @returns {Object} Promise resolved with copy of validated config resolved on success
+ * @returns {Object} Promise resolved with copy of validated namespace config resolved on success
  */
 
 ConfigWorker.prototype.processNamespaceDeclaration = function (data, namespace) {
-    return this.getConfig()
+    return this.validate(data, { schemaType: CONFIG_CLASSES.NAMESPACE_CLASS_NAME })
+        .then(() => this.getConfig())
         .then((savedConfig) => {
             const mergedDecl = util.isObjectEmpty(savedConfig.raw) ? { class: 'Telemetry' } : util.deepCopy(savedConfig.raw);
             mergedDecl[namespace] = data;
-            return this.processDeclaration(mergedDecl, { savedConfig, namespaceToUpdate: namespace });
+            return this.processDeclaration(mergedDecl, { savedConfig, namespaceToUpdate: namespace })
+                .then(fullConfig => Promise.resolve(fullConfig[namespace] || {}));
         });
 };
 
@@ -298,16 +307,30 @@ ConfigWorker.prototype.processDeclaration = function (data, options) {
 };
 
 /**
- * Get raw (origin) config
+ * Get raw (original) config
  *
  * @public
- * @param {Object} restOperation
+ * @param {String} namespace - namespace name
  *
- * @returns {Promise<Object>} resolved with raw (origin) config
+ * @returns {Promise<Object>} resolved with raw (original) config
+ *                           - full declaration if namespace param provided,
+ *                             otherwise just the namespace config
  */
-ConfigWorker.prototype.getRawConfig = function () {
-    return this.getConfig().then(config => Promise.resolve((config && config.raw) || {}));
+ConfigWorker.prototype.getRawConfig = function (namespace) {
+    return this.getConfig()
+        .then(config => Promise.resolve((config && config.raw) || {}))
+        .then((fullConfig) => {
+            if (namespace) {
+                const namespaceConfig = fullConfig[namespace];
+                if (util.isObjectEmpty(namespaceConfig)) {
+                    return Promise.reject(new errors.ObjectNotFoundInConfigError(`Namespace with name '${namespace}' doesn't exist`));
+                }
+                return namespaceConfig;
+            }
+            return fullConfig;
+        });
 };
+
 
 // initialize singleton
 let configWorker;

@@ -95,6 +95,10 @@ describe('Config Util', () => {
                 .then(validated => configUtil.componentizeConfig(validated));
         };
 
+        const sortMappings = (mappings) => {
+            Object.keys(mappings).forEach(key => mappings[key].sort());
+        };
+
         beforeEach(() => {
             sinon.stub(deviceUtil, 'encryptSecret').resolvesArg(0);
             sinon.stub(deviceUtil, 'decryptSecret').resolvesArg(0);
@@ -112,7 +116,11 @@ describe('Config Util', () => {
                         parseDeclaration(testConf.declaration)
                             .then(configData => configUtil.normalizeComponents(configData))
                             .then((normalized) => {
-                                assert.deepStrictEqual(normalized, testConf.expected);
+                                sortMappings(normalized.mappings);
+                                sortMappings(testConf.expected.mappings);
+
+                                assert.deepStrictEqual(normalized.mappings, testConf.expected.mappings);
+                                assert.sameDeepMembers(normalized.components, testConf.expected.components);
                             }));
                 });
             });

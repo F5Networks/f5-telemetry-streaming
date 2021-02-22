@@ -19,7 +19,7 @@ const sinon = require('sinon');
 
 const BaseRequestHandler = require('../../../src/lib/requestHandlers/baseHandler');
 const configWorker = require('../../../src/lib/config');
-const InternalServerErrorHandler = require('../../../src/lib/requestHandlers/httpStatus/internalServerErrorHandler');
+const httpErrors = require('../../../src/lib/requestHandlers/httpErrors');
 const requestRouter = require('../../../src/lib/requestHandlers/router');
 const testUtil = require('../shared/util');
 
@@ -277,10 +277,10 @@ describe('Requests Router', () => {
             });
     });
 
-    it('should return hardcoded server internal error when error thrown in InternalServerErrorHandler', () => {
+    it('should return hardcoded \'internal server error\' when error handler fails', () => {
         requestRouter.register(['GET', 'POST'], '/test', CustomRequestHandler);
         sinon.stub(CustomRequestHandler.prototype, 'process').rejects(new Error('expectedError'));
-        sinon.stub(InternalServerErrorHandler.prototype, 'getBody').throws(new Error('ISE_Error'));
+        sinon.stub(httpErrors.InternalServerError.prototype, 'getBody').throws(new Error('ISE_Error'));
 
         const restOp = new testUtil.MockRestOperation({ method: 'GET' });
         restOp.uri = testUtil.parseURL('http://localhost/test');

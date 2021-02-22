@@ -11,7 +11,7 @@
 const nodeUtil = require('util');
 
 const BaseRequestHandler = require('./baseHandler');
-const errors = require('../errors');
+const ErrorHandler = require('./errorHandler');
 const router = require('./router');
 const systemPoller = require('../systemPoller');
 
@@ -61,17 +61,7 @@ SystemPollerEndpointHandler.prototype.process = function () {
             this.body = fetchedData.map(d => d.data);
             return this;
         })
-        .catch((error) => {
-            if (error instanceof errors.ConfigLookupError) {
-                this.code = 404;
-                this.body = {
-                    code: this.code,
-                    message: error.message
-                };
-                return this;
-            }
-            return Promise.reject(error);
-        });
+        .catch(error => new ErrorHandler(error).process());
 };
 
 router.on('register', (routerInst, enableDebug) => {

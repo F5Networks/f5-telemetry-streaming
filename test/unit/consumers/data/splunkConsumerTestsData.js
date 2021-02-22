@@ -9,8 +9,8 @@
 'use strict';
 
 module.exports = {
-    legacySystemData: [
-        {
+    legacySystemData: {
+        exampleOfSystemPollerOutput: {
             expectedData: [
                 {
                     event: {
@@ -912,9 +912,9 @@ module.exports = {
                 }
             ]
         }
-    ],
-    multiMetricSystemData: [
-        {
+    },
+    multiMetricSystemData: {
+        exampleOfSystemPollerOutput: {
             expectedData: [
                 {
                     fields: {
@@ -3353,6 +3353,32 @@ module.exports = {
                     time: 1546304461000
                 }
             ]
+        },
+        systemPollerOutputWithReferences: {
+            name: 'multi-metric output to check the case when References are ignored',
+            expectedData: [
+                {
+                    time: 1546304461000,
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    host: 'telemetry.bigip.com',
+                    fields: {
+                        hostname: 'telemetry.bigip.com',
+                        telemetryStreamingStatisticSet: 'system'
+                    }
+                },
+                {
+                    time: 1546304461000,
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    host: 'telemetry.bigip.com',
+                    fields: {
+                        'metric_name:metric': 10,
+                        name: 'pool1',
+                        telemetryStreamingStatisticSet: 'pools'
+                    }
+                }
+            ]
         }
-    ]
+    }
 };

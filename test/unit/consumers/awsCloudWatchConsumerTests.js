@@ -19,7 +19,7 @@ const sinon = require('sinon');
 
 const awsCloudWatchIndex = require('../../../src/lib/consumers/AWS_CloudWatch/index');
 const testUtil = require('../shared/util');
-const awsUtil = require('../../../src/lib/consumers/AWS_CloudWatch/awsUtil');
+const awsUtil = require('../../../src/lib/consumers/shared/awsUtil');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;

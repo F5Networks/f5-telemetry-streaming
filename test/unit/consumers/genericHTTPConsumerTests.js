@@ -31,6 +31,8 @@ describe('Generic_HTTP', () => {
         host: 'localhost'
     };
 
+    const redactString = '*****';
+
     afterEach(() => {
         testUtil.checkNockActiveMocks(nock);
         sinon.restore();
@@ -102,7 +104,34 @@ describe('Generic_HTTP', () => {
             return genericHttpIndex(context)
                 .then(() => {
                     const traceData = JSON.parse(context.tracer.write.firstCall.args[0]);
-                    assert.deepStrictEqual(traceData.headers, { Authorization: '*****' });
+                    assert.deepStrictEqual(traceData.headers, { Authorization: redactString });
+                });
+        });
+
+        it('should trace data with certificates redacted', () => {
+            const context = testUtil.buildConsumerContext({
+                config: {
+                    method: 'POST',
+                    protocol: 'http',
+                    port: '8080',
+                    path: '/',
+                    host: 'myMetricsSystem',
+                    privateKey: 'secretKey',
+                    clientCertificate: 'myCert',
+                    rootCertificate: 'CACert'
+                }
+            });
+
+            nock('http://myMetricsSystem:8080')
+                .post('/')
+                .reply(200);
+
+            return genericHttpIndex(context)
+                .then(() => {
+                    const traceData = JSON.parse(context.tracer.write.firstCall.args[0]);
+                    assert.deepStrictEqual(traceData.privateKey, redactString);
+                    assert.deepStrictEqual(traceData.clientCertificate, redactString);
+                    assert.deepStrictEqual(traceData.rootCertificate, redactString);
                 });
         });
 
@@ -237,6 +266,55 @@ describe('Generic_HTTP', () => {
                         host: 'proxyServer', port: 8080, username: 'test', passphrase: 'test', allowSelfSignedCert: true
                     });
                     assert.deepStrictEqual(reqOpt.allowSelfSignedCert, true);
+                });
+        });
+    });
+
+    describe('tls options', () => {
+        let requestUtilSpy;
+
+        beforeEach(() => {
+            requestUtilSpy = sinon.stub(httpUtil, 'sendToConsumer').resolves();
+        });
+
+        it('should pass tls options', () => {
+            const context = testUtil.buildConsumerContext({
+                config: {
+                    method: 'POST',
+                    protocol: 'https',
+                    port: '80',
+                    host: 'targetHost',
+                    privateKey: 'secretKey',
+                    clientCertificate: 'myCert',
+                    rootCertificate: 'CACert'
+                }
+            });
+            return genericHttpIndex(context)
+                .then(() => {
+                    const reqOpt = requestUtilSpy.firstCall.args[0];
+                    assert.deepStrictEqual(reqOpt.ca, 'CACert');
+                    assert.deepStrictEqual(reqOpt.cert, 'myCert');
+                    assert.deepStrictEqual(reqOpt.key, 'secretKey');
+                });
+        });
+
+        it('should not allow self signed certs when using tls options', () => {
+            const context = testUtil.buildConsumerContext({
+                config: {
+                    method: 'POST',
+                    protocol: 'https',
+                    port: '80',
+                    host: 'targetHost',
+                    privateKey: 'secretKey',
+                    clientCertificate: 'myCert',
+                    rootCertificate: 'CACert',
+                    allowSelfSignedCert: true
+                }
+            });
+            return genericHttpIndex(context)
+                .then(() => {
+                    const reqOpt = requestUtilSpy.firstCall.args[0];
+                    assert.deepStrictEqual(reqOpt.allowSelfSignedCert, false);
                 });
         });
     });

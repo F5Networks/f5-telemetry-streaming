@@ -11,10 +11,11 @@
 const nodeUtil = require('util');
 
 const BaseRequestHandler = require('./baseHandler');
+const ErrorHandler = require('./errorHandler');
+const httpErrors = require('./httpErrors');
 const configWorker = require('../config');
 const logger = require('../logger');
 const router = require('./router');
-const ServiceUnavailableErrorHandler = require('./httpStatus/serviceUnavailableErrorHandler');
 
 /**
  * /declare endpoint handler
@@ -52,13 +53,19 @@ DeclareEndpointHandler.prototype.getBody = function () {
  */
 DeclareEndpointHandler.prototype.process = function () {
     let promise;
+    const namespace = this.params && this.params.namespace ? this.params.namespace : undefined;
+
     if (this.getMethod() === 'POST') {
         if (DeclareEndpointHandler.PROCESSING_DECLARATION_FLAG) {
             logger.debug('Can\'t process new declaration while previous one is still in progress');
-            return Promise.resolve(new ServiceUnavailableErrorHandler(this.restOperation));
+            return Promise.resolve(new ErrorHandler(new httpErrors.ServiceUnavailableError()));
         }
         DeclareEndpointHandler.PROCESSING_DECLARATION_FLAG = true;
-        promise = configWorker.processDeclaration(this.restOperation.getBody())
+        promise = namespace
+            ? configWorker.processNamespaceDeclaration(this.restOperation.getBody(), this.params.namespace)
+            : configWorker.processDeclaration(this.restOperation.getBody());
+
+        promise = promise
             .then((config) => {
                 DeclareEndpointHandler.PROCESSING_DECLARATION_FLAG = false;
                 return config;
@@ -68,8 +75,9 @@ DeclareEndpointHandler.prototype.process = function () {
                 return Promise.reject(err);
             });
     } else {
-        promise = configWorker.getRawConfig();
+        promise = configWorker.getRawConfig(namespace);
     }
+
     return promise.then((config) => {
         this.code = 200;
         this.body = {
@@ -78,18 +86,7 @@ DeclareEndpointHandler.prototype.process = function () {
         };
         return this;
     })
-        .catch((error) => {
-            if (error.code === 'ValidationError') {
-                this.code = 422;
-                this.body = {
-                    code: this.code,
-                    message: 'Unprocessable entity',
-                    error: error.message
-                };
-                return this;
-            }
-            return Promise.reject(error);
-        });
+        .catch(error => new ErrorHandler(error).process());
 };
 
 DeclareEndpointHandler.PROCESSING_DECLARATION_FLAG = false;
@@ -97,6 +94,8 @@ DeclareEndpointHandler.PROCESSING_DECLARATION_FLAG = false;
 router.on('register', (routerInst) => {
     routerInst.register('GET', '/declare', DeclareEndpointHandler);
     routerInst.register('POST', '/declare', DeclareEndpointHandler);
+    routerInst.register('GET', '/namespace/:namespace/declare', DeclareEndpointHandler);
+    routerInst.register('POST', '/namespace/:namespace/declare', DeclareEndpointHandler);
 });
 
 module.exports = DeclareEndpointHandler;

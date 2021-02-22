@@ -8,10 +8,11 @@
 
 'use strict';
 
-const deviceUtil = require('./utils/device');
 const constants = require('./constants');
-const util = require('./utils/misc');
+const deviceUtil = require('./utils/device');
 const logger = require('./logger');
+const retryPromise = require('./utils/promise').retry;
+const util = require('./utils/misc');
 
 /** @module EndpointLoader */
 
@@ -299,7 +300,7 @@ EndpointLoader.prototype.getData = function (uri, options) {
         backoff: 100
     };
     const fullUri = options.endpointFields ? `${uri}?$select=${options.endpointFields.join(',')}` : uri;
-    return util.retryPromise(() => deviceUtil.makeDeviceRequest(this.host, fullUri, httpOptions), retryOpts)
+    return retryPromise(() => deviceUtil.makeDeviceRequest(this.host, fullUri, httpOptions), retryOpts)
         .then((data) => {
             const ret = {
                 name: options.name !== undefined ? options.name : uri,

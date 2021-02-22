@@ -8,9 +8,10 @@
 
 'use strict';
 
-const util = require('./misc');
 const azureUtil = require('../consumers/shared/azureUtil');
 const logger = require('../logger');
+const retryPromise = require('./promise').retry;
+const util = require('./misc');
 
 /** @module metadataUtil */
 // provides a facade for metadata related methods based on instance environment
@@ -29,7 +30,7 @@ function getInstanceMetadata(consumerContext) {
     const consumerType = consumerContext.config.type;
     let promise = Promise.resolve();
     if (consumerType.indexOf('Azure') > -1) {
-        promise = util.retryPromise(() => azureUtil.getInstanceMetadata(consumerContext), { maxTries: 1 });
+        promise = retryPromise(() => azureUtil.getInstanceMetadata(consumerContext), { maxTries: 1 });
     }
 
     return promise
