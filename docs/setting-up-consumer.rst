@@ -19,7 +19,9 @@ Required information:
  - Port: Default is 8088, this can be configured within the Global Settings section of the Splunk HEC.
  - API Key: An API key must be created and provided in the passphrase object of the declaration, refer to Splunk documentation for the correct way to create an HEC token.
 
-.. NOTE:: If you want to specify proxy settings for Splunk consumers in TS 1.17 and later, see the :ref:`Splunk Proxy<splunkproxy>` example.
+If you want to specify proxy settings for Splunk consumers in TS 1.17 and later, see the :ref:`Splunk Proxy<splunkproxy>` example.
+
+.. NOTE:: When using the :doc:`custom endpoints feature<custom-endpoints>`, be sure to include **/mgmt/tm/sys/global-settings** in your endpoints for Telemetry Streaming to be able to find the hostname.
 
 Example Declaration:
 
@@ -442,7 +444,7 @@ Required Information:
 
 .. IMPORTANT:: In TS v1.15 and later, if Telemetry Streaming is unable to locate the hostname in the systemPoller data, it sends the metric with hostname value **host.unknown**. This gets transformed to **hostname-unknown** as required by StatsD. This is because StatsD uses a **.** as a delimiter, and TS automatically replaces it with a **-**. For example: |br| |bold| { |br| |sp| |sp| |sp| metricName: 'f5telemetry.hostname-unknown.customStats.clientSideTraffic-bitsIn', |br| |sp| |sp| |sp| metricValue: 111111030 |br| } |boldclose| 
 
-.. NOTE:: When using the :doc:`custom endpoints feature<custom-endpoints>`, be sure to include **/mgmt/tm/sys/global-settings** in your endpoints for Telemetry Streaming to be able to find the hostname. 
+.. NOTE:: When using the :doc:`custom endpoints feature<custom-endpoints>`, be sure to include **/mgmt/tm/sys/global-settings** in your endpoints for Telemetry Streaming to be able to find the hostname.
 
 To see more information about installing StatsD, see |StatsDWiki|.
 
