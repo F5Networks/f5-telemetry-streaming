@@ -70,6 +70,8 @@ For example, your declaration could add the following snippet, which contains en
 
 |
 
+.. _hostname:
+
 Including hostname information
 ``````````````````````````````
 In order to have hostname information available in the data sent to your consumer, F5 recommends you always include the following endpoint when using custom endpoints:
