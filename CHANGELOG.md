@@ -4,6 +4,7 @@ Changes to this project are documented in this file. More detail and links can b
 ## 1.19.0
 ### Added
 - AUTOTOOL-2160: Added monitor checks for memory thresholds, which prevents restnoded from crashing on reaching memory limits (runs by default)
+- AUTOTOOL-1915: Added new Event Listener endpoint (/eventListener/$eventListener and /namespace/$namespace/eventListener/$eventListener) to send a debug message to an Event Listener
 ### Fixed
 - AUTOTOOL-2164: Fixed Route Domain ID handling for Virtual Server and Pool stats
 ### Changed

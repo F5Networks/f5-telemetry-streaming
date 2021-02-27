@@ -9,6 +9,7 @@
 'use strict';
 
 require('./declareHandler');
+require('./eventListenerHandler');
 require('./infoHandler');
 require('./ihealthPollerHandler');
 require('./pullConsumerHandler');
