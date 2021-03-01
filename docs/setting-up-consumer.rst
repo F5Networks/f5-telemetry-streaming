@@ -71,7 +71,7 @@ Telemetry Streaming 1.17 introduces the ability to use Splunk multi-metric forma
 
 See the |splunkmm| for more information.
 
-.. IMPORTANT:: Only canonical (default) system poller output is supported
+.. IMPORTANT:: Only canonical (default) system poller output is supported. Custom endpoints are not supported with the multi-metric format.
 
 To use this feature, the **format** of the Splunk Telemetry_Consumer must be set to **multiMetric** as shown in the example.
 
