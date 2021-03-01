@@ -8,7 +8,7 @@ The Custom Endpoints defined within a Telemetry Streaming declaration must then 
 Telemetry Streaming v1.10+ also includes the ability to define multiple system pollers within a single declaration.
 Using multiple system pollers within a single declaration allows for a configuration where one system poller can pull data from the default endpoints, and another system poller pulls data only from its referenced, Custom Endpoints. 
 
-.. NOTE::  Custom endpoints are currently for BIG-IP only. 
+.. NOTE::  Custom endpoints are currently for BIG-IP only. Custom endpoints are NOT supported with :ref:`Splunk multi-metric format<multi-metric>`.
 
 
 Using the Telemetry_Endpoints class
