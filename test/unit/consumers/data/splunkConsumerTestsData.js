@@ -1976,6 +1976,8 @@ module.exports = {
                         'metric_name:recordsIn': 0,
                         'metric_name:recordsOut': 0,
                         'metric_name:sniRejects': 0,
+                        'metric_name:totCompatConns': 0,
+                        'metric_name:totNativeConns': 0,
                         name: '/Common/clientssl',
                         telemetryStreamingStatisticSet: 'clientSslProfiles',
                         tenant: 'Common'
@@ -2033,6 +2035,8 @@ module.exports = {
                         'metric_name:recordsIn': 0,
                         'metric_name:recordsOut': 0,
                         'metric_name:sniRejects': 0,
+                        'metric_name:totCompatConns': 100,
+                        'metric_name:totNativeConns': 100,
                         name: '/Example_Tenant/A1/webtls',
                         telemetryStreamingStatisticSet: 'clientSslProfiles',
                         tenant: 'Example_Tenant'
@@ -2089,6 +2093,8 @@ module.exports = {
                         'metric_name:protocolUses.tlsv1_3': 0,
                         'metric_name:recordsIn': 0,
                         'metric_name:recordsOut': 0,
+                        'metric_name:totCompatConns': 0,
+                        'metric_name:totNativeConns': 0,
                         name: '/Common/serverssl',
                         telemetryStreamingStatisticSet: 'serverSslProfiles',
                         tenant: 'Common'
