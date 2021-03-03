@@ -3,6 +3,7 @@ Changes to this project are documented in this file. More detail and links can b
 
 ## 1.19.0
 ### Added
+- AUTOTOOL-2280 [GitHub #79](https://github.com/F5Networks/f5-telemetry-streaming/issues/79): Expose totNativeConns and totCompatConns on SSL profile stats
 - AUTOTOOL-2160: Added monitor checks for memory thresholds, which prevents restnoded from crashing on reaching memory limits (runs by default)
 - AUTOTOOL-1915: Added new Event Listener endpoint (/eventListener/$eventListener and /namespace/$namespace/eventListener/$eventListener) to send a debug message to an Event Listener
 ### Fixed

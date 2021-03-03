@@ -537,6 +537,14 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.totCompatConns',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.totNativeConns',
+                    metricValue: 0
+                },
+                {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.activeHandshakeRejected',
                     metricValue: 0
                 },
@@ -715,6 +723,14 @@ module.exports = {
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.sniRejects',
                     metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.totCompatConns',
+                    metricValue: 100
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.totNativeConns',
+                    metricValue: 100
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.cnamePools.-Common-ts_cname_pool.members.www-cnameone-tstest-com.alternate',
@@ -1958,6 +1974,14 @@ module.exports = {
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.recordsOut',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.totCompatConns',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.totNativeConns',
                     metricValue: 0
                 },
                 {

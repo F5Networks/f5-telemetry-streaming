@@ -591,6 +591,8 @@
             "recordsIn": 0,
             "recordsOut": 0,
             "sniRejects": 0,
+            "totCompatConns": 0,
+            "totNativeConns": 0,
             "name": "/Common/clientssl",
             "tenant": "Common",
             "application": ""
@@ -641,6 +643,8 @@
             "recordsIn": 0,
             "recordsOut": 0,
             "sniRejects": 0,
+            "totCompatConns": 100,
+            "totNativeConns": 100,
             "name": "/Example_Tenant/A1/webtls",
             "tenant": "Example_Tenant",
             "application": "A1"
@@ -692,6 +696,8 @@
             "protocolUses.tlsv1_3": 0,
             "recordsIn": 0,
             "recordsOut": 0,
+            "totCompatConns": 0,
+            "totNativeConns": 0,
             "name": "/Common/serverssl",
             "tenant": "Common",
             "application": ""
