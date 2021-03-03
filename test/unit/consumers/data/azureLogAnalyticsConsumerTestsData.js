@@ -346,6 +346,10 @@ module.exports = {
                                 'clientside.bitsIn': 0,
                                 'clientside.bitsOut': 0,
                                 'clientside.curConns': 0,
+                                'clientside.maxConns': 0,
+                                'clientside.pktsIn': 0,
+                                'clientside.pktsOut': 0,
+                                'clientside.totConns': 0,
                                 destination: '10.5.6.7:80',
                                 enabledState: 'enabled',
                                 ipProtocol: 'tcp',
@@ -372,6 +376,10 @@ module.exports = {
                                 'clientside.bitsIn': 0,
                                 'clientside.bitsOut': 0,
                                 'clientside.curConns': 0,
+                                'clientside.maxConns': 0,
+                                'clientside.pktsIn': 0,
+                                'clientside.pktsOut': 0,
+                                'clientside.totConns': 0,
                                 destination: '192.0.2.11:443',
                                 enabledState: 'enabled',
                                 ipProtocol: 'tcp',
@@ -388,6 +396,10 @@ module.exports = {
                                 'clientside.bitsIn': 0,
                                 'clientside.bitsOut': 0,
                                 'clientside.curConns': 0,
+                                'clientside.maxConns': 0,
+                                'clientside.pktsIn': 0,
+                                'clientside.pktsOut': 0,
+                                'clientside.totConns': 0,
                                 destination: '192.0.2.11:80',
                                 enabledState: 'enabled',
                                 name: '/Example_Tenant/A1/serviceMain-Redirect',
@@ -409,7 +421,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:h6eg0jvac2pOLT+SfxV5cGQvLUjWLExsaqsHEYdUBMk=',
+                        Authorization: 'SharedKey myWorkspace:fXbTcwglyeCjGtg2DLxT6ZgotDRZqDMMs7+7ZCV8bhc=',
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_virtualServers',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -435,6 +447,10 @@ module.exports = {
                                         'serverside.bitsIn': 0,
                                         'serverside.bitsOut': 0,
                                         'serverside.curConns': 0,
+                                        'serverside.maxConns': 0,
+                                        'serverside.pktsIn': 0,
+                                        'serverside.pktsOut': 0,
+                                        'serverside.totConns': 0,
                                         'status.statusReason': 'Pool member is available'
                                     }
                                 },
@@ -442,6 +458,10 @@ module.exports = {
                                 'serverside.bitsIn': 0,
                                 'serverside.bitsOut': 0,
                                 'serverside.curConns': 0,
+                                'serverside.maxConns': 0,
+                                'serverside.pktsIn': 0,
+                                'serverside.pktsOut': 0,
+                                'serverside.totConns': 0,
                                 'status.statusReason': 'The pool is available',
                                 tenant: 'Common'
                             },
@@ -460,6 +480,10 @@ module.exports = {
                                         'serverside.bitsIn': 0,
                                         'serverside.bitsOut': 0,
                                         'serverside.curConns': 0,
+                                        'serverside.maxConns': 0,
+                                        'serverside.pktsIn': 0,
+                                        'serverside.pktsOut': 0,
+                                        'serverside.totConns': 0,
                                         'status.statusReason': 'Pool member has been marked down by a monitor'
                                     }
                                 },
@@ -467,6 +491,10 @@ module.exports = {
                                 'serverside.bitsIn': 0,
                                 'serverside.bitsOut': 0,
                                 'serverside.curConns': 0,
+                                'serverside.maxConns': 0,
+                                'serverside.pktsIn': 0,
+                                'serverside.pktsOut': 0,
+                                'serverside.totConns': 0,
                                 'status.statusReason': 'The pool is available',
                                 tenant: 'Common'
                             },
@@ -485,6 +513,10 @@ module.exports = {
                                         'serverside.bitsIn': 0,
                                         'serverside.bitsOut': 0,
                                         'serverside.curConns': 0,
+                                        'serverside.maxConns': 0,
+                                        'serverside.pktsIn': 0,
+                                        'serverside.pktsOut': 0,
+                                        'serverside.totConns': 0,
                                         'status.statusReason': 'Pool member is available'
                                     }
                                 },
@@ -492,6 +524,10 @@ module.exports = {
                                 'serverside.bitsIn': 0,
                                 'serverside.bitsOut': 0,
                                 'serverside.curConns': 0,
+                                'serverside.maxConns': 0,
+                                'serverside.pktsIn': 0,
+                                'serverside.pktsOut': 0,
+                                'serverside.totConns': 0,
                                 'status.statusReason': 'The pool is available',
                                 tenant: 'Example_Tenant'
                             },
@@ -510,6 +546,10 @@ module.exports = {
                                         'serverside.bitsIn': 0,
                                         'serverside.bitsOut': 0,
                                         'serverside.curConns': 0,
+                                        'serverside.maxConns': 0,
+                                        'serverside.pktsIn': 0,
+                                        'serverside.pktsOut': 0,
+                                        'serverside.totConns': 0,
                                         'status.statusReason': 'Pool member is available'
                                     },
                                     '/Example_Tenant/192.0.2.13:80': {
@@ -521,6 +561,10 @@ module.exports = {
                                         'serverside.bitsIn': 0,
                                         'serverside.bitsOut': 0,
                                         'serverside.curConns': 0,
+                                        'serverside.maxConns': 0,
+                                        'serverside.pktsIn': 0,
+                                        'serverside.pktsOut': 0,
+                                        'serverside.totConns': 0,
                                         'status.statusReason': 'Pool member is available'
                                     }
                                 },
@@ -528,6 +572,10 @@ module.exports = {
                                 'serverside.bitsIn': 0,
                                 'serverside.bitsOut': 0,
                                 'serverside.curConns': 0,
+                                'serverside.maxConns': 0,
+                                'serverside.pktsIn': 0,
+                                'serverside.pktsOut': 0,
+                                'serverside.totConns': 0,
                                 'status.statusReason': 'The pool is available',
                                 tenant: 'Example_Tenant'
                             }
@@ -535,7 +583,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:3Av9tdaMHdEc9bJPNvFNHKN5VBilNUzpHvXJd/qJgJw=',
+                        Authorization: 'SharedKey myWorkspace:1oFmIkjCcPPDKVHQCVaCRMod3Cvpx4nc15WA/MWjNJw=',
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_pools',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'

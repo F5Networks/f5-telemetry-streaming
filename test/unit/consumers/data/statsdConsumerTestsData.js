@@ -1673,6 +1673,22 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-app-app-app_pool.members.-Common-10-0-3-5-80.serverside-maxConns',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-app-app-app_pool.members.-Common-10-0-3-5-80.serverside-pktsIn',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-app-app-app_pool.members.-Common-10-0-3-5-80.serverside-pktsOut',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-app-app-app_pool.members.-Common-10-0-3-5-80.serverside-totConns',
+                    metricValue: 0
+                },
+                {
                     metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-app-app-app_pool.activeMemberCnt',
                     metricValue: 0
                 },
@@ -1686,6 +1702,22 @@ module.exports = {
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-app-app-app_pool.serverside-curConns',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-app-app-app_pool.serverside-maxConns',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-app-app-app_pool.serverside-pktsIn',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-app-app-app_pool.serverside-pktsOut',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-app-app-app_pool.serverside-totConns',
                     metricValue: 0
                 },
                 {
@@ -1705,6 +1737,22 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-telemetry-local.members.-Common-10-0-1-100-6514.serverside-maxConns',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-telemetry-local.members.-Common-10-0-1-100-6514.serverside-pktsIn',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-telemetry-local.members.-Common-10-0-1-100-6514.serverside-pktsOut',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-telemetry-local.members.-Common-10-0-1-100-6514.serverside-totConns',
+                    metricValue: 0
+                },
+                {
                     metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-telemetry-local.activeMemberCnt',
                     metricValue: 0
                 },
@@ -1718,6 +1766,22 @@ module.exports = {
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-telemetry-local.serverside-curConns',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-telemetry-local.serverside-maxConns',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-telemetry-local.serverside-pktsIn',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-telemetry-local.serverside-pktsOut',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-telemetry-local.serverside-totConns',
                     metricValue: 0
                 },
                 {
@@ -1737,6 +1801,22 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-hsl_pool.members.-Example_Tenant-192-168-120-6-514.serverside-maxConns',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-hsl_pool.members.-Example_Tenant-192-168-120-6-514.serverside-pktsIn',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-hsl_pool.members.-Example_Tenant-192-168-120-6-514.serverside-pktsOut',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-hsl_pool.members.-Example_Tenant-192-168-120-6-514.serverside-totConns',
+                    metricValue: 0
+                },
+                {
                     metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-hsl_pool.activeMemberCnt',
                     metricValue: 0
                 },
@@ -1750,6 +1830,22 @@ module.exports = {
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-hsl_pool.serverside-curConns',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-hsl_pool.serverside-maxConns',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-hsl_pool.serverside-pktsIn',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-hsl_pool.serverside-pktsOut',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-hsl_pool.serverside-totConns',
                     metricValue: 0
                 },
                 {
@@ -1769,6 +1865,22 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-12-80.serverside-maxConns',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-12-80.serverside-pktsIn',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-12-80.serverside-pktsOut',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-12-80.serverside-totConns',
+                    metricValue: 0
+                },
+                {
                     metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-13-80.port',
                     metricValue: 0
                 },
@@ -1785,6 +1897,22 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-13-80.serverside-maxConns',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-13-80.serverside-pktsIn',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-13-80.serverside-pktsOut',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-13-80.serverside-totConns',
+                    metricValue: 0
+                },
+                {
                     metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.activeMemberCnt',
                     metricValue: 0
                 },
@@ -1798,6 +1926,22 @@ module.exports = {
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.serverside-curConns',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.serverside-maxConns',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.serverside-pktsIn',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.serverside-pktsOut',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.serverside-totConns',
                     metricValue: 0
                 },
                 {
@@ -2225,6 +2369,22 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Common-app-app-app_vs.clientside-maxConns',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Common-app-app-app_vs.clientside-pktsIn',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Common-app-app-app_vs.clientside-pktsOut',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Common-app-app-app_vs.clientside-totConns',
+                    metricValue: 0
+                },
+                {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-bitsIn',
                     metricValue: 0
                 },
@@ -2237,6 +2397,22 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-maxConns',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-pktsIn',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-pktsOut',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-totConns',
+                    metricValue: 0
+                },
+                {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-bitsIn',
                     metricValue: 0
                 },
@@ -2246,6 +2422,22 @@ module.exports = {
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-curConns',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-maxConns',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-pktsIn',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-pktsOut',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-totConns',
                     metricValue: 0
                 }
             ]
