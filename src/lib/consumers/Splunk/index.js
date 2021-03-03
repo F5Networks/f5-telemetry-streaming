@@ -13,9 +13,9 @@ const zlib = require('zlib');
 const dataMapping = require('./dataMapping');
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 const memConverter = require('./multiMetricEventConverter');
-const httpUtil = require('./../shared/httpUtil');
+const httpUtil = require('../shared/httpUtil');
 
-const GZIP_DATA = true;
+
 const MAX_CHUNK_SIZE = 99000;
 const HEC_EVENTS_URI = '/services/collector/event';
 const HEC_METRICS_URI = '/services/collector';
@@ -25,12 +25,13 @@ const DATA_FORMATS = {
     METRICS: 'multiMetric'
 };
 
-
 /**
  * See {@link ../README.md#context} for documentation
+ *
+ * @returns {Promise} resolved once data sent to destination (never rejects)
  */
 module.exports = function (context) {
-    transformData(context)
+    return transformData(context)
         .then(data => forwardData(data, context))
         .catch((err) => {
             context.logger.exception('Splunk data processing error', err);
@@ -38,11 +39,11 @@ module.exports = function (context) {
 };
 
 /**
-* Add transformed data
-*
-* @param {Object} ctx     - context object
-* @param {Object} newData - transformed data
-*/
+ * Add transformed data
+ *
+ * @param {Object} ctx - context object
+ * @param {Object} newData - transformed data
+ */
 function appendData(ctx, newData) {
     const results = ctx.results;
     const newDataStr = JSON.stringify(newData, ctx.results.jsonReplacer);
@@ -58,33 +59,35 @@ function appendData(ctx, newData) {
 }
 
 /**
-* Transform data using provided callback
-*
-* @param {function(object):object} cb - callback function to transform
-* @param {Object} ctx                 - context object
-*
-* @returns {Object} Promise resolved with undefined
-*/
+ * Transform data using provided callback
+ *
+ * @param {Function(object):object} cb - callback function to transform
+ * @param {Object} ctx - context object
+ *
+ * @returns {Promise} resolved once data transformed
+ */
 function safeDataTransform(cb, ctx) {
-    return new Promise((resolve) => {
-        resolve(cb(ctx));
-    }).then((data) => {
-        if (data) {
-            if (Array.isArray(data)) {
-                data.forEach(part => appendData(ctx, part));
-            } else {
-                appendData(ctx, data);
+    return Promise.resolve()
+        .then(() => cb(ctx))
+        .then((data) => {
+            if (data) {
+                if (Array.isArray(data)) {
+                    data.forEach(part => appendData(ctx, part));
+                } else {
+                    appendData(ctx, data);
+                }
             }
-        }
-    }).catch((err) => {
-        ctx.globalCtx.logger.exception('Splunk.safeDataTransform error', err);
-    });
+        }).catch((err) => {
+            ctx.globalCtx.logger.exception('Splunk.safeDataTransform error', err);
+        });
 }
 
 /**
  * Convert data to default format
+ *
  * @param {Object} ctx - context object
- * @returns {Object} Promise resolved with string (converted data)
+ *
+ * @returns {Promise<Array<String>>} resolved once default format applied to data
  */
 function defaultDataFormat(ctx) {
     return Promise.resolve([JSON.stringify(dataMapping.defaultFormat(ctx))]);
@@ -92,22 +95,27 @@ function defaultDataFormat(ctx) {
 
 /**
  * Convert data to multi metric format
+ *
  * @param {Object} ctx - context object
- * @returns {Object} Promise resolved with (converted data)
+ *
+ * @returns {Promise<Array<String>} resolved with transformed data
  */
 function multiMetricDataFormat(ctx) {
-    const events = [];
-    memConverter(ctx.event.data, event => events.push(JSON.stringify(event)));
-    return Promise.resolve(events);
+    return Promise.resolve()
+        .then(() => {
+            const events = [];
+            memConverter(ctx.event.data, event => events.push(JSON.stringify(event)));
+            return events;
+        });
 }
 
 /**
-* Transform incoming data
-*
-* @param {Object} globalCtx - global context
-*
-* @returns {Object} Promise resolved with transformed data
-*/
+ * Transform incoming data
+  *
+ * @param {Object} globalCtx - global context
+ *
+ * @returns {Promise<Array<String>>} resolved with transformed data
+ */
 function transformData(globalCtx) {
     if (globalCtx.config.format === DATA_FORMATS.METRICS) {
         if (globalCtx.event.type === EVENT_TYPES.SYSTEM_POLLER && !globalCtx.event.isCustom) {
@@ -139,8 +147,8 @@ function transformData(globalCtx) {
     let p = null;
     if (globalCtx.event.type === EVENT_TYPES.SYSTEM_POLLER && !globalCtx.event.isCustom) {
         requestCtx.cache.dataTimestamp = Date.parse(globalCtx.event.data.system.systemTimestamp);
-        p = Promise.all(dataMapping.stats.map(func => safeDataTransform(func, requestCtx)));
-        p.then(() => safeDataTransform(dataMapping.overall, requestCtx));
+        p = Promise.all(dataMapping.stats.map(func => safeDataTransform(func, requestCtx)))
+            .then(() => safeDataTransform(dataMapping.overall, requestCtx));
     } else if (globalCtx.event.type === EVENT_TYPES.IHEALTH_POLLER) {
         p = safeDataTransform(dataMapping.ihealth, requestCtx);
     }
@@ -148,22 +156,20 @@ function transformData(globalCtx) {
     if (!p) {
         return Promise.resolve([]);
     }
-    return p.then(() => Promise.resolve(requestCtx.results.translatedData));
+    return p.then(() => requestCtx.results.translatedData);
 }
 
 /**
-* Create default options for request
-*
-* @param {Object} consumer - consumer's config object
-*
-* @returns {Object} options for requestUtil
-*/
+ * Create default options for request
+ *
+ * @param {Object} consumer - consumer's config object
+ *
+ * @returns {Object} options for requestUtil
+ */
 function getRequestOptions(consumer) {
     const requestOpts = {
         allowSelfSignedCert: consumer.allowSelfSignedCert,
-        // yeah, we don't have GZIP option in the schema
-        // but it is easier to debug if you can configure it
-        gzip: typeof consumer.gzip !== 'undefined' ? consumer.gzip : GZIP_DATA,
+        gzip: consumer.compressionType === 'gzip',
         headers: {
             Authorization: `Splunk ${consumer.passphrase}`
         },
@@ -189,15 +195,15 @@ function getRequestOptions(consumer) {
 }
 
 /**
-* Send data to consumer
-*
-* @param {string[]} dataChunk      - list of strings to send
-* @param {Object} context          - context
-* @param {Object} context.request  - request object
-* @param {Object} context.consumer - consumer object
-*
-* @returns {Object} Promise object resolved with response's statusCode
-*/
+ * Send data to consumer
+ *
+ * @param {string[]} dataChunk      - list of strings to send
+ * @param {Object} context          - context
+ * @param {Object} context.request  - request object
+ * @param {Object} context.consumer - consumer object
+ *
+ * @returns {Promise} resolved with complete response
+ */
 function sendDataChunk(dataChunk, context) {
     const logger = context.globalCtx.logger;
 
@@ -219,85 +225,74 @@ function sendDataChunk(dataChunk, context) {
         }
     }).then((data) => {
         logger.debug(`sending data - ${data.length} bytes`);
-
         const opts = Object.assign({ body: data, logger }, context.requestOpts);
         opts.headers = Object.assign(opts.headers, {
             'Content-Length': data.length
         });
-
-        return httpUtil.sendToConsumer(opts)
-            .then(response => response[1].statusCode);
+        return httpUtil.sendToConsumer(opts);
     });
 }
 
 /**
-* Forward data to consumer
-*
-* @param {string[]} dataToSend - list of strings to send
-* @param {Object} globalCtx    - global context object
-*
-*/
+ * Forward data to consumer
+ *
+ * @param {Array<String>} dataToSend - list of strings to send
+ * @param {Object} globalCtx    - global context object
+ *
+ * @returns {Promise} resolve once data sent to destination
+ */
 function forwardData(dataToSend, globalCtx) {
     if (!dataToSend || dataToSend.length === 0) {
         globalCtx.logger.debug('No data to forward to Splunk');
-        return Promise.resolve(true);
+        return Promise.resolve();
+    }
+    const context = {
+        globalCtx,
+        requestOpts: getRequestOptions(globalCtx.config),
+        consumer: globalCtx.config
+    };
+    if (globalCtx.tracer) {
+        // redact passphrase in consumer config
+        const tracedConsumerCtx = JSON.parse(JSON.stringify(context.consumer));
+        tracedConsumerCtx.passphrase = '*****';
+        // redact passphrase in proxy config
+        if (tracedConsumerCtx.proxy && tracedConsumerCtx.proxy.passphrase) {
+            tracedConsumerCtx.proxy.passphrase = '*****';
+        }
+        // redact passphrase in request options
+        const tracedRequestOpts = JSON.parse(JSON.stringify(context.requestOpts));
+        tracedRequestOpts.headers.Authorization = '*****';
+        // redact passphrase in proxy config
+        if (tracedRequestOpts.proxy && tracedRequestOpts.proxy.passphrase) {
+            tracedRequestOpts.proxy.passphrase = '*****';
+        }
+        globalCtx.tracer.write(JSON.stringify({
+            dataToSend,
+            consumer: tracedConsumerCtx,
+            requestOpts: tracedRequestOpts
+        }, null, 2));
     }
 
     return new Promise((resolve) => {
-        const context = {
-            globalCtx,
-            requestOpts: getRequestOptions(globalCtx.config),
-            consumer: globalCtx.config
-        };
-
-        if (globalCtx.tracer) {
-            // redact passphrase in consumer config
-            const tracedConsumerCtx = JSON.parse(JSON.stringify(context.consumer));
-            tracedConsumerCtx.passphrase = '*****';
-            // redact passphrase in proxy config
-            if (tracedConsumerCtx.proxy && tracedConsumerCtx.proxy.passphrase) {
-                tracedConsumerCtx.proxy.passphrase = '*****';
+        (function sendNextChunk(startIdx) {
+            if (startIdx >= dataToSend.length) {
+                return resolve();
             }
-            // redact passphrase in request options
-            const tracedRequestOpts = JSON.parse(JSON.stringify(context.requestOpts));
-            tracedRequestOpts.headers.Authorization = '*****';
-            // redact passphrase in proxy config
-            if (tracedRequestOpts.proxy && tracedRequestOpts.proxy.passphrase) {
-                tracedRequestOpts.proxy.passphrase = '*****';
-            }
+            return Promise.resolve()
+                .then(() => {
+                    const dataChunks = [];
+                    let chunksSize = 0;
 
-            globalCtx.tracer.write(JSON.stringify({
-                dataToSend,
-                consumer: tracedConsumerCtx,
-                requestOpts: tracedRequestOpts
-            }, null, 2));
-        }
-
-        let dataChunk = [];
-        let chunkSize = 0;
-
-        // eslint-disable-next-line
-        for (let i = 0; i < dataToSend.length; i++) {
-            const data = dataToSend[i];
-
-            if (chunkSize < MAX_CHUNK_SIZE) {
-                chunkSize += data.length;
-                dataChunk.push(data);
-            }
-            if (chunkSize >= MAX_CHUNK_SIZE || i === dataToSend.length - 1) {
-                sendDataChunk(dataChunk, context)
-                    .then((res) => {
-                        globalCtx.logger.debug(`Response status code: ${res}`);
-                    }).catch((err) => {
-                        globalCtx.logger.error(`Unable to send data chunk: ${err}`);
-                    });
-
-                if (i !== dataToSend.length) {
-                    dataChunk = [];
-                    chunkSize = 0;
-                }
-            }
-        }
-        resolve(true);
+                    while (chunksSize < MAX_CHUNK_SIZE && startIdx < dataToSend.length) {
+                        chunksSize += dataToSend[startIdx].length;
+                        dataChunks.push(dataToSend[startIdx]);
+                        startIdx += 1;
+                    }
+                    return sendDataChunk(dataChunks, context);
+                }).catch((error) => {
+                    globalCtx.logger.exception('Unable to send data chunk', error);
+                })
+                .then(() => sendNextChunk(startIdx));
+        }(0)); // calling the immediate function here and pass 0 as startIdx
     });
 }
