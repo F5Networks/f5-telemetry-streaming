@@ -2869,7 +2869,8 @@ module.exports = {
                                 },
                                 enable: true,
                                 port: 8088,
-                                trace: false
+                                trace: false,
+                                compressionType: 'gzip'
                             },
                             {
                                 name: 'SystemPoller_1',

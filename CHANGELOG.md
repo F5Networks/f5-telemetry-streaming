@@ -6,8 +6,10 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-2280 [GitHub #79](https://github.com/F5Networks/f5-telemetry-streaming/issues/79): Expose totNativeConns and totCompatConns on SSL profile stats
 - AUTOTOOL-2160: Added monitor checks for memory thresholds, which prevents restnoded from crashing on reaching memory limits (runs by default)
 - AUTOTOOL-1915: Added new Event Listener endpoint (/eventListener/$eventListener and /namespace/$namespace/eventListener/$eventListener) to send a debug message to an Event Listener
+- AUTOTOOL-2266: Added ability to configure "compressionType" for Splunk consumer
 ### Fixed
 - AUTOTOOL-2164: Fixed Route Domain ID handling for Virtual Server and Pool stats
+- [GitHub #109](https://github.com/F5Networks/f5-telemetry-streaming/issues/109): Splunk debug output does not log HTTP Response payload
 - AUTOTOOL-2304: Update example output for maxConns, pktsIn, pktsOut, and totConns
 ### Changed
 - AUTOTOOL-2091: Trace full payload sent to StatsD Consumer

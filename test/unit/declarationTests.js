@@ -4644,7 +4644,8 @@ describe('Declarations', () => {
                         class: 'Secret',
                         protected: 'SecureVault',
                         cipherText: '$M$foo'
-                    }
+                    },
+                    compressionType: 'gzip'
                 }
             ));
 
@@ -4668,7 +4669,8 @@ describe('Declarations', () => {
                         passphrase: {
                             cipherText: 'passphrase'
                         }
-                    }
+                    },
+                    compressionType: 'gzip'
                 },
                 {
                     type: 'Splunk',
@@ -4693,9 +4695,45 @@ describe('Declarations', () => {
                             protected: 'SecureVault',
                             cipherText: '$M$foo'
                         }
-                    }
+                    },
+                    compressionType: 'gzip'
                 }
             ));
+
+            it('should accept none as valid value for compressionType', () => validateMinimal(
+                {
+                    type: 'Splunk',
+                    host: 'host',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    },
+                    compressionType: 'none'
+                },
+                {
+                    type: 'Splunk',
+                    host: 'host',
+                    protocol: 'https',
+                    port: 8088,
+                    format: 'default',
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    },
+                    compressionType: 'none'
+                }
+            ));
+
+            it('should not accept invalid values for compressionType', () => assert.isRejected(validateFull(
+                {
+                    type: 'Splunk',
+                    host: 'host',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    },
+                    compressionType: 'compression'
+                }
+            ), /should be equal to one of the allowed values/));
         });
 
         describe('Statsd', () => {
