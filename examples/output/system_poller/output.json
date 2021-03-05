@@ -30,6 +30,7 @@
         "gtmConfigTime": "2019-06-07T18:11:53.000Z",
         "cpu": 0,
         "memory": 0,
+        "swap": 0,
         "tmmCpu": 0,
         "tmmMemory": 0,
         "tmmTraffic": {
