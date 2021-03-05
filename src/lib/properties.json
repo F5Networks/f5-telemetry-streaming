@@ -188,6 +188,17 @@
                 }
             ]
         },
+        "swap": {
+            "structure": { "parentKey": "system" },
+            "key": "/mgmt/tm/sys/memory::sys/memory/memory-host",
+            "normalization": [
+                {
+                    "runFunctions": [
+                        { "name": "getPercentFromKeys", "args": { "totalKey": "swapTotal", "partialKey": "swapUsed", "nestedObjects": true } }
+                    ]
+                }
+            ]
+        },
         "tmmCpu": {
             "structure": { "parentKey": "system" },
             "key": "tmmInfo",
