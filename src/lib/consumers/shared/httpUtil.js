@@ -94,7 +94,7 @@ function sendToConsumer(config) {
             if (!requestError) {
                 config.logger.debug(`response: ${response[1].statusCode} ${response[1].statusMessage}`);
                 if (response[0]) {
-                    config.logger.debug(`response body: ${response[0]}`);
+                    config.logger.debug(`response body: ${typeof response[0] === 'object' ? JSON.stringify(response[0]) : response[0]}`);
                 }
                 return Promise.resolve(response);
             }

@@ -8,6 +8,7 @@
         "port": 8088,
         "passphrase": {
             "cipherText": "apikey"
-        }
+        },
+        "compressionType": "gzip"
     }
 }
