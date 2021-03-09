@@ -9,7 +9,8 @@
 'use strict';
 
 const assert = require('assert');
-const cloneDeep = require('lodash/cloneDeep');
+const assignDefaults = require('lodash/defaultsDeep');
+const deepCopy = require('lodash/cloneDeep');
 const fsUtil = require('fs');
 const nock = require('nock');
 const pathUtil = require('path');
@@ -75,15 +76,24 @@ module.exports = {
     MockTracer,
 
     /**
+     * Assign defaults to object (uses lodash.defaultsDeep under the hood)
+     * Note: check when working with arrays, as values may be merged incorrectly
+     *
+     * @param {Object} obj      - object to assign defaults to
+     * @param {...Object} defaults - defaults to assign to object
+     *
+     * @returns {Object}
+     */
+    assignDefaults,
+
+    /**
      * Deep copy
      *
      * @param {any} obj - object to copy
      *
      * @returns {any} deep copy of source object
      */
-    deepCopy(obj) {
-        return cloneDeep(obj);
-    },
+    deepCopy,
 
     /**
      * Generates a consumer config
