@@ -4842,7 +4842,7 @@ describe('Declarations', () => {
                         projectId: 'deos-dev',
                         privateKeyId: '11111111111111111111111',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyVal'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',
@@ -4868,7 +4868,7 @@ describe('Declarations', () => {
                         projectId: 'deos-dev',
                         privateKeyId: '11111111111111111111111',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyVal'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',

@@ -55,7 +55,7 @@ describe('F5_Cloud', () => {
             projectId: 'deos-dev',
             privateKeyId: '11111111111111111111111',
             privateKey: {
-                cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                cipherText: 'privateKeyValue'
             },
             clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
             clientId: '1212121212121212121212',
