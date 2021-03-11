@@ -172,7 +172,7 @@ describe('Splunk', () => {
                         host: proxyHost,
                         port: proxyPort,
                         username: 'user',
-                        passphrase: 'pass',
+                        passphrase: 'passphrase',
                         allowSelfSignedCert: true
                     }
                 }

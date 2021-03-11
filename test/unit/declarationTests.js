@@ -674,11 +674,11 @@ describe('Declarations', () => {
                     f5csSensorId: '12345',
                     payloadSchemaNid: 'f5',
                     serviceAccount: {
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKeyId: '11111111111111111111111',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyValue'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',
@@ -4838,7 +4838,7 @@ describe('Declarations', () => {
                     payloadSchemaNid: 'f5',
                     serviceAccount: {
                         authType: 'goog',
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKeyId: '11111111111111111111111',
                         privateKey: {
@@ -4864,7 +4864,7 @@ describe('Declarations', () => {
                     payloadSchemaNid: 'f5',
                     serviceAccount: {
                         authType: 'google-auth',
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKeyId: '11111111111111111111111',
                         privateKey: {
@@ -4890,11 +4890,11 @@ describe('Declarations', () => {
                     payloadSchemaNid: 'f5',
                     serviceAccount: {
                         authType: 'google-auth',
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKeyId: '11111111111111111111111',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyValue'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',
@@ -4916,11 +4916,11 @@ describe('Declarations', () => {
                     f5csSensorId: '12345',
                     serviceAccount: {
                         authType: 'google-auth',
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKeyId: '11111111111111111111111',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyValue'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',
@@ -4943,10 +4943,10 @@ describe('Declarations', () => {
                     payloadSchemaNid: 'f5',
                     serviceAccount: {
                         authType: 'google-auth',
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyValue'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',
@@ -4969,11 +4969,11 @@ describe('Declarations', () => {
                     payloadSchemaNid: 'f5',
                     serviceAccount: {
                         authType: 'google-auth',
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKeyId: '11111111111111111111111',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyValue'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',
@@ -5008,7 +5008,7 @@ describe('Declarations', () => {
                         privateKeyId: '11111111111111111111111',
                         projectId: 'deos-dev',
                         tokenUri: 'https://oauth2.googleapis.com/token',
-                        type: 'service_account'
+                        type: 'not_used'
                     },
                     targetAudience: 'deos-ingest',
                     trace: false,
@@ -5028,11 +5028,11 @@ describe('Declarations', () => {
                     enable: true,
                     allowSelfSignedCert: true,
                     serviceAccount: {
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKeyId: '11111111111111111111111',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyValue'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',
@@ -5067,7 +5067,7 @@ describe('Declarations', () => {
                         privateKeyId: '11111111111111111111111',
                         projectId: 'deos-dev',
                         tokenUri: 'https://oauth2.googleapis.com/token',
-                        type: 'service_account'
+                        type: 'not_used'
                     },
                     targetAudience: 'deos-ingest',
                     trace: true,

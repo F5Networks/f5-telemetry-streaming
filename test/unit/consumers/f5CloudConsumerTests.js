@@ -51,7 +51,6 @@ describe('F5_Cloud', () => {
         payloadSchemaNid: 'f5',
         serviceAccount: { // mock
             authType: 'google-auth',
-            type: 'service_account',
             projectId: 'deos-dev',
             privateKeyId: '11111111111111111111111',
             privateKey: {
