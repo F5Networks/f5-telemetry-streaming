@@ -172,7 +172,7 @@ describe('Splunk', () => {
                         host: proxyHost,
                         port: proxyPort,
                         username: 'user',
-                        passphrase: 'pass',
+                        passphrase: 'passphrase',
                         allowSelfSignedCert: true
                     }
                 }
@@ -661,6 +661,8 @@ describe('Splunk', () => {
             });
 
             it('should pass proxy options with allowSelfSignedCert', () => {
+                const proxyUser = 'user';
+                const proxyPassword = 'passphrase';
                 const proxyHost = 'proxyServer';
                 const proxyPort = 8080;
                 const proxyProto = 'http';
@@ -674,8 +676,8 @@ describe('Splunk', () => {
                             protocol: proxyProto,
                             host: proxyHost,
                             port: proxyPort,
-                            username: 'user',
-                            passphrase: 'pass',
+                            username: proxyUser,
+                            passphrase: proxyPassword,
                             allowSelfSignedCert: true
                         }
                     }
@@ -690,7 +692,7 @@ describe('Splunk', () => {
                 return splunkIndex(context)
                     .then(() => {
                         const opts = postSpy.firstCall.args[0];
-                        assert.deepStrictEqual(opts.proxy, 'http://user:pass@proxyServer:8080');
+                        assert.deepStrictEqual(opts.proxy, `http://${proxyUser}:${proxyPassword}@proxyServer:8080`);
                         assert.deepStrictEqual(opts.strictSSL, false);
                         assert.strictEqual(opts.uri, 'https://localhost:80/services/collector/event');
                     });
