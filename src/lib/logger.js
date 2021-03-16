@@ -146,16 +146,19 @@ Logger.prototype.info = function (msg) {
         this.logger.info(prepareMsg(this.prefix, msg));
     }
 };
-
 Logger.prototype.warning = function (msg) {
     if (WARNING >= currentLogLevel) {
         this.logger.warning(prepareMsg(this.prefix, msg));
     }
 };
-
 Logger.prototype.debug = function (msg) {
     if (DEBUG >= currentLogLevel) {
         this.logger.finest(prepareMsg(this.prefix, msg));
+    }
+};
+Logger.prototype.debugException = function (msg, err) {
+    if (DEBUG >= currentLogLevel) {
+        this.logger.finest(prepareMsg(this.prefix, `${msg}\nTraceback:\n${(err && err.stack) || 'no traceback available'}`));
     }
 };
 Logger.prototype.exception = function (msg, err) {
