@@ -185,7 +185,7 @@ describe('Splunk', () => {
             });
             return splunkIndex(context)
                 .then(() => {
-                    const traceData = JSON.parse(context.tracer.write.firstCall.args[0]);
+                    const traceData = context.tracer.write.firstCall.args[0];
                     assert.notStrictEqual(traceData.consumer.passphrase.indexOf('*****'), -1,
                         'consumer config passphrase should be redacted');
                     assert.notStrictEqual(traceData.consumer.proxy.passphrase.indexOf('*****'), -1,

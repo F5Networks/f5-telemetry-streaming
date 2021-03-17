@@ -602,4 +602,149 @@ describe('Misc Util', () => {
             assert.strictEqual(util.getProperty(obj, ['child2', 'prop3', '0'], 'wrong tree'), 'wrong tree');
         });
     });
+
+    describe('.maskSecrets', () => {
+        it('should mask secrets - cipherText (without new lines)', () => {
+            const decl = {
+                passphrase: {
+                    cipherText: 'test_passphrase'
+                }
+            };
+            const expected = 'this contains secrets: {"passphrase":{*********}}';
+            const masked = util.maskSecrets(`this contains secrets: ${JSON.stringify(decl)}`);
+            assert.deepStrictEqual(masked, expected, 'should mask secrets');
+            assert.deepStrictEqual(util.maskSecrets(masked), expected, 'should keep message the same when secrets masked already');
+        });
+
+        it('should mask secrets - cipherText (with new lines)', () => {
+            const decl = {
+                passphrase: {
+                    cipherText: 'test_passphrase'
+                }
+            };
+            const expected = 'this contains secrets: {\n    "passphrase": {\n        "cipherText": "*********"\n    }\n}';
+            const masked = util.maskSecrets(`this contains secrets: ${JSON.stringify(decl, null, 4)}`);
+            assert.deepStrictEqual(masked, expected, 'should mask secrets');
+            assert.deepStrictEqual(util.maskSecrets(masked), expected, 'should keep message the same when secrets masked already');
+        });
+
+        it('should mask secrets - cipherText (without quotes)', () => {
+            const decl = '{ passphrase:\n{\ncipherText: \'test_passphrase\'\n}\n}';
+            const expected = 'this contains secrets: { passphrase:\n{\ncipherText: \'*********\'\n}\n}';
+            const masked = util.maskSecrets(`this contains secrets: ${decl}`);
+            assert.deepStrictEqual(masked, expected, 'should mask secrets');
+            assert.deepStrictEqual(util.maskSecrets(masked), expected, 'should keep message the same when secrets masked already');
+        });
+
+        it('should mask secrets - cipherText (with non matching quotes)', () => {
+            const decl = '{ passphrase:\n{\n\'cipherText": \'test_passphrase\'\n}\n}';
+            const expected = 'this contains secrets: { passphrase:\n{\n\'cipherText": \'*********\'\n}\n}';
+            const masked = util.maskSecrets(`this contains secrets: ${decl}`);
+            assert.deepStrictEqual(masked, expected, 'should mask secrets');
+            assert.deepStrictEqual(util.maskSecrets(masked), expected, 'should keep message the same when secrets masked already');
+        });
+
+        it('should mask secrets - cipherText (with new lines, serialized 2+ times)', () => {
+            let decl = JSON.stringify({
+                passphrase: {
+                    cipherText: 'test_passphrase'
+                }
+            }, null, 4);
+            let expectedMsg = '"{\\n    \\"passphrase\\": {*********}\\n}"';
+            for (let i = 0; i < 10; i += 1) {
+                decl = JSON.stringify(decl, null, 4);
+                const masked = util.maskSecrets(`this contains secrets: ${decl}`);
+                assert.include(
+                    masked,
+                    `this contains secrets: ${expectedMsg}`,
+                    `should mask secret event after ${i + 2} serialization(s)`
+                );
+                assert.include(util.maskSecrets(masked), expectedMsg, 'should keep message the same when secrets masked already');
+                expectedMsg = JSON.stringify(expectedMsg);
+            }
+        });
+
+        it('should mask secrets - passphrase (without new lines)', () => {
+            const decl = {
+                passphrase: 'test_passphrase'
+            };
+            const expected = 'this contains secrets: {"passphrase":"*********"}';
+            const masked = util.maskSecrets(`this contains secrets: ${JSON.stringify(decl)}`);
+            assert.deepStrictEqual(masked, expected, 'should mask secrets');
+            assert.deepStrictEqual(util.maskSecrets(masked), expected, 'should keep message the same when secrets masked already');
+        });
+
+        it('should mask secrets - passphrase (with new lines)', () => {
+            const decl = {
+                passphrase: 'test_passphrase'
+            };
+            const expected = 'this contains secrets: {\n    "passphrase": "*********"\n}';
+            const masked = util.maskSecrets(`this contains secrets: ${JSON.stringify(decl, null, 4)}`);
+            assert.deepStrictEqual(masked, expected, 'should mask secrets');
+            assert.deepStrictEqual(util.maskSecrets(masked), expected, 'should keep message the same when secrets masked already');
+        });
+
+        it('should mask secrets - passphrase (with non matching quotes)', () => {
+            const decl = '{ \'passphrase": \'test_passphrase\'}';
+            const expected = 'this contains secrets: { \'passphrase": \'*********\'}';
+            const masked = util.maskSecrets(`this contains secrets: ${decl}`);
+            assert.deepStrictEqual(masked, expected, 'should mask secrets');
+            assert.deepStrictEqual(util.maskSecrets(masked), expected, 'should keep message the same when secrets masked already');
+        });
+
+        it('should mask secrets - passphrase (without quotes)', () => {
+            const decl = '{ passphrase: \'test_passphrase\'}';
+            const expected = 'this contains secrets: { passphrase: \'*********\'}';
+            const masked = util.maskSecrets(`this contains secrets: ${decl}`);
+            assert.deepStrictEqual(masked, expected, 'should mask secrets');
+            assert.deepStrictEqual(util.maskSecrets(masked), expected, 'should keep message the same when secrets masked already');
+        });
+
+        it('should mask secrets - passphrase (with non matching quotes and without new lines)', () => {
+            const decl = '{ \'passphrase": { cipherText: \'test_passphrase\'}}';
+            const expected = 'this contains secrets: { \'passphrase": {*********}}';
+            const masked = util.maskSecrets(`this contains secrets: ${decl}`);
+            assert.deepStrictEqual(masked, expected, 'should mask secrets');
+            assert.deepStrictEqual(util.maskSecrets(masked), expected, 'should keep message the same when secrets masked already');
+        });
+
+        it('should mask secrets - passphrase (without new lines, serialized multiple times)', () => {
+            const decl = {
+                passphrase: 'test_passphrase'
+            };
+            let expectedMsg = '{"passphrase":"*********"}';
+            let txt = decl;
+            for (let i = 0; i < 10; i += 1) {
+                txt = JSON.stringify(txt);
+                const masked = util.maskSecrets(`this contains secrets: ${txt}`);
+                assert.include(
+                    masked,
+                    `this contains secrets: ${expectedMsg}`,
+                    `should mask secret event after ${i + 1} serialization(s)`
+                );
+                assert.include(util.maskSecrets(masked), expectedMsg, 'should keep message the same when secrets masked already');
+                expectedMsg = JSON.stringify(expectedMsg);
+            }
+        });
+
+        it('should mask secrets - cipherText (without new lines, serialized multiple times)', () => {
+            let decl = {
+                passphrase: {
+                    cipherText: 'test_passphrase'
+                }
+            };
+            let expectedMsg = '{"passphrase":{*********}}';
+            for (let i = 0; i < 10; i += 1) {
+                decl = JSON.stringify(decl);
+                const masked = util.maskSecrets(`this contains secrets: ${decl}`);
+                assert.include(
+                    masked,
+                    `this contains secrets: ${expectedMsg}`,
+                    `should mask secret event after ${i + 1} serialization(s)`
+                );
+                assert.include(util.maskSecrets(masked), expectedMsg, 'should keep message the same when secrets masked already');
+                expectedMsg = JSON.stringify(expectedMsg);
+            }
+        });
+    });
 });

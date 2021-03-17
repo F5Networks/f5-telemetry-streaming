@@ -79,7 +79,7 @@ module.exports = function (context) {
     ];
 
     if (context.tracer) {
-        context.tracer.write(JSON.stringify(payload, null, 4));
+        context.tracer.write(payload);
     }
 
     producer.on('ready', () => {

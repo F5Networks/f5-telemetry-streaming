@@ -9,9 +9,12 @@
 'use strict';
 
 const path = require('path');
+
+const constants = require('../constants');
 const logger = require('../logger');
 const util = require('./misc');
-const constants = require('../constants');
+
+
 /**
  * Tracer class - useful for debug to dump streams of data.
  *
@@ -24,6 +27,7 @@ const constants = require('../constants');
  * @property {String} path    - path to file
  * @property {Number} fd      - file descriptor
  * @property {Boolean} disabled - is tracer disabled
+ * @property {Logger} logger - logger instance
  */
 class Tracer {
     constructor(name, tracerPath) {
@@ -35,7 +39,20 @@ class Tracer {
     }
 
     /**
+     * @public
+     * @returns {Logger} instance
+     */
+    get logger() {
+        Object.defineProperty(this, 'logger', {
+            value: logger.getChild('tracer').getChild(this.name)
+        });
+        return this.logger;
+    }
+
+    /**
      * Add data to cache
+     *
+     * Note: makes copy of 'data'
      *
      * @sync
      * @private
@@ -47,6 +64,11 @@ class Tracer {
         }
         while (this.cache.length >= constants.TRACER.LIST_SIZE) {
             this.cache.shift();
+        }
+        try {
+            data = util.deepCopy(data);
+        } catch (copyError) {
+            this.logger.debugException('Unable to make copy of data', copyError);
         }
         this.cache.push({ data, timestamp: new Date().toISOString() });
     }
@@ -62,10 +84,10 @@ class Tracer {
         if (typeof this.fd === 'undefined') {
             return Promise.resolve();
         }
-        logger.debug(`Closing tracer '${this.name}' stream  to file '${this.path}'`);
+        this.logger.debug(`Closing stream  to file '${this.path}'`);
         return util.fs.close(this.fd)
             .catch((closeErr) => {
-                logger.exception(`tracer._close unable to close file '${this.path}' with fd '${this.fd}'`, closeErr);
+                this.logger.debugException(`Unable to close file '${this.path}' with fd '${this.fd}'`, closeErr);
             })
             .then(() => {
                 this.fd = undefined;
@@ -102,14 +124,14 @@ class Tracer {
         const baseDir = path.dirname(this.path);
         return util.fs.access(baseDir, (util.fs.constants || util.fs).R_OK)
             .catch((accessErr) => {
-                logger.exception(`tracer._mkdir unable to access dir '${baseDir}'`, accessErr);
+                this.logger.debugException(`Unable to access dir '${baseDir}'`, accessErr);
                 return true;
             })
             .then((needToCreate) => {
                 if (needToCreate !== true) {
                     return Promise.resolve();
                 }
-                logger.debug(`Creating dir '${baseDir}' for tracer '${this.name}'`);
+                this.logger.debug(`Creating dir '${baseDir}'`);
                 return util.fs.mkdir(baseDir);
             });
     }
@@ -125,7 +147,7 @@ class Tracer {
         if (typeof this.fd !== 'undefined') {
             return Promise.resolve();
         }
-        logger.debug(`Creating file '${this.path}' for tracer '${this.name}'`);
+        this.logger.debug(`Creating file '${this.path}'`);
         return this._mkdir()
             .then(() => util.fs.open(this.path, 'w+'))
             .then((openRet) => {
@@ -202,12 +224,12 @@ class Tracer {
                 this._cacheReset = true;
                 return this._mergeAndResetCache(readData);
             })
-            .then(data => JSON.stringify(data, null, 4))
+            .then(data => util.maskSecrets(util.stringify(data, true)))
             .then(dataToWrite => util.fs.ftruncate(this.fd, 0)
                 .then(() => util.fs.write(this.fd, dataToWrite, 0, constants.TRACER.ENCODING)))
             .catch((err) => {
                 // close trace, lost data
-                logger.exception(`tracer._tryWriteData unable to write data to '${this.path}' for tracer '${this.name}'`, err);
+                this.logger.debugException(`Unable to write data to '${this.path}'`, err);
                 return this._close();
             })
             .then(() => {
@@ -260,7 +282,7 @@ class Tracer {
      * @returns {Promise} resolved once tracer stopped
      */
     stop() {
-        logger.debug(`Stop tracer '${this.name}' stream  to file '${this.path}'`);
+        this.logger.debug(`Stopping stream to file '${this.path}'`);
         this.disabled = true;
         // schedule file closing right after last scheduled writing attempt
         // but data that awaits for writing will be lost
@@ -270,6 +292,8 @@ class Tracer {
 
     /**
      * Write data to tracer
+     *
+     * Note: makes copy of 'data'
      *
      * @async
      * @public
