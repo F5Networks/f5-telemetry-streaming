@@ -66,25 +66,46 @@ function stringify(msg) {
  */
 function maskSecrets(msg) {
     let ret = msg;
-    const secrets = {
-        passphrase: {
-            replace: /(?:"passphrase":\s*{)(.*?)(?:})/g,
-            with: '"passphrase":{*********}'
+    const mask = '*********';
+    const secrets = [
+        {
+            /**
+             * single line:
+             *
+             * { "passphrase": { ...secret... } }
+             */
+            str: 'passphrase',
+            replace: /(\\{0,}["']{0,1}passphrase\\{0,}["']{0,1}\s*:\s*){.*?}/g,
+            with: `$1{${mask}}`
         },
-        '"passphrase"': {
-            replace: /(?:"passphrase":\s*")(.*?)(?:")/g,
-            with: '"passphrase":"*********"'
+        {
+            /**
+             * {
+             *     "passphrase": "secret"
+             * }
+             */
+            str: 'passphrase',
+            replace: /(\\{0,}["']{0,1}passphrase\\{0,}["']{0,1}\s*:\s*)(\\{0,}["']{1}).*?\2/g,
+            with: `$1$2${mask}$2`
         },
-        cipherText: {
-            replace: /(?:"cipherText":\s*")(.*?)(?:")/g,
-            with: '"cipherText":"*********"'
+        {
+            /**
+             * {
+             *     someSecret: {
+             *         cipherText: "secret"
+             *     }
+             * }
+             */
+            str: 'cipherText',
+            replace: /(\\{0,}["']{0,1}cipherText\\{0,}["']{0,1}\s*:\s*)(\\{0,}["']{1}).*?\2/g,
+            with: `$1$2${mask}$2`
         }
-    };
+    ];
     // place in try/catch
     try {
-        Object.keys(secrets).forEach((k) => {
-            if (msg.indexOf(k) !== -1) {
-                ret = ret.replace(secrets[k].replace, secrets[k].with);
+        secrets.forEach((secret) => {
+            if (msg.indexOf(secret.str) !== -1) {
+                ret = ret.replace(secret.replace, secret.with);
             }
         });
     } catch (e) {
@@ -226,3 +247,4 @@ mainLogger.setLogLevel(INFO);
 
 
 module.exports = mainLogger;
+module.exports.maskSecrets = maskSecrets;
