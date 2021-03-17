@@ -123,17 +123,15 @@ class Tracer {
     _mkdir() {
         const baseDir = path.dirname(this.path);
         return util.fs.access(baseDir, (util.fs.constants || util.fs).R_OK)
-            .catch((accessErr) => {
-                this.logger.debugException(`Unable to access dir '${baseDir}'`, accessErr);
-                return true;
-            })
-            .then((needToCreate) => {
-                if (needToCreate !== true) {
+            .then(() => true, () => false)
+            .then((exist) => {
+                if (exist) {
                     return Promise.resolve();
                 }
                 this.logger.debug(`Creating dir '${baseDir}'`);
                 return util.fs.mkdir(baseDir);
-            });
+            })
+            .catch(mkdirError => (mkdirError.code === 'EEXIST' ? Promise.resolve() : Promise.reject(mkdirError)));
     }
 
     /**
