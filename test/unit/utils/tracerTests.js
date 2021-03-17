@@ -88,6 +88,17 @@ describe('Tracer Util', () => {
             });
     });
 
+    it('should try to create parent directory', () => {
+        sinon.stub(constants.TRACER, 'DIR').value('/test/inaccessible/directory');
+        sinon.stub(util.fs, 'mkdir').resolves();
+        tracer = Tracer.createFromConfig('class2', 'obj2', { trace: true });
+        return tracer.write('foobar')
+            .then(() => {
+                assert.isAbove(util.fs.mkdir.callCount, 0, 'should call util.fs.mkdir');
+                assert.strictEqual(util.fs.mkdir.args[0][0], '/test/inaccessible/directory');
+            });
+    });
+
     it(`should write max ${constants.TRACER.LIST_SIZE} items`, () => {
         let totalRecords = 0;
         let allWrittenData = [];
