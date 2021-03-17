@@ -97,7 +97,7 @@ describe('Sumo_Logic', () => {
 
             sinon.stub(request, 'post').callsFake((opts) => {
                 try {
-                    const traceData = JSON.parse(context.tracer.write.firstCall.args[0]);
+                    const traceData = context.tracer.write.firstCall.args[0];
                     assert.notStrictEqual(traceData.url.indexOf('*****'), -1);
                     assert.strictEqual(opts.url, 'http://localhost:80/receiver/v1/http/mySecret');
                     done();

@@ -110,7 +110,7 @@ describe('Data Pipeline', () => {
         return dataPipeline.process(dataCtx, { tracer })
             .then(() => {
                 assert.notStrictEqual(tracerData, undefined, 'should write data to tracer');
-                assert.deepStrictEqual(JSON.parse(tracerData), dataCtx, 'tracer data should match processed data');
+                assert.deepStrictEqual(tracerData, dataCtx, 'tracer data should match processed data');
             });
     });
 

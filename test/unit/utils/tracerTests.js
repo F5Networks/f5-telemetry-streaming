@@ -124,6 +124,18 @@ describe('Tracer Util', () => {
             });
     });
 
+    it('should make copy of data', () => {
+        const data = [1, 2, 3];
+        const writePromise = tracer.write(data);
+        data.push(4);
+        return writePromise.then(() => {
+            assert.deepStrictEqual(
+                readTraceFile(tracerFile),
+                addTimestamps([[1, 2, 3]])
+            );
+        });
+    });
+
     it('should merge new data with existing data', () => tracer.write('item1')
         .then(() => {
             assert.deepStrictEqual(
@@ -213,4 +225,57 @@ describe('Tracer Util', () => {
                 assert.strictEqual(sameTracer.fd, tracer.fd, 'fd should be the sane');
             })
     ));
+
+    it('should mask secrets', () => {
+        const data = {
+            text: 'passphrase: { cipherText: \'test_passphrase\' }\n'
+                + '"passphrase": {\ncipherText: "test_passphrase"\n}'
+                + '\'passphrase": "test_passphrase"',
+            passphrase: 'test_passphrase',
+            passphrase2: {
+                cipherText: 'test_passphrase'
+            }
+        };
+        return tracer.write(data)
+            .then(() => {
+                const traceData = readTraceFile(tracerFile);
+                assert.deepStrictEqual(
+                    traceData,
+                    addTimestamps([{
+                        passphrase: '*********',
+                        passphrase2: {
+                            cipherText: '*********'
+                        },
+                        text: 'passphrase: {*********}\n'
+                        + '"passphrase": {*********}'
+                        + '\'passphrase": "*********"'
+                    }])
+                );
+                return tracer.write(traceData[0].data);
+            })
+            .then(() => {
+                assert.deepStrictEqual(
+                    readTraceFile(tracerFile),
+                    addTimestamps([{
+                        passphrase: '*********',
+                        passphrase2: {
+                            cipherText: '*********'
+                        },
+                        text: 'passphrase: {*********}\n'
+                        + '"passphrase": {*********}'
+                        + '\'passphrase": "*********"'
+                    },
+                    {
+                        passphrase: '*********',
+                        passphrase2: {
+                            cipherText: '*********'
+                        },
+                        text: 'passphrase: {*********}\n'
+                        + '"passphrase": {*********}'
+                        + '\'passphrase": "*********"'
+                    }], 'should modify message when secrets masked already')
+                );
+                return tracer.write(data[0]);
+            });
+    });
 });

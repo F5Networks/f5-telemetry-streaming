@@ -266,11 +266,11 @@ function forwardData(dataToSend, globalCtx) {
         if (tracedRequestOpts.proxy && tracedRequestOpts.proxy.passphrase) {
             tracedRequestOpts.proxy.passphrase = '*****';
         }
-        globalCtx.tracer.write(JSON.stringify({
+        globalCtx.tracer.write({
             dataToSend,
             consumer: tracedConsumerCtx,
             requestOpts: tracedRequestOpts
-        }, null, 2));
+        });
     }
 
     return new Promise((resolve) => {
