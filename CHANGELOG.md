@@ -11,6 +11,7 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-2164: Fixed Route Domain ID handling for Virtual Server and Pool stats
 - [GitHub #109](https://github.com/F5Networks/f5-telemetry-streaming/issues/109): Splunk debug output does not log HTTP Response payload
 - AUTOTOOL-2304: Update example output for maxConns, pktsIn, pktsOut, and totConns
+- AUTOTOOL-2310: Tracer unable to access destination directory
 ### Changed
 - AUTOTOOL-2091: Trace full payload sent to StatsD Consumer
 - AUTOTOOL-2213: Update npm packages (applicationinsights from v1.8.9 to v.1.8.10, aws-sdk from v2.830.0 to v2.854.0, eventemitter2 from v6.4.3 to v6.4.4, google-auth-library from v6.1.4 to v.6.1.6, lodash from v.4.17.20 to v4.17.21)
