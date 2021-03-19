@@ -80,6 +80,11 @@ Internal tool notes:
 - It is packaged as a container made available via an internal docker repository, a project variable contains the url for the container.
 - It uses VIO as the runtime for instance creation/deletion, project variables contain the name of the VIO project, VIO credentials, etc.
 
+DUT software version update:
+
+- Open `test/functional/deployment/declaration.yml`
+- Update properties under `desired` section to match newer software version
+
 #### Local
 
 ##### Creating a new build

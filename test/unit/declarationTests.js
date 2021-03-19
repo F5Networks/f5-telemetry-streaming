@@ -674,11 +674,11 @@ describe('Declarations', () => {
                     f5csSensorId: '12345',
                     payloadSchemaNid: 'f5',
                     serviceAccount: {
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKeyId: '11111111111111111111111',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyValue'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',
@@ -4644,7 +4644,8 @@ describe('Declarations', () => {
                         class: 'Secret',
                         protected: 'SecureVault',
                         cipherText: '$M$foo'
-                    }
+                    },
+                    compressionType: 'gzip'
                 }
             ));
 
@@ -4668,7 +4669,8 @@ describe('Declarations', () => {
                         passphrase: {
                             cipherText: 'passphrase'
                         }
-                    }
+                    },
+                    compressionType: 'gzip'
                 },
                 {
                     type: 'Splunk',
@@ -4693,9 +4695,45 @@ describe('Declarations', () => {
                             protected: 'SecureVault',
                             cipherText: '$M$foo'
                         }
-                    }
+                    },
+                    compressionType: 'gzip'
                 }
             ));
+
+            it('should accept none as valid value for compressionType', () => validateMinimal(
+                {
+                    type: 'Splunk',
+                    host: 'host',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    },
+                    compressionType: 'none'
+                },
+                {
+                    type: 'Splunk',
+                    host: 'host',
+                    protocol: 'https',
+                    port: 8088,
+                    format: 'default',
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$foo'
+                    },
+                    compressionType: 'none'
+                }
+            ));
+
+            it('should not accept invalid values for compressionType', () => assert.isRejected(validateFull(
+                {
+                    type: 'Splunk',
+                    host: 'host',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    },
+                    compressionType: 'compression'
+                }
+            ), /should be equal to one of the allowed values/));
         });
 
         describe('Statsd', () => {
@@ -4800,11 +4838,11 @@ describe('Declarations', () => {
                     payloadSchemaNid: 'f5',
                     serviceAccount: {
                         authType: 'goog',
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKeyId: '11111111111111111111111',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyVal'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',
@@ -4826,11 +4864,11 @@ describe('Declarations', () => {
                     payloadSchemaNid: 'f5',
                     serviceAccount: {
                         authType: 'google-auth',
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKeyId: '11111111111111111111111',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyVal'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',
@@ -4852,11 +4890,11 @@ describe('Declarations', () => {
                     payloadSchemaNid: 'f5',
                     serviceAccount: {
                         authType: 'google-auth',
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKeyId: '11111111111111111111111',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyValue'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',
@@ -4878,11 +4916,11 @@ describe('Declarations', () => {
                     f5csSensorId: '12345',
                     serviceAccount: {
                         authType: 'google-auth',
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKeyId: '11111111111111111111111',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyValue'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',
@@ -4905,10 +4943,10 @@ describe('Declarations', () => {
                     payloadSchemaNid: 'f5',
                     serviceAccount: {
                         authType: 'google-auth',
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyValue'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',
@@ -4931,11 +4969,11 @@ describe('Declarations', () => {
                     payloadSchemaNid: 'f5',
                     serviceAccount: {
                         authType: 'google-auth',
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKeyId: '11111111111111111111111',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyValue'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',
@@ -4970,7 +5008,7 @@ describe('Declarations', () => {
                         privateKeyId: '11111111111111111111111',
                         projectId: 'deos-dev',
                         tokenUri: 'https://oauth2.googleapis.com/token',
-                        type: 'service_account'
+                        type: 'not_used'
                     },
                     targetAudience: 'deos-ingest',
                     trace: false,
@@ -4990,11 +5028,11 @@ describe('Declarations', () => {
                     enable: true,
                     allowSelfSignedCert: true,
                     serviceAccount: {
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKeyId: '11111111111111111111111',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyValue'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',
@@ -5029,7 +5067,7 @@ describe('Declarations', () => {
                         privateKeyId: '11111111111111111111111',
                         projectId: 'deos-dev',
                         tokenUri: 'https://oauth2.googleapis.com/token',
-                        type: 'service_account'
+                        type: 'not_used'
                     },
                     targetAudience: 'deos-ingest',
                     trace: true,

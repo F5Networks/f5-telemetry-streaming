@@ -103,6 +103,22 @@ module.exports = {
                                 'serverside.totConns': 0,
                                 'status.statusReason': 'Pool member does not have service checking enabled',
                                 totRequests: 0
+                            },
+                            '/Common/10.10.0.2%10:80': {
+                                addr: '10.10.0.2%10',
+                                availabilityState: 'unknown',
+                                enabledState: 'enabled',
+                                monitorStatus: 'unchecked',
+                                port: 80,
+                                'serverside.bitsIn': 0,
+                                'serverside.bitsOut': 0,
+                                'serverside.curConns': 0,
+                                'serverside.maxConns': 0,
+                                'serverside.pktsIn': 0,
+                                'serverside.pktsOut': 0,
+                                'serverside.totConns': 0,
+                                'status.statusReason': 'Pool member does not have service checking enabled',
+                                totRequests: 0
                             }
                         },
                         name: '/Common/test_pool_0',
@@ -204,6 +220,89 @@ module.exports = {
                                         },
                                         nodeName: {
                                             description: '/Common/10.10.0.2'
+                                        },
+                                        poolName: {
+                                            description: '/Common/test_pool_0'
+                                        },
+                                        port: {
+                                            value: 80
+                                        },
+                                        'serverside.bitsIn': {
+                                            value: 0
+                                        },
+                                        'serverside.bitsOut': {
+                                            value: 0
+                                        },
+                                        'serverside.curConns': {
+                                            value: 0
+                                        },
+                                        'serverside.maxConns': {
+                                            value: 0
+                                        },
+                                        'serverside.pktsIn': {
+                                            value: 0
+                                        },
+                                        'serverside.pktsOut': {
+                                            value: 0
+                                        },
+                                        'serverside.totConns': {
+                                            value: 0
+                                        },
+                                        sessionStatus: {
+                                            description: 'enabled'
+                                        },
+                                        'status.availabilityState': {
+                                            description: 'unknown'
+                                        },
+                                        'status.enabledState': {
+                                            description: 'enabled'
+                                        },
+                                        'status.statusReason': {
+                                            description: 'Pool member does not have service checking enabled'
+                                        },
+                                        totRequests: {
+                                            value: 0
+                                        }
+                                    }
+                                }
+                            },
+                            'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2%2510:80/stats': {
+                                nestedStats: {
+                                    kind: 'tm:ltm:pool:members:membersstats',
+                                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2%2510:80/stats?ver=14.1.0',
+                                    entries: {
+                                        addr: {
+                                            description: '10.10.0.2%10'
+                                        },
+                                        'connq.ageEdm': {
+                                            value: 0
+                                        },
+                                        'connq.ageEma': {
+                                            value: 0
+                                        },
+                                        'connq.ageHead': {
+                                            value: 0
+                                        },
+                                        'connq.ageMax': {
+                                            value: 0
+                                        },
+                                        'connq.depth': {
+                                            value: 0
+                                        },
+                                        'connq.serviced': {
+                                            value: 0
+                                        },
+                                        curSessions: {
+                                            value: 0
+                                        },
+                                        monitorRule: {
+                                            description: 'none'
+                                        },
+                                        monitorStatus: {
+                                            description: 'unchecked'
+                                        },
+                                        nodeName: {
+                                            description: '/Common/10.10.0.2%10'
                                         },
                                         poolName: {
                                             description: '/Common/test_pool_0'

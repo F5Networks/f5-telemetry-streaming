@@ -266,6 +266,8 @@ describe('HTTP Util Tests', () => {
             });
 
             it('should support proxy options - with creds', (done) => {
+                const proxyUser = 'auser';
+                const proxyPass = 'asecret';
                 const config = buildDefaultConfig({
                     hosts: ['destServer'],
                     port: 443,
@@ -273,8 +275,8 @@ describe('HTTP Util Tests', () => {
                         host: 'proxyServer',
                         port: 443,
                         protocol: 'https',
-                        username: 'auser',
-                        passphrase: 'asecret'
+                        username: proxyUser,
+                        passphrase: proxyPass
                     }
                 });
                 sinon.stub(request, 'post').callsFake((reqOpts) => {
@@ -285,7 +287,7 @@ describe('HTTP Util Tests', () => {
                             headers: {
                                 'User-Agent': constants.USER_AGENT
                             },
-                            proxy: 'https://auser:asecret@proxyServer:443',
+                            proxy: `https://${proxyUser}:${proxyPass}@proxyServer:443`,
                             strictSSL: true,
                             uri: 'https://destServer:443/'
                         });

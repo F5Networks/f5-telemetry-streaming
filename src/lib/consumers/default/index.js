@@ -26,7 +26,7 @@ module.exports = function (context) {
     logger.info(`Data type '${event.type}' processed`);
     if (tracer) {
         // pretty JSON dump
-        tracer.write(JSON.stringify(event.data, null, 4));
+        tracer.write(event.data);
     }
     // nothing to do, default plugin
     return Promise.resolve();

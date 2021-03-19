@@ -8,6 +8,9 @@
 
 'use strict';
 
+const maskSecrets = require('./utils/misc').maskSecrets;
+const stringify = require('./utils/misc').stringify;
+
 /** @module logger */
 
 let logger;
@@ -38,65 +41,9 @@ Object.keys(logLevels).forEach((key) => {
 });
 let currentLogLevel = NOTSET;
 
-
-/**
- * Stringify a message
- *
- * @param {Object|String} msg - message to stringify
- *
- * @returns {Object|String} Stringified message (or at least we tried to)
- */
-function stringify(msg) {
-    if (typeof msg === 'object') {
-        try {
-            msg = JSON.stringify(msg);
-        } catch (e) {
-            // just leave original message intact
-        }
-    }
-    return msg;
-}
-
-/**
- * Mask Secrets (as needed)
- *
- * @param {String} msg - message to mask
- *
- * @returns {String} Masked message
- */
-function maskSecrets(msg) {
-    let ret = msg;
-    const secrets = {
-        passphrase: {
-            replace: /(?:"passphrase":\s*{)(.*?)(?:})/g,
-            with: '"passphrase":{*********}'
-        },
-        '"passphrase"': {
-            replace: /(?:"passphrase":\s*")(.*?)(?:")/g,
-            with: '"passphrase":"*********"'
-        },
-        cipherText: {
-            replace: /(?:"cipherText":\s*")(.*?)(?:")/g,
-            with: '"cipherText":"*********"'
-        }
-    };
-    // place in try/catch
-    try {
-        Object.keys(secrets).forEach((k) => {
-            if (msg.indexOf(k) !== -1) {
-                ret = ret.replace(secrets[k].replace, secrets[k].with);
-            }
-        });
-    } catch (e) {
-        // just continue
-    }
-    return ret;
-}
-
 const prepareMsg = function (prefix, msg) {
     return `[${prefix}] ${maskSecrets(stringify(msg))}`;
 };
-
 
 /* f5-logger module supports the following levels
 levels: {
@@ -146,16 +93,19 @@ Logger.prototype.info = function (msg) {
         this.logger.info(prepareMsg(this.prefix, msg));
     }
 };
-
 Logger.prototype.warning = function (msg) {
     if (WARNING >= currentLogLevel) {
         this.logger.warning(prepareMsg(this.prefix, msg));
     }
 };
-
 Logger.prototype.debug = function (msg) {
     if (DEBUG >= currentLogLevel) {
         this.logger.finest(prepareMsg(this.prefix, msg));
+    }
+};
+Logger.prototype.debugException = function (msg, err) {
+    if (DEBUG >= currentLogLevel) {
+        this.logger.finest(prepareMsg(this.prefix, `${msg}\nTraceback:\n${(err && err.stack) || 'no traceback available'}`));
     }
 };
 Logger.prototype.exception = function (msg, err) {
@@ -223,3 +173,4 @@ mainLogger.setLogLevel(INFO);
 
 
 module.exports = mainLogger;
+module.exports.maskSecrets = maskSecrets;

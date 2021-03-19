@@ -88,6 +88,17 @@ describe('Tracer Util', () => {
             });
     });
 
+    it('should try to create parent directory', () => {
+        sinon.stub(constants.TRACER, 'DIR').value('/test/inaccessible/directory');
+        sinon.stub(util.fs, 'mkdir').resolves();
+        tracer = Tracer.createFromConfig('class2', 'obj2', { trace: true });
+        return tracer.write('foobar')
+            .then(() => {
+                assert.isAbove(util.fs.mkdir.callCount, 0, 'should call util.fs.mkdir');
+                assert.strictEqual(util.fs.mkdir.args[0][0], '/test/inaccessible/directory');
+            });
+    });
+
     it(`should write max ${constants.TRACER.LIST_SIZE} items`, () => {
         let totalRecords = 0;
         let allWrittenData = [];
@@ -122,6 +133,18 @@ describe('Tracer Util', () => {
             .then((writtenData) => {
                 validateTracerData(writtenData);
             });
+    });
+
+    it('should make copy of data', () => {
+        const data = [1, 2, 3];
+        const writePromise = tracer.write(data);
+        data.push(4);
+        return writePromise.then(() => {
+            assert.deepStrictEqual(
+                readTraceFile(tracerFile),
+                addTimestamps([[1, 2, 3]])
+            );
+        });
     });
 
     it('should merge new data with existing data', () => tracer.write('item1')
@@ -213,4 +236,57 @@ describe('Tracer Util', () => {
                 assert.strictEqual(sameTracer.fd, tracer.fd, 'fd should be the sane');
             })
     ));
+
+    it('should mask secrets', () => {
+        const data = {
+            text: 'passphrase: { cipherText: \'test_passphrase\' }\n'
+                + '"passphrase": {\ncipherText: "test_passphrase"\n}'
+                + '\'passphrase": "test_passphrase"',
+            passphrase: 'test_passphrase',
+            passphrase2: {
+                cipherText: 'test_passphrase'
+            }
+        };
+        return tracer.write(data)
+            .then(() => {
+                const traceData = readTraceFile(tracerFile);
+                assert.deepStrictEqual(
+                    traceData,
+                    addTimestamps([{
+                        passphrase: '*********',
+                        passphrase2: {
+                            cipherText: '*********'
+                        },
+                        text: 'passphrase: {*********}\n'
+                        + '"passphrase": {*********}'
+                        + '\'passphrase": "*********"'
+                    }])
+                );
+                return tracer.write(traceData[0].data);
+            })
+            .then(() => {
+                assert.deepStrictEqual(
+                    readTraceFile(tracerFile),
+                    addTimestamps([{
+                        passphrase: '*********',
+                        passphrase2: {
+                            cipherText: '*********'
+                        },
+                        text: 'passphrase: {*********}\n'
+                        + '"passphrase": {*********}'
+                        + '\'passphrase": "*********"'
+                    },
+                    {
+                        passphrase: '*********',
+                        passphrase2: {
+                            cipherText: '*********'
+                        },
+                        text: 'passphrase: {*********}\n'
+                        + '"passphrase": {*********}'
+                        + '\'passphrase": "*********"'
+                    }], 'should modify message when secrets masked already')
+                );
+                return tracer.write(data[0]);
+            });
+    });
 });

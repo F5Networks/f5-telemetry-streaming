@@ -227,7 +227,12 @@ module.exports = {
         const entries = 'entries';
         if (data && data[entries] && !Array.isArray(data)) {
             // entry keys may look like https://localhost/mgmt/tm/sys/tmm-info/0.0/stats, we should simplify this somewhat
-            const simplifyKey = key => key.replace('https://localhost/', '').replace('mgmt/tm/', '');
+            const simplifyKey = (key) => {
+                if (key.startsWith('https://localhost/')) {
+                    key = decodeURI(key.replace('https://localhost/', ''));
+                }
+                return key.replace('mgmt/tm/', '');
+            };
 
             const iFE = options.includeFirstEntry;
             const entryKey = Object.keys(data[entries])[0];

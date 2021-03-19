@@ -56,7 +56,7 @@ function process(poller, data, other) {
     normalized.destinationIds = poller.config.destinationIds;
     const tracer = poller.getTracer();
     if (tracer) {
-        tracer.write(JSON.stringify(normalized, null, 4));
+        tracer.write(normalized);
     }
     if (!poller.isTestOnly()) {
         // call out to pipeline

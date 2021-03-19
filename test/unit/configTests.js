@@ -16,49 +16,38 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const util = require('../../src/lib/utils/misc');
 const config = require('../../src/lib/config');
+const configTestsData = require('./data/configTestsData');
 const constants = require('../../src/lib/constants');
 const deviceUtil = require('../../src/lib/utils/device');
-const psModule = require('../../src/lib/persistentStorage');
-const configTestsData = require('./data/configTestsData');
+const persistentStorage = require('../../src/lib/persistentStorage');
+const stubs = require('./shared/stubs');
 const testUtil = require('./shared/util');
+const util = require('../../src/lib/utils/misc');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe('Config', () => {
-    let persistentStorage;
-    let restStorage;
+    let persistentStorageStub;
     let upgradeConfigurationMock;
     let uuidCounter = 0;
-
-    const baseState = {
-        _data_: {
-            config: {
-                raw: {},
-                normalized: { components: [], mappings: {} }
-            }
-        }
-    };
-
-    before(() => {
-        persistentStorage = psModule.persistentStorage;
-        restStorage = new psModule.RestStorage({
-            loadState: (first, cb) => { cb(null, baseState); },
-            saveState: (first, state, cb) => { cb(null); }
-        });
-    });
 
     beforeEach(() => {
         sinon.stub(util, 'generateUuid').callsFake(() => {
             uuidCounter += 1;
             return `uuid${uuidCounter}`;
         });
-        sinon.stub(persistentStorage, 'storage').value(restStorage);
-        restStorage._cache = JSON.parse(JSON.stringify(baseState));
+        persistentStorageStub = stubs.persistentStorage(persistentStorage);
+        persistentStorageStub.loadData = {
+            config: {
+                raw: {},
+                normalized: { components: [], mappings: {} }
+            }
+        };
         // Stub upgradeConfiguration() to ensure no config side-effects
         upgradeConfigurationMock = sinon.stub(config, 'upgradeConfiguration').callsFake(c => Promise.resolve(c));
+        return persistentStorage.persistentStorage.load();
     });
 
     afterEach(() => {
@@ -183,49 +172,70 @@ describe('Config', () => {
 
     describe('.saveConfig()', () => {
         it('should throw an error if save config fails', () => {
-            sinon.stub(persistentStorage, 'set').rejects(new Error('saveStateError'));
+            persistentStorageStub.saveError = new Error('saveStateError');
             return assert.isRejected(config.saveConfig(), /saveStateError/);
         });
     });
 
     describe('.getConfig()', () => {
         it('should return BASE_CONFIG if data is undefined', () => {
-            sinon.stub(persistentStorage, 'get').resolves(undefined);
-            return assert.becomes(config.getConfig(),
-                { raw: {}, normalized: { components: [], mappings: {} } });
+            persistentStorageStub.loadState = null;
+            return persistentStorage.persistentStorage.load()
+                .then(() => assert.becomes(
+                    config.getConfig(),
+                    { raw: {}, normalized: { components: [], mappings: {} } }
+                ));
         });
 
         it('should return BASE_CONFIG if data is {}', () => {
-            sinon.stub(persistentStorage, 'get').resolves({});
-            return assert.becomes(config.getConfig(),
-                { raw: {}, normalized: { components: [], mappings: {} } });
+            persistentStorageStub.loadData = { config: {} };
+            return persistentStorage.persistentStorage.load()
+                .then(() => assert.becomes(
+                    config.getConfig(),
+                    { raw: {}, normalized: { components: [], mappings: {} } }
+                ));
         });
 
-
         it('should return BASE_CONFIG even if data.parsed is {}, and remove parsed property', () => {
-            sinon.stub(persistentStorage, 'get').resolves({ raw: {}, parsed: {} });
-            return assert.becomes(config.getConfig(),
-                { raw: {}, normalized: { components: [], mappings: {} } });
+            persistentStorageStub.loadData = { config: { raw: {}, parsed: {} } };
+            return persistentStorage.persistentStorage.load()
+                .then(() => assert.becomes(
+                    config.getConfig(),
+                    { raw: {}, normalized: { components: [], mappings: {} } }
+                ));
         });
 
         it('should return data if data.normalized is set', () => {
-            sinon.stub(persistentStorage, 'get').resolves({ raw: { value: 'Hello World' }, normalized: { value: 'Hello World' } });
-            return assert.becomes(config.getConfig(), { raw: { value: 'Hello World' }, normalized: { value: 'Hello World' } });
+            persistentStorageStub.loadData = { config: { raw: { value: 'Hello World' }, normalized: { value: 'Hello World' } } };
+            return persistentStorage.persistentStorage.load()
+                .then(() => assert.becomes(
+                    config.getConfig(),
+                    { raw: { value: 'Hello World' }, normalized: { value: 'Hello World' } }
+                ));
         });
 
         it('should return BASE_CONFIG if data.raw is {}', () => {
-            sinon.stub(persistentStorage, 'get').resolves({ raw: {} });
-            return assert.becomes(config.getConfig(),
-                { raw: {}, normalized: { components: [], mappings: {} } });
+            persistentStorageStub.loadData = { config: { raw: {} } };
+            return persistentStorage.persistentStorage.load()
+                .then(() => assert.becomes(
+                    config.getConfig(),
+                    { raw: {}, normalized: { components: [], mappings: {} } }
+                ));
         });
+
         it('should return data if data.raw is set', () => {
-            sinon.stub(persistentStorage, 'get').resolves({ raw: { value: 'Hello World' }, normalized: { components: [{ value: 'Hello World' }] } });
-            return assert.becomes(config.getConfig(), { raw: { value: 'Hello World' }, normalized: { components: [{ value: 'Hello World' }] } });
+            persistentStorageStub.loadData = { config: { raw: { value: 'Hello World' }, normalized: { components: [{ value: 'Hello World' }] } } };
+            return persistentStorage.persistentStorage.load()
+                .then(() => assert.becomes(
+                    config.getConfig(),
+                    { raw: { value: 'Hello World' }, normalized: { components: [{ value: 'Hello World' }] } }
+                ));
         });
     });
 
     describe('.loadConfig()', () => {
         let configChangeMock;
+
         beforeEach(() => {
             configChangeMock = sinon.stub(config, '_notifyConfigChange').resolves();
         });
@@ -235,12 +245,12 @@ describe('Config', () => {
         });
 
         it('should reject if persistentStorage errors', () => {
-            sinon.stub(persistentStorage, 'get').rejects(new Error('loadStateError'));
+            sinon.stub(persistentStorage.PersistentStorageProxy.prototype, 'get').rejects(new Error('loadStateError'));
             return assert.isRejected(config.loadConfig(), /loadStateError/);
         });
 
         it('should set config to BASE_CONFIG, even if persistentStorage returns {}', () => {
-            sinon.stub(persistentStorage, 'get').resolves({});
+            sinon.stub(persistentStorage.PersistentStorageProxy.prototype, 'get').resolves({});
             return config.loadConfig()
                 .then(() => {
                     assert.deepStrictEqual(configChangeMock.firstCall.args[0],
@@ -450,7 +460,7 @@ describe('Config', () => {
                     mappings: {}
                 }
             };
-            return assert.becomes(config.upgradeConfiguration(util.deepCopy(curConfig)), curConfig);
+            return assert.becomes(config.upgradeConfiguration(testUtil.deepCopy(curConfig)), curConfig);
         });
 
         it('should not fail on empty config', () => {
@@ -515,9 +525,9 @@ describe('Config', () => {
                 port: 8100,
                 protocol: 'http'
             };
-            const defComp = util.assignDefaults({ id: 'uuid-default', namespace: 'f5telemetry_default' }, util.deepCopy(baseComp));
-            const existingComp = util.assignDefaults({ id: 'uuid-namespace-was-here', namespace: 'NamespaceWasHere' }, util.deepCopy(baseComp));
-            const newComp = util.assignDefaults({ id: 'uuid1', namespace: 'NewbieNamespace' }, util.deepCopy(baseComp));
+            const defComp = testUtil.assignDefaults({ id: 'uuid-default', namespace: 'f5telemetry_default' }, testUtil.deepCopy(baseComp));
+            const existingComp = testUtil.assignDefaults({ id: 'uuid-namespace-was-here', namespace: 'NamespaceWasHere' }, testUtil.deepCopy(baseComp));
+            const newComp = testUtil.assignDefaults({ id: 'uuid1', namespace: 'NewbieNamespace' }, testUtil.deepCopy(baseComp));
 
             savedConfig = {
                 raw: {
@@ -541,7 +551,7 @@ describe('Config', () => {
                 }
             };
 
-            const expectedNormalized = util.deepCopy(savedConfig.normalized);
+            const expectedNormalized = testUtil.deepCopy(savedConfig.normalized);
             expectedNormalized.components[0].skipUpdate = true;
             expectedNormalized.components[1].skipUpdate = true;
             expectedNormalized.components.push(newComp);

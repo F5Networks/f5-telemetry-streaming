@@ -9,6 +9,49 @@
 'use strict';
 
 module.exports = {
+    eventData: [
+        {
+            expectedData: [
+                {
+                    allowSelfSignedCert: true,
+                    body: [
+                        {
+                            AggrInterval: '300',
+                            AvgConcurrentConnections: '66',
+                            AvgCpu: '1096',
+                            AvgCpuAnalysisPlane: '0',
+                            AvgCpuControlPlane: '0',
+                            AvgCpuDataPlane: '0',
+                            AvgMemory: '3751',
+                            AvgThroughput: '237991',
+                            ConcurrentConnectionsHealth: '0',
+                            CpuHealth: '10',
+                            EOCTimestamp: '1576002300',
+                            Entity: 'SystemMonitor',
+                            HitCount: '1',
+                            MaxConcurrentConnections: '66',
+                            MaxCpu: '1096',
+                            MemoryHealth: '37',
+                            SlotId: '0',
+                            ThroughputHealth: '0',
+                            TotalBytes: '2379912',
+                            errdefs_msgno: '22282286',
+                            hostname: 'telemetry.bigip.com',
+                            telemetryEventCategory: 'AVR'
+                        }
+                    ],
+                    fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
+                    headers: {
+                        Authorization: 'SharedKey myWorkspace:5AKOPxGUtNUt32E7JJKzj0gRQdtO1abqhj6LxSOgWwo=',
+                        'Content-Type': 'application/json',
+                        'Log-Type': 'F5Telemetry_AVR',
+                        'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
+                    },
+                    method: 'POST'
+                }
+            ]
+        }
+    ],
     systemData: [
         {
             expectedData: [
@@ -303,6 +346,10 @@ module.exports = {
                                 'clientside.bitsIn': 0,
                                 'clientside.bitsOut': 0,
                                 'clientside.curConns': 0,
+                                'clientside.maxConns': 0,
+                                'clientside.pktsIn': 0,
+                                'clientside.pktsOut': 0,
+                                'clientside.totConns': 0,
                                 destination: '10.5.6.7:80',
                                 enabledState: 'enabled',
                                 ipProtocol: 'tcp',
@@ -329,6 +376,10 @@ module.exports = {
                                 'clientside.bitsIn': 0,
                                 'clientside.bitsOut': 0,
                                 'clientside.curConns': 0,
+                                'clientside.maxConns': 0,
+                                'clientside.pktsIn': 0,
+                                'clientside.pktsOut': 0,
+                                'clientside.totConns': 0,
                                 destination: '192.0.2.11:443',
                                 enabledState: 'enabled',
                                 ipProtocol: 'tcp',
@@ -345,6 +396,10 @@ module.exports = {
                                 'clientside.bitsIn': 0,
                                 'clientside.bitsOut': 0,
                                 'clientside.curConns': 0,
+                                'clientside.maxConns': 0,
+                                'clientside.pktsIn': 0,
+                                'clientside.pktsOut': 0,
+                                'clientside.totConns': 0,
                                 destination: '192.0.2.11:80',
                                 enabledState: 'enabled',
                                 name: '/Example_Tenant/A1/serviceMain-Redirect',
@@ -366,7 +421,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:h6eg0jvac2pOLT+SfxV5cGQvLUjWLExsaqsHEYdUBMk=',
+                        Authorization: 'SharedKey myWorkspace:fXbTcwglyeCjGtg2DLxT6ZgotDRZqDMMs7+7ZCV8bhc=',
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_virtualServers',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -392,6 +447,10 @@ module.exports = {
                                         'serverside.bitsIn': 0,
                                         'serverside.bitsOut': 0,
                                         'serverside.curConns': 0,
+                                        'serverside.maxConns': 0,
+                                        'serverside.pktsIn': 0,
+                                        'serverside.pktsOut': 0,
+                                        'serverside.totConns': 0,
                                         'status.statusReason': 'Pool member is available'
                                     }
                                 },
@@ -399,6 +458,10 @@ module.exports = {
                                 'serverside.bitsIn': 0,
                                 'serverside.bitsOut': 0,
                                 'serverside.curConns': 0,
+                                'serverside.maxConns': 0,
+                                'serverside.pktsIn': 0,
+                                'serverside.pktsOut': 0,
+                                'serverside.totConns': 0,
                                 'status.statusReason': 'The pool is available',
                                 tenant: 'Common'
                             },
@@ -417,6 +480,10 @@ module.exports = {
                                         'serverside.bitsIn': 0,
                                         'serverside.bitsOut': 0,
                                         'serverside.curConns': 0,
+                                        'serverside.maxConns': 0,
+                                        'serverside.pktsIn': 0,
+                                        'serverside.pktsOut': 0,
+                                        'serverside.totConns': 0,
                                         'status.statusReason': 'Pool member has been marked down by a monitor'
                                     }
                                 },
@@ -424,6 +491,10 @@ module.exports = {
                                 'serverside.bitsIn': 0,
                                 'serverside.bitsOut': 0,
                                 'serverside.curConns': 0,
+                                'serverside.maxConns': 0,
+                                'serverside.pktsIn': 0,
+                                'serverside.pktsOut': 0,
+                                'serverside.totConns': 0,
                                 'status.statusReason': 'The pool is available',
                                 tenant: 'Common'
                             },
@@ -442,6 +513,10 @@ module.exports = {
                                         'serverside.bitsIn': 0,
                                         'serverside.bitsOut': 0,
                                         'serverside.curConns': 0,
+                                        'serverside.maxConns': 0,
+                                        'serverside.pktsIn': 0,
+                                        'serverside.pktsOut': 0,
+                                        'serverside.totConns': 0,
                                         'status.statusReason': 'Pool member is available'
                                     }
                                 },
@@ -449,6 +524,10 @@ module.exports = {
                                 'serverside.bitsIn': 0,
                                 'serverside.bitsOut': 0,
                                 'serverside.curConns': 0,
+                                'serverside.maxConns': 0,
+                                'serverside.pktsIn': 0,
+                                'serverside.pktsOut': 0,
+                                'serverside.totConns': 0,
                                 'status.statusReason': 'The pool is available',
                                 tenant: 'Example_Tenant'
                             },
@@ -467,6 +546,10 @@ module.exports = {
                                         'serverside.bitsIn': 0,
                                         'serverside.bitsOut': 0,
                                         'serverside.curConns': 0,
+                                        'serverside.maxConns': 0,
+                                        'serverside.pktsIn': 0,
+                                        'serverside.pktsOut': 0,
+                                        'serverside.totConns': 0,
                                         'status.statusReason': 'Pool member is available'
                                     },
                                     '/Example_Tenant/192.0.2.13:80': {
@@ -478,6 +561,10 @@ module.exports = {
                                         'serverside.bitsIn': 0,
                                         'serverside.bitsOut': 0,
                                         'serverside.curConns': 0,
+                                        'serverside.maxConns': 0,
+                                        'serverside.pktsIn': 0,
+                                        'serverside.pktsOut': 0,
+                                        'serverside.totConns': 0,
                                         'status.statusReason': 'Pool member is available'
                                     }
                                 },
@@ -485,6 +572,10 @@ module.exports = {
                                 'serverside.bitsIn': 0,
                                 'serverside.bitsOut': 0,
                                 'serverside.curConns': 0,
+                                'serverside.maxConns': 0,
+                                'serverside.pktsIn': 0,
+                                'serverside.pktsOut': 0,
+                                'serverside.totConns': 0,
                                 'status.statusReason': 'The pool is available',
                                 tenant: 'Example_Tenant'
                             }
@@ -492,7 +583,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:3Av9tdaMHdEc9bJPNvFNHKN5VBilNUzpHvXJd/qJgJw=',
+                        Authorization: 'SharedKey myWorkspace:1oFmIkjCcPPDKVHQCVaCRMod3Cvpx4nc15WA/MWjNJw=',
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_pools',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -673,7 +764,9 @@ module.exports = {
                                 recordsIn: 0,
                                 recordsOut: 0,
                                 sniRejects: 0,
-                                tenant: 'Common'
+                                tenant: 'Common',
+                                totCompatConns: 0,
+                                totNativeConns: 0
                             },
                             '/Example_Tenant/A1/webtls': {
                                 activeHandshakeRejected: 0,
@@ -723,13 +816,15 @@ module.exports = {
                                 recordsIn: 0,
                                 recordsOut: 0,
                                 sniRejects: 0,
-                                tenant: 'Example_Tenant'
+                                tenant: 'Example_Tenant',
+                                totCompatConns: 100,
+                                totNativeConns: 100
                             }
                         }
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:Vy/VFO/q74fmTdpVLoHQf4fEmAnvKzciPyPWaYQFrUY=',
+                        Authorization: 'SharedKey myWorkspace:3bKXfVgHp75WNYpskuw06OGi59rQmJcibOdute3ysSY=',
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_clientSslProfiles',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -787,13 +882,15 @@ module.exports = {
                                 'protocolUses.tlsv1_3': 0,
                                 recordsIn: 0,
                                 recordsOut: 0,
-                                tenant: 'Common'
+                                tenant: 'Common',
+                                totCompatConns: 0,
+                                totNativeConns: 0
                             }
                         }
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:SVsebvJsBDg8ufp9yMjMFVQPe0TdlUBVeroZwoOdg2E=',
+                        Authorization: 'SharedKey myWorkspace:EJXLWlrW18LS9xrmeCdEC05Z8tTN3mUvm6RAzMi6Cg4=',
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_serverSslProfiles',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -1822,49 +1919,6 @@ module.exports = {
                         Authorization: 'SharedKey myWorkspace:HTlS6jtEi0oPBWJtKIlQOpx/IaXTjG4RxnFXr7aE0DY=',
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_telemetryEventCategory',
-                        'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
-                    },
-                    method: 'POST'
-                }
-            ]
-        }
-    ],
-    eventData: [
-        {
-            expectedData: [
-                {
-                    allowSelfSignedCert: true,
-                    body: [
-                        {
-                            AggrInterval: '300',
-                            AvgConcurrentConnections: '66',
-                            AvgCpu: '1096',
-                            AvgCpuAnalysisPlane: '0',
-                            AvgCpuControlPlane: '0',
-                            AvgCpuDataPlane: '0',
-                            AvgMemory: '3751',
-                            AvgThroughput: '237991',
-                            ConcurrentConnectionsHealth: '0',
-                            CpuHealth: '10',
-                            EOCTimestamp: '1576002300',
-                            Entity: 'SystemMonitor',
-                            HitCount: '1',
-                            MaxConcurrentConnections: '66',
-                            MaxCpu: '1096',
-                            MemoryHealth: '37',
-                            SlotId: '0',
-                            ThroughputHealth: '0',
-                            TotalBytes: '2379912',
-                            errdefs_msgno: '22282286',
-                            hostname: 'telemetry.bigip.com',
-                            telemetryEventCategory: 'AVR'
-                        }
-                    ],
-                    fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
-                    headers: {
-                        Authorization: 'SharedKey myWorkspace:5AKOPxGUtNUt32E7JJKzj0gRQdtO1abqhj6LxSOgWwo=',
-                        'Content-Type': 'application/json',
-                        'Log-Type': 'F5Telemetry_AVR',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
                     },
                     method: 'POST'

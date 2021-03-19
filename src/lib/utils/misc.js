@@ -56,6 +56,42 @@ const fsPromisified = (function promisifyNodeFsModule(fsModule) {
 
 const VERSION_COMPARATORS = ['==', '===', '<', '<=', '>', '>=', '!=', '!=='];
 
+const SECERTS_MASK = '*********';
+const KEYWORDS_TO_MASK = [
+    {
+        /**
+         * single line:
+         *
+         * { "passphrase": { ...secret... } }
+         */
+        str: 'passphrase',
+        replace: /(\\{0,}["']{0,1}passphrase\\{0,}["']{0,1}\s*:\s*){.*?}/g,
+        with: `$1{${SECERTS_MASK}}`
+    },
+    {
+        /**
+         * {
+         *     "passphrase": "secret"
+         * }
+         */
+        str: 'passphrase',
+        replace: /(\\{0,}["']{0,1}passphrase\\{0,}["']{0,1}\s*:\s*)(\\{0,}["']{1}).*?\2/g,
+        with: `$1$2${SECERTS_MASK}$2`
+    },
+    {
+        /**
+         * {
+         *     someSecret: {
+         *         cipherText: "secret"
+         *     }
+         * }
+         */
+        str: 'cipherText',
+        replace: /(\\{0,}["']{0,1}cipherText\\{0,}["']{0,1}\s*:\s*)(\\{0,}["']{1}).*?\2/g,
+        with: `$1$2${SECERTS_MASK}$2`
+    }
+];
+
 
 module.exports = {
     /**
@@ -394,6 +430,28 @@ module.exports = {
      */
     getProperty(object, propertyPath, defaultValue) {
         return objectGet(object, propertyPath, defaultValue);
+    },
+
+    /**
+     * Mask Secrets (as needed)
+     *
+     * @param {String} msg - message to mask
+     *
+     * @returns {String} Masked message
+     */
+    maskSecrets(msg) {
+        let ret = msg;
+        // place in try/catch
+        try {
+            KEYWORDS_TO_MASK.forEach((keyword) => {
+                if (msg.indexOf(keyword.str) !== -1) {
+                    ret = ret.replace(keyword.replace, keyword.with);
+                }
+            });
+        } catch (e) {
+            // just continue
+        }
+        return ret;
     },
 
     /**

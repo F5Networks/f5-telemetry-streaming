@@ -105,7 +105,9 @@ module.exports = {
                         recordsOut: 0,
                         sniRejects: 0,
                         name: '/Common/clientssl',
-                        tenant: 'Common'
+                        tenant: 'Common',
+                        totCompatConns: 0,
+                        totNativeConns: 0
                     }
                 }
             },

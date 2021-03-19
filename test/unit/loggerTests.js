@@ -86,7 +86,7 @@ describe('Logger', () => {
         logger.setLogLevel(invalidName);
 
         assert.strictEqual(loggedMessages.error.length, 1);
-        assert.notStrictEqual(loggedMessages.error[0].indexOf(invalidName), -1);
+        assert.include(loggedMessages.error[0], invalidName);
     });
 
     it('should return appropriate log level name for non-standard value', () => {
@@ -111,7 +111,7 @@ describe('Logger', () => {
                 if (logger.getLevel(logType) >= logger.getLevel()) {
                     assert.strictEqual(loggedMessages[logType].length, 1);
                     // check it contains the message - no exact match as prefix [telemetry] will be added
-                    assert.notStrictEqual(loggedMessages[logType][0].indexOf(msg), -1);
+                    assert.include(loggedMessages[logType][0], msg);
                 } else {
                     assert.strictEqual(loggedMessages[logType].length, 0);
                 }
@@ -120,13 +120,22 @@ describe('Logger', () => {
     });
 
     it('should log an exception', () => {
-        const level = 'exception';
-        logger[level](`this is a ${level} message`, new Error('foo'));
+        const msgType = 'exception';
+        logger.exception(`this is a ${msgType} message`, new Error('foo'));
+        logger.debugException(`this is a ${msgType} message`, new Error('foo'));
 
         assert.strictEqual(loggedMessages.error.length, 1);
+        assert.strictEqual(loggedMessages.debug.length, 0);
+        assert.include(loggedMessages.error[0], `this is a ${msgType} message`);
 
-        // check it contains the message - no exact match as prefix [telemetry] will be added
-        assert.notStrictEqual(loggedMessages.error[0].indexOf(`this is a ${level} message`), -1);
+        logger.setLogLevel('debug');
+        logger.exception(`this is a ${msgType} message`, new Error('foo'));
+        logger.debugException(`this is a ${msgType} message [debug]`, new Error('foo'));
+
+        assert.strictEqual(loggedMessages.error.length, 2);
+        assert.strictEqual(loggedMessages.debug.length, 1);
+        assert.include(loggedMessages.error[1], `this is a ${msgType} message`);
+        assert.include(loggedMessages.debug[0], `this is a ${msgType} message [debug]`);
     });
 
     it('should stringify object', () => {
@@ -134,7 +143,7 @@ describe('Logger', () => {
             foo: 'bar'
         };
         logger.info(msg);
-        assert.notStrictEqual(loggedMessages.info[0].indexOf('{"foo":"bar"}'), -1);
+        assert.include(loggedMessages.info[0], '{"foo":"bar"}');
     });
 
     it('should get a child logger', () => {
@@ -143,48 +152,20 @@ describe('Logger', () => {
         childLogger.logger = loggerMock;
 
         childLogger.info('foo');
-        assert.notStrictEqual(loggedMessages.info[0].indexOf(`[telemetry.${prefix}]`), -1);
+        assert.include(loggedMessages.info[0], `[telemetry.${prefix}]`);
     });
 
-    describe('mask secrets', () => {
-        it('should mask secrets - cipherText (without new lines)', () => {
-            const decl = {
-                passphrase: {
-                    cipherText: 'foo'
-                }
-            };
-            const expected = 'this contains secrets: {"passphrase":{*********}}';
-            logger.info(`this contains secrets: ${JSON.stringify(decl)}`);
-            assert.notStrictEqual(loggedMessages.info[0].indexOf(expected), -1);
-        });
+    it('should mask secrets', () => {
+        const msg = 'passphrase: { cipherText: \'test_passphrase\' }\n'
+            + '"passphrase": {\ncipherText: "test_passphrase"\n}'
+            + '\'passphrase": "test_passphrase"';
+        const expected = 'this contains secrets: passphrase: {*********}\n'
+        + '"passphrase": {\ncipherText: "*********"\n}'
+        + '\'passphrase": "*********"';
+        logger.info(`this contains secrets: ${msg}`);
+        assert.include(loggedMessages.info[0], expected, 'should mask secrets');
 
-        it('should mask secrets - cipherText (with new lines)', () => {
-            const decl = {
-                passphrase: {
-                    cipherText: 'foo'
-                }
-            };
-            const expected = 'this contains secrets: {\n    "passphrase": {\n        "cipherText":"*********"\n    }\n}';
-            logger.info(`this contains secrets: ${JSON.stringify(decl, null, 4)}`);
-            assert.notStrictEqual(loggedMessages.info[0].indexOf(expected), -1);
-        });
-
-        it('should mask secrets - passphrase (without new lines)', () => {
-            const decl = {
-                passphrase: 'foo'
-            };
-            const expected = 'this contains secrets: {"passphrase":"*********"}';
-            logger.info(`this contains secrets: ${JSON.stringify(decl)}`);
-            assert.notStrictEqual(loggedMessages.info[0].indexOf(expected), -1);
-        });
-
-        it('should mask secrets - passphrase (with new lines)', () => {
-            const decl = {
-                passphrase: 'foo'
-            };
-            const expected = 'this contains secrets: {\n    "passphrase":"*********"\n}';
-            logger.info(`this contains secrets: ${JSON.stringify(decl, null, 4)}`);
-            assert.notStrictEqual(loggedMessages.info[0].indexOf(expected), -1);
-        });
+        logger.info(loggedMessages.info[0]);
+        assert.include(loggedMessages.info[1], expected, 'should keep message the same once masked');
     });
 });
