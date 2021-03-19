@@ -11,6 +11,10 @@ Document Revision History
         - Description
         - Date
 
+      * - 1.19.0
+        - Updated the documentation for Telemetry Streaming v1.19.0. This release contains the following changes: |br| * Added a new troubleshooting entry providing memory threshold information (see :ref:`Memory Threshold<memory>`) |br| |br| Issues Resolved: |br| * Fixed Route Domain ID handling for Virtual Server and Pool stats |br| * Splunk debug output does not log HTTP Response payload, `GitHub #109 <https://github.com/F5Networks/f5-telemetry-streaming/issues/109>`_ |br| * Update example output for maxConns, pktsIn, pktsOut, and totConns
+        - 4-6-21
+  
       * - Unreleased
         - This documentation only update contains the following change: |br| * Updated the note in :ref:`Splunk multi-metric format<multi-metric>` to add that custom endpoints are not supported with multi-metric format (added the same note to :doc:`custom-endpoints`).
         - 3-1-21
