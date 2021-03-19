@@ -169,7 +169,7 @@ If your BIG-IP system seems to be using a relatively high amount of CPU and degr
 **More information** |br|
 Restjavad may become unstable if the amount of memory required by the daemon exceeds the value allocated for its use. The memory required by the restjavad daemon may grow significantly in system configurations with either a high volume of device statistics collection (AVR provisioning), or a with relatively large number of LTM objects managed by the REST framework (SSL Orchestrator provisioning). The overall system performance is degraded during the continuous restart of the restjavad daemon due to high CPU usage. 
 
-See `Bug ID 894593 <https://cdn.f5.com/product/bugtracker/ID894593.html>`_ and `Bug ID 776393 <https://cdn.f5.com/product/bugtracker/ID776393.html>`_.
+See `Bug ID 894593 <https://cdn.f5.com/product/bugtracker/ID894593.html>`_, `Bug ID 776393 <https://cdn.f5.com/product/bugtracker/ID776393.html>`_, and `Bug ID 839597 <https://cdn.f5.com/product/bugtracker/ID839597.html>`_.
 
 **Workaround** |br|
 Increase the memory allocated for the restjavad daemon (e.g. 2 GB), by running the following commands in a BIG-IP terminal.
@@ -177,6 +177,59 @@ Increase the memory allocated for the restjavad daemon (e.g. 2 GB), by running t
 ``tmsh modify sys db restjavad.useextramb value true`` |br|
 ``tmsh modify sys db provision.extramb value 2048`` |br|
 ``bigstart restart restjavad``
+
+.. IMPORTANT:: You should not exceed 2500MB
+
+|
+
+.. _memory: 
+
+Where can I find memory Telemetry Streaming memory threshold information?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This section contains guidance how to configure the Telemetry Streaming memory usage threshold to help prevent **restnoded** from restarting when too much memory is used. When **restnoded** restarts, the Telemetry Streaming consumer is unavailable.
+
+You can configure your memory threshold using the new **memoryThresholdPercent** property in the **Controls** class.  For example, to set the memory threshold to 65%, you use:
+
+.. code-block:: json
+   :emphasize-lines: 6
+
+   {
+    "class": "Telemetry",
+    "controls": {
+        "class": "Controls",
+        "logLevel": "info",
+        "memoryThresholdPercent": 65
+        }
+    }
+
+.. NOTE:: You can disable monitor checks by setting **memoryThresholdPercent** value to 100.
+
+Telemetry Streaming v1.18 introduced a change in behavior for the monitor checks that run by default. Memory usage is monitored to prevent **restnoded** from crashing and restarting if memory usage becomes too high. By default (without user configuration), this translates to 90% of total memory allocated for restnoded (1433 MB by default, unless you set the db variables as noted in the workaround section of :ref:`restjavad`).
+
+Monitor checks run by default on intervals depending on %memory usage:
+
+.. list-table::
+      :widths: 100 25
+      :header-rows: 1
+
+      * - % of total memory usage
+        - Interval
+      
+      * - 0 - 24
+        - 30 seconds 
+  
+      * - 25 - 49
+        - 15 seconds 
+  
+      * - 50 - 74
+        - 10 seconds 
+
+      * - 75 - 89
+        - 5 seconds 
+
+      * - 90+
+        - 3 seconds 
+
 
 
 
