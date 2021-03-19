@@ -184,9 +184,11 @@ Increase the memory allocated for the restjavad daemon (e.g. 2 GB), by running t
 
 .. _memory: 
 
-Where can I find memory Telemetry Streaming memory threshold information?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Where can I find Telemetry Streaming memory threshold information?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This section contains guidance how to configure the Telemetry Streaming memory usage threshold to help prevent **restnoded** from restarting when too much memory is used. When **restnoded** restarts, the Telemetry Streaming consumer is unavailable.
+
+Telemetry Streaming v1.18 introduced a change in behavior by adding monitor checks that run by default. Memory usage is monitored to prevent **restnoded** from crashing and restarting if memory usage becomes too high. By default (without user configuration), this translates to 90% of total memory allocated for restnoded (1433 MB by default, unless you set the db variables as noted in the workaround section of :ref:`restjavad`).
 
 You can configure your memory threshold using the new **memoryThresholdPercent** property in the **Controls** class.  For example, to set the memory threshold to 65%, you use:
 
@@ -204,12 +206,10 @@ You can configure your memory threshold using the new **memoryThresholdPercent**
 
 .. NOTE:: You can disable monitor checks by setting **memoryThresholdPercent** value to 100.
 
-Telemetry Streaming v1.18 introduced a change in behavior for the monitor checks that run by default. Memory usage is monitored to prevent **restnoded** from crashing and restarting if memory usage becomes too high. By default (without user configuration), this translates to 90% of total memory allocated for restnoded (1433 MB by default, unless you set the db variables as noted in the workaround section of :ref:`restjavad`).
 
 Monitor checks run by default on intervals depending on %memory usage:
 
 .. list-table::
-      :widths: 100 25
       :header-rows: 1
 
       * - % of total memory usage
