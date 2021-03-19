@@ -204,7 +204,7 @@ You can configure your memory threshold using the new **memoryThresholdPercent**
 
 .. NOTE:: You can disable monitor checks by setting **memoryThresholdPercent** value to 100.
 
-Telemetry Streaming v1.18 introduced a change in behavior for the monitor checks that run by default. Memory usage is monitored to prevent **restnoded** from crashing and restarting if memory usage becomes too high. By default (without user configuration), this translates to 90% of total memory allocated for restnoded (1433 MB by default, unless you set the db variables as noted in in the workaround section of :ref:`restjavad`).
+Telemetry Streaming v1.18 introduced a change in behavior for the monitor checks that run by default. Memory usage is monitored to prevent **restnoded** from crashing and restarting if memory usage becomes too high. By default (without user configuration), this translates to 90% of total memory allocated for restnoded (1433 MB by default, unless you set the db variables as noted in the workaround section of :ref:`restjavad`).
 
 Monitor checks run by default on intervals depending on %memory usage:
 
