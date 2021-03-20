@@ -314,6 +314,7 @@ module.exports = {
                             syncStatus: 'Standalone',
                             syncSummary: ' ',
                             systemTimestamp: '2019-01-01T01:01:01Z',
+                            swap: 0,
                             tmmCpu: 0,
                             tmmMemory: 0,
                             tmmTraffic: {
@@ -328,7 +329,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:UNhbSbGMVSIUHPlGjmDwGfSd8kqX9zG5sOGmNvMVsJg=',
+                        Authorization: 'SharedKey myWorkspace:tw+6CadFsKkkFvuczHA1V1fwFNLmkw91fKxfp39tFlw=',
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_system',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'

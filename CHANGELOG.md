@@ -7,6 +7,7 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-2160: Added monitor checks for memory thresholds, which prevents restnoded from crashing on reaching memory limits (runs by default)
 - AUTOTOOL-1915: Added new Event Listener endpoint (/eventListener/$eventListener and /namespace/$namespace/eventListener/$eventListener) to send a debug message to an Event Listener
 - AUTOTOOL-2266: Added ability to configure "compressionType" for Splunk consumer
+- AUTOTOOL-2314: Added 'swap' metric to 'system' group (System Poller output)
 ### Fixed
 - AUTOTOOL-2164: Fixed Route Domain ID handling for Virtual Server and Pool stats
 - [GitHub #109](https://github.com/F5Networks/f5-telemetry-streaming/issues/109): Splunk debug output does not log HTTP Response payload
