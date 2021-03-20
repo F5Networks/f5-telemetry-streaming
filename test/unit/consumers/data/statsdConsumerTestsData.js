@@ -2345,6 +2345,10 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.swap',
+                    metricValue: 0
+                },
+                {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.tmmCpu',
                     metricValue: 0
                 },
