@@ -173,4 +173,3 @@ mainLogger.setLogLevel(INFO);
 
 
 module.exports = mainLogger;
-module.exports.maskSecrets = maskSecrets;
