@@ -160,6 +160,37 @@ When the log level is set to **debug**, many more events are logged to the restn
 
 |
 
+.. _eventlistenerdata:
+
+How can I check if my Telemetry Streaming Event Listener is sending data to my consumer?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Telemetry Streaming v1.19 introduced a new feature that allows you to send arbitrary data to a Telemetry Streaming Event Listener instead of waiting for the BIG-IP to send a message(s) to the Event Listener.  This allows you to test that your Telemetry Streaming Consumers are properly configured.
+
+You must have already submitted a declaration that includes the following:
+    - An Event Listener
+    - In the |controls| class, the **debug** property set to **true**.
+    - You should have a Consumer in your declaration so you can see the test payload successfully made it to your Consumer.
+
+
+To check that your Event Listener is sending data to the Consumer, you send an HTTP POST to one of the two new endpoints introduced in v1.19, depending on whether you are using |namespaceref| or not:
+
+- If not using Namespaces: ``https://{{host}}/mgmt/shared/telemetry/eventListener/{{listener_name}}``
+
+- If using Namespaces: ``https://{{host}}/mgmt/shared/telemetry/namespace/{{namespace_name}}/eventListener/{{listener_name}}``
+
+
+You can send any valid (but also arbitrary) JSON body, such as:
+
+.. code-block:: json
+
+    {
+        "message": "my debugging message"
+    }
+
+
+Telemetry Streaming sends this JSON payload to the Event Listener you specified, and the Event Listener processes and sends this debugging payload through Telemetry Streaming to any/all of the your configured Consumers.
+
+
 .. _restjavad:
 
 Why is my BIG-IP experiencing occasional high CPU usage and slower performance?
@@ -250,3 +281,7 @@ Monitor checks run by default on intervals depending on %memory usage:
 
    <a href="https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/schema-reference.html#controls" target="_blank">Controls</a>
 
+.. |namespaceref| raw:: html
+
+   <a href="https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/namespaces.html" target="_blank">Namespaces</a>
+   
