@@ -19,9 +19,7 @@ const iHealthPoller = require('./ihealthPoller');
 const dataPipeline = require('./dataPipeline');
 const normalize = require('./normalize');
 const properties = require('./properties.json').ihealth;
-const tracers = require('./utils/tracer').Tracer;
 
-const IHEALTH_POLLER_CLASS_NAME = constants.CONFIG_CLASSES.IHEALTH_POLLER_CLASS_NAME;
 
 /** @module ihealth */
 
@@ -56,7 +54,7 @@ function process(poller, data, other) {
     normalized.destinationIds = poller.config.destinationIds;
     const tracer = poller.getTracer();
     if (tracer) {
-        tracer.write(JSON.stringify(normalized, null, 4));
+        tracer.write(normalized);
     }
     if (!poller.isTestOnly()) {
         // call out to pipeline
@@ -186,12 +184,7 @@ function getRequestedIHealthPoller(originalConfig, systemName, pollerName) {
 configWorker.on('change', config => new Promise((resolve) => {
     logger.debug('configWorker change event in iHealthPoller'); // helpful debug
 
-    // timestamp to filed out-dated tracers
     const pollers = {};
-
-    // timestamp to find out-dated tracers
-    const tracersTimestamp = new Date().getTime();
-
     const iHealthPollers = getEnabledPollerConfigs(config);
 
     iHealthPollers.forEach((iHealthPollerConfig) => {
@@ -236,9 +229,6 @@ configWorker.on('change', config => new Promise((resolve) => {
             iHealthPoller.remove(poller);
         }
     });
-
-    tracers.remove(tracer => tracer.name.startsWith(IHEALTH_POLLER_CLASS_NAME)
-        && tracer.lastGetTouch < tracersTimestamp);
 
     logger.debug(`${Object.keys(pollers).length} iHealth poller(s) running`);
     resolve();

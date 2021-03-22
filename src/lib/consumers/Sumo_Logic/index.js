@@ -39,7 +39,7 @@ module.exports = function (context) {
             .join('/')
             .concat('/*****'));
         const traceData = { url: tracedUrl, headers: httpHeaders, body: JSON.parse(httpBody) };
-        context.tracer.write(JSON.stringify(traceData, null, 4));
+        context.tracer.write(traceData);
     }
 
     // eslint-disable-next-line no-unused-vars

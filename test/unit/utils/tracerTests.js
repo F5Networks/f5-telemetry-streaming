@@ -21,7 +21,7 @@ const sinon = require('sinon');
 
 const constants = require('../../../src/lib/constants');
 const util = require('../../../src/lib/utils/misc');
-const Tracer = require('../../../src/lib/utils/tracer').Tracer;
+const tracers = require('../../../src/lib/utils/tracer');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -60,17 +60,19 @@ describe('Tracer Util', () => {
             emptyDir(tracerDir);
         }
         config = {
+            class: 'class',
+            traceName: 'obj',
             trace: tracerFile
         };
-        tracer = Tracer.createFromConfig('class', 'obj', config);
+        tracer = tracers.fromConfig(config);
         clock = sinon.useFakeTimers(fakeDate);
     });
 
-    afterEach(() => {
-        sinon.restore();
-        clock.restore();
-        return Tracer.remove(() => true);
-    });
+    afterEach(() => tracers.unregisterAll()
+        .then(() => {
+            sinon.restore();
+            clock.restore();
+        }));
 
     after(() => {
         removeDir(tracerDir);
@@ -78,13 +80,24 @@ describe('Tracer Util', () => {
 
     it('should create tracer using default location and write data to it', () => {
         sinon.stub(constants.TRACER, 'DIR').value(tracerDir);
-        tracer = Tracer.createFromConfig('class2', 'obj2', { trace: true });
+        tracer = tracers.fromConfig({ class: 'class2', traceName: 'obj2', trace: true });
         return tracer.write('foobar')
             .then(() => {
                 assert.deepStrictEqual(
                     readTraceFile(`${tracerDir}/class2.obj2`),
                     addTimestamps(['foobar'])
                 );
+            });
+    });
+
+    it('should try to create parent directory', () => {
+        sinon.stub(constants.TRACER, 'DIR').value('/test/inaccessible/directory');
+        sinon.stub(util.fs, 'mkdir').resolves();
+        tracer = tracers.fromConfig({ class: 'class2', traceName: 'obj2', trace: true });
+        return tracer.write('foobar')
+            .then(() => {
+                assert.isAbove(util.fs.mkdir.callCount, 0, 'should call util.fs.mkdir');
+                assert.strictEqual(util.fs.mkdir.args[0][0], '/test/inaccessible/directory');
             });
     });
 
@@ -122,6 +135,18 @@ describe('Tracer Util', () => {
             .then((writtenData) => {
                 validateTracerData(writtenData);
             });
+    });
+
+    it('should make copy of data', () => {
+        const data = [1, 2, 3];
+        const writePromise = tracer.write(data);
+        data.push(4);
+        return writePromise.then(() => {
+            assert.deepStrictEqual(
+                readTraceFile(tracerFile),
+                addTimestamps([[1, 2, 3]])
+            );
+        });
     });
 
     it('should merge new data with existing data', () => tracer.write('item1')
@@ -186,31 +211,133 @@ describe('Tracer Util', () => {
             });
     });
 
-    it('should remove tracer', () => {
-        Tracer.remove(tracer);
-        assert.strictEqual(Tracer.instances[tracer.name], undefined);
+    it('should return registered tracers', () => {
+        const tracer2 = tracers.fromConfig({ class: 'class', traceName: 'tracer2', trace: true });
+        const tracer3 = tracers.fromConfig({ class: 'class', traceName: 'tracer3', trace: true });
+        const registered = tracers.registered();
+
+        assert.strictEqual(registered.length, 3, 'should register 3 tracers');
+        assert.include(registered, tracer, 'should register tracer');
+        assert.include(registered, tracer2, 'should register tracer');
+        assert.include(registered, tracer3, 'should register tracer');
     });
 
-    it('should remove tracer by name', () => {
-        Tracer.remove(tracer.name);
-        assert.strictEqual(Tracer.instances[tracer.name], undefined);
-    });
+    it('should unregister tracer', () => tracers.unregister(tracer)
+        .then(() => {
+            assert.notInclude(tracers.registered(), tracer, 'should unregister tracer');
+            assert.isTrue(tracer.disabled, 'should be disabled once unregistered');
+        }));
 
-    it('should remove tracer by filter', () => {
-        Tracer.remove(t => t.name === tracer.name);
-        assert.strictEqual(Tracer.instances[tracer.name], undefined);
-    });
-
-    it('should get existing tracer by the name', () => assert.isFulfilled(
-        tracer.write('somethings')
+    it('should unregister all tracers', () => {
+        const tracer2 = tracers.fromConfig({ class: 'class', traceName: 'tracer2', trace: true });
+        const tracer3 = tracers.fromConfig({ class: 'class', traceName: 'tracer3', trace: true });
+        assert.strictEqual(tracers.registered().length, 3, 'should register 3 tracers');
+        return tracers.unregisterAll()
             .then(() => {
-                const sameTracer = Tracer.createFromConfig('class', 'obj', config);
-                return sameTracer.write('something3')
-                    .then(() => Promise.resolve(sameTracer));
+                assert.strictEqual(tracers.registered().length, 0, 'should have no registered tracers');
+                assert.isTrue(tracer.disabled, 'should be disabled once unregistered');
+                assert.isTrue(tracer2.disabled, 'should be disabled once unregistered');
+                assert.isTrue(tracer3.disabled, 'should be disabled once unregistered');
+            });
+    });
+
+    it('should get existing tracer using similar config', () => {
+        let sameTracer;
+        return tracer.write('somethings')
+            .then(() => {
+                sameTracer = tracers.fromConfig({ class: 'class', traceName: 'obj', trace: tracerFile });
+                return sameTracer.write('something3');
             })
-            .then((sameTracer) => {
+            .then(() => {
                 assert.notStrictEqual(sameTracer.fd, undefined, 'should set fd');
-                assert.strictEqual(sameTracer.fd, tracer.fd, 'fd should be the sane');
+                assert.strictEqual(sameTracer.fd, tracer.fd, 'fd should be the same');
+            });
+    });
+
+    it('should not create trace when component or/and trace disabled', () => {
+        assert.isNull(tracers.fromConfig({
+            class: 'class', traceName: 'obj', trace: tracerFile, enable: false
+        }));
+        assert.isNull(tracers.fromConfig({
+            class: 'class', traceName: 'obj', trace: false, enable: false
+        }));
+        assert.isNull(tracers.fromConfig({
+            class: 'class', traceName: 'obj', trace: true, enable: false
+        }));
+        assert.isNull(tracers.fromConfig({
+            class: 'class', traceName: 'obj', trace: false, enable: true
+        }));
+    });
+
+    it('should stop and create tracer using similar config when path changed', () => {
+        let sameTracer;
+        return tracer.write('somethings')
+            .then(() => {
+                sameTracer = tracers.fromConfig({ class: 'class', traceName: 'obj', trace: `${tracerFile}new` });
+                return sameTracer.write('something3');
             })
-    ));
+            .then(() => {
+                assert.notStrictEqual(sameTracer.fd, undefined, 'should set fd');
+                assert.notStrictEqual(sameTracer.fd, tracer.fd, 'fd should not be the same');
+                assert.isTrue(tracer.disabled, 'should disable pre-existing tracer');
+                assert.isFalse(sameTracer.disabled, 'should not disable new tracer');
+
+                const registered = tracers.registered();
+                assert.notInclude(registered, tracer, 'should unregister pre-existing tracer');
+                assert.include(registered, sameTracer, 'should register new tracer');
+            });
+    });
+
+    it('should mask secrets', () => {
+        const data = {
+            text: 'passphrase: { cipherText: \'test_passphrase\' }\n'
+                + '"passphrase": {\ncipherText: "test_passphrase"\n}'
+                + '\'passphrase": "test_passphrase"',
+            passphrase: 'test_passphrase',
+            passphrase2: {
+                cipherText: 'test_passphrase'
+            }
+        };
+        return tracer.write(data)
+            .then(() => {
+                const traceData = readTraceFile(tracerFile);
+                assert.deepStrictEqual(
+                    traceData,
+                    addTimestamps([{
+                        passphrase: '*********',
+                        passphrase2: {
+                            cipherText: '*********'
+                        },
+                        text: 'passphrase: {*********}\n'
+                        + '"passphrase": {*********}'
+                        + '\'passphrase": "*********"'
+                    }])
+                );
+                return tracer.write(traceData[0].data);
+            })
+            .then(() => {
+                assert.deepStrictEqual(
+                    readTraceFile(tracerFile),
+                    addTimestamps([{
+                        passphrase: '*********',
+                        passphrase2: {
+                            cipherText: '*********'
+                        },
+                        text: 'passphrase: {*********}\n'
+                        + '"passphrase": {*********}'
+                        + '\'passphrase": "*********"'
+                    },
+                    {
+                        passphrase: '*********',
+                        passphrase2: {
+                            cipherText: '*********'
+                        },
+                        text: 'passphrase: {*********}\n'
+                        + '"passphrase": {*********}'
+                        + '\'passphrase": "*********"'
+                    }], 'should modify message when secrets masked already')
+                );
+                return tracer.write(data[0]);
+            });
+    });
 });

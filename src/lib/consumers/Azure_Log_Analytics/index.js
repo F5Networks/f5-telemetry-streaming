@@ -86,7 +86,7 @@ module.exports = function (context) {
             });
 
             if (context.tracer) {
-                context.tracer.write(JSON.stringify(tracerMsg, null, 4));
+                context.tracer.write(tracerMsg);
             }
             return Promise.all(promises);
         })

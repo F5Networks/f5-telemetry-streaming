@@ -124,7 +124,7 @@ function process(dataCtx, options) {
             processActions(dataCtx, options.actions, options.deviceContext);
         }
         if (options.tracer) {
-            options.tracer.write(JSON.stringify(dataCtx, null, 4));
+            options.tracer.write(dataCtx);
         }
         let promise = Promise.resolve();
         if (!options.noConsumers) {

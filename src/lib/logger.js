@@ -8,6 +8,9 @@
 
 'use strict';
 
+const maskSecrets = require('./utils/misc').maskSecrets;
+const stringify = require('./utils/misc').stringify;
+
 /** @module logger */
 
 let logger;
@@ -38,65 +41,9 @@ Object.keys(logLevels).forEach((key) => {
 });
 let currentLogLevel = NOTSET;
 
-
-/**
- * Stringify a message
- *
- * @param {Object|String} msg - message to stringify
- *
- * @returns {Object|String} Stringified message (or at least we tried to)
- */
-function stringify(msg) {
-    if (typeof msg === 'object') {
-        try {
-            msg = JSON.stringify(msg);
-        } catch (e) {
-            // just leave original message intact
-        }
-    }
-    return msg;
-}
-
-/**
- * Mask Secrets (as needed)
- *
- * @param {String} msg - message to mask
- *
- * @returns {String} Masked message
- */
-function maskSecrets(msg) {
-    let ret = msg;
-    const secrets = {
-        passphrase: {
-            replace: /(?:"passphrase":\s*{)(.*?)(?:})/g,
-            with: '"passphrase":{*********}'
-        },
-        '"passphrase"': {
-            replace: /(?:"passphrase":\s*")(.*?)(?:")/g,
-            with: '"passphrase":"*********"'
-        },
-        cipherText: {
-            replace: /(?:"cipherText":\s*")(.*?)(?:")/g,
-            with: '"cipherText":"*********"'
-        }
-    };
-    // place in try/catch
-    try {
-        Object.keys(secrets).forEach((k) => {
-            if (msg.indexOf(k) !== -1) {
-                ret = ret.replace(secrets[k].replace, secrets[k].with);
-            }
-        });
-    } catch (e) {
-        // just continue
-    }
-    return ret;
-}
-
 const prepareMsg = function (prefix, msg) {
     return `[${prefix}] ${maskSecrets(stringify(msg))}`;
 };
-
 
 /* f5-logger module supports the following levels
 levels: {

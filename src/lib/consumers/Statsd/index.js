@@ -63,7 +63,7 @@ module.exports = function (context) {
     return tcpCheck
         .then(() => {
             // collect individual metrics, to trace full 'payload' of data
-            const tracePaylod = [];
+            const tracePayload = [];
             // copy, strip, diff - returns list of metrics and nested path
             const copyData = JSON.parse(JSON.stringify(data));
             stripMetrics(copyData);
@@ -89,13 +89,13 @@ module.exports = function (context) {
                 const metricValue = item.rhs;
 
                 if (context.tracer) {
-                    tracePaylod.push(`${metricName}: ${metricValue}`);
+                    tracePayload.push(`${metricName}: ${metricValue}`);
                 }
                 client.gauge(metricName, metricValue);
             });
 
             if (context.tracer) {
-                context.tracer.write(tracePaylod);
+                context.tracer.write(tracePayload);
             }
 
             // Force a close(), which will force buffer to flush (aka: send metrics)

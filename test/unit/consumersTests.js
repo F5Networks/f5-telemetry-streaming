@@ -81,7 +81,7 @@ describe('Consumers', () => {
                 });
         });
 
-        it('should return empty list of consumers', () => configWorker.emitAsync('change', {})
+        it('should return empty list of consumers', () => configWorker.emitAsync('change', { components: [], mappings: {} })
             .then(() => {
                 const loadedConsumers = consumers.getConsumers();
                 assert.strictEqual(loadedConsumers.length, 0);
@@ -101,7 +101,7 @@ describe('Consumers', () => {
                 .then(() => {
                     const loadedConsumers = consumers.getConsumers();
                     assert.strictEqual(loadedConsumers.length, 1, 'should load default consumer');
-                    return configWorker.emitAsync('change', {});
+                    return configWorker.emitAsync('change', { components: [], mappings: {} });
                 })
                 .then(() => {
                     const loadedConsumers = consumers.getConsumers();

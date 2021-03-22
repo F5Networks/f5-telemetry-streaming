@@ -21,7 +21,7 @@ const systemPoller = require('../../src/lib/systemPoller');
 const SystemStats = require('../../src/lib/systemStats');
 const util = require('../../src/lib/utils/misc');
 const deviceUtil = require('../../src/lib/utils/device');
-const tracers = require('../../src/lib/utils/tracer').Tracer;
+const tracers = require('../../src/lib/utils/tracer');
 
 const systemPollerConfigTestsData = require('./data/systemPollerTestsData');
 const testUtil = require('./shared/util');
@@ -285,14 +285,10 @@ describe('System Poller', () => {
             }
         };
 
-        let activeTracersStub;
-        let allTracersStub;
         let pollerTimers;
         let utilStub;
 
         beforeEach(() => {
-            activeTracersStub = [];
-            allTracersStub = [];
             pollerTimers = {};
             utilStub = { start: [], stop: [], update: [] };
 
@@ -307,13 +303,8 @@ describe('System Poller', () => {
             sinon.stub(util, 'stop').callsFake((arg) => {
                 utilStub.stop.push({ arg });
             });
-            sinon.stub(tracers, 'createFromConfig').callsFake((className, objName, config) => {
-                allTracersStub.push(objName);
-                if (config.trace) {
-                    activeTracersStub.push(objName);
-                }
-                return null;
-            });
+            sinon.stub(tracers.Tracer.prototype, 'stop').resolves();
+            sinon.stub(tracers.Tracer.prototype, 'write').resolves();
             sinon.stub(systemPoller, 'getPollerTimers').returns(pollerTimers);
 
             return validateAndNormalize(defaultDeclaration)
@@ -321,17 +312,13 @@ describe('System Poller', () => {
                 .then(() => {
                     assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].timer, 180);
                     assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].config.traceName, 'My_System::SystemPoller_1');
-                    assert.strictEqual(allTracersStub.length, 1);
-                    assert.strictEqual(activeTracersStub.length, 1);
+                    assert.strictEqual(tracers.registered().length, 1);
+                    assert.strictEqual(tracers.registered()[0].name, 'Telemetry_System_Poller.My_System::SystemPoller_1');
                     assert.strictEqual(utilStub.start.length, 1);
                     assert.strictEqual(utilStub.update.length, 0);
                     assert.strictEqual(utilStub.stop.length, 0);
 
                     utilStub = { start: [], stop: [], update: [] };
-                    allTracersStub = [];
-                    activeTracersStub = [];
-                })
-                .then(() => {
                     uuidCounter = 0;
                 });
         });
@@ -344,8 +331,7 @@ describe('System Poller', () => {
         it('should stop existing poller(s) when removed from config', () => configWorker.emitAsync('change', { components: [], mappings: {} })
             .then(() => {
                 assert.deepStrictEqual(pollerTimers, {});
-                assert.strictEqual(allTracersStub.length, 0);
-                assert.strictEqual(activeTracersStub.length, 0);
+                assert.strictEqual(tracers.registered().length, 0);
                 assert.strictEqual(utilStub.start.length, 0);
                 assert.strictEqual(utilStub.update.length, 0);
                 assert.strictEqual(utilStub.stop.length, 1);
@@ -364,7 +350,7 @@ describe('System Poller', () => {
                 enable: true,
                 interval: 500,
                 trace: true,
-                tracer: null,
+                tracer: tracers.registered()[0],
                 credentials: {
                     username: undefined,
                     passphrase: undefined
@@ -393,8 +379,8 @@ describe('System Poller', () => {
             return validateAndNormalize(newDeclaration)
                 .then(normalizedConfig => configWorker.emitAsync('change', normalizedConfig))
                 .then(() => {
-                    assert.strictEqual(allTracersStub.length, 1);
-                    assert.strictEqual(activeTracersStub.length, 1);
+                    assert.strictEqual(tracers.registered().length, 1);
+                    assert.strictEqual(tracers.registered()[0].name, 'Telemetry_System_Poller.My_System::SystemPoller_1');
                     assert.strictEqual(utilStub.start.length, 0);
                     assert.strictEqual(utilStub.update.length, 1);
                     assert.strictEqual(utilStub.stop.length, 0);
@@ -416,8 +402,7 @@ describe('System Poller', () => {
                 .then(normalizedConfig => configWorker.emitAsync('change', normalizedConfig))
                 .then(() => {
                     assert.deepStrictEqual(pollerTimers, {});
-                    assert.strictEqual(allTracersStub.length, 0);
-                    assert.strictEqual(activeTracersStub.length, 0);
+                    assert.strictEqual(tracers.registered().length, 0);
                     assert.strictEqual(utilStub.start.length, 0);
                     assert.strictEqual(utilStub.update.length, 0);
                     assert.strictEqual(utilStub.stop.length, 1);
@@ -434,8 +419,8 @@ describe('System Poller', () => {
                     assert.strictEqual(Object.keys(pollerTimers).length, 1);
                     assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].timer, 180);
                     assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].config.traceName, 'My_System::SystemPoller_1');
-                    assert.strictEqual(allTracersStub.length, 1);
-                    assert.strictEqual(activeTracersStub.length, 1);
+                    assert.strictEqual(tracers.registered().length, 1);
+                    assert.strictEqual(tracers.registered()[0].name, 'Telemetry_System_Poller.My_System::SystemPoller_1');
                     assert.strictEqual(utilStub.start.length, 0);
                     assert.strictEqual(utilStub.update.length, 1);
                     assert.strictEqual(utilStub.stop.length, 0);
@@ -449,8 +434,7 @@ describe('System Poller', () => {
                 .then(normalizedConfig => configWorker.emitAsync('change', normalizedConfig))
                 .then(() => {
                     assert.deepStrictEqual(pollerTimers, {});
-                    assert.strictEqual(allTracersStub.length, 0);
-                    assert.strictEqual(activeTracersStub.length, 0);
+                    assert.strictEqual(tracers.registered().length, 0);
                     assert.strictEqual(utilStub.start.length, 0);
                     assert.strictEqual(utilStub.update.length, 0);
                     assert.strictEqual(utilStub.stop.length, 1);
@@ -467,8 +451,8 @@ describe('System Poller', () => {
                     assert.strictEqual(Object.keys(pollerTimers).length, 1);
                     assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].timer, 180);
                     assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].config.traceName, 'My_System::SystemPoller_1');
-                    assert.strictEqual(allTracersStub.length, 1);
-                    assert.strictEqual(activeTracersStub.length, 1);
+                    assert.strictEqual(tracers.registered().length, 1);
+                    assert.strictEqual(tracers.registered()[0].name, 'Telemetry_System_Poller.My_System::SystemPoller_1');
                     assert.strictEqual(utilStub.start.length, 0);
                     assert.strictEqual(utilStub.update.length, 1);
                     assert.strictEqual(utilStub.stop.length, 0);
@@ -488,8 +472,8 @@ describe('System Poller', () => {
                     assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].config.traceName, 'My_System::SystemPoller_1');
                     assert.strictEqual(pollerTimers['My_System_New::SystemPoller_2'].timer, 500);
                     assert.strictEqual(pollerTimers['My_System_New::SystemPoller_2'].config.traceName, 'My_System_New::SystemPoller_2');
-                    assert.strictEqual(allTracersStub.length, 2);
-                    assert.strictEqual(activeTracersStub.length, 1);
+                    assert.strictEqual(tracers.registered().length, 1);
+                    assert.strictEqual(tracers.registered()[0].name, 'Telemetry_System_Poller.My_System::SystemPoller_1');
                     assert.strictEqual(utilStub.start.length, 1);
                     assert.strictEqual(utilStub.update.length, 1);
                     assert.strictEqual(utilStub.stop.length, 0);
@@ -533,8 +517,14 @@ describe('System Poller', () => {
                     assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].timer, 180);
                     assert.strictEqual(pollerTimers['My_System_New::SystemPoller_2'].timer, 10);
                     assert.strictEqual(pollerTimers['My_System_New::My_Poller'].timer, 500);
-                    assert.strictEqual(allTracersStub.length, 3);
-                    assert.strictEqual(activeTracersStub.length, 3);
+                    assert.sameMembers(
+                        tracers.registered().map(t => t.name),
+                        [
+                            'Telemetry_System_Poller.My_System::SystemPoller_1',
+                            'Telemetry_System_Poller.My_System_New::SystemPoller_2',
+                            'Telemetry_System_Poller.My_System_New::My_Poller'
+                        ]
+                    );
                     assert.strictEqual(utilStub.start.length, 2);
                     assert.strictEqual(utilStub.update.length, 1);
                     assert.strictEqual(utilStub.stop.length, 0);
@@ -547,7 +537,7 @@ describe('System Poller', () => {
                         enable: true,
                         interval: 500,
                         trace: true,
-                        tracer: null,
+                        tracer: tracers.registered().find(t => t.name === 'Telemetry_System_Poller.My_System_New::My_Poller'),
                         credentials: {
                             username: undefined,
                             passphrase: undefined
@@ -581,7 +571,7 @@ describe('System Poller', () => {
                         enable: true,
                         interval: 10,
                         trace: true,
-                        tracer: null,
+                        tracer: tracers.registered().find(t => t.name === 'Telemetry_System_Poller.My_System_New::SystemPoller_2'),
                         traceName: 'My_System_New::SystemPoller_2',
                         credentials: {
                             username: undefined,
@@ -673,7 +663,7 @@ describe('System Poller', () => {
                 class: 'Telemetry_Namespace',
                 My_System: {
                     class: 'Telemetry_System',
-                    trace: false,
+                    trace: true,
                     systemPoller: {
                         interval: 500
                     }
@@ -691,7 +681,13 @@ describe('System Poller', () => {
                             assert.strictEqual(Object.keys(pollerTimers).length, 2);
                             assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].timer, 180);
                             assert.strictEqual(pollerTimers['NewNamespace::My_System::SystemPoller_1'].timer, 500);
-
+                            assert.sameMembers(
+                                tracers.registered().map(t => t.name),
+                                [
+                                    'Telemetry_System_Poller.My_System::SystemPoller_1',
+                                    'Telemetry_System_Poller.NewNamespace::My_System::SystemPoller_1'
+                                ]
+                            );
                             assert.strictEqual(utilStub.start.length, 1);
                             assert.strictEqual(utilStub.update.length, 0);
                             assert.strictEqual(utilStub.stop.length, 0);

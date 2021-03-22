@@ -155,45 +155,17 @@ describe('Logger', () => {
         assert.include(loggedMessages.info[0], `[telemetry.${prefix}]`);
     });
 
-    describe('mask secrets', () => {
-        it('should mask secrets - cipherText (without new lines)', () => {
-            const decl = {
-                passphrase: {
-                    cipherText: 'foo'
-                }
-            };
-            const expected = 'this contains secrets: {"passphrase":{*********}}';
-            logger.info(`this contains secrets: ${JSON.stringify(decl)}`);
-            assert.include(loggedMessages.info[0], expected);
-        });
+    it('should mask secrets', () => {
+        const msg = 'passphrase: { cipherText: \'test_passphrase\' }\n'
+            + '"passphrase": {\ncipherText: "test_passphrase"\n}'
+            + '\'passphrase": "test_passphrase"';
+        const expected = 'this contains secrets: passphrase: {*********}\n'
+        + '"passphrase": {\ncipherText: "*********"\n}'
+        + '\'passphrase": "*********"';
+        logger.info(`this contains secrets: ${msg}`);
+        assert.include(loggedMessages.info[0], expected, 'should mask secrets');
 
-        it('should mask secrets - cipherText (with new lines)', () => {
-            const decl = {
-                passphrase: {
-                    cipherText: 'foo'
-                }
-            };
-            const expected = 'this contains secrets: {\n    "passphrase": {\n        "cipherText":"*********"\n    }\n}';
-            logger.info(`this contains secrets: ${JSON.stringify(decl, null, 4)}`);
-            assert.include(loggedMessages.info[0], expected);
-        });
-
-        it('should mask secrets - passphrase (without new lines)', () => {
-            const decl = {
-                passphrase: 'foo'
-            };
-            const expected = 'this contains secrets: {"passphrase":"*********"}';
-            logger.info(`this contains secrets: ${JSON.stringify(decl)}`);
-            assert.include(loggedMessages.info[0], expected);
-        });
-
-        it('should mask secrets - passphrase (with new lines)', () => {
-            const decl = {
-                passphrase: 'foo'
-            };
-            const expected = 'this contains secrets: {\n    "passphrase":"*********"\n}';
-            logger.info(`this contains secrets: ${JSON.stringify(decl, null, 4)}`);
-            assert.include(loggedMessages.info[0], expected);
-        });
+        logger.info(loggedMessages.info[0]);
+        assert.include(loggedMessages.info[1], expected, 'should keep message the same once masked');
     });
 });
