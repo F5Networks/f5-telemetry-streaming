@@ -18,7 +18,6 @@ const sinon = require('sinon');
 
 const configWorker = require('../../src/lib/config');
 const configUtil = require('../../src/lib/utils/config');
-const tracers = require('../../src/lib/utils/tracer').Tracer;
 /* eslint-disable no-unused-vars */
 const ihealth = require('../../src/lib/ihealth');
 const ihealthPoller = require('../../src/lib/ihealthPoller');
@@ -121,22 +120,9 @@ describe('iHealth', () => {
             trace: false
         };
 
-        let activeTracersStub;
-        let allTracersStub;
         let ihealthPollerInstanceStub;
 
         beforeEach(() => {
-            activeTracersStub = [];
-            allTracersStub = [];
-
-            sinon.stub(tracers, 'createFromConfig').callsFake((className, objName, config) => {
-                allTracersStub.push(objName);
-                if (config.trace) {
-                    activeTracersStub.push(objName);
-                }
-                return null;
-            });
-
             sinon.stub(deviceUtil, 'encryptSecret').resolves('$M$foo');
             sinon.stub(deviceUtil, 'getDeviceType').resolves(constants.DEVICE_TYPE.BIG_IP);
             sinon.stub(ihealthPoller, 'updateStorage');

@@ -112,7 +112,7 @@ describe('Pull Consumers', () => {
             // config will not pass schema validation
             // but this test allows catching if consumer module/dir is not configured properly
             return configUtil.normalizeConfig(exampleConfig)
-                .then(normalized => configWorker.emitAsync('change', { normalized }))
+                .then(normalized => configWorker.emitAsync('change', normalized))
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
                     assert.strictEqual(Object.keys(loadedConsumers).indexOf('unknowntype'), -1,
@@ -137,7 +137,7 @@ describe('Pull Consumers', () => {
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
                     assert.deepEqual(loadedConsumers[0].config.type, 'default', 'should load default consumer');
-                    return configWorker.emitAsync('change', {});
+                    return configWorker.emitAsync('change', { components: [], mappings: {} });
                 })
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
