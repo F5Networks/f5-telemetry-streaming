@@ -17,9 +17,8 @@ const ihUtil = require('./utils/ihealth');
 const persistentStorage = require('./persistentStorage').persistentStorage;
 const configWorker = require('./config');
 const configUtil = require('./utils/config');
-const tracers = require('./utils/tracer').Tracer;
+const tracers = require('./utils/tracer');
 
-const IHEALTH_POLLER_CLASS_NAME = constants.CONFIG_CLASSES.IHEALTH_POLLER_CLASS_NAME;
 const PERSISTENT_STORAGE_KEY = 'ihealth';
 
 const IHEALTH_POLL_MAX_TIMEOUT = 60 * 60 * 1000; // 1 h.
@@ -753,7 +752,7 @@ IHealthPoller.prototype.process = function () {
  * @returns {module:util~Tracer} tracer instance
  */
 IHealthPoller.prototype.getTracer = function () {
-    return tracers.createFromConfig(IHEALTH_POLLER_CLASS_NAME, this.sysName, this.config);
+    return tracers.fromConfig(this.config);
 };
 
 /**

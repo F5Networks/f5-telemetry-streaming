@@ -17,15 +17,12 @@ const logger = require('./logger');
 const SystemStats = require('./systemStats');
 const util = require('./utils/misc');
 const configUtil = require('./utils/config');
-const tracers = require('./utils/tracer').Tracer;
+const tracers = require('./utils/tracer');
 const APP_THRESHOLDS = require('./constants').APP_THRESHOLDS;
 const monitor = require('./utils/monitor');
 
 /** @module systemPoller */
 
-const CONFIG_CLASSES = constants.CONFIG_CLASSES;
-// use SYSTEM_POLLER_CLASS_NAME to keep compatibility with previous versions
-const TRACER_CLASS_NAME = CONFIG_CLASSES.SYSTEM_POLLER_CLASS_NAME;
 // key - poller name, value - { timer, config }
 const POLLER_TIMERS = {};
 
@@ -126,9 +123,7 @@ function applyConfig(originalConfig) {
         const existingPoller = currPollers[key];
         newPollerIDs.push(key);
         if (!pollerConfig.skipUpdate || !existingPoller) {
-            pollerConfig.tracer = tracers.createFromConfig(
-                TRACER_CLASS_NAME, key, pollerConfig
-            );
+            pollerConfig.tracer = tracers.fromConfig(pollerConfig);
             const baseMsg = `system poller ${key}. Interval = ${pollerConfig.interval} sec.`;
             // add to data context to track source poller config and destination(s)
             pollerConfig.destinationIds = originalConfig.mappings[pollerConfig.id];
@@ -341,14 +336,7 @@ function fetchPollersData(pollerConfigs, decryptSecrets) {
 // config worker change event
 configWorker.on('change', config => new Promise((resolve) => {
     logger.debug('configWorker change event in systemPoller');
-    // timestamp to find out-dated tracers
-    const tracersTimestamp = new Date().getTime();
-
     applyConfig(util.deepCopy(config));
-    // remove tracers that were not touched
-    tracers.remove(tracer => tracer.name.startsWith(TRACER_CLASS_NAME)
-        && tracer.lastGetTouch < tracersTimestamp);
-
     // reset for monitor check
     processingEnabled = true;
 

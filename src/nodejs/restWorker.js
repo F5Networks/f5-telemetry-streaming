@@ -30,7 +30,8 @@ const configListenerModulesToLoad = [
     '../lib/systemPoller',
     '../lib/ihealth',
     '../lib/requestHandlers/connections',
-    '../lib/utils/monitor.js'
+    '../lib/utils/monitor.js',
+    '../lib/utils/tracer.js'
 ];
 
 configListenerModulesToLoad.forEach((module) => {

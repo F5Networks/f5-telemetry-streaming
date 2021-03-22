@@ -17,11 +17,10 @@ const systemPoller = require('./systemPoller');
 const errors = require('./errors');
 const logger = require('./logger');
 const configUtil = require('./utils/config');
-const tracers = require('./utils/tracer').Tracer;
+const tracers = require('./utils/tracer');
 const moduleLoader = require('./utils/moduleLoader').ModuleLoader;
 
 const PULL_CONSUMERS_DIR = '../pullConsumers';
-const CLASS_NAME = constants.CONFIG_CLASSES.PULL_CONSUMER_CLASS_NAME;
 let PULL_CONSUMERS = [];
 
 class ModuleNotLoadedError extends errors.ConfigLookupError {}
@@ -147,7 +146,7 @@ function loadConsumers(config) {
                     config: util.deepCopy(consumerConfig),
                     consumer: consumerModule,
                     logger: logger.getChild(`${consumerType}.${consumerConfig.traceName}`),
-                    tracer: tracers.createFromConfig(CLASS_NAME, consumerConfig.traceName, consumerConfig)
+                    tracer: tracers.fromConfig(consumerConfig)
                 };
                 // copy consumer's data
                 resolve(consumer);
@@ -199,9 +198,6 @@ configWorker.on('change', config => Promise.resolve()
         logger.debug('configWorker change event in Pull Consumers');
 
         const consumersToLoad = configUtil.getTelemetryPullConsumers(config);
-        // timestamp to filed out-dated tracers
-        const tracersTimestamp = new Date().getTime();
-
         const typesBefore = getLoadedConsumerTypes();
 
         return loadConsumers(consumersToLoad)
@@ -212,11 +208,7 @@ configWorker.on('change', config => Promise.resolve()
             .catch((err) => {
                 logger.exception('Unhandled exception when loading consumers', err);
             })
-            .then(() => {
-                unloadUnusedModules(typesBefore);
-                tracers.remove(tracer => tracer.name.startsWith(CLASS_NAME)
-                    && tracer.lastGetTouch < tracersTimestamp);
-            });
+            .then(() => unloadUnusedModules(typesBefore));
     }));
 
 module.exports = {
