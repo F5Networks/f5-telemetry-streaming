@@ -23,7 +23,7 @@ If you want to specify proxy settings for Splunk consumers in TS 1.17 and later,
 
 .. NOTE:: When using the :doc:`custom endpoints feature<custom-endpoints>`, be sure to include **/mgmt/tm/sys/global-settings** in your endpoints for Telemetry Streaming to be able to find the hostname.
 
-**NEW in TS 1.19**|br|
+**NEW in TS 1.19** |br|
 Be sure to see :ref:`Memory usage spikes<splunkmem>` in the Troubleshooting section for information on the **compressionType** property introduced in TS 1.19. When set to **none**, this property stops TS from compressing data before sending it to Splunk, which can help reduce memory usage.
 
 Example Declaration:
