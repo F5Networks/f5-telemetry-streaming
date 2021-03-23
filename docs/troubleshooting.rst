@@ -190,6 +190,7 @@ You can send any valid (but also arbitrary) JSON body, such as:
 
 Telemetry Streaming sends this JSON payload to the Event Listener you specified, and the Event Listener processes and sends this debugging payload through Telemetry Streaming to any/all of the your configured Consumers.
 
+|
 
 .. _restjavad:
 
