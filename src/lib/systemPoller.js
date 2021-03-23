@@ -11,7 +11,6 @@
 const constants = require('./constants');
 const configWorker = require('./config');
 const dataPipeline = require('./dataPipeline');
-const deviceUtil = require('./utils/device');
 const errors = require('./errors');
 const logger = require('./logger');
 const SystemStats = require('./systemStats');
@@ -289,11 +288,11 @@ function safeProcess() {
 function getPollersConfig(sysOrPollerName, options) {
     options = options || {};
     const includeDisabled = (typeof options.includeDisabled === 'undefined') ? false : options.includeDisabled;
-    return configWorker.getConfig()
-        .then(currentConfig => findSystemOrPollerConfigs(
-            currentConfig.normalized, sysOrPollerName, options.pollerName, options.namespace
+    return Promise.resolve()
+        .then(() => findSystemOrPollerConfigs(
+            configWorker.currentConfig, sysOrPollerName, options.pollerName, options.namespace
         ))
-        .then(config => deviceUtil.decryptAllSecrets(config))
+        .then(config => configUtil.decryptSecrets(config))
         .then((configs) => {
             if (configs.length === 0) {
                 // unexpected, something went wrong
@@ -316,7 +315,7 @@ function fetchPollersData(pollerConfigs, decryptSecrets) {
     // need to wrap with catch to avoid situations when one of the promises was rejected
     // and another one left in unknown state
     const caughtErrors = [];
-    const promise = decryptSecrets ? deviceUtil.decryptAllSecrets(pollerConfigs)
+    const promise = decryptSecrets ? configUtil.decryptSecrets(pollerConfigs)
         : Promise.resolve(pollerConfigs);
 
     return promise

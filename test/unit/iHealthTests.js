@@ -17,44 +17,44 @@ const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
 const configWorker = require('../../src/lib/config');
-const configUtil = require('../../src/lib/utils/config');
-/* eslint-disable no-unused-vars */
+const constants = require('../../src/lib/constants');
+const deviceUtil = require('../../src/lib/utils/device');
+// eslint-disable-next-line no-unused-vars
 const ihealth = require('../../src/lib/ihealth');
 const ihealthPoller = require('../../src/lib/ihealthPoller');
-const constants = require('../../src/lib/constants');
-const util = require('../../src/lib/utils/misc');
-const deviceUtil = require('../../src/lib/utils/device');
+const persistentStorage = require('../../src/lib/persistentStorage');
+const stubs = require('./shared/stubs');
+const teemReporter = require('../../src/lib/teemReporter');
 const testUtil = require('./shared/util');
+const utilMisc = require('../../src/lib/utils/misc');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe('iHealth', () => {
-    let uuidCounter = 0;
-    const validateAndNormalize = function (declaration) {
-        return configWorker.validate(util.deepCopy(declaration))
-            .then(validated => configUtil.normalizeConfig(validated));
-    };
-
     beforeEach(() => {
-        sinon.stub(util, 'generateUuid').callsFake(() => {
-            uuidCounter += 1;
-            return `uuid${uuidCounter}`;
+        stubs.coreStub({
+            configWorker,
+            deviceUtil,
+            persistentStorage,
+            teemReporter,
+            utilMisc
         });
     });
+
     afterEach(() => {
-        uuidCounter = 0;
         sinon.restore();
     });
+
     describe('config "on change" event', () => {
         const defaultDeclaration = {
             class: 'Telemetry',
             My_System: {
                 class: 'Telemetry_System',
                 iHealthPoller: {
-                    username: 'IHEALTH_ACCOUNT_USERNAME',
+                    username: 'test_user',
                     passphrase: {
-                        cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE'
+                        cipherText: 'test_passphrase'
                     },
                     interval: {
                         timeWindow: {
@@ -75,12 +75,8 @@ describe('iHealth', () => {
             iHealth: {
                 name: 'iHealthPoller_1',
                 credentials: {
-                    passphrase: {
-                        cipherText: '$M$foo',
-                        class: 'Secret',
-                        protected: 'SecureVault'
-                    },
-                    username: 'IHEALTH_ACCOUNT_USERNAME'
+                    passphrase: 'test_passphrase',
+                    username: 'test_user'
                 },
                 downloadFolder: undefined,
                 interval: {
@@ -123,8 +119,6 @@ describe('iHealth', () => {
         let ihealthPollerInstanceStub;
 
         beforeEach(() => {
-            sinon.stub(deviceUtil, 'encryptSecret').resolves('$M$foo');
-            sinon.stub(deviceUtil, 'getDeviceType').resolves(constants.DEVICE_TYPE.BIG_IP);
             sinon.stub(ihealthPoller, 'updateStorage');
             sinon.stub(ihealthPoller, 'create').callsFake((namespace, sysKey, iHealthPoller, testOnly) => {
                 const createArgs = [namespace, sysKey, iHealthPoller, testOnly].filter(x => x !== undefined);
@@ -139,8 +133,7 @@ describe('iHealth', () => {
 
         it('should build iHealthPoller instance', () => {
             const newDeclaration = testUtil.deepCopy(defaultDeclaration);
-            return validateAndNormalize(newDeclaration)
-                .then(normalized => configWorker.emitAsync('change', normalized))
+            return configWorker.processDeclaration(newDeclaration)
                 .then(() => {
                     assert.strictEqual(ihealthPollerInstanceStub.getKey(), 'f5telemetry_default::My_System');
                     assert.deepEqual(ihealthPollerInstanceStub.config, expectedOutput);
@@ -156,8 +149,7 @@ describe('iHealth', () => {
             newDeclaration.My_System.iHealthPoller = 'My_iHealth_Poller';
             testExpectedOutput.iHealth.name = 'My_iHealth_Poller';
             testExpectedOutput.name = 'My_iHealth_Poller';
-            return validateAndNormalize(newDeclaration)
-                .then(normalized => configWorker.emitAsync('change', normalized))
+            return configWorker.processDeclaration(newDeclaration)
                 .then(() => {
                     assert.strictEqual(ihealthPollerInstanceStub.getKey(), 'f5telemetry_default::My_System');
                     assert.deepEqual(ihealthPollerInstanceStub.config, testExpectedOutput);

@@ -13,7 +13,6 @@ const logger = require('./logger');
 const constants = require('./constants');
 const util = require('./utils/misc');
 const configUtil = require('./utils/config');
-const deviceUtil = require('./utils/device');
 const configWorker = require('./config');
 const iHealthPoller = require('./ihealthPoller');
 const dataPipeline = require('./dataPipeline');
@@ -107,10 +106,9 @@ function getCurrentState() {
  * Process client's request via REST API
  */
 function startPoller(systemName, pollerName) {
-    return configWorker.getConfig()
-        .then((config) => {
-            config = config.normalized || {};
-
+    return Promise.resolve()
+        .then(() => {
+            const config = configWorker.currentConfig;
             // Check if requested components exist
             const ihPollerConfig = getRequestedIHealthPoller(config, systemName, pollerName);
             if (util.isObjectEmpty(ihPollerConfig)) {
@@ -127,10 +125,10 @@ function startPoller(systemName, pollerName) {
                 state.created = true;
                 state.message = 'iHealth poller created. See logs for current progress.';
 
-                ihInstance = iHealthPoller.create(config.namespace, systemName, pollerName, true);
+                ihInstance = iHealthPoller.create(namespaceName, systemName, pollerName, true);
                 // can decrypt here
                 ihInstance.dataCallback = safeProcess;
-                deviceUtil.decryptAllSecrets(ihInstance.config)
+                configUtil.decryptSecrets(ihInstance.config)
                     .then((decryptedConf) => {
                         ihInstance.config = decryptedConf;
                         ihInstance.process();

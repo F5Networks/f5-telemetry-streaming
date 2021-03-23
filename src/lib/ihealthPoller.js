@@ -12,7 +12,6 @@ const logger = require('./logger'); // eslint-disable-line no-unused-vars
 const constants = require('./constants');
 const datetimeUtil = require('./utils/datetime');
 const util = require('./utils/misc');
-const deviceUtil = require('./utils/device');
 const ihUtil = require('./utils/ihealth');
 const persistentStorage = require('./persistentStorage').persistentStorage;
 const configWorker = require('./config');
@@ -381,9 +380,9 @@ IHealthPoller.prototype.fetchConfigs = function () {
         return Promise.resolve();
     }
 
-    return configWorker.getConfig()
-        .then((config) => {
-            config = config.normalized || {};
+    return Promise.resolve()
+        .then(() => {
+            const config = configWorker.currentConfig;
             // System name is required.
             // iHealthPoller name is optional.
             // TODO: Update to also filter on Namespaces
@@ -396,7 +395,7 @@ IHealthPoller.prototype.fetchConfigs = function () {
             if (util.isObjectEmpty(filteredConfigs)) {
                 return Promise.reject(new Error('System or iHealth Poller declaration not found'));
             }
-            return deviceUtil.decryptAllSecrets(filteredConfigs[0]);
+            return configUtil.decryptSecrets(filteredConfigs[0]);
         })
         .then((decryptedConfig) => {
             this.config = decryptedConfig;

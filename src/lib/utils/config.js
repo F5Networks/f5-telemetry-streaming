@@ -10,6 +10,7 @@
 
 const constants = require('../constants');
 const declValidator = require('../declarationValidator');
+const deviceUtil = require('./device');
 const logger = require('../logger');
 const util = require('./misc');
 
@@ -186,7 +187,7 @@ function getTracePrefix(config) {
 }
 
 function updateSystemPollerConfig(systemConfig, pollerConfig, fetchTMStats, isACopy) {
-    pollerConfig.id = isACopy || !pollerConfig.id ? util.generateUuid() : pollerConfig.id;
+    pollerConfig.id = (isACopy || !pollerConfig.id) ? util.generateUuid() : pollerConfig.id;
     pollerConfig.name = pollerConfig.name || pollerConfig.id;
     pollerConfig.namespace = pollerConfig.namespace || systemConfig.namespace;
     pollerConfig.traceName = `${getTracePrefix(pollerConfig)}${systemConfig.name}::${pollerConfig.name}`;
@@ -316,6 +317,14 @@ function normalizeTelemetryEndpoints(originalConfig) {
         return innerEndpoint;
     }
 
+    // remove leading and trailing '/'
+    function trimPath(val) {
+        return val.substring(
+            val.startsWith('/') ? 1 : 0,
+            val.endsWith('/') ? (val.length - 1) : val.length
+        );
+    }
+
     function processEndpoint(endpoint, cb) {
         if (typeof endpoint === 'object') {
             // array of definitions - can be all of the following
@@ -333,7 +342,7 @@ function normalizeTelemetryEndpoints(originalConfig) {
                 cb(endpoint);
             }
         } else if (typeof endpoint === 'string') {
-            const refs = endpoint.split('/');
+            const refs = trimPath(endpoint).split('/');
             // reference to a Telemetry_Endpoints object
             // format is ObjectName/pathName
             endpoint = telemetryEndpoints.find(e => e.name === refs[0]);
@@ -786,7 +795,7 @@ function mergeNamespaceConfig(namespaceConfig, options) {
 
     return this.normalizeConfig(toNormalize)
         .then((namespaceNormalized) => {
-            const savedNormalized = options.savedConfig.normalized;
+            const savedNormalized = options.savedConfig;
             const removedIds = [];
             savedNormalized.components.forEach((component) => {
                 if (component.namespace === options.namespaceToUpdate) {
@@ -801,6 +810,20 @@ function mergeNamespaceConfig(namespaceConfig, options) {
             };
             return allNormalized;
         });
+}
+
+/**
+ * Decrypt all secrets
+ *
+ * Note: this method mutates 'data'
+ *
+ * @public
+ * @param {object} data - declaration or configuration to decrypt
+ *
+ * @returns {Promise<object>} resolved with decrypted secrets
+ */
+function decryptSecrets(data) {
+    return deviceUtil.decryptAllSecrets(data);
 }
 
 module.exports = {
@@ -818,5 +841,6 @@ module.exports = {
     getTelemetryPullConsumers,
     getTelemetryListeners,
     getTelemetryIHealthPollers,
-    hasEnabledComponents
+    hasEnabledComponents,
+    decryptSecrets
 };

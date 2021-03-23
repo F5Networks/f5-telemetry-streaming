@@ -313,9 +313,9 @@ module.exports = {
                             class: 'Telemetry_System',
                             enable: true,
                             iHealthPoller: {
-                                username: 'IHEALTH_ACCOUNT_USERNAME',
+                                username: 'test_user_1',
                                 passphrase: {
-                                    cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE'
+                                    cipherText: 'test_passphrase_1'
                                 },
                                 interval: {
                                     timeWindow: {
@@ -389,9 +389,9 @@ module.exports = {
                                 iHealth: {
                                     name: 'iHealthPoller_1',
                                     credentials: {
-                                        username: 'IHEALTH_ACCOUNT_USERNAME',
+                                        username: 'test_user_1',
                                         passphrase: {
-                                            cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE',
+                                            cipherText: '$M$test_passphrase_1',
                                             class: 'Secret',
                                             protected: 'SecureVault'
                                         }
@@ -447,9 +447,9 @@ module.exports = {
                         },
                         My_iHealth_Poller: {
                             class: 'Telemetry_iHealth_Poller',
-                            username: 'IHEALTH_ACCOUNT_USERNAME',
+                            username: 'test_user_1',
                             passphrase: {
-                                cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE'
+                                cipherText: 'test_passphrase_1'
                             },
                             interval: {
                                 timeWindow: {
@@ -484,9 +484,9 @@ module.exports = {
                                 iHealth: {
                                     name: 'My_iHealth_Poller',
                                     credentials: {
-                                        username: 'IHEALTH_ACCOUNT_USERNAME',
+                                        username: 'test_user_1',
                                         passphrase: {
-                                            cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE',
+                                            cipherText: '$M$test_passphrase_1',
                                             class: 'Secret',
                                             protected: 'SecureVault'
                                         }
@@ -555,9 +555,9 @@ module.exports = {
                             class: 'Telemetry_iHealth_Poller',
                             enable: true,
                             trace: true,
-                            username: 'IHEALTH_ACCOUNT_USERNAME',
+                            username: 'test_user_1',
                             passphrase: {
-                                cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE'
+                                cipherText: 'test_passphrase_1'
                             },
                             interval: {
                                 timeWindow: {
@@ -608,9 +608,9 @@ module.exports = {
                                 iHealth: {
                                     name: 'My_iHealth_Poller',
                                     credentials: {
-                                        username: 'IHEALTH_ACCOUNT_USERNAME',
+                                        username: 'test_user_1',
                                         passphrase: {
-                                            cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE',
+                                            cipherText: '$M$test_passphrase_1',
                                             class: 'Secret',
                                             protected: 'SecureVault'
                                         }
@@ -661,9 +661,9 @@ module.exports = {
                                 iHealth: {
                                     name: 'My_iHealth_Poller',
                                     credentials: {
-                                        username: 'IHEALTH_ACCOUNT_USERNAME',
+                                        username: 'test_user_1',
                                         passphrase: {
-                                            cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE',
+                                            cipherText: '$M$test_passphrase_1',
                                             class: 'Secret',
                                             protected: 'SecureVault'
                                         }
@@ -716,9 +716,9 @@ module.exports = {
                         class: 'Telemetry',
                         My_iHealth_Poller_1: {
                             class: 'Telemetry_iHealth_Poller',
-                            username: 'IHEALTH_ACCOUNT_USERNAME',
+                            username: 'test_user_1',
                             passphrase: {
-                                cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE'
+                                cipherText: 'test_passphrase_1'
                             },
                             interval: {
                                 timeWindow: {
@@ -729,9 +729,9 @@ module.exports = {
                         },
                         My_iHealth_Poller_2: {
                             class: 'Telemetry_iHealth_Poller',
-                            username: 'IHEALTH_ACCOUNT_USERNAME',
+                            username: 'test_user_2',
                             passphrase: {
-                                cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE'
+                                cipherText: 'test_passphrase_2'
                             },
                             interval: {
                                 timeWindow: {
@@ -754,9 +754,9 @@ module.exports = {
                                 iHealth: {
                                     name: 'My_iHealth_Poller_1',
                                     credentials: {
-                                        username: 'IHEALTH_ACCOUNT_USERNAME',
+                                        username: 'test_user_1',
                                         passphrase: {
-                                            cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE',
+                                            cipherText: '$M$test_passphrase_1',
                                             class: 'Secret',
                                             protected: 'SecureVault'
                                         }
@@ -807,9 +807,9 @@ module.exports = {
                                 iHealth: {
                                     name: 'My_iHealth_Poller_2',
                                     credentials: {
-                                        username: 'IHEALTH_ACCOUNT_USERNAME',
+                                        username: 'test_user_2',
                                         passphrase: {
-                                            cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE',
+                                            cipherText: '$M$test_passphrase_2',
                                             class: 'Secret',
                                             protected: 'SecureVault'
                                         }
@@ -890,9 +890,9 @@ module.exports = {
                         class: 'Telemetry',
                         My_iHealth_Poller: {
                             class: 'Telemetry_iHealth_Poller',
-                            username: 'IHEALTH_ACCOUNT_USERNAME',
+                            username: 'test_user_1',
                             passphrase: {
-                                cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE'
+                                cipherText: 'test_passphrase_1'
                             },
                             interval: {
                                 timeWindow: {
@@ -914,9 +914,9 @@ module.exports = {
                                 iHealth: {
                                     name: 'My_iHealth_Poller',
                                     credentials: {
-                                        username: 'IHEALTH_ACCOUNT_USERNAME',
+                                        username: 'test_user_1',
                                         passphrase: {
-                                            cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE',
+                                            cipherText: '$M$test_passphrase_1',
                                             class: 'Secret',
                                             protected: 'SecureVault'
                                         }
@@ -985,9 +985,9 @@ module.exports = {
                             class: 'Telemetry_Namespace',
                             My_iHealth_Poller: {
                                 class: 'Telemetry_iHealth_Poller',
-                                username: 'IHEALTH_ACCOUNT_USERNAME',
+                                username: 'test_user_1',
                                 passphrase: {
-                                    cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE'
+                                    cipherText: 'test_passphrase_1'
                                 },
                                 interval: {
                                     timeWindow: {
@@ -1010,9 +1010,9 @@ module.exports = {
                                 iHealth: {
                                     name: 'My_iHealth_Poller',
                                     credentials: {
-                                        username: 'IHEALTH_ACCOUNT_USERNAME',
+                                        username: 'test_user_1',
                                         passphrase: {
-                                            cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE',
+                                            cipherText: '$M$test_passphrase_1',
                                             class: 'Secret',
                                             protected: 'SecureVault'
                                         }
@@ -1079,9 +1079,9 @@ module.exports = {
                         class: 'Telemetry',
                         My_iHealth_Poller: {
                             class: 'Telemetry_iHealth_Poller',
-                            username: 'IHEALTH_ACCOUNT_USERNAME',
+                            username: 'test_user_1',
                             passphrase: {
-                                cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE'
+                                cipherText: 'test_passphrase_1'
                             },
                             interval: {
                                 timeWindow: {
@@ -1109,9 +1109,9 @@ module.exports = {
                                 iHealth: {
                                     name: 'My_iHealth_Poller',
                                     credentials: {
-                                        username: 'IHEALTH_ACCOUNT_USERNAME',
+                                        username: 'test_user_1',
                                         passphrase: {
-                                            cipherText: 'IHEALTH_ACCOUNT_PASSPHRASE',
+                                            cipherText: '$M$test_passphrase_1',
                                             class: 'Secret',
                                             protected: 'SecureVault'
                                         }
@@ -1559,7 +1559,7 @@ module.exports = {
                                 credentials: {
                                     username: 'username1',
                                     passphrase: {
-                                        cipherText: 'passphrase1',
+                                        cipherText: '$M$passphrase1',
                                         class: 'Secret',
                                         protected: 'SecureVault'
                                     }
@@ -1601,7 +1601,7 @@ module.exports = {
                                 credentials: {
                                     username: 'username2',
                                     passphrase: {
-                                        cipherText: 'passphrase2',
+                                        cipherText: '$M$passphrase2',
                                         class: 'Secret',
                                         protected: 'SecureVault'
                                     }
@@ -1625,7 +1625,7 @@ module.exports = {
                                 ],
                                 username: 'username1',
                                 passphrase: {
-                                    cipherText: 'passphrase1',
+                                    cipherText: '$M$passphrase1',
                                     class: 'Secret',
                                     protected: 'SecureVault'
                                 }
@@ -1645,7 +1645,7 @@ module.exports = {
                                 ],
                                 username: 'username2',
                                 passphrase: {
-                                    cipherText: 'passphrase2',
+                                    cipherText: '$M$passphrase2',
                                     class: 'Secret',
                                     protected: 'SecureVault'
                                 }
@@ -1903,7 +1903,7 @@ module.exports = {
                                 credentials: {
                                     username: 'username',
                                     passphrase: {
-                                        cipherText: 'passphrase',
+                                        cipherText: '$M$passphrase',
                                         class: 'Secret',
                                         protected: 'SecureVault'
                                     }
@@ -1933,7 +1933,7 @@ module.exports = {
                                 protocol: 'https',
                                 allowSelfSignedCert: true,
                                 passphrase: {
-                                    cipherText: 'passphrase',
+                                    cipherText: '$M$passphrase',
                                     class: 'Secret',
                                     protected: 'SecureVault'
                                 },
@@ -2863,7 +2863,7 @@ module.exports = {
                                 host: '192.0.2.1',
                                 protocol: 'https',
                                 passphrase: {
-                                    cipherText: '$M$jellybeans',
+                                    cipherText: '$M$$M$jellybeans',
                                     class: 'Secret',
                                     protected: 'SecureVault'
                                 },
@@ -3767,7 +3767,7 @@ module.exports = {
                             systemPoller: {
                                 endpointList: [
                                     'Enabled_Endpoints_1',
-                                    'Enabled_Endpoints_2/enabledEndpoint2',
+                                    '/Enabled_Endpoints_2/enabledEndpoint2/',
                                     'Enabled_Endpoints_1',
                                     'Enabled_Endpoints_2/enabledEndpoint2',
                                     'Disabled_Endpoints_1/disabledEndpoint',

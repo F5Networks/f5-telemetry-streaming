@@ -1041,11 +1041,11 @@ module.exports = {
     },
 
     /**
-     * Decrypt all secrets in config
+     * Decrypt all secrets
      *
-     * @param {Object} data - data (config)
+     * @param {Object} data - data to decrypt
      *
-     * @returns {Object} Returns promise resolved with config containing decrypted secrets
+     * @returns {Promise<Object>} resolve with decrypted data
      */
     decryptAllSecrets(data) {
         // helper functions strictly for this function

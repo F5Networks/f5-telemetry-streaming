@@ -193,6 +193,16 @@ describe('Persistent Storage', () => {
                 return assert.isRejected(persistentStorageInst.load(), /loadStateError/);
             });
 
+            it('should set _data_ to object when loaded null', () => {
+                persistentStorageStub.loadData = null;
+                return persistentStorageInst.load()
+                    .then((state) => {
+                        assert.deepStrictEqual(state, {});
+                        assert.deepStrictEqual(persistentStorageInst.storage._cache, { _data_: {} });
+                    });
+            });
+
+
             it('should load empty state', () => {
                 persistentStorageStub.loadState = null;
                 return persistentStorageInst.load()
