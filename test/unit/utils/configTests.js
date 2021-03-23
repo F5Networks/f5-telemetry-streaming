@@ -17,29 +17,33 @@ const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
 const configWorker = require('../../../src/lib/config');
+const configUtil = require('../../../src/lib/utils/config');
+const configUtilTestData = require('../data/configUtilTestsData');
 const constants = require('../../../src/lib/constants');
 const deviceUtil = require('../../../src/lib/utils/device');
-const configUtil = require('../../../src/lib/utils/config');
-const util = require('../../../src/lib/utils/misc');
-
-const configUtilTestData = require('../data/configUtilTestsData');
+const persistentStorage = require('../../../src/lib/persistentStorage');
+const stubs = require('../shared/stubs');
+const teemReporter = require('../../../src/lib/teemReporter');
 const testUtil = require('../shared/util');
+const utilMisc = require('../../../src/lib/utils/misc');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe('Config Util', () => {
-    let uuidCounter = 0;
+    let coreStub;
 
     beforeEach(() => {
-        sinon.stub(util, 'generateUuid').callsFake(() => {
-            uuidCounter += 1;
-            return `uuid${uuidCounter}`;
+        coreStub = stubs.coreStub({
+            configWorker,
+            deviceUtil,
+            persistentStorage,
+            teemReporter,
+            utilMisc
         });
     });
 
     afterEach(() => {
-        uuidCounter = 0;
         sinon.restore();
     });
 
@@ -65,7 +69,7 @@ describe('Config Util', () => {
             });
 
             it('should assign random UUIDs for the components', () => {
-                util.generateUuid.restore();
+                coreStub.utilMisc.generateUuid.restore();
                 const decl = {
                     System1: {
                         class: 'Telemetry_System'
@@ -90,21 +94,9 @@ describe('Config Util', () => {
     });
 
     describe('.normalizeComponents', () => {
-        const parseDeclaration = function (declaration) {
-            return configWorker.validate(declaration)
-                .then(validated => configUtil.componentizeConfig(validated));
-        };
-
         const sortMappings = (mappings) => {
             Object.keys(mappings).forEach(key => mappings[key].sort());
         };
-
-        beforeEach(() => {
-            sinon.stub(deviceUtil, 'encryptSecret').resolvesArg(0);
-            sinon.stub(deviceUtil, 'decryptSecret').resolvesArg(0);
-            sinon.stub(deviceUtil, 'getDeviceType').resolves(constants.DEVICE_TYPE.BIG_IP);
-            sinon.stub(util, 'networkCheck').resolves();
-        });
 
         const testSetData = configUtilTestData.normalizeComponents;
         /* eslint-disable implicit-arrow-linebreak */
@@ -113,9 +105,9 @@ describe('Config Util', () => {
             testUtil.getCallableDescribe(testSet)(testSet.name, () => {
                 testSet.tests.forEach((testConf) => {
                     testUtil.getCallableIt(testConf)(testConf.name, () =>
-                        parseDeclaration(testConf.declaration)
-                            .then(configData => configUtil.normalizeComponents(configData))
-                            .then((normalized) => {
+                        configWorker.processDeclaration(testConf.declaration)
+                            .then(() => {
+                                const normalized = configWorker.currentConfig;
                                 sortMappings(normalized.mappings);
                                 sortMappings(testConf.expected.mappings);
 
@@ -169,6 +161,94 @@ describe('Config Util', () => {
                             id: 'uuid1'
                         });
                 });
+        });
+    });
+
+    describe('.decryptAllSecrets()', () => {
+        it('should decrypt secrets (JSON declaration)', () => {
+            const encrypted = {
+                class: 'Telemetry',
+                My_Namespace: {
+                    class: 'Telemetry_Namespace',
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.1',
+                        path: '`=/Shared/constants/path`',
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$passphrase'
+                        }
+                    }
+                }
+            };
+            const decrypted = {
+                class: 'Telemetry',
+                My_Namespace: {
+                    class: 'Telemetry_Namespace',
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.1',
+                        path: '`=/Shared/constants/path`',
+                        passphrase: 'passphrase'
+                    }
+                }
+            };
+            return assert.becomes(configUtil.decryptSecrets(encrypted), decrypted);
+        });
+
+        it('should decrypt secrets (normalized configuration)', () => {
+            const encrypted = {
+                mappings: {},
+                components: [
+                    {
+                        name: 'My_Consumer',
+                        traceName: 'My_Consumer',
+                        id: 'uuid2',
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        enable: true,
+                        method: 'POST',
+                        host: '192.0.2.1',
+                        path: '/foo',
+                        port: 443,
+                        protocol: 'https',
+                        trace: false,
+                        allowSelfSignedCert: false,
+                        namespace: 'f5telemetry_default',
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$passphrase'
+                        }
+                    }
+                ]
+            };
+            const decrypted = {
+                mappings: {},
+                components: [
+                    {
+                        name: 'My_Consumer',
+                        traceName: 'My_Consumer',
+                        id: 'uuid2',
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        enable: true,
+                        method: 'POST',
+                        host: '192.0.2.1',
+                        path: '/foo',
+                        port: 443,
+                        protocol: 'https',
+                        trace: false,
+                        allowSelfSignedCert: false,
+                        namespace: 'f5telemetry_default',
+                        passphrase: 'passphrase' // decrypted secret
+                    }
+                ]
+            };
+            return assert.becomes(configUtil.decryptSecrets(encrypted), decrypted);
         });
     });
 });

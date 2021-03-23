@@ -16,15 +16,17 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const configUtil = require('../../../src/lib/utils/config');
 const configWorker = require('../../../src/lib/config');
 const dataPipeline = require('../../../src/lib/dataPipeline');
 const EventListener = require('../../../src/lib/eventListener');
 const eventListenerTestData = require('../data/eventListenerTestsData');
 const messageStream = require('../../../src/lib/eventListener/messageStream');
+const persistentStorage = require('../../../src/lib/persistentStorage');
+const stubs = require('../shared/stubs');
+const teemReporter = require('../../../src/lib/teemReporter');
 const testUtil = require('../shared/util');
 const tracers = require('../../../src/lib/utils/tracer');
-const util = require('../../../src/lib/utils/misc');
+const utilMisc = require('../../../src/lib/utils/misc');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -35,7 +37,6 @@ describe('Event Listener', () => {
      * we are not using any other API to interact with it
      */
     let actualData;
-    let uuidCounter = 0;
 
     const defaultTestPort = 1234;
     const defaultDeclarationPort = 6514;
@@ -56,16 +57,6 @@ describe('Event Listener', () => {
         } else {
             assert.isNull(actualListener.filterFunc);
         }
-    };
-
-    const validateAndNormalize = function (declaration) {
-        return configWorker.validate(util.deepCopy(declaration))
-            .then(validated => Promise.resolve(configUtil.normalizeConfig(validated)));
-    };
-
-    const validateAndNormalizeEmit = function (declaration) {
-        return validateAndNormalize(declaration)
-            .then(normalized => configWorker.emitAsync('change', normalized));
     };
 
     const addData = (dataPipelineArgs) => {
@@ -95,6 +86,12 @@ describe('Event Listener', () => {
             }
         };
 
+        stubs.coreStub({
+            configWorker,
+            persistentStorage,
+            teemReporter,
+            utilMisc
+        });
         sinon.stub(dataPipeline, 'process').callsFake(function () {
             addData(Array.from(arguments));
             return Promise.resolve();
@@ -104,14 +101,10 @@ describe('Event Listener', () => {
             sinon.stub(messageStream.MessageStream.prototype, method).resolves();
         });
 
-        sinon.stub(util, 'generateUuid').callsFake(() => {
-            uuidCounter += 1;
-            return `uuid${uuidCounter}`;
-        });
         sinon.stub(tracers.Tracer.prototype, 'stop').resolves();
         sinon.stub(tracers.Tracer.prototype, 'write').resolves();
 
-        return validateAndNormalizeEmit(util.deepCopy(origDecl))
+        return configWorker.processDeclaration(utilMisc.deepCopy(origDecl))
             .then(() => {
                 const listeners = EventListener.instances;
                 assert.strictEqual(Object.keys(listeners).length, 1);
@@ -122,9 +115,6 @@ describe('Event Listener', () => {
                 assert.strictEqual(tracers.registered().length, 1);
                 assert.strictEqual(tracers.registered()[0].name, 'Telemetry_Listener.Listener1');
                 assert.strictEqual(EventListener.receiversManager.getAll().length, 1);
-
-                // reset counts
-                uuidCounter = 0;
             });
     });
 
@@ -135,7 +125,6 @@ describe('Event Listener', () => {
             assert.strictEqual(EventListener.receiversManager.getAll().length, 0);
         })
         .then(() => {
-            uuidCounter = 0;
             sinon.restore();
         }));
 
@@ -157,7 +146,7 @@ describe('Event Listener', () => {
     });
 
     it('should create listeners with default and custom opts on config change event (no prior config)', () => {
-        const newDecl = util.deepCopy(origDecl);
+        const newDecl = testUtil.deepCopy(origDecl);
         newDecl.Listener2 = {
             class: 'Telemetry_Listener',
             match: 'somePattern',
@@ -170,7 +159,7 @@ describe('Event Listener', () => {
             trace: true
         };
 
-        return validateAndNormalizeEmit(util.deepCopy(newDecl))
+        return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
             .then(() => {
                 assert.sameMembers(
                     tracers.registered().map(t => t.name),
@@ -181,7 +170,7 @@ describe('Event Listener', () => {
                     ]
                 );
                 assert.strictEqual(EventListener.receiversManager.getAll().length, 2);
-                assert.deepStrictEqual(gatherIds(), ['uuid1', 'uuid2', 'uuid3']);
+                assert.deepStrictEqual(gatherIds(), ['uuid2', 'uuid3', 'uuid4']);
 
                 const listeners = EventListener.instances;
                 assertListener(listeners.Listener1, {
@@ -213,12 +202,12 @@ describe('Event Listener', () => {
     });
 
     it('should update existing listener(s) without restarting if port is the same', () => {
-        const newDecl = util.deepCopy(origDecl);
+        const newDecl = testUtil.deepCopy(origDecl);
         newDecl.Listener1.trace = true;
         const updateSpy = sinon.stub(EventListener.prototype, 'updateConfig');
         const existingMessageStream = EventListener.receiversManager.registered[newDecl.Listener1.port];
 
-        return validateAndNormalizeEmit(util.deepCopy(newDecl))
+        return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
             .then(() => {
                 assert.strictEqual(tracers.registered().length, 1);
                 assert.strictEqual(tracers.registered()[0].name, 'Telemetry_Listener.Listener1');
@@ -244,10 +233,9 @@ describe('Event Listener', () => {
             });
     });
 
-    it('should add a new listener without updating existing one when skipUpdate = true', () => {
+    it('should start new listener without restarting/updating existing one when processing a new namespace declaration', () => {
         const updateSpy = sinon.spy(EventListener.prototype, 'updateConfig');
-        const newDecl = util.deepCopy(origDecl);
-        newDecl.New = {
+        const newDecl = {
             class: 'Telemetry_Namespace',
             Listener1: {
                 class: 'Telemetry_Listener',
@@ -255,17 +243,13 @@ describe('Event Listener', () => {
                 trace: true
             }
         };
-        return validateAndNormalize(newDecl)
-            .then((normalized) => {
-                normalized.components[0].skipUpdate = true;
-                return configWorker.emitAsync('change', normalized);
-            })
+        return configWorker.processNamespaceDeclaration(testUtil.deepCopy(newDecl), 'newNamespace')
             .then(() => {
                 assert.sameMembers(
                     tracers.registered().map(t => t.name),
                     [
                         'Telemetry_Listener.Listener1',
-                        'Telemetry_Listener.New::Listener1'
+                        'Telemetry_Listener.newNamespace::Listener1'
                     ]
                 );
                 assert.deepStrictEqual(gatherIds(), ['uuid1', 'uuid2']);
@@ -274,8 +258,8 @@ describe('Event Listener', () => {
                 assertListener(listeners.Listener1, {
                     tags: { tenant: '`T`', application: '`A`' }
                 });
-                assertListener(listeners['New::Listener1'], {});
-                // one for each protocol, called through constructor
+                assertListener(listeners['newNamespace::Listener1'], {});
+                // called twice - 1) constructor 2) config on change event handler
                 assert.isTrue(updateSpy.calledTwice);
                 assert.strictEqual(EventListener.getAll().length, 2);
                 assert.strictEqual(EventListener.receiversManager.getAll().length, 2);
@@ -283,10 +267,10 @@ describe('Event Listener', () => {
     });
 
     it('should remove disabled listener', () => {
-        const newDecl = util.deepCopy(origDecl);
+        const newDecl = testUtil.deepCopy(origDecl);
         newDecl.Listener1.enable = false;
 
-        return validateAndNormalizeEmit(util.deepCopy(newDecl))
+        return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
             .then(() => {
                 assert.strictEqual(tracers.registered().length, 0);
                 assert.strictEqual(EventListener.getAll().length, 0);
@@ -295,7 +279,7 @@ describe('Event Listener', () => {
     });
 
     it('should allow another instance to listen on the same port', () => {
-        const newDecl = util.deepCopy(origDecl);
+        const newDecl = testUtil.deepCopy(origDecl);
         newDecl.New = {
             class: 'Telemetry_Namespace',
             Listener1: {
@@ -305,7 +289,7 @@ describe('Event Listener', () => {
             }
         };
 
-        return validateAndNormalizeEmit(util.deepCopy(newDecl))
+        return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
             .then(() => {
                 assert.sameMembers(
                     tracers.registered().map(t => t.name),
@@ -316,7 +300,7 @@ describe('Event Listener', () => {
                 );
                 assert.strictEqual(EventListener.getAll().length, 2);
                 assert.strictEqual(EventListener.receiversManager.getAll().length, 1);
-                assert.deepStrictEqual(gatherIds(), ['uuid1', 'uuid2']);
+                assert.deepStrictEqual(gatherIds(), ['uuid2', 'uuid3']);
                 const listeners = EventListener.instances;
 
                 return EventListener.receiversManager.getMessageStream(newDecl.Listener1.port).emitAsync('messages', ['6514'])
@@ -328,7 +312,7 @@ describe('Event Listener', () => {
     });
 
     it('should update config of existing listener', () => {
-        const newDecl = util.deepCopy(origDecl);
+        const newDecl = testUtil.deepCopy(origDecl);
         newDecl.Listener1 = {
             class: 'Telemetry_Listener',
             port: 9999,
@@ -345,13 +329,13 @@ describe('Event Listener', () => {
                 }
             }]
         };
-        return validateAndNormalizeEmit(util.deepCopy(newDecl))
+        return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
             .then(() => {
                 assert.strictEqual(tracers.registered().length, 1);
                 assert.strictEqual(tracers.registered()[0].name, 'Telemetry_Listener.Listener1');
                 assert.strictEqual(EventListener.getAll().length, 1);
                 assert.strictEqual(EventListener.receiversManager.getAll().length, 1);
-                assert.deepStrictEqual(gatherIds(), ['uuid1']);
+                assert.deepStrictEqual(gatherIds(), ['uuid2']);
                 const listeners = EventListener.instances;
 
                 assertListener(listeners.Listener1, {
@@ -379,16 +363,16 @@ describe('Event Listener', () => {
     });
 
     it('should set minimum and default props', () => {
-        const newDecl = util.deepCopy(origDecl);
+        const newDecl = testUtil.deepCopy(origDecl);
         newDecl.Listener1 = {
             class: 'Telemetry_Listener'
         };
-        return validateAndNormalizeEmit(util.deepCopy(newDecl))
+        return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
             .then(() => {
                 assert.strictEqual(EventListener.getAll().length, 1);
                 assert.strictEqual(EventListener.receiversManager.getAll().length, 1);
                 assert.strictEqual(tracers.registered().length, 0);
-                assert.deepStrictEqual(gatherIds(), ['uuid1']);
+                assert.deepStrictEqual(gatherIds(), ['uuid2']);
                 const listeners = EventListener.instances;
 
                 assertListener(listeners.Listener1, {});
@@ -407,7 +391,7 @@ describe('Event Listener', () => {
         const msStartSpy = sinon.spy(messageStream.MessageStream.prototype, 'restart');
         messageStream.MessageStream.prototype.startHandler.rejects(new Error('test error'));
 
-        const newDecl = util.deepCopy(origDecl);
+        const newDecl = testUtil.deepCopy(origDecl);
         newDecl.Listener1 = {
             class: 'Telemetry_Listener',
             port: 9999,
@@ -424,7 +408,7 @@ describe('Event Listener', () => {
                 }
             }]
         };
-        return validateAndNormalizeEmit(util.deepCopy(newDecl))
+        return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
             .then(() => {
                 assert.strictEqual(msStartSpy.callCount, 10);
             });

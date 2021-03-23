@@ -36,18 +36,18 @@ function getData(consumerName, namespace) {
     let config; // to pass to systemPoller
     let consumerConfig;
     namespace = namespace || constants.DEFAULT_UNNAMED_NAMESPACE;
-    return configWorker.getConfig()
-        .then((curConfig) => {
+    return Promise.resolve()
+        .then(() => {
             // config was copied by getConfig already
-            config = curConfig;
+            config = configWorker.currentConfig;
 
-            consumerConfig = getConsumerConfig(config.normalized, consumerName, namespace);
+            consumerConfig = getConsumerConfig(config, consumerName, namespace);
             // Don't bother collecting stats if requested Consumer Type is not loaded
             if (!PULL_CONSUMERS.find(pc => pc.config.type === consumerConfig.type)) {
                 throw new ModuleNotLoadedError(`Pull Consumer of type '${consumerConfig.type}' is not loaded`);
             }
 
-            const pollerConfigs = getEnabledPollersForConsumer(config.normalized, consumerConfig.id);
+            const pollerConfigs = getEnabledPollersForConsumer(config, consumerConfig.id);
             return systemPoller.fetchPollersData(util.deepCopy(pollerConfigs), true);
         })
         .then(pollerData => invokeConsumer(consumerConfig, pollerData));

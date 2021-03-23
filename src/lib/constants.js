@@ -83,6 +83,7 @@ module.exports = {
         }
     },
     CONFIG_CLASSES: {
+        ROOT_CLASS: 'Telemetry',
         CONSUMER_CLASS_NAME: 'Telemetry_Consumer',
         PULL_CONSUMER_CLASS_NAME: 'Telemetry_Pull_Consumer',
         CONTROLS_CLASS_NAME: 'Controls',
@@ -92,6 +93,9 @@ module.exports = {
         SYSTEM_CLASS_NAME: 'Telemetry_System',
         SYSTEM_POLLER_CLASS_NAME: 'Telemetry_System_Poller',
         NAMESPACE_CLASS_NAME: 'Telemetry_Namespace'
+    },
+    CONFIG_WORKER: {
+        STORAGE_KEY: 'config'
     },
     DAY_NAME_TO_WEEKDAY,
     DEVICE_DEFAULT_PORT: 8100,

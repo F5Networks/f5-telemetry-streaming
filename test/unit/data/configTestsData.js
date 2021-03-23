@@ -8,489 +8,2086 @@
 
 'use strict';
 
-// const constants = require('../../../src/lib/constants');
+const constants = require('../../../src/lib/constants');
 
 module.exports = {
-    processNamespaceDeclaration: [
-        {
-            name: 'should process without existing config',
-            existingConfig: {
-                raw: {},
-                normalized: { components: [], mappings: {} }
-            },
-            input: {
-                namespace: 'newNoOther',
+    processDeclaration: {
+        name: '.processDeclaration()',
+        tests: [
+            {
+                name: 'process empty declaration without pre-loaded configuration',
                 declaration: {
-                    class: 'Telemetry_Namespace',
-                    Poller: {
-                        class: 'Telemetry_System_Poller'
-                    }
-                }
-            },
-            expectedResult: {
-                class: 'Telemetry_Namespace',
-                Poller: {
-                    class: 'Telemetry_System_Poller',
-                    enable: true,
-                    interval: 300,
-                    actions: [
-                        {
-                            setTag: {
-                                tenant: '`T`',
-                                application: '`A`'
-                            },
-                            enable: true
-                        }
-                    ],
-                    allowSelfSignedCert: false,
-                    host: 'localhost',
-                    port: 8100,
-                    protocol: 'http'
-                }
-            },
-            expectedNormalized: {
-                mappings: {
-                    uuid1: []
+                    class: 'Telemetry'
                 },
-                components: [
-                    {
-                        class: 'Telemetry_System_Poller',
-                        enable: true,
-                        interval: 300,
-                        name: 'Poller',
-                        id: 'uuid1',
-                        namespace: 'newNoOther',
-                        traceName: 'newNoOther::Poller_System::Poller',
-                        trace: false,
-                        connection: {
-                            host: 'localhost',
-                            port: 8100,
-                            protocol: 'http',
-                            allowSelfSignedCert: false
-                        },
-                        dataOpts: {
-                            actions: [
-                                {
-                                    setTag: {
-                                        tenant: '`T`',
-                                        application: '`A`'
-                                    },
-                                    enable: true
-                                }
-                            ],
-                            tags: undefined,
-                            noTMStats: true
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
-                        }
-                    },
-                    {
-                        class: 'Telemetry_System',
-                        enable: true,
-                        host: 'localhost',
-                        port: 8100,
-                        protocol: 'http',
-                        allowSelfSignedCert: false,
-                        id: 'uuid2',
-                        name: 'Poller_System',
-                        systemPollers: [
-                            'uuid1'
-                        ]
-                    }
-                ]
-            }
-        },
-        {
-            name: 'should merge with existing config (default namespace)',
-            existingConfig: {
-                raw: {
+                expectedExpandedDeclaration: {
                     class: 'Telemetry',
-                    My_System_1: {
-                        class: 'Telemetry_System',
-                        trace: false
+                    schemaVersion: constants.VERSION
+                },
+                expectedValidatedDeclaration: {
+                    class: 'Telemetry',
+                    schemaVersion: constants.VERSION
+                },
+                expectedEmittedConfiguration: {
+                    mappings: {},
+                    components: []
+                },
+                expectedCurrentConfiguration: {
+                    mappings: {},
+                    components: []
+                }
+            },
+            {
+                name: 'process empty declaration with pre-loaded configuration, should remove all objects',
+                preLoadDeclaration: {
+                    class: 'Telemetry',
+                    Shared: {
+                        class: 'Shared',
+                        constants: {
+                            class: 'Constants',
+                            path: '/foo'
+                        }
+                    },
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.1',
+                        path: '`=/Shared/constants/path`',
+                        passphrase: {
+                            cipherText: 'passphrase' // check that configUtil.decryptSecrets called
+                        }
                     }
                 },
-                normalized: {
-                    mappings: {},
-                    components: [
-                        {
-                            name: 'My_System_1',
-                            id: 'uuid-abc',
-                            namespace: 'f5telemetry_default',
-                            class: 'Telemetry_System',
-                            enable: true,
-                            systemPollers: [],
-                            allowSelfSignedCert: false,
-                            host: 'localhost',
-                            port: 8100,
-                            protocol: 'http',
-                            trace: false
-                        }
-                    ]
-                }
-            },
-            input: {
-                namespace: 'newWithDefault',
                 declaration: {
-                    class: 'Telemetry_Namespace',
-                    My_Listener_1: {
-                        class: 'Telemetry_Listener'
-                    }
+                    class: 'Telemetry'
+                },
+                expectedExpandedDeclaration: {
+                    class: 'Telemetry',
+                    schemaVersion: constants.VERSION
+                },
+                expectedValidatedDeclaration: {
+                    class: 'Telemetry',
+                    schemaVersion: constants.VERSION
+                },
+                expectedEmittedConfiguration: {
+                    mappings: {},
+                    components: []
+                },
+                expectedCurrentConfiguration: {
+                    mappings: {},
+                    components: []
                 }
             },
-            expectedResult: {
-                class: 'Telemetry_Namespace',
-                My_Listener_1: {
-                    class: 'Telemetry_Listener',
-                    enable: true,
-                    trace: false,
-                    port: 6514,
-                    match: '',
-                    actions: [
-                        {
-                            setTag: {
-                                tenant: '`T`',
-                                application: '`A`'
-                            },
-                            enable: true
+            {
+                name: 'process complex declaration with pre-loaded configuration',
+                additionalTests: true,
+                preLoadDeclaration: {
+                    class: 'Telemetry'
+                },
+                declaration: {
+                    class: 'Telemetry',
+                    Shared: {
+                        class: 'Shared',
+                        constants: {
+                            class: 'Constants',
+                            path: '/foo'
                         }
-                    ]
-                }
-            },
-            expectedNormalized: {
-                mappings: { uuid1: [] },
-                components: [
-                    {
-                        name: 'My_System_1',
-                        id: 'uuid-abc',
-                        namespace: 'f5telemetry_default',
-                        class: 'Telemetry_System',
-                        enable: true,
-                        systemPollers: [],
-                        allowSelfSignedCert: false,
-                        host: 'localhost',
-                        port: 8100,
-                        protocol: 'http',
-                        trace: false
                     },
-                    {
-                        class: 'Telemetry_Listener',
-                        enable: true,
-                        trace: false,
-                        port: 6514,
-                        match: '',
-                        actions: [
-                            {
-                                setTag: {
-                                    tenant: '`T`',
-                                    application: '`A`'
-                                },
-                                enable: true
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.1',
+                        path: '`=/Shared/constants/path`',
+                        passphrase: {
+                            cipherText: 'passphrase' // check that configUtil.decryptSecrets called
+                        }
+                    },
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace',
+                        Shared: {
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/bar'
                             }
-                        ],
-                        name: 'My_Listener_1',
-                        id: 'uuid1',
-                        namespace: 'newWithDefault',
-                        tag: {},
-                        traceName: 'newWithDefault::My_Listener_1'
-                    }
-                ]
-            }
-        },
-        {
-            name: 'should merge with existing config (different namespace)',
-            existingConfig: {
-                raw: {
-                    class: 'Telemetry',
-                    FirstNamespace: {
-                        class: 'Telemetry_Namespace',
-                        My_System_1: {
-                            class: 'Telemetry_System'
+                        },
+                        My_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '`=/Shared/constants/path`',
+                            passphrase: {
+                                cipherText: 'passphrase' // check that configUtil.decryptSecrets called
+                            }
                         }
                     }
                 },
-                normalized: {
-                    mappings: {},
-                    components: [
-                        {
-                            name: 'My_System_1',
-                            id: 'uuid-first',
-                            namespace: 'FirstNamespace',
-                            class: 'Telemetry_System',
-                            enable: true,
-                            systemPollers: [],
-                            allowSelfSignedCert: false,
-                            host: 'localhost',
-                            port: 8100,
-                            protocol: 'http'
+                expectedExpandedDeclaration: {
+                    class: 'Telemetry',
+                    schemaVersion: constants.VERSION,
+                    Shared: {
+                        class: 'Shared',
+                        constants: {
+                            class: 'Constants',
+                            path: '/foo'
                         }
-                    ]
-                }
-            },
-            input: {
-                namespace: 'SecondNamespace',
-                declaration: {
-                    class: 'Telemetry_Namespace',
-                    My_System_1: {
-                        class: 'Telemetry_System'
-                    }
-                }
-            },
-            expectedResult: {
-                class: 'Telemetry_Namespace',
-                My_System_1: {
-                    class: 'Telemetry_System',
-                    enable: true,
-                    allowSelfSignedCert: false,
-                    host: 'localhost',
-                    port: 8100,
-                    protocol: 'http'
-                }
-            },
-            expectedNormalized: {
-                mappings: {},
-                components: [
-                    {
-                        name: 'My_System_1',
-                        id: 'uuid-first',
-                        namespace: 'FirstNamespace',
-                        class: 'Telemetry_System',
-                        enable: true,
-                        systemPollers: [],
-                        allowSelfSignedCert: false,
-                        host: 'localhost',
-                        port: 8100,
-                        protocol: 'http'
                     },
-                    {
-                        name: 'My_System_1',
-                        id: 'uuid1',
-                        namespace: 'SecondNamespace',
-                        class: 'Telemetry_System',
-                        enable: true,
-                        systemPollers: [],
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.1',
+                        path: '/foo',
                         allowSelfSignedCert: false,
-                        host: 'localhost',
-                        port: 8100,
-                        protocol: 'http'
-                    }
-                ]
-            }
-        },
-        {
-            name: 'should update existing namespace config (with config diff)',
-            existingConfig: {
-                raw: {
-                    class: 'Telemetry',
-                    SameNamespace: {
-                        class: 'Telemetry_Namespace',
-                        My_System_1: {
-                            class: 'Telemetry_System'
-                        }
-                    }
-                },
-                normalized: {
-                    mappings: {},
-                    components: [
-                        {
-                            name: 'My_System_1',
-                            id: 'uuid-same',
-                            namespace: 'SameNamespace',
-                            class: 'Telemetry_System',
-                            enable: true,
-                            systemPollers: [],
-                            allowSelfSignedCert: false,
-                            host: 'localhost',
-                            port: 8100,
-                            protocol: 'http'
-                        }
-                    ]
-                }
-            },
-            input: {
-                namespace: 'SameNamespace',
-                declaration: {
-                    class: 'Telemetry_Namespace',
-                    My_System_1: {
-                        class: 'Telemetry_System',
-                        host: 'some.other.host',
-                        trace: true
-                    }
-                }
-            },
-            expectedResult: {
-                class: 'Telemetry_Namespace',
-                My_System_1: {
-                    class: 'Telemetry_System',
-                    host: 'some.other.host',
-                    trace: true,
-                    enable: true,
-                    allowSelfSignedCert: false,
-                    port: 8100,
-                    protocol: 'http'
-                }
-            },
-            expectedNormalized: {
-                mappings: {},
-                components: [
-                    {
-                        name: 'My_System_1',
-                        id: 'uuid1',
-                        namespace: 'SameNamespace',
-                        class: 'Telemetry_System',
                         enable: true,
-                        systemPollers: [],
-                        allowSelfSignedCert: false,
-                        host: 'some.other.host',
-                        port: 8100,
-                        protocol: 'http',
-                        trace: true
-                    }
-                ]
-            }
-        },
-        {
-            name: 'should update existing namespace config (without config diff)',
-            existingConfig: {
-                raw: {
-                    class: 'Telemetry',
-                    SameNamespace: {
-                        class: 'Telemetry_Namespace',
-                        My_System_1: {
-                            class: 'Telemetry_System'
+                        method: 'POST',
+                        port: 443,
+                        protocol: 'https',
+                        trace: false,
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$passphrase'
                         }
-                    }
-                },
-                normalized: {
-                    mappings: {},
-                    components: [
-                        {
-                            name: 'My_System_1',
-                            id: 'uuid-same',
-                            namespace: 'SameNamespace',
-                            class: 'Telemetry_System',
-                            enable: true,
-                            systemPollers: [],
-                            allowSelfSignedCert: false,
-                            host: 'localhost',
-                            port: 8100,
-                            protocol: 'http'
-                        }
-                    ]
-                }
-            },
-            input: {
-                namespace: 'SameNamespace',
-                declaration: {
-                    class: 'Telemetry_Namespace',
-                    My_System_1: {
-                        class: 'Telemetry_System'
-                    }
-                }
-            },
-            expectedResult: {
-                class: 'Telemetry_Namespace',
-                My_System_1: {
-                    class: 'Telemetry_System',
-                    enable: true,
-                    allowSelfSignedCert: false,
-                    host: 'localhost',
-                    port: 8100,
-                    protocol: 'http'
-                }
-            },
-            expectedNormalized: {
-                mappings: {},
-                components: [
-                    {
-                        name: 'My_System_1',
-                        id: 'uuid1',
-                        namespace: 'SameNamespace',
-                        class: 'Telemetry_System',
-                        enable: true,
-                        systemPollers: [],
-                        allowSelfSignedCert: false,
-                        host: 'localhost',
-                        port: 8100,
-                        protocol: 'http'
-                    }
-                ]
-            }
-        },
-        {
-            name: 'should remove existing namespace config (empty declaration)',
-            existingConfig: {
-                raw: {
-                    class: 'Telemetry',
-                    My_System_1: {
-                        class: 'Telemetry_System',
-                        trace: false
                     },
-                    SameNamespace: {
+                    My_Namespace: {
                         class: 'Telemetry_Namespace',
-                        My_System_1: {
-                            class: 'Telemetry_System'
+                        Shared: {
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/bar'
+                            }
+                        },
+                        My_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '/bar',
+                            allowSelfSignedCert: false,
+                            enable: true,
+                            method: 'POST',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
                         }
                     }
                 },
-                normalized: {
+                expectedValidatedDeclaration: {
+                    class: 'Telemetry',
+                    schemaVersion: constants.VERSION,
+                    Shared: {
+                        class: 'Shared',
+                        constants: {
+                            class: 'Constants',
+                            path: '/foo'
+                        }
+                    },
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.1',
+                        path: '`=/Shared/constants/path`',
+                        allowSelfSignedCert: false,
+                        enable: true,
+                        method: 'POST',
+                        port: 443,
+                        protocol: 'https',
+                        trace: false,
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$passphrase'
+                        }
+                    },
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace',
+                        Shared: {
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/bar'
+                            }
+                        },
+                        My_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '`=/Shared/constants/path`',
+                            allowSelfSignedCert: false,
+                            enable: true,
+                            method: 'POST',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        }
+                    }
+                },
+                expectedEmittedConfiguration: {
                     mappings: {},
                     components: [
                         {
-                            name: 'My_System_1',
-                            id: 'uuid-abc',
-                            namespace: 'f5telemetry_default',
-                            class: 'Telemetry_System',
-                            enable: true,
-                            systemPollers: [],
-                            allowSelfSignedCert: false,
-                            host: 'localhost',
-                            port: 8100,
-                            protocol: 'http',
-                            trace: false
+                            name: 'Shared',
+                            id: 'uuid1',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            },
+                            namespace: 'f5telemetry_default'
                         },
                         {
-                            name: 'My_System_1',
-                            id: 'uuid-same',
-                            namespace: 'SameNamespace',
-                            class: 'Telemetry_System',
+                            name: 'My_Consumer',
+                            traceName: 'My_Consumer',
+                            id: 'uuid2',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
                             enable: true,
-                            systemPollers: [],
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/foo',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
                             allowSelfSignedCert: false,
-                            host: 'localhost',
-                            port: 8100,
-                            protocol: 'http'
+                            namespace: 'f5telemetry_default',
+                            passphrase: 'passphrase' // decrypted secret
+                        },
+                        {
+                            name: 'Shared',
+                            id: 'uuid3',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/bar'
+                            },
+                            namespace: 'My_Namespace'
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'My_Namespace::My_Consumer',
+                            id: 'uuid4',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/bar',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'My_Namespace',
+                            passphrase: 'passphrase' // decrypted secret
+                        }
+                    ]
+                },
+                expectedCurrentConfiguration: {
+                    mappings: {},
+                    components: [
+                        {
+                            name: 'Shared',
+                            id: 'uuid1',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            },
+                            namespace: 'f5telemetry_default'
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'My_Consumer',
+                            id: 'uuid2',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/foo',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'f5telemetry_default',
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        },
+                        {
+                            name: 'Shared',
+                            id: 'uuid3',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/bar'
+                            },
+                            namespace: 'My_Namespace'
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'My_Namespace::My_Consumer',
+                            id: 'uuid4',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/bar',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'My_Namespace',
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
                         }
                     ]
                 }
-            },
-            input: {
-                namespace: 'SameNamespace',
+            }
+        ]
+    },
+    processNamespaceDeclaration: {
+        name: '.processNamespaceDeclaration()',
+        tests: [
+            {
+                name: 'process empty Namespace declaration without pre-loaded configuration',
+                namespaceName: 'My_Namespace',
                 declaration: {
                     class: 'Telemetry_Namespace'
+                },
+                expectedExpandedDeclaration: {
+                    class: 'Telemetry_Namespace'
+                },
+                expectedFullDeclaration: {
+                    class: 'Telemetry',
+                    schemaVersion: constants.VERSION,
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace'
+                    }
+                },
+                expectedValidatedDeclaration: {
+                    class: 'Telemetry_Namespace'
+                },
+                expectedEmittedConfiguration: {
+                    mappings: {},
+                    components: []
+                },
+                expectedCurrentConfiguration: {
+                    mappings: {},
+                    components: []
                 }
             },
-            expectedResult: { class: 'Telemetry_Namespace' },
-            expectedNormalized: {
-                mappings: {},
-                components: [
-                    {
-                        name: 'My_System_1',
-                        id: 'uuid-abc',
-                        namespace: 'f5telemetry_default',
-                        class: 'Telemetry_System',
-                        enable: true,
-                        systemPollers: [],
-                        allowSelfSignedCert: false,
-                        host: 'localhost',
-                        port: 8100,
-                        protocol: 'http',
-                        trace: false
+            {
+                name: 'process Namespace declaration without pre-loaded configuration',
+                namespaceName: 'My_Namespace',
+                declaration: {
+                    class: 'Telemetry_Namespace',
+                    Shared: {
+                        class: 'Shared',
+                        constants: {
+                            class: 'Constants',
+                            path: '/bar'
+                        }
+                    },
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.1',
+                        path: '`=/Shared/constants/path`',
+                        passphrase: {
+                            cipherText: 'passphrase' // check that configUtil.decryptSecrets called
+                        }
                     }
-                ]
+                },
+                expectedExpandedDeclaration: {
+                    class: 'Telemetry_Namespace',
+                    Shared: {
+                        class: 'Shared',
+                        constants: {
+                            class: 'Constants',
+                            path: '/bar'
+                        }
+                    },
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.1',
+                        path: '/bar',
+                        allowSelfSignedCert: false,
+                        enable: true,
+                        method: 'POST',
+                        port: 443,
+                        protocol: 'https',
+                        trace: false,
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$passphrase'
+                        }
+                    }
+                },
+                expectedFullDeclaration: {
+                    class: 'Telemetry',
+                    schemaVersion: constants.VERSION,
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace',
+                        Shared: {
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/bar'
+                            }
+                        },
+                        My_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '`=/Shared/constants/path`',
+                            allowSelfSignedCert: false,
+                            enable: true,
+                            method: 'POST',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        }
+                    }
+                },
+                expectedValidatedDeclaration: {
+                    class: 'Telemetry_Namespace',
+                    Shared: {
+                        class: 'Shared',
+                        constants: {
+                            class: 'Constants',
+                            path: '/bar'
+                        }
+                    },
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.1',
+                        path: '`=/Shared/constants/path`',
+                        allowSelfSignedCert: false,
+                        enable: true,
+                        method: 'POST',
+                        port: 443,
+                        protocol: 'https',
+                        trace: false,
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$passphrase'
+                        }
+                    }
+                },
+                expectedEmittedConfiguration: {
+                    mappings: {},
+                    components: [
+                        {
+                            name: 'Shared',
+                            id: 'uuid1',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/bar'
+                            },
+                            namespace: 'My_Namespace'
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'My_Namespace::My_Consumer',
+                            id: 'uuid2',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/bar',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'My_Namespace',
+                            passphrase: 'passphrase' // decrypted secret
+                        }
+                    ]
+                },
+                expectedCurrentConfiguration: {
+                    mappings: {},
+                    components: [
+                        {
+                            name: 'Shared',
+                            id: 'uuid1',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/bar'
+                            },
+                            namespace: 'My_Namespace'
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'My_Namespace::My_Consumer',
+                            id: 'uuid2',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/bar',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'My_Namespace',
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                name: 'process Namespace declaration with pre-loaded configuration',
+                additionalTests: true,
+                namespaceName: 'My_Namespace',
+                preLoadDeclaration: {
+                    class: 'Telemetry',
+                    Shared: {
+                        class: 'Shared',
+                        constants: {
+                            class: 'Constants',
+                            path: '/foo'
+                        }
+                    },
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.1',
+                        path: '`=/Shared/constants/path`',
+                        passphrase: {
+                            cipherText: 'passphrase' // check that configUtil.decryptSecrets called
+                        }
+                    }
+                },
+                declaration: {
+                    class: 'Telemetry_Namespace',
+                    Shared: {
+                        class: 'Shared',
+                        constants: {
+                            class: 'Constants',
+                            path: '/bar'
+                        }
+                    },
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.1',
+                        path: '`=/Shared/constants/path`',
+                        passphrase: {
+                            cipherText: 'passphrase' // check that configUtil.decryptSecrets called
+                        }
+                    }
+                },
+                expectedExpandedDeclaration: {
+                    class: 'Telemetry_Namespace',
+                    Shared: {
+                        class: 'Shared',
+                        constants: {
+                            class: 'Constants',
+                            path: '/bar'
+                        }
+                    },
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.1',
+                        path: '/bar',
+                        allowSelfSignedCert: false,
+                        enable: true,
+                        method: 'POST',
+                        port: 443,
+                        protocol: 'https',
+                        trace: false,
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$passphrase'
+                        }
+                    }
+                },
+                expectedFullDeclaration: {
+                    class: 'Telemetry',
+                    schemaVersion: constants.VERSION,
+                    Shared: {
+                        class: 'Shared',
+                        constants: {
+                            class: 'Constants',
+                            path: '/foo'
+                        }
+                    },
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.1',
+                        path: '`=/Shared/constants/path`',
+                        allowSelfSignedCert: false,
+                        enable: true,
+                        method: 'POST',
+                        port: 443,
+                        protocol: 'https',
+                        trace: false,
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$passphrase'
+                        }
+                    },
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace',
+                        Shared: {
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/bar'
+                            }
+                        },
+                        My_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '`=/Shared/constants/path`',
+                            allowSelfSignedCert: false,
+                            enable: true,
+                            method: 'POST',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        }
+                    }
+                },
+                expectedValidatedDeclaration: {
+                    class: 'Telemetry_Namespace',
+                    Shared: {
+                        class: 'Shared',
+                        constants: {
+                            class: 'Constants',
+                            path: '/bar'
+                        }
+                    },
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.1',
+                        path: '`=/Shared/constants/path`',
+                        allowSelfSignedCert: false,
+                        enable: true,
+                        method: 'POST',
+                        port: 443,
+                        protocol: 'https',
+                        trace: false,
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$passphrase'
+                        }
+                    }
+                },
+                expectedEmittedConfiguration: {
+                    mappings: {},
+                    components: [
+                        {
+                            name: 'Shared',
+                            id: 'uuid1',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            },
+                            namespace: 'f5telemetry_default',
+                            skipUpdate: true
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'My_Consumer',
+                            id: 'uuid2',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/foo',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'f5telemetry_default',
+                            passphrase: 'passphrase', // decrypted secret
+                            skipUpdate: true
+                        },
+                        {
+                            name: 'Shared',
+                            id: 'uuid3',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/bar'
+                            },
+                            namespace: 'My_Namespace'
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'My_Namespace::My_Consumer',
+                            id: 'uuid4',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/bar',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'My_Namespace',
+                            passphrase: 'passphrase' // decrypted secret
+                        }
+                    ]
+                },
+                expectedCurrentConfiguration: {
+                    mappings: {},
+                    components: [
+                        {
+                            name: 'Shared',
+                            id: 'uuid1',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            },
+                            namespace: 'f5telemetry_default'
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'My_Consumer',
+                            id: 'uuid2',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/foo',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'f5telemetry_default',
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        },
+                        {
+                            name: 'Shared',
+                            id: 'uuid3',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/bar'
+                            },
+                            namespace: 'My_Namespace'
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'My_Namespace::My_Consumer',
+                            id: 'uuid4',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/bar',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'My_Namespace',
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                name: '.process Namespace declaration with pre-loaded configuration, merge with another Namespace, unchanged namespaces have skipUpdate = true',
+                namespaceName: 'My_Namespace',
+                preLoadDeclaration: {
+                    class: 'Telemetry',
+                    ExistingNameSpace: {
+                        class: 'Telemetry_Namespace',
+                        Shared: {
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            }
+                        },
+                        My_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '`=/Shared/constants/path`',
+                            passphrase: {
+                                cipherText: 'passphrase' // check that configUtil.decryptSecrets called
+                            }
+                        }
+                    }
+                },
+                declaration: {
+                    class: 'Telemetry_Namespace',
+                    Shared: {
+                        class: 'Shared',
+                        constants: {
+                            class: 'Constants',
+                            path: '/bar'
+                        }
+                    },
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.1',
+                        path: '`=/Shared/constants/path`',
+                        passphrase: {
+                            cipherText: 'passphrase' // check that configUtil.decryptSecrets called
+                        }
+                    }
+                },
+                expectedExpandedDeclaration: {
+                    class: 'Telemetry_Namespace',
+                    Shared: {
+                        class: 'Shared',
+                        constants: {
+                            class: 'Constants',
+                            path: '/bar'
+                        }
+                    },
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.1',
+                        path: '/bar',
+                        allowSelfSignedCert: false,
+                        enable: true,
+                        method: 'POST',
+                        port: 443,
+                        protocol: 'https',
+                        trace: false,
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$passphrase'
+                        }
+                    }
+                },
+                expectedFullDeclaration: {
+                    class: 'Telemetry',
+                    schemaVersion: constants.VERSION,
+                    ExistingNameSpace: {
+                        class: 'Telemetry_Namespace',
+                        Shared: {
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            }
+                        },
+                        My_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '`=/Shared/constants/path`',
+                            allowSelfSignedCert: false,
+                            enable: true,
+                            method: 'POST',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        }
+                    },
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace',
+                        Shared: {
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/bar'
+                            }
+                        },
+                        My_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '`=/Shared/constants/path`',
+                            allowSelfSignedCert: false,
+                            enable: true,
+                            method: 'POST',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        }
+                    }
+                },
+                expectedValidatedDeclaration: {
+                    class: 'Telemetry_Namespace',
+                    Shared: {
+                        class: 'Shared',
+                        constants: {
+                            class: 'Constants',
+                            path: '/bar'
+                        }
+                    },
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.1',
+                        path: '`=/Shared/constants/path`',
+                        allowSelfSignedCert: false,
+                        enable: true,
+                        method: 'POST',
+                        port: 443,
+                        protocol: 'https',
+                        trace: false,
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$passphrase'
+                        }
+                    }
+                },
+                expectedEmittedConfiguration: {
+                    mappings: {},
+                    components: [
+                        {
+                            name: 'Shared',
+                            id: 'uuid1',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            },
+                            namespace: 'ExistingNameSpace',
+                            skipUpdate: true
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'ExistingNameSpace::My_Consumer',
+                            id: 'uuid2',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/foo',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'ExistingNameSpace',
+                            passphrase: 'passphrase', // decrypted secret
+                            skipUpdate: true
+                        },
+                        {
+                            name: 'Shared',
+                            id: 'uuid3',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/bar'
+                            },
+                            namespace: 'My_Namespace'
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'My_Namespace::My_Consumer',
+                            id: 'uuid4',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/bar',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'My_Namespace',
+                            passphrase: 'passphrase' // decrypted secret
+                        }
+                    ]
+                },
+                expectedCurrentConfiguration: {
+                    mappings: {},
+                    components: [
+                        {
+                            name: 'Shared',
+                            id: 'uuid1',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            },
+                            namespace: 'ExistingNameSpace'
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'ExistingNameSpace::My_Consumer',
+                            id: 'uuid2',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/foo',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'ExistingNameSpace',
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        },
+                        {
+                            name: 'Shared',
+                            id: 'uuid3',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/bar'
+                            },
+                            namespace: 'My_Namespace'
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'My_Namespace::My_Consumer',
+                            id: 'uuid4',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/bar',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'My_Namespace',
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                name: 'process Namespace declaration with pre-loaded configuration, merge with same empty Namespace',
+                namespaceName: 'My_Namespace',
+                preLoadDeclaration: {
+                    class: 'Telemetry',
+                    ExistingNameSpace: {
+                        class: 'Telemetry_Namespace',
+                        Shared: {
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            }
+                        },
+                        My_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '`=/Shared/constants/path`',
+                            passphrase: {
+                                cipherText: 'passphrase' // check that configUtil.decryptSecrets called
+                            }
+                        }
+                    },
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace'
+                    }
+                },
+                declaration: {
+                    class: 'Telemetry_Namespace',
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.10',
+                        passphrase: {
+                            cipherText: 'passphrase' // check that configUtil.decryptSecrets called
+                        }
+                    }
+                },
+                expectedExpandedDeclaration: {
+                    class: 'Telemetry_Namespace',
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.10',
+                        path: '/',
+                        allowSelfSignedCert: false,
+                        enable: true,
+                        method: 'POST',
+                        port: 443,
+                        protocol: 'https',
+                        trace: false,
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$passphrase'
+                        }
+                    }
+                },
+                expectedFullDeclaration: {
+                    class: 'Telemetry',
+                    schemaVersion: constants.VERSION,
+                    ExistingNameSpace: {
+                        class: 'Telemetry_Namespace',
+                        Shared: {
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            }
+                        },
+                        My_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '`=/Shared/constants/path`',
+                            allowSelfSignedCert: false,
+                            enable: true,
+                            method: 'POST',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        }
+                    },
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace',
+                        My_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.10',
+                            allowSelfSignedCert: false,
+                            enable: true,
+                            path: '/',
+                            method: 'POST',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        }
+                    }
+                },
+                expectedValidatedDeclaration: {
+                    class: 'Telemetry_Namespace',
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.10',
+                        allowSelfSignedCert: false,
+                        enable: true,
+                        method: 'POST',
+                        port: 443,
+                        path: '/',
+                        protocol: 'https',
+                        trace: false,
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$passphrase'
+                        }
+                    }
+                },
+                expectedEmittedConfiguration: {
+                    mappings: {},
+                    components: [
+                        {
+                            name: 'Shared',
+                            id: 'uuid1',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            },
+                            namespace: 'ExistingNameSpace',
+                            skipUpdate: true
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'ExistingNameSpace::My_Consumer',
+                            id: 'uuid2',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/foo',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'ExistingNameSpace',
+                            passphrase: 'passphrase', // decrypted secret
+                            skipUpdate: true
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'My_Namespace::My_Consumer',
+                            id: 'uuid3',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            path: '/',
+                            host: '192.0.2.10',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'My_Namespace',
+                            passphrase: 'passphrase' // decrypted secret
+                        }
+                    ]
+                },
+                expectedCurrentConfiguration: {
+                    mappings: {},
+                    components: [
+                        {
+                            name: 'Shared',
+                            id: 'uuid1',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            },
+                            namespace: 'ExistingNameSpace'
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'ExistingNameSpace::My_Consumer',
+                            id: 'uuid2',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/foo',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'ExistingNameSpace',
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'My_Namespace::My_Consumer',
+                            id: 'uuid3',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            path: '/',
+                            host: '192.0.2.10',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'My_Namespace',
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                name: 'process Namespace declaration with pre-loaded configuration, merge changes with same Namespace',
+                namespaceName: 'My_Namespace',
+                preLoadDeclaration: {
+                    class: 'Telemetry',
+                    ExistingNameSpace: {
+                        class: 'Telemetry_Namespace',
+                        Shared: {
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            }
+                        },
+                        My_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '`=/Shared/constants/path`',
+                            passphrase: {
+                                cipherText: 'passphrase' // check that configUtil.decryptSecrets called
+                            }
+                        }
+                    },
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace',
+                        Shared: {
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/bar'
+                            }
+                        },
+                        My_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '`=/Shared/constants/path`',
+                            passphrase: {
+                                cipherText: 'passphrase' // check that configUtil.decryptSecrets called
+                            }
+                        }
+                    }
+                },
+                declaration: {
+                    class: 'Telemetry_Namespace',
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.10',
+                        passphrase: {
+                            cipherText: 'passphrase' // check that configUtil.decryptSecrets called
+                        }
+                    }
+                },
+                expectedExpandedDeclaration: {
+                    class: 'Telemetry_Namespace',
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.10',
+                        path: '/',
+                        allowSelfSignedCert: false,
+                        enable: true,
+                        method: 'POST',
+                        port: 443,
+                        protocol: 'https',
+                        trace: false,
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$passphrase'
+                        }
+                    }
+                },
+                expectedFullDeclaration: {
+                    class: 'Telemetry',
+                    schemaVersion: constants.VERSION,
+                    ExistingNameSpace: {
+                        class: 'Telemetry_Namespace',
+                        Shared: {
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            }
+                        },
+                        My_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '`=/Shared/constants/path`',
+                            allowSelfSignedCert: false,
+                            enable: true,
+                            method: 'POST',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        }
+                    },
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace',
+                        My_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.10',
+                            allowSelfSignedCert: false,
+                            enable: true,
+                            path: '/',
+                            method: 'POST',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        }
+                    }
+                },
+                expectedValidatedDeclaration: {
+                    class: 'Telemetry_Namespace',
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.10',
+                        allowSelfSignedCert: false,
+                        enable: true,
+                        method: 'POST',
+                        port: 443,
+                        path: '/',
+                        protocol: 'https',
+                        trace: false,
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$passphrase'
+                        }
+                    }
+                },
+                expectedEmittedConfiguration: {
+                    mappings: {},
+                    components: [
+                        {
+                            name: 'Shared',
+                            id: 'uuid1',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            },
+                            namespace: 'ExistingNameSpace',
+                            skipUpdate: true
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'ExistingNameSpace::My_Consumer',
+                            id: 'uuid2',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/foo',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'ExistingNameSpace',
+                            passphrase: 'passphrase', // decrypted secret
+                            skipUpdate: true
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'My_Namespace::My_Consumer',
+                            id: 'uuid5',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            path: '/',
+                            host: '192.0.2.10',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'My_Namespace',
+                            passphrase: 'passphrase' // decrypted secret
+                        }
+                    ]
+                },
+                expectedCurrentConfiguration: {
+                    mappings: {},
+                    components: [
+                        {
+                            name: 'Shared',
+                            id: 'uuid1',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            },
+                            namespace: 'ExistingNameSpace'
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'ExistingNameSpace::My_Consumer',
+                            id: 'uuid2',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/foo',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'ExistingNameSpace',
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'My_Namespace::My_Consumer',
+                            id: 'uuid5',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            path: '/',
+                            host: '192.0.2.10',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'My_Namespace',
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                name: 'process Namespace declaration with pre-loaded configuration, merge with same Namespace without changes, should re-generate IDs',
+                namespaceName: 'My_Namespace',
+                preLoadDeclaration: {
+                    class: 'Telemetry',
+                    ExistingNameSpace: {
+                        class: 'Telemetry_Namespace',
+                        Shared: {
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            }
+                        },
+                        My_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '`=/Shared/constants/path`',
+                            passphrase: {
+                                cipherText: 'passphrase' // check that configUtil.decryptSecrets called
+                            }
+                        }
+                    },
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace',
+                        Shared: {
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/bar'
+                            }
+                        },
+                        My_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '`=/Shared/constants/path`',
+                            passphrase: {
+                                cipherText: 'passphrase' // check that configUtil.decryptSecrets called
+                            }
+                        }
+                    }
+                },
+                declaration: {
+                    class: 'Telemetry_Namespace',
+                    Shared: {
+                        class: 'Shared',
+                        constants: {
+                            class: 'Constants',
+                            path: '/bar'
+                        }
+                    },
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.1',
+                        path: '`=/Shared/constants/path`',
+                        passphrase: {
+                            cipherText: 'passphrase' // check that configUtil.decryptSecrets called
+                        }
+                    }
+                },
+                expectedExpandedDeclaration: {
+                    class: 'Telemetry_Namespace',
+                    Shared: {
+                        class: 'Shared',
+                        constants: {
+                            class: 'Constants',
+                            path: '/bar'
+                        }
+                    },
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.1',
+                        path: '/bar',
+                        allowSelfSignedCert: false,
+                        enable: true,
+                        method: 'POST',
+                        port: 443,
+                        protocol: 'https',
+                        trace: false,
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$passphrase'
+                        }
+                    }
+                },
+                expectedFullDeclaration: {
+                    class: 'Telemetry',
+                    schemaVersion: constants.VERSION,
+                    ExistingNameSpace: {
+                        class: 'Telemetry_Namespace',
+                        Shared: {
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            }
+                        },
+                        My_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '`=/Shared/constants/path`',
+                            allowSelfSignedCert: false,
+                            enable: true,
+                            method: 'POST',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        }
+                    },
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace',
+                        Shared: {
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/bar'
+                            }
+                        },
+                        My_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '`=/Shared/constants/path`',
+                            allowSelfSignedCert: false,
+                            enable: true,
+                            method: 'POST',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        }
+                    }
+                },
+                expectedValidatedDeclaration: {
+                    class: 'Telemetry_Namespace',
+                    Shared: {
+                        class: 'Shared',
+                        constants: {
+                            class: 'Constants',
+                            path: '/bar'
+                        }
+                    },
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.1',
+                        path: '`=/Shared/constants/path`',
+                        allowSelfSignedCert: false,
+                        enable: true,
+                        method: 'POST',
+                        port: 443,
+                        protocol: 'https',
+                        trace: false,
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$passphrase'
+                        }
+                    }
+                },
+                expectedEmittedConfiguration: {
+                    mappings: {},
+                    components: [
+                        {
+                            name: 'Shared',
+                            id: 'uuid1',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            },
+                            namespace: 'ExistingNameSpace',
+                            skipUpdate: true
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'ExistingNameSpace::My_Consumer',
+                            id: 'uuid2',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/foo',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'ExistingNameSpace',
+                            passphrase: 'passphrase', // decrypted secret
+                            skipUpdate: true
+                        },
+                        {
+                            name: 'Shared',
+                            id: 'uuid5',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/bar'
+                            },
+                            namespace: 'My_Namespace'
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'My_Namespace::My_Consumer',
+                            id: 'uuid6',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/bar',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'My_Namespace',
+                            passphrase: 'passphrase' // decrypted secret
+                        }
+                    ]
+                },
+                expectedCurrentConfiguration: {
+                    mappings: {},
+                    components: [
+                        {
+                            name: 'Shared',
+                            id: 'uuid1',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            },
+                            namespace: 'ExistingNameSpace'
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'ExistingNameSpace::My_Consumer',
+                            id: 'uuid2',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/foo',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'ExistingNameSpace',
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        },
+                        {
+                            name: 'Shared',
+                            id: 'uuid5',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/bar'
+                            },
+                            namespace: 'My_Namespace'
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'My_Namespace::My_Consumer',
+                            id: 'uuid6',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/bar',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'My_Namespace',
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                name: 'process Namespace declaration with pre-loaded configuration, merge with same Namespace without objects, should remove all objects',
+                namespaceName: 'My_Namespace',
+                preLoadDeclaration: {
+                    class: 'Telemetry',
+                    ExistingNameSpace: {
+                        class: 'Telemetry_Namespace',
+                        Shared: {
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            }
+                        },
+                        My_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '`=/Shared/constants/path`',
+                            passphrase: {
+                                cipherText: 'passphrase' // check that configUtil.decryptSecrets called
+                            }
+                        }
+                    },
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace',
+                        Shared: {
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/bar'
+                            }
+                        },
+                        My_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '`=/Shared/constants/path`',
+                            passphrase: {
+                                cipherText: 'passphrase' // check that configUtil.decryptSecrets called
+                            }
+                        }
+                    }
+                },
+                declaration: {
+                    class: 'Telemetry_Namespace'
+                },
+                expectedExpandedDeclaration: {
+                    class: 'Telemetry_Namespace'
+                },
+                expectedFullDeclaration: {
+                    class: 'Telemetry',
+                    schemaVersion: constants.VERSION,
+                    ExistingNameSpace: {
+                        class: 'Telemetry_Namespace',
+                        Shared: {
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            }
+                        },
+                        My_Consumer: {
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            host: '192.0.2.1',
+                            path: '`=/Shared/constants/path`',
+                            allowSelfSignedCert: false,
+                            enable: true,
+                            method: 'POST',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        }
+                    },
+                    My_Namespace: {
+                        class: 'Telemetry_Namespace'
+                    }
+                },
+                expectedValidatedDeclaration: {
+                    class: 'Telemetry_Namespace'
+                },
+                expectedEmittedConfiguration: {
+                    mappings: {},
+                    components: [
+                        {
+                            name: 'Shared',
+                            id: 'uuid1',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            },
+                            namespace: 'ExistingNameSpace',
+                            skipUpdate: true
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'ExistingNameSpace::My_Consumer',
+                            id: 'uuid2',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/foo',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'ExistingNameSpace',
+                            passphrase: 'passphrase', // decrypted secret
+                            skipUpdate: true
+                        }
+                    ]
+                },
+                expectedCurrentConfiguration: {
+                    mappings: {},
+                    components: [
+                        {
+                            name: 'Shared',
+                            id: 'uuid1',
+                            class: 'Shared',
+                            constants: {
+                                class: 'Constants',
+                                path: '/foo'
+                            },
+                            namespace: 'ExistingNameSpace'
+                        },
+                        {
+                            name: 'My_Consumer',
+                            traceName: 'ExistingNameSpace::My_Consumer',
+                            id: 'uuid2',
+                            class: 'Telemetry_Consumer',
+                            type: 'Generic_HTTP',
+                            enable: true,
+                            method: 'POST',
+                            host: '192.0.2.1',
+                            path: '/foo',
+                            port: 443,
+                            protocol: 'https',
+                            trace: false,
+                            allowSelfSignedCert: false,
+                            namespace: 'ExistingNameSpace',
+                            passphrase: {
+                                class: 'Secret',
+                                protected: 'SecureVault',
+                                cipherText: '$M$passphrase'
+                            }
+                        }
+                    ]
+                }
             }
-        }
-    ]
+        ]
+    }
 };

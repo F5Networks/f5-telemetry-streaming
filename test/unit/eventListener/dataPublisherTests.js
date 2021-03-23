@@ -20,39 +20,23 @@ const nodeUtil = require('util');
 const EventEmitter = require('events');
 
 const configWorker = require('../../../src/lib/config');
+const persistentStorage = require('../../../src/lib/persistentStorage');
+const stubs = require('../shared/stubs');
+const teemReporter = require('../../../src/lib/teemReporter');
+const utilMisc = require('../../../src/lib/utils/misc');
 const dataPublisher = require('../../../src/lib/eventListener/dataPublisher');
-const util = require('../../../src/lib/utils/misc');
-
-const configUtil = require('../../../src/lib/utils/config');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
-const validateAndNormalize = function (declaration) {
-    return configWorker.validate(util.deepCopy(declaration))
-        .then(validated => Promise.resolve(configUtil.normalizeConfig(validated)));
-};
-
-const getDefaultDeclaration = () => ({
-    class: 'Telemetry',
-    Controls: {
-        class: 'Controls',
-        debug: true
-    },
-    MyListener: {
-        class: 'Telemetry_Listener',
-        port: 6514,
-        enable: true,
-        trace: false
-    }
-});
-
 describe('Data Publisher', () => {
-    let declaration;
-
     beforeEach(() => {
-        sinon.stub(configWorker, 'getConfig').callsFake(() => validateAndNormalize(declaration)
-            .then(normalized => Promise.resolve({ normalized })));
+        stubs.coreStub({
+            configWorker,
+            persistentStorage,
+            teemReporter,
+            utilMisc
+        });
     });
 
     afterEach(() => sinon.restore());
@@ -61,6 +45,20 @@ describe('Data Publisher', () => {
         let netConnectionPort;
         let netClientWriteFunction;
         let sentData;
+
+        const getDefaultDeclaration = () => ({
+            class: 'Telemetry',
+            Controls: {
+                class: 'Controls',
+                debug: true
+            },
+            MyListener: {
+                class: 'Telemetry_Listener',
+                port: 6514,
+                enable: true,
+                trace: false
+            }
+        });
 
         function MockNetConnection(opts) {
             EventEmitter.call(this);
@@ -76,6 +74,7 @@ describe('Data Publisher', () => {
             }, 5);
         }
         nodeUtil.inherits(MockNetConnection, EventEmitter);
+
         beforeEach(() => {
             netConnectionPort = undefined;
             sentData = undefined;
@@ -83,8 +82,8 @@ describe('Data Publisher', () => {
                 sentData = data;
                 cb();
             };
-            declaration = getDefaultDeclaration();
             sinon.stub(net, 'createConnection').callsFake(opts => new MockNetConnection(opts));
+            return configWorker.processDeclaration(getDefaultDeclaration());
         });
 
         it('should send data to Event Listener (JSON object)', () => dataPublisher.sendDataToListener({ data: 'testDataToSend' }, 'MyListener')
@@ -94,6 +93,7 @@ describe('Data Publisher', () => {
             }));
 
         it('should send data to Event Listener in namespace', () => {
+            const declaration = getDefaultDeclaration();
             declaration.MyNamespace = {
                 class: 'Telemetry_Namespace',
                 MyListener: {
@@ -103,7 +103,8 @@ describe('Data Publisher', () => {
                     trace: false
                 }
             };
-            return dataPublisher.sendDataToListener({ data: 'someStringToNamespaceListener' }, 'MyListener', { namespace: 'MyNamespace' })
+            return configWorker.processDeclaration(declaration)
+                .then(() => dataPublisher.sendDataToListener({ data: 'someStringToNamespaceListener' }, 'MyListener', { namespace: 'MyNamespace' }))
                 .then(() => {
                     assert.strictEqual(netConnectionPort, 6515);
                     assert.strictEqual(sentData, '{"data":"someStringToNamespaceListener"}');
@@ -111,9 +112,13 @@ describe('Data Publisher', () => {
         });
 
         it('should reject if requested listener is disabled', () => {
+            const declaration = getDefaultDeclaration();
             declaration.MyListener.enable = false;
-            return assert.isRejected(dataPublisher.sendDataToListener({ data: 'testDataToSend' }, 'MyListener'),
-                /Unable to send debugging message to EventListener: MyListener. Event Listener is disabled/);
+            return assert.isRejected(
+                configWorker.processDeclaration(declaration)
+                    .then(() => dataPublisher.sendDataToListener({ data: 'testDataToSend' }, 'MyListener')),
+                /Unable to send debugging message to EventListener: MyListener. Event Listener is disabled/
+            );
         });
 
         it('should reject if requested listener does not exist (no namespace)', () => assert.isRejected(

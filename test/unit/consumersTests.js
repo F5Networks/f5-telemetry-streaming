@@ -18,32 +18,30 @@ const sinon = require('sinon');
 
 const configWorker = require('../../src/lib/config');
 const configUtil = require('../../src/lib/utils/config');
-const util = require('../../src/lib/utils/misc');
 const consumers = require('../../src/lib/consumers');
 const moduleLoader = require('../../src/lib/utils/moduleLoader').ModuleLoader;
+const utilMisc = require('../../src/lib/utils/misc');
+const persistentStorage = require('../../src/lib/persistentStorage');
+const stubs = require('./shared/stubs');
+const teemReporter = require('../../src/lib/teemReporter');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe('Consumers', () => {
-    let uuidCounter = 0;
-
     beforeEach(() => {
-        sinon.stub(util, 'generateUuid').callsFake(() => {
-            uuidCounter += 1;
-            return `uuid${uuidCounter}`;
+        stubs.coreStub({
+            configWorker,
+            persistentStorage,
+            teemReporter,
+            utilMisc
         });
+        return configWorker.processDeclaration({ class: 'Telemetry' });
     });
 
     afterEach(() => {
-        uuidCounter = 0;
         sinon.restore();
     });
-
-    const validateAndNormalize = function (declaration) {
-        return configWorker.validate(util.deepCopy(declaration))
-            .then(validated => configUtil.normalizeConfig(validated));
-    };
 
     describe('config listener', () => {
         it('should load required consumers', () => {
@@ -54,9 +52,7 @@ describe('Consumers', () => {
                     type: 'default'
                 }
             };
-
-            return validateAndNormalize(exampleConfig)
-                .then(normalized => configWorker.emitAsync('change', normalized))
+            return configWorker.processDeclaration(exampleConfig)
                 .then(() => {
                     const loadedConsumers = consumers.getConsumers();
                     assert.strictEqual(loadedConsumers.length, 1, 'should load default consumer');
@@ -72,9 +68,7 @@ describe('Consumers', () => {
                     enable: false
                 }
             };
-
-            return validateAndNormalize(exampleConfig)
-                .then(normalized => configWorker.emitAsync('change', normalized))
+            return configWorker.processDeclaration(exampleConfig)
                 .then(() => {
                     const loadedConsumers = consumers.getConsumers();
                     assert.strictEqual(loadedConsumers.length, 0, 'should not load disabled consumer');
@@ -95,9 +89,7 @@ describe('Consumers', () => {
                     type: 'default'
                 }
             };
-
-            return validateAndNormalize(priorConfig)
-                .then(normalized => configWorker.emitAsync('change', normalized))
+            return configWorker.processDeclaration(priorConfig)
                 .then(() => {
                     const loadedConsumers = consumers.getConsumers();
                     assert.strictEqual(loadedConsumers.length, 1, 'should load default consumer');
@@ -128,9 +120,8 @@ describe('Consumers', () => {
                 });
         });
 
-        it('should not reload existing consumer when skipUpdate = true', () => {
-            let existingComp;
-            let newComp;
+        it('should not reload existing consumer when processing a new namespace declaration', () => {
+            let existingConsumer;
             const existingConfig = {
                 class: 'Telemetry',
                 FirstConsumer: {
@@ -139,45 +130,27 @@ describe('Consumers', () => {
                 }
             };
 
-            const newConfig = {
-                class: 'Telemetry',
-                FirstConsumer: {
+            const namespaceConfig = {
+                class: 'Telemetry_Namespace',
+                SecondConsumer: {
                     class: 'Telemetry_Consumer',
                     type: 'default'
-                },
-                NewNamespace: {
-                    class: 'Telemetry_Namespace',
-                    SecondConsumer: {
-                        class: 'Telemetry_Consumer',
-                        type: 'default'
-                    }
                 }
             };
             const moduleLoaderSpy = sinon.spy(moduleLoader, 'load');
-            return validateAndNormalize(existingConfig)
-                .then((normalized) => {
-                    existingComp = normalized.components[0];
-                    // emit change event, then wait a short period
-                    return configWorker.emitAsync('change', normalized);
-                })
+            return configWorker.processDeclaration(existingConfig)
                 .then(() => {
                     const loadedConsumers = consumers.getConsumers();
                     assert.strictEqual(loadedConsumers.length, 1, 'should load default consumer');
                     assert.isTrue(moduleLoaderSpy.calledOnce);
+                    existingConsumer = loadedConsumers[0];
                 })
-                .then(() => validateAndNormalize(newConfig))
-                .then((normalized) => {
-                    newComp = normalized.components.find(c => c.class === 'Telemetry_Consumer' && c.namespace === 'NewNamespace');
-                    // simulate a namespace only declaration request
-                    // existing config unchanged, id the same
-                    existingComp.skipUpdate = true;
-                    normalized.components[0] = existingComp;
-                    return configWorker.emitAsync('change', normalized);
-                })
+                .then(() => configWorker.processNamespaceDeclaration(namespaceConfig, 'NewNamespace'))
                 .then(() => {
                     const loadedConsumers = consumers.getConsumers();
-                    assert.strictEqual(loadedConsumers[0].id, existingComp.id);
-                    assert.strictEqual(loadedConsumers[1].id, newComp.id);
+                    assert.strictEqual(loadedConsumers.length, 2, 'should load new consumer too');
+                    assert.strictEqual(loadedConsumers[0].id, existingConsumer.id);
+                    assert.strictEqual(loadedConsumers[1].id, 'uuid2');
                     assert.isTrue(moduleLoaderSpy.calledTwice);
                 });
         });
