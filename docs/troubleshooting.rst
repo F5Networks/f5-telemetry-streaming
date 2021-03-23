@@ -263,6 +263,16 @@ Monitor checks run by default on intervals depending on %memory usage:
         - 3 seconds 
 
 
+|
+
+.. _splunkmem:
+
+Why do I see memory usage spikes when TS is configured to send data to a Splunk consumer?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+By default, Telemetry Streaming compresses data before sending it to Splunk. Depending on the events per second rate (events from the Event Listener and System Poller), you may see spikes in memory usage. 
+
+Telemetry Streaming 1.19 and later includes the **compressionType** property in the |telemetryconsumer| class.  You can set this property to **none** (**gzip** is the default) to help reduce memory usage.
+
 
 
 .. |br| raw:: html
@@ -285,4 +295,7 @@ Monitor checks run by default on intervals depending on %memory usage:
 .. |namespaceref| raw:: html
 
    <a href="https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/namespaces.html" target="_blank">Namespaces</a>
-   
+
+.. |telemetryconsumer| raw:: html
+ 
+   <a href="https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/schema-reference.html#telemetry-consumer" target="_blank">Telemetry_Consumer</a>
