@@ -53,53 +53,25 @@ function findSystemOrPollerConfigs(originalConfig, sysOrPollerName, pollerName, 
     // If namespace is undefined, assumption is we're querying for objects in the 'default namespace'
     const namespaceInfo = namespace ? ` in Namespace '${namespace}'` : '';
     namespace = namespace || constants.DEFAULT_UNNAMED_NAMESPACE;
-    const systems = configUtil.getTelemetrySystems(originalConfig, namespace);
     const systemPollers = configUtil.getTelemetrySystemPollers(originalConfig, namespace);
-    let poller;
+    let pollers = [];
 
-    const system = systems.find(s => s.name === sysOrPollerName);
     if (sysOrPollerName && pollerName) {
-        if (!util.isObjectEmpty(system)) {
-            poller = systemPollers.filter(p => p.name === pollerName && system.systemPollers.indexOf(p.id) > -1);
-        }
+        // probably system's and poller's names
+        pollers = systemPollers.filter(p => p.name === pollerName && p.systemName === sysOrPollerName);
     } else {
         // each object has unique name per namespace
         // so, one of the system or poller will be 'undefined'
-        poller = systemPollers.filter(p => p.name === sysOrPollerName);
+        pollers = systemPollers.filter(p => p.systemName === sysOrPollerName);
     }
 
-    const systemFound = !util.isObjectEmpty(system);
-    const pollerFound = poller && poller.length > 0;
-    // check for errors at first
-    if (!systemFound || !pollerFound) {
+    if (pollers.length === 0) {
         if (pollerName) {
-            // sysOrPollerName and pollerName both passed to the function
-            if (!systemFound) {
-                throw new errors.ObjectNotFoundInConfigError(`System with name '${sysOrPollerName}' doesn't exist${namespaceInfo}`);
-            }
-
-            if (!pollerFound) {
-                throw new errors.ObjectNotFoundInConfigError(`System Poller with name '${pollerName}' doesn't exist in System '${sysOrPollerName}'${namespaceInfo}`);
-            }
-
-            throw new errors.ObjectNotFoundInConfigError(`System Poller with name '${pollerName}' doesn't exist${namespaceInfo}`);
+            throw new errors.ObjectNotFoundInConfigError(`System Poller with name '${pollerName}' doesn't exist in System '${sysOrPollerName}'${namespaceInfo}`);
         }
-        if (!(systemFound || pollerFound)) {
-            throw new errors.ObjectNotFoundInConfigError(`System or System Poller with name '${sysOrPollerName}' doesn't exist${namespaceInfo}`);
-        }
-
-        if (systemFound && system.systemPollers.length === 0) {
-            throw new NoPollersError(`System with name '${sysOrPollerName}' has no System Poller configured${namespaceInfo}`);
-        }
+        throw new errors.ObjectNotFoundInConfigError(`System or System Poller with name '${sysOrPollerName}' doesn't exist or has no configured System Pollers${namespaceInfo}`);
     }
-    // error check passed and now we have valid objects to continue with
-    let config = [];
-    if (pollerFound) {
-        config = poller;
-    } else {
-        config = originalConfig.components.filter(c => system.systemPollers.indexOf(c.id) > -1);
-    }
-    return config;
+    return pollers;
 }
 
 function getEnabledPollerConfigs(originalConfig, includeDisabled) {
@@ -125,7 +97,7 @@ function applyConfig(originalConfig) {
             pollerConfig.tracer = tracers.fromConfig(pollerConfig);
             const baseMsg = `system poller ${key}. Interval = ${pollerConfig.interval} sec.`;
             // add to data context to track source poller config and destination(s)
-            pollerConfig.destinationIds = originalConfig.mappings[pollerConfig.id];
+            pollerConfig.destinationIds = configUtil.getReceivers(originalConfig, pollerConfig).map(r => r.id);
             if (pollerConfig.interval === 0) {
                 logger.info(`Configuring non-polling ${baseMsg}`);
                 if (currPollers[key]) {

@@ -30,12 +30,13 @@ const assert = chai.assert;
 
 describe('Consumers', () => {
     beforeEach(() => {
-        stubs.coreStub({
+        const coreStub = stubs.coreStub({
             configWorker,
             persistentStorage,
             teemReporter,
             utilMisc
         });
+        coreStub.utilMisc.generateUuid.numbersOnly = false;
         return configWorker.processDeclaration({ class: 'Telemetry' });
     });
 
@@ -111,7 +112,7 @@ describe('Consumers', () => {
             };
             // config will not pass schema validation
             // but this test allows catching if consumer module/dir is not configured properly
-            return configUtil.normalizeConfig(exampleConfig)
+            return configUtil.normalizeDeclaration(exampleConfig)
                 .then(normalized => configWorker.emitAsync('change', normalized))
                 .then(() => {
                     const loadedConsumers = consumers.getConsumers();
@@ -150,7 +151,7 @@ describe('Consumers', () => {
                     const loadedConsumers = consumers.getConsumers();
                     assert.strictEqual(loadedConsumers.length, 2, 'should load new consumer too');
                     assert.strictEqual(loadedConsumers[0].id, existingConsumer.id);
-                    assert.strictEqual(loadedConsumers[1].id, 'uuid2');
+                    assert.strictEqual(loadedConsumers[1].id, 'NewNamespace::SecondConsumer');
                     assert.isTrue(moduleLoaderSpy.calledTwice);
                 });
         });

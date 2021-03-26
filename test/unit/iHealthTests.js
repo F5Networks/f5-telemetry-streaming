@@ -17,7 +17,6 @@ const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
 const configWorker = require('../../src/lib/config');
-const constants = require('../../src/lib/constants');
 const deviceUtil = require('../../src/lib/utils/device');
 // eslint-disable-next-line no-unused-vars
 const ihealth = require('../../src/lib/ihealth');
@@ -69,9 +68,10 @@ describe('iHealth', () => {
         const expectedOutput = {
             enable: true,
             class: 'Telemetry_iHealth_Poller',
-            id: 'uuid2',
+            id: 'uuid1',
             name: 'iHealthPoller_1',
-            namespace: constants.DEFAULT_UNNAMED_NAMESPACE,
+            namespace: 'f5telemetry_default',
+            systemName: 'My_System',
             iHealth: {
                 name: 'iHealthPoller_1',
                 credentials: {
@@ -113,7 +113,8 @@ describe('iHealth', () => {
                 host: 'localhost',
                 name: 'My_System'
             },
-            trace: false
+            trace: false,
+            traceName: 'My_System::iHealthPoller_1'
         };
 
         let ihealthPollerInstanceStub;
@@ -149,6 +150,7 @@ describe('iHealth', () => {
             newDeclaration.My_System.iHealthPoller = 'My_iHealth_Poller';
             testExpectedOutput.iHealth.name = 'My_iHealth_Poller';
             testExpectedOutput.name = 'My_iHealth_Poller';
+            testExpectedOutput.traceName = 'My_System::My_iHealth_Poller';
             return configWorker.processDeclaration(newDeclaration)
                 .then(() => {
                     assert.strictEqual(ihealthPollerInstanceStub.getKey(), 'f5telemetry_default::My_System');

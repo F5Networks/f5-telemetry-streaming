@@ -10,21 +10,22 @@
 
 const Ajv = require('ajv');
 
+const CLASSES = require('./constants').CONFIG_CLASSES;
 const customKeywords = require('./customKeywords');
 const util = require('./utils/misc');
 
 const baseSchema = require('../schema/latest/base_schema.json');
+const consumerSchema = require('../schema/latest/consumer_schema.json');
 const controlsSchema = require('../schema/latest/controls_schema.json');
-const systemSchema = require('../schema/latest/system_schema.json');
+const endpointsSchema = require('../schema/latest/endpoints_schema.json');
+const iHealthPollerSchema = require('../schema/latest/ihealth_poller_schema.json');
+const listenerSchema = require('../schema/latest/listener_schema.json');
+const namespaceSchema = require('../schema/latest/namespace_schema.json');
+const pullConsumerSchema = require('../schema/latest/pull_consumer_schema.json');
 const sharedSchema = require('../schema/latest/shared_schema.json');
 const systemPollerSchema = require('../schema/latest/system_poller_schema.json');
-const listenerSchema = require('../schema/latest/listener_schema.json');
-const consumerSchema = require('../schema/latest/consumer_schema.json');
-const pullConsumerSchema = require('../schema/latest/pull_consumer_schema.json');
-const iHealthPollerSchema = require('../schema/latest/ihealth_poller_schema.json');
-const endpointsSchema = require('../schema/latest/endpoints_schema.json');
-const namespaceSchema = require('../schema/latest/namespace_schema.json');
-const CLASSES = require('./constants').CONFIG_CLASSES;
+const systemSchema = require('../schema/latest/system_schema.json');
+
 
 /**
  * Process errors
@@ -58,8 +59,7 @@ module.exports = {
     /**
      * Pre-compile schema
      *
-     * @public
-     * @returns {Object} AJV validator functions
+     * @returns {SchemaValidatorFunctions} AJV validator functions
      */
     getValidators() {
         const schemas = {
@@ -99,15 +99,14 @@ module.exports = {
         };
         // retrieve previously compiled schema
         validators[CLASSES.NAMESPACE_CLASS_NAME] = ajv.getSchema(`${namespaceSchema.$id}#/definitions/namespace`);
-
         return validators;
     },
 
     /**
      * Validate data
      *
-     * @param {Object} validator           - validator
-     * @param {Object} data                - data to validate
+     * @param {Object} validator - validator
+     * @param {Object} data - data to validate
      * @param {Object} [additionalContext] - additional context to pass to validator
      *
      * @returns {Promise} resolved with validated data
@@ -162,3 +161,10 @@ module.exports = {
             .then(() => Promise.resolve(data));
     }
 };
+
+/**
+ * @typedef SchemaValidatorFunctions
+ * @type {Object}
+ * @property {Function} full - validator to validate entire declaration
+ * @property {Function} Telemetry_Namespace - validator to validate Telemetry_Namespace object only
+ */

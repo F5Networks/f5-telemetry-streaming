@@ -204,7 +204,7 @@ configWorker.on('change', config => new Promise((resolve) => {
 
         ihInstance = iHealthPoller.create(iHealthPollerConfig.namespace, system.name);
         ihInstance.config = iHealthPollerConfig;
-        ihInstance.destinationIds = config.mappings[iHealthPollerConfig.id];
+        ihInstance.destinationIds = configUtil.getReceivers(config, iHealthPollerConfig).map(r => r.id);
         ihInstance.dataCallback = safeProcess;
         ihInstance.getTracer();
         pollers[ihInstance.getKey()] = ihInstance;

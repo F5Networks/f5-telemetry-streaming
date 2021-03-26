@@ -181,9 +181,8 @@ monitor.on('err', (err) => {
 
 configWorker.on('change', config => new Promise((resolve) => {
     logger.debug('configWorker change event in monitor');
-    const configCopy = util.deepCopy(config);
-    const controls = configUtil.getControls(configCopy);
-    const monitoringNeeded = configUtil.hasEnabledComponents(configCopy);
+    const controls = configUtil.getTelemetryControls(config);
+    const monitoringNeeded = configUtil.hasEnabledComponents(config);
     const memThresholdPct = controls.memoryThresholdPercent;
 
     if (monitoringNeeded && (!memThresholdPct || memThresholdPct < 100)) {

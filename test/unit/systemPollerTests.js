@@ -44,6 +44,7 @@ describe('System Poller', () => {
             teemReporter,
             utilMisc
         });
+        coreStub.utilMisc.generateUuid.numbersOnly = false;
     });
 
     afterEach(() => configWorker.processDeclaration({ class: 'Telemetry' })
@@ -137,7 +138,7 @@ describe('System Poller', () => {
                     .then(() => systemPoller.getPollersConfig(testConf.sysOrPollerName, testConf.funcOptions))
                     .then((pollersConfig) => {
                         pollersConfig = pollersConfig.map(p => ({ name: p.traceName }));
-                        assert.deepStrictEqual(pollersConfig, testConf.expectedConfig);
+                        assert.sameDeepMembers(pollersConfig, testConf.expectedConfig);
                         // assert.isTrue(coreStub.deviceUtil.decryptSecret.called);
                     }, (error) => {
                         if (testConf.errorRegExp) {
@@ -342,7 +343,8 @@ describe('System Poller', () => {
             const expectedPollerConfig = {
                 name: 'SystemPoller_1',
                 traceName: 'My_System::SystemPoller_1',
-                id: 'uuid4',
+                systemName: 'My_System',
+                id: 'My_System::SystemPoller_1',
                 namespace: 'f5telemetry_default',
                 class: 'Telemetry_System_Poller',
                 enable: true,
@@ -462,8 +464,8 @@ describe('System Poller', () => {
                     assert.strictEqual(Object.keys(pollerTimers).length, 2);
                     assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].timer, 180);
                     assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].config.traceName, 'My_System::SystemPoller_1');
-                    assert.strictEqual(pollerTimers['My_System_New::SystemPoller_2'].timer, 500);
-                    assert.strictEqual(pollerTimers['My_System_New::SystemPoller_2'].config.traceName, 'My_System_New::SystemPoller_2');
+                    assert.strictEqual(pollerTimers['My_System_New::SystemPoller_1'].timer, 500);
+                    assert.strictEqual(pollerTimers['My_System_New::SystemPoller_1'].config.traceName, 'My_System_New::SystemPoller_1');
                     assert.strictEqual(tracers.registered().length, 1);
                     assert.strictEqual(tracers.registered()[0].name, 'Telemetry_System_Poller.My_System::SystemPoller_1');
                     assert.strictEqual(utilStub.start.length, 1);
@@ -494,108 +496,104 @@ describe('System Poller', () => {
                 trace: true,
                 interval: 500
             };
-            // components:
-            // declared ones go first
-            // - My_System: uuid1
-            // - My_System_New: uuid2
-            // - My_Poller: uuid3
-            // nested and auto-generated ones:
-            // - My_System::System_Poller1: uuid4
-            // - My_System::System_Poller2: uuid5
             return configWorker.processDeclaration(testUtil.deepCopy(newDeclaration))
                 .then(() => {
                     assert.strictEqual(Object.keys(pollerTimers).length, 3);
                     assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].timer, 180);
-                    assert.strictEqual(pollerTimers['My_System_New::SystemPoller_2'].timer, 10);
+                    assert.strictEqual(pollerTimers['My_System_New::SystemPoller_1'].timer, 10);
                     assert.strictEqual(pollerTimers['My_System_New::My_Poller'].timer, 500);
                     assert.sameMembers(
                         tracers.registered().map(t => t.name),
                         [
                             'Telemetry_System_Poller.My_System::SystemPoller_1',
-                            'Telemetry_System_Poller.My_System_New::SystemPoller_2',
+                            'Telemetry_System_Poller.My_System_New::SystemPoller_1',
                             'Telemetry_System_Poller.My_System_New::My_Poller'
                         ]
                     );
                     assert.strictEqual(utilStub.start.length, 2);
                     assert.strictEqual(utilStub.update.length, 1);
                     assert.strictEqual(utilStub.stop.length, 0);
-                    assert.deepStrictEqual(utilStub.start[0].args, {
-                        id: 'uuid5',
-                        name: 'My_Poller',
-                        namespace: 'f5telemetry_default',
-                        class: 'Telemetry_System_Poller',
-                        traceName: 'My_System_New::My_Poller',
-                        enable: true,
-                        interval: 500,
-                        trace: true,
-                        tracer: tracers.registered().find(t => t.name === 'Telemetry_System_Poller.My_System_New::My_Poller'),
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
-                        },
-                        connection: {
-                            allowSelfSignedCert: false,
-                            host: 'localhost',
-                            port: 8100,
-                            protocol: 'http'
-                        },
-                        dataOpts: {
-                            noTMStats: true,
-                            tags: undefined,
-                            actions: [
-                                {
-                                    enable: true,
-                                    setTag: {
-                                        application: '`A`',
-                                        tenant: '`T`'
+                    assert.sameDeepMembers(utilStub.start.map(args => args.args), [
+                        {
+                            id: 'My_System_New::My_Poller',
+                            name: 'My_Poller',
+                            namespace: 'f5telemetry_default',
+                            class: 'Telemetry_System_Poller',
+                            systemName: 'My_System_New',
+                            traceName: 'My_System_New::My_Poller',
+                            enable: true,
+                            interval: 500,
+                            trace: true,
+                            tracer: tracers.registered().find(t => t.name === 'Telemetry_System_Poller.My_System_New::My_Poller'),
+                            credentials: {
+                                username: undefined,
+                                passphrase: undefined
+                            },
+                            connection: {
+                                allowSelfSignedCert: false,
+                                host: 'localhost',
+                                port: 8100,
+                                protocol: 'http'
+                            },
+                            dataOpts: {
+                                noTMStats: true,
+                                tags: undefined,
+                                actions: [
+                                    {
+                                        enable: true,
+                                        setTag: {
+                                            application: '`A`',
+                                            tenant: '`T`'
+                                        }
                                     }
-                                }
-                            ]
+                                ]
+                            },
+                            destinationIds: []
                         },
-                        destinationIds: []
-                    });
-                    assert.deepStrictEqual(utilStub.start[1].args, {
-                        name: 'SystemPoller_2',
-                        id: 'uuid7',
-                        namespace: 'f5telemetry_default',
-                        class: 'Telemetry_System_Poller',
-                        enable: true,
-                        interval: 10,
-                        trace: true,
-                        tracer: tracers.registered().find(t => t.name === 'Telemetry_System_Poller.My_System_New::SystemPoller_2'),
-                        traceName: 'My_System_New::SystemPoller_2',
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
-                        },
-                        connection: {
-                            allowSelfSignedCert: false,
-                            host: 'localhost',
-                            port: 8100,
-                            protocol: 'http'
-                        },
-                        dataOpts: {
-                            noTMStats: true,
-                            tags: undefined,
-                            actions: [
-                                {
-                                    enable: true,
-                                    setTag: {
-                                        application: '`A`',
-                                        tenant: '`T`'
+                        {
+                            name: 'SystemPoller_1',
+                            id: 'My_System_New::SystemPoller_1',
+                            namespace: 'f5telemetry_default',
+                            class: 'Telemetry_System_Poller',
+                            enable: true,
+                            interval: 10,
+                            trace: true,
+                            systemName: 'My_System_New',
+                            tracer: tracers.registered().find(t => t.name === 'Telemetry_System_Poller.My_System_New::SystemPoller_1'),
+                            traceName: 'My_System_New::SystemPoller_1',
+                            credentials: {
+                                username: undefined,
+                                passphrase: undefined
+                            },
+                            connection: {
+                                allowSelfSignedCert: false,
+                                host: 'localhost',
+                                port: 8100,
+                                protocol: 'http'
+                            },
+                            dataOpts: {
+                                noTMStats: true,
+                                tags: undefined,
+                                actions: [
+                                    {
+                                        enable: true,
+                                        setTag: {
+                                            application: '`A`',
+                                            tenant: '`T`'
+                                        }
                                     }
+                                ]
+                            },
+                            endpoints: {
+                                endpoint1: {
+                                    enable: true,
+                                    name: 'endpoint1',
+                                    path: '/mgmt/ltm/pool'
                                 }
-                            ]
-                        },
-                        endpoints: {
-                            endpoint1: {
-                                enable: true,
-                                name: 'endpoint1',
-                                path: '/mgmt/ltm/pool'
-                            }
-                        },
-                        destinationIds: []
-                    });
+                            },
+                            destinationIds: []
+                        }
+                    ]);
                 });
         });
 

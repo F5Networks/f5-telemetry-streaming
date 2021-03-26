@@ -37,11 +37,11 @@ describe('Event Listener', () => {
      * we are not using any other API to interact with it
      */
     let actualData;
+    let coreStub;
+    let origDecl;
 
     const defaultTestPort = 1234;
     const defaultDeclarationPort = 6514;
-
-    let origDecl;
 
     const assertListener = function (actualListener, expListener) {
         assert.deepStrictEqual(actualListener.tags, expListener.tags || {});
@@ -86,12 +86,14 @@ describe('Event Listener', () => {
             }
         };
 
-        stubs.coreStub({
+        coreStub = stubs.coreStub({
             configWorker,
             persistentStorage,
             teemReporter,
             utilMisc
         });
+        coreStub.utilMisc.generateUuid.numbersOnly = false;
+
         sinon.stub(dataPipeline, 'process').callsFake(function () {
             addData(Array.from(arguments));
             return Promise.resolve();
@@ -108,7 +110,7 @@ describe('Event Listener', () => {
             .then(() => {
                 const listeners = EventListener.instances;
                 assert.strictEqual(Object.keys(listeners).length, 1);
-                assert.deepStrictEqual(gatherIds(), ['uuid1']);
+                assert.deepStrictEqual(gatherIds(), ['Listener1']);
                 assertListener(listeners.Listener1, {
                     tags: { tenant: '`T`', application: '`A`' }
                 });
@@ -170,7 +172,7 @@ describe('Event Listener', () => {
                     ]
                 );
                 assert.strictEqual(EventListener.receiversManager.getAll().length, 2);
-                assert.deepStrictEqual(gatherIds(), ['uuid2', 'uuid3', 'uuid4']);
+                assert.sameDeepMembers(gatherIds(), ['Listener1', 'Listener2', 'Listener3']);
 
                 const listeners = EventListener.instances;
                 assertListener(listeners.Listener1, {
@@ -211,7 +213,7 @@ describe('Event Listener', () => {
             .then(() => {
                 assert.strictEqual(tracers.registered().length, 1);
                 assert.strictEqual(tracers.registered()[0].name, 'Telemetry_Listener.Listener1');
-                assert.deepStrictEqual(gatherIds(), ['uuid1']);
+                assert.deepStrictEqual(gatherIds(), ['Listener1']);
 
                 const listeners = EventListener.instances;
                 assertListener(listeners.Listener1, {
@@ -252,7 +254,7 @@ describe('Event Listener', () => {
                         'Telemetry_Listener.newNamespace::Listener1'
                     ]
                 );
-                assert.deepStrictEqual(gatherIds(), ['uuid1', 'uuid2']);
+                assert.sameDeepMembers(gatherIds(), ['Listener1', 'newNamespace::Listener1']);
 
                 const listeners = EventListener.instances;
                 assertListener(listeners.Listener1, {
@@ -300,7 +302,7 @@ describe('Event Listener', () => {
                 );
                 assert.strictEqual(EventListener.getAll().length, 2);
                 assert.strictEqual(EventListener.receiversManager.getAll().length, 1);
-                assert.deepStrictEqual(gatherIds(), ['uuid2', 'uuid3']);
+                assert.sameDeepMembers(gatherIds(), ['Listener1', 'New::Listener1']);
                 const listeners = EventListener.instances;
 
                 return EventListener.receiversManager.getMessageStream(newDecl.Listener1.port).emitAsync('messages', ['6514'])
@@ -335,7 +337,7 @@ describe('Event Listener', () => {
                 assert.strictEqual(tracers.registered()[0].name, 'Telemetry_Listener.Listener1');
                 assert.strictEqual(EventListener.getAll().length, 1);
                 assert.strictEqual(EventListener.receiversManager.getAll().length, 1);
-                assert.deepStrictEqual(gatherIds(), ['uuid2']);
+                assert.deepStrictEqual(gatherIds(), ['Listener1']);
                 const listeners = EventListener.instances;
 
                 assertListener(listeners.Listener1, {
@@ -372,7 +374,7 @@ describe('Event Listener', () => {
                 assert.strictEqual(EventListener.getAll().length, 1);
                 assert.strictEqual(EventListener.receiversManager.getAll().length, 1);
                 assert.strictEqual(tracers.registered().length, 0);
-                assert.deepStrictEqual(gatherIds(), ['uuid2']);
+                assert.deepStrictEqual(gatherIds(), ['Listener1']);
                 const listeners = EventListener.instances;
 
                 assertListener(listeners.Listener1, {});

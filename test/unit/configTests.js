@@ -41,6 +41,7 @@ describe('Config', () => {
             utilMisc
         });
         coreStub.persistentStorage.loadData = { config: { } };
+        coreStub.utilMisc.generateUuid.numbersOnly = false;
         return configWorker.cleanup()
             .then(() => persistentStorage.persistentStorage.load());
     });
@@ -72,7 +73,7 @@ describe('Config', () => {
                     components: [{
                         name: 'My_Consumer',
                         traceName: 'My_Consumer',
-                        id: 'uuid1',
+                        id: 'My_Consumer',
                         class: 'Telemetry_Consumer',
                         type: 'default',
                         enable: true,
@@ -126,7 +127,7 @@ describe('Config', () => {
                         components: [{
                             class: 'Telemetry_Consumer',
                             type: 'default',
-                            id: 'uuid1',
+                            id: 'My_Consumer',
                             name: 'My_Consumer',
                             namespace: 'f5telemetry_default',
                             traceName: 'My_Consumer',
@@ -332,7 +333,7 @@ describe('Config', () => {
                 components: [{
                     class: 'Telemetry_Consumer',
                     type: 'default',
-                    id: 'uuid1',
+                    id: 'My_Consumer',
                     name: 'My_Consumer',
                     namespace: 'f5telemetry_default',
                     traceName: 'My_Consumer',

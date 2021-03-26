@@ -347,7 +347,7 @@ configWorker.on('change', (config) => {
         const listener = EventListener.get(name, port);
         listener.updateConfig({
             actions: listenerConfig.actions,
-            destinationIds: config.mappings[listenerConfig.id],
+            destinationIds: configUtil.getReceivers(config, listenerConfig).map(r => r.id),
             filterFunc: buildFilterFunc(listenerConfig),
             id: listenerConfig.id,
             tags: listenerConfig.tag,
