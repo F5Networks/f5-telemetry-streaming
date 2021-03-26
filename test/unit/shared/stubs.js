@@ -221,7 +221,16 @@ const _module = module.exports = {
             networkCheck: sinon.stub(utilMisc, 'networkCheck')
         };
         ctx.generateUuid.uuidCounter = 0;
-        ctx.generateUuid.callsFake(() => {
+        ctx.generateUuid.numbersOnly = true;
+        ctx.generateUuid.callsFake(function () {
+            if (this && !ctx.generateUuid.numbersOnly) {
+                if (this.traceName) {
+                    return this.traceName;
+                }
+                if (this.namespace) {
+                    return `${this.namespace}::${this.name}`;
+                }
+            }
             ctx.generateUuid.uuidCounter += 1;
             return `uuid${ctx.generateUuid.uuidCounter}`;
         });
@@ -283,6 +292,7 @@ const _module = module.exports = {
  * @type {object}
  * @property {object} generateUuid - stub for generateUuid
  * @property {number} generateUuid.uuidCounter - counter value
+ * @property {boolean} generateUuid.numbersOnly - numbers only
  * @property {object} getRuntimeInfo - stub for getRuntimeInfo
  * @property {object} networkCheck - stub for networkCheck
  */

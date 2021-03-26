@@ -19,7 +19,6 @@ const sinon = require('sinon');
 const configWorker = require('../../src/lib/config');
 const configUtil = require('../../src/lib/utils/config');
 const CONFIG_CLASSES = require('../../src/lib/constants').CONFIG_CLASSES;
-const constants = require('../../src/lib/constants');
 const deviceUtil = require('../../src/lib/utils/device');
 const moduleLoader = require('../../src/lib/utils/moduleLoader').ModuleLoader;
 const persistentStorage = require('../../src/lib/persistentStorage');
@@ -107,7 +106,7 @@ describe('Pull Consumers', () => {
             };
             // config will not pass schema validation
             // but this test allows catching if consumer module/dir is not configured properly
-            return configUtil.normalizeConfig(exampleConfig)
+            return configUtil.normalizeDeclaration(exampleConfig)
                 .then(normalized => configWorker.emitAsync('change', normalized))
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
@@ -187,7 +186,14 @@ describe('Pull Consumers', () => {
                 if (returnCtx) {
                     return returnCtx(declaration, pollerConfig);
                 }
-                return Promise.resolve({ data: { mockedResponse: { pollerName: pollerConfig.name } } });
+                return Promise.resolve({
+                    data: {
+                        mockedResponse: {
+                            pollerName: pollerConfig.name,
+                            systemName: pollerConfig.systemName
+                        }
+                    }
+                });
             });
         });
 
@@ -200,9 +206,8 @@ describe('Pull Consumers', () => {
             return configWorker.processDeclaration(testUtil.deepCopy(declaration))
                 .then(() => pullConsumers.getData(testConf.consumerName, testConf.namespace))
                 .then((data) => {
-                    assert.deepStrictEqual(data, testConf.expectedResponse);
-                })
-                .catch((err) => {
+                    assert.sameDeepMembers(data, testConf.expectedResponse);
+                }, (err) => {
                     if (testConf.errorRegExp) {
                         return assert.match(err, testConf.errorRegExp, 'should match error reg exp');
                     }
@@ -214,7 +219,7 @@ describe('Pull Consumers', () => {
 
         describe('default (no namespace), lookup using f5telemetry_default name',
             () => pullConsumersTestsData.getData.forEach((testConf) => {
-                testConf.namespace = constants.DEFAULT_UNNAMED_NAMESPACE;
+                testConf.namespace = 'f5telemetry_default';
                 runTestCase(testConf);
             }));
 

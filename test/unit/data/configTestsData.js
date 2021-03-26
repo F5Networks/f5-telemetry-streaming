@@ -236,7 +236,7 @@ module.exports = {
                     components: [
                         {
                             name: 'Shared',
-                            id: 'uuid1',
+                            id: 'f5telemetry_default::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -247,7 +247,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'My_Consumer',
-                            id: 'uuid2',
+                            id: 'My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -263,7 +263,7 @@ module.exports = {
                         },
                         {
                             name: 'Shared',
-                            id: 'uuid3',
+                            id: 'My_Namespace::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -274,7 +274,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'My_Namespace::My_Consumer',
-                            id: 'uuid4',
+                            id: 'My_Namespace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -295,7 +295,7 @@ module.exports = {
                     components: [
                         {
                             name: 'Shared',
-                            id: 'uuid1',
+                            id: 'f5telemetry_default::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -306,7 +306,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'My_Consumer',
-                            id: 'uuid2',
+                            id: 'My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -326,7 +326,7 @@ module.exports = {
                         },
                         {
                             name: 'Shared',
-                            id: 'uuid3',
+                            id: 'My_Namespace::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -337,7 +337,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'My_Namespace::My_Consumer',
-                            id: 'uuid4',
+                            id: 'My_Namespace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -503,7 +503,7 @@ module.exports = {
                     components: [
                         {
                             name: 'Shared',
-                            id: 'uuid1',
+                            id: 'My_Namespace::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -514,7 +514,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'My_Namespace::My_Consumer',
-                            id: 'uuid2',
+                            id: 'My_Namespace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -535,7 +535,7 @@ module.exports = {
                     components: [
                         {
                             name: 'Shared',
-                            id: 'uuid1',
+                            id: 'My_Namespace::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -546,7 +546,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'My_Namespace::My_Consumer',
-                            id: 'uuid2',
+                            id: 'My_Namespace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -723,7 +723,7 @@ module.exports = {
                     components: [
                         {
                             name: 'Shared',
-                            id: 'uuid1',
+                            id: 'f5telemetry_default::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -735,7 +735,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'My_Consumer',
-                            id: 'uuid2',
+                            id: 'My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -752,7 +752,7 @@ module.exports = {
                         },
                         {
                             name: 'Shared',
-                            id: 'uuid3',
+                            id: 'My_Namespace::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -763,7 +763,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'My_Namespace::My_Consumer',
-                            id: 'uuid4',
+                            id: 'My_Namespace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -784,7 +784,7 @@ module.exports = {
                     components: [
                         {
                             name: 'Shared',
-                            id: 'uuid1',
+                            id: 'f5telemetry_default::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -795,7 +795,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'My_Consumer',
-                            id: 'uuid2',
+                            id: 'My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -815,7 +815,7 @@ module.exports = {
                         },
                         {
                             name: 'Shared',
-                            id: 'uuid3',
+                            id: 'My_Namespace::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -826,7 +826,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'My_Namespace::My_Consumer',
-                            id: 'uuid4',
+                            id: 'My_Namespace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -848,7 +848,7 @@ module.exports = {
                 }
             },
             {
-                name: '.process Namespace declaration with pre-loaded configuration, merge with another Namespace, unchanged namespaces have skipUpdate = true',
+                name: 'process Namespace declaration with pre-loaded configuration, merge with another Namespace, unchanged namespaces have skipUpdate = true',
                 namespaceName: 'My_Namespace',
                 preLoadDeclaration: {
                     class: 'Telemetry',
@@ -1008,7 +1008,7 @@ module.exports = {
                     components: [
                         {
                             name: 'Shared',
-                            id: 'uuid1',
+                            id: 'ExistingNameSpace::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -1020,7 +1020,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'ExistingNameSpace::My_Consumer',
-                            id: 'uuid2',
+                            id: 'ExistingNameSpace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -1037,7 +1037,7 @@ module.exports = {
                         },
                         {
                             name: 'Shared',
-                            id: 'uuid3',
+                            id: 'My_Namespace::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -1048,7 +1048,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'My_Namespace::My_Consumer',
-                            id: 'uuid4',
+                            id: 'My_Namespace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -1069,7 +1069,7 @@ module.exports = {
                     components: [
                         {
                             name: 'Shared',
-                            id: 'uuid1',
+                            id: 'ExistingNameSpace::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -1080,7 +1080,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'ExistingNameSpace::My_Consumer',
-                            id: 'uuid2',
+                            id: 'ExistingNameSpace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -1100,7 +1100,7 @@ module.exports = {
                         },
                         {
                             name: 'Shared',
-                            id: 'uuid3',
+                            id: 'My_Namespace::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -1111,7 +1111,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'My_Namespace::My_Consumer',
-                            id: 'uuid4',
+                            id: 'My_Namespace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -1267,7 +1267,7 @@ module.exports = {
                     components: [
                         {
                             name: 'Shared',
-                            id: 'uuid1',
+                            id: 'ExistingNameSpace::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -1279,7 +1279,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'ExistingNameSpace::My_Consumer',
-                            id: 'uuid2',
+                            id: 'ExistingNameSpace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -1297,7 +1297,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'My_Namespace::My_Consumer',
-                            id: 'uuid3',
+                            id: 'My_Namespace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -1318,7 +1318,7 @@ module.exports = {
                     components: [
                         {
                             name: 'Shared',
-                            id: 'uuid1',
+                            id: 'ExistingNameSpace::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -1329,7 +1329,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'ExistingNameSpace::My_Consumer',
-                            id: 'uuid2',
+                            id: 'ExistingNameSpace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -1350,7 +1350,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'My_Namespace::My_Consumer',
-                            id: 'uuid3',
+                            id: 'My_Namespace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -1522,7 +1522,7 @@ module.exports = {
                     components: [
                         {
                             name: 'Shared',
-                            id: 'uuid1',
+                            id: 'ExistingNameSpace::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -1534,7 +1534,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'ExistingNameSpace::My_Consumer',
-                            id: 'uuid2',
+                            id: 'ExistingNameSpace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -1552,7 +1552,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'My_Namespace::My_Consumer',
-                            id: 'uuid5',
+                            id: 'My_Namespace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -1573,7 +1573,7 @@ module.exports = {
                     components: [
                         {
                             name: 'Shared',
-                            id: 'uuid1',
+                            id: 'ExistingNameSpace::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -1584,7 +1584,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'ExistingNameSpace::My_Consumer',
-                            id: 'uuid2',
+                            id: 'ExistingNameSpace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -1605,7 +1605,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'My_Namespace::My_Consumer',
-                            id: 'uuid5',
+                            id: 'My_Namespace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -1806,7 +1806,7 @@ module.exports = {
                     components: [
                         {
                             name: 'Shared',
-                            id: 'uuid1',
+                            id: 'ExistingNameSpace::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -1818,7 +1818,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'ExistingNameSpace::My_Consumer',
-                            id: 'uuid2',
+                            id: 'ExistingNameSpace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -1835,7 +1835,7 @@ module.exports = {
                         },
                         {
                             name: 'Shared',
-                            id: 'uuid5',
+                            id: 'My_Namespace::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -1846,7 +1846,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'My_Namespace::My_Consumer',
-                            id: 'uuid6',
+                            id: 'My_Namespace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -1867,7 +1867,7 @@ module.exports = {
                     components: [
                         {
                             name: 'Shared',
-                            id: 'uuid1',
+                            id: 'ExistingNameSpace::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -1878,7 +1878,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'ExistingNameSpace::My_Consumer',
-                            id: 'uuid2',
+                            id: 'ExistingNameSpace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -1898,7 +1898,7 @@ module.exports = {
                         },
                         {
                             name: 'Shared',
-                            id: 'uuid5',
+                            id: 'My_Namespace::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -1909,7 +1909,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'My_Namespace::My_Consumer',
-                            id: 'uuid6',
+                            id: 'My_Namespace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -2022,7 +2022,7 @@ module.exports = {
                     components: [
                         {
                             name: 'Shared',
-                            id: 'uuid1',
+                            id: 'ExistingNameSpace::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -2034,7 +2034,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'ExistingNameSpace::My_Consumer',
-                            id: 'uuid2',
+                            id: 'ExistingNameSpace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -2056,7 +2056,7 @@ module.exports = {
                     components: [
                         {
                             name: 'Shared',
-                            id: 'uuid1',
+                            id: 'ExistingNameSpace::Shared',
                             class: 'Shared',
                             constants: {
                                 class: 'Constants',
@@ -2067,7 +2067,7 @@ module.exports = {
                         {
                             name: 'My_Consumer',
                             traceName: 'ExistingNameSpace::My_Consumer',
-                            id: 'uuid2',
+                            id: 'ExistingNameSpace::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,

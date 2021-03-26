@@ -34,7 +34,7 @@ const BASE_STORAGE_DATA = {};
  *
  * @event change - config was validated and can be propagated
  *
- * @property {object} currentConfig - copy of current configuration
+ * @property {Configuration} currentConfig - copy of current configuration
  * @property {Logger} logger - logger instance
  * @property {TeemReporter} teemReporter - TeemReporter instance
  * @property {object} validators - AJV validators
@@ -42,7 +42,7 @@ const BASE_STORAGE_DATA = {};
 class ConfigWorker extends SafeEventEmitter {
     /**
      * @public
-     * @returns {object} copy of current configuration
+     * @returns {Configuration} copy of current configuration
      */
     get currentConfig() {
         return util.deepCopy(this._currentConfig || BASE_CONFIG);
@@ -217,13 +217,13 @@ class ConfigWorker extends SafeEventEmitter {
                     setConfigOpts.namespaceToUpdate = options.namespaceToUpdate;
                     // normalize the specified namespace config only
                     // keep the values for other namespaces if  they already exist
-                    return configUtil.mergeNamespaceConfig(expandedConfig[options.namespaceToUpdate], {
-                        namespaceToUpdate: options.namespaceToUpdate,
-                        savedConfig: this.currentConfig
-                    });
+                    return configUtil.mergeDeclaration(
+                        { [options.namespaceToUpdate]: expandedConfig[options.namespaceToUpdate] },
+                        this.currentConfig
+                    );
                 }
                 // normalize the whole config, will generate new UUIDs
-                return configUtil.normalizeConfig(expandedConfig);
+                return configUtil.normalizeDeclaration(expandedConfig);
             })
             .then((conf) => {
                 // normalized config is a config that is
@@ -283,7 +283,7 @@ function expandDeclaration(declaration) {
  * NOTE: it mutates 'newConfig'.
  *
  * @this ConfigWorker
- * @param {object} newConfig - new config
+ * @param {Configuration} newConfig - new config
  * @param {object} options - options when setting config
  * @param {string} options.namespaceToUpdate - namespace of components
  *     that are the only ones that need updating instead of all config
@@ -314,7 +314,7 @@ function notifyConfigChange(newConfig, options) {
              * the config must make its own local copy.
              *
              * @event ConfigWorker#change
-             * @type {object}
+             * @type {Configuration}
              */
             return this.emitAsync('change', decryptedConfig);
         })
@@ -369,7 +369,7 @@ const configWorker = new ConfigWorker();
 
 // config worker change event, should be first in the handlers chain
 configWorker.on('change', config => new Promise((resolve) => {
-    const settings = configUtil.getControls(config);
+    const settings = configUtil.getTelemetryControls(config);
     if (!util.isObjectEmpty(settings)) {
         // default value should be 'info'
         logger.setLogLevel(settings.logLevel);

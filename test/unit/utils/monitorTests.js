@@ -64,11 +64,12 @@ describe('Monitor Util', () => {
         const mockConfig1 = {
             components: [
                 {
-                    class: 'Telemery_System',
+                    class: 'Telemetry_System_Poller',
                     enable: true
                 },
                 {
-                    class: 'Controls'
+                    class: 'Controls',
+                    namespace: 'f5telemetry_default'
                     // prior to v1.18
                     // memoryThresholdPercent: undefined
                 }
@@ -77,24 +78,26 @@ describe('Monitor Util', () => {
         const mockConfig2 = {
             components: [
                 {
-                    class: 'Telemery_System',
+                    class: 'Telemetry_System_Poller',
                     enable: true
                 },
                 {
                     class: 'Controls',
-                    memoryThresholdPercent: 50
+                    memoryThresholdPercent: 50,
+                    namespace: 'f5telemetry_default'
                 }
             ]
         };
         const mockConfig3 = {
             components: [
                 {
-                    class: 'Telemery_System',
+                    class: 'Telemetry_System_Poller',
                     enable: false
                 },
                 {
                     class: 'Controls',
-                    memoryThresholdPercent: 76
+                    memoryThresholdPercent: 76,
+                    namespace: 'f5telemetry_default'
                 }
             ]
         };
@@ -147,12 +150,13 @@ describe('Monitor Util', () => {
                 const mockConfigDisable = {
                     components: [
                         {
-                            class: 'Telemery_System',
+                            class: 'Telemetry_System_Poller',
                             enable: true
                         },
                         {
                             class: 'Controls',
-                            memoryThresholdPercent: 100
+                            memoryThresholdPercent: 100,
+                            namespace: 'f5telemetry_default'
                         }
                     ]
                 };
