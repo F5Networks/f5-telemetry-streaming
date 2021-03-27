@@ -15,6 +15,7 @@ const errors = require('./errors');
 const logger = require('./logger');
 const SystemStats = require('./systemStats');
 const util = require('./utils/misc');
+const timers = require('./utils/timers');
 const configUtil = require('./utils/config');
 const tracers = require('./utils/tracer');
 const APP_THRESHOLDS = require('./constants').APP_THRESHOLDS;
@@ -100,26 +101,23 @@ function applyConfig(originalConfig) {
             pollerConfig.destinationIds = configUtil.getReceivers(originalConfig, pollerConfig).map(r => r.id);
             if (pollerConfig.interval === 0) {
                 logger.info(`Configuring non-polling ${baseMsg}`);
-                if (currPollers[key]) {
-                    util.stop(currPollers[key].timer || currPollers[key]);
+                if (currPollers[key] && currPollers[key].timer) {
+                    currPollers[key].timer.stop();
                 }
                 currPollers[key] = undefined;
-            } else if (currPollers[key]) {
+            } else if (currPollers[key] && currPollers[key].timer) {
                 logger.info(`Updating ${baseMsg}`);
-                currPollers[key] = {
-                    timer: util.update(
-                        currPollers[key].timer || currPollers[key], safeProcess, pollerConfig, pollerConfig.interval
-                    ),
-                    config: pollerConfig
-                };
+                currPollers[key].timer.update(safeProcess, pollerConfig, pollerConfig.interval);
+                currPollers[key].config = pollerConfig;
             } else {
                 logger.info(`Starting ${baseMsg}`);
                 currPollers[key] = {
-                    timer: util.start(
-                        safeProcess, pollerConfig, pollerConfig.interval
-                    ),
+                    timer: new timers.SlidingTimer(safeProcess, pollerConfig, pollerConfig.interval, {
+                        logInfo: pollerConfig.traceName
+                    }),
                     config: pollerConfig
                 };
+                currPollers[key].timer.start();
             }
         }
     });
@@ -128,8 +126,8 @@ function applyConfig(originalConfig) {
         if (newPollerIDs.indexOf(key) === -1) {
             logger.info(`Disabling/removing system poller ${key}`);
             // for pollers with interval=0, the key exists, but value is undefined
-            if (!util.isObjectEmpty(currPollers[key])) {
-                util.stop(currPollers[key].timer);
+            if (!util.isObjectEmpty(currPollers[key]) && currPollers[key].timer) {
+                currPollers[key].timer.stop();
             }
             delete currPollers[key];
         }
@@ -142,10 +140,17 @@ function enablePollers() {
         const poller = currentPollers[pollerKey];
         if (poller && poller.config && poller.config.interval > 0) {
             logger.info(`Enabling system poller ${pollerKey}. Interval = ${poller.config.interval} sec.`);
-            // in case disable failed for some reason, ensure we stop any running timer
-            currentPollers[pollerKey].timer = util.update(
-                currentPollers[pollerKey].timer, safeProcess, poller.config, poller.config.interval
-            );
+            if (poller.timer) {
+                // Update timer to enable/re-enable the poller
+                poller.timer.update(
+                    safeProcess, poller.config, poller.config.interval
+                );
+            } else {
+                poller.timer = new timers.SlidingTimer(safeProcess, poller.config, poller.config.interval, {
+                    logInfo: poller.config.traceName
+                });
+                poller.timer.start();
+            }
         }
     });
 }
@@ -156,8 +161,9 @@ function disablePollers() {
         const poller = currentPollers[pollerKey];
         if (poller && poller.config && poller.config.interval > 0) {
             logger.info(`Disabling system poller ${pollerKey}`);
-            util.stop(currentPollers[pollerKey].timer);
-            currentPollers[pollerKey].timer = null;
+            if (poller.timer) {
+                poller.timer.stop();
+            }
         }
     });
 }

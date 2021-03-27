@@ -18,16 +18,16 @@ const sinon = require('sinon');
 const APP_THRESHOLDS = require('../../../src/lib/constants').APP_THRESHOLDS;
 
 const config = require('../../../src/lib/config');
+const timers = require('../../../src/lib/utils/timers');
 const monitor = require('../../../src/lib/utils/monitor');
 const deviceUtil = require('../../../src/lib/utils/device');
-const util = require('../../../src/lib/utils/misc');
 const testUtil = require('../shared/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe('Monitor Util', () => {
-    let utilStub;
+    let timerStub;
 
     before(() => {
         // disabled by default, otherwise test imports can trigger multiple monitor instance starts
@@ -40,18 +40,17 @@ describe('Monitor Util', () => {
     });
 
     beforeEach(() => {
-        utilStub = { start: [], stop: [], update: [] };
-
-        sinon.stub(util, 'start').callsFake((func, args, interval) => {
-            utilStub.start.push({ args, interval });
+        timerStub = { start: [], stop: [], update: [] };
+        sinon.stub(timers.BasicTimer.prototype, 'start').callsFake((func, args, interval) => {
+            timerStub.start.push({ args, interval });
             return interval;
         });
-        sinon.stub(util, 'update').callsFake((id, func, args, interval) => {
-            utilStub.update.push({ args, interval });
-            return interval;
+        sinon.stub(timers.BasicTimer.prototype, 'stop').callsFake((arg) => {
+            timerStub.stop.push({ arg });
         });
-        sinon.stub(util, 'stop').callsFake((arg) => {
-            utilStub.stop.push({ arg });
+        sinon.stub(timers.BasicTimer.prototype, 'update').callsFake((id, func, args, interval) => {
+            timerStub.update.push({ args, interval });
+            return interval;
         });
     });
 
@@ -109,9 +108,9 @@ describe('Monitor Util', () => {
                     timer1 = monitor.timer;
                     assert.exists(timer1);
                     assert.strictEqual(monitor.memoryThreshold, 1290);
-                    assert.deepStrictEqual(utilStub.start, [{ args: null, interval: 5 }]);
-                    assert.deepStrictEqual(utilStub.stop, []);
-                    assert.deepStrictEqual(utilStub.update, []);
+                    assert.deepStrictEqual(timerStub.start, [{ args: null, interval: 5 }]);
+                    assert.deepStrictEqual(timerStub.stop, []);
+                    assert.deepStrictEqual(timerStub.update, []);
                 });
         });
 
@@ -124,9 +123,9 @@ describe('Monitor Util', () => {
             .then(() => {
                 assert.exists(monitor.timer);
                 assert.strictEqual(monitor.memoryThreshold, 717);
-                assert.deepStrictEqual(utilStub.start, [{ args: null, interval: 5 }]);
-                assert.deepStrictEqual(utilStub.stop, []);
-                assert.deepStrictEqual(utilStub.update, [{ args: null, interval: 5 }]);
+                assert.deepStrictEqual(timerStub.start, [{ args: null, interval: 5 }]);
+                assert.deepStrictEqual(timerStub.stop, []);
+                assert.deepStrictEqual(timerStub.update, [{ args: null, interval: 5 }]);
             }));
 
         it('should disable monitor checks when there are no components enabled', () => config.emitAsync('change', mockConfig2)
@@ -138,9 +137,9 @@ describe('Monitor Util', () => {
             .then(() => {
                 assert.notExists(monitor.timer);
                 assert.notExists(monitor.memoryThreshold);
-                assert.deepStrictEqual(utilStub.start, [{ args: null, interval: 5 }]);
-                assert.deepStrictEqual(utilStub.update, []);
-                assert.deepStrictEqual(utilStub.stop, [{ arg: 5 }]);
+                assert.deepStrictEqual(timerStub.start, [{ args: null, interval: 5 }]);
+                assert.deepStrictEqual(timerStub.update, []);
+                assert.deepStrictEqual(timerStub.stop, [{ arg: 5 }]);
             }));
 
         it('should disable monitor checks when threshold = 100%', () => config.emitAsync('change', mockConfig2)
@@ -165,9 +164,9 @@ describe('Monitor Util', () => {
             .then(() => {
                 assert.notExists(monitor.timer);
                 assert.notExists(monitor.memoryThreshold);
-                assert.deepStrictEqual(utilStub.start, [{ args: null, interval: 5 }]);
-                assert.deepStrictEqual(utilStub.update, []);
-                assert.deepStrictEqual(utilStub.stop, [{ arg: 5 }]);
+                assert.deepStrictEqual(timerStub.start, [{ args: null, interval: 5 }]);
+                assert.deepStrictEqual(timerStub.update, []);
+                assert.deepStrictEqual(timerStub.stop, [{ arg: 5 }]);
             }));
     });
 
@@ -232,7 +231,7 @@ describe('Monitor Util', () => {
                 return monitor.checkThresholds()
                     .then(() => {
                         assert.strictEqual(monitor.interval, usageTest.sec, `should change interval to ${usageTest.sec} for usage ${memUsageVal} ${usageTest.memUsagePercent}`);
-                        assert.deepStrictEqual(utilStub.update, [{ args: null, interval: usageTest.sec }]);
+                        assert.deepStrictEqual(timerStub.update, [{ args: null, interval: usageTest.sec }]);
                     });
             });
         });
