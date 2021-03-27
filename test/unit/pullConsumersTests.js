@@ -28,12 +28,21 @@ const stubs = require('./shared/stubs');
 const systemPoller = require('../../src/lib/systemPoller');
 const teemReporter = require('../../src/lib/teemReporter');
 const testUtil = require('./shared/util');
+const timers = require('../../src/lib/utils/timers');
 const utilMisc = require('../../src/lib/utils/misc');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe('Pull Consumers', () => {
+    class MockTimer {
+        start() { }
+
+        stop() { }
+
+        update() { }
+    }
+
     beforeEach(() => {
         stubs.coreStub({
             configWorker,
@@ -43,8 +52,11 @@ describe('Pull Consumers', () => {
             utilMisc
         });
         // config.emit change event will trigger the poller as well
-        sinon.stub(utilMisc, 'update').callsFake(() => {});
-        sinon.stub(utilMisc, 'start').callsFake(() => {});
+        sinon.stub(timers, 'SlidingTimer').callsFake(() => new MockTimer());
+        // sinon doesn't seem to handle stubbing something in the constructor - stub methods instead
+        sinon.stub(timers.BasicTimer.prototype, 'start').returns();
+        sinon.stub(timers.BasicTimer.prototype, 'stop').returns();
+        sinon.stub(timers.BasicTimer.prototype, 'update').returns();
     });
 
     afterEach(() => {

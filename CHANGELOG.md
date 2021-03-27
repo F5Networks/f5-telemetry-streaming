@@ -16,6 +16,7 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-2368: Tracer(s) from other namespaces should not stop when namespace-only declaration posted
 ### Changed
 - AUTOTOOL-2091: Trace full payload sent to StatsD Consumer
+- AUTOTOOL-2250: System Poller recurring scheduling changed so that System Poller executions do not overlap
 - AUTOTOOL-2213: Update npm packages (applicationinsights from v1.8.9 to v.1.8.10, aws-sdk from v2.830.0 to v2.854.0, eventemitter2 from v6.4.3 to v6.4.4, google-auth-library from v6.1.4 to v.6.1.6, lodash from v.4.17.20 to v4.17.21)
 - AUTOTOOL-1509: Remove excessive data formatting from tracer
 ### Removed

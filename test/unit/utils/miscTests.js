@@ -19,65 +19,10 @@ const sinon = require('sinon');
 
 const util = require('../../../src/lib/utils/misc');
 
-
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe('Misc Util', () => {
-    describe('.start()', () => {
-        it('should start function on interval', () => assert.isFulfilled(
-            new Promise((resolve) => {
-                const intervalID = util.start(
-                    (args) => {
-                        util.stop(intervalID);
-                        assert.strictEqual(args, 'test');
-                        resolve();
-                    },
-                    'test',
-                    0.01
-                );
-            })
-        ));
-    });
-
-    describe('.update()', () => {
-        it('should update function\'s interval', () => assert.isFulfilled(
-            new Promise((resolve) => {
-                const intervalID = util.start(
-                    () => {
-                        const newIntervalID = util.update(
-                            intervalID,
-                            (args) => {
-                                util.stop(newIntervalID);
-                                assert.strictEqual(args, 'test');
-                                resolve();
-                            },
-                            'test',
-                            0.01
-                        );
-                    },
-                    0.01
-                );
-            })
-        ));
-    });
-
-    describe('.stop()', () => {
-        it('should stop function', () => assert.isFulfilled(
-            new Promise((resolve) => {
-                const intervalID = util.start(
-                    (args) => {
-                        util.stop(intervalID);
-                        assert.strictEqual(args, 'test');
-                        resolve();
-                    },
-                    'test',
-                    0.01
-                );
-            })
-        ));
-    });
-
     describe('.stringify()', () => {
         it('should stringify object', () => {
             assert.strictEqual(
