@@ -25,7 +25,7 @@ const persistentStorage = require('../../../src/lib/persistentStorage');
 const stubs = require('../shared/stubs');
 const teemReporter = require('../../../src/lib/teemReporter');
 const testUtil = require('../shared/util');
-const tracers = require('../../../src/lib/utils/tracer');
+const tracer = require('../../../src/lib/utils/tracer');
 const utilMisc = require('../../../src/lib/utils/misc');
 
 chai.use(chaiAsPromised);
@@ -71,6 +71,8 @@ describe('Event Listener', () => {
         return ids;
     };
 
+    const registeredTracerNames = () => tracer.registered().map(t => t.name);
+
     beforeEach(() => {
         actualData = {};
         origDecl = {
@@ -90,6 +92,7 @@ describe('Event Listener', () => {
             configWorker,
             persistentStorage,
             teemReporter,
+            tracer,
             utilMisc
         });
         coreStub.utilMisc.generateUuid.numbersOnly = false;
@@ -103,9 +106,6 @@ describe('Event Listener', () => {
             sinon.stub(messageStream.MessageStream.prototype, method).resolves();
         });
 
-        sinon.stub(tracers.Tracer.prototype, 'stop').resolves();
-        sinon.stub(tracers.Tracer.prototype, 'write').resolves();
-
         return configWorker.processDeclaration(utilMisc.deepCopy(origDecl))
             .then(() => {
                 const listeners = EventListener.instances;
@@ -114,8 +114,7 @@ describe('Event Listener', () => {
                 assertListener(listeners.Listener1, {
                     tags: { tenant: '`T`', application: '`A`' }
                 });
-                assert.strictEqual(tracers.registered().length, 1);
-                assert.strictEqual(tracers.registered()[0].name, 'Telemetry_Listener.Listener1');
+                assert.sameDeepMembers(registeredTracerNames(), ['Telemetry_Listener.Listener1']);
                 assert.strictEqual(EventListener.receiversManager.getAll().length, 1);
             });
     });
@@ -163,8 +162,8 @@ describe('Event Listener', () => {
 
         return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
             .then(() => {
-                assert.sameMembers(
-                    tracers.registered().map(t => t.name),
+                assert.sameDeepMembers(
+                    registeredTracerNames(),
                     [
                         'Telemetry_Listener.Listener1',
                         'Telemetry_Listener.Listener2',
@@ -197,7 +196,7 @@ describe('Event Listener', () => {
         assert.notStrictEqual(EventListener.receiversManager.getAll().length, 0);
         return configWorker.emitAsync('change', { components: [], mappings: {} })
             .then(() => {
-                assert.strictEqual(tracers.registered().length, 0);
+                assert.sameDeepMembers(registeredTracerNames(), []);
                 assert.strictEqual(EventListener.getAll().length, 0);
                 assert.strictEqual(EventListener.receiversManager.getAll().length, 0);
             });
@@ -211,8 +210,7 @@ describe('Event Listener', () => {
 
         return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
             .then(() => {
-                assert.strictEqual(tracers.registered().length, 1);
-                assert.strictEqual(tracers.registered()[0].name, 'Telemetry_Listener.Listener1');
+                assert.sameDeepMembers(registeredTracerNames(), ['Telemetry_Listener.Listener1']);
                 assert.deepStrictEqual(gatherIds(), ['Listener1']);
 
                 const listeners = EventListener.instances;
@@ -247,8 +245,8 @@ describe('Event Listener', () => {
         };
         return configWorker.processNamespaceDeclaration(testUtil.deepCopy(newDecl), 'newNamespace')
             .then(() => {
-                assert.sameMembers(
-                    tracers.registered().map(t => t.name),
+                assert.sameDeepMembers(
+                    registeredTracerNames(),
                     [
                         'Telemetry_Listener.Listener1',
                         'Telemetry_Listener.newNamespace::Listener1'
@@ -274,7 +272,7 @@ describe('Event Listener', () => {
 
         return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
             .then(() => {
-                assert.strictEqual(tracers.registered().length, 0);
+                assert.sameDeepMembers(registeredTracerNames(), []);
                 assert.strictEqual(EventListener.getAll().length, 0);
                 assert.strictEqual(EventListener.receiversManager.getAll().length, 0);
             });
@@ -293,8 +291,8 @@ describe('Event Listener', () => {
 
         return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
             .then(() => {
-                assert.sameMembers(
-                    tracers.registered().map(t => t.name),
+                assert.sameDeepMembers(
+                    registeredTracerNames(),
                     [
                         'Telemetry_Listener.Listener1',
                         'Telemetry_Listener.New::Listener1'
@@ -333,8 +331,7 @@ describe('Event Listener', () => {
         };
         return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
             .then(() => {
-                assert.strictEqual(tracers.registered().length, 1);
-                assert.strictEqual(tracers.registered()[0].name, 'Telemetry_Listener.Listener1');
+                assert.sameDeepMembers(registeredTracerNames(), ['Telemetry_Listener.Listener1']);
                 assert.strictEqual(EventListener.getAll().length, 1);
                 assert.strictEqual(EventListener.receiversManager.getAll().length, 1);
                 assert.deepStrictEqual(gatherIds(), ['Listener1']);
@@ -373,7 +370,7 @@ describe('Event Listener', () => {
             .then(() => {
                 assert.strictEqual(EventListener.getAll().length, 1);
                 assert.strictEqual(EventListener.receiversManager.getAll().length, 1);
-                assert.strictEqual(tracers.registered().length, 0);
+                assert.sameDeepMembers(registeredTracerNames(), []);
                 assert.deepStrictEqual(gatherIds(), ['Listener1']);
                 const listeners = EventListener.instances;
 

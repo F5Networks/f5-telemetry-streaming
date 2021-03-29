@@ -14,7 +14,7 @@ const nock = require('nock');
 
 const testUtil = require('./shared/util');
 const SystemStats = require('../../src/lib/systemStats');
-const customEndptsTestsData = require('./data/customEndpointsTestsData');
+const customEndpointsTestsData = require('./data/customEndpointsTestsData');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -28,8 +28,8 @@ describe('Custom Endpoints (Telemetry_Endpoints)', () => {
         }
     };
 
-    Object.keys(customEndptsTestsData).forEach((testSetKey) => {
-        const testSet = customEndptsTestsData[testSetKey];
+    Object.keys(customEndpointsTestsData).forEach((testSetKey) => {
+        const testSet = customEndpointsTestsData[testSetKey];
 
         testUtil.getCallableDescribe(testSet)(testSet.name, () => {
             afterEach(() => {

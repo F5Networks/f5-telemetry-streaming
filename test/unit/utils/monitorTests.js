@@ -15,8 +15,8 @@ require('../shared/restoreCache')();
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
-const APP_THRESHOLDS = require('../../../src/lib/constants').APP_THRESHOLDS;
 
+const APP_THRESHOLDS = require('../../../src/lib/constants').APP_THRESHOLDS;
 const config = require('../../../src/lib/config');
 const timers = require('../../../src/lib/utils/timers');
 const monitor = require('../../../src/lib/utils/monitor');

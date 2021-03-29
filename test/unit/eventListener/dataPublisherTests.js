@@ -20,11 +20,11 @@ const nodeUtil = require('util');
 const EventEmitter = require('events');
 
 const configWorker = require('../../../src/lib/config');
+const dataPublisher = require('../../../src/lib/eventListener/dataPublisher');
 const persistentStorage = require('../../../src/lib/persistentStorage');
 const stubs = require('../shared/stubs');
 const teemReporter = require('../../../src/lib/teemReporter');
 const utilMisc = require('../../../src/lib/utils/misc');
-const dataPublisher = require('../../../src/lib/eventListener/dataPublisher');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
