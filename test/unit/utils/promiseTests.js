@@ -17,7 +17,6 @@ const chaiAsPromised = require('chai-as-promised');
 
 const promiseUtil = require('../../../src/lib/utils/promise');
 
-
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
