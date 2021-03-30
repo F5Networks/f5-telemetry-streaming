@@ -373,6 +373,10 @@ class RestStorage extends StorageInterface {
             if (typeof state._data_ === 'string') {
                 state._data_ = JSON.parse(state._data_);
             }
+            if (state._data_ === null) {
+                // otherwise lodash.set will ignore all operations
+                state._data_ = {};
+            }
         } else {
             state._data_ = {};
             if (typeof state.config !== 'undefined') {

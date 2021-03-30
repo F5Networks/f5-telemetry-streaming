@@ -53,7 +53,7 @@ describe('restWorker', () => {
         // remove all existing listeners as consumers, systemPoller and
         // prev instances of RestWorker
         config.removeAllListeners();
-        loadConfigStub = sinon.stub(config, 'loadConfig');
+        loadConfigStub = sinon.stub(config, 'load');
         loadConfigStub.resolves();
         gatherHostDeviceInfoStub = sinon.stub(deviceUtil, 'gatherHostDeviceInfo');
         gatherHostDeviceInfoStub.resolves();

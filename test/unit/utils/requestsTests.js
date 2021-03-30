@@ -17,6 +17,7 @@ const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 const nock = require('nock');
 const request = require('request');
+
 const testUtil = require('../shared/util');
 const requestsUtil = require('../../../src/lib/utils/requests');
 

@@ -12,14 +12,12 @@ const logger = require('./logger'); // eslint-disable-line no-unused-vars
 const constants = require('./constants');
 const datetimeUtil = require('./utils/datetime');
 const util = require('./utils/misc');
-const deviceUtil = require('./utils/device');
 const ihUtil = require('./utils/ihealth');
 const persistentStorage = require('./persistentStorage').persistentStorage;
 const configWorker = require('./config');
 const configUtil = require('./utils/config');
-const tracers = require('./utils/tracer').Tracer;
+const tracers = require('./utils/tracer');
 
-const IHEALTH_POLLER_CLASS_NAME = constants.CONFIG_CLASSES.IHEALTH_POLLER_CLASS_NAME;
 const PERSISTENT_STORAGE_KEY = 'ihealth';
 
 const IHEALTH_POLL_MAX_TIMEOUT = 60 * 60 * 1000; // 1 h.
@@ -382,9 +380,9 @@ IHealthPoller.prototype.fetchConfigs = function () {
         return Promise.resolve();
     }
 
-    return configWorker.getConfig()
-        .then((config) => {
-            config = config.normalized || {};
+    return Promise.resolve()
+        .then(() => {
+            const config = configWorker.currentConfig;
             // System name is required.
             // iHealthPoller name is optional.
             // TODO: Update to also filter on Namespaces
@@ -397,7 +395,7 @@ IHealthPoller.prototype.fetchConfigs = function () {
             if (util.isObjectEmpty(filteredConfigs)) {
                 return Promise.reject(new Error('System or iHealth Poller declaration not found'));
             }
-            return deviceUtil.decryptAllSecrets(filteredConfigs[0]);
+            return configUtil.decryptSecrets(filteredConfigs[0]);
         })
         .then((decryptedConfig) => {
             this.config = decryptedConfig;
@@ -753,7 +751,7 @@ IHealthPoller.prototype.process = function () {
  * @returns {module:util~Tracer} tracer instance
  */
 IHealthPoller.prototype.getTracer = function () {
-    return tracers.createFromConfig(IHEALTH_POLLER_CLASS_NAME, this.sysName, this.config);
+    return tracers.fromConfig(this.config);
 };
 
 /**

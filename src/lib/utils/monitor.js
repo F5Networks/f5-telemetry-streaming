@@ -11,7 +11,7 @@
 const APP_THRESHOLDS = require('../constants').APP_THRESHOLDS;
 const deviceUtil = require('./device');
 const logger = require('../logger');
-const util = require('./misc');
+const timers = require('./timers');
 const configWorker = require('../config');
 const configUtil = require('./config');
 const SafeEventEmitter = require('./eventEmitter').SafeEventEmitter;
@@ -46,6 +46,7 @@ class Monitor extends SafeEventEmitter {
         this.memoryThresholdPercent = null;
         this.memoryLimit = null;
         this.timer = null;
+        this.basicTimer = new timers.BasicTimer();
         this.interval = DEFAULT_INTERVAL_SEC;
 
         const stopSignals = ['exit', 'SIGINT', 'SIGTERM', 'SIGHUP'];
@@ -93,7 +94,7 @@ class Monitor extends SafeEventEmitter {
         if (this.isEnabled()) {
             this.setLimits(memThresholdPercent);
             this.interval = DEFAULT_INTERVAL_SEC;
-            this.timer = util.start(this.checkThresholds.bind(this), null, this.interval);
+            this.timer = this.basicTimer.start(this.checkThresholds.bind(this), null, this.interval);
             logger.info(`Monitor checks started. Interval: ${this.interval}s | Memory Threshold: ${this.memoryThreshold} MB`);
         }
     }
@@ -105,7 +106,7 @@ class Monitor extends SafeEventEmitter {
      */
     stop() {
         if (this.timer) {
-            util.stop(this.timer);
+            this.basicTimer.stop(this.timer);
             logger.info('Monitor checks stopped.');
         }
         this.timer = null;
@@ -126,7 +127,7 @@ class Monitor extends SafeEventEmitter {
         if (this.isEnabled()) {
             this.setLimits(memThresholdPercent);
             this.interval = interval;
-            this.timer = util.update(this.timer, this.checkThresholds.bind(this), null, this.interval);
+            this.timer = this.basicTimer.update(this.timer, this.checkThresholds.bind(this), null, this.interval);
             logger.info(`Monitor checks updated. Interval: ${this.interval}s | Memory Threshold: ${this.memoryThreshold} MB`);
         }
     }
@@ -181,9 +182,8 @@ monitor.on('err', (err) => {
 
 configWorker.on('change', config => new Promise((resolve) => {
     logger.debug('configWorker change event in monitor');
-    const configCopy = util.deepCopy(config);
-    const controls = configUtil.getControls(configCopy);
-    const monitoringNeeded = configUtil.hasEnabledComponents(configCopy);
+    const controls = configUtil.getTelemetryControls(config);
+    const monitoringNeeded = configUtil.hasEnabledComponents(config);
     const memThresholdPct = controls.memoryThresholdPercent;
 
     if (monitoringNeeded && (!memThresholdPct || memThresholdPct < 100)) {

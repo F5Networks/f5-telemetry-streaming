@@ -10,14 +10,204 @@
 
 const sinon = require('sinon');
 
+const assignDefaults = require('./util').assignDefaults;
+const constants = require('../../../src/lib/constants');
 const deepCopy = require('./util').deepCopy;
 
+/**
+ * Add 'restore' function for stub
+ *
+ * @param {object} stub - stub
+ * @param {function} restoreFn - function to call on restore
+ */
+function addStubRestore(stub, restoreFn) {
+    const originRestore = stub.restore;
+    stub.restore = () => {
+        restoreFn();
+        if (originRestore) {
+            originRestore.call(stub);
+        }
+    };
+}
 
-module.exports = {
+// reference to module.exports
+// eslint-disable-next-line no-multi-assign
+const _module = module.exports = {
+    /**
+     * Stub core modules
+     *
+     * @param {object} coreModules - core modules to stub
+     * @param {ConfigWorker} [coreModules.configWorker] - config worker
+     * @param {module} [coreModules.deviceUtil] - Device Utils module
+     * @param {module} [coreModules.logger] - Logger module
+     * @param {module} [coreModules.persistentStorage] - Persistent Storage module
+     * @param {module} [coreModules.teemReporter] - Teem Reporter module
+     * @param {module} [coreModules.tracer] - Tracer module
+     * @param {module} [coreModules.utilMisc] - Utils (misc.) module
+     * @param {object} [options] - options, see each stub for additional info
+     *
+     * @returns {CoreStubCtx} stubs for core modules
+     */
+    coreStub(coreModules, options) {
+        options = options || {};
+        const ctx = {};
+        if (coreModules.configWorker) {
+            ctx.configWorker = _module.configWorker(coreModules.configWorker, options.configWorker);
+        }
+        if (coreModules.deviceUtil) {
+            ctx.deviceUtil = _module.deviceUtil(coreModules.deviceUtil, options.deviceUtil);
+        }
+        if (coreModules.logger) {
+            ctx.logger = _module.logger(coreModules.logger, options.logger);
+        }
+        if (coreModules.persistentStorage) {
+            ctx.persistentStorage = _module.persistentStorage(coreModules.persistentStorage, options.persistentStorage);
+        }
+        if (coreModules.teemReporter) {
+            ctx.teemReporter = _module.teemReporter(coreModules.teemReporter, options.teemReporter);
+        }
+        if (coreModules.tracer) {
+            ctx.tracer = _module.tracer(coreModules.tracer, options.tracer);
+        }
+        if (coreModules.utilMisc) {
+            ctx.utilMisc = _module.utilMisc(coreModules.utilMisc, options.utilMisc);
+        }
+        return ctx;
+    },
+
+    /**
+     * Stub for Config Worker
+     *
+     * @param {ConfigWorker} configWorker - instance of ConfigWorker
+     *
+     * @returns {ConfigWorkerStubCtx} stub context
+     */
+    configWorker(configWorker) {
+        const ctx = _module.eventEmitter(configWorker);
+        ctx.configs = [];
+        configWorker.on('change', config => ctx.configs.push(config));
+        return ctx;
+    },
+
+    /**
+     * Stub for Device Utils
+     *
+     * @param {module} deviceUtil - module
+     *
+     * @returns {DeviceUtilStubCtx} stub context
+     */
+    deviceUtil(deviceUtil) {
+        const ctx = {
+            decryptSecret: sinon.stub(deviceUtil, 'decryptSecret'),
+            encryptSecret: sinon.stub(deviceUtil, 'encryptSecret'),
+            getDeviceType: sinon.stub(deviceUtil, 'getDeviceType')
+        };
+        ctx.decryptSecret.callsFake(data => Promise.resolve(data.slice(3)));
+        ctx.encryptSecret.callsFake(data => Promise.resolve(`$M$${data}`));
+        ctx.getDeviceType.resolves(constants.DEVICE_TYPE.BIG_IP);
+        return ctx;
+    },
+
+    /**
+     * Stub for EventEmitter2
+     *
+     * @param {EventEmitter2} emitter - EventEmitter2 instance
+     *
+     * @returns {EventEmitter2Ctx} stub context
+     */
+    eventEmitter(emitter) {
+        const ctx = {
+            preExistingListeners: {},
+            stub: sinon.stub()
+        };
+        emitter.eventNames().forEach((evtName) => {
+            ctx.preExistingListeners[evtName] = emitter.listeners(evtName).slice(0);
+        });
+        addStubRestore(ctx.stub, () => {
+            emitter.removeAllListeners();
+            Object.keys(ctx.preExistingListeners).forEach((evtName) => {
+                ctx.preExistingListeners[evtName].forEach(listener => emitter.on(evtName, listener));
+            });
+        });
+        return ctx;
+    },
+
+    /**
+     * Stub listener for EventEmitter
+     *
+     * @param {EventEmitter} emitter - emitter
+     * @param {string} event - event name
+     * @param {function} [listener] - listener
+     *
+     * @returns {object} sinon stub and adds stub as listener for event
+     */
+    eventEmitterListener(emitter, event, listener) {
+        const stub = sinon.stub();
+        emitter.on(event, stub);
+        stub.callsFake(listener);
+        addStubRestore(stub, () => emitter.removeListener(event, stub));
+        return stub;
+    },
+
+    /**
+     * Stub for Logger
+     *
+     * @param {module} logger - module
+     * @param {object} [options] - options
+     * @param {boolean} [options.setToDebug = true] - set default logging level to DEBUG
+     * @param {boolean} [options.ignoreLevelChange = true] - ignore logging level change
+     *
+     * @returns {LoggerStubCtx} stub context
+     */
+    logger(logger, options) {
+        options = assignDefaults(options, {
+            setToDebug: true,
+            ignoreLevelChange: true
+        });
+        if (options.setToDebug) {
+            logger.setLogLevel('debug');
+        }
+        const setLogLevelOrigin = logger.setLogLevel;
+        // deeply tied to current implementation
+        const ctx = {
+            messages: {
+                all: [],
+                debug: [],
+                error: [],
+                info: [],
+                warning: []
+            },
+            logLevelHistory: [],
+            setLogLevel: sinon.stub(logger, 'setLogLevel')
+        };
+        const f5Levels = [
+            ['finest', 'debug'],
+            ['info', 'info'],
+            ['severe', 'error'],
+            ['warning', 'warning']
+        ];
+        f5Levels.forEach((pair) => {
+            const f5level = pair[0];
+            const msgLvl = pair[1];
+            ctx[f5level] = sinon.stub(logger.logger, f5level);
+            ctx[f5level].callsFake((message) => {
+                ctx.messages.all.push(message);
+                ctx.messages[msgLvl].push(message);
+            });
+        });
+        ctx.setLogLevel.callsFake((level) => {
+            ctx.logLevelHistory.push(level);
+            if (!options.ignoreLevelChange) {
+                setLogLevelOrigin.call(logger, level);
+            }
+        });
+        return ctx;
+    },
+
     /**
      * Stub for Persistent Storage with RestStorage as backend
      *
-     * @param {module} persistentStorage - instance
+     * @param {module} persistentStorage - module
      *
      * @returns {PersistentStorageStubCtx} stub context
      */
@@ -34,9 +224,10 @@ module.exports = {
             restWorker,
             saveCb: null,
             saveError: null,
+            savedData: null,
             savedState: null,
             savedStateParse: true,
-            stub: sinon.stub(persistentStorage.persistentStorage, 'storage')
+            storage: sinon.stub(persistentStorage.persistentStorage, 'storage')
         };
         restWorker.loadState.callsFake((first, cb) => {
             if (ctx.loadCb) {
@@ -57,14 +248,127 @@ module.exports = {
             ctx.savedState = deepCopy(state);
             if (ctx.savedState._data_ && ctx.savedStateParse) {
                 ctx.savedState._data_ = JSON.parse(ctx.savedState._data_);
+                ctx.savedData = deepCopy(ctx.savedState._data_);
             }
             cb(ctx.saveError);
         });
-        ctx.stub.value(new persistentStorage.RestStorage(restWorker));
+        ctx.storage.value(new persistentStorage.RestStorage(restWorker));
+        return ctx;
+    },
+
+    /**
+     * Stub for TeemReporter
+     *
+     * @param {module} teemReporter - module
+     *
+     * @returns {TeemReporterStubCtx} stub context
+     */
+    teemReporter(teemReporter) {
+        const ctx = {
+            declarations: [],
+            process: sinon.stub(teemReporter.TeemReporter.prototype, 'process')
+        };
+        ctx.process.callsFake(declaration => ctx.declarations.push(declaration));
+        return ctx;
+    },
+
+    /**
+     * Stub for Tracer
+     *
+     * @param {module} tracer - module
+     *
+     * @returns {TracerStubCtx} stub context
+     */
+    tracer(tracer) {
+        const ctx = {
+            data: {},
+            write: sinon.stub(tracer.Tracer.prototype, 'write')
+        };
+        ctx.write.callsFake(function write(data) {
+            ctx.data[this.name] = ctx.data[this.name] || [];
+            ctx.data[this.name].push(data);
+        });
+        return ctx;
+    },
+
+    /**
+     * Stub for Utils (misc.)
+     *
+     * @param {module} utilMisc  - module
+     *
+     * @returns {UtilMiscStubCtx} stub context
+     */
+    utilMisc(utilMisc) {
+        const ctx = {
+            generateUuid: sinon.stub(utilMisc, 'generateUuid'),
+            getRuntimeInfo: sinon.stub(utilMisc, 'getRuntimeInfo'),
+            networkCheck: sinon.stub(utilMisc, 'networkCheck')
+        };
+        ctx.generateUuid.uuidCounter = 0;
+        ctx.generateUuid.numbersOnly = true;
+        ctx.generateUuid.callsFake(function () {
+            if (this && !ctx.generateUuid.numbersOnly) {
+                if (this.traceName) {
+                    return this.traceName;
+                }
+                if (this.namespace) {
+                    return `${this.namespace}::${this.name}`;
+                }
+            }
+            ctx.generateUuid.uuidCounter += 1;
+            return `uuid${ctx.generateUuid.uuidCounter}`;
+        });
+        ctx.getRuntimeInfo.value(() => ({ nodeVersion: '4.6.0' }));
+        ctx.networkCheck.resolves();
         return ctx;
     }
 };
 
+/**
+ * @typedef ConfigWorkerStubCtx
+ * @type {EventEmitter2Ctx}
+ * @property {Array<object>} configs - list of emitted configs
+ */
+/**
+ * @typedef CoreStubCtx
+ * @type {object}
+ * @property {ConfigWorkerStubCtx} configWorker - config worker stub
+ * @property {DeviceUtilStubCtx} deviceUtil - Device Util stub
+ * @property {LoggerStubCtx} logger - Logger stub
+ * @property {PersistentStorageStubCtx} persistentStorage - Persistent Storage stub
+ * @property {TeemReporterStubCtx} teemReporter - Teem Reporter stub
+ * @property {TracerStubCtx} teemReporter - Tracer stub
+ * @property {UtilMiscStubCtx} utilMisc - Util Misc. stub
+ */
+/**
+ * @typedef DeviceUtilStubCtx
+ * @type {object}
+ * @property {object} decryptSecret - stub for decryptSecret
+ * @property {object} encryptSecret - stub for encryptSecret
+ * @property {object} getDeviceType - stub for getDeviceType
+ */
+/**
+ * @typedef EventEmitter2Ctx
+ * @type {object}
+ * @property {Object<string, Array<function>} preExistingListeners - listeners to restore
+ * @property {object} stub - sinon stub
+ */
+/**
+ * @typedef LoggerStubCtx
+ * @type {object}
+ * @property {object} messages - logged messages
+ * @property {Array<string>} messages.all - all logged messages
+ * @property {Array<string>} messages.debug - debug messages
+ * @property {Array<string>} messages.error - error messages
+ * @property {Array<string>} messages.info - info messages
+ * @property {Array<string>} messages.warning - warning messages
+ * @property {Array<string>} logLevelHistory - log level history
+ * @property {object} finest - sinon stub for Logger.logger.finest
+ * @property {object} info - sinon stub for Logger.logger.info
+ * @property {object} severe - sinon stub for Logger.logger.severe
+ * @property {object} warning - sinon stub for Logger.logger.warning
+ * @property {object} setLogLevel - sinon stub for Logger.setLogLevel
+ */
 /**
  * @typedef PersistentStorageStubCtx
  * @type {object}
@@ -77,4 +381,26 @@ module.exports = {
  * @property {Error} saveError - error to return to callback passed on attempt to save
  * @property {any} savedState - saved state on attempt to save (will override 'loadState')
  * @property {boolean} savedStateParse - parse '_data_' property of saved state if exist
+ * @property {object} storage - sinon stub for persistentStorage.persistentStorage.storage
+ */
+/**
+ * @typedef TeemReporterStubCtx
+ * @type {object}
+ * @property {Array<object>} declarations - list of processed declarations
+ * @property {object} process - sinon stub for TeemReporter.prototype.process
+ */
+/**
+ * @typedef TracerStubCtx
+ * @type {object}
+ * @property {Object<string, Array<any>>} data - data written to tracers
+ * @property {object} write - sinon stub for Tracer.prototype.write
+ */
+/**
+ * @typedef UtilMiscStubCtx
+ * @type {object}
+ * @property {object} generateUuid - stub for generateUuid
+ * @property {number} generateUuid.uuidCounter - counter value
+ * @property {boolean} generateUuid.numbersOnly - numbers only
+ * @property {object} getRuntimeInfo - stub for getRuntimeInfo
+ * @property {object} networkCheck - stub for networkCheck
  */

@@ -11,21 +11,18 @@
 const constants = require('./constants');
 const configWorker = require('./config');
 const dataPipeline = require('./dataPipeline');
-const deviceUtil = require('./utils/device');
 const errors = require('./errors');
 const logger = require('./logger');
 const SystemStats = require('./systemStats');
 const util = require('./utils/misc');
+const timers = require('./utils/timers');
 const configUtil = require('./utils/config');
-const tracers = require('./utils/tracer').Tracer;
+const tracers = require('./utils/tracer');
 const APP_THRESHOLDS = require('./constants').APP_THRESHOLDS;
 const monitor = require('./utils/monitor');
 
 /** @module systemPoller */
 
-const CONFIG_CLASSES = constants.CONFIG_CLASSES;
-// use SYSTEM_POLLER_CLASS_NAME to keep compatibility with previous versions
-const TRACER_CLASS_NAME = CONFIG_CLASSES.SYSTEM_POLLER_CLASS_NAME;
 // key - poller name, value - { timer, config }
 const POLLER_TIMERS = {};
 
@@ -57,53 +54,25 @@ function findSystemOrPollerConfigs(originalConfig, sysOrPollerName, pollerName, 
     // If namespace is undefined, assumption is we're querying for objects in the 'default namespace'
     const namespaceInfo = namespace ? ` in Namespace '${namespace}'` : '';
     namespace = namespace || constants.DEFAULT_UNNAMED_NAMESPACE;
-    const systems = configUtil.getTelemetrySystems(originalConfig, namespace);
     const systemPollers = configUtil.getTelemetrySystemPollers(originalConfig, namespace);
-    let poller;
+    let pollers = [];
 
-    const system = systems.find(s => s.name === sysOrPollerName);
     if (sysOrPollerName && pollerName) {
-        if (!util.isObjectEmpty(system)) {
-            poller = systemPollers.filter(p => p.name === pollerName && system.systemPollers.indexOf(p.id) > -1);
-        }
+        // probably system's and poller's names
+        pollers = systemPollers.filter(p => p.name === pollerName && p.systemName === sysOrPollerName);
     } else {
         // each object has unique name per namespace
         // so, one of the system or poller will be 'undefined'
-        poller = systemPollers.filter(p => p.name === sysOrPollerName);
+        pollers = systemPollers.filter(p => p.systemName === sysOrPollerName);
     }
 
-    const systemFound = !util.isObjectEmpty(system);
-    const pollerFound = poller && poller.length > 0;
-    // check for errors at first
-    if (!systemFound || !pollerFound) {
+    if (pollers.length === 0) {
         if (pollerName) {
-            // sysOrPollerName and pollerName both passed to the function
-            if (!systemFound) {
-                throw new errors.ObjectNotFoundInConfigError(`System with name '${sysOrPollerName}' doesn't exist${namespaceInfo}`);
-            }
-
-            if (!pollerFound) {
-                throw new errors.ObjectNotFoundInConfigError(`System Poller with name '${pollerName}' doesn't exist in System '${sysOrPollerName}'${namespaceInfo}`);
-            }
-
-            throw new errors.ObjectNotFoundInConfigError(`System Poller with name '${pollerName}' doesn't exist${namespaceInfo}`);
+            throw new errors.ObjectNotFoundInConfigError(`System Poller with name '${pollerName}' doesn't exist in System '${sysOrPollerName}'${namespaceInfo}`);
         }
-        if (!(systemFound || pollerFound)) {
-            throw new errors.ObjectNotFoundInConfigError(`System or System Poller with name '${sysOrPollerName}' doesn't exist${namespaceInfo}`);
-        }
-
-        if (systemFound && system.systemPollers.length === 0) {
-            throw new NoPollersError(`System with name '${sysOrPollerName}' has no System Poller configured${namespaceInfo}`);
-        }
+        throw new errors.ObjectNotFoundInConfigError(`System or System Poller with name '${sysOrPollerName}' doesn't exist or has no configured System Pollers${namespaceInfo}`);
     }
-    // error check passed and now we have valid objects to continue with
-    let config = [];
-    if (pollerFound) {
-        config = poller;
-    } else {
-        config = originalConfig.components.filter(c => system.systemPollers.indexOf(c.id) > -1);
-    }
-    return config;
+    return pollers;
 }
 
 function getEnabledPollerConfigs(originalConfig, includeDisabled) {
@@ -126,34 +95,29 @@ function applyConfig(originalConfig) {
         const existingPoller = currPollers[key];
         newPollerIDs.push(key);
         if (!pollerConfig.skipUpdate || !existingPoller) {
-            pollerConfig.tracer = tracers.createFromConfig(
-                TRACER_CLASS_NAME, key, pollerConfig
-            );
+            pollerConfig.tracer = tracers.fromConfig(pollerConfig);
             const baseMsg = `system poller ${key}. Interval = ${pollerConfig.interval} sec.`;
             // add to data context to track source poller config and destination(s)
-            pollerConfig.destinationIds = originalConfig.mappings[pollerConfig.id];
+            pollerConfig.destinationIds = configUtil.getReceivers(originalConfig, pollerConfig).map(r => r.id);
             if (pollerConfig.interval === 0) {
                 logger.info(`Configuring non-polling ${baseMsg}`);
-                if (currPollers[key]) {
-                    util.stop(currPollers[key].timer || currPollers[key]);
+                if (currPollers[key] && currPollers[key].timer) {
+                    currPollers[key].timer.stop();
                 }
                 currPollers[key] = undefined;
-            } else if (currPollers[key]) {
+            } else if (currPollers[key] && currPollers[key].timer) {
                 logger.info(`Updating ${baseMsg}`);
-                currPollers[key] = {
-                    timer: util.update(
-                        currPollers[key].timer || currPollers[key], safeProcess, pollerConfig, pollerConfig.interval
-                    ),
-                    config: pollerConfig
-                };
+                currPollers[key].timer.update(safeProcess, pollerConfig, pollerConfig.interval);
+                currPollers[key].config = pollerConfig;
             } else {
                 logger.info(`Starting ${baseMsg}`);
                 currPollers[key] = {
-                    timer: util.start(
-                        safeProcess, pollerConfig, pollerConfig.interval
-                    ),
+                    timer: new timers.SlidingTimer(safeProcess, pollerConfig, pollerConfig.interval, {
+                        logInfo: pollerConfig.traceName
+                    }),
                     config: pollerConfig
                 };
+                currPollers[key].timer.start();
             }
         }
     });
@@ -162,8 +126,8 @@ function applyConfig(originalConfig) {
         if (newPollerIDs.indexOf(key) === -1) {
             logger.info(`Disabling/removing system poller ${key}`);
             // for pollers with interval=0, the key exists, but value is undefined
-            if (!util.isObjectEmpty(currPollers[key])) {
-                util.stop(currPollers[key].timer);
+            if (!util.isObjectEmpty(currPollers[key]) && currPollers[key].timer) {
+                currPollers[key].timer.stop();
             }
             delete currPollers[key];
         }
@@ -176,10 +140,17 @@ function enablePollers() {
         const poller = currentPollers[pollerKey];
         if (poller && poller.config && poller.config.interval > 0) {
             logger.info(`Enabling system poller ${pollerKey}. Interval = ${poller.config.interval} sec.`);
-            // in case disable failed for some reason, ensure we stop any running timer
-            currentPollers[pollerKey].timer = util.update(
-                currentPollers[pollerKey].timer, safeProcess, poller.config, poller.config.interval
-            );
+            if (poller.timer) {
+                // Update timer to enable/re-enable the poller
+                poller.timer.update(
+                    safeProcess, poller.config, poller.config.interval
+                );
+            } else {
+                poller.timer = new timers.SlidingTimer(safeProcess, poller.config, poller.config.interval, {
+                    logInfo: poller.config.traceName
+                });
+                poller.timer.start();
+            }
         }
     });
 }
@@ -190,8 +161,9 @@ function disablePollers() {
         const poller = currentPollers[pollerKey];
         if (poller && poller.config && poller.config.interval > 0) {
             logger.info(`Disabling system poller ${pollerKey}`);
-            util.stop(currentPollers[pollerKey].timer);
-            currentPollers[pollerKey].timer = null;
+            if (poller.timer) {
+                poller.timer.stop();
+            }
         }
     });
 }
@@ -294,11 +266,11 @@ function safeProcess() {
 function getPollersConfig(sysOrPollerName, options) {
     options = options || {};
     const includeDisabled = (typeof options.includeDisabled === 'undefined') ? false : options.includeDisabled;
-    return configWorker.getConfig()
-        .then(currentConfig => findSystemOrPollerConfigs(
-            currentConfig.normalized, sysOrPollerName, options.pollerName, options.namespace
+    return Promise.resolve()
+        .then(() => findSystemOrPollerConfigs(
+            configWorker.currentConfig, sysOrPollerName, options.pollerName, options.namespace
         ))
-        .then(config => deviceUtil.decryptAllSecrets(config))
+        .then(config => configUtil.decryptSecrets(config))
         .then((configs) => {
             if (configs.length === 0) {
                 // unexpected, something went wrong
@@ -321,7 +293,7 @@ function fetchPollersData(pollerConfigs, decryptSecrets) {
     // need to wrap with catch to avoid situations when one of the promises was rejected
     // and another one left in unknown state
     const caughtErrors = [];
-    const promise = decryptSecrets ? deviceUtil.decryptAllSecrets(pollerConfigs)
+    const promise = decryptSecrets ? configUtil.decryptSecrets(pollerConfigs)
         : Promise.resolve(pollerConfigs);
 
     return promise
@@ -341,14 +313,7 @@ function fetchPollersData(pollerConfigs, decryptSecrets) {
 // config worker change event
 configWorker.on('change', config => new Promise((resolve) => {
     logger.debug('configWorker change event in systemPoller');
-    // timestamp to find out-dated tracers
-    const tracersTimestamp = new Date().getTime();
-
     applyConfig(util.deepCopy(config));
-    // remove tracers that were not touched
-    tracers.remove(tracer => tracer.name.startsWith(TRACER_CLASS_NAME)
-        && tracer.lastGetTouch < tracersTimestamp);
-
     // reset for monitor check
     processingEnabled = true;
 

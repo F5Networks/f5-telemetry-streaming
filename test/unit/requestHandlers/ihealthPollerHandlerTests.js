@@ -17,7 +17,7 @@ const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
 const errors = require('../../../src/lib/errors');
-const ihealh = require('../../../src/lib/ihealth');
+const ihealth = require('../../../src/lib/ihealth');
 const IHealthPollerHandler = require('../../../src/lib/requestHandlers/ihealthPollerHandler');
 const testUtil = require('../shared/util');
 const ErrorHandler = require('../../../src/lib/requestHandlers/errorHandler');
@@ -42,7 +42,7 @@ describe('SystemPollerHandler', () => {
 
     it('should return 200 on GET request to retrieve current state', () => {
         requestHandler.params = {};
-        sinon.stub(ihealh, 'getCurrentState').callsFake(() => ({
+        sinon.stub(ihealth, 'getCurrentState').callsFake(() => ({
             state: 'current'
         }));
 
@@ -60,7 +60,7 @@ describe('SystemPollerHandler', () => {
     });
 
     it('should return 201 on GET request to start new polling cycle', () => {
-        sinon.stub(ihealh, 'startPoller').callsFake((systemName, pollerName) => Promise.resolve({
+        sinon.stub(ihealth, 'startPoller').callsFake((systemName, pollerName) => Promise.resolve({
             created: true,
             systemDeclName: systemName,
             iHealthDeclName: pollerName,
@@ -81,7 +81,7 @@ describe('SystemPollerHandler', () => {
     });
 
     it('should return 202 on GET request to start polling cycle that running already', () => {
-        sinon.stub(ihealh, 'startPoller').callsFake((systemName, pollerName) => Promise.resolve({
+        sinon.stub(ihealth, 'startPoller').callsFake((systemName, pollerName) => Promise.resolve({
             runningAlready: true,
             systemDeclName: systemName,
             iHealthDeclName: pollerName,
@@ -103,7 +103,7 @@ describe('SystemPollerHandler', () => {
 
 
     it('should return 404 when unable to make config lookup', () => {
-        sinon.stub(ihealh, 'startPoller').rejects(new errors.ConfigLookupError('expectedError'));
+        sinon.stub(ihealth, 'startPoller').rejects(new errors.ConfigLookupError('expectedError'));
         return requestHandler.process()
             .then((handler) => {
                 assert.isTrue(handler instanceof ErrorHandler, 'should return a reference to error handler');
@@ -116,7 +116,7 @@ describe('SystemPollerHandler', () => {
     });
 
     it('should reject when caught unknown error', () => {
-        sinon.stub(ihealh, 'startPoller').rejects(new Error('expectedError'));
+        sinon.stub(ihealth, 'startPoller').rejects(new Error('expectedError'));
         return assert.isRejected(requestHandler.process(), 'expectedError');
     });
 });

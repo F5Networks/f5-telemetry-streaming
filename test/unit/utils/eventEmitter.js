@@ -14,6 +14,7 @@ require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
+
 const eventEmitter = require('../../../src/lib/utils/eventEmitter');
 
 chai.use(chaiAsPromised);

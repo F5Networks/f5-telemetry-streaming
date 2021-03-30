@@ -193,34 +193,6 @@ module.exports = {
     },
 
     /**
-     * Start function
-     *
-     * @returns {Object} setInterval ID (to be used by clearInterval)
-     */
-    start(func, args, intervalInS) {
-        return setInterval(func, intervalInS * 1000, args);
-    },
-
-    /**
-     * Update function
-     *
-     * @returns {Object} Result of function start()
-     */
-    update(setIntervalId, func, args, intervalInS) {
-        clearInterval(setIntervalId);
-        return this.start(func, args, intervalInS);
-    },
-
-    /**
-     * Stop function
-     *
-     * @param {integer} intervalID - interval ID
-     */
-    stop(intervalID) {
-        clearInterval(intervalID);
-    },
-
-    /**
      * Return Node version without 'v'
      */
     getRuntimeInfo() {

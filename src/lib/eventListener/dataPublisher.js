@@ -30,9 +30,9 @@ class NoListenerError extends errors.ConfigLookupError {}
  */
 function sendDataToListener(data, listenerName, options) {
     const opts = options || {};
-    return configWorker.getConfig()
-        .then((config) => {
-            const eventListener = configUtil.getTelemetryListeners(config.normalized, opts.namespace)
+    return Promise.resolve()
+        .then(() => {
+            const eventListener = configUtil.getTelemetryListeners(configWorker.currentConfig, opts.namespace)
                 .find(el => el.name === listenerName);
 
             let error;

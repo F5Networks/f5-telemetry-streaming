@@ -11,6 +11,14 @@ Document Revision History
         - Description
         - Date
 
+      * - 1.19.0
+        - Updated the documentation for Telemetry Streaming v1.19.0. This release contains the following changes: |br| * Added a new troubleshooting entry providing memory threshold information (see :ref:`Memory Threshold<memory>`) |br| * Added new Event Listener endpoints for sending debug messages to an Event Listener (see :ref:`Event Listener endpoints<eventlistenerdata>`) |br| * Updated the :ref:`Splunk Consumer<splunk-ref>` documentation with the new **compressionType** property, and added a related troubleshooting entry (see :ref:`Troubleshooting<splunkmem>`)  |br| * **totNativeConns** and **totCompatConns** are now exposed on SSL profile stats |br| * Added the **swap** metric to the **system** group (System Poller output), see :ref:`System Information<sysinfo>`) |br| |br| Issues Resolved: |br| * Fixed Route Domain ID handling for Virtual Server and Pool stats |br| * Splunk debug output does not log HTTP Response payload, `GitHub #109 <https://github.com/F5Networks/f5-telemetry-streaming/issues/109>`_ |br| * Update example output for maxConns, pktsIn, pktsOut, and totConns |br| * Tracer unable to access destination directory |br| * Tracer(s) from other namespaces should not stop when namespace-only declaration posted
+        - 4-6-21
+  
+      * - Unreleased
+        - This documentation only update contains the following change: |br| * Updated the note in :ref:`Splunk multi-metric format<multi-metric>` to add that custom endpoints are not supported with multi-metric format (added the same note to :doc:`custom-endpoints`).
+        - 3-1-21
+     
       * - 1.18.0
         - Updated the documentation for Telemetry Streaming v1.18.0. This release contains the following changes: |br| * Added new endpoints for individual namespaces (see :ref:`Namespace endpoints<namespaceEP>`) |br| * Added support for TLS client authentication for the Generic HTTP consumer (see the :ref:`TLS Client example<httptls>` and the :ref:`Generic HTTP consumer page<http-ref>`) |br| * Added response logging to Event Listener page (see :ref:`LTM Request Log profile<requestlog>` and the updated :ref:`AS3 Logging example<as3logging-ref>`)  |br| * Added a note to the :ref:`Splunk consumer<splunk-ref>` and a new section in Custom Endpoints for :ref:`Including hostname information<hostname>`  (`GitHub #107 <https://github.com/F5Networks/f5-telemetry-streaming/issues/107>`_)  |br| * Added a note to :ref:`awscloud-ref` and :ref:`awss3-ref` about root certificates for AWS services being embedded within Telemetry Streaming  |br| |br| Issues Resolved: |br| * Fix Event Listener startup errors that might cause restnoded to crash |br| * Splunk multiEvent format should ignore 'References'
         - 2-23-21

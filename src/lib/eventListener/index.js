@@ -18,17 +18,16 @@ const normalize = require('../normalize');
 const promiseUtil = require('../utils/promise');
 const properties = require('../properties.json');
 const stringify = require('../utils/misc').stringify;
-const tracers = require('../utils/tracer').Tracer;
+const tracers = require('../utils/tracer');
+
+/** @module EventListener */
 
 
-const CLASS_NAME = constants.CONFIG_CLASSES.EVENT_LISTENER_CLASS_NAME;
 const normalizationOpts = {
     global: properties.global,
     events: properties.events,
     definitions: properties.definitions
 };
-
-/** @module EventListener */
 
 /**
  * Create function to filter events by pattern defined in config
@@ -315,8 +314,6 @@ EventListener.remove = function (listener) {
 // config worker change event
 configWorker.on('change', (config) => {
     logger.debug('configWorker change event in eventListener'); // helpful debug
-    // timestamp to find out-dated tracers
-    const tracersTimestamp = new Date().getTime();
     const configuredListeners = configUtil.getTelemetryListeners(config);
 
     // stop all removed listeners
@@ -350,16 +347,13 @@ configWorker.on('change', (config) => {
         const listener = EventListener.get(name, port);
         listener.updateConfig({
             actions: listenerConfig.actions,
-            destinationIds: config.mappings[listenerConfig.id],
+            destinationIds: configUtil.getReceivers(config, listenerConfig).map(r => r.id),
             filterFunc: buildFilterFunc(listenerConfig),
             id: listenerConfig.id,
             tags: listenerConfig.tag,
-            tracer: tracers.createFromConfig(CLASS_NAME, name, listenerConfig)
+            tracer: tracers.fromConfig(listenerConfig)
         });
     });
-
-    tracers.remove(tracer => tracer.name.startsWith(CLASS_NAME)
-        && tracer.lastGetTouch < tracersTimestamp);
 
     return EventListener.receiversManager.stopAndRemoveInactive()
         .then(() => EventListener.receiversManager.start())

@@ -230,7 +230,8 @@
                     }
                 ]
             },
-            "else": {}
+            "else": {},
+            "$comment": "Telemetry_iHealth_Poller should be either built-in within Telemetry_System or referenced by Telemetry_System(s), otherwise it will be treated as disabled"
         }
     ]
 }

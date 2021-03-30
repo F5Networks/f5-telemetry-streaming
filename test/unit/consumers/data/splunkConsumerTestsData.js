@@ -940,6 +940,7 @@ module.exports = {
                         'metric_name:ltmConfigTime': 1560978820000,
                         'metric_name:memory': 0,
                         'metric_name:systemTimestamp': 1546304461000,
+                        'metric_name:swap': 0,
                         'metric_name:tmmCpu': 0,
                         'metric_name:tmmMemory': 0,
                         platformId: 'Z100',

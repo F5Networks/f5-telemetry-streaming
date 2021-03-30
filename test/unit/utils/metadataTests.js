@@ -15,6 +15,7 @@ require('../shared/restoreCache')();
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
+
 const azureUtil = require('../../../src/lib/consumers/shared/azureUtil');
 const metadataUtil = require('../../../src/lib/utils/metadata');
 
