@@ -4,6 +4,7 @@ Pull Consumers
 ==============
 Use this section to find example declarations and notes for pull-based monitoring systems. See :doc:`setting-up-consumer` for push-based consumers.
 
+.. _aboutpull:
 
 About Pull Consumers
 --------------------
