@@ -14,6 +14,8 @@ const assignDefaults = require('./util').assignDefaults;
 const constants = require('../../../src/lib/constants');
 const deepCopy = require('./util').deepCopy;
 
+let SINON_FAKE_CLOCK = null;
+
 /**
  * Add 'restore' function for stub
  *
@@ -33,6 +35,107 @@ function addStubRestore(stub, restoreFn) {
 // reference to module.exports
 // eslint-disable-next-line no-multi-assign
 const _module = module.exports = {
+    /**
+     * Sinon fake timers
+     *
+     * @param {object} [options] - options
+     * @param {any} [options.fakeTimersOpts] - sinon.useFakeTimers options, see sinon.useFakeTimers docs
+     *
+     * @returns {ClockStubCtx} clock stub context
+     */
+    clock(options) {
+        options = options || {};
+        if (SINON_FAKE_CLOCK === null) {
+            SINON_FAKE_CLOCK = sinon.useFakeTimers(options.fakeTimersOpts);
+        } else if (typeof options.fakeTimersOpts !== 'undefined') {
+            throw new Error('SINON_FAKE_CLOCK configured already');
+        }
+        let stopClockForward = false;
+        const ctx = {
+            stub: sinon.stub()
+        };
+        if (SINON_FAKE_CLOCK) {
+            ctx.fakeClock = SINON_FAKE_CLOCK;
+        }
+        addStubRestore(ctx.stub, () => {
+            if (SINON_FAKE_CLOCK) {
+                stopClockForward = true;
+                SINON_FAKE_CLOCK.restore();
+                SINON_FAKE_CLOCK = null;
+                delete ctx.fakeClock;
+            }
+            ctx.stopClockForward();
+        });
+        /**
+         * Move clock forward
+         *
+         * @param {number} tickStep - number of ticks
+         * @param {object} [fwdOptions] - options
+         * @param {function} [fwdOptions.cb] - callback to call before schedule next tick
+         * @param {boolean} [fwdOptions.once] - run .tick once only
+         * @param {boolean} [fwdOptions.promisify] - promisify activity
+         *
+         * @returns {Promise | void} once scheduled
+         */
+        ctx.clockForward = (tickStep, fwdOptions) => {
+            fwdOptions = fwdOptions || {};
+            stopClockForward = false;
+
+            // eslint-disable-next-line consistent-return
+            function doTimeTick(ticks) {
+                if (ctx.fakeClock) {
+                    ctx.fakeClock.tick(ticks);
+                }
+                if (!fwdOptions.once) {
+                    return fwdOptions.promisify ? Promise.resolve().then(timeTick) : timeTick();
+                }
+            }
+            function then(ticks) {
+                if (stopClockForward) {
+                    return;
+                }
+                if (ticks === false) {
+                    return;
+                }
+                ticks = typeof ticks === 'number' ? ticks : tickStep;
+                if (ctx.fakeClock) {
+                    if (fwdOptions.promisify) {
+                        ctx.fakeClock._setImmediate(() => doTimeTick(ticks));
+                    } else {
+                        doTimeTick(ticks);
+                    }
+                }
+            }
+            function timeTick() {
+                let nextTick = tickStep;
+                if (stopClockForward) {
+                    return;
+                }
+                if (fwdOptions.cb) {
+                    nextTick = fwdOptions.cb();
+                }
+                if (nextTick.then) {
+                    if (!fwdOptions.promisify) {
+                        throw new Error('Callback passed to "clockForward" returned Promise but "clockForward" was not configured to use Promises!');
+                    }
+                    nextTick.then(then);
+                } else {
+                    then(nextTick);
+                }
+            }
+            return fwdOptions.promisify ? Promise.resolve().then(timeTick) : timeTick();
+        };
+        /**
+         * Stop fake clock activity
+         *
+         * @returns {void}
+         */
+        ctx.stopClockForward = () => {
+            stopClockForward = true;
+        };
+        return ctx;
+    },
+
     /**
      * Stub core modules
      *
@@ -150,6 +253,66 @@ const _module = module.exports = {
     },
 
     /**
+     * Stub modules for iHealthPoller
+     *
+     * @param {object} modules - modules to stub
+     * @param {module} [modules.ihealthUtil] - iHealth Util
+     *
+     * @returns {iHealthPollerStubCtx} stubs for iHealthPoller related modules
+     */
+    iHealthPoller(modules) {
+        const ctx = {};
+        if (modules.ihealthUtil) {
+            ctx.ihealthUtil = _module.ihealthUtil(modules.ihealthUtil);
+        }
+        return ctx;
+    },
+
+    /**
+     * Stub for iHealth utils
+     *
+     * @param {module} ihealthUtil - module
+     *
+     * @returns {ihealthUtilStubCtx} stub context
+     */
+    ihealthUtil(ihealthUtil) {
+        const qkviewFile = 'qkviewFile';
+        const qkviewReportExample = {
+            diagnostics: [],
+            system_information: {
+                hostname: 'localhost.localdomain'
+            }
+        };
+        const qkviewURI = 'https://ihealth-api.f5.com/qkview-analyzer/api/qkviews/0000000';
+
+        const ctx = {
+            DeviceAPI: {
+                removeFile: sinon.stub(ihealthUtil.DeviceAPI.prototype, 'removeFile')
+            },
+            IHealthManager: {
+                constructor: sinon.spy(ihealthUtil, 'IHealthManager'),
+                fetchQkviewDiagnostics: sinon.stub(ihealthUtil.IHealthManager.prototype, 'fetchQkviewDiagnostics'),
+                isQkviewReportReady: sinon.stub(ihealthUtil.IHealthManager.prototype, 'isQkviewReportReady'),
+                initialize: sinon.stub(ihealthUtil.IHealthManager.prototype, 'initialize'),
+                uploadQkview: sinon.stub(ihealthUtil.IHealthManager.prototype, 'uploadQkview')
+            },
+            QkviewManager: {
+                constructor: sinon.spy(ihealthUtil, 'QkviewManager'),
+                initialize: sinon.stub(ihealthUtil.QkviewManager.prototype, 'initialize'),
+                process: sinon.stub(ihealthUtil.QkviewManager.prototype, 'process')
+            }
+        };
+        ctx.DeviceAPI.removeFile.resolves();
+        ctx.IHealthManager.fetchQkviewDiagnostics.callsFake(() => Promise.resolve(deepCopy(qkviewReportExample)));
+        ctx.IHealthManager.isQkviewReportReady.resolves(true);
+        ctx.IHealthManager.initialize.callsFake(function init() { return this; });
+        ctx.IHealthManager.uploadQkview.resolves(qkviewURI);
+        ctx.QkviewManager.initialize.callsFake(function init() { return this; });
+        ctx.QkviewManager.process.resolves(qkviewFile);
+        return ctx;
+    },
+
+    /**
      * Stub for Logger
      *
      * @param {module} logger - module
@@ -193,6 +356,7 @@ const _module = module.exports = {
             ctx[f5level].callsFake((message) => {
                 ctx.messages.all.push(message);
                 ctx.messages[msgLvl].push(message);
+                ctx[f5level].wrappedMethod(message);
             });
         });
         ctx.setLogLevel.callsFake((level) => {
@@ -217,12 +381,14 @@ const _module = module.exports = {
             saveState: sinon.stub()
         };
         const ctx = {
-            loadCb: null,
+            loadCbAfter: null,
+            loadCbBefore: null,
             // loadData - should be set explicitly
             loadError: null,
             loadState: { _data_: {} },
             restWorker,
-            saveCb: null,
+            saveCbAfter: null,
+            saveCbBefore: null,
             saveError: null,
             savedData: null,
             savedState: null,
@@ -230,18 +396,21 @@ const _module = module.exports = {
             storage: sinon.stub(persistentStorage.persistentStorage, 'storage')
         };
         restWorker.loadState.callsFake((first, cb) => {
-            if (ctx.loadCb) {
-                ctx.loadCb(ctx, first, cb);
+            if (ctx.loadCbBefore) {
+                ctx.loadCbBefore(ctx, first, cb);
             }
             if (Object.prototype.hasOwnProperty.call(ctx, 'loadData')) {
                 ctx.loadState = { _data_: JSON.stringify(ctx.loadData) };
                 delete ctx.loadData;
             }
             cb(ctx.loadError, ctx.loadState);
+            if (ctx.loadCbAfter) {
+                ctx.loadCbAfter(ctx, first, cb);
+            }
         });
         restWorker.saveState.callsFake((first, state, cb) => {
-            if (ctx.saveCb) {
-                ctx.saveCb(ctx, first, state, cb);
+            if (ctx.saveCbBefore) {
+                ctx.saveCbBefore(ctx, first, state, cb);
             }
             // override to be able to load it again
             ctx.loadState = state;
@@ -251,6 +420,9 @@ const _module = module.exports = {
                 ctx.savedData = deepCopy(ctx.savedState._data_);
             }
             cb(ctx.saveError);
+            if (ctx.saveCbAfter) {
+                ctx.saveCbAfter(ctx, first, state, cb);
+            }
         });
         ctx.storage.value(new persistentStorage.RestStorage(restWorker));
         return ctx;
@@ -325,6 +497,14 @@ const _module = module.exports = {
 };
 
 /**
+ * @typedef ClockStubCtx
+ * @type {object}
+ * @property {function} clockForward - move clock forward
+ * @property {object} [fakeClock] - sinon' fakeTimer object
+ * @property {function} stopClockForward - stop fake clock activity
+ * @property {object} stub - sinon stub
+ */
+/**
  * @typedef ConfigWorkerStubCtx
  * @type {EventEmitter2Ctx}
  * @property {Array<object>} configs - list of emitted configs
@@ -337,7 +517,7 @@ const _module = module.exports = {
  * @property {LoggerStubCtx} logger - Logger stub
  * @property {PersistentStorageStubCtx} persistentStorage - Persistent Storage stub
  * @property {TeemReporterStubCtx} teemReporter - Teem Reporter stub
- * @property {TracerStubCtx} teemReporter - Tracer stub
+ * @property {TracerStubCtx} tracer - Tracer stub
  * @property {UtilMiscStubCtx} utilMisc - Util Misc. stub
  */
 /**
@@ -370,14 +550,33 @@ const _module = module.exports = {
  * @property {object} setLogLevel - sinon stub for Logger.setLogLevel
  */
 /**
+ * @typedef iHealthPollerStubCtx
+ * @type {object}
+ * @property {ihealthUtilStubCtx} ihealthUtil - iHealth Utils stubs
+ */
+/**
+ * @typedef ihealthUtilStubCtx
+ * @type {object}
+ * @property {object} IHealthManager - IHealthManager stubs
+ * @property {object} IHealthManager.fetchQkviewDiagnostics - stub for IHealthManager.prototype.fetchQkviewDiagnostics
+ * @property {object} IHealthManager.isQkviewReportReady - stub for IHealthManager.prototype.isQkviewReportReady
+ * @property {object} IHealthManager.initialize - stub for IHealthManager.prototype.initialize
+ * @property {object} IHealthManager.uploadQkview - stub for IHealthManager.prototype.uploadQkview
+ * @property {object} QkviewManager - IHealthManager stubs
+ * @property {object} QkviewManager.initialize - stub for QkviewManager.prototype.initialize
+ * @property {object} QkviewManager.process - stub for QkviewManager.prototype.process
+ */
+/**
  * @typedef PersistentStorageStubCtx
  * @type {object}
- * @property {function} loadCb - error to throw on attempt to load
+ * @property {function} loadCbAfter - error to throw on attempt to load
+ * @property {function} loadCbBefore - error to throw on attempt to load
  * @property {any} loadData - data to set to '_data_' property on attempt to load
  * @property {Error} loadError - error to return to callback passed on attempt to load
  * @property {any} loadState - state to return on attempt to load
  * @property {object} restWorker - RestWorker stub
- * @property {function} saveCb - error to throw on attempt to save
+ * @property {function} saveCbAfter - error to throw on attempt to save
+ * @property {function} saveCbBefore - error to throw on attempt to save
  * @property {Error} saveError - error to return to callback passed on attempt to save
  * @property {any} savedState - saved state on attempt to save (will override 'loadState')
  * @property {boolean} savedStateParse - parse '_data_' property of saved state if exist

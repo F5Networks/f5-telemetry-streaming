@@ -29,21 +29,14 @@ function processHeaders(headers) {
     return ret;
 }
 
-function getProxyUrl(proxyOpts) {
-    let proxy;
-    if (!util.isObjectEmpty(proxyOpts)) {
-        let auth;
-        if (proxyOpts.username) {
-            auth = proxyOpts.username;
-            if (proxyOpts.passphrase) {
-                auth = `${auth}:${proxyOpts.passphrase}`;
-            }
-        }
-        auth = auth ? `${auth}@` : '';
-        const port = proxyOpts.port ? `:${proxyOpts.port}` : '';
-        proxy = `${proxyOpts.protocol || 'https'}://${auth}${proxyOpts.host}${port}`;
-    }
-    return proxy;
+function getProxy(proxyOpts) {
+    return {
+        host: proxyOpts.host,
+        port: proxyOpts.port,
+        protocol: proxyOpts.protocol || 'https',
+        username: proxyOpts.username,
+        passphrase: proxyOpts.passphrase
+    };
 }
 
 /**
@@ -72,7 +65,9 @@ function sendToConsumer(config) {
     ['hosts', 'hostIdx', 'logger', 'proxy', 'uri'].forEach((prop) => {
         delete requestOptions[prop];
     });
-    requestOptions.proxy = getProxyUrl(config.proxy);
+    if (!util.isObjectEmpty(config.proxy)) {
+        requestOptions.proxy = getProxy(config.proxy);
+    }
     requestOptions.includeResponseObject = true;
 
     let response;

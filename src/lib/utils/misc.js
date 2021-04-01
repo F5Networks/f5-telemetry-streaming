@@ -14,6 +14,7 @@ const clone = require('lodash/clone');
 const mergeWith = require('lodash/mergeWith');
 const trim = require('lodash/trim');
 const objectGet = require('lodash/get');
+const childProcess = require('child_process');
 const fs = require('fs');
 const net = require('net');
 // deep require support is deprecated for versions 7+ (requires node8+)
@@ -24,35 +25,34 @@ const uuidv4 = require('uuid/v4');
 */
 
 /**
- * Promisified FS module
+ * Convert async callback function to promise-based funcs
+ *
+ * Note: when error passed to callback then all other args will be attached
+ * to it and can be access via 'error.callbackArgs' property
+ *
+ * @property {Object} module - origin module
+ * @property {String} funcName - function name
+ *
+ * @returns {Function<Promise>} proxy function
  */
-const fsPromisified = (function promisifyNodeFsModule(fsModule) {
-    function proxy(originFunc) {
-        return function () {
-            return new Promise((resolve, reject) => {
-                const args = Array.from(arguments);
-                args.push(function () {
-                    const cbArgs = Array.from(arguments);
-                    // error usually is first arg
-                    if (cbArgs[0]) {
-                        reject(cbArgs[0]);
-                    } else {
-                        resolve(cbArgs.slice(1));
-                    }
-                });
-                originFunc.apply(null, args);
+function proxyForNodeCallbackFuncs(module, funcName) {
+    return function () {
+        return new Promise((resolve, reject) => {
+            const args = Array.from(arguments);
+            args.push(function () {
+                const cbArgs = Array.from(arguments);
+                // error usually is first arg
+                if (cbArgs[0]) {
+                    cbArgs[0].callbackArgs = cbArgs.slice(1);
+                    reject(cbArgs[0]);
+                } else {
+                    resolve(cbArgs.slice(1));
+                }
             });
-        };
-    }
-    const newFsModule = Object.create(fsModule);
-    Object.keys(fsModule).forEach((key) => {
-        if (typeof fsModule[`${key}Sync`] !== 'undefined') {
-            newFsModule[key] = proxy(fs[key]);
-        }
-    });
-    return newFsModule;
-}(fs));
-
+            module[funcName].apply(module, args);
+        });
+    };
+}
 
 const VERSION_COMPARATORS = ['==', '===', '<', '<=', '>', '>=', '!=', '!=='];
 
@@ -98,7 +98,7 @@ module.exports = {
      * Assign defaults to object (uses lodash.defaultsDeep under the hood)
      * Note: check when working with arrays, as values may be merged incorrectly
      *
-     * @param {Object} obj      - object to assign defaults to
+     * @param {Object} obj - object to assign defaults to
      * @param {...Object} defaults - defaults to assign to object
      *
      * @returns {Object}
@@ -405,6 +405,43 @@ module.exports = {
     },
 
     /**
+     * Sleep for N ms.
+     *
+     * @returns {Promise} resolved once N .ms passed or rejected if canceled via .cancel()
+     */
+    sleep(sleepTime) {
+        /**
+         * According to http://www.ecma-international.org/ecma-262/6.0/#sec-promise-executor
+         * executor will be called immediately (synchronously) on attempt to create Promise
+         */
+        let cancelCb;
+        const promise = new Promise((resolve, reject) => {
+            const timeoutID = setTimeout(() => {
+                cancelCb = null;
+                resolve();
+            }, sleepTime);
+            cancelCb = (reason) => {
+                cancelCb = null;
+                clearTimeout(timeoutID);
+                reject(reason || new Error('canceled'));
+            };
+        });
+        /**
+         * @param {Error} [reason] - cancellation reason
+         *
+         * @returns {Boolean} 'true' if cancelCb called else 'false'
+         */
+        promise.cancel = (reason) => {
+            if (cancelCb) {
+                cancelCb(reason);
+                return true;
+            }
+            return false;
+        };
+        return promise;
+    },
+
+    /**
      * Mask Secrets (as needed)
      *
      * @param {String} msg - message to mask
@@ -427,7 +464,30 @@ module.exports = {
     },
 
     /**
+     * Promisified 'child_process'' module
+     *
      * @see fs
      */
-    fs: fsPromisified
+    childProcess: (function promisifyNodeChildProcessModule(cpModule) {
+        const newCpModule = Object.create(cpModule);
+        ['exec', 'execFile'].forEach((key) => {
+            newCpModule[key] = proxyForNodeCallbackFuncs(cpModule, key);
+        });
+        return newCpModule;
+    }(childProcess)),
+
+    /**
+     * Promisified 'fs' module
+     *
+     * @see fs
+     */
+    fs: (function promisifyNodeFsModule(fsModule) {
+        const newFsModule = Object.create(fsModule);
+        Object.keys(fsModule).forEach((key) => {
+            if (typeof fsModule[`${key}Sync`] !== 'undefined') {
+                newFsModule[key] = proxyForNodeCallbackFuncs(fsModule, key);
+            }
+        });
+        return newFsModule;
+    }(fs))
 };

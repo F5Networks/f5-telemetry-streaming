@@ -93,9 +93,12 @@ describe('TeemReporter', () => {
         it('should not throw an error if reporting failed', () => {
             const teemReporter = new TeemReporter();
             sinon.stub(teemReporter.teemDevice, 'reportRecord').rejects({ message: 'TEEM failed!' });
-            const loggerSpy = sinon.spy(teemReporter.logger, 'exception');
+            const loggerSpy = sinon.spy(teemReporter.logger, 'debugException');
             return teemReporter.process(decl)
-                .then(() => assert.deepStrictEqual(loggerSpy.firstCall.args, ['Unable to send analytics data', { message: 'TEEM failed!' }]));
+                .then(() => {
+                    assert.isTrue(loggerSpy.callCount >= 1, 'should call logger.debugException at least once');
+                    assert.deepStrictEqual(loggerSpy.firstCall.args, ['Unable to send analytics data', { message: 'TEEM failed!' }]);
+                });
         });
     });
 
