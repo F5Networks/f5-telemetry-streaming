@@ -15,7 +15,7 @@ The following are important notes about namespaces.
 - You must send a full declaration to **/telemetry/declare**. If there are multiple namespaces, you must declare them all in the POST body, otherwise, they are omitted. To configure a single namespace, see :ref:`namespaceEP`.
 - All namespaces inherit the top level **controls** object. 
 - For pull consumers: If you declare a pull consumer under a namespace, the URI to get the data should specify the namespace in path, for example **/mgmt/shared/telemetry/namespace/${namespaceName}/pullconsumer/${pullConsumerName}**
-
+- In v1.19 and later, you cannot have a namespace name that is the same as the name of any other Telemetry class type in the default namespace, if you do, Telemetry Streaming returns an error. However, you can have a namespace name that is the same as the name of another Telemetry class type in another, non-default) namespace.
 
 The following examples show how you can use namespaces in your Telemetry Streaming declarations.
 
