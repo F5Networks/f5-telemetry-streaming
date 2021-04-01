@@ -16,7 +16,6 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const net = require('net');
 const sinon = require('sinon');
-
 const util = require('../../../src/lib/utils/misc');
 
 chai.use(chaiAsPromised);
@@ -545,6 +544,54 @@ describe('Misc Util', () => {
 
         it('should return defaultValue specified if property not found', () => {
             assert.strictEqual(util.getProperty(obj, ['child2', 'prop3', '0'], 'wrong tree'), 'wrong tree');
+        });
+    });
+
+    describe('.sleep()', () => {
+        it('should sleep for X ms.', () => {
+            const startTime = Date.now();
+            const expectedDelay = 100;
+            return util.sleep(expectedDelay)
+                .then(() => {
+                    const actualDelay = Date.now() - startTime;
+                    assert.isTrue(actualDelay >= expectedDelay * 0.9, `expected actual delay ${actualDelay} be +- equal to ${expectedDelay}`);
+                });
+        });
+
+        it('should cancel promise', () => {
+            const promise = util.sleep(50);
+            assert.isTrue(promise.cancel(new Error('expected error')));
+            assert.isFalse(promise.cancel(new Error('expected error')));
+            return assert.isRejected(
+                promise.then(() => Promise.reject(new Error('cancellation doesn\'t work'))),
+                'expected error'
+            );
+        });
+
+        it('should cancel promise after some delay', () => {
+            const promise = util.sleep(50);
+            setTimeout(() => promise.cancel(), 10);
+            return assert.isRejected(
+                promise.then(() => Promise.reject(new Error('cancellation doesn\'t work'))),
+                'canceled'
+            );
+        });
+
+        it('should not be able to cancel once resolved', () => {
+            const promise = util.sleep(50);
+            return promise.then(() => {
+                assert.isFalse(promise.cancel(new Error('expected error')));
+            });
+        });
+
+        it('should not be able to cancel once canceled', () => {
+            const promise = util.sleep(50);
+            assert.isTrue(promise.cancel());
+            return promise.catch(err => err)
+                .then((err) => {
+                    assert.isTrue(/canceled/.test(err));
+                    assert.isFalse(promise.cancel(new Error('expected error')));
+                });
         });
     });
 

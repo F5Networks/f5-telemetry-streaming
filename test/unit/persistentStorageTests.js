@@ -189,7 +189,7 @@ describe('Persistent Storage', () => {
             });
 
             it('should fail to load when restWorker throws error', () => {
-                persistentStorageStub.loadCb = () => { throw new Error('loadStateError'); };
+                persistentStorageStub.loadCbBefore = () => { throw new Error('loadStateError'); };
                 return assert.isRejected(persistentStorageInst.load(), /loadStateError/);
             });
 
@@ -287,7 +287,7 @@ describe('Persistent Storage', () => {
             });
 
             it('should fail to save when restWorker throws error', () => {
-                persistentStorageStub.saveCb = () => { throw new Error('saveStateError'); };
+                persistentStorageStub.saveCbBefore = () => { throw new Error('saveStateError'); };
                 return assert.isRejected(persistentStorageInst.save(), /saveStateError/);
             });
 
@@ -311,11 +311,11 @@ describe('Persistent Storage', () => {
             });
 
             it('should queue \'save\' operation if current \'save\' in progress', () => {
-                persistentStorageStub.saveCb = () => {
+                persistentStorageStub.saveCbBefore = () => {
                     // trigger next 'save' op and it will be queued
                     // because we are in the middle of prev. 'save' op.
                     persistentStorageInst.save();
-                    delete persistentStorageStub.saveCb;
+                    delete persistentStorageStub.saveCbBefore;
                 };
                 return persistentStorageInst.load() // save #1
                     .then(() => persistentStorageInst.save())
@@ -361,7 +361,7 @@ describe('Persistent Storage', () => {
                     sp2: 200
                 };
                 persistentStorageStub.loadState = deepCopy(loadState);
-                persistentStorageStub.saveCb = (ctx, first, state) => {
+                persistentStorageStub.saveCbBefore = (ctx, first, state) => {
                     // sometimes RestWorker backend sets some data required for further work
                     state.sp1 = 200;
                     state.sp2 = 300;
@@ -450,8 +450,8 @@ describe('Persistent Storage', () => {
 
             it('should preserve load-save order', () => {
                 const history = [];
-                persistentStorageStub.loadCb = () => history.push('load');
-                persistentStorageStub.saveCb = () => history.push('save');
+                persistentStorageStub.loadCbBefore = () => history.push('load');
+                persistentStorageStub.saveCbBefore = () => history.push('save');
                 persistentStorageInst.load(); // load #1
                 persistentStorageInst.save(); // save #1
                 persistentStorageInst.load(); // load #1
@@ -464,8 +464,8 @@ describe('Persistent Storage', () => {
 
             it('should preserve save-load order', () => {
                 const history = [];
-                persistentStorageStub.loadCb = () => history.push('load');
-                persistentStorageStub.saveCb = () => history.push('save');
+                persistentStorageStub.loadCbBefore = () => history.push('load');
+                persistentStorageStub.saveCbBefore = () => history.push('save');
                 persistentStorageInst.save(); // load #1
                 persistentStorageInst.load(); // save #1
                 persistentStorageInst.save(); // load #1

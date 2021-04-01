@@ -324,11 +324,11 @@ configWorker.on('change', (config) => {
             EventListener.remove(listener);
         }
     });
-    // stop all disabled listeners and those that have port updated
+    // stop all disabled listeners
     configuredListeners.forEach((listenerConfig) => {
         const listener = EventListener.getByName(listenerConfig.traceName);
         if (listener && listenerConfig.enable === false) {
-            logger.debug(`Removing event listener - ${listener.name} [port = ${listener.port}]. Reason - removed from configuration. Reason - disabled.`);
+            logger.debug(`Removing event listener - ${listener.name} [port = ${listener.port}]. Reason - disabled.`);
             EventListener.remove(listener);
         }
     });

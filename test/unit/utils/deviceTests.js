@@ -261,6 +261,10 @@ describe('Device Util', () => {
             testUtil.mockEndpoints([{
                 endpoint: '/mgmt/tm/util/unix-ls',
                 method: 'post',
+                request: {
+                    command: 'run',
+                    utilCmdArgs: '/config1'
+                },
                 response: {
                     commandResult: '/bin/ls: cannot access /config1: No such file or directory\n'
                 }
@@ -275,12 +279,16 @@ describe('Device Util', () => {
             testUtil.mockEndpoints([{
                 endpoint: '/mgmt/tm/util/unix-mv',
                 method: 'post',
+                request: {
+                    command: 'run',
+                    utilCmdArgs: '/config1 /config2'
+                },
                 response: {
                     commandResult: 'some error here'
                 }
             }]);
             return assert.isRejected(
-                deviceUtil.runTMUtilUnixCommand('mv', '/config1', constants.LOCAL_HOST),
+                deviceUtil.runTMUtilUnixCommand('mv', '/config1 /config2', constants.LOCAL_HOST),
                 /some error here/
             );
         });
@@ -289,6 +297,10 @@ describe('Device Util', () => {
             testUtil.mockEndpoints([{
                 endpoint: '/mgmt/tm/util/unix-rm',
                 method: 'post',
+                request: {
+                    command: 'run',
+                    utilCmdArgs: '/config1'
+                },
                 response: {
                     commandResult: 'some error here'
                 }
@@ -303,6 +315,10 @@ describe('Device Util', () => {
             testUtil.mockEndpoints([{
                 endpoint: /\/mgmt\/tm\/util\/unix-(rm|mv)/,
                 method: 'post',
+                request: {
+                    command: 'run',
+                    utilCmdArgs: '/config1'
+                },
                 response: {},
                 options: {
                     times: 2
@@ -316,13 +332,35 @@ describe('Device Util', () => {
             testUtil.mockEndpoints([{
                 endpoint: '/mgmt/tm/util/unix-ls',
                 method: 'post',
+                request: {
+                    command: 'run',
+                    utilCmdArgs: '/config1'
+                },
                 response: {
-                    commandResult: 'something'
+                    commandResult: 'file1\nfile2\n'
                 }
             }]);
             return assert.becomes(
                 deviceUtil.runTMUtilUnixCommand('ls', '/config1', constants.LOCAL_HOST),
-                'something'
+                ['file1', 'file2']
+            );
+        });
+
+        it('should not split output into array on attempt to list folder', () => {
+            testUtil.mockEndpoints([{
+                endpoint: '/mgmt/tm/util/unix-ls',
+                method: 'post',
+                request: {
+                    command: 'run',
+                    utilCmdArgs: '/config1'
+                },
+                response: {
+                    commandResult: 'file1\nfile2\n'
+                }
+            }]);
+            return assert.becomes(
+                deviceUtil.runTMUtilUnixCommand('ls', '/config1', constants.LOCAL_HOST, { splitLsOutput: false }),
+                'file1\nfile2\n'
             );
         });
     });
@@ -355,18 +393,6 @@ describe('Device Util', () => {
             return assert.becomes(
                 deviceUtil.getDeviceVersion(constants.LOCAL_HOST),
                 expected
-            );
-        });
-
-        it('should fail on return device version', () => {
-            testUtil.mockEndpoints([{
-                endpoint: '/mgmt/tm/sys/version',
-                code: 400,
-                response: {}
-            }]);
-            return assert.isRejected(
-                deviceUtil.getDeviceVersion(constants.LOCAL_HOST),
-                /getDeviceVersion:/
             );
         });
     });
@@ -450,8 +476,8 @@ describe('Device Util', () => {
                 }],
                 {
                     host: '1.1.1.1',
-                    port: constants.DEVICE_DEFAULT_PORT,
-                    proto: constants.DEVICE_DEFAULT_PROTOCOL
+                    port: constants.DEVICE_REST_API.PORT,
+                    proto: constants.DEVICE_REST_API.PROTOCOL
                 }
             );
             const opts = {
@@ -526,47 +552,9 @@ describe('Device Util', () => {
                 'something'
             );
         });
-
-        it('should fail on execute shell command', () => {
-            testUtil.mockEndpoints([{
-                endpoint: '/mgmt/tm/util/bash',
-                code: 400,
-                method: 'post',
-                request: {
-                    command: 'run',
-                    utilCmdArgs: '-c "echo something"'
-                }
-            }]);
-            return assert.isRejected(
-                deviceUtil.executeShellCommandOnDevice(constants.LOCAL_HOST, 'echo something'),
-                /executeShellCommandOnDevice:/
-            );
-        });
     });
 
     describe('.getAuthToken()', () => {
-        it('should fail to get an auth token', () => {
-            testUtil.mockEndpoints(
-                [{
-                    endpoint: '/mgmt/shared/authn/login',
-                    code: 404,
-                    method: 'post',
-                    request: {
-                        username: 'username',
-                        password: 'password',
-                        loginProviderName: 'tmos'
-                    }
-                }],
-                {
-                    host: 'example.com'
-                }
-            );
-            return assert.isRejected(
-                deviceUtil.getAuthToken('example.com', 'username', 'password'),
-                /requestAuthToken:/
-            );
-        });
-
         it('should get an auth token', () => {
             testUtil.mockEndpoints(
                 [{
@@ -735,10 +723,7 @@ describe('Device Util', () => {
             sinon.stub(childProcess, 'execFile').callsFake((cmd, args, cb) => {
                 cb(new Error('decrypt error'), null, 'stderr');
             });
-            return assert.isRejected(
-                deviceUtil.decryptSecret('foo'),
-                /decryptSecret exec error.*decrypt error.*stderr/
-            );
+            return assert.isRejected(deviceUtil.decryptSecret('foo'), /decrypt error/);
         });
     });
 
@@ -826,6 +811,126 @@ describe('Device Util', () => {
             assert.strictEqual(deviceUtil.transformTMOSobjectName('partition', '/name/name', 'subPath'), '~partition~subPath~~name~name');
             assert.strictEqual(deviceUtil.transformTMOSobjectName('partition', '/name/name', 'subPath'), '~partition~subPath~~name~name');
             assert.strictEqual(deviceUtil.transformTMOSobjectName('', 'name'), 'name');
+        });
+    });
+
+    describe('.pathExists()', () => {
+        it('should fail when path doesn\'t exist', () => {
+            testUtil.mockEndpoints([{
+                endpoint: '/mgmt/tm/util/unix-ls',
+                method: 'post',
+                request: {
+                    command: 'run',
+                    utilCmdArgs: '"testPath"'
+                },
+                response: {
+                    commandResult: '/bin/ls: testPath doesn\'t exist'
+                }
+            }]);
+            return assert.isRejected(
+                deviceUtil.pathExists('testPath', constants.LOCAL_HOST),
+                /bin\/ls: testPath/
+            );
+        });
+
+        it('should resolve when path exists', () => {
+            testUtil.mockEndpoints([{
+                endpoint: '/mgmt/tm/util/unix-ls',
+                method: 'post',
+                request: {
+                    command: 'run',
+                    utilCmdArgs: '"testPath"'
+                },
+                response: {
+                    commandResult: 'testPath'
+                }
+            }]);
+            return assert.isFulfilled(deviceUtil.pathExists('testPath', constants.LOCAL_HOST));
+        });
+    });
+
+    describe('.removePath()', () => {
+        it('should fail when unable to remove path', () => {
+            testUtil.mockEndpoints([{
+                endpoint: '/mgmt/tm/util/unix-rm',
+                method: 'post',
+                request: {
+                    command: 'run',
+                    utilCmdArgs: '"path"'
+                },
+                response: {
+                    commandResult: 'some error message'
+                }
+            }]);
+            return assert.isRejected(
+                deviceUtil.removePath('path', constants.LOCAL_HOST),
+                /some error message/
+            );
+        });
+
+        it('should resolve when successfully removed path', () => {
+            testUtil.mockEndpoints([{
+                endpoint: '/mgmt/tm/util/unix-rm',
+                method: 'post',
+                request: {
+                    command: 'run',
+                    utilCmdArgs: '"path"'
+                },
+                response: {}
+            }]);
+            return assert.isFulfilled(deviceUtil.removePath('path', constants.LOCAL_HOST));
+        });
+    });
+
+    describe('.getDeviceInfo()', () => {
+        it('should fetch device info', () => {
+            testUtil.mockEndpoints([{
+                endpoint: '/mgmt/shared/identified-devices/config/device-info',
+                method: 'get',
+                response: {
+                    baseMac: '00:00:00:00:00:00',
+                    build: '0.0.0',
+                    chassisSerialNumber: '00000000-0000-0000-000000000000',
+                    halUuid: '00000000-0000-0000-0000-000000000000',
+                    hostMac: '00:00:00:00:00:00',
+                    hostname: 'localhost.localdomain',
+                    isClustered: false,
+                    isVirtual: true,
+                    machineId: '00000000-0000-0000-000000000000',
+                    managementAddress: '192.168.1.10',
+                    mcpDeviceName: '/Common/localhost.localdomain',
+                    physicalMemory: 7168,
+                    platform: 'Z100',
+                    product: 'BIG-IP',
+                    trustDomainGuid: '3ed9b666-e28c-4958-9726fa163e25ef8a',
+                    version: '13.1.0',
+                    generation: 0,
+                    lastUpdateMicros: 0,
+                    kind: 'shared:resolver:device-groups:deviceinfostate',
+                    selfLink: 'https://localhost/mgmt/shared/identified-devices/config/device-info'
+                }
+            }]);
+            return assert.becomes(
+                deviceUtil.getDeviceInfo(constants.LOCAL_HOST),
+                {
+                    baseMac: '00:00:00:00:00:00',
+                    build: '0.0.0',
+                    chassisSerialNumber: '00000000-0000-0000-000000000000',
+                    halUuid: '00000000-0000-0000-0000-000000000000',
+                    hostMac: '00:00:00:00:00:00',
+                    hostname: 'localhost.localdomain',
+                    isClustered: false,
+                    isVirtual: true,
+                    machineId: '00000000-0000-0000-000000000000',
+                    managementAddress: '192.168.1.10',
+                    mcpDeviceName: '/Common/localhost.localdomain',
+                    physicalMemory: 7168,
+                    platform: 'Z100',
+                    product: 'BIG-IP',
+                    trustDomainGuid: '3ed9b666-e28c-4958-9726fa163e25ef8a',
+                    version: '13.1.0'
+                }
+            );
         });
     });
 });

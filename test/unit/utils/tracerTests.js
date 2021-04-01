@@ -319,21 +319,19 @@ describe('Tracer Util', () => {
         });
 
         it('should stop and create tracer using similar config when path changed', () => {
-            let sameTracer;
+            let newTracer;
             return tracerInst.write('somethings')
                 .then(() => {
-                    sameTracer = tracer.fromConfig({ class: 'class', traceName: 'obj', trace: `${tracerFile}new` });
-                    return sameTracer.write('something3');
+                    newTracer = tracer.fromConfig({ class: 'class', traceName: 'obj', trace: `${tracerFile}new` });
+                    return newTracer.write('something3');
                 })
                 .then(() => {
-                    assert.notStrictEqual(sameTracer.fd, undefined, 'should set fd');
-                    assert.notStrictEqual(sameTracer.fd, tracerInst.fd, 'fd should not be the same');
-                    assert.isTrue(tracerInst.disabled, 'should disable pre-existing tracer');
-                    assert.isFalse(sameTracer.disabled, 'should not disable new tracer');
+                    assert.notDeepEqual(tracerInst, newTracer, 'should return different instance');
+                    assert.notStrictEqual(tracerInst.path, newTracer.path, 'should use different paths');
 
                     const registered = tracer.registered();
                     assert.notInclude(registered, tracerInst, 'should unregister pre-existing tracer');
-                    assert.include(registered, sameTracer, 'should register new tracer');
+                    assert.include(registered, newTracer, 'should register new tracer');
                 });
         });
 

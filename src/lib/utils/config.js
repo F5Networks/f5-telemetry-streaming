@@ -30,7 +30,7 @@ const POLLER_KEYS = {
 };
 const IHEALTH_POLLER_KEYS = {
     toDelete: [
-        'interval', 'username', 'passphrase', 'proxy', 'usedAsRef'
+        'downloadFolder', 'interval', 'username', 'passphrase', 'proxy', 'usedAsRef'
     ]
 };
 
