@@ -13,13 +13,14 @@ const EventEmitter2 = require('eventemitter2');
 /**
  * Log error
  *
+ * @param {string} event - event
  * @param {Error} error - error to log
  *
  * @returns {Error} error
  */
-function logSafeEmitException(error) {
+function logSafeEmitException(event, error) {
     if (this.logger) {
-        this.logger.exception(`${this.constructor.name}.safeEmit(Async) uncaught error`, error);
+        this.logger.exception(`${this.constructor.name}.safeEmit(Async), event "${event}", uncaught error`, error);
     }
     return error;
 }
@@ -37,7 +38,7 @@ class SafeEventEmitter extends EventEmitter2 {
         try {
             return this.emit.apply(this, arguments);
         } catch (emitErr) {
-            return logSafeEmitException.call(this, emitErr);
+            return logSafeEmitException.call(this, arguments[0], emitErr);
         }
     }
 
@@ -51,9 +52,9 @@ class SafeEventEmitter extends EventEmitter2 {
     safeEmitAsync() {
         try {
             return this.emitAsync.apply(this, arguments)
-                .catch(logSafeEmitException.bind(this));
+                .catch(error => logSafeEmitException.call(this, arguments[0], error));
         } catch (emitErr) {
-            return Promise.resolve(logSafeEmitException.call(this, emitErr));
+            return Promise.resolve(logSafeEmitException.call(this, arguments[0], emitErr));
         }
     }
 }

@@ -8,12 +8,16 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-1915: Added new Event Listener endpoint (/eventListener/$eventListener and /namespace/$namespace/eventListener/$eventListener) to send a debug message to an Event Listener
 - AUTOTOOL-2266: Added ability to configure "compressionType" for Splunk consumer
 - AUTOTOOL-2314: Added 'swap' metric to 'system' group (System Poller output)
+- AUTOTOOL-2115: Namespaces support for iHealth Poller
 ### Fixed
+- AUTOTOOL-494: iHealth Poller creates corrupted Qkview files
 - AUTOTOOL-2164: Fixed Route Domain ID handling for Virtual Server and Pool stats
 - [GitHub #109](https://github.com/F5Networks/f5-telemetry-streaming/issues/109): Splunk debug output does not log HTTP Response payload
 - AUTOTOOL-2304: Update example output for maxConns, pktsIn, pktsOut, and totConns
+- AUTOTOOL-494: iHealth Poller creates corrupted Qkview files
 - AUTOTOOL-2310: Tracer unable to access destination directory
 - AUTOTOOL-2368: Tracer(s) from other namespaces should not stop when namespace-only declaration posted
+- AUTOTOOL-2376: iHealth Poller downloadFolder should not be required on local device
 ### Changed
 - AUTOTOOL-2091: Trace full payload sent to StatsD Consumer
 - AUTOTOOL-2250: System Poller recurring scheduling changed so that System Poller executions do not overlap

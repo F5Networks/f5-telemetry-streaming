@@ -40,6 +40,7 @@ MockRestOperation.prototype.getStatusCode = function () { return this.statusCode
 MockRestOperation.prototype.setStatusCode = function (code) { this.statusCode = code; };
 MockRestOperation.prototype.getUri = function () { return this.uri; };
 MockRestOperation.prototype.complete = function () { };
+MockRestOperation.prototype.parseAndSetURI = function (uri) { this.uri = module.exports.parseURL(uri); };
 
 /**
  * Logger mock object
