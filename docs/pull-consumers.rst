@@ -4,6 +4,7 @@ Pull Consumers
 ==============
 Use this section to find example declarations and notes for pull-based monitoring systems. See :doc:`setting-up-consumer` for push-based consumers.
 
+.. _aboutpull:
 
 About Pull Consumers
 --------------------
@@ -14,7 +15,7 @@ Telemetry Streaming 1.11 introduced a *pull* consumer to support pull-based moni
 - With TS 1.11, you can set a Telemetry_System_Poller **interval=0**. This disables the background polling process, but keeps the Poller enabled. Using interval=0 on a Poller allows for the Poller to only collect data from a BIG-IP when the Pull Consumer API endpoint is scraped, so that the Poller doesn't collect data from a BIG-IP when it is not needed.
 - If a Poller is used for both a Pull Consumer and a Push Consumer, the interval will need to be set to a non-zero number of seconds, so that the background polling process will collect data and push it to the configured Push Consumers.
 - Each Pull Consumer must reference, via the systemPoller property, which Telemetry_System_Poller the Pull Consumer will collect data from when the Pull Consumer HTTP API is called. This can be configured as a single systemPoller, or as an array of systemPollers, using the name of the configured System Poller.
-
+- If a Poller referred by a Pull Consumer was attached to two Systems, then the response from the Pull Consumer will contain data from those Systems.
 
 |
 
