@@ -28,6 +28,7 @@ The system poller collects and normalizes statistics from a system, such as BIG-
 | interval           | 60 - 6000, **300**             |  This value determines the polling period in seconds. By default, Telemetry Streaming collects statistics every 300 seconds.               |
 +--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 
+.. _ihealthpoller:
 
 iHealth poller
 ``````````````
