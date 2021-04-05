@@ -38,7 +38,7 @@ module.exports = {
                 }
             },
             consumerName: 'My_Pull_Consumer',
-            expectedResponse: [{ mockedResponse: { pollerName: 'My_System_Poller' } }]
+            expectedResponse: [{ mockedResponse: { pollerName: 'My_System_Poller', systemName: 'My_System' } }]
         },
         // TEST RELATED DATA STARTS HERE
         {
@@ -63,8 +63,41 @@ module.exports = {
             },
             consumerName: 'My_Pull_Consumer',
             expectedResponse: [
-                { mockedResponse: { pollerName: 'My_Second_System_Poller' } },
-                { mockedResponse: { pollerName: 'My_System_Poller' } }
+                { mockedResponse: { pollerName: 'My_Second_System_Poller', systemName: 'My_System' } },
+                { mockedResponse: { pollerName: 'My_System_Poller', systemName: 'My_System' } }
+            ]
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should retrieve data when declaration associates Pull Consumer with multiple System Pollers and Systems',
+            declaration: {
+                class: 'Telemetry',
+                My_Second_System_Poller: {
+                    class: 'Telemetry_System_Poller'
+                },
+                My_System_Poller: {
+                    class: 'Telemetry_System_Poller'
+                },
+                My_System: {
+                    class: 'Telemetry_System',
+                    systemPoller: ['My_System_Poller', 'My_Second_System_Poller']
+                },
+                My_System_2: {
+                    class: 'Telemetry_System',
+                    systemPoller: ['My_System_Poller', 'My_Second_System_Poller']
+                },
+                My_Pull_Consumer: {
+                    class: 'Telemetry_Pull_Consumer',
+                    type: 'default',
+                    systemPoller: ['My_System_Poller', 'My_Second_System_Poller']
+                }
+            },
+            consumerName: 'My_Pull_Consumer',
+            expectedResponse: [
+                { mockedResponse: { pollerName: 'My_Second_System_Poller', systemName: 'My_System' } },
+                { mockedResponse: { pollerName: 'My_System_Poller', systemName: 'My_System' } },
+                { mockedResponse: { pollerName: 'My_Second_System_Poller', systemName: 'My_System_2' } },
+                { mockedResponse: { pollerName: 'My_System_Poller', systemName: 'My_System_2' } }
             ]
         },
         // TEST RELATED DATA STARTS HERE
@@ -87,7 +120,7 @@ module.exports = {
             },
             consumerName: 'My_Pull_Consumer',
             expectedResponse: [
-                { mockedResponse: { pollerName: 'My_System_Poller' } }
+                { mockedResponse: { pollerName: 'My_System_Poller', systemName: 'My_System' } }
             ]
         },
         // TEST RELATED DATA STARTS HERE
@@ -114,7 +147,7 @@ module.exports = {
             },
             consumerName: 'My_Pull_Consumer',
             expectedResponse: [
-                { mockedResponse: { pollerName: 'My_Second_System_Poller' } }
+                { mockedResponse: { pollerName: 'My_Second_System_Poller', systemName: 'My_System' } }
             ]
         },
         // TEST RELATED DATA STARTS HERE

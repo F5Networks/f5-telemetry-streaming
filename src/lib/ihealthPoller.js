@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -8,972 +8,1431 @@
 
 'use strict';
 
-const logger = require('./logger'); // eslint-disable-line no-unused-vars
+const machina = require('machina');
+
+const configUtil = require('./utils/config');
+const configWorker = require('./config');
 const constants = require('./constants');
 const datetimeUtil = require('./utils/datetime');
-const util = require('./utils/misc');
-const deviceUtil = require('./utils/device');
-const ihUtil = require('./utils/ihealth');
+const ihealthUtil = require('./utils/ihealth');
+const logger = require('./logger');
 const persistentStorage = require('./persistentStorage').persistentStorage;
-const configWorker = require('./config');
-const configUtil = require('./utils/config');
-const tracers = require('./utils/tracer').Tracer;
-
-const IHEALTH_POLLER_CLASS_NAME = constants.CONFIG_CLASSES.IHEALTH_POLLER_CLASS_NAME;
-const PERSISTENT_STORAGE_KEY = 'ihealth';
-
-const IHEALTH_POLL_MAX_TIMEOUT = 60 * 60 * 1000; // 1 h.
-const IHEALTH_POLL_RETRY_DELAY = 2 * 60 * 1000; // 2 min.
-const IHEALTH_UPLOAD_RETRY_DELAY = 2 * 60 * 1000; // 2 min.
-const IHEALTH_QKVIEW_RETRY_DELAY = 2 * 60 * 1000; // 2 min.
-
-const TASK_MAX_RETRY = 5;
-const TASK_PROCESS_DELAY = 1 * 1000; // 1 sec.
-const TASK_QUEUE_CHECK_DELAY = 5 * 60 * 1000; // 5 min.
-
+const promiseUtil = require('./utils/promise');
+const SafeEventEmitter = require('./utils/eventEmitter').SafeEventEmitter;
+const util = require('./utils/misc');
 
 /** @module iHealthPoller */
 
 /**
- * Silent catch
+ * FSM State Transitions
  *
- * @async
- * @private
- * @param {Error} error - error
+ * Initial state: uninitialized
  *
- * @returns {Promise} Promise resolved in any case
+ * uninitialized -----> input=start ----> initialized (emits 'started' event)
+ *                 +--> prepare
+ * initialized ----|
+ *                 +--> restore
+ * prepare -----------> schedule
+ * schedule ----------> scheduleCheck
+ *                 +--> sleep ----> scheduleCheck
+ * scheduleCheck --|
+ *                 +--> collectQkview
+ *                 +--> sleep ----> collectQkview
+ * collectQkview --|
+ *                 +--> uploadQkview
+ *                 +--> sleep ----> uploadQkview
+ * uploadQkview --|
+ *                 +--> collectReport
+ *                 +--> sleep ----> collectReport
+ * collectReport --|
+ *                 +--> processReport (emits 'report' event)
+ * processReport -----> cleanup ----> completed (emits 'completed' event)
+ *                 +--> prepare
+ * completed ------|
+ *                 +--> died (emits 'died' event, without additional arguments)
+ * died --------------> uninitialized
+ *                 +--> scheduleCheck
+ *                 +--> collectQkview
+ * restore --------|
+ *                 +--> uploadQkview
+ *                 +--> cleanup
+ *
+ * All states (except 'cleanup', 'died', 'failed') may transit to 'failed' or 'disabled' states
+ *
+ * disabled ----------> cleanup ------> died (emits 'died' event, may pass Error as an argument)
+ * failed ---------+--> cleanup ------> died (emits 'died' event with Error as an argument)
+ *                 +--> died (emits 'died' event with Error as an argument)
  */
-function silentCatch(err) {
-    logger.debug(`silentCatch: ${err}`);
-    return Promise.resolve();
-}
 
 /**
- * Check is qkview valid or not
+ * FSM for iHealth Poller
  *
- * @private
+ * @class
  *
- * @param {Object}  qkview                    - qkview object
- * @param {Boolean} qkview.downloaded        - is qkview downloaded to the local device or not
- * @param {Boolean} qkview.md5verified       - is qkview's md5sum the same as original file
- * @param {Boolean} qkview.remoteOriginPath  - path to qkview on the remote device
+ * @fires IHealthPollerFSM.safeEmitter#completed
+ * @fires IHealthPollerFSM.safeEmitter#died
+ * @fires IHealthPollerFSM.safeEmitter#disabling
+ * @fires IHealthPollerFSM.safeEmitter#report
+ * @fires IHealthPollerFSM.safeEmitter#started
+ * @fires IHealthPollerFSM.safeEmitter#transitioned
  *
- * @returns {Boolean} if qkview is valid
+ * @property {Logger} logger - logger instance
+ * @property {IHealthPoller} poller - iHealth Poller
+ * @property {SafeEventEmitter} safeEmitter - event emitter
+ * @property {iHealthPollerStorage} data - data from PersistentStorage
  */
-function isQkviewValid(qkview) {
-    let valid = false;
-    if (!util.isObjectEmpty(qkview) && qkview.downloaded) {
-        valid = qkview.md5verified;
+const IHealthPollerFSM = machina.Fsm.extend({
+    namespace: 'ihealth-poller',
+    initialState: 'uninitialized',
+
+    /**
+     * Constructor
+     * @param {object} options - init options
+     * @param {IHealthPoller} options.poller - IHealthPoller instance
+     */
+    initialize: function initialize(options) {
+        this.poller = options.poller;
+        this.logger = this.poller.logger;
+        this.safeEmitter = new SafeEventEmitter();
+
+        this.on('transitioned', (args) => {
+            this.logger.debug(`State changed from "${args.fromState}" to "${args.toState}"`);
+            this.safeEmitter.safeEmit('transitioned', { fromState: args.fromState, toState: args.toState });
+            if (this.states[args.fromState] && this.states[args.fromState].saveOnExit) {
+                this.data.lastKnownState = args.fromState;
+                fsmRun.call(this, () => saveDataToStorage.call(this.poller, this.data), { resolve: true });
+            }
+        });
+    },
+
+    /**
+     * @public
+     * @returns {void} once cleaned up (should be used only when instance is not needed any more)
+     */
+    cleanup: function cleanup() {
+        this.data = null;
+        this.off();
+        if (this.safeEmitter) {
+            this.safeEmitter.stopListeningTo();
+            this.safeEmitter.removeAllListeners();
+            delete this.safeEmitter;
+        }
+    },
+
+    /**
+     * @public
+     * @returns {iHealthPollerFsmInfo} FSM stats
+     */
+    info: function info() {
+        const nextExecDate = getNextExecDate.call(this);
+        const timeUntilNext = timeUntilNextExecution.call(this);
+        return {
+            currentCycle: util.deepCopy(this.data.currentCycle),
+            demoMode: this.isDemoModeEnabled(),
+            disabled: this.isDisabled(),
+            nextFireDate: nextExecDate === null ? 'not set' : nextExecDate.toISOString(),
+            state: this.state,
+            stats: util.deepCopy(this.data.stats),
+            timeUntilNextExecution: timeUntilNext === null ? 'not available' : timeUntilNext
+        };
+    },
+
+    /**
+     * @public
+     * @returns {boolean} true when state is other than 'uninitialized'
+     */
+    isActive: function isActive() {
+        // 'died' can walk too!
+        return this.state !== 'uninitialized';
+    },
+
+    /**
+     * @public
+     * @returns {boolean} true when in 'demo' mode
+     */
+    isDemoModeEnabled: function isDemoModeEnabled() {
+        return this.poller.isDemoModeEnabled();
+    },
+
+    /**
+     * @public
+     * @returns {boolean} true when instance disabled
+     */
+    isDisabled: function isDisabled() {
+        return this.poller.isDisabled();
+    },
+
+    /**
+     * @public
+     * @returns {Promise} resolved once FSM started
+     */
+    start: function start() {
+        return Promise.resolve()
+            .then(() => {
+                if (this.isActive()) {
+                    return Promise.reject(new Error('IHealthPollerFSM instance is active already'));
+                }
+                const diedPromise = this.safeEmitter.waitFor('died');
+                const startedPromise = this.safeEmitter.waitFor('started');
+                return promiseUtil.allSettled([
+                    // wrap 'start' in promise to catch all errors and cancel pending promises
+                    Promise.resolve()
+                        .then(() => this.handle('start'))
+                        .catch((error) => {
+                            diedPromise.cancel();
+                            startedPromise.cancel();
+                            return Promise.reject(error);
+                        }),
+                    startedPromise.then(() => diedPromise.cancel()),
+                    diedPromise.then((error) => {
+                        startedPromise.cancel();
+                        return error;
+                    })
+                ]);
+            })
+            .then((statuses) => {
+                // statuses are in the same order as promises above
+                if (statuses[0].status === 'fulfilled' && statuses[1].status === 'fulfilled') {
+                    return Promise.resolve();
+                }
+                // 'startedPromise' has no valid rejection reason besides 'cancel' - not interested
+                return Promise.reject(statuses[0].reason
+                    || statuses[2].reason
+                    || new Error('Unable to start IHealthPollerFSM instance due unknown reason'));
+            });
+    },
+
+    /**
+     * @public
+     * @returns {Promise<?Error>} resolved once FSM changed it's state to 'died'
+     */
+    stop: function stop() {
+        return Promise.resolve()
+            .then(() => {
+                if (!this._diedPromise) {
+                    this._diedPromise = this.safeEmitter.waitFor('died');
+                    // catch and resolve errors in case of cancellation
+                    this._diedPromise.catch(error => error);
+                }
+                // need to emit 'disabling' event to
+                // - interrupt 'sleep'
+                // - let others know that disabling started
+                return this.safeEmitter.safeEmitAsync('disabling');
+            })
+            .then(() => {
+                if (!this.isActive()) {
+                    if (this._diedPromise) {
+                        // it might be fulfilled already
+                        // but worth to try to cancel it
+                        this._diedPromise.cancel(new Error('IHealthPollerFSM instance is not active'));
+                    }
+                    return Promise.resolve();
+                }
+                return this._diedPromise;
+            })
+            .catch((error) => {
+                if (this._diedPromise) {
+                    this._diedPromise.cancel(error);
+                }
+                return error;
+            })
+            .then((error) => {
+                delete this._diedPromise;
+                // waitFor may be resolved with Array (see official docs)
+                return Array.isArray(error) ? error[0] : error;
+            });
+    },
+
+    /**
+     * States
+     *
+     * - saveOnExit - when set to 'true' then data will be saved to PersistentStorage once state changed
+     */
+    states: {
+        /**
+         * Do cleanup, doesn't matter what state was before
+         *
+         * Next state on success - depends on input ('completed' by default, to keep the loop running on)
+         */
+        cleanup: {
+            saveOnExit: true,
+            /**
+             * @param {string} [nextState = 'completed'] - next state once cleanup done
+             * @param {...Any} [otherArgs] - other args to pass to next state
+             */
+            _onEnter: function _onEnter(nextState) {
+                nextState = nextState || 'completed';
+                // wrapping entire promise chain into _runSafe
+                fsmRun.call(this, () => promiseUtil.allSettled([
+                    removeQkview.call(this) // remove Qkview
+                ])
+                    .then(() => this.transition.apply(this, [nextState].concat(Array.from(arguments).slice(1)))));
+            }
+        },
+        /**
+         * Collect Qkview data from target device
+         *
+         * Next state on success - uploadQkview
+         */
+        collectQkview: {
+            saveOnExit: true,
+            _onEnter: function _onEnter() {
+                if (fsmDisabledIfNeeded.call(this)) {
+                    return;
+                }
+                fsmRunWithRetry.call(this, () => collectQkview.call(this)
+                    .then(() => this.transition('uploadQkview')));
+            }
+        },
+        /**
+         * Collect Qkview report from F5 iHealth Service
+         *
+         * Next state on success - processReport
+         */
+        collectReport: {
+            saveOnExit: true,
+            _onEnter: function _onEnter() {
+                if (fsmDisabledIfNeeded.call(this)) {
+                    return;
+                }
+                fsmRunWithRetry.call(this, () => fetchQkviewReport.call(this)
+                    .then((report) => {
+                        if (report.isReady) {
+                            this.transition('processReport', report.report);
+                        } else {
+                            this.logger.debug('Qkview report is not ready yet');
+                            fsmRetryState.call(this);
+                        }
+                    }));
+            }
+        },
+        /**
+         * Polling cycle successfully completed
+         *
+         * Next state on success:
+         *  - died - when in 'demo' mode
+         *  - prepare
+         *
+         * @fires IHealthPollerFSM.safeEmitter#completed
+         */
+        completed: {
+            /**
+             * @fires IHealthPollerFSM.safeEmitter#completed
+             */
+            _onEnter: function _onEnter() {
+                if (fsmDisabledIfNeeded.call(this)) {
+                    return;
+                }
+                /**
+                 * Emit 'completed' event
+                 *
+                 * @event IHealthPollerFSM.safeEmitter#completed
+                 */
+                fsmRun.call(this, () => Promise.resolve()
+                    .then(() => {
+                        this.data.currentCycle.succeed = true;
+                        this.data.stats.cyclesCompleted += 1;
+                        return this.safeEmitter.safeEmitAsync('completed');
+                    })
+                    .then(() => this.transition(this.isDemoModeEnabled() ? 'died' : 'prepare')));
+            }
+        },
+        /**
+         * Poller died, final state
+         *
+         * @fires IHealthPollerFSM.safeEmitter#died
+         */
+        died: {
+            /**
+             * @param {Error} [error] - error to pass to listeners
+             * @fires IHealthPollerFSM#died
+             */
+            _onEnter: function _onEnter(error) {
+                /**
+                 * Emit 'died' event
+                 *
+                 * @event IHealthPollerFSM.safeEmitter#died
+                 * @param {Error} [error] - error if exists
+                 */
+                fsmRun(() => {
+                    cleanupSensitiveData.call(this);
+                    this.transition('uninitialized');
+                    return this.safeEmitter.safeEmitAsync('died', error);
+                }, { resolve: true });
+            }
+        },
+        /**
+         * Poller was disabled via 'stop'
+         *
+         * Next state on success - cleanup -> died
+         */
+        disabled: {
+            _onEnter: function _onEnter() {
+                fsmRun.call(this, () => this.transition('cleanup', 'died'));
+            }
+        },
+        /**
+         * Polling cycle failed
+         *
+         * Next state on success:
+         *  - died - when in 'demo' mode
+         *  - prepare
+         */
+        failed: {
+            /**
+             * @param {Error} error - fail reason
+             */
+            _onEnter: function _onEnter(error) {
+                fsmRun.call(this, () => {
+                    this.data.currentCycle.succeed = false;
+                    this.data.currentCycle.errorMsg = `${error}`;
+                }, { reject: true })
+                    .catch(innerError => innerError)
+                    .then((innerError) => {
+                        if (this.isDemoModeEnabled() || this.isDisabled()) {
+                            this.transition('died', innerError || error);
+                        } else {
+                            this.logger.exception('Recovering after receiving error', error);
+                            this.transition('prepare');
+                        }
+                    });
+            }
+        },
+        /**
+         * Initialize newly created instance
+         *
+         * Next state on success - 'prepare' or 'restore'
+         */
+        initialized: {
+            _onEnter: function _onEnter() {
+                if (fsmDisabledIfNeeded.call(this)) {
+                    return;
+                }
+                fsmRun.call(this, () => initStorageData.call(this)
+                    .then(() => this.safeEmitter.safeEmitAsync('started'))
+                    .then(() => this.transition(this.data.lastKnownState ? 'restore' : 'prepare')));
+            }
+        },
+        /**
+         * Prepare to next polling cycle
+         *
+         * Next state on success - schedule
+         */
+        prepare: {
+            _onEnter: function _onEnter() {
+                if (fsmDisabledIfNeeded.call(this)) {
+                    return;
+                }
+                fsmRun.call(this, () => {
+                    this.data.stats.cycles += 1;
+                    initPollingCycleInfo.call(this, this.data);
+                    this.transition('schedule');
+                });
+            }
+        },
+        /**
+         * Process Qkview report
+         *
+         * Next state on success - cleanup -> completed
+         *
+         * @fires IHealthPollerFSM#report
+         */
+        processReport: {
+            saveOnExit: true,
+            _onEnter: function _onEnter(report) {
+                if (fsmDisabledIfNeeded.call(this)) {
+                    return;
+                }
+                /**
+                 * Emit 'report' event
+                 *
+                 * @event IHealthPollerFSM#report
+                 * @param {QkviewReport} report - Qkview report
+                 */
+                fsmRun.call(this, () => this.safeEmitter.safeEmitAsync('report', processQkviewReport.call(this, report))
+                    .then(() => {
+                        this.data.currentCycle.qkview.reportProcessed = true;
+                        this.transition('cleanup', 'completed');
+                    }));
+            }
+        },
+        /**
+         * Restore FSM to prev. state if possible
+         */
+        restore: {
+            _onEnter: function _onEnter() {
+                if (fsmDisabledIfNeeded.call(this)) {
+                    return;
+                }
+                fsmRun.call(this, () => {
+                    const lastKnownState = this.data.lastKnownState;
+                    const qkview = (this.data.currentCycle && this.data.currentCycle.qkview) || {};
+                    let nextState;
+
+                    this.logger.debug(`Restoring iHealthPollerFSM, last known state is "${lastKnownState}"`);
+                    if (lastKnownState === 'schedule') {
+                        // might be negative in case if past due already
+                        const nextExecTime = timeUntilNextExecution.call(this);
+                        nextState = 'schedule';
+                        if (nextExecTime >= 0
+                            || Math.abs(nextExecTime) < constants.IHEALTH.POLLER_CONF.SCHEDULING.MAX_PAST_DUE) {
+                            nextState = 'scheduleCheck';
+                        } else {
+                            this.logger.debug('Need to schedule new execution date, current one is expired');
+                        }
+                    } else if (lastKnownState === 'collectQkview') {
+                        nextState = 'collectQkview';
+                        if (qkview.qkviewFile) {
+                            nextState = 'uploadQkview';
+                        }
+                    } else if (lastKnownState === 'uploadQkview') {
+                        nextState = 'uploadQkview';
+                        if (qkview.qkviewURI) {
+                            nextState = 'collectReport';
+                        }
+                    } else if (lastKnownState === 'collectReport'
+                        || (lastKnownState === 'processReport' && !qkview.reportProcessed)) {
+                        nextState = 'collectReport';
+                    }
+                    if (!nextState) {
+                        nextState = 'cleanup';
+                    }
+                    this.logger.debug(`Restoring iHealthPollerFSM to state "${nextState}"`);
+                    this.transition(nextState);
+                });
+            }
+        },
+        /**
+         * Schedule next polling cycle
+         *
+         * Next state on success - scheduleCheck
+         */
+        schedule: {
+            saveOnExit: true,
+            _onEnter: function _onEnter() {
+                if (fsmDisabledIfNeeded.call(this)) {
+                    return;
+                }
+                fsmRun.call(this, () => scheduleNextExecution.call(this)
+                    .then(() => this.transition('scheduleCheck')));
+            }
+        },
+        /**
+         * Check if it is time to start polling cycle
+         *
+         * Next state on success:
+         *  - sleep -> scheduleCheck - when it is too early
+         *  - collectQkview - when it is time to start polling cycle
+         */
+        scheduleCheck: {
+            _onEnter: function _onEnter() {
+                if (fsmDisabledIfNeeded.call(this)) {
+                    return;
+                }
+                fsmRun.call(this, () => checkNextExecutionTime.call(this)
+                    .then(allowedToStart => this.handle(allowedToStart ? 'ready' : 'sleep')));
+            },
+            ready: 'collectQkview',
+            sleep: function sleep() {
+                const sleepTime = timeUntilNextExecution.call(this);
+                const defaultDelay = constants.IHEALTH.POLLER_CONF.SCHEDULING.DELAY;
+                this.transition('sleep', {
+                    nextState: this.state,
+                    sleepTime: sleepTime < defaultDelay ? sleepTime : defaultDelay
+                });
+            }
+        },
+        /**
+         * Sleep and nothing else
+         *
+         * Next state on success - depends on input
+         */
+        sleep: {
+            _onEnter: function _onEnter(options) {
+                if (fsmDisabledIfNeeded.call(this)) {
+                    return;
+                }
+                const sleepTime = (options.sleepTime > 0 && options.sleepTime) || 0;
+                if (sleepTime) {
+                    cleanupSensitiveData.call(this);
+                }
+                this.logger.debug(`Going to sleep for ${sleepTime} ms. Next state is "${options.nextState}"`);
+
+                const sleepPromise = util.sleep(sleepTime || 0);
+                const disablingPromise = this.safeEmitter.waitFor('disabling');
+
+                promiseUtil.allSettled([
+                    sleepPromise.then(() => {
+                        disablingPromise.cancel();
+                        this.transition(options.nextState);
+                    }),
+                    disablingPromise.then(() => {
+                        sleepPromise.cancel();
+                        this.transition('disabled');
+                    })
+                ]);
+            }
+        },
+        /**
+         * Initial state when instance created
+         *
+         * Next state on success - initialized
+         */
+        uninitialized: {
+            start: function start() {
+                if (fsmDisabledIfNeeded.call(this)) {
+                    return;
+                }
+                fsmRun.call(this, () => this.transition('initialized'));
+            }
+        },
+        /**
+         * Upload Qkview to F5 iHealth Service
+         *
+         * Next state on success - collectReport
+         */
+        uploadQkview: {
+            saveOnExit: true,
+            _onEnter: function _onEnter() {
+                if (fsmDisabledIfNeeded.call(this)) {
+                    return;
+                }
+                fsmRunWithRetry.call(this, () => uploadQkview.call(this)
+                    .then(() => this.transition('collectReport')));
+            }
+        }
     }
-    return valid;
-}
+});
 
-/**
- * Filter callback
- *
- * @callback IHealthPoller~dataCallback
- * @param {Object} data - iHealth data
- * @param {Object} other - other info
- */
+Object.defineProperty(IHealthPollerFSM.prototype, 'data', {
+    get() {
+        if (!this._data) {
+            this._data = createStorageObject.call(this);
+        }
+        return this._data;
+    },
+
+    set(val) {
+        this._data = val;
+    }
+});
 
 /**
  * iHealth poller
  *
- * @class
+ * Note: when 'demo' set to 'true' then following operations disabled/changed the behavior to speed up
+ * the process:
+ * - saving current state to storage - disabled
+ * - scheduling a next operation - delay decreased to speed up the process
+ * - only 1 polling cycle
+ * - starts immediately
  *
- * @param {String}  namespaceName       - Namespace name
- * @param {String}  sysName             - System declaration name
- * @param {String}  [ihName]            - iHealth Poller declaration name
- * @param {Boolean} [testOnly]          - 'true' to test pipeline only
+ * DEMO instances are useful in case when the user needs to check
+ * - iHealth credentials/connectivity
+ * - proxy configuration/credentials/connectivity
+ * - BIG-IP configuration/credentials/connectivity
  *
- * @property {String}  sysName          - System declaration name
- * @property {String}  ihName           - iHealth Poller declaration name
- * @property {String}  namespaceName    - Namespace name
- * @property {Object}  config           - config
- * @property {String}  state            - current state
- * @property {IHealthPoller~dataCallback} dataCallback - data callback
+ * @fires IHealthPoller#completed
+ * @fires IHealthPoller#died
+ * @fires IHealthPoller#disabled
+ * @fires IHealthPoller#report
+ * @fires IHealthPoller#started
+ * @fires IHealthPoller#transitioned
+ *
+ * @property {string} id - iHealth Poller config ID
+ * @property {Logger} logger - logger instance
+ * @property {string} name - instance name
+ * @property {string} storageKey - storage key
  */
-function IHealthPoller(namespaceName, sysName, ihName, testOnly) {
-    this.sysName = sysName;
-    this.ihName = ihName;
-    this.namespace = namespaceName;
-    this.config = null;
-    this.dataCallback = null;
-    this.destinationIds = null;
+class IHealthPoller extends SafeEventEmitter {
+    /**
+     * @param {string} id - config object ID
+     * @param {IHealthPollerOptions} [options] - options
+     */
+    constructor(id, options) {
+        super();
+        options = util.assignDefaults(options, {
+            demo: false,
+            name: `${this.constructor.name}_${id}`
+        });
 
-    this._isTestOnly = testOnly === undefined ? false : testOnly;
-    this._timerID = null;
-    this._inProgress = false;
-    this._storage = this._getBaseStorage();
+        this._demo = !!options.demo;
+        this._id = id;
+        this._name = `${options.name}${this._demo ? ' (DEMO)' : ''}`;
+        this.logger = logger.getChild(this.constructor.name).getChild(this._name);
 
-    this.logger = logger.getChild('iHealthPoller').getChild(this.getKey());
+        this._fsm = new IHealthPollerFSM({ poller: this });
+        // passthrough FSM events
+        this.listenTo(this._fsm.safeEmitter, {
+            completed: 'completed',
+            died: 'died',
+            disabling: 'disabling',
+            report: 'report',
+            started: 'started',
+            transitioned: 'transitioned'
+        });
+    }
+
+    /**
+     * @public
+     * @returns {Promise} resolved once 'disabling' event received
+     */
+    get disablingPromise() {
+        return this._disablingPromise;
+    }
+
+    /**
+     * @public
+     * @returns {string} poller's config ID
+     */
+    get id() {
+        return this._id;
+    }
+
+    /**
+     * @public
+     * @returns {string} poller's name
+     */
+    get name() {
+        return this._name;
+    }
+
+    /**
+     * @public
+     * @returns {string} key to use to store data in storage
+     */
+    get storageKey() {
+        return this.id;
+    }
+
+    /**
+     * @public
+     * Do cleanup once instance died or deleted, should be performed when FSM not running only
+     */
+    cleanup() {
+        this.stopListeningTo();
+        this.removeAllListeners();
+        if (this._fsm) {
+            this._fsm.cleanup();
+            delete this._fsm;
+        }
+    }
+
+    /**
+     * @public
+     * @returns {Promise<object>} resolved with config
+     */
+    getConfig() {
+        return Promise.resolve()
+            .then(() => {
+                const pollerConfig = configUtil.getTelemetryIHealthPollers(configWorker.currentConfig)
+                    .find(ihpConf => ihpConf.traceName === this.id);
+
+                if (util.isObjectEmpty(pollerConfig)) {
+                    return Promise.reject(new Error(`Configuration for iHealth Poller "${this.name}" (${this.id}) not found!`));
+                }
+                return pollerConfig;
+            });
+    }
+
+    /**
+     * @public
+     * @returns {iHealthPollerInfo} poller's info
+     */
+    info() {
+        return Object.assign(this._fsm.info(), {
+            id: this.id,
+            name: this.name
+        });
+    }
+
+    /**
+     * @public
+     * @returns {boolean} true when instance is running (even when disabled)
+     */
+    isActive() {
+        return this._fsm.isActive();
+    }
+
+    /**
+     * @public
+     * @returns {boolean} 'true' if instance in 'demo' mode
+     */
+    isDemoModeEnabled() {
+        return this._demo;
+    }
+
+    /**
+     * @public
+     * @returns {boolean} 'true' if instance disabled
+     */
+    isDisabled() {
+        return !!this._stopPromise;
+    }
+
+    /**
+     * @public
+     * @returns {Promise} resolved once iHealth Poller started
+     */
+    start() {
+        // simple guardian in case of attempt to start FSM twice
+        if (!this._startPromise) {
+            this._startPromise = Promise.resolve()
+                .then(() => this._fsm.start())
+                .catch(error => error)
+                .then((error) => {
+                    delete this._startPromise;
+                    return error ? Promise.reject(error) : Promise.resolve();
+                });
+        }
+        return this._startPromise;
+    }
+
+    /**
+     * May take some time to complete, depends on FSM' current state.
+     *
+     * @public
+     * @returns {Promise} resolved once iHealth Poller stopped
+     */
+    stop() {
+        // simple guardian in case of attempt to stop FSM twice
+        if (!this._stopPromise) {
+            this._disablingPromise = this.waitFor('disabling');
+            this._stopPromise = Promise.resolve()
+                .then(() => removeDataFromStorage.call(this))
+                .then(() => this._fsm.stop())
+                .catch((error) => {
+                    this._disablingPromise.cancel(error);
+                    return error;
+                })
+                .then((error) => {
+                    delete this._disablingPromise;
+                    delete this._stopPromise;
+                    return error ? Promise.reject(error) : Promise.resolve();
+                });
+        }
+        return this._stopPromise;
+    }
 }
 
 /**
- * IHealthPoller state
- *
+ * CLASS METHODS
+ */
+/**
  * @private
+ * @member {Array<IHealthPoller>} - instances
  */
-IHealthPoller.STATE = {
-    /** @private */
-    NEW: 'NEW',
-    /** @private */
-    DISABLED: 'DISABLED',
-    /** @private */
-    REMOVED: 'REMOVED',
-    /** @private */
-    QUEUED: 'QUEUED',
-    /** @private */
-    PREPARE: 'PREPARE',
-    /** @private */
-    READY: 'READY',
-    /** @private */
-    FAILED: 'FAILED',
-    /** @private */
-    DONE: 'DONE',
-    /** @private */
-    QKVIEW_IN_PROGRESS: 'QKVIEW_IN_PROGRESS',
-    /** @private */
-    QKVIEW_RETRY: 'QKVIEW_RETRY',
-    /** @private */
-    QKVIEW_COLLECTED: 'QKVIEW_COLLECTED',
-    /** @private */
-    IHEALTH_UPLOAD_IN_PROGRESS: 'IHEALTH_UPLOAD_IN_PROGRESS',
-    /** @private */
-    IHEALTH_UPLOAD_RETRY: 'IHEALTH_UPLOAD_RETRY',
-    /** @private */
-    IHEALTH_UPLOADED: 'IHEALTH_UPLOADED',
-    /** @private */
-    IHEALTH_POLL_IN_PROGRESS: 'IHEALTH_POLL_IN_PROGRESS',
-    /** @private */
-    IHEALTH_POLL_RETRY: 'IHEALTH_POLL_RETRY',
-    /** @private */
-    IHEALTH_POLL_DONE: 'IHEALTH_POLL_DONE'
-};
+IHealthPoller._instances = [];
 
 /**
- * Get base storage object
- *
- * @private
- * @returns {Object} base storage object
+ * @returns {Promise} resolved once all orphaned data removed from storage
  */
-IHealthPoller.prototype._getBaseStorage = function () {
-    return {
-        sysName: this.sysName,
-        ihName: this.ihName,
-        state: IHealthPoller.STATE.NEW,
-        nextExecTime: 0,
-        qkviewRetry: 0,
-        ihealthUploadRetry: 0,
-        ihealthPollStart: 0
-    };
-};
-
-/**
- * Fetch instance state from storage
- *
- * @async
- * @private
- * @returns {Promise.<Object>} Promise resolved with instance state
- */
-IHealthPoller.prototype._getStorageState = function () {
-    if (this.isTestOnly() || this.isDisabled()) {
-        return Promise.resolve();
-    }
-    return IHealthPoller.getStorage()
-        .then((storage) => {
-            storage = storage || {};
-            this._storage = storage[this.getKey()];
-
-            let p;
-            if (util.isObjectEmpty(this._storage)) {
-                this._storage = this._getBaseStorage();
-                p = this._saveStorageState();
-            }
-            return p || Promise.resolve();
-        });
-};
-
-/**
- * Save current state to storage
- *
- * @async
- * @private
- * @returns {Promise} Promise resolved when state saved to storage
- */
-IHealthPoller.prototype._saveStorageState = function () {
-    if (this.isTestOnly() || this.isDisabled()) {
-        return Promise.resolve();
-    }
-    return IHealthPoller.getStorage()
-        .then((storage) => {
-            // do not update state when disabled!
-            if (this.isDisabled()) {
-                return Promise.resolve();
-            }
-            storage[this.getKey()] = this._storage;
-            return IHealthPoller.updateStorage(storage);
-        })
-        .catch((err) => {
-            this.logger.debug(`saveStorageState: unable to update storage: ${err}`);
-        });
-};
-
-/**
- * Get instance key
- *
- * @returns {String} instance key
- */
-IHealthPoller.prototype.getKey = function () {
-    return IHealthPoller.getKey(this.namespace, this.sysName, this.ihName, this.isTestOnly());
-};
-
-/**
- * Return current state
- *
- * @returns {String} current state
- */
-IHealthPoller.prototype.getState = function () {
-    return this._storage.state;
-};
-
-/**
- * Return next fire date
- *
- * @returns {Date} next fire date
- */
-IHealthPoller.prototype.getNextFireDate = function () {
-    const nextExecTime = this._storage.nextExecTime;
-    return nextExecTime ? new Date(nextExecTime) : null;
-};
-
-/**
- * Set new state
- *
- * @param {String} newState - new state
- * @param {Boolean} [force] - force the state
- */
-IHealthPoller.prototype.setState = function (newState, force) {
-    if (newState !== this._storage.state && (force || !this.isDisabled())) {
-        this.logger.debug(`State changed from ${this._storage.state} to ${newState}`);
-        this._storage.state = newState;
-    }
-};
-
-/**
- * Check if instance in process of task execution
- *
- * @returns {Boolean} 'true' when instance is busy now
- */
-IHealthPoller.prototype.inProgress = function () {
-    return this._inProgress;
-};
-
-/**
- * Check is it instance for testing only
- *
- * @returns {Boolean} 'true' when instance for tests only
- */
-IHealthPoller.prototype.isTestOnly = function () {
-    return this._isTestOnly;
-};
-
-/**
- * Check if state is equal to given
- *
- * @param {String} state - state to compare
- */
-IHealthPoller.prototype.isStateEq = function (state) {
-    return this._storage.state === state;
-};
-
-/**
- * Check if instance disabled or not
- *
- * @returns {Boolean} 'true' if instance disabled else 'false'
- */
-IHealthPoller.prototype.isDisabled = function () {
-    return this.isStateEq(IHealthPoller.STATE.DISABLED) || this.isRemoved();
-};
-
-/**
- * Check if instance removed or not
- *
- * @returns {Boolean} 'true' if instance removed else 'false'
- */
-IHealthPoller.prototype.isRemoved = function () {
-    return this.isStateEq(IHealthPoller.STATE.REMOVED);
-};
-
-/**
- * Check if task done or not
- *
- * @returns {Boolean} 'true' if task don else 'false'
- */
-IHealthPoller.prototype.isDone = function () {
-    return this.isStateEq(IHealthPoller.STATE.DONE);
-};
-
-/**
- * Check if task failed or not
- *
- * @returns {Boolean} 'true' if task failed else 'false'
- */
-IHealthPoller.prototype.isFailed = function () {
-    return this.isStateEq(IHealthPoller.STATE.FAILED);
-};
-
-/**
- * Check if task queued or not
- *
- * @returns {Boolean} 'true' if task queued else 'false'
- */
-IHealthPoller.prototype.isQueued = function () {
-    return this.isStateEq(IHealthPoller.STATE.QUEUED);
-};
-
-/**
- * Check if task can be scheduled or not
- *
- * @returns {Boolean} 'true' if task can be scheduled else 'false'
- */
-IHealthPoller.prototype.canBeScheduled = function () {
-    return !this.isRemoved() && (this.isStateEq(IHealthPoller.STATE.NEW)
-        || this.isDone()
-        || this.isFailed());
-};
-
-/**
- * Check if task should be fired or not
- *
- * @returns {Boolean} 'true' if task should be fired else 'false'
- */
-IHealthPoller.prototype.shouldBeFired = function () {
-    return this.timeBeforeFire() <= TASK_QUEUE_CHECK_DELAY;
-};
-
-/**
- * Check if config available
- *
- * @returns {Boolean} 'true' if config available else 'false'
- */
-IHealthPoller.prototype.isConfigsAvailable = function () {
-    return !util.isObjectEmpty(this.config);
-};
-
-/**
- * Return time before next fire
- *
- * @returns {Integer} time in ms. before next task firing
- */
-IHealthPoller.prototype.timeBeforeFire = function () {
-    return this._storage.nextExecTime - (new Date()).getTime();
-};
-
-/**
- * Fetch System and iHealth configs
- *
- * @async
- * @returns {Promise} Promise resolved when System and iHealth config are decrypted.
- *     It doesn't guarantee that config exists at all.
- */
-IHealthPoller.prototype.fetchConfigs = function () {
-    if (this.config) {
-        return Promise.resolve();
-    }
-
-    return configWorker.getConfig()
-        .then((config) => {
-            config = config.normalized || {};
-            // System name is required.
-            // iHealthPoller name is optional.
-            // TODO: Update to also filter on Namespaces
-            const filteredConfigs = configUtil.getTelemetryIHealthPollers(config).filter(
-                ih => ih.system.name === this.sysName
-            );
-            if (this.ihName) {
-                filteredConfigs.filter(s => s.iHealth.name === this.ihName);
-            }
-            if (util.isObjectEmpty(filteredConfigs)) {
-                return Promise.reject(new Error('System or iHealth Poller declaration not found'));
-            }
-            return deviceUtil.decryptAllSecrets(filteredConfigs[0]);
-        })
-        .then((decryptedConfig) => {
-            this.config = decryptedConfig;
-        })
-        .catch((err) => {
-            throw new Error(`fetchConfigs: ${err}`);
-        });
-};
-
-/**
- * Return delay to schedule next iteration depending on current state
- *
- * @returns {Integer} delay in ms.
- */
-IHealthPoller.prototype.getProcessDelay = function () {
-    if (this.isStateEq(IHealthPoller.STATE.QKVIEW_RETRY)) {
-        return IHEALTH_QKVIEW_RETRY_DELAY;
-    }
-    if (this.isStateEq(IHealthPoller.STATE.IHEALTH_UPLOAD_RETRY)) {
-        return IHEALTH_UPLOAD_RETRY_DELAY;
-    }
-    if (this.isStateEq(IHealthPoller.STATE.IHEALTH_POLL_RETRY)) {
-        return IHEALTH_POLL_RETRY_DELAY;
-    }
-    if (this.isQueued()) {
-        const beforeFire = this.timeBeforeFire();
-        return beforeFire < TASK_QUEUE_CHECK_DELAY ? beforeFire : TASK_QUEUE_CHECK_DELAY;
-    }
-    if (this.isDisabled()) {
-        return 1000; // 1 sec.
-    }
-    return TASK_PROCESS_DELAY;
-};
-
-/**
- * QkviewManager factory
- *
- * @returns {module:ihealthUtil~QkviewManager} instance of QkviewManager
- */
-IHealthPoller.prototype.getQkviewManager = function () {
-    const system = this.config.system;
-    const iHealth = this.config.iHealth;
-    const options = {
-        deviceName: this.sysName,
-        dacliUID: this.getKey(),
-        credentials: util.deepCopy(system.credentials),
-        connection: util.deepCopy(system.connection),
-        shouldDownload: true,
-        downloadFolder: iHealth.downloadFolder
-    };
-
-    const qkviewManager = new ihUtil.QkviewManager(system.host, options);
-    if (!util.isObjectEmpty(this._storage.qkview)) {
-        qkviewManager.qkview = this._storage.qkview;
-    }
-    return qkviewManager;
-};
-
-/**
- * IHealthManager factory
- *
- * @returns {module:ihealthUtil~IHealthManager} instance of IHealthManager
- */
-IHealthPoller.prototype.getIHealthManager = function () {
-    const qkview = this._storage.qkview || {};
-    const iHealth = this.config.iHealth;
-    const options = {
-        deviceName: this.sysName,
-        dacliUID: this.getKey(),
-        qkviewFile: qkview.localDownloadPath,
-        qkviewURI: qkview.ihealthURI,
-        proxy: util.deepCopy(iHealth.proxy),
-        ihealth: {
-            credentials: util.deepCopy(iHealth.credentials)
-        }
-    };
-    return new ihUtil.IHealthManagerLocal(options);
-};
-
-/**
- * Gather Qkview from the F5 device
- *
- * @async
- * @returns {Promise} Promise resolved when Qkview created and downloaded (optional)
- */
-IHealthPoller.prototype.gatherQkview = function () {
-    let error;
-    delete this._storage.qkview;
-
-    this.setState(IHealthPoller.STATE.QKVIEW_IN_PROGRESS);
-
-    const qm = this.getQkviewManager();
-    return qm.prepare()
-        .then(() => {
-            // when device is remote tnen qkview should be
-            // downloaded to local machine
-            if (!(qm.isLocalDevice || qm.shouldDownload)) {
-                this.setState(IHealthPoller.STATE.FAILED);
-                return Promise.reject(new Error('downloadFolder should be '
-                    + 'configured to support remote devices'));
-            }
-            return Promise.resolve();
-        })
-        .then(() => qm.process())
-        .catch((err) => {
-            error = err;
-        })
-        .then(() => {
-            if (error && !isQkviewValid(qm.qkview)) {
-                this.logger.debug(`gatherQkview: Unable to collect Qkview: ${error}`);
-                return qm.cleanup().catch(silentCatch);
-            }
-            this._storage.qkview = util.deepCopy(qm.qkview);
-            return Promise.resolve();
-        })
-        .then(() => {
-            let p;
-
-            if (!util.isObjectEmpty(this._storage.qkview)) {
-                this.setState(IHealthPoller.STATE.QKVIEW_COLLECTED);
-            } else if (this._storage.qkviewRetry < TASK_MAX_RETRY) {
-                this.setState(IHealthPoller.STATE.QKVIEW_RETRY);
-                this._storage.qkviewRetry += 1;
-            } else {
-                this.setState(IHealthPoller.STATE.FAILED);
-                p = Promise.reject(new Error('gatherQkview: Unable to collect Qkview '
-                    + `after ${TASK_MAX_RETRY} attempts`));
-            }
-            return p || Promise.resolve();
-        });
-};
-
-/**
- * Upload Qkview file to F5 iHealth Service
- *
- * @async
- * @returns {Promise} Promise resolved when Qkview uploaded
- */
-IHealthPoller.prototype.uploadQkview = function () {
-    let error;
-    let p;
-
-    this.setState(IHealthPoller.STATE.IHEALTH_UPLOAD_IN_PROGRESS);
-
-    const im = this.getIHealthManager();
-    if (!im.qkviewFile) {
-        this.setState(IHealthPoller.STATE.FAILED);
-        const errMsg = 'uploadQkview: no path to Qkview file provided';
-        this.logger.error(errMsg);
-        return Promise.reject(new Error(errMsg));
-    }
-
-    return im.prepare()
-        .then(() => im.uploadQkview())
-        .then((location) => {
-            this._storage.qkview.ihealthURI = location;
-            this.setState(IHealthPoller.STATE.IHEALTH_UPLOADED);
-        })
-        .catch((err) => {
-            error = err;
-            this.logger.debug('uploadQkview: Unable to upload Qkview to '
-                + `F5 iHealth service: ${error}`);
-
-            if (this._storage.ihealthUploadRetry < TASK_MAX_RETRY) {
-                this.setState(IHealthPoller.STATE.IHEALTH_UPLOAD_RETRY);
-                this._storage.ihealthUploadRetry += 1;
-            } else {
-                this.setState(IHealthPoller.STATE.FAILED);
-                error = new Error('uploadQkview: Unable to upload Qkview '
-                    + `after ${TASK_MAX_RETRY} attempts`);
-                p = Promise.reject(error);
-            }
-        })
-        /* eslint-disable-next-line */
-        .then(() => {
-            // cleanup cookies and etc. if needed
-            return im.cleanup().catch(silentCatch);
-        })
-        .then(() => {
-            if (!error) {
-                // we don't need qkview anymore - removing it
-                const qm = this.getQkviewManager();
-                return qm.prepare()
-                    .then(() => qm.cleanup())
-                    .catch(silentCatch);
-            }
-            return p || Promise.resolve();
-        });
-};
-
-/**
- * Download Qkview diagnostics from F5 iHealth Service
- *
- * @async
- * @returns {Promise} Promise resolved when Qkview diagnostics downloaded
- */
-IHealthPoller.prototype.fetchDiagnostics = function () {
-    let data;
-    let error;
-    let p;
-
-    this.setState(IHealthPoller.STATE.IHEALTH_POLL_IN_PROGRESS);
-
-    const im = this.getIHealthManager();
-    if (!im.qkviewURI) {
-        this.setState(IHealthPoller.STATE.FAILED);
-        const errMsg = 'fetchDiagnostics: no URI to Qkview diagnostics '
-            + 'on F5 iHealth Service provided';
-        this.logger.error(errMsg);
-        return Promise.reject(new Error(errMsg));
-    }
-
-    // set polling start time
-    if (this._storage.ihealthPollStart === 0) {
-        this._storage.ihealthPollStart = (new Date()).getTime();
-    }
-
-    return im.prepare()
-        .then(() => im.isQkviewAnalyzeReady())
-        /* eslint-disable-next-line */
-        .then((isReady) => {
-            return isReady ? im.getDiagnosticsJSON() : Promise.resolve(false);
-        })
-        .then((resp) => {
-            data = resp;
-        })
-        .catch((err) => {
-            error = err;
-        })
-        .then(() => {
-            if (data && !util.isObjectEmpty(data.diagnostics)) {
-                this.setState(IHealthPoller.STATE.IHEALTH_POLL_DONE);
-                this.sendDataToPipeline(data);
-            } else if (((new Date()).getTime() - this._storage.ihealthPollStart) < IHEALTH_POLL_MAX_TIMEOUT) {
-                this.setState(IHealthPoller.STATE.IHEALTH_POLL_RETRY);
-                if (!error) {
-                    let errMsg = 'Invalid response from F5 iHealth Service';
-                    if (data) {
-                        errMsg = `${errMsg}: unable to fetch 'diagnostics' key from response`;
-                    }
-                    error = new Error(errMsg);
+IHealthPoller.cleanupOrphanedStorageData = function cleanupOrphanedStorageData() {
+    return persistentStorage.get(constants.IHEALTH.STORAGE_KEY)
+        .then((storageData) => {
+            storageData = storageData || {};
+            // ignoring 'demo' instances - they are restricted from storing the data
+            const existingKeys = IHealthPoller.getAll().map(poller => poller.storageKey);
+            Object.keys(storageData).forEach((skey) => {
+                if (existingKeys.indexOf(skey) === -1) {
+                    delete storageData[skey];
                 }
-                this.logger.debug(`fetchDiagnostics: ${error}`);
-            } else {
-                this.setState(IHealthPoller.STATE.FAILED);
-                error = new Error('fetchDiagnostics: Unable to poll Qkview Analysis '
-                    + `results from F5 iHealth service: ${error || 'timeout'}`);
-                p = Promise.reject(error);
-            }
-            return Promise.resolve();
-        })
-        /* eslint-disable-next-line */
-        .then(() => {
-            // cleanup cookies and etc. if needed
-            return im.cleanup().catch(silentCatch);
-        })
-        .then(() => p || Promise.resolve());
-};
-
-/**
- * Start main pipeline for task processing
- *
- * @async
- * @returns {Promise} Promise resolved when pipeline completed
- */
-IHealthPoller.prototype.process = function () {
-    this._inProgress = true;
-
-    return this._getStorageState()
-        .then(() => this.fetchConfigs())
-        .then(() => {
-            if (!this.isConfigsAvailable()) {
-                // no configs - disable poller and remove it later
-                this.disable();
-            }
-        })
-        .then(() => {
-            if (this.canBeScheduled()) {
-                return this.putOnSchedule();
-            }
-            return Promise.resolve();
-        })
-        .then(() => {
-            if (this.isQueued() && this.shouldBeFired()) {
-                return this.prepare();
-            }
-            return Promise.resolve();
-        })
-        .then(() => {
-            if (this.isStateEq(IHealthPoller.STATE.READY)
-                || this.isStateEq(IHealthPoller.STATE.QKVIEW_RETRY)) {
-                return this.gatherQkview();
-            }
-            if (this.isStateEq(IHealthPoller.STATE.QKVIEW_COLLECTED)
-                || this.isStateEq(IHealthPoller.STATE.IHEALTH_UPLOAD_RETRY)) {
-                return this.uploadQkview();
-            }
-            if (this.isStateEq(IHealthPoller.STATE.IHEALTH_UPLOADED)
-                || this.isStateEq(IHealthPoller.STATE.IHEALTH_POLL_RETRY)) {
-                return this.fetchDiagnostics();
-            }
-            return Promise.resolve();
-        })
-        .catch((err) => {
-            this.setState(IHealthPoller.STATE.FAILED);
-            this.logger.exception('IHealthPoller.process error', err);
-        })
-        .then(() => {
-            if (this.isStateEq(IHealthPoller.STATE.IHEALTH_POLL_DONE)) {
-                this.setState(IHealthPoller.STATE.DONE);
-            }
-            if (this.isTestOnly() && (this.isDone() || this.isFailed())) {
-                this.disable();
-            }
-            if (!this.isRemoved() && (this.isFailed() || this.isDisabled())) {
-                const p = this.cleanup().catch(silentCatch);
-                if (this.isDisabled()) {
-                    p.then(() => this.removeAllData()).catch(silentCatch);
-                }
-            }
-            return Promise.resolve();
-        })
-        .then(() => this._saveStorageState())
-        .catch((err) => {
-            this.setState(IHealthPoller.STATE.FAILED);
-            this.logger.exception('IHealthPoller.process error', err);
-        })
-        .then(() => {
-            // set it here to set correct timeout
-            // according to current state
-            this._inProgress = false;
-
-            if (this.isRemoved()) {
-                return Promise.resolve();
-            }
-            // schedule next iteration
-            const delay = this.getProcessDelay();
-            this._timerID = setTimeout(() => this.process(), delay);
-
-            if (this.isTestOnly()) {
-                this.logger.debug(`Next pipeline check scheduled in ${(delay || 1) / 1000} sec.`);
-            }
-            return Promise.resolve();
-        })
-        .catch((err) => {
-            this.logger.exception('IHealthPoller.process: unhandled error', err);
+            });
+            return persistentStorage.set(constants.IHEALTH.STORAGE_KEY, storageData);
         });
 };
 
 /**
- * Create tracer instance or return existing one
+ * @param {string} id - poller's config ID
+ * @param {IHealthPollerOptions} [options] - options, see IHealthPoller.constructor for more details
  *
- * @returns {module:util~Tracer} tracer instance
+ * @returns {IHealthPoller} newly created iHealth Poller instance
  */
-IHealthPoller.prototype.getTracer = function () {
-    return tracers.createFromConfig(IHEALTH_POLLER_CLASS_NAME, this.sysName, this.config);
-};
+IHealthPoller.create = function create(id, options) {
+    options = options || {};
+    let poller = IHealthPoller._instances.find(p => p.id === id);
 
-/**
- * Send data to Data Pipeline
- *
- * @param {Object} data - data to send
- */
-IHealthPoller.prototype.sendDataToPipeline = function (data) {
-    this.logger.debug('iHealth poller cycle finished');
-
-    if (this.isDisabled() || !this.dataCallback) {
-        return;
+    if (poller && poller.isDemoModeEnabled() === !!options.demo) {
+        throw new Error(`iHealthPoller instance with ID "${poller.id}" created already (demo = ${poller.isDemoModeEnabled()})`);
     }
-    const parts = this._storage.qkview.ihealthURI.split('/');
-    const other = {
-        ihealthLink: this._storage.qkview.ihealthURI,
-        qkviewNumber: parts[parts.length - 1] || parts[parts.length - 2],
-        cycleStart: this._storage.startTimeStamp,
-        cycleEnd: new Date().toISOString()
-    };
-    this.dataCallback(this, data, other);
-};
-
-/**
- * Disable instance
- */
-IHealthPoller.prototype.disable = function () {
-    if (this.isRemoved()) {
-        return;
-    }
-
-    this.setState(IHealthPoller.STATE.DISABLED);
-    if (this._inProgress) {
-        // do nothing, because it means removal will
-        // be schedule inside of 'process'
-        return;
-    }
-    clearTimeout(this._timerID);
-    this._timerID = setTimeout(() => this.process(), this.getProcessDelay());
-};
-
-/**
- * Pre-processing state - set all required params to initial state/values
- *
- * @async
- * @returns {Promise} Promise resolved when preparation done
- */
-IHealthPoller.prototype.prepare = function () {
-    if (this.isDisabled()) {
-        return Promise.resolve();
-    }
-    this.setState(IHealthPoller.STATE.PREPARE);
-
-    this._storage.startTimeStamp = new Date().toISOString();
-    this._storage.qkviewRetry = 0;
-    this._storage.ihealthUploadRetry = 0;
-    this._storage.ihealthPollStart = 0;
-    delete this._storage.qkview;
-
-    this.setState(IHealthPoller.STATE.READY);
-    return Promise.resolve();
-};
-
-/**
- * Put task on schedule
- */
-IHealthPoller.prototype.putOnSchedule = function () {
-    let nextExecDate = this.getNextFireDate();
-    const fromDate = nextExecDate;
-    const allowNow = !nextExecDate;
-    nextExecDate = datetimeUtil.getNextFireDate(this.config.iHealth.interval, fromDate, allowNow);
-
-    this._storage.nextExecTime = nextExecDate.getTime();
-    this.logger.debug(`Next execution date for iHealth Poller "${this.sysName}": ${nextExecDate.toISOString()}`);
-
-    if (this.isTestOnly()) {
-        nextExecDate = new Date();
-        this._storage.nextExecTime = nextExecDate.getTime();
-    }
-
-    this.setState(IHealthPoller.STATE.QUEUED);
-};
-
-/**
- * Clean up all data in case when task failed or instance disabled
- *
- * @async
- * @returns {Promise} Promise resolved when data removed
- */
-IHealthPoller.prototype.cleanup = function () {
-    // remove nextExecTime to allow task to be
-    // rescheduled in current time frame
-    this._storage.nextExecTime = 0;
-
-    if (util.isObjectEmpty(this._storage.qkview) || util.isObjectEmpty(this.config)) {
-        return Promise.resolve();
-    }
-
-    const qm = this.getQkviewManager();
-    const im = this.getIHealthManager();
-    delete this._storage.qkview;
-
-    return qm.prepare()
-        .then(() => qm.cleanup())
-        .catch(silentCatch)
-        .then(() => im.prepare())
-        .then(() => im.cleanup())
-        .catch(silentCatch);
-};
-
-/**
- * Remove all data associated with instance
- *
- * @async
- * @returns {Promise} Promise resolved when data deleted
- */
-IHealthPoller.prototype.removeAllData = function () {
-    this.setState(IHealthPoller.STATE.REMOVED, true);
-    // we don't need timeout anymore
-    clearTimeout(this._timerID);
-    if (this.isTestOnly()) {
-        // remove it from registered instances
-        IHealthPoller.remove(this);
-    }
-};
-
-/**
- * iHealth Poller instances
- *
- * @member {Object.<string, IHealthPoller>} - instances cache
- */
-IHealthPoller.instances = {};
-
-/**
- * Build iHealth poller key
- *
- * @private
- *
- * @param {String} namespace    - Namespace
- * @param {String} sysName      - System declaration name
- * @param {String} [ihName]     - iHealth declaration name
- * @param {Boolean} [testOnly]  - 'true' to test pipeline only
- *
- * @returns {String} iHealth poller key
- */
-IHealthPoller.getKey = function (namespace, sysName, ihName, testOnly) {
-    ihName = ihName || '';
-    namespace = namespace || '';
-    if (ihName) {
-        sysName = `${sysName}.${ihName}`;
-    }
-    let namespacePrefix = '';
-    if (namespace && namespace !== constants.DEFAULT_UNNAMED_NAMESPACE) {
-        namespacePrefix = `${namespace}::`;
-    }
-    const key = `${namespacePrefix}${sysName}_ihp${sysName.length}${ihName.length}`;
-    const suffix = testOnly ? '_test' : '';
-    return `${key}${suffix}`;
-};
-
-/**
- * Get iHealth poller
- *
- * @param {String} namespace   - Namespace name
- * @param {String} sysName     - System declaration name
- * @param {String} ihName      - iHealth declaration name
- * @param {Boolean} [testOnly] - 'true' to test pipeline only
- *
- * @returns {module:ihealth~IHealthPoller | undefined} iHealth Poller instance
- *     if exists else undefined
- */
-IHealthPoller.get = function (namespace, sysName, ihName, testOnly) {
-    return IHealthPoller.instances[IHealthPoller.getKey(namespace, sysName, ihName, testOnly)];
-};
-
-/**
- * Create new iHealth poller
- *
- * @param {String} namespaceName    - Namespace name
- * @param {String} sysName          - System declaration name
- * @param {String} [ihName]         - iHealth declaration name
- * @param {Boolean} [testOnly]      - 'true' to test pipeline only
- *
- * @returns {module:ihealth~IHealthPoller} iHealth Poller instance
- */
-IHealthPoller.create = function (namespaceName, sysName, ihName, testOnly) {
-    const poller = new IHealthPoller(namespaceName, sysName, ihName, testOnly);
-    IHealthPoller.instances[poller.getKey()] = poller;
+    poller = new IHealthPoller(id, options);
+    IHealthPoller._instances.push(poller);
     return poller;
 };
 
 /**
- * Remove iHealth poller
- * @param {module:ihealth~IHealthPoller} poller - IHealthPoller instance
+ * @param {string} id - poller's config ID
+ * @param {IHealthPollerOptions} [options] - options, see IHealthPoller.constructor for more details
+ *
+ * @returns {IHealthPoller} newly created iHealth Poller 'demo' instance
  */
-IHealthPoller.remove = function (poller) {
-    delete IHealthPoller.instances[poller.getKey()];
+IHealthPoller.createDemo = function create(id, options) {
+    options = options || {};
+    options.demo = true;
+    return IHealthPoller.create(id, options);
 };
 
 /**
- * Get storage data
+ * Disabling and stopping iHealth Poller is tricky process and can take some time (depends on poller's state)
+ * to shutdown it properly. Because of it this method returns Promise resolved once poller disabled and return
+ * value can be used to wait until it completely died. Instance will be unregistered once disabled.
  *
- * @async
- * @returns {Promise.<Object>} Promise resolved current storage data
+ * @param {IHealthPoller} poller - IHealthPoller instance
+ *
+ * @returns {Promise<object>} resolved once instance disabled (not actually stopped or died yet).
+ *     Response contains single property 'stopPromise' than will be resolved once poller completely
+ *     stopped (never rejects).
  */
-IHealthPoller.getStorage = function () {
-    return persistentStorage.get(PERSISTENT_STORAGE_KEY) || {};
+IHealthPoller.disable = function disable(poller) {
+    const stopPromise = poller.stop();
+    return poller.disablingPromise.then(() => {
+        IHealthPoller.unregister(poller);
+        return {
+            stopPromise: stopPromise
+                .catch((error) => {
+                    poller.logger.exception('Unexpected exception on attempt to stop', error);
+                })
+                .then(() => poller.cleanup())
+                .catch(error => poller.logger.exception('Unexpected exception on attempt to stop', error))
+        };
+    });
 };
 
 /**
- * Updated storage
+ * @param {string} id - poller's config ID
  *
- * @async
- * @param {Object} data - data to save
- *
- * @returns {Promise} Promise resolved when data saved to storage
+ * @returns {Array<IHealthPoller>} iHealth Poller instances (non-demo and/or demo)
  */
-IHealthPoller.updateStorage = function (data) {
-    return persistentStorage.set(PERSISTENT_STORAGE_KEY, data);
+IHealthPoller.get = function get(id) {
+    return IHealthPoller._instances.filter(p => p.id === id);
 };
 
+/**
+ * @param {object} [options] - options
+ * @param {boolean} [options.demoOnly = false] - include 'demo' instances only
+ * @param {boolean} [options.includeDemo = false] - include 'demo' instances too
+ *
+ * @returns {Array<IHealthPoller>} instances
+ */
+IHealthPoller.getAll = function getAll(options) {
+    options = util.assignDefaults(options, {
+        demoOnly: false,
+        includeDemo: false
+    });
+    let instances = [];
+    if (!options.demoOnly) {
+        instances = instances.concat(IHealthPoller._instances.filter(p => !p.isDemoModeEnabled()));
+    }
+    if (options.demoOnly || options.includeDemo) {
+        instances = instances.concat(IHealthPoller._instances.filter(p => p.isDemoModeEnabled()));
+    }
+    return instances;
+};
+
+/**
+ * @param {IHealthPoller} poller - IHealthPoller instance or poller's config ID
+ *
+ * @returns {void} when instance unregistered
+ */
+IHealthPoller.unregister = function unregister(poller) {
+    const idx = IHealthPoller._instances.indexOf(poller);
+    if (idx !== -1) {
+        IHealthPoller._instances.splice(idx, 1);
+    }
+};
+
+/**
+ * PRIVATE METHODS
+ */
+/**
+ * @this IHealthPollerFSM
+ * @returns {Promise<boolean>} resolved with true if it is time to start next polling cycle
+ */
+function checkNextExecutionTime() {
+    const allowedToStart = shouldBeExecuted.call(this);
+    if (allowedToStart) {
+        this.data.currentCycle.startTimestamp = Date.now();
+        this.logger.debug('Starting the polling cycle now');
+    } else {
+        this.logger.debug(`Next scheduled polling cycle starts in ${timeUntilNextExecution.call(this) / 1000} s.) (${getNextExecDate.call(this).toISOString()})`);
+    }
+    return Promise.resolve(allowedToStart);
+}
+
+/**
+ * @this IHealthPollerFSM
+ * @returns {void} once sensitive data cleaned up
+ */
+function cleanupSensitiveData() {
+    this.config = null;
+}
+
+/**
+ * @this IHealthPollerFSM
+ * @returns {Promise} resolved once Qkview collected
+ */
+function collectQkview() {
+    return createQkviewManager.call(this)
+        .then(qkviewMgr => qkviewMgr.process())
+        .then((qkviewFilePath) => {
+            this.data.currentCycle.qkview.qkviewFile = qkviewFilePath;
+            this.data.stats.qkviewsCollected += 1;
+        });
+}
+
+/**
+ * @this IHealthPollerFSM
+ * @returns {Promise<IHealthManager>} resolved with IHealthManager instance
+ */
+function createIHealthManager() {
+    return initConfig.call(this)
+        .then(decryptConfigIfNeeded.bind(this))
+        .then(() => new ihealthUtil.IHealthManager(util.deepCopy(this.config.iHealth.credentials), {
+            logger: this.logger,
+            proxy: util.deepCopy(this.config.iHealth.proxy)
+        }));
+}
+
+/**
+ * @this IHealthPollerFSM
+ * @returns {Promise<QkviewManager>} resolved with QkviewManager instance
+ */
+function createQkviewManager() {
+    return initConfig.call(this)
+        .then(decryptConfigIfNeeded.bind(this))
+        .then(() => new ihealthUtil.QkviewManager(this.config.system.host, {
+            connection: util.deepCopy(this.config.system.connection),
+            credentials: util.deepCopy(this.config.system.credentials),
+            downloadFolder: this.config.iHealth.downloadFolder || constants.DEVICE_TMP_DIR,
+            logger: this.logger
+        }));
+}
+
+/**
+ * @this IHealthPollerFSM
+ * @returns {object} base 'data' object
+ */
+function createStorageObject() {
+    const data = {
+        schedule: {
+            nextExecTime: 0
+        },
+        stats: {
+            cycles: 0,
+            cyclesCompleted: 0,
+            qkviewsCollected: 0,
+            qkviewCollectRetries: 0,
+            qkviewsUploaded: 0,
+            qkviewUploadRetries: 0,
+            reportsCollected: 0,
+            reportCollectRetries: 0
+        },
+        version: '2.0'
+    };
+    initPollingCycleInfo.call(this, data);
+    return data;
+}
+
+/**
+ * @this IHealthPollerFSM
+ * @returns {Promise} resolve once configuration data decrypted
+ */
+function decryptConfigIfNeeded() {
+    if (this.config.isDecrypted) {
+        return Promise.resolve();
+    }
+    return configUtil.decryptSecrets(this.config)
+        .then((decryptedConfig) => {
+            this.config = decryptedConfig;
+            this.config.isDecrypted = true;
+        });
+}
+
+/**
+ * @this IHealthPollerFSM
+ * @returns {Promise<object>} resolved with Qkview report
+ */
+function fetchQkviewReport() {
+    let ihealthMgr;
+    return createIHealthManager.call(this)
+        .then((_ihealthMgr) => {
+            ihealthMgr = _ihealthMgr;
+            return ihealthMgr.isQkviewReportReady(this.data.currentCycle.qkview.qkviewURI);
+        })
+        .then((isReady) => {
+            if (isReady) {
+                return ihealthMgr.fetchQkviewDiagnostics(this.data.currentCycle.qkview.qkviewURI);
+            }
+            return null;
+        })
+        .then((reportData) => {
+            if (reportData) {
+                this.data.stats.reportsCollected += 1;
+                this.data.currentCycle.endTimestamp = Date.now();
+            }
+            return {
+                report: reportData,
+                isReady: !!reportData
+            };
+        });
+}
+
+
+/**
+ * Do transition to 'disabled' if needed
+ *
+ * @this IHealthPollerFSM
+ * @returns {boolean} true if instance was disabled
+ */
+function fsmDisabledIfNeeded() {
+    if (this.isDisabled()) {
+        fsmRun.call(this, () => this.transition('disabled'));
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Do following transition - current_state -> cleanup -> failed (error)
+ *
+ * @this IHealthPollerFSM
+ * @param {Error} error - error
+ */
+function fsmFatalFailure(error) {
+    this.transition('cleanup', 'failed', error);
+}
+
+/**
+ * Do transition to the same state after delay if possible
+ *
+ * @this IHealthPollerFSM
+ * @param {Error} [error] - error to log
+ */
+function fsmRetryState(error) {
+    if (error) {
+        this.logger.debugException(`Error caught (state = ${this.state})`, error);
+    }
+    const keys = {
+        collectQkview: {
+            opt: 'QKVIEW_COLLECT',
+            retry: 'qkviewCollect',
+            stats: 'qkviewCollectRetries'
+        },
+        collectReport: {
+            opt: 'QKVIEW_REPORT',
+            retry: 'reportCollect',
+            stats: 'reportCollectRetries'
+        },
+        uploadQkview: {
+            opt: 'QKVIEW_UPLOAD',
+            retry: 'qkviewUpload',
+            stats: 'qkviewUploadRetries'
+        }
+    }[this.state];
+    const retries = this.data.currentCycle.retries;
+    const stats = this.data.stats;
+
+    if (!keys) {
+        fsmFatalFailure.call(this, new Error(`Unexpected state "${this.state}" in fsmRetryState()!`));
+    } else if (retries[keys.retry] < constants.IHEALTH.POLLER_CONF[keys.opt].MAX_RETRIES) {
+        retries[keys.retry] += 1;
+        stats[keys.stats] += 1;
+
+        this.logger.debug(`State "${this.state}" going to retry after sleep (#${retries[keys.retry]}, max. ${constants.IHEALTH.POLLER_CONF[keys.opt].MAX_RETRIES} retries)`);
+        this.transition('sleep', {
+            nextState: this.state,
+            sleepTime: constants.IHEALTH.POLLER_CONF[keys.opt].DELAY
+        });
+    } else {
+        fsmFatalFailure.call(this, new Error(`Max. number of retries for state "${this.state}" reached!`));
+    }
+}
+
+/**
+ * Exec function with wrapped in '.catch'
+ *
+ * @this IHealthPollerFSM
+ * @param {Function} fn - function to run
+ * @param {object} [options] - options
+ * @param {object} [options.reject = false] - reject when caught an error
+ * @param {object} [options.resolve = false] - resolve when caught an error
+ *
+ * @returns {Promise}
+ */
+function fsmRun(fn, options) {
+    options = options || {};
+    return Promise.resolve()
+        .then(fn)
+        .catch((error) => {
+            if (options.reject) {
+                return Promise.reject(error);
+            }
+            if (options.resolve) {
+                return Promise.resolve(error);
+            }
+            return fsmFatalFailure.call(this, error);
+        });
+}
+
+/**
+ * @this IHealthPollerFSM
+ * @param {Function} fn - function to run and re-run on fail
+ */
+function fsmRunWithRetry(fn) {
+    Promise.resolve()
+        .then(fn)
+        .catch(fsmRetryState.bind(this));
+}
+
+/**
+ * @this IHealthPollerFSM
+ * @returns {Date | null} next execution Date or null
+ */
+function getNextExecDate() {
+    const nextExecTime = this.data.schedule.nextExecTime || null;
+    return nextExecTime ? new Date(nextExecTime) : null;
+}
+
+/**
+ * @this IHealthPollerFSM
+ * @returns {Promise} resolved once System and/or iHealth config found
+ */
+function initConfig() {
+    if (!util.isObjectEmpty(this.config)) {
+        return Promise.resolve();
+    }
+    return this.poller.getConfig()
+        .then((config) => {
+            this.config = config;
+        });
+}
+
+/**
+ * @this IHealthPollerFSM
+ * @param {object} data - data from PersistentStorage
+ * @returns {void} once info related to prev. polling cycle removed
+ */
+function initPollingCycleInfo(data) {
+    data.currentCycle = {
+        cycleNo: data.stats.cycles,
+        endTimestamp: null,
+        qkview: {},
+        retries: {
+            qkviewCollect: 0,
+            qkviewUpload: 0,
+            reportCollect: 0
+        },
+        startTimestamp: null
+    };
+}
+
+/**
+ * @this IHealthPollerFSM
+ * @returns {Promise} resolved once data from PersistentStorage received and initialized
+ */
+function initStorageData() {
+    return loadDataFromStorage.call(this.poller)
+        .then((data) => {
+            if (!util.isObjectEmpty(data) && data.version) {
+                this.data = data;
+            }
+        });
+}
+
+/**
+ * @this IHealthPoller
+ * @returns {Promise<iHealthPollerStorage>} resolved with data from PersistentStorage assigned to 'storageKey'
+ *     or simply resolved when in 'demo' mode or disabled
+ */
+function loadDataFromStorage() {
+    if (this.isDemoModeEnabled() || this.isDisabled()) {
+        return Promise.resolve();
+    }
+    return persistentStorage.get([constants.IHEALTH.STORAGE_KEY, this.storageKey]);
+}
+
+/**
+ * @this IHealthPollerFSM
+ * @param {object} report - raw Qkview report data to process
+ *
+ * @returns {QkviewReport} processed Qkview report
+ */
+function processQkviewReport(report) {
+    // https://ihealth-api.f5.com/qkview-analyzer/api/qkviews/<qkview_id>/ (last / is optional)
+    const currentCycle = this.data.currentCycle;
+    const uriParts = currentCycle.qkview.qkviewURI.split('/');
+    const additionalInfo = {
+        ihealthLink: currentCycle.qkview.qkviewURI,
+        qkviewNumber: uriParts[uriParts.length - 1] || uriParts[uriParts.length - 2],
+        cycleStart: currentCycle.startTimestamp,
+        cycleEnd: currentCycle.endTimestamp
+    };
+    return {
+        report,
+        additionalInfo
+    };
+}
+
+/**
+ * @this IHealthPoller
+ * @returns {Promise} resolved once data assigned to 'storageKey' removed
+ *     from PersistentStorage or simply resolved when in 'demo' mode or disabled
+ */
+function removeDataFromStorage() {
+    if (this.isDemoModeEnabled()) {
+        return Promise.resolve();
+    }
+    return persistentStorage.remove([constants.IHEALTH.STORAGE_KEY, this.storageKey]);
+}
+
+/**
+ * @this IHealthPollerFSM
+ * @returns {Promise} resolved once Qkview removed from localhost
+ */
+function removeQkview() {
+    const qkviewPath = ((this.data.currentCycle && this.data.currentCycle.qkview) || {}).qkviewFile;
+    if (!qkviewPath) {
+        return Promise.resolve();
+    }
+    return createQkviewManager.call(this)
+        .then(qkviewMgr => qkviewMgr.localDevice.removeFile(qkviewPath));
+}
+
+/**
+ * @this IHealthPoller
+ * @param {iHealthPollerStorage} data - data to save (JSON-serializable)
+ *
+ * @returns {Promise} resolved once data assigned and saved to PersistentStorage using 'storageKey'
+ *     or simply resolved when in 'demo' mode or disabled
+ */
+function saveDataToStorage(data) {
+    if (this.isDemoModeEnabled() || this.isDisabled()) {
+        return Promise.resolve();
+    }
+    return persistentStorage.set([constants.IHEALTH.STORAGE_KEY, this.storageKey], data);
+}
+
+/**
+ * @this IHealthPollerFSM
+ * @returns {Promise} resolved once next execution scheduled
+ */
+function scheduleNextExecution() {
+    return initConfig.call(this)
+        .then(() => {
+            let nextExecDate = getNextExecDate.call(this);
+            const fromDate = nextExecDate;
+            const allowNow = !nextExecDate;
+            nextExecDate = datetimeUtil.getNextFireDate(this.config.iHealth.interval, fromDate, allowNow);
+            this.data.schedule.nextExecTime = nextExecDate.getTime();
+            this.logger.debug(`Next polling cycle starts on ${nextExecDate.toISOString()} (in ${timeUntilNextExecution.call(this) / 1000} s.)`);
+        });
+}
+
+/**
+ * @this IHealthPollerFSM
+ * @returns {boolean} 'true' if task should be executed (only 'true' will be returned when in 'demo' mode)
+ */
+function shouldBeExecuted() {
+    return this.isDemoModeEnabled() || timeUntilNextExecution.call(this) <= 0;
+}
+
+/**
+ * @this IHealthPollerFSM
+ * @returns {Integer | null} number of milliseconds left till next scheduled execution, (0 when in 'demo' mode)
+ *      or null when not available
+ */
+function timeUntilNextExecution() {
+    if (this.isDemoModeEnabled()) {
+        return 0;
+    }
+    const nextExecDate = getNextExecDate.call(this);
+    return nextExecDate ? (nextExecDate.getTime() - Date.now()) : null;
+}
+
+/**
+ * @this IHealthPollerFSM
+ * @returns {Promise} resolved once Qkview uploaded to F5 iHealth Service
+ */
+function uploadQkview() {
+    return createIHealthManager.call(this)
+        .then(ihealthMgr => ihealthMgr.uploadQkview(this.data.currentCycle.qkview.qkviewFile))
+        .then((qkviewURI) => {
+            this.data.currentCycle.qkview.qkviewURI = qkviewURI;
+            this.data.stats.qkviewsUploaded += 1;
+        });
+}
 
 module.exports = IHealthPoller;
+
+/**
+ * @typedef QkviewReport
+ * @type {object}
+ * @property {object} report - Qkview report data
+ * @property {object} additionalInfo - additional service info
+ * @property {string} ihealthLink - F5 iHealth Service Qkview URI
+ * @property {string} qkviewNumber - Qkview ID
+ * @property {number} cycleStart - time when polling cycle started
+ * @property {number} cycleEnd - time when polling cycle ended
+ */
+/**
+ * @typedef iHealthPollerFsmPollCycle
+ * @type {object}
+ * @property {number} cycleNo - iteration number
+ * @property {number} endTimestamp - timestamp of when polling cycle finished
+ * @property {string} errorMsg - error message if poll cycle failed
+ * @property {object} qkview - Qkview related data
+ * @property {string} qkview.qkviewFile - file path to Qkview obtained from BIG-IP
+ * @property {string} qkview.qkviewURI - Qkview URI returned from F5 iHealth Service
+ * @property {boolean} qkview.reportProcessed - whether or not Qkview report was processed
+ * @property {object} retries - iHealth Poller retries info for current polling cycle
+ * @property {number} retries.qkviewCollect - number of retries made on attempt to obtain Qkview file
+ * @property {number} retries.qkviewUpload - number of retries made on attempt to upload Qkview file
+ * @property {number} retries.reportCollect - number of retries made on attempt to obtain Qkview report
+ * @property {number} startTimestamp - timestamp of when polling cycle started
+ * @property {boolean} succeed - whether or not poll cycle completed successfully
+ */
+/**
+ * @typedef iHealthPollerFsmStats
+ * @type {object}
+ * @property {number} cycles - number of polling cycles
+ * @property {number} cyclesCompleted - number of completed cycles
+ * @property {number} qkviewsCollected - number of Qkview files successfully collected
+ * @property {number} qkviewCollectRetries - number of retries made on attempt to obtain Qkview file
+ * @property {number} qkviewsUploaded - number of Qkview files successfully uploaded
+ * @property {number} qkviewUploadRetries - number of retries made on attempt to upload Qkview file
+ * @property {number} reportsCollected - number of Qkview reports successfully received
+ * @property {number} reportCollectRetries - number of retries made on attempt to obtain Qkview report
+ */
+/**
+ * @typedef iHealthPollerStorage
+ * @type {object}
+ * @property {iHealthPollerFsmPollCycle} currentCycle - data related to current polling cycle
+ * @property {string} lastKnownState - state set before data was saved
+ * @property {object} schedule - iHealth Poller polling schedule data
+ * @property {number} schedule.nextExecTime - timestamp of next scheduled execution
+ * @property {iHealthPollerFsmStats} stats - iHealth Poller stats
+ * @property {string} version - data's format version
+ */
+/**
+ * @typedef iHealthPollerFsmInfo
+ * @type {object}
+ * @property {iHealthPollerFsmPollCycle} currentCycle - current cycle info
+ * @property {boolean} demoMode - whether or not in 'demo' mode
+ * @property {boolean} disabled - whether or not instance was disabled (attempted to stop)
+ * @property {string} nextFireDate - next scheduled execution date
+ * @property {string} state - current state
+ * @property {iHealthPollerFsmStats} stats - iHealth Poller FSM stats
+ * @property {number} timeUntilNextExecution - number of ms. before next scheduled execution
+ */
+/**
+ * @typedef iHealthPollerInfo
+ * @type {iHealthPollerFsmInfo}
+ * @property {string} id - instance's config ID
+ * @property {string} name - instance's name
+ */
+/**
+ * @typedef IHealthPollerOptions
+ * @type {object}
+ * @property {boolean} [demo = false] - enable 'demo' mode
+ * @property {string} [name] - name to use (e.g. for logging)
+ */

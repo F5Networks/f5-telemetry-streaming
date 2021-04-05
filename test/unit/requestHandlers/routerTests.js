@@ -20,7 +20,10 @@ const sinon = require('sinon');
 const BaseRequestHandler = require('../../../src/lib/requestHandlers/baseHandler');
 const configWorker = require('../../../src/lib/config');
 const httpErrors = require('../../../src/lib/requestHandlers/httpErrors');
+const persistentStorage = require('../../../src/lib/persistentStorage');
 const requestRouter = require('../../../src/lib/requestHandlers/router');
+const stubs = require('../shared/stubs');
+const teemReporter = require('../../../src/lib/teemReporter');
 const testUtil = require('../shared/util');
 
 chai.use(chaiAsPromised);
@@ -57,6 +60,11 @@ CustomRequestHandler.prototype.process = function () {
 
 describe('Requests Router', () => {
     beforeEach(() => {
+        stubs.coreStub({
+            configWorker,
+            persistentStorage,
+            teemReporter
+        });
         requestRouter.removeAllHandlers();
     });
 
@@ -324,30 +332,21 @@ describe('Requests Router', () => {
     it('should register handlers on config change event', () => {
         const spy = sinon.spy();
         requestRouter.on('register', spy);
-        return configWorker.emitAsync('change', {
-            components: [
-                {
-                    id: 'uuid1',
-                    name: 'Controls',
-                    namespace: 'f5telemetry_default',
-                    class: 'Controls',
-                    debug: true
-                }
-            ]
+        return configWorker.processDeclaration({
+            class: 'Telemetry',
+            controls: {
+                class: 'Controls',
+                debug: true
+            }
         })
             .then(() => {
                 assert.ok(spy.args[0][0] === requestRouter, 'should pass router instance');
                 assert.strictEqual(spy.args[0][1], true, 'should pass debug state');
-                return configWorker.emitAsync('change', {
-                    components: [
-                        {
-                            id: 'uuid1',
-                            name: 'Controls',
-                            namespace: 'f5telemetry_default',
-                            class: 'Controls',
-                            debug: false
-                        }
-                    ]
+                return configWorker.processDeclaration({
+                    class: 'Telemetry',
+                    controls: {
+                        class: 'Controls'
+                    }
                 });
             })
             .then(() => {

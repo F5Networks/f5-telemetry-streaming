@@ -30,7 +30,8 @@ const configListenerModulesToLoad = [
     '../lib/systemPoller',
     '../lib/ihealth',
     '../lib/requestHandlers/connections',
-    '../lib/utils/monitor.js'
+    '../lib/utils/monitor.js',
+    '../lib/utils/tracer.js'
 ];
 
 configListenerModulesToLoad.forEach((module) => {
@@ -124,7 +125,7 @@ RestWorker.prototype._initializeApplication = function (success, failure) {
         .then((loadedState) => {
             logger.debug(`Loaded state ${util.stringify(loadedState)}`);
         })
-        .then(() => configWorker.loadConfig())
+        .then(() => configWorker.load())
         .then(() => success())
         .catch((err) => {
             logger.exception('Startup Failed', err);

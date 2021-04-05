@@ -61,6 +61,7 @@ module.exports = function (context) {
             }
         }
     );
+
     options.method = 'POST';
     options.headers = {};
     options.fullURI = 'https://oauth2.googleapis.com/token';

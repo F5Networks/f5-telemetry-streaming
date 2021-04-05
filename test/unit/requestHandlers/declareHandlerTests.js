@@ -16,18 +16,35 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const ErrorHandler = require('../../../src/lib/requestHandlers/errorHandler');
 const configWorker = require('../../../src/lib/config');
+const constants = require('../../../src/lib/constants');
 const DeclareHandler = require('../../../src/lib/requestHandlers/declareHandler');
+const deviceUtil = require('../../../src/lib/utils/device');
+const ErrorHandler = require('../../../src/lib/requestHandlers/errorHandler');
+const persistentStorage = require('../../../src/lib/persistentStorage');
+const stubs = require('../shared/stubs');
+const teemReporter = require('../../../src/lib/teemReporter');
 const testUtil = require('../shared/util');
+const utilMisc = require('../../../src/lib/utils/misc');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
-
 describe('DeclareHandler', () => {
     let requestHandler;
     let uri;
+
+    beforeEach(() => {
+        stubs.coreStub({
+            configWorker,
+            deviceUtil,
+            persistentStorage,
+            teemReporter,
+            utilMisc
+        });
+        return persistentStorage.persistentStorage.load()
+            .then(() => configWorker.load());
+    });
 
     afterEach(() => {
         requestHandler = null;
@@ -93,30 +110,31 @@ describe('DeclareHandler', () => {
         });
 
         it('should get full raw config on GET request', () => {
-            const mockConfig = { class: 'Telemetry' };
             const expected = {
                 code: 200,
                 body: {
                     message: 'success',
-                    declaration: mockConfig
+                    declaration: {
+                        class: 'Telemetry',
+                        schemaVersion: constants.VERSION
+                    }
                 }
             };
-            sinon.stub(configWorker, 'getRawConfig').resolves(testUtil.deepCopy(mockConfig));
             requestHandler = new DeclareHandler(getRestOperation('GET'));
             return assertProcessResult(expected);
         });
 
         it('should return 200 on POST - valid declaration', () => {
-            const mockConfig = { config: 'validated' };
             const expected = {
                 code: 200,
                 body: {
                     message: 'success',
-                    declaration: mockConfig
+                    declaration: {
+                        class: 'Telemetry',
+                        schemaVersion: constants.VERSION
+                    }
                 }
             };
-
-            sinon.stub(configWorker, 'processDeclaration').resolves(testUtil.deepCopy(mockConfig));
             requestHandler = new DeclareHandler(getRestOperation('POST', { class: 'Telemetry' }));
             return assertProcessResult(expected);
         });
@@ -137,7 +155,7 @@ describe('DeclareHandler', () => {
         it('should return 503 on attempt to POST declaration while previous one is still in process', () => {
             const mockConfig = { config: 'validated' };
             sinon.stub(configWorker, 'processDeclaration').callsFake(() => testUtil.sleep(50).then(() => testUtil.deepCopy(mockConfig)));
-            sinon.stub(configWorker, 'getRawConfig').callsFake(() => testUtil.sleep(50).then(() => testUtil.deepCopy(mockConfig)));
+            sinon.stub(configWorker, 'getDeclaration').callsFake(() => testUtil.sleep(50).then(() => testUtil.deepCopy(mockConfig)));
 
             const expectedResponses = {
                 GET: {
@@ -169,7 +187,7 @@ describe('DeclareHandler', () => {
         });
 
         it('should reject whe unknown error is caught', () => {
-            sinon.stub(configWorker, 'getRawConfig').rejects(new Error('expectedError'));
+            sinon.stub(configWorker, 'getDeclaration').rejects(new Error('expectedError'));
             requestHandler = new DeclareHandler(getRestOperation('GET'));
             return assert.isRejected(requestHandler.process(), 'expectedError');
         });
@@ -178,16 +196,14 @@ describe('DeclareHandler', () => {
     describe('/namespace/:namespace/declare', () => {
         beforeEach(() => {
             uri = 'http://localhost:8100/mgmt/shared/telemetry/namespace/testNamespace/declare';
+            return configWorker.processDeclaration({
+                class: 'Telemetry',
+                testNamespace: { class: 'Telemetry_Namespace' },
+                otherNamespace: { class: 'Telemetry_Namespace' }
+            });
         });
 
         it('should get namespace-only raw config on GET request', () => {
-            const mockConfig = {
-                raw: {
-                    class: 'Telemetry',
-                    testNamespace: { class: 'Telemetry_Namespace' },
-                    otherNamespace: { class: 'Telemetry_Namespace', unwanted: true }
-                }
-            };
             const expected = {
                 code: 200,
                 body: {
@@ -195,7 +211,6 @@ describe('DeclareHandler', () => {
                     declaration: { class: 'Telemetry_Namespace' }
                 }
             };
-            sinon.stub(configWorker, 'getConfig').resolves(mockConfig);
             requestHandler = new DeclareHandler(getRestOperation('GET'), { namespace: 'testNamespace' });
             return assertProcessResult(expected);
         });
@@ -205,27 +220,24 @@ describe('DeclareHandler', () => {
                 code: 404,
                 body: {
                     code: 404,
-                    message: 'Namespace with name \'testNamespace\' doesn\'t exist'
+                    message: 'Namespace with name \'nonExistingNamespace\' doesn\'t exist'
                 }
             };
-            sinon.stub(configWorker, 'getConfig').resolves({ raw: { class: 'Telemetry' } });
-
-            requestHandler = new DeclareHandler(getRestOperation('GET'), { namespace: 'testNamespace' });
+            requestHandler = new DeclareHandler(getRestOperation('GET'), { namespace: 'nonExistingNamespace' });
             return assertProcessResult(expected);
         });
 
         it('should return 200 on POST - valid declaration', () => {
-            const mockConfig = { config: 'validated' };
             const expected = {
                 code: 200,
                 body: {
                     message: 'success',
-                    declaration: mockConfig
+                    declaration: {
+                        class: 'Telemetry_Namespace'
+                    }
                 }
             };
-
-            sinon.stub(configWorker, 'processDeclaration').resolves(testUtil.deepCopy(mockConfig));
-            requestHandler = new DeclareHandler(getRestOperation('POST', { class: 'Telemetry_Namespace' }));
+            requestHandler = new DeclareHandler(getRestOperation('POST', { class: 'Telemetry_Namespace' }), { namespace: 'testNamespace' });
             return assertProcessResult(expected);
         });
 
@@ -238,17 +250,19 @@ describe('DeclareHandler', () => {
                     error: /"schemaPath":"#\/properties\/class\/enum","params":{"allowedValues":\["Telemetry_Namespace"\]/
                 }
             };
-            sinon.stub(configWorker, 'getConfig').resolves({ raw: { class: 'Telemetry' } });
-
             requestHandler = new DeclareHandler(getRestOperation('POST', { class: 'Telemetry' }), { namespace: 'testNamespace' });
             return assertProcessResult(expected);
         });
 
         it('should return 503 on attempt to POST declaration while previous one is still in process', () => {
             const namespaceConfig = { class: 'Telemetry_Namespace' };
-            const validatedConfig = { class: 'Telemetry', testNamespace: { class: 'Telemetry_Namespace' } };
-            sinon.stub(configWorker, 'processDeclaration').callsFake(() => testUtil.sleep(50).then(() => validatedConfig));
-            sinon.stub(configWorker, 'getConfig').callsFake(() => testUtil.sleep(50).then(() => ({ raw: validatedConfig })));
+            sinon.stub(configWorker, 'processDeclaration').callsFake(function () {
+                return testUtil.sleep(50)
+                    .then(() => {
+                        configWorker.processDeclaration.restore();
+                        return configWorker.processDeclaration.apply(configWorker, arguments);
+                    });
+            });
 
             const expectedResponses = {
                 GET: {
@@ -280,7 +294,7 @@ describe('DeclareHandler', () => {
         });
 
         it('should reject when unknown error is caught', () => {
-            sinon.stub(configWorker, 'getConfig').rejects(new Error('expectedError'));
+            sinon.stub(configWorker, 'getDeclaration').rejects(new Error('expectedError'));
             requestHandler = new DeclareHandler(getRestOperation('POST', { class: 'Telemetry_Namespace' }), { namespace: 'testNamespace' });
             return assert.isRejected(requestHandler.process(), 'expectedError');
         });

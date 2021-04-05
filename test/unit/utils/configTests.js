@@ -16,34 +16,174 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const configWorker = require('../../../src/lib/config');
-const constants = require('../../../src/lib/constants');
-const deviceUtil = require('../../../src/lib/utils/device');
 const configUtil = require('../../../src/lib/utils/config');
-const util = require('../../../src/lib/utils/misc');
-
-const configUtilTestData = require('../data/configUtilTestsData');
+const configUtilTestData = require('../data/configUtilTests');
+const configWorker = require('../../../src/lib/config');
+const deviceUtil = require('../../../src/lib/utils/device');
+const persistentStorage = require('../../../src/lib/persistentStorage');
+const stubs = require('../shared/stubs');
+const teemReporter = require('../../../src/lib/teemReporter');
 const testUtil = require('../shared/util');
+const utilMisc = require('../../../src/lib/utils/misc');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe('Config Util', () => {
-    let uuidCounter = 0;
+    let coreStub;
+
+    const parseDeclaration = (declaration, options) => configWorker.processDeclaration(
+        testUtil.deepCopy(declaration), options
+    );
 
     beforeEach(() => {
-        sinon.stub(util, 'generateUuid').callsFake(() => {
-            uuidCounter += 1;
-            return `uuid${uuidCounter}`;
+        coreStub = stubs.coreStub({
+            configWorker,
+            deviceUtil,
+            persistentStorage,
+            teemReporter,
+            utilMisc
         });
+        coreStub.utilMisc.generateUuid.numbersOnly = false;
     });
 
     afterEach(() => {
-        uuidCounter = 0;
         sinon.restore();
     });
 
-    describe('.componentizeConfig()', () => {
+    describe('.getComponents', () => {
+        it('should return empty array when no config passed', () => assert.deepStrictEqual(configUtil.getComponents(), []));
+        it('should return empty array when no .components', () => assert.deepStrictEqual(configUtil.getComponents({}), []));
+
+        configUtilTestData.getComponents.tests.forEach((testConf) => {
+            testUtil.getCallableIt(testConf)(testConf.name, () => parseDeclaration(testConf.declaration)
+                .then(() => {
+                    assert.sameDeepMembers(
+                        configUtil.getComponents(configWorker.currentConfig, {
+                            class: testConf.classFilter,
+                            filter: testConf.filter,
+                            namespace: testConf.namespaceFilter
+                        }),
+                        testConf.expected
+                    );
+                }));
+        });
+    });
+
+    describe('.getReceivers()', () => {
+        it('should return receivers when defined', () => {
+            const rawDecl = {
+                class: 'Telemetry',
+                listener: {
+                    class: 'Telemetry_Listener'
+                },
+                My_Namespace: {
+                    class: 'Telemetry_Namespace',
+                    listener: {
+                        class: 'Telemetry_Listener'
+                    },
+                    consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'default'
+                    }
+                }
+            };
+            return parseDeclaration(rawDecl)
+                .then(() => {
+                    let listener = configUtil.getTelemetryListeners(configWorker.currentConfig, 'f5telemetry_default')[0];
+                    assert.deepStrictEqual(configUtil.getReceivers(configWorker.currentConfig, listener), []);
+
+                    listener = configUtil.getTelemetryListeners(configWorker.currentConfig, 'My_Namespace')[0];
+                    assert.deepStrictEqual(
+                        configUtil.getReceivers(configWorker.currentConfig, listener).map(c => c.id),
+                        ['My_Namespace::consumer']
+                    );
+                });
+        });
+    });
+
+    describe('.getTelemetryControls()', () => {
+        it('should return Controls', () => {
+            const rawDecl = {
+                class: 'Telemetry',
+                controls: {
+                    class: 'Controls',
+                    logLevel: 'debug'
+                }
+            };
+            return parseDeclaration(rawDecl)
+                .then(() => {
+                    assert.deepStrictEqual(configUtil.getTelemetryControls(configWorker.currentConfig),
+                        {
+                            class: 'Controls',
+                            name: 'controls',
+                            logLevel: 'debug',
+                            namespace: 'f5telemetry_default',
+                            id: 'f5telemetry_default::controls',
+                            memoryThresholdPercent: 90,
+                            debug: false
+                        });
+                });
+        });
+
+        it('should return Controls object and not array when multiple Controls defined', () => {
+            const rawDecl = {
+                class: 'Telemetry',
+                controls: {
+                    class: 'Controls',
+                    logLevel: 'debug'
+                },
+                controls2: {
+                    class: 'Controls',
+                    logLevel: 'debug'
+                }
+            };
+            return parseDeclaration(rawDecl)
+                .then(() => {
+                    assert.deepStrictEqual(configUtil.getTelemetryControls(configWorker.currentConfig),
+                        {
+                            class: 'Controls',
+                            name: 'controls', // this is just a guess, depends on ordering
+                            logLevel: 'debug',
+                            namespace: 'f5telemetry_default',
+                            id: 'f5telemetry_default::controls',
+                            memoryThresholdPercent: 90,
+                            debug: false
+                        });
+                });
+        });
+
+        it('should return empty object when Controls not found', () => {
+            const rawDecl = {
+                class: 'Telemetry'
+            };
+            return parseDeclaration(rawDecl)
+                .then(() => {
+                    assert.deepStrictEqual(configUtil.getTelemetryControls(configWorker.currentConfig), {});
+                });
+        });
+    });
+
+    describe('.hasEnabledComponents()', () => {
+        it('should return false when no config passed', () => assert.deepStrictEqual(configUtil.hasEnabledComponents(), false));
+        it('should return false when no .components', () => assert.deepStrictEqual(configUtil.hasEnabledComponents({}), false));
+
+        configUtilTestData.hasEnabledComponents.tests.forEach((testConf) => {
+            testUtil.getCallableIt(testConf)(testConf.name, () => parseDeclaration(testConf.declaration)
+                .then(() => {
+                    assert.strictEqual(
+                        configUtil.hasEnabledComponents(configWorker.currentConfig, {
+                            class: testConf.classFilter,
+                            filter: testConf.filter,
+                            namespace: testConf.namespaceFilter
+                        }),
+                        testConf.expected
+                    );
+                }));
+        });
+    });
+
+    describe('.normalizeDeclaration()', () => {
         describe('core behavior', () => {
             const noParseResult = {
                 mappings: {},
@@ -55,120 +195,248 @@ describe('Config Util', () => {
                 return regex.test(strValue);
             };
 
-            it('should return empty object mappings and components when no declaration', () => {
-                assert.becomes(configUtil.componentizeConfig(), noParseResult);
-            });
-
-            it('should not fail on null', () => {
-                // typeof null === 'object'
-                assert.becomes(configUtil.componentizeConfig(null), noParseResult);
-            });
+            it('should not fail on null', () => assert.becomes(configUtil.normalizeDeclaration(null), noParseResult));
+            it('should not fail on Array', () => assert.becomes(configUtil.normalizeDeclaration([{ class: 'Telemetry' }]), noParseResult));
+            it('should not fail on string', () => assert.becomes(configUtil.normalizeDeclaration('declaration'), noParseResult));
+            it('should not fail on empty object', () => assert.becomes(configUtil.normalizeDeclaration({}), noParseResult));
 
             it('should assign random UUIDs for the components', () => {
-                util.generateUuid.restore();
+                coreStub.utilMisc.generateUuid.restore();
                 const decl = {
-                    System1: {
-                        class: 'Telemetry_System'
-                    },
+                    class: 'Telemetry',
                     Listener1: {
+                        class: 'Telemetry_Listener'
+                    },
+                    Listener2: {
                         class: 'Telemetry_Listener'
                     }
                 };
-                return configUtil.componentizeConfig(decl, false)
-                    .then((parsedConf) => {
-                        assert(isValidUuid(parsedConf.components[1].id));
-                        assert(isValidUuid(parsedConf.components[0].id));
+                return parseDeclaration(decl)
+                    .then(() => {
+                        assert.isTrue(isValidUuid(configWorker.currentConfig.components[1].id));
+                        assert.isTrue(isValidUuid(configWorker.currentConfig.components[0].id));
                     });
             });
         });
 
-        describe('raw declaration input variations', () => {
-            const testSet = configUtilTestData.componentizeConfig;
-            testSet.forEach(testConf => testUtil.getCallableIt(testConf)(testConf.name,
-                () => assert.becomes(configUtil.componentizeConfig(testConf.inputDecl), testConf.expected)));
-        });
-    });
-
-    describe('.normalizeComponents', () => {
-        const parseDeclaration = function (declaration) {
-            return configWorker.validate(declaration)
-                .then(validated => configUtil.componentizeConfig(validated));
-        };
-
-        const sortMappings = (mappings) => {
-            Object.keys(mappings).forEach(key => mappings[key].sort());
-        };
-
-        beforeEach(() => {
-            sinon.stub(deviceUtil, 'encryptSecret').resolvesArg(0);
-            sinon.stub(deviceUtil, 'decryptSecret').resolvesArg(0);
-            sinon.stub(deviceUtil, 'getDeviceType').resolves(constants.DEVICE_TYPE.BIG_IP);
-            sinon.stub(util, 'networkCheck').resolves();
-        });
-
-        const testSetData = configUtilTestData.normalizeComponents;
-        /* eslint-disable implicit-arrow-linebreak */
+        const testSetData = configUtilTestData.normalizeDeclaration;
         Object.keys(testSetData).forEach((testSetKey) => {
             const testSet = testSetData[testSetKey];
             testUtil.getCallableDescribe(testSet)(testSet.name, () => {
                 testSet.tests.forEach((testConf) => {
-                    testUtil.getCallableIt(testConf)(testConf.name, () =>
-                        parseDeclaration(testConf.declaration)
-                            .then(configData => configUtil.normalizeComponents(configData))
-                            .then((normalized) => {
-                                sortMappings(normalized.mappings);
-                                sortMappings(testConf.expected.mappings);
-
-                                assert.deepStrictEqual(normalized.mappings, testConf.expected.mappings);
-                                assert.sameDeepMembers(normalized.components, testConf.expected.components);
-                            }));
+                    testUtil.getCallableIt(testConf)(testConf.name, () => parseDeclaration(testConf.declaration)
+                        .then(() => {
+                            assert.sameDeepMembers(
+                                [configWorker.currentConfig.mappings],
+                                [testConf.expected.mappings]
+                            );
+                            assert.sameDeepMembers(
+                                configWorker.currentConfig.components,
+                                testConf.expected.components
+                            );
+                        }));
                 });
             });
         });
     });
 
-    describe('.getPollerTraceValue()', () => {
-        it('should preserve trace config', () => {
-            const matrix = configUtilTestData.getPollerTraceValue;
-            const systemTraceValues = matrix[0];
-
-            for (let i = 1; i < matrix.length; i += 1) {
-                const pollerTrace = matrix[i][0];
-
-                for (let j = 1; j < systemTraceValues.length; j += 1) {
-                    const systemTrace = systemTraceValues[j];
-                    const expectedTrace = matrix[i][j];
-                    assert.strictEqual(
-                        configUtil.getPollerTraceValue(systemTrace, pollerTrace),
-                        expectedTrace,
-                        `Expected to be ${expectedTrace} when systemTrace=${systemTrace} and pollerTrace=${pollerTrace}`
-                    );
-                }
-            }
+    describe('.mergeDeclaration()', () => {
+        configUtilTestData.mergeDeclaration.tests.forEach((testConf) => {
+            testUtil.getCallableIt(testConf)(testConf.name, () => Promise.all([
+                parseDeclaration(testConf.baseDeclaration, { expanded: true }).then(configUtil.normalizeDeclaration),
+                parseDeclaration(testConf.newDeclaration, { expanded: true })
+            ])
+                .then(configs => configUtil.mergeDeclaration(configs[1], configs[0]))
+                .then((normalized) => {
+                    assert.sameDeepMembers([normalized.mappings], [testConf.expected.mappings]);
+                    assert.sameDeepMembers(normalized.components, testConf.expected.components);
+                }));
         });
     });
 
-    describe('.getControls', () => {
-        it('should return controls from new config format (normalized)', () => {
-            const rawDecl = {
+    describe('.removeComponents()', () => {
+        it('should not fail no config passed', () => assert.doesNotThrow(() => configUtil.removeComponents()));
+        it('should not fail when no .components', () => assert.doesNotThrow(() => configUtil.removeComponents({})));
+
+        it('should remove all components', () => {
+            const decl = {
                 class: 'Telemetry',
-                controls: {
-                    class: 'Controls',
-                    logLevel: 'debug'
+                My_Listener: {
+                    class: 'Telemetry_Listener'
+                },
+                My_Consumer: {
+                    class: 'Telemetry_Consumer',
+                    type: 'default'
+                },
+                My_Namespace: {
+                    class: 'Telemetry_Namespace',
+                    My_Listener: {
+                        class: 'Telemetry_Listener'
+                    }
                 }
             };
+            return parseDeclaration(decl)
+                .then(() => {
+                    const parsedConf = configWorker.currentConfig;
+                    assert.deepStrictEqual(parsedConf.mappings, { My_Listener: ['My_Consumer'] });
+                    assert.strictEqual(parsedConf.components.length, 3);
 
-            return configUtil.componentizeConfig(rawDecl)
-                .then((convertedConfig) => {
-                    assert.deepStrictEqual(configUtil.getControls(convertedConfig),
-                        {
-                            class: 'Controls',
-                            name: 'controls',
-                            logLevel: 'debug',
-                            namespace: constants.DEFAULT_UNNAMED_NAMESPACE,
-                            id: 'uuid1'
-                        });
+                    configUtil.removeComponents(parsedConf);
+                    assert.deepStrictEqual(parsedConf.mappings, {});
+                    assert.deepStrictEqual(parsedConf.components, []);
                 });
+        });
+
+        it('should remove component and update mapping', () => {
+            const decl = {
+                class: 'Telemetry',
+                My_Listener: {
+                    class: 'Telemetry_Listener'
+                },
+                My_Consumer: {
+                    class: 'Telemetry_Consumer',
+                    type: 'default'
+                },
+                My_Consumer_2: {
+                    class: 'Telemetry_Consumer',
+                    type: 'default'
+                },
+                My_Consumer_3: {
+                    class: 'Telemetry_Consumer',
+                    type: 'default'
+                },
+                My_Namespace: {
+                    class: 'Telemetry_Namespace',
+                    My_Listener: {
+                        class: 'Telemetry_Listener'
+                    },
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'default'
+                    }
+                }
+            };
+            return parseDeclaration(decl)
+                .then(() => {
+                    const parsedConf = configWorker.currentConfig;
+                    assert.deepStrictEqual(parsedConf.mappings, {
+                        My_Listener: ['My_Consumer', 'My_Consumer_2', 'My_Consumer_3'],
+                        'My_Namespace::My_Listener': ['My_Namespace::My_Consumer']
+                    });
+
+                    configUtil.removeComponents(parsedConf, { filter: c => c.name === 'My_Consumer' });
+                    assert.deepStrictEqual(parsedConf.mappings, {
+                        My_Listener: ['My_Consumer_2', 'My_Consumer_3']
+                    });
+                    assert.strictEqual(configUtil.getTelemetryListeners(parsedConf).length, 2);
+                    assert.strictEqual(configUtil.getTelemetryConsumers(parsedConf).length, 2);
+
+                    configUtil.removeComponents(parsedConf, { filter: c => c.name === 'My_Listener', namespace: 'f5telemetry_default' });
+                    assert.deepStrictEqual(parsedConf.mappings, {});
+                    assert.strictEqual(configUtil.getTelemetryListeners(parsedConf).length, 1);
+                    assert.strictEqual(configUtil.getTelemetryConsumers(parsedConf).length, 2);
+
+                    configUtil.removeComponents(parsedConf, { class: 'Telemetry_Listener', namespace: c => c.namespace === 'My_Namespace' });
+                    assert.deepStrictEqual(parsedConf.mappings, {});
+                    assert.strictEqual(configUtil.getTelemetryListeners(parsedConf).length, 0);
+                    assert.strictEqual(configUtil.getTelemetryConsumers(parsedConf).length, 2);
+
+                    configUtil.removeComponents(parsedConf, { filter: c => c.name === 'My_Consumer_2' });
+                    assert.deepStrictEqual(parsedConf.mappings, {});
+                    assert.strictEqual(configUtil.getTelemetryConsumers(parsedConf).length, 1);
+
+                    configUtil.removeComponents(parsedConf, { class: 'Telemetry_Consumer' });
+                    assert.deepStrictEqual(parsedConf.mappings, {});
+                    assert.strictEqual(configUtil.getTelemetryConsumers(parsedConf).length, 0);
+                });
+        });
+    });
+
+    describe('.decryptAllSecrets()', () => {
+        it('should decrypt secrets (JSON declaration)', () => {
+            const encrypted = {
+                class: 'Telemetry',
+                My_Namespace: {
+                    class: 'Telemetry_Namespace',
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.1',
+                        path: '`=/Shared/constants/path`',
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$passphrase'
+                        }
+                    }
+                }
+            };
+            const decrypted = {
+                class: 'Telemetry',
+                My_Namespace: {
+                    class: 'Telemetry_Namespace',
+                    My_Consumer: {
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.0.2.1',
+                        path: '`=/Shared/constants/path`',
+                        passphrase: 'passphrase'
+                    }
+                }
+            };
+            return assert.becomes(configUtil.decryptSecrets(encrypted), decrypted);
+        });
+
+        it('should decrypt secrets (normalized configuration)', () => {
+            const encrypted = {
+                mappings: {},
+                components: [
+                    {
+                        name: 'My_Consumer',
+                        traceName: 'My_Consumer',
+                        id: 'uuid2',
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        enable: true,
+                        method: 'POST',
+                        host: '192.0.2.1',
+                        path: '/foo',
+                        port: 443,
+                        protocol: 'https',
+                        trace: false,
+                        allowSelfSignedCert: false,
+                        namespace: 'f5telemetry_default',
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$passphrase'
+                        }
+                    }
+                ]
+            };
+            const decrypted = {
+                mappings: {},
+                components: [
+                    {
+                        name: 'My_Consumer',
+                        traceName: 'My_Consumer',
+                        id: 'uuid2',
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        enable: true,
+                        method: 'POST',
+                        host: '192.0.2.1',
+                        path: '/foo',
+                        port: 443,
+                        protocol: 'https',
+                        trace: false,
+                        allowSelfSignedCert: false,
+                        namespace: 'f5telemetry_default',
+                        passphrase: 'passphrase' // decrypted secret
+                    }
+                ]
+            };
+            return assert.becomes(configUtil.decryptSecrets(encrypted), decrypted);
         });
     });
 });

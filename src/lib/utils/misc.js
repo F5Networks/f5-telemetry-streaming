@@ -14,6 +14,7 @@ const clone = require('lodash/clone');
 const mergeWith = require('lodash/mergeWith');
 const trim = require('lodash/trim');
 const objectGet = require('lodash/get');
+const childProcess = require('child_process');
 const fs = require('fs');
 const net = require('net');
 // deep require support is deprecated for versions 7+ (requires node8+)
@@ -24,37 +25,72 @@ const uuidv4 = require('uuid/v4');
 */
 
 /**
- * Promisified FS module
+ * Convert async callback function to promise-based funcs
+ *
+ * Note: when error passed to callback then all other args will be attached
+ * to it and can be access via 'error.callbackArgs' property
+ *
+ * @property {Object} module - origin module
+ * @property {String} funcName - function name
+ *
+ * @returns {Function<Promise>} proxy function
  */
-const fsPromisified = (function promisifyNodeFsModule(fsModule) {
-    function proxy(originFunc) {
-        return function () {
-            return new Promise((resolve, reject) => {
-                const args = Array.from(arguments);
-                args.push(function () {
-                    const cbArgs = Array.from(arguments);
-                    // error usually is first arg
-                    if (cbArgs[0]) {
-                        reject(cbArgs[0]);
-                    } else {
-                        resolve(cbArgs.slice(1));
-                    }
-                });
-                originFunc.apply(null, args);
+function proxyForNodeCallbackFuncs(module, funcName) {
+    return function () {
+        return new Promise((resolve, reject) => {
+            const args = Array.from(arguments);
+            args.push(function () {
+                const cbArgs = Array.from(arguments);
+                // error usually is first arg
+                if (cbArgs[0]) {
+                    cbArgs[0].callbackArgs = cbArgs.slice(1);
+                    reject(cbArgs[0]);
+                } else {
+                    resolve(cbArgs.slice(1));
+                }
             });
-        };
-    }
-    const newFsModule = Object.create(fsModule);
-    Object.keys(fsModule).forEach((key) => {
-        if (typeof fsModule[`${key}Sync`] !== 'undefined') {
-            newFsModule[key] = proxy(fs[key]);
-        }
-    });
-    return newFsModule;
-}(fs));
-
+            module[funcName].apply(module, args);
+        });
+    };
+}
 
 const VERSION_COMPARATORS = ['==', '===', '<', '<=', '>', '>=', '!=', '!=='];
+
+const SECERTS_MASK = '*********';
+const KEYWORDS_TO_MASK = [
+    {
+        /**
+         * single line:
+         *
+         * { "passphrase": { ...secret... } }
+         */
+        str: 'passphrase',
+        replace: /(\\{0,}["']{0,1}passphrase\\{0,}["']{0,1}\s*:\s*){.*?}/g,
+        with: `$1{${SECERTS_MASK}}`
+    },
+    {
+        /**
+         * {
+         *     "passphrase": "secret"
+         * }
+         */
+        str: 'passphrase',
+        replace: /(\\{0,}["']{0,1}passphrase\\{0,}["']{0,1}\s*:\s*)(\\{0,}["']{1}).*?\2/g,
+        with: `$1$2${SECERTS_MASK}$2`
+    },
+    {
+        /**
+         * {
+         *     someSecret: {
+         *         cipherText: "secret"
+         *     }
+         * }
+         */
+        str: 'cipherText',
+        replace: /(\\{0,}["']{0,1}cipherText\\{0,}["']{0,1}\s*:\s*)(\\{0,}["']{1}).*?\2/g,
+        with: `$1$2${SECERTS_MASK}$2`
+    }
+];
 
 
 module.exports = {
@@ -62,7 +98,7 @@ module.exports = {
      * Assign defaults to object (uses lodash.defaultsDeep under the hood)
      * Note: check when working with arrays, as values may be merged incorrectly
      *
-     * @param {Object} obj      - object to assign defaults to
+     * @param {Object} obj - object to assign defaults to
      * @param {...Object} defaults - defaults to assign to object
      *
      * @returns {Object}
@@ -154,34 +190,6 @@ module.exports = {
         }
         // First Object in array has been merged with all other Objects - it has the complete data set.
         return collection[0] || {};
-    },
-
-    /**
-     * Start function
-     *
-     * @returns {Object} setInterval ID (to be used by clearInterval)
-     */
-    start(func, args, intervalInS) {
-        return setInterval(func, intervalInS * 1000, args);
-    },
-
-    /**
-     * Update function
-     *
-     * @returns {Object} Result of function start()
-     */
-    update(setIntervalId, func, args, intervalInS) {
-        clearInterval(setIntervalId);
-        return this.start(func, args, intervalInS);
-    },
-
-    /**
-     * Stop function
-     *
-     * @param {integer} intervalID - interval ID
-     */
-    stop(intervalID) {
-        clearInterval(intervalID);
     },
 
     /**
@@ -397,7 +405,89 @@ module.exports = {
     },
 
     /**
+     * Sleep for N ms.
+     *
+     * @returns {Promise} resolved once N .ms passed or rejected if canceled via .cancel()
+     */
+    sleep(sleepTime) {
+        /**
+         * According to http://www.ecma-international.org/ecma-262/6.0/#sec-promise-executor
+         * executor will be called immediately (synchronously) on attempt to create Promise
+         */
+        let cancelCb;
+        const promise = new Promise((resolve, reject) => {
+            const timeoutID = setTimeout(() => {
+                cancelCb = null;
+                resolve();
+            }, sleepTime);
+            cancelCb = (reason) => {
+                cancelCb = null;
+                clearTimeout(timeoutID);
+                reject(reason || new Error('canceled'));
+            };
+        });
+        /**
+         * @param {Error} [reason] - cancellation reason
+         *
+         * @returns {Boolean} 'true' if cancelCb called else 'false'
+         */
+        promise.cancel = (reason) => {
+            if (cancelCb) {
+                cancelCb(reason);
+                return true;
+            }
+            return false;
+        };
+        return promise;
+    },
+
+    /**
+     * Mask Secrets (as needed)
+     *
+     * @param {String} msg - message to mask
+     *
+     * @returns {String} Masked message
+     */
+    maskSecrets(msg) {
+        let ret = msg;
+        // place in try/catch
+        try {
+            KEYWORDS_TO_MASK.forEach((keyword) => {
+                if (msg.indexOf(keyword.str) !== -1) {
+                    ret = ret.replace(keyword.replace, keyword.with);
+                }
+            });
+        } catch (e) {
+            // just continue
+        }
+        return ret;
+    },
+
+    /**
+     * Promisified 'child_process'' module
+     *
      * @see fs
      */
-    fs: fsPromisified
+    childProcess: (function promisifyNodeChildProcessModule(cpModule) {
+        const newCpModule = Object.create(cpModule);
+        ['exec', 'execFile'].forEach((key) => {
+            newCpModule[key] = proxyForNodeCallbackFuncs(cpModule, key);
+        });
+        return newCpModule;
+    }(childProcess)),
+
+    /**
+     * Promisified 'fs' module
+     *
+     * @see fs
+     */
+    fs: (function promisifyNodeFsModule(fsModule) {
+        const newFsModule = Object.create(fsModule);
+        Object.keys(fsModule).forEach((key) => {
+            if (typeof fsModule[`${key}Sync`] !== 'undefined') {
+                newFsModule[key] = proxyForNodeCallbackFuncs(fsModule, key);
+            }
+        });
+        return newFsModule;
+    }(fs))
 };

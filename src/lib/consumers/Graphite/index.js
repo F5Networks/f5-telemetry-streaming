@@ -34,7 +34,7 @@ module.exports = function (context) {
         strictSSL: !context.config.allowSelfSignedCert
     };
     if (context.tracer) {
-        context.tracer.write(JSON.stringify({ url, headers: httpHeaders, body: JSON.parse(httpBody) }, null, 4));
+        context.tracer.write(requestOptions);
     }
 
     // eslint-disable-next-line no-unused-vars

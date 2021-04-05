@@ -160,6 +160,38 @@ When the log level is set to **debug**, many more events are logged to the restn
 
 |
 
+.. _eventlistenerdata:
+
+How can I check if my Telemetry Streaming Event Listener is sending data to my consumer?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Telemetry Streaming v1.19 introduced a new feature that allows you to send arbitrary data to a Telemetry Streaming Event Listener instead of waiting for the BIG-IP to send a message(s) to the Event Listener.  This allows you to test that your Telemetry Streaming Consumers are properly configured.
+
+You must have already submitted a declaration that includes the following:
+    - An Event Listener
+    - In the |controls| class, the **debug** property set to **true**.
+    - You should have a Consumer in your declaration so you can see the test payload successfully made it to your Consumer.
+
+
+To check that your Event Listener is sending data to the Consumer, you send an HTTP POST to one of the two new endpoints introduced in v1.19, depending on whether you are using |namespaceref| or not:
+
+- If not using Namespaces: ``https://{{host}}/mgmt/shared/telemetry/eventListener/{{listener_name}}``
+
+- If using Namespaces: ``https://{{host}}/mgmt/shared/telemetry/namespace/{{namespace_name}}/eventListener/{{listener_name}}``
+
+
+You can send any valid (but also arbitrary) JSON body, such as:
+
+.. code-block:: json
+
+    {
+        "message": "my debugging message"
+    }
+
+
+Telemetry Streaming sends this JSON payload to the Event Listener you specified, and the Event Listener processes and sends this debugging payload through Telemetry Streaming to any/all of the your configured Consumers.
+
+|
+
 .. _restjavad:
 
 Why is my BIG-IP experiencing occasional high CPU usage and slower performance?
@@ -169,7 +201,7 @@ If your BIG-IP system seems to be using a relatively high amount of CPU and degr
 **More information** |br|
 Restjavad may become unstable if the amount of memory required by the daemon exceeds the value allocated for its use. The memory required by the restjavad daemon may grow significantly in system configurations with either a high volume of device statistics collection (AVR provisioning), or a with relatively large number of LTM objects managed by the REST framework (SSL Orchestrator provisioning). The overall system performance is degraded during the continuous restart of the restjavad daemon due to high CPU usage. 
 
-See `Bug ID 894593 <https://cdn.f5.com/product/bugtracker/ID894593.html>`_ and `Bug ID 776393 <https://cdn.f5.com/product/bugtracker/ID776393.html>`_.
+See `Bug ID 894593 <https://cdn.f5.com/product/bugtracker/ID894593.html>`_, `Bug ID 776393 <https://cdn.f5.com/product/bugtracker/ID776393.html>`_, and `Bug ID 839597 <https://cdn.f5.com/product/bugtracker/ID839597.html>`_.
 
 **Workaround** |br|
 Increase the memory allocated for the restjavad daemon (e.g. 2 GB), by running the following commands in a BIG-IP terminal.
@@ -177,6 +209,69 @@ Increase the memory allocated for the restjavad daemon (e.g. 2 GB), by running t
 ``tmsh modify sys db restjavad.useextramb value true`` |br|
 ``tmsh modify sys db provision.extramb value 2048`` |br|
 ``bigstart restart restjavad``
+
+.. IMPORTANT:: You should not exceed 2500MB
+
+|
+
+.. _memory: 
+
+Where can I find Telemetry Streaming memory threshold information?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This section contains guidance how to configure the Telemetry Streaming memory usage threshold to help prevent **restnoded** from restarting when too much memory is used. When **restnoded** restarts, the Telemetry Streaming consumer is unavailable.
+
+Telemetry Streaming v1.18 introduced a change in behavior by adding monitor checks that run by default. Memory usage is monitored to prevent **restnoded** from crashing and restarting if memory usage becomes too high. By default (without user configuration), this translates to 90% of total memory allocated for restnoded (1433 MB by default, unless you set the db variables as noted in the workaround section of :ref:`restjavad`).
+
+You can configure your memory threshold using the new **memoryThresholdPercent** property in the **Controls** class.  For example, to set the memory threshold to 65%, you use:
+
+.. code-block:: json
+   :emphasize-lines: 6
+
+   {
+    "class": "Telemetry",
+    "controls": {
+        "class": "Controls",
+        "logLevel": "info",
+        "memoryThresholdPercent": 65
+        }
+    }
+
+.. NOTE:: You can disable monitor checks by setting **memoryThresholdPercent** value to 100.
+
+
+Monitor checks run by default on intervals depending on %memory usage:
+
+.. list-table::
+      :header-rows: 1
+
+      * - % of total memory usage
+        - Interval
+      
+      * - 0 - 24
+        - 30 seconds 
+  
+      * - 25 - 49
+        - 15 seconds 
+  
+      * - 50 - 74
+        - 10 seconds 
+
+      * - 75 - 89
+        - 5 seconds 
+
+      * - 90+
+        - 3 seconds 
+
+
+|
+
+.. _splunkmem:
+
+Why do I see memory usage spikes when TS is configured to send data to a Splunk consumer?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+By default, Telemetry Streaming compresses data before sending it to Splunk. Depending on the events per second rate (events from the Event Listener and System Poller), you may see spikes in memory usage. 
+
+Telemetry Streaming 1.19 and later includes the **compressionType** property in the |telemetryconsumer| class.  You can set this property to **none** (**gzip** is the default) to help reduce memory usage.
 
 
 
@@ -197,3 +292,10 @@ Increase the memory allocated for the restjavad daemon (e.g. 2 GB), by running t
 
    <a href="https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/schema-reference.html#controls" target="_blank">Controls</a>
 
+.. |namespaceref| raw:: html
+
+   <a href="https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/namespaces.html" target="_blank">Namespaces</a>
+
+.. |telemetryconsumer| raw:: html
+ 
+   <a href="https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/schema-reference.html#telemetry-consumer" target="_blank">Telemetry_Consumer</a>

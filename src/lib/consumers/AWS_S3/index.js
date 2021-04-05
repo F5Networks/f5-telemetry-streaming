@@ -42,7 +42,7 @@ module.exports = function (context) {
             };
 
             if (context.tracer) {
-                context.tracer.write(util.stringify(params, true));
+                context.tracer.write(params);
             }
 
             return new Promise((resolve, reject) => {

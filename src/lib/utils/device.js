@@ -8,7 +8,6 @@
 
 'use strict';
 
-const childProcess = require('child_process');
 const fs = require('fs');
 const crypto = require('crypto');
 const diff = require('deep-diff');
@@ -536,7 +535,9 @@ function isVersionAffectedBySecretsBug(version) {
 
 module.exports = {
     /**
-     * Gather Host Device Info
+     * Gather Host Device Info (Host Device is the device TS is running on)
+     *
+     * Note: result of this operation will be cached
      *
      * @returns {Promise} resolved once info about Host Device was gathered
      */
@@ -602,22 +603,17 @@ module.exports = {
         if (typeof deviceType !== 'undefined') {
             return Promise.resolve(deviceType);
         }
-
-        return new Promise((resolve) => {
-            const versionFile = '/VERSION';
-            fs.readFile(versionFile, (err, data) => {
-                // .toString() in case if data is Buffer
-                if (!err && (new RegExp('product:\\s+big-ip', 'i')).test(data.toString())) {
-                    resolve(constants.DEVICE_TYPE.BIG_IP);
-                } else {
-                    // don't reject, just assume we are running on a container
-                    if (err) {
-                        logger.debug(`Unable to read '${versionFile}': ${err}`);
-                    }
-                    resolve(constants.DEVICE_TYPE.CONTAINER);
+        return util.fs.readFile('/VERSION')
+            .then((ret) => {
+                if ((new RegExp('product:\\s+big-ip', 'i')).test(ret[0].toString())) {
+                    return Promise.resolve(constants.DEVICE_TYPE.BIG_IP);
                 }
+                return Promise.reject(new Error('Host is not BIG-IP'));
+            })
+            .catch((readErr) => {
+                logger.debugException('Unable to detect device type', readErr);
+                return Promise.resolve(constants.DEVICE_TYPE.CONTAINER);
             });
-        });
     },
 
     /**
@@ -627,6 +623,8 @@ module.exports = {
      * @param {String} host                 - host
      * @param {String} uri                  - uri to download from the remote device
      * @param {Object} [options]            - function options, see 'makeDeviceRequest'
+     *
+     * @returns {Promise} resolved once file downloaded
      */
     downloadFileFromDevice(dst, host, uri, options) {
         const _this = this;
@@ -767,8 +765,9 @@ module.exports = {
      * @param {String} args      - arguments to pass to command
      * @param {String} host      - host
      * @param {Object} [options] - function options, see 'makeDeviceRequest'
+     * @param {Boolean} [options.splitLsOutput = true] - split 'ls' output into array
      *
-     * @returns {Object} Promise resolved with command's output
+     * @returns {Promise<String | Array<String>>} resolved with command's output
      */
     runTMUtilUnixCommand(cmd, args, host, options) {
         if (['ls', 'rm', 'mv'].indexOf(cmd) === -1) {
@@ -782,18 +781,25 @@ module.exports = {
             command: 'run',
             utilCmdArgs: args
         };
+        const splitLsOutput = typeof options.splitLsOutput === 'undefined' || options.splitLsOutput;
+        delete options.splitLsOutput;
+
         return this.makeDeviceRequest(host, uri, options)
             .then((res) => {
                 // mv and rm should have no commandResult on success
-                if (res.commandResult && (res.commandResult.startsWith('/bin/ls:')
-                        || (cmd === 'mv' || cmd === 'rm'))) {
+                if (res.commandResult && (
+                    (cmd === 'ls' && res.commandResult.startsWith('/bin/ls:'))
+                        || cmd === 'mv' || cmd === 'rm')) {
                     return Promise.reject(new Error(res.commandResult));
                 }
-                return Promise.resolve(res.commandResult || '');
-            })
-            .catch((err) => {
-                const msg = `runTMUtilUnixCommand: ${err}`;
-                throw new Error(msg);
+                res.commandResult = res.commandResult || '';
+                if (cmd === 'ls' && splitLsOutput) {
+                    res.commandResult = res.commandResult.split(/\r\n|\r|\n/);
+                    if (res.commandResult[res.commandResult.length - 1] === '') {
+                        res.commandResult.pop();
+                    }
+                }
+                return Promise.resolve(res.commandResult);
             });
     },
 
@@ -820,10 +826,6 @@ module.exports = {
                     result[prop[0].toLowerCase() + prop.slice(1)] = entries[prop].description;
                 });
                 return result;
-            })
-            .catch((err) => {
-                const msg = `getDeviceVersion: ${err}`;
-                throw new Error(msg);
             });
     },
 
@@ -880,7 +882,7 @@ module.exports = {
      * @param {Object} [options]                      - function options, similar to 'makeRequest'.
      *                                                  Copy it before pass to function.
      * @param {Object} [options.credentials]          - authorization data
-     * @param {String} [options.credentials.username] - username for authorization. Ignored when 'username' specified
+     * @param {String} [options.credentials.username] - username for authorization. Ignored when 'token' specified
      * @param {String} [options.credentials.token]    - authorization token
      *
      * @returns {Object} Returns promise resolved with response
@@ -896,13 +898,13 @@ module.exports = {
             if (credentials.token) {
                 headers['x-f5-auth-token'] = credentials.token;
             } else if (!headers.Authorization) {
-                const username = credentials.username || constants.DEVICE_DEFAULT_USER;
+                const username = credentials.username || constants.DEVICE_REST_API.USER;
                 headers.Authorization = `Basic ${Buffer.from(`${username}:`).toString('base64')}`;
             }
         } // else - should we delete 'Authorization' header?
 
-        options.protocol = options.protocol || constants.DEVICE_DEFAULT_PROTOCOL;
-        options.port = options.port || constants.DEVICE_DEFAULT_PORT;
+        options.protocol = options.protocol || constants.DEVICE_REST_API.PROTOCOL;
+        options.port = options.port || constants.DEVICE_REST_API.PORT;
         return requestsUtil.makeRequest(host, uri, options);
     },
 
@@ -927,11 +929,7 @@ module.exports = {
             utilCmdArgs: `-c "${command}"`
         };
         return this.makeDeviceRequest(host, uri, options)
-            .then(res => res.commandResult || '')
-            .catch((err) => {
-                const msg = `executeShellCommandOnDevice: ${err}`;
-                throw new Error(msg);
-            });
+            .then(res => res.commandResult || '');
     },
 
     /**
@@ -960,11 +958,7 @@ module.exports = {
         };
 
         return this.makeDeviceRequest(host, uri, options)
-            .then(data => ({ token: data.token.token }))
-            .catch((err) => {
-                const msg = `requestAuthToken: ${err}`;
-                throw new Error(msg);
-            });
+            .then(data => ({ token: data.token.token }));
     },
 
     /**
@@ -1028,24 +1022,16 @@ module.exports = {
     decryptSecret(data) {
         const splitData = data.split(',');
         const args = [`${__dirname}/decryptConfValue.php`].concat(splitData);
-        return new Promise((resolve, reject) => {
-            childProcess.execFile('/usr/bin/php', args, (error, stdout, stderr) => {
-                if (error) {
-                    reject(new Error(`decryptSecret exec error: ${error} ${stderr}`));
-                } else {
-                    // stdout should simply contain decrypted secret
-                    resolve(stdout);
-                }
-            });
-        });
+        return util.childProcess.execFile('/usr/bin/php', args)
+            .then(ret => ret[0]);
     },
 
     /**
-     * Decrypt all secrets in config
+     * Decrypt all secrets
      *
-     * @param {Object} data - data (config)
+     * @param {Object} data - data to decrypt
      *
-     * @returns {Object} Returns promise resolved with config containing decrypted secrets
+     * @returns {Promise<Object>} resolve with decrypted data
      */
     decryptAllSecrets(data) {
         // helper functions strictly for this function
@@ -1126,10 +1112,6 @@ module.exports = {
                 });
                 // return (modified) data
                 return data;
-            })
-            .catch((err) => {
-                const msg = `decryptAllSecrets: ${err}`;
-                throw new Error(msg);
             });
     },
 
@@ -1162,6 +1144,69 @@ module.exports = {
             name = `~${name}`;
         }
         return `${partition}${subPath}${name}`;
+    },
+
+    /**
+     * Check if path exists on the device
+     *
+     * @param {String} path - path
+     * @param {String} host - host
+     * @param {Object} [options] - function options, see 'makeDeviceRequest'
+     *
+     * @returns {Promise} resolved when path exists on device
+     */
+    pathExists(path, host, options) {
+        return this.runTMUtilUnixCommand('ls', `"${path}"`, host, options);
+    },
+
+    /**
+     * Remove path on the device
+     *
+     * @param {String} path - path to remove
+     * @param {String} host - host
+     * @param {Object} [options] - function options, see 'makeDeviceRequest'
+     *
+     * @returns {Promise} resolved when path removed
+     */
+    removePath(path, host, options) {
+        return this.runTMUtilUnixCommand('rm', `"${path}"`, host, options);
+    },
+
+    /**
+     * Fetch device's info
+     *
+     * Fetches system info for arbitrary BIG-IP via REST API
+     *
+     * @param {String} host  - host
+     * @param {Object} [options] - function options, see 'makeDeviceRequest'
+     *
+     * @returns {Promise<Object>} resolved with device's info
+     */
+    getDeviceInfo(host, options) {
+        const uri = '/mgmt/shared/identified-devices/config/device-info';
+        options = options || {};
+        options.method = 'GET';
+        options.includeResponseObject = false;
+
+        return this.makeDeviceRequest(host, uri, options)
+            .then(res => ({
+                baseMac: res.baseMac,
+                build: res.build,
+                chassisSerialNumber: res.chassisSerialNumber,
+                halUuid: res.halUuid,
+                hostMac: res.hostMac,
+                hostname: res.hostname,
+                isClustered: res.isClustered,
+                isVirtual: res.isVirtual,
+                machineId: res.machineId,
+                managementAddress: res.managementAddress,
+                mcpDeviceName: res.mcpDeviceName,
+                physicalMemory: res.physicalMemory,
+                platform: res.platform,
+                product: res.product,
+                trustDomainGuid: res.trustDomainGuid,
+                version: res.version
+            }));
     },
 
     DeviceAsyncCLI

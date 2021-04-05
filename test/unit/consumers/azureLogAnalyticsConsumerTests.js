@@ -166,7 +166,7 @@ describe('Azure_Log_Analytics', () => {
                         'Log-Type': 'customLogType_new',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
                     });
-                    const traceData = JSON.parse(context.tracer.write.firstCall.args[0]);
+                    const traceData = context.tracer.write.firstCall.args[0];
                     assert.strictEqual(traceData[0].headers.Authorization, '*****');
                 });
         });
