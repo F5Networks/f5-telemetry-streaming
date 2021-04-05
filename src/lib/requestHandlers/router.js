@@ -190,7 +190,7 @@ RequestRouter.prototype.onConfigChange = function (config) {
     logger.debug('configWorker change event in RequestRouter'); // helpful debug
 
     this.removeAllHandlers();
-    this.registerAllHandlers(configUtil.getControls(config).debug);
+    this.registerAllHandlers(configUtil.getTelemetryControls(config).debug);
 };
 
 const defaultRouter = new RequestRouter();

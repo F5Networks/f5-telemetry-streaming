@@ -152,7 +152,7 @@ describe('ElasticSearch', () => {
 
             return elasticSearchIndex(context)
                 .then(() => {
-                    const traceData = JSON.parse(context.tracer.write.firstCall.args[0]);
+                    const traceData = context.tracer.write.firstCall.args[0];
 
                     assert.strictEqual(traceData.uri, '/ts_elasticsearch_consumer/f5telemetry');
                     assert.deepStrictEqual(traceData.body, {

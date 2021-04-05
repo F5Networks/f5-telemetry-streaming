@@ -25,7 +25,8 @@ const assert = chai.assert;
 
 describe('Forwarder', () => {
     const config = {
-        type: 'consumerType'
+        type: 'consumerType',
+        traceName: 'testConsumer'
     };
     const type = 'dataType';
     const data = { foo: 'bar' };
@@ -105,6 +106,6 @@ describe('Forwarder', () => {
                 metadata: {}
             }
         ]);
-        return assert.isFulfilled(forwarder.forward({ type, data, destinationIds: [] }));
+        return assert.isFulfilled(forwarder.forward({ type, data, destinationIds: ['uuid123'] }));
     });
 });

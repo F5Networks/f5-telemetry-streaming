@@ -64,7 +64,7 @@ module.exports = function (context) {
             tracedHeaders = JSON.parse(JSON.stringify(tracedHeaders));
             tracedHeaders.Authorization = '*****';
         }
-        context.tracer.write(JSON.stringify({
+        context.tracer.write({
             body: payload,
             host: config.host,
             headers: tracedHeaders,
@@ -73,7 +73,7 @@ module.exports = function (context) {
             protocol,
             allowSelfSignedCert: config.allowSelfSignedCert,
             uri
-        }, null, 4));
+        });
     }
 
     return httpUtil.sendToConsumer({

@@ -8,34 +8,102 @@
 
 'use strict';
 
-const path = require('path');
-const logger = require('../logger');
-const util = require('./misc');
+const pathUtil = require('path');
+
 const constants = require('../constants');
+const configWorker = require('../config');
+const logger = require('../logger').getChild('tracer');
+const util = require('./misc');
+
+/** @module tracer */
+
+const CLASSES_WITH_TRACE = [
+    constants.CONFIG_CLASSES.SYSTEM_POLLER_CLASS_NAME,
+    constants.CONFIG_CLASSES.IHEALTH_POLLER_CLASS_NAME,
+    constants.CONFIG_CLASSES.EVENT_LISTENER_CLASS_NAME,
+    constants.CONFIG_CLASSES.PULL_CONSUMER_CLASS_NAME,
+    constants.CONFIG_CLASSES.CONSUMER_CLASS_NAME
+];
+
+/**
+ * Registered instances
+ *
+ * @type {Object<string, Tracer>}
+ */
+const INSTANCES = {};
+
 /**
  * Tracer class - useful for debug to dump streams of data.
  *
  * @class
  *
- * @param {String} name       - tracer's name
- * @param {String} tracerPath - path to file
- *
- * @property {String} name    - tracer's name
- * @property {String} path    - path to file
- * @property {Number} fd      - file descriptor
- * @property {Boolean} disabled - is tracer disabled
+ * @read {string} name - tracer's name
+ * @property {string} path - path to file
+ * @property {number} fd - file descriptor
+ * @property {boolean} disabled - is tracer disabled
+ * @property {Logger} logger - logger instance
  */
 class Tracer {
-    constructor(name, tracerPath) {
-        this.name = name;
-        this.path = tracerPath;
-        this.fd = undefined;
-        this.disabled = false;
-        this.touch();
+    /**
+     * Constructor
+     *
+     * @param {string} name - tracer's name
+     * @param {string} path - path to file
+     */
+    constructor(name, path) {
+        this._name = name;
+        this._path = path;
+        this._fd = undefined;
+        this._disabled = false;
+    }
+
+    /**
+     * @public
+     * @returns {boolean} true if tracer disabled
+     */
+    get disabled() {
+        return this._disabled;
+    }
+
+    /**
+     * @public
+     * @returns {number} file descriptor
+     */
+    get fd() {
+        return this._fd;
+    }
+
+    /**
+     * @public
+     * @returns {Logger} instance
+     */
+    get logger() {
+        Object.defineProperty(this, 'logger', {
+            value: logger.getChild(this.name)
+        });
+        return this.logger;
+    }
+
+    /**
+     * @public
+     * @returns {string} name
+     */
+    get name() {
+        return this._name;
+    }
+
+    /**
+     * @public
+     * @returns {string} path to trace file
+     */
+    get path() {
+        return this._path;
     }
 
     /**
      * Add data to cache
+     *
+     * Note: makes copy of 'data'
      *
      * @sync
      * @private
@@ -47,6 +115,11 @@ class Tracer {
         }
         while (this.cache.length >= constants.TRACER.LIST_SIZE) {
             this.cache.shift();
+        }
+        try {
+            data = util.deepCopy(data);
+        } catch (copyError) {
+            this.logger.debugException('Unable to make copy of data', copyError);
         }
         this.cache.push({ data, timestamp: new Date().toISOString() });
     }
@@ -62,13 +135,13 @@ class Tracer {
         if (typeof this.fd === 'undefined') {
             return Promise.resolve();
         }
-        logger.debug(`Closing tracer '${this.name}' stream  to file '${this.path}'`);
+        this.logger.debug(`Closing stream  to file '${this.path}'`);
         return util.fs.close(this.fd)
             .catch((closeErr) => {
-                logger.exception(`tracer._close unable to close file '${this.path}' with fd '${this.fd}'`, closeErr);
+                this.logger.debugException(`Unable to close file '${this.path}' with fd '${this.fd}'`, closeErr);
             })
             .then(() => {
-                this.fd = undefined;
+                this._fd = undefined;
             });
     }
 
@@ -99,19 +172,17 @@ class Tracer {
      * @returns {Promise} resolved once destination directory created
      */
     _mkdir() {
-        const baseDir = path.dirname(this.path);
+        const baseDir = pathUtil.dirname(this.path);
         return util.fs.access(baseDir, (util.fs.constants || util.fs).R_OK)
-            .catch((accessErr) => {
-                logger.exception(`tracer._mkdir unable to access dir '${baseDir}'`, accessErr);
-                return true;
-            })
-            .then((needToCreate) => {
-                if (needToCreate !== true) {
+            .then(() => true, () => false)
+            .then((exist) => {
+                if (exist) {
                     return Promise.resolve();
                 }
-                logger.debug(`Creating dir '${baseDir}' for tracer '${this.name}'`);
+                this.logger.debug(`Creating dir '${baseDir}'`);
                 return util.fs.mkdir(baseDir);
-            });
+            })
+            .catch(mkdirError => (mkdirError.code === 'EEXIST' ? Promise.resolve() : Promise.reject(mkdirError)));
     }
 
     /**
@@ -125,11 +196,11 @@ class Tracer {
         if (typeof this.fd !== 'undefined') {
             return Promise.resolve();
         }
-        logger.debug(`Creating file '${this.path}' for tracer '${this.name}'`);
+        this.logger.debug(`Creating file '${this.path}'`);
         return this._mkdir()
             .then(() => util.fs.open(this.path, 'w+'))
             .then((openRet) => {
-                this.fd = openRet[0];
+                this._fd = openRet[0];
             });
     }
 
@@ -202,12 +273,12 @@ class Tracer {
                 this._cacheReset = true;
                 return this._mergeAndResetCache(readData);
             })
-            .then(data => JSON.stringify(data, null, 4))
+            .then(data => util.maskSecrets(util.stringify(data, true)))
             .then(dataToWrite => util.fs.ftruncate(this.fd, 0)
                 .then(() => util.fs.write(this.fd, dataToWrite, 0, constants.TRACER.ENCODING)))
             .catch((err) => {
                 // close trace, lost data
-                logger.exception(`tracer._tryWriteData unable to write data to '${this.path}' for tracer '${this.name}'`, err);
+                this.logger.debugException(`Unable to write data to '${this.path}'`, err);
                 return this._close();
             })
             .then(() => {
@@ -246,13 +317,6 @@ class Tracer {
     }
 
     /**
-     * Update last touch timestamp
-     */
-    touch() {
-        this.lastGetTouch = new Date().getTime();
-    }
-
-    /**
      * Stop tracer permanently
      *
      * @async
@@ -260,8 +324,8 @@ class Tracer {
      * @returns {Promise} resolved once tracer stopped
      */
     stop() {
-        logger.debug(`Stop tracer '${this.name}' stream  to file '${this.path}'`);
-        this.disabled = true;
+        this.logger.debug(`Stopping stream to file '${this.path}'`);
+        this._disabled = true;
         // schedule file closing right after last scheduled writing attempt
         // but data that awaits for writing will be lost
         return (this._tryWriteDataPromise ? this._tryWriteDataPromise : Promise.resolve())
@@ -270,6 +334,8 @@ class Tracer {
 
     /**
      * Write data to tracer
+     *
+     * Note: makes copy of 'data'
      *
      * @async
      * @public
@@ -287,108 +353,137 @@ class Tracer {
 }
 
 /**
- * Remove registered tracer
+ * Get Tracer instance or create new one
  *
- * @param {Tracer} tracer - tracer instance to remove
+ * @public
+ *
+ * @param {string} name - tracer name
+ * @param {string} path - destination path
+ *
+ * @returns {Tracer} Tracer instance
+ */
+function getOrCreate(name, path) {
+    let tracer = INSTANCES[name];
+    if (tracer && tracer.path !== path) {
+        logger.debug(`Updating tracer instance - '${name}' file '${path}'`);
+        unregister(tracer, true);
+        tracer = null;
+    } else {
+        logger.debug(`Creating new tracer instance - '${name}' file '${path}'`);
+    }
+    if (!tracer) {
+        tracer = new Tracer(name, path);
+        INSTANCES[name] = tracer;
+    }
+    return tracer;
+}
+
+/**
+ * Create tracer from config and register it
+ *
+ * Note: if component disabled then 'null' will be returned
+ *
+ * @public
+ *
+ * @param {object} config - configuration/component
+ * @param {string} config.class - component's class
+ * @param {boolean} config.enable - true if component enabled
+ * @param {boolean|string} config.trace - true/false for enable/disable or path to a file to write data
+ * @param {string} config.traceName - tracer's name
+ *
+ * @returns {Tracer|null} Tracer object or null when tracing feature disabled
+ */
+function fromConfig(config) {
+    let tracer = null;
+    if (config.trace && config.enable !== false) {
+        const name = `${config.class}.${config.traceName}`;
+        let path = config.trace;
+        if (config.trace === true) {
+            path = pathUtil.join(constants.TRACER.DIR, name);
+        }
+        tracer = getOrCreate(name, path);
+    }
+    return tracer;
+}
+
+/**
+ * Registered tracers
+ *
+ * @returns {Array<Tracer>} registered tracers
+ */
+function registered() {
+    return Object.keys(INSTANCES).map(key => INSTANCES[key]);
+}
+
+/**
+ * Unregister and stop tracer
+ *
+ * @param {Tracer} tracer - tracer
+ * @param {boolean} [catchErr = false] - catch errors on attempt to stop tracer
  *
  * @returns {Promise} resolved once tracer stopped
  */
-Tracer._remove = function (tracer) {
+function unregister(tracer, catchErr) {
     let promise = Promise.resolve();
     if (tracer) {
         // stop tracer to avoid re-using it
         // new tracer will be created if needed
-        promise = tracer.stop();
-        delete Tracer.instances[tracer.name];
+        promise = promise.then(() => tracer.stop());
+        if (catchErr) {
+            promise = promise.catch(err => logger.debugException(`Uncaught error on attempt to unregister tracer "${tracer.name}"`, err));
+        }
+        delete INSTANCES[tracer.name];
     }
     return promise;
-};
+}
 
 /**
- * Instances cache.
+ * Unregister all registered tracers
  *
- * @member {Object.<String, Tracer>}
+ * @returns {Promise} resolved once all tracers registered
  */
-Tracer.instances = {};
+function unregisterAll() {
+    return Promise.all(registered().map(tracer => unregister(tracer, true)));
+}
 
-/**
- * Get Tracer instance or create new one
- *
- * @param {String} name       - tracer name
- * @param {String} tracerPath - destination path
- *
- * @returns {Tracer} Tracer instance
- */
-Tracer.get = function (name, tracerPath) {
-    let tracer = Tracer.instances[name];
-    if (!tracer) {
-        logger.debug(`Creating new tracer instance - '${name}' file '${tracerPath}'`);
-        tracer = new Tracer(name, tracerPath);
-        Tracer.instances[name] = tracer;
-    } else {
-        logger.debug(`Updating tracer instance - '${name}' file '${tracerPath}'`);
-        tracer.path = tracerPath;
-        tracer.touch();
-    }
-    return tracer;
-};
+// config worker change event
+configWorker.on('change', config => Promise.resolve()
+    .then(() => {
+        /**
+         * This event might be handled by other listeners already
+         * and new tracers might be created already too. 'fromConfig'
+         * will return same instance if it was created already or create new once if doesn't exist
+         * -> that's why this can be done before/after ant other 'change' listener execution.
+         * Facts:
+         * - no one except this listener can remove old Tracer instances
+         * - any listener (include this one) may create new Tracer instances
+         * Based on those facts:
+         * - fetch all existing Tracer instances
+         * - read configuration and create new Tracer instances
+         * - Set(preExisting) - Set(newlyCreated) = Set(toRemove);
+         */
+        logger.debug('configWorker "change" event');
+        const registeredTracers = registered();
+        // ignore skipUpdate setting - it should not affect not changed tracers
+        const configuredTracers = config.components
+            .filter(component => CLASSES_WITH_TRACE.indexOf(component.class) !== -1)
+            .map(component => fromConfig(component))
+            .filter(tracer => tracer);
 
-/**
- * Create tracer from config
- *
- * @param {String} className              - object's class name
- * @param {String} objName                - object's name
- * @param {Object} config                 - object's config
- * @param {String|Boolean} [config.trace] - path to file, if 'true' then default path will be used
- *
- * @returns {Tracer} Tracer object
- */
-Tracer.createFromConfig = function (className, objName, config) {
-    let tracer = null;
-    if (config.trace) {
-        objName = `${className}.${objName}`;
-        let tracerPath = config.trace;
-        if (config.trace === true) {
-            tracerPath = path.join(constants.TRACER.DIR, objName);
-        }
-        tracer = Tracer.get(objName, tracerPath);
-    }
-    return tracer;
-};
-
-/**
- * Filter callback
- *
- * @callback Tracer~filterCallback
- * @param {Tracer} tracer - tracer object
- */
-
-/**
- * Remove Tracer instance
- *
- * @param {String | Tracer | Tracer~filterCallback} toRemove - tracer or tracer's name to remove
- *                                                             or filter function
- *
- * @returns {Promise} resolved once matched tracers stopped
- */
-Tracer.remove = function (toRemove) {
-    const promises = [];
-    if (typeof toRemove === 'function') {
-        Object.keys(Tracer.instances).forEach((tracerName) => {
-            const tracer = Tracer.instances[tracerName];
-            if (toRemove(tracer)) {
-                promises.push(Tracer._remove(tracer));
+        registeredTracers.forEach((tracer) => {
+            if (configuredTracers.indexOf(tracer) === -1) {
+                unregister(tracer, true);
             }
         });
-    } else {
-        if (typeof toRemove !== 'string') {
-            toRemove = toRemove.name;
-        }
-        promises.push(Tracer._remove(Tracer.instances[toRemove]));
-    }
-    return Promise.all(promises);
-};
+
+        logger.info(`${registered().length} tracer(s) running`);
+    }));
 
 module.exports = {
-    Tracer
+    Tracer,
+    getOrCreate,
+    fromConfig,
+    registered,
+    unregister,
+    unregisterAll
 };

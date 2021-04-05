@@ -103,7 +103,7 @@ describe('Generic_HTTP', () => {
 
             return genericHttpIndex(context)
                 .then(() => {
-                    const traceData = JSON.parse(context.tracer.write.firstCall.args[0]);
+                    const traceData = context.tracer.write.firstCall.args[0];
                     assert.deepStrictEqual(traceData.headers, { Authorization: redactString });
                 });
         });
@@ -128,7 +128,7 @@ describe('Generic_HTTP', () => {
 
             return genericHttpIndex(context)
                 .then(() => {
-                    const traceData = JSON.parse(context.tracer.write.firstCall.args[0]);
+                    const traceData = context.tracer.write.firstCall.args[0];
                     assert.deepStrictEqual(traceData.privateKey, redactString);
                     assert.deepStrictEqual(traceData.clientCertificate, redactString);
                     assert.deepStrictEqual(traceData.rootCertificate, redactString);

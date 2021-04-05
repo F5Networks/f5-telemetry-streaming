@@ -15,7 +15,7 @@ const util = require('./misc');
 
 /** @module requestsUtil */
 /* Helper functions for making requests
-*/
+ */
 
 // cleanup options. Update tests (test/unit/utils/requestsTests.js) when adding new value
 const MAKE_REQUEST_OPTS_TO_REMOVE = [
@@ -29,6 +29,43 @@ const MAKE_REQUEST_OPTS_TO_REMOVE = [
     'protocol',
     'rawResponseBody'
 ];
+
+/**
+ * Build proxy URL
+ *
+ * @param {Object | String} [proxyOpts] - proxy options
+ * @param {String} [proxyOpts.host] - proxy host
+ * @param {Number | String} [proxyOpts.port] - proxy port
+ * @param {String} [proxyOpts.protocol] - proxy protocol
+ * @param {String} [proxyOpts.username] - proxy username
+ * @param {String} [proxyOpts.passphrase] - proxy passphrase
+ *
+ * @returns {String} proxy URL
+ */
+const buildProxyURL = function (proxyOpts) {
+    let proxyURL;
+    if (typeof proxyOpts === 'string') {
+        if (proxyOpts) {
+            // might be a good idea to check for protocol and etc.
+            proxyURL = proxyOpts;
+        }
+    } else if (typeof proxyOpts === 'object') {
+        if (proxyOpts.host) {
+            let auth = '';
+            if (proxyOpts.username) {
+                auth = proxyOpts.username;
+                if (proxyOpts.passphrase) {
+                    auth = `${auth}:${proxyOpts.passphrase}`;
+                }
+                auth = `${auth}@`;
+            }
+            const protocol = proxyOpts.protocol || 'http';
+            const port = proxyOpts.port ? `:${proxyOpts.port}` : '';
+            proxyURL = `${protocol}://${auth}${proxyOpts.host}${port}`;
+        }
+    }
+    return proxyURL;
+};
 
 /**
  * Perform HTTP request
@@ -49,30 +86,28 @@ const MAKE_REQUEST_OPTS_TO_REMOVE = [
  * // host and uri
  * makeRequest(hostStr, uriStr)
  *
- * @param {String}  [host]                         - HTTP host
- * @param {String}  [uri]                          - HTTP uri
- * @param {Object}  [options]                      - function options. Copy it before pass to function.
- * @param {String}  [options.fullURI]              - full HTTP URI
- * @param {String}  [options.protocol]             - HTTP protocol, by default http
- * @param {Integer} [options.port]                 - HTTP port, by default 80
- * @param {String}  [options.method]               - HTTP method, by default GET
- * @param {Any}     [options.body]                 - HTTP body, must be a Buffer, String or ReadStream or
- *                                                   JSON-serializable object
- * @param {Boolean} [options.json]                 - sets HTTP body to JSON representation of value and adds
- *                                                   Content-type: application/json header, by default true
- * @param {Object}  [options.headers]              - HTTP headers
- * @param {Object}  [options.continueOnErrorCode]  - continue on non-successful response code, by default false
- * @param {Boolean} [options.allowSelfSignedCert]  - do not require SSL certificates be valid, by default false
- * @param {Object}  [options.rawResponseBody]      - return response as Buffer object with binary data,
- *                                                   by default false
- * @param {Boolean} [options.includeResponseObject] - return [body, responseObject], by default false
- * @param {Array<Integer>|Integer} [options.expectedResponseCode]  - expected response code, by default 200
- * @param {Integer} [options.timeout]              - Milliseconds to wait for a socket timeout. Option
- *                                                    'passes through' to 'request' library
- * @param {String}  [options.proxy]                - proxy URI
- * @param {Boolean} [config.gzip]                  - accept compressed content from the server
+ * @param {String}  [host] - HTTP host
+ * @param {String}  [uri] - HTTP uri
+ * @param {Object}  [options] - function options. Copy it before pass to function.
+ * @param {String}  [options.fullURI] - full HTTP URI
+ * @param {String}  [options.protocol = 'http'] - HTTP protocol
+ * @param {Integer} [options.port = 80] - HTTP port
+ * @param {String}  [options.method = 'GET'] - HTTP method
+ * @param {Any}     [options.body] - HTTP body, must be a Buffer, String or ReadStream or JSON-serializable object
+ * @param {Boolean} [options.json = true] - sets HTTP body to JSON representation of value
+ *      and adds Content-type: application/json header
+ * @param {Object}  [options.headers] - HTTP headers
+ * @param {Object}  [options.continueOnErrorCode = false]  - continue on non-successful response code
+ * @param {Boolean} [options.allowSelfSignedCert = false]  - do not require SSL certificates be valid
+ * @param {Object}  [options.rawResponseBody = false] - return response as Buffer object with binary data
+ * @param {Boolean} [options.includeResponseObject = false] - return [body, responseObject]
+ * @param {Array<Integer>|Integer} [options.expectedResponseCode = 200]  - expected response code
+ * @param {Integer} [options.timeout] - Milliseconds to wait for a socket timeout.
+ *      Option 'passes through' to 'request' library
+ * @param {String | Proxy} [options.proxy] - proxy URI or proxy config
+ * @param {Boolean} [options.gzip] - accept compressed content from the server
  *
- * @returns {Promise.<?any>} Returns promise resolved with response
+ * @returns {Promise<Any>} resolved with response
  */
 const makeRequest = function () {
     if (arguments.length === 0) {
@@ -127,6 +162,9 @@ const makeRequest = function () {
         throw new Error('makeRequest: no fullURI or host provided');
     }
     options.uri = uri;
+    if (typeof options.proxy !== 'undefined') {
+        options.proxy = buildProxyURL(options.proxy);
+    }
 
     const continueOnErrorCode = options.continueOnErrorCode;
     const expectedResponseCode = Array.isArray(options.expectedResponseCode)
@@ -168,3 +206,12 @@ const makeRequest = function () {
 module.exports = {
     makeRequest
 };
+
+/**
+ * @typedef Proxy
+ * @property {String} host - host
+ * @property {String} [protocol = 'http'] - protocol
+ * @property {Integer} [port] - port
+ * @property {String} [username] - username to use for auth
+ * @property {String} [passphrase] - passphrase to sue for auth
+ */

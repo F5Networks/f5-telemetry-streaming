@@ -17,27 +17,30 @@ const chaiAsPromised = require('chai-as-promised');
 const fs = require('fs');
 const sinon = require('sinon');
 
-const config = require('../../src/lib/config');
+const configWorker = require('../../src/lib/config');
 const constants = require('../../src/lib/constants');
 const deviceUtil = require('../../src/lib/utils/device');
-const util = require('../../src/lib/utils/misc');
+const persistentStorage = require('../../src/lib/persistentStorage');
+const stubs = require('./shared/stubs');
+const teemReporter = require('../../src/lib/teemReporter');
+const utilMisc = require('../../src/lib/utils/misc');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe('Declarations', () => {
-    let encryptSecretStub;
-    let getDeviceTypeStub;
-    let networkCheckStub;
+    let coreStub;
 
     beforeEach(() => {
-        encryptSecretStub = sinon.stub(deviceUtil, 'encryptSecret');
-        encryptSecretStub.resolves('$M$foo');
-        getDeviceTypeStub = sinon.stub(deviceUtil, 'getDeviceType');
-        getDeviceTypeStub.resolves(constants.DEVICE_TYPE.BIG_IP);
-        networkCheckStub = sinon.stub(util, 'networkCheck');
-        networkCheckStub.resolves();
+        coreStub = stubs.coreStub({
+            configWorker,
+            deviceUtil,
+            persistentStorage,
+            teemReporter,
+            utilMisc
+        });
     });
+
     afterEach(() => {
         sinon.restore();
     });
@@ -56,7 +59,7 @@ describe('Declarations', () => {
                 }
             });
             // added for F5_Cloud tests
-            sinon.stub(util, 'getRuntimeInfo').value(() => ({ nodeVersion: '8.12.0' }));
+            sinon.stub(utilMisc, 'getRuntimeInfo').value(() => ({ nodeVersion: '8.12.0' }));
         });
         // first let's validate all example declarations
         const baseDir = `${__dirname}/../../examples/declarations`;
@@ -64,7 +67,7 @@ describe('Declarations', () => {
         files.forEach((file) => {
             it(`should validate example: ${file}`, () => {
                 const data = JSON.parse(fs.readFileSync(`${baseDir}/${file}`));
-                return assert.isFulfilled(config.validate(data));
+                return assert.isFulfilled(configWorker.processDeclaration(data));
             });
         });
     });
@@ -110,8 +113,8 @@ describe('Declarations', () => {
                 }
             };
             return assert.isFulfilled(Promise.all([
-                config.validate(decl1),
-                config.validate(decl2)
+                configWorker.processDeclaration(decl1),
+                configWorker.processDeclaration(decl2)
             ]));
         });
 
@@ -128,8 +131,8 @@ describe('Declarations', () => {
                 invalidDevice: deviceCheckErrMsg
             };
 
-            networkCheckStub.rejects(new Error('failed network check'));
-            getDeviceTypeStub.resolves(constants.DEVICE_TYPE.CONTAINER);
+            coreStub.utilMisc.networkCheck.rejects(new Error('failed network check'));
+            coreStub.deviceUtil.getDeviceType.resolves(constants.DEVICE_TYPE.CONTAINER);
 
             const decl1 = {
                 class: 'Telemetry',
@@ -183,7 +186,7 @@ describe('Declarations', () => {
                 }
             };
             const errors = {};
-            const validate = (name, decl) => config.validate(decl).catch((e) => {
+            const validate = (name, decl) => configWorker.processDeclaration(decl).catch((e) => {
                 errors[name] = e.message || e;
             });
             return Promise.all([
@@ -231,7 +234,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return config.validate(data)
+                return configWorker.processDeclaration(data)
                     .then((validConfig) => {
                         const proxy = validConfig.My_iHealth.proxy;
                         assert.strictEqual(proxy.protocol, 'http');
@@ -268,7 +271,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return config.validate(data)
+                return configWorker.processDeclaration(data)
                     .then((validConfig) => {
                         const proxy = validConfig.My_iHealth.proxy;
                         assert.strictEqual(proxy.protocol, 'https');
@@ -277,7 +280,7 @@ describe('Declarations', () => {
                         assert.strictEqual(proxy.allowSelfSignedCert, true);
                         assert.strictEqual(proxy.enableHostConnectivityCheck, false);
                         assert.strictEqual(proxy.username, 'username');
-                        assert.strictEqual(proxy.passphrase.cipherText, '$M$foo');
+                        assert.strictEqual(proxy.passphrase.cipherText, '$M$passphrase');
                     });
             });
 
@@ -293,7 +296,7 @@ describe('Declarations', () => {
                         proxy: {}
                     }
                 };
-                return assert.isRejected(config.validate(data), /host.*should have required property 'host'/);
+                return assert.isRejected(configWorker.processDeclaration(data), /host.*should have required property 'host'/);
             });
 
             it('should fail when invalid port specified', () => {
@@ -311,7 +314,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data), /proxy\/port.*should be <=/);
+                return assert.isRejected(configWorker.processDeclaration(data), /proxy\/port.*should be <=/);
             });
 
             it('should fail when invalid protocol specified', () => {
@@ -329,7 +332,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data), /proxy\/protocol.*should be equal to one of the allowed values/);
+                return assert.isRejected(configWorker.processDeclaration(data), /proxy\/protocol.*should be equal to one of the allowed values/);
             });
 
             it('should fail when invalid allowSelfSignedCert specified', () => {
@@ -347,7 +350,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data), /proxy\/allowSelfSignedCert.*should be boolean/);
+                return assert.isRejected(configWorker.processDeclaration(data), /proxy\/allowSelfSignedCert.*should be boolean/);
             });
 
             it('should fail when invalid enableHostConnectivityCheck specified', () => {
@@ -365,7 +368,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data), /proxy\/enableHostConnectivityCheck.*should be boolean/);
+                return assert.isRejected(configWorker.processDeclaration(data), /proxy\/enableHostConnectivityCheck.*should be boolean/);
             });
 
             it('should not allow additional properties', () => {
@@ -383,7 +386,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data), /someProp.*should NOT have additional properties/);
+                return assert.isRejected(configWorker.processDeclaration(data), /someProp.*should NOT have additional properties/);
             });
 
             it('should fail when passphrase specified alone', () => {
@@ -403,7 +406,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data), /should have property username when property passphrase is present/);
+                return assert.isRejected(configWorker.processDeclaration(data), /should have property username when property passphrase is present/);
             });
         });
 
@@ -425,7 +428,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return config.validate(data)
+                return configWorker.processDeclaration(data)
                     .then((validConfig) => {
                         const actions = validConfig.My_System.systemPoller.actions;
                         assert.deepStrictEqual(actions[0].locations, {});
@@ -451,7 +454,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return config.validate(data)
+                return configWorker.processDeclaration(data)
                     .then((validConfig) => {
                         const actions = validConfig.My_System.systemPoller.actions;
                         assert.deepStrictEqual(actions[0].locations, { a: true });
@@ -477,7 +480,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data), /should match exactly one schema in oneOf/);
+                return assert.isRejected(configWorker.processDeclaration(data), /should match exactly one schema in oneOf/);
             });
 
             it('should pass with object type location with single property', () => {
@@ -501,7 +504,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return config.validate(data)
+                return configWorker.processDeclaration(data)
                     .then((validConfig) => {
                         const actions = validConfig.My_System.systemPoller.actions;
                         assert.deepStrictEqual(actions[0].locations, { a: { b: true } });
@@ -532,7 +535,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return config.validate(data)
+                return configWorker.processDeclaration(data)
                     .then((validConfig) => {
                         const actions = validConfig.My_System.systemPoller.actions;
                         assert.deepStrictEqual(actions[0].locations, { a: { b: true, c: { d: true } } });
@@ -563,7 +566,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data), /should match exactly one schema in oneOf.*locations/);
+                return assert.isRejected(configWorker.processDeclaration(data), /should match exactly one schema in oneOf.*locations/);
             });
 
             it('should fail with object type location with multiple properties and one is invalid type', () => {
@@ -590,7 +593,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data), /should match exactly one schema in oneOf.*locations/);
+                return assert.isRejected(configWorker.processDeclaration(data), /should match exactly one schema in oneOf.*locations/);
             });
 
             it('should fail when multiple actions are in the same action object', () => {
@@ -611,7 +614,7 @@ describe('Declarations', () => {
                         ]
                     }
                 };
-                return assert.isRejected(config.validate(data), /My_Poller\/actions\/0.*should NOT be valid/);
+                return assert.isRejected(configWorker.processDeclaration(data), /My_Poller\/actions\/0.*should NOT be valid/);
             });
 
             it('should fail when a location is not provided with includeData action', () => {
@@ -628,7 +631,7 @@ describe('Declarations', () => {
                         ]
                     }
                 };
-                return assert.isRejected(config.validate(data), /dependencies\/excludeData\/allOf\/0\/required.*should have required property 'locations'/);
+                return assert.isRejected(configWorker.processDeclaration(data), /dependencies\/excludeData\/allOf\/0\/required.*should have required property 'locations'/);
             });
 
             it('should pass when regexes are used in action locations', () => {
@@ -653,7 +656,7 @@ describe('Declarations', () => {
                         ]
                     }
                 };
-                return config.validate(data)
+                return configWorker.processDeclaration(data)
                     .then((validConfig) => {
                         const poller = validConfig.My_Poller;
                         assert.deepStrictEqual(poller.actions[0].locations.virtualServers, { vs$: true });
@@ -674,11 +677,11 @@ describe('Declarations', () => {
                     f5csSensorId: '12345',
                     payloadSchemaNid: 'f5',
                     serviceAccount: {
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKeyId: '11111111111111111111111',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyValue'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',
@@ -691,14 +694,14 @@ describe('Declarations', () => {
                 }
             };
 
-            it('should fail becuase node version too low', () => {
-                sinon.stub(util, 'getRuntimeInfo').value(() => ({ nodeVersion: '8.6.0' }));
-                return assert.isRejected(config.validate(data), 'requested node version');
+            it('should fail because node version too low', () => {
+                coreStub.utilMisc.getRuntimeInfo.value(() => ({ nodeVersion: '8.6.0' }));
+                return assert.isRejected(configWorker.processDeclaration(data), 'requested node version');
             });
 
-            it('should succeed becuase node version is higher then required', () => {
-                sinon.stub(util, 'getRuntimeInfo').value(() => ({ nodeVersion: '8.12.0' }));
-                return assert.isFulfilled(config.validate(data));
+            it('should succeed because node version is higher then required', () => {
+                coreStub.utilMisc.getRuntimeInfo.value(() => ({ nodeVersion: '8.12.0' }));
+                return assert.isFulfilled(configWorker.processDeclaration(data));
             });
         });
 
@@ -722,7 +725,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data), /downloadFolder.*Unable to access path/);
+                return assert.isRejected(configWorker.processDeclaration(data), /downloadFolder.*Unable to access path/);
             });
 
             it('should be able to access directory from iHealth declaration', () => {
@@ -744,13 +747,13 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isFulfilled(config.validate(data));
+                return assert.isFulfilled(configWorker.processDeclaration(data));
             });
         });
 
         describe('f5secret', () => {
             it('should fail cipherText with wrong device type', () => {
-                getDeviceTypeStub.resolves(constants.DEVICE_TYPE.CONTAINER);
+                coreStub.deviceUtil.getDeviceType.resolves(constants.DEVICE_TYPE.CONTAINER);
                 const data = {
                     class: 'Telemetry',
                     My_Poller: {
@@ -761,7 +764,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return assert.isRejected(config.validate(data), /requires running on BIG-IP/);
+                return assert.isRejected(configWorker.processDeclaration(data), /requires running on BIG-IP/);
             });
 
             it('should not re-encrypt', () => {
@@ -776,14 +779,14 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return config.validate(data)
+                return configWorker.processDeclaration(data)
                     .then(() => {
                         assert.strictEqual(data.My_Poller.passphrase.cipherText, cipher);
                     });
             });
 
             it('should base64 decode cipherText', () => {
-                encryptSecretStub.resolvesArg(0);
+                coreStub.deviceUtil.encryptSecret.callsFake(data => Promise.resolve(`$M$${data}`));
                 const cipher = 'ZjVzZWNyZXQ='; // f5secret
                 const data = {
                     class: 'Telemetry',
@@ -795,9 +798,9 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return config.validate(data)
+                return configWorker.processDeclaration(data)
                     .then(() => {
-                        assert.strictEqual(data.My_Poller.passphrase.cipherText, 'f5secret');
+                        assert.strictEqual(data.My_Poller.passphrase.cipherText, '$M$f5secret');
                     });
             });
 
@@ -812,7 +815,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data), /should be encrypted by BIG-IP when.*protected.*SecureVault/);
+                return assert.isRejected(configWorker.processDeclaration(data), /should be encrypted by BIG-IP when.*protected.*SecureVault/);
             });
 
             it('should fail when cipherText or environmentVar missed', () => {
@@ -825,7 +828,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data), /missing cipherText or environmentVar/);
+                return assert.isRejected(configWorker.processDeclaration(data), /missing cipherText or environmentVar/);
             });
         });
 
@@ -848,7 +851,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return config.validate(data, { context: { expand: true } })
+                return configWorker.processDeclaration(data, { expanded: true })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Consumer.path, '/foo');
                     });
@@ -888,7 +891,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return config.validate(data, { context: { expand: true } })
+                return configWorker.processDeclaration(data, { expanded: true })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Namespace.My_NS_Consumer.path, '/nsfoo');
                         assert.strictEqual(validated.My_Consumer.path, '/upperfoo');
@@ -906,7 +909,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return config.validate(data, { context: { expand: true } })
+                return configWorker.processDeclaration(data, { expanded: true })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Consumer.path, '192.0.2.1');
                     });
@@ -926,7 +929,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return config.validate(data, { context: { expand: true } })
+                return configWorker.processDeclaration(data, { expanded: true })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Namespace.My_NS_Consumer.path, '192.0.2.1');
                     });
@@ -949,7 +952,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return config.validate(data, { context: { expand: true } })
+                return configWorker.processDeclaration(data, { expanded: true })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Consumer.headers[0].value, '192.0.2.1');
                     });
@@ -975,7 +978,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return config.validate(data, { context: { expand: true } })
+                return configWorker.processDeclaration(data, { expanded: true })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Namespace.My_NS_Consumer.headers[0].value, '192.0.2.1');
                     });
@@ -1000,7 +1003,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return config.validate(data, { context: { expand: true } })
+                return configWorker.processDeclaration(data, { expanded: true })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Consumer.path, '/foo/bar/baz');
                     });
@@ -1024,19 +1027,16 @@ describe('Declarations', () => {
                     }
                 };
 
-                return config.validate(data, { context: { expand: true } })
+                return configWorker.processDeclaration(data, { expanded: true })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Consumer.path, 'foo');
                     });
             });
 
             it('should expand pointer (object)', () => {
-                const resolvedSecret = '$M$bar';
-                encryptSecretStub.resolves(resolvedSecret);
-
                 const expectedValue = {
                     class: 'Secret',
-                    cipherText: resolvedSecret,
+                    cipherText: '$M$foo',
                     protected: 'SecureVault'
                 };
                 const data = {
@@ -1066,17 +1066,15 @@ describe('Declarations', () => {
                     }
                 };
 
-                return config.validate(data, { context: { expand: true } })
+                return configWorker.processDeclaration(data, { expanded: true })
                     .then((validated) => {
                         assert.deepStrictEqual(validated.My_Consumer.path, expectedValue);
                         assert.deepStrictEqual(validated.My_Consumer.headers[0].value, expectedValue);
-                        return assert.isFulfilled(config.validate(validated));
+                        return assert.isFulfilled(configWorker.processDeclaration(validated));
                     });
             });
 
             it('should fail pointer (object) with additional chars', () => {
-                encryptSecretStub.resolvesArg(0);
-
                 const data = {
                     class: 'Telemetry',
                     My_Consumer: {
@@ -1089,7 +1087,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data, { context: { expand: true } }), /syntax requires single pointer/);
+                return assert.isRejected(configWorker.processDeclaration(data, { expanded: true }), /syntax requires single pointer/);
             });
 
             it('should fail pointer (absolute) outside \'Shared\'', () => {
@@ -1102,7 +1100,7 @@ describe('Declarations', () => {
                         path: '`=/class`'
                     }
                 };
-                return assert.isRejected(config.validate(data, { context: { expand: true } }), /requires pointers root to be 'Shared'/);
+                return assert.isRejected(configWorker.processDeclaration(data, { expanded: true }), /requires pointers root to be 'Shared'/);
             });
 
             it('should fail expanding pointer (absolute) outside of Namespace', () => {
@@ -1125,7 +1123,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data, { context: { expand: true } }), /Cannot read property 'constants' of undefined/);
+                return assert.isRejected(configWorker.processDeclaration(data, { expanded: true }), /Cannot read property 'constants' of undefined/);
             });
 
             it('should fail with correct dataPath when pointer is outside of Namespace', () => {
@@ -1148,18 +1146,12 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data, { context: { expand: true } }), /dataPath":"\/My_Namespace\/My_NS_Consumer\/path/);
+                return assert.isRejected(configWorker.processDeclaration(data, { expanded: true }), /dataPath":"\/My_Namespace\/My_NS_Consumer\/path/);
             });
         });
 
         describe('hostConnectivityCheck', () => {
             it('should pass host network check', () => {
-                let called = false;
-                networkCheckStub.callsFake(() => {
-                    called = true;
-                    return Promise.resolve();
-                });
-
                 const data = {
                     class: 'Telemetry',
                     My_Consumer: {
@@ -1169,22 +1161,33 @@ describe('Declarations', () => {
                         enableHostConnectivityCheck: true
                     }
                 };
-                return config.validate(data)
+                return configWorker.processDeclaration(data)
                     .then(() => {
-                        assert.strictEqual(called, true);
+                        assert.strictEqual(coreStub.utilMisc.networkCheck.called, true);
                     });
             });
 
             it('should pass host network check when multiple hosts specified', () => {
-                const expected = [
+                // duplicates because it validates twice
+                const hosts = [
                     '192.0.2.1',
                     '192.0.2.2',
                     '192.0.2.3',
                     '192.0.2.4'
                 ];
+                const expected = [
+                    '192.0.2.1',
+                    '192.0.2.1',
+                    '192.0.2.2',
+                    '192.0.2.2',
+                    '192.0.2.3',
+                    '192.0.2.3',
+                    '192.0.2.4',
+                    '192.0.2.4'
+                ];
 
                 const called = [];
-                networkCheckStub.callsFake((host) => {
+                coreStub.utilMisc.networkCheck.callsFake((host) => {
                     called.push(host);
                     return Promise.resolve();
                 });
@@ -1194,12 +1197,12 @@ describe('Declarations', () => {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: expected[0],
-                        fallbackHosts: expected.slice(1),
+                        host: hosts[0],
+                        fallbackHosts: hosts.slice(1),
                         enableHostConnectivityCheck: true
                     }
                 };
-                return config.validate(data)
+                return configWorker.processDeclaration(data)
                     .then(() => {
                         // sort just in case
                         called.sort();
@@ -1217,7 +1220,13 @@ describe('Declarations', () => {
                     '192.0.2.4'
                 ];
 
+                // duplicates because it validates twice
                 const expected = [
+                    { host: '192.0.2.1', port: 443 }, // My_Consumer host
+                    { host: '192.0.2.3', port: 443 }, // My_Consumer fallback[0]
+                    { host: '192.0.2.4', port: 443 }, // My_Consumer fallback[0]
+                    { host: '192.0.2.2', port: 443 }, // My_NS_Consumer host
+                    { host: '192.0.2.4', port: 443 }, // My_NS_Consumer fallback[0],
                     { host: '192.0.2.1', port: 443 }, // My_Consumer host
                     { host: '192.0.2.3', port: 443 }, // My_Consumer fallback[0]
                     { host: '192.0.2.4', port: 443 }, // My_Consumer fallback[0]
@@ -1227,7 +1236,7 @@ describe('Declarations', () => {
 
                 const called = [];
 
-                networkCheckStub.callsFake((host, port) => {
+                coreStub.utilMisc.networkCheck.callsFake((host, port) => {
                     called.push({ host, port });
                     return Promise.resolve();
                 });
@@ -1252,7 +1261,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return config.validate(data)
+                return configWorker.processDeclaration(data)
                     .then(() => {
                         assert.deepStrictEqual(called, expected);
                     });
@@ -1260,7 +1269,7 @@ describe('Declarations', () => {
 
             it('should fail host network check', () => {
                 const errMsg = 'failed network check';
-                networkCheckStub.rejects(new Error(errMsg));
+                coreStub.utilMisc.networkCheck.rejects(new Error(errMsg));
 
                 const data = {
                     class: 'Telemetry',
@@ -1271,7 +1280,7 @@ describe('Declarations', () => {
                         enableHostConnectivityCheck: true
                     }
                 };
-                return assert.isRejected(config.validate(data), new RegExp(errMsg));
+                return assert.isRejected(configWorker.processDeclaration(data), new RegExp(errMsg));
             });
         });
 
@@ -1302,7 +1311,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isFulfilled(config.validate(data));
+                return assert.isFulfilled(configWorker.processDeclaration(data));
             });
 
             it('should resolve full item in Namespace', () => {
@@ -1330,7 +1339,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isFulfilled(config.validate(data));
+                return assert.isFulfilled(configWorker.processDeclaration(data));
             });
 
             it('should trim leading and trailing backslashes', () => {
@@ -1359,7 +1368,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isFulfilled(config.validate(data));
+                return assert.isFulfilled(configWorker.processDeclaration(data));
             });
 
             it('should return error when full item path cannot be resolved', () => {
@@ -1386,7 +1395,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = 'Unable to find \\"My_Endpoints/items/i_dont_exist\\"';
-                return assert.isRejected(config.validate(data), errMsg);
+                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
             });
 
             it('should return error when value is not valid declarationClassProp', () => {
@@ -1412,7 +1421,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = '\\"Non_Existing\\" does not follow format \\"ObjectName/key1\\"';
-                return assert.isRejected(config.validate(data), errMsg);
+                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
             });
 
             it('should return error when object referenced is not correct class', () => {
@@ -1432,7 +1441,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = '\\"My_Endpoints\\" must be of object type and class \\"Telemetry_Endpoints\\"';
-                return assert.isRejected(config.validate(data), errMsg);
+                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
             });
 
             it('should return error when object referenced is not in the named Namespace', () => {
@@ -1461,7 +1470,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = '\\"My_Endpoints\\" must be of object type and class \\"Telemetry_Endpoints\\"';
-                return assert.isRejected(config.validate(data), errMsg);
+                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
             });
 
             it('should return error when object referenced is not in the default Namespace', () => {
@@ -1490,7 +1499,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = '\\"My_Endpoints\\" must be of object type and class \\"Telemetry_Endpoints\\"';
-                return assert.isRejected(config.validate(data), errMsg);
+                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
             });
 
             it('should return error when object referenced is not in the default Namespace, even when using Namespace prefix', () => {
@@ -1519,7 +1528,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = '\\"My_Namespace/My_Endpoints/a\\" does not follow format \\"ObjectName/key1\\"';
-                return assert.isRejected(config.validate(data), errMsg);
+                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
             });
 
             it('should fail to resolve when instance property matches class property', () => {
@@ -1545,7 +1554,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isFulfilled(config.validate(declaration)
+                return assert.isFulfilled(configWorker.processDeclaration(declaration)
                     .then((data) => {
                         assert.notStrictEqual(data.My_System.systemPoller.endpointList[0], 'My_Endpoints/items/items');
                     }));
@@ -1564,7 +1573,7 @@ describe('Declarations', () => {
                         systemPoller: 'My_Poller'
                     }
                 };
-                return assert.isFulfilled(config.validate(data));
+                return assert.isFulfilled(configWorker.processDeclaration(data));
             });
 
             it('should pass when object only exists in user-defined Namespace', () => {
@@ -1581,7 +1590,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isFulfilled(config.validate(data));
+                return assert.isFulfilled(configWorker.processDeclaration(data));
             });
 
             it('should pass when object exists in multiple Namespaces', () => {
@@ -1608,7 +1617,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isFulfilled(config.validate(data));
+                return assert.isFulfilled(configWorker.processDeclaration(data));
             });
 
             it('should return error when object referenced is in a different Namespace', () => {
@@ -1636,7 +1645,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = 'declaration with name \\"My_Poller_Two\\" and class \\"Telemetry_System_Poller\\" doesn\'t exist';
-                return assert.isRejected(config.validate(data), errMsg);
+                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
             });
 
             it('should return return correct dataPath in error when object referenced is in a different Namespace', () => {
@@ -1657,7 +1666,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = /dataPath":"\/My_Namespace_One\/My_System\/systemPoller/;
-                return assert.isRejected(config.validate(data), errMsg);
+                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
             });
 
             it('should return error when object referenced is not correct class', () => {
@@ -1672,7 +1681,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = 'declaration with name \\"My_Poller\\" and class \\"Telemetry_System_Poller\\" doesn\'t exist';
-                return assert.isRejected(config.validate(data), errMsg);
+                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
             });
 
             it('should return error when object referenced is not "object" type', () => {
@@ -1684,7 +1693,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = 'declaration with name \\"class\\" and class \\"Telemetry_System_Poller\\" doesn\'t exist';
-                return assert.isRejected(config.validate(data), errMsg);
+                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
             });
 
             it('should return error when object not exist', () => {
@@ -1696,7 +1705,130 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = 'declaration with name \\"Non_Existing_Poller\\" and class \\"Telemetry_System_Poller\\" doesn\'t exist';
-                return assert.isRejected(config.validate(data), errMsg);
+                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
+            });
+        });
+    });
+
+    describe('Controls', () => {
+        describe('logLevel', () => {
+            [
+                {
+                    logLevel: 'debug',
+                    expectedToPass: true
+                },
+                {
+                    logLevel: 'info',
+                    expectedToPass: true
+                },
+                {
+                    logLevel: 'error',
+                    expectedToPass: true
+                },
+                {
+                    logLevel: 'invalidValue',
+                    expectedToPass: false
+                }
+            ].forEach((testCase) => {
+                it(`should ${testCase.expectedToPass ? '' : 'not '}allow to set "logLevel" to "${testCase.logLevel}"`, () => {
+                    const data = {
+                        class: 'Telemetry',
+                        Controls: {
+                            class: 'Controls',
+                            logLevel: testCase.logLevel
+                        }
+                    };
+                    if (testCase.expectedToPass) {
+                        return configWorker.processDeclaration(data)
+                            .then((validConfig) => {
+                                assert.strictEqual(validConfig.Controls.logLevel, testCase.logLevel, `'should match "${testCase.logLevel}"`);
+                            });
+                    }
+                    return assert.isRejected(configWorker.processDeclaration(data), /logLevel.*should be equal to one of the allowed value/);
+                });
+            });
+        });
+
+        describe('debug', () => {
+            [
+                {
+                    debug: true,
+                    expectedToPass: true
+                },
+                {
+                    debug: false,
+                    expectedToPass: true
+                },
+                {
+                    debug: 'invalidValue',
+                    expectedToPass: false
+                }
+            ].forEach((testCase) => {
+                it(`should ${testCase.expectedToPass ? '' : 'not '}allow to set "debug" to "${testCase.debug}"`, () => {
+                    const data = {
+                        class: 'Telemetry',
+                        Controls: {
+                            class: 'Controls',
+                            debug: testCase.debug
+                        }
+                    };
+                    if (testCase.expectedToPass) {
+                        return configWorker.processDeclaration(data)
+                            .then((validConfig) => {
+                                assert.strictEqual(validConfig.Controls.debug, testCase.debug, `'should match "${testCase.debug}"`);
+                            });
+                    }
+                    return assert.isRejected(configWorker.processDeclaration(data), /debug.*should be boolean/);
+                });
+            });
+        });
+
+        describe('memoryThresholdPercent', () => {
+            [
+                {
+                    memoryThresholdPercent: 1,
+                    expectedToPass: true
+                },
+                {
+                    memoryThresholdPercent: 100,
+                    expectedToPass: true
+                },
+                {
+                    memoryThresholdPercent: 50,
+                    expectedToPass: true
+                },
+                {
+                    memoryThresholdPercent: 101,
+                    expectedToPass: false,
+                    errorMsg: /memoryThresholdPercent.*should be <= 100/
+                },
+                {
+                    memoryThresholdPercent: 0,
+                    expectedToPass: false,
+                    errorMsg: /memoryThresholdPercent.*should be >= 1/
+                },
+                {
+                    memoryThresholdPercent: 'invalidValue',
+                    expectedToPass: false,
+                    errorMsg: /memoryThresholdPercent.*should be integer/
+                }
+            ].forEach((testCase) => {
+                it(`should ${testCase.expectedToPass ? '' : 'not '}allow to set "memoryThresholdPercent" to "${testCase.memoryThresholdPercent}"`, () => {
+                    const data = {
+                        class: 'Telemetry',
+                        Controls: {
+                            class: 'Controls',
+                            memoryThresholdPercent: testCase.memoryThresholdPercent
+                        }
+                    };
+                    if (testCase.expectedToPass) {
+                        return configWorker.processDeclaration(data)
+                            .then((validConfig) => {
+                                assert.strictEqual(validConfig.Controls.memoryThresholdPercent, testCase.memoryThresholdPercent, `'should match "${testCase.memoryThresholdPercent}"`);
+                            });
+                    }
+                    return assert.isRejected(configWorker.processDeclaration(data), testCase.errorMsg);
+                });
             });
         });
     });
@@ -1709,7 +1841,7 @@ describe('Declarations', () => {
                     class: 'Telemetry_System_Poller'
                 }
             };
-            return config.validate(data)
+            return configWorker.processDeclaration(data)
                 .then((validConfig) => {
                     const poller = validConfig.My_Poller;
                     assert.notStrictEqual(poller, undefined);
@@ -1822,7 +1954,7 @@ describe('Declarations', () => {
                     ]
                 }
             };
-            return config.validate(data)
+            return configWorker.processDeclaration(data)
                 .then((validConfig) => {
                     const poller = validConfig.My_Poller;
                     assert.notStrictEqual(poller, undefined);
@@ -1837,7 +1969,7 @@ describe('Declarations', () => {
                     assert.strictEqual(poller.allowSelfSignedCert, true);
                     assert.strictEqual(poller.enableHostConnectivityCheck, false);
                     assert.strictEqual(poller.username, 'username');
-                    assert.strictEqual(poller.passphrase.cipherText, '$M$foo');
+                    assert.strictEqual(poller.passphrase.cipherText, '$M$passphrase');
                     assert.strictEqual(poller.actions[0].enable, true);
                     // setTag action
                     assert.deepStrictEqual(poller.actions[0].setTag, { tag1: 'tag1 value', tag2: {} });
@@ -1901,7 +2033,7 @@ describe('Declarations', () => {
                     ]
                 }
             };
-            return assert.isRejected(config.validate(data), /should NOT be valid/);
+            return assert.isRejected(configWorker.processDeclaration(data), /should NOT be valid/);
         });
 
         it('should not allow an ifAnyMatch block that is not an array', () => {
@@ -1926,7 +2058,7 @@ describe('Declarations', () => {
                     ]
                 }
             };
-            return assert.isRejected(config.validate(data), /should be array/);
+            return assert.isRejected(configWorker.processDeclaration(data), /should be array/);
         });
 
         it('should not allow additional properties', () => {
@@ -1937,7 +2069,7 @@ describe('Declarations', () => {
                     someProp: 'someValue'
                 }
             };
-            return assert.isRejected(config.validate(data), /someProp.*should NOT have additional properties/);
+            return assert.isRejected(configWorker.processDeclaration(data), /someProp.*should NOT have additional properties/);
         });
 
         describe('interval', () => {
@@ -1954,7 +2086,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return config.validate(data)
+                return configWorker.processDeclaration(data)
                     .then(validated => assert.strictEqual(validated.My_Poller.interval, 0));
             });
 
@@ -1966,7 +2098,7 @@ describe('Declarations', () => {
                         interval: 0
                     }
                 };
-                return config.validate(data)
+                return configWorker.processDeclaration(data)
                     .then(validated => assert.strictEqual(validated.My_Poller.interval, 0));
             });
 
@@ -1979,7 +2111,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = /interval\/minimum.*should be >= 60/;
-                return assert.isRejected(config.validate(data), errMsg);
+                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
             });
 
             it('should restrict maximum to 6000 when endpointList is NOT specified', () => {
@@ -1991,7 +2123,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = /interval\/maximum.*should be <= 6000/;
-                return assert.isRejected(config.validate(data), errMsg);
+                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
             });
 
             it('should not restrict maximum to 6000 when endpointList is specified', () => {
@@ -2007,7 +2139,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return config.validate(data)
+                return configWorker.processDeclaration(data)
                     .then(validated => assert.strictEqual(validated.My_Poller.interval, 100000));
             });
         });
@@ -2068,7 +2200,7 @@ describe('Declarations', () => {
                         ]
                     }
                 };
-                return config.validate(data)
+                return configWorker.processDeclaration(data)
                     .then((validConfig) => {
                         const poller = validConfig.My_Poller;
                         assert.deepStrictEqual(
@@ -2106,7 +2238,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = 'should NOT have fewer than 1 items';
-                return assert.isRejected(config.validate(data), errMsg);
+                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
             });
 
             it('should not allow endpointList to be empty object', () => {
@@ -2118,7 +2250,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = 'should have required property \'items\'';
-                return assert.isRejected(config.validate(data), errMsg);
+                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
             });
 
             it('should allow endpointList as Telemetry_Endpoints (as single reference)', () => {
@@ -2136,7 +2268,7 @@ describe('Declarations', () => {
                         endpointList: 'My_Endpoints'
                     }
                 };
-                return config.validate(data)
+                return configWorker.processDeclaration(data)
                     .then((validConfig) => {
                         const poller = validConfig.My_Poller;
                         assert.deepStrictEqual(poller.endpointList, 'My_Endpoints');
@@ -2156,7 +2288,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return config.validate(data)
+                return configWorker.processDeclaration(data)
                     .then((validConfig) => {
                         const poller = validConfig.My_Poller;
                         assert.deepStrictEqual(poller.endpointList,
@@ -2184,7 +2316,7 @@ describe('Declarations', () => {
                     class: 'Telemetry_Listener'
                 }
             };
-            return config.validate(data)
+            return configWorker.processDeclaration(data)
                 .then((validConfig) => {
                     const listener = validConfig.My_Listener;
                     assert.notStrictEqual(listener, undefined);
@@ -2255,7 +2387,7 @@ describe('Declarations', () => {
                     ]
                 }
             };
-            return config.validate(data)
+            return configWorker.processDeclaration(data)
                 .then((validConfig) => {
                     const listener = validConfig.My_Listener;
                     assert.notStrictEqual(listener, undefined);
@@ -2289,7 +2421,7 @@ describe('Declarations', () => {
                     someProp: 'someValue'
                 }
             };
-            return assert.isRejected(config.validate(data), /someProp.*should NOT have additional properties/);
+            return assert.isRejected(configWorker.processDeclaration(data), /someProp.*should NOT have additional properties/);
         });
     });
 
@@ -2311,13 +2443,13 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return config.validate(data)
+            return configWorker.processDeclaration(data)
                 .then((validConfig) => {
                     const poller = validConfig.My_iHealth_Poller;
                     assert.notStrictEqual(poller, undefined);
                     assert.strictEqual(poller.class, 'Telemetry_iHealth_Poller');
                     assert.strictEqual(poller.username, 'username');
-                    assert.strictEqual(poller.passphrase.cipherText, '$M$foo');
+                    assert.strictEqual(poller.passphrase.cipherText, '$M$passphrase');
                     assert.deepStrictEqual(poller.interval, {
                         timeWindow: {
                             start: '00:00',
@@ -2353,18 +2485,18 @@ describe('Declarations', () => {
                         enableHostConnectivityCheck: false,
                         username: 'username',
                         passphrase: {
-                            cipherText: 'passphrase'
+                            cipherText: 'proxyPassphrase'
                         }
                     }
                 }
             };
-            return config.validate(data)
+            return configWorker.processDeclaration(data)
                 .then((validConfig) => {
                     const poller = validConfig.My_iHealth_Poller;
                     assert.notStrictEqual(poller, undefined);
                     assert.strictEqual(poller.class, 'Telemetry_iHealth_Poller');
                     assert.strictEqual(poller.username, 'username');
-                    assert.strictEqual(poller.passphrase.cipherText, '$M$foo');
+                    assert.strictEqual(poller.passphrase.cipherText, '$M$passphrase');
                     assert.deepStrictEqual(poller.interval, {
                         frequency: 'weekly',
                         day: 1,
@@ -2380,7 +2512,7 @@ describe('Declarations', () => {
                     assert.strictEqual(proxy.allowSelfSignedCert, true);
                     assert.strictEqual(proxy.enableHostConnectivityCheck, false);
                     assert.strictEqual(proxy.username, 'username');
-                    assert.strictEqual(proxy.passphrase.cipherText, '$M$foo');
+                    assert.strictEqual(proxy.passphrase.cipherText, '$M$proxyPassphrase');
                 });
         });
 
@@ -2396,7 +2528,7 @@ describe('Declarations', () => {
                     someProp: 'someValue'
                 }
             };
-            return assert.isRejected(config.validate(data), /someProp.*should NOT have additional properties/);
+            return assert.isRejected(configWorker.processDeclaration(data), /someProp.*should NOT have additional properties/);
         });
 
         it('should not allow empty string as downloadFolder\' value', () => {
@@ -2411,7 +2543,7 @@ describe('Declarations', () => {
                     downloadFolder: ''
                 }
             };
-            return assert.isRejected(config.validate(data), /downloadFolder.*minLength/);
+            return assert.isRejected(configWorker.processDeclaration(data), /downloadFolder.*minLength/);
         });
 
         describe('interval', () => {
@@ -2433,7 +2565,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isFulfilled(config.validate(data));
+                return assert.isFulfilled(configWorker.processDeclaration(data));
             });
 
             it('should pass full declaration', () => {
@@ -2455,7 +2587,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isFulfilled(config.validate(data));
+                return assert.isFulfilled(configWorker.processDeclaration(data));
             });
 
             it('should not allow additional properties', () => {
@@ -2478,7 +2610,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data), /someProp.*should NOT have additional properties/);
+                return assert.isRejected(configWorker.processDeclaration(data), /someProp.*should NOT have additional properties/);
             });
 
             it('should fail parse invalid time string', () => {
@@ -2499,7 +2631,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data), /interval.timeWindow.start.*should match pattern/);
+                return assert.isRejected(configWorker.processDeclaration(data), /interval.timeWindow.start.*should match pattern/);
             });
 
             it('should preserve difference between start and end time (2hr min)', () => {
@@ -2520,7 +2652,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data), /interval.timeWindow.*specify window with size of a/);
+                return assert.isRejected(configWorker.processDeclaration(data), /interval.timeWindow.*specify window with size of a/);
             });
 
             it('should fail when invalid weekly day name specified', () => {
@@ -2542,7 +2674,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data), /interval.day.*should match pattern/);
+                return assert.isRejected(configWorker.processDeclaration(data), /interval.day.*should match pattern/);
             });
 
             it('should fail when invalid weekly day specified', () => {
@@ -2564,7 +2696,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data), /interval.day.*should be <= 7/);
+                return assert.isRejected(configWorker.processDeclaration(data), /interval.day.*should be <= 7/);
             });
 
             it('should fail when invalid monthly day specified', () => {
@@ -2586,7 +2718,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(config.validate(data), /interval.day.*should be <= 31/);
+                return assert.isRejected(configWorker.processDeclaration(data), /interval.day.*should be <= 31/);
             });
         });
     });
@@ -2599,7 +2731,7 @@ describe('Declarations', () => {
                     class: 'Telemetry_System'
                 }
             };
-            return config.validate(data)
+            return configWorker.processDeclaration(data)
                 .then((validConfig) => {
                     const system = validConfig.My_System;
                     assert.notStrictEqual(system, undefined);
@@ -2657,7 +2789,7 @@ describe('Declarations', () => {
                     iHealthPoller: 'My_iHealth_Poller'
                 }
             };
-            return config.validate(data)
+            return configWorker.processDeclaration(data)
                 .then((validConfig) => {
                     const system = validConfig.My_System;
                     assert.notStrictEqual(system, undefined);
@@ -2670,7 +2802,7 @@ describe('Declarations', () => {
                     assert.strictEqual(system.allowSelfSignedCert, true);
                     assert.strictEqual(system.enableHostConnectivityCheck, false);
                     assert.strictEqual(system.username, 'username');
-                    assert.strictEqual(system.passphrase.cipherText, '$M$foo');
+                    assert.strictEqual(system.passphrase.cipherText, '$M$passphrase');
                     assert.strictEqual(system.iHealthPoller, 'My_iHealth_Poller');
                     assert.deepStrictEqual(system.systemPoller, [
                         'My_Poller',
@@ -2699,7 +2831,7 @@ describe('Declarations', () => {
                     someProp: 'someValue'
                 }
             };
-            return assert.isRejected(config.validate(data), /someProp.*should NOT have additional properties/);
+            return assert.isRejected(configWorker.processDeclaration(data), /someProp.*should NOT have additional properties/);
         });
 
         it('should allow to attach poller declaration by name', () => {
@@ -2713,7 +2845,7 @@ describe('Declarations', () => {
                     systemPoller: 'My_System_Poller'
                 }
             };
-            return assert.isFulfilled(config.validate(data));
+            return assert.isFulfilled(configWorker.processDeclaration(data));
         });
 
         it('should fail when non-existing poller declaration attached', () => {
@@ -2724,7 +2856,7 @@ describe('Declarations', () => {
                     systemPoller: 'My_System_Poller_Non_existing'
                 }
             };
-            return assert.isRejected(config.validate(data), /declaration with name.*(Telemetry_System_Poller|My_System_Poller_Non_existing)/);
+            return assert.isRejected(configWorker.processDeclaration(data), /declaration with name.*(Telemetry_System_Poller|My_System_Poller_Non_existing)/);
         });
 
         it('should fail when poller declaration specified by name with invalid type', () => {
@@ -2738,7 +2870,7 @@ describe('Declarations', () => {
                     systemPoller: 'My_System_2'
                 }
             };
-            return assert.isRejected(config.validate(data), /declaration with name.*(Telemetry_System_Poller|My_System_2)/);
+            return assert.isRejected(configWorker.processDeclaration(data), /declaration with name.*(Telemetry_System_Poller|My_System_2)/);
         });
 
         it('should allow to attach inline System Poller minimal declaration', () => {
@@ -2750,7 +2882,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return config.validate(data)
+            return configWorker.processDeclaration(data)
                 .then((validConfig) => {
                     const poller = validConfig.My_System.systemPoller;
                     assert.notStrictEqual(poller, undefined);
@@ -2805,7 +2937,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return config.validate(data)
+            return configWorker.processDeclaration(data)
                 .then((validConfig) => {
                     const poller = validConfig.My_System.systemPoller;
                     assert.notStrictEqual(poller, undefined);
@@ -2837,7 +2969,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return assert.isRejected(config.validate(data), /systemPoller.*should NOT have additional properties/);
+            return assert.isRejected(configWorker.processDeclaration(data), /systemPoller.*should NOT have additional properties/);
         });
 
         it('should allow to attach inline iHealth Poller minimal declaration', () => {
@@ -2859,12 +2991,12 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return config.validate(data)
+            return configWorker.processDeclaration(data)
                 .then((validConfig) => {
                     const poller = validConfig.My_System.iHealthPoller;
                     assert.notStrictEqual(poller, undefined);
                     assert.strictEqual(poller.username, 'username');
-                    assert.strictEqual(poller.passphrase.cipherText, '$M$foo');
+                    assert.strictEqual(poller.passphrase.cipherText, '$M$passphrase');
                     assert.deepStrictEqual(poller.interval, {
                         timeWindow: {
                             start: '00:00',
@@ -2901,18 +3033,18 @@ describe('Declarations', () => {
                             enableHostConnectivityCheck: false,
                             username: 'username',
                             passphrase: {
-                                cipherText: 'passphrase'
+                                cipherText: 'proxyPassphrase'
                             }
                         }
                     }
                 }
             };
-            return config.validate(data)
+            return configWorker.processDeclaration(data)
                 .then((validConfig) => {
                     const poller = validConfig.My_System.iHealthPoller;
                     assert.notStrictEqual(poller, undefined);
                     assert.strictEqual(poller.username, 'username');
-                    assert.strictEqual(poller.passphrase.cipherText, '$M$foo');
+                    assert.strictEqual(poller.passphrase.cipherText, '$M$passphrase');
                     assert.deepStrictEqual(poller.interval, {
                         frequency: 'weekly',
                         day: 1,
@@ -2928,7 +3060,7 @@ describe('Declarations', () => {
                     assert.strictEqual(proxy.allowSelfSignedCert, true);
                     assert.strictEqual(proxy.enableHostConnectivityCheck, false);
                     assert.strictEqual(proxy.username, 'username');
-                    assert.strictEqual(proxy.passphrase.cipherText, '$M$foo');
+                    assert.strictEqual(proxy.passphrase.cipherText, '$M$proxyPassphrase');
                 });
         });
 
@@ -2952,7 +3084,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return assert.isRejected(config.validate(data), /iHealthPoller.*should NOT have additional properties/);
+            return assert.isRejected(configWorker.processDeclaration(data), /iHealthPoller.*should NOT have additional properties/);
         });
 
         it('should allow to attach inline declaration for System Poller and iHealth Poller', () => {
@@ -2977,7 +3109,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return assert.isFulfilled(config.validate(data));
+            return assert.isFulfilled(configWorker.processDeclaration(data));
         });
 
         it('should allow systemPoller as an array (inline object)', () => {
@@ -2996,7 +3128,7 @@ describe('Declarations', () => {
                     ]
                 }
             };
-            return config.validate(data)
+            return configWorker.processDeclaration(data)
                 .then((validConfig) => {
                     const poller = validConfig.My_System.systemPoller;
                     assert.deepStrictEqual(poller,
@@ -3042,7 +3174,7 @@ describe('Declarations', () => {
                     trace: true
                 }
             };
-            return assert.isFulfilled(config.validate(data));
+            return assert.isFulfilled(configWorker.processDeclaration(data));
         });
 
         it('should allow systemPoller as an array (mixed ref and object)', () => {
@@ -3062,7 +3194,7 @@ describe('Declarations', () => {
                     interval: 80
                 }
             };
-            return assert.isFulfilled(config.validate(data));
+            return assert.isFulfilled(configWorker.processDeclaration(data));
         });
 
         it('should not allow a systemPoller as empty array', () => {
@@ -3074,7 +3206,7 @@ describe('Declarations', () => {
                 }
             };
             const errMsg = 'should NOT have fewer than 1 items';
-            return assert.isRejected(config.validate(data), errMsg);
+            return assert.isRejected(configWorker.processDeclaration(data), errMsg);
         });
 
         it('should not allow a systemPoller with empty endpointList object', () => {
@@ -3089,7 +3221,7 @@ describe('Declarations', () => {
                 }
             };
             const errMsg = 'should have required property \'items\'';
-            return assert.isRejected(config.validate(data), errMsg);
+            return assert.isRejected(configWorker.processDeclaration(data), errMsg);
         });
 
         it('should not allow a systemPoller with empty items in endpointList object', () => {
@@ -3106,7 +3238,7 @@ describe('Declarations', () => {
                 }
             };
             const errMsg = 'should NOT have fewer than 1 properties';
-            return assert.isRejected(config.validate(data), errMsg);
+            return assert.isRejected(configWorker.processDeclaration(data), errMsg);
         });
 
         it('should not allow a systemPoller with empty endpointList array', () => {
@@ -3121,7 +3253,7 @@ describe('Declarations', () => {
                 }
             };
             const errMsg = 'should NOT have fewer than 1 items';
-            return assert.isRejected(config.validate(data), errMsg);
+            return assert.isRejected(configWorker.processDeclaration(data), errMsg);
         });
 
         it('should not allow a systemPoller with empty items in endpointList array', () => {
@@ -3140,7 +3272,7 @@ describe('Declarations', () => {
                 }
             };
             const errMsg = 'should NOT have fewer than 1 properties';
-            return assert.isRejected(config.validate(data), errMsg);
+            return assert.isRejected(configWorker.processDeclaration(data), errMsg);
         });
     });
 
@@ -3157,7 +3289,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return config.validate(data)
+            return configWorker.processDeclaration(data)
                 .then((validConfig) => {
                     const endpoints = validConfig.My_Endpoints;
                     assert.deepStrictEqual(endpoints.items, {
@@ -3185,7 +3317,7 @@ describe('Declarations', () => {
                     something: true
                 }
             };
-            return assert.isRejected(config.validate(data), /something.*should NOT have additional properties/);
+            return assert.isRejected(configWorker.processDeclaration(data), /something.*should NOT have additional properties/);
         });
 
         it('should allow full declaration', () => {
@@ -3209,7 +3341,7 @@ describe('Declarations', () => {
                 }
             };
 
-            return config.validate(data)
+            return configWorker.processDeclaration(data)
                 .then((validConfig) => {
                     const endpoints = validConfig.My_Endpoints;
                     assert.deepStrictEqual(endpoints.items, {
@@ -3235,7 +3367,7 @@ describe('Declarations', () => {
                     items: {}
                 }
             };
-            return assert.isRejected(config.validate(data), /\/My_Endpoints\/items.*items\/minProperties.*limit":1/);
+            return assert.isRejected(configWorker.processDeclaration(data), /\/My_Endpoints\/items.*items\/minProperties.*limit":1/);
         });
 
         it('should not allow items that are not of type object', () => {
@@ -3249,7 +3381,7 @@ describe('Declarations', () => {
                     ]
                 }
             };
-            return assert.isRejected(config.validate(data), /\/My_Endpoints\/items.*should be object/);
+            return assert.isRejected(configWorker.processDeclaration(data), /\/My_Endpoints\/items.*should be object/);
         });
 
         it('should not allow additional properties in items', () => {
@@ -3267,7 +3399,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return assert.isRejected(config.validate(data), /\/My_Endpoints\/items.*should NOT have additional properties/);
+            return assert.isRejected(configWorker.processDeclaration(data), /\/My_Endpoints\/items.*should NOT have additional properties/);
         });
 
         it('should not allow empty name', () => {
@@ -3284,7 +3416,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return assert.isRejected(config.validate(data), /\/My_Endpoints\/items\/first\/name.*should NOT be shorter than/);
+            return assert.isRejected(configWorker.processDeclaration(data), /\/My_Endpoints\/items\/first\/name.*should NOT be shorter than/);
         });
 
         it('should not allow empty path', () => {
@@ -3300,7 +3432,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return assert.isRejected(config.validate(data), /\/My_Endpoints\/items\/first\/path.*should NOT be shorter than/);
+            return assert.isRejected(configWorker.processDeclaration(data), /\/My_Endpoints\/items\/first\/path.*should NOT be shorter than/);
         });
     });
 
@@ -3311,11 +3443,11 @@ describe('Declarations', () => {
         let fullExpected;
 
         const validate = (targetDeclaration, consumerProps, expectedTarget, expectedProps, addtlContext) => {
-            let context;
+            let options;
             Object.assign(targetDeclaration.My_Consumer, consumerProps);
             Object.assign(expectedTarget || {}, expectedProps || {});
             if (addtlContext) {
-                context = { expand: true };
+                options = { expanded: true };
                 targetDeclaration.Shared = {
                     class: 'Shared',
                     constants: {
@@ -3324,7 +3456,7 @@ describe('Declarations', () => {
                 };
                 Object.assign(targetDeclaration.Shared.constants, addtlContext.constants);
             }
-            return config.validate(targetDeclaration, { context })
+            return configWorker.processDeclaration(targetDeclaration, options)
                 .then((validConfig) => {
                     assert.deepStrictEqual(validConfig.My_Consumer, expectedTarget);
                 });
@@ -3472,7 +3604,7 @@ describe('Declarations', () => {
                         passphrase: {
                             class: 'Secret',
                             protected: 'SecureVault',
-                            cipherText: '$M$foo'
+                            cipherText: '$M$cipherText'
                         },
                         dataType: 'logs'
                     }
@@ -3543,7 +3675,7 @@ describe('Declarations', () => {
                         passphrase: {
                             class: 'Secret',
                             protected: 'SecureVault',
-                            cipherText: '$M$foo'
+                            cipherText: '$M$cipherText'
                         }
                     }
                 ));
@@ -3633,7 +3765,7 @@ describe('Declarations', () => {
                     passphrase: {
                         class: 'Secret',
                         protected: 'SecureVault',
-                        cipherText: '$M$foo'
+                        cipherText: '$M$cipherText'
                     }
                 }
             ));
@@ -3655,7 +3787,7 @@ describe('Declarations', () => {
                     passphrase: {
                         class: 'Secret',
                         protected: 'SecureVault',
-                        cipherText: '$M$foo'
+                        cipherText: '$M$cipherText'
                     }
                 }
             ));
@@ -3677,7 +3809,7 @@ describe('Declarations', () => {
                     passphrase: {
                         class: 'Secret',
                         protected: 'SecureVault',
-                        cipherText: '$M$foo'
+                        cipherText: '$M$cipherText'
                     },
                     region: 'australiacentral'
                 }
@@ -3835,7 +3967,7 @@ describe('Declarations', () => {
                             value: {
                                 class: 'Secret',
                                 protected: 'SecureVault',
-                                cipherText: '$M$foo'
+                                cipherText: '$M$cipherText'
                             }
                         },
                         {
@@ -4056,7 +4188,7 @@ describe('Declarations', () => {
                     passphrase: {
                         class: 'Secret',
                         protected: 'SecureVault',
-                        cipherText: '$M$foo'
+                        cipherText: '$M$cipherText'
                     },
                     apiVersion: '1.0',
                     dataType: 'dataType'
@@ -4099,12 +4231,12 @@ describe('Declarations', () => {
                     path: '/',
                     method: 'POST',
                     clientCertificate: {
-                        cipherText: '$M$foo',
+                        cipherText: '$M$myCert',
                         class: 'Secret',
                         protected: 'SecureVault'
                     },
                     privateKey: {
-                        cipherText: '$M$foo',
+                        cipherText: '$M$myKey',
                         class: 'Secret',
                         protected: 'SecureVault'
                     }
@@ -4163,7 +4295,7 @@ describe('Declarations', () => {
                         enableHostConnectivityCheck: false,
                         username: 'username',
                         passphrase: {
-                            cipherText: 'passphrase'
+                            cipherText: 'proxyPassphrase'
                         }
                     },
                     privateKey: {
@@ -4198,7 +4330,7 @@ describe('Declarations', () => {
                     passphrase: {
                         class: 'Secret',
                         protected: 'SecureVault',
-                        cipherText: '$M$foo'
+                        cipherText: '$M$cipherText'
                     },
                     proxy: {
                         host: 'localhost',
@@ -4210,21 +4342,21 @@ describe('Declarations', () => {
                         passphrase: {
                             class: 'Secret',
                             protected: 'SecureVault',
-                            cipherText: '$M$foo'
+                            cipherText: '$M$proxyPassphrase'
                         }
                     },
                     clientCertificate: {
-                        cipherText: '$M$foo',
+                        cipherText: '$M$myCert',
                         class: 'Secret',
                         protected: 'SecureVault'
                     },
                     privateKey: {
-                        cipherText: '$M$foo',
+                        cipherText: '$M$myKey',
                         class: 'Secret',
                         protected: 'SecureVault'
                     },
                     rootCertificate: {
-                        cipherText: '$M$foo',
+                        cipherText: '$M$myCA',
                         class: 'Secret',
                         protected: 'SecureVault'
                     }
@@ -4250,7 +4382,7 @@ describe('Declarations', () => {
                     privateKey: {
                         class: 'Secret',
                         protected: 'SecureVault',
-                        cipherText: '$M$foo'
+                        cipherText: '$M$privateKey'
                     },
                     serviceEmail: 'serviceEmail'
                 }
@@ -4273,7 +4405,7 @@ describe('Declarations', () => {
                     privateKey: {
                         class: 'Secret',
                         protected: 'SecureVault',
-                        cipherText: '$M$foo'
+                        cipherText: '$M$privateKey'
                     },
                     serviceEmail: 'serviceEmail'
                 }
@@ -4296,7 +4428,7 @@ describe('Declarations', () => {
                     privateKey: {
                         class: 'Secret',
                         protected: 'SecureVault',
-                        cipherText: '$M$foo'
+                        cipherText: '$M$privateKey'
                     },
                     serviceEmail: 'serviceEmail'
                 }
@@ -4377,7 +4509,7 @@ describe('Declarations', () => {
                     passphrase: {
                         class: 'Secret',
                         protected: 'SecureVault',
-                        cipherText: '$M$foo'
+                        cipherText: '$M$cipherText'
                     }
                 }
             ));
@@ -4405,12 +4537,12 @@ describe('Declarations', () => {
                     privateKey: {
                         class: 'Secret',
                         protected: 'SecureVault',
-                        cipherText: '$M$foo'
+                        cipherText: '$M$privateKey'
                     },
                     clientCertificate: {
                         class: 'Secret',
                         protected: 'SecureVault',
-                        cipherText: '$M$foo'
+                        cipherText: '$M$clientCertificate'
                     }
                 }
             ));
@@ -4443,17 +4575,17 @@ describe('Declarations', () => {
                     privateKey: {
                         class: 'Secret',
                         protected: 'SecureVault',
-                        cipherText: '$M$foo'
+                        cipherText: '$M$privateKey'
                     },
                     clientCertificate: {
                         class: 'Secret',
                         protected: 'SecureVault',
-                        cipherText: '$M$foo'
+                        cipherText: '$M$clientCertificate'
                     },
                     rootCertificate: {
                         class: 'Secret',
                         protected: 'SecureVault',
-                        cipherText: '$M$foo'
+                        cipherText: '$M$rootCertificate'
                     }
                 }
             ));
@@ -4520,8 +4652,9 @@ describe('Declarations', () => {
                     passphrase: {
                         class: 'Secret',
                         protected: 'SecureVault',
-                        cipherText: '$M$foo'
-                    }
+                        cipherText: '$M$cipherText'
+                    },
+                    compressionType: 'gzip'
                 }
             ));
 
@@ -4545,7 +4678,8 @@ describe('Declarations', () => {
                         passphrase: {
                             cipherText: 'passphrase'
                         }
-                    }
+                    },
+                    compressionType: 'gzip'
                 },
                 {
                     type: 'Splunk',
@@ -4556,7 +4690,7 @@ describe('Declarations', () => {
                     passphrase: {
                         class: 'Secret',
                         protected: 'SecureVault',
-                        cipherText: '$M$foo'
+                        cipherText: '$M$cipherText'
                     },
                     proxy: {
                         host: 'localhost',
@@ -4568,11 +4702,47 @@ describe('Declarations', () => {
                         passphrase: {
                             class: 'Secret',
                             protected: 'SecureVault',
-                            cipherText: '$M$foo'
+                            cipherText: '$M$passphrase'
                         }
-                    }
+                    },
+                    compressionType: 'gzip'
                 }
             ));
+
+            it('should accept none as valid value for compressionType', () => validateMinimal(
+                {
+                    type: 'Splunk',
+                    host: 'host',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    },
+                    compressionType: 'none'
+                },
+                {
+                    type: 'Splunk',
+                    host: 'host',
+                    protocol: 'https',
+                    port: 8088,
+                    format: 'default',
+                    passphrase: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$cipherText'
+                    },
+                    compressionType: 'none'
+                }
+            ));
+
+            it('should not accept invalid values for compressionType', () => assert.isRejected(validateFull(
+                {
+                    type: 'Splunk',
+                    host: 'host',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    },
+                    compressionType: 'compression'
+                }
+            ), /should be equal to one of the allowed values/));
         });
 
         describe('Statsd', () => {
@@ -4632,7 +4802,7 @@ describe('Declarations', () => {
                     passphrase: {
                         class: 'Secret',
                         protected: 'SecureVault',
-                        cipherText: '$M$foo'
+                        cipherText: '$M$cipherText'
                     }
                 }
             ));
@@ -4657,7 +4827,7 @@ describe('Declarations', () => {
                     passphrase: {
                         class: 'Secret',
                         protected: 'SecureVault',
-                        cipherText: '$M$foo'
+                        cipherText: '$M$cipherText'
                     }
                 }
             ));
@@ -4665,7 +4835,7 @@ describe('Declarations', () => {
 
         describe('F5_Cloud', () => {
             beforeEach(() => {
-                sinon.stub(util, 'getRuntimeInfo').value(() => ({ nodeVersion: '8.12.0' }));
+                coreStub.utilMisc.getRuntimeInfo.value(() => ({ nodeVersion: '8.12.0' }));
             });
 
             it('should fail because authType is not valid', () => assert.isRejected(
@@ -4677,11 +4847,11 @@ describe('Declarations', () => {
                     payloadSchemaNid: 'f5',
                     serviceAccount: {
                         authType: 'goog',
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKeyId: '11111111111111111111111',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyVal'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',
@@ -4703,11 +4873,11 @@ describe('Declarations', () => {
                     payloadSchemaNid: 'f5',
                     serviceAccount: {
                         authType: 'google-auth',
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKeyId: '11111111111111111111111',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyVal'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',
@@ -4729,11 +4899,11 @@ describe('Declarations', () => {
                     payloadSchemaNid: 'f5',
                     serviceAccount: {
                         authType: 'google-auth',
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKeyId: '11111111111111111111111',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyValue'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',
@@ -4755,11 +4925,11 @@ describe('Declarations', () => {
                     f5csSensorId: '12345',
                     serviceAccount: {
                         authType: 'google-auth',
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKeyId: '11111111111111111111111',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyValue'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',
@@ -4782,10 +4952,10 @@ describe('Declarations', () => {
                     payloadSchemaNid: 'f5',
                     serviceAccount: {
                         authType: 'google-auth',
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyValue'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',
@@ -4808,11 +4978,11 @@ describe('Declarations', () => {
                     payloadSchemaNid: 'f5',
                     serviceAccount: {
                         authType: 'google-auth',
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKeyId: '11111111111111111111111',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyValue'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',
@@ -4840,14 +5010,14 @@ describe('Declarations', () => {
                         clientId: '1212121212121212121212',
                         clientX509CertUrl: 'https://www.googleapis.com/robot/v1/metadata/x509/test%40deos-dev.iam.gserviceaccount.com',
                         privateKey: {
-                            cipherText: '$M$foo',
+                            cipherText: '$M$privateKeyValue',
                             class: 'Secret',
                             protected: 'SecureVault'
                         },
                         privateKeyId: '11111111111111111111111',
                         projectId: 'deos-dev',
                         tokenUri: 'https://oauth2.googleapis.com/token',
-                        type: 'service_account'
+                        type: 'not_used'
                     },
                     targetAudience: 'deos-ingest',
                     trace: false,
@@ -4867,11 +5037,11 @@ describe('Declarations', () => {
                     enable: true,
                     allowSelfSignedCert: true,
                     serviceAccount: {
-                        type: 'service_account',
+                        type: 'not_used',
                         projectId: 'deos-dev',
                         privateKeyId: '11111111111111111111111',
                         privateKey: {
-                            cipherText: '-----BEGIN PRIVATE KEY-----\nPRIVATEKEY'
+                            cipherText: 'privateKeyValue'
                         },
                         clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
                         clientId: '1212121212121212121212',
@@ -4899,14 +5069,14 @@ describe('Declarations', () => {
                         clientId: '1212121212121212121212',
                         clientX509CertUrl: 'https://www.googleapis.com/robot/v1/metadata/x509/test%40deos-dev.iam.gserviceaccount.com',
                         privateKey: {
-                            cipherText: '$M$foo',
+                            cipherText: '$M$privateKeyValue',
                             class: 'Secret',
                             protected: 'SecureVault'
                         },
                         privateKeyId: '11111111111111111111111',
                         projectId: 'deos-dev',
                         tokenUri: 'https://oauth2.googleapis.com/token',
-                        type: 'service_account'
+                        type: 'not_used'
                     },
                     targetAudience: 'deos-ingest',
                     trace: true,
@@ -4923,11 +5093,11 @@ describe('Declarations', () => {
         let fullExpected;
 
         const validate = (targetDeclaration, consumerProps, expectedTarget, expectedProps, addtlContext) => {
-            let context;
+            let options;
             Object.assign(targetDeclaration.My_Pull_Consumer, consumerProps);
             Object.assign(expectedTarget || {}, expectedProps || {});
             if (addtlContext) {
-                context = { expand: true };
+                options = { expanded: true };
                 targetDeclaration.Shared = {
                     class: 'Shared',
                     constants: {
@@ -4936,7 +5106,7 @@ describe('Declarations', () => {
                 };
                 Object.assign(targetDeclaration.Shared.constants, addtlContext.constants);
             }
-            return config.validate(targetDeclaration, { context })
+            return configWorker.processDeclaration(targetDeclaration, options)
                 .then((validConfig) => {
                     assert.deepStrictEqual(validConfig.My_Pull_Consumer, expectedTarget);
                 });
@@ -5041,11 +5211,11 @@ describe('Declarations', () => {
         let fullExpected;
 
         const validate = (targetDeclaration, namespaceProps, expectedTarget, expectedProps, addtlContext) => {
-            let context;
+            let options;
             Object.assign(targetDeclaration.My_Namespace, namespaceProps);
             Object.assign(expectedTarget || {}, expectedProps || {});
             if (addtlContext) {
-                context = { expand: true };
+                options = { expanded: true };
                 targetDeclaration.Shared = {
                     class: 'Shared',
                     constants: {
@@ -5054,7 +5224,7 @@ describe('Declarations', () => {
                 };
                 Object.assign(targetDeclaration.Shared.constants, addtlContext.constants);
             }
-            return config.validate(targetDeclaration, { context })
+            return configWorker.processDeclaration(targetDeclaration, options)
                 .then((validConfig) => {
                     assert.deepStrictEqual(validConfig.My_Namespace, expectedTarget);
                 });

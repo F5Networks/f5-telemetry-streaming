@@ -52,7 +52,7 @@ function setup() {
 }
 
 function test() {
-    const testDataTimestamp = (new Date()).getTime();
+    let testDataTimestamp;
     const splunkHecTokens = {
         events: null,
         metrics: null
@@ -190,26 +190,45 @@ function test() {
         });
     });
 
-    const testSetups = [
-        {
-            name: 'multi metric events (format = multiMetric)',
-            format: 'multiMetric',
-            tokenName: 'metrics',
-            metricsTests: true
-        },
-        {
-            name: 'hec events (format = default)',
-            format: 'default',
-            tokenName: 'events',
-            eventListenerTests: true,
-            queryEventsTests: true
-        }
-    ];
+    const testSetupOptions = {
+        compression: [
+            {
+                name: 'compression = default (gzip)',
+                value: undefined
+            },
+            {
+                name: 'compression = none',
+                value: 'none'
+            }
+        ],
+        format: [
+            {
+                name: 'multi metric events (format = multiMetric)',
+                value: 'multiMetric',
+                tokenName: 'metrics',
+                metricsTests: true
+            },
+            {
+                name: 'hec events (format = default)',
+                value: 'default',
+                tokenName: 'events',
+                eventListenerTests: true,
+                queryEventsTests: true
+            }
+        ]
+    };
+    const testSetups = [];
+    testSetupOptions.compression.forEach((compression) => {
+        testSetupOptions.format.forEach((format) => {
+            testSetups.push({ compression, format });
+        });
+    });
 
     testSetups.forEach((testSetup) => {
-        describe(testSetup.name, () => {
+        describe(`${testSetup.compression.name}, ${testSetup.format.name}`, () => {
             describe('Consumer Test: Splunk - Configure TS and generate data', () => {
                 const consumerDeclaration = util.deepCopy(DECLARATION);
+
                 // this need only to insert 'splunkHecEventsToken'
                 it('should compute declaration', () => {
                     consumerDeclaration[SPLUNK_CONSUMER_NAME] = {
@@ -219,10 +238,11 @@ function test() {
                         protocol: 'https',
                         port: SPLUNK_HEC_PORT,
                         passphrase: {
-                            cipherText: splunkHecTokens[testSetup.tokenName]
+                            cipherText: splunkHecTokens[testSetup.format.tokenName]
                         },
-                        format: testSetup.format,
-                        allowSelfSignedCert: true
+                        format: testSetup.format.value,
+                        allowSelfSignedCert: true,
+                        compressionType: testSetup.compression.value
                     };
                 });
 
@@ -231,7 +251,11 @@ function test() {
                     () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(consumerDeclaration))
                 ));
 
-                if (testSetup.eventListenerTests) {
+                if (testSetup.format.eventListenerTests) {
+                    it('set data timestamp', () => {
+                        testDataTimestamp = (new Date()).getTime();
+                    });
+
                     it('should send event to TS Event Listener', () => {
                         const msg = `testDataTimestamp="${testDataTimestamp}",test="true",testType="${SPLUNK_CONSUMER_NAME}"`;
                         return dutUtils.sendDataToEventListeners(dut => `hostname="${dut.hostname}",${msg}`);
@@ -295,15 +319,16 @@ function test() {
                 // end helper function
 
                 DUTS.forEach((dut) => {
-                    const searchMetrics = `| mcatalog values(metric_name) WHERE index=* AND host="${dut.hostname}"`;
-                    const searchQuerySP = `search source=f5.telemetry | search "system.hostname"="${dut.hostname}" | head 1`;
-                    const searchQueryEL = `search source=f5.telemetry | spath testType | search testType="${SPLUNK_CONSUMER_NAME}" | search hostname="${dut.hostname}" | search testDataTimestamp="${testDataTimestamp}" | head 1`;
+                    // use earliest and latests query modifiers to filter results
+                    const searchMetrics = () => `| mcatalog values(metric_name) WHERE index=* AND host="${dut.hostname}" AND earliest=-30s latest=now`;
+                    const searchQuerySP = () => `search source=f5.telemetry earliest=-30s latest=now | search "system.hostname"="${dut.hostname}" | head 1`;
+                    const searchQueryEL = () => `search source=f5.telemetry | spath testType | search testType="${SPLUNK_CONSUMER_NAME}" | search hostname="${dut.hostname}" | search testDataTimestamp="${testDataTimestamp}" | head 1`;
 
-                    if (testSetup.queryEventsTests) {
+                    if (testSetup.format.queryEventsTests) {
                         it(`should check for system poller data from:${dut.hostalias}`, () => new Promise(resolve => setTimeout(resolve, 30000))
                             .then(() => {
-                                util.logger.info(`Splunk search query for system poller data: ${searchQuerySP}`);
-                                return query(searchQuerySP);
+                                util.logger.info(`Splunk search query for system poller data: ${searchQuerySP()}`);
+                                return query(searchQuerySP());
                             })
                             .then((data) => {
                                 util.logger.info('Splunk response:', data);
@@ -326,11 +351,11 @@ function test() {
                             }));
                     }
 
-                    if (testSetup.metricsTests) {
+                    if (testSetup.format.metricsTests) {
                         it(`should check for system poller metrics from:${dut.hostalias}`, () => new Promise(resolve => setTimeout(resolve, 30000))
                             .then(() => {
-                                util.logger.info(`Splunk search query for system poller data: ${searchMetrics}`);
-                                return query(searchMetrics);
+                                util.logger.info(`Splunk search query for system poller data: ${searchMetrics()}`);
+                                return query(searchMetrics());
                             })
                             .then((data) => {
                                 util.logger.info('Splunk response:', data);
@@ -350,11 +375,11 @@ function test() {
                             }));
                     }
 
-                    if (testSetup.eventListenerTests) {
+                    if (testSetup.format.eventListenerTests) {
                         it(`should check for event listener data from:${dut.hostalias}`, () => new Promise(resolve => setTimeout(resolve, 30000))
                             .then(() => {
-                                util.logger.info(`Splunk search query for event listener data: ${searchQueryEL}`);
-                                return query(searchQueryEL);
+                                util.logger.info(`Splunk search query for event listener data: ${searchQueryEL()}`);
+                                return query(searchQueryEL());
                             })
                             .then((data) => {
                                 util.logger.info('Splunk response:', data);

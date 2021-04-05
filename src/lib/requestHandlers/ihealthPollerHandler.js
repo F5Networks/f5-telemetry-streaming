@@ -13,7 +13,6 @@ const nodeUtil = require('util');
 const BaseRequestHandler = require('./baseHandler');
 const ErrorHandler = require('./errorHandler');
 const ihealth = require('../ihealth');
-const isObjectEmpty = require('../utils/misc').isObjectEmpty;
 const router = require('./router');
 
 /**
@@ -51,35 +50,39 @@ IHealthPollerEndpointHandler.prototype.getBody = function () {
  *      once request processed
  */
 IHealthPollerEndpointHandler.prototype.process = function () {
-    if (isObjectEmpty(this.params)) {
-        return new Promise((resolve) => {
-            this.code = 200;
-            this.body = {
-                code: this.code,
-                message: ihealth.getCurrentState()
-            };
-            resolve(this);
-        });
+    let responsePromise = Promise.resolve();
+    if (!this.params.system) {
+        responsePromise = responsePromise.then(() => new Promise(
+            resolve => resolve(ihealth.getCurrentState(this.params.namespace))
+        )
+            .then((statuses) => {
+                this.code = 200;
+                this.body = {
+                    code: this.code,
+                    message: statuses
+                };
+                return this;
+            }));
+    } else {
+        responsePromise = responsePromise.then(() => ihealth.startPoller(this.params.system, this.params.namespace)
+            .then((state) => {
+                this.code = state.isRunning ? 202 : 201;
+                this.body = {
+                    code: this.code,
+                    state
+                };
+                return this;
+            }));
     }
-
-    return ihealth.startPoller(this.params.system, this.params.poller)
-        .then((state) => {
-            this.code = state.runningAlready ? 202 : 201;
-            this.body = {
-                code: this.code,
-                systemDeclName: state.systemDeclName,
-                iHealthDeclName: state.iHealthDeclName,
-                message: state.message
-            };
-            return this;
-        })
-        .catch(error => new ErrorHandler(error).process());
+    return responsePromise.catch(error => new ErrorHandler(error).process());
 };
 
 router.on('register', (routerInst, enableDebug) => {
     if (enableDebug) {
         routerInst.register('GET', '/ihealthpoller', IHealthPollerEndpointHandler);
-        routerInst.register('GET', '/ihealthpoller/:system/:poller?', IHealthPollerEndpointHandler);
+        routerInst.register('GET', '/ihealthpoller/:system', IHealthPollerEndpointHandler);
+        routerInst.register('GET', '/namespace/:namespace/ihealthpoller', IHealthPollerEndpointHandler);
+        routerInst.register('GET', '/namespace/:namespace/ihealthpoller/:system', IHealthPollerEndpointHandler);
     }
 });
 

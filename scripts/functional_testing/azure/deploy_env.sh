@@ -13,6 +13,7 @@ function check_env_vars() {
     # Required Environment Variables:
     checkEnvVariable AZURE_PIPELINE_RESOURCE_GROUP
     checkEnvVariable AZURE_VM_PWD
+    checkEnvVariable AZURE_IMAGE_URN
 
     if [[ "$cloudType" == "gov" ]]; then
         checkEnvVariable AZUREGOV_VM_DOMAIN
@@ -59,7 +60,7 @@ function deploy() {
     az group deployment create -g $AZURE_PIPELINE_RESOURCE_GROUP \
     --name "pipeline.${CI_PIPELINE_ID}" --template-file ./scripts/functional_testing/azure/azure_2nic_byol_deploy.json \
     --parameters adminPasswordOrKey=$AZURE_VM_PWD dnsLabel=tsbigip vnetName=existingStackVnet vnetResourceGroupName=ecosystems_automationtoolchain_telemetrystreaming_persistent_azure-consumers \
-    mgmtSubnetName=mgmt externalSubnetName=external restrictedSrcAddress="*" mgmtIpAddress="192.168.1.4" imageName=AllTwoBootLocations allowUsageAnalytics=No allowPhoneHome=No instanceName=$instanceName
+    mgmtSubnetName=mgmt externalSubnetName=external restrictedSrcAddress="*" mgmtIpAddress="192.168.1.4" customImageUrn=$AZURE_IMAGE_URN allowUsageAnalytics=No allowPhoneHome=No instanceName=$instanceName
 }
 
 function assign_mi() {

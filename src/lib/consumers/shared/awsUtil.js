@@ -95,7 +95,7 @@ function sendLogs(context) {
                 sequenceToken: undefined
             };
             if (context.tracer) {
-                context.tracer.write(JSON.stringify(params, null, 4));
+                context.tracer.write(params);
             }
             const describeParams = {
                 logGroupName: logGroup,
