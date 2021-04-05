@@ -1,10 +1,6 @@
 
 
 stages:
-<<<<<<< HEAD
-    - build
-    - doc
-=======
     - lint
     - atg-shared-checks
     - test
@@ -114,7 +110,6 @@ include:
     image: mcr.microsoft.com/azure-cli
     stage: teardown
     when: always
->>>>>>> doc-release-branch
 
 
 ##############################################################
