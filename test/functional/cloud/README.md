@@ -11,7 +11,24 @@ Tests should be run using the following syntax:
 ### Scripts
 Scripts are located at `scripts/functional_testing/{cloudName}`
 
+### AWS
+#### Updating BIG-IP Versions
+The Deployment Tool specifies the AMI to use in the AWS BIG-IP deployment. That AMI variable (aws_bigip_ami_id) can be updated in the following directory of the Deployment Tool repository:
+```
+plans/aws_byol/variables.tf
+```
+**Note:** The AMI used should be a BYOL, All Modules, 1 Boot location AMI (ex: F5 `BIGIP-15.1.0.4-0.0.6 BYOL-All Modules 1Boot Loc`)
+
 ### Azure
+
+#### Updating BIG-IP Versions
+BIG-IPs are deployed to Azure using an Azure Resource Manager template, located at `scripts/functional_testing/azure/azure_2nic_byol_deploy.json`, and the template is executed from the deployment script located at `scripts/functional_testing/azure/deploy_env.sh`. The `deploy_env.sh` script uses an Environment Variable to set a custom "imageUrn", which is set by the `AZURE_IMAGE_URN` variable.
+
+Image URNs can be located by querying Azure; example searching for a 15.1.2* image:
+```
+az vm image list --sku f5-big-all-2slot-byol --publisher f5-networks --all | jq -r '.[] | select(.version | startswith("15.1.2"))'
+```
+**Note:** The Image used shoudl be a BYOL, All Modules, 2 Slot image
 
 #### Azure_Log_Analytics
 #### Prerequisites for a sample minimal setup

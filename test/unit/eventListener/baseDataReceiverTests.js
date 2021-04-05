@@ -336,39 +336,3 @@ describe('Base Data Receiver', () => {
         });
     });
 });
-
-describe('Safe Event Emitter', () => {
-    const eventName = 'eventName';
-    let emitter;
-
-    beforeEach(() => {
-        emitter = new baseDataReceiver.SafeEventEmitter();
-    });
-
-    afterEach(() => {
-        emitter.removeAllListeners(eventName);
-    });
-
-    describe('safeEmit', () => {
-        it('should catch listener error', () => {
-            const error = new Error('test error');
-            emitter.on(eventName, () => { throw error; });
-            const ret = emitter.safeEmit(eventName);
-            assert.isTrue(error === ret, 'should return error');
-        });
-    });
-
-    describe('safeEmitAsync', () => {
-        it('should catch listener error in sync part', () => {
-            const error = new Error('test error');
-            emitter.on(eventName, () => { throw error; });
-            return assert.becomes(emitter.safeEmitAsync(eventName), error);
-        });
-
-        it('should catch listener error in async part', () => {
-            const error = new Error('test error');
-            emitter.on(eventName, () => new Promise((resolve, reject) => reject(error)));
-            return assert.becomes(emitter.safeEmitAsync(eventName), error);
-        });
-    });
-});

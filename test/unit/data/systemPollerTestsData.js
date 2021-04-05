@@ -27,7 +27,7 @@ module.exports = {
                 }
             },
             sysOrPollerName: 'testSystem',
-            errorRegExp: /System with name 'testSystem' has no System Poller configured/
+            errorRegExp: /System or System Poller with name 'testSystem' doesn't exist or has no configured System Pollers/
         },
         {
             name: 'should fail when System with such name doesn\'t exist',
@@ -38,7 +38,7 @@ module.exports = {
             funcOptions: {
                 pollerName: 'testPoller'
             },
-            errorRegExp: /System with name 'testSystem' doesn't exist/
+            errorRegExp: /System Poller with name 'testPoller' doesn't exist in System 'testSystem'/
         },
         {
             name: 'should fail when System Poller with such name doesn\'t exist',
@@ -195,7 +195,7 @@ module.exports = {
             }]
         },
         {
-            name: 'should return array with pollers configs (ref, by system and poller name)',
+            name: 'should fail to get config for bound poller',
             declaration: {
                 class: 'Telemetry',
                 testSystem: {
@@ -208,9 +208,7 @@ module.exports = {
                 }
             },
             sysOrPollerName: 'systemPoller',
-            expectedConfig: [{
-                name: 'testSystem::systemPoller'
-            }]
+            errorRegExp: /System or System Poller with name 'systemPoller' doesn't exist or has no configured System Pollers/
         },
         {
             name: 'should return array with pollers configs (by poller name - system not associated)',
@@ -226,7 +224,7 @@ module.exports = {
             },
             sysOrPollerName: 'systemPoller',
             expectedConfig: [{
-                name: 'systemPoller_System::systemPoller'
+                name: 'systemPoller::systemPoller'
             }]
         },
         {
@@ -268,7 +266,6 @@ module.exports = {
             declaration: {
                 class: 'Telemetry',
                 My_System: {
-                    // uuid1
                     allowSelfSignedCert: false,
                     class: 'Telemetry_System',
                     enable: true,
@@ -279,26 +276,22 @@ module.exports = {
                         'My_System_Poller',
                         'The_Other_System_Poller',
                         {
-                            // uuid4
                             enable: false,
                             interval: 250
                         },
                         {
-                            // uuid5
                             enable: true,
                             interval: 500
                         }
                     ]
                 },
                 My_System_Poller: {
-                    // uuid2
                     class: 'Telemetry_System_Poller',
                     actions: [],
                     enable: true,
                     interval: 321
                 },
                 The_Other_System_Poller: {
-                    // uuid3
                     class: 'Telemetry_System_Poller',
                     actions: [],
                     enable: true,
@@ -323,24 +316,7 @@ module.exports = {
             },
             sysOrPollerName: 'systemPoller',
             expectedConfig: [{
-                name: 'systemPoller_System::systemPoller'
-            }]
-        },
-        {
-            name: 'should return array with pollers configs (ref, by poller name)',
-            declaration: {
-                class: 'Telemetry',
-                testSystem: {
-                    class: 'Telemetry_System',
-                    systemPoller: 'testPoller'
-                },
-                testPoller: {
-                    class: 'Telemetry_System_Poller'
-                }
-            },
-            sysOrPollerName: 'testPoller',
-            expectedConfig: [{
-                name: 'testSystem::testPoller'
+                name: 'systemPoller::systemPoller'
             }]
         },
         {
@@ -475,7 +451,7 @@ module.exports = {
                 includeDisabled: true
             },
             expectedConfig: [{
-                name: 'systemPoller_System::systemPoller'
+                name: 'systemPoller::systemPoller'
             }]
         }
     ],
@@ -485,15 +461,6 @@ module.exports = {
             name: 'it should locate by System Poller name (no namespaceName)',
             rawConfig: {
                 class: 'Telemetry',
-                My_System: {
-                    allowSelfSignedCert: false,
-                    class: 'Telemetry_System',
-                    enable: true,
-                    host: 'localhost',
-                    port: 8100,
-                    protocol: 'http',
-                    systemPoller: 'My_System_Poller'
-                },
                 My_System_Poller: {
                     class: 'Telemetry_System_Poller',
                     actions: [],
@@ -506,9 +473,10 @@ module.exports = {
                 enable: true,
                 interval: 300,
                 name: 'My_System_Poller',
-                id: 'uuid2',
+                id: 'My_System_Poller::My_System_Poller',
                 namespace: 'f5telemetry_default',
-                traceName: 'My_System::My_System_Poller',
+                traceName: 'My_System_Poller::My_System_Poller',
+                systemName: 'My_System_Poller',
                 trace: false,
                 connection: {
                     host: 'localhost',
@@ -554,9 +522,10 @@ module.exports = {
                 enable: true,
                 interval: 90,
                 name: 'My_System_Poller',
-                id: 'uuid2',
+                id: 'My_Namespace::My_System_Poller::My_System_Poller',
                 namespace: 'My_Namespace',
-                traceName: 'My_Namespace::My_System_Poller_System::My_System_Poller',
+                systemName: 'My_System_Poller',
+                traceName: 'My_Namespace::My_System_Poller::My_System_Poller',
                 trace: false,
                 connection: {
                     host: 'localhost',
@@ -603,8 +572,9 @@ module.exports = {
                 enable: true,
                 interval: 300,
                 name: 'My_System_Poller',
-                id: 'uuid2',
+                id: 'My_System::My_System_Poller',
                 namespace: 'f5telemetry_default',
+                systemName: 'My_System',
                 traceName: 'My_System::My_System_Poller',
                 trace: false,
                 connection: {
@@ -669,8 +639,9 @@ module.exports = {
                 enable: true,
                 interval: 90,
                 name: 'My_System_Poller',
-                id: 'uuid4',
+                id: 'My_Namespace::My_System::My_System_Poller',
                 namespace: 'My_Namespace',
+                systemName: 'My_System',
                 traceName: 'My_Namespace::My_System::My_System_Poller',
                 trace: false,
                 connection: {
@@ -718,7 +689,8 @@ module.exports = {
                 enable: true,
                 interval: 300,
                 name: 'My_System_Poller',
-                id: 'uuid2',
+                id: 'My_System::My_System_Poller',
+                systemName: 'My_System',
                 namespace: 'f5telemetry_default',
                 traceName: 'My_System::My_System_Poller',
                 trace: false,
@@ -785,8 +757,9 @@ module.exports = {
                 enable: true,
                 interval: 90,
                 name: 'My_System_Poller',
-                id: 'uuid4',
+                id: 'My_Namespace::My_System::My_System_Poller',
                 namespace: 'My_Namespace',
+                systemName: 'My_System',
                 traceName: 'My_Namespace::My_System::My_System_Poller',
                 trace: false,
                 connection: {
@@ -844,7 +817,8 @@ module.exports = {
                 enable: true,
                 interval: 300,
                 name: 'My_Desired_Poller',
-                id: 'uuid3',
+                id: 'My_System::My_Desired_Poller',
+                systemName: 'My_System',
                 namespace: 'f5telemetry_default',
                 traceName: 'My_System::My_Desired_Poller',
                 trace: false,
@@ -869,7 +843,7 @@ module.exports = {
         },
         // TEST RELATED DATA STARTS HERE
         {
-            name: 'it should locate a specific SystemPoller without specifying a System (no namespaceName)',
+            name: 'it should not locate a specific SystemPoller without specifying a System (no namespaceName)',
             rawConfig: {
                 class: 'Telemetry',
                 My_System: {
@@ -897,31 +871,7 @@ module.exports = {
                     interval: 100
                 }
             },
-            expected: [{
-                class: 'Telemetry_System_Poller',
-                enable: true,
-                interval: 300,
-                name: 'My_Desired_Poller',
-                id: 'uuid2',
-                namespace: 'f5telemetry_default',
-                traceName: 'My_System::My_Desired_Poller',
-                trace: false,
-                connection: {
-                    host: 'localhost',
-                    port: 8100,
-                    protocol: 'http',
-                    allowSelfSignedCert: false
-                },
-                dataOpts: {
-                    actions: [],
-                    noTMStats: true,
-                    tags: undefined
-                },
-                credentials: {
-                    username: undefined,
-                    passphrase: undefined
-                }
-            }],
+            expected: 'System or System Poller with name \'My_Desired_Poller\' doesn\'t exist or has no configured System Pollers',
             sysOrPollerName: 'My_Desired_Poller'
         },
         // TEST RELATED DATA STARTS HERE
@@ -965,7 +915,7 @@ module.exports = {
                     ]
                 }
             },
-            expected: 'System with name \'My_Desired_Poller\' doesn\'t exist',
+            expected: 'System Poller with name \'My_Desired_Poller\' doesn\'t exist in System \'My_Desired_Poller\'',
             sysOrPollerName: 'My_Desired_Poller',
             pollerName: 'My_Desired_Poller'
         },
@@ -988,7 +938,7 @@ module.exports = {
                     }]
                 }
             },
-            expected: 'System or System Poller with name \'My_Desired_System\' doesn\'t exist',
+            expected: 'System or System Poller with name \'My_Desired_System\' doesn\'t exist or has no configured System Pollers',
             sysOrPollerName: 'My_Desired_System'
         },
         // TEST RELATED DATA STARTS HERE
@@ -1015,7 +965,8 @@ module.exports = {
                 enable: true,
                 interval: 300,
                 name: 'SystemPoller_1',
-                id: 'uuid2',
+                id: 'My_System::SystemPoller_1',
+                systemName: 'My_System',
                 namespace: 'f5telemetry_default',
                 traceName: 'My_System::SystemPoller_1',
                 trace: false,
@@ -1035,7 +986,8 @@ module.exports = {
                     passphrase: undefined
                 }
             }],
-            sysOrPollerName: 'SystemPoller_1'
+            sysOrPollerName: 'My_System',
+            pollerName: 'SystemPoller_1'
         },
         // TEST RELATED DATA STARTS HERE
         {
@@ -1080,7 +1032,8 @@ module.exports = {
                 enable: true,
                 interval: 90,
                 name: 'SystemPoller_1',
-                id: 'uuid4',
+                id: 'My_Namespace_Two::My_System::SystemPoller_1',
+                systemName: 'My_System',
                 namespace: 'My_Namespace_Two',
                 traceName: 'My_Namespace_Two::My_System::SystemPoller_1',
                 trace: false,
@@ -1128,7 +1081,7 @@ module.exports = {
                     class: 'Telemetry_Namespace'
                 }
             },
-            expected: 'System or System Poller with name \'My_Desired_System\' doesn\'t exist in Namespace \'My_Namespace_Two\'',
+            expected: 'System or System Poller with name \'My_Desired_System\' doesn\'t exist or has no configured System Pollers in Namespace \'My_Namespace_Two\'',
             sysOrPollerName: 'My_Desired_System',
             namespaceName: 'My_Namespace_Two'
         },
@@ -1154,7 +1107,7 @@ module.exports = {
                     class: 'Telemetry_Namespace'
                 }
             },
-            expected: 'System or System Poller with name \'My_Desired_System\' doesn\'t exist in Namespace \'My_Namespace\'',
+            expected: 'System or System Poller with name \'My_Desired_System\' doesn\'t exist or has no configured System Pollers in Namespace \'My_Namespace\'',
             sysOrPollerName: 'My_Desired_System',
             namespaceName: 'My_Namespace'
         },

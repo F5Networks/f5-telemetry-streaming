@@ -54,7 +54,7 @@ module.exports = function (context) {
             tracedProxy.passphrase = redactString;
         }
 
-        context.tracer.write(JSON.stringify({
+        context.tracer.write({
             allowSelfSignedCert,
             body,
             host,
@@ -68,7 +68,7 @@ module.exports = function (context) {
             privateKey: util.isObjectEmpty(key) ? undefined : redactString,
             clientCertificate: util.isObjectEmpty(cert) ? undefined : redactString,
             rootCertificate: util.isObjectEmpty(ca) ? undefined : redactString
-        }, null, 4));
+        });
     }
     return httpUtil.sendToConsumer({
         allowSelfSignedCert,

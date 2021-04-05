@@ -70,7 +70,20 @@ module.exports = {
     RELEASE,
     VERSION,
     APP_NAME: 'Telemetry Streaming',
+    APP_THRESHOLDS: {
+        MONITOR_DISABLED: 'MONITOR_DISABLED',
+        MEMORY: {
+            // node default max is 1.4 GB
+            // assume this is the default provisioning
+            // value can vary according to db variables, handled by restjavad
+            DEFAULT_MB: 1433,
+            DEFAULT_LIMIT_PERCENT: 90,
+            OK: 'MEMORY_USAGE_OK',
+            NOT_OK: 'MEMORY_USAGE_HIGH'
+        }
+    },
     CONFIG_CLASSES: {
+        ROOT_CLASS: 'Telemetry',
         CONSUMER_CLASS_NAME: 'Telemetry_Consumer',
         PULL_CONSUMER_CLASS_NAME: 'Telemetry_Pull_Consumer',
         CONTROLS_CLASS_NAME: 'Controls',
@@ -81,14 +94,25 @@ module.exports = {
         SYSTEM_POLLER_CLASS_NAME: 'Telemetry_System_Poller',
         NAMESPACE_CLASS_NAME: 'Telemetry_Namespace'
     },
+    CONFIG_WORKER: {
+        STORAGE_KEY: 'config'
+    },
     DAY_NAME_TO_WEEKDAY,
-    DEVICE_DEFAULT_PORT: 8100,
-    DEVICE_DEFAULT_PROTOCOL: 'http',
-    DEVICE_DEFAULT_USER: 'admin',
-    DEVICE_REST_BULK_DIR: '/var/config/rest/bulk',
-    DEVICE_REST_BULK_URI: '/mgmt/shared/file-transfer/bulk/',
-    DEVICE_REST_MAMD_DIR: '/var/config/rest/madm',
-    DEVICE_REST_MADM_URI: '/mgmt/shared/file-transfer/madm/',
+    DEVICE_REST_API: {
+        PORT: 8100,
+        PROTOCOL: 'http',
+        TRANSFER_FILES: {
+            BULK: {
+                DIR: '/var/config/rest/bulk',
+                URI: '/mgmt/shared/file-transfer/bulk/'
+            },
+            MADM: {
+                DIR: '/var/config/rest/madm',
+                URI: '/mgmt/shared/file-transfer/madm/'
+            }
+        },
+        USER: 'admin'
+    },
     DEVICE_TMP_DIR: '/shared/tmp',
     DEVICE_TYPE: {
         BIG_IP: 'BIG-IP',
@@ -115,14 +139,36 @@ module.exports = {
         DEFAULT_PORT: 80,
         DEFAULT_PROTOCOL: 'http'
     },
-    IHEALTH_API_LOGIN: 'https://api.f5.com/auth/pub/sso/login/ihealth-api',
-    IHEALTH_API_UPLOAD: 'https://ihealth-api.f5.com/qkview-analyzer/api/qkviews',
+    IHEALTH: {
+        POLLER_CONF: {
+            QKVIEW_COLLECT: {
+                DELAY: 2 * 60 * 1000, // 2 min.
+                MAX_RETRIES: 5
+            },
+            QKVIEW_REPORT: {
+                DELAY: 2 * 60 * 1000, // 2 min.
+                MAX_RETRIES: 30
+            },
+            QKVIEW_UPLOAD: {
+                DELAY: 2 * 60 * 1000, // 2 min.
+                MAX_RETRIES: 5
+            },
+            SCHEDULING: {
+                DELAY: 5 * 60 * 1000, // 5 min.
+                MAX_PAST_DUE: 2 * 60 * 60 * 1000 // 2 hours
+            }
+        },
+        SERVICE_API: {
+            LOGIN: 'https://api.f5.com/auth/pub/sso/login/ihealth-api',
+            UPLOAD: 'https://ihealth-api.f5.com/qkview-analyzer/api/qkviews'
+        },
+        STORAGE_KEY: 'ihealth'
+    },
     LOCAL_HOST: 'localhost',
     PASSPHRASE_CIPHER_TEXT: 'cipherText',
     PASSPHRASE_ENVIRONMENT_VAR: 'environmentVar',
     PORT_TO_PROTO,
     PROTO_TO_PORT,
-    QKVIEW_CMD_LOCAL_TIMEOUT: 1 * 60 * 60 * 1000, // 1 hour in milliseconds
     STATS_KEY_SEP: '::',
     STRICT_TLS_REQUIRED: true,
     TRACER: {

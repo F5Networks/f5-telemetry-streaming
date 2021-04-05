@@ -98,6 +98,26 @@ module.exports = {
                         tenant: 'Common',
                         application: 'app',
                         totRequests: 0
+                    },
+                    '/Common/app/192.168.1.10%10': {
+                        availabilityState: 'unknown',
+                        'clientside.bitsIn': 0,
+                        'clientside.bitsOut': 0,
+                        'clientside.curConns': 0,
+                        'clientside.maxConns': 0,
+                        'clientside.pktsIn': 0,
+                        'clientside.pktsOut': 0,
+                        'clientside.totConns': 0,
+                        destination: '192.168.1.10%10',
+                        enabledState: 'enabled',
+                        ipProtocol: 'tcp',
+                        mask: '255.255.255.255',
+                        name: '/Common/app/192.168.1.10%10',
+                        pool: '/Common/test_pool_0',
+                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
+                        tenant: 'Common',
+                        application: 'app',
+                        totRequests: 0
                     }
                 }
             },
@@ -117,6 +137,17 @@ module.exports = {
                                 pool: '/Common/test_pool_0',
                                 poolReference: {
                                     link: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0?ver=14.1.0'
+                                }
+                            },
+                            {
+                                name: 'test_vs_0',
+                                fullPath: '/Common/app/192.168.1.10%10',
+                                selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~app~192.168.1.10%2510?ver=14.1.0',
+                                ipProtocol: 'tcp',
+                                mask: '255.255.255.255',
+                                pool: '/Common/test_pool_0',
+                                poolReference: {
+                                    link: 'https://localhost/mgmt/tm/ltm/pool/~Common~192.168.1.10%2510?ver=14.1.0'
                                 }
                             }
                         ]
@@ -213,6 +244,149 @@ module.exports = {
                                         },
                                         tmName: {
                                             description: '/Common/test_vs_0'
+                                        },
+                                        oneMinAvgUsageRatio: {
+                                            value: 0
+                                        },
+                                        'status.availabilityState': {
+                                            description: 'unknown'
+                                        },
+                                        'status.enabledState': {
+                                            description: 'enabled'
+                                        },
+                                        'status.statusReason': {
+                                            description: 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet'
+                                        },
+                                        syncookieStatus: {
+                                            description: 'not-activated'
+                                        },
+                                        'syncookie.accepts': {
+                                            value: 0
+                                        },
+                                        'syncookie.hwAccepts': {
+                                            value: 0
+                                        },
+                                        'syncookie.hwSyncookies': {
+                                            value: 0
+                                        },
+                                        'syncookie.hwsyncookieInstance': {
+                                            value: 0
+                                        },
+                                        'syncookie.rejects': {
+                                            value: 0
+                                        },
+                                        'syncookie.swsyncookieInstance': {
+                                            value: 0
+                                        },
+                                        'syncookie.syncacheCurr': {
+                                            value: 0
+                                        },
+                                        'syncookie.syncacheOver': {
+                                            value: 0
+                                        },
+                                        'syncookie.syncookies': {
+                                            value: 0
+                                        },
+                                        totRequests: {
+                                            value: 0
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    endpoint: '/mgmt/tm/ltm/virtual/~Common~app~192.168.1.10%2510/stats',
+                    response: {
+                        kind: 'tm:ltm:virtual:virtualstats',
+                        selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~app~192.168.1.10%2510/stats?ver=14.1.0',
+                        entries: {
+                            'https://localhost/mgmt/tm/ltm/virtual/~Common~app~192.168.1.10%2510/stats': {
+                                nestedStats: {
+                                    kind: 'tm:ltm:virtual:virtualstats',
+                                    selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~app~192.168.1.10%2510/stats?ver=14.1.0',
+                                    entries: {
+                                        'clientside.bitsIn': {
+                                            value: 0
+                                        },
+                                        'clientside.bitsOut': {
+                                            value: 0
+                                        },
+                                        'clientside.curConns': {
+                                            value: 0
+                                        },
+                                        'clientside.evictedConns': {
+                                            value: 0
+                                        },
+                                        'clientside.maxConns': {
+                                            value: 0
+                                        },
+                                        'clientside.pktsIn': {
+                                            value: 0
+                                        },
+                                        'clientside.pktsOut': {
+                                            value: 0
+                                        },
+                                        'clientside.slowKilled': {
+                                            value: 0
+                                        },
+                                        'clientside.totConns': {
+                                            value: 0
+                                        },
+                                        cmpEnableMode: {
+                                            description: 'all-cpus'
+                                        },
+                                        cmpEnabled: {
+                                            description: 'enabled'
+                                        },
+                                        csMaxConnDur: {
+                                            value: 0
+                                        },
+                                        csMeanConnDur: {
+                                            value: 0
+                                        },
+                                        csMinConnDur: {
+                                            value: 0
+                                        },
+                                        destination: {
+                                            description: '192.168.1.10%10'
+                                        },
+                                        'ephemeral.bitsIn': {
+                                            value: 0
+                                        },
+                                        'ephemeral.bitsOut': {
+                                            value: 0
+                                        },
+                                        'ephemeral.curConns': {
+                                            value: 0
+                                        },
+                                        'ephemeral.evictedConns': {
+                                            value: 0
+                                        },
+                                        'ephemeral.maxConns': {
+                                            value: 0
+                                        },
+                                        'ephemeral.pktsIn': {
+                                            value: 0
+                                        },
+                                        'ephemeral.pktsOut': {
+                                            value: 0
+                                        },
+                                        'ephemeral.slowKilled': {
+                                            value: 0
+                                        },
+                                        'ephemeral.totConns': {
+                                            value: 0
+                                        },
+                                        fiveMinAvgUsageRatio: {
+                                            value: 0
+                                        },
+                                        fiveSecAvgUsageRatio: {
+                                            value: 0
+                                        },
+                                        tmName: {
+                                            description: '/Common/192.168.1.10%10'
                                         },
                                         oneMinAvgUsageRatio: {
                                             value: 0

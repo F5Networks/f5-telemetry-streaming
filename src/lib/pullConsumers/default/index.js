@@ -46,7 +46,7 @@ module.exports = function (context) {
     logger.info('success');
     if (tracer) {
         // pretty JSON dump
-        tracer.write(JSON.stringify(formattedData, null, 4));
+        tracer.write(formattedData);
     }
     return Promise.resolve(formattedData);
 };

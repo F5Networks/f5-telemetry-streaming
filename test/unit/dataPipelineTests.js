@@ -12,15 +12,23 @@
 
 require('./shared/restoreCache')();
 
+
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
+const constants = require('../../src/lib/constants');
+const consumers = require('../../src/lib/consumers');
 const dataFilter = require('../../src/lib/dataFilter');
 const dataPipeline = require('../../src/lib/dataPipeline');
 const dataTagging = require('../../src/lib/dataTagging');
-const EVENT_TYPES = require('../../src/lib/constants').EVENT_TYPES;
 const forwarder = require('../../src/lib/forwarder');
+const logger = require('../../src/lib/logger');
+const monitor = require('../../src/lib/utils/monitor');
+const stubs = require('./shared/stubs');
+const testAssert = require('./shared/assert');
+
+const EVENT_TYPES = constants.EVENT_TYPES;
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -103,7 +111,7 @@ describe('Data Pipeline', () => {
         return dataPipeline.process(dataCtx, { tracer })
             .then(() => {
                 assert.notStrictEqual(tracerData, undefined, 'should write data to tracer');
-                assert.deepStrictEqual(JSON.parse(tracerData), dataCtx, 'tracer data should match processed data');
+                assert.deepStrictEqual(tracerData, dataCtx, 'tracer data should match processed data');
             });
     });
 
@@ -225,7 +233,7 @@ describe('Data Pipeline', () => {
         };
         return dataPipeline.process(dataCtx, options)
             .then(() => {
-                assert.strictEqual(handleActionsData.length, 4);
+                assert.lengthOf(handleActionsData, 4);
                 assert.deepStrictEqual(handleActionsData[0].actionCtx.setTag, {});
                 assert.deepStrictEqual(handleActionsData[1].actionCtx.includeData, {});
                 assert.deepStrictEqual(handleActionsData[2].actionCtx.setTag, {});
@@ -276,5 +284,96 @@ describe('Data Pipeline', () => {
             .then(() => {
                 assert.strictEqual(forwardFlag, false, 'should not call forwarder');
             });
+    });
+
+    describe('monitor "on check" event', () => {
+        let coreStub;
+
+        const dataCtx = {
+            data: {
+                event_source: 'request_logging',
+                event_timestamp: '2019-01-01:01:01.000Z',
+                telemetryEventCategory: 'LTM'
+            },
+            type: EVENT_TYPES.LTM_EVENT,
+            destinationIds: [1234, 6789]
+        };
+
+        const dataCtx2 = {
+            data: {
+                EOCTimestamp: '1556592720',
+                AggrInterval: '30',
+                HitCount: '3',
+                telemetryEventCategory: 'AVR'
+            },
+            type: EVENT_TYPES.AVR_EVENT,
+            destinationIds: [4564]
+        };
+
+        const options = {
+            actions: [
+                {
+                    enable: true,
+                    setTag: {}
+                }
+            ]
+        };
+
+        beforeEach(() => {
+            sinon.stub(consumers, 'getConsumers').returns([
+                {
+                    name: 'consumer1',
+                    id: 1234
+                },
+                {
+                    name: 'consumer2',
+                    id: 4564
+                },
+                {
+                    name: 'consumer3',
+                    id: 6789
+                }
+            ]);
+            coreStub = stubs.coreStub({
+                logger
+            });
+        });
+
+        it('should not forward when memory thresholds reached and log info for skipped data', () => monitor.safeEmitAsync('check', constants.APP_THRESHOLDS.MEMORY.NOT_OK)
+            .then(() => dataPipeline.process(dataCtx, options))
+            .then(() => {
+                assert.strictEqual(forwardFlag, false, 'should not call forwarder');
+                assert.strictEqual(dataPipeline.isEnabled(), false, 'should disable data pipeline');
+                testAssert.includeMatch(coreStub.logger.messages.warning, 'MEMORY_USAGE_HIGH. Incoming data will not be forwarded');
+                testAssert.includeMatch(coreStub.logger.messages.warning, 'Skipped Data - Category: "LTM" | Consumers: ["consumer1","consumer3"] | Addtl Info: "event_timestamp": "2019-01-01:01:01.000Z"');
+            }));
+
+        it('should re-enable when memory thresholds return to normal', () => monitor.safeEmitAsync('check', constants.APP_THRESHOLDS.MEMORY.NOT_OK)
+            .then(() => dataPipeline.process(dataCtx, options))
+            .then(() => monitor.safeEmitAsync('check', constants.APP_THRESHOLDS.MEMORY.OK))
+            .then(() => dataPipeline.process(dataCtx, options))
+            .then(() => {
+                assert.strictEqual(forwardFlag, true, 'should call forwarder');
+                assert.strictEqual(dataPipeline.isEnabled(), true, 'should enable data pipeline');
+                testAssert.includeMatch(coreStub.logger.messages.warning, 'MEMORY_USAGE_OK. Resuming data pipeline processing.');
+            }));
+
+        it('should only log when status changed', () => monitor.safeEmitAsync('check', constants.APP_THRESHOLDS.MEMORY.OK)
+            .then(() => dataPipeline.process(dataCtx, options))
+            .then(() => {
+                // default threshold ok, so emitting an OK should not trigger a log
+                assert.isTrue(coreStub.logger.warning.notCalled);
+                return monitor.safeEmitAsync('check', constants.APP_THRESHOLDS.MEMORY.NOT_OK);
+            })
+            .then(() => dataPipeline.process(dataCtx, options))
+            .then(() => {
+                testAssert.includeMatch(coreStub.logger.messages.warning, 'MEMORY_USAGE_HIGH. Incoming data will not be forwarded.');
+                testAssert.includeMatch(coreStub.logger.messages.warning, 'Skipped Data - Category: "LTM" | Consumers: ["consumer1","consumer3"] | Addtl Info: "event_timestamp": "2019-01-01:01:01.000Z"');
+                return monitor.safeEmitAsync('check', constants.APP_THRESHOLDS.MEMORY.NOT_OK);
+            })
+            .then(() => dataPipeline.process(dataCtx2, options))
+            .then(() => {
+                testAssert.includeMatch(coreStub.logger.messages.warning, 'Skipped Data - Category: "AVR" | Consumers: ["consumer2"] | Addtl Info: "EOCTimestamp": "1556592720"');
+            }));
     });
 });

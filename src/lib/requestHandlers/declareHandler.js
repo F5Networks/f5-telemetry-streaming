@@ -75,7 +75,7 @@ DeclareEndpointHandler.prototype.process = function () {
                 return Promise.reject(err);
             });
     } else {
-        promise = configWorker.getRawConfig(namespace);
+        promise = configWorker.getDeclaration(namespace);
     }
 
     return promise.then((config) => {

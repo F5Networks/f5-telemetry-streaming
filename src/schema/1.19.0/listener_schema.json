@@ -1,0 +1,89 @@
+{
+    "$id": "listener_schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry Streaming event listener schema",
+    "description": "",
+    "type": "object",
+    "allOf": [
+        {
+            "if": { "properties": { "class": { "const": "Telemetry_Listener" } } },
+            "then": {
+                "required": [
+                    "class"
+                ],
+                "properties": {
+                    "class": {
+                        "title": "Class",
+                        "description": "Telemetry Streaming Event Listener class",
+                        "type": "string",
+                        "enum": [ "Telemetry_Listener" ]
+                    },
+                    "enable": {
+                        "default": true,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/enable"
+                            }
+                        ]
+                    },
+                    "trace": {
+                        "default": false,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/trace"
+                            }
+                        ]
+                    },
+                    "port": {
+                        "minimum": 1024,
+                        "maximum": 65535,
+                        "default": 6514,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/port"
+                            }
+                        ]
+                    },
+                    "tag": {
+                        "$comment": "Deprecated! Use actions with a setTag action.",
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/tag"
+                            }
+                        ]
+                    },
+                    "match": {
+                        "default": "",
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/match"
+                            }
+                        ]
+                    },
+                    "actions": {
+                        "title": "Actions",
+                        "description": "Actions to be performed on the listener.",
+                        "type": "array",
+                        "items": {
+                            "allOf": [
+                                {
+                                    "$ref": "base_schema.json#/definitions/action"
+                                }
+                            ]
+                        },
+                        "default": [
+                            {
+                                "setTag": {
+                                    "tenant": "`T`",
+                                    "application": "`A`"
+                                }
+                            }
+                        ]
+                    }
+                },
+                "additionalProperties": false
+            },
+            "else": {}
+        }
+    ]
+}

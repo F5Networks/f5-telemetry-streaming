@@ -90,7 +90,7 @@ module.exports = function (context) {
         logger.debug('success');
         if (tracer) {
             // pretty JSON dump
-            tracer.write(JSON.stringify(output, null, 4));
+            tracer.write(output);
         }
 
         resolve(output);

@@ -179,6 +179,33 @@ describe('Normalize', () => {
             assert.strictEqual(result, 'Version');
         });
 
+        it('should replace %25 with % in URL', () => {
+            const virtualStats = {
+                kind: 'tm:ltm:virtual:virtualstats',
+                selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~app~192.168.1.10%2510/stats?ver=14.1.0',
+                entries: {
+                    'https://localhost/mgmt/tm/ltm/virtual/~Common~app~192.168.1.10%2510/stats': {
+                        nestedStats: {
+                            kind: 'tm:ltm:virtual:virtualstats',
+                            selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~app~192.168.1.10%2510/stats?ver=14.1.0',
+                            entries: {
+                                'clientside.bitsIn': {
+                                    value: 0
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            const expectedData = {
+                'ltm/virtual/~Common~app~192.168.1.10%10/stats': {
+                    'clientside.bitsIn': 0
+                }
+            };
+            const result = normalize.data(virtualStats);
+            assert.deepStrictEqual(result, expectedData);
+        });
+
         describe('filterByKeys', () => {
             it('should filter by key', () => {
                 const options = {
