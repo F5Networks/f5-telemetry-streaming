@@ -329,16 +329,19 @@ module.exports = {
                             '/usr': {
                                 '1024-blocks': 5186648,
                                 Capacity: '84%',
+                                Capacity_Float: 0.84,
                                 name: '/usr'
                             },
                             '/var': {
                                 '1024-blocks': 5186648,
                                 Capacity: '24%',
+                                Capacity_Float: 0.24,
                                 name: '/var'
                             },
                             '/log': {
                                 '1024-blocks': 5186648,
                                 Capacity: '32%',
+                                Capacity_Float: 0.32,
                                 name: '/log'
                             }
                         }
@@ -386,6 +389,7 @@ module.exports = {
                             '/usr': {
                                 '1024-blocks': 5186648,
                                 Capacity: '84%',
+                                Capacity_Float: 0.84,
                                 name: '/usr'
                             }
                         }
@@ -638,16 +642,19 @@ module.exports = {
                             '/usr': {
                                 '1024-blocks': 5186648,
                                 Capacity: '84%',
+                                Capacity_Float: 0.84,
                                 name: '/usr'
                             },
                             '/var': {
                                 '1024-blocks': 5186648,
                                 Capacity: '24%',
+                                Capacity_Float: 0.24,
                                 name: '/var'
                             },
                             '/log': {
                                 '1024-blocks': 5186648,
                                 Capacity: '32%',
+                                Capacity_Float: 0.32,
                                 name: '/log'
                             }
                         }
@@ -713,11 +720,13 @@ module.exports = {
                         diskStorage: {
                             '/var': {
                                 Capacity: '24%',
+                                Capacity_Float: 0.24,
                                 name: '/var'
                             },
                             '/log': {
                                 '1024-blocks': 5186648,
                                 Capacity: '32%',
+                                Capacity_Float: 0.32,
                                 name: '/log'
                             }
                         }

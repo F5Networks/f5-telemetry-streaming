@@ -61,6 +61,27 @@ f5_1024_blocks{diskStorage="/var/apm/mount/apmclients-7180.2019.119.331-4683.0.i
 f5_1024_blocks{diskStorage="/run/user/91"} 1643492
 f5_1024_blocks{diskStorage="/mnt/sshplugin_tempfs"} 8217452
 
+# HELP f5_Capacity_Float Capacity_Float
+# TYPE f5_Capacity_Float gauge
+f5_Capacity_Float{diskStorage="/"} 0.48
+f5_Capacity_Float{diskStorage="/dev"} 0.01
+f5_Capacity_Float{diskStorage="/dev/shm"} 0.07
+f5_Capacity_Float{diskStorage="/run"} 0.01
+f5_Capacity_Float{diskStorage="/sys/fs/cgroup"} 0
+f5_Capacity_Float{diskStorage="/usr"} 0.84
+f5_Capacity_Float{diskStorage="/shared"} 0.04
+f5_Capacity_Float{diskStorage="/shared/rrd.1.2"} 0.01
+f5_Capacity_Float{diskStorage="/config"} 0.09
+f5_Capacity_Float{diskStorage="/var"} 0.29
+f5_Capacity_Float{diskStorage="/var/prompt"} 0.01
+f5_Capacity_Float{diskStorage="/var/tmstat"} 0.01
+f5_Capacity_Float{diskStorage="/var/log"} 0.15
+f5_Capacity_Float{diskStorage="/appdata"} 0.05
+f5_Capacity_Float{diskStorage="/var/loipc"} 0
+f5_Capacity_Float{diskStorage="/var/apm/mount/apmclients-7180.2019.119.331-4683.0.iso"} 1
+f5_Capacity_Float{diskStorage="/run/user/91"} 0
+f5_Capacity_Float{diskStorage="/mnt/sshplugin_tempfs"} 0
+
 # HELP f5_r_s r/s
 # TYPE f5_r_s gauge
 f5_r_s{diskLatency="sda"} 1.05
