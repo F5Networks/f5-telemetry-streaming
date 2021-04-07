@@ -2357,6 +2357,18 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-var-apm-mount-apmclients-7170-2018-627-21-3-0-iso.Capacity_Float',
+                    metricValue: 1
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-var-loipc.Capacity_Float',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-mnt-sshplugin_tempfs.Capacity_Float',
+                    metricValue: 0
+                },
+                {
                     metricName: 'f5telemetry.telemetry-bigip-com.telemetryServiceInfo.pollingInterval',
                     metricValue: 0
                 },

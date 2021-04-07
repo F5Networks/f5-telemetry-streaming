@@ -191,6 +191,7 @@ module.exports = {
                         '/': {
                             '1024-blocks': '428150',
                             Capacity: '35%',
+                            Capacity_Float: 0.35,
                             name: '/'
                         }
                     },

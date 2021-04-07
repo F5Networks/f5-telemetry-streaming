@@ -649,5 +649,22 @@ module.exports = {
      */
     convertEmptyToObject(args) {
         return util.isObjectEmpty(args.data) ? {} : args.data;
+    },
+
+    /**
+     * Add Capacity_Float property
+     *
+     * @param {Object} args               - args object
+     * @param {Object} [args.data]        - data to process (always included)
+     * @param {Array<String>} [args.path] - path to fetch data from
+     *
+     * @returns {Object} Returns updated data
+     */
+    diskStoragePercentsToFloating(args) {
+        const diskStorage = args.data;
+        Object.keys(diskStorage).forEach((diskName) => {
+            diskStorage[diskName].Capacity_Float = parseFloat(diskStorage[diskName].Capacity) / 100.0;
+        });
+        return args.data;
     }
 };

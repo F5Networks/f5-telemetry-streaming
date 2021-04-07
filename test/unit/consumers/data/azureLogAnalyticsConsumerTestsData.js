@@ -140,76 +140,91 @@ module.exports = {
                                 '/': {
                                     '1024-blocks': '436342',
                                     Capacity: '55%',
+                                    Capacity_Float: 0.55,
                                     name: '/'
                                 },
                                 '/appdata': {
                                     '1024-blocks': '51607740',
                                     Capacity: '3%',
+                                    Capacity_Float: 0.03,
                                     name: '/appdata'
                                 },
                                 '/config': {
                                     '1024-blocks': '3269592',
                                     Capacity: '11%',
+                                    Capacity_Float: 0.11,
                                     name: '/config'
                                 },
                                 '/dev/shm': {
                                     '1024-blocks': '7181064',
                                     Capacity: '9%',
+                                    Capacity_Float: 0.09,
                                     name: '/dev/shm'
                                 },
                                 '/mnt/sshplugin_tempfs': {
                                     '1024-blocks': '7181064',
                                     Capacity: '0%',
+                                    Capacity_Float: 0,
                                     name: '/mnt/sshplugin_tempfs'
                                 },
                                 '/shared': {
                                     '1024-blocks': '20642428',
                                     Capacity: '3%',
+                                    Capacity_Float: 0.03,
                                     name: '/shared'
                                 },
                                 '/shared/rrd.1.2': {
                                     '1024-blocks': '7181064',
                                     Capacity: '1%',
+                                    Capacity_Float: 0.01,
                                     name: '/shared/rrd.1.2'
                                 },
                                 '/usr': {
                                     '1024-blocks': '4136432',
                                     Capacity: '83%',
+                                    Capacity_Float: 0.83,
                                     name: '/usr'
                                 },
                                 '/var': {
                                     '1024-blocks': '3096336',
                                     Capacity: '37%',
+                                    Capacity_Float: 0.37,
                                     name: '/var'
                                 },
                                 '/var/apm/mount/apmclients-7170.2018.627.21-3.0.iso': {
                                     '1024-blocks': '298004',
                                     Capacity: '100%',
+                                    Capacity_Float: 1,
                                     name: '/var/apm/mount/apmclients-7170.2018.627.21-3.0.iso'
                                 },
                                 '/var/log': {
                                     '1024-blocks': '3023760',
                                     Capacity: '8%',
+                                    Capacity_Float: 0.08,
                                     name: '/var/log'
                                 },
                                 '/var/loipc': {
                                     '1024-blocks': '7181064',
                                     Capacity: '0%',
+                                    Capacity_Float: 0,
                                     name: '/var/loipc'
                                 },
                                 '/var/prompt': {
                                     '1024-blocks': '4096',
                                     Capacity: '1%',
+                                    Capacity_Float: 0.01,
                                     name: '/var/prompt'
                                 },
                                 '/var/run': {
                                     '1024-blocks': '7181064',
                                     Capacity: '1%',
+                                    Capacity_Float: 0.01,
                                     name: '/var/run'
                                 },
                                 '/var/tmstat': {
                                     '1024-blocks': '7181064',
                                     Capacity: '1%',
+                                    Capacity_Float: 0.01,
                                     name: '/var/tmstat'
                                 }
                             },
@@ -329,7 +344,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:tw+6CadFsKkkFvuczHA1V1fwFNLmkw91fKxfp39tFlw=',
+                        Authorization: 'SharedKey myWorkspace:FK4rTYqoe5Hl6CJol2GaOROr7+tlwnwwEZuwoVvmmsU=',
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_system',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'

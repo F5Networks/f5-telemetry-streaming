@@ -89,6 +89,7 @@ module.exports = {
                     event: {
                         '1024-blocks': '436342',
                         Capacity: '55%',
+                        Capacity_Float: 0.55,
                         Filesystem: '/',
                         aggr_period: 0,
                         device_base_mac: '00:0d:3a:30:34:51',
@@ -105,6 +106,7 @@ module.exports = {
                     event: {
                         '1024-blocks': '7181064',
                         Capacity: '9%',
+                        Capacity_Float: 0.09,
                         Filesystem: '/dev/shm',
                         aggr_period: 0,
                         device_base_mac: '00:0d:3a:30:34:51',
@@ -121,6 +123,7 @@ module.exports = {
                     event: {
                         '1024-blocks': '3269592',
                         Capacity: '11%',
+                        Capacity_Float: 0.11,
                         Filesystem: '/config',
                         aggr_period: 0,
                         device_base_mac: '00:0d:3a:30:34:51',
@@ -137,6 +140,7 @@ module.exports = {
                     event: {
                         '1024-blocks': '4136432',
                         Capacity: '83%',
+                        Capacity_Float: 0.83,
                         Filesystem: '/usr',
                         aggr_period: 0,
                         device_base_mac: '00:0d:3a:30:34:51',
@@ -153,6 +157,7 @@ module.exports = {
                     event: {
                         '1024-blocks': '3096336',
                         Capacity: '37%',
+                        Capacity_Float: 0.37,
                         Filesystem: '/var',
                         aggr_period: 0,
                         device_base_mac: '00:0d:3a:30:34:51',
@@ -169,6 +174,7 @@ module.exports = {
                     event: {
                         '1024-blocks': '20642428',
                         Capacity: '3%',
+                        Capacity_Float: 0.03,
                         Filesystem: '/shared',
                         aggr_period: 0,
                         device_base_mac: '00:0d:3a:30:34:51',
@@ -185,6 +191,7 @@ module.exports = {
                     event: {
                         '1024-blocks': '3023760',
                         Capacity: '8%',
+                        Capacity_Float: 0.08,
                         Filesystem: '/var/log',
                         aggr_period: 0,
                         device_base_mac: '00:0d:3a:30:34:51',
@@ -201,6 +208,7 @@ module.exports = {
                     event: {
                         '1024-blocks': '51607740',
                         Capacity: '3%',
+                        Capacity_Float: 0.03,
                         Filesystem: '/appdata',
                         aggr_period: 0,
                         device_base_mac: '00:0d:3a:30:34:51',
@@ -217,6 +225,7 @@ module.exports = {
                     event: {
                         '1024-blocks': '7181064',
                         Capacity: '1%',
+                        Capacity_Float: 0.01,
                         Filesystem: '/shared/rrd.1.2',
                         aggr_period: 0,
                         device_base_mac: '00:0d:3a:30:34:51',
@@ -233,6 +242,7 @@ module.exports = {
                     event: {
                         '1024-blocks': '7181064',
                         Capacity: '1%',
+                        Capacity_Float: 0.01,
                         Filesystem: '/var/run',
                         aggr_period: 0,
                         device_base_mac: '00:0d:3a:30:34:51',
@@ -249,6 +259,7 @@ module.exports = {
                     event: {
                         '1024-blocks': '7181064',
                         Capacity: '1%',
+                        Capacity_Float: 0.01,
                         Filesystem: '/var/tmstat',
                         aggr_period: 0,
                         device_base_mac: '00:0d:3a:30:34:51',
@@ -265,6 +276,7 @@ module.exports = {
                     event: {
                         '1024-blocks': '4096',
                         Capacity: '1%',
+                        Capacity_Float: 0.01,
                         Filesystem: '/var/prompt',
                         aggr_period: 0,
                         device_base_mac: '00:0d:3a:30:34:51',
@@ -281,6 +293,7 @@ module.exports = {
                     event: {
                         '1024-blocks': '298004',
                         Capacity: '100%',
+                        Capacity_Float: 1,
                         Filesystem: '/var/apm/mount/apmclients-7170.2018.627.21-3.0.iso',
                         aggr_period: 0,
                         device_base_mac: '00:0d:3a:30:34:51',
@@ -297,6 +310,7 @@ module.exports = {
                     event: {
                         '1024-blocks': '7181064',
                         Capacity: '0%',
+                        Capacity_Float: 0,
                         Filesystem: '/var/loipc',
                         aggr_period: 0,
                         device_base_mac: '00:0d:3a:30:34:51',
@@ -313,6 +327,7 @@ module.exports = {
                     event: {
                         '1024-blocks': '7181064',
                         Capacity: '0%',
+                        Capacity_Float: 0,
                         Filesystem: '/mnt/sshplugin_tempfs',
                         aggr_period: 0,
                         device_base_mac: '00:0d:3a:30:34:51',
@@ -899,7 +914,7 @@ module.exports = {
                 {
                     event: {
                         aggr_period: 0,
-                        bytes_transfered: 19723,
+                        bytes_transfered: 20044,
                         device_base_mac: '00:0d:3a:30:34:51',
                         devicegroup: 'example_device_group',
                         facility: 'myFacility',

@@ -326,6 +326,7 @@ const PROPERTIES_TO_HANDLERS = {
                     }
                     return DEFAULT_CAST_CB(key, value);
                 },
+                deleteCb: key => key === 'Capacity_Float',
                 renameCb: key => (key === 'Capacity' ? 'Capacity%' : key)
             },
             tmmTraffic: {

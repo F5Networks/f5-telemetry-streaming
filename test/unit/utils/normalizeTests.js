@@ -813,4 +813,34 @@ describe('Normalize Util', () => {
             assert.deepStrictEqual(actual, data, 'should return the same data and not a copy');
         });
     });
+
+    describe('.diskStoragePercentsToFloating()', () => {
+        it('should not fail when no Capacity property or unexpected value', () => {
+            let actual = normalizeUtil.diskStoragePercentsToFloating({ data: { '/': { name: '/' } } });
+            assert.deepStrictEqual(actual, { '/': { name: '/', Capacity_Float: NaN } });
+
+            actual = normalizeUtil.diskStoragePercentsToFloating({ data: { '/': { name: '/', Capacity: undefined } } });
+            assert.deepStrictEqual(actual, { '/': { name: '/', Capacity: undefined, Capacity_Float: NaN } });
+
+            actual = normalizeUtil.diskStoragePercentsToFloating({ data: { '/': { name: '/', Capacity: 'NotANumber' } } });
+            assert.deepStrictEqual(actual, { '/': { name: '/', Capacity: 'NotANumber', Capacity_Float: NaN } });
+        });
+
+        it('should convert Capacity value to Capacity_Float', () => {
+            let actual = normalizeUtil.diskStoragePercentsToFloating({ data: { '/': { name: '/', Capacity: '0%' } } });
+            assert.deepStrictEqual(actual, { '/': { name: '/', Capacity: '0%', Capacity_Float: 0 } }, 'should convert value');
+
+            actual = normalizeUtil.diskStoragePercentsToFloating({ data: { '/': { name: '/', Capacity: '100%' } } });
+            assert.deepStrictEqual(actual, { '/': { name: '/', Capacity: '100%', Capacity_Float: 1 } }, 'should convert value');
+
+            actual = normalizeUtil.diskStoragePercentsToFloating({ data: { '/': { name: '/', Capacity: '50.50%' } } });
+            assert.deepStrictEqual(actual, { '/': { name: '/', Capacity: '50.50%', Capacity_Float: 0.5050 } }, 'should convert value');
+
+            actual = normalizeUtil.diskStoragePercentsToFloating({ data: { '/': { name: '/', Capacity: '50.50%90' } } });
+            assert.deepStrictEqual(actual, { '/': { name: '/', Capacity: '50.50%90', Capacity_Float: 0.5050 } }, 'should convert value');
+
+            actual = normalizeUtil.diskStoragePercentsToFloating({ data: { '/': { name: '/', Capacity: 50 } } });
+            assert.deepStrictEqual(actual, { '/': { name: '/', Capacity: 50, Capacity_Float: 0.5 } }, 'should convert value');
+        });
+    });
 });
