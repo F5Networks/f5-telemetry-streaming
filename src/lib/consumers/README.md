@@ -74,3 +74,9 @@ Please be aware that this solution should anticipate processing a moderately hig
 - Do NOT log at info level during "normal" behavior
 - Do log at error level if consumer does not receive event
 - If unsure what level a log message should be at, use debug
+
+### Metrics-only Consumers
+
+Value conversion rules:
+
+- *boolean* -> **Number**(*boolean*) - **true** === 1 and **false** === 0

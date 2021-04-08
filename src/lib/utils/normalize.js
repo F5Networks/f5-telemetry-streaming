@@ -666,5 +666,18 @@ module.exports = {
             diskStorage[diskName].Capacity_Float = parseFloat(diskStorage[diskName].Capacity) / 100.0;
         });
         return args.data;
+    },
+
+    /**
+     * Convert ConfigSync color status to boolean
+     *
+     * @param {Object} args               - args object
+     * @param {Object} [args.data]        - data to process (always included)
+     * @param {Array<String>} [args.path] - path to fetch data from
+     *
+     * @returns {Object} Returns updated data
+     */
+    configSyncColorToBool(args) {
+        return args.data === 'green';
     }
 };

@@ -1323,6 +1323,20 @@ f5_returnToDns{cnameWideIps="/Common/cnamewideip.example.com"} 0
 f5_returnToDns{mxWideIps="/Common/mxwideip.example.com"} 0
 f5_returnToDns{srvWideIps="/Common/srvwideip.example.com"} 0
 
+# HELP f5_enabled enabled
+# TYPE f5_enabled gauge
+f5_enabled{aPools="/Common/aPool"} 1
+f5_enabled{aaaaPools="/Common/aaaPool"} 1
+f5_enabled{cnamePools="/Common/cnamePool"} 1
+f5_enabled{mxPools="/Common/mxPool"} 1
+f5_enabled{naptrPools="/Common/NPool"} 1
+f5_enabled{srvPools="/Common/srvPool"} 1
+f5_enabled{aWideIps="/Common/awideip.example.com"} 1
+f5_enabled{aaaaWideIps="/Common/aaawideip.example.com"} 1
+f5_enabled{cnameWideIps="/Common/cnamewideip.example.com"} 1
+f5_enabled{mxWideIps="/Common/mxwideip.example.com"} 1
+f5_enabled{srvWideIps="/Common/srvwideip.example.com"} 1
+
 # HELP f5_limitMaxBps limitMaxBps
 # TYPE f5_limitMaxBps gauge
 f5_limitMaxBps{aPools="/Common/aPool"} 0
@@ -1515,6 +1529,10 @@ f5_ttlPersistence{aaaaWideIps="/Common/aaawideip.example.com"} 3600
 f5_ttlPersistence{cnameWideIps="/Common/cnamewideip.example.com"} 3600
 f5_ttlPersistence{mxWideIps="/Common/mxwideip.example.com"} 3600
 f5_ttlPersistence{srvWideIps="/Common/srvwideip.example.com"} 3600
+
+# HELP f5_system_configSyncSucceeded system_configSyncSucceeded
+# TYPE f5_system_configSyncSucceeded gauge
+f5_system_configSyncSucceeded 1
 
 # HELP f5_system_syncSummary system_syncSummary
 # TYPE f5_system_syncSummary gauge

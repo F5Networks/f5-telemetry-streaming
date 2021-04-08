@@ -710,6 +710,7 @@ Note: available only when `debug` is turned on.
         "configReady": "yes",
         "licenseReady": "yes",
         "provisionReady": "yes",
+        "configSyncSucceeded": true,
         "syncMode": "standalone",
         "syncColor": "green",
         "syncStatus": "Standalone",
