@@ -4,6 +4,7 @@ Changes to this project are documented in this file. More detail and links can b
 ## 1.20.0
 ### Added
 - AUTOTOOL-2311: [GitHub #119](https://github.com/F5Networks/f5-telemetry-streaming/issues/119): Added Capacity_Float to system.diskStorage
+- AUTOTOOL-2330: [GitHub #74](https://github.com/F5Networks/f5-telemetry-streaming/issues/74): Added system.configSyncSucceeded to default output and f5_system_configSyncSucceeded to Prometheus output
 ### Fixed
 ### Changed
 ### Removed

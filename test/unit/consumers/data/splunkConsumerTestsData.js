@@ -960,6 +960,7 @@ module.exports = {
                         'metric_name:tmmMemory': 0,
                         platformId: 'Z100',
                         provisionReady: 'yes',
+                        configSyncSucceeded: true,
                         syncColor: 'green',
                         syncMode: 'standalone',
                         syncStatus: 'Standalone',

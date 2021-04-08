@@ -324,6 +324,7 @@ module.exports = {
                                     name: 'urldb'
                                 }
                             },
+                            configSyncSucceeded: true,
                             syncColor: 'green',
                             syncMode: 'standalone',
                             syncStatus: 'Standalone',
@@ -344,7 +345,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:FK4rTYqoe5Hl6CJol2GaOROr7+tlwnwwEZuwoVvmmsU=',
+                        Authorization: 'SharedKey myWorkspace:7Qvg23cc+JUi7xlcTMaAvciJbMqG6IokCH0V4kEopHE=',
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_system',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'

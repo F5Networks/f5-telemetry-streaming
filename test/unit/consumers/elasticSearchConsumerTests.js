@@ -276,6 +276,7 @@ describe('Rename Keys', () => {
                 chassisId: 'missing data',
                 baseMac: 'fa:16:3e:17:d1:27',
                 callBackUrl: 'https://10.145.69.123',
+                configSyncSucceeded: true,
                 syncMode: 'standalone',
                 syncColor: 'green',
                 syncStatus: 'Standalone',

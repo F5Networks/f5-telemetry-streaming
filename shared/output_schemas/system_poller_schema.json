@@ -50,6 +50,9 @@
                 "provisionReady": {
                     "type": "string"
                 },
+                "configSyncSucceeded": {
+                    "type": "boolean"
+                },
                 "syncMode": {
                     "type": "string"
                 },
@@ -135,6 +138,7 @@
                 "chassisId",
                 "baseMac",
                 "callBackUrl",
+                "configSyncSucceeded",
                 "syncMode",
                 "syncColor",
                 "syncStatus",

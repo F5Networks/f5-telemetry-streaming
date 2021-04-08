@@ -33,6 +33,7 @@ module.exports = {
                             configReady: 'yes',
                             licenseReady: 'yes',
                             provisionReady: 'yes',
+                            configSyncSucceeded: true,
                             syncMode: 'standalone',
                             syncColor: 'green',
                             syncStatus: 'Standalone',
