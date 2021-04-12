@@ -48,7 +48,15 @@ describe('Google_Cloud_Monitoring', () => {
                     tmmTraffic: {
                         'clientSideTraffic.bitsIn': 123456
                     },
-                    syncStatus: 'Standalone'
+                    syncStatus: 'Standalone',
+                    diskStorage: {
+                        '/': {
+                            Capacity_Float: 10.10
+                        },
+                        '/var': {
+                            Capacity_Float: 0
+                        }
+                    }
                 },
                 telemetryEventCategory: 'systemInfo'
             },
@@ -151,7 +159,7 @@ describe('Google_Cloud_Monitoring', () => {
             .post('')
             .reply(200, { access_token: 'hereHaveSomeAccess' });
 
-        return assert.isFulfilled(cloudMonitoringIndex(context))
+        return cloudMonitoringIndex(context)
             .then(() => {
                 assert.ok(nock.isDone());
             });
