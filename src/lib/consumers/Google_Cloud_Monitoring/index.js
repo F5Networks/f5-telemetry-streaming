@@ -15,6 +15,9 @@ const requestsUtil = require('../../utils/requests');
 
 function checkMetricDescriptors(data, descriptors, currentPath, metrics) {
     Object.keys(data).forEach((key) => {
+        if (key === 'diskStorage') {
+            return;
+        }
         const path = `${currentPath}/${key}`;
         if (typeof data[key] === 'object') {
             checkMetricDescriptors(data[key], descriptors, path, metrics);
