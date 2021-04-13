@@ -128,36 +128,56 @@ class Logger {
         return levelName;
     }
 
+    /**
+     * @param {any} msg - debug message
+     */
     debug(msg) {
         if (DEBUG >= CURRENT_LOG_LEVEL) {
             this.logger.finest(processMessage(this.prefix, msg));
         }
     }
 
+    /**
+     * @param {any} msg - debug message
+     * @param {Error} err - error
+     */
     debugException(msg, err) {
         if (DEBUG >= CURRENT_LOG_LEVEL) {
             this.logger.finest(processMessage(this.prefix, `${msg}\nTraceback:\n${(err && err.stack) || 'no traceback available'}`));
         }
     }
 
+    /**
+     * @param {any} msg - error message
+     */
     error(msg) {
         if (ERROR >= CURRENT_LOG_LEVEL) {
             this.logger.severe(processMessage(this.prefix, msg));
         }
     }
 
+    /**
+     * @param {any} msg - error message
+     * @param {Error} err - error
+     */
     exception(msg, err) {
         if (ERROR >= CURRENT_LOG_LEVEL) {
             this.logger.severe(processMessage(this.prefix, `${msg}\nTraceback:\n${(err && err.stack) || 'no traceback available'}`));
         }
     }
 
+    /**
+     * @param {any} msg - info message
+     */
     info(msg) {
         if (INFO >= CURRENT_LOG_LEVEL) {
             this.logger.info(processMessage(this.prefix, msg));
         }
     }
 
+    /**
+     * @param {any} msg - warning message
+     */
     warning(msg) {
         if (WARNING >= CURRENT_LOG_LEVEL) {
             this.logger.warning(processMessage(this.prefix, msg));

@@ -101,6 +101,41 @@ class Tracer {
     }
 
     /**
+     * Stop tracer permanently
+     *
+     * @async
+     * @public
+     * @returns {Promise} resolved once tracer stopped
+     */
+    stop() {
+        this.logger.debug(`Stopping stream to file '${this.path}'`);
+        this._disabled = true;
+        // schedule file closing right after last scheduled writing attempt
+        // but data that awaits for writing will be lost
+        return (this._tryWriteDataPromise ? this._tryWriteDataPromise : Promise.resolve())
+            .then(this._close.bind(this));
+    }
+
+    /**
+     * Write data to tracer
+     *
+     * Note: makes copy of 'data'
+     *
+     * @async
+     * @public
+     * @param {Any} data - data to write to tracer (should be JSON serializable)
+     *
+     * @returns {Promise} resolved once data written to file
+     */
+    write(data) {
+        if (this.disabled) {
+            return Promise.resolve();
+        }
+        this._cacheData(data);
+        return this._write();
+    }
+
+    /**
      * Add data to cache
      *
      * Note: makes copy of 'data'
@@ -314,41 +349,6 @@ class Tracer {
 
         // create a new promise to avoid accidental chaining to internal promises responsible for data writing
         return new Promise(resolve => tryWriteDataPromise.then(resolve));
-    }
-
-    /**
-     * Stop tracer permanently
-     *
-     * @async
-     * @public
-     * @returns {Promise} resolved once tracer stopped
-     */
-    stop() {
-        this.logger.debug(`Stopping stream to file '${this.path}'`);
-        this._disabled = true;
-        // schedule file closing right after last scheduled writing attempt
-        // but data that awaits for writing will be lost
-        return (this._tryWriteDataPromise ? this._tryWriteDataPromise : Promise.resolve())
-            .then(this._close.bind(this));
-    }
-
-    /**
-     * Write data to tracer
-     *
-     * Note: makes copy of 'data'
-     *
-     * @async
-     * @public
-     * @param {Any} data - data to write to tracer (should be JSON serializable)
-     *
-     * @returns {Promise} resolved once data written to file
-     */
-    write(data) {
-        if (this.disabled) {
-            return Promise.resolve();
-        }
-        this._cacheData(data);
-        return this._write();
     }
 }
 

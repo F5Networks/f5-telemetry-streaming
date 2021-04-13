@@ -8,61 +8,54 @@
 
 'use strict';
 
-const nodeUtil = require('util');
-
 const BaseRequestHandler = require('./baseHandler');
 const ErrorHandler = require('./errorHandler');
 const router = require('./router');
 const dataPublisher = require('../eventListener/dataPublisher');
 
 /**
- * /eventListener endpoint handler
- *
- * @param {Object} restOperation
+ * Request handler for /eventListener endpoint
  */
-function EventListenerEndpointHandler() {
-    BaseRequestHandler.apply(this, arguments);
+class EventListenerEndpointHandler extends BaseRequestHandler {
+    /**
+     * Get response code
+     *
+     * @returns {Integer} response code
+     */
+    getCode() {
+        return this.code;
+    }
+
+    /**
+     * Get response body
+     *
+     * @returns {Any} response body
+     */
+    getBody() {
+        return this.body;
+    }
+
+    /**
+     * Process request
+     *
+     * @returns {Promise<EventListenerEndpointHandler>} resolved with instance of EventListenerEndpointHandler
+     *                                                      once request processed
+     */
+    process() {
+        const dataToSend = this.restOperation.getBody();
+        return dataPublisher.sendDataToListener(dataToSend, this.params.eventListener,
+            { namespace: this.params.namespace })
+            .then(() => {
+                this.body = {
+                    message: 'success',
+                    data: dataToSend
+                };
+                this.code = 200;
+                return this;
+            })
+            .catch(error => new ErrorHandler(error).process());
+    }
 }
-nodeUtil.inherits(EventListenerEndpointHandler, BaseRequestHandler);
-
-/**
- * Get response code
- *
- * @returns {Integer} response code
- */
-EventListenerEndpointHandler.prototype.getCode = function () {
-    return this.code;
-};
-
-/**
- * Get response body
- *
- * @returns {Any} response body
- */
-EventListenerEndpointHandler.prototype.getBody = function () {
-    return this.body;
-};
-
-/**
- * Process request
- *
- * @returns {Promise<EventListenerEndpointHandler>} resolved with instance of EventListenerEndpointHandler
- *                                                      once request processed
- */
-EventListenerEndpointHandler.prototype.process = function () {
-    const dataToSend = this.restOperation.getBody();
-    return dataPublisher.sendDataToListener(dataToSend, this.params.eventListener,
-        { namespace: this.params.namespace })
-        .then(() => {
-            this.body = {
-                message: 'success',
-                data: dataToSend
-            };
-            this.code = 200;
-            return this;
-        })
-        .catch(error => new ErrorHandler(error).process());
-};
 
 router.on('register', (routerInst, enableDebug) => {
     // Only enable endpoints if controls.Debug=true
