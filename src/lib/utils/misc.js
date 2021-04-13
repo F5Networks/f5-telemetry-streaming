@@ -56,7 +56,7 @@ function proxyForNodeCallbackFuncs(module, funcName) {
 
 const VERSION_COMPARATORS = ['==', '===', '<', '<=', '>', '>=', '!=', '!=='];
 
-const SECERTS_MASK = '*********';
+const SECRETS_MASK = '*********';
 const KEYWORDS_TO_MASK = [
     {
         /**
@@ -66,7 +66,7 @@ const KEYWORDS_TO_MASK = [
          */
         str: 'passphrase',
         replace: /(\\{0,}["']{0,1}passphrase\\{0,}["']{0,1}\s*:\s*){.*?}/g,
-        with: `$1{${SECERTS_MASK}}`
+        with: `$1{${SECRETS_MASK}}`
     },
     {
         /**
@@ -76,7 +76,7 @@ const KEYWORDS_TO_MASK = [
          */
         str: 'passphrase',
         replace: /(\\{0,}["']{0,1}passphrase\\{0,}["']{0,1}\s*:\s*)(\\{0,}["']{1}).*?\2/g,
-        with: `$1$2${SECERTS_MASK}$2`
+        with: `$1$2${SECRETS_MASK}$2`
     },
     {
         /**
@@ -88,7 +88,7 @@ const KEYWORDS_TO_MASK = [
          */
         str: 'cipherText',
         replace: /(\\{0,}["']{0,1}cipherText\\{0,}["']{0,1}\s*:\s*)(\\{0,}["']{1}).*?\2/g,
-        with: `$1$2${SECERTS_MASK}$2`
+        with: `$1$2${SECRETS_MASK}$2`
     }
 ];
 

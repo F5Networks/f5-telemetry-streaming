@@ -8,134 +8,115 @@
 
 'use strict';
 
-const EventEmitter = require('events');
-const nodeUtil = require('util');
 const TinyRequestRouter = require('tiny-request-router').Router;
+
+const configUtil = require('../utils/config');
+const configWorker = require('../config');
 const ErrorHandler = require('./errorHandler');
 const httpErrors = require('./httpErrors');
-const configWorker = require('../config');
 const logger = require('../logger');
-const configUtil = require('../utils/config');
+const SafeEventEmitter = require('../utils/eventEmitter').SafeEventEmitter;
 
 /**
  * Simple router to route incoming requests to REST API.
  *
  * @class
  *
- * @property {Object} routes - mapping /path/to/resource to handler
+ * @property {Object} pathToMethod - mapping /path/to/resource to handler
  */
-function RequestRouter() {
-    EventEmitter.call(this);
-    this.router = new TinyRequestRouter();
-    this.pathToMethod = {};
-}
-nodeUtil.inherits(RequestRouter, EventEmitter);
-
-/**
- * Register request handler.
- *
- * @public
- * @param {String | Array<String>} method - HTTP method (POST, GET, etc.), could be array
- * @param {String} endpointURI - URI path (see path-to-regexp npm module for more info)
- * @param {Object} handlerClass - request handler class (BaseRequestHandler as parent class)
- */
-RequestRouter.prototype.register = function (methods, endpointURI, handlerClass) {
-    this.pathToMethod[endpointURI] = this.pathToMethod[endpointURI] || {};
-    methods = Array.isArray(methods) ? methods : [methods];
-    methods.forEach((method) => {
-        method = method.toUpperCase();
-        logger.debug(`Registering handler for endpoint - ${method} ${endpointURI}`);
-        this.pathToMethod[endpointURI][method] = handlerClass;
-    });
-    this.router.all(endpointURI);
-};
-
-/**
- * Remove all registered handlers
- */
-RequestRouter.prototype.removeAllHandlers = function () {
-    this.router.routes = [];
-    this.pathToMethod = {};
-};
-
-/**
- * Process request.
- *
- * @public
- * @param {Object} restOperation - request object
- * @param {String} [uriPrefix] - prefix to remove from URI before processing
- *
- * @returns {Promise} resolved once request processed
- */
-RequestRouter.prototype.processRestOperation = function (restOperation, uriPrefix) {
-    let responsePromise;
-    try {
-        responsePromise = this._processRestOperation(restOperation, uriPrefix);
-    } catch (err) {
-        // in case if synchronous part of the code failed
-        logger.exception('restOperation processing error', err);
-        responsePromise = (new ErrorHandler(new httpErrors.InternalServerError())).process();
+class RequestRouter extends SafeEventEmitter {
+    constructor() {
+        super();
+        this.router = new TinyRequestRouter();
+        this.pathToMethod = {};
     }
-    return responsePromise.catch((err) => {
-        logger.exception('restOperation processing error', err);
-        return (new ErrorHandler(new httpErrors.InternalServerError())).process();
-    })
-        .then((handler) => {
-            logger.info(`${handler.getCode()} ${restOperation.getMethod().toUpperCase()} ${restOperation.getUri().pathname}`);
-            this._restOperationResponder(restOperation, handler.getCode(), handler.getBody());
+
+    /**
+     * Process request.
+     *
+     * @public
+     * @param {Object} restOperation - request object
+     * @param {String} [uriPrefix] - prefix to remove from URI before processing
+     *
+     * @returns {Promise} resolved once request processed
+     */
+    processRestOperation(restOperation, uriPrefix) {
+        let responsePromise;
+        try {
+            responsePromise = processRestOperation.call(this, restOperation, uriPrefix);
+        } catch (err) {
+            // in case if synchronous part of the code failed
+            logger.exception('restOperation processing error', err);
+            responsePromise = (new ErrorHandler(new httpErrors.InternalServerError())).process();
+        }
+        return responsePromise.catch((err) => {
+            logger.exception('restOperation processing error', err);
+            return (new ErrorHandler(new httpErrors.InternalServerError())).process();
         })
-        .catch((fatalError) => {
-            // in case if .then above failed
-            logger.exception('restOperation processing fatal error', fatalError);
-            this._restOperationResponder(restOperation, 500, 'Internal Server Error');
+            .then((handler) => {
+                logger.info(`${handler.getCode()} ${restOperation.getMethod().toUpperCase()} ${restOperation.getUri().pathname}`);
+                restOperationResponder.call(this, restOperation, handler.getCode(), handler.getBody());
+            })
+            .catch((fatalError) => {
+                // in case if .then above failed
+                logger.exception('restOperation processing fatal error', fatalError);
+                restOperationResponder.call(this, restOperation, 500, 'Internal Server Error');
+            });
+    }
+
+    /**
+     * Register request handler.
+     *
+     * @public
+     * @param {String | Array<String>} method - HTTP method (POST, GET, etc.), could be array
+     * @param {String} endpointURI - URI path (see path-to-regexp npm module for more info)
+     * @param {Object} handlerClass - request handler class (BaseRequestHandler as parent class)
+     */
+    register(methods, endpointURI, handlerClass) {
+        this.pathToMethod[endpointURI] = this.pathToMethod[endpointURI] || {};
+        methods = Array.isArray(methods) ? methods : [methods];
+        methods.forEach((method) => {
+            method = method.toUpperCase();
+            logger.debug(`Registering handler for endpoint - ${method} ${endpointURI}`);
+            this.pathToMethod[endpointURI][method] = handlerClass;
         });
-};
+        this.router.all(endpointURI);
+    }
+
+    /**
+     * Register Endpoints
+     *
+     * @public
+     * @param {Boolean} enableDebug - enable debug endpoints
+     */
+    registerAllHandlers(enableDebug) {
+        this.emit('register', this, enableDebug);
+    }
+
+    /**
+     * Remove all registered handlers
+     *
+     * @public
+     */
+    removeAllHandlers() {
+        this.router.routes = [];
+        this.pathToMethod = {};
+    }
+}
 
 /**
- * LX rest operation responder
- *
- * @private
- * @param {Object} restOperation  - restOperation to complete
- * @param {String} status         - HTTP status
- * @param {String} body           - HTTP body
+ * PRIVATE METHODS
  */
-RequestRouter.prototype._restOperationResponder = function (restOperation, status, body) {
-    restOperation.setStatusCode(status);
-    restOperation.setBody(body);
-    restOperation.complete();
-};
-
-
-/**
- * Process request.
- *
- * @private
- * @param {Object} restOperation - request object
- * @param {String} [uriPrefix] - prefix to remove from URI before processing
- *
- * @returns {Promise} resolved once request processed
- */
-RequestRouter.prototype._processRestOperation = function (restOperation, uriPrefix) {
-    const requestURI = restOperation.getUri();
-    const requestPathname = requestURI.pathname;
-    const requestMethod = restOperation.getMethod().toUpperCase();
-    logger.info(`Request received: ${requestMethod} ${requestPathname}`);
-
-    const handler = this.findRequestHandler(restOperation, uriPrefix);
-    logger.debug(`'${handler.constructor.name}' request handler assigned to request: ${requestMethod} ${requestPathname}`);
-    return handler.process();
-};
-
 /**
  * Find handler for request
  *
- * @public
+ * @this RequestRouter
  * @param {Object} restOperation - request object
  * @param {String} [uriPrefix] - prefix to remove from URI before processing
  *
  * @returns {BaseRequestHandler} handler instance
  */
-RequestRouter.prototype.findRequestHandler = function (restOperation, uriPrefix) {
+function findRequestHandler(restOperation, uriPrefix) {
     // Somehow we need to respond to such requests.
     // When Content-Type === application/json then getBody() tries to
     // evaluate data as JSON and returns code 500 on failure.
@@ -169,33 +150,48 @@ RequestRouter.prototype.findRequestHandler = function (restOperation, uriPrefix)
 
     const handler = new RequestHandler(restOperation, match.params);
     return handler;
-};
+}
 
 /**
- * Register Endpoints
+ * Process request.
  *
- * @public
- * @param {Boolean} enableDebug - enable debug endpoints
+ * @this RequestRouter
+ * @param {Object} restOperation - request object
+ * @param {String} [uriPrefix] - prefix to remove from URI before processing
+ *
+ * @returns {Promise} resolved once request processed
  */
-RequestRouter.prototype.registerAllHandlers = function (enableDebug) {
-    this.emit('register', this, enableDebug);
-};
+function processRestOperation(restOperation, uriPrefix) {
+    const requestURI = restOperation.getUri();
+    const requestPathname = requestURI.pathname;
+    const requestMethod = restOperation.getMethod().toUpperCase();
+    logger.info(`Request received: ${requestMethod} ${requestPathname}`);
+
+    const handler = findRequestHandler.call(this, restOperation, uriPrefix);
+    logger.debug(`'${handler.constructor.name}' request handler assigned to request: ${requestMethod} ${requestPathname}`);
+    return handler.process();
+}
 
 /**
- * Handle for config changes
+ * LX rest operation responder
  *
- * @public
+ * @this RequestRouter
+ * @param {Object} restOperation  - restOperation to complete
+ * @param {String} status         - HTTP status
+ * @param {String} body           - HTTP body
  */
-RequestRouter.prototype.onConfigChange = function (config) {
-    logger.debug('configWorker change event in RequestRouter'); // helpful debug
+function restOperationResponder(restOperation, status, body) {
+    restOperation.setStatusCode(status);
+    restOperation.setBody(body);
+    restOperation.complete();
+}
 
-    this.removeAllHandlers();
-    this.registerAllHandlers(configUtil.getTelemetryControls(config).debug);
-};
 
 const defaultRouter = new RequestRouter();
 configWorker.on('change', config => new Promise((resolve) => {
-    defaultRouter.onConfigChange(config);
+    logger.debug('configWorker change event in RequestRouter'); // helpful debug
+    defaultRouter.removeAllHandlers();
+    defaultRouter.registerAllHandlers(configUtil.getTelemetryControls(config).debug);
     resolve();
 }));
 

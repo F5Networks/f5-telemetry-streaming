@@ -150,7 +150,7 @@ class RestStorage extends StorageInterface {
     /**
      * Constructor
      *
-     * @property {module:restWorkers~RestWorker} restWorker - RestWorker instance
+     * @param {RestWorker} restWorker - RestWorker instance
      */
     constructor(restWorker) {
         super();
