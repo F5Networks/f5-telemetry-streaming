@@ -38,7 +38,7 @@
         "@grpc/proto-loader": "~0.3.0",
         "ajv": "^6.12.6",
         "applicationinsights": "^1.8.10",
-        "aws-sdk": "^2.854.0",
+        "aws-sdk": "^2.885.0",
         "commander": "^2.20.3",
         "deep-diff": "^1.0.2",
         "eventemitter2": "^6.4.4",
@@ -80,6 +80,7 @@
     },
     "comments": {
         "dependencies": {
+            "ajv": "This package dropped support for older node versions and requires the ajv package to be recompiled. Use v6.X.Y for Node v4.",
             "@grpc/proto-loader": "v0.3.0 - This package is used for GRPC connection, supports node v6 and above.",
             "commander": "This package dropped support for older node versions. Use v2.X.Y for Node v4.",
             "google-auth-library": "This package is used for GRPC connection, supports node v10 and above, but fromJSON function works in node v8.11.1 - should use v6.1.X only",

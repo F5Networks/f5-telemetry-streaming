@@ -7,6 +7,7 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-2330: [GitHub #74](https://github.com/F5Networks/f5-telemetry-streaming/issues/74): Added system.configSyncSucceeded to default output and f5_system_configSyncSucceeded to Prometheus output
 ### Fixed
 ### Changed
+- AUTOTOOL-2297: Update npm packages (aws-sdk from v2.854.0 to v2.885.0)
 ### Removed
 
 ## 1.19.0
