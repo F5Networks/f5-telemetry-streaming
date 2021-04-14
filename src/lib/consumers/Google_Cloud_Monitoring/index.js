@@ -153,12 +153,16 @@ module.exports = function (context) {
                 timeSeries.timeSeries.push({ metric, points, resource });
             });
 
+            if (context.tracer) {
+                context.tracer.write(timeSeries);
+            }
+
             options.fullURI = `${baseUri}/${projectId}/timeSeries`;
             options.body = timeSeries;
             options.method = 'POST';
             return requestsUtil.makeRequest(options);
         })
-        .then(() => Promise.resolve())
+        .then(() => context.logger.debug('success'))
         .catch((err) => {
             context.logger.error(`error: ${err.message ? err.message : err}`);
         });
