@@ -15,10 +15,10 @@ require('../shared/restoreCache')();
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 
-const testUtil = require('./../shared/util');
 const ErrorHandler = require('../../../src/lib/requestHandlers/errorHandler');
 const errors = require('../../../src/lib/errors');
 const httpErrors = require('../../../src/lib/requestHandlers/httpErrors');
+const testUtil = require('./../shared/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;

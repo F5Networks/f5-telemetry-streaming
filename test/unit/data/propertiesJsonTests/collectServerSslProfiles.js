@@ -104,7 +104,9 @@ module.exports = {
                         recordsIn: 0,
                         recordsOut: 0,
                         tenant: 'Common',
-                        name: '/Common/apm-default-serverssl'
+                        name: '/Common/apm-default-serverssl',
+                        totCompatConns: 0,
+                        totNativeConns: 0
                     }
                 }
             },

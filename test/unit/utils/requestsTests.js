@@ -17,6 +17,7 @@ const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 const nock = require('nock');
 const request = require('request');
+
 const testUtil = require('../shared/util');
 const requestsUtil = require('../../../src/lib/utils/requests');
 
@@ -254,7 +255,7 @@ describe('Requests Util', () => {
         [
             {
                 name: 'timeout',
-                opts: { timeout: 100 },
+                options: { timeout: 100 },
                 expected: { timeout: 100 }
             }
         ].forEach((testConf) => {
@@ -264,12 +265,90 @@ describe('Requests Util', () => {
                     passedOpts = opts;
                     cb(null, { statusCode: 200, statusMessage: '' }, {});
                 });
-                return requestsUtil.makeRequest('host', testConf.opts)
+                return requestsUtil.makeRequest('host', testConf.options)
                     .then(() => {
-                        Object.keys(testConf.expected).forEach((expectedOpt) => {
-                            assert.deepStrictEqual(passedOpts[expectedOpt], testConf.expected[expectedOpt]);
-                        });
+                        assert.include(passedOpts, testConf.expected);
                     });
+            });
+        });
+
+        describe('proxy options', () => {
+            // it is impossible to test proxy options via nock, so lets just mock request.get
+            [
+                {
+                    name: 'should use proxy when specified (as string)',
+                    options: {
+                        proxy: 'http://proxy.example.com'
+                    },
+                    expected: {
+                        proxy: 'http://proxy.example.com'
+                    }
+                },
+                {
+                    name: 'should use proxy when specified (as object)',
+                    options: {
+                        proxy: {
+                            host: 'proxy.example.com'
+                        }
+                    },
+                    expected: {
+                        proxy: 'http://proxy.example.com'
+                    }
+                },
+                {
+                    name: 'should use proxy when specified with other options and auth (username only)',
+                    options: {
+                        proxy: {
+                            host: 'test_host_1',
+                            protocol: 'https',
+                            port: '8888',
+                            username: 'test_user_1'
+                        }
+                    },
+                    expected: {
+                        proxy: 'https://test_user_1@test_host_1:8888'
+                    }
+                },
+                {
+                    name: 'should use proxy when specified with all available options',
+                    options: {
+                        proxy: {
+                            host: 'test_host_1',
+                            protocol: 'https',
+                            port: '8888',
+                            username: 'test_user_1',
+                            passphrase: 'test_passphrase_1'
+                        }
+                    },
+                    expected: {
+                        proxy: `https://${'test_user_1'}:${'test_passphrase_1'}@${'test_host_1'}:8888`
+                    }
+                },
+                {
+                    name: 'should set to undefined when invalid option passed to the function',
+                    options: {
+                        proxy: ''
+                    },
+                    expected: {
+                        proxy: undefined
+                    }
+                }
+            ].forEach((testConf) => {
+                it(testConf.name, () => {
+                    let passedOpts;
+                    sinon.stub(request, 'get').callsFake((opts, cb) => {
+                        passedOpts = opts;
+                        cb(null, { statusCode: 200, statusMessage: '' }, {});
+                    });
+                    return requestsUtil.makeRequest('host', testConf.options)
+                        .then(() => {
+                            if (testConf.notExpected) {
+                                assert.doesNotHaveAnyKeys(passedOpts, testConf.notExpected);
+                            } else {
+                                assert.include(passedOpts, testConf.expected);
+                            }
+                        });
+                });
             });
         });
     });

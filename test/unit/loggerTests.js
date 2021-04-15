@@ -17,6 +17,7 @@ const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
 const logger = require('../../src/lib/logger');
+const stubs = require('./shared/stubs');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -26,31 +27,24 @@ describe('Logger', () => {
         'notset',
         'debug',
         'info',
+        'warning',
         'error'
     ];
-    const loggedMessages = {
-        error: [],
-        info: [],
-        debug: []
-    };
-    const loggerMock = {
-        severe(msg) { loggedMessages.error.push(msg); },
-        info(msg) { loggedMessages.info.push(msg); },
-        finest(msg) { loggedMessages.debug.push(msg); }
-    };
 
-    before(() => {
-        sinon.stub(logger, 'logger').value(loggerMock);
-    });
+    let coreStub;
 
     beforeEach(() => {
-        logger.setLogLevel('info');
-        Object.keys(loggedMessages).forEach((msgType) => {
-            loggedMessages[msgType] = [];
+        coreStub = stubs.coreStub({
+            logger
+        }, {
+            logger: {
+                setToDebug: false,
+                ignoreLevelChange: false
+            }
         });
     });
 
-    after(() => {
+    afterEach(() => {
         sinon.restore();
     });
 
@@ -63,7 +57,7 @@ describe('Logger', () => {
         logLevels.forEach((logLevelName) => {
             logger.setLogLevel(logLevelName);
             count += 1;
-            assert.strictEqual(loggedMessages.info.length, count);
+            assert.lengthOf(coreStub.logger.messages.info, count);
         });
     });
 
@@ -82,8 +76,8 @@ describe('Logger', () => {
         const invalidName = 'invalidErrorLevelName';
         logger.setLogLevel(invalidName);
 
-        assert.strictEqual(loggedMessages.error.length, 1);
-        assert.notStrictEqual(loggedMessages.error[0].indexOf(invalidName), -1);
+        assert.lengthOf(coreStub.logger.messages.error, 1);
+        assert.include(coreStub.logger.messages.error[0], invalidName);
     });
 
     it('should return appropriate log level name for non-standard value', () => {
@@ -96,34 +90,43 @@ describe('Logger', () => {
     });
 
     logLevels.forEach((logLevel) => {
-        Object.keys(loggedMessages).forEach((logType) => {
+        ['debug', 'error', 'info', 'warning'].forEach((logType) => {
             it(`should log at the appropriate '${logType}' level and preserve global '${logLevel}' level`, () => {
-                // this call logs message about level change, so we already have 1 item in loggedMessages.info
+                // this call logs message about level change, so we already have 1 item in coreStub.logger.messages.info
                 logger.setLogLevel(logLevel);
-                loggedMessages.info = [];
+                coreStub.logger.messages.info = [];
 
                 const msg = `this is a ${logType} message`;
                 logger[logType](msg);
 
                 if (logger.getLevel(logType) >= logger.getLevel()) {
-                    assert.strictEqual(loggedMessages[logType].length, 1);
+                    assert.lengthOf(coreStub.logger.messages[logType], 1);
                     // check it contains the message - no exact match as prefix [telemetry] will be added
-                    assert.notStrictEqual(loggedMessages[logType][0].indexOf(msg), -1);
+                    assert.include(coreStub.logger.messages[logType][0], msg);
                 } else {
-                    assert.strictEqual(loggedMessages[logType].length, 0);
+                    assert.lengthOf(coreStub.logger.messages[logType], 0);
                 }
             });
         });
     });
 
     it('should log an exception', () => {
-        const level = 'exception';
-        logger[level](`this is a ${level} message`, new Error('foo'));
+        const msgType = 'exception';
+        logger.exception(`this is a ${msgType} message`, new Error('foo'));
+        logger.debugException(`this is a ${msgType} message`, new Error('foo'));
 
-        assert.strictEqual(loggedMessages.error.length, 1);
+        assert.lengthOf(coreStub.logger.messages.error, 1);
+        assert.lengthOf(coreStub.logger.messages.debug, 0);
+        assert.include(coreStub.logger.messages.error[0], `this is a ${msgType} message`);
 
-        // check it contains the message - no exact match as prefix [telemetry] will be added
-        assert.notStrictEqual(loggedMessages.error[0].indexOf(`this is a ${level} message`), -1);
+        logger.setLogLevel('debug');
+        logger.exception(`this is a ${msgType} message`, new Error('foo'));
+        logger.debugException(`this is a ${msgType} message [debug]`, new Error('foo'));
+
+        assert.lengthOf(coreStub.logger.messages.error, 2);
+        assert.lengthOf(coreStub.logger.messages.debug, 1);
+        assert.include(coreStub.logger.messages.error[1], `this is a ${msgType} message`);
+        assert.include(coreStub.logger.messages.debug[0], `this is a ${msgType} message [debug]`);
     });
 
     it('should stringify object', () => {
@@ -131,57 +134,27 @@ describe('Logger', () => {
             foo: 'bar'
         };
         logger.info(msg);
-        assert.notStrictEqual(loggedMessages.info[0].indexOf('{"foo":"bar"}'), -1);
+        assert.include(coreStub.logger.messages.info[0], '{"foo":"bar"}');
     });
 
     it('should get a child logger', () => {
         const prefix = 'prefix';
         const childLogger = logger.getChild(prefix);
-        childLogger.logger = loggerMock;
-
         childLogger.info('foo');
-        assert.notStrictEqual(loggedMessages.info[0].indexOf(`[telemetry.${prefix}]`), -1);
+        assert.strictEqual(coreStub.logger.messages.info[0], `[telemetry.${prefix}] foo`);
     });
 
-    describe('mask secrets', () => {
-        it('should mask secrets - cipherText (without new lines)', () => {
-            const decl = {
-                passphrase: {
-                    cipherText: 'foo'
-                }
-            };
-            const expected = 'this contains secrets: {"passphrase":{*********}}';
-            logger.info(`this contains secrets: ${JSON.stringify(decl)}`);
-            assert.notStrictEqual(loggedMessages.info[0].indexOf(expected), -1);
-        });
+    it('should mask secrets', () => {
+        const msg = 'passphrase: { cipherText: \'test_passphrase\' }\n'
+            + '"passphrase": {\ncipherText: "test_passphrase"\n}'
+            + '\'passphrase": "test_passphrase"';
+        const expected = 'this contains secrets: passphrase: {*********}\n'
+        + '"passphrase": {\ncipherText: "*********"\n}'
+        + '\'passphrase": "*********"';
+        logger.info(`this contains secrets: ${msg}`);
+        assert.include(coreStub.logger.messages.info[0], expected, 'should mask secrets');
 
-        it('should mask secrets - cipherText (with new lines)', () => {
-            const decl = {
-                passphrase: {
-                    cipherText: 'foo'
-                }
-            };
-            const expected = 'this contains secrets: {\n    "passphrase": {\n        "cipherText":"*********"\n    }\n}';
-            logger.info(`this contains secrets: ${JSON.stringify(decl, null, 4)}`);
-            assert.notStrictEqual(loggedMessages.info[0].indexOf(expected), -1);
-        });
-
-        it('should mask secrets - passphrase (without new lines)', () => {
-            const decl = {
-                passphrase: 'foo'
-            };
-            const expected = 'this contains secrets: {"passphrase":"*********"}';
-            logger.info(`this contains secrets: ${JSON.stringify(decl)}`);
-            assert.notStrictEqual(loggedMessages.info[0].indexOf(expected), -1);
-        });
-
-        it('should mask secrets - passphrase (with new lines)', () => {
-            const decl = {
-                passphrase: 'foo'
-            };
-            const expected = 'this contains secrets: {\n    "passphrase":"*********"\n}';
-            logger.info(`this contains secrets: ${JSON.stringify(decl, null, 4)}`);
-            assert.notStrictEqual(loggedMessages.info[0].indexOf(expected), -1);
-        });
+        logger.info(coreStub.logger.messages.info[0]);
+        assert.include(coreStub.logger.messages.info[1], expected, 'should keep message the same once masked');
     });
 });

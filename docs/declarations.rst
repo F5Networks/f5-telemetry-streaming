@@ -178,6 +178,27 @@ The following example also uses :doc:`Telemetry Streaming Namespaces<namespaces>
 |
 
 
+.. _httptls:
+
+Generic HTTP consumer with TLS Client Authentication
+----------------------------------------------------
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+   Support for TLS client authentication with the Generic HTTP consumer is available in TS v1.18 and later
+
+This example shows how you can configure TLS client authentication for :ref:`Generic HTTP consumers<http-ref>` in a Telemetry Streaming declaration using version 1.18 and later. 
+
+
+.. literalinclude:: ../examples/declarations/generic_http_tls_client_auth.json
+    :language: json
+
+
+
+|
+
+
+
+
 .. |proxy| raw:: html
 
    <a href="https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/schema-reference.html#proxy" target="_blank">Proxy</a>

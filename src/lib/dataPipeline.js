@@ -14,7 +14,24 @@ const dataTagging = require('./dataTagging');
 const dataFilter = require('./dataFilter');
 const util = require('./utils/misc');
 const EVENT_TYPES = require('./constants').EVENT_TYPES;
+const monitor = require('./utils/monitor');
+const consumersHandler = require('./consumers');
+const constants = require('./constants');
 
+const EVENT_CUSTOM_TIMESTAMP_KEY = constants.EVENT_CUSTOM_TIMESTAMP_KEY;
+const APP_THRESHOLDS = constants.APP_THRESHOLDS;
+
+let processingEnabled = true;
+
+/**
+ * Check if dataPipeline is running
+ * Toggled by monitor checks
+ *
+ * @returns {Boolean} - whether or not processing is enabled
+ */
+function isEnabled() {
+    return processingEnabled;
+}
 
 /**
  * Process actions like filtering or tagging
@@ -50,6 +67,31 @@ function processActions(dataCtx, actions, deviceCtx) {
     });
 }
 
+/**
+ * Build log entry for data that we do not process and include details to help users troubleshoot
+ *
+ * @param {Object} dataCtx - the data context
+ * @returns {String} - the assembled log entry
+ */
+function buildSkippedDataLog(dataCtx) {
+    let timestampInfo = '';
+    // best effort to log some known timestamp obj/fields
+    const timestampKeys = ['telemetryServiceInfo', EVENT_CUSTOM_TIMESTAMP_KEY, 'EOCTimestamp', 'event_timestamp'];
+    // need just one field to match
+    timestampKeys.some((key) => {
+        if (dataCtx.data[key]) {
+            timestampInfo = `"${key}": ${JSON.stringify(dataCtx.data[key])}`;
+            return true;
+        }
+        return false;
+    });
+
+    const consumers = consumersHandler.getConsumers()
+        .filter(c => dataCtx.destinationIds.indexOf(c.id) > -1)
+        .map(c => c.name);
+    return `Skipped Data - Category: "${dataCtx.data.telemetryEventCategory}" | Consumers: ${JSON.stringify(consumers)} | Addtl Info: ${timestampInfo}`;
+}
+
 
 /**
 * Pipeline to process data
@@ -66,6 +108,11 @@ function processActions(dataCtx, actions, deviceCtx) {
 *       once data will be forwarded to consumers
 */
 function process(dataCtx, options) {
+    if (!isEnabled()) {
+        logger.warning(buildSkippedDataLog(dataCtx));
+        return Promise.resolve();
+    }
+
     return new Promise((resolve) => {
         options = options || {};
         // add telemetryEventCategory to data, fairly verbose name to avoid conflicts
@@ -77,7 +124,7 @@ function process(dataCtx, options) {
             processActions(dataCtx, options.actions, options.deviceContext);
         }
         if (options.tracer) {
-            options.tracer.write(JSON.stringify(dataCtx, null, 4));
+            options.tracer.write(dataCtx);
         }
         let promise = Promise.resolve();
         if (!options.noConsumers) {
@@ -98,6 +145,19 @@ function process(dataCtx, options) {
     });
 }
 
+monitor.on('check', status => new Promise((resolve) => {
+    const monitorChecksOk = status === APP_THRESHOLDS.MEMORY.OK;
+    // only log on status change to minimize entries
+    if (processingEnabled !== monitorChecksOk) {
+        logger.warning(`${status}. ${monitorChecksOk ? 'Resuming data pipeline processing.' : 'Incoming data will not be forwarded.'}`);
+    }
+    processingEnabled = monitorChecksOk;
+    resolve();
+}).catch((err) => {
+    logger.exception('Unexpected error in data pipeline (monitor check handler).', err);
+}));
+
 module.exports = {
-    process
+    process,
+    isEnabled
 };

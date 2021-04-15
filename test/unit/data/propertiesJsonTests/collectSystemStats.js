@@ -170,6 +170,7 @@ module.exports = {
                     ltmConfigTime: '2020-01-24T03:47:29.000Z',
                     cpu: 7,
                     memory: 16,
+                    swap: 43,
                     tmmCpu: 0,
                     tmmMemory: 3,
                     tmmTraffic: {
@@ -634,7 +635,7 @@ module.exports = {
                 {
                     endpoint: '/mgmt/tm/sys/memory',
                     options: {
-                        times: 2
+                        times: 3
                     },
                     response: {
                         kind: 'tm:sys:memory:memorystats',
@@ -651,6 +652,12 @@ module.exports = {
                                                     },
                                                     memoryUsed: {
                                                         value: 1314352272
+                                                    },
+                                                    swapTotal: {
+                                                        value: 1048571904
+                                                    },
+                                                    swapUsed: {
+                                                        value: 455475200
                                                     },
                                                     tmmMemoryTotal: {
                                                         value: 6320816128
@@ -1082,11 +1089,12 @@ module.exports = {
          */
         {
             name: 'should collect memory-host on a multi host device',
-            statsToCollect: ['system', 'memory', 'tmmMemory'],
+            statsToCollect: ['system', 'memory', 'tmmMemory', 'swap'],
             contextToCollect: context => context,
             expectedData: {
                 system: {
                     memory: 70,
+                    swap: 38,
                     tmmMemory: 7
                 }
             },
@@ -1094,7 +1102,7 @@ module.exports = {
                 {
                     endpoint: '/mgmt/tm/sys/memory',
                     options: {
-                        times: 2
+                        times: 3
                     },
                     response: {
                         kind: 'tm:sys:memory:memorystats',
@@ -1111,6 +1119,12 @@ module.exports = {
                                                     },
                                                     memoryUsed: {
                                                         value: 1314352272
+                                                    },
+                                                    swapTotal: {
+                                                        value: 1048571904
+                                                    },
+                                                    swapUsed: {
+                                                        value: 455475200
                                                     },
                                                     tmmMemoryTotal: {
                                                         value: 6320816128
@@ -1129,6 +1143,12 @@ module.exports = {
                                                     },
                                                     memoryUsed: {
                                                         value: 16091751448
+                                                    },
+                                                    swapTotal: {
+                                                        value: 1098571904
+                                                    },
+                                                    swapUsed: {
+                                                        value: 355475200
                                                     },
                                                     tmmMemoryTotal: {
                                                         value: 423624704
@@ -1208,6 +1228,7 @@ module.exports = {
                     systemTimestamp: 'missing data',
                     cpu: 'missing data',
                     memory: NaN, // should be fixed and set to missing data
+                    swap: NaN, // should be fixed and set to missing data
                     tmmCpu: NaN, // should be fixed and set to missing data
                     tmmMemory: NaN, // should be fixed and set to missing data
                     tmmTraffic: {},
@@ -1312,7 +1333,7 @@ module.exports = {
                 {
                     endpoint: '/mgmt/tm/sys/memory',
                     options: {
-                        times: 2
+                        times: 3
                     },
                     response: {
                         kind: 'tm:sys:memory:memorystats',
@@ -1443,6 +1464,7 @@ module.exports = {
                     systemTimestamp: 'missing data',
                     cpu: 'missing data',
                     memory: NaN, // should be fixed and set to missing data
+                    swap: NaN, // should be fixed and set to missing data
                     tmmCpu: NaN, // should be fixed and set to missing data
                     tmmMemory: NaN, // should be fixed and set to missing data
                     tmmTraffic: {},
@@ -1544,7 +1566,7 @@ module.exports = {
                 {
                     endpoint: '/mgmt/tm/sys/memory',
                     options: {
-                        times: 2
+                        times: 3
                     },
                     response: {
                         kind: 'tm:sys:memory:memorystats',

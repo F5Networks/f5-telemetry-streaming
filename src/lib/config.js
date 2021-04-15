@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -8,343 +8,368 @@
 
 'use strict';
 
-const EventEmitter2 = require('eventemitter2');
-const nodeUtil = require('util');
+const CONFIG_CLASSES = require('./constants').CONFIG_CLASSES;
+const CONFIG_WORKER = require('./constants').CONFIG_WORKER;
+const configUtil = require('./utils/config');
 const errors = require('./errors');
-
-const deviceUtil = require('./utils/device');
 const logger = require('./logger');
 const persistentStorage = require('./persistentStorage').persistentStorage;
-const util = require('./utils/misc');
-const configUtil = require('./utils/config');
+const SafeEventEmitter = require('./utils/eventEmitter').SafeEventEmitter;
 const TeemReporter = require('./teemReporter').TeemReporter;
-const CONFIG_CLASSES = require('./constants').CONFIG_CLASSES;
+const util = require('./utils/misc');
 
-const PERSISTENT_STORAGE_KEY = 'config';
+/** @module ConfigWorker */
+
 const BASE_CONFIG = {
-    raw: {},
-    normalized: { components: [], mappings: {} }
+    components: [],
+    mappings: {}
 };
+const BASE_DECLARATION = {
+    class: CONFIG_CLASSES.ROOT_CLASS
+};
+const BASE_STORAGE_DATA = {};
 
 /**
  * ConfigWorker class
  *
- * @property {Object} validator - JSON schema validator
- *
  * @event change - config was validated and can be propagated
+ *
+ * @property {Configuration} currentConfig - copy of current configuration
+ * @property {Logger} logger - logger instance
+ * @property {TeemReporter} teemReporter - TeemReporter instance
+ * @property {object} validators - AJV validators
  */
-function ConfigWorker() {
-    this.validators = configUtil.getValidators();
-    this.teemReporter = new TeemReporter();
+class ConfigWorker extends SafeEventEmitter {
+    /**
+     * @public
+     * @returns {Configuration} copy of current configuration
+     */
+    get currentConfig() {
+        return util.deepCopy(this._currentConfig || BASE_CONFIG);
+    }
+
+    /**
+     * @public
+     * @returns {Logger} instance
+     */
+    get logger() {
+        // lazy initialization
+        Object.defineProperty(this, 'logger', {
+            value: logger.getChild('ConfigWorker')
+        });
+        return this.logger;
+    }
+
+    /**
+     * @public
+     * @returns {TeemReporter} instance
+     */
+    get teemReporter() {
+        // lazy initialization
+        Object.defineProperty(this, 'teemReporter', {
+            value: new TeemReporter()
+        });
+        return this.teemReporter;
+    }
+
+    /**
+     * @public
+     * @returns {object} AJV validators
+     */
+    get validators() {
+        // lazy initialization
+        Object.defineProperty(this, 'validators', {
+            value: configUtil.getValidators()
+        });
+        return this.validators;
+    }
+
+    /**
+     * Cleanup current state
+     *
+     * @public
+     * @returns {Promise} resolved once data removed from storage
+     */
+    cleanup() {
+        delete this._currentConfig;
+        return persistentStorage.remove(CONFIG_WORKER.STORAGE_KEY);
+    }
+
+    /**
+     * Get raw (original) config
+     *
+     * @public
+     * @param {string} namespace - namespace name
+     *
+     * @returns {Promise<object>} resolved with raw (original) config - full declaration
+     *     if no namespace param provided, otherwise just the namespace config
+     */
+    getDeclaration(namespace) {
+        // returns copy already, don't need to copy one more time
+        return getStorageData.call(this)
+            .then((storageData) => {
+                let declaration = (storageData && storageData.raw) || util.deepCopy(BASE_DECLARATION);
+                if (namespace) {
+                    declaration = declaration[namespace];
+                    if (util.isObjectEmpty(declaration)) {
+                        return Promise.reject(new errors.ObjectNotFoundInConfigError(`Namespace with name '${namespace}' doesn't exist`));
+                    }
+                }
+                return declaration;
+            });
+    }
+
+    /**
+     * Load config
+     *
+     * @public
+     * @returns {Promise<object>} resolved with loaded and processed declaration
+     */
+    load() {
+        return this.getDeclaration()
+            .then(declaration => this.processDeclaration(declaration))
+            .catch((error) => {
+                this.logger.exception('Unable to load and validate existing declaration', error);
+                this.logger.warning('Going to try to load default empty declaration. Old declaration is still accessible via API');
+                // to be able to retrieve current declaration via API do not save empty declaration
+                return this.processDeclaration(BASE_DECLARATION, { save: false });
+            })
+            .then((declaration) => {
+                this.logger.info('Application config loaded');
+                return declaration;
+            });
+    }
+
+    /**
+     * Process incoming, user provided declaration (namespace only)
+     *
+     * Merge namespace declaration with any existing config and then perform validation, parsing and application
+     *
+     * Note: this method mutates 'namespaceDeclaration'
+     *
+     * @public
+     * @param {object} namespaceDeclaration - namespace-only data to process
+     * @param {string} namespace - namespace to which config belongs to
+     * @param {object} [options] - options, see 'processDeclaration' for more defaults
+     *
+     * @returns {Promise<object>} resolved with copy of validated namespace declaration resolved on success
+     */
+    processNamespaceDeclaration(namespaceDeclaration, namespace, options) {
+        // each call to 'validate' mutates data
+        namespaceDeclaration = namespaceDeclaration || {};
+        options = options || {};
+        return validate.call(this, namespaceDeclaration, { schemaType: CONFIG_CLASSES.NAMESPACE_CLASS_NAME })
+            .then(() => this.getDeclaration())
+            .then((declaration) => {
+                if (typeof declaration[namespace] === 'object' && declaration[namespace].class !== CONFIG_CLASSES.NAMESPACE_CLASS_NAME) {
+                    return Promise.reject(new Error(`Unable to override existing object with name "${namespace}" and "class" different from "${CONFIG_CLASSES.NAMESPACE_CLASS_NAME}"`));
+                }
+                options.namespaceToUpdate = namespace;
+                declaration[namespace] = namespaceDeclaration;
+                return this.processDeclaration(declaration, options)
+                    .then(fullConfig => (fullConfig[namespace] || {}));
+            });
+    }
+
+    /**
+     * Process incoming, user provided declaration (full config)
+     *
+     * Validate JSON declaration against config schema, parse it and apply it to current app
+     *
+     * Note: this method mutates 'declaration'
+     *
+     * @public
+     * @param {object} declaration - declaration to validate against config schema
+     * @param {object} [options] - options when processing declaration config
+     * @param {boolean} [options.expanded = false] - return expanded declaration instead of just validated
+     * @param {string} [options.namespaceToUpdate] - only update this namespace config
+     * @param {boolean} [options.save = true] - save validated declaration to storage
+     *
+     * @returns {Promise<object>} resolved with copy of validated declaration resolved on success
+     */
+    processDeclaration(declaration, options) {
+        const setConfigOpts = {};
+        const storageData = util.deepCopy(BASE_STORAGE_DATA);
+        let expandedConfig = {};
+        let validatedConfig = {};
+
+        declaration = declaration || {};
+        options = util.assignDefaults(options, {
+            expanded: false,
+            save: true
+        });
+        this.logger.debug(`Configuration to process: ${util.stringify(declaration)}`);
+        // validate declaration, then run it back through validator with scratch
+        // property set for additional processing required prior to internal consumption
+        // each call to 'validate' mutates data
+        return validate.call(this, declaration)
+            .then((config) => {
+                // ensure that 'validatedConfig' is a copy
+                validatedConfig = util.deepCopy(config);
+                storageData.raw = util.deepCopy(config);
+                this.logger.debug('Expanding configuration');
+                return expandDeclaration.call(this, declaration);
+            })
+            .then((config) => {
+                this.logger.debug('Configuration successfully validated');
+                expandedConfig = config;
+                if (options.namespaceToUpdate) {
+                    setConfigOpts.namespaceToUpdate = options.namespaceToUpdate;
+                    // normalize the specified namespace config only
+                    // keep the values for other namespaces if  they already exist
+                    return configUtil.mergeDeclaration(
+                        { [options.namespaceToUpdate]: expandedConfig[options.namespaceToUpdate] },
+                        this.currentConfig
+                    );
+                }
+                // normalize the whole config, will generate new UUIDs
+                return configUtil.normalizeDeclaration(expandedConfig);
+            })
+            .then((conf) => {
+                // normalized config is a config that is
+                // - validated against schema decl
+                // - expanded with schema defaults
+                // - polymorphic components like poller, systems and endpoints are normalized
+                // - converted to the format with ids for lookup
+                this._currentConfig = conf;
+                this.logger.debug(`Configuration to save: ${util.stringify(storageData)}`);
+                if (options.save) {
+                    return saveToStorage.call(this, storageData);
+                }
+                return Promise.resolve();
+            })
+            .then(() => notifyConfigChange.call(this, this.currentConfig, setConfigOpts))
+            .then(() => {
+                this.teemReporter.process(validatedConfig);
+                return options.expanded ? expandedConfig : validatedConfig;
+            });
+    }
 }
 
-nodeUtil.inherits(ConfigWorker, EventEmitter2);
-
 /**
- * Setter for config
- *
- * @public
- * @param {Object} newConfig - new config
- * @param {Object} options - options when setting config
- * @param {String} options.namespaceToUpdate - namespace name of components
- *               that are the only ones that need updating instead of all config
- *
- * @returns {Promise} resolve once config applied
+ * @this ConfigWorker
+ * @returns {Promise<object>} resolved with data loaded from Persistent Storage
  */
-ConfigWorker.prototype.setConfig = function (newConfig, options) {
-    return this.upgradeConfiguration(newConfig)
-        .then(upgradedConfig => this._notifyConfigChange(upgradedConfig, options));
-};
-
-/**
- * TS 1.16.0 introduced the 'normalized' property on the configuration object.
- * Configurations saved prior to 1.16.0 will need to have this property set. Ensure it is set.
- *
- * @param {Object} config           - Configuration object
- * @param {Object} [config.parsed]  - Parsed configuration
- *
- * @returns {Promise} Promise resolved with upgraded config
- */
-ConfigWorker.prototype.upgradeConfiguration = function (config) {
-    if (util.isObjectEmpty(config)) {
-        return Promise.resolve(util.deepCopy(BASE_CONFIG));
-    }
-
-    if (config.normalized) {
-        return Promise.resolve(config);
-    }
-
-    return this.expandConfig(util.deepCopy(config.raw))
-        .then(expandedConfig => configUtil.normalizeConfig(expandedConfig))
-        .then((normalizedConfig) => {
-            config.normalized = normalizedConfig;
-            // Remove unnecessary config.parsed property
-            delete config.parsed;
-            return this.saveConfig(config);
-        })
-        .then(() => {
-            logger.debug('Upgraded saved configuration to have \'normalized\' configuration');
-            return this.getConfig();
+function getStorageData() {
+    // persistentStorage.get returns data copy
+    return persistentStorage.get(CONFIG_WORKER.STORAGE_KEY)
+        .then((data) => {
+            // NOTE: starting from 1.19 '.raw' stored only
+            if (typeof data === 'undefined') {
+                data = util.deepCopy(BASE_STORAGE_DATA);
+                this.logger.debug(`persistentStorage did not have a value for ${CONFIG_WORKER.STORAGE_KEY}`);
+            }
+            return data;
         });
-};
+}
+
+/**
+ * Performs additional processing for declaration and returns an expanded version
+ * (e.g. assign property defaults)
+ *
+ * @this ConfigWorker
+ * @param {object} declaration - declaration to expand
+ *
+ * @returns {Promise<object>} resolved once declaration expanded
+ */
+function expandDeclaration(declaration) {
+    // set flag for additional declaration processing
+    return validate.call(this, declaration, { context: { expand: true } });
+}
 
 /**
  * Notify listeners about config change
  *
- * @private
- * @param {Object} newConfig - new config
- * @param {Object} options - options when setting config
- * @param {String} options.namespaceToUpdate - namespace of components
- *               that are the only ones that need updating instead of all config
+ * NOTE: it mutates 'newConfig'.
  *
- * @emits ConfigWorker#change
+ * @this ConfigWorker
+ * @param {Configuration} newConfig - new config
+ * @param {object} options - options when setting config
+ * @param {string} options.namespaceToUpdate - namespace of components
+ *     that are the only ones that need updating instead of all config
+ *
+ * @fires ConfigWorker#change
  *
  * @returns {Promise} resolved once all listeners received config and processed it
  */
-ConfigWorker.prototype._notifyConfigChange = function (newConfig, options) {
-    if (!newConfig || !newConfig.normalized) {
-        throw new Error('_notifyConfigChange() Missing required config.');
+function notifyConfigChange(newConfig, options) {
+    if (!newConfig || !newConfig.components) {
+        return Promise.reject(new Error('notifyConfigChange() Missing required config.'));
     }
     // handle passphrases first - decrypt, download, etc.
-    return deviceUtil.decryptAllSecrets(newConfig.normalized)
+    // this call mutates 'newConfig'
+    return configUtil.decryptSecrets(newConfig)
         .then((decryptedConfig) => {
-            // deepCopy the emitted config
-            // HOWEVER: the copy is passed by reference to each Listener.
-            // Any listener that modifies the config must make its own local copy.
-            const configToEmit = util.deepCopy(decryptedConfig);
             if (!util.isObjectEmpty(options) && typeof options.namespaceToUpdate !== 'undefined') {
-                configToEmit.components.forEach((component) => {
+                decryptedConfig.components.forEach((component) => {
                     if (component.namespace !== options.namespaceToUpdate) {
                         component.skipUpdate = true;
                     }
                 });
             }
-            return this.emitAsync('change', configToEmit);
+            /**
+             * Config changed event.
+             *
+             * The config copy is passed by reference to each Listener. Any listener that modifies
+             * the config must make its own local copy.
+             *
+             * @event ConfigWorker#change
+             * @type {Configuration}
+             */
+            return this.emitAsync('change', decryptedConfig);
         })
         .catch((err) => {
-            logger.error(`notifyConfigChange error: ${err}`);
+            this.logger.exception('notifyConfigChange error: ', err);
         });
-};
-/**
- * Load config
- *
- * @public
- * @returns {Object} Promise which is resolved once state is saved
- */
-ConfigWorker.prototype.loadConfig = function () {
-    return this.getConfig()
-        .then(config => this.setConfig(config))
-        .then(() => {
-            logger.info('Application config loaded');
-        })
-        .catch((err) => {
-            logger.exception('Unexpected error on attempt to load application state', err);
-            return Promise.reject(err);
-        });
-};
+}
 
 /**
- * Save config
+ * @this ConfigWorker
+ * @param {object} storageData - data to save to Persistent Storage
  *
- * @public
- * @returns {Object} Promise which is resolved once state is saved
+ * @returns {Promise} resolved once config is saved
  */
-ConfigWorker.prototype.saveConfig = function (config) {
+function saveToStorage(storageData) {
     // persistentStorage.set will make copy of data
-    return persistentStorage.set(PERSISTENT_STORAGE_KEY, config)
-        .then(() => logger.debug('Application config saved'))
+    return persistentStorage.set(CONFIG_WORKER.STORAGE_KEY, storageData)
+        .then(() => this.logger.debug('Application config saved'))
         .catch((err) => {
-            logger.exception('Unexpected error on attempt to save application state', err);
+            this.logger.exception('Unexpected error on attempt to save application state', err);
             return Promise.reject(err);
         });
-};
+}
 
 /**
- * Get config
+ * Validate JSON declaration against config schema
  *
- * @public
- * @returns {Promise} Promise resolved with config
- */
-ConfigWorker.prototype.getConfig = function () {
-    // persistentStorage.get returns data copy
-    return persistentStorage.get(PERSISTENT_STORAGE_KEY)
-        .then((data) => {
-            let config = util.deepCopy(BASE_CONFIG);
-
-            if (typeof data === 'undefined') {
-                logger.debug(`persistentStorage did not have a value for ${PERSISTENT_STORAGE_KEY}`);
-            } else if (!util.isObjectEmpty(data.raw)) {
-                // NOTE: data.parsed would only be available for legacy format (< v1.16 )
-                // starting 1.16, data.parsed is replaced by data.normalized
-                config = data;
-            }
-            return config;
-        });
-};
-
-/**
- * Validate JSON data against config schema
+ * NOTE: it mutates 'declaration'.
  *
- * @public
- * @param {Object} data       - data to validate against config schema
- * @param {Object} options    - optional validation settings
- * @param {String} options.schemaType - type of schema to validate against. Defaults to full (whole schema)
- * @param {Object} options.context - additional context to pass through to validator
+ * @this ConfigWorker
+ * @param {object} declaration - declaration to validate against config schema
+ * @param {object} options    - optional validation settings
+ * @param {string} options.schemaType - type of schema to validate against. Defaults to full (whole schema)
+ * @param {object} options.context - additional context to pass through to validator
  *
  * @returns {Object} Promise which is resolved with the validated schema
  */
-ConfigWorker.prototype.validate = function (data, options) {
+function validate(declaration, options) {
     options = util.assignDefaults(options, { schemaType: 'full' });
-
-    if (!util.isObjectEmpty(this.validators)) {
-        const validatorFunc = this.validators[options.schemaType];
-        if (typeof validatorFunc !== 'undefined') {
-            return configUtil.validate(validatorFunc, data, options.context)
-                .catch(err => Promise.reject(new errors.ValidationError(err)));
-        }
+    const validatorFunc = this.validators[options.schemaType];
+    if (typeof validatorFunc !== 'undefined') {
+        // AJV validators mutates 'declaration'
+        return configUtil.validate(validatorFunc, declaration, options.context)
+            .catch(err => Promise.reject(new errors.ValidationError(err)));
     }
-
     return Promise.reject(new Error('Validator is not available'));
-};
-
-/**
- * Performs additional processing for config and returns an expanded version
- * (e.g. assign property defaults)
- *
- * @private
- * @param {Object} rawConfig     - config to expand
- *
- * @returns {Object} Promise which is resolved with the expanded config
- */
-ConfigWorker.prototype.expandConfig = function (rawConfig) {
-    return this.validate(rawConfig, { context: { expand: true } }); // set flag for additional decl processing
-};
-
-/**
- * Process incoming, user provided declaration (namespace only)
- *
- * Merge namespace declaration with any existing config and then perform validation, parsing and application
- *
- * @public
- * @param {Object} data - namespace-only data to process
- * @param {String} namespace - namespace to which config belongs to
- *
- * @returns {Object} Promise resolved with copy of validated namespace config resolved on success
- */
-
-ConfigWorker.prototype.processNamespaceDeclaration = function (data, namespace) {
-    return this.validate(data, { schemaType: CONFIG_CLASSES.NAMESPACE_CLASS_NAME })
-        .then(() => this.getConfig())
-        .then((savedConfig) => {
-            const mergedDecl = util.isObjectEmpty(savedConfig.raw) ? { class: 'Telemetry' } : util.deepCopy(savedConfig.raw);
-            mergedDecl[namespace] = data;
-            return this.processDeclaration(mergedDecl, { savedConfig, namespaceToUpdate: namespace })
-                .then(fullConfig => Promise.resolve(fullConfig[namespace] || {}));
-        });
-};
-
-/**
- * Process incoming, user provided declaration (full config)
- *
- * Validate JSON data against config schema, parse it and apply it to current app
- *
- * @public
- * @param {Object} data - data to validate against config schema
- * @param {Object} options - options when processing declaration config
- * @param {String} options.namespaceToUpdate - only update this namespace config
- * @param {Object} options.savedConfig - existing config to merge namespace config with
- *
- * @returns {Object} Promise resolved with copy of validated config resolved on success
- */
-ConfigWorker.prototype.processDeclaration = function (data, options) {
-    data = data || {};
-    let validatedConfig = {};
-    const configToSave = {
-        raw: {},
-        normalized: {}
-    };
-    const setConfigOpts = {};
-    logger.debug(`Configuration to process: ${util.stringify(data)}`);
-    // validate declaration, then run it back through validator with scratch
-    // property set for additional processing required prior to internal consumption
-    // note: ?show=expanded could return config to user with this processing done (later)
-    return this.validate(data)
-        .then((config) => {
-            // Ensure that 'validatedConfig' is a copy
-            validatedConfig = util.deepCopy(config);
-            configToSave.raw = validatedConfig;
-            logger.debug('Expanding configuration');
-            return this.expandConfig(data);
-        })
-        .then((expandedConfig) => {
-            logger.debug('Configuration successfully validated');
-            if (!util.isObjectEmpty(options) && options.namespaceToUpdate) {
-                setConfigOpts.namespaceToUpdate = options.namespaceToUpdate;
-                // normalize the specified namespace config only
-                // keep the values for other namespaces if  they already exist
-                return configUtil.mergeNamespaceConfig(expandedConfig[options.namespaceToUpdate], options);
-            }
-            // normalize the whole config, will generate new UUIDs
-            return configUtil.normalizeConfig(expandedConfig);
-        })
-        .then((normalizedConfig) => {
-            // config.normalized that we save is a config that is
-            // - validated against schema decl
-            // - expanded with schema defaults
-            // - polymorphic components like poller, systems and endpoints are normalized
-            // - converted to the format with ids for lookup
-            configToSave.normalized = normalizedConfig;
-            logger.debug(`Configuration to save: ${util.stringify(configToSave)}`);
-            return this.saveConfig(configToSave);
-        })
-        .then(() => this.getConfig())
-        .then(config => this.setConfig(config, setConfigOpts))
-        .then(() => {
-            this.teemReporter.process(validatedConfig);
-            return validatedConfig;
-        })
-        .catch(error => Promise.reject(error));
-};
-
-/**
- * Get raw (original) config
- *
- * @public
- * @param {String} namespace - namespace name
- *
- * @returns {Promise<Object>} resolved with raw (original) config
- *                           - full declaration if namespace param provided,
- *                             otherwise just the namespace config
- */
-ConfigWorker.prototype.getRawConfig = function (namespace) {
-    return this.getConfig()
-        .then(config => Promise.resolve((config && config.raw) || {}))
-        .then((fullConfig) => {
-            if (namespace) {
-                const namespaceConfig = fullConfig[namespace];
-                if (util.isObjectEmpty(namespaceConfig)) {
-                    return Promise.reject(new errors.ObjectNotFoundInConfigError(`Namespace with name '${namespace}' doesn't exist`));
-                }
-                return namespaceConfig;
-            }
-            return fullConfig;
-        });
-};
-
-
-// initialize singleton
-let configWorker;
-try {
-    configWorker = new ConfigWorker();
-} catch (err) {
-    logger.exception('Unable to create new Config Worker', err);
-    throw err;
 }
 
 
+// initialize singleton
+const configWorker = new ConfigWorker();
+
 // config worker change event, should be first in the handlers chain
 configWorker.on('change', config => new Promise((resolve) => {
-    const settings = configUtil.getControls(config);
+    const settings = configUtil.getTelemetryControls(config);
     if (!util.isObjectEmpty(settings)) {
         // default value should be 'info'
         logger.setLogLevel(settings.logLevel);
@@ -354,7 +379,7 @@ configWorker.on('change', config => new Promise((resolve) => {
 
 // handle EventEmitter errors to avoid NodeJS crashing
 configWorker.on('error', (err) => {
-    logger.exception('Unhandled error in ConfigWorker', err);
+    this.logger.exception('Unhandled error in ConfigWorker', err);
 });
 
 module.exports = configWorker;

@@ -17,16 +17,27 @@ const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 const TeemRecord = require('@f5devcentral/f5-teem').Record;
 
-const config = require('../../src/lib/config');
+const configWorker = require('../../src/lib/config');
 const constants = require('../../src/lib/constants');
 const deviceUtil = require('../../src/lib/utils/device');
+const persistentStorage = require('../../src/lib/persistentStorage');
+const stubs = require('./shared/stubs');
 const TeemReporter = require('../../src/lib/teemReporter').TeemReporter;
-const util = require('../../src/lib/utils/misc');
+const utilMisc = require('../../src/lib/utils/misc');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe('TeemReporter', () => {
+    beforeEach(() => {
+        stubs.coreStub({
+            configWorker,
+            deviceUtil,
+            persistentStorage,
+            utilMisc
+        });
+    });
+
     afterEach(() => {
         sinon.restore();
     });
@@ -82,26 +93,23 @@ describe('TeemReporter', () => {
         it('should not throw an error if reporting failed', () => {
             const teemReporter = new TeemReporter();
             sinon.stub(teemReporter.teemDevice, 'reportRecord').rejects({ message: 'TEEM failed!' });
-            const loggerSpy = sinon.spy(teemReporter.logger, 'exception');
+            const loggerSpy = sinon.spy(teemReporter.logger, 'debugException');
             return teemReporter.process(decl)
-                .then(() => assert.deepStrictEqual(loggerSpy.firstCall.args, ['Unable to send analytics data', { message: 'TEEM failed!' }]));
+                .then(() => {
+                    assert.isTrue(loggerSpy.callCount >= 1, 'should call logger.debugException at least once');
+                    assert.deepStrictEqual(loggerSpy.firstCall.args, ['Unable to send analytics data', { message: 'TEEM failed!' }]);
+                });
         });
     });
 
 
     describe('.fetchExtraData()', () => {
         const teemReporter = new TeemReporter();
-        const validate = (decl, expectedExtraData) => config.validate(decl)
+        const validate = (decl, expectedExtraData) => configWorker.processDeclaration(decl)
             .then((validConfig) => {
                 const extraData = teemReporter.fetchExtraData(validConfig);
                 assert.deepStrictEqual(extraData, expectedExtraData);
             });
-
-        beforeEach(() => {
-            sinon.stub(deviceUtil, 'encryptSecret').resolves('$M$foo');
-            sinon.stub(deviceUtil, 'getDeviceType').resolves(constants.DEVICE_TYPE.BIG_IP);
-            sinon.stub(util, 'networkCheck').resolves();
-        });
 
         it('should process empty object', () => {
             const result = teemReporter.fetchExtraData({});

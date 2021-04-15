@@ -2,6 +2,7 @@ image: ${ARTIFACTORY_DOCKER_HUB}/node:8
 
 stages:
     - lint
+    - atg-shared-checks
     - test
     - build
     - doc
@@ -9,6 +10,16 @@ stages:
     - functional test
     - teardown
     - publish
+
+# This inherits all the jobs defined in the parent template
+# Override variables in this project as needed
+include:
+# adds atg-shared-checks stage and jobs
+# adds atg_shared_checks_result job to test stage
+  - project: automation-toolchain/atg-shared-templates
+    file: security/base.gitlab-ci.yml
+    ref: v1.0.4
+
 
 ##############################################################
 #                                                            #
