@@ -16,31 +16,6 @@ const SafeEventEmitter = require('../utils/eventEmitter').SafeEventEmitter;
 class BaseDataReceiverError extends errors.BaseError {}
 class StateTransitionError extends BaseDataReceiverError {}
 
-/**
- * Catch error (if promise throws it) and set next state
- *
- * @async
- * @param {Promise} promise - promise
- * @param {DataReceiverState | String} successState - state to try to set when promise is fulfilled
- * @param {DataReceiverState | String} failState - state to try to set when promise is rejected
- * @param {Object} [options] - options for ._setState
- *
- * @returns {Promise} resolved with original return value
- */
-function callAndSetState(promise, successState, failState, options) {
-    let uncaughtErr;
-    let originRet;
-
-    return promise.then((ret) => {
-        originRet = ret;
-    })
-        .catch((err) => {
-            uncaughtErr = err;
-        })
-        .then(() => this._setState(uncaughtErr ? failState : successState, options))
-        .then(() => (uncaughtErr ? Promise.reject(uncaughtErr) : Promise.resolve(originRet)));
-}
-
 
 /**
  * Base class for Data Receivers (base on EventEmitter2)
@@ -68,23 +43,6 @@ class BaseDataReceiver extends SafeEventEmitter {
                 this.removeAllListeners();
             }
         });
-    }
-
-    /**
-     * Set state
-     *
-     * @private
-     * @async
-     * @param {DataReceiverState} nextState - next state
-     *
-     * @returns {Promise} resolved when state changed
-     */
-    __setState(nextState, force) {
-        force = typeof force === 'undefined' ? false : force;
-        this.logger.debug(`changing state from '${this.getCurrentStateName()}' to '${nextState.name}' [force = ${force}]`);
-        const prevState = this._state;
-        this._state = nextState;
-        return this.safeEmitAsync('stateChanged', { current: this.getCurrentStateName(), previous: prevState.name });
     }
 
     /**
@@ -121,7 +79,7 @@ class BaseDataReceiver extends SafeEventEmitter {
                 return Promise.reject(this.getStateTransitionError(desiredState));
             }
         }
-        return this.__setState(desiredState, options.force);
+        return setState.call(this, desiredState, options.force);
     }
 
     /**
@@ -384,6 +342,50 @@ BaseDataReceiver.STATE = {
         waitForTransition: true
     }
 };
+
+/**
+ * PRIVATE METHODS
+ */
+/**
+ * Catch error (if promise throws it) and set next state
+ *
+ * @this BaseDataReceiver
+ * @param {Promise} promise - promise
+ * @param {DataReceiverState | String} successState - state to try to set when promise is fulfilled
+ * @param {DataReceiverState | String} failState - state to try to set when promise is rejected
+ * @param {Object} [options] - options for ._setState
+ *
+ * @returns {Promise} resolved with original return value
+ */
+function callAndSetState(promise, successState, failState, options) {
+    let uncaughtErr;
+    let originRet;
+
+    return promise.then((ret) => {
+        originRet = ret;
+    })
+        .catch((err) => {
+            uncaughtErr = err;
+        })
+        .then(() => this._setState(uncaughtErr ? failState : successState, options))
+        .then(() => (uncaughtErr ? Promise.reject(uncaughtErr) : Promise.resolve(originRet)));
+}
+
+/**
+ * Set state
+ *
+ * @this BaseDataReceiver
+ * @param {DataReceiverState} nextState - next state
+ *
+ * @returns {Promise} resolved when state changed
+ */
+function setState(nextState, force) {
+    force = typeof force === 'undefined' ? false : force;
+    this.logger.debug(`changing state from '${this.getCurrentStateName()}' to '${nextState.name}' [force = ${force}]`);
+    const prevState = this._state;
+    this._state = nextState;
+    return this.safeEmitAsync('stateChanged', { current: this.getCurrentStateName(), previous: prevState.name });
+}
 
 module.exports = {
     BaseDataReceiver,

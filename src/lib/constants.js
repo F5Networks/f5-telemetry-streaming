@@ -27,6 +27,25 @@ const packageVersionInfo = (function () {
     return packageVersion;
 }());
 
+const schemaInfo = (function () {
+    const fname = `${__dirname}/../schema/latest/base_schema.json`;
+    let schemaCurrentVersion;
+    let schemaMinimumVersion;
+
+    try {
+        // eslint-disable-next-line global-require,import/no-dynamic-require
+        const schemaVersionEnum = require(fname).properties.schemaVersion.enum;
+        delete require.cache[require.resolve(fname)];
+
+        schemaCurrentVersion = schemaVersionEnum[0];
+        schemaMinimumVersion = schemaVersionEnum[schemaVersionEnum.length - 1];
+    } catch (err) {
+        schemaCurrentVersion = '0.0.0';
+        schemaMinimumVersion = '0.0.0';
+    }
+    return [schemaCurrentVersion, schemaMinimumVersion];
+}());
+
 const VERSION = packageVersionInfo[0];
 const RELEASE = packageVersionInfo[1];
 
@@ -169,6 +188,10 @@ module.exports = {
     PASSPHRASE_ENVIRONMENT_VAR: 'environmentVar',
     PORT_TO_PROTO,
     PROTO_TO_PORT,
+    SCHEMA_INFO: {
+        CURRENT: schemaInfo[0],
+        MINIMUM: schemaInfo[1]
+    },
     STATS_KEY_SEP: '::',
     STRICT_TLS_REQUIRED: true,
     TRACER: {

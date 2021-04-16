@@ -17,6 +17,7 @@ const chaiAsPromised = require('chai-as-promised');
 
 const constants = require('../../src/lib/constants');
 const packageInfo = require('../../package.json');
+const schemaInfo = require('../../src/schema/latest/base_schema.json').properties.schemaVersion.enum;
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -151,6 +152,10 @@ describe('Constants', () => {
             PROTO_TO_PORT: {
                 http: 80,
                 https: 443
+            },
+            SCHEMA_INFO: {
+                CURRENT: schemaInfo[0],
+                MINIMUM: '0.9.0'
             },
             STATS_KEY_SEP: '::',
             STRICT_TLS_REQUIRED: true,
