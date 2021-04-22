@@ -8,15 +8,14 @@
 
 'use strict';
 
-const logger = require('./logger');
-const forwarder = require('./forwarder');
-const dataTagging = require('./dataTagging');
-const dataFilter = require('./dataFilter');
-const util = require('./utils/misc');
-const EVENT_TYPES = require('./constants').EVENT_TYPES;
-const monitor = require('./utils/monitor');
-const consumersHandler = require('./consumers');
+const actionProcessor = require('./actionProcessor');
 const constants = require('./constants');
+const consumersHandler = require('./consumers');
+const EVENT_TYPES = require('./constants').EVENT_TYPES;
+const forwarder = require('./forwarder');
+const logger = require('./logger');
+const monitor = require('./utils/monitor');
+const util = require('./utils/misc');
 
 const EVENT_CUSTOM_TIMESTAMP_KEY = constants.EVENT_CUSTOM_TIMESTAMP_KEY;
 const APP_THRESHOLDS = constants.APP_THRESHOLDS;
@@ -31,40 +30,6 @@ let processingEnabled = true;
  */
 function isEnabled() {
     return processingEnabled;
-}
-
-/**
- * Process actions like filtering or tagging
- *
- * @param {Object}  dataCtx               - wrapper with data to process
- * @param {Object}  dataCtx.data          - data to process
- * @param {String}  dataCtx.type          - type of data to process
- * @param {Object}  [actions]             - actions to apply to data (e.g. filters, tags)
- * @param {Boolean} [actions.enable]      - whether or not to enable the given action
- * @param {Object}  [actions.setTag]      - apply tag
- * @param {Object}  [actions.includeData] - include data
- * @param {Object}  [actions.excludeData] - exclude data
- * @param {Object}  deviceCtx             - device context
- */
-
-function processActions(dataCtx, actions, deviceCtx) {
-    actions.forEach((actionCtx) => {
-        if (!actionCtx.enable) {
-            return;
-        }
-        let handler = null;
-        if (actionCtx.setTag) {
-            handler = dataTagging;
-        } else if (actionCtx.includeData || actionCtx.excludeData) {
-            handler = dataFilter;
-        }
-        if (!handler) {
-            const errMsg = `dataPipeline:processActions error: unknown action - ${JSON.stringify(actionCtx)}`;
-            logger.error(errMsg);
-            throw new Error(errMsg);
-        }
-        handler.handleAction(dataCtx, actionCtx, deviceCtx);
-    });
 }
 
 /**
@@ -121,7 +86,7 @@ function process(dataCtx, options) {
         }
         // iHealthPoller doesn't support actions (filtering and tagging)
         if (dataCtx.type !== EVENT_TYPES.IHEALTH_POLLER && !util.isObjectEmpty(options.actions)) {
-            processActions(dataCtx, options.actions, options.deviceContext);
+            actionProcessor.processActions(dataCtx, options.actions, options.deviceContext);
         }
         if (options.tracer) {
             options.tracer.write(dataCtx);
