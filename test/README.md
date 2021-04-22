@@ -6,6 +6,10 @@ This directory contains all of the tests for this project.  This documentation i
 
 - keep output to console clean as much as possible. Use `console` to log information about tests only (e.g. test skip). Of course you can still use `console` during development process.
 - use `logger` from `winstonLogger.js` to log all information from tests which can be useful for debugging. All logs (from `console` too) will be written to `test/artifacts/testoutput.log`
+- Env variable `LOG_SECRETS` set to `1` or `true` makes `logger` to log `unmasked` secrets to log file.
+- Env variable `LOG_DST` allows to write TS related logs (logs written by TS via `logger` from `src/logger.js`) to:
+  - var set to value `console` - logs will be written to stdout and to file (`test/artifacts/testoutput.log`)
+  - var set to value `file` (**default** value) - logs will be written to file only (`test/artifacts/testoutput.log`)
 
 ## Unit
 
@@ -130,7 +134,7 @@ If you already have an existing set of devices, you can run the functional tests
 2. Set your environment variables. Note that the DUT tests will still run setup. It grabs the rpm if it exists in `dist` directory.
 
         Env variables
-
+    
         SKIP_DUT_TESTS - set value to 1 or true to skip package tests against BIG-IP. DUT device setup/teardown will still run.
         SKIP_CONSUMER_TESTS - set value to 1 or true to skip package tests against Consumers
         CONSUMER_TYPE_REGEX - specify RegEx to filter Consumers by name
@@ -140,14 +144,14 @@ If you already have an existing set of devices, you can run the functional tests
     
 ##### Sample bash script to run functional tests
 
-        
+
         #!/usr/bin/env bash
         export SKIP_DUT_TESTS="true"
         export SKIP_CONSUMER_TESTS="false"
         export CONSUMER_TYPE_REGEX="splunk"
         export TEST_HARNESS_FILE="/path/to/harness_facts_flat.json"
         npm run test-functional
-        
+
 #### Google Cloud Monitoring consumer tests
 
 These tests are under /test/functional/consumers/googleCloudMonitoringTests.js. They have a few environment variables that will need to be present in Gitlab. These environment variables are:
