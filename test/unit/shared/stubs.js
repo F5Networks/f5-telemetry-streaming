@@ -13,6 +13,7 @@ const sinon = require('sinon');
 const assignDefaults = require('./util').assignDefaults;
 const constants = require('../../../src/lib/constants');
 const deepCopy = require('./util').deepCopy;
+const tsLogsForwarder = require('../../winstonLogger').tsLogger;
 
 let SINON_FAKE_CLOCK = null;
 
@@ -357,6 +358,10 @@ const _module = module.exports = {
                 ctx.messages.all.push(message);
                 ctx.messages[msgLvl].push(message);
                 ctx[f5level].wrappedMethod(message);
+
+                if (tsLogsForwarder.logger) {
+                    tsLogsForwarder.logger[tsLogsForwarder.levels[f5level]](message);
+                }
             });
         });
         ctx.setLogLevel.callsFake((level) => {
