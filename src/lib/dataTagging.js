@@ -16,34 +16,6 @@ const systemStatsUtil = require('./utils/systemStats');
 const EVENT_TYPES = require('./constants').EVENT_TYPES;
 
 /**
- * Handle tagging actions on the data.
- * Note:
- *  - data will be modified in place - make a copy (if need) before passing to this function.
- *  - supports only data from SystemPoller and EventLister
- *
- * @public
- *
- * @param {Object}  dataCtx                - data context wrapper
- * @param {Object}  dataCtx.data           - data to process
- * @param {String}  dataCtx.type           - type of data to process
- * @param {Object}  actionCtx              - 'setTag' action to perform on the data
- * @param {Object}  deviceCtx              - device context
- * @param {Object}  [actionCtx.setTag]     - tag(s) that will be applied
- * @param {Object}  [actionCtx.locations]  - where the tags should be applied
- * @param {Object}  [actionCtx.ifAllMatch] - conditions to check before
- * @param {Object}  [actionCtx.ifAnyMatch] - conditions to check before
- *
- * @returns {void}
- */
-function handleAction(dataCtx, actionCtx, deviceCtx) {
-    if (!util.isObjectEmpty(actionCtx.setTag)
-            && dataUtil.checkConditions(dataCtx, actionCtx)) {
-        addTags(dataCtx, actionCtx, deviceCtx);
-    }
-}
-
-
-/**
  * Applies the tags to the data
  *
  * @private - use for testing only
@@ -211,5 +183,5 @@ function addTag(data, tagKey, tagVal, location, statProp) {
 
 
 module.exports = {
-    handleAction
+    addTags
 };

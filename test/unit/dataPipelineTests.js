@@ -17,11 +17,10 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
+const actionProcessor = require('../../src/lib/actionProcessor');
 const constants = require('../../src/lib/constants');
 const consumers = require('../../src/lib/consumers');
-const dataFilter = require('../../src/lib/dataFilter');
 const dataPipeline = require('../../src/lib/dataPipeline');
-const dataTagging = require('../../src/lib/dataTagging');
 const forwarder = require('../../src/lib/forwarder');
 const logger = require('../../src/lib/logger');
 const monitor = require('../../src/lib/utils/monitor');
@@ -37,14 +36,14 @@ describe('Data Pipeline', () => {
     let forwardFlag;
     let forwardedData;
     let forwardError;
-    let handleActionsData;
-    let taggingHandlerStub;
+    let processActionsData;
+    let processActionsStub;
 
     beforeEach(() => {
         forwardedData = undefined;
         forwardError = undefined;
         forwardFlag = false;
-        handleActionsData = [];
+        processActionsData = [];
 
         sinon.stub(forwarder, 'forward').callsFake((data) => {
             forwardFlag = true;
@@ -54,12 +53,9 @@ describe('Data Pipeline', () => {
             forwardedData = data;
             return Promise.resolve();
         });
-        taggingHandlerStub = sinon.stub(dataTagging, 'handleAction');
-        taggingHandlerStub.callsFake((dataCtx, actionCtx, deviceCtx) => {
-            handleActionsData.push({ dataCtx, actionCtx, deviceCtx });
-        });
-        sinon.stub(dataFilter, 'handleAction').callsFake((dataCtx, actionCtx) => {
-            handleActionsData.push({ dataCtx, actionCtx });
+
+        processActionsStub = sinon.stub(actionProcessor, 'processActions').callsFake((dataCtx, actions, deviceCtx) => {
+            processActionsData.push({ dataCtx, actions, deviceCtx });
         });
     });
 
@@ -157,7 +153,7 @@ describe('Data Pipeline', () => {
         };
         return dataPipeline.process(dataCtx, options)
             .then(() => {
-                assert.deepStrictEqual(handleActionsData, []);
+                assert.deepStrictEqual(processActionsData, []);
             });
     });
 
@@ -182,7 +178,7 @@ describe('Data Pipeline', () => {
         return dataPipeline.process(dataCtx, options)
             .then(() => {
                 assert.deepStrictEqual(
-                    handleActionsData,
+                    processActionsData,
                     [
                         {
                             dataCtx: {
@@ -192,7 +188,7 @@ describe('Data Pipeline', () => {
                                 },
                                 type: 'systemInfo'
                             },
-                            actionCtx: { enable: true, setTag: {} },
+                            actions: [{ enable: true, setTag: {} }],
                             deviceCtx: { deviceVersion: 'a.b.c.1' }
                         }
                     ]
@@ -233,15 +229,17 @@ describe('Data Pipeline', () => {
         };
         return dataPipeline.process(dataCtx, options)
             .then(() => {
-                assert.lengthOf(handleActionsData, 4);
-                assert.deepStrictEqual(handleActionsData[0].actionCtx.setTag, {});
-                assert.deepStrictEqual(handleActionsData[1].actionCtx.includeData, {});
-                assert.deepStrictEqual(handleActionsData[2].actionCtx.setTag, {});
-                assert.deepStrictEqual(handleActionsData[3].actionCtx.excludeData, {});
+                const actualActions = processActionsData[0].actions;
+                assert.lengthOf(actualActions, 5);
+                assert.deepStrictEqual(actualActions[0].setTag, {});
+                assert.deepStrictEqual(actualActions[1].includeData, {});
+                assert.deepStrictEqual(actualActions[2].setTag, {});
+                assert.deepStrictEqual(actualActions[3].setTag, {});
+                assert.deepStrictEqual(actualActions[4].excludeData, {});
             });
     });
 
-    it('should fail when unknown', () => {
+    it('should not fail on unknown action', () => {
         const dataCtx = {
             data: {
                 foo: 'bar'
@@ -256,16 +254,13 @@ describe('Data Pipeline', () => {
                 }
             ]
         };
-        return assert.isRejected(
-            dataPipeline.process(dataCtx, options),
-            /unknown action/,
-            'should fail when unknown action passed'
-        );
+
+        return assert.isFulfilled(dataPipeline.process(dataCtx, options), 'should not fail on unknown actions');
     });
 
     it('should not forward when no data', () => {
-        taggingHandlerStub.reset();
-        taggingHandlerStub.callsFake((dataCtx) => {
+        processActionsStub.reset();
+        processActionsStub.callsFake((dataCtx) => {
             dataCtx.data = {};
         });
         const dataCtx = {
