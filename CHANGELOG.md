@@ -6,6 +6,7 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-2311: [GitHub #119](https://github.com/F5Networks/f5-telemetry-streaming/issues/119): Added Capacity_Float to system.diskStorage
 - AUTOTOOL-2330: [GitHub #74](https://github.com/F5Networks/f5-telemetry-streaming/issues/74): Added system.configSyncSucceeded to default output and f5_system_configSyncSucceeded to Prometheus output
 - AUTOTOOL-2439: Added data tracing and 'success' message to Google Cloud Monitoring consumer
+- AUTOTOOL-2312: [GitHub #114](https://github.com/F5Networks/f5-telemetry-streaming/issues/114): Added support to the Generic HTTP Consumer for additional modification of data payloads, including the addition of the 'JMESPathQuery' action
 ### Fixed
 ### Changed
 - AUTOTOOL-2297: Update npm packages (aws-sdk from v2.854.0 to v2.885.0)

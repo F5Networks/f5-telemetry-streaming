@@ -2397,9 +2397,137 @@ module.exports = {
                 }
             }
         ],
+        JMESPath: [
+            // TEST RELATED DATA STARTS HERE
+            {
+                name: 'should apply JMESPath action to data',
+                dataCtx: {
+                    data: {
+                        system: {
+                            hostname: 'bigip1',
+                            version: 'version',
+                            versionBuild: 'versionBuild'
+                        }
+                    }
+                },
+                actions: [
+                    {
+                        enable: true,
+                        JMESPath: {},
+                        expression: '{ message: @ }'
+                    }
+                ],
+                expectedCtx: {
+                    data: {
+                        message: {
+                            system: {
+                                hostname: 'bigip1',
+                                version: 'version',
+                                versionBuild: 'versionBuild'
+                            }
+                        }
+                    }
+                }
+            },
+            // TEST RELATED DATA STARTS HERE
+            {
+                name: 'should not apply disabled JMESPath action to data',
+                dataCtx: {
+                    data: {
+                        system: {
+                            hostname: 'bigip1',
+                            version: 'version',
+                            versionBuild: 'versionBuild'
+                        }
+                    }
+                },
+                actions: [
+                    {
+                        enable: false,
+                        JMESPath: {},
+                        expression: '{ message: @ }'
+                    }
+                ],
+                expectedCtx: {
+                    data: {
+                        system: {
+                            hostname: 'bigip1',
+                            version: 'version',
+                            versionBuild: 'versionBuild'
+                        }
+                    }
+                }
+            },
+            // TEST RELATED DATA STARTS HERE
+            {
+                name: 'should not error on invalid JMESPath expression',
+                dataCtx: {
+                    data: {
+                        system: {
+                            hostname: 'bigip1',
+                            version: 'version',
+                            versionBuild: 'versionBuild'
+                        }
+                    }
+                },
+                actions: [
+                    {
+                        enable: true,
+                        JMESPath: {},
+                        expression: true
+                    }
+                ],
+                expectedCtx: {
+                    data: {
+                        system: {
+                            hostname: 'bigip1',
+                            version: 'version',
+                            versionBuild: 'versionBuild'
+                        }
+                    }
+                }
+            },
+            // TEST RELATED DATA STARTS HERE
+            {
+                name: 'should be able to handle multiple JMESPath expressions',
+                dataCtx: {
+                    data: {
+                        system: {
+                            hostname: 'bigip1',
+                            version: 'version',
+                            versionBuild: 'versionBuild'
+                        }
+                    }
+                },
+                actions: [
+                    {
+                        enable: true,
+                        JMESPath: {},
+                        expression: '{ message: @ }'
+                    },
+                    {
+                        enable: true,
+                        JMESPath: {},
+                        expression: 'merge(@, {"host": message.system.hostname})'
+                    }
+                ],
+                expectedCtx: {
+                    data: {
+                        host: 'bigip1',
+                        message: {
+                            system: {
+                                hostname: 'bigip1',
+                                version: 'version',
+                                versionBuild: 'versionBuild'
+                            }
+                        }
+                    }
+                }
+            }
+        ],
         combinations: [
             {
-                name: 'should handle multiple actions (setTags, includeData, excludeData)',
+                name: 'should handle multiple actions (setTags, includeData, excludeData, JMESPath)',
                 dataCtx: {
                     data: {
                         virtualServers: {
@@ -2461,27 +2589,23 @@ module.exports = {
                         locations: {
                             virtualServers: true
                         }
+                    },
+                    {
+                        enable: true,
+                        JMESPath: {},
+                        expression: 'tmstats.{ cpu: cpuInfoStat }'
                     }
                 ],
                 expectedCtx: {
                     data: {
-                        tmstats: {
-                            cpuInfoStat: [
-                                {
-                                    theTag: 'Tag to add'
-                                },
-                                {
-                                    theTag: 'Tag to add'
-                                }
-                            ],
-                            diskInfoStat: [
-                                {},
-                                {
-                                    theTag: 'Tag to add'
-                                }
-                            ]
-                        },
-                        system: {}
+                        cpu: [
+                            {
+                                theTag: 'Tag to add'
+                            },
+                            {
+                                theTag: 'Tag to add'
+                            }
+                        ]
                     }
                 }
             }

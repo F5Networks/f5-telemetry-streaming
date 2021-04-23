@@ -16,6 +16,7 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
+const actionProcessor = require('../../src/lib/actionProcessor');
 const DataFilter = require('../../src/lib/dataFilter').DataFilter;
 const forwarder = require('../../src/lib/forwarder');
 const consumers = require('../../src/lib/consumers');
@@ -84,6 +85,140 @@ describe('Forwarder', () => {
                 assert.deepStrictEqual(actualContext.config, config);
                 assert.deepStrictEqual(actualContext.metadata, metadata);
                 assert.deepStrictEqual(consumersCalled, ['uuid1', 'uuid3']);
+            }));
+    });
+
+    it('should process any defined actions', () => {
+        const consumersCalled = [];
+        const processActionsStub = sinon.stub(actionProcessor, 'processActions');
+        sinon.stub(consumers, 'getConsumers').returns([
+            {
+                consumer: () => {
+                    consumersCalled.push('uuid1');
+                },
+                id: 'uuid1',
+                config: {
+                    type: 'consumerType',
+                    traceName: 'testConsumer',
+                    actions: [{
+                        enable: true,
+                        JMESPath: {},
+                        expression: '{ message: @ }'
+                    }]
+                },
+                tracer: null,
+                filter: new DataFilter({}),
+                logger: {},
+                metadata
+            }
+        ]);
+        const mockContext = { type, data, destinationIds: ['uuid1'] };
+        return assert.isFulfilled(forwarder.forward(mockContext)
+            .then(() => {
+                assert.strictEqual(processActionsStub.calledOnce, true, 'should be called only once');
+                assert.deepStrictEqual(processActionsStub.firstCall.args[1],
+                    [
+                        {
+                            enable: true,
+                            JMESPath: {},
+                            expression: '{ message: @ }'
+                        }
+                    ]);
+                assert.deepStrictEqual(consumersCalled, ['uuid1'], 'should still call consumer when actions are used');
+            }));
+    });
+
+    it('should still forward the data if the action processor fails', () => {
+        const consumersCalled = [];
+        const processActionsStub = sinon.stub(actionProcessor, 'processActions').throws(new Error('ERROR'));
+        sinon.stub(consumers, 'getConsumers').returns([
+            {
+                consumer: () => {
+                    consumersCalled.push('uuid1');
+                },
+                id: 'uuid1',
+                config: {
+                    type: 'consumerType',
+                    traceName: 'testConsumer',
+                    actions: [{
+                        enable: true,
+                        JMESPath: {},
+                        expression: 'badexpression'
+                    }]
+                },
+                tracer: null,
+                filter: new DataFilter({}),
+                logger: {},
+                metadata
+            }
+        ]);
+        const mockContext = { type, data, destinationIds: ['uuid1'] };
+        return assert.isFulfilled(forwarder.forward(mockContext)
+            .then(() => {
+                assert.strictEqual(processActionsStub.calledOnce, true, 'should be called only once');
+                assert.deepStrictEqual(processActionsStub.firstCall.args[1],
+                    [
+                        {
+                            enable: true,
+                            JMESPath: {},
+                            expression: 'badexpression'
+                        }
+                    ]);
+                assert.deepStrictEqual(processActionsStub.exceptions[0].message, 'ERROR');
+                assert.deepStrictEqual(consumersCalled, ['uuid1'], 'should still call consumer when actions are used');
+            }));
+    });
+
+    it('should not allow consumer actions to modify another consumer\'s data', () => {
+        const consumerContexts = [];
+        const processActionsStub = sinon.stub(actionProcessor, 'processActions').callsFake((event, actions) => {
+            actions = actions || [];
+            actions.forEach((action) => {
+                if (action.JMESPath) {
+                    event.data = 'modifiedData';
+                }
+            });
+        });
+        sinon.stub(consumers, 'getConsumers').returns([
+            {
+                consumer: (context) => {
+                    consumerContexts.push({ id: 'uuid1', data: context.event.data });
+                },
+                id: 'uuid1',
+                config: {
+                    type: 'consumerType',
+                    traceName: 'testConsumer',
+                    actions: [{
+                        enable: true,
+                        JMESPath: {},
+                        expression: '{ message: @ }'
+                    }]
+                },
+                tracer: null,
+                filter: new DataFilter({}),
+                logger: {},
+                metadata
+            },
+            {
+                consumer: (context) => {
+                    consumerContexts.push({ id: 'uuid2', data: context.event.data });
+                },
+                id: 'uuid2',
+                config,
+                tracer: null,
+                filter: new DataFilter({}),
+                logger: {},
+                metadata
+            }
+        ]);
+        const mockContext = { type, data, destinationIds: ['uuid1', 'uuid2'] };
+        return assert.isFulfilled(forwarder.forward(mockContext)
+            .then(() => {
+                assert.strictEqual(processActionsStub.calledTwice, true, 'should be called for each consumer');
+                assert.deepStrictEqual(consumerContexts, [
+                    { id: 'uuid1', data: 'modifiedData' },
+                    { id: 'uuid2', data: { foo: 'bar' } }
+                ], 'should only modify first consumer\'s data');
             }));
     });
 
