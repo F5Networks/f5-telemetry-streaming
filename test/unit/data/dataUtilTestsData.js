@@ -18,6 +18,160 @@ module.exports = {
      * Following options available:
      * - only (bool) - run this test only (it.only)
      * */
+    applyJMESPathExpression: [
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should execute JMESPath expression (nest incoming message)',
+            dataCtx: {
+                data: {
+                    virtualServers: {
+                        '/test/gjd_ftp': {
+                            'serverside.bitsIn': true,
+                            enabledState: 'enabled'
+                        },
+                        virtual2: {
+                            'serverside.bitsIn': true
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip.example.com'
+                    }
+                }
+            },
+            expression: '{ message: @ }',
+            expectedCtx: {
+                data: {
+                    message: {
+                        virtualServers: {
+                            '/test/gjd_ftp': {
+                                'serverside.bitsIn': true,
+                                enabledState: 'enabled'
+                            },
+                            virtual2: {
+                                'serverside.bitsIn': true
+                            }
+                        },
+                        system: {
+                            hostname: 'bigip.example.com'
+                        }
+                    }
+                }
+            }
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should execute JMESPath expression (add dynamic tag)',
+            dataCtx: {
+                data: {
+                    virtualServers: {
+                        '/test/gjd_ftp': {
+                            'serverside.bitsIn': true,
+                            enabledState: 'enabled'
+                        },
+                        virtual2: {
+                            'serverside.bitsIn': true
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip.example.com'
+                    }
+                }
+            },
+            expression: 'merge(@, {"host": system.hostname})',
+            expectedCtx: {
+                data: {
+                    virtualServers: {
+                        '/test/gjd_ftp': {
+                            'serverside.bitsIn': true,
+                            enabledState: 'enabled'
+                        },
+                        virtual2: {
+                            'serverside.bitsIn': true
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip.example.com'
+                    },
+                    host: 'bigip.example.com'
+                }
+            }
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should execute JMESPath expression (add static tag)',
+            dataCtx: {
+                data: {
+                    virtualServers: {
+                        '/test/gjd_ftp': {
+                            'serverside.bitsIn': true,
+                            enabledState: 'enabled'
+                        },
+                        virtual2: {
+                            'serverside.bitsIn': true
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip.example.com'
+                    }
+                }
+            },
+            expression: 'merge(@, {"datacenter": \'denver\'})',
+            expectedCtx: {
+                data: {
+                    virtualServers: {
+                        '/test/gjd_ftp': {
+                            'serverside.bitsIn': true,
+                            enabledState: 'enabled'
+                        },
+                        virtual2: {
+                            'serverside.bitsIn': true
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip.example.com'
+                    },
+                    datacenter: 'denver'
+                }
+            }
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should return original data if bad expression',
+            dataCtx: {
+                data: {
+                    virtualServers: {
+                        '/test/gjd_ftp': {
+                            'serverside.bitsIn': true,
+                            enabledState: 'enabled'
+                        },
+                        virtual2: {
+                            'serverside.bitsIn': true
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip.example.com'
+                    }
+                }
+            },
+            expression: true,
+            expectedCtx: {
+                data: {
+                    virtualServers: {
+                        '/test/gjd_ftp': {
+                            'serverside.bitsIn': true,
+                            enabledState: 'enabled'
+                        },
+                        virtual2: {
+                            'serverside.bitsIn': true
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip.example.com'
+                    }
+                }
+            }
+        }
+    ],
     checkConditions: [
         // TEST RELATED DATA STARTS HERE
         {

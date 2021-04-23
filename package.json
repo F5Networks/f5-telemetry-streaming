@@ -44,6 +44,7 @@
         "eventemitter2": "^6.4.4",
         "google-auth-library": "^6.1.6",
         "grpc-js-0.2-modified": "git://github.com/f5devcentral/grpc-js-0.2-modified.git#1.0",
+        "jmespath": "^0.15.0",
         "jsonwebtoken": "^8.5.1",
         "kafka-node": "^2.6.1",
         "lodash": "^4.17.21",

@@ -27,7 +27,7 @@ const assert = chai.assert;
 
 describe('Action Processor', () => {
     describe('processActions', () => {
-        ['dataTagging', 'dataFiltering', 'combinations'].forEach((actionType) => {
+        ['dataTagging', 'dataFiltering', 'JMESPath', 'combinations'].forEach((actionType) => {
             describe(actionType, () => {
                 actionProcessorData.processActions[actionType].forEach((testConf) => {
                     testUtil.getCallableIt(testConf)(testConf.name, () => {
@@ -44,8 +44,17 @@ describe('Action Processor', () => {
         });
 
         describe('handler calls', () => {
-            it('should handle actions in desired order', () => {
-                const handlerCalls = [];
+            let dataCtx;
+            let handlerCalls;
+
+            before(() => {
+                dataCtx = {
+                    data: {
+                        foo: 'bar'
+                    },
+                    type: EVENT_TYPES.SYSTEM_POLLER
+                };
+                handlerCalls = [];
                 sinon.stub(dataUtil, 'preserveStrictMatches').callsFake(() => {
                     handlerCalls.push('preserveStrictMatches');
                 });
@@ -55,12 +64,9 @@ describe('Action Processor', () => {
                 sinon.stub(dataTagging, 'addTags').callsFake(() => {
                     handlerCalls.push('addTags');
                 });
-                const dataCtx = {
-                    data: {
-                        foo: 'bar'
-                    },
-                    type: EVENT_TYPES.SYSTEM_POLLER
-                };
+            });
+
+            it('should handle actions in desired order', () => {
                 const actions = [
                     {
                         enable: true,
@@ -94,6 +100,22 @@ describe('Action Processor', () => {
                 assert.deepStrictEqual(handlerCalls,
                     ['addTags', 'preserveStrictMatches', 'addTags', 'removeStrictMatches'],
                     'should call handler functions and skip disabled actions');
+            });
+
+            it('should not fail if actions param is undefined', () => {
+                actionProcessor.processActions(dataCtx, undefined);
+                assert.deepStrictEqual(dataCtx, { data: { foo: 'bar' }, type: 'systemInfo' });
+            });
+
+            it('should fail on an unknown action', () => {
+                const actions = [
+                    {
+                        enable: true,
+                        myBadAction: {}
+                    }
+                ];
+                assert.throws(() => actionProcessor.processActions(dataCtx, actions),
+                    /actionProcessor:processActions error: unknown action.*myBadAction/, 'should throw error if unknown action');
             });
         });
     });

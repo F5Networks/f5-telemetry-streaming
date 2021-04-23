@@ -28,6 +28,7 @@ const dataUtil = require('./utils/data');
  */
 
 function processActions(dataCtx, actions, deviceCtx) {
+    actions = actions || [];
     actions.forEach((actionCtx) => {
         if (!actionCtx.enable) {
             return;
@@ -37,6 +38,8 @@ function processActions(dataCtx, actions, deviceCtx) {
             handler = handleDataTagging;
         } else if (actionCtx.includeData || actionCtx.excludeData) {
             handler = handleDataFilter;
+        } else if (actionCtx.JMESPath) {
+            handler = handleJMESPath;
         }
         if (!handler) {
             const errMsg = `actionProcessor:processActions error: unknown action - ${JSON.stringify(actionCtx)}`;
@@ -103,6 +106,23 @@ function handleDataTagging(dataCtx, actionCtx, deviceCtx) {
     if (!util.isObjectEmpty(actionCtx.setTag)
             && dataUtil.checkConditions(dataCtx, actionCtx)) {
         dataTagging.addTags(dataCtx, actionCtx, deviceCtx);
+    }
+}
+
+/**
+ * Handle JMESPath actions on the data.
+ * Note:
+ *  - data will be modifed in place - make a copy (if needed) before passing to this function.
+ *
+ * @param {Object}  dataCtx                 - data context wrapper
+ * @param {Object}  dataCtx.data            - data to process
+ * @param {Object}  actionCtx               - 'JMESPath' action to perform on the data
+ * @param {Object}  [actionCtx.expression]  - JMESPath expression to apply to the data
+ */
+function handleJMESPath(dataCtx, actionCtx) {
+    // completely short-circuit if no JMESPath action, or if dataCtx.data or actionCtx.expression is empty
+    if ((actionCtx.JMESPath) && !util.isObjectEmpty(dataCtx.data) && !util.isObjectEmpty(actionCtx.expression)) {
+        dataUtil.applyJMESPathExpression(dataCtx, actionCtx.expression);
     }
 }
 

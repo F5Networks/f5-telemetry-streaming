@@ -48,6 +48,18 @@ describe('Data Util', () => {
         });
     });
 
+    describe('applyJMESPathExpression', () => {
+        dataUtilTestsData.applyJMESPathExpression.forEach((testConf) => {
+            testUtil.getCallableIt(testConf)(testConf.name, () => {
+                dataUtil.applyJMESPathExpression(
+                    testConf.dataCtx,
+                    testConf.expression
+                );
+                assert.deepStrictEqual(testConf.dataCtx, testConf.expectedCtx);
+            });
+        });
+    });
+
     describe('checkConditions', () => {
         ['', '_ifAnyMatch', '_ifAllMatch'].forEach((matchType) => {
             describe(matchType, () => {
@@ -90,7 +102,7 @@ describe('Data Util', () => {
                         return testConf.nestedKey ? item[testConf.nestedKey] : null;
                     }
                     if (testConf.propertiesToKeep
-                            && Object.prototype.hasOwnProperty.call(testConf.propertiesToKeep, key)) {
+                        && Object.prototype.hasOwnProperty.call(testConf.propertiesToKeep, key)) {
                         return !testConf.propertiesToKeep[key];
                     }
                     return true;
@@ -119,7 +131,7 @@ describe('Data Util', () => {
                             return testConf.nestedKey ? item[testConf.nestedKey] : null;
                         }
                         if (testConf.propertiesToKeep
-                                && Object.prototype.hasOwnProperty.call(testConf.propertiesToKeep, key)) {
+                            && Object.prototype.hasOwnProperty.call(testConf.propertiesToKeep, key)) {
                             return !testConf.propertiesToKeep[key];
                         }
                         return true;
