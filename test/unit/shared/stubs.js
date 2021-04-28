@@ -73,8 +73,10 @@ const _module = module.exports = {
          * @param {number} tickStep - number of ticks
          * @param {object} [fwdOptions] - options
          * @param {function} [fwdOptions.cb] - callback to call before schedule next tick
-         * @param {boolean} [fwdOptions.once] - run .tick once only
+         * @param {number} [fwdOptions.delay] - delay in ms. before .tick
+         * @param {boolean} [fwdOptions.once] - run .tick one time only
          * @param {boolean} [fwdOptions.promisify] - promisify activity
+         * @param {number} [fwdOptions.repeat] - repeat .tick N times
          *
          * @returns {Promise | void} once scheduled
          */
@@ -82,12 +84,16 @@ const _module = module.exports = {
             fwdOptions = fwdOptions || {};
             stopClockForward = false;
 
+            let callCount = 0;
+            const repeatTimes = fwdOptions.once ? 1 : fwdOptions.repeat;
+
             // eslint-disable-next-line consistent-return
             function doTimeTick(ticks) {
                 if (ctx.fakeClock) {
+                    callCount += 1;
                     ctx.fakeClock.tick(ticks);
                 }
-                if (!fwdOptions.once) {
+                if (typeof repeatTimes === 'undefined' || (repeatTimes && repeatTimes > callCount)) {
                     return fwdOptions.promisify ? Promise.resolve().then(timeTick) : timeTick();
                 }
             }
@@ -100,8 +106,10 @@ const _module = module.exports = {
                 }
                 ticks = typeof ticks === 'number' ? ticks : tickStep;
                 if (ctx.fakeClock) {
-                    if (fwdOptions.promisify) {
-                        ctx.fakeClock._setImmediate(() => doTimeTick(ticks));
+                    if (typeof fwdOptions.delay === 'number') {
+                        ctx.fakeClock._setTimeout(doTimeTick, fwdOptions.delay, ticks);
+                    } else if (fwdOptions.promisify) {
+                        ctx.fakeClock._setImmediate(doTimeTick, ticks);
                     } else {
                         doTimeTick(ticks);
                     }

@@ -18,40 +18,31 @@ const sinon = require('sinon');
 
 const APP_THRESHOLDS = require('../../../src/lib/constants').APP_THRESHOLDS;
 const config = require('../../../src/lib/config');
-const timers = require('../../../src/lib/utils/timers');
-const monitor = require('../../../src/lib/utils/monitor');
 const deviceUtil = require('../../../src/lib/utils/device');
+const logger = require('../../../src/lib/logger');
+const monitor = require('../../../src/lib/utils/monitor');
+const stubs = require('../shared/stubs');
+const testAssert = require('../shared/assert');
 const testUtil = require('../shared/util');
+const timers = require('../../../src/lib/utils/timers');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+/**
+ * TODO: refactor tests:
+ * - add more complex and reliable tests
+ */
 describe('Monitor Util', () => {
-    let timerStub;
-
-    before(() => {
-        // disabled by default, otherwise test imports can trigger multiple monitor instance starts
-        // since we're bypassing the singleton in tests using restoreCache
-        process.env[APP_THRESHOLDS.MONITOR_DISABLED] = undefined;
-    });
-
-    after(() => {
-        process.env[APP_THRESHOLDS.MONITOR_DISABLED] = true;
-    });
+    let disabledEnvVarStub;
+    let loggerStub;
 
     beforeEach(() => {
-        timerStub = { start: [], stop: [], update: [] };
-        sinon.stub(timers.BasicTimer.prototype, 'start').callsFake((func, args, interval) => {
-            timerStub.start.push({ args, interval });
-            return interval;
-        });
-        sinon.stub(timers.BasicTimer.prototype, 'stop').callsFake((arg) => {
-            timerStub.stop.push({ arg });
-        });
-        sinon.stub(timers.BasicTimer.prototype, 'update').callsFake((id, func, args, interval) => {
-            timerStub.update.push({ args, interval });
-            return interval;
-        });
+        // disabled by default, otherwise test imports can trigger multiple monitor instance starts
+        // since we're bypassing the singleton in tests using restoreCache
+        disabledEnvVarStub = sinon.stub(process.env, APP_THRESHOLDS.MONITOR_DISABLED);
+        disabledEnvVarStub.value(undefined);
+        loggerStub = stubs.logger(logger);
     });
 
     afterEach(() => {
@@ -101,51 +92,47 @@ describe('Monitor Util', () => {
             ]
         };
 
-        it('should enable monitor checks when there are components enabled', () => {
-            let timer1;
-            return config.emitAsync('change', mockConfig1)
-                .then(() => {
-                    timer1 = monitor.timer;
-                    assert.exists(timer1);
-                    assert.strictEqual(monitor.memoryThreshold, 1290);
-                    assert.deepStrictEqual(timerStub.start, [{ args: null, interval: 5 }]);
-                    assert.deepStrictEqual(timerStub.stop, []);
-                    assert.deepStrictEqual(timerStub.update, []);
-                });
-        });
+        it('should enable monitor checks when there are components enabled', () => config.emitAsync('change', mockConfig1)
+            .then(() => {
+                assert.instanceOf(monitor.timer, timers.BasicTimer);
+                assert.strictEqual(monitor.memoryThreshold, 1290);
+                assert.strictEqual(monitor.timer.intervalInS, 5, 'should set interval to 5 sec');
+                assert.isTrue(monitor.timer.isActive(), 'should be active');
+            }));
 
         it('should update monitor checks when there are components enabled', () => config.emitAsync('change', mockConfig1)
             .then(() => {
-                assert.exists(monitor.timer);
+                assert.instanceOf(monitor.timer, timers.BasicTimer);
                 assert.strictEqual(monitor.memoryThreshold, 1290);
+                assert.strictEqual(monitor.timer.intervalInS, 5, 'should set interval to 5 sec');
+                assert.isTrue(monitor.timer.isActive(), 'should be active');
                 return config.emitAsync('change', mockConfig2);
             })
             .then(() => {
-                assert.exists(monitor.timer);
+                assert.instanceOf(monitor.timer, timers.BasicTimer);
                 assert.strictEqual(monitor.memoryThreshold, 717);
-                assert.deepStrictEqual(timerStub.start, [{ args: null, interval: 5 }]);
-                assert.deepStrictEqual(timerStub.stop, []);
-                assert.deepStrictEqual(timerStub.update, [{ args: null, interval: 5 }]);
+                assert.strictEqual(monitor.timer.intervalInS, 5, 'should set interval to 5 sec');
+                assert.isTrue(monitor.timer.isActive(), 'should be active');
             }));
 
         it('should disable monitor checks when there are no components enabled', () => config.emitAsync('change', mockConfig2)
             .then(() => {
-                assert.exists(monitor.timer);
+                assert.instanceOf(monitor.timer, timers.BasicTimer);
                 assert.strictEqual(monitor.memoryThreshold, 717);
+                assert.isTrue(monitor.timer.isActive(), 'should start timer');
                 return config.emitAsync('change', mockConfig3);
             })
             .then(() => {
-                assert.notExists(monitor.timer);
                 assert.notExists(monitor.memoryThreshold);
-                assert.deepStrictEqual(timerStub.start, [{ args: null, interval: 5 }]);
-                assert.deepStrictEqual(timerStub.update, []);
-                assert.deepStrictEqual(timerStub.stop, [{ arg: 5 }]);
+                assert.isFalse(monitor.timer.isActive(), 'should stop timer');
             }));
 
         it('should disable monitor checks when threshold = 100%', () => config.emitAsync('change', mockConfig2)
             .then(() => {
-                assert.exists(monitor.timer);
+                assert.instanceOf(monitor.timer, timers.BasicTimer);
+                assert.isTrue(monitor.timer.isActive(), 'should start timer');
                 assert.strictEqual(monitor.memoryThreshold, 717);
+
                 const mockConfigDisable = {
                     components: [
                         {
@@ -162,20 +149,71 @@ describe('Monitor Util', () => {
                 return config.emitAsync('change', mockConfigDisable);
             })
             .then(() => {
-                assert.notExists(monitor.timer);
+                assert.isFalse(monitor.timer.isActive(), 'should stop timer');
                 assert.notExists(monitor.memoryThreshold);
-                assert.deepStrictEqual(timerStub.start, [{ args: null, interval: 5 }]);
-                assert.deepStrictEqual(timerStub.update, []);
-                assert.deepStrictEqual(timerStub.stop, [{ arg: 5 }]);
             }));
+
+        it('should keep timer running after checks', () => {
+            sinon.stub(process, 'memoryUsage').returns({ rss: 987654321 });
+            const emitSpy = sinon.spy(monitor, 'emitAsync');
+            const fakeClock = stubs.clock();
+            return config.emitAsync('change', mockConfig2)
+                .then(() => {
+                    assert.isTrue(monitor.timer.isActive(), 'should be active');
+                    fakeClock.clockForward(1000, { promisify: true, repeat: 1000 });
+                    return testUtil.sleep(1000 * 999);
+                })
+                .then(() => {
+                    assert.isTrue(emitSpy.alwaysCalledWith('check', APP_THRESHOLDS.MEMORY.NOT_OK));
+                    assert.isTrue(monitor.timer.isActive(), 'should be active');
+                });
+        });
+
+        it('should ignore config changes when disabled via env var', () => {
+            disabledEnvVarStub.value('true');
+            return config.emitAsync('change', mockConfig1)
+                .then(() => {
+                    assert.isFalse(monitor.timer.isActive(), 'should be inactive');
+                    return config.emitAsync('change', mockConfig1);
+                })
+                .then(() => {
+                    assert.isFalse(monitor.timer.isActive(), 'should be inactive');
+                });
+        });
+
+        it('should catch event handler errors', () => monitor.emitAsync('error', new Error('test error'))
+            .then(() => {
+                testAssert.includeMatch(
+                    loggerStub.messages.error,
+                    /An unexpected error occurred in monitor check[\s\S]+test error/gm,
+                    'should log error message'
+                );
+            }));
+
+        it('should catch config event handler error', () => {
+            sinon.stub(monitor, 'start').throws(new Error('test error'));
+            return config.emitAsync('change', mockConfig1)
+                .then(() => {
+                    testAssert.includeMatch(
+                        loggerStub.messages.error,
+                        /An error occurred in monitor checks \(config change handler\)[\s\S]+test error/gm,
+                        'should log error message'
+                    );
+                });
+        });
     });
 
     describe('.checkThresholds', () => {
         let emitSpy;
+
         beforeEach(() => {
-            sinon.stub(deviceUtil, 'getHostDeviceInfo').returns({ NODE_MEMORY_LIMIT: 1000 });
-            sinon.stub(monitor, 'memoryThreshold').value(700);
+            sinon.stub(deviceUtil, 'getHostDeviceInfo').returns(1000);
             emitSpy = sinon.spy(monitor, 'emitAsync');
+            return monitor.start(70);
+        });
+
+        afterEach(() => {
+            assert.isEmpty(loggerStub.messages.error, 'should have no error messages');
         });
 
         it('should emit check event MEMORY_USAGE_HIGH when higher value than threshold', () => {
@@ -207,7 +245,6 @@ describe('Monitor Util', () => {
         let memUsageStub;
 
         beforeEach(() => {
-            sinon.stub(monitor, 'interval').value(1);
             sinon.stub(monitor, 'memoryLimit').value(1000);
             sinon.stub(monitor, 'memoryThresholdPercent').value(80);
             sinon.stub(monitor, 'memoryThreshold').value(800);
@@ -230,8 +267,7 @@ describe('Monitor Util', () => {
                 memUsageStub.returns(memUsageVal);
                 return monitor.checkThresholds()
                     .then(() => {
-                        assert.strictEqual(monitor.interval, usageTest.sec, `should change interval to ${usageTest.sec} for usage ${memUsageVal} ${usageTest.memUsagePercent}`);
-                        assert.deepStrictEqual(timerStub.update, [{ args: null, interval: usageTest.sec }]);
+                        assert.strictEqual(monitor.timer.intervalInS, usageTest.sec, `should change interval to ${usageTest.sec} for usage ${memUsageVal} ${usageTest.memUsagePercent}`);
                     });
             });
         });
