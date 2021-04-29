@@ -221,6 +221,10 @@ describe('Monitor Util', () => {
             assert.isEmpty(loggerStub.messages.error, 'should have no error messages');
         });
 
+        afterEach(() => {
+            assert.isEmpty(loggerStub.messages.error, 'should have no error messages');
+        });
+
         it('should emit check event MEMORY_USAGE_HIGH when higher value than threshold', () => {
             sinon.stub(process, 'memoryUsage').returns({ rss: 987654321 });
             return monitor.checkThresholds()
