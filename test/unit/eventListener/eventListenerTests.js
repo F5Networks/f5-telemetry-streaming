@@ -109,21 +109,21 @@ describe('Event Listener', () => {
         return configWorker.processDeclaration(utilMisc.deepCopy(origDecl))
             .then(() => {
                 const listeners = EventListener.instances;
-                assert.strictEqual(Object.keys(listeners).length, 1);
+                assert.lengthOf(Object.keys(listeners), 1);
                 assert.deepStrictEqual(gatherIds(), ['Listener1']);
                 assertListener(listeners.Listener1, {
                     tags: { tenant: '`T`', application: '`A`' }
                 });
                 assert.sameDeepMembers(registeredTracerNames(), ['Telemetry_Listener.Listener1']);
-                assert.strictEqual(EventListener.receiversManager.getAll().length, 1);
+                assert.lengthOf(EventListener.receiversManager.getAll(), 1);
             });
     });
 
     afterEach(() => configWorker.emitAsync('change', { components: [], mappings: {} })
         .then(() => {
             const listeners = EventListener.getAll();
-            assert.strictEqual(Object.keys(listeners).length, 0);
-            assert.strictEqual(EventListener.receiversManager.getAll().length, 0);
+            assert.isEmpty(Object.keys(listeners));
+            assert.isEmpty(EventListener.receiversManager.getAll());
         })
         .then(() => {
             sinon.restore();
@@ -170,7 +170,7 @@ describe('Event Listener', () => {
                         'Telemetry_Listener.Listener3'
                     ]
                 );
-                assert.strictEqual(EventListener.receiversManager.getAll().length, 2);
+                assert.lengthOf(EventListener.receiversManager.getAll(), 2);
                 assert.sameDeepMembers(gatherIds(), ['Listener1', 'Listener2', 'Listener3']);
 
                 const listeners = EventListener.instances;
@@ -192,13 +192,13 @@ describe('Event Listener', () => {
     });
 
     it('should stop existing listener(s) when removed from config', () => {
-        assert.notStrictEqual(EventListener.getAll().length, 0);
-        assert.notStrictEqual(EventListener.receiversManager.getAll().length, 0);
+        assert.isNotEmpty(EventListener.getAll());
+        assert.isNotEmpty(EventListener.receiversManager.getAll());
         return configWorker.emitAsync('change', { components: [], mappings: {} })
             .then(() => {
                 assert.sameDeepMembers(registeredTracerNames(), []);
-                assert.strictEqual(EventListener.getAll().length, 0);
-                assert.strictEqual(EventListener.receiversManager.getAll().length, 0);
+                assert.isEmpty(EventListener.getAll());
+                assert.isEmpty(EventListener.receiversManager.getAll());
             });
     });
 
@@ -220,8 +220,8 @@ describe('Event Listener', () => {
                 // one for each protocol
                 assert.isTrue(updateSpy.calledOnce);
 
-                assert.strictEqual(EventListener.getAll().length, 1);
-                assert.strictEqual(EventListener.receiversManager.getAll().length, 1);
+                assert.lengthOf(EventListener.getAll(), 1);
+                assert.lengthOf(EventListener.receiversManager.getAll(), 1);
 
                 const currentMessageSteam = EventListener.receiversManager.getMessageStream(newDecl.Listener1.port);
                 assert.isTrue(existingMessageStream === currentMessageSteam, 'should not re-create Message Stream');
@@ -261,8 +261,8 @@ describe('Event Listener', () => {
                 assertListener(listeners['newNamespace::Listener1'], {});
                 // called twice - 1) constructor 2) config on change event handler
                 assert.isTrue(updateSpy.calledTwice);
-                assert.strictEqual(EventListener.getAll().length, 2);
-                assert.strictEqual(EventListener.receiversManager.getAll().length, 2);
+                assert.lengthOf(EventListener.getAll(), 2);
+                assert.lengthOf(EventListener.receiversManager.getAll(), 2);
             });
     });
 
@@ -273,8 +273,8 @@ describe('Event Listener', () => {
         return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
             .then(() => {
                 assert.sameDeepMembers(registeredTracerNames(), []);
-                assert.strictEqual(EventListener.getAll().length, 0);
-                assert.strictEqual(EventListener.receiversManager.getAll().length, 0);
+                assert.isEmpty(EventListener.getAll());
+                assert.isEmpty(EventListener.receiversManager.getAll());
             });
     });
 
@@ -298,8 +298,8 @@ describe('Event Listener', () => {
                         'Telemetry_Listener.New::Listener1'
                     ]
                 );
-                assert.strictEqual(EventListener.getAll().length, 2);
-                assert.strictEqual(EventListener.receiversManager.getAll().length, 1);
+                assert.lengthOf(EventListener.getAll(), 2);
+                assert.lengthOf(EventListener.receiversManager.getAll(), 1);
                 assert.sameDeepMembers(gatherIds(), ['Listener1', 'New::Listener1']);
                 const listeners = EventListener.instances;
 
@@ -332,8 +332,8 @@ describe('Event Listener', () => {
         return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
             .then(() => {
                 assert.sameDeepMembers(registeredTracerNames(), ['Telemetry_Listener.Listener1']);
-                assert.strictEqual(EventListener.getAll().length, 1);
-                assert.strictEqual(EventListener.receiversManager.getAll().length, 1);
+                assert.lengthOf(EventListener.getAll(), 1);
+                assert.lengthOf(EventListener.receiversManager.getAll(), 1);
                 assert.deepStrictEqual(gatherIds(), ['Listener1']);
                 const listeners = EventListener.instances;
 
@@ -368,8 +368,8 @@ describe('Event Listener', () => {
         };
         return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
             .then(() => {
-                assert.strictEqual(EventListener.getAll().length, 1);
-                assert.strictEqual(EventListener.receiversManager.getAll().length, 1);
+                assert.lengthOf(EventListener.getAll(), 1);
+                assert.lengthOf(EventListener.receiversManager.getAll(), 1);
                 assert.sameDeepMembers(registeredTracerNames(), []);
                 assert.deepStrictEqual(gatherIds(), ['Listener1']);
                 const listeners = EventListener.instances;

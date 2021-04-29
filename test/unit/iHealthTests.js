@@ -207,7 +207,7 @@ describe('iHealth', () => {
         ihealthStub.ihealthUtil.QkviewManager.process.rejects(new Error('expected error'));
         return configWorker.processDeclaration({ class: 'Telemetry' })
             .then(() => {
-                assert.strictEqual(IHealthPoller.getAll({ includeDemo: true }).length, 0, 'should have no running pollers');
+                assert.isEmpty(IHealthPoller.getAll({ includeDemo: true }), 'should have no running pollers');
             });
     });
 

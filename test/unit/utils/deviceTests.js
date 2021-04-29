@@ -685,8 +685,8 @@ describe('Device Util', () => {
             return deviceUtil.encryptSecret(largeSecret, true)
                 .then(() => {
                     const requestSecret = radiusRequests[0];
-                    assert.strictEqual(radiusRequests.length, 2, 'largeSecret should be in 2 chunks');
-                    assert.strictEqual(requestSecret.length, 500, 'length of chunk should be 500');
+                    assert.lengthOf(radiusRequests, 2, 'largeSecret should be in 2 chunks');
+                    assert.lengthOf(requestSecret, 500, 'length of chunk should be 500');
                     assert.ok(new RegExp(/\n/).test(requestSecret), 'newlines should be preserved');
                 });
         });

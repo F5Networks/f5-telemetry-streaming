@@ -201,7 +201,7 @@ describe('IHealthPoller', () => {
                 return poller.start()
                     .then(() => IHealthPoller.disable(poller))
                     .then((retObj) => {
-                        assert.lengthOf(IHealthPoller.get('id'), 0, 'should unregister instance once disabled it');
+                        assert.isEmpty(IHealthPoller.get('id'), 'should unregister instance once disabled it');
                         assert.instanceOf(retObj.stopPromise, Promise, 'should be instance of Promise');
                         return retObj.stopPromise;
                     });
@@ -212,7 +212,7 @@ describe('IHealthPoller', () => {
                 return poller.start()
                     .then(() => Promise.all([IHealthPoller.disable(poller), IHealthPoller.disable(poller)]))
                     .then((retObj) => {
-                        assert.lengthOf(IHealthPoller.get('id'), 0, 'should unregister instance once disabled it');
+                        assert.isEmpty(IHealthPoller.get('id'), 'should unregister instance once disabled it');
                         assert.instanceOf(retObj[0].stopPromise, Promise, 'should be instance of Promise');
                         assert.instanceOf(retObj[1].stopPromise, Promise, 'should be instance of Promise');
                         return Promise.all([retObj[0].stopPromise, retObj[1].stopPromise]);
@@ -222,7 +222,7 @@ describe('IHealthPoller', () => {
 
         describe('.get()', () => {
             it('should return null when instance with such ID doesn\'t exist', () => {
-                assert.lengthOf(IHealthPoller.get('id'), 0, 'should return no instances with such ID');
+                assert.isEmpty(IHealthPoller.get('id'), 'should return no instances with such ID');
             });
 
             it('should return instance by ID', () => {

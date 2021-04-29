@@ -1104,7 +1104,7 @@ describe('Timer Tests', () => {
                             .then(() => {
                                 timestamps.push(Date.now());
                                 try {
-                                    assert.lengthOf(arguments, 0);
+                                    assert.isEmpty(arguments);
                                 } catch (err) {
                                     reject(err);
                                 }
@@ -1130,7 +1130,7 @@ describe('Timer Tests', () => {
                     intervalID = timers.setSlidingInterval(function () {
                         timestamps.push(Date.now());
                         try {
-                            assert.lengthOf(arguments, 0);
+                            assert.isEmpty(arguments);
                         } catch (err) {
                             reject(err);
                         }

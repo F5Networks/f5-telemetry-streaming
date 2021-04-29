@@ -196,8 +196,7 @@ describe('System Stats', () => {
                 const shouldKeep = (testConf.shouldKeep || testConf.shouldKeepOnly || []).filter(
                     statKey => activeStats.indexOf(statKey) === -1
                 );
-                assert.strictEqual(shouldKeep.length, 0,
-                    `[shouldKeep] should keep following properties - '${JSON.stringify(shouldKeep)}'`);
+                assert.isEmpty(shouldKeep, `[shouldKeep] should keep following properties - '${JSON.stringify(shouldKeep)}'`);
 
                 // not strict, just verifies that properties are in skip list
                 // so, if property not in skip list -> it is an error
@@ -205,8 +204,7 @@ describe('System Stats', () => {
                     // stats key SHOULD be in skip list
                     statKey => activeStats.indexOf(statKey) !== -1
                 );
-                assert.strictEqual(shouldRemove.length, 0,
-                    `[shouldRemove] should remove following properties - '${JSON.stringify(shouldRemove)}'`);
+                assert.isEmpty(shouldRemove, `[shouldRemove] should remove following properties - '${JSON.stringify(shouldRemove)}'`);
 
                 // strict, that only certain properties are presented.
                 // [] (empty array) - means 'keep nothing'
@@ -217,8 +215,7 @@ describe('System Stats', () => {
                             && testConf.shouldKeepOnly.indexOf(statKey) === -1
                     );
                 }
-                assert.strictEqual(notRemoved.length, 0,
-                    `[shouldKeepOnly] should remove following properties - '${JSON.stringify(notRemoved)}'`);
+                assert.isEmpty(notRemoved, `[shouldKeepOnly] should remove following properties - '${JSON.stringify(notRemoved)}'`);
 
                 // strict, verifies only that properties are removed.
                 // [] (empty array) - means 'remove nothing'
@@ -229,8 +226,7 @@ describe('System Stats', () => {
                             && testConf.shouldRemoveOnly.indexOf(statKey) === -1
                     );
                 }
-                assert.strictEqual(notKept.length, 0,
-                    `[shouldRemoveOnly] should keep following properties - '${JSON.stringify(notKept)}'`);
+                assert.isEmpty(notKept, `[shouldRemoveOnly] should keep following properties - '${JSON.stringify(notKept)}'`);
 
                 dataStateValidator();
             });

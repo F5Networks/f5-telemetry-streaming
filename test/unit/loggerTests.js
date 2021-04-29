@@ -104,7 +104,7 @@ describe('Logger', () => {
                     // check it contains the message - no exact match as prefix [telemetry] will be added
                     assert.include(coreStub.logger.messages[logType][0], msg);
                 } else {
-                    assert.lengthOf(coreStub.logger.messages[logType], 0);
+                    assert.isEmpty(coreStub.logger.messages[logType]);
                 }
             });
         });
@@ -116,7 +116,7 @@ describe('Logger', () => {
         logger.debugException(`this is a ${msgType} message`, new Error('foo'));
 
         assert.lengthOf(coreStub.logger.messages.error, 1);
-        assert.lengthOf(coreStub.logger.messages.debug, 0);
+        assert.isEmpty(coreStub.logger.messages.debug);
         assert.include(coreStub.logger.messages.error[0], `this is a ${msgType} message`);
 
         logger.setLogLevel('debug');

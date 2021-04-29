@@ -93,14 +93,14 @@ describe('IHealthPollerHandler', () => {
 
         return configWorker.processDeclaration(declaration)
             .then(() => {
-                assert.strictEqual(IHealthPoller.getAll({ includeDemo: true }).length, 2, 'should have 2 running pollers');
+                assert.lengthOf(IHealthPoller.getAll({ includeDemo: true }), 2, 'should have 2 running pollers');
             });
     });
 
     afterEach(() => configWorker.processDeclaration({ class: 'Telemetry' })
         .then(() => {
             sinon.restore();
-            assert.strictEqual(IHealthPoller.getAll({ includeDemo: true }).length, 0, 'should have 0 running pollers');
+            assert.isEmpty(IHealthPoller.getAll({ includeDemo: true }), 'should have 0 running pollers');
         }));
 
     describe('/ihealthpoller', () => {

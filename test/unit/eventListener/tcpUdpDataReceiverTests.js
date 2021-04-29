@@ -638,22 +638,22 @@ describe('TCP and UDP Receivers', () => {
         describe('.restart()', () => {
             it('should recrate all receivers on restart', () => receiverInst.start()
                 .then(() => {
-                    assert.strictEqual(serverMocks.length, 2, 'should create 2 sockets');
+                    assert.lengthOf(serverMocks, 2, 'should create 2 sockets');
                     assert.strictEqual(getServerMock().opts.type, 'udp4', 'should create udp4 listener');
                     assert.strictEqual(getServerMock(true).opts.type, 'udp6', 'should create udp6 listener');
                     return receiverInst.restart();
                 })
                 .then(() => {
-                    assert.strictEqual(serverMocks.length, 4, 'should create 2 more sockets');
-                    assert.strictEqual(serverMocks.filter(mock => mock.opts.type === 'udp4').length, 2, 'should have 2 udp4 sockets');
-                    assert.strictEqual(serverMocks.filter(mock => mock.opts.type === 'udp6').length, 2, 'should have 2 udp6 sockets');
+                    assert.lengthOf(serverMocks, 4, 'should create 2 more sockets');
+                    assert.lengthOf(serverMocks.filter(mock => mock.opts.type === 'udp4'), 2, 'should have 2 udp4 sockets');
+                    assert.lengthOf(serverMocks.filter(mock => mock.opts.type === 'udp6'), 2, 'should have 2 udp6 sockets');
                 }));
         });
 
         describe('.start()', () => {
             it('should start receivers', () => receiverInst.start()
                 .then(() => {
-                    assert.strictEqual(serverMocks.length, 2, 'should create 2 sockets');
+                    assert.lengthOf(serverMocks, 2, 'should create 2 sockets');
                     assert.strictEqual(getServerMock().opts.type, 'udp4', 'should create udp4 listener');
                     assert.strictEqual(getServerMock(true).opts.type, 'udp6', 'should create udp6 listener');
                     assert.isTrue(receiverInst.isRunning(), 'should be in running state');
