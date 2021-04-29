@@ -78,7 +78,7 @@ describe('AWS Util Tests', () => {
                 .then(() => {
                     const agent = actualParams.httpOptions.agent;
                     assert.ok(agent instanceof https.Agent, 'agent should be instance of https.Agent');
-                    assert.ok(agent.options.ca.length, 'should have atleast 1 certificate');
+                    assert.isNotEmpty(agent.options.ca, 'should have at least 1 certificate');
                     assert.strictEqual(agent.options.rejectUnauthorized, true);
                 });
         });
@@ -211,13 +211,13 @@ describe('AWS Util Tests', () => {
                 return awsUtil.sendMetrics(context, mockMetrics)
                     .catch((err) => {
                         assert.strictEqual(err.message, 'At least one batch encountered an error while sending metrics data');
-                        assert.strictEqual(allReqs.length, 4);
+                        assert.lengthOf(allReqs, 4);
                         // should log exception for errored out requests
                         assert.isTrue(context.logger.exception.calledTwice);
                         assert.deepStrictEqual(context.logger.exception.getCalls()[0].args[1].message, 'Error req: 2 idxMin: 20 idxMax: 39');
                         assert.deepStrictEqual(context.logger.exception.getCalls()[1].args[1].message, 'Error req: 3 idxMin: 40 idxMax: 59');
                         // should handle all requests even if at least one fails
-                        assert.strictEqual(successfulReqs.length, 2);
+                        assert.lengthOf(successfulReqs, 2);
                         assert.deepStrictEqual(successfulReqs[0].MetricData[0], { idx: 0 });
                         assert.deepStrictEqual(successfulReqs[0].MetricData[19], { idx: 19 });
                         assert.deepStrictEqual(successfulReqs[1].MetricData[0], { idx: 60 });

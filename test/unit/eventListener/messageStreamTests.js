@@ -222,24 +222,24 @@ describe('Message Stream Receiver', () => {
     describe('.restart()', () => {
         it('should recreate all receivers on restart', () => receiverInst.start()
             .then(() => {
-                assert.strictEqual(serverMocks.length, 3, 'should create 3 sockets');
+                assert.lengthOf(serverMocks, 3, 'should create 3 sockets');
                 assert.strictEqual(getServerMock(MockUdpServer, false).opts.type, 'udp4', 'should create udp4 listener');
                 assert.strictEqual(getServerMock(MockUdpServer, true).opts.type, 'udp6', 'should create udp6 listener');
                 assert.strictEqual(getServerMock(MockTcpServer).opts.allowHalfOpen, false, 'should create tcp listener');
                 return receiverInst.restart();
             })
             .then(() => {
-                assert.strictEqual(serverMocks.length, 6, 'should create 3 more sockets');
-                assert.strictEqual(serverMocks.filter(mock => mock.opts.type === 'udp4').length, 2, 'should have 2 udp4 sockets');
-                assert.strictEqual(serverMocks.filter(mock => mock.opts.type === 'udp6').length, 2, 'should have 2 udp6 sockets');
-                assert.strictEqual(serverMocks.filter(mock => mock.opts.allowHalfOpen === false).length, 2, 'should have 2 tcp sockets');
+                assert.lengthOf(serverMocks, 6, 'should create 3 more sockets');
+                assert.lengthOf(serverMocks.filter(mock => mock.opts.type === 'udp4'), 2, 'should have 2 udp4 sockets');
+                assert.lengthOf(serverMocks.filter(mock => mock.opts.type === 'udp6'), 2, 'should have 2 udp6 sockets');
+                assert.lengthOf(serverMocks.filter(mock => mock.opts.allowHalfOpen === false), 2, 'should have 2 tcp sockets');
             }));
     });
 
     describe('.start()', () => {
         it('should start receivers', () => receiverInst.start()
             .then(() => {
-                assert.strictEqual(serverMocks.length, 3, 'should create 3 sockets');
+                assert.lengthOf(serverMocks, 3, 'should create 3 sockets');
                 assert.strictEqual(getServerMock(MockUdpServer, false).opts.type, 'udp4', 'should create udp4 listener');
                 assert.strictEqual(getServerMock(MockUdpServer, true).opts.type, 'udp6', 'should create udp6 listener');
                 assert.strictEqual(getServerMock(MockTcpServer).opts.allowHalfOpen, false, 'should create tcp listener');

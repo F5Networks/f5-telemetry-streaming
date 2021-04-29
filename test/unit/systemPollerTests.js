@@ -318,7 +318,7 @@ describe('System Poller', () => {
             it('should stop existing poller(s) when removed from config', () => configWorker.emitAsync('change', { components: [], mappings: {} })
                 .then(() => {
                     assert.deepStrictEqual(pollerTimers, {});
-                    assert.lengthOf(tracer.registered(), 0);
+                    assert.isEmpty(tracer.registered());
                     assert.isFalse(pollerTimersBefore['My_System::SystemPoller_1'].timer.isActive(), 'should be inactive');
                 }));
 
@@ -389,7 +389,7 @@ describe('System Poller', () => {
                 return configWorker.processDeclaration(testUtil.deepCopy(newDeclaration))
                     .then(() => {
                         assert.deepStrictEqual(pollerTimers, {});
-                        assert.lengthOf(tracer.registered(), 0);
+                        assert.isEmpty(tracer.registered());
                         assert.isFalse(pollerTimersBefore['My_System::SystemPoller_1'].timer.isActive(), 'should be inactive');
                     });
             });
@@ -415,7 +415,7 @@ describe('System Poller', () => {
                 return configWorker.processDeclaration(testUtil.deepCopy(newDeclaration))
                     .then(() => {
                         assert.deepStrictEqual(pollerTimers, {});
-                        assert.lengthOf(tracer.registered(), 0);
+                        assert.isEmpty(tracer.registered());
                         assert.isFalse(pollerTimersBefore['My_System::SystemPoller_1'].timer.isActive(), 'should be inactive');
                     });
             });

@@ -315,7 +315,7 @@ describe('Tracer Util', () => {
                 assert.lengthOf(tracer.registered(), 3, 'should register 3 tracers');
                 return tracer.unregisterAll()
                     .then(() => {
-                        assert.lengthOf(tracer.registered(), 0, 'should have no registered tracers');
+                        assert.isEmpty(tracer.registered(), 'should have no registered tracers');
                         assert.isTrue(tracerInst.disabled, 'should be disabled once unregistered');
                         assert.isTrue(tracerInst2.disabled, 'should be disabled once unregistered');
                         assert.isTrue(tracerInst3.disabled, 'should be disabled once unregistered');

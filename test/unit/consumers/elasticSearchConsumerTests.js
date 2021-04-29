@@ -185,7 +185,7 @@ describe('Rename Keys', () => {
 
         util.renameKeys(target, regexTest, replacement);
 
-        assert.strictEqual(Object.keys(target[member1]).length, 2);
+        assert.lengthOf(Object.keys(target[member1]), 2);
         assert.equal(target[member1].a, 1);
         assert.equal(target[member1].b, 2);
 
@@ -206,7 +206,7 @@ describe('Rename Keys', () => {
 
         util.renameKeys(target, regexTest, replacement);
 
-        assert.strictEqual(Object.keys(target.a[member1]).length, 2);
+        assert.lengthOf(Object.keys(target.a[member1]), 2);
         assert.strictEqual(target.a[member1].a, 1);
         assert.strictEqual(target.a[member1].b, 2);
 
@@ -227,7 +227,7 @@ describe('Rename Keys', () => {
 
         util.renameKeys(target, regexTest, replacement);
 
-        assert.strictEqual(Object.keys(target.a.b[member1]).length, 2);
+        assert.lengthOf(Object.keys(target.a.b[member1]), 2);
         assert.strictEqual(target.a.b[member1].a, 1);
         assert.strictEqual(target.a.b[member1].b, 2);
 
@@ -248,17 +248,17 @@ describe('Rename Keys', () => {
 
         util.renameKeys(target, regexTest, replacement);
 
-        assert.strictEqual(Object.keys(target[member1]).length, 3);
+        assert.lengthOf(Object.keys(target[member1]), 3);
         assert.strictEqual(target[member1].a, 1);
         assert.strictEqual(target[member1].b, 2);
         assert.strictEqual(target[member1][member2Pre], undefined);
 
-        assert.strictEqual(Object.keys(target[member1][member2Post]).length, 3);
+        assert.lengthOf(Object.keys(target[member1][member2Post]), 3);
         assert.strictEqual(target[member1][member2Post].c, 3);
         assert.strictEqual(target[member1][member2Post].d, 4);
         assert.strictEqual(target[member1][member2Post][member3Pre], undefined);
 
-        assert.strictEqual(Object.keys(target[member1][member2Post][member3Post]).length, 2);
+        assert.lengthOf(Object.keys(target[member1][member2Post][member3Post]), 2);
         assert.strictEqual(target[member1][member2Post][member3Post].e, 5);
         assert.strictEqual(target[member1][member2Post][member3Post].f, 6);
     });

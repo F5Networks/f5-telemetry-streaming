@@ -176,7 +176,7 @@ describe('Requests Util', () => {
             return assert.isFulfilled(
                 requestsUtil.makeRequest('example.com', { includeResponseObject: true })
                     .then((resp) => {
-                        assert.strictEqual(resp.length, 2, 'should return array of 2');
+                        assert.lengthOf(resp, 2, 'should return array of 2');
                         assert.deepStrictEqual(resp[0], { someValidJSONData: 1 });
                     })
             );

@@ -200,8 +200,7 @@ describe('Promise Util', () => {
             return promiseUtil.retry(promiseFunc, { maxTries, delay })
                 .catch((err) => {
                     assert.ok(/expected error/.test(err));
-                    assert.ok(timestamps.length === expectedTries,
-                        `Expected ${expectedTries} timestamps, got ${timestamps.length}`);
+                    assert.lengthOf(timestamps, expectedTries, `Expected ${expectedTries} timestamps, got ${timestamps.length}`);
 
                     for (let i = 1; i < timestamps.length; i += 1) {
                         const actualDelay = timestamps[i] - timestamps[i - 1];
@@ -227,8 +226,7 @@ describe('Promise Util', () => {
             return promiseUtil.retry(promiseFunc, { maxTries, delay, backoff })
                 .catch((err) => {
                     assert.ok(/expected error/.test(err));
-                    assert.ok(timestamps.length === expectedTries,
-                        `Expected ${expectedTries} timestamps, got ${timestamps.length}`);
+                    assert.lengthOf(timestamps, expectedTries, `Expected ${expectedTries} timestamps, got ${timestamps.length}`);
 
                     for (let i = 1; i < timestamps.length; i += 1) {
                         const actualDelay = timestamps[i] - timestamps[i - 1];
