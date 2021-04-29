@@ -335,7 +335,13 @@ describe('System Poller', () => {
                     class: 'Telemetry_System_Poller',
                     enable: true,
                     interval: 500,
-                    trace: true,
+                    trace: {
+                        enable: true,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_System_Poller.My_System::SystemPoller_1',
+                        path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1'
+                    },
                     tracer: tracer.registered()[0],
                     credentials: {
                         username: undefined,
@@ -499,7 +505,13 @@ describe('System Poller', () => {
                                     traceName: 'My_System_New::My_Poller',
                                     enable: true,
                                     interval: 500,
-                                    trace: true,
+                                    trace: {
+                                        enable: true,
+                                        encoding: 'utf8',
+                                        maxRecords: 10,
+                                        name: 'Telemetry_System_Poller.My_System_New::My_Poller',
+                                        path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_New::My_Poller'
+                                    },
                                     tracer: tracer.registered().find(t => t.name === 'Telemetry_System_Poller.My_System_New::My_Poller'),
                                     credentials: {
                                         username: undefined,
@@ -539,7 +551,13 @@ describe('System Poller', () => {
                                     class: 'Telemetry_System_Poller',
                                     enable: true,
                                     interval: 10,
-                                    trace: true,
+                                    trace: {
+                                        enable: true,
+                                        encoding: 'utf8',
+                                        maxRecords: 10,
+                                        name: 'Telemetry_System_Poller.My_System_New::SystemPoller_1',
+                                        path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_New::SystemPoller_1'
+                                    },
                                     systemName: 'My_System_New',
                                     tracer: tracer.registered().find(t => t.name === 'Telemetry_System_Poller.My_System_New::SystemPoller_1'),
                                     traceName: 'My_System_New::SystemPoller_1',
@@ -637,7 +655,13 @@ describe('System Poller', () => {
                                     class: 'Telemetry_System_Poller',
                                     enable: true,
                                     interval: 200,
-                                    trace: true,
+                                    trace: {
+                                        enable: true,
+                                        encoding: 'utf8',
+                                        maxRecords: 10,
+                                        name: 'Telemetry_System_Poller.My_System::SystemPoller_1',
+                                        path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1'
+                                    },
                                     tracer: tracer.registered()[0],
                                     credentials: {
                                         username: undefined,

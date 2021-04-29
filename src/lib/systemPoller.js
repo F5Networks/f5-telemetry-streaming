@@ -96,7 +96,7 @@ function applyConfig(originalConfig) {
         const existingPoller = currPollers[key];
         newPollerIDs.push(key);
         if (!pollerConfig.skipUpdate || !existingPoller) {
-            pollerConfig.tracer = tracers.fromConfig(pollerConfig);
+            pollerConfig.tracer = tracers.fromConfig(pollerConfig.trace);
             const baseMsg = `system poller ${key}. Interval = ${pollerConfig.interval} sec.`;
             // add to data context to track source poller config and destination(s)
             pollerConfig.destinationIds = configUtil.getReceivers(originalConfig, pollerConfig).map(r => r.id);

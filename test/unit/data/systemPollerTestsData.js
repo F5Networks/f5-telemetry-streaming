@@ -477,7 +477,13 @@ module.exports = {
                 namespace: 'f5telemetry_default',
                 traceName: 'My_System_Poller::My_System_Poller',
                 systemName: 'My_System_Poller',
-                trace: false,
+                trace: {
+                    enable: false,
+                    encoding: 'utf8',
+                    maxRecords: 10,
+                    name: 'Telemetry_System_Poller.My_System_Poller::My_System_Poller',
+                    path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_Poller::My_System_Poller'
+                },
                 connection: {
                     host: 'localhost',
                     port: 8100,
@@ -526,7 +532,13 @@ module.exports = {
                 namespace: 'My_Namespace',
                 systemName: 'My_System_Poller',
                 traceName: 'My_Namespace::My_System_Poller::My_System_Poller',
-                trace: false,
+                trace: {
+                    enable: false,
+                    encoding: 'utf8',
+                    maxRecords: 10,
+                    name: 'Telemetry_System_Poller.My_Namespace::My_System_Poller::My_System_Poller',
+                    path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System_Poller::My_System_Poller'
+                },
                 connection: {
                     host: 'localhost',
                     port: 8100,
@@ -576,7 +588,13 @@ module.exports = {
                 namespace: 'f5telemetry_default',
                 systemName: 'My_System',
                 traceName: 'My_System::My_System_Poller',
-                trace: false,
+                trace: {
+                    enable: false,
+                    encoding: 'utf8',
+                    maxRecords: 10,
+                    name: 'Telemetry_System_Poller.My_System::My_System_Poller',
+                    path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::My_System_Poller'
+                },
                 connection: {
                     host: 'localhost',
                     port: 8100,
@@ -643,7 +661,13 @@ module.exports = {
                 namespace: 'My_Namespace',
                 systemName: 'My_System',
                 traceName: 'My_Namespace::My_System::My_System_Poller',
-                trace: false,
+                trace: {
+                    enable: false,
+                    encoding: 'utf8',
+                    maxRecords: 10,
+                    name: 'Telemetry_System_Poller.My_Namespace::My_System::My_System_Poller',
+                    path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System::My_System_Poller'
+                },
                 connection: {
                     host: 'localhost',
                     port: 8080,
@@ -693,7 +717,13 @@ module.exports = {
                 systemName: 'My_System',
                 namespace: 'f5telemetry_default',
                 traceName: 'My_System::My_System_Poller',
-                trace: false,
+                trace: {
+                    enable: false,
+                    encoding: 'utf8',
+                    maxRecords: 10,
+                    name: 'Telemetry_System_Poller.My_System::My_System_Poller',
+                    path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::My_System_Poller'
+                },
                 connection: {
                     host: 'localhost',
                     port: 8100,
@@ -761,7 +791,13 @@ module.exports = {
                 namespace: 'My_Namespace',
                 systemName: 'My_System',
                 traceName: 'My_Namespace::My_System::My_System_Poller',
-                trace: false,
+                trace: {
+                    enable: false,
+                    encoding: 'utf8',
+                    maxRecords: 10,
+                    name: 'Telemetry_System_Poller.My_Namespace::My_System::My_System_Poller',
+                    path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System::My_System_Poller'
+                },
                 connection: {
                     host: 'localhost',
                     port: 8080,
@@ -821,7 +857,13 @@ module.exports = {
                 systemName: 'My_System',
                 namespace: 'f5telemetry_default',
                 traceName: 'My_System::My_Desired_Poller',
-                trace: false,
+                trace: {
+                    enable: false,
+                    encoding: 'utf8',
+                    maxRecords: 10,
+                    name: 'Telemetry_System_Poller.My_System::My_Desired_Poller',
+                    path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::My_Desired_Poller'
+                },
                 connection: {
                     host: 'localhost',
                     port: 8100,
@@ -969,7 +1011,13 @@ module.exports = {
                 systemName: 'My_System',
                 namespace: 'f5telemetry_default',
                 traceName: 'My_System::SystemPoller_1',
-                trace: false,
+                trace: {
+                    enable: false,
+                    encoding: 'utf8',
+                    maxRecords: 10,
+                    name: 'Telemetry_System_Poller.My_System::SystemPoller_1',
+                    path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1'
+                },
                 connection: {
                     host: 'localhost',
                     port: 8100,
@@ -1036,7 +1084,13 @@ module.exports = {
                 systemName: 'My_System',
                 namespace: 'My_Namespace_Two',
                 traceName: 'My_Namespace_Two::My_System::SystemPoller_1',
-                trace: false,
+                trace: {
+                    enable: false,
+                    encoding: 'utf8',
+                    maxRecords: 10,
+                    name: 'Telemetry_System_Poller.My_Namespace_Two::My_System::SystemPoller_1',
+                    path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace_Two::My_System::SystemPoller_1'
+                },
                 connection: {
                     host: 'localhost',
                     port: 8080,

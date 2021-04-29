@@ -69,7 +69,7 @@ function loadConsumers(config) {
                     id: consumerConfig.id,
                     config: util.deepCopy(consumerConfig),
                     consumer: consumerModule,
-                    tracer: tracers.fromConfig(consumerConfig),
+                    tracer: tracers.fromConfig(consumerConfig.trace),
                     filter: new DataFilter(consumerConfig)
                 };
                 consumer.config.allowSelfSignedCert = consumer.config.allowSelfSignedCert === undefined

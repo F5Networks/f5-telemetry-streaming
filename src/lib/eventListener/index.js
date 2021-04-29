@@ -351,7 +351,7 @@ configWorker.on('change', (config) => {
             filterFunc: buildFilterFunc(listenerConfig),
             id: listenerConfig.id,
             tags: listenerConfig.tag,
-            tracer: tracers.fromConfig(listenerConfig)
+            tracer: tracers.fromConfig(listenerConfig.trace)
         });
     });
 
