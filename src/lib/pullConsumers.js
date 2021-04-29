@@ -145,7 +145,7 @@ function loadConsumers(config) {
                     config: util.deepCopy(consumerConfig),
                     consumer: consumerModule,
                     logger: logger.getChild(`${consumerType}.${consumerConfig.traceName}`),
-                    tracer: tracers.fromConfig(consumerConfig)
+                    tracer: tracers.fromConfig(consumerConfig.trace)
                 };
                 // copy consumer's data
                 resolve(consumer);

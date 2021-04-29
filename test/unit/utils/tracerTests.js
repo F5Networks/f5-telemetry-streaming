@@ -20,7 +20,6 @@ const path = require('path');
 const sinon = require('sinon');
 
 const configWorker = require('../../../src/lib/config');
-const constants = require('../../../src/lib/constants');
 const deviceUtil = require('../../../src/lib/utils/device');
 const logger = require('../../../src/lib/logger');
 const persistentStorage = require('../../../src/lib/persistentStorage');
@@ -41,14 +40,15 @@ describe('Tracer Util', () => {
 
     describe('Tracer', () => {
         const tracerDir = `${os.tmpdir()}/telemetry`; // os.tmpdir for windows + linux
+        const tracerEncoding = 'utf8';
         const tracerFile = `${tracerDir}/tracerTest`;
+        const tracerName = 'tracerName';
         const fakeDate = new Date();
-        let clock;
         let config;
         let coreStub;
         let tracerInst;
 
-        const readTraceFile = filePath => JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        const readTraceFile = (filePath, encoding) => JSON.parse(fs.readFileSync(filePath, encoding || tracerEncoding));
         const emptyDir = (dirPath) => {
             fs.readdirSync(dirPath).forEach((item) => {
                 item = path.join(dirPath, item);
@@ -72,348 +72,640 @@ describe('Tracer Util', () => {
             coreStub = stubs.coreStub({
                 logger
             });
+            stubs.clock({ fakeTimersOpts: fakeDate });
 
             if (fs.existsSync(tracerDir)) {
                 emptyDir(tracerDir);
             }
+
             config = {
-                class: 'class',
-                traceName: 'obj',
-                trace: tracerFile
+                name: tracerName,
+                path: tracerFile
             };
             tracerInst = tracer.fromConfig(config);
-            clock = sinon.useFakeTimers(fakeDate);
         });
 
-        afterEach(() => tracer.unregisterAll()
-            .then(() => {
-                clock.restore();
-            }));
+        afterEach(() => tracer.unregisterAll());
 
         after(() => {
             removeDir(tracerDir);
         });
 
-        it('should create tracer using default location and write data to it', () => {
-            sinon.stub(constants.TRACER, 'DIR').value(tracerDir);
-            tracerInst = tracer.fromConfig({ class: 'class2', traceName: 'obj2', trace: true });
-            return tracerInst.write('foobar')
+        describe('.fromConfig()', () => {
+            it('should create tracer using provided location and write data to it', () => {
+                tracerInst = tracer.fromConfig({
+                    name: tracerName,
+                    path: tracerFile
+                });
+                assert.deepStrictEqual(tracerInst.name, tracerName, 'should set name');
+                assert.deepStrictEqual(tracerInst.path, tracerFile, 'should set path');
+                assert.deepStrictEqual(tracerInst.encoding, 'utf8', 'should set default encoding');
+                assert.deepStrictEqual(tracerInst.maxRecords, 10, 'should set default maxRecords');
+                assert.deepStrictEqual(tracerInst.disabled, false, 'should not be disabled');
+                assert.notExists(tracerInst.fd, 'should have no fd');
+
+                return tracerInst.write('foobar')
+                    .then(() => {
+                        assert.deepStrictEqual(
+                            readTraceFile(tracerFile),
+                            addTimestamps(['foobar'])
+                        );
+                    });
+            });
+
+            it('should create tracer using provided location and options and write data to it', () => {
+                tracerInst = tracer.fromConfig({
+                    enable: true,
+                    encoding: 'ascii',
+                    maxRecords: 1,
+                    name: tracerName,
+                    path: tracerFile
+                });
+                assert.deepStrictEqual(tracerInst.name, tracerName, 'should set name');
+                assert.deepStrictEqual(tracerInst.path, tracerFile, 'should set path');
+                assert.deepStrictEqual(tracerInst.encoding, 'ascii', 'should set custom encoding');
+                assert.deepStrictEqual(tracerInst.maxRecords, 1, 'should set custom maxRecords');
+                assert.deepStrictEqual(tracerInst.disabled, false, 'should not be disabled');
+                assert.notExists(tracerInst.fd, 'should have no fd');
+
+                return tracerInst.write('foobar')
+                    .then(() => {
+                        assert.deepStrictEqual(
+                            readTraceFile(tracerFile),
+                            addTimestamps(['foobar'])
+                        );
+                    });
+            });
+
+            it('should return existing tracer', () => {
+                let sameTracerInst;
+                tracerInst = tracer.fromConfig({
+                    name: 'newTracerName',
+                    path: tracerFile,
+                    options: {
+                        encoding: 'ascii',
+                        maxRecords: 1
+                    }
+                });
+                return tracerInst.write('foobar')
+                    .then(() => {
+                        assert.deepStrictEqual(
+                            readTraceFile(tracerFile),
+                            addTimestamps(['foobar'])
+                        );
+                        sameTracerInst = tracer.fromConfig({
+                            name: 'newTracerName',
+                            path: tracerFile,
+                            options: {
+                                encoding: 'ascii',
+                                maxRecords: 1
+                            }
+                        });
+                        return sameTracerInst.write('foobar');
+                    })
+                    .then(() => {
+                        assert.isTrue(tracerInst === sameTracerInst, 'should return same instance');
+                        assert.deepStrictEqual(tracerInst, sameTracerInst, 'should return same instance');
+                        assert.exists(sameTracerInst.fd, 'should set fd');
+                        assert.strictEqual(sameTracerInst.fd, tracerInst.fd, 'fd should be the same');
+                        testAssert.notIncludeMatch(
+                            coreStub.logger.messages.debug,
+                            /Creating new tracer instance - 'newTracerName'/,
+                            'should not log debug message'
+                        );
+                        testAssert.notIncludeMatch(
+                            coreStub.logger.messages.debug,
+                            /Updating tracer instance - 'tracerName'/,
+                            'should not log debug message'
+                        );
+                    });
+            });
+
+            it('should not create tracer when disabled', () => {
+                tracer.unregister(tracerInst);
+                assert.lengthOf(tracer.registered(), 0, 'should have not tracers registered');
+
+                tracerInst = tracer.fromConfig({
+                    enable: false,
+                    encoding: 'ascii',
+                    maxRecords: 1,
+                    name: tracerName,
+                    path: tracerFile
+                });
+                assert.notExists(tracerInst, 'should not create Tracer when disabled');
+                assert.lengthOf(tracer.registered(), 0, 'should have not tracers registered');
+            });
+
+            it('should stop and create new tracer when path changed', () => {
+                let newTracer;
+                tracerInst = tracer.fromConfig({
+                    name: tracerName,
+                    path: tracerFile
+                });
+                return tracerInst.write('somethings')
+                    .then(() => {
+                        newTracer = tracer.fromConfig({
+                            name: tracerName,
+                            path: `${tracerFile}New`
+                        });
+                        return newTracer.write('something3');
+                    })
+                    .then(() => {
+                        assert.notDeepEqual(tracerInst, newTracer, 'should return different instance');
+                        assert.notDeepEqual(tracerInst.path, newTracer.path, 'should use different paths');
+
+                        const registered = tracer.registered();
+                        assert.notInclude(registered, tracerInst, 'should unregister pre-existing tracer');
+                        assert.include(registered, newTracer, 'should register new tracer');
+                        assert.isTrue(tracerInst.disabled, 'should disabled old instance');
+                        testAssert.includeMatch(
+                            coreStub.logger.messages.debug,
+                            /Updating tracer instance - 'tracerName'/,
+                            'should log debug message'
+                        );
+                    });
+            });
+
+            it('should stop and create new tracer when maxRecords changed', () => {
+                let newTracer;
+                tracerInst = tracer.fromConfig({
+                    name: tracerName,
+                    path: tracerFile
+                });
+                return tracerInst.write('somethings')
+                    .then(() => {
+                        newTracer = tracer.fromConfig({
+                            name: tracerName,
+                            path: tracerFile,
+                            maxRecords: 100
+                        });
+                        return newTracer.write('something3');
+                    })
+                    .then(() => {
+                        assert.notDeepEqual(tracerInst, newTracer, 'should return different instance');
+                        assert.notDeepEqual(tracerInst.maxRecords, newTracer.maxRecords, 'should use different maxRecords');
+
+                        const registered = tracer.registered();
+                        assert.notInclude(registered, tracerInst, 'should unregister pre-existing tracer');
+                        assert.include(registered, newTracer, 'should register new tracer');
+                        assert.isTrue(tracerInst.disabled, 'should disabled old instance');
+                        testAssert.includeMatch(
+                            coreStub.logger.messages.debug,
+                            /Updating tracer instance - 'tracerName'/,
+                            'should log debug message'
+                        );
+                    });
+            });
+
+            it('should stop and create new tracer when encoding changed', () => {
+                let newTracer;
+                tracerInst = tracer.fromConfig({
+                    name: tracerName,
+                    path: tracerFile
+                });
+                return tracerInst.write('somethings')
+                    .then(() => {
+                        newTracer = tracer.fromConfig({
+                            name: tracerName,
+                            path: tracerFile,
+                            encoding: 'ascii'
+                        });
+                        return newTracer.write('something3');
+                    })
+                    .then(() => {
+                        assert.notDeepEqual(tracerInst, newTracer, 'should return different instance');
+                        assert.notDeepEqual(tracerInst.encoding, newTracer.encoding, 'should use different paths');
+
+                        const registered = tracer.registered();
+                        assert.notInclude(registered, tracerInst, 'should unregister pre-existing tracer');
+                        assert.include(registered, newTracer, 'should register new tracer');
+                        assert.isTrue(tracerInst.disabled, 'should disabled old instance');
+                        testAssert.includeMatch(
+                            coreStub.logger.messages.debug,
+                            /Updating tracer instance - 'tracerName'/,
+                            'should log debug message'
+                        );
+                    });
+            });
+        });
+
+        describe('.registered()', () => {
+            it('should return registered tracers', () => {
+                const tracerInst2 = tracer.fromConfig({ name: 'tracer2' });
+                const tracerInst3 = tracer.fromConfig({ name: 'tracer3' });
+                const registered = tracer.registered();
+
+                assert.lengthOf(registered, 3, 'should register 3 tracers');
+                assert.include(registered, tracerInst, 'should register tracer');
+                assert.include(registered, tracerInst2, 'should register tracer');
+                assert.include(registered, tracerInst3, 'should register tracer');
+            });
+        });
+
+        describe('.unregister()', () => {
+            it('should unregister tracer', () => tracer.unregister(tracerInst)
                 .then(() => {
+                    assert.notInclude(tracer.registered(), tracerInst, 'should unregister tracer');
+                    assert.isTrue(tracerInst.disabled, 'should be disabled once unregistered');
+                }));
+
+            it('should unregister all tracers', () => {
+                const tracerInst2 = tracer.fromConfig({ name: 'tracer2' });
+                const tracerInst3 = tracer.fromConfig({ name: 'tracer3' });
+                assert.lengthOf(tracer.registered(), 3, 'should register 3 tracers');
+                return tracer.unregisterAll()
+                    .then(() => {
+                        assert.lengthOf(tracer.registered(), 0, 'should have no registered tracers');
+                        assert.isTrue(tracerInst.disabled, 'should be disabled once unregistered');
+                        assert.isTrue(tracerInst2.disabled, 'should be disabled once unregistered');
+                        assert.isTrue(tracerInst3.disabled, 'should be disabled once unregistered');
+                    });
+            });
+
+            it('should not fail when no tracer passed to .unregister', () => assert.isFulfilled(tracer.unregister()));
+
+            it('should catch rejection on attempt to unregister', () => {
+                sinon.stub(tracer.Tracer.prototype, 'stop').rejects(new Error('stop error'));
+                return tracer.unregister(tracerInst, true)
+                    .then(() => {
+                        testAssert.includeMatch(
+                            coreStub.logger.messages.debug,
+                            /Uncaught error on attempt to unregister tracer[\s\S]*stop error/gm,
+                            'should log debug message with error'
+                        );
+                    });
+            });
+        });
+
+        describe('constructor', () => {
+            it('should create tracer using provided location and write data to it', () => {
+                tracerInst = new tracer.Tracer('tracerName', tracerFile);
+                assert.deepStrictEqual(tracerInst.name, 'tracerName', 'should set name');
+                assert.deepStrictEqual(tracerInst.path, tracerFile, 'should set path');
+                assert.deepStrictEqual(tracerInst.encoding, 'utf8', 'should set default encoding');
+                assert.deepStrictEqual(tracerInst.maxRecords, 10, 'should set default maxRecords');
+                assert.deepStrictEqual(tracerInst.disabled, false, 'should not be disabled');
+                assert.notExists(tracerInst.fd, 'should have no fd');
+
+                return tracerInst.write('foobar-Ӂ-unicode')
+                    .then(() => {
+                        assert.deepStrictEqual(
+                            readTraceFile(tracerFile),
+                            addTimestamps(['foobar-Ӂ-unicode'])
+                        );
+                    });
+            });
+
+            it('should create tracer using provided location and options and write data to it', () => {
+                tracerInst = new tracer.Tracer('tracerName', tracerFile, {
+                    encoding: 'ascii',
+                    maxRecords: 1
+                });
+                assert.deepStrictEqual(tracerInst.name, 'tracerName', 'should set name');
+                assert.deepStrictEqual(tracerInst.path, tracerFile, 'should set path');
+                assert.deepStrictEqual(tracerInst.encoding, 'ascii', 'should set default encoding');
+                assert.deepStrictEqual(tracerInst.maxRecords, 1, 'should set default maxRecords');
+                assert.deepStrictEqual(tracerInst.disabled, false, 'should not be disabled');
+                assert.notExists(tracerInst.fd, 'should have no fd');
+
+                return tracerInst.write('foobar')
+                    .then(() => {
+                        assert.deepStrictEqual(
+                            readTraceFile(tracerFile, 'ascii'),
+                            addTimestamps(['foobar'])
+                        );
+                    });
+            });
+        });
+
+        describe('.write()', () => {
+            it('should try to create parent directory', () => {
+                sinon.stub(utilMisc.fs, 'mkdir').resolves();
+                tracerInst = tracer.fromConfig({
+                    name: tracerName,
+                    path: '/test/inaccessible/directory/file'
+                });
+                return tracerInst.write('foobar')
+                    .then(() => {
+                        assert.isAbove(utilMisc.fs.mkdir.callCount, 0, 'should call utilMisc.fs.mkdir');
+                        assert.strictEqual(utilMisc.fs.mkdir.args[0][0], '/test/inaccessible/directory');
+                        testAssert.includeMatch(
+                            coreStub.logger.messages.debug,
+                            /Creating dir '\/test\/inaccessible\/directory'/,
+                            'should log debug message'
+                        );
+                    });
+            });
+
+            it('should not try to create parent directory if exist already (concurrent requests)', () => {
+                sinon.stub(utilMisc.fs, 'access').rejects(new Error('access error'));
+                sinon.stub(utilMisc.fs, 'mkdir').callsFake(() => {
+                    const error = new Error('folder exists');
+                    error.code = 'EEXIST';
+                    return Promise.reject(error);
+                });
+                tracerInst = tracer.fromConfig({
+                    name: tracerName,
+                    path: '/test/inaccessible/directory/file'
+                });
+                return tracerInst.write('foobar')
+                    .then(() => {
+                        testAssert.notIncludeMatch(
+                            coreStub.logger.messages.debug,
+                            /Unable to write data[\s\S]*folder exists/gm,
+                            'should ignore mkdir EEXIST error'
+                        );
+                    });
+            });
+
+            it('should not reject when unable to create parent directory', () => {
+                sinon.stub(utilMisc.fs, 'mkdir').rejects(new Error('mkdir error'));
+                tracerInst = tracer.fromConfig({
+                    name: tracerName,
+                    path: '/test/inaccessible/directory/file'
+                });
+                return tracerInst.write('foobar')
+                    .then(() => {
+                        testAssert.includeMatch(
+                            coreStub.logger.messages.debug,
+                            /Unable to write data[\s\S]*mkdir error/gm,
+                            'should log mkdir error'
+                        );
+                    });
+            });
+
+            [
+                0,
+                1,
+                10,
+                100
+            ].forEach(maxRecords => it(`should write max ${maxRecords} records`, () => {
+                let totalRecords = 0;
+                let allWrittenData = [];
+
+                const writeNumbersToTracer = (num) => {
+                    const promises = [];
+                    const writtenData = [];
+                    for (let i = 0; i < num; i += 1) {
+                        totalRecords += 1;
+                        promises.push(tracerInst.write(totalRecords));
+                        writtenData.push(totalRecords);
+                    }
+                    return Promise.all(promises).then(() => writtenData);
+                };
+                const getExpectedData = data => addTimestamps(data.slice(data.length - maxRecords));
+                const validateTracerData = (writtenData) => {
+                    allWrittenData = allWrittenData.concat(writtenData);
+                    const data = readTraceFile(tracerFile);
+                    assert.lengthOf(data, maxRecords);
+                    assert.deepStrictEqual(data, getExpectedData(allWrittenData));
+                };
+
+                tracerInst = tracer.fromConfig({
+                    name: 'class.obj',
+                    path: tracerFile,
+                    maxRecords
+                });
+                assert.deepStrictEqual(tracerInst.maxRecords, maxRecords, 'should set value for maxRecords');
+
+                return writeNumbersToTracer(maxRecords * 2 + 2)
+                    .then((writtenData) => {
+                        validateTracerData(writtenData);
+                        return writeNumbersToTracer(Math.floor(maxRecords / 2));
+                    })
+                    .then((writtenData) => {
+                        validateTracerData(writtenData);
+                        return writeNumbersToTracer(Math.floor(maxRecords) + 2);
+                    })
+                    .then((writtenData) => {
+                        validateTracerData(writtenData);
+                    });
+            }));
+
+            it('should make copy of data', () => {
+                const data = [1, 2, 3];
+                const writePromise = tracerInst.write(data);
+                data.push(4);
+                return writePromise.then(() => {
                     assert.deepStrictEqual(
-                        readTraceFile(`${tracerDir}/class2.obj2`),
-                        addTimestamps(['foobar'])
+                        readTraceFile(tracerFile),
+                        addTimestamps([[1, 2, 3]])
                     );
                 });
-        });
-
-        it('should try to create parent directory', () => {
-            sinon.stub(constants.TRACER, 'DIR').value('/test/inaccessible/directory');
-            sinon.stub(utilMisc.fs, 'mkdir').resolves();
-            tracerInst = tracer.fromConfig({ class: 'class2', traceName: 'obj2', trace: true });
-            return tracerInst.write('foobar')
-                .then(() => {
-                    assert.isAbove(utilMisc.fs.mkdir.callCount, 0, 'should call utilMisc.fs.mkdir');
-                    assert.strictEqual(utilMisc.fs.mkdir.args[0][0], '/test/inaccessible/directory');
-                });
-        });
-
-        it('should not try to create parent directory if exist already (concurrent requests)', () => {
-            sinon.stub(constants.TRACER, 'DIR').value('/test/inaccessible/directory');
-            sinon.stub(utilMisc.fs, 'access').rejects(new Error('access error'));
-            sinon.stub(utilMisc.fs, 'mkdir').callsFake(() => {
-                const error = new Error('folder exists');
-                error.code = 'EEXIST';
-                return Promise.reject(error);
             });
-            tracerInst = tracer.fromConfig({ class: 'class2', traceName: 'obj2', trace: true });
-            return tracerInst.write('foobar')
-                .then(() => {
-                    testAssert.notIncludeMatch(
-                        coreStub.logger.messages.debug,
-                        /folder exists/,
-                        'should ignore mkdir EEXIST error'
-                    );
-                });
-        });
 
-        it('should not reject when unable to create parent directory', () => {
-            sinon.stub(constants.TRACER, 'DIR').value('/test/inaccessible/directory');
-            sinon.stub(utilMisc.fs, 'mkdir').rejects(new Error('mkdir error'));
-            tracerInst = tracer.fromConfig({ class: 'class2', traceName: 'obj2', trace: true });
-            return tracerInst.write('foobar')
-                .then(() => {
-                    testAssert.includeMatch(
-                        coreStub.logger.messages.debug,
-                        /mkdir error/,
-                        'should log mkdir error'
-                    );
-                });
-        });
-
-        it(`should write max ${constants.TRACER.LIST_SIZE} items`, () => {
-            let totalRecords = 0;
-            let allWrittenData = [];
-
-            const writeNumbersToTracer = (num) => {
-                const promises = [];
-                const writtenData = [];
-                for (let i = 0; i < num; i += 1) {
-                    totalRecords += 1;
-                    promises.push(tracerInst.write(totalRecords));
-                    writtenData.push(totalRecords);
-                }
-                return Promise.all(promises).then(() => writtenData);
-            };
-            const getExpectedData = data => addTimestamps(data.slice(data.length - constants.TRACER.LIST_SIZE));
-            const validateTracerData = (writtenData) => {
-                allWrittenData = allWrittenData.concat(writtenData);
-                const data = readTraceFile(tracerFile);
-                assert.lengthOf(data, constants.TRACER.LIST_SIZE);
-                assert.deepStrictEqual(data, getExpectedData(allWrittenData));
-            };
-
-            return writeNumbersToTracer(constants.TRACER.LIST_SIZE * 2)
-                .then((writtenData) => {
-                    validateTracerData(writtenData);
-                    return writeNumbersToTracer(Math.floor(constants.TRACER.LIST_SIZE / 2));
-                })
-                .then((writtenData) => {
-                    validateTracerData(writtenData);
-                    return writeNumbersToTracer(Math.floor(constants.TRACER.LIST_SIZE));
-                })
-                .then((writtenData) => {
-                    validateTracerData(writtenData);
-                });
-        });
-
-        it('should make copy of data', () => {
-            const data = [1, 2, 3];
-            const writePromise = tracerInst.write(data);
-            data.push(4);
-            return writePromise.then(() => {
-                assert.deepStrictEqual(
-                    readTraceFile(tracerFile),
-                    addTimestamps([[1, 2, 3]])
-                );
+            it('should not fail when unable to make copy of data', () => {
+                sinon.stub(utilMisc, 'deepCopy').throws(new Error('expected copy error'));
+                const data = [1, 2, 3];
+                return tracerInst.write(data)
+                    .then(() => {
+                        testAssert.includeMatch(
+                            coreStub.logger.messages.debug,
+                            /Unable to make copy of data[\s\S]*expected copy error/gm,
+                            'should log debug message with error'
+                        );
+                    });
             });
-        });
 
-        it('should merge new data with existing data', () => tracerInst.write('item1')
-            .then(() => {
-                assert.deepStrictEqual(
-                    readTraceFile(tracerFile),
-                    addTimestamps(['item1'])
-                );
-                return tracerInst.write('item2');
-            })
-            .then(() => {
-                assert.deepStrictEqual(
-                    readTraceFile(tracerFile),
-                    addTimestamps(['item1', 'item2'])
-                );
-            }));
-
-        it('should not fail if unable to parse existing data', () => tracerInst.write('item1')
-            .then(() => {
-                fs.truncateSync(tracerFile, 0);
-                fs.writeFileSync(tracerFile, '{test');
-                return tracerInst.write('item1');
-            })
-            .then(() => {
-                assert.deepStrictEqual(
-                    readTraceFile(tracerFile),
-                    addTimestamps(['item1'])
-                );
-            }));
-
-        it('should write not more data when disabled', () => tracerInst.write('item1')
-            .then(() => tracerInst.stop())
-            .then(() => tracerInst.write('item2'))
-            .then(() => {
-                assert.deepStrictEqual(
-                    readTraceFile(tracerFile),
-                    addTimestamps(['item1'])
-                );
-            }));
-
-        it('should complete scheduled operations before stop', () => {
-            tracerInst.write('item1');
-            return tracerInst.stop()
+            it('should merge new data with existing data', () => tracerInst.write('item1')
                 .then(() => {
                     assert.deepStrictEqual(
                         readTraceFile(tracerFile),
                         addTimestamps(['item1'])
                     );
-                });
-        });
-
-        it('should write object to tracer', () => {
-            const expectedObject = {
-                test: 'test'
-            };
-            return tracerInst.write(testUtil.deepCopy(expectedObject))
+                    return tracerInst.write('item2');
+                })
                 .then(() => {
                     assert.deepStrictEqual(
                         readTraceFile(tracerFile),
-                        addTimestamps([expectedObject])
+                        addTimestamps(['item1', 'item2'])
                     );
-                });
-        });
+                }));
 
-        it('should return registered tracers', () => {
-            const tracerInst2 = tracer.fromConfig({ class: 'class', traceName: 'tracer2', trace: true });
-            const tracerInst3 = tracer.fromConfig({ class: 'class', traceName: 'tracer3', trace: true });
-            const registered = tracer.registered();
-
-            assert.lengthOf(registered, 3, 'should register 3 tracers');
-            assert.include(registered, tracerInst, 'should register tracer');
-            assert.include(registered, tracerInst2, 'should register tracer');
-            assert.include(registered, tracerInst3, 'should register tracer');
-        });
-
-        it('should unregister tracer', () => tracer.unregister(tracerInst)
-            .then(() => {
-                assert.notInclude(tracer.registered(), tracerInst, 'should unregister tracer');
-                assert.isTrue(tracerInst.disabled, 'should be disabled once unregistered');
-            }));
-
-        it('should unregister all tracers', () => {
-            const tracerInst2 = tracer.fromConfig({ class: 'class', traceName: 'tracer2', trace: true });
-            const tracerInst3 = tracer.fromConfig({ class: 'class', traceName: 'tracer3', trace: true });
-            assert.lengthOf(tracer.registered(), 3, 'should register 3 tracers');
-            return tracer.unregisterAll()
+            it('should not fail if unable to parse existing data', () => tracerInst.write('item1')
                 .then(() => {
-                    assert.lengthOf(tracer.registered(), 0, 'should have no registered tracers');
-                    assert.isTrue(tracerInst.disabled, 'should be disabled once unregistered');
-                    assert.isTrue(tracerInst2.disabled, 'should be disabled once unregistered');
-                    assert.isTrue(tracerInst3.disabled, 'should be disabled once unregistered');
-                });
-        });
-
-        it('should get existing tracer using similar config', () => {
-            let sameTracer;
-            return tracerInst.write('somethings')
-                .then(() => {
-                    sameTracer = tracer.fromConfig({ class: 'class', traceName: 'obj', trace: tracerFile });
-                    return sameTracer.write('something3');
+                    fs.truncateSync(tracerFile, 0);
+                    fs.writeFileSync(tracerFile, '{test');
+                    return tracerInst.write('item1');
                 })
                 .then(() => {
-                    assert.notStrictEqual(sameTracer.fd, undefined, 'should set fd');
-                    assert.strictEqual(sameTracer.fd, tracerInst.fd, 'fd should be the same');
-                });
-        });
+                    assert.deepStrictEqual(
+                        readTraceFile(tracerFile),
+                        addTimestamps(['item1'])
+                    );
+                }));
 
-        it('should not create trace when component or/and trace disabled', () => {
-            assert.isNull(tracer.fromConfig({
-                class: 'class', traceName: 'obj', trace: tracerFile, enable: false
-            }));
-            assert.isNull(tracer.fromConfig({
-                class: 'class', traceName: 'obj', trace: false, enable: false
-            }));
-            assert.isNull(tracer.fromConfig({
-                class: 'class', traceName: 'obj', trace: true, enable: false
-            }));
-            assert.isNull(tracer.fromConfig({
-                class: 'class', traceName: 'obj', trace: false, enable: true
-            }));
-        });
-
-        it('should stop and create tracer using similar config when path changed', () => {
-            let newTracer;
-            return tracerInst.write('somethings')
-                .then(() => {
-                    newTracer = tracer.fromConfig({ class: 'class', traceName: 'obj', trace: `${tracerFile}new` });
-                    return newTracer.write('something3');
-                })
-                .then(() => {
-                    assert.notDeepEqual(tracerInst, newTracer, 'should return different instance');
-                    assert.notStrictEqual(tracerInst.path, newTracer.path, 'should use different paths');
-
-                    const registered = tracer.registered();
-                    assert.notInclude(registered, tracerInst, 'should unregister pre-existing tracer');
-                    assert.include(registered, newTracer, 'should register new tracer');
-                });
-        });
-
-        it('should not fail when unable to close file using descriptor', () => {
-            sinon.stub(utilMisc.fs, 'close').rejects(new Error('close error'));
-            coreStub.logger.messages.debug = [];
-            return tracerInst.write('test')
+            it('should write not more data when disabled', () => tracerInst.write('item1')
                 .then(() => tracerInst.stop())
+                .then(() => tracerInst.write('item2'))
                 .then(() => {
-                    testAssert.includeMatch(
-                        coreStub.logger.messages.debug,
-                        /close error/,
-                        'should log debug message with error'
-                    );
-                });
-        });
-
-        it('should not fail when no tracer passed to .unregister', () => assert.isFulfilled(tracer.unregister()));
-
-        it('should catch rejection on attempt to unregister', () => {
-            sinon.stub(tracer.Tracer.prototype, 'stop').rejects(new Error('stop error'));
-            return tracer.unregister(tracerInst, true)
-                .then(() => {
-                    testAssert.includeMatch(
-                        coreStub.logger.messages.debug,
-                        /stop error/,
-                        'should log debug message with error'
-                    );
-                });
-        });
-
-        it('should mask secrets', () => {
-            const data = {
-                text: 'passphrase: { cipherText: \'test_passphrase\' }\n'
-                    + '"passphrase": {\ncipherText: "test_passphrase"\n}'
-                    + '\'passphrase": "test_passphrase"',
-                passphrase: 'test_passphrase',
-                passphrase2: {
-                    cipherText: 'test_passphrase'
-                }
-            };
-            return tracerInst.write(data)
-                .then(() => {
-                    const traceData = readTraceFile(tracerFile);
                     assert.deepStrictEqual(
-                        traceData,
-                        addTimestamps([{
-                            passphrase: '*********',
-                            passphrase2: {
-                                cipherText: '*********'
-                            },
-                            text: 'passphrase: {*********}\n'
-                            + '"passphrase": {*********}'
-                            + '\'passphrase": "*********"'
-                        }])
+                        readTraceFile(tracerFile),
+                        addTimestamps(['item1'])
                     );
-                    return tracerInst.write(traceData[0].data);
+                }));
+
+            it('should complete scheduled operations before stop', () => {
+                tracerInst.write('item1');
+                return tracerInst.stop()
+                    .then(() => {
+                        assert.deepStrictEqual(
+                            readTraceFile(tracerFile),
+                            addTimestamps(['item1'])
+                        );
+                    });
+            });
+
+            it('should write object to tracer', () => {
+                const expectedObject = {
+                    test: 'test'
+                };
+                return tracerInst.write(testUtil.deepCopy(expectedObject))
+                    .then(() => {
+                        assert.deepStrictEqual(
+                            readTraceFile(tracerFile),
+                            addTimestamps([expectedObject])
+                        );
+                    });
+            });
+
+            it('should mask secrets', () => {
+                const data = {
+                    text: 'passphrase: { cipherText: \'test_passphrase\' }\n'
+                        + '"passphrase": {\ncipherText: "test_passphrase"\n}'
+                        + '\'passphrase": "test_passphrase"',
+                    passphrase: 'test_passphrase',
+                    passphrase2: {
+                        cipherText: 'test_passphrase'
+                    }
+                };
+                return tracerInst.write(data)
+                    .then(() => {
+                        const traceData = readTraceFile(tracerFile);
+                        assert.deepStrictEqual(
+                            traceData,
+                            addTimestamps([{
+                                passphrase: '*********',
+                                passphrase2: {
+                                    cipherText: '*********'
+                                },
+                                text: 'passphrase: {*********}\n'
+                                + '"passphrase": {*********}'
+                                + '\'passphrase": "*********"'
+                            }])
+                        );
+                        return tracerInst.write(traceData[0].data);
+                    })
+                    .then(() => {
+                        assert.deepStrictEqual(
+                            readTraceFile(tracerFile),
+                            addTimestamps([{
+                                passphrase: '*********',
+                                passphrase2: {
+                                    cipherText: '*********'
+                                },
+                                text: 'passphrase: {*********}\n'
+                                + '"passphrase": {*********}'
+                                + '\'passphrase": "*********"'
+                            },
+                            {
+                                passphrase: '*********',
+                                passphrase2: {
+                                    cipherText: '*********'
+                                },
+                                text: 'passphrase: {*********}\n'
+                                + '"passphrase": {*********}'
+                                + '\'passphrase": "*********"'
+                            }], 'should modify message when secrets masked already')
+                        );
+                        return tracerInst.write(data[0]);
+                    });
+            });
+
+            it('should create new write request when current one in progress already', () => {
+                const dataHistory = [];
+                const fsWriteStub = sinon.stub(utilMisc.fs, 'write');
+                let writePromise;
+
+                fsWriteStub.callsFake(function () {
+                    // see args list in docs
+                    dataHistory.push(arguments[1]);
+                    if (!writePromise) {
+                        writePromise = tracerInst.write('delayed record');
+                    }
+                    return fsWriteStub.wrappedMethod.apply(utilMisc.fs, arguments);
+                });
+                return tracerInst.write('first record')
+                    .then(() => writePromise)
+                    .then(() => {
+                        assert.match(dataHistory[0], /first record/, 'should include first record');
+                        assert.notMatch(dataHistory[0], /delayed record/, 'should not include delayed record');
+                        assert.match(dataHistory[1], /first record/, 'should include first record');
+                        assert.match(dataHistory[1], /delayed record/, 'should include delayed record');
+                    });
+            });
+
+            it('should not create new write request when tracer stopped', () => {
+                const dataHistory = [];
+                const fsWriteStub = sinon.stub(utilMisc.fs, 'write');
+                let writePromise;
+
+                fsWriteStub.callsFake(function () {
+                    // see args list in docs
+                    dataHistory.push(arguments[1]);
+                    if (!writePromise) {
+                        // should create new delayed write operation
+                        writePromise = tracerInst.write('delayed record');
+                    }
+                    tracerInst.stop(); // stop it to set 'disabled' to true
+                    return fsWriteStub.wrappedMethod.apply(utilMisc.fs, arguments);
+                });
+                return tracerInst.write('first record')
+                    .then(() => writePromise)
+                    .then(() => {
+                        assert.lengthOf(dataHistory, 1, 'should not try to write data once stopped');
+                        assert.match(dataHistory[0], /first record/, 'should include first record');
+                        assert.notMatch(dataHistory[0], /delayed record/, 'should not include delayed record');
+                    });
+            });
+        });
+
+        describe('.stop()', () => {
+            it('should not fail when unable to close file using descriptor', () => {
+                sinon.stub(utilMisc.fs, 'close').rejects(new Error('close error'));
+                coreStub.logger.messages.debug = [];
+                return tracerInst.write('test')
+                    .then(() => tracerInst.stop())
+                    .then(() => {
+                        testAssert.includeMatch(
+                            coreStub.logger.messages.debug,
+                            /Unable to close file[\s\S]*close error/gm,
+                            'should log debug message with error'
+                        );
+                    });
+            });
+
+            it('should stop tracer', () => tracerInst.write('test')
+                .then(() => {
+                    assert.deepStrictEqual(
+                        readTraceFile(tracerFile),
+                        addTimestamps(['test'])
+                    );
+                    return tracerInst.stop();
+                })
+                .then(() => {
+                    assert.isTrue(tracerInst.disabled, 'should disabled tracer once stopped');
+                    assert.notExists(tracerInst.fd, 'should have not fd once stopped');
+                    return tracerInst.write('test2');
                 })
                 .then(() => {
                     assert.deepStrictEqual(
                         readTraceFile(tracerFile),
-                        addTimestamps([{
-                            passphrase: '*********',
-                            passphrase2: {
-                                cipherText: '*********'
-                            },
-                            text: 'passphrase: {*********}\n'
-                            + '"passphrase": {*********}'
-                            + '\'passphrase": "*********"'
-                        },
-                        {
-                            passphrase: '*********',
-                            passphrase2: {
-                                cipherText: '*********'
-                            },
-                            text: 'passphrase: {*********}\n'
-                            + '"passphrase": {*********}'
-                            + '\'passphrase": "*********"'
-                        }], 'should modify message when secrets masked already')
+                        addTimestamps(['test'])
                     );
-                    return tracerInst.write(data[0]);
-                });
+                    assert.isTrue(tracerInst.disabled, 'should disabled tracer once stopped');
+                    assert.notExists(tracerInst.fd, 'should have not fd once stopped');
+                }));
         });
     });
 
