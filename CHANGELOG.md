@@ -8,6 +8,7 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-2439: Added data tracing and 'success' message to Google Cloud Monitoring consumer
 - AUTOTOOL-2312: [GitHub #114](https://github.com/F5Networks/f5-telemetry-streaming/issues/114): Added support to the Generic HTTP Consumer for additional modification of data payloads, including the addition of the 'JMESPathQuery' action
 ### Fixed
+- AUTOTOOL-2464: S3 date path is incorrect
 ### Changed
 - AUTOTOOL-2297: Update npm packages (aws-sdk from v2.854.0 to v2.885.0)
 ### Removed

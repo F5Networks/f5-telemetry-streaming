@@ -43,8 +43,8 @@ describe('AWS_S3', () => {
                 cb(null, '');
             }
         });
-        // stub getDay() since it attempts to convert into 'local' time.
-        sinon.stub(Date.prototype, 'getDay').returns('1');
+        // stub getDate() since it attempts to convert into 'local' time.
+        sinon.stub(Date.prototype, 'getDate').returns('4');
         // Fake the clock to get a consistent S3 object Key value (which are partitioned by time)
         clock = sinon.useFakeTimers({
             now: new Date('Feb 4, 2019 01:02:03 GMT+00:00'),
@@ -114,7 +114,7 @@ describe('AWS_S3', () => {
             Body: '',
             Bucket: 'dataBucket',
             ContentType: 'application/json',
-            Key: '2019/1/1/2019-02-04T01:02:03.000Z.log',
+            Key: '2019/2/4/2019-02-04T01:02:03.000Z.log',
             Metadata: {
                 f5telemetry: 'true'
             }

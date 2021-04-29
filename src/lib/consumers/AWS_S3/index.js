@@ -22,8 +22,8 @@ module.exports = function (context) {
         const date = new Date();
         const dateString = date.toISOString();
         const year = date.getFullYear();
-        const month = date.getMonth();
-        const day = date.getDay();
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
         return `${year}/${month}/${day}/${dateString}.log`;
     };
 
