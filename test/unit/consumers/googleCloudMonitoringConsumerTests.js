@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -127,7 +127,7 @@ describe('Google_Cloud_Monitoring', () => {
 
         context = testUtil.deepCopy(originContext);
         context.logger = logger.getChild('gcm');
-        context.tracer = tracer.getOrCreate('gcm', 'gcm');
+        context.tracer = tracer.fromConfig({ name: 'gcm', path: 'gcm' });
 
         sinon.stub(jwt, 'sign').returns('somejsonwebtoken');
         nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors')

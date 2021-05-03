@@ -13,6 +13,8 @@
  * - obj.traceName
  * - obj.namespace::obj.name
  * - UUID
+ *
+ * NOTE: JSON Schema sets 'false' to iHealth Poller 'trace' if it is omitted
  */
 
 module.exports = {
@@ -25,11 +27,12 @@ module.exports = {
         // matrix (like boolean logic),
         // first array is system's trace value (ignore element at index 0)
         // first element of each next line (starting from line 1) is poller's trace value
-        ['',        undefined,  'system',   true,       false], // eslint-disable-line no-multi-spaces
-        [undefined, false,      'system',   true,       false], // eslint-disable-line no-multi-spaces
-        ['poller',  'poller',   'poller',   'poller',   false], // eslint-disable-line no-multi-spaces
-        [true,      true,       'system',   true,       false], // eslint-disable-line no-multi-spaces
-        [false,     false,      false,      false,      false]  // eslint-disable-line no-multi-spaces
+        // each pair - [system poller value, ihealth poller value]
+        ['',         undefined,              'system',               true,                   false        ], // eslint-disable-line no-multi-spaces, array-bracket-spacing
+        [undefined, [false, false],         ['system', false],      [true, false],          [false, false]], // eslint-disable-line no-multi-spaces
+        ['poller',  ['poller', 'poller'],   ['poller', 'poller'],   ['poller', 'poller'],   [false, false]], // eslint-disable-line no-multi-spaces
+        [true,      [true, true],           ['system', 'system'],   [true, true],           [false, false]], // eslint-disable-line no-multi-spaces
+        [false,     [false, false],         [false, false],         [false, false],         [false, false]]  // eslint-disable-line no-multi-spaces, max-len
     ];
     const systemTraceValues = traceValueMatrix[0];
     for (let i = 1; i < traceValueMatrix.length; i += 1) {
@@ -39,32 +42,38 @@ module.exports = {
             const expectedTrace = traceValueMatrix[i][j];
             module.exports.tests.push(Object.assign({
                 name: `should preserve trace config - systemTrace = ${systemTrace}, pollerTrace = ${pollerTrace}, expectedTrace = ${expectedTrace}`
-            }, generateDeclarationAndExpectedOutput(systemTrace, pollerTrace, expectedTrace)));
+            }, generateDeclarationAndExpectedOutput({
+                system: systemTrace,
+                systemPoller: pollerTrace,
+                ihealthPoller: pollerTrace,
+                expectedSystemPoller: expectedTrace[0],
+                expectedIHealthPoller: expectedTrace[1]
+            })));
         }
     }
 }()); // invoke func immediately
 
-function generateDeclarationAndExpectedOutput(systemTrace, pollerTrace, expectedTrace) {
+function generateDeclarationAndExpectedOutput(trace) {
     return {
         declaration: {
             class: 'Telemetry',
             My_Poller_1: {
                 class: 'Telemetry_System_Poller',
                 host: 'host1',
-                trace: pollerTrace
+                trace: trace.systemPoller
             },
             My_Poller_2: {
                 class: 'Telemetry_System_Poller',
                 host: 'host2',
-                trace: pollerTrace
+                trace: trace.systemPoller
             },
             My_System: {
                 class: 'Telemetry_System',
                 host: 'host3',
                 enable: true,
-                trace: systemTrace,
+                trace: trace.system,
                 iHealthPoller: {
-                    trace: pollerTrace,
+                    trace: trace.ihealthPoller,
                     username: 'test_user_1',
                     passphrase: {
                         cipherText: 'test_passphrase_1'
@@ -80,7 +89,7 @@ function generateDeclarationAndExpectedOutput(systemTrace, pollerTrace, expected
                     'My_Poller_1',
                     {
                         interval: 60,
-                        trace: pollerTrace
+                        trace: trace.systemPoller
                     }
                 ]
             },
@@ -88,11 +97,11 @@ function generateDeclarationAndExpectedOutput(systemTrace, pollerTrace, expected
                 class: 'Telemetry_System',
                 host: 'host4',
                 iHealthPoller: 'My_iHealth_Poller',
-                trace: systemTrace
+                trace: trace.system
             },
             My_iHealth_Poller: {
                 class: 'Telemetry_iHealth_Poller',
-                trace: pollerTrace,
+                trace: trace.ihealthPoller,
                 username: 'test_user_2',
                 passphrase: {
                     cipherText: 'test_passphrase_2'
@@ -139,7 +148,13 @@ function generateDeclarationAndExpectedOutput(systemTrace, pollerTrace, expected
                     name: 'My_Poller_2',
                     namespace: 'f5telemetry_default',
                     systemName: 'My_Poller_2',
-                    trace: pollerTrace || false,
+                    trace: {
+                        enable: !!trace.systemPoller,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_System_Poller.My_Poller_2::My_Poller_2',
+                        path: typeof trace.systemPoller === 'string' ? trace.systemPoller : '/var/tmp/telemetry/Telemetry_System_Poller.My_Poller_2::My_Poller_2'
+                    },
                     traceName: 'My_Poller_2::My_Poller_2'
                 },
                 {
@@ -173,7 +188,13 @@ function generateDeclarationAndExpectedOutput(systemTrace, pollerTrace, expected
                     name: 'My_Poller_1',
                     namespace: 'f5telemetry_default',
                     systemName: 'My_System',
-                    trace: expectedTrace,
+                    trace: {
+                        enable: !!trace.expectedSystemPoller,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_System_Poller.My_System::My_Poller_1',
+                        path: typeof trace.expectedSystemPoller === 'string' ? trace.expectedSystemPoller : '/var/tmp/telemetry/Telemetry_System_Poller.My_System::My_Poller_1'
+                    },
                     traceName: 'My_System::My_Poller_1'
                 },
                 {
@@ -207,14 +228,26 @@ function generateDeclarationAndExpectedOutput(systemTrace, pollerTrace, expected
                     name: 'SystemPoller_1',
                     namespace: 'f5telemetry_default',
                     systemName: 'My_System',
-                    trace: expectedTrace,
+                    trace: {
+                        enable: !!trace.expectedSystemPoller,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_System_Poller.My_System::SystemPoller_1',
+                        path: typeof trace.expectedSystemPoller === 'string' ? trace.expectedSystemPoller : '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1'
+                    },
                     traceName: 'My_System::SystemPoller_1'
                 },
                 {
                     class: 'Telemetry_iHealth_Poller',
                     name: 'iHealthPoller_1',
                     enable: true,
-                    trace: pollerTrace ? expectedTrace : false, // schema default is false
+                    trace: {
+                        enable: !!trace.expectedIHealthPoller,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_iHealth_Poller.My_System::iHealthPoller_1',
+                        path: typeof trace.expectedIHealthPoller === 'string' ? trace.expectedIHealthPoller : '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System::iHealthPoller_1'
+                    },
                     iHealth: {
                         name: 'iHealthPoller_1',
                         credentials: {
@@ -269,7 +302,13 @@ function generateDeclarationAndExpectedOutput(systemTrace, pollerTrace, expected
                     class: 'Telemetry_iHealth_Poller',
                     name: 'My_iHealth_Poller',
                     enable: true,
-                    trace: pollerTrace ? expectedTrace : false, // schema default is false
+                    trace: {
+                        enable: !!trace.expectedIHealthPoller,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_iHealth_Poller.My_System_2::My_iHealth_Poller',
+                        path: typeof trace.expectedIHealthPoller === 'string' ? trace.expectedIHealthPoller : '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System_2::My_iHealth_Poller'
+                    },
                     iHealth: {
                         name: 'My_iHealth_Poller',
                         credentials: {

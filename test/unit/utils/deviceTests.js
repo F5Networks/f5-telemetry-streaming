@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -685,8 +685,8 @@ describe('Device Util', () => {
             return deviceUtil.encryptSecret(largeSecret, true)
                 .then(() => {
                     const requestSecret = radiusRequests[0];
-                    assert.strictEqual(radiusRequests.length, 2, 'largeSecret should be in 2 chunks');
-                    assert.strictEqual(requestSecret.length, 500, 'length of chunk should be 500');
+                    assert.lengthOf(radiusRequests, 2, 'largeSecret should be in 2 chunks');
+                    assert.lengthOf(requestSecret, 500, 'length of chunk should be 500');
                     assert.ok(new RegExp(/\n/).test(requestSecret), 'newlines should be preserved');
                 });
         });

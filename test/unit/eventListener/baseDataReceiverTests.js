@@ -1,5 +1,5 @@
 /*
- * Copyright 2020. F5 Networks, Inc. See End User License Agreement ('EULA') for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ('EULA') for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -216,7 +216,7 @@ describe('Base Data Receiver', () => {
                 receiverInst.restart().catch(Array.prototype.push.bind(errors))
             ])
                 .then(() => {
-                    assert.strictEqual(errors.length, 1, 'should throw error');
+                    assert.lengthOf(errors, 1, 'should throw error');
                     assert.isTrue(/RESTARTING.*RESTARTING/.test(errors[0]), 'should not be able to change state to RESTARTING again');
                     assert.strictEqual(startHandlerStub.callCount, 1, 'should call startHandler once');
                     assert.strictEqual(stopHandlerStub.callCount, 1, 'should call stopHandlerStub once');
@@ -273,7 +273,7 @@ describe('Base Data Receiver', () => {
                 receiverInst.stop().then(resolve).catch(reject);
             })
                 .then(() => {
-                    assert.strictEqual(errors.length, 1, 'should throw error');
+                    assert.lengthOf(errors, 1, 'should throw error');
                     assert.isTrue(/STOPPING.*STARTING/.test(errors[0]), 'should not be able to change state to STOPPING');
                 });
         });
@@ -322,7 +322,7 @@ describe('Base Data Receiver', () => {
                 receiverInst.start().then(resolve).catch(reject);
             })
                 .then(() => {
-                    assert.strictEqual(errors.length, 1, 'should throw error');
+                    assert.lengthOf(errors, 1, 'should throw error');
                     assert.isTrue(/STARTING.*STOPPING/.test(errors[0]), 'should not be able to change state to STOPPING');
                 });
         });

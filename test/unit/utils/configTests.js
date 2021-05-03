@@ -1,5 +1,5 @@
 /*
- * Copyright 2020. F5 Networks, Inc. See End User License Agreement ('EULA') for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ('EULA') for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -279,7 +279,7 @@ describe('Config Util', () => {
                 .then(() => {
                     const parsedConf = configWorker.currentConfig;
                     assert.deepStrictEqual(parsedConf.mappings, { My_Listener: ['My_Consumer'] });
-                    assert.strictEqual(parsedConf.components.length, 3);
+                    assert.lengthOf(parsedConf.components, 3);
 
                     configUtil.removeComponents(parsedConf);
                     assert.deepStrictEqual(parsedConf.mappings, {});
@@ -328,26 +328,26 @@ describe('Config Util', () => {
                     assert.deepStrictEqual(parsedConf.mappings, {
                         My_Listener: ['My_Consumer_2', 'My_Consumer_3']
                     });
-                    assert.strictEqual(configUtil.getTelemetryListeners(parsedConf).length, 2);
-                    assert.strictEqual(configUtil.getTelemetryConsumers(parsedConf).length, 2);
+                    assert.lengthOf(configUtil.getTelemetryListeners(parsedConf), 2);
+                    assert.lengthOf(configUtil.getTelemetryConsumers(parsedConf), 2);
 
                     configUtil.removeComponents(parsedConf, { filter: c => c.name === 'My_Listener', namespace: 'f5telemetry_default' });
                     assert.deepStrictEqual(parsedConf.mappings, {});
-                    assert.strictEqual(configUtil.getTelemetryListeners(parsedConf).length, 1);
-                    assert.strictEqual(configUtil.getTelemetryConsumers(parsedConf).length, 2);
+                    assert.lengthOf(configUtil.getTelemetryListeners(parsedConf), 1);
+                    assert.lengthOf(configUtil.getTelemetryConsumers(parsedConf), 2);
 
                     configUtil.removeComponents(parsedConf, { class: 'Telemetry_Listener', namespace: c => c.namespace === 'My_Namespace' });
                     assert.deepStrictEqual(parsedConf.mappings, {});
-                    assert.strictEqual(configUtil.getTelemetryListeners(parsedConf).length, 0);
-                    assert.strictEqual(configUtil.getTelemetryConsumers(parsedConf).length, 2);
+                    assert.isEmpty(configUtil.getTelemetryListeners(parsedConf));
+                    assert.lengthOf(configUtil.getTelemetryConsumers(parsedConf), 2);
 
                     configUtil.removeComponents(parsedConf, { filter: c => c.name === 'My_Consumer_2' });
                     assert.deepStrictEqual(parsedConf.mappings, {});
-                    assert.strictEqual(configUtil.getTelemetryConsumers(parsedConf).length, 1);
+                    assert.lengthOf(configUtil.getTelemetryConsumers(parsedConf), 1);
 
                     configUtil.removeComponents(parsedConf, { class: 'Telemetry_Consumer' });
                     assert.deepStrictEqual(parsedConf.mappings, {});
-                    assert.strictEqual(configUtil.getTelemetryConsumers(parsedConf).length, 0);
+                    assert.isEmpty(configUtil.getTelemetryConsumers(parsedConf));
                 });
         });
     });

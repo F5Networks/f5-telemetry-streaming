@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -10,20 +10,14 @@
 
 const pathUtil = require('path');
 
-const constants = require('../constants');
 const configWorker = require('../config');
 const logger = require('../logger').getChild('tracer');
 const util = require('./misc');
 
 /** @module tracer */
 
-const CLASSES_WITH_TRACE = [
-    constants.CONFIG_CLASSES.SYSTEM_POLLER_CLASS_NAME,
-    constants.CONFIG_CLASSES.IHEALTH_POLLER_CLASS_NAME,
-    constants.CONFIG_CLASSES.EVENT_LISTENER_CLASS_NAME,
-    constants.CONFIG_CLASSES.PULL_CONSUMER_CLASS_NAME,
-    constants.CONFIG_CLASSES.CONSUMER_CLASS_NAME
-];
+const DEFAULT_MAX_RECORDS = 10;
+const DEFAULT_ENCODING = 'utf8';
 
 /**
  * Registered instances
@@ -37,11 +31,13 @@ const INSTANCES = {};
  *
  * @class
  *
- * @read {string} name - tracer's name
- * @property {string} path - path to file
- * @property {number} fd - file descriptor
  * @property {boolean} disabled - is tracer disabled
+ * @property {string} encoding - data encoding
+ * @property {number} fd - file descriptor
  * @property {Logger} logger - logger instance
+ * @property {number} maxRecords - number of records to store
+ * @property {string} name - tracer's name
+ * @property {string} path - path to file
  */
 class Tracer {
     /**
@@ -49,12 +45,28 @@ class Tracer {
      *
      * @param {string} name - tracer's name
      * @param {string} path - path to file
+     * @param {TracerOptions} [options] - options
      */
-    constructor(name, path) {
-        this._name = name;
-        this._path = path;
+    constructor(name, path, options) {
+        options = setTracerOptionsDefaults(options);
+        this._cache = [];
         this._fd = undefined;
         this._disabled = false;
+        /**
+         * read-only properties below that should never be changed
+         */
+        Object.defineProperty(this, 'name', {
+            value: name
+        });
+        Object.defineProperty(this, 'path', {
+            value: path
+        });
+        Object.defineProperty(this, 'maxRecords', {
+            value: options.maxRecords
+        });
+        Object.defineProperty(this, 'encoding', {
+            value: options.encoding
+        });
     }
 
     /**
@@ -82,22 +94,6 @@ class Tracer {
             value: logger.getChild(this.name)
         });
         return this.logger;
-    }
-
-    /**
-     * @public
-     * @returns {string} name
-     */
-    get name() {
-        return this._name;
-    }
-
-    /**
-     * @public
-     * @returns {string} path to trace file
-     */
-    get path() {
-        return this._path;
     }
 
     /**
@@ -145,18 +141,15 @@ class Tracer {
      * @param {Any} data - data to add (should be JSON serializable)
      */
     _cacheData(data) {
-        if (!this.cache) {
-            this.cache = [];
-        }
-        while (this.cache.length >= constants.TRACER.LIST_SIZE) {
-            this.cache.shift();
+        while (this._cache.length > this.maxRecords) {
+            this._cache.shift();
         }
         try {
             data = util.deepCopy(data);
         } catch (copyError) {
             this.logger.debugException('Unable to make copy of data', copyError);
         }
-        this.cache.push({ data, timestamp: new Date().toISOString() });
+        this._cache.push({ data, timestamp: new Date().toISOString() });
     }
 
     /**
@@ -188,14 +181,12 @@ class Tracer {
      * @returns {Array<Any>} merged data
      */
     _mergeAndResetCache(data) {
-        if (this.cache) {
-            if (this.cache.length >= constants.TRACER.LIST_SIZE) {
-                data = this.cache.slice(this.cache.length - constants.TRACER.LIST_SIZE);
-            } else {
-                data = data.slice(data.length - constants.TRACER.LIST_SIZE + this.cache.length).concat(this.cache);
-            }
+        if (this._cache.length >= this.maxRecords) {
+            data = this._cache.slice(this._cache.length - this.maxRecords);
+        } else {
+            data = data.slice(data.length - this.maxRecords + this._cache.length).concat(this._cache);
         }
-        this.cache = [];
+        this._cache = [];
         return data;
     }
 
@@ -281,7 +272,7 @@ class Tracer {
                     .then((readRet) => {
                         const buffer = readRet[1];
                         const bytesRead = readRet[0];
-                        return buffer.slice(0, bytesRead).toString(constants.TRACER.ENCODING);
+                        return buffer.slice(0, bytesRead).toString(this.encoding);
                     });
             });
     }
@@ -298,7 +289,7 @@ class Tracer {
         return this._open()
             .then(() => {
                 // don't need to read and parse data when cache has a lot of data already
-                if (this.cache.length >= constants.TRACER.LIST_SIZE) {
+                if (this._cache.length >= this.maxRecords) {
                     return [];
                 }
                 return this._read()
@@ -310,7 +301,7 @@ class Tracer {
             })
             .then(data => util.maskSecrets(util.stringify(data, true)))
             .then(dataToWrite => util.fs.ftruncate(this.fd, 0)
-                .then(() => util.fs.write(this.fd, dataToWrite, 0, constants.TRACER.ENCODING)))
+                .then(() => util.fs.write(this.fd, dataToWrite, 0, this.encoding)))
             .catch((err) => {
                 // close trace, lost data
                 this.logger.debugException(`Unable to write data to '${this.path}'`, err);
@@ -348,34 +339,8 @@ class Tracer {
         // it means we are still on time and we can resolve this promise once current attempt resolved
 
         // create a new promise to avoid accidental chaining to internal promises responsible for data writing
-        return new Promise(resolve => tryWriteDataPromise.then(resolve));
+        return new Promise((resolve, reject) => tryWriteDataPromise.then(resolve, reject));
     }
-}
-
-/**
- * Get Tracer instance or create new one
- *
- * @public
- *
- * @param {string} name - tracer name
- * @param {string} path - destination path
- *
- * @returns {Tracer} Tracer instance
- */
-function getOrCreate(name, path) {
-    let tracer = INSTANCES[name];
-    if (tracer && tracer.path !== path) {
-        logger.debug(`Updating tracer instance - '${name}' file '${path}'`);
-        unregister(tracer, true);
-        tracer = null;
-    } else {
-        logger.debug(`Creating new tracer instance - '${name}' file '${path}'`);
-    }
-    if (!tracer) {
-        tracer = new Tracer(name, path);
-        INSTANCES[name] = tracer;
-    }
-    return tracer;
 }
 
 /**
@@ -384,24 +349,17 @@ function getOrCreate(name, path) {
  * Note: if component disabled then 'null' will be returned
  *
  * @public
- *
- * @param {object} config - configuration/component
- * @param {string} config.class - component's class
- * @param {boolean} config.enable - true if component enabled
- * @param {boolean|string} config.trace - true/false for enable/disable or path to a file to write data
- * @param {string} config.traceName - tracer's name
+ * @param {TracerConfig} config - tracer configuration
  *
  * @returns {Tracer|null} Tracer object or null when tracing feature disabled
  */
 function fromConfig(config) {
     let tracer = null;
-    if (config.trace && config.enable !== false) {
-        const name = `${config.class}.${config.traceName}`;
-        let path = config.trace;
-        if (config.trace === true) {
-            path = pathUtil.join(constants.TRACER.DIR, name);
-        }
-        tracer = getOrCreate(name, path);
+    if (config.enable !== false) {
+        tracer = getOrCreate(config.name, config.path, {
+            encoding: config.encoding,
+            maxRecords: config.maxRecords
+        });
     }
     return tracer;
 }
@@ -409,6 +367,7 @@ function fromConfig(config) {
 /**
  * Registered tracers
  *
+ * @public
  * @returns {Array<Tracer>} registered tracers
  */
 function registered() {
@@ -418,6 +377,7 @@ function registered() {
 /**
  * Unregister and stop tracer
  *
+ * @public
  * @param {Tracer} tracer - tracer
  * @param {boolean} [catchErr = false] - catch errors on attempt to stop tracer
  *
@@ -466,8 +426,8 @@ configWorker.on('change', config => Promise.resolve()
         const registeredTracers = registered();
         // ignore skipUpdate setting - it should not affect not changed tracers
         const configuredTracers = config.components
-            .filter(component => CLASSES_WITH_TRACE.indexOf(component.class) !== -1)
-            .map(component => fromConfig(component))
+            .filter(component => component.trace)
+            .map(component => fromConfig(component.trace))
             .filter(tracer => tracer);
 
         registeredTracers.forEach((tracer) => {
@@ -475,15 +435,72 @@ configWorker.on('change', config => Promise.resolve()
                 unregister(tracer, true);
             }
         });
-
         logger.info(`${registered().length} tracer(s) running`);
     }));
 
+/**
+ * PRIVATE METHODS
+ */
+/**
+ * @param {object} options - options to set defaults to
+ *
+ * @returns {TracerOptions} options with defaults set
+ */
+function setTracerOptionsDefaults(options) {
+    return util.assignDefaults(options, {
+        encoding: DEFAULT_ENCODING,
+        maxRecords: DEFAULT_MAX_RECORDS
+    });
+}
+
+/**
+ * Get Tracer instance or create new one
+ *
+ * @public
+ * @param {string} name - tracer name
+ * @param {string} path - destination path
+ * @param {TracerOptions} [options] - Tracer options
+ *
+ * @returns {Tracer} Tracer instance
+ */
+function getOrCreate(name, path, options) {
+    options = setTracerOptionsDefaults(options);
+    let tracer = INSTANCES[name];
+
+    if (tracer && (tracer.path !== path
+        || tracer.maxRecords !== options.maxRecords
+        || tracer.encoding !== options.encoding)) {
+        logger.debug(`Updating tracer instance - '${name}' file '${path}'`);
+        unregister(tracer, true);
+        tracer = null;
+    } else if (!tracer) {
+        logger.debug(`Creating new tracer instance - '${name}' file '${path}'`);
+    }
+    if (!tracer) {
+        tracer = new Tracer(name, path, options);
+        INSTANCES[name] = tracer;
+    }
+    return tracer;
+}
+
 module.exports = {
     Tracer,
-    getOrCreate,
     fromConfig,
     registered,
     unregister,
     unregisterAll
 };
+
+/**
+ * @typedef TracerOptions
+ * @type {object}
+ * @property {string} [encoding = 'utf8'] - data encoding
+ * @property {number} [maxRecords = 10] - max records to store
+ */
+/**
+ * @typedef TracerConfig
+ * @type {TracerOptions}
+ * @property {string} name - name
+ * @property {string} path - path to use to write data to
+ * @property {boolean} [enable = true] - enable/disable Tracer
+ */

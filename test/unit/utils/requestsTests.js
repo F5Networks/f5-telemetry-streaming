@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -176,7 +176,7 @@ describe('Requests Util', () => {
             return assert.isFulfilled(
                 requestsUtil.makeRequest('example.com', { includeResponseObject: true })
                     .then((resp) => {
-                        assert.strictEqual(resp.length, 2, 'should return array of 2');
+                        assert.lengthOf(resp, 2, 'should return array of 2');
                         assert.deepStrictEqual(resp[0], { someValidJSONData: 1 });
                     })
             );

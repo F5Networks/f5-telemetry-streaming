@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -104,7 +104,7 @@ describe('Logger', () => {
                     // check it contains the message - no exact match as prefix [telemetry] will be added
                     assert.include(coreStub.logger.messages[logType][0], msg);
                 } else {
-                    assert.lengthOf(coreStub.logger.messages[logType], 0);
+                    assert.isEmpty(coreStub.logger.messages[logType]);
                 }
             });
         });
@@ -116,7 +116,7 @@ describe('Logger', () => {
         logger.debugException(`this is a ${msgType} message`, new Error('foo'));
 
         assert.lengthOf(coreStub.logger.messages.error, 1);
-        assert.lengthOf(coreStub.logger.messages.debug, 0);
+        assert.isEmpty(coreStub.logger.messages.debug);
         assert.include(coreStub.logger.messages.error[0], `this is a ${msgType} message`);
 
         logger.setLogLevel('debug');

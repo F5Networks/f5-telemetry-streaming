@@ -1,5 +1,5 @@
 /*
- * Copyright 2020. F5 Networks, Inc. See End User License Agreement ('EULA') for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ('EULA') for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -318,7 +318,7 @@ describe('System Poller', () => {
             it('should stop existing poller(s) when removed from config', () => configWorker.emitAsync('change', { components: [], mappings: {} })
                 .then(() => {
                     assert.deepStrictEqual(pollerTimers, {});
-                    assert.lengthOf(tracer.registered(), 0);
+                    assert.isEmpty(tracer.registered());
                     assert.isFalse(pollerTimersBefore['My_System::SystemPoller_1'].timer.isActive(), 'should be inactive');
                 }));
 
@@ -335,7 +335,13 @@ describe('System Poller', () => {
                     class: 'Telemetry_System_Poller',
                     enable: true,
                     interval: 500,
-                    trace: true,
+                    trace: {
+                        enable: true,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_System_Poller.My_System::SystemPoller_1',
+                        path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1'
+                    },
                     tracer: tracer.registered()[0],
                     credentials: {
                         username: undefined,
@@ -383,7 +389,7 @@ describe('System Poller', () => {
                 return configWorker.processDeclaration(testUtil.deepCopy(newDeclaration))
                     .then(() => {
                         assert.deepStrictEqual(pollerTimers, {});
-                        assert.lengthOf(tracer.registered(), 0);
+                        assert.isEmpty(tracer.registered());
                         assert.isFalse(pollerTimersBefore['My_System::SystemPoller_1'].timer.isActive(), 'should be inactive');
                     });
             });
@@ -409,7 +415,7 @@ describe('System Poller', () => {
                 return configWorker.processDeclaration(testUtil.deepCopy(newDeclaration))
                     .then(() => {
                         assert.deepStrictEqual(pollerTimers, {});
-                        assert.lengthOf(tracer.registered(), 0);
+                        assert.isEmpty(tracer.registered());
                         assert.isFalse(pollerTimersBefore['My_System::SystemPoller_1'].timer.isActive(), 'should be inactive');
                     });
             });
@@ -499,7 +505,13 @@ describe('System Poller', () => {
                                     traceName: 'My_System_New::My_Poller',
                                     enable: true,
                                     interval: 500,
-                                    trace: true,
+                                    trace: {
+                                        enable: true,
+                                        encoding: 'utf8',
+                                        maxRecords: 10,
+                                        name: 'Telemetry_System_Poller.My_System_New::My_Poller',
+                                        path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_New::My_Poller'
+                                    },
                                     tracer: tracer.registered().find(t => t.name === 'Telemetry_System_Poller.My_System_New::My_Poller'),
                                     credentials: {
                                         username: undefined,
@@ -539,7 +551,13 @@ describe('System Poller', () => {
                                     class: 'Telemetry_System_Poller',
                                     enable: true,
                                     interval: 10,
-                                    trace: true,
+                                    trace: {
+                                        enable: true,
+                                        encoding: 'utf8',
+                                        maxRecords: 10,
+                                        name: 'Telemetry_System_Poller.My_System_New::SystemPoller_1',
+                                        path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_New::SystemPoller_1'
+                                    },
                                     systemName: 'My_System_New',
                                     tracer: tracer.registered().find(t => t.name === 'Telemetry_System_Poller.My_System_New::SystemPoller_1'),
                                     traceName: 'My_System_New::SystemPoller_1',
@@ -637,7 +655,13 @@ describe('System Poller', () => {
                                     class: 'Telemetry_System_Poller',
                                     enable: true,
                                     interval: 200,
-                                    trace: true,
+                                    trace: {
+                                        enable: true,
+                                        encoding: 'utf8',
+                                        maxRecords: 10,
+                                        name: 'Telemetry_System_Poller.My_System::SystemPoller_1',
+                                        path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1'
+                                    },
                                     tracer: tracer.registered()[0],
                                     credentials: {
                                         username: undefined,

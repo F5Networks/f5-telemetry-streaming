@@ -1,5 +1,5 @@
 /*
- * Copyright 2020. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -7,6 +7,8 @@
  */
 
 'use strict';
+
+const pathUtil = require('path');
 
 const constants = require('../constants');
 const declValidator = require('../declarationValidator');
@@ -160,6 +162,22 @@ function getTracePrefix(component) {
         return ''; // keep current behavior
     }
     return `${component.namespace}::`;
+}
+
+/**
+ * @param {Component} component - component
+ *
+ * @returns {TracerConfig} Tracer config
+ */
+function getTracerConfig(component) {
+    const name = `${component.class}.${component.traceName}`;
+    return {
+        name,
+        path: typeof component.trace === 'string' ? component.trace : pathUtil.join(constants.TRACER.DIR, name),
+        enable: component.enable && !!component.trace,
+        encoding: constants.TRACER.ENCODING,
+        maxRecords: constants.TRACER.LIST_SIZE
+    };
 }
 
 /**
@@ -403,6 +421,7 @@ function normalizeTelemetryListeners(convertedConfig) {
     listeners.forEach((listener) => {
         listener.tag = listener.tag || {};
         listener.traceName = `${getTracePrefix(listener)}${listener.name}`;
+        listener.trace = getTracerConfig(listener);
     });
 }
 
@@ -422,6 +441,7 @@ function normalizeTelemetryConsumers(convertedConfig) {
     const consumers = _module.getTelemetryConsumers(convertedConfig);
     consumers.forEach((consumer) => {
         consumer.traceName = `${getTracePrefix(consumer)}${consumer.name}`;
+        consumer.trace = getTracerConfig(consumer);
     });
 }
 
@@ -441,6 +461,7 @@ function normalizeTelemetryPullConsumers(convertedConfig) {
     const pullConsumers = _module.getTelemetryPullConsumers(convertedConfig);
     pullConsumers.forEach((consumer) => {
         consumer.traceName = `${getTracePrefix(consumer)}${consumer.name}`;
+        consumer.trace = getTracerConfig(consumer);
         consumer.systemPollers = Array.isArray(consumer.systemPoller) ? consumer.systemPoller : [consumer.systemPoller];
         delete consumer.systemPoller;
     });
@@ -622,6 +643,7 @@ function updateSystemPollerConfig(systemConfig, pollerConfig, fetchTMStats) {
         username: systemConfig.username,
         passphrase: systemConfig.passphrase
     };
+    pollerConfig.trace = getTracerConfig(pollerConfig);
     POLLER_KEYS.toDelete.forEach((key) => {
         delete pollerConfig[key];
     });
@@ -685,6 +707,7 @@ function updateIHealthPollerConfig(systemConfig, pollerConfig) {
             passphrase: systemConfig.passphrase
         }
     };
+    pollerConfig.trace = getTracerConfig(pollerConfig);
     IHEALTH_POLLER_KEYS.toDelete.forEach((key) => {
         delete pollerConfig[key];
     });
@@ -1054,9 +1077,10 @@ _module = module.exports = {
  * @property {string} id - unique ID
  * @property {string} name - name
  * @property {string} namespace - namespace a component belongs to
+ * @property {string} traceName - unique name computed using namespace and object's name,
+ *     should be used for logging and etc.
  * @property {boolean} [enable] - true if component enabled
  * @property {boolean} [trace] - true if 'trace' enabled
- * @property {string} [traceName] - tracer's name computed using namespace and object's name
  */
 /**
  * @typedef Configuration

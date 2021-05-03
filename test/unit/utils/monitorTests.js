@@ -208,8 +208,17 @@ describe('Monitor Util', () => {
 
         beforeEach(() => {
             sinon.stub(deviceUtil, 'getHostDeviceInfo').returns(1000);
+            monitor.setLimits(70);
             emitSpy = sinon.spy(monitor, 'emitAsync');
             return monitor.start(70);
+        });
+
+        afterEach(() => {
+            assert.isEmpty(loggerStub.messages.error, 'should have no error messages');
+        });
+
+        afterEach(() => {
+            assert.isEmpty(loggerStub.messages.error, 'should have no error messages');
         });
 
         afterEach(() => {

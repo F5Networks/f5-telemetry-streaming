@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -35,8 +35,8 @@ describe('Constants', () => {
             versionInfo.push('1');
         }
         // to be sure that we really have some data
-        assert.notStrictEqual(versionInfo[0].length, 0);
-        assert.notStrictEqual(versionInfo[1].length, 0);
+        assert.isNotEmpty(versionInfo[0]);
+        assert.isNotEmpty(versionInfo[1]);
 
         // TODO: add other constants later
         assert.deepStrictEqual(constants, {

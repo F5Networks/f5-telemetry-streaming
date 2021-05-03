@@ -43,7 +43,13 @@ module.exports = {
                     name: 'Consumer_1',
                     traceName: 'Consumer_1',
                     namespace: 'f5telemetry_default',
-                    trace: false,
+                    trace: {
+                        enable: false,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_Consumer.Consumer_1',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1'
+                    },
                     type: 'default'
                 },
                 {
@@ -54,7 +60,13 @@ module.exports = {
                     name: 'Consumer_1',
                     traceName: 'My_Namespace::Consumer_1',
                     namespace: 'My_Namespace',
-                    trace: false,
+                    trace: {
+                        enable: false,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_Consumer.My_Namespace::Consumer_1',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1'
+                    },
                     type: 'default'
                 }
             ]
@@ -96,7 +108,13 @@ module.exports = {
                     name: 'Consumer_1',
                     traceName: 'Consumer_1',
                     namespace: 'f5telemetry_default',
-                    trace: false,
+                    trace: {
+                        enable: false,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_Consumer.Consumer_1',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1'
+                    },
                     type: 'default'
                 },
                 {
@@ -107,7 +125,13 @@ module.exports = {
                     name: 'Consumer_2',
                     traceName: 'Consumer_2',
                     namespace: 'f5telemetry_default',
-                    trace: false,
+                    trace: {
+                        enable: false,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_Consumer.Consumer_2',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_2'
+                    },
                     type: 'default'
                 },
                 {
@@ -118,7 +142,13 @@ module.exports = {
                     name: 'Consumer_1',
                     traceName: 'My_Namespace::Consumer_1',
                     namespace: 'My_Namespace',
-                    trace: false,
+                    trace: {
+                        enable: false,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_Consumer.My_Namespace::Consumer_1',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1'
+                    },
                     type: 'default'
                 },
                 {
@@ -129,7 +159,13 @@ module.exports = {
                     name: 'Consumer_2',
                     traceName: 'My_Namespace::Consumer_2',
                     namespace: 'My_Namespace',
-                    trace: false,
+                    trace: {
+                        enable: false,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_Consumer.My_Namespace::Consumer_2',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_2'
+                    },
                     type: 'default'
                 }
             ]
@@ -171,7 +207,13 @@ module.exports = {
                     name: 'Consumer_1',
                     traceName: 'Consumer_1',
                     namespace: 'f5telemetry_default',
-                    trace: false,
+                    trace: {
+                        enable: false,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_Consumer.Consumer_1',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1'
+                    },
                     type: 'default'
                 },
                 {
@@ -182,7 +224,13 @@ module.exports = {
                     name: 'Consumer_1',
                     traceName: 'My_Namespace::Consumer_1',
                     namespace: 'My_Namespace',
-                    trace: false,
+                    trace: {
+                        enable: false,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_Consumer.My_Namespace::Consumer_1',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1'
+                    },
                     type: 'default'
                 }
             ]
@@ -234,7 +282,13 @@ module.exports = {
                     namespace: 'f5telemetry_default',
                     port: 6514,
                     tag: {},
-                    trace: false,
+                    trace: {
+                        enable: false,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_Listener.Listener1',
+                        path: '/var/tmp/telemetry/Telemetry_Listener.Listener1'
+                    },
                     traceName: 'Listener1'
                 },
                 {
@@ -245,7 +299,13 @@ module.exports = {
                     name: 'Consumer_1',
                     traceName: 'Consumer_1',
                     namespace: 'f5telemetry_default',
-                    trace: false,
+                    trace: {
+                        enable: false,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_Consumer.Consumer_1',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1'
+                    },
                     type: 'default'
                 },
                 {
@@ -256,7 +316,13 @@ module.exports = {
                     name: 'Consumer_2',
                     traceName: 'Consumer_2',
                     namespace: 'f5telemetry_default',
-                    trace: false,
+                    trace: {
+                        enable: false,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_Consumer.Consumer_2',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_2'
+                    },
                     type: 'default'
                 }
             ]
@@ -298,7 +364,13 @@ module.exports = {
                     name: 'Consumer_1',
                     traceName: 'My_Namespace::Consumer_1',
                     namespace: 'My_Namespace',
-                    trace: false,
+                    trace: {
+                        enable: false,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_Consumer.My_Namespace::Consumer_1',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1'
+                    },
                     type: 'default'
                 },
                 {
@@ -309,7 +381,13 @@ module.exports = {
                     name: 'Consumer_2',
                     traceName: 'My_Namespace::Consumer_2',
                     namespace: 'My_Namespace',
-                    trace: false,
+                    trace: {
+                        enable: false,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_Consumer.My_Namespace::Consumer_2',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_2'
+                    },
                     type: 'default'
                 }
             ]
@@ -352,7 +430,13 @@ module.exports = {
                     name: 'Consumer_1',
                     traceName: 'Consumer_1',
                     namespace: 'f5telemetry_default',
-                    trace: false,
+                    trace: {
+                        enable: false,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_Consumer.Consumer_1',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1'
+                    },
                     type: 'default'
                 },
                 {
@@ -363,7 +447,13 @@ module.exports = {
                     name: 'Consumer_2',
                     traceName: 'Consumer_2',
                     namespace: 'f5telemetry_default',
-                    trace: false,
+                    trace: {
+                        enable: false,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_Consumer.Consumer_2',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_2'
+                    },
                     type: 'default'
                 }
             ]
@@ -405,7 +495,13 @@ module.exports = {
                     name: 'Consumer_1',
                     traceName: 'Consumer_1',
                     namespace: 'f5telemetry_default',
-                    trace: false,
+                    trace: {
+                        enable: false,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_Consumer.Consumer_1',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1'
+                    },
                     type: 'default'
                 },
                 {
@@ -416,7 +512,13 @@ module.exports = {
                     name: 'Consumer_1',
                     traceName: 'My_Namespace::Consumer_1',
                     namespace: 'My_Namespace',
-                    trace: false,
+                    trace: {
+                        enable: false,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        name: 'Telemetry_Consumer.My_Namespace::Consumer_1',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1'
+                    },
                     type: 'default'
                 }
             ]

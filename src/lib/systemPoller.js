@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -96,7 +96,7 @@ function applyConfig(originalConfig) {
         const existingPoller = currPollers[key];
         newPollerIDs.push(key);
         if (!pollerConfig.skipUpdate || !existingPoller) {
-            pollerConfig.tracer = tracers.fromConfig(pollerConfig);
+            pollerConfig.tracer = tracers.fromConfig(pollerConfig.trace);
             const baseMsg = `system poller ${key}. Interval = ${pollerConfig.interval} sec.`;
             // add to data context to track source poller config and destination(s)
             pollerConfig.destinationIds = configUtil.getReceivers(originalConfig, pollerConfig).map(r => r.id);

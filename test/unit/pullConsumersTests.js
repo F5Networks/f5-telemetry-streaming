@@ -1,5 +1,5 @@
 /*
- * Copyright 2020. F5 Networks, Inc. See End User License Agreement ('EULA') for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ('EULA') for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -65,7 +65,7 @@ describe('Pull Consumers', () => {
             return configWorker.processDeclaration(exampleConfig)
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
-                    assert.deepStrictEqual(loadedConsumers.length, 1);
+                    assert.lengthOf(loadedConsumers, 1);
                     assert.deepStrictEqual(loadedConsumers[0].config.type, 'default', 'should load default consumer');
                 });
         });
@@ -160,14 +160,14 @@ describe('Pull Consumers', () => {
             return configWorker.processDeclaration(priorConfig)
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
-                    assert.strictEqual(loadedConsumers.length, 1, 'should load default consumer');
+                    assert.lengthOf(loadedConsumers, 1, 'should load default consumer');
                     assert.isTrue(moduleLoaderSpy.calledOnce);
                     existingConsumer = loadedConsumers[0];
                 })
                 .then(() => configWorker.processNamespaceDeclaration(namespaceConfig, 'NewNamespace'))
                 .then(() => {
                     const loadedConsumerIds = pullConsumers.getConsumers().map(c => c.id);
-                    assert.strictEqual(loadedConsumerIds.length, 2, 'should load new consumer');
+                    assert.lengthOf(loadedConsumerIds, 2, 'should load new consumer');
                     assert.deepStrictEqual(loadedConsumerIds[0], existingConsumer.id);
                     assert.isTrue(moduleLoaderSpy.calledTwice);
                 });
