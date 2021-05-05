@@ -260,7 +260,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -293,7 +292,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.My_Namespace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -331,7 +329,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -368,7 +365,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.My_Namespace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -551,7 +547,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.My_Namespace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -589,7 +584,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.My_Namespace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -784,7 +778,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -818,7 +811,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.My_Namespace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -856,7 +848,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -893,7 +884,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.My_Namespace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -1093,7 +1083,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.ExistingNameSpace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -1127,7 +1116,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.My_Namespace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -1165,7 +1153,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.ExistingNameSpace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -1202,7 +1189,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.My_Namespace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -1376,7 +1362,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.ExistingNameSpace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -1400,7 +1385,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.My_Namespace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -1438,7 +1422,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.ExistingNameSpace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -1465,7 +1448,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.My_Namespace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -1655,7 +1637,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.ExistingNameSpace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -1679,7 +1660,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.My_Namespace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -1717,7 +1697,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.ExistingNameSpace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -1744,7 +1723,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.My_Namespace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -1963,7 +1941,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.ExistingNameSpace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -1997,7 +1974,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.My_Namespace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -2035,7 +2011,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.ExistingNameSpace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -2072,7 +2047,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.My_Namespace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -2203,7 +2177,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.ExistingNameSpace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer'
                             },
                             allowSelfSignedCert: false,
@@ -2242,7 +2215,6 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.ExistingNameSpace::My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer'
                             },
                             allowSelfSignedCert: false,

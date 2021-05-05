@@ -378,6 +378,11 @@ const _module = module.exports = {
                 setLogLevelOrigin.call(logger, level);
             }
         });
+        ctx.removeAllMessages = () => {
+            Object.keys(ctx.messages).forEach((key) => {
+                ctx.messages[key] = [];
+            });
+        };
         return ctx;
     },
 
@@ -470,8 +475,8 @@ const _module = module.exports = {
             write: sinon.stub(tracer.Tracer.prototype, 'write')
         };
         ctx.write.callsFake(function write(data) {
-            ctx.data[this.name] = ctx.data[this.name] || [];
-            ctx.data[this.name].push(data);
+            ctx.data[this.path] = ctx.data[this.path] || [];
+            ctx.data[this.path].push(data);
         });
         return ctx;
     },

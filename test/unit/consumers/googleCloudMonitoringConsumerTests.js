@@ -127,7 +127,7 @@ describe('Google_Cloud_Monitoring', () => {
 
         context = testUtil.deepCopy(originContext);
         context.logger = logger.getChild('gcm');
-        context.tracer = tracer.fromConfig({ name: 'gcm', path: 'gcm' });
+        context.tracer = tracer.fromConfig({ path: 'gcm' });
 
         sinon.stub(jwt, 'sign').returns('somejsonwebtoken');
         nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors')

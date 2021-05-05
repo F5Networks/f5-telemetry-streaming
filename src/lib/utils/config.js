@@ -170,10 +170,10 @@ function getTracePrefix(component) {
  * @returns {TracerConfig} Tracer config
  */
 function getTracerConfig(component) {
-    const name = `${component.class}.${component.traceName}`;
     return {
-        name,
-        path: typeof component.trace === 'string' ? component.trace : pathUtil.join(constants.TRACER.DIR, name),
+        path: typeof component.trace === 'string'
+            ? component.trace
+            : pathUtil.join(constants.TRACER.DIR, `${component.class}.${component.traceName}`),
         enable: component.enable && !!component.trace,
         encoding: constants.TRACER.ENCODING,
         maxRecords: constants.TRACER.LIST_SIZE
