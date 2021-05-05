@@ -91,7 +91,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Listener_1',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1'
                         },
                         match: '',
@@ -118,7 +117,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Listener_2',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_2'
                         },
                         match: '/somepattern/',
@@ -151,7 +149,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Namespace::My_Listener_1',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_1'
                         },
                         match: '',
@@ -178,7 +175,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Namespace::My_Listener_2',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_2'
                         },
                         match: '/somepattern/',
@@ -237,7 +233,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Listener_1',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1'
                         },
                         match: '',
@@ -264,7 +259,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Listener_2',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_2'
                         },
                         match: '',
@@ -291,7 +285,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Namespace::My_Listener_1',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_1'
                         },
                         match: '',
@@ -318,7 +311,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Namespace::My_Listener_2',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_2'
                         },
                         match: '',
@@ -399,7 +391,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Listener_1',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1'
                         },
                         match: '',
@@ -426,7 +417,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Listener_2',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_2'
                         },
                         match: '',
@@ -453,7 +443,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1'
                         },
                         type: 'default'
@@ -470,7 +459,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Namespace::My_Listener_1',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_1'
                         },
                         match: '',
@@ -497,7 +485,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Namespace::My_Listener_2',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_2'
                         },
                         match: '',
@@ -524,7 +511,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace::Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1'
                         },
                         type: 'default'
@@ -541,7 +527,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Namespace_2::My_Listener_1',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace_2::My_Listener_1'
                         },
                         match: '',
@@ -568,7 +553,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Namespace_2::My_Listener_2',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace_2::My_Listener_2'
                         },
                         match: '',
@@ -595,7 +579,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace_2::Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace_2::Consumer_1'
                         },
                         type: 'default'
@@ -678,7 +661,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Listener_1',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1'
                         },
                         match: '',
@@ -705,7 +687,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Listener_2',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_2'
                         },
                         match: '',
@@ -732,7 +713,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1'
                         },
                         type: 'default'
@@ -749,7 +729,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.Consumer_2',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_2'
                         },
                         type: 'default'
@@ -766,7 +745,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Namespace::My_Listener_1',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_1'
                         },
                         match: '',
@@ -793,7 +771,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Namespace::My_Listener_2',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_2'
                         },
                         match: '',
@@ -820,7 +797,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace::Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1'
                         },
                         type: 'default'
@@ -837,7 +813,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace::Consumer_2',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_2'
                         },
                         type: 'default'
@@ -854,7 +829,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Namespace_2::My_Listener_1',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace_2::My_Listener_1'
                         },
                         match: '',
@@ -881,7 +855,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Namespace_2::My_Listener_2',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace_2::My_Listener_2'
                         },
                         match: '',
@@ -908,7 +881,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace_2::Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace_2::Consumer_1'
                         },
                         type: 'default'
@@ -925,7 +897,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace_2::Consumer_2',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace_2::Consumer_2'
                         },
                         type: 'default'

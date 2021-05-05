@@ -117,7 +117,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_System::SystemPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1'
                         },
                         traceName: 'My_System::SystemPoller_1'
@@ -130,7 +129,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_System::iHealthPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System::iHealthPoller_1'
                         },
                         iHealth: {
@@ -194,7 +192,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Consumer',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer'
                         },
                         traceName: 'My_Consumer',
@@ -235,7 +232,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::My_System::SystemPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System::SystemPoller_1'
                         },
                         traceName: 'My_Namespace::My_System::SystemPoller_1'
@@ -248,7 +244,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_Namespace::My_System::iHealthPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace::My_System::iHealthPoller_1'
                         },
                         iHealth: {
@@ -312,7 +307,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace::My_Consumer',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer'
                         },
                         traceName: 'My_Namespace::My_Consumer',
@@ -386,7 +380,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_System::My_iHealth_Poller',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System::My_iHealth_Poller'
                         },
                         iHealth: {
@@ -451,7 +444,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Consumer',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer'
                         },
                         traceName: 'My_Consumer',
@@ -464,7 +456,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_Namespace::My_System::My_iHealth_Poller',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace::My_System::My_iHealth_Poller'
                         },
                         iHealth: {
@@ -529,7 +520,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace::My_Consumer',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer'
                         },
                         traceName: 'My_Namespace::My_Consumer',
@@ -627,7 +617,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_System_1::My_iHealth_Poller',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System_1::My_iHealth_Poller'
                         },
                         iHealth: {
@@ -688,7 +677,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_System_2::My_iHealth_Poller',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System_2::My_iHealth_Poller'
                         },
                         iHealth: {
@@ -753,7 +741,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Consumer',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer'
                         },
                         traceName: 'My_Consumer',
@@ -766,7 +753,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_Namespace::My_System_1::My_iHealth_Poller',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace::My_System_1::My_iHealth_Poller'
                         },
                         iHealth: {
@@ -827,7 +813,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_Namespace::My_System_2::My_iHealth_Poller',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace::My_System_2::My_iHealth_Poller'
                         },
                         iHealth: {
@@ -892,7 +877,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace::My_Consumer',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer'
                         },
                         traceName: 'My_Namespace::My_Consumer',
@@ -1051,7 +1035,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_System::iHealthPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System::iHealthPoller_1'
                         },
                         iHealth: {
@@ -1111,7 +1094,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_System_2::My_iHealth_Poller',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System_2::My_iHealth_Poller'
                         },
                         iHealth: {
@@ -1173,7 +1155,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_Namespace::My_System::iHealthPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace::My_System::iHealthPoller_1'
                         },
                         iHealth: {
@@ -1233,7 +1214,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_Namespace::My_System_2::My_iHealth_Poller',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace::My_System_2::My_iHealth_Poller'
                         },
                         iHealth: {
@@ -1436,7 +1416,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_System::iHealthPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System::iHealthPoller_1'
                         },
                         iHealth: {
@@ -1496,7 +1475,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_System_2::My_iHealth_Poller',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System_2::My_iHealth_Poller'
                         },
                         iHealth: {
@@ -1561,7 +1539,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1'
                         },
                         traceName: 'My_Consumer_1',
@@ -1575,7 +1552,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_Namespace::My_System::iHealthPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace::My_System::iHealthPoller_1'
                         },
                         iHealth: {
@@ -1635,7 +1611,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_Namespace::My_System_2::My_iHealth_Poller',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace::My_System_2::My_iHealth_Poller'
                         },
                         iHealth: {
@@ -1700,7 +1675,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace::My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_1'
                         },
                         traceName: 'My_Namespace::My_Consumer_1',
@@ -1714,7 +1688,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_Namespace_2::My_System::iHealthPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace_2::My_System::iHealthPoller_1'
                         },
                         iHealth: {
@@ -1774,7 +1747,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_Namespace_2::My_System_2::My_iHealth_Poller',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace_2::My_System_2::My_iHealth_Poller'
                         },
                         iHealth: {
@@ -1839,7 +1811,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace_2::My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace_2::My_Consumer_1'
                         },
                         traceName: 'My_Namespace_2::My_Consumer_1',
@@ -2000,7 +1971,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_System::iHealthPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System::iHealthPoller_1'
                         },
                         iHealth: {
@@ -2060,7 +2030,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_System_2::My_iHealth_Poller',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System_2::My_iHealth_Poller'
                         },
                         iHealth: {
@@ -2125,7 +2094,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1'
                         },
                         traceName: 'My_Consumer_1',
@@ -2142,7 +2110,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Consumer_2',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_2'
                         },
                         traceName: 'My_Consumer_2',
@@ -2156,7 +2123,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_Namespace::My_System::iHealthPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace::My_System::iHealthPoller_1'
                         },
                         iHealth: {
@@ -2216,7 +2182,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_Namespace::My_System_2::My_iHealth_Poller',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace::My_System_2::My_iHealth_Poller'
                         },
                         iHealth: {
@@ -2281,7 +2246,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace::My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_1'
                         },
                         traceName: 'My_Namespace::My_Consumer_1',
@@ -2298,7 +2262,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace::My_Consumer_2',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_2'
                         },
                         traceName: 'My_Namespace::My_Consumer_2',
@@ -2312,7 +2275,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_Namespace_2::My_System::iHealthPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace_2::My_System::iHealthPoller_1'
                         },
                         iHealth: {
@@ -2372,7 +2334,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_iHealth_Poller.My_Namespace_2::My_System_2::My_iHealth_Poller',
                             path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace_2::My_System_2::My_iHealth_Poller'
                         },
                         iHealth: {
@@ -2437,7 +2398,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace_2::My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace_2::My_Consumer_1'
                         },
                         traceName: 'My_Namespace_2::My_Consumer_1',
@@ -2454,7 +2414,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace_2::My_Consumer_2',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace_2::My_Consumer_2'
                         },
                         traceName: 'My_Namespace_2::My_Consumer_2',

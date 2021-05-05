@@ -10,6 +10,7 @@
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
+const zip = require('lodash/zip');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -19,7 +20,7 @@ module.exports = {
      * Asserts that haystack includes needle
      *
      * @param {Array|string} haystack - haystack
-     * @param {RegExp} needle - needle to search for in haystack
+     * @param {RegExp|string} needle - needle to search for in haystack
      * @param {string} [message] - message to show on fail
      */
     includeMatch(haystack, needle, message) {
@@ -31,6 +32,26 @@ module.exports = {
             : checkFn(haystack);
         if (!ok) {
             assert.include(haystack, needle, message);
+        }
+    },
+
+    /**
+     * Asserts that every element in haystack has match in the same order
+     *
+     * @param {Array} source - source of data
+     * @param {Array<string|RegExp>} needles - ordered array with needles for each object in source
+     * @param {string} [message] - message to show on fail
+     */
+    sameOrderedMatches(sources, needles, message) {
+        const ok = zip(sources, needles).every((pair) => {
+            const data = pair[0];
+            const needle = pair[1];
+            return needle instanceof RegExp
+                ? needle.test(data)
+                : data.indexOf(needle) !== -1;
+        });
+        if (!ok) {
+            assert.sameDeepOrderedMembers(sources, needles, message);
         }
     },
 
