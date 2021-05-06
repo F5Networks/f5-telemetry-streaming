@@ -57,7 +57,7 @@ describe('Default Pull Consumer', () => {
         sinon.stub(context, 'event').value([[]]);
         return defaultConsumer(context)
             .then((data) => {
-                assert.deepEqual(data, []);
+                assert.deepStrictEqual(data, []);
             });
     });
 

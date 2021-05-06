@@ -142,7 +142,7 @@ describe('Statsd', () => {
             });
 
             return statsDIndex(context)
-                .then(() => assert.deepStrictEqual(metrics, []));
+                .then(() => assert.isEmpty(metrics));
         });
 
         it('should log exception if connection failure', () => {

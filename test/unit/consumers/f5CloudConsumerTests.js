@@ -172,7 +172,7 @@ describe('F5_Cloud', () => {
                         const a = mockServer.getInteractionsOn('Post');
                         assert.lengthOf(a, 1);
                         const decodedData = JSON.parse(a[0].payload.toString('utf8'));
-                        assert.deepEqual(expectedData, decodedData);
+                        assert.deepStrictEqual(expectedData, decodedData);
                         assert.equal(expectedSchemaLabel, a[0].payloadSchema.split(':')[4]);
                         client.close();
                     }

@@ -212,11 +212,7 @@ describe('IHealthPollerHandler', () => {
                 .then(() => {
                     assert.strictEqual(restOpMock.getStatusCode(), 200, 'should return expected code');
                     assert.strictEqual(restOpMock.getBody().code, 200, 'should return expected code');
-                    assert.sameDeepMembers(
-                        restOpMock.getBody().message.map(s => s.name),
-                        [],
-                        'should return expected body'
-                    );
+                    assert.isEmpty(restOpMock.getBody().message.map(s => s.name), 'should return expected body');
                 });
         });
 

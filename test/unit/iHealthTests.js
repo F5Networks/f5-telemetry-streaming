@@ -224,7 +224,7 @@ describe('iHealth', () => {
         .then(() => {
             sinon.restore();
             // related to blocks like .catch(err => logError(err))
-            assert.deepStrictEqual(coreStub.logger.messages.error, [], 'should have no errors logged');
+            assert.isEmpty(coreStub.logger.messages.error, 'should have no errors logged');
         }));
 
     describe('config "on change" event', () => {
@@ -567,16 +567,8 @@ describe('iHealth', () => {
             declaration.Namespace.System.enable = false;
             return configWorker.processDeclaration(testUtil.deepCopy(declaration))
                 .then(() => {
-                    assert.sameMembers(
-                        IHealthPoller.getAll({ includeDemo: true }).map(p => p.id),
-                        [],
-                        'should not create instances'
-                    );
-                    assert.sameMembers(
-                        registeredTracerPaths(),
-                        [],
-                        'should not create tracers'
-                    );
+                    assert.isEmpty(IHealthPoller.getAll({ includeDemo: true }).map(p => p.id), 'should not create instances');
+                    assert.isEmpty(registeredTracerPaths(), 'should not create tracers');
                 });
         });
 
@@ -737,14 +729,14 @@ describe('iHealth', () => {
         });
 
         it('should return empty array when no pollers', () => configWorker.processDeclaration({ class: 'Telemetry' })
-            .then(() => assert.deepStrictEqual(ihealth.getCurrentState('NonExistingNamespace'), [], 'should return empty list')));
+            .then(() => assert.isEmpty(ihealth.getCurrentState('NonExistingNamespace'), 'should return empty list')));
 
         it('should return empty array for non-existing namespace', () => {
-            assert.deepStrictEqual(ihealth.getCurrentState('NonExistingNamespace'), [], 'should return empty list');
+            assert.isEmpty(ihealth.getCurrentState('NonExistingNamespace'), 'should return empty list');
         });
 
         it('should return empty array for empty namespace', () => configWorker.processNamespaceDeclaration({ class: 'Telemetry_Namespace' }, 'Namespace')
-            .then(() => assert.deepStrictEqual(ihealth.getCurrentState('Namespace'), [], 'should return empty list')));
+            .then(() => assert.isEmpty(ihealth.getCurrentState('Namespace'), 'should return empty list')));
 
         it('should return statuses for all pollers', () => {
             assert.sameDeepMembers(

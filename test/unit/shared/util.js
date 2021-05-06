@@ -8,8 +8,9 @@
 
 'use strict';
 
-const assert = require('assert');
 const assignDefaults = require('lodash/defaultsDeep');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 const deepCopy = require('lodash/cloneDeep');
 const fsUtil = require('fs');
 const nock = require('nock');
@@ -20,6 +21,8 @@ const urllib = require('url');
 const systemPollerData = require('../../../examples/output/system_poller/output.json');
 const avrData = require('../consumers/data/avrData.json');
 
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
 function MockRestOperation(opts) {
     opts = opts || {};
