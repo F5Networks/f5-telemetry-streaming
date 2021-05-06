@@ -58,7 +58,7 @@ describe('Custom Endpoints (Telemetry_Endpoints)', () => {
                         })
                             .then((data) => {
                                 assert.deepStrictEqual(data, testConf.expectedData, `should match expected output (attempt #${i})`);
-                                assert.deepStrictEqual(stats.loader.cachedResponse, {}, `cache should be erased (attempt #${i})`);
+                                assert.isEmpty(stats.loader.cachedResponse, `cache should be erased (attempt #${i})`);
                                 endpointsStateValidator();
                             });
                     }

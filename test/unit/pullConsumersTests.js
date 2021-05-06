@@ -86,7 +86,7 @@ describe('Pull Consumers', () => {
             return configWorker.processDeclaration(exampleConfig)
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
-                    assert.deepStrictEqual(loadedConsumers, [], 'should not load disabled consumer');
+                    assert.isEmpty(loadedConsumers, 'should not load disabled consumer');
                 });
         });
 
@@ -128,12 +128,12 @@ describe('Pull Consumers', () => {
             return configWorker.processDeclaration(priorConfig)
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
-                    assert.deepEqual(loadedConsumers[0].config.type, 'default', 'should load default consumer');
+                    assert.deepStrictEqual(loadedConsumers[0].config.type, 'default', 'should load default consumer');
                     return configWorker.emitAsync('change', { components: [], mappings: {} });
                 })
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
-                    assert.deepStrictEqual(loadedConsumers, [], 'should unload default consumer');
+                    assert.isEmpty(loadedConsumers, 'should unload default consumer');
                 })
                 .catch(err => Promise.reject(err));
         });

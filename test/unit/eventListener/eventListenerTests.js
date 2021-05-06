@@ -201,7 +201,7 @@ describe('Event Listener', () => {
         assert.isNotEmpty(EventListener.receiversManager.getAll());
         return configWorker.emitAsync('change', { components: [], mappings: {} })
             .then(() => {
-                assert.sameDeepMembers(registeredTracerPaths(), []);
+                assert.isEmpty(registeredTracerPaths());
                 assert.isEmpty(EventListener.getAll());
                 assert.isEmpty(EventListener.receiversManager.getAll());
             });
@@ -277,7 +277,7 @@ describe('Event Listener', () => {
 
         return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
             .then(() => {
-                assert.sameDeepMembers(registeredTracerPaths(), []);
+                assert.isEmpty(registeredTracerPaths());
                 assert.isEmpty(EventListener.getAll());
                 assert.isEmpty(EventListener.receiversManager.getAll());
             });
@@ -375,7 +375,7 @@ describe('Event Listener', () => {
             .then(() => {
                 assert.lengthOf(EventListener.getAll(), 1);
                 assert.lengthOf(EventListener.receiversManager.getAll(), 1);
-                assert.sameDeepMembers(registeredTracerPaths(), []);
+                assert.isEmpty(registeredTracerPaths());
                 assert.deepStrictEqual(gatherIds(), ['Listener1']);
                 const listeners = EventListener.instances;
 
@@ -430,7 +430,7 @@ describe('Event Listener', () => {
             })
             .then(() => {
                 receivers.forEach(r => assert.isTrue(r.isDestroyed(), 'should be destroyed'));
-                assert.deepStrictEqual(EventListener.receiversManager.registered, {}, 'should have no registered receivers');
+                assert.isEmpty(EventListener.receiversManager.registered, 'should have no registered receivers');
             });
     });
 });
