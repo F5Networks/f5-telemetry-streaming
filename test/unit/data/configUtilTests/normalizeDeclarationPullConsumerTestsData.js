@@ -160,7 +160,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Pull_Consumer.My_Pull_Consumer',
                             path: '/var/tmp/telemetry/Telemetry_Pull_Consumer.My_Pull_Consumer'
                         },
                         name: 'My_Pull_Consumer',
@@ -181,7 +180,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Pull_Consumer.My_Namespace::My_Pull_Consumer',
                             path: '/var/tmp/telemetry/Telemetry_Pull_Consumer.My_Namespace::My_Pull_Consumer'
                         },
                         name: 'My_Pull_Consumer',
@@ -205,7 +203,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_System::Pull_Poller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::Pull_Poller_1'
                         },
                         traceName: 'My_System::Pull_Poller_1',
@@ -245,7 +242,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_System_2::Pull_Poller_2',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_2::Pull_Poller_2'
                         },
                         traceName: 'My_System_2::Pull_Poller_2',
@@ -285,7 +281,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_System_3::Pull_Poller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_3::Pull_Poller_1'
                         },
                         traceName: 'My_System_3::Pull_Poller_1',
@@ -325,7 +320,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_System_3::Pull_Poller_2',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_3::Pull_Poller_2'
                         },
                         traceName: 'My_System_3::Pull_Poller_2',
@@ -365,7 +359,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_System_3::SystemPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_3::SystemPoller_1'
                         },
                         traceName: 'My_System_3::SystemPoller_1',
@@ -405,7 +398,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_System_3::Regular_Poller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_3::Regular_Poller_1'
                         },
                         traceName: 'My_System_3::Regular_Poller_1',
@@ -445,7 +437,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::My_System::Pull_Poller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System::Pull_Poller_1'
                         },
                         traceName: 'My_Namespace::My_System::Pull_Poller_1',
@@ -485,7 +476,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::My_System_2::Pull_Poller_2',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System_2::Pull_Poller_2'
                         },
                         traceName: 'My_Namespace::My_System_2::Pull_Poller_2',
@@ -525,7 +515,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::My_System_3::Pull_Poller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System_3::Pull_Poller_1'
                         },
                         traceName: 'My_Namespace::My_System_3::Pull_Poller_1',
@@ -565,7 +554,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::My_System_3::Pull_Poller_2',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System_3::Pull_Poller_2'
                         },
                         traceName: 'My_Namespace::My_System_3::Pull_Poller_2',
@@ -605,7 +593,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::My_System_3::SystemPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System_3::SystemPoller_1'
                         },
                         traceName: 'My_Namespace::My_System_3::SystemPoller_1',
@@ -645,7 +632,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::My_System_3::Regular_Poller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System_3::Regular_Poller_1'
                         },
                         traceName: 'My_Namespace::My_System_3::Regular_Poller_1',
@@ -685,7 +671,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.Pull_Poller_3::Pull_Poller_3',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.Pull_Poller_3::Pull_Poller_3'
                         },
                         traceName: 'Pull_Poller_3::Pull_Poller_3',
@@ -725,7 +710,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.Pull_Poller_4::Pull_Poller_4',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.Pull_Poller_4::Pull_Poller_4'
                         },
                         traceName: 'Pull_Poller_4::Pull_Poller_4',
@@ -765,7 +749,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::Pull_Poller_3::Pull_Poller_3',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::Pull_Poller_3::Pull_Poller_3'
                         },
                         traceName: 'My_Namespace::Pull_Poller_3::Pull_Poller_3',
@@ -805,7 +788,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::Pull_Poller_4::Pull_Poller_4',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::Pull_Poller_4::Pull_Poller_4'
                         },
                         traceName: 'My_Namespace::Pull_Poller_4::Pull_Poller_4',
@@ -881,7 +863,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Pull_Consumer.My_Pull_Consumer',
                             path: '/var/tmp/telemetry/Telemetry_Pull_Consumer.My_Pull_Consumer'
                         },
                         name: 'My_Pull_Consumer',
@@ -900,7 +881,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Pull_Consumer.My_Namespace::My_Pull_Consumer',
                             path: '/var/tmp/telemetry/Telemetry_Pull_Consumer.My_Namespace::My_Pull_Consumer'
                         },
                         name: 'My_Pull_Consumer',
@@ -922,7 +902,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.Pull_Poller_1::Pull_Poller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.Pull_Poller_1::Pull_Poller_1'
                         },
                         traceName: 'Pull_Poller_1::Pull_Poller_1',
@@ -962,7 +941,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::Pull_Poller_1::Pull_Poller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::Pull_Poller_1::Pull_Poller_1'
                         },
                         traceName: 'My_Namespace::Pull_Poller_1::Pull_Poller_1',

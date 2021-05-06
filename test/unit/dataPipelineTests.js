@@ -153,7 +153,7 @@ describe('Data Pipeline', () => {
         };
         return dataPipeline.process(dataCtx, options)
             .then(() => {
-                assert.deepStrictEqual(processActionsData, []);
+                assert.isEmpty(processActionsData);
             });
     });
 

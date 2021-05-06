@@ -33,7 +33,7 @@ const utilMisc = require('../../../src/lib/utils/misc');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
-describe('Tracer Util', () => {
+describe('Tracer', () => {
     afterEach(() => {
         sinon.restore();
     });
@@ -42,7 +42,6 @@ describe('Tracer Util', () => {
         const tracerDir = `${os.tmpdir()}/telemetry`; // os.tmpdir for windows + linux
         const tracerEncoding = 'utf8';
         const tracerFile = `${tracerDir}/tracerTest`;
-        const tracerName = 'tracerName';
         const fakeDate = new Date();
         let config;
         let coreStub;
@@ -79,10 +78,10 @@ describe('Tracer Util', () => {
             }
 
             config = {
-                name: tracerName,
                 path: tracerFile
             };
             tracerInst = tracer.fromConfig(config);
+            coreStub.logger.removeAllMessages();
         });
 
         afterEach(() => tracer.unregisterAll());
@@ -94,10 +93,9 @@ describe('Tracer Util', () => {
         describe('.fromConfig()', () => {
             it('should create tracer using provided location and write data to it', () => {
                 tracerInst = tracer.fromConfig({
-                    name: tracerName,
                     path: tracerFile
                 });
-                assert.deepStrictEqual(tracerInst.name, tracerName, 'should set name');
+                assert.match(tracerInst.name, /tracer_\d+/, 'should set name');
                 assert.deepStrictEqual(tracerInst.path, tracerFile, 'should set path');
                 assert.deepStrictEqual(tracerInst.encoding, 'utf8', 'should set default encoding');
                 assert.deepStrictEqual(tracerInst.maxRecords, 10, 'should set default maxRecords');
@@ -118,10 +116,9 @@ describe('Tracer Util', () => {
                     enable: true,
                     encoding: 'ascii',
                     maxRecords: 1,
-                    name: tracerName,
                     path: tracerFile
                 });
-                assert.deepStrictEqual(tracerInst.name, tracerName, 'should set name');
+                assert.match(tracerInst.name, /tracer_\d+/, 'should set name');
                 assert.deepStrictEqual(tracerInst.path, tracerFile, 'should set path');
                 assert.deepStrictEqual(tracerInst.encoding, 'ascii', 'should set custom encoding');
                 assert.deepStrictEqual(tracerInst.maxRecords, 1, 'should set custom maxRecords');
@@ -140,7 +137,6 @@ describe('Tracer Util', () => {
             it('should return existing tracer', () => {
                 let sameTracerInst;
                 tracerInst = tracer.fromConfig({
-                    name: 'newTracerName',
                     path: tracerFile,
                     options: {
                         encoding: 'ascii',
@@ -154,7 +150,6 @@ describe('Tracer Util', () => {
                             addTimestamps(['foobar'])
                         );
                         sameTracerInst = tracer.fromConfig({
-                            name: 'newTracerName',
                             path: tracerFile,
                             options: {
                                 encoding: 'ascii',
@@ -170,12 +165,12 @@ describe('Tracer Util', () => {
                         assert.strictEqual(sameTracerInst.fd, tracerInst.fd, 'fd should be the same');
                         testAssert.notIncludeMatch(
                             coreStub.logger.messages.debug,
-                            /Creating new tracer instance - 'newTracerName'/,
+                            new RegExp(`Creating new tracer instance for file '${tracerFile}'`),
                             'should not log debug message'
                         );
                         testAssert.notIncludeMatch(
                             coreStub.logger.messages.debug,
-                            /Updating tracer instance - 'tracerName'/,
+                            new RegExp(`Updating tracer instance for file '${tracerFile}'`),
                             'should not log debug message'
                         );
                     });
@@ -189,53 +184,20 @@ describe('Tracer Util', () => {
                     enable: false,
                     encoding: 'ascii',
                     maxRecords: 1,
-                    name: tracerName,
                     path: tracerFile
                 });
                 assert.notExists(tracerInst, 'should not create Tracer when disabled');
                 assert.lengthOf(tracer.registered(), 0, 'should have not tracers registered');
             });
 
-            it('should stop and create new tracer when path changed', () => {
-                let newTracer;
-                tracerInst = tracer.fromConfig({
-                    name: tracerName,
-                    path: tracerFile
-                });
-                return tracerInst.write('somethings')
-                    .then(() => {
-                        newTracer = tracer.fromConfig({
-                            name: tracerName,
-                            path: `${tracerFile}New`
-                        });
-                        return newTracer.write('something3');
-                    })
-                    .then(() => {
-                        assert.notDeepEqual(tracerInst, newTracer, 'should return different instance');
-                        assert.notDeepEqual(tracerInst.path, newTracer.path, 'should use different paths');
-
-                        const registered = tracer.registered();
-                        assert.notInclude(registered, tracerInst, 'should unregister pre-existing tracer');
-                        assert.include(registered, newTracer, 'should register new tracer');
-                        assert.isTrue(tracerInst.disabled, 'should disabled old instance');
-                        testAssert.includeMatch(
-                            coreStub.logger.messages.debug,
-                            /Updating tracer instance - 'tracerName'/,
-                            'should log debug message'
-                        );
-                    });
-            });
-
             it('should stop and create new tracer when maxRecords changed', () => {
                 let newTracer;
                 tracerInst = tracer.fromConfig({
-                    name: tracerName,
                     path: tracerFile
                 });
                 return tracerInst.write('somethings')
                     .then(() => {
                         newTracer = tracer.fromConfig({
-                            name: tracerName,
                             path: tracerFile,
                             maxRecords: 100
                         });
@@ -251,7 +213,7 @@ describe('Tracer Util', () => {
                         assert.isTrue(tracerInst.disabled, 'should disabled old instance');
                         testAssert.includeMatch(
                             coreStub.logger.messages.debug,
-                            /Updating tracer instance - 'tracerName'/,
+                            new RegExp(`Updating tracer instance for file '${tracerFile}'`),
                             'should log debug message'
                         );
                     });
@@ -260,13 +222,11 @@ describe('Tracer Util', () => {
             it('should stop and create new tracer when encoding changed', () => {
                 let newTracer;
                 tracerInst = tracer.fromConfig({
-                    name: tracerName,
                     path: tracerFile
                 });
                 return tracerInst.write('somethings')
                     .then(() => {
                         newTracer = tracer.fromConfig({
-                            name: tracerName,
                             path: tracerFile,
                             encoding: 'ascii'
                         });
@@ -282,7 +242,7 @@ describe('Tracer Util', () => {
                         assert.isTrue(tracerInst.disabled, 'should disabled old instance');
                         testAssert.includeMatch(
                             coreStub.logger.messages.debug,
-                            /Updating tracer instance - 'tracerName'/,
+                            new RegExp(`Updating tracer instance for file '${tracerFile}'`),
                             'should log debug message'
                         );
                     });
@@ -291,8 +251,8 @@ describe('Tracer Util', () => {
 
         describe('.registered()', () => {
             it('should return registered tracers', () => {
-                const tracerInst2 = tracer.fromConfig({ name: 'tracer2' });
-                const tracerInst3 = tracer.fromConfig({ name: 'tracer3' });
+                const tracerInst2 = tracer.fromConfig({ path: 'tracer2' });
+                const tracerInst3 = tracer.fromConfig({ path: 'tracer3' });
                 const registered = tracer.registered();
 
                 assert.lengthOf(registered, 3, 'should register 3 tracers');
@@ -310,8 +270,8 @@ describe('Tracer Util', () => {
                 }));
 
             it('should unregister all tracers', () => {
-                const tracerInst2 = tracer.fromConfig({ name: 'tracer2' });
-                const tracerInst3 = tracer.fromConfig({ name: 'tracer3' });
+                const tracerInst2 = tracer.fromConfig({ path: 'tracer2' });
+                const tracerInst3 = tracer.fromConfig({ path: 'tracer3' });
                 assert.lengthOf(tracer.registered(), 3, 'should register 3 tracers');
                 return tracer.unregisterAll()
                     .then(() => {
@@ -339,8 +299,8 @@ describe('Tracer Util', () => {
 
         describe('constructor', () => {
             it('should create tracer using provided location and write data to it', () => {
-                tracerInst = new tracer.Tracer('tracerName', tracerFile);
-                assert.deepStrictEqual(tracerInst.name, 'tracerName', 'should set name');
+                tracerInst = new tracer.Tracer(tracerFile);
+                assert.match(tracerInst.name, /tracer_\d+/, 'should set name');
                 assert.deepStrictEqual(tracerInst.path, tracerFile, 'should set path');
                 assert.deepStrictEqual(tracerInst.encoding, 'utf8', 'should set default encoding');
                 assert.deepStrictEqual(tracerInst.maxRecords, 10, 'should set default maxRecords');
@@ -357,11 +317,11 @@ describe('Tracer Util', () => {
             });
 
             it('should create tracer using provided location and options and write data to it', () => {
-                tracerInst = new tracer.Tracer('tracerName', tracerFile, {
+                tracerInst = new tracer.Tracer(tracerFile, {
                     encoding: 'ascii',
                     maxRecords: 1
                 });
-                assert.deepStrictEqual(tracerInst.name, 'tracerName', 'should set name');
+                assert.match(tracerInst.name, /tracer_\d+/, 'should set name');
                 assert.deepStrictEqual(tracerInst.path, tracerFile, 'should set path');
                 assert.deepStrictEqual(tracerInst.encoding, 'ascii', 'should set default encoding');
                 assert.deepStrictEqual(tracerInst.maxRecords, 1, 'should set default maxRecords');
@@ -382,7 +342,6 @@ describe('Tracer Util', () => {
             it('should try to create parent directory', () => {
                 sinon.stub(utilMisc.fs, 'mkdir').resolves();
                 tracerInst = tracer.fromConfig({
-                    name: tracerName,
                     path: '/test/inaccessible/directory/file'
                 });
                 return tracerInst.write('foobar')
@@ -405,7 +364,6 @@ describe('Tracer Util', () => {
                     return Promise.reject(error);
                 });
                 tracerInst = tracer.fromConfig({
-                    name: tracerName,
                     path: '/test/inaccessible/directory/file'
                 });
                 return tracerInst.write('foobar')
@@ -421,7 +379,6 @@ describe('Tracer Util', () => {
             it('should not reject when unable to create parent directory', () => {
                 sinon.stub(utilMisc.fs, 'mkdir').rejects(new Error('mkdir error'));
                 tracerInst = tracer.fromConfig({
-                    name: tracerName,
                     path: '/test/inaccessible/directory/file'
                 });
                 return tracerInst.write('foobar')
@@ -673,7 +630,7 @@ describe('Tracer Util', () => {
         describe('.stop()', () => {
             it('should not fail when unable to close file using descriptor', () => {
                 sinon.stub(utilMisc.fs, 'close').rejects(new Error('close error'));
-                coreStub.logger.messages.debug = [];
+                coreStub.logger.removeAllMessages();
                 return tracerInst.write('test')
                     .then(() => tracerInst.stop())
                     .then(() => {
@@ -722,7 +679,7 @@ describe('Tracer Util', () => {
 
             return configWorker.processDeclaration({ class: 'Telemetry' })
                 .then(() => {
-                    assert.deepStrictEqual(tracer.registered(), [], 'should have no registered tracers');
+                    assert.isEmpty(tracer.registered(), 'should have no registered tracers');
                 });
         });
 
@@ -751,11 +708,6 @@ describe('Tracer Util', () => {
             .then(() => {
                 const registered = tracer.registered();
                 assert.sameDeepMembers(
-                    registered.map(t => t.name),
-                    ['Telemetry_Consumer.My_Consumer', 'Telemetry_Listener.My_Listener'],
-                    'should have 2 registered tracers'
-                );
-                assert.sameDeepMembers(
                     registered.map(t => t.path),
                     ['/var/tmp/telemetry/Telemetry_Consumer.My_Consumer', 'listener'],
                     'should configure destination as expected'
@@ -764,7 +716,7 @@ describe('Tracer Util', () => {
                     .then(() => registered);
             })
             .then((registeredBefore) => {
-                assert.deepStrictEqual(tracer.registered(), [], 'should have no registered tracers');
+                assert.isEmpty(tracer.registered(), 'should have no registered tracers');
                 registeredBefore.forEach((tracerInst) => {
                     assert.isTrue(tracerInst.disabled, 'should be disabled once unregistered');
                 });
@@ -794,11 +746,6 @@ describe('Tracer Util', () => {
         })
             .then(() => {
                 const registered = tracer.registered();
-                assert.sameDeepMembers(
-                    registered.map(t => t.name),
-                    ['Telemetry_Consumer.My_Consumer', 'Telemetry_Listener.My_Listener'],
-                    'should have 2 registered tracers'
-                );
                 assert.sameDeepMembers(
                     registered.map(t => t.path),
                     ['/var/tmp/telemetry/Telemetry_Consumer.My_Consumer', 'listener'],
@@ -831,14 +778,6 @@ describe('Tracer Util', () => {
                 registeredBefore.forEach((tracerInst) => {
                     assert.isTrue(tracerInst.disabled, 'should be disabled once unregistered');
                 });
-                assert.sameDeepMembers(
-                    tracer.registered().map(t => t.name),
-                    [
-                        'Telemetry_Listener.My_Disabled_Listener',
-                        'Telemetry_System_Poller.My_Enabled_Poller_With_Disabled_Trace::My_Enabled_Poller_With_Disabled_Trace'
-                    ],
-                    'should have 2 registered tracers'
-                );
                 assert.sameDeepMembers(
                     tracer.registered().map(t => t.path),
                     [
@@ -878,11 +817,6 @@ describe('Tracer Util', () => {
             .then(() => {
                 const registered = tracer.registered(); // remember those instances - should survive all updates
                 assert.sameDeepMembers(
-                    registered.map(t => t.name),
-                    ['Telemetry_Consumer.My_Consumer', 'Telemetry_Listener.My_Listener'],
-                    'should have 2 registered tracers'
-                );
-                assert.sameDeepMembers(
                     registered.map(t => t.path),
                     ['/var/tmp/telemetry/Telemetry_Consumer.My_Consumer', 'listener'],
                     'should configure destination as expected'
@@ -906,16 +840,6 @@ describe('Tracer Util', () => {
                 registeredBefore.forEach((tracerInst) => {
                     assert.isFalse(tracerInst.disabled, 'should not disable pre-existing tracers');
                 });
-                assert.sameDeepMembers(
-                    tracer.registered().map(t => t.name),
-                    [
-                        'Telemetry_Consumer.My_Consumer',
-                        'Telemetry_Listener.My_Listener',
-                        'Telemetry_Consumer.Namespace::My_Consumer',
-                        'Telemetry_Listener.Namespace::My_Listener'
-                    ],
-                    'should have 4 registered tracers'
-                );
                 assert.sameDeepMembers(
                     tracer.registered().map(t => t.path),
                     [
@@ -946,15 +870,6 @@ describe('Tracer Util', () => {
                     assert.isFalse(tracerInst.disabled, 'should not disable pre-existing tracers');
                 });
                 assert.sameDeepMembers(
-                    tracer.registered().map(t => t.name),
-                    [
-                        'Telemetry_Consumer.My_Consumer',
-                        'Telemetry_Listener.My_Listener',
-                        'Telemetry_Listener.Namespace::My_Listener'
-                    ],
-                    'should have 3 registered tracers'
-                );
-                assert.sameDeepMembers(
                     tracer.registered().map(t => t.path),
                     [
                         '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer',
@@ -972,11 +887,6 @@ describe('Tracer Util', () => {
                 registeredBefore.forEach((tracerInst) => {
                     assert.isFalse(tracerInst.disabled, 'should not disable pre-existing tracers');
                 });
-                assert.sameDeepMembers(
-                    tracer.registered().map(t => t.name),
-                    ['Telemetry_Consumer.My_Consumer', 'Telemetry_Listener.My_Listener'],
-                    'should have 2 registered tracers'
-                );
                 assert.sameDeepMembers(
                     tracer.registered().map(t => t.path),
                     ['/var/tmp/telemetry/Telemetry_Consumer.My_Consumer', 'listener'],

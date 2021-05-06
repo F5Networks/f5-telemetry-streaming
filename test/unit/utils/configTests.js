@@ -52,8 +52,8 @@ describe('Config Util', () => {
     });
 
     describe('.getComponents', () => {
-        it('should return empty array when no config passed', () => assert.deepStrictEqual(configUtil.getComponents(), []));
-        it('should return empty array when no .components', () => assert.deepStrictEqual(configUtil.getComponents({}), []));
+        it('should return empty array when no config passed', () => assert.isEmpty(configUtil.getComponents()));
+        it('should return empty array when no .components', () => assert.isEmpty(configUtil.getComponents({})));
 
         configUtilTestData.getComponents.tests.forEach((testConf) => {
             testUtil.getCallableIt(testConf)(testConf.name, () => parseDeclaration(testConf.declaration)
@@ -91,7 +91,7 @@ describe('Config Util', () => {
             return parseDeclaration(rawDecl)
                 .then(() => {
                     let listener = configUtil.getTelemetryListeners(configWorker.currentConfig, 'f5telemetry_default')[0];
-                    assert.deepStrictEqual(configUtil.getReceivers(configWorker.currentConfig, listener), []);
+                    assert.isEmpty(configUtil.getReceivers(configWorker.currentConfig, listener));
 
                     listener = configUtil.getTelemetryListeners(configWorker.currentConfig, 'My_Namespace')[0];
                     assert.deepStrictEqual(
@@ -283,7 +283,7 @@ describe('Config Util', () => {
 
                     configUtil.removeComponents(parsedConf);
                     assert.deepStrictEqual(parsedConf.mappings, {});
-                    assert.deepStrictEqual(parsedConf.components, []);
+                    assert.isEmpty(parsedConf.components);
                 });
         });
 

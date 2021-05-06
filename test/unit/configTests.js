@@ -81,7 +81,6 @@ describe('Config', () => {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Consumer',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer'
                         },
                         allowSelfSignedCert: false,
@@ -142,7 +141,6 @@ describe('Config', () => {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                name: 'Telemetry_Consumer.My_Consumer',
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer'
                             },
                             allowSelfSignedCert: false
@@ -354,7 +352,6 @@ describe('Config', () => {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        name: 'Telemetry_Consumer.My_Consumer',
                         path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer'
                     },
                     allowSelfSignedCert: false

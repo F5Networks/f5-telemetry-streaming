@@ -84,7 +84,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Poller_1::My_Poller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Poller_1::My_Poller_1'
                         },
                         interval: 300,
@@ -124,7 +123,6 @@ module.exports = {
                             enable: true,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Poller_2::My_Poller_2',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Poller_2::My_Poller_2'
                         },
                         interval: 600,
@@ -175,7 +173,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1'
                         },
                         traceName: 'My_Consumer_1',
@@ -187,7 +184,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::My_Poller_1::My_Poller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_Poller_1::My_Poller_1'
                         },
                         interval: 300,
@@ -227,7 +223,6 @@ module.exports = {
                             enable: true,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::My_Poller_2::My_Poller_2',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_Poller_2::My_Poller_2'
                         },
                         interval: 600,
@@ -278,7 +273,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace::My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_1'
                         },
                         traceName: 'My_Namespace::My_Consumer_1',
@@ -357,7 +351,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_System_1::My_Poller_1',
                             path: 'fromSystem'
                         },
                         interval: 500,
@@ -397,7 +390,6 @@ module.exports = {
                             enable: true,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_System_2::My_Poller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_2::My_Poller_1'
                         },
                         interval: 500,
@@ -442,7 +434,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1'
                         },
                         traceName: 'My_Consumer_1',
@@ -454,7 +445,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::My_System_1::My_Poller_1',
                             path: 'fromSystem'
                         },
                         interval: 500,
@@ -494,7 +484,6 @@ module.exports = {
                             enable: true,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::My_System_2::My_Poller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System_2::My_Poller_1'
                         },
                         interval: 500,
@@ -539,7 +528,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace::My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_1'
                         },
                         traceName: 'My_Namespace::My_Consumer_1',
@@ -639,7 +627,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Poller_1::My_Poller_1',
                             path: 'something'
                         },
                         interval: 10,
@@ -695,7 +682,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1'
                         },
                         traceName: 'My_Consumer_1',
@@ -708,7 +694,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::My_Poller_1::My_Poller_1',
                             path: 'something'
                         },
                         interval: 10,
@@ -764,7 +749,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace::My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_1'
                         },
                         traceName: 'My_Namespace::My_Consumer_1',
@@ -876,7 +860,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_System::My_Poller_1',
                             path: 'something'
                         },
                         interval: 10,
@@ -928,7 +911,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1'
                         },
                         traceName: 'My_Consumer_1',
@@ -941,7 +923,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::My_System::My_Poller_1',
                             path: 'something'
                         },
                         interval: 10,
@@ -993,7 +974,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace::My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_1'
                         },
                         traceName: 'My_Namespace::My_Consumer_1',
@@ -1089,7 +1069,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_System::Poller_With_Actions',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::Poller_With_Actions'
                         },
                         interval: 300,
@@ -1146,7 +1125,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1'
                         },
                         traceName: 'My_Consumer_1',
@@ -1159,7 +1137,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::My_System::Poller_With_Actions',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System::Poller_With_Actions'
                         },
                         interval: 300,
@@ -1216,7 +1193,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace::My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_1'
                         },
                         traceName: 'My_Namespace::My_Consumer_1',
@@ -1308,7 +1284,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_System::SystemPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1'
                         },
                         interval: 300,
@@ -1365,7 +1340,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1'
                         },
                         traceName: 'My_Consumer_1',
@@ -1378,7 +1352,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::My_System::SystemPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System::SystemPoller_1'
                         },
                         interval: 300,
@@ -1435,7 +1408,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace::My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_1'
                         },
                         traceName: 'My_Namespace::My_Consumer_1',
@@ -1489,7 +1461,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_System::SystemPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1'
                         },
                         interval: 234,
@@ -1534,7 +1505,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1'
                         },
                         traceName: 'My_Consumer_1',
@@ -1547,7 +1517,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::My_System::SystemPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System::SystemPoller_1'
                         },
                         interval: 234,
@@ -1592,7 +1561,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace::My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_1'
                         },
                         traceName: 'My_Namespace::My_Consumer_1',
@@ -1722,7 +1690,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1'
                         },
                         allowSelfSignedCert: false,
@@ -1749,7 +1716,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace::My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_1'
                         },
                         allowSelfSignedCert: false,
@@ -1769,7 +1735,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace_2::My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace_2::My_Consumer_1'
                         },
                         allowSelfSignedCert: false,
@@ -1789,7 +1754,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_System::SystemPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1'
                         },
                         traceName: 'My_System::SystemPoller_1',
@@ -1829,7 +1793,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_System::My_Poller_2',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::My_Poller_2'
                         },
                         traceName: 'My_System::My_Poller_2',
@@ -1869,7 +1832,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::My_System::SystemPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System::SystemPoller_1'
                         },
                         traceName: 'My_Namespace::My_System::SystemPoller_1',
@@ -1909,7 +1871,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::My_System::My_Poller_2',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System::My_Poller_2'
                         },
                         traceName: 'My_Namespace::My_System::My_Poller_2',
@@ -1949,7 +1910,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace_2::My_System::SystemPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace_2::My_System::SystemPoller_1'
                         },
                         traceName: 'My_Namespace_2::My_System::SystemPoller_1',
@@ -1989,7 +1949,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace_2::My_System::My_Poller_2',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace_2::My_System::My_Poller_2'
                         },
                         traceName: 'My_Namespace_2::My_System::My_Poller_2',
@@ -2029,7 +1988,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Poller_1::My_Poller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Poller_1::My_Poller_1'
                         },
                         traceName: 'My_Poller_1::My_Poller_1',
@@ -2069,7 +2027,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::My_Poller_1::My_Poller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_Poller_1::My_Poller_1'
                         },
                         traceName: 'My_Namespace::My_Poller_1::My_Poller_1',
@@ -2109,7 +2066,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace_2::My_Poller_1::My_Poller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace_2::My_Poller_1::My_Poller_1'
                         },
                         traceName: 'My_Namespace_2::My_Poller_1::My_Poller_1',
@@ -2173,7 +2129,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_System::SystemPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1'
                         },
                         interval: 234,
@@ -2214,7 +2169,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::My_System::SystemPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System::SystemPoller_1'
                         },
                         interval: 234,
@@ -2351,7 +2305,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_System::SystemPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1'
                         },
                         interval: 234,
@@ -2392,7 +2345,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_System_2::SystemPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_2::SystemPoller_1'
                         },
                         interval: 234,
@@ -2437,7 +2389,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1'
                         },
                         traceName: 'My_Consumer_1',
@@ -2454,7 +2405,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Consumer_2',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_2'
                         },
                         traceName: 'My_Consumer_2',
@@ -2467,7 +2417,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::My_System::SystemPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System::SystemPoller_1'
                         },
                         interval: 234,
@@ -2508,7 +2457,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace::My_System_2::SystemPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System_2::SystemPoller_1'
                         },
                         interval: 234,
@@ -2553,7 +2501,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace::My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_1'
                         },
                         traceName: 'My_Namespace::My_Consumer_1',
@@ -2570,7 +2517,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace::My_Consumer_2',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_2'
                         },
                         traceName: 'My_Namespace::My_Consumer_2',
@@ -2583,7 +2529,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace_2::My_System::SystemPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace_2::My_System::SystemPoller_1'
                         },
                         interval: 234,
@@ -2624,7 +2569,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_System_Poller.My_Namespace_2::My_System_2::SystemPoller_1',
                             path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace_2::My_System_2::SystemPoller_1'
                         },
                         interval: 234,
@@ -2669,7 +2613,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace_2::My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace_2::My_Consumer_1'
                         },
                         traceName: 'My_Namespace_2::My_Consumer_1',
@@ -2686,7 +2629,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace_2::My_Consumer_2',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace_2::My_Consumer_2'
                         },
                         traceName: 'My_Namespace_2::My_Consumer_2',

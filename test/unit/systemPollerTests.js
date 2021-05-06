@@ -26,6 +26,7 @@ const systemPoller = require('../../src/lib/systemPoller');
 const systemPollerConfigTestsData = require('./data/systemPollerTestsData');
 const SystemStats = require('../../src/lib/systemStats');
 const teemReporter = require('../../src/lib/teemReporter');
+const testAssert = require('./shared/assert');
 const testUtil = require('./shared/util');
 const tracer = require('../../src/lib/utils/tracer');
 const utilMisc = require('../../src/lib/utils/misc');
@@ -300,6 +301,12 @@ describe('System Poller', () => {
             let pollerTimers;
             let pollerTimersBefore;
 
+            const registeredTracerPaths = () => {
+                const paths = tracer.registered().map(t => t.path);
+                paths.sort();
+                return paths;
+            };
+
             beforeEach(() => {
                 pollerTimers = {};
                 sinon.stub(systemPoller, 'getPollerTimers').returns(pollerTimers);
@@ -310,7 +317,7 @@ describe('System Poller', () => {
                         assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].timer.args[0].traceName, 'My_System::SystemPoller_1');
                         assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].config.traceName, 'My_System::SystemPoller_1');
                         assert.lengthOf(tracer.registered(), 1);
-                        assert.strictEqual(tracer.registered()[0].name, 'Telemetry_System_Poller.My_System::SystemPoller_1');
+                        testAssert.sameOrderedMatches(registeredTracerPaths(), ['Telemetry_System_Poller.My_System::SystemPoller_1']);
                         pollerTimersBefore = Object.assign({}, pollerTimers);
                     });
             });
@@ -339,7 +346,6 @@ describe('System Poller', () => {
                         enable: true,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        name: 'Telemetry_System_Poller.My_System::SystemPoller_1',
                         path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1'
                     },
                     tracer: tracer.registered()[0],
@@ -371,7 +377,7 @@ describe('System Poller', () => {
                 return configWorker.processDeclaration(testUtil.deepCopy(newDeclaration))
                     .then(() => {
                         assert.lengthOf(tracer.registered(), 1);
-                        assert.strictEqual(tracer.registered()[0].name, 'Telemetry_System_Poller.My_System::SystemPoller_1');
+                        testAssert.sameOrderedMatches(registeredTracerPaths(), ['Telemetry_System_Poller.My_System::SystemPoller_1']);
                         assert.deepStrictEqual(pollerTimers['My_System::SystemPoller_1'].config, expectedPollerConfig);
                         assert.isTrue(pollerTimers['My_System::SystemPoller_1'].timer.isActive(), 'should be active');
                         assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].timer.intervalInS, 500, 'should set configured interval');
@@ -405,7 +411,7 @@ describe('System Poller', () => {
                         assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].timer.intervalInS, 180, 'should set configured interval');
                         assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].config.traceName, 'My_System::SystemPoller_1');
                         assert.lengthOf(tracer.registered(), 1);
-                        assert.strictEqual(tracer.registered()[0].name, 'Telemetry_System_Poller.My_System::SystemPoller_1');
+                        testAssert.sameOrderedMatches(registeredTracerPaths(), ['Telemetry_System_Poller.My_System::SystemPoller_1']);
                     });
             });
 
@@ -431,7 +437,7 @@ describe('System Poller', () => {
                         assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].timer.intervalInS, 180, 'should set configured interval');
                         assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].config.traceName, 'My_System::SystemPoller_1');
                         assert.lengthOf(tracer.registered(), 1);
-                        assert.strictEqual(tracer.registered()[0].name, 'Telemetry_System_Poller.My_System::SystemPoller_1');
+                        testAssert.sameOrderedMatches(registeredTracerPaths(), ['Telemetry_System_Poller.My_System::SystemPoller_1']);
                     });
             });
 
@@ -450,7 +456,7 @@ describe('System Poller', () => {
                         assert.strictEqual(pollerTimers['My_System_New::SystemPoller_1'].timer.intervalInS, 500, 'should set configured interval');
                         assert.strictEqual(pollerTimers['My_System_New::SystemPoller_1'].config.traceName, 'My_System_New::SystemPoller_1');
                         assert.lengthOf(tracer.registered(), 1);
-                        assert.strictEqual(tracer.registered()[0].name, 'Telemetry_System_Poller.My_System::SystemPoller_1');
+                        testAssert.sameOrderedMatches(registeredTracerPaths(), ['Telemetry_System_Poller.My_System::SystemPoller_1']);
                     });
             });
 
@@ -485,14 +491,11 @@ describe('System Poller', () => {
                         assert.strictEqual(pollerTimers['My_System_New::SystemPoller_1'].timer.intervalInS, 10, 'should set configured interval');
                         assert.isTrue(pollerTimers['My_System_New::My_Poller'].timer.isActive(), 'should be active');
                         assert.strictEqual(pollerTimers['My_System_New::My_Poller'].timer.intervalInS, 500, 'should set configured interval');
-                        assert.sameMembers(
-                            tracer.registered().map(t => t.name),
-                            [
-                                'Telemetry_System_Poller.My_System::SystemPoller_1',
-                                'Telemetry_System_Poller.My_System_New::SystemPoller_1',
-                                'Telemetry_System_Poller.My_System_New::My_Poller'
-                            ]
-                        );
+                        testAssert.sameOrderedMatches(registeredTracerPaths(), [
+                            'Telemetry_System_Poller.My_System::SystemPoller_1',
+                            'Telemetry_System_Poller.My_System_New::My_Poller',
+                            'Telemetry_System_Poller.My_System_New::SystemPoller_1'
+                        ]);
                         assert.deepStrictEqual(
                             pollerTimers['My_System_New::My_Poller'].timer.args,
                             [
@@ -509,10 +512,9 @@ describe('System Poller', () => {
                                         enable: true,
                                         encoding: 'utf8',
                                         maxRecords: 10,
-                                        name: 'Telemetry_System_Poller.My_System_New::My_Poller',
                                         path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_New::My_Poller'
                                     },
-                                    tracer: tracer.registered().find(t => t.name === 'Telemetry_System_Poller.My_System_New::My_Poller'),
+                                    tracer: tracer.registered().find(t => /Telemetry_System_Poller.My_System_New::My_Poller/.test(t.path)),
                                     credentials: {
                                         username: undefined,
                                         passphrase: undefined
@@ -555,11 +557,10 @@ describe('System Poller', () => {
                                         enable: true,
                                         encoding: 'utf8',
                                         maxRecords: 10,
-                                        name: 'Telemetry_System_Poller.My_System_New::SystemPoller_1',
                                         path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_New::SystemPoller_1'
                                     },
                                     systemName: 'My_System_New',
-                                    tracer: tracer.registered().find(t => t.name === 'Telemetry_System_Poller.My_System_New::SystemPoller_1'),
+                                    tracer: tracer.registered().find(t => /Telemetry_System_Poller.My_System_New::SystemPoller_1/.test(t.path)),
                                     traceName: 'My_System_New::SystemPoller_1',
                                     credentials: {
                                         username: undefined,
@@ -659,7 +660,6 @@ describe('System Poller', () => {
                                         enable: true,
                                         encoding: 'utf8',
                                         maxRecords: 10,
-                                        name: 'Telemetry_System_Poller.My_System::SystemPoller_1',
                                         path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1'
                                     },
                                     tracer: tracer.registered()[0],
@@ -714,13 +714,10 @@ describe('System Poller', () => {
                         assert.strictEqual(pollerTimers['My_System::SystemPoller_1'].timer.intervalInS, 180, 'should set configured interval');
                         assert.isTrue(pollerTimers['NewNamespace::My_System::SystemPoller_1'].timer.isActive(), 'should be active');
                         assert.strictEqual(pollerTimers['NewNamespace::My_System::SystemPoller_1'].timer.intervalInS, 500, 'should set configured interval');
-                        assert.sameMembers(
-                            tracer.registered().map(t => t.name),
-                            [
-                                'Telemetry_System_Poller.My_System::SystemPoller_1',
-                                'Telemetry_System_Poller.NewNamespace::My_System::SystemPoller_1'
-                            ]
-                        );
+                        testAssert.sameOrderedMatches(registeredTracerPaths(), [
+                            'Telemetry_System_Poller.My_System::SystemPoller_1',
+                            'Telemetry_System_Poller.NewNamespace::My_System::SystemPoller_1'
+                        ]);
                     });
             });
         });

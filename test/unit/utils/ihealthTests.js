@@ -50,7 +50,7 @@ describe('iHealth Utils', () => {
         describe('constructor', () => {
             it('should set defaults', () => {
                 assert.strictEqual(deviceApiInst.host, remoteHostName, 'should match host value');
-                assert.deepStrictEqual(deviceApiInst.connection, {}, 'should have empty connection options');
+                assert.isEmpty(deviceApiInst.connection, 'should have empty connection options');
                 assert.deepStrictEqual(deviceApiInst.credentials, {
                     token: 'token' // see beforeEach
                 }, 'should have empty credentials');
@@ -1110,7 +1110,7 @@ describe('iHealth Utils', () => {
                 return qkmInst.process()
                     .then((localPath) => {
                         assert.strictEqual(localPath, '/remote/path/to/remote.qkview');
-                        assert.deepStrictEqual(removedFiles, []);
+                        assert.isEmpty(removedFiles);
                     });
             });
         });

@@ -81,7 +81,6 @@ function assignTracerConfig(component) {
             enable: component.enable && !!component.trace,
             encoding: 'utf8',
             maxRecords: 10,
-            name: `${component.class}.${component.traceName}`,
             path: `/var/tmp/telemetry/${component.class}.${component.traceName}`
         };
         component.trace = typeof component.trace !== 'object' ? {} : component.trace;

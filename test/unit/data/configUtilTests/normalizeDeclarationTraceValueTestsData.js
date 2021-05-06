@@ -152,7 +152,6 @@ function generateDeclarationAndExpectedOutput(trace) {
                         enable: !!trace.systemPoller,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        name: 'Telemetry_System_Poller.My_Poller_2::My_Poller_2',
                         path: typeof trace.systemPoller === 'string' ? trace.systemPoller : '/var/tmp/telemetry/Telemetry_System_Poller.My_Poller_2::My_Poller_2'
                     },
                     traceName: 'My_Poller_2::My_Poller_2'
@@ -192,7 +191,6 @@ function generateDeclarationAndExpectedOutput(trace) {
                         enable: !!trace.expectedSystemPoller,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        name: 'Telemetry_System_Poller.My_System::My_Poller_1',
                         path: typeof trace.expectedSystemPoller === 'string' ? trace.expectedSystemPoller : '/var/tmp/telemetry/Telemetry_System_Poller.My_System::My_Poller_1'
                     },
                     traceName: 'My_System::My_Poller_1'
@@ -232,7 +230,6 @@ function generateDeclarationAndExpectedOutput(trace) {
                         enable: !!trace.expectedSystemPoller,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        name: 'Telemetry_System_Poller.My_System::SystemPoller_1',
                         path: typeof trace.expectedSystemPoller === 'string' ? trace.expectedSystemPoller : '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1'
                     },
                     traceName: 'My_System::SystemPoller_1'
@@ -245,7 +242,6 @@ function generateDeclarationAndExpectedOutput(trace) {
                         enable: !!trace.expectedIHealthPoller,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        name: 'Telemetry_iHealth_Poller.My_System::iHealthPoller_1',
                         path: typeof trace.expectedIHealthPoller === 'string' ? trace.expectedIHealthPoller : '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System::iHealthPoller_1'
                     },
                     iHealth: {
@@ -306,7 +302,6 @@ function generateDeclarationAndExpectedOutput(trace) {
                         enable: !!trace.expectedIHealthPoller,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        name: 'Telemetry_iHealth_Poller.My_System_2::My_iHealth_Poller',
                         path: typeof trace.expectedIHealthPoller === 'string' ? trace.expectedIHealthPoller : '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System_2::My_iHealth_Poller'
                     },
                     iHealth: {

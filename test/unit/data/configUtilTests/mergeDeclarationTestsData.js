@@ -74,7 +74,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1'
                         },
                         allowSelfSignedCert: false,
@@ -90,7 +89,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Listener_1',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1'
                         },
                         port: 6514,
@@ -118,7 +116,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace::My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_1'
                         },
                         allowSelfSignedCert: false,
@@ -134,7 +131,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Namespace::My_Listener_1',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_1'
                         },
                         port: 6514,
@@ -200,7 +196,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1'
                         },
                         allowSelfSignedCert: false,
@@ -216,7 +211,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Listener_1',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1'
                         },
                         port: 6514,
@@ -244,7 +238,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace::My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_1'
                         },
                         allowSelfSignedCert: false,
@@ -260,7 +253,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Namespace::My_Listener_1',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_1'
                         },
                         port: 6514,
@@ -339,7 +331,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1'
                         },
                         allowSelfSignedCert: false,
@@ -355,7 +346,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Listener_1',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1'
                         },
                         port: 6514,
@@ -383,7 +373,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace::My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_1'
                         },
                         allowSelfSignedCert: false,
@@ -399,7 +388,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Namespace::My_Listener_1',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_1'
                         },
                         port: 6514,
@@ -427,7 +415,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace_2::My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace_2::My_Consumer_1'
                         },
                         allowSelfSignedCert: false,
@@ -443,7 +430,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Namespace_2::My_Listener_1',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace_2::My_Listener_1'
                         },
                         port: 6514,
@@ -539,7 +525,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Consumer_1_Overwritten',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1_Overwritten'
                         },
                         allowSelfSignedCert: false,
@@ -555,7 +540,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Listener_1_Overwritten',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1_Overwritten'
                         },
                         port: 6514,
@@ -583,7 +567,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace::My_Consumer_1_Overwritten',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_1_Overwritten'
                         },
                         allowSelfSignedCert: false,
@@ -599,7 +582,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Namespace::My_Listener_1_Overwritten',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_1_Overwritten'
                         },
                         port: 6514,
@@ -627,7 +609,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Consumer.My_Namespace_2::My_Consumer_1',
                             path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace_2::My_Consumer_1'
                         },
                         allowSelfSignedCert: false,
@@ -643,7 +624,6 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            name: 'Telemetry_Listener.My_Namespace_2::My_Listener_1',
                             path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace_2::My_Listener_1'
                         },
                         port: 6514,

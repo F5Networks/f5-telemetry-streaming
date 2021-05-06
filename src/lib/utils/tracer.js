@@ -20,6 +20,11 @@ const DEFAULT_MAX_RECORDS = 10;
 const DEFAULT_ENCODING = 'utf8';
 
 /**
+ * Using it for logging only
+ */
+let TRACER_ID = 0;
+
+/**
  * Registered instances
  *
  * @type {Object<string, Tracer>}
@@ -43,11 +48,11 @@ class Tracer {
     /**
      * Constructor
      *
-     * @param {string} name - tracer's name
      * @param {string} path - path to file
      * @param {TracerOptions} [options] - options
      */
-    constructor(name, path, options) {
+    constructor(path, options) {
+        TRACER_ID += 1;
         options = setTracerOptionsDefaults(options);
         this._cache = [];
         this._fd = undefined;
@@ -56,7 +61,7 @@ class Tracer {
          * read-only properties below that should never be changed
          */
         Object.defineProperty(this, 'name', {
-            value: name
+            value: `tracer_${TRACER_ID}`
         });
         Object.defineProperty(this, 'path', {
             value: path
@@ -356,7 +361,7 @@ class Tracer {
 function fromConfig(config) {
     let tracer = null;
     if (config.enable !== false) {
-        tracer = getOrCreate(config.name, config.path, {
+        tracer = getOrCreate(config.path, {
             encoding: config.encoding,
             maxRecords: config.maxRecords
         });
@@ -390,9 +395,9 @@ function unregister(tracer, catchErr) {
         // new tracer will be created if needed
         promise = promise.then(() => tracer.stop());
         if (catchErr) {
-            promise = promise.catch(err => logger.debugException(`Uncaught error on attempt to unregister tracer "${tracer.name}"`, err));
+            promise = promise.catch(err => logger.debugException(`Uncaught error on attempt to unregister tracer for file '${tracer.path}'`, err));
         }
-        delete INSTANCES[tracer.name];
+        delete INSTANCES[tracer.path];
     }
     return promise;
 }
@@ -457,28 +462,26 @@ function setTracerOptionsDefaults(options) {
  * Get Tracer instance or create new one
  *
  * @public
- * @param {string} name - tracer name
  * @param {string} path - destination path
  * @param {TracerOptions} [options] - Tracer options
  *
  * @returns {Tracer} Tracer instance
  */
-function getOrCreate(name, path, options) {
+function getOrCreate(path, options) {
     options = setTracerOptionsDefaults(options);
-    let tracer = INSTANCES[name];
+    let tracer = INSTANCES[path];
 
-    if (tracer && (tracer.path !== path
-        || tracer.maxRecords !== options.maxRecords
+    if (tracer && (tracer.maxRecords !== options.maxRecords
         || tracer.encoding !== options.encoding)) {
-        logger.debug(`Updating tracer instance - '${name}' file '${path}'`);
+        logger.debug(`Updating tracer instance for file '${path}'`);
         unregister(tracer, true);
         tracer = null;
     } else if (!tracer) {
-        logger.debug(`Creating new tracer instance - '${name}' file '${path}'`);
+        logger.debug(`Creating new tracer instance for file '${path}'`);
     }
     if (!tracer) {
-        tracer = new Tracer(name, path, options);
-        INSTANCES[name] = tracer;
+        tracer = new Tracer(path, options);
+        INSTANCES[path] = tracer;
     }
     return tracer;
 }
@@ -500,7 +503,6 @@ module.exports = {
 /**
  * @typedef TracerConfig
  * @type {TracerOptions}
- * @property {string} name - name
  * @property {string} path - path to use to write data to
  * @property {boolean} [enable = true] - enable/disable Tracer
  */

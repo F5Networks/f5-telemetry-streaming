@@ -53,7 +53,7 @@ describe('IHealthPoller', () => {
             .map(poller => IHealthPoller.disable(poller, true)))
             .then(retObjs => Promise.all(retObjs.map(obj => obj.stopPromise)))
             .then(() => {
-                assert.deepStrictEqual(IHealthPoller.getAll({ includeDemo: true }), []);
+                assert.isEmpty(IHealthPoller.getAll({ includeDemo: true }), 'should have no running iHealth Pollers before any test');
                 return persistentStorage.persistentStorage.load();
             });
     });
@@ -62,7 +62,7 @@ describe('IHealthPoller', () => {
         .map(poller => IHealthPoller.disable(poller, true)))
         .then(retObjs => Promise.all(retObjs.map(obj => obj.stopPromise)))
         .then(() => {
-            assert.deepStrictEqual(IHealthPoller.getAll({ includeDemo: true }), [], 'should have no running iHealth Pollers');
+            assert.isEmpty(IHealthPoller.getAll({ includeDemo: true }), 'should have no running iHealth Pollers');
             sinon.restore();
         }));
 
@@ -103,11 +103,7 @@ describe('IHealthPoller', () => {
                     ['poller1'],
                     'should register iHealth Poller'
                 );
-                assert.deepStrictEqual(
-                    IHealthPoller.getAll({ demoOnly: true }).map(p => p.id),
-                    [],
-                    'should have no demo instances'
-                );
+                assert.isEmpty(IHealthPoller.getAll({ demoOnly: true }).map(p => p.id), 'should have no demo instances');
             });
 
             it('should create and register instance (demo instance)', () => {
@@ -118,11 +114,7 @@ describe('IHealthPoller', () => {
                     ['demoPoller1'],
                     'should register demo iHealth Poller'
                 );
-                assert.deepStrictEqual(
-                    IHealthPoller.getAll({ includeDemo: false }).map(p => p.id),
-                    [],
-                    'should have no non-demo instances'
-                );
+                assert.isEmpty(IHealthPoller.getAll({ includeDemo: false }).map(p => p.id), 'should have no non-demo instances');
             });
 
             it('should throw error when instance exists already', () => {
@@ -259,10 +251,10 @@ describe('IHealthPoller', () => {
 
         describe('.getAll()', () => {
             it('should return empty array when no instances registered', () => {
-                assert.deepStrictEqual(IHealthPoller.getAll(), [], 'should have no instances by default');
-                assert.deepStrictEqual(IHealthPoller.getAll({ includeDemo: true }), [], 'should have no instances at all by default');
-                assert.deepStrictEqual(IHealthPoller.getAll({ demoOnly: true }), [], 'should have no demo instances by default');
-                assert.deepStrictEqual(IHealthPoller.getAll({ demoOnly: true, includeDemo: true }), [], 'should have no demo instances by default');
+                assert.isEmpty(IHealthPoller.getAll(), 'should have no instances by default');
+                assert.isEmpty(IHealthPoller.getAll({ includeDemo: true }), 'should have no instances at all by default');
+                assert.isEmpty(IHealthPoller.getAll({ demoOnly: true }), 'should have no demo instances by default');
+                assert.isEmpty(IHealthPoller.getAll({ demoOnly: true, includeDemo: true }), 'should have no demo instances by default');
             });
 
             it('should return non-demo instances only', () => {
@@ -345,11 +337,7 @@ describe('IHealthPoller', () => {
 
                 IHealthPoller.unregister(poller);
                 IHealthPoller.unregister(demoPoller);
-                assert.deepStrictEqual(
-                    IHealthPoller.getAll({ includeDemo: true }),
-                    [],
-                    'should have no registered instances'
-                );
+                assert.isEmpty(IHealthPoller.getAll({ includeDemo: true }), 'should have no registered instances');
                 assert.doesNotThrow(
                     () => IHealthPoller.unregister(poller),
                     'should not throw error when instance not registered'
