@@ -600,6 +600,7 @@ The following table shows the possible parameters for excludeData.  After the ta
 
 |
 
+
 Example 1
 ^^^^^^^^^
 The following is an example of Telemetry output without using excludeData:
@@ -778,6 +779,58 @@ And this is an example of the output from the Action definition.
         }
     }
 
+
 |
+
+Customizing the Generic HTTP consumer payload
+---------------------------------------------
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+   Support for customizing the generic HTTP consumer payload is available in TS 1.20.0 and later.  
+
+Telemetry Streaming 1.20 introduced a feature that allows you to restructure the data coming out of the Telemetry Streaming Generic HTTP consumer so it fits the format of 3rd party systems.  This is useful when you want the Telemetry Streaming payload in the format of a system that does not have a specific Telemetry Streaming consumer.  It also helps when trying to get log data into any kind of HTTP API.
+
+This feature is enabled as a JMES path expression (using a JMES path library) in the Telemetry Consumer class as an **action** for the Generic HTTP consumer. TS takes the JMES expression with the string that you provide, and applies the expression to the data received by the consumer.
+
+.. IMPORTANT:: Currently, you can only use this with the Generic HTTP consumer and only with JMES path expressions.
+
+The following example is a basic declaration with a JMES path expression:
+
+.. code-block:: json
+
+    {
+        "class": "Telemetry",
+        "My_System": {
+            "class": "Telemetry_System",
+            "systemPoller": {
+                "interval": 60
+            }
+        },
+        "My_Consumer": {
+            "class": "Telemetry_Consumer",
+            "type": "Generic_HTTP",
+            "host": "192.0.2.1",
+            "protocol": "http",
+            "port": 8080,
+            "path": "/bigip",
+            "actions": [
+                {
+                    "JMESPath": {},
+                    "expression": "{ virtuals: virtualServers, service: telemetryEventCategory, hostname: system.hostname, staticTag: 'any string value' }"
+                }
+            ]
+        }
+    }
+ 
+
+For more detailed examples, see 
+
+
+
+
+
+
+
+   
 |
 
