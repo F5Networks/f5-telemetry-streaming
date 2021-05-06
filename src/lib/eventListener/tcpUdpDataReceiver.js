@@ -122,7 +122,7 @@ class TCPDataReceiver extends TcpUdpBaseDataReceiver {
         conn.on('data', data => callDataCallback.call(this, data, conn))
             .on('error', () => conn.destroy()) // destroy emits 'close' event
             .on('close', () => removeTcpConnection.call(this, conn))
-            .on('end', () => {}); // allowHalfOpen is false by default, no needs to call 'end' explicitlyq
+            .on('end', () => {}); // allowHalfOpen is false by default, no need to call 'end' explicitly
     }
 
     /**

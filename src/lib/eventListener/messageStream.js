@@ -157,7 +157,7 @@ MessageStream.MAX_UNPARSED_DATA_CAP = 0.7;
  *
  * @type {Integer}
  */
-MessageStream.MAX_OPEN_QUOTE_SIZE = 512;
+MessageStream.MAX_OPEN_QUOTE_SIZE = MessageStream.MAX_BUFFER_SIZE; // Set to MAX_BUFFER_SIZE to handle large properties
 
 /**
  * Map protocol to its implementation
