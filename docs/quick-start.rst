@@ -37,6 +37,8 @@ up and running with Telemetry Streaming.
 
 #. POST to the URI ``https://<BIG-IP>/mgmt/shared/telemetry/declare``
 
+.. _qs-example:
+
 Quick Start Example
 -------------------
 

@@ -196,6 +196,46 @@ This example shows how you can configure TLS client authentication for :ref:`Gen
 
 |
 
+.. _custompl:
+
+Customizing the Generic HTTP consumer payload
+---------------------------------------------
+.. IMPORTANT:: Customizing the Generic HTTP consumer payload is available in TS v1.20.0 and later. See :ref:`customize-data` for complete information on this feature.
+
+.. code-block:: json
+
+    {
+        "class": "Telemetry",
+        "My_System": {
+            "class": "Telemetry_System",
+            "systemPoller": {
+                "interval": 60
+            }
+        },
+        "My_Consumer": {
+            "class": "Telemetry_Consumer",
+            "type": "Generic_HTTP",
+            "host": "192.0.2.1",
+            "protocol": "http",
+            "port": 8080,
+            "path": "/bigip",
+            "actions": [
+                {
+                    "JMESPath": {},
+                    "expression": "{ virtuals: virtualServers, service: telemetryEventCategory, hostname: system.hostname, staticTag: 'any string value' }"
+                }
+            ]
+        }
+    }
+
+
+:ref:`Back to top<examples>`
+
+|
+
+
+
+
 
 
 
