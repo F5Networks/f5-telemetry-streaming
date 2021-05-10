@@ -91,7 +91,7 @@
                 "dependencies": {
                     "node-zookeeper-client": {
                         "dependencies": {
-                            "underscore": "This package sohuld be pinned to 1.13.1 in package-lock.json due https://npmjs.com/advisories/1674."
+                            "underscore": "This package should be pinned to 1.13.1 in package-lock.json due https://npmjs.com/advisories/1674."
                         }
                     }
                 }
