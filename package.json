@@ -8,8 +8,8 @@
         "url": "git+https://github.com/F5Networks/f5-telemetry-streaming.git"
     },
     "scripts": {
-        "install-production": "npm install --production --no-optional",
-        "install-test": "npm install --no-optional",
+        "install-production": "npm ci --production --no-optional",
+        "install-test": "npm ci --no-optional",
         "lint": "eslint src test",
         "test-functional": "mocha \"./test/functional/testRunner.js\" --opts ./test/functional/.mocha.opts",
         "test-functional-cloud-azure": "mocha \"./test/functional/cloud/azureTests.js\" --opts ./test/functional/.mocha.opts",
@@ -86,7 +86,16 @@
             "@grpc/proto-loader": "v0.3.0 - This package is used for GRPC connection, supports node v6 and above.",
             "commander": "This package dropped support for older node versions. Use v2.X.Y for Node v4.",
             "google-auth-library": "This package is used for GRPC connection, supports node v10 and above, but fromJSON function works in node v8.11.1 - should use v6.1.X only",
-            "kafka-node": "This package dropped support for older node versions. Use v2.X.Y for Node v4.",
+            "kafka-node": {
+                "comments": "This package dropped support for older node versions. Use v2.X.Y for Node v4.",
+                "dependencies": {
+                    "node-zookeeper-client": {
+                        "dependencies": {
+                            "underscore": "This package sohuld be pinned to 1.13.1 in package-lock.json due https://npmjs.com/advisories/1674."
+                        }
+                    }
+                }
+            },
             "long": "This package is used for GRPC connection, this can only be used with node v8.11.1 and higher (http2 support).",
             "prom-client": "This package dropped support for older node versions. Use v11.X.Y for Node v4.",
             "uuid": "This package dropped support for older node versions starting v7.0.0. Their policy is supported node versions + one legacy version."
