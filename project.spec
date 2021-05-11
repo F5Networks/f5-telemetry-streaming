@@ -16,7 +16,7 @@ Telemetry Streaming for BIG-IP
 cp -r %{main}/src/ %{_builddir}/src/
 rm -r %{_builddir}/src/schema/[0-9]*
 cp %{main}/package*.json %{_builddir}/src
-npm install --only=prod --prefix %{_builddir}/src --no-optional
+npm ci --no-optional --only=prod --prefix %{_builddir}/src 
 echo -n %{version}-%{release} > %{_builddir}/src/version
 
 %install
