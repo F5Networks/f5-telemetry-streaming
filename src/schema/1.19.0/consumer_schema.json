@@ -465,8 +465,6 @@
             "description": "To decide if GRPC connection should use SSL and then it is secured" ,
             "type": "boolean",
             "f5expand": true
-<<<<<<< HEAD
-=======
         },
         "compressionType": {
             "$comment": "Required for certain consumers: Splunk",
@@ -474,7 +472,6 @@
             "description": "Whether or not to compress data and what compression to use before sending it to destination",
             "type": "string",
             "enum": ["none", "gzip"]
->>>>>>> v1.20.0
         }
     },
     "allOf": [
@@ -591,12 +588,8 @@
                             "serviceAccount": {},
                             "targetAudience": {},
                             "useSSL": {},
-<<<<<<< HEAD
-                            "proxy": {}
-=======
                             "proxy": {},
                             "compressionType": {}
->>>>>>> v1.20.0
                         },
                         "additionalProperties": false
                     },
@@ -663,12 +656,8 @@
                                 "port": { "$ref": "#/definitions/port", "default": 8088 },
                                 "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
                                 "format": { "$ref": "#/definitions/format", "default": "default" },
-<<<<<<< HEAD
-                                "proxy": { "$ref": "base_schema.json#/definitions/proxy" }
-=======
                                 "proxy": { "$ref": "base_schema.json#/definitions/proxy" },
                                 "compressionType": { "$ref": "#/definitions/compressionType", "default": "gzip" }
->>>>>>> v1.20.0
                             }
                         },
                         "else": {}
