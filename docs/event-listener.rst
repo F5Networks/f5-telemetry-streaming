@@ -12,7 +12,7 @@ To use the Event Listener, you must:
 
 1. Configure the sources of log/event data. You can do this by either POSTing a single AS3 declaration or you can use TMSH or the GUI to configure individual modules.
 
-2. Post a telemetry declaration with the Telemetry_Listener class, as shown in the following minimal example of an Event Listner:
+2. Post a telemetry declaration with the Telemetry_Listener class, as shown in the following minimal example of an Event Listener:
 
 
 .. code-block:: bash
@@ -22,6 +22,8 @@ To use the Event Listener, you must:
       "port": 6514
    }
 
+
+Tracing can also can be optionally enabled for each Telemetry Streaming Listener, using the **trace** property. By default, tracing is disabled (the **trace** property defaults to **false**), but can be enabled by setting the property to **true**, or to a string value representing a valid operating system path (for example: ``/var/telemetry/myTraceFile.json``). When tracing is enabled, the Listener will write the data it receives (after Telemetry Streaming has processed and normalized the data) to disk. Telemetry Streaming 1.20.0 and later also includes the ability to trace the raw input data (before Telemetry Streaming has processed the data). For more information and instructions, see :ref:`Trace<trace>`.
 
 IMPORTANT:
 
