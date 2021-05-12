@@ -197,7 +197,8 @@ module.exports = {
     TRACER: {
         DIR: '/var/tmp/telemetry',
         ENCODING: 'utf8',
-        LIST_SIZE: 10
+        MAX_RECORDS_INPUT: 9999,
+        MAX_RECORDS_OUTPUT: 10
     },
     USER_AGENT: `f5-telemetry/${VERSION}`,
     WEEKDAY_TO_DAY_NAME

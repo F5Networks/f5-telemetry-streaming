@@ -37,6 +37,7 @@
         "@f5devcentral/f5-teem": "^1.4.6",
         "@grpc/proto-loader": "~0.3.0",
         "ajv": "^6.12.6",
+        "ajv-keywords": "^3.5.2",
         "applicationinsights": "^1.8.10",
         "aws-sdk": "^2.885.0",
         "commander": "^2.20.3",

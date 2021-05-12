@@ -21,16 +21,20 @@ const udp = require('dgram');
 
 const messageStreamTestData = require('../data/messageStreamTestsData');
 const messageStream = require('../../../src/lib/eventListener/messageStream');
+const stubs = require('../shared/stubs');
 const testUtil = require('../shared/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe('Message Stream Receiver', () => {
+    let clock;
     let dataCallbackSpy;
     let onMockCreatedCallback;
+    let rawDataCallbackSpy;
     let receiverInst;
     let serverMocks;
+    let socketId;
 
     const testPort = 6514;
     const testAddr = 'localhost10';
@@ -80,11 +84,30 @@ describe('Message Stream Receiver', () => {
         return mock;
     };
 
+    const createSocketInfo = (cls, ipv6) => {
+        socketId += 1;
+        if (cls === MockUdpServer) {
+            return {
+                address: ipv6 ? testAddr6 : testAddr,
+                port: testPort + socketId
+            };
+        }
+        const socketMock = new MockTcpSocket();
+        socketMock.remoteAddress = ipv6 ? testAddr6 : testAddr;
+        socketMock.remotePort = testPort + socketId;
+        return socketMock;
+    };
+
     beforeEach(() => {
+        clock = stubs.clock();
         dataCallbackSpy = sinon.spy();
+        rawDataCallbackSpy = sinon.spy();
         serverMocks = [];
+        socketId = 0;
+
         receiverInst = new messageStream.MessageStream(testPort, { address: testAddr });
         receiverInst.on('messages', dataCallbackSpy);
+        receiverInst.on('rawData', rawDataCallbackSpy);
 
         sinon.stub(messageStream.MessageStream, 'MAX_BUFFER_TIMEOUT').value(testBufferTimeout);
 
@@ -103,22 +126,213 @@ describe('Message Stream Receiver', () => {
         sinon.restore();
     });
 
-    describe('.dataHandler()', () => {
-        let socketId = 0;
-        const createSocketInfo = (cls, ipv6) => {
-            socketId += 1;
-            if (cls === MockUdpServer) {
-                return {
-                    address: ipv6 ? testAddr6 : testAddr,
-                    port: testPort + socketId
-                };
-            }
-            const socketMock = new MockTcpSocket();
-            socketMock.remoteAddress = ipv6 ? testAddr6 : testAddr;
-            socketMock.remotePort = testPort + socketId;
-            return socketMock;
-        };
+    describe('"rawData" event', () => {
+        describe('raw data handling for each protocol', () => {
+            const testMessage = Buffer.from('<1>testData\n');
 
+            beforeEach(() => {
+                receiverInst.enableRawDataForwarding();
+            });
+
+            it('should retrieve raw data via udp4 socket', () => receiverInst.start()
+                .then(() => {
+                    const socketInfo = createSocketInfo(MockUdpServer, false);
+                    getServerMock(MockUdpServer, false).emit('message', testMessage, socketInfo);
+                    return receiverInst.stop();
+                })
+                .then(() => {
+                    assert.deepStrictEqual(
+                        rawDataCallbackSpy.args,
+                        [[{
+                            data: Buffer.from('<1>testData\n'),
+                            protocol: 'udp',
+                            senderKey: 'udp4-localhost10-6515',
+                            timestamp: 0,
+                            hrtime: [0, 0]
+                        }]]
+                    );
+                }));
+
+            it('should retrieve data via udp6 socket', () => receiverInst.start()
+                .then(() => {
+                    const socketInfo = createSocketInfo(MockUdpServer, true);
+                    getServerMock(MockUdpServer, true).emit('message', testMessage, socketInfo);
+                    return receiverInst.stop();
+                })
+                .then(() => {
+                    assert.deepStrictEqual(
+                        rawDataCallbackSpy.args,
+                        [[{
+                            data: Buffer.from('<1>testData\n'),
+                            protocol: 'udp',
+                            senderKey: 'udp6-::localhost10-6515',
+                            timestamp: 0,
+                            hrtime: [0, 0]
+                        }]]
+                    );
+                }));
+
+            it('should retrieve data via tcp socket', () => receiverInst.start()
+                .then(() => {
+                    const socketInfo = createSocketInfo(MockTcpServer);
+                    getServerMock(MockTcpServer).emit('connection', socketInfo);
+                    socketInfo.emit('data', testMessage);
+                    return receiverInst.stop();
+                })
+                .then(() => {
+                    assert.deepStrictEqual(
+                        rawDataCallbackSpy.args,
+                        [[{
+                            data: Buffer.from('<1>testData\n'),
+                            protocol: 'tcp',
+                            senderKey: 'tcp-localhost10-6515',
+                            timestamp: 0,
+                            hrtime: [0, 0]
+                        }]]
+                    );
+                }));
+
+            it('should retrieve raw data via all protocol at same time', () => receiverInst.start()
+                .then(() => {
+                    const socketInfoTcp = createSocketInfo(MockTcpServer); // port 6515
+                    getServerMock(MockTcpServer).emit('connection', socketInfoTcp);
+                    const socketInfoUdp4 = createSocketInfo(MockUdpServer, false); // port 6516
+                    const socketInfoUdp6 = createSocketInfo(MockUdpServer, true); // port 6517
+
+                    socketInfoTcp.emit('data', Buffer.from('<tcp1>start'));
+                    getServerMock(MockUdpServer, false).emit('message', Buffer.from('<udp4>start'), socketInfoUdp4);
+                    getServerMock(MockUdpServer, true).emit('message', Buffer.from('<udp6>start'), socketInfoUdp6);
+                    socketInfoTcp.emit('data', Buffer.from('<tcp1>end\n'));
+                    getServerMock(MockUdpServer, false).emit('message', Buffer.from('<udp4>end\n'), socketInfoUdp4);
+                    getServerMock(MockUdpServer, true).emit('message', Buffer.from('<udp6>end\n'), socketInfoUdp6);
+
+                    return receiverInst.stop();
+                })
+                .then(() => {
+                    assert.sameDeepMembers(
+                        rawDataCallbackSpy.args,
+                        [
+                            [{
+                                data: Buffer.from('<tcp1>start'),
+                                protocol: 'tcp',
+                                senderKey: 'tcp-localhost10-6515',
+                                timestamp: 0,
+                                hrtime: [0, 0]
+                            }],
+                            [{
+                                data: Buffer.from('<udp4>start'),
+                                protocol: 'udp',
+                                senderKey: 'udp4-localhost10-6516',
+                                timestamp: 0,
+                                hrtime: [0, 0]
+                            }],
+                            [{
+                                data: Buffer.from('<udp6>start'),
+                                protocol: 'udp',
+                                senderKey: 'udp6-::localhost10-6517',
+                                timestamp: 0,
+                                hrtime: [0, 0]
+                            }],
+                            [{
+                                data: Buffer.from('<tcp1>end\n'),
+                                protocol: 'tcp',
+                                senderKey: 'tcp-localhost10-6515',
+                                timestamp: 0,
+                                hrtime: [0, 0]
+                            }],
+                            [{
+                                data: Buffer.from('<udp4>end\n'),
+                                protocol: 'udp',
+                                senderKey: 'udp4-localhost10-6516',
+                                timestamp: 0,
+                                hrtime: [0, 0]
+                            }],
+                            [{
+                                data: Buffer.from('<udp6>end\n'),
+                                protocol: 'udp',
+                                senderKey: 'udp6-::localhost10-6517',
+                                timestamp: 0,
+                                hrtime: [0, 0]
+                            }]
+                        ]
+                    );
+                }));
+
+            it('should not enable raw data forwarding', () => {
+                receiverInst.disableRawDataForwarding();
+                return receiverInst.start()
+                    .then(() => {
+                        const socketInfo = createSocketInfo(MockUdpServer, false);
+                        getServerMock(MockUdpServer, false).emit('message', testMessage, socketInfo);
+                        clock.clockForward(100, { promisify: true });
+                        return testUtil.sleep(1000); // process pending promises
+                    })
+                    .then(() => receiverInst.stop())
+                    .then(() => {
+                        assert.lengthOf(rawDataCallbackSpy.args, 0, 'should not forward raw data once disabled');
+                    });
+            });
+
+            it('should enable/disable raw data forwarding', () => receiverInst.start()
+                .then(() => {
+                    const socketInfo = createSocketInfo(MockUdpServer, false); // port 6515
+                    getServerMock(MockUdpServer, false).emit('message', testMessage, socketInfo);
+                    clock.clockForward(100, { promisify: true });
+                    return testUtil.sleep(1000); // process pending promises
+                })
+                .then(() => {
+                    assert.deepStrictEqual(
+                        rawDataCallbackSpy.args,
+                        [[{
+                            data: Buffer.from('<1>testData\n'),
+                            protocol: 'udp',
+                            senderKey: 'udp4-localhost10-6515',
+                            timestamp: 0,
+                            hrtime: [0, 0]
+                        }]]
+                    );
+
+                    receiverInst.disableRawDataForwarding();
+                    const socketInfo = createSocketInfo(MockUdpServer, false); // port 6516
+                    getServerMock(MockUdpServer, false).emit('message', testMessage, socketInfo);
+                    return testUtil.sleep(1000); // process pending promises
+                })
+                .then(() => {
+                    assert.lengthOf(rawDataCallbackSpy.args, 1, 'should not forward raw data once disabled');
+                })
+                .then(() => {
+                    receiverInst.enableRawDataForwarding();
+                    const socketInfo = createSocketInfo(MockUdpServer, false); // port 6517
+                    getServerMock(MockUdpServer, false).emit('message', testMessage, socketInfo);
+                    clock.clockForward(100, { promisify: true });
+                    return testUtil.sleep(1000); // process pending promises
+                })
+                .then(() => receiverInst.stop())
+                .then(() => {
+                    assert.deepStrictEqual(
+                        rawDataCallbackSpy.args,
+                        [
+                            [{
+                                data: Buffer.from('<1>testData\n'),
+                                protocol: 'udp',
+                                senderKey: 'udp4-localhost10-6515',
+                                timestamp: 0,
+                                hrtime: [0, 0]
+                            }],
+                            [{
+                                data: Buffer.from('<1>testData\n'),
+                                protocol: 'udp',
+                                senderKey: 'udp4-localhost10-6517',
+                                timestamp: 2000,
+                                hrtime: [2, 0]
+                            }]
+                        ]
+                    );
+                }));
+        });
+    });
+
+    describe('"messages" event', () => {
         describe('data handling for each protocol', () => {
             const testMessage = '<1>testData\n';
 
@@ -186,15 +400,6 @@ describe('Message Stream Receiver', () => {
                 });
                 return events;
             };
-            let fakeClock;
-
-            beforeEach(() => {
-                fakeClock = sinon.useFakeTimers();
-            });
-
-            afterEach(() => {
-                fakeClock.restore();
-            });
 
             messageStreamTestData.dataHandler.forEach((testConf) => {
                 const separators = JSON.stringify(testConf.chunks).indexOf('{sep}') !== -1 ? ['\n', '\r\n'] : [''];
@@ -208,9 +413,10 @@ describe('Message Stream Receiver', () => {
                             const socketInfo = createSocketInfo(MockUdpServer, false);
                             const server = getServerMock(MockUdpServer, false);
                             testConf.chunks.forEach(chunk => server.emit('message', chunk.replace(/\{sep\}/g, sep), socketInfo));
-                            fakeClock.tick(testBufferTimeout * 2);
-                            return receiverInst.stop();
+                            clock.clockForward(100, { promisify: true });
+                            return testUtil.sleep(testBufferTimeout * 4); // sleep to process pending tasks
                         })
+                        .then(() => receiverInst.stop())
                         .then(() => {
                             assert.deepStrictEqual(fetchEvents(), testConf.expectedData);
                         }));
@@ -291,6 +497,29 @@ describe('Message Stream Receiver', () => {
                     assert.strictEqual(closeSpy.callCount, 3, 'should close 3 sockets');
                     assert.isFalse(receiverInst.isRunning(), 'should not be in running state');
                     assert.isTrue(receiverInst.hasState(messageStream.MessageStream.STATE.STOPPED), 'should have STOPPED state');
+                });
+        });
+
+        it('should cleanup all pending tasks', () => {
+            let socketInfo;
+            let server;
+            return receiverInst.start()
+                .then(() => {
+                    socketInfo = createSocketInfo(MockUdpServer, false);
+                    server = getServerMock(MockUdpServer, false);
+                    server.emit('message', 'test_message="', socketInfo);
+
+                    clock.clockForward(100, { promisify: true });
+                    return testUtil.sleep(testBufferTimeout * 4); // sleep to process pending tasks
+                })
+                .then(() => {
+                    assert.deepStrictEqual(dataCallbackSpy.args, [[['test_message="']]], 'should process incomplete message');
+                    server.emit('message', 'test_message_2="', socketInfo);
+                    return testUtil.sleep(testBufferTimeout / 2); // sleep to process pending tasks
+                })
+                .then(() => receiverInst.stop())
+                .then(() => {
+                    assert.lengthOf(dataCallbackSpy.args, 1, 'should not process second message when stopped');
                 });
         });
     });

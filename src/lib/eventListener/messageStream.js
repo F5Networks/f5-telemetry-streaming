@@ -31,22 +31,24 @@ class MessageStreamError extends baseDataReceiver.BaseDataReceiverError {}
  *
  * @see module:BaseDataReceiverError.BaseDataReceiver
  *
- * @property {String} address - address to listen on
+ * @property {string} address - address to listen on
  * @property {Logger} logger - logger instance
- * @property {Number} port - port to listen on
- * @property {Array<String>} protocols - protocols to use
+ * @property {number} port - port to listen on
+ * @property {Array<string>} protocols - protocols to use
  *
  * @fires MessageStream#messages
+ * @fires MessageStream#rawData
  */
 class MessageStream extends baseDataReceiver.BaseDataReceiver {
     /**
      * Constructor
      *
-     * @param {Number} port - port to listen on
-     * @param {Object} [options={}] - additional options
-     * @param {String} [options.address] - address to listen on
+     * @param {number} port - port to listen on
+     * @param {object} [options={}] - additional options
+     * @param {string} [options.address] - address to listen on
      * @param {Logger} [options.logger] - logger to use instead of default one
-     * @param {Array<String>} [options.protocols=['tcp', 'udp']] - protocols to use
+     * @param {Array<string>} [options.protocols=['tcp', 'udp']] - protocols to use
+     * @param {boolean} [options.rawDataForwarding = false] - enable 'rawData' event
      */
     constructor(port, options) {
         super();
@@ -55,6 +57,7 @@ class MessageStream extends baseDataReceiver.BaseDataReceiver {
         this.logger = (options.logger || logger).getChild('messageStream');
         this.port = port;
         this.protocols = options.protocols || ['tcp', 'udp'];
+        this._rawDataForwarding = !!options.rawDataForwarding;
     }
 
     /**
@@ -74,15 +77,66 @@ class MessageStream extends baseDataReceiver.BaseDataReceiver {
                 }
             );
             receiver.on('data', (data, connKey) => dataHandler.call(this, protocol, data, connKey));
-            return receiver;
+            return { receiver, protocol };
         });
         this._dataBuffers = {};
+
+        if (this._rawDataForwarding) {
+            this.enableRawDataForwarding();
+        } else {
+            this.disableRawDataForwarding();
+        }
+    }
+
+    /**
+     * Disable forwarding of raw data (stop emitting 'rawData' event)
+     *
+     * @returns {void} once raw data forwarding disabled
+     */
+    disableRawDataForwarding() {
+        this._rawDataForwarding = false;
+        if (!this.hasReceivers()) {
+            return;
+        }
+
+        if (this._dataFwdCallbacks) {
+            this._dataFwdCallbacks.forEach(config => config.receiver.removeListener('data', config.callback));
+            this._dataFwdCallbacks = null;
+        }
+    }
+
+    /**
+     * Enable forwarding of raw data (start emitting 'rawData' event)
+     *
+     * @returns {void} once raw data forwarding enabled
+     */
+    enableRawDataForwarding() {
+        this._rawDataForwarding = true;
+        if (!this.hasReceivers()) {
+            return;
+        }
+        if (!this._dataFwdCallbacks) {
+            this._dataFwdCallbacks = this._receivers.map((receiver) => {
+                const callback = (data, connKey, timestamp, hrtime) => this.safeEmitAsync('rawData', {
+                    data,
+                    protocol: receiver.protocol,
+                    senderKey: connKey,
+                    timestamp,
+                    hrtime
+                });
+                receiver.receiver.on('data', callback);
+                return {
+                    receiver: receiver.receiver,
+                    callback
+                };
+            });
+        }
     }
 
     /**
      * Check if has any internal receivers
      *
-     * @returns {Boolean}
+     * @returns {boolean}
      */
     hasReceivers() {
         return this._receivers && this._receivers.length > 0;
@@ -99,7 +153,7 @@ class MessageStream extends baseDataReceiver.BaseDataReceiver {
             return Promise.reject(this.getStateTransitionError(this.constructor.STATE.STARTING));
         }
         this.createReceivers();
-        return promiseUtil.allSettled(this._receivers.map(receiver => receiver.start()))
+        return promiseUtil.allSettled(this._receivers.map(receiver => receiver.receiver.start()))
             .then(promiseUtil.getValues);
     }
 
@@ -113,9 +167,17 @@ class MessageStream extends baseDataReceiver.BaseDataReceiver {
         if (!this.hasReceivers()) {
             return Promise.resolve();
         }
-        return promiseUtil.allSettled(this._receivers.map(receiver => receiver.destroy()))
+        return promiseUtil.allSettled(this._receivers.map(receiver => receiver.receiver.destroy()))
             .then((statuses) => {
+                if (this._dataBuffers) {
+                    Object.keys(this._dataBuffers).forEach((key) => {
+                        if (this._dataBuffers[key].timeoutID) {
+                            clearTimeout(this._dataBuffers[key].timeoutID);
+                        }
+                    });
+                }
                 this._dataBuffers = null;
+                this._dataFwdCallbacks = null;
                 this._receivers = null;
                 return promiseUtil.getValues(statuses);
             });
@@ -126,7 +188,7 @@ class MessageStream extends baseDataReceiver.BaseDataReceiver {
  * Length of buffer for each connection. When amount of data stored in buffer
  * is higher than threshold then even incomplete data will be flushed
  *
- * @type {Integer}
+ * @type {number}
  */
 MessageStream.MAX_BUFFER_SIZE = 16 * 1024; // 16k chars
 
@@ -134,14 +196,14 @@ MessageStream.MAX_BUFFER_SIZE = 16 * 1024; // 16k chars
  * Number of time a timeout for particular buffer can be reset before
  * flushing all data
  *
- * @type {Integer}
+ * @type {number}
  */
 MessageStream.MAX_BUFFER_NUM_TIMEOUTS = 5;
 
 /**
  * Buffer timeout
  *
- * @type {Integer}
+ * @type {number}
  */
 MessageStream.MAX_BUFFER_TIMEOUT = 10 * 1000; // 10 sec.
 
@@ -155,7 +217,7 @@ MessageStream.MAX_UNPARSED_DATA_CAP = 0.7;
  * treated as malformed message. In other words this parameter declares how
  * many chars single field can contain.
  *
- * @type {Integer}
+ * @type {number}
  */
 MessageStream.MAX_OPEN_QUOTE_SIZE = MessageStream.MAX_BUFFER_SIZE; // Set to MAX_BUFFER_SIZE to handle large properties
 
@@ -174,9 +236,9 @@ MessageStream.PROTOCOL_RECEIVER = {
  * Data handler
  *
  * @this MessageStream
- * @param {String} proto - protocol
+ * @param {string} proto - protocol
  * @param {Buffer} data - data to process
- * @param {String} senderKey - sender's unique key
+ * @param {string} senderKey - sender's unique key
  */
 function dataHandler(proto, data, senderKey) {
     data = data.toString();
@@ -230,10 +292,10 @@ function dataHandler(proto, data, senderKey) {
  *   then line will be splitted into multiple lines too
  *
  * @this MessageStream
- * @param {String} data - data
- * @param {Boolean} [incomplete = false] - when some data left treat it as complete message
+ * @param {string} data - data
+ * @param {boolean} [incomplete = false] - when some data left treat it as complete message
  *
- * @returns {String} incomplete data
+ * @returns {string} incomplete data
  *
  * @fires MessageStream#messages
  */
@@ -325,7 +387,9 @@ function extractMessages(data, incomplete) {
         }
         data = '';
     }
-    this.safeEmitAsync('messages', lines);
+    if (lines.length) {
+        this.safeEmitAsync('messages', lines);
+    }
     return data.length ? data.slice(startIdx) : data;
 }
 
@@ -335,8 +399,23 @@ module.exports = {
 };
 
 /**
+ * @typedef RawDataObject
+ * @type {object}
+ * @property {buffer} data - raw data
+ * @property {string} protocol - protocol
+ * @property {string} senderKey - unique sender key
+ * @property {number} timestamp - timestamp when data was received
+ * @property {Array<number>} hrtime - high resolution time when data was received
+ */
+/**
  * Messages event
  *
  * @event MessageStream#messages
- * @param {Array<String>} messages - array of received messages
+ * @param {Array<string>} messages - array of received messages
+ */
+/**
+ * Raw data event
+ *
+ * @event MessageStream#rawData
+ * @param {RawDataObject} rawData - wrapper around inner properties
  */
