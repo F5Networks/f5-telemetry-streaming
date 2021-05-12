@@ -346,7 +346,8 @@ describe('System Poller', () => {
                         enable: true,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1'
+                        path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1',
+                        type: 'output'
                     },
                     tracer: tracer.registered()[0],
                     credentials: {
@@ -512,7 +513,8 @@ describe('System Poller', () => {
                                         enable: true,
                                         encoding: 'utf8',
                                         maxRecords: 10,
-                                        path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_New::My_Poller'
+                                        path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_New::My_Poller',
+                                        type: 'output'
                                     },
                                     tracer: tracer.registered().find(t => /Telemetry_System_Poller.My_System_New::My_Poller/.test(t.path)),
                                     credentials: {
@@ -557,7 +559,8 @@ describe('System Poller', () => {
                                         enable: true,
                                         encoding: 'utf8',
                                         maxRecords: 10,
-                                        path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_New::SystemPoller_1'
+                                        path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_New::SystemPoller_1',
+                                        type: 'output'
                                     },
                                     systemName: 'My_System_New',
                                     tracer: tracer.registered().find(t => /Telemetry_System_Poller.My_System_New::SystemPoller_1/.test(t.path)),
@@ -660,7 +663,8 @@ describe('System Poller', () => {
                                         enable: true,
                                         encoding: 'utf8',
                                         maxRecords: 10,
-                                        path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1'
+                                        path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1',
+                                        type: 'output'
                                     },
                                     tracer: tracer.registered()[0],
                                     credentials: {

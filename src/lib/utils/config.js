@@ -166,18 +166,36 @@ function getTracePrefix(component) {
 
 /**
  * @param {Component} component - component
+ * @param {object} [traceConfig] - trace config to process instead of component.trace
  *
- * @returns {TracerConfig} Tracer config
+ * @returns {TypedTracerConfig} Tracer config
  */
-function getTracerConfig(component) {
-    return {
-        path: typeof component.trace === 'string'
-            ? component.trace
-            : pathUtil.join(constants.TRACER.DIR, `${component.class}.${component.traceName}`),
-        enable: component.enable && !!component.trace,
+function getTracerConfig(component, traceConfig) {
+    traceConfig = arguments.length > 1 ? traceConfig : component.trace;
+    if (Array.isArray(traceConfig)) {
+        return traceConfig.map(config => getTracerConfig(component, config));
+    }
+    if (typeof traceConfig !== 'object') {
+        /**
+         * old-style tracer configuration, possible values are true, false, "pathToFile"
+         */
+        return getTracerConfig(component, {
+            enable: !!traceConfig,
+            path: typeof traceConfig === 'string' ? traceConfig : undefined, // undefined will be converted to default pass by assignDefaults,
+            type: 'output'
+        });
+    }
+    const pathPrefix = traceConfig.type === 'input' ? 'INPUT.' : '';
+    const maxRecords = traceConfig.type === 'input' ? constants.TRACER.MAX_RECORDS_INPUT : constants.TRACER.MAX_RECORDS_OUTPUT;
+    traceConfig = util.assignDefaults(util.deepCopy(traceConfig), {
+        enable: true,
         encoding: constants.TRACER.ENCODING,
-        maxRecords: constants.TRACER.LIST_SIZE
-    };
+        maxRecords,
+        path: traceConfig.path || pathUtil.join(constants.TRACER.DIR, `${pathPrefix}${component.class}.${component.traceName}`),
+        type: 'output'
+    });
+    traceConfig.enable = component.enable && traceConfig.enable;
+    return traceConfig;
 }
 
 /**
@@ -421,7 +439,13 @@ function normalizeTelemetryListeners(convertedConfig) {
     listeners.forEach((listener) => {
         listener.tag = listener.tag || {};
         listener.traceName = `${getTracePrefix(listener)}${listener.name}`;
-        listener.trace = getTracerConfig(listener);
+
+        let traceConfigs = getTracerConfig(listener);
+        traceConfigs = Array.isArray(traceConfigs) ? traceConfigs : [traceConfigs];
+        listener.trace = traceConfigs.find(t => t.type === 'output')
+            || getTracerConfig(listener, false);
+        listener.traceInput = traceConfigs.find(t => t.type === 'input')
+            || getTracerConfig(listener, { enable: false, type: 'input' });
     });
 }
 
@@ -1103,4 +1127,9 @@ _module = module.exports = {
  *         }
  *     ]
  * }
+ */
+/**
+ * @typedef TypedTracerConfig
+ * @type {TracerConfig}
+ * @property {string} type - 'output' or 'input'
  */

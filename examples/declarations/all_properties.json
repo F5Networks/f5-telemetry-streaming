@@ -53,7 +53,10 @@
     "My_Listener": {
         "class": "Telemetry_Listener",
         "enable": true,
-        "trace": false,
+        "trace": [
+            { "type": "input" },
+            { "type": "output" }
+        ],
         "port": 6514,
         "tag": {
             "tenant": "`T`",

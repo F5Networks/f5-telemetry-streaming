@@ -2459,6 +2459,232 @@ describe('Declarations', () => {
             };
             return assert.isRejected(configWorker.processDeclaration(data), /My_Listener\/actions\/0.*should NOT have additional properties/);
         });
+
+        describe('tracer v2', () => {
+            describe('config object', () => {
+                it('should allow set tracer to object (type = "output")', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: { type: 'output' }
+                        }
+                    };
+                    return configWorker.processDeclaration(data)
+                        .then((validConfig) => {
+                            const listener = validConfig.My_Listener;
+                            assert.notStrictEqual(listener, undefined);
+                            assert.strictEqual(listener.class, 'Telemetry_Listener');
+                            assert.strictEqual(listener.enable, true);
+                            assert.deepStrictEqual(listener.trace, {
+                                type: 'output'
+                            });
+                            assert.strictEqual(listener.port, 6514);
+                            assert.deepStrictEqual(listener.actions, [{ enable: true, setTag: { tenant: '`T`', application: '`A`' } }]);
+                            assert.deepStrictEqual(listener.match, '');
+                        });
+                });
+
+                it('should allow set tracer to object (type = "input")', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: { type: 'input' }
+                        }
+                    };
+                    return configWorker.processDeclaration(data)
+                        .then((validConfig) => {
+                            const listener = validConfig.My_Listener;
+                            assert.notStrictEqual(listener, undefined);
+                            assert.strictEqual(listener.class, 'Telemetry_Listener');
+                            assert.strictEqual(listener.enable, true);
+                            assert.deepStrictEqual(listener.trace, {
+                                type: 'input'
+                            });
+                            assert.strictEqual(listener.port, 6514);
+                            assert.deepStrictEqual(listener.actions, [{ enable: true, setTag: { tenant: '`T`', application: '`A`' } }]);
+                            assert.deepStrictEqual(listener.match, '');
+                        });
+                });
+
+                it('should allow set tracer to object (all properties)', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: { type: 'output', path: 'path' }
+                        }
+                    };
+                    return configWorker.processDeclaration(data)
+                        .then((validConfig) => {
+                            const listener = validConfig.My_Listener;
+                            assert.notStrictEqual(listener, undefined);
+                            assert.strictEqual(listener.class, 'Telemetry_Listener');
+                            assert.strictEqual(listener.enable, true);
+                            assert.deepStrictEqual(listener.trace, {
+                                type: 'output', path: 'path'
+                            });
+                            assert.strictEqual(listener.port, 6514);
+                            assert.deepStrictEqual(listener.actions, [{ enable: true, setTag: { tenant: '`T`', application: '`A`' } }]);
+                            assert.deepStrictEqual(listener.match, '');
+                        });
+                });
+
+                it('should not allow set tracer path to empty string', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: { type: 'input', path: '' }
+                        }
+                    };
+                    return assert.isRejected(configWorker.processDeclaration(data), /should NOT be shorter than 1 character/);
+                });
+
+                it('should not allow set tracer without "type"', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: {}
+                        }
+                    };
+                    return assert.isRejected(configWorker.processDeclaration(data), /should have required property 'type'/);
+                });
+
+                it('should not allow set invalid value to tracer "type"', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: { type: 'invalidType' }
+                        }
+                    };
+                    return assert.isRejected(configWorker.processDeclaration(data), /trace.*type.*enum.*should be equal to one of the allowed values/);
+                });
+            });
+
+            describe('array of config objects', () => {
+                it('should allow set tracer to array of objects ("type" only)', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: [{ type: 'output' }, { type: 'input' }]
+                        }
+                    };
+                    return configWorker.processDeclaration(data)
+                        .then((validConfig) => {
+                            const listener = validConfig.My_Listener;
+                            assert.notStrictEqual(listener, undefined);
+                            assert.strictEqual(listener.class, 'Telemetry_Listener');
+                            assert.strictEqual(listener.enable, true);
+                            assert.deepStrictEqual(listener.trace, [
+                                { type: 'output' },
+                                { type: 'input' }
+                            ]);
+                            assert.strictEqual(listener.port, 6514);
+                            assert.deepStrictEqual(listener.actions, [{ enable: true, setTag: { tenant: '`T`', application: '`A`' } }]);
+                            assert.deepStrictEqual(listener.match, '');
+                        });
+                });
+
+                it('should allow set tracer to array of objects (all properties)', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: [{ type: 'output', path: 'outputPath' }, { type: 'input', path: 'inputPath' }]
+                        }
+                    };
+                    return configWorker.processDeclaration(data)
+                        .then((validConfig) => {
+                            const listener = validConfig.My_Listener;
+                            assert.notStrictEqual(listener, undefined);
+                            assert.strictEqual(listener.class, 'Telemetry_Listener');
+                            assert.strictEqual(listener.enable, true);
+                            assert.deepStrictEqual(listener.trace, [
+                                { type: 'output', path: 'outputPath' },
+                                { type: 'input', path: 'inputPath' }
+                            ]);
+                            assert.strictEqual(listener.port, 6514);
+                            assert.deepStrictEqual(listener.actions, [{ enable: true, setTag: { tenant: '`T`', application: '`A`' } }]);
+                            assert.deepStrictEqual(listener.match, '');
+                        });
+                });
+
+                it('should not allow set tracer to array of objects with same "type"', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: [{ type: 'output', path: 'outputPath' }, { type: 'output', path: 'inputPath' }]
+                        }
+                    };
+                    return assert.isRejected(configWorker.processDeclaration(data), /should pass .*uniqueItemProperties.* keyword validation/);
+                });
+
+                it('should not allow set tracer to an empty array', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: []
+                        }
+                    };
+                    return assert.isRejected(configWorker.processDeclaration(data), /should NOT have fewer than 1 items/);
+                });
+
+                it('should not allow set tracer to an array with 3+ elements', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: [
+                                { type: 'input' },
+                                { type: 'output' },
+                                { type: 'input' }
+                            ]
+                        }
+                    };
+                    return assert.isRejected(configWorker.processDeclaration(data), /should NOT have more than 2 items/);
+                });
+
+                it('should not allow set tracer path to empty string', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: [{ type: 'input', path: '' }, { type: 'output', path: 'path' }]
+                        }
+                    };
+                    return assert.isRejected(configWorker.processDeclaration(data), /should NOT be shorter than 1 character/);
+                });
+
+                it('should not allow set tracer without "type"', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: [{}]
+                        }
+                    };
+                    return assert.isRejected(configWorker.processDeclaration(data), /should have required property 'type'/);
+                });
+
+                it('should not allow set invalid value to tracer "type"', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: [{ type: 'invalidType' }]
+                        }
+                    };
+                    return assert.isRejected(configWorker.processDeclaration(data), /trace.*type.*enum.*should be equal to one of the allowed values/);
+                });
+            });
+        });
     });
 
     describe('Telemetry_iHealth_Poller', () => {

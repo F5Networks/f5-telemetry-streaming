@@ -134,7 +134,7 @@ class TCPDataReceiver extends TcpUdpBaseDataReceiver {
      * @returns {String} unique key
      */
     getConnKey(conn) {
-        return `${conn.remoteAddress}-${conn.remotePort}`;
+        return `tcp-${conn.remoteAddress}-${conn.remotePort}`;
     }
 
     /**
@@ -236,7 +236,7 @@ class UDPDataReceiver extends TcpUdpBaseDataReceiver {
      * @returns {String} unique key
      */
     getConnKey(remoteInfo) {
-        return `${remoteInfo.address}-${remoteInfo.port}`;
+        return `${this.family}-${remoteInfo.address}-${remoteInfo.port}`;
     }
 
     /**
@@ -406,7 +406,7 @@ function addTcpConnection(conn) {
  * @returns {Promise} resolved once data processed
  */
 function callDataCallback(data, connInfo) {
-    return this.safeEmitAsync('data', data, this.getConnKey(connInfo));
+    return this.safeEmitAsync('data', data, this.getConnKey(connInfo), Date.now(), process.hrtime());
 }
 
 /**
@@ -449,4 +449,6 @@ module.exports = {
  * @event TcpUdpBaseDataReceiver#data
  * @param {Buffer} data - data
  * @param {String} connKey - connection unique key
+ * @param {Number} timestamp - data timestamp in ms.
+ * @param {Array<Number>} hrtime - result of calling process.hrtime()
  */

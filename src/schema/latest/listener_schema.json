@@ -28,9 +28,12 @@
                     },
                     "trace": {
                         "default": false,
-                        "allOf": [
+                        "oneOf": [
                             {
                                 "$ref": "base_schema.json#/definitions/trace"
+                            },
+                            {
+                                "$ref": "base_schema.json#/definitions/traceV2"
                             }
                         ]
                     },
