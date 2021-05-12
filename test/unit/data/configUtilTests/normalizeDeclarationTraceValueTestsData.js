@@ -152,7 +152,8 @@ function generateDeclarationAndExpectedOutput(trace) {
                         enable: !!trace.systemPoller,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: typeof trace.systemPoller === 'string' ? trace.systemPoller : '/var/tmp/telemetry/Telemetry_System_Poller.My_Poller_2::My_Poller_2'
+                        path: typeof trace.systemPoller === 'string' ? trace.systemPoller : '/var/tmp/telemetry/Telemetry_System_Poller.My_Poller_2::My_Poller_2',
+                        type: 'output'
                     },
                     traceName: 'My_Poller_2::My_Poller_2'
                 },
@@ -191,7 +192,8 @@ function generateDeclarationAndExpectedOutput(trace) {
                         enable: !!trace.expectedSystemPoller,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: typeof trace.expectedSystemPoller === 'string' ? trace.expectedSystemPoller : '/var/tmp/telemetry/Telemetry_System_Poller.My_System::My_Poller_1'
+                        path: typeof trace.expectedSystemPoller === 'string' ? trace.expectedSystemPoller : '/var/tmp/telemetry/Telemetry_System_Poller.My_System::My_Poller_1',
+                        type: 'output'
                     },
                     traceName: 'My_System::My_Poller_1'
                 },
@@ -230,7 +232,8 @@ function generateDeclarationAndExpectedOutput(trace) {
                         enable: !!trace.expectedSystemPoller,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: typeof trace.expectedSystemPoller === 'string' ? trace.expectedSystemPoller : '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1'
+                        path: typeof trace.expectedSystemPoller === 'string' ? trace.expectedSystemPoller : '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1',
+                        type: 'output'
                     },
                     traceName: 'My_System::SystemPoller_1'
                 },
@@ -242,7 +245,8 @@ function generateDeclarationAndExpectedOutput(trace) {
                         enable: !!trace.expectedIHealthPoller,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: typeof trace.expectedIHealthPoller === 'string' ? trace.expectedIHealthPoller : '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System::iHealthPoller_1'
+                        path: typeof trace.expectedIHealthPoller === 'string' ? trace.expectedIHealthPoller : '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System::iHealthPoller_1',
+                        type: 'output'
                     },
                     iHealth: {
                         name: 'iHealthPoller_1',
@@ -302,7 +306,8 @@ function generateDeclarationAndExpectedOutput(trace) {
                         enable: !!trace.expectedIHealthPoller,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: typeof trace.expectedIHealthPoller === 'string' ? trace.expectedIHealthPoller : '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System_2::My_iHealth_Poller'
+                        path: typeof trace.expectedIHealthPoller === 'string' ? trace.expectedIHealthPoller : '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System_2::My_iHealth_Poller',
+                        type: 'output'
                     },
                     iHealth: {
                         name: 'My_iHealth_Poller',

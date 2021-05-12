@@ -30,7 +30,10 @@ module.exports = {
                     match: '/somepattern/',
                     port: 4567,
                     enable: false,
-                    trace: true,
+                    trace: [
+                        { type: 'input', path: 'traceInput' },
+                        { type: 'output', path: 'trace' }
+                    ],
                     tag: { // NOTE: deprecated
                         tenant: 'ten',
                         application: 'app'
@@ -57,7 +60,10 @@ module.exports = {
                         match: '/somepattern/',
                         port: 4567,
                         enable: false,
-                        trace: true,
+                        trace: [
+                            { type: 'input', path: 'traceInput' },
+                            { type: 'output', path: 'trace' }
+                        ],
                         tag: { // NOTE: deprecated
                             tenant: 'ten',
                             application: 'app'
@@ -87,11 +93,19 @@ module.exports = {
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Listener_1',
+                            type: 'input'
+                        },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1'
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1',
+                            type: 'output'
                         },
                         match: '',
                         tag: {},
@@ -113,11 +127,19 @@ module.exports = {
                         class: 'Telemetry_Listener',
                         port: 4567,
                         enable: false,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: 'traceInput',
+                            type: 'input'
+                        },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_2'
+                            path: 'trace',
+                            type: 'output'
                         },
                         match: '/somepattern/',
                         tag: { // NOTE: deprecated
@@ -145,11 +167,19 @@ module.exports = {
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Namespace::My_Listener_1',
+                            type: 'input'
+                        },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_1'
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_1',
+                            type: 'output'
                         },
                         match: '',
                         tag: {},
@@ -171,11 +201,19 @@ module.exports = {
                         class: 'Telemetry_Listener',
                         port: 4567,
                         enable: false,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: 'traceInput',
+                            type: 'input'
+                        },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_2'
+                            path: 'trace',
+                            type: 'output'
                         },
                         match: '/somepattern/',
                         tag: { // NOTE: deprecated
@@ -229,11 +267,19 @@ module.exports = {
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Listener_1',
+                            type: 'input'
+                        },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1'
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1',
+                            type: 'output'
                         },
                         match: '',
                         tag: {},
@@ -255,11 +301,19 @@ module.exports = {
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Listener_2',
+                            type: 'input'
+                        },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_2'
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_2',
+                            type: 'output'
                         },
                         match: '',
                         tag: {},
@@ -281,11 +335,19 @@ module.exports = {
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Namespace::My_Listener_1',
+                            type: 'input'
+                        },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_1'
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_1',
+                            type: 'output'
                         },
                         match: '',
                         tag: {},
@@ -307,11 +369,19 @@ module.exports = {
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Namespace::My_Listener_2',
+                            type: 'input'
+                        },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_2'
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_2',
+                            type: 'output'
                         },
                         match: '',
                         tag: {},
@@ -387,11 +457,19 @@ module.exports = {
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Listener_1',
+                            type: 'input'
+                        },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1'
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1',
+                            type: 'output'
                         },
                         match: '',
                         tag: {},
@@ -413,11 +491,19 @@ module.exports = {
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Listener_2',
+                            type: 'input'
+                        },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_2'
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_2',
+                            type: 'output'
                         },
                         match: '',
                         tag: {},
@@ -443,7 +529,8 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1'
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1',
+                            type: 'output'
                         },
                         type: 'default'
                     },
@@ -455,11 +542,19 @@ module.exports = {
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Namespace::My_Listener_1',
+                            type: 'input'
+                        },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_1'
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_1',
+                            type: 'output'
                         },
                         match: '',
                         tag: {},
@@ -481,11 +576,19 @@ module.exports = {
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Namespace::My_Listener_2',
+                            type: 'input'
+                        },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_2'
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_2',
+                            type: 'output'
                         },
                         match: '',
                         tag: {},
@@ -511,7 +614,8 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1'
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1',
+                            type: 'output'
                         },
                         type: 'default'
                     },
@@ -523,11 +627,19 @@ module.exports = {
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Namespace_2::My_Listener_1',
+                            type: 'input'
+                        },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace_2::My_Listener_1'
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace_2::My_Listener_1',
+                            type: 'output'
                         },
                         match: '',
                         tag: {},
@@ -549,11 +661,19 @@ module.exports = {
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Namespace_2::My_Listener_2',
+                            type: 'input'
+                        },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace_2::My_Listener_2'
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace_2::My_Listener_2',
+                            type: 'output'
                         },
                         match: '',
                         tag: {},
@@ -579,7 +699,8 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace_2::Consumer_1'
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace_2::Consumer_1',
+                            type: 'output'
                         },
                         type: 'default'
                     }
@@ -657,11 +778,19 @@ module.exports = {
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Listener_1',
+                            type: 'input'
+                        },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1'
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1',
+                            type: 'output'
                         },
                         match: '',
                         tag: {},
@@ -683,11 +812,19 @@ module.exports = {
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Listener_2',
+                            type: 'input'
+                        },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_2'
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_2',
+                            type: 'output'
                         },
                         match: '',
                         tag: {},
@@ -713,7 +850,8 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1'
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1',
+                            type: 'output'
                         },
                         type: 'default'
                     },
@@ -729,7 +867,8 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_2'
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_2',
+                            type: 'output'
                         },
                         type: 'default'
                     },
@@ -741,11 +880,19 @@ module.exports = {
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Namespace::My_Listener_1',
+                            type: 'input'
+                        },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_1'
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_1',
+                            type: 'output'
                         },
                         match: '',
                         tag: {},
@@ -767,11 +914,19 @@ module.exports = {
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Namespace::My_Listener_2',
+                            type: 'input'
+                        },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_2'
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_2',
+                            type: 'output'
                         },
                         match: '',
                         tag: {},
@@ -797,7 +952,8 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1'
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1',
+                            type: 'output'
                         },
                         type: 'default'
                     },
@@ -813,7 +969,8 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_2'
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_2',
+                            type: 'output'
                         },
                         type: 'default'
                     },
@@ -825,11 +982,19 @@ module.exports = {
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Namespace_2::My_Listener_1',
+                            type: 'input'
+                        },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace_2::My_Listener_1'
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace_2::My_Listener_1',
+                            type: 'output'
                         },
                         match: '',
                         tag: {},
@@ -851,11 +1016,19 @@ module.exports = {
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Namespace_2::My_Listener_2',
+                            type: 'input'
+                        },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace_2::My_Listener_2'
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace_2::My_Listener_2',
+                            type: 'output'
                         },
                         match: '',
                         tag: {},
@@ -881,7 +1054,8 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace_2::Consumer_1'
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace_2::Consumer_1',
+                            type: 'output'
                         },
                         type: 'default'
                     },
@@ -897,7 +1071,8 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace_2::Consumer_2'
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace_2::Consumer_2',
+                            type: 'output'
                         },
                         type: 'default'
                     }

@@ -431,8 +431,13 @@ configWorker.on('change', config => Promise.resolve()
         const registeredTracers = registered();
         // ignore skipUpdate setting - it should not affect not changed tracers
         const configuredTracers = config.components
-            .filter(component => component.trace)
-            .map(component => fromConfig(component.trace))
+            .reduce((acc, component) => {
+                acc.push(component.trace);
+                acc.push(component.traceInput);
+                return acc;
+            }, [])
+            .filter(traceConf => traceConf)
+            .map(traceConf => fromConfig(traceConf))
             .filter(tracer => tracer);
 
         registeredTracers.forEach((tracer) => {

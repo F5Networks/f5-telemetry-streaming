@@ -96,6 +96,8 @@ function combineSchemas() {
                         // Telemetry_System -> iHealthPoller property -> ref to iHealthPollerRef -> iHealthPoller
                         value = getReferenceValue(prop.oneOf[1].$ref, schemaId, schemaMap);
                         value = getReferenceValue(value.definition.allOf[1].$ref, value.schemaId, schemaMap).definition;
+                    } else if (propKey === 'trace') {
+                        value = getReferenceValue(prop.oneOf[0].$ref, schemaId, schemaMap).definition;
                     } else {
                         value = getReferenceValue(prop.oneOf[1].allOf[1].$ref, schemaId, schemaMap).definition;
                     }

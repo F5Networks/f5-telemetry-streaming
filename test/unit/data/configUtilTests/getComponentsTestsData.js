@@ -47,7 +47,8 @@ module.exports = {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1'
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1',
+                        type: 'output'
                     },
                     type: 'default'
                 },
@@ -63,7 +64,8 @@ module.exports = {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1'
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1',
+                        type: 'output'
                     },
                     type: 'default'
                 }
@@ -110,7 +112,8 @@ module.exports = {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1'
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1',
+                        type: 'output'
                     },
                     type: 'default'
                 },
@@ -126,7 +129,8 @@ module.exports = {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_2'
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_2',
+                        type: 'output'
                     },
                     type: 'default'
                 },
@@ -142,7 +146,8 @@ module.exports = {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1'
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1',
+                        type: 'output'
                     },
                     type: 'default'
                 },
@@ -158,7 +163,8 @@ module.exports = {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_2'
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_2',
+                        type: 'output'
                     },
                     type: 'default'
                 }
@@ -205,7 +211,8 @@ module.exports = {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1'
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1',
+                        type: 'output'
                     },
                     type: 'default'
                 },
@@ -221,7 +228,8 @@ module.exports = {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1'
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1',
+                        type: 'output'
                     },
                     type: 'default'
                 }
@@ -274,11 +282,19 @@ module.exports = {
                     namespace: 'f5telemetry_default',
                     port: 6514,
                     tag: {},
+                    traceInput: {
+                        enable: false,
+                        encoding: 'utf8',
+                        maxRecords: 9999,
+                        path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.Listener1',
+                        type: 'input'
+                    },
                     trace: {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Listener.Listener1'
+                        path: '/var/tmp/telemetry/Telemetry_Listener.Listener1',
+                        type: 'output'
                     },
                     traceName: 'Listener1'
                 },
@@ -294,7 +310,8 @@ module.exports = {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1'
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1',
+                        type: 'output'
                     },
                     type: 'default'
                 },
@@ -310,7 +327,8 @@ module.exports = {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_2'
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_2',
+                        type: 'output'
                     },
                     type: 'default'
                 }
@@ -357,7 +375,8 @@ module.exports = {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1'
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1',
+                        type: 'output'
                     },
                     type: 'default'
                 },
@@ -373,7 +392,8 @@ module.exports = {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_2'
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_2',
+                        type: 'output'
                     },
                     type: 'default'
                 }
@@ -421,7 +441,8 @@ module.exports = {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1'
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1',
+                        type: 'output'
                     },
                     type: 'default'
                 },
@@ -437,7 +458,8 @@ module.exports = {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_2'
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_2',
+                        type: 'output'
                     },
                     type: 'default'
                 }
@@ -484,7 +506,8 @@ module.exports = {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1'
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1',
+                        type: 'output'
                     },
                     type: 'default'
                 },
@@ -500,7 +523,8 @@ module.exports = {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1'
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1',
+                        type: 'output'
                     },
                     type: 'default'
                 }

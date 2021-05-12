@@ -15,6 +15,44 @@
             "description": "Enables data dumping to file. Boolean uses pre-defined file location, however value could be a string which contains path to a specific file instead" ,
             "type": ["boolean", "string"]
         },
+        "traceConfig": {
+            "title": "Trace (v2)",
+            "description": "Enables data dumping to file. Boolean uses pre-defined file location, however value could be a string which contains path to a specific file instead",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "title": "Trace type",
+                    "description": "Trace type - output data or input data",
+                    "type": "string",
+                    "enum": ["output", "input"]
+                },
+                "path": {
+                    "title": "Path to trace file",
+                    "description": "Path to trace file to write data to",
+                    "type": "string",
+                    "minLength": 1
+                }
+            },
+            "required": ["type"]
+        },
+        "traceV2": {
+            "title": "Trace (v2)",
+            "description": "Enables data dumping to file. Boolean uses pre-defined file location, however value could be a string which contains path to a specific file instead",
+            "oneOf": [
+                { "$ref": "#/definitions/traceConfig" },
+                {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 2,
+                    "uniqueItemProperties": ["type"],
+                    "items": {
+                        "allOf": [{
+                            "$ref": "#/definitions/traceConfig"
+                        }]
+                    }
+                }
+            ]
+        },
         "secret": {
             "title": "Passphrase (secret)",
             "description": "" ,
