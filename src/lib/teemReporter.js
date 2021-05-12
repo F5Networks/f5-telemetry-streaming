@@ -1,5 +1,5 @@
 /*
- * Copyright 2020. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -21,56 +21,59 @@ const CONFIG_CLASSES = constants.CONFIG_CLASSES;
 /**
  * TeemReporter class - Handle reporting of analytics data using F5-TEEM
  *
- * @class
- *
  * @property {Object} assetInfo - assetInformation sent to TEEM
  * @property {Object} teemDevice - TEEM device instance
  */
-function TeemReporter() {
-    this.assetInfo = {
-        name: constants.APP_NAME,
-        version: constants.VERSION
-    };
-    this.teemDevice = new TeemDevice(this.assetInfo);
-    this.logger = logger.getChild('teemReporter');
+class TeemReporter {
+    /**
+     * Constructor
+     */
+    constructor() {
+        this.assetInfo = {
+            name: constants.APP_NAME,
+            version: constants.VERSION
+        };
+        this.teemDevice = new TeemDevice(this.assetInfo);
+        this.logger = logger.getChild('teemReporter');
+    }
+
+    /**
+     * Perform the actual TEEM processing
+     *
+     * @param {Object} config - the configuration to use to generate TEEM data
+     *
+     * @returns {Promise} Guaranteed to always fulfill and not reject on error
+     */
+    process(config) {
+        let teemRecord;
+
+        return Promise.resolve()
+            .then(() => {
+                teemRecord = new TeemRecord(`${constants.APP_NAME} Telemetry Data`, '1');
+            })
+            .then(() => teemRecord.calculateAssetId())
+            .then(() => teemRecord.addRegKey())
+            .then(() => teemRecord.addPlatformInfo())
+            .then(() => teemRecord.addProvisionedModules())
+            .then(() => teemRecord.addClassCount(config))
+            .then(() => teemRecord.addJsonObject(this.fetchExtraData(config)))
+            .then(() => this.teemDevice.reportRecord(teemRecord))
+            .catch(err => this.logger.debugException('Unable to send analytics data', err));
+    }
+
+    /**
+     * Fetch extra data from the configuration
+     *
+     * @param {Object} config - the configuration to use to fetch extra data from
+     *
+     * @returns {Object} with extra data fetched from the configuration
+     */
+    fetchExtraData(config) {
+        const extraData = {};
+        computeCounters(config, extraData);
+        return extraData;
+    }
 }
-
-/**
- * Perform the actual TEEM processing
- *
- * @param {Object} config - the configuration to use to generate TEEM data
- *
- * @returns {Promise} Guaranteed to always fulfill and not reject on error
- */
-TeemReporter.prototype.process = function (config) {
-    let teemRecord;
-
-    return Promise.resolve()
-        .then(() => {
-            teemRecord = new TeemRecord(`${constants.APP_NAME} Telemetry Data`, '1');
-        })
-        .then(() => teemRecord.calculateAssetId())
-        .then(() => teemRecord.addRegKey())
-        .then(() => teemRecord.addPlatformInfo())
-        .then(() => teemRecord.addProvisionedModules())
-        .then(() => teemRecord.addClassCount(config))
-        .then(() => teemRecord.addJsonObject(this.fetchExtraData(config)))
-        .then(() => this.teemDevice.reportRecord(teemRecord))
-        .catch(err => this.logger.debugException('Unable to send analytics data', err));
-};
-
-/**
- * Fetch extra data from the configuration
- *
- * @param {Object} config - the configuration to use to fetch extra data from
- *
- * @returns {Object} with extra data fetched from the configuration
- */
-TeemReporter.prototype.fetchExtraData = function (config) {
-    const extraData = {};
-    computeCounters(config, extraData);
-    return extraData;
-};
 
 /**
  * Calculate counters for Consumers (by type), inlined System Pollers and iHealth Pollers

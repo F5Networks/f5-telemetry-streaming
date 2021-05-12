@@ -82,7 +82,7 @@ function createReportCallback(poller, pollerConfig, globalConfig) {
         destinationIDs: configUtil.getReceivers(globalConfig, pollerConfig).map(r => r.id),
         pollerID: pollerConfig.id,
         demoMode: poller.isDemoModeEnabled(),
-        tracer: tracer.fromConfig(pollerConfig)
+        tracer: tracer.fromConfig(pollerConfig.trace)
     };
     return safeProcess.bind(reportCallback.bind(ctx));
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -96,6 +96,8 @@ function combineSchemas() {
                         // Telemetry_System -> iHealthPoller property -> ref to iHealthPollerRef -> iHealthPoller
                         value = getReferenceValue(prop.oneOf[1].$ref, schemaId, schemaMap);
                         value = getReferenceValue(value.definition.allOf[1].$ref, value.schemaId, schemaMap).definition;
+                    } else if (propKey === 'trace') {
+                        value = getReferenceValue(prop.oneOf[0].$ref, schemaId, schemaMap).definition;
                     } else {
                         value = getReferenceValue(prop.oneOf[1].allOf[1].$ref, schemaId, schemaMap).definition;
                     }

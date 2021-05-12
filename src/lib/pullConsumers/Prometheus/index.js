@@ -1,5 +1,5 @@
 /*
- * Copyright 2020. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -89,10 +89,8 @@ module.exports = function (context) {
         const output = registry.metrics();
         logger.debug('success');
         if (tracer) {
-            // pretty JSON dump
             tracer.write(output);
         }
-
         resolve(output);
     });
 };
@@ -309,6 +307,8 @@ function getMetrics(data, options) {
         if (!Number.isNaN(numData)) {
             storeMetric(options.pathOrKey, numData, metrics);
         }
+    } else if (typeof data === 'boolean') {
+        storeMetric(options.pathOrKey, Number(data), metrics);
     } else if (typeof data === 'object') {
         if (Array.isArray(data)) {
             data.forEach((d, index) => {

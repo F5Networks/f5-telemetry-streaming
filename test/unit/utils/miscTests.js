@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -362,12 +362,12 @@ describe('Misc Util', () => {
                 }
             };
             util.renameKeys(target, /red/, 'green');
-            assert.strictEqual(Object.keys(target).length, 1);
-            assert.strictEqual(Object.keys(target.brightgreentomato).length, 2);
+            assert.lengthOf(Object.keys(target), 1);
+            assert.lengthOf(Object.keys(target.brightgreentomato), 2);
             assert.strictEqual(target.brightgreentomato.a, 1);
-            assert.strictEqual(Object.keys(target.brightgreentomato.greencar).length, 2);
+            assert.lengthOf(Object.keys(target.brightgreentomato.greencar), 2);
             assert.strictEqual(target.brightgreentomato.greencar.b, 2);
-            assert.strictEqual(Object.keys(target.brightgreentomato.greencar.paintitgreen).length, 1);
+            assert.lengthOf(Object.keys(target.brightgreentomato.greencar.paintitgreen), 1);
             assert.strictEqual(target.brightgreentomato.greencar.paintitgreen.c, 3);
         });
 
@@ -377,7 +377,7 @@ describe('Misc Util', () => {
             };
             util.renameKeys(target, /red/, 'green');
 
-            assert.strictEqual(Object.keys(target).length, 1);
+            assert.lengthOf(Object.keys(target), 1);
             assert.strictEqual(target.brightgreenredredtomato.a, 1);
         });
 
@@ -387,7 +387,7 @@ describe('Misc Util', () => {
             };
             util.renameKeys(target, /red/i, 'green');
 
-            assert.strictEqual(Object.keys(target).length, 1);
+            assert.lengthOf(Object.keys(target), 1);
             assert.strictEqual(target.brightgreenTomato.a, 1);
         });
 
@@ -397,7 +397,7 @@ describe('Misc Util', () => {
             };
             util.renameKeys(target, /red/g, 'green');
 
-            assert.strictEqual(Object.keys(target).length, 1);
+            assert.lengthOf(Object.keys(target), 1);
             assert.strictEqual(target.brightgreengreentomato.a, 1);
         });
 
@@ -407,7 +407,7 @@ describe('Misc Util', () => {
             };
             util.renameKeys(target, /red/ig, 'green');
 
-            assert.strictEqual(Object.keys(target).length, 1);
+            assert.lengthOf(Object.keys(target), 1);
             assert.strictEqual(target.brightgreengreengreentomato.a, 1);
         });
 
@@ -419,7 +419,7 @@ describe('Misc Util', () => {
             };
             util.renameKeys(target, /[bt]ear/, 'jelly');
 
-            assert.strictEqual(Object.keys(target).length, 3);
+            assert.lengthOf(Object.keys(target), 3);
             assert.strictEqual(target.jellyclaw.a, 1);
             assert.strictEqual(target.jellydrop.b, 2);
             assert.strictEqual(target.dearjohn.c, 3);
@@ -433,7 +433,7 @@ describe('Misc Util', () => {
             };
             util.renameKeys(target, /[^bt]ear/, 'jelly');
 
-            assert.strictEqual(Object.keys(target).length, 3);
+            assert.lengthOf(Object.keys(target), 3);
             assert.strictEqual(target.bearclaw.a, 1);
             assert.strictEqual(target.teardrop.b, 2);
             assert.strictEqual(target.jellyjohn.c, 3);

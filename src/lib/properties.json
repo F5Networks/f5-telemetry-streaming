@@ -112,6 +112,15 @@
                 "disabled": true
             }
         },
+        "configSyncSucceeded": {
+            "structure": { "parentKey": "system" },
+            "key": "/mgmt/tm/cm/sync-status::cm/sync-status/0::color",
+            "normalization": [
+                {
+                    "runFunctions": [{ "name": "configSyncColorToBool" }]
+                }
+            ]
+        },
         "licenseReady": {
             "structure": { "parentKey": "system" },
             "if": {
@@ -240,6 +249,9 @@
             "normalization": [
                 {
                     "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Mounted", "filterKeys": { "include": [ "/", "Capacity", "1024-blocks" ] } } }]
+                },
+                {
+                    "runFunctions": [ { "name": "diskStoragePercentsToFloating" } ]
                 }
             ]
         },

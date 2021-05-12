@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -200,8 +200,7 @@ describe('Promise Util', () => {
             return promiseUtil.retry(promiseFunc, { maxTries, delay })
                 .catch((err) => {
                     assert.ok(/expected error/.test(err));
-                    assert.ok(timestamps.length === expectedTries,
-                        `Expected ${expectedTries} timestamps, got ${timestamps.length}`);
+                    assert.lengthOf(timestamps, expectedTries, `Expected ${expectedTries} timestamps, got ${timestamps.length}`);
 
                     for (let i = 1; i < timestamps.length; i += 1) {
                         const actualDelay = timestamps[i] - timestamps[i - 1];
@@ -227,8 +226,7 @@ describe('Promise Util', () => {
             return promiseUtil.retry(promiseFunc, { maxTries, delay, backoff })
                 .catch((err) => {
                     assert.ok(/expected error/.test(err));
-                    assert.ok(timestamps.length === expectedTries,
-                        `Expected ${expectedTries} timestamps, got ${timestamps.length}`);
+                    assert.lengthOf(timestamps, expectedTries, `Expected ${expectedTries} timestamps, got ${timestamps.length}`);
 
                     for (let i = 1; i < timestamps.length; i += 1) {
                         const actualDelay = timestamps[i] - timestamps[i - 1];

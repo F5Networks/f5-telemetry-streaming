@@ -54,6 +54,8 @@ AFM Request Log
     
 :ref:`Back to top<outputexample-ref>`
 
+.. _asmrl:
+
 ASM Request Log
 ---------------
 .. NOTE:: Log streams from LTM, AFM, ASM, and APM are not configured by Telemetry Streaming, they must be configured with AS3 or another method.

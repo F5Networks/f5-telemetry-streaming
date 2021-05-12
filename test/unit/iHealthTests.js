@@ -107,8 +107,16 @@ describe('iHealth', () => {
         return components;
     };
 
-    const registeredTracerNames = () => tracer.registered().map(t => t.name);
-    const toTracerNames = ids => ids.map(id => `Telemetry_iHealth_Poller.${id}`);
+    const registeredTracerPaths = () => {
+        const paths = tracer.registered().map(t => t.path);
+        paths.sort();
+        return paths;
+    };
+    const toTracerPaths = (ids) => {
+        const tracerPaths = ids.map(id => `Telemetry_iHealth_Poller.${id}`);
+        tracerPaths.sort();
+        return tracerPaths;
+    };
 
     const verifyPollersConfig = (pollers, expectedConfigs) => Promise.all(pollers.map(p => p.getConfig()))
         .then(configs => assert.sameDeepMembers(configs, expectedConfigs, 'should match expected configuration'));
@@ -207,7 +215,7 @@ describe('iHealth', () => {
         ihealthStub.ihealthUtil.QkviewManager.process.rejects(new Error('expected error'));
         return configWorker.processDeclaration({ class: 'Telemetry' })
             .then(() => {
-                assert.strictEqual(IHealthPoller.getAll({ includeDemo: true }).length, 0, 'should have no running pollers');
+                assert.isEmpty(IHealthPoller.getAll({ includeDemo: true }), 'should have no running pollers');
             });
     });
 
@@ -216,7 +224,7 @@ describe('iHealth', () => {
         .then(() => {
             sinon.restore();
             // related to blocks like .catch(err => logError(err))
-            assert.deepStrictEqual(coreStub.logger.messages.error, [], 'should have no errors logged');
+            assert.isEmpty(coreStub.logger.messages.error, 'should have no errors logged');
         }));
 
     describe('config "on change" event', () => {
@@ -230,9 +238,9 @@ describe('iHealth', () => {
                         preExistingConfigIDs,
                         'should create instances with expected IDs'
                     );
-                    assert.sameMembers(
-                        registeredTracerNames(),
-                        toTracerNames(preExistingConfigIDs),
+                    testAssert.sameOrderedMatches(
+                        registeredTracerPaths(),
+                        toTracerPaths(preExistingConfigIDs),
                         'should create tracers with expected IDs'
                     );
                     return verifyPollersConfig(IHealthPoller.getAll({ includeDemo: true }), expectedConfiguration());
@@ -288,9 +296,9 @@ describe('iHealth', () => {
                         preExistingConfigIDs,
                         'should create instances with expected IDs'
                     );
-                    assert.sameMembers(
-                        registeredTracerNames(),
-                        toTracerNames(preExistingConfigIDs),
+                    testAssert.sameOrderedMatches(
+                        registeredTracerPaths(),
+                        toTracerPaths(preExistingConfigIDs),
                         'should create tracers with expected IDs'
                     );
                     instancesBefore.forEach((inst) => {
@@ -345,9 +353,9 @@ describe('iHealth', () => {
                         'should create instances with expected IDs'
                     );
                     // using pre-existing list of IDs because 'demo' using same Tracer instance
-                    assert.sameMembers(
-                        registeredTracerNames(),
-                        toTracerNames(preExistingConfigIDs),
+                    testAssert.sameOrderedMatches(
+                        registeredTracerPaths(),
+                        toTracerPaths(preExistingConfigIDs),
                         'should create tracers with expected IDs'
                     );
                     // ignoring Namespace' 'demo' instance
@@ -415,9 +423,9 @@ describe('iHealth', () => {
                         newInstances[0],
                         'should not create new instance when only namespace was updated'
                     );
-                    assert.sameMembers(
-                        registeredTracerNames(),
-                        toTracerNames(['Namespace::System::iHealthPoller_1']),
+                    testAssert.sameOrderedMatches(
+                        registeredTracerPaths(),
+                        toTracerPaths(['Namespace::System::iHealthPoller_1']),
                         'should create tracers with expected IDs'
                     );
                 });
@@ -440,9 +448,9 @@ describe('iHealth', () => {
                         newInstances[0],
                         'should not create new instance when only namespace was updated'
                     );
-                    assert.sameMembers(
-                        registeredTracerNames(),
-                        toTracerNames(['Namespace::System::iHealthPoller_1']),
+                    testAssert.sameOrderedMatches(
+                        registeredTracerPaths(),
+                        toTracerPaths(['Namespace::System::iHealthPoller_1']),
                         'should create tracers with expected IDs'
                     );
                 });
@@ -466,9 +474,9 @@ describe('iHealth', () => {
                         preExistingConfigIDs,
                         'should create instances with expected IDs'
                     );
-                    assert.sameMembers(
-                        registeredTracerNames(),
-                        toTracerNames(preExistingConfigIDs),
+                    testAssert.sameOrderedMatches(
+                        registeredTracerPaths(),
+                        toTracerPaths(preExistingConfigIDs),
                         'should create tracers with expected IDs'
                     );
                     instancesBefore.forEach((inst) => {
@@ -494,9 +502,9 @@ describe('iHealth', () => {
                         newInstances[0],
                         'should not create new instance when only namespace was updated'
                     );
-                    assert.sameMembers(
-                        registeredTracerNames(),
-                        toTracerNames(['Namespace::System::iHealthPoller_1']),
+                    testAssert.sameOrderedMatches(
+                        registeredTracerPaths(),
+                        toTracerPaths(['Namespace::System::iHealthPoller_1']),
                         'should create tracers with expected IDs'
                     );
                 });
@@ -520,9 +528,9 @@ describe('iHealth', () => {
                         preExistingConfigIDs,
                         'should create instances with expected IDs'
                     );
-                    assert.sameMembers(
-                        registeredTracerNames(),
-                        toTracerNames(preExistingConfigIDs),
+                    testAssert.sameOrderedMatches(
+                        registeredTracerPaths(),
+                        toTracerPaths(preExistingConfigIDs),
                         'should create tracers with expected IDs'
                     );
                     instancesBefore.forEach((inst) => {
@@ -540,9 +548,9 @@ describe('iHealth', () => {
                         preExistingConfigIDs,
                         'should create instances with expected IDs'
                     );
-                    assert.sameMembers(
-                        registeredTracerNames(),
-                        toTracerNames(preExistingConfigIDs),
+                    testAssert.sameOrderedMatches(
+                        registeredTracerPaths(),
+                        toTracerPaths(preExistingConfigIDs),
                         'should create tracers with expected IDs'
                     );
                     testAssert.includeMatch(coreStub.logger.messages.error, /expected error/, 'should log error');
@@ -559,16 +567,8 @@ describe('iHealth', () => {
             declaration.Namespace.System.enable = false;
             return configWorker.processDeclaration(testUtil.deepCopy(declaration))
                 .then(() => {
-                    assert.sameMembers(
-                        IHealthPoller.getAll({ includeDemo: true }).map(p => p.id),
-                        [],
-                        'should not create instances'
-                    );
-                    assert.sameMembers(
-                        registeredTracerNames(),
-                        [],
-                        'should not create tracers'
-                    );
+                    assert.isEmpty(IHealthPoller.getAll({ includeDemo: true }).map(p => p.id), 'should not create instances');
+                    assert.isEmpty(registeredTracerPaths(), 'should not create tracers');
                 });
         });
 
@@ -719,9 +719,9 @@ describe('iHealth', () => {
                         preExistingConfigIDs,
                         'should create instances with expected IDs'
                     );
-                    assert.sameMembers(
-                        registeredTracerNames(),
-                        toTracerNames(preExistingConfigIDs),
+                    testAssert.sameOrderedMatches(
+                        registeredTracerPaths(),
+                        toTracerPaths(preExistingConfigIDs),
                         'should create tracers with expected IDs'
                     );
                     return verifyPollersConfig(IHealthPoller.getAll({ includeDemo: true }), expectedConfiguration());
@@ -729,14 +729,14 @@ describe('iHealth', () => {
         });
 
         it('should return empty array when no pollers', () => configWorker.processDeclaration({ class: 'Telemetry' })
-            .then(() => assert.deepStrictEqual(ihealth.getCurrentState('NonExistingNamespace'), [], 'should return empty list')));
+            .then(() => assert.isEmpty(ihealth.getCurrentState('NonExistingNamespace'), 'should return empty list')));
 
         it('should return empty array for non-existing namespace', () => {
-            assert.deepStrictEqual(ihealth.getCurrentState('NonExistingNamespace'), [], 'should return empty list');
+            assert.isEmpty(ihealth.getCurrentState('NonExistingNamespace'), 'should return empty list');
         });
 
         it('should return empty array for empty namespace', () => configWorker.processNamespaceDeclaration({ class: 'Telemetry_Namespace' }, 'Namespace')
-            .then(() => assert.deepStrictEqual(ihealth.getCurrentState('Namespace'), [], 'should return empty list')));
+            .then(() => assert.isEmpty(ihealth.getCurrentState('Namespace'), 'should return empty list')));
 
         it('should return statuses for all pollers', () => {
             assert.sameDeepMembers(

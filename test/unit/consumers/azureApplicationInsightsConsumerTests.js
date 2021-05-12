@@ -1,5 +1,5 @@
 /*
- * Copyright 2020. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -12,7 +12,8 @@
 
 require('../shared/restoreCache')();
 
-const assert = require('assert');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 const appInsights = require('applicationinsights');
 
@@ -20,6 +21,9 @@ const requestsUtil = require('../../../src/lib/utils/requests');
 const azureAppInsightsIndex = require('../../../src/lib/consumers/Azure_Application_Insights/index');
 const azureUtil = require('../../../src/lib/consumers/shared/azureUtil');
 const testUtil = require('../shared/util');
+
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
 describe('Azure_Application_Insights', () => {
     let requests;
@@ -55,7 +59,7 @@ describe('Azure_Application_Insights', () => {
             return azureAppInsightsIndex(context)
                 .then(() => {
                     assert(aiSpy.setup.withArgs('skip-instr-key-guid').notCalled, 'The app insights client must skip non system poller data');
-                    return assert.deepStrictEqual(requests, []);
+                    assert.isEmpty(requests);
                 });
         });
         it('should NOT track when no metrics available (only numeric values are valid)', () => {
@@ -79,7 +83,7 @@ describe('Azure_Application_Insights', () => {
                         'The app insights client should not be setup when skipping metrics'
                     );
                     assert.strictEqual(aiSpy.TelemetryClient.getCalls().find(c => c.args[0] === 'should-not-be-called-guid'), undefined);
-                    return assert.deepStrictEqual(requests, []);
+                    assert.isEmpty(requests);
                 });
         });
 
@@ -115,8 +119,7 @@ describe('Azure_Application_Insights', () => {
 
                     assert.strictEqual(actualClientConfig.maxBatchSize, 250);
                     assert.strictEqual(actualClientConfig.maxBatchIntervalMs, 5000);
-
-                    return assert.deepStrictEqual(requests, [
+                    assert.deepStrictEqual(requests, [
                         { name: 'F5_num', value: 1234 },
                         { name: 'F5_parent_child1', value: 435.0 },
                         { name: 'F5_parent_child2', value: 230.334 },
@@ -159,8 +162,7 @@ describe('Azure_Application_Insights', () => {
                     assert.strictEqual(actualClientConfig.maxBatchIntervalMs, 3333);
                     assert.strictEqual(actualClientConfig.proxyHttpsUrl, 'testhost123/proxy');
                     assert.strictEqual(actualClientConfig.endpointUrl, '/mycustom.endpoint/v2');
-
-                    return assert.deepStrictEqual(requests, [
+                    assert.deepStrictEqual(requests, [
                         { name: 'F5_category_someRate', value: 1.1 },
                         { name: 'F5_category_anotherOne', value: 20 },
                         { name: 'F5_category_yetAnother', value: 13.11111 }
@@ -194,8 +196,7 @@ describe('Azure_Application_Insights', () => {
 
                     const expectedMetric1 = { name: 'F5_num', value: 1234 };
                     const expectedMetric2 = { name: 'F5_strNum', value: 24.1 };
-
-                    return assert.deepStrictEqual(requests,
+                    assert.deepStrictEqual(requests,
                         [
                             expectedMetric1,
                             expectedMetric2,

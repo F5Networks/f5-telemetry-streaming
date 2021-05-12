@@ -1,6 +1,6 @@
 {
     "name": "f5-telemetry",
-    "version": "1.19.0-3",
+    "version": "1.20.0-3",
     "author": "F5 Networks",
     "license": "Apache-2.0",
     "repository": {
@@ -8,8 +8,8 @@
         "url": "git+https://github.com/F5Networks/f5-telemetry-streaming.git"
     },
     "scripts": {
-        "install-production": "npm install --production --no-optional",
-        "install-test": "npm install --no-optional",
+        "install-production": "npm ci --production --no-optional",
+        "install-test": "npm ci --no-optional",
         "lint": "eslint src test",
         "test-functional": "mocha \"./test/functional/testRunner.js\" --opts ./test/functional/.mocha.opts",
         "test-functional-cloud-azure": "mocha \"./test/functional/cloud/azureTests.js\" --opts ./test/functional/.mocha.opts",
@@ -37,13 +37,15 @@
         "@f5devcentral/f5-teem": "^1.4.6",
         "@grpc/proto-loader": "~0.3.0",
         "ajv": "^6.12.6",
+        "ajv-keywords": "^3.5.2",
         "applicationinsights": "^1.8.10",
-        "aws-sdk": "^2.854.0",
+        "aws-sdk": "^2.885.0",
         "commander": "^2.20.3",
         "deep-diff": "^1.0.2",
         "eventemitter2": "^6.4.4",
         "google-auth-library": "^6.1.6",
         "grpc-js-0.2-modified": "git://github.com/f5devcentral/grpc-js-0.2-modified.git#1.0",
+        "jmespath": "^0.15.0",
         "jsonwebtoken": "^8.5.1",
         "kafka-node": "^2.6.1",
         "lodash": "^4.17.21",
@@ -61,6 +63,7 @@
         "chai": "^4.2.0",
         "chai-as-promised": "^7.1.1",
         "grpc-mock": "^0.7.0",
+        "grpc": "1.24.7",
         "icrdk": "git://github.com/f5devcentral/f5-icontrollx-dev-kit.git#master",
         "mocha": "^7.2.0",
         "nock": "10.0.0",
@@ -80,10 +83,20 @@
     },
     "comments": {
         "dependencies": {
+            "ajv": "This package dropped support for older node versions and requires the ajv package to be recompiled. Use v6.X.Y for Node v4.",
             "@grpc/proto-loader": "v0.3.0 - This package is used for GRPC connection, supports node v6 and above.",
             "commander": "This package dropped support for older node versions. Use v2.X.Y for Node v4.",
             "google-auth-library": "This package is used for GRPC connection, supports node v10 and above, but fromJSON function works in node v8.11.1 - should use v6.1.X only",
-            "kafka-node": "This package dropped support for older node versions. Use v2.X.Y for Node v4.",
+            "kafka-node": {
+                "comments": "This package dropped support for older node versions. Use v2.X.Y for Node v4.",
+                "dependencies": {
+                    "node-zookeeper-client": {
+                        "dependencies": {
+                            "underscore": "This package should be pinned to 1.13.1 in package-lock.json due https://npmjs.com/advisories/1674."
+                        }
+                    }
+                }
+            },
             "long": "This package is used for GRPC connection, this can only be used with node v8.11.1 and higher (http2 support).",
             "prom-client": "This package dropped support for older node versions. Use v11.X.Y for Node v4.",
             "uuid": "This package dropped support for older node versions starting v7.0.0. Their policy is supported node versions + one legacy version."
@@ -91,6 +104,7 @@
         "devDependencies": {
             "chai": "This package dropped support for older node versions. Use v4.X.Y for Node v4.",
             "grpc-mock": "This package is used for GRPC connection, dependent of grpc lib that supports node v4 and above.",
+            "grpc": "This package is used for GRPC connection. Pinned to v1.24.7 as later versions do not compile on Node v6.",
             "mocha": "This package dropped support for older node versions. Use v5.X.Y for Node v4 and v6.2.2 for Node v6.",
             "nock": "This package dropped support for older node versions. Use v10.0.0 for Node v4.",
             "nyc": "This package dropped support for older node versions. Use v14.X.Y for Node v4.",

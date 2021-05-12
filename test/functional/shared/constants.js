@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -83,10 +83,12 @@ module.exports = {
         F5_CLOUD: {
             SERVICE_ACCOUNT: 'F5_CLOUD_GCP_SERVICE_ACCOUNT'
         },
-        GCP_PROJECT_ID: 'GCP_PROJECT_ID',
-        GCP_PRIVATE_KEY_ID: 'GCP_PRIVATE_KEY_ID',
-        GCP_PRIVATE_KEY: 'GCP_PRIVATE_KEY',
-        GCP_SERVICE_EMAIL: 'GCP_SERVICE_EMAIL'
+        GCP: {
+            PROJECT_ID: 'GCP_PROJECT_ID',
+            PRIVATE_KEY_ID: 'GCP_PRIVATE_KEY_ID',
+            PRIVATE_KEY: 'GCP_PRIVATE_KEY',
+            SERVICE_EMAIL: 'GCP_SERVICE_EMAIL'
+        }
     },
     EVENT_LISTENER_DEFAULT_PORT: 6514, // default port
     EVENT_LISTENER_SECONDARY_PORT: 56515,

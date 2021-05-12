@@ -1,5 +1,5 @@
 /*
- * Copyright 2020. F5 Networks, Inc. See End User License Agreement ('EULA') for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ('EULA') for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -20,11 +20,13 @@ const net = require('net');
 const udp = require('dgram');
 
 const tcpUdpDataReceiver = require('../../../src/lib/eventListener/tcpUdpDataReceiver');
+const stubs = require('../shared/stubs');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe('TCP and UDP Receivers', () => {
+    let clock;
     let dataCallbackSpy;
     let receiverInst;
 
@@ -34,6 +36,7 @@ describe('TCP and UDP Receivers', () => {
 
     beforeEach(() => {
         sinon.stub(tcpUdpDataReceiver.TcpUdpBaseDataReceiver, 'RESTART_DELAY').value(1);
+        clock = stubs.clock();
         dataCallbackSpy = sinon.spy();
     });
 
@@ -119,7 +122,7 @@ describe('TCP and UDP Receivers', () => {
             createServerMockCb = null;
         });
 
-        describe('.callCallback()', () => {
+        describe('"data" event', () => {
             let socketId = 0;
             let serverMock;
 
@@ -146,7 +149,7 @@ describe('TCP and UDP Receivers', () => {
                 serverMock = null;
             });
 
-            it('should call callback when received data', () => {
+            it('should emit "data" event when received data', () => {
                 const expectedData = [];
                 return receiverInst.start()
                     .then(() => {
@@ -164,8 +167,8 @@ describe('TCP and UDP Receivers', () => {
                     })
                     .then(() => {
                         assert.deepStrictEqual(dataCallbackSpy.args, [
-                            [expectedData[0], expectedData[0]],
-                            [expectedData[1], expectedData[1]]
+                            [expectedData[0], expectedData[0], 0, [0, 0]],
+                            [expectedData[1], expectedData[1], 0, [0, 0]]
                         ]);
                         assert.isFalse(receiverInst.isRunning(), 'should not be in running state');
                         assert.isTrue(receiverInst.hasState(tcpUdpDataReceiver.TCPDataReceiver.STATE.STOPPED), 'should have STOPPED state');
@@ -175,7 +178,7 @@ describe('TCP and UDP Receivers', () => {
 
         describe('.getConnKey()', () => {
             it('should compute unique key', () => {
-                assert.strictEqual(receiverInst.getConnKey({ remoteAddress: testAddr, remotePort: testPort }), `${testAddr}-${testPort}`);
+                assert.strictEqual(receiverInst.getConnKey({ remoteAddress: testAddr, remotePort: testPort }), `tcp-${testAddr}-${testPort}`);
             });
         });
 
@@ -236,6 +239,7 @@ describe('TCP and UDP Receivers', () => {
                     serverMock.on('closeMock', closeSpy);
                 };
 
+                clock.clockForward(5, { promisify: true });
                 return new Promise((resolve, reject) => {
                     const originSafeRestart = receiverInst.safeRestart.bind(receiverInst);
                     sinon.stub(receiverInst, 'safeRestart')
@@ -357,7 +361,7 @@ describe('TCP and UDP Receivers', () => {
             createServerMockCb = null;
         });
 
-        describe('.callCallback()', () => {
+        describe('"data" event', () => {
             let socketId = 0;
             let serverMock;
 
@@ -384,7 +388,7 @@ describe('TCP and UDP Receivers', () => {
                 serverMock = null;
             });
 
-            it('should call callback when received data', () => {
+            it('should emit "data" event when received data', () => {
                 const expectedData = [];
                 return receiverInst.start()
                     .then(() => {
@@ -400,8 +404,8 @@ describe('TCP and UDP Receivers', () => {
                     })
                     .then(() => {
                         assert.deepStrictEqual(dataCallbackSpy.args, [
-                            [expectedData[0], expectedData[0]],
-                            [expectedData[1], expectedData[1]]
+                            [expectedData[0], expectedData[0], 0, [0, 0]],
+                            [expectedData[1], expectedData[1], 0, [0, 0]]
                         ]);
                         assert.isFalse(receiverInst.isRunning(), 'should not be in running state');
                         assert.isTrue(receiverInst.hasState(tcpUdpDataReceiver.UDPDataReceiver.STATE.STOPPED), 'should have STOPPED state');
@@ -411,7 +415,7 @@ describe('TCP and UDP Receivers', () => {
 
         describe('.getConnKey()', () => {
             it('should compute unique key', () => {
-                assert.strictEqual(receiverInst.getConnKey({ address: testAddr, port: testPort }), `${testAddr}-${testPort}`);
+                assert.strictEqual(receiverInst.getConnKey({ address: testAddr, port: testPort }), `udp4-${testAddr}-${testPort}`);
             });
         });
 
@@ -489,6 +493,7 @@ describe('TCP and UDP Receivers', () => {
                     serverMock.on('closeMock', closeSpy);
                 };
 
+                clock.clockForward(5, { promisify: true });
                 return new Promise((resolve, reject) => {
                     const originSafeRestart = receiverInst.safeRestart.bind(receiverInst);
                     sinon.stub(receiverInst, 'safeRestart')
@@ -600,7 +605,7 @@ describe('TCP and UDP Receivers', () => {
             });
         });
 
-        describe('.callCallback()', () => {
+        describe('"data" event', () => {
             let socketId = 0;
             const createSocketInfo = (ipv6) => {
                 socketId += 1;
@@ -610,7 +615,7 @@ describe('TCP and UDP Receivers', () => {
                 };
             };
 
-            it('should call callback when received data', () => {
+            it('should emit "data" event when received data', () => {
                 const expectedData = [];
                 return receiverInst.start()
                     .then(() => {
@@ -619,15 +624,15 @@ describe('TCP and UDP Receivers', () => {
                         getServerMock().emit('message', expectedData[0], socketInfo1);
 
                         const socketInfo2 = createSocketInfo(true);
-                        expectedData.push(receiverInst._receivers[0].getConnKey(socketInfo2));
+                        expectedData.push(receiverInst._receivers[1].getConnKey(socketInfo2));
                         getServerMock(true).emit('message', expectedData[1], socketInfo2);
 
                         return receiverInst.stop();
                     })
                     .then(() => {
-                        assert.deepStrictEqual(dataCallbackSpy.args, [
-                            [expectedData[0], expectedData[0]],
-                            [expectedData[1], expectedData[1]]
+                        assert.sameDeepMembers(dataCallbackSpy.args, [
+                            [expectedData[0], expectedData[0], 0, [0, 0]],
+                            [expectedData[1], expectedData[1], 0, [0, 0]]
                         ]);
                         assert.isFalse(receiverInst.isRunning(), 'should not be in running state');
                         assert.isTrue(receiverInst.hasState(tcpUdpDataReceiver.DualUDPDataReceiver.STATE.STOPPED), 'should have STOPPED state');
@@ -638,22 +643,22 @@ describe('TCP and UDP Receivers', () => {
         describe('.restart()', () => {
             it('should recrate all receivers on restart', () => receiverInst.start()
                 .then(() => {
-                    assert.strictEqual(serverMocks.length, 2, 'should create 2 sockets');
+                    assert.lengthOf(serverMocks, 2, 'should create 2 sockets');
                     assert.strictEqual(getServerMock().opts.type, 'udp4', 'should create udp4 listener');
                     assert.strictEqual(getServerMock(true).opts.type, 'udp6', 'should create udp6 listener');
                     return receiverInst.restart();
                 })
                 .then(() => {
-                    assert.strictEqual(serverMocks.length, 4, 'should create 2 more sockets');
-                    assert.strictEqual(serverMocks.filter(mock => mock.opts.type === 'udp4').length, 2, 'should have 2 udp4 sockets');
-                    assert.strictEqual(serverMocks.filter(mock => mock.opts.type === 'udp6').length, 2, 'should have 2 udp6 sockets');
+                    assert.lengthOf(serverMocks, 4, 'should create 2 more sockets');
+                    assert.lengthOf(serverMocks.filter(mock => mock.opts.type === 'udp4'), 2, 'should have 2 udp4 sockets');
+                    assert.lengthOf(serverMocks.filter(mock => mock.opts.type === 'udp6'), 2, 'should have 2 udp6 sockets');
                 }));
         });
 
         describe('.start()', () => {
             it('should start receivers', () => receiverInst.start()
                 .then(() => {
-                    assert.strictEqual(serverMocks.length, 2, 'should create 2 sockets');
+                    assert.lengthOf(serverMocks, 2, 'should create 2 sockets');
                     assert.strictEqual(getServerMock().opts.type, 'udp4', 'should create udp4 listener');
                     assert.strictEqual(getServerMock(true).opts.type, 'udp6', 'should create udp6 listener');
                     assert.isTrue(receiverInst.isRunning(), 'should be in running state');

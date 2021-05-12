@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ('EULA') for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ('EULA') for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -811,6 +811,36 @@ describe('Normalize Util', () => {
             // check that it is not a copy
             data.b.c = 10;
             assert.deepStrictEqual(actual, data, 'should return the same data and not a copy');
+        });
+    });
+
+    describe('.diskStoragePercentsToFloating()', () => {
+        it('should not fail when no Capacity property or unexpected value', () => {
+            let actual = normalizeUtil.diskStoragePercentsToFloating({ data: { '/': { name: '/' } } });
+            assert.deepStrictEqual(actual, { '/': { name: '/', Capacity_Float: NaN } });
+
+            actual = normalizeUtil.diskStoragePercentsToFloating({ data: { '/': { name: '/', Capacity: undefined } } });
+            assert.deepStrictEqual(actual, { '/': { name: '/', Capacity: undefined, Capacity_Float: NaN } });
+
+            actual = normalizeUtil.diskStoragePercentsToFloating({ data: { '/': { name: '/', Capacity: 'NotANumber' } } });
+            assert.deepStrictEqual(actual, { '/': { name: '/', Capacity: 'NotANumber', Capacity_Float: NaN } });
+        });
+
+        it('should convert Capacity value to Capacity_Float', () => {
+            let actual = normalizeUtil.diskStoragePercentsToFloating({ data: { '/': { name: '/', Capacity: '0%' } } });
+            assert.deepStrictEqual(actual, { '/': { name: '/', Capacity: '0%', Capacity_Float: 0 } }, 'should convert value');
+
+            actual = normalizeUtil.diskStoragePercentsToFloating({ data: { '/': { name: '/', Capacity: '100%' } } });
+            assert.deepStrictEqual(actual, { '/': { name: '/', Capacity: '100%', Capacity_Float: 1 } }, 'should convert value');
+
+            actual = normalizeUtil.diskStoragePercentsToFloating({ data: { '/': { name: '/', Capacity: '50.50%' } } });
+            assert.deepStrictEqual(actual, { '/': { name: '/', Capacity: '50.50%', Capacity_Float: 0.5050 } }, 'should convert value');
+
+            actual = normalizeUtil.diskStoragePercentsToFloating({ data: { '/': { name: '/', Capacity: '50.50%90' } } });
+            assert.deepStrictEqual(actual, { '/': { name: '/', Capacity: '50.50%90', Capacity_Float: 0.5050 } }, 'should convert value');
+
+            actual = normalizeUtil.diskStoragePercentsToFloating({ data: { '/': { name: '/', Capacity: 50 } } });
+            assert.deepStrictEqual(actual, { '/': { name: '/', Capacity: 50, Capacity_Float: 0.5 } }, 'should convert value');
         });
     });
 });

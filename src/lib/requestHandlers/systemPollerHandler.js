@@ -1,5 +1,5 @@
 /*
- * Copyright 2020. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -8,61 +8,54 @@
 
 'use strict';
 
-const nodeUtil = require('util');
-
 const BaseRequestHandler = require('./baseHandler');
 const ErrorHandler = require('./errorHandler');
 const router = require('./router');
 const systemPoller = require('../systemPoller');
 
 /**
- * /systempoller endpoint handler
- *
- * @param {Object} restOperation
+ * Request handler for /systempoller endpoint
  */
-function SystemPollerEndpointHandler() {
-    BaseRequestHandler.apply(this, arguments);
-}
-nodeUtil.inherits(SystemPollerEndpointHandler, BaseRequestHandler);
+class SystemPollerEndpointHandler extends BaseRequestHandler {
+    /**
+     * Get response code
+     *
+     * @returns {Integer} response code
+     */
+    getCode() {
+        return this.code;
+    }
 
-/**
- * Get response code
- *
- * @returns {Integer} response code
- */
-SystemPollerEndpointHandler.prototype.getCode = function () {
-    return this.code;
-};
+    /**
+     * Get response body
+     *
+     * @returns {Any} response body
+     */
+    getBody() {
+        return this.body;
+    }
 
-/**
- * Get response body
- *
- * @returns {Any} response body
- */
-SystemPollerEndpointHandler.prototype.getBody = function () {
-    return this.body;
-};
-
-/**
- * Process request
- *
- * @returns {Promise<SystemPollerEndpointHandler>} resolved with instance of SystemPollerEndpointHandler
- *      once request processed
- */
-SystemPollerEndpointHandler.prototype.process = function () {
-    return systemPoller.getPollersConfig(this.params.system, {
-        pollerName: this.params.poller,
-        namespace: this.params.namespace,
-        includeDisabled: true
-    })
-        .then(systemPoller.fetchPollersData.bind(systemPoller))
-        .then((fetchedData) => {
-            this.code = 200;
-            this.body = fetchedData.map(d => d.data);
-            return this;
+    /**
+     * Process request
+     *
+     * @returns {Promise<SystemPollerEndpointHandler>} resolved with instance of SystemPollerEndpointHandler
+     *      once request processed
+     */
+    process() {
+        return systemPoller.getPollersConfig(this.params.system, {
+            pollerName: this.params.poller,
+            namespace: this.params.namespace,
+            includeDisabled: true
         })
-        .catch(error => new ErrorHandler(error).process());
-};
+            .then(systemPoller.fetchPollersData.bind(systemPoller))
+            .then((fetchedData) => {
+                this.code = 200;
+                this.body = fetchedData.map(d => d.data);
+                return this;
+            })
+            .catch(error => new ErrorHandler(error).process());
+    }
+}
 
 router.on('register', (routerInst, enableDebug) => {
     if (enableDebug) {

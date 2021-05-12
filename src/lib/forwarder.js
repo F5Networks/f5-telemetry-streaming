@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -8,8 +8,9 @@
 
 'use strict';
 
-const logger = require('./logger'); // eslint-disable-line no-unused-vars
+const actionProcessor = require('./actionProcessor');
 const consumersHndlr = require('./consumers');
+const logger = require('./logger'); // eslint-disable-line no-unused-vars
 
 /**
 * Forward data to consumer
@@ -38,6 +39,15 @@ function forwardData(dataCtx) {
                 logger: logger.getChild(`${consumer.config.type}.${consumer.config.traceName}`),
                 metadata: consumer.metadata
             };
+
+            try {
+                // Apply actions to the event - event is already deep copied in consumer.filter.apply() call
+                actionProcessor.processActions(context.event, consumer.config.actions);
+            } catch (err) {
+                // Catch the error, but do not exit
+                context.logger.exception('Error on attempt to process actions on consumer', err);
+            }
+
             // forwarding not guaranteed to succeed, but we will not throw error if attempt failed
             try {
                 consumer.consumer(context);

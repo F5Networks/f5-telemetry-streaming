@@ -1,4 +1,5 @@
-/* * Copyright 2020. F5 Networks, Inc. See End User License Agreement ("EULA") for
+/*
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -47,20 +48,6 @@ class TcpUdpBaseDataReceiver extends baseDataReceiver.BaseDataReceiver {
     }
 
     /**
-     * Call data callback
-     *
-     * @param {Buffer} data
-     * @param {Object} connInfo
-     *
-     * @fires TcpUdpBaseDataReceiver#data
-     *
-     * @returns {Promise} resolved once data processed
-     */
-    callCallback(data, connInfo) {
-        return this.safeEmitAsync('data', data, this.getConnKey(connInfo));
-    }
-
-    /**
      * Connection unique key
      *
      * @private
@@ -75,7 +62,6 @@ class TcpUdpBaseDataReceiver extends baseDataReceiver.BaseDataReceiver {
     /**
      * Get receiver options to start listening for data
      *
-     * @private
      * @returns {Object} options
      */
     getReceiverOptions() {
@@ -127,53 +113,16 @@ class TCPDataReceiver extends TcpUdpBaseDataReceiver {
     }
 
     /**
-     * Add connection to the list of opened connections
-     *
-     * @private
-     * @param {Socket} conn - connection to add
-     */
-    _addConnection(conn) {
-        this.logger.debug(`new connection - ${this.getConnKey(conn)}`);
-        this._connections.push(conn);
-    }
-
-    /**
-     * Close all opened client connections
-     *
-     * @private
-     */
-    _closeAllConnections() {
-        this.logger.debug('closing all client connections');
-        // do .slice in case if ._removeConnection will be called
-        this._connections.slice(0).forEach(conn => conn.destroy());
-        this._connections = [];
-    }
-
-    /**
-     * Remove connection from the list of opened connections
-     *
-     * @private
-     * @param {Socket} conn - connection to remove
-     */
-    _removeConnection(conn) {
-        this.logger.debug(`removing connection - ${this.getConnKey(conn)}`);
-        const idx = this._connections.indexOf(conn);
-        if (idx > -1) {
-            this._connections.splice(idx, 1);
-        }
-    }
-
-    /**
      * Connection handler
      *
      * @param {Socket} conn - connection
      */
     connectionHandler(conn) {
-        this._addConnection(conn);
-        conn.on('data', data => this.callCallback(data, conn))
+        addTcpConnection.call(this, conn);
+        conn.on('data', data => callDataCallback.call(this, data, conn))
             .on('error', () => conn.destroy()) // destroy emits 'close' event
-            .on('close', () => this._removeConnection(conn))
-            .on('end', () => {}); // allowHalfOpen is false by default, no needs to call 'end' explicitlyq
+            .on('close', () => removeTcpConnection.call(this, conn))
+            .on('end', () => {}); // allowHalfOpen is false by default, no need to call 'end' explicitly
     }
 
     /**
@@ -185,7 +134,7 @@ class TCPDataReceiver extends TcpUdpBaseDataReceiver {
      * @returns {String} unique key
      */
     getConnKey(conn) {
-        return `${conn.remoteAddress}-${conn.remotePort}`;
+        return `tcp-${conn.remoteAddress}-${conn.remotePort}`;
     }
 
     /**
@@ -245,7 +194,7 @@ class TCPDataReceiver extends TcpUdpBaseDataReceiver {
             if (!this._socket) {
                 resolve();
             } else {
-                this._closeAllConnections();
+                closeAllTcpConnections.call(this);
                 this._socket.close(() => {
                     this._socket.removeAllListeners();
                     this._socket = null;
@@ -287,7 +236,7 @@ class UDPDataReceiver extends TcpUdpBaseDataReceiver {
      * @returns {String} unique key
      */
     getConnKey(remoteInfo) {
-        return `${remoteInfo.address}-${remoteInfo.port}`;
+        return `${this.family}-${remoteInfo.address}-${remoteInfo.port}`;
     }
 
     /**
@@ -328,7 +277,7 @@ class UDPDataReceiver extends TcpUdpBaseDataReceiver {
                             reject(new TcpUdpDataReceiverError('socket closed before being ready'));
                         }
                     })
-                    .on('message', this.callCallback.bind(this));
+                    .on('message', callDataCallback.bind(this));
 
                 const options = this.getReceiverOptions();
                 this.logger.debug(`starting listen using following options ${JSON.stringify(options)}`);
@@ -431,6 +380,61 @@ class DualUDPDataReceiver extends TcpUdpBaseDataReceiver {
     }
 }
 
+/**
+ * PRIVATE METHODS
+ */
+/**
+ * Add connection to the list of opened connections
+ *
+ * @this TCPDataReceiver
+ * @param {Socket} conn - connection to add
+ */
+function addTcpConnection(conn) {
+    this.logger.debug(`new connection - ${this.getConnKey(conn)}`);
+    this._connections.push(conn);
+}
+
+/**
+ * Call data callback
+ *
+ * @this TcpUdpBaseDataReceiver
+ * @param {Buffer} data
+ * @param {Object} connInfo
+ *
+ * @fires TcpUdpBaseDataReceiver#data
+ *
+ * @returns {Promise} resolved once data processed
+ */
+function callDataCallback(data, connInfo) {
+    return this.safeEmitAsync('data', data, this.getConnKey(connInfo), Date.now(), process.hrtime());
+}
+
+/**
+ * Close all opened client connections
+ *
+ * @this TCPDataReceiver
+ */
+function closeAllTcpConnections() {
+    this.logger.debug('closing all client connections');
+    // do .slice in case if ._removeConnection will be called
+    this._connections.slice(0).forEach(conn => conn.destroy());
+    this._connections = [];
+}
+
+/**
+ * Remove connection from the list of opened connections
+ *
+ * @this TCPDataReceiver
+ * @param {Socket} conn - connection to remove
+ */
+function removeTcpConnection(conn) {
+    this.logger.debug(`removing connection - ${this.getConnKey(conn)}`);
+    const idx = this._connections.indexOf(conn);
+    if (idx > -1) {
+        this._connections.splice(idx, 1);
+    }
+}
+
 module.exports = {
     DualUDPDataReceiver,
     TcpUdpBaseDataReceiver,
@@ -445,4 +449,6 @@ module.exports = {
  * @event TcpUdpBaseDataReceiver#data
  * @param {Buffer} data - data
  * @param {String} connKey - connection unique key
+ * @param {Number} timestamp - data timestamp in ms.
+ * @param {Array<Number>} hrtime - result of calling process.hrtime()
  */

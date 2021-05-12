@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ('EULA') for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ('EULA') for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -102,7 +102,7 @@ describe('properties.json', () => {
                         })
                             .then((data) => {
                                 assert.deepStrictEqual(data, testConf.expectedData, `should match expected output (attempt #${i}`);
-                                assert.deepStrictEqual(stats.loader.cachedResponse, {}, `cache should be erased (attempt #${i}`);
+                                assert.isEmpty(stats.loader.cachedResponse, `cache should be erased (attempt #${i}`);
 
                                 pathsStateValidator();
                                 propertiesStateValidator();

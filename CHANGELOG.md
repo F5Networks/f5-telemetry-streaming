@@ -1,17 +1,32 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.20.0
+### Added
+- AUTOTOOL-2311: [GitHub #119](https://github.com/F5Networks/f5-telemetry-streaming/issues/119): Added Capacity_Float to system.diskStorage
+- AUTOTOOL-2330: [GitHub #74](https://github.com/F5Networks/f5-telemetry-streaming/issues/74): Added system.configSyncSucceeded to default output and f5_system_configSyncSucceeded to Prometheus output
+- AUTOTOOL-2439: Added data tracing and 'success' message to Google Cloud Monitoring consumer
+- AUTOTOOL-2312: [GitHub #114](https://github.com/F5Networks/f5-telemetry-streaming/issues/114): Added support to the Generic HTTP Consumer for additional modification of data payloads, including the addition of the 'JMESPathQuery' action
+- AUTOTOOL-2456: Added new Event Listener feature to trace incoming data and save it to a file for further debugging
+### Fixed
+- AUTOTOOL-2451: [GitHub #127](https://github.com/F5Networks/f5-telemetry-streaming/issues/127): Fixed issue where 'long' fields in ASM events where causing ASM events to become malformed. Individual event fields are now permitted to be <= MAX_BUFFER_SIZE (16k)
+- AUTOTOOL-2464: AWS S3 date path is incorrect
+- AUTOTOOL-2488: Should not create multiple Tracer instances that points to the same file
+### Changed
+- AUTOTOOL-2297: Update npm packages (aws-sdk from v2.854.0 to v2.885.0)
+### Removed
+
 ## 1.19.0
 ### Added
 - AUTOTOOL-2280: [GitHub #79](https://github.com/F5Networks/f5-telemetry-streaming/issues/79): Expose totNativeConns and totCompatConns on SSL profile stats
 - AUTOTOOL-2160: Added monitor checks for memory thresholds, which prevents restnoded from crashing on reaching memory limits (runs by default)
 - AUTOTOOL-1915: Added new Event Listener endpoint (/eventListener/$eventListener and /namespace/$namespace/eventListener/$eventListener) to send a debug message to an Event Listener
 - AUTOTOOL-2266: Added ability to configure "compressionType" for Splunk consumer
-- AUTOTOOL-2314: Added 'swap' metric to 'system' group (System Poller output)
+- AUTOTOOL-2314: [GitHub #120](https://github.com/F5Networks/f5-telemetry-streaming/issues/120) Added 'swap' metric to 'system' group (System Poller output)
 - AUTOTOOL-2115: Namespaces support for iHealth Poller
 ### Fixed
 - AUTOTOOL-494: iHealth Poller creates corrupted Qkview files
-- AUTOTOOL-2164: Fixed Route Domain ID handling for Virtual Server and Pool stats
+- AUTOTOOL-2164: [GitHub #108](https://github.com/F5Networks/f5-telemetry-streaming/issues/108) Fixed Route Domain ID handling for Virtual Server and Pool stats
 - [GitHub #109](https://github.com/F5Networks/f5-telemetry-streaming/issues/109): Splunk debug output does not log HTTP Response payload
 - AUTOTOOL-2304: Update example output for maxConns, pktsIn, pktsOut, and totConns
 - AUTOTOOL-494: iHealth Poller creates corrupted Qkview files

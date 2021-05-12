@@ -1,5 +1,5 @@
 /*
- * Copyright 2020. F5 Networks, Inc. See End User License Agreement ('EULA') for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ('EULA') for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -187,39 +187,54 @@ module.exports = {
             ]
         },
         {
-            name: 'quote opened but field is too long (> 512 chars, without new line)',
+            name: 'quote opened but field is longer than MAX_BUFFER_SIZE (> 16k chars, without new line)',
             chunks: [
-                '<0>Jul  6 22:37:15 bigip14.1.2.3.test BigIP:EOCtimestamp="',
-                '1'.repeat(520),
+                `<0>Jul  6 22:37:15 bigip14.1.2.3.test BigIP:EOCtimestamp="${'1'.repeat(20 * 1024)}`,
                 '",nextfield="1"'
             ],
             expectedData: [
                 '<0>Jul  6 22:37:15 bigip14.1.2.3.test BigIP:EOCtimestamp="',
-                `${'1'.repeat(520)}",nextfield="1"`
+                `${'1'.repeat(20 * 1024)}`,
+                '",nextfield="1"'
             ]
         },
         {
-            name: 'quote opened but field is too long (> 512 chars, with new line) (example 1)',
+            name: 'quote opened but field is too long (> 16k chars, without new line)',
+            chunks: [
+                '<0>Jul  6 22:37:15 bigip14.1.2.3.test BigIP:EOCtimestamp="',
+                '1'.repeat(16 * 1024),
+                '",nextfield="1"'
+            ],
+            expectedData: [
+                '<0>Jul  6 22:37:15 bigip14.1.2.3.test BigIP:EOCtimestamp="',
+                `${'1'.repeat(16 * 1024)}`,
+                '",nextfield="1"'
+            ]
+        },
+        {
+            name: 'quote opened but field is too long (> 16k chars, with new line) (example 1)',
             chunks: [
                 '<0>Jul  6 22:37:15 bigip14.1.2.3.test BigIP:EOCtimestamp="a\n',
-                '1'.repeat(520),
+                '1'.repeat(16 * 1024),
                 '",nextfield="1"'
             ],
             expectedData: [
                 '<0>Jul  6 22:37:15 bigip14.1.2.3.test BigIP:EOCtimestamp="a',
-                `${'1'.repeat(520)}",nextfield="1"`
+                `${'1'.repeat(16 * 1024)}`,
+                '",nextfield="1"'
             ]
         },
         {
-            name: 'quote opened but field is too long (> 512 chars, with new line) (example 2)',
+            name: 'quote opened but field is too long (> 16k chars, with new line) (example 2)',
             chunks: [
                 '<0>Jul  6 22:37:15 bigip14.1.2.3.test BigIP:EOCtimestamp="a\r\n',
-                '1'.repeat(520),
+                '1'.repeat(16 * 1024),
                 '",nextfield="1"'
             ],
             expectedData: [
                 '<0>Jul  6 22:37:15 bigip14.1.2.3.test BigIP:EOCtimestamp="a',
-                `${'1'.repeat(520)}",nextfield="1"`
+                `${'1'.repeat(16 * 1024)}`,
+                '",nextfield="1"'
             ]
         },
         {
@@ -422,6 +437,28 @@ module.exports = {
                 'key1=""\'\'',
                 'key2=\'\'',
                 'key3=""'
+            ]
+        },
+        {
+            name: 'ASM data (single ASM event)',
+            chunks: [
+                '<134>May  4 11:01:56 localhost.localdomain ASM:unit_hostname="bigip1",management_ip_address="192.0.2.1",management_ip_address_2="",http_class_name="/Common/ASMTestPolicy",web_application_name="/Common/ASMTestPolicy",policy_name="/Common/ASMTestPolicy",policy_apply_date="2021-04-29 14:20:42",violations="",support_id="2508780119460416236",request_status="passed",response_code="0",ip_client="192.0.2.2",route_domain="0",method="OPTIONS",protocol="HTTP",query_string="param=tomatoes",x_forwarded_for_header_value="N/A",sig_ids="",sig_names="",date_time="2021-05-04 11:01:55",severity="Informational",attack_type="",geo_location="N/A",ip_address_intelligence="N/A",username="N/A",session_id="0",src_port="56022",dest_port="7878",dest_ip="192.0.2.3",sub_violations="",virus_name="N/A",violation_rating="0",websocket_direction="N/A",websocket_message_type="N/A",device_id="N/A",staged_sig_ids="",staged_sig_names="",threat_campaign_names="",staged_threat_campaign_names="",blocking_exception_reason="N/A",captcha_result="not_received",microservice="",vs_name="/Common/testvs",uri="/hello",fragment="",request="OPTIONS /hello?param=tomatoes HTTP/1.1\\r\\nHost: 192.0.2.3:7878\\r\\nUser-Agent: curl/7.64.1\\r\\nAccept: */*\\r\\nContent-Type: application/json\\r\\ntoken: 12341234\\r\\n\\r\\n",response="Response logging disabled"\r\n'
+            ],
+            expectedData: [
+                '<134>May  4 11:01:56 localhost.localdomain ASM:unit_hostname="bigip1",management_ip_address="192.0.2.1",management_ip_address_2="",http_class_name="/Common/ASMTestPolicy",web_application_name="/Common/ASMTestPolicy",policy_name="/Common/ASMTestPolicy",policy_apply_date="2021-04-29 14:20:42",violations="",support_id="2508780119460416236",request_status="passed",response_code="0",ip_client="192.0.2.2",route_domain="0",method="OPTIONS",protocol="HTTP",query_string="param=tomatoes",x_forwarded_for_header_value="N/A",sig_ids="",sig_names="",date_time="2021-05-04 11:01:55",severity="Informational",attack_type="",geo_location="N/A",ip_address_intelligence="N/A",username="N/A",session_id="0",src_port="56022",dest_port="7878",dest_ip="192.0.2.3",sub_violations="",virus_name="N/A",violation_rating="0",websocket_direction="N/A",websocket_message_type="N/A",device_id="N/A",staged_sig_ids="",staged_sig_names="",threat_campaign_names="",staged_threat_campaign_names="",blocking_exception_reason="N/A",captcha_result="not_received",microservice="",vs_name="/Common/testvs",uri="/hello",fragment="",request="OPTIONS /hello?param=tomatoes HTTP/1.1\\r\\nHost: 192.0.2.3:7878\\r\\nUser-Agent: curl/7.64.1\\r\\nAccept: */*\\r\\nContent-Type: application/json\\r\\ntoken: 12341234\\r\\n\\r\\n",response="Response logging disabled"'
+            ]
+        },
+        {
+            name: 'ASM data (multi-chunk ASM event)',
+            chunks: [
+                '<134>May  4 11:01:56 localhost.localdomain ASM:unit_hostname="bigip1",management_ip_address="192.0.2.1",management_ip_address_2="",http_class_name="/Common/ASMTestPolicy",web_application_name="/Common/ASMTestPolicy",policy_name="/Common/ASMTestPolicy",policy_apply_date="2021-04-29 14:20:42",violations="",support_id="2508780119460416236",request_status="passed",response_code="0",ip_client="192.0.2.2",route_domain="0",method="OPTIONS",protocol="HTTP",query_string="param=tomatoes",x_forwarded_for_header_value="N/A",sig_ids="",sig_names="",date_time="2021-05-04 11:01:55",severity="Informational",attack_type="",geo_location="N/A",ip_address_intelligence="N/A",username="N/A",session_id="0",src_port="56022",dest_port="7878",dest_ip="192.0.2.3",sub_violations="",virus_name="N/A",violation_rating="0",websocket_direction="N/A",websocket_message_type="N/A",device_id="N/A",staged_sig_ids="",staged_sig_names="",threat_campaign_names="",staged_threat_campaign_names="",blocking_exception_reason="N/A",captcha_result="not_received",microservice="",vs_name="/Common/testvs",uri="/hello",fragment="",request="OPTIONS /hello?param=tomatoes',
+                `${'/apples'.repeat(100)}`,
+                'HTTP/1.1\\r\\nHost: 192.0.2.3:7878\\r\\nUser-Agent: curl/7.64.1\\r\\nAccept: */*\\r\\nContent-Type: application/json\\r\\ntoken: 12341234\\r\\n\\r\\n",response="Response logging disabled"\r\n'
+            ],
+            expectedData: [
+                '<134>May  4 11:01:56 localhost.localdomain ASM:unit_hostname="bigip1",management_ip_address="192.0.2.1",management_ip_address_2="",http_class_name="/Common/ASMTestPolicy",web_application_name="/Common/ASMTestPolicy",policy_name="/Common/ASMTestPolicy",policy_apply_date="2021-04-29 14:20:42",violations="",support_id="2508780119460416236",request_status="passed",response_code="0",ip_client="192.0.2.2",route_domain="0",method="OPTIONS",protocol="HTTP",query_string="param=tomatoes",x_forwarded_for_header_value="N/A",sig_ids="",sig_names="",date_time="2021-05-04 11:01:55",severity="Informational",attack_type="",geo_location="N/A",ip_address_intelligence="N/A",username="N/A",session_id="0",src_port="56022",dest_port="7878",dest_ip="192.0.2.3",sub_violations="",virus_name="N/A",violation_rating="0",websocket_direction="N/A",websocket_message_type="N/A",device_id="N/A",staged_sig_ids="",staged_sig_names="",threat_campaign_names="",staged_threat_campaign_names="",blocking_exception_reason="N/A",captcha_result="not_received",microservice="",vs_name="/Common/testvs",uri="/hello",fragment="",request="OPTIONS /hello?param=tomatoes'
+                + `${'/apples'.repeat(100)}`
+                + 'HTTP/1.1\\r\\nHost: 192.0.2.3:7878\\r\\nUser-Agent: curl/7.64.1\\r\\nAccept: */*\\r\\nContent-Type: application/json\\r\\ntoken: 12341234\\r\\n\\r\\n",response="Response logging disabled"'
             ]
         }
     ]

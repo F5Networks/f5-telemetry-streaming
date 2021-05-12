@@ -25,52 +25,80 @@ You can click the following links to go directly to a specific :doc:`setting-up-
       :header-rows: 1
 
       * - **Push Consumers**
-        - **Pull Consumers**
+        - **Supports System Poller**
+        - **Supports Event Listener**
 
       * - :ref:`splunk-ref`
-        - :ref:`pull`
+        - yes
+        - yes
     
       * - :ref:`azure-ref`
-        - :ref:`prometheus`
+        - yes
+        - yes
 
       * - :ref:`appinsight-ref`
-        - :ref:`pushpull`
+        - yes (metrics only)
+        - no
 
       * - :ref:`awscloud-ref`
-        - 
+        - yes (metrics only)
+        - no
 
       * - :ref:`awss3-ref`
-        -
+        - yes
+        - yes
 
       * - :ref:`graphite-ref`
-        - 
+        - yes
+        - yes
 
       * - :ref:`kafka-ref`
-        - 
+        - yes
+        - yes
 
       * - :ref:`elasticsearch-ref`
-        -
+        - yes
+        - yes
 
       * - :ref:`sumologic-ref`
-        - 
+        - yes
+        - yes
 
       * - :ref:`statsd-ref`
-        - 
+        - yes (metrics only)
+        - no
 
       * - :ref:`http-ref`
-        - 
+        - yes
+        - yes
 
       * - :ref:`F5 Beacon<beacon-ref>`
-        - 
+        - yes
+        - yes
 
       * - :ref:`fluentd-ref`
-        - 
+        - yes
+        - yes
 
       * - :ref:`stackdrive`
-        - 
+        - yes (metrics only)
+        - no
 
 
+.. list-table::
+      :header-rows: 1
 
+      * - **Pull Consumers**
+        - **Supports System Poller**
+        - **Supports Event Listener**
+
+      * - :ref:`pull`
+        - yes
+        - no
+
+      * - :ref:`prometheus`
+        - yes (metrics only)
+        - no
 
 
 

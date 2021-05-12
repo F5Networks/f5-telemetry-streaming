@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -15,6 +15,44 @@ const path = require('path');
 const winston = require('winston');
 
 const LOG_FILE = `${__dirname}/artifacts/testoutput.log`;
+const LOG_DST = ['console', 'file'].find(item => item === (process.env.LOG_DST || 'file').trim());
+const LOG_SECRETS_ENABLED = !!['1', 'true'].find(item => item === process.env.LOG_SECRETS);
+
+const SECRETS_MASK = '*********';
+const KEYWORDS_TO_MASK = [
+    {
+        /**
+         * single line:
+         *
+         * { "passphrase": { ...secret... } }
+         */
+        str: 'passphrase',
+        replace: /(\\{0,}["']{0,1}passphrase\\{0,}["']{0,1}\s*:\s*){.*?}/g,
+        with: `$1{${SECRETS_MASK}}`
+    },
+    {
+        /**
+         * {
+         *     "passphrase": "secret"
+         * }
+         */
+        str: 'passphrase',
+        replace: /(\\{0,}["']{0,1}passphrase\\{0,}["']{0,1}\s*:\s*)(\\{0,}["']{1}).*?\2/g,
+        with: `$1$2${SECRETS_MASK}$2`
+    },
+    {
+        /**
+         * {
+         *     someSecret: {
+         *         cipherText: "secret"
+         *     }
+         * }
+         */
+        str: 'cipherText',
+        replace: /(\\{0,}["']{0,1}cipherText\\{0,}["']{0,1}\s*:\s*)(\\{0,}["']{1}).*?\2/g,
+        with: `$1$2${SECRETS_MASK}$2`
+    }
+];
 
 // create dir if not exists
 const artifactsDir = path.parse(LOG_FILE);
@@ -39,26 +77,15 @@ winston.setLevels(winston.config.syslog.levels);
  * @returns {String} Masked message
  */
 function maskSecrets(msg) {
+    if (LOG_SECRETS_ENABLED) {
+        return msg;
+    }
     let ret = msg;
-    const secrets = {
-        passphrase: {
-            replace: /(?:"passphrase":\s*{)(.*?)(?:})/g,
-            with: '"passphrase":{*********}'
-        },
-        '"passphrase"': {
-            replace: /(?:"passphrase":\s*")(.*?)(?:")/g,
-            with: '"passphrase":"*********"'
-        },
-        cipherText: {
-            replace: /(?:"cipherText":\s*")(.*?)(?:")/g,
-            with: '"cipherText":"*********"'
-        }
-    };
     // place in try/catch
     try {
-        Object.keys(secrets).forEach((k) => {
-            if (msg.indexOf(k) !== -1) {
-                ret = ret.replace(secrets[k].replace, secrets[k].with);
+        KEYWORDS_TO_MASK.forEach((keyword) => {
+            if (msg.indexOf(keyword.str) !== -1) {
+                ret = ret.replace(keyword.replace, keyword.with);
             }
         });
     } catch (e) {
@@ -80,6 +107,9 @@ const fileTransport = new (winston.transports.File)({
     filename: LOG_FILE,
     level: 'debug',
     json: false,
+    options: {
+        flags: 'w'
+    },
     timestamp,
     formatter
 });
@@ -113,7 +143,31 @@ hookStream(process.stderr, (string) => {
 
 console.info(`Writing logs to ${LOG_FILE}`);
 console.info('Hooks to STDOUT and STDERR were applied');
+console.info(`Secrets logging - ${LOG_SECRETS_ENABLED ? 'ENABLED' : 'DISABLED'}`);
+
+if (LOG_DST === 'file') {
+    console.info(`TS logs will be written to ${LOG_FILE}`);
+} else if (LOG_DST === 'console') {
+    console.info(`TS logs will be written to stdout and to ${LOG_FILE}`);
+}
 
 module.exports = {
-    logger: fileLogger
+    logger: fileLogger,
+    tsLogger: (function () {
+        let logger = fileLogger;
+        if (LOG_DST === 'console') {
+            logger = console;
+        } else if (LOG_DST !== 'file') {
+            logger = null;
+        }
+        return {
+            logger,
+            levels: {
+                finest: 'debug',
+                info: 'info',
+                severe: 'error',
+                warning: 'warn'
+            }
+        };
+    }())
 };

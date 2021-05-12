@@ -1,5 +1,5 @@
 /*
- * Copyright 2020. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -9,8 +9,6 @@
 'use strict';
 
 require('./restoreCache');
-
-const constants = require('../../../src/lib/constants');
 
 /* eslint-disable no-console */
 
@@ -24,4 +22,5 @@ process.on('unhandledRejection', (reason, promise) => {
 // so set these to work around tests
 process.setMaxListeners(15);
 // tests needing the monitor should manually enable these
-process.env[constants.APP_THRESHOLDS.MONITOR_DISABLED] = true;
+// constants.APP_THRESHOLDS.MONITOR_DISABLED
+process.env.MONITOR_DISABLED = true;

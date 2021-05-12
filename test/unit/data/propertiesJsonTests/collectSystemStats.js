@@ -1,5 +1,5 @@
 /*
- * Copyright 2020. F5 Networks, Inc. See End User License Agreement ('EULA') for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ('EULA') for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -152,6 +152,7 @@ module.exports = {
                     baseMac: '00:01:0A:0B:0C:0D',
                     callBackUrl: 'https://10.0.0.107',
                     configReady: 'yes',
+                    configSyncSucceeded: true,
                     licenseReady: 'yes',
                     provisionReady: 'yes',
                     syncColor: 'green',
@@ -191,6 +192,7 @@ module.exports = {
                         '/': {
                             '1024-blocks': '428150',
                             Capacity: '35%',
+                            Capacity_Float: 0.35,
                             name: '/'
                         }
                     },
@@ -1219,6 +1221,7 @@ module.exports = {
                     chassisId: 'missing data',
                     baseMac: 'missing data',
                     callBackUrl: 'null',
+                    configSyncSucceeded: false,
                     syncColor: 'missing data',
                     syncMode: 'missing data',
                     syncStatus: 'missing data',
@@ -1455,6 +1458,7 @@ module.exports = {
                     chassisId: 'missing data',
                     baseMac: 'missing data',
                     callBackUrl: 'null',
+                    configSyncSucceeded: false,
                     syncColor: 'missing data',
                     syncMode: 'missing data',
                     syncStatus: 'missing data',

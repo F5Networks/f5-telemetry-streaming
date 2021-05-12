@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -17,6 +17,7 @@ const chaiAsPromised = require('chai-as-promised');
 
 const constants = require('../../src/lib/constants');
 const packageInfo = require('../../package.json');
+const schemaInfo = require('../../src/schema/latest/base_schema.json').properties.schemaVersion.enum;
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -34,8 +35,8 @@ describe('Constants', () => {
             versionInfo.push('1');
         }
         // to be sure that we really have some data
-        assert.notStrictEqual(versionInfo[0].length, 0);
-        assert.notStrictEqual(versionInfo[1].length, 0);
+        assert.isNotEmpty(versionInfo[0]);
+        assert.isNotEmpty(versionInfo[1]);
 
         // TODO: add other constants later
         assert.deepStrictEqual(constants, {
@@ -152,12 +153,17 @@ describe('Constants', () => {
                 http: 80,
                 https: 443
             },
+            SCHEMA_INFO: {
+                CURRENT: schemaInfo[0],
+                MINIMUM: '0.9.0'
+            },
             STATS_KEY_SEP: '::',
             STRICT_TLS_REQUIRED: true,
             TRACER: {
                 DIR: '/var/tmp/telemetry',
                 ENCODING: 'utf8',
-                LIST_SIZE: 10
+                MAX_RECORDS_INPUT: 9999,
+                MAX_RECORDS_OUTPUT: 10
             },
             USER_AGENT: `f5-telemetry/${versionInfo[0]}`,
             WEEKDAY_TO_DAY_NAME: {

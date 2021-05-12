@@ -68,7 +68,13 @@ module.exports = {
                         namespace: 'f5telemetry_default',
                         systemName: 'My_System',
                         traceName: 'My_System::SystemPoller_1',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1',
+                            type: 'output'
+                        },
                         connection: {
                             host: 'host1',
                             port: 8100,
@@ -103,7 +109,13 @@ module.exports = {
                         namespace: 'My_Namespace',
                         systemName: 'My_System',
                         traceName: 'My_Namespace::My_System::SystemPoller_1',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System::SystemPoller_1',
+                            type: 'output'
+                        },
                         connection: {
                             host: 'host2',
                             port: 8100,
@@ -180,7 +192,13 @@ module.exports = {
                         namespace: 'f5telemetry_default',
                         systemName: 'My_System',
                         traceName: 'My_System::SystemPoller_1',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1',
+                            type: 'output'
+                        },
                         connection: {
                             host: 'host1',
                             port: 8100,
@@ -221,7 +239,13 @@ module.exports = {
                         namespace: 'My_Namespace',
                         systemName: 'My_System',
                         traceName: 'My_Namespace::My_System::SystemPoller_1',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System::SystemPoller_1',
+                            type: 'output'
+                        },
                         connection: {
                             host: 'host2',
                             port: 8100,
@@ -488,7 +512,13 @@ module.exports = {
                         namespace: 'f5telemetry_default',
                         systemName: 'My_System_1',
                         traceName: 'My_System_1::SystemPoller_1',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_1::SystemPoller_1',
+                            type: 'output'
+                        },
                         connection: {
                             host: 'host1',
                             port: 8100,
@@ -529,7 +559,13 @@ module.exports = {
                         namespace: 'f5telemetry_default',
                         systemName: 'My_System_2',
                         traceName: 'My_System_2::SystemPoller_1',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_2::SystemPoller_1',
+                            type: 'output'
+                        },
                         connection: {
                             host: 'host2',
                             port: 8100,
@@ -585,7 +621,13 @@ module.exports = {
                         namespace: 'f5telemetry_default',
                         systemName: 'My_System_3',
                         traceName: 'My_System_3::SystemPoller_1',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_3::SystemPoller_1',
+                            type: 'output'
+                        },
                         connection: {
                             host: 'host3',
                             port: 8100,
@@ -631,7 +673,13 @@ module.exports = {
                         namespace: 'My_Namespace',
                         systemName: 'My_System_1',
                         traceName: 'My_Namespace::My_System_1::SystemPoller_1',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System_1::SystemPoller_1',
+                            type: 'output'
+                        },
                         connection: {
                             host: 'host4',
                             port: 8100,
@@ -672,7 +720,13 @@ module.exports = {
                         namespace: 'My_Namespace',
                         systemName: 'My_System_2',
                         traceName: 'My_Namespace::My_System_2::SystemPoller_1',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System_2::SystemPoller_1',
+                            type: 'output'
+                        },
                         connection: {
                             host: 'host5',
                             port: 8100,
@@ -728,7 +782,13 @@ module.exports = {
                         namespace: 'My_Namespace',
                         systemName: 'My_System_3',
                         traceName: 'My_Namespace::My_System_3::SystemPoller_1',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System_3::SystemPoller_1',
+                            type: 'output'
+                        },
                         connection: {
                             host: 'host6',
                             port: 8100,

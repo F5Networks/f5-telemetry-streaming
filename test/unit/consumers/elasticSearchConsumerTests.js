@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -185,7 +185,7 @@ describe('Rename Keys', () => {
 
         util.renameKeys(target, regexTest, replacement);
 
-        assert.strictEqual(Object.keys(target[member1]).length, 2);
+        assert.lengthOf(Object.keys(target[member1]), 2);
         assert.equal(target[member1].a, 1);
         assert.equal(target[member1].b, 2);
 
@@ -206,7 +206,7 @@ describe('Rename Keys', () => {
 
         util.renameKeys(target, regexTest, replacement);
 
-        assert.strictEqual(Object.keys(target.a[member1]).length, 2);
+        assert.lengthOf(Object.keys(target.a[member1]), 2);
         assert.strictEqual(target.a[member1].a, 1);
         assert.strictEqual(target.a[member1].b, 2);
 
@@ -227,7 +227,7 @@ describe('Rename Keys', () => {
 
         util.renameKeys(target, regexTest, replacement);
 
-        assert.strictEqual(Object.keys(target.a.b[member1]).length, 2);
+        assert.lengthOf(Object.keys(target.a.b[member1]), 2);
         assert.strictEqual(target.a.b[member1].a, 1);
         assert.strictEqual(target.a.b[member1].b, 2);
 
@@ -248,17 +248,17 @@ describe('Rename Keys', () => {
 
         util.renameKeys(target, regexTest, replacement);
 
-        assert.strictEqual(Object.keys(target[member1]).length, 3);
+        assert.lengthOf(Object.keys(target[member1]), 3);
         assert.strictEqual(target[member1].a, 1);
         assert.strictEqual(target[member1].b, 2);
         assert.strictEqual(target[member1][member2Pre], undefined);
 
-        assert.strictEqual(Object.keys(target[member1][member2Post]).length, 3);
+        assert.lengthOf(Object.keys(target[member1][member2Post]), 3);
         assert.strictEqual(target[member1][member2Post].c, 3);
         assert.strictEqual(target[member1][member2Post].d, 4);
         assert.strictEqual(target[member1][member2Post][member3Pre], undefined);
 
-        assert.strictEqual(Object.keys(target[member1][member2Post][member3Post]).length, 2);
+        assert.lengthOf(Object.keys(target[member1][member2Post][member3Post]), 2);
         assert.strictEqual(target[member1][member2Post][member3Post].e, 5);
         assert.strictEqual(target[member1][member2Post][member3Post].f, 6);
     });
@@ -276,6 +276,7 @@ describe('Rename Keys', () => {
                 chassisId: 'missing data',
                 baseMac: 'fa:16:3e:17:d1:27',
                 callBackUrl: 'https://10.145.69.123',
+                configSyncSucceeded: true,
                 syncMode: 'standalone',
                 syncColor: 'green',
                 syncStatus: 'Standalone',
