@@ -9,9 +9,9 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-2312: [GitHub #114](https://github.com/F5Networks/f5-telemetry-streaming/issues/114): Added support to the Generic HTTP Consumer for additional modification of data payloads, including the addition of the 'JMESPathQuery' action
 - AUTOTOOL-2456: Added new Event Listener feature to trace incoming data and save it to a file for further debugging
 ### Fixed
-- AUTOTOOL-2451: [GitHub #127](https://github.com/F5Networks/f5-telemetry-streaming/issues/127): Fixed issue where 'long' fields in ASM events where causing ASM events to become malformed. Individual event fields are now permitted to be <= MAX_BUFFER_SIZE (16k)
-- AUTOTOOL-2464: AWS S3 date path is incorrect
-- AUTOTOOL-2488: Should not create multiple Tracer instances that points to the same file
+- AUTOTOOL-2451: [GitHub #127](https://github.com/F5Networks/f5-telemetry-streaming/issues/127): Fixed issue where 'long' fields in ASM events were causing ASM events to become malformed. Individual event fields are now permitted to be <= MAX_BUFFER_SIZE (16k)
+- AUTOTOOL-2464: AWS S3 date path was incorrect
+- AUTOTOOL-2488: Should not create multiple Tracer instances that point to the same file
 ### Changed
 - AUTOTOOL-2297: Update npm packages (aws-sdk from v2.854.0 to v2.885.0)
 ### Removed

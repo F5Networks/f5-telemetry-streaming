@@ -27,6 +27,9 @@ IMPORTANT:
 
 - The following configuration examples assume that TS is running on the same BIG-IP that is being monitored, and that the listener is using default port 6514.
 - When TS is not a local listener, the corresponding configurations should be adjusted to reflect remote addresses.
+  
+
+.. NOTE:: See :ref:`this troubleshooting entry<trace>` for information on how to write an Event Listener's incoming raw data to a trace file to assist with troubleshooting.
 
 
 
@@ -464,6 +467,7 @@ The following shows the input sent as different buffers, and the resulting outpu
           },
           "type": "ASM"
       }
+
 
 
 
