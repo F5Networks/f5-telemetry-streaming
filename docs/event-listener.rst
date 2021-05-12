@@ -465,6 +465,61 @@ The following shows the input sent as different buffers, and the resulting outpu
           "type": "ASM"
       }
 
+|
+
+.. _trace:
+
+Writing an Event Listener's incoming raw data to a trace file
+-------------------------------------------------------------
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+   Support for writing an Event Listener's incoming raw data to a trace file is available in TS v1.20 and later
+
+In Telemetry Streaming 1.20 and later you can configure TS to write an Event Listener's incoming raw data to a trace file. This is useful when troubleshooting, as it allows you to reproduce the exact issue instead of relying on the BIG-IP configuration, profiles, and traffic generation.
+
+This feature is enabled using the **trace** property with values of **input** and/or **output**. All data is written to the ``/var/tmp/telemetry`` directory (or check logs for the exact file path).
+
+.. IMPORTANT:: **Input** tracing data is written in HEX format. If you want to remove sensitive data, you need to decode HEX data, clean or remove the sensitive data, and re-encode it back to HEX format. But this operation does not guarantee 100% reproduction of issue (in the case of input tracing data will be sent to F5 Support for further investigation). Instead of cleaning the data (or complete removal of sensitive data), we recommend replacing it with non-sensitive data (i.e. the exact same size and original encoding).
+
+The following is an example of configuring the Event Listener to trace incoming data:
+
+.. code-block:: json
+
+    {
+        "class": "Telemetry",
+        "Listener": {
+            "class": "Telemetry_Listener",
+            "trace": {
+                "type": "input"
+            }
+        }
+    }
+
+|
+
+If you want to enable both input and output tracing, use the following syntax in your Event Listener:
+
+.. code-block:: json
+
+    {
+        "class": "Telemetry",
+        "Listener": {
+            "class": "Telemetry_Listener",
+            "trace": [
+                {
+                    "type": "input"
+                },
+                {
+                    "type": "output"
+                }
+            ]
+        }
+    }
+
+
+
+
+
 
 
 .. |logging-png| image:: /images/high-speed-logging.png
