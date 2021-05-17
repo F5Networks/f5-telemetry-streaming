@@ -1,6 +1,12 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.21.0
+### Added
+### Fixed
+### Changed
+### Removed
+
 ## 1.20.0
 ### Added
 - AUTOTOOL-2311: [GitHub #119](https://github.com/F5Networks/f5-telemetry-streaming/issues/119): Added Capacity_Float to system.diskStorage
