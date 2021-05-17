@@ -54,7 +54,7 @@
     * 1.17.0 - 13.1 MB (NOTE: grpc module deps increase)
     * 1.18.0 - 13.3 MB
     * 1.19.0 - 14.1 MB
-    * 1.20.0 -
+    * 1.20.0 - 14.4 MB
   * Install build to BIG-IP, navigate to folder `/var/config/rest/iapps/f5-telemetry/` and check following:
     * Run `du -sh` and check that folder's size (shouldn't be much greater than previous versions):
       * 1.4.0 - 65 MB
@@ -73,7 +73,7 @@
       * 1.17.0 - 95 MB (NOTE: grpc module deps increase)
       * 1.18.0 - 100 MB
       * 1.19.0 - 101 MB
-      * 1.20.0 -
+      * 1.20.0 - 103MB
     * Check `nodejs/node_modules` folder - if you see `eslint`, `mocha` or something else from [package.json](package.json) `devDependencies` section - something wrong with build process. Probably some `npm` flags are work as not expected and it MUST BE FIXED before publishing.
 * Ensure that all tests (unit tests and functional tests passed)
 * Optional: Ensure that your local tags match remote. If not, remove all and re-fetch:

@@ -5,6 +5,54 @@
     "description": "",
     "type": "object",
     "definitions": {
+        "actions": {
+            "title": "Actions",
+            "description": "Actions to be performed on the Consumer.",
+            "type": "array",
+            "items": {
+                "allOf": [
+                    {
+                        "title": "JMES Actions",
+                        "properties": {
+                            "enable": {
+                                "title": "Enable",
+                                "description": "Whether to enable this action in the declaration or not.",
+                                "type": "boolean",
+                                "default": true
+                            },
+                            "JMESPath": {
+                                "title": "JMESPath",
+                                "description": "Will use a JMESPath expression to modify the incoming data payload",
+                                "type": "object",
+                                "additionalProperties": false
+                            },
+                            "expression": {
+                                "title": "Expression",
+                                "description": "The JMESPath expression to be applied to the incoming data payload",
+                                "type": "string"
+                            }
+                        },
+                        "additionalProperties": false,
+                        "dependencies": {
+                            "expression": {
+                                "allOf": [
+                                    {
+                                        "required": ["JMESPath"]
+                                    }
+                                ]
+                            },
+                            "JMESPath": {
+                                "allOf": [
+                                    {
+                                        "required": ["expression"]
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ]
+            }
+        },
         "host": {
             "$comment": "Required for certain consumers: standard property",
             "title": "Host",
@@ -543,6 +591,10 @@
                     {
                         "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a separate block",
                         "properties": {
+<<<<<<< HEAD
+=======
+                            "actions": {},
+>>>>>>> master
                             "class": {},
                             "enable": {},
                             "trace": {},
@@ -591,7 +643,20 @@
                             "proxy": {},
                             "compressionType": {}
                         },
+<<<<<<< HEAD
                         "additionalProperties": false
+=======
+                        "additionalProperties": false,
+                        "dependencies": {
+                            "actions": {
+                                "allOf": [
+                                    {
+                                        "properties": { "type": { "const": "Generic_HTTP" } }
+                                    }
+                                ]
+                            }
+                        }
+>>>>>>> master
                     },
                     {
                         "if": { "properties": { "type": { "const": "default" } } },
@@ -628,7 +693,12 @@
                                 "proxy": { "$ref": "base_schema.json#/definitions/proxy" },
                                 "privateKey": { "$ref": "#/definitions/privateKey" },
                                 "clientCertificate": { "$ref": "#/definitions/clientCertificate" },
+<<<<<<< HEAD
                                 "rootCertificate": { "$ref": "#/definitions/rootCertificate" }
+=======
+                                "rootCertificate": { "$ref": "#/definitions/rootCertificate" },
+                                "actions": { "$ref": "#/definitions/actions" }
+>>>>>>> master
                             },
                             "allOf": [
                                 {
