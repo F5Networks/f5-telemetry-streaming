@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -22,8 +22,8 @@ module.exports = function (context) {
         const date = new Date();
         const dateString = date.toISOString();
         const year = date.getFullYear();
-        const month = date.getMonth();
-        const day = date.getDay();
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
         return `${year}/${month}/${day}/${dateString}.log`;
     };
 

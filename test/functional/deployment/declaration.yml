@@ -62,18 +62,18 @@ request:
         image: BIGIP-13.0.0.0.0.1650
       desired:
         branch: ''
-        build: 0.0.11
+        build: 0.0.4
         iso_file: ''
-        version: 14.1.4
+        version: 14.1.4.1
     bigip_15_1:
       default:
         force: false
         image: BIGIP-13.0.0.0.0.1650
       desired:
         branch: ''
-        build: 0.0.9
+        build: 0.0.7
         iso_file: ''
-        version: 15.1.2
+        version: 15.1.2.1
     bigip_16_0:
       default:
         force: false

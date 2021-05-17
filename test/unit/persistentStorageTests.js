@@ -129,7 +129,7 @@ describe('Persistent Storage', () => {
                 return Promise.all([getAndSet(), getAndSet()])
                     .then(() => persistentStorageInst.get('data'))
                     .then((data) => {
-                        assert.strictEqual(Object.keys(data).length, 1);
+                        assert.lengthOf(Object.keys(data), 1);
                     });
             });
         });

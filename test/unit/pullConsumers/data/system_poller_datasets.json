@@ -16,6 +16,7 @@
                 "configReady": "yes",
                 "licenseReady": "yes",
                 "provisionReady": "yes",
+                "configSyncSucceededed": true,
                 "syncMode": "standalone",
                 "syncColor": "green",
                 "syncStatus": "Standalone",
@@ -37,91 +38,109 @@
                     "/": {
                         "1024-blocks": "428150",
                         "Capacity": "48%",
+                        "Capacity_Float": 0.48,
                         "name": "/"
                     },
                     "/dev": {
                         "1024-blocks": "8208412",
                         "Capacity": "1%",
+                        "Capacity_Float": 0.01,
                         "name": "/dev"
                     },
                     "/dev/shm": {
                         "1024-blocks": "8217452",
                         "Capacity": "7%",
+                        "Capacity_Float": 0.07,
                         "name": "/dev/shm"
                     },
                     "/run": {
                         "1024-blocks": "8217452",
                         "Capacity": "1%",
+                        "Capacity_Float": 0.01,
                         "name": "/run"
                     },
                     "/sys/fs/cgroup": {
                         "1024-blocks": "8217452",
                         "Capacity": "0%",
+                        "Capacity_Float": 0,
                         "name": "/sys/fs/cgroup"
                     },
                     "/usr": {
                         "1024-blocks": "5186648",
                         "Capacity": "84%",
+                        "Capacity_Float": 0.84,
                         "name": "/usr"
                     },
                     "/shared": {
                         "1024-blocks": "15350768",
                         "Capacity": "4%",
+                        "Capacity_Float": 0.04,
                         "name": "/shared"
                     },
                     "/shared/rrd.1.2": {
                         "1024-blocks": "8217452",
                         "Capacity": "1%",
+                        "Capacity_Float": 0.01,
                         "name": "/shared/rrd.1.2"
                     },
                     "/config": {
                         "1024-blocks": "2171984",
                         "Capacity": "9%",
+                        "Capacity_Float": 0.09,
                         "name": "/config"
                     },
                     "/var": {
                         "1024-blocks": "3030800",
                         "Capacity": "29%",
+                        "Capacity_Float": 0.29,
                         "name": "/var"
                     },
                     "/var/prompt": {
                         "1024-blocks": "4096",
                         "Capacity": "1%",
+                        "Capacity_Float": 0.01,
                         "name": "/var/prompt"
                     },
                     "/var/tmstat": {
                         "1024-blocks": "8217452",
                         "Capacity": "1%",
+                        "Capacity_Float": 0.01,
                         "name": "/var/tmstat"
                     },
                     "/var/log": {
                         "1024-blocks": "2958224",
                         "Capacity": "15%",
+                        "Capacity_Float": 0.15,
                         "name": "/var/log"
                     },
                     "/appdata": {
                         "1024-blocks": "25717852",
                         "Capacity": "5%",
+                        "Capacity_Float": 0.05,
                         "name": "/appdata"
                     },
                     "/var/loipc": {
                         "1024-blocks": "8217452",
                         "Capacity": "0%",
+                        "Capacity_Float": 0,
                         "name": "/var/loipc"
                     },
                     "/var/apm/mount/apmclients-7180.2019.119.331-4683.0.iso": {
                         "1024-blocks": "304366",
                         "Capacity": "100%",
+                        "Capacity_Float": 1,
                         "name": "/var/apm/mount/apmclients-7180.2019.119.331-4683.0.iso"
                     },
                     "/run/user/91": {
                         "1024-blocks": "1643492",
                         "Capacity": "0%",
+                        "Capacity_Float": 0,
                         "name": "/run/user/91"
                     },
                     "/mnt/sshplugin_tempfs": {
                         "1024-blocks": "8217452",
                         "Capacity": "0%",
+                        "Capacity_Float": 0,
                         "name": "/mnt/sshplugin_tempfs"
                     }
                 },
@@ -514,6 +533,7 @@
                 "configReady": "yes",
                 "licenseReady": "yes",
                 "provisionReady": "yes",
+                "configSyncSucceeded": true,
                 "syncMode": "standalone",
                 "syncColor": "green",
                 "syncStatus": "Standalone",
@@ -535,91 +555,109 @@
                     "/": {
                         "1024-blocks": "428150",
                         "Capacity": "48%",
+                        "Capacity_Float": 0.48,
                         "name": "/"
                     },
                     "/dev": {
                         "1024-blocks": "8208412",
                         "Capacity": "1%",
+                        "Capacity_Float": 0.01,
                         "name": "/dev"
                     },
                     "/dev/shm": {
                         "1024-blocks": "8217452",
                         "Capacity": "7%",
+                        "Capacity_Float": 0.07,
                         "name": "/dev/shm"
                     },
                     "/run": {
                         "1024-blocks": "8217452",
                         "Capacity": "1%",
+                        "Capacity_Float": 0.01,
                         "name": "/run"
                     },
                     "/sys/fs/cgroup": {
                         "1024-blocks": "8217452",
                         "Capacity": "0%",
+                        "Capacity_Float": 0,
                         "name": "/sys/fs/cgroup"
                     },
                     "/usr": {
                         "1024-blocks": "5186648",
                         "Capacity": "84%",
+                        "Capacity_Float": 0.84,
                         "name": "/usr"
                     },
                     "/shared": {
                         "1024-blocks": "15350768",
                         "Capacity": "4%",
+                        "Capacity_Float": 0.04,
                         "name": "/shared"
                     },
                     "/shared/rrd.1.2": {
                         "1024-blocks": "8217452",
                         "Capacity": "1%",
+                        "Capacity_Float": 0.01,
                         "name": "/shared/rrd.1.2"
                     },
                     "/config": {
                         "1024-blocks": "2171984",
                         "Capacity": "9%",
+                        "Capacity_Float": 0.09,
                         "name": "/config"
                     },
                     "/var": {
                         "1024-blocks": "3030800",
                         "Capacity": "29%",
+                        "Capacity_Float": 0.29,
                         "name": "/var"
                     },
                     "/var/prompt": {
                         "1024-blocks": "4096",
                         "Capacity": "1%",
+                        "Capacity_Float": 0.01,
                         "name": "/var/prompt"
                     },
                     "/var/tmstat": {
                         "1024-blocks": "8217452",
                         "Capacity": "1%",
+                        "Capacity_Float": 0.01,
                         "name": "/var/tmstat"
                     },
                     "/var/log": {
                         "1024-blocks": "2958224",
                         "Capacity": "15%",
+                        "Capacity_Float": 0.15,
                         "name": "/var/log"
                     },
                     "/appdata": {
                         "1024-blocks": "25717852",
                         "Capacity": "5%",
+                        "Capacity_Float": 0.05,
                         "name": "/appdata"
                     },
                     "/var/loipc": {
                         "1024-blocks": "8217452",
                         "Capacity": "0%",
+                        "Capacity_Float": 0,
                         "name": "/var/loipc"
                     },
                     "/var/apm/mount/apmclients-7180.2019.119.331-4683.0.iso": {
                         "1024-blocks": "304366",
                         "Capacity": "100%",
+                        "Capacity_Float": 1,
                         "name": "/var/apm/mount/apmclients-7180.2019.119.331-4683.0.iso"
                     },
                     "/run/user/91": {
                         "1024-blocks": "1643492",
                         "Capacity": "0%",
+                        "Capacity_Float": 0,
                         "name": "/run/user/91"
                     },
                     "/mnt/sshplugin_tempfs": {
                         "1024-blocks": "8217452",
                         "Capacity": "0%",
+                        "Capacity_Float": 0,
                         "name": "/mnt/sshplugin_tempfs"
                     }
                 },

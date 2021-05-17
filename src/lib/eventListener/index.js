@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -114,6 +114,11 @@ class ReceiversManager {
             if (receiver.hasListeners('messages') && !receiver.isRunning()) {
                 receivers.push(receiver);
             }
+            if (receiver.hasListeners('rawData')) {
+                receiver.enableRawDataForwarding();
+            } else {
+                receiver.disableRawDataForwarding();
+            }
         });
         return promiseUtil.allSettled(
             receivers.map(r => r.restart({ attempts: 10 }) // without delay for now (REST API is sync)
@@ -165,21 +170,31 @@ class EventListener {
     constructor(name, options) {
         this.name = name;
         this.logger = logger.getChild(this.name);
-        this.callback = messages => this.onMessagesHandler(messages);
+        this.dataCallback = this.onMessagesHandler.bind(this);
+        this.rawDataCallback = this.onRawDataHandler.bind(this);
         this.updateConfig(options);
     }
 
+    /**
+     * @param {messageStream} ms - message stream to attach
+     *
+     * @returns {void} once message stream attached to event listener
+     */
     attachMessageStream(ms) {
         if (this.messageStream) {
             throw new Error('Message Stream attached already!');
         }
         this.messageStream = ms;
-        this.messageStream.on('messages', this.callback);
+        this.messageStream.on('messages', this.dataCallback);
     }
 
+    /**
+     * @returns {void} once message stream detached from event listener
+     */
     detachMessageStream() {
         if (this.messageStream) {
-            this.messageStream.removeListener('messages', this.callback);
+            this.messageStream.removeListener('messages', this.dataCallback);
+            this.messageStream.removeListener('rawData', this.rawDataCallback);
             this.messageStream = null;
         }
     }
@@ -231,6 +246,17 @@ class EventListener {
     }
 
     /**
+     * @param {RawDataObject} rawData - raw data
+     */
+    onRawDataHandler(data) {
+        if (this.inputTracer) {
+            data = Object.assign({}, data);
+            data.data = data.data.toString('hex');
+            this.inputTracer.write(data);
+        }
+    }
+
+    /**
      * Update listener's configuration - tracer, tags, actions and etc.
      *
      * @param {Object} [config = {}] - config
@@ -249,8 +275,25 @@ class EventListener {
         this.destinationIds = config.destinationIds;
         this.filterFunc = config.filterFunc;
         this.id = config.id;
+        this.inputTracer = config.inputTracer;
         this.tracer = config.tracer;
         this.tags = config.tags;
+    }
+
+    /**
+     * @returns {void} once event listener enabled/disabled raw data handling
+     */
+    updateRawDataHandling() {
+        const isRegistered = this.messageStream.listeners('rawData').indexOf(this.rawDataCallback) !== -1;
+        if (this.inputTracer) {
+            if (!isRegistered) {
+                this.logger.debug('Enabling input tracing');
+                this.messageStream.on('rawData', this.rawDataCallback);
+            }
+        } else if (isRegistered) {
+            this.logger.debug('Disabling input tracing');
+            this.messageStream.removeListener('rawData', this.rawDataCallback);
+        }
     }
 }
 
@@ -320,7 +363,7 @@ configWorker.on('change', (config) => {
     EventListener.getAll().forEach((listener) => {
         const configMatch = configuredListeners.find(n => n.traceName === listener.name);
         if (!configMatch) {
-            logger.debug(`Removing event listener - ${listener.name} [port = ${listener.port}]. Reason - removed from configuration.`);
+            logger.debug(`Removing event listener - ${listener.name} [port = ${listener.messageStream.port}]. Reason - removed from configuration.`);
             EventListener.remove(listener);
         }
     });
@@ -351,8 +394,10 @@ configWorker.on('change', (config) => {
             filterFunc: buildFilterFunc(listenerConfig),
             id: listenerConfig.id,
             tags: listenerConfig.tag,
-            tracer: tracers.fromConfig(listenerConfig)
+            tracer: tracers.fromConfig(listenerConfig.trace),
+            inputTracer: tracers.fromConfig(listenerConfig.traceInput)
         });
+        listener.updateRawDataHandling();
     });
 
     return EventListener.receiversManager.stopAndRemoveInactive()

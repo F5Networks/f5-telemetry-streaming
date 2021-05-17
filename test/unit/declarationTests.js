@@ -1,5 +1,5 @@
 /*
- * Copyright 2020. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -410,192 +410,7 @@ describe('Declarations', () => {
             });
         });
 
-        describe('locations', () => {
-            it('should pass with empty locations', () => {
-                const data = {
-                    class: 'Telemetry',
-                    My_System: {
-                        class: 'Telemetry_System',
-                        systemPoller: {
-                            actions: [
-                                {
-                                    setTag: {
-                                        newTag: 'tag value'
-                                    },
-                                    locations: {}
-                                }
-                            ]
-                        }
-                    }
-                };
-                return configWorker.processDeclaration(data)
-                    .then((validConfig) => {
-                        const actions = validConfig.My_System.systemPoller.actions;
-                        assert.deepStrictEqual(actions[0].locations, {});
-                    });
-            });
-
-            it('should pass with location type of boolean', () => {
-                const data = {
-                    class: 'Telemetry',
-                    My_System: {
-                        class: 'Telemetry_System',
-                        systemPoller: {
-                            actions: [
-                                {
-                                    setTag: {
-                                        newTag: 'tag value'
-                                    },
-                                    locations: {
-                                        a: true
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                };
-                return configWorker.processDeclaration(data)
-                    .then((validConfig) => {
-                        const actions = validConfig.My_System.systemPoller.actions;
-                        assert.deepStrictEqual(actions[0].locations, { a: true });
-                    });
-            });
-
-            it('should fail with location type boolean with value of false', () => {
-                const data = {
-                    class: 'Telemetry',
-                    My_System: {
-                        class: 'Telemetry_System',
-                        systemPoller: {
-                            actions: [
-                                {
-                                    setTag: {
-                                        newTag: 'tag value'
-                                    },
-                                    locations: {
-                                        a: false
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                };
-                return assert.isRejected(configWorker.processDeclaration(data), /should match exactly one schema in oneOf/);
-            });
-
-            it('should pass with object type location with single property', () => {
-                const data = {
-                    class: 'Telemetry',
-                    My_System: {
-                        class: 'Telemetry_System',
-                        systemPoller: {
-                            actions: [
-                                {
-                                    setTag: {
-                                        newTag: 'tag value'
-                                    },
-                                    locations: {
-                                        a: {
-                                            b: true
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                };
-                return configWorker.processDeclaration(data)
-                    .then((validConfig) => {
-                        const actions = validConfig.My_System.systemPoller.actions;
-                        assert.deepStrictEqual(actions[0].locations, { a: { b: true } });
-                    });
-            });
-
-            it('should pass with object type location with multiple properties', () => {
-                const data = {
-                    class: 'Telemetry',
-                    My_System: {
-                        class: 'Telemetry_System',
-                        systemPoller: {
-                            actions: [
-                                {
-                                    setTag: {
-                                        newTag: 'tag value'
-                                    },
-                                    locations: {
-                                        a: {
-                                            b: true,
-                                            c: {
-                                                d: true
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                };
-                return configWorker.processDeclaration(data)
-                    .then((validConfig) => {
-                        const actions = validConfig.My_System.systemPoller.actions;
-                        assert.deepStrictEqual(actions[0].locations, { a: { b: true, c: { d: true } } });
-                    });
-            });
-
-            it('should fail with object type location with multiple properties and one is false', () => {
-                const data = {
-                    class: 'Telemetry',
-                    My_System: {
-                        class: 'Telemetry_System',
-                        systemPoller: {
-                            actions: [
-                                {
-                                    setTag: {
-                                        newTag: 'tag value'
-                                    },
-                                    locations: {
-                                        a: {
-                                            b: true,
-                                            c: {
-                                                d: false
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                };
-                return assert.isRejected(configWorker.processDeclaration(data), /should match exactly one schema in oneOf.*locations/);
-            });
-
-            it('should fail with object type location with multiple properties and one is invalid type', () => {
-                const data = {
-                    class: 'Telemetry',
-                    My_System: {
-                        class: 'Telemetry_System',
-                        systemPoller: {
-                            actions: [
-                                {
-                                    setTag: {
-                                        newTag: 'tag value'
-                                    },
-                                    locations: {
-                                        a: {
-                                            b: true,
-                                            c: {
-                                                d: []
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                };
-                return assert.isRejected(configWorker.processDeclaration(data), /should match exactly one schema in oneOf.*locations/);
-            });
-
+        describe('actions', () => {
             it('should fail when multiple actions are in the same action object', () => {
                 const data = {
                     class: 'Telemetry',
@@ -617,51 +432,238 @@ describe('Declarations', () => {
                 return assert.isRejected(configWorker.processDeclaration(data), /My_Poller\/actions\/0.*should NOT be valid/);
             });
 
-            it('should fail when a location is not provided with includeData action', () => {
-                const data = {
-                    class: 'Telemetry',
-                    My_Poller: {
-                        class: 'Telemetry_System_Poller',
-                        interval: 90,
-                        actions: [
-                            {
-                                enable: true,
-                                excludeData: {}
+            describe('locations', () => {
+                it('should pass with empty locations', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_System: {
+                            class: 'Telemetry_System',
+                            systemPoller: {
+                                actions: [
+                                    {
+                                        setTag: {
+                                            newTag: 'tag value'
+                                        },
+                                        locations: {}
+                                    }
+                                ]
                             }
-                        ]
-                    }
-                };
-                return assert.isRejected(configWorker.processDeclaration(data), /dependencies\/excludeData\/allOf\/0\/required.*should have required property 'locations'/);
-            });
+                        }
+                    };
+                    return configWorker.processDeclaration(data)
+                        .then((validConfig) => {
+                            const actions = validConfig.My_System.systemPoller.actions;
+                            assert.deepStrictEqual(actions[0].locations, {});
+                        });
+                });
 
-            it('should pass when regexes are used in action locations', () => {
-                const data = {
-                    class: 'Telemetry',
-                    My_Poller: {
-                        class: 'Telemetry_System_Poller',
-                        interval: 90,
-                        actions: [
-                            {
-                                enable: true,
-                                includeData: {},
-                                locations: {
-                                    virtualServers: {
-                                        vs$: true
-                                    },
-                                    pools: {
-                                        '^/Common/Shared/': true
+                it('should pass with location type of boolean', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_System: {
+                            class: 'Telemetry_System',
+                            systemPoller: {
+                                actions: [
+                                    {
+                                        setTag: {
+                                            newTag: 'tag value'
+                                        },
+                                        locations: {
+                                            a: true
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    };
+                    return configWorker.processDeclaration(data)
+                        .then((validConfig) => {
+                            const actions = validConfig.My_System.systemPoller.actions;
+                            assert.deepStrictEqual(actions[0].locations, { a: true });
+                        });
+                });
+
+                it('should fail with location type boolean with value of false', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_System: {
+                            class: 'Telemetry_System',
+                            systemPoller: {
+                                actions: [
+                                    {
+                                        setTag: {
+                                            newTag: 'tag value'
+                                        },
+                                        locations: {
+                                            a: false
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    };
+                    return assert.isRejected(configWorker.processDeclaration(data), /should match exactly one schema in oneOf/);
+                });
+
+                it('should pass with object type location with single property', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_System: {
+                            class: 'Telemetry_System',
+                            systemPoller: {
+                                actions: [
+                                    {
+                                        setTag: {
+                                            newTag: 'tag value'
+                                        },
+                                        locations: {
+                                            a: {
+                                                b: true
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    };
+                    return configWorker.processDeclaration(data)
+                        .then((validConfig) => {
+                            const actions = validConfig.My_System.systemPoller.actions;
+                            assert.deepStrictEqual(actions[0].locations, { a: { b: true } });
+                        });
+                });
+
+                it('should pass with object type location with multiple properties', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_System: {
+                            class: 'Telemetry_System',
+                            systemPoller: {
+                                actions: [
+                                    {
+                                        setTag: {
+                                            newTag: 'tag value'
+                                        },
+                                        locations: {
+                                            a: {
+                                                b: true,
+                                                c: {
+                                                    d: true
+                                                }
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    };
+                    return configWorker.processDeclaration(data)
+                        .then((validConfig) => {
+                            const actions = validConfig.My_System.systemPoller.actions;
+                            assert.deepStrictEqual(actions[0].locations, { a: { b: true, c: { d: true } } });
+                        });
+                });
+
+                it('should fail with object type location with multiple properties and one is false', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_System: {
+                            class: 'Telemetry_System',
+                            systemPoller: {
+                                actions: [
+                                    {
+                                        setTag: {
+                                            newTag: 'tag value'
+                                        },
+                                        locations: {
+                                            a: {
+                                                b: true,
+                                                c: {
+                                                    d: false
+                                                }
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    };
+                    return assert.isRejected(configWorker.processDeclaration(data), /should match exactly one schema in oneOf.*locations/);
+                });
+
+                it('should fail with object type location with multiple properties and one is invalid type', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_System: {
+                            class: 'Telemetry_System',
+                            systemPoller: {
+                                actions: [
+                                    {
+                                        setTag: {
+                                            newTag: 'tag value'
+                                        },
+                                        locations: {
+                                            a: {
+                                                b: true,
+                                                c: {
+                                                    d: []
+                                                }
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    };
+                    return assert.isRejected(configWorker.processDeclaration(data), /should match exactly one schema in oneOf.*locations/);
+                });
+
+                it('should fail when a location is not provided with includeData action', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Poller: {
+                            class: 'Telemetry_System_Poller',
+                            interval: 90,
+                            actions: [
+                                {
+                                    enable: true,
+                                    excludeData: {}
+                                }
+                            ]
+                        }
+                    };
+                    return assert.isRejected(configWorker.processDeclaration(data), /dependencies\/excludeData\/allOf\/0\/required.*should have required property 'locations'/);
+                });
+
+                it('should pass when regexes are used in action locations', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Poller: {
+                            class: 'Telemetry_System_Poller',
+                            interval: 90,
+                            actions: [
+                                {
+                                    enable: true,
+                                    includeData: {},
+                                    locations: {
+                                        virtualServers: {
+                                            vs$: true
+                                        },
+                                        pools: {
+                                            '^/Common/Shared/': true
+                                        }
                                     }
                                 }
-                            }
-                        ]
-                    }
-                };
-                return configWorker.processDeclaration(data)
-                    .then((validConfig) => {
-                        const poller = validConfig.My_Poller;
-                        assert.deepStrictEqual(poller.actions[0].locations.virtualServers, { vs$: true });
-                        assert.deepStrictEqual(poller.actions[0].locations.pools, { '^/Common/Shared/': true });
-                    });
+                            ]
+                        }
+                    };
+                    return configWorker.processDeclaration(data)
+                        .then((validConfig) => {
+                            const poller = validConfig.My_Poller;
+                            assert.deepStrictEqual(poller.actions[0].locations.virtualServers, { vs$: true });
+                            assert.deepStrictEqual(poller.actions[0].locations.pools, { '^/Common/Shared/': true });
+                        });
+                });
             });
         });
     });
@@ -2004,6 +2006,23 @@ describe('Declarations', () => {
                 });
         });
 
+        it('should not allow JMESPath in the action object', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Poller: {
+                    class: 'Telemetry_System_Poller',
+                    interval: 90,
+                    actions: [
+                        {
+                            JMESPath: {},
+                            expression: '{ message: @, service: telemetryEventCategory, hostname: hostname }'
+                        }
+                    ]
+                }
+            };
+            return assert.isRejected(configWorker.processDeclaration(data), /My_Poller\/actions\/0.*should NOT have additional properties/);
+        });
+
         it('should not allow ifAnyMatch and ifAllMatch in same action', () => {
             const data = {
                 class: 'Telemetry',
@@ -2422,6 +2441,249 @@ describe('Declarations', () => {
                 }
             };
             return assert.isRejected(configWorker.processDeclaration(data), /someProp.*should NOT have additional properties/);
+        });
+
+        it('should not allow JMESPath in the action object', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Listener: {
+                    class: 'Telemetry_Listener',
+                    port: 6514,
+                    actions: [
+                        {
+                            JMESPath: {},
+                            expression: '{ message: @, service: telemetryEventCategory, hostname: hostname }'
+                        }
+                    ]
+                }
+            };
+            return assert.isRejected(configWorker.processDeclaration(data), /My_Listener\/actions\/0.*should NOT have additional properties/);
+        });
+
+        describe('tracer v2', () => {
+            describe('config object', () => {
+                it('should allow set tracer to object (type = "output")', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: { type: 'output' }
+                        }
+                    };
+                    return configWorker.processDeclaration(data)
+                        .then((validConfig) => {
+                            const listener = validConfig.My_Listener;
+                            assert.notStrictEqual(listener, undefined);
+                            assert.strictEqual(listener.class, 'Telemetry_Listener');
+                            assert.strictEqual(listener.enable, true);
+                            assert.deepStrictEqual(listener.trace, {
+                                type: 'output'
+                            });
+                            assert.strictEqual(listener.port, 6514);
+                            assert.deepStrictEqual(listener.actions, [{ enable: true, setTag: { tenant: '`T`', application: '`A`' } }]);
+                            assert.deepStrictEqual(listener.match, '');
+                        });
+                });
+
+                it('should allow set tracer to object (type = "input")', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: { type: 'input' }
+                        }
+                    };
+                    return configWorker.processDeclaration(data)
+                        .then((validConfig) => {
+                            const listener = validConfig.My_Listener;
+                            assert.notStrictEqual(listener, undefined);
+                            assert.strictEqual(listener.class, 'Telemetry_Listener');
+                            assert.strictEqual(listener.enable, true);
+                            assert.deepStrictEqual(listener.trace, {
+                                type: 'input'
+                            });
+                            assert.strictEqual(listener.port, 6514);
+                            assert.deepStrictEqual(listener.actions, [{ enable: true, setTag: { tenant: '`T`', application: '`A`' } }]);
+                            assert.deepStrictEqual(listener.match, '');
+                        });
+                });
+
+                it('should allow set tracer to object (all properties)', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: { type: 'output', path: 'path' }
+                        }
+                    };
+                    return configWorker.processDeclaration(data)
+                        .then((validConfig) => {
+                            const listener = validConfig.My_Listener;
+                            assert.notStrictEqual(listener, undefined);
+                            assert.strictEqual(listener.class, 'Telemetry_Listener');
+                            assert.strictEqual(listener.enable, true);
+                            assert.deepStrictEqual(listener.trace, {
+                                type: 'output', path: 'path'
+                            });
+                            assert.strictEqual(listener.port, 6514);
+                            assert.deepStrictEqual(listener.actions, [{ enable: true, setTag: { tenant: '`T`', application: '`A`' } }]);
+                            assert.deepStrictEqual(listener.match, '');
+                        });
+                });
+
+                it('should not allow set tracer path to empty string', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: { type: 'input', path: '' }
+                        }
+                    };
+                    return assert.isRejected(configWorker.processDeclaration(data), /should NOT be shorter than 1 character/);
+                });
+
+                it('should not allow set tracer without "type"', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: {}
+                        }
+                    };
+                    return assert.isRejected(configWorker.processDeclaration(data), /should have required property 'type'/);
+                });
+
+                it('should not allow set invalid value to tracer "type"', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: { type: 'invalidType' }
+                        }
+                    };
+                    return assert.isRejected(configWorker.processDeclaration(data), /trace.*type.*enum.*should be equal to one of the allowed values/);
+                });
+            });
+
+            describe('array of config objects', () => {
+                it('should allow set tracer to array of objects ("type" only)', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: [{ type: 'output' }, { type: 'input' }]
+                        }
+                    };
+                    return configWorker.processDeclaration(data)
+                        .then((validConfig) => {
+                            const listener = validConfig.My_Listener;
+                            assert.notStrictEqual(listener, undefined);
+                            assert.strictEqual(listener.class, 'Telemetry_Listener');
+                            assert.strictEqual(listener.enable, true);
+                            assert.deepStrictEqual(listener.trace, [
+                                { type: 'output' },
+                                { type: 'input' }
+                            ]);
+                            assert.strictEqual(listener.port, 6514);
+                            assert.deepStrictEqual(listener.actions, [{ enable: true, setTag: { tenant: '`T`', application: '`A`' } }]);
+                            assert.deepStrictEqual(listener.match, '');
+                        });
+                });
+
+                it('should allow set tracer to array of objects (all properties)', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: [{ type: 'output', path: 'outputPath' }, { type: 'input', path: 'inputPath' }]
+                        }
+                    };
+                    return configWorker.processDeclaration(data)
+                        .then((validConfig) => {
+                            const listener = validConfig.My_Listener;
+                            assert.notStrictEqual(listener, undefined);
+                            assert.strictEqual(listener.class, 'Telemetry_Listener');
+                            assert.strictEqual(listener.enable, true);
+                            assert.deepStrictEqual(listener.trace, [
+                                { type: 'output', path: 'outputPath' },
+                                { type: 'input', path: 'inputPath' }
+                            ]);
+                            assert.strictEqual(listener.port, 6514);
+                            assert.deepStrictEqual(listener.actions, [{ enable: true, setTag: { tenant: '`T`', application: '`A`' } }]);
+                            assert.deepStrictEqual(listener.match, '');
+                        });
+                });
+
+                it('should not allow set tracer to array of objects with same "type"', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: [{ type: 'output', path: 'outputPath' }, { type: 'output', path: 'inputPath' }]
+                        }
+                    };
+                    return assert.isRejected(configWorker.processDeclaration(data), /should pass .*uniqueItemProperties.* keyword validation/);
+                });
+
+                it('should not allow set tracer to an empty array', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: []
+                        }
+                    };
+                    return assert.isRejected(configWorker.processDeclaration(data), /should NOT have fewer than 1 items/);
+                });
+
+                it('should not allow set tracer to an array with 3+ elements', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: [
+                                { type: 'input' },
+                                { type: 'output' },
+                                { type: 'input' }
+                            ]
+                        }
+                    };
+                    return assert.isRejected(configWorker.processDeclaration(data), /should NOT have more than 2 items/);
+                });
+
+                it('should not allow set tracer path to empty string', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: [{ type: 'input', path: '' }, { type: 'output', path: 'path' }]
+                        }
+                    };
+                    return assert.isRejected(configWorker.processDeclaration(data), /should NOT be shorter than 1 character/);
+                });
+
+                it('should not allow set tracer without "type"', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: [{}]
+                        }
+                    };
+                    return assert.isRejected(configWorker.processDeclaration(data), /should have required property 'type'/);
+                });
+
+                it('should not allow set invalid value to tracer "type"', () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Listener: {
+                            class: 'Telemetry_Listener',
+                            trace: [{ type: 'invalidType' }]
+                        }
+                    };
+                    return assert.isRejected(configWorker.processDeclaration(data), /trace.*type.*enum.*should be equal to one of the allowed values/);
+                });
+            });
         });
     });
 
@@ -3522,6 +3784,19 @@ describe('Declarations', () => {
             /My_Consumer.*someKey.*should NOT have additional properties/
         ));
 
+        it('should not allow actions object on non-Generic HTTP Consumers (ex: default)', () => assert.isRejected(
+            validateMinimal({
+                type: 'default',
+                actions: [
+                    {
+                        JMESPath: {},
+                        expression: '{ message: @ }'
+                    }
+                ]
+            }),
+            /My_Consumer\/type.*"allowedValue":"Generic_HTTP".*should be equal to constant/
+        ));
+
         describe('AWS_CloudWatch', () => {
             describe('dataType', () => {
                 it('should not allow invalid value', () => assert.isRejected(
@@ -4262,6 +4537,64 @@ describe('Declarations', () => {
                     }
                 }
             ), /should have required property 'clientCertificate'/));
+
+            it('should not allow the includeData \'action\' in the declaration', () => assert.isRejected(validateFull(
+                {
+                    type: 'Generic_HTTP',
+                    host: 'host',
+                    actions: [
+                        {
+                            includeData: {},
+                            locations: {
+                                system: true
+                            }
+                        }
+                    ]
+                }
+            ), /\/My_Consumer\/actions\/0.*("additionalProperty":"includeData").*should NOT have additional properties/));
+
+            it('should not allow the excludeData \'action\' in the declaration', () => assert.isRejected(validateFull(
+                {
+                    type: 'Generic_HTTP',
+                    host: 'host',
+                    actions: [
+                        {
+                            excludeData: {},
+                            locations: {
+                                system: true
+                            }
+                        }
+                    ]
+                }
+            ), /\/My_Consumer\/actions\/0.*("additionalProperty":"excludeData").*should NOT have additional properties/));
+
+            it('should allow JMESPath in \'actions\' block', () => validateMinimal(
+                {
+                    type: 'Generic_HTTP',
+                    host: 'host',
+                    actions: [
+                        {
+                            JMESPath: {},
+                            expression: '{ message: @ }'
+                        }
+                    ]
+                },
+                {
+                    type: 'Generic_HTTP',
+                    host: 'host',
+                    protocol: 'https',
+                    port: 443,
+                    path: '/',
+                    method: 'POST',
+                    actions: [
+                        {
+                            enable: true,
+                            JMESPath: {},
+                            expression: '{ message: @ }'
+                        }
+                    ]
+                }
+            ));
 
             it('should allow full declaration', () => validateFull(
                 {

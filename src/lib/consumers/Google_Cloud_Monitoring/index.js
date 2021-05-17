@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -15,6 +15,9 @@ const requestsUtil = require('../../utils/requests');
 
 function checkMetricDescriptors(data, descriptors, currentPath, metrics) {
     Object.keys(data).forEach((key) => {
+        if (key === 'diskStorage') {
+            return;
+        }
         const path = `${currentPath}/${key}`;
         if (typeof data[key] === 'object') {
             checkMetricDescriptors(data[key], descriptors, path, metrics);
@@ -150,12 +153,16 @@ module.exports = function (context) {
                 timeSeries.timeSeries.push({ metric, points, resource });
             });
 
+            if (context.tracer) {
+                context.tracer.write(timeSeries);
+            }
+
             options.fullURI = `${baseUri}/${projectId}/timeSeries`;
             options.body = timeSeries;
             options.method = 'POST';
             return requestsUtil.makeRequest(options);
         })
-        .then(() => Promise.resolve())
+        .then(() => context.logger.debug('success'))
         .catch((err) => {
             context.logger.error(`error: ${err.message ? err.message : err}`);
         });

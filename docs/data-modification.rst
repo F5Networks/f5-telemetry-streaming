@@ -600,6 +600,7 @@ The following table shows the possible parameters for excludeData.  After the ta
 
 |
 
+
 Example 1
 ^^^^^^^^^
 The following is an example of Telemetry output without using excludeData:
@@ -777,7 +778,4 @@ And this is an example of the output from the Action definition.
             }
         }
     }
-
-|
-|
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -142,7 +142,7 @@ describe('Statsd', () => {
             });
 
             return statsDIndex(context)
-                .then(() => assert.deepStrictEqual(metrics, []));
+                .then(() => assert.isEmpty(metrics));
         });
 
         it('should log exception if connection failure', () => {

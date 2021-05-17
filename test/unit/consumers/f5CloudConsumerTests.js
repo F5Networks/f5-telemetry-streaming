@@ -1,5 +1,5 @@
 /*
- * Copyright 2019. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -172,7 +172,7 @@ describe('F5_Cloud', () => {
                         const a = mockServer.getInteractionsOn('Post');
                         assert.lengthOf(a, 1);
                         const decodedData = JSON.parse(a[0].payload.toString('utf8'));
-                        assert.deepEqual(expectedData, decodedData);
+                        assert.deepStrictEqual(expectedData, decodedData);
                         assert.equal(expectedSchemaLabel, a[0].payloadSchema.split(':')[4]);
                         client.close();
                     }

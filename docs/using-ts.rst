@@ -20,5 +20,7 @@ Using Telemetry Streaming Index
    logging
    http-methods
    rest-api-endpoints
+   data-modification
+   customizing-data
    advanced-options
    deleting-ts-config

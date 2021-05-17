@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -56,7 +56,7 @@ describe('Consumers', () => {
             return configWorker.processDeclaration(exampleConfig)
                 .then(() => {
                     const loadedConsumers = consumers.getConsumers();
-                    assert.strictEqual(loadedConsumers.length, 1, 'should load default consumer');
+                    assert.lengthOf(loadedConsumers, 1, 'should load default consumer');
                 });
         });
 
@@ -72,14 +72,14 @@ describe('Consumers', () => {
             return configWorker.processDeclaration(exampleConfig)
                 .then(() => {
                     const loadedConsumers = consumers.getConsumers();
-                    assert.strictEqual(loadedConsumers.length, 0, 'should not load disabled consumer');
+                    assert.isEmpty(loadedConsumers, 'should not load disabled consumer');
                 });
         });
 
         it('should return empty list of consumers', () => configWorker.emitAsync('change', { components: [], mappings: {} })
             .then(() => {
                 const loadedConsumers = consumers.getConsumers();
-                assert.strictEqual(loadedConsumers.length, 0);
+                assert.isEmpty(loadedConsumers);
             }));
 
         it('should unload unrequired consumers', () => {
@@ -93,12 +93,12 @@ describe('Consumers', () => {
             return configWorker.processDeclaration(priorConfig)
                 .then(() => {
                     const loadedConsumers = consumers.getConsumers();
-                    assert.strictEqual(loadedConsumers.length, 1, 'should load default consumer');
+                    assert.lengthOf(loadedConsumers, 1, 'should load default consumer');
                     return configWorker.emitAsync('change', { components: [], mappings: {} });
                 })
                 .then(() => {
                     const loadedConsumers = consumers.getConsumers();
-                    assert.strictEqual(Object.keys(loadedConsumers).length, 0, 'should unload default consumer');
+                    assert.isEmpty(Object.keys(loadedConsumers), 'should unload default consumer');
                 });
         });
 
@@ -142,14 +142,14 @@ describe('Consumers', () => {
             return configWorker.processDeclaration(existingConfig)
                 .then(() => {
                     const loadedConsumers = consumers.getConsumers();
-                    assert.strictEqual(loadedConsumers.length, 1, 'should load default consumer');
+                    assert.lengthOf(loadedConsumers, 1, 'should load default consumer');
                     assert.isTrue(moduleLoaderSpy.calledOnce);
                     existingConsumer = loadedConsumers[0];
                 })
                 .then(() => configWorker.processNamespaceDeclaration(namespaceConfig, 'NewNamespace'))
                 .then(() => {
                     const loadedConsumers = consumers.getConsumers();
-                    assert.strictEqual(loadedConsumers.length, 2, 'should load new consumer too');
+                    assert.lengthOf(loadedConsumers, 2, 'should load new consumer too');
                     assert.strictEqual(loadedConsumers[0].id, existingConsumer.id);
                     assert.strictEqual(loadedConsumers[1].id, 'NewNamespace::SecondConsumer');
                     assert.isTrue(moduleLoaderSpy.calledTwice);

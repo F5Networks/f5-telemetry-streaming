@@ -57,7 +57,7 @@ function mergeData(object) {
  * @param {object} object - target object
  * @param {...object} [sources] - source objects
  *
- * @returns {object} object
+ * @returns {function} function that returns object
  */
 function mergeArgsTo(object) {
     return function () {
@@ -66,13 +66,64 @@ function mergeArgsTo(object) {
     };
 }
 
+/**
+ * Create Tracer Config if needed
+ *
+ * Note: this method mutates 'component'.
+ *
+ * @param {Component} component - configuration component
+ *
+ * @returns {Component} with assigned TRacer config
+ */
+function assignTracerConfig(component) {
+    if (typeof component.trace !== 'undefined') {
+        const traceConfig = {
+            enable: component.enable && !!component.trace,
+            encoding: 'utf8',
+            maxRecords: 10,
+            path: `/var/tmp/telemetry/${component.class}.${component.traceName}`,
+            type: 'output'
+        };
+        component.trace = typeof component.trace !== 'object' ? {} : component.trace;
+        component.trace = defaultsDeep(component.trace, traceConfig);
+    }
+    return component;
+}
+
+/**
+ * Generate Configuration Component
+ *
+ * @param {Component} componentDefaults - defaults for configuration component
+ *
+ * @returns {function<Component>} function that returns generated component
+ */
+function configComponentGenerator(componentDefaults) {
+    return function () {
+        let component = mergeArgsTo(componentDefaults).apply(null, arguments);
+        component = assignTracerConfig(component);
+        return component;
+    };
+}
+
+/**
+ * Generate Declaration Component
+ *
+ * @param {Component} componentDefaults - defaults for declaration component
+ *
+ * @returns {function<Component>} function that returns generated component
+ */
+function declarationComponentGenerator(componentDefaults) {
+    return function () {
+        return mergeArgsTo(componentDefaults).apply(null, arguments);
+    };
+}
 
 // eslint-disable-next-line no-multi-assign
 module.exports = {
     configuration: {
         consumer: {
             default: {
-                decrypted: mergeArgsTo({
+                decrypted: configComponentGenerator({
                     class: 'Telemetry_Consumer',
                     allowSelfSignedCert: false,
                     enable: true,
@@ -87,7 +138,7 @@ module.exports = {
         },
         ihealthPoller: {
             full: {
-                encrypted: mergeArgsTo({
+                encrypted: configComponentGenerator({
                     class: 'Telemetry_iHealth_Poller',
                     name: 'iHealthPoller',
                     enable: true,
@@ -155,11 +206,11 @@ module.exports = {
     },
     declaration: {
         base: {
-            decrypted: mergeArgsTo({ class: 'Telemetry' })
+            decrypted: declarationComponentGenerator({ class: 'Telemetry' })
         },
         consumer: {
             default: {
-                decrypted: mergeArgsTo({
+                decrypted: declarationComponentGenerator({
                     class: 'Telemetry_Consumer',
                     type: 'default'
                 })
@@ -167,7 +218,7 @@ module.exports = {
         },
         controls: {
             full: {
-                decrypted: mergeArgsTo({
+                decrypted: declarationComponentGenerator({
                     class: 'Controls',
                     debug: true,
                     logLevel: 'debug'
@@ -176,7 +227,7 @@ module.exports = {
         },
         ihealthPoller: {
             full: {
-                decrypted: mergeArgsTo({
+                decrypted: declarationComponentGenerator({
                     class: 'Telemetry_iHealth_Poller',
                     trace: true,
                     enable: true,
@@ -205,7 +256,7 @@ module.exports = {
                 })
             },
             inlineMinimal: {
-                decrypted: mergeArgsTo({
+                decrypted: declarationComponentGenerator({
                     username: 'test_user_1',
                     passphrase: {
                         cipherText: 'test_passphrase_1'
@@ -219,7 +270,7 @@ module.exports = {
                 })
             },
             inlineFull: {
-                decrypted: mergeArgsTo({
+                decrypted: declarationComponentGenerator({
                     trace: true,
                     enable: true,
                     username: 'test_user_1',
@@ -248,7 +299,7 @@ module.exports = {
                 })
             },
             minimal: {
-                decrypted: mergeArgsTo({
+                decrypted: declarationComponentGenerator({
                     class: 'Telemetry_iHealth_Poller',
                     username: 'test_user_1',
                     passphrase: {
@@ -265,12 +316,12 @@ module.exports = {
         },
         namespace: {
             base: {
-                decrypted: mergeArgsTo({ class: 'Telemetry_Namespace' })
+                decrypted: declarationComponentGenerator({ class: 'Telemetry_Namespace' })
             }
         },
         system: {
             full: {
-                decrypted: mergeArgsTo({
+                decrypted: declarationComponentGenerator({
                     class: 'Telemetry_System',
                     enable: true,
                     trace: true,
@@ -286,7 +337,7 @@ module.exports = {
                 })
             },
             minimal: {
-                decrypted: mergeArgsTo({
+                decrypted: declarationComponentGenerator({
                     class: 'Telemetry_System'
                 })
             }
@@ -294,7 +345,7 @@ module.exports = {
     }
 };
 
-module.exports.configuration.ihealthPoller.full.decrypted = mergeArgsTo(
+module.exports.configuration.ihealthPoller.full.decrypted = configComponentGenerator(
     module.exports.configuration.ihealthPoller.full.encrypted([
         { key: 'iHealth.credentials.passphrase', value: { cipherText: 'test_passphrase_1' } },
         { key: 'iHealth.proxy.credentials.passphrase', value: { cipherText: 'test_passphrase_2' } },
@@ -302,7 +353,7 @@ module.exports.configuration.ihealthPoller.full.decrypted = mergeArgsTo(
     ])
 );
 module.exports.configuration.ihealthPoller.minimal = {
-    encrypted: mergeArgsTo(
+    encrypted: configComponentGenerator(
         module.exports.configuration.ihealthPoller.full.encrypted([
             { key: 'iHealth.downloadFolder', value: undefined },
             {
@@ -339,7 +390,7 @@ module.exports.configuration.ihealthPoller.minimal = {
         ])
     )
 };
-module.exports.configuration.ihealthPoller.minimal.decrypted = mergeArgsTo(
+module.exports.configuration.ihealthPoller.minimal.decrypted = configComponentGenerator(
     module.exports.configuration.ihealthPoller.minimal.encrypted([
         { key: 'iHealth.credentials.passphrase', value: { cipherText: 'test_passphrase_1' } }
     ])

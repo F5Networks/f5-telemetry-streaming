@@ -1,5 +1,5 @@
 /*
- * Copyright 2020. F5 Networks, Inc. See End User License Agreement ('EULA') for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ('EULA') for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -53,7 +53,7 @@ describe('IHealthPoller', () => {
             .map(poller => IHealthPoller.disable(poller, true)))
             .then(retObjs => Promise.all(retObjs.map(obj => obj.stopPromise)))
             .then(() => {
-                assert.deepStrictEqual(IHealthPoller.getAll({ includeDemo: true }), []);
+                assert.isEmpty(IHealthPoller.getAll({ includeDemo: true }), 'should have no running iHealth Pollers before any test');
                 return persistentStorage.persistentStorage.load();
             });
     });
@@ -62,7 +62,7 @@ describe('IHealthPoller', () => {
         .map(poller => IHealthPoller.disable(poller, true)))
         .then(retObjs => Promise.all(retObjs.map(obj => obj.stopPromise)))
         .then(() => {
-            assert.deepStrictEqual(IHealthPoller.getAll({ includeDemo: true }), [], 'should have no running iHealth Pollers');
+            assert.isEmpty(IHealthPoller.getAll({ includeDemo: true }), 'should have no running iHealth Pollers');
             sinon.restore();
         }));
 
@@ -103,11 +103,7 @@ describe('IHealthPoller', () => {
                     ['poller1'],
                     'should register iHealth Poller'
                 );
-                assert.deepStrictEqual(
-                    IHealthPoller.getAll({ demoOnly: true }).map(p => p.id),
-                    [],
-                    'should have no demo instances'
-                );
+                assert.isEmpty(IHealthPoller.getAll({ demoOnly: true }).map(p => p.id), 'should have no demo instances');
             });
 
             it('should create and register instance (demo instance)', () => {
@@ -118,11 +114,7 @@ describe('IHealthPoller', () => {
                     ['demoPoller1'],
                     'should register demo iHealth Poller'
                 );
-                assert.deepStrictEqual(
-                    IHealthPoller.getAll({ includeDemo: false }).map(p => p.id),
-                    [],
-                    'should have no non-demo instances'
-                );
+                assert.isEmpty(IHealthPoller.getAll({ includeDemo: false }).map(p => p.id), 'should have no non-demo instances');
             });
 
             it('should throw error when instance exists already', () => {
@@ -201,7 +193,7 @@ describe('IHealthPoller', () => {
                 return poller.start()
                     .then(() => IHealthPoller.disable(poller))
                     .then((retObj) => {
-                        assert.lengthOf(IHealthPoller.get('id'), 0, 'should unregister instance once disabled it');
+                        assert.isEmpty(IHealthPoller.get('id'), 'should unregister instance once disabled it');
                         assert.instanceOf(retObj.stopPromise, Promise, 'should be instance of Promise');
                         return retObj.stopPromise;
                     });
@@ -212,7 +204,7 @@ describe('IHealthPoller', () => {
                 return poller.start()
                     .then(() => Promise.all([IHealthPoller.disable(poller), IHealthPoller.disable(poller)]))
                     .then((retObj) => {
-                        assert.lengthOf(IHealthPoller.get('id'), 0, 'should unregister instance once disabled it');
+                        assert.isEmpty(IHealthPoller.get('id'), 'should unregister instance once disabled it');
                         assert.instanceOf(retObj[0].stopPromise, Promise, 'should be instance of Promise');
                         assert.instanceOf(retObj[1].stopPromise, Promise, 'should be instance of Promise');
                         return Promise.all([retObj[0].stopPromise, retObj[1].stopPromise]);
@@ -222,7 +214,7 @@ describe('IHealthPoller', () => {
 
         describe('.get()', () => {
             it('should return null when instance with such ID doesn\'t exist', () => {
-                assert.lengthOf(IHealthPoller.get('id'), 0, 'should return no instances with such ID');
+                assert.isEmpty(IHealthPoller.get('id'), 'should return no instances with such ID');
             });
 
             it('should return instance by ID', () => {
@@ -259,10 +251,10 @@ describe('IHealthPoller', () => {
 
         describe('.getAll()', () => {
             it('should return empty array when no instances registered', () => {
-                assert.deepStrictEqual(IHealthPoller.getAll(), [], 'should have no instances by default');
-                assert.deepStrictEqual(IHealthPoller.getAll({ includeDemo: true }), [], 'should have no instances at all by default');
-                assert.deepStrictEqual(IHealthPoller.getAll({ demoOnly: true }), [], 'should have no demo instances by default');
-                assert.deepStrictEqual(IHealthPoller.getAll({ demoOnly: true, includeDemo: true }), [], 'should have no demo instances by default');
+                assert.isEmpty(IHealthPoller.getAll(), 'should have no instances by default');
+                assert.isEmpty(IHealthPoller.getAll({ includeDemo: true }), 'should have no instances at all by default');
+                assert.isEmpty(IHealthPoller.getAll({ demoOnly: true }), 'should have no demo instances by default');
+                assert.isEmpty(IHealthPoller.getAll({ demoOnly: true, includeDemo: true }), 'should have no demo instances by default');
             });
 
             it('should return non-demo instances only', () => {
@@ -345,11 +337,7 @@ describe('IHealthPoller', () => {
 
                 IHealthPoller.unregister(poller);
                 IHealthPoller.unregister(demoPoller);
-                assert.deepStrictEqual(
-                    IHealthPoller.getAll({ includeDemo: true }),
-                    [],
-                    'should have no registered instances'
-                );
+                assert.isEmpty(IHealthPoller.getAll({ includeDemo: true }), 'should have no registered instances');
                 assert.doesNotThrow(
                     () => IHealthPoller.unregister(poller),
                     'should not throw error when instance not registered'

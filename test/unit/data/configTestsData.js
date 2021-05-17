@@ -1,5 +1,5 @@
 /*
- * Copyright 2020. F5 Networks, Inc. See End User License Agreement ('EULA') for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ('EULA') for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -256,7 +256,13 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'f5telemetry_default',
                             passphrase: 'passphrase' // decrypted secret
@@ -283,7 +289,13 @@ module.exports = {
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: 'passphrase' // decrypted secret
@@ -315,7 +327,13 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'f5telemetry_default',
                             passphrase: {
@@ -346,7 +364,13 @@ module.exports = {
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: {
@@ -523,7 +547,13 @@ module.exports = {
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: 'passphrase' // decrypted secret
@@ -555,7 +585,13 @@ module.exports = {
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: {
@@ -744,7 +780,13 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'f5telemetry_default',
                             passphrase: 'passphrase', // decrypted secret
@@ -772,7 +814,13 @@ module.exports = {
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: 'passphrase' // decrypted secret
@@ -804,7 +852,13 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'f5telemetry_default',
                             passphrase: {
@@ -835,7 +889,13 @@ module.exports = {
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: {
@@ -1029,7 +1089,13 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'ExistingNameSpace',
                             passphrase: 'passphrase', // decrypted secret
@@ -1057,7 +1123,13 @@ module.exports = {
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: 'passphrase' // decrypted secret
@@ -1089,7 +1161,13 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'ExistingNameSpace',
                             passphrase: {
@@ -1120,7 +1198,13 @@ module.exports = {
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: {
@@ -1288,7 +1372,13 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'ExistingNameSpace',
                             passphrase: 'passphrase', // decrypted secret
@@ -1306,7 +1396,13 @@ module.exports = {
                             host: '192.0.2.10',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: 'passphrase' // decrypted secret
@@ -1338,7 +1434,13 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'ExistingNameSpace',
                             passphrase: {
@@ -1359,7 +1461,13 @@ module.exports = {
                             host: '192.0.2.10',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: {
@@ -1543,7 +1651,13 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'ExistingNameSpace',
                             passphrase: 'passphrase', // decrypted secret
@@ -1561,7 +1675,13 @@ module.exports = {
                             host: '192.0.2.10',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: 'passphrase' // decrypted secret
@@ -1593,7 +1713,13 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'ExistingNameSpace',
                             passphrase: {
@@ -1614,7 +1740,13 @@ module.exports = {
                             host: '192.0.2.10',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: {
@@ -1827,7 +1959,13 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'ExistingNameSpace',
                             passphrase: 'passphrase', // decrypted secret
@@ -1855,7 +1993,13 @@ module.exports = {
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: 'passphrase' // decrypted secret
@@ -1887,7 +2031,13 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'ExistingNameSpace',
                             passphrase: {
@@ -1918,7 +2068,13 @@ module.exports = {
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: {
@@ -2043,7 +2199,13 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'ExistingNameSpace',
                             passphrase: 'passphrase', // decrypted secret
@@ -2076,7 +2238,13 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false,
                             namespace: 'ExistingNameSpace',
                             passphrase: {

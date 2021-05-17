@@ -1,5 +1,5 @@
 /*
- * Copyright 2020. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -326,6 +326,7 @@ const PROPERTIES_TO_HANDLERS = {
                     }
                     return DEFAULT_CAST_CB(key, value);
                 },
+                deleteCb: key => key === 'Capacity_Float',
                 renameCb: key => (key === 'Capacity' ? 'Capacity%' : key)
             },
             tmmTraffic: {

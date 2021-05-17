@@ -113,14 +113,26 @@ module.exports = {
                         name: 'SystemPoller_1',
                         namespace: 'f5telemetry_default',
                         systemName: 'My_System',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1',
+                            type: 'output'
+                        },
                         traceName: 'My_System::SystemPoller_1'
                     },
                     {
                         class: 'Telemetry_iHealth_Poller',
                         name: 'iHealthPoller_1',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System::iHealthPoller_1',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'iHealthPoller_1',
                             credentials: {
@@ -178,7 +190,13 @@ module.exports = {
                         id: 'My_Consumer',
                         name: 'My_Consumer',
                         namespace: 'f5telemetry_default',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer',
+                            type: 'output'
+                        },
                         traceName: 'My_Consumer',
                         type: 'default'
                     },
@@ -213,14 +231,26 @@ module.exports = {
                         name: 'SystemPoller_1',
                         namespace: 'My_Namespace',
                         systemName: 'My_System',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_Namespace::My_System::SystemPoller_1',
+                            type: 'output'
+                        },
                         traceName: 'My_Namespace::My_System::SystemPoller_1'
                     },
                     {
                         class: 'Telemetry_iHealth_Poller',
                         name: 'iHealthPoller_1',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace::My_System::iHealthPoller_1',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'iHealthPoller_1',
                             credentials: {
@@ -278,7 +308,13 @@ module.exports = {
                         id: 'My_Namespace::My_Consumer',
                         name: 'My_Consumer',
                         namespace: 'My_Namespace',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
+                            type: 'output'
+                        },
                         traceName: 'My_Namespace::My_Consumer',
                         type: 'default'
                     }
@@ -346,7 +382,13 @@ module.exports = {
                     {
                         class: 'Telemetry_iHealth_Poller',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System::My_iHealth_Poller',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'My_iHealth_Poller',
                             credentials: {
@@ -405,14 +447,26 @@ module.exports = {
                         id: 'My_Consumer',
                         name: 'My_Consumer',
                         namespace: 'f5telemetry_default',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer',
+                            type: 'output'
+                        },
                         traceName: 'My_Consumer',
                         type: 'default'
                     },
                     {
                         class: 'Telemetry_iHealth_Poller',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace::My_System::My_iHealth_Poller',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'My_iHealth_Poller',
                             credentials: {
@@ -471,7 +525,13 @@ module.exports = {
                         id: 'My_Namespace::My_Consumer',
                         name: 'My_Consumer',
                         namespace: 'My_Namespace',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
+                            type: 'output'
+                        },
                         traceName: 'My_Namespace::My_Consumer',
                         type: 'default'
                     }
@@ -563,7 +623,13 @@ module.exports = {
                     {
                         class: 'Telemetry_iHealth_Poller',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System_1::My_iHealth_Poller',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'My_iHealth_Poller',
                             credentials: {
@@ -618,7 +684,13 @@ module.exports = {
                     {
                         class: 'Telemetry_iHealth_Poller',
                         enable: false,
-                        trace: true,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System_2::My_iHealth_Poller',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'My_iHealth_Poller',
                             credentials: {
@@ -677,14 +749,26 @@ module.exports = {
                         id: 'My_Consumer',
                         name: 'My_Consumer',
                         namespace: 'f5telemetry_default',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer',
+                            type: 'output'
+                        },
                         traceName: 'My_Consumer',
                         type: 'default'
                     },
                     {
                         class: 'Telemetry_iHealth_Poller',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace::My_System_1::My_iHealth_Poller',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'My_iHealth_Poller',
                             credentials: {
@@ -739,7 +823,13 @@ module.exports = {
                     {
                         class: 'Telemetry_iHealth_Poller',
                         enable: false,
-                        trace: true,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace::My_System_2::My_iHealth_Poller',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'My_iHealth_Poller',
                             credentials: {
@@ -798,7 +888,13 @@ module.exports = {
                         id: 'My_Namespace::My_Consumer',
                         name: 'My_Consumer',
                         namespace: 'My_Namespace',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
+                            type: 'output'
+                        },
                         traceName: 'My_Namespace::My_Consumer',
                         type: 'default'
                     }
@@ -951,7 +1047,13 @@ module.exports = {
                         class: 'Telemetry_iHealth_Poller',
                         name: 'iHealthPoller_1',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System::iHealthPoller_1',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'iHealthPoller_1',
                             credentials: {
@@ -1005,7 +1107,13 @@ module.exports = {
                     {
                         class: 'Telemetry_iHealth_Poller',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System_2::My_iHealth_Poller',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'My_iHealth_Poller',
                             credentials: {
@@ -1061,7 +1169,13 @@ module.exports = {
                         class: 'Telemetry_iHealth_Poller',
                         name: 'iHealthPoller_1',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace::My_System::iHealthPoller_1',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'iHealthPoller_1',
                             credentials: {
@@ -1115,7 +1229,13 @@ module.exports = {
                     {
                         class: 'Telemetry_iHealth_Poller',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace::My_System_2::My_iHealth_Poller',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'My_iHealth_Poller',
                             credentials: {
@@ -1312,7 +1432,13 @@ module.exports = {
                         class: 'Telemetry_iHealth_Poller',
                         name: 'iHealthPoller_1',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System::iHealthPoller_1',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'iHealthPoller_1',
                             credentials: {
@@ -1366,7 +1492,13 @@ module.exports = {
                     {
                         class: 'Telemetry_iHealth_Poller',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System_2::My_iHealth_Poller',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'My_iHealth_Poller',
                             credentials: {
@@ -1425,7 +1557,13 @@ module.exports = {
                         id: 'My_Consumer_1',
                         name: 'My_Consumer_1',
                         namespace: 'f5telemetry_default',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1',
+                            type: 'output'
+                        },
                         traceName: 'My_Consumer_1',
                         type: 'default'
                     },
@@ -1433,7 +1571,13 @@ module.exports = {
                         class: 'Telemetry_iHealth_Poller',
                         name: 'iHealthPoller_1',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace::My_System::iHealthPoller_1',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'iHealthPoller_1',
                             credentials: {
@@ -1487,7 +1631,13 @@ module.exports = {
                     {
                         class: 'Telemetry_iHealth_Poller',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace::My_System_2::My_iHealth_Poller',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'My_iHealth_Poller',
                             credentials: {
@@ -1546,7 +1696,13 @@ module.exports = {
                         id: 'My_Namespace::My_Consumer_1',
                         name: 'My_Consumer_1',
                         namespace: 'My_Namespace',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_1',
+                            type: 'output'
+                        },
                         traceName: 'My_Namespace::My_Consumer_1',
                         type: 'default'
                     },
@@ -1554,7 +1710,13 @@ module.exports = {
                         class: 'Telemetry_iHealth_Poller',
                         name: 'iHealthPoller_1',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace_2::My_System::iHealthPoller_1',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'iHealthPoller_1',
                             credentials: {
@@ -1608,7 +1770,13 @@ module.exports = {
                     {
                         class: 'Telemetry_iHealth_Poller',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace_2::My_System_2::My_iHealth_Poller',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'My_iHealth_Poller',
                             credentials: {
@@ -1667,7 +1835,13 @@ module.exports = {
                         id: 'My_Namespace_2::My_Consumer_1',
                         name: 'My_Consumer_1',
                         namespace: 'My_Namespace_2',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace_2::My_Consumer_1',
+                            type: 'output'
+                        },
                         traceName: 'My_Namespace_2::My_Consumer_1',
                         type: 'default'
                     }
@@ -1822,7 +1996,13 @@ module.exports = {
                         class: 'Telemetry_iHealth_Poller',
                         name: 'iHealthPoller_1',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System::iHealthPoller_1',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'iHealthPoller_1',
                             credentials: {
@@ -1876,7 +2056,13 @@ module.exports = {
                     {
                         class: 'Telemetry_iHealth_Poller',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System_2::My_iHealth_Poller',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'My_iHealth_Poller',
                             credentials: {
@@ -1935,7 +2121,13 @@ module.exports = {
                         id: 'My_Consumer_1',
                         name: 'My_Consumer_1',
                         namespace: 'f5telemetry_default',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1',
+                            type: 'output'
+                        },
                         traceName: 'My_Consumer_1',
                         type: 'default'
                     },
@@ -1946,7 +2138,13 @@ module.exports = {
                         id: 'My_Consumer_2',
                         name: 'My_Consumer_2',
                         namespace: 'f5telemetry_default',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_2',
+                            type: 'output'
+                        },
                         traceName: 'My_Consumer_2',
                         type: 'default'
                     },
@@ -1954,7 +2152,13 @@ module.exports = {
                         class: 'Telemetry_iHealth_Poller',
                         name: 'iHealthPoller_1',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace::My_System::iHealthPoller_1',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'iHealthPoller_1',
                             credentials: {
@@ -2008,7 +2212,13 @@ module.exports = {
                     {
                         class: 'Telemetry_iHealth_Poller',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace::My_System_2::My_iHealth_Poller',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'My_iHealth_Poller',
                             credentials: {
@@ -2067,7 +2277,13 @@ module.exports = {
                         id: 'My_Namespace::My_Consumer_1',
                         name: 'My_Consumer_1',
                         namespace: 'My_Namespace',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_1',
+                            type: 'output'
+                        },
                         traceName: 'My_Namespace::My_Consumer_1',
                         type: 'default'
                     },
@@ -2078,7 +2294,13 @@ module.exports = {
                         id: 'My_Namespace::My_Consumer_2',
                         name: 'My_Consumer_2',
                         namespace: 'My_Namespace',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_2',
+                            type: 'output'
+                        },
                         traceName: 'My_Namespace::My_Consumer_2',
                         type: 'default'
                     },
@@ -2086,7 +2308,13 @@ module.exports = {
                         class: 'Telemetry_iHealth_Poller',
                         name: 'iHealthPoller_1',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace_2::My_System::iHealthPoller_1',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'iHealthPoller_1',
                             credentials: {
@@ -2140,7 +2368,13 @@ module.exports = {
                     {
                         class: 'Telemetry_iHealth_Poller',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_Namespace_2::My_System_2::My_iHealth_Poller',
+                            type: 'output'
+                        },
                         iHealth: {
                             name: 'My_iHealth_Poller',
                             credentials: {
@@ -2199,7 +2433,13 @@ module.exports = {
                         id: 'My_Namespace_2::My_Consumer_1',
                         name: 'My_Consumer_1',
                         namespace: 'My_Namespace_2',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace_2::My_Consumer_1',
+                            type: 'output'
+                        },
                         traceName: 'My_Namespace_2::My_Consumer_1',
                         type: 'default'
                     },
@@ -2210,7 +2450,13 @@ module.exports = {
                         id: 'My_Namespace_2::My_Consumer_2',
                         name: 'My_Consumer_2',
                         namespace: 'My_Namespace_2',
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace_2::My_Consumer_2',
+                            type: 'output'
+                        },
                         traceName: 'My_Namespace_2::My_Consumer_2',
                         type: 'default'
                     }

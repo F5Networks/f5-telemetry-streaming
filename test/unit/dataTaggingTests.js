@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -16,26 +16,12 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 
 const dataTagging = require('../../src/lib/dataTagging');
-const dataTaggingTestsData = require('./data/dataTaggingTestsData');
-const testUtil = require('./shared/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe('Data Tagging', () => {
-    describe('handleAction', () => {
-        dataTaggingTestsData.handleAction.forEach((testConf) => {
-            testUtil.getCallableIt(testConf)(testConf.name, () => {
-                const deviceCtx = testConf.deviceCtx || {
-                    deviceVersion: '13.0.0.0',
-                    provisioning: { ltm: { name: 'ltm', level: 'nominal' } }
-                };
-
-                dataTagging.handleAction(testConf.dataCtx, testConf.actionCtx, deviceCtx);
-                assert.deepStrictEqual(testConf.dataCtx, testConf.expectedCtx);
-            });
-        });
-
+    describe('addTag', () => {
         it('should make deep copy of tag\'s value (example 1)', () => {
             const actionCtx = {
                 enable: true,
@@ -50,6 +36,10 @@ describe('Data Tagging', () => {
                     foo: 'bar'
                 }
             };
+            const deviceCtx = {
+                deviceVersion: '13.0.0.0',
+                provisioning: { ltm: { name: 'ltm', level: 'nominal' } }
+            };
             const expectedCtx = {
                 data: {
                     foo: 'bar',
@@ -58,7 +48,7 @@ describe('Data Tagging', () => {
                     }
                 }
             };
-            dataTagging.handleAction(dataCtx, actionCtx);
+            dataTagging.addTags(dataCtx, actionCtx, deviceCtx);
             delete actionCtx.setTag.tag.key;
             // data with injected tag should be not affected
             assert.deepStrictEqual(dataCtx, expectedCtx);
@@ -86,6 +76,10 @@ describe('Data Tagging', () => {
                     }
                 }
             };
+            const deviceCtx = {
+                deviceVersion: '13.0.0.0',
+                provisioning: { ltm: { name: 'ltm', level: 'nominal' } }
+            };
             const expectedCtx = {
                 data: {
                     virtualServers: {
@@ -102,7 +96,7 @@ describe('Data Tagging', () => {
                     }
                 }
             };
-            dataTagging.handleAction(dataCtx, actionCtx);
+            dataTagging.addTags(dataCtx, actionCtx, deviceCtx);
             delete actionCtx.setTag.tag.key;
             // data with injected tag should be not affected
             assert.deepStrictEqual(dataCtx, expectedCtx);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -2354,6 +2354,18 @@ module.exports = {
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.tmmMemory',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-var-apm-mount-apmclients-7170-2018-627-21-3-0-iso.Capacity_Float',
+                    metricValue: 1
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-var-loipc.Capacity_Float',
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-mnt-sshplugin_tempfs.Capacity_Float',
                     metricValue: 0
                 },
                 {

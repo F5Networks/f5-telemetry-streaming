@@ -77,7 +77,13 @@ describe('Config', () => {
                         class: 'Telemetry_Consumer',
                         type: 'default',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer',
+                            type: 'output'
+                        },
                         allowSelfSignedCert: false,
                         namespace: 'f5telemetry_default'
                     }]
@@ -132,7 +138,13 @@ describe('Config', () => {
                             namespace: 'f5telemetry_default',
                             traceName: 'My_Consumer',
                             enable: true,
-                            trace: false,
+                            trace: {
+                                enable: false,
+                                encoding: 'utf8',
+                                maxRecords: 10,
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer',
+                                type: 'output'
+                            },
                             allowSelfSignedCert: false
                         }]
                     });
@@ -338,7 +350,13 @@ describe('Config', () => {
                     namespace: 'f5telemetry_default',
                     traceName: 'My_Consumer',
                     enable: true,
-                    trace: false,
+                    trace: {
+                        enable: false,
+                        encoding: 'utf8',
+                        maxRecords: 10,
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer',
+                        type: 'output'
+                    },
                     allowSelfSignedCert: false
                 }]
             };

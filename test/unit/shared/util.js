@@ -1,5 +1,5 @@
 /*
- * Copyright 2019. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -8,8 +8,9 @@
 
 'use strict';
 
-const assert = require('assert');
 const assignDefaults = require('lodash/defaultsDeep');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 const deepCopy = require('lodash/cloneDeep');
 const fsUtil = require('fs');
 const nock = require('nock');
@@ -20,6 +21,8 @@ const urllib = require('url');
 const systemPollerData = require('../../../examples/output/system_poller/output.json');
 const avrData = require('../consumers/data/avrData.json');
 
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
 function MockRestOperation(opts) {
     opts = opts || {};

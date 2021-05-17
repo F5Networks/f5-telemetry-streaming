@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -19,10 +19,10 @@ const requestsUtil = require('../../../src/lib/utils/requests');
 const DUTS = sharedUtil.getHosts('BIGIP');
 
 const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
-const PROJECT_ID = process.env[constants.ENV_VARS.GCP_PROJECT_ID];
-const PRIVATE_KEY_ID = process.env[constants.ENV_VARS.GCP_PRIVATE_KEY_ID];
-const PRIVATE_KEY = process.env[constants.ENV_VARS.GCP_PRIVATE_KEY].replace(/REPLACE/g, '\n');
-const SERVICE_EMAIL = process.env[constants.ENV_VARS.GCP_SERVICE_EMAIL];
+const PROJECT_ID = process.env[constants.ENV_VARS.GCP.PROJECT_ID];
+const PRIVATE_KEY_ID = process.env[constants.ENV_VARS.GCP.PRIVATE_KEY_ID];
+const PRIVATE_KEY = process.env[constants.ENV_VARS.GCP.PRIVATE_KEY].replace(/REPLACE/g, '\n');
+const SERVICE_EMAIL = process.env[constants.ENV_VARS.GCP.SERVICE_EMAIL];
 const GOOGLE_SD_CONSUMER_NAME = 'Google_SD_Consumer';
 
 let accessToken;

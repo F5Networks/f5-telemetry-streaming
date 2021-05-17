@@ -1,5 +1,5 @@
 /*
- * Copyright 2020. F5 Networks, Inc. See End User License Agreement ('EULA') for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ('EULA') for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -28,21 +28,12 @@ const stubs = require('./shared/stubs');
 const systemPoller = require('../../src/lib/systemPoller');
 const teemReporter = require('../../src/lib/teemReporter');
 const testUtil = require('./shared/util');
-const timers = require('../../src/lib/utils/timers');
 const utilMisc = require('../../src/lib/utils/misc');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe('Pull Consumers', () => {
-    class MockTimer {
-        start() { }
-
-        stop() { }
-
-        update() { }
-    }
-
     beforeEach(() => {
         stubs.coreStub({
             configWorker,
@@ -51,12 +42,7 @@ describe('Pull Consumers', () => {
             teemReporter,
             utilMisc
         });
-        // config.emit change event will trigger the poller as well
-        sinon.stub(timers, 'SlidingTimer').callsFake(() => new MockTimer());
-        // sinon doesn't seem to handle stubbing something in the constructor - stub methods instead
-        sinon.stub(timers.BasicTimer.prototype, 'start').returns();
-        sinon.stub(timers.BasicTimer.prototype, 'stop').returns();
-        sinon.stub(timers.BasicTimer.prototype, 'update').returns();
+        stubs.clock();
     });
 
     afterEach(() => {
@@ -79,7 +65,7 @@ describe('Pull Consumers', () => {
             return configWorker.processDeclaration(exampleConfig)
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
-                    assert.deepStrictEqual(loadedConsumers.length, 1);
+                    assert.lengthOf(loadedConsumers, 1);
                     assert.deepStrictEqual(loadedConsumers[0].config.type, 'default', 'should load default consumer');
                 });
         });
@@ -100,7 +86,7 @@ describe('Pull Consumers', () => {
             return configWorker.processDeclaration(exampleConfig)
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
-                    assert.deepStrictEqual(loadedConsumers, [], 'should not load disabled consumer');
+                    assert.isEmpty(loadedConsumers, 'should not load disabled consumer');
                 });
         });
 
@@ -142,12 +128,12 @@ describe('Pull Consumers', () => {
             return configWorker.processDeclaration(priorConfig)
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
-                    assert.deepEqual(loadedConsumers[0].config.type, 'default', 'should load default consumer');
+                    assert.deepStrictEqual(loadedConsumers[0].config.type, 'default', 'should load default consumer');
                     return configWorker.emitAsync('change', { components: [], mappings: {} });
                 })
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
-                    assert.deepStrictEqual(loadedConsumers, [], 'should unload default consumer');
+                    assert.isEmpty(loadedConsumers, 'should unload default consumer');
                 })
                 .catch(err => Promise.reject(err));
         });
@@ -174,14 +160,14 @@ describe('Pull Consumers', () => {
             return configWorker.processDeclaration(priorConfig)
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
-                    assert.strictEqual(loadedConsumers.length, 1, 'should load default consumer');
+                    assert.lengthOf(loadedConsumers, 1, 'should load default consumer');
                     assert.isTrue(moduleLoaderSpy.calledOnce);
                     existingConsumer = loadedConsumers[0];
                 })
                 .then(() => configWorker.processNamespaceDeclaration(namespaceConfig, 'NewNamespace'))
                 .then(() => {
                     const loadedConsumerIds = pullConsumers.getConsumers().map(c => c.id);
-                    assert.strictEqual(loadedConsumerIds.length, 2, 'should load new consumer');
+                    assert.lengthOf(loadedConsumerIds, 2, 'should load new consumer');
                     assert.deepStrictEqual(loadedConsumerIds[0], existingConsumer.id);
                     assert.isTrue(moduleLoaderSpy.calledTwice);
                 });

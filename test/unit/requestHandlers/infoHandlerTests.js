@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -14,7 +14,6 @@ require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
-const fs = require('fs');
 const sinon = require('sinon');
 
 const constants = require('../../../src/lib/constants');
@@ -42,18 +41,10 @@ describe('InfoHandler', () => {
     });
 
     it('should return info data on GET request', () => {
-        sinon.stub(fs, 'readFile').callsFake((fname, cb) => {
-            const fakeSchema = {
-                properties: {
-                    schemaVersion: {
-                        enum: ['newerVersion', '4', '3', '2', 'olderVersion']
-                    }
-                }
-            };
-            cb(null, JSON.stringify(fakeSchema));
-        });
         sinon.stub(constants, 'VERSION').value('TS_VERSION');
         sinon.stub(constants, 'RELEASE').value('TS_RELEASE');
+        sinon.stub(constants.SCHEMA_INFO, 'CURRENT').value('TS_SCHEMA_CURRENT');
+        sinon.stub(constants.SCHEMA_INFO, 'MINIMUM').value('TS_SCHEMA_MINIMUM');
         sinon.stub(process, 'version').value('NODE_VERSION');
 
         return requestHandler.process()
@@ -64,8 +55,8 @@ describe('InfoHandler', () => {
                     nodeVersion: 'NODE_VERSION',
                     version: 'TS_VERSION',
                     release: 'TS_RELEASE',
-                    schemaCurrent: 'newerVersion',
-                    schemaMinimum: 'olderVersion'
+                    schemaCurrent: 'TS_SCHEMA_CURRENT',
+                    schemaMinimum: 'TS_SCHEMA_MINIMUM'
                 }, 'should return expected body');
             });
     });
@@ -85,11 +76,4 @@ describe('InfoHandler', () => {
                 schemaMinimum: schemaInfo[schemaInfo.length - 1]
             }, 'should return expected body');
         }));
-
-    it('should reject when caught unknown error', () => {
-        sinon.stub(fs, 'readFile').callsFake((fname, cb) => {
-            cb(new Error('expectedError'));
-        });
-        return assert.isRejected(requestHandler.process(), 'expectedError');
-    });
 });

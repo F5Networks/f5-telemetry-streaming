@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -93,14 +93,14 @@ describe('IHealthPollerHandler', () => {
 
         return configWorker.processDeclaration(declaration)
             .then(() => {
-                assert.strictEqual(IHealthPoller.getAll({ includeDemo: true }).length, 2, 'should have 2 running pollers');
+                assert.lengthOf(IHealthPoller.getAll({ includeDemo: true }), 2, 'should have 2 running pollers');
             });
     });
 
     afterEach(() => configWorker.processDeclaration({ class: 'Telemetry' })
         .then(() => {
             sinon.restore();
-            assert.strictEqual(IHealthPoller.getAll({ includeDemo: true }).length, 0, 'should have 0 running pollers');
+            assert.isEmpty(IHealthPoller.getAll({ includeDemo: true }), 'should have 0 running pollers');
         }));
 
     describe('/ihealthpoller', () => {
@@ -212,11 +212,7 @@ describe('IHealthPollerHandler', () => {
                 .then(() => {
                     assert.strictEqual(restOpMock.getStatusCode(), 200, 'should return expected code');
                     assert.strictEqual(restOpMock.getBody().code, 200, 'should return expected code');
-                    assert.sameDeepMembers(
-                        restOpMock.getBody().message.map(s => s.name),
-                        [],
-                        'should return expected body'
-                    );
+                    assert.isEmpty(restOpMock.getBody().message.map(s => s.name), 'should return expected body');
                 });
         });
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -128,36 +128,56 @@ class Logger {
         return levelName;
     }
 
+    /**
+     * @param {any} msg - debug message
+     */
     debug(msg) {
         if (DEBUG >= CURRENT_LOG_LEVEL) {
             this.logger.finest(processMessage(this.prefix, msg));
         }
     }
 
+    /**
+     * @param {any} msg - debug message
+     * @param {Error} err - error
+     */
     debugException(msg, err) {
         if (DEBUG >= CURRENT_LOG_LEVEL) {
             this.logger.finest(processMessage(this.prefix, `${msg}\nTraceback:\n${(err && err.stack) || 'no traceback available'}`));
         }
     }
 
+    /**
+     * @param {any} msg - error message
+     */
     error(msg) {
         if (ERROR >= CURRENT_LOG_LEVEL) {
             this.logger.severe(processMessage(this.prefix, msg));
         }
     }
 
+    /**
+     * @param {any} msg - error message
+     * @param {Error} err - error
+     */
     exception(msg, err) {
         if (ERROR >= CURRENT_LOG_LEVEL) {
             this.logger.severe(processMessage(this.prefix, `${msg}\nTraceback:\n${(err && err.stack) || 'no traceback available'}`));
         }
     }
 
+    /**
+     * @param {any} msg - info message
+     */
     info(msg) {
         if (INFO >= CURRENT_LOG_LEVEL) {
             this.logger.info(processMessage(this.prefix, msg));
         }
     }
 
+    /**
+     * @param {any} msg - warning message
+     */
     warning(msg) {
         if (WARNING >= CURRENT_LOG_LEVEL) {
             this.logger.warning(processMessage(this.prefix, msg));

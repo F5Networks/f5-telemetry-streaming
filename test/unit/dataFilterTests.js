@@ -1,5 +1,5 @@
 /*
- * Copyright 2019. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -15,9 +15,7 @@ require('./shared/restoreCache')();
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 
-const dataFilterTestsData = require('./data/dataFilterTestsData');
 const dataFilter = require('../../src/lib/dataFilter');
-const testUtil = require('./shared/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -58,15 +56,6 @@ describe('Data Filter', () => {
 
             assert.deepStrictEqual(filter.excludeList, expected);
             assert.deepStrictEqual(filteredData, data);
-        });
-    });
-
-    describe('handleAction', () => {
-        dataFilterTestsData.handleAction.forEach((testConf) => {
-            testUtil.getCallableIt(testConf)(testConf.name, () => {
-                dataFilter.handleAction(testConf.dataCtx, testConf.actionCtx);
-                assert.deepStrictEqual(testConf.dataCtx, testConf.expectedCtx);
-            });
         });
     });
 });

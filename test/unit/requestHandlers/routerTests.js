@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -14,7 +14,6 @@ require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
-const nodeUtil = require('util');
 const sinon = require('sinon');
 
 const BaseRequestHandler = require('../../../src/lib/requestHandlers/baseHandler');
@@ -30,32 +29,33 @@ chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 
-function CustomRequestHandler() {
-    BaseRequestHandler.apply(this, arguments);
-    this.code = 999;
-    this.body = 'body';
+class CustomRequestHandler extends BaseRequestHandler {
+    constructor(restOperation, params) {
+        super(restOperation, params);
+        this.code = 999;
+        this.body = 'body';
+    }
+
+    getCode() {
+        return this.code;
+    }
+
+    setCode(code) {
+        this.code = code;
+    }
+
+    getBody() {
+        return this.body;
+    }
+
+    setBody(body) {
+        this.body = body;
+    }
+
+    process() {
+        return Promise.resolve(this);
+    }
 }
-nodeUtil.inherits(CustomRequestHandler, BaseRequestHandler);
-
-CustomRequestHandler.prototype.getCode = function () {
-    return this.code;
-};
-
-CustomRequestHandler.prototype.setCode = function (code) {
-    this.code = code;
-};
-
-CustomRequestHandler.prototype.getBody = function () {
-    return this.body;
-};
-
-CustomRequestHandler.prototype.setBody = function (body) {
-    this.body = body;
-};
-
-CustomRequestHandler.prototype.process = function () {
-    return Promise.resolve(this);
-};
 
 
 describe('Requests Router', () => {

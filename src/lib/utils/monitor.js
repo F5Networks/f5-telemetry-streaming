@@ -45,9 +45,11 @@ class Monitor extends SafeEventEmitter {
         this.memoryThreshold = null;
         this.memoryThresholdPercent = null;
         this.memoryLimit = null;
-        this.timer = null;
-        this.basicTimer = new timers.BasicTimer();
-        this.interval = DEFAULT_INTERVAL_SEC;
+        this.timer = new timers.BasicTimer(this.checkThresholds.bind(this), {
+            abortOnFailure: false,
+            intervalInS: DEFAULT_INTERVAL_SEC,
+            logger: this.logger.getChild('timer')
+        });
 
         const stopSignals = ['exit', 'SIGINT', 'SIGTERM', 'SIGHUP'];
         stopSignals.forEach((signal) => {
@@ -88,29 +90,21 @@ class Monitor extends SafeEventEmitter {
      *      (% of total memory usage that once reached, triggers an event).
      *       First run starts after 5 seconds, then interval auto-adjusts according to usage
      *
-     * @returns {void}
+     * @returns {Promise} resolved once timer started
      */
     start(memThresholdPercent) {
-        if (this.isEnabled()) {
-            this.setLimits(memThresholdPercent);
-            this.interval = DEFAULT_INTERVAL_SEC;
-            this.timer = this.basicTimer.start(this.checkThresholds.bind(this), null, this.interval);
-            logger.info(`Monitor checks started. Interval: ${this.interval}s | Memory Threshold: ${this.memoryThreshold} MB`);
-        }
+        return this.update(memThresholdPercent, DEFAULT_INTERVAL_SEC);
     }
 
     /**
      * Stops and clear the monitor timer
      *
-     *  @returns {void}
+     *  @returns {Promise} resolved once timer stopped
      */
     stop() {
-        if (this.timer) {
-            this.basicTimer.stop(this.timer);
-            logger.info('Monitor checks stopped.');
-        }
-        this.timer = null;
         this.memoryThreshold = null;
+        return this.timer.stop()
+            .then(() => logger.info('Monitor checks stopped.'));
     }
 
     /**
@@ -120,16 +114,16 @@ class Monitor extends SafeEventEmitter {
      *      (% of total memory usage that once reached, fires an event)
      * @param {Number} interval - The frequency of monitor timer in seconds, defaults to 5
      *
-     *  @returns {void}
+     *  @returns {Promise} resolved once timer updated
      */
     update(memThresholdPercent, interval) {
-        interval = interval || DEFAULT_INTERVAL_SEC;
-        if (this.isEnabled()) {
-            this.setLimits(memThresholdPercent);
-            this.interval = interval;
-            this.timer = this.basicTimer.update(this.timer, this.checkThresholds.bind(this), null, this.interval);
-            logger.info(`Monitor checks updated. Interval: ${this.interval}s | Memory Threshold: ${this.memoryThreshold} MB`);
+        if (!this.isEnabled()) {
+            return Promise.resolve();
         }
+        interval = interval || DEFAULT_INTERVAL_SEC;
+        this.setLimits(memThresholdPercent);
+        return this.timer.update(this.checkThresholds.bind(this), interval)
+            .then(() => logger.info(`Monitor checks updated. Interval: ${this.timer.intervalInS}s | Memory Threshold: ${this.memoryThreshold} MB`));
     }
 
     /**
@@ -153,12 +147,10 @@ class Monitor extends SafeEventEmitter {
                 const newInterval = MEM_PERCENT_TO_INTERVAL_SEC.find(
                     mapping => usedMemPercent >= mapping.min && usedMemPercent <= mapping.max
                 ).interval;
-                if (this.interval !== newInterval) {
-                    this.update(this.memoryThresholdPercent, newInterval);
+                if (this.timer.intervalInS !== newInterval) {
+                    return this.update(this.memoryThresholdPercent, newInterval);
                 }
-            })
-            .catch((err) => {
-                logger.exception('Unexpected error while performing monitor checks', err);
+                return Promise.resolve();
             });
     }
 
@@ -176,28 +168,25 @@ class Monitor extends SafeEventEmitter {
 
 const monitor = new Monitor();
 
-monitor.on('err', (err) => {
+monitor.on('error', (err) => {
     logger.exception('An unexpected error occurred in monitor checks', err);
 });
 
-configWorker.on('change', config => new Promise((resolve) => {
-    logger.debug('configWorker change event in monitor');
-    const controls = configUtil.getTelemetryControls(config);
-    const monitoringNeeded = configUtil.hasEnabledComponents(config);
-    const memThresholdPct = controls.memoryThresholdPercent;
+configWorker.on('change', config => Promise.resolve()
+    .then(() => {
+        logger.debug('configWorker change event in monitor');
+        const controls = configUtil.getTelemetryControls(config);
+        const monitoringNeeded = configUtil.hasEnabledComponents(config);
+        const memThresholdPct = controls.memoryThresholdPercent;
 
-    if (monitoringNeeded && (!memThresholdPct || memThresholdPct < 100)) {
-        if (!monitor.timer) {
-            monitor.start(memThresholdPct);
-        } else {
-            monitor.update(memThresholdPct);
+        if (!monitoringNeeded || memThresholdPct >= 100) {
+            return monitor.stop();
         }
-    } else {
-        monitor.stop();
-    }
-    resolve();
-}).catch((err) => {
-    logger.exception('An error occurred in monitor checks (config change handler)', err);
-}));
+        return monitor.timer.isActive()
+            ? monitor.update(memThresholdPct)
+            : monitor.start(memThresholdPct);
+    }).catch((err) => {
+        logger.exception('An error occurred in monitor checks (config change handler)', err);
+    }));
 
 module.exports = monitor;

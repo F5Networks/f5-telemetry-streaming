@@ -1,0 +1,50 @@
+{
+    "$id": "shared_schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry streaming Shared schema",
+    "description": "",
+    "type": "object",
+    "allOf": [
+        {
+            "if": { "properties": { "class": { "const": "Shared" } } },
+            "then": {
+                "required": [
+                    "class"
+                ],
+                "properties": {
+                    "class": {
+                        "title": "Class",
+                        "description": "Telemetry streaming Shared class",
+                        "type": "string",
+                        "enum": [ "Shared" ]
+                    }
+                },
+                "additionalProperties": {
+                    "properties": {
+                        "class": {
+                            "title": "Class",
+                            "type": "string",
+                            "enum": [
+                                "Constants",
+                                "Secret"
+                            ]
+                        }
+                    },    
+                    "allOf": [
+                        {
+                            "if": { "properties": { "class": { "const": "Constants" } } },
+                            "then": { "$ref": "base_schema.json#/definitions/constants" },
+                            "else": {}
+                        },
+                        {
+                            "if": { "properties": { "class": { "const": "Secret" } } },
+                            "then": { "$ref": "base_schema.json#/definitions/secret" },
+                            "else": {}
+                        }
+                    ]
+                }
+            },
+            "else": {}
+        }
+    ]
+}

@@ -70,7 +70,13 @@ module.exports = {
                         class: 'Telemetry_Consumer',
                         type: 'default',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1',
+                            type: 'output'
+                        },
                         allowSelfSignedCert: false,
                         name: 'My_Consumer_1',
                         namespace: 'f5telemetry_default',
@@ -80,7 +86,20 @@ module.exports = {
                     {
                         class: 'Telemetry_Listener',
                         enable: true,
-                        trace: false,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Listener_1',
+                            type: 'input'
+                        },
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1',
+                            type: 'output'
+                        },
                         port: 6514,
                         match: '',
                         actions: [
@@ -102,7 +121,13 @@ module.exports = {
                         class: 'Telemetry_Consumer',
                         type: 'default',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_1',
+                            type: 'output'
+                        },
                         allowSelfSignedCert: false,
                         name: 'My_Consumer_1',
                         namespace: 'My_Namespace',
@@ -112,7 +137,20 @@ module.exports = {
                     {
                         class: 'Telemetry_Listener',
                         enable: true,
-                        trace: false,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Namespace::My_Listener_1',
+                            type: 'input'
+                        },
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_1',
+                            type: 'output'
+                        },
                         port: 6514,
                         match: '',
                         actions: [
@@ -172,7 +210,13 @@ module.exports = {
                         class: 'Telemetry_Consumer',
                         type: 'default',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1',
+                            type: 'output'
+                        },
                         allowSelfSignedCert: false,
                         name: 'My_Consumer_1',
                         namespace: 'f5telemetry_default',
@@ -182,7 +226,20 @@ module.exports = {
                     {
                         class: 'Telemetry_Listener',
                         enable: true,
-                        trace: false,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Listener_1',
+                            type: 'input'
+                        },
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1',
+                            type: 'output'
+                        },
                         port: 6514,
                         match: '',
                         actions: [
@@ -204,7 +261,13 @@ module.exports = {
                         class: 'Telemetry_Consumer',
                         type: 'default',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_1',
+                            type: 'output'
+                        },
                         allowSelfSignedCert: false,
                         name: 'My_Consumer_1',
                         namespace: 'My_Namespace',
@@ -214,7 +277,20 @@ module.exports = {
                     {
                         class: 'Telemetry_Listener',
                         enable: true,
-                        trace: false,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Namespace::My_Listener_1',
+                            type: 'input'
+                        },
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_1',
+                            type: 'output'
+                        },
                         port: 6514,
                         match: '',
                         actions: [
@@ -287,7 +363,13 @@ module.exports = {
                         class: 'Telemetry_Consumer',
                         type: 'default',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1',
+                            type: 'output'
+                        },
                         allowSelfSignedCert: false,
                         name: 'My_Consumer_1',
                         namespace: 'f5telemetry_default',
@@ -297,7 +379,20 @@ module.exports = {
                     {
                         class: 'Telemetry_Listener',
                         enable: true,
-                        trace: false,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Listener_1',
+                            type: 'input'
+                        },
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1',
+                            type: 'output'
+                        },
                         port: 6514,
                         match: '',
                         actions: [
@@ -319,7 +414,13 @@ module.exports = {
                         class: 'Telemetry_Consumer',
                         type: 'default',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_1',
+                            type: 'output'
+                        },
                         allowSelfSignedCert: false,
                         name: 'My_Consumer_1',
                         namespace: 'My_Namespace',
@@ -329,7 +430,20 @@ module.exports = {
                     {
                         class: 'Telemetry_Listener',
                         enable: true,
-                        trace: false,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Namespace::My_Listener_1',
+                            type: 'input'
+                        },
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_1',
+                            type: 'output'
+                        },
                         port: 6514,
                         match: '',
                         actions: [
@@ -351,7 +465,13 @@ module.exports = {
                         class: 'Telemetry_Consumer',
                         type: 'default',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace_2::My_Consumer_1',
+                            type: 'output'
+                        },
                         allowSelfSignedCert: false,
                         name: 'My_Consumer_1',
                         namespace: 'My_Namespace_2',
@@ -361,7 +481,20 @@ module.exports = {
                     {
                         class: 'Telemetry_Listener',
                         enable: true,
-                        trace: false,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Namespace_2::My_Listener_1',
+                            type: 'input'
+                        },
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace_2::My_Listener_1',
+                            type: 'output'
+                        },
                         port: 6514,
                         match: '',
                         actions: [
@@ -451,7 +584,13 @@ module.exports = {
                         class: 'Telemetry_Consumer',
                         type: 'default',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1_Overwritten',
+                            type: 'output'
+                        },
                         allowSelfSignedCert: false,
                         name: 'My_Consumer_1_Overwritten',
                         namespace: 'f5telemetry_default',
@@ -461,7 +600,20 @@ module.exports = {
                     {
                         class: 'Telemetry_Listener',
                         enable: true,
-                        trace: false,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Listener_1_Overwritten',
+                            type: 'input'
+                        },
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1_Overwritten',
+                            type: 'output'
+                        },
                         port: 6514,
                         match: '',
                         actions: [
@@ -483,7 +635,13 @@ module.exports = {
                         class: 'Telemetry_Consumer',
                         type: 'default',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer_1_Overwritten',
+                            type: 'output'
+                        },
                         allowSelfSignedCert: false,
                         name: 'My_Consumer_1_Overwritten',
                         namespace: 'My_Namespace',
@@ -493,7 +651,20 @@ module.exports = {
                     {
                         class: 'Telemetry_Listener',
                         enable: true,
-                        trace: false,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Namespace::My_Listener_1_Overwritten',
+                            type: 'input'
+                        },
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace::My_Listener_1_Overwritten',
+                            type: 'output'
+                        },
                         port: 6514,
                         match: '',
                         actions: [
@@ -515,7 +686,13 @@ module.exports = {
                         class: 'Telemetry_Consumer',
                         type: 'default',
                         enable: true,
-                        trace: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace_2::My_Consumer_1',
+                            type: 'output'
+                        },
                         allowSelfSignedCert: false,
                         name: 'My_Consumer_1',
                         namespace: 'My_Namespace_2',
@@ -525,7 +702,20 @@ module.exports = {
                     {
                         class: 'Telemetry_Listener',
                         enable: true,
-                        trace: false,
+                        traceInput: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 9999,
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Namespace_2::My_Listener_1',
+                            type: 'input'
+                        },
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Namespace_2::My_Listener_1',
+                            type: 'output'
+                        },
                         port: 6514,
                         match: '',
                         actions: [

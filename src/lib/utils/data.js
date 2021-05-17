@@ -1,5 +1,5 @@
 /*
- * Copyright 2019. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -7,6 +7,8 @@
  */
 
 'use strict';
+
+const jmespath = require('jmespath');
 
 const logger = require('../logger');
 const util = require('./misc');
@@ -360,7 +362,30 @@ function preserveStrictMatches(data, matchObj, strict, cb) {
     return wasDataPreserved;
 }
 
+/**
+ * Applies the provided JMESPath expresion to the input data.
+ *
+ * Note:
+ *  - dataCtx.data will be modified in place - make a copy (if needed) before passing to this function.
+ *  - will catch and log any exceptions thrown by jmespath.search().
+ *      If an exception is thrown, dataCtx.data will not be modified
+ *
+ * @param {Object} dataCtx          - complete data context collected from BIG-IP
+ * @param {Object} dataCtx.data     - data from the BIG-IP to process
+ * @param {String} expression       - JMESPath expression
+ *
+ * @returns {void}
+ */
+function applyJMESPathExpression(dataCtx, expression) {
+    try {
+        dataCtx.data = jmespath.search(dataCtx.data, expression);
+    } catch (err) {
+        logger.exception(`applyExpression error (expression = "${expression}")`, err);
+    }
+}
+
 module.exports = {
+    applyJMESPathExpression,
     checkConditions,
     getMatches,
     getDeepMatches,

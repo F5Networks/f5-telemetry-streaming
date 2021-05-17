@@ -1,5 +1,5 @@
 /*
- * Copyright 2018. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -25,6 +25,25 @@ const packageVersionInfo = (function () {
         packageVersion.push('1');
     }
     return packageVersion;
+}());
+
+const schemaInfo = (function () {
+    const fname = `${__dirname}/../schema/latest/base_schema.json`;
+    let schemaCurrentVersion;
+    let schemaMinimumVersion;
+
+    try {
+        // eslint-disable-next-line global-require,import/no-dynamic-require
+        const schemaVersionEnum = require(fname).properties.schemaVersion.enum;
+        delete require.cache[require.resolve(fname)];
+
+        schemaCurrentVersion = schemaVersionEnum[0];
+        schemaMinimumVersion = schemaVersionEnum[schemaVersionEnum.length - 1];
+    } catch (err) {
+        schemaCurrentVersion = '0.0.0';
+        schemaMinimumVersion = '0.0.0';
+    }
+    return [schemaCurrentVersion, schemaMinimumVersion];
 }());
 
 const VERSION = packageVersionInfo[0];
@@ -169,12 +188,17 @@ module.exports = {
     PASSPHRASE_ENVIRONMENT_VAR: 'environmentVar',
     PORT_TO_PROTO,
     PROTO_TO_PORT,
+    SCHEMA_INFO: {
+        CURRENT: schemaInfo[0],
+        MINIMUM: schemaInfo[1]
+    },
     STATS_KEY_SEP: '::',
     STRICT_TLS_REQUIRED: true,
     TRACER: {
         DIR: '/var/tmp/telemetry',
         ENCODING: 'utf8',
-        LIST_SIZE: 10
+        MAX_RECORDS_INPUT: 9999,
+        MAX_RECORDS_OUTPUT: 10
     },
     USER_AGENT: `f5-telemetry/${VERSION}`,
     WEEKDAY_TO_DAY_NAME
