@@ -591,10 +591,7 @@
                     {
                         "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a separate block",
                         "properties": {
-<<<<<<< HEAD
-=======
                             "actions": {},
->>>>>>> master
                             "class": {},
                             "enable": {},
                             "trace": {},
@@ -643,9 +640,6 @@
                             "proxy": {},
                             "compressionType": {}
                         },
-<<<<<<< HEAD
-                        "additionalProperties": false
-=======
                         "additionalProperties": false,
                         "dependencies": {
                             "actions": {
@@ -656,7 +650,6 @@
                                 ]
                             }
                         }
->>>>>>> master
                     },
                     {
                         "if": { "properties": { "type": { "const": "default" } } },
@@ -693,12 +686,8 @@
                                 "proxy": { "$ref": "base_schema.json#/definitions/proxy" },
                                 "privateKey": { "$ref": "#/definitions/privateKey" },
                                 "clientCertificate": { "$ref": "#/definitions/clientCertificate" },
-<<<<<<< HEAD
-                                "rootCertificate": { "$ref": "#/definitions/rootCertificate" }
-=======
                                 "rootCertificate": { "$ref": "#/definitions/rootCertificate" },
                                 "actions": { "$ref": "#/definitions/actions" }
->>>>>>> master
                             },
                             "allOf": [
                                 {
