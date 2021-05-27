@@ -34,12 +34,12 @@
         ]
     },
     "dependencies": {
-        "@f5devcentral/f5-teem": "^1.4.6",
+        "@f5devcentral/f5-teem": "^1.5.0",
         "@grpc/proto-loader": "~0.3.0",
         "ajv": "^6.12.6",
         "ajv-keywords": "^3.5.2",
         "applicationinsights": "^1.8.10",
-        "aws-sdk": "^2.885.0",
+        "aws-sdk": "^2.914.0",
         "commander": "^2.20.3",
         "deep-diff": "^1.0.2",
         "eventemitter2": "^6.4.4",
@@ -51,19 +51,19 @@
         "lodash": "^4.17.21",
         "long": "^4.0.0",
         "machina": "^4.0.2",
-        "mustache": "^4.1.0",
+        "mustache": "^4.2.0",
         "prom-client": "11.0.0",
         "request": "^2.88.2",
-        "statsd-client": "^0.4.5",
+        "statsd-client": "^0.4.6",
         "tiny-request-router": "^1.2.2",
         "uuid": "^3.4.0"
     },
     "devDependencies": {
         "@f5devcentral/eslint-config-f5-atg": "latest",
-        "chai": "^4.2.0",
+        "chai": "^4.3.4",
         "chai-as-promised": "^7.1.1",
-        "grpc-mock": "^0.7.0",
         "grpc": "1.24.7",
+        "grpc-mock": "^0.7.0",
         "icrdk": "git://github.com/f5devcentral/f5-icontrollx-dev-kit.git#master",
         "mocha": "^7.2.0",
         "nock": "10.0.0",
@@ -83,8 +83,9 @@
     },
     "comments": {
         "dependencies": {
-            "ajv": "This package dropped support for older node versions and requires the ajv package to be recompiled. Use v6.X.Y for Node v4.",
             "@grpc/proto-loader": "v0.3.0 - This package is used for GRPC connection, supports node v6 and above.",
+            "ajv": "This package dropped support for older node versions and requires the ajv package to be recompiled. Use v6.X.Y for Node v4.",
+            "applicationinsights": "This package requires Node v8 in 2.0.0+ as it now includes OpenTelemetry packages. Use v1.X.Y for Node v4.",
             "commander": "This package dropped support for older node versions. Use v2.X.Y for Node v4.",
             "google-auth-library": "This package is used for GRPC connection, supports node v10 and above, but fromJSON function works in node v8.11.1 - should use v6.1.X only",
             "kafka-node": {
