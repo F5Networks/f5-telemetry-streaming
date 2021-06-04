@@ -6,6 +6,7 @@ Changes to this project are documented in this file. More detail and links can b
 ### Fixed
 ### Changed
 - AUTOTOOL-2510: Update npm packages (@f5devcentral/f5-teem from v1.4.6 to v1.5.0, aws-sdk from v2.885.0 to v2.914.0, mustache from v4.1.0 to v4.2.0, statsd-client from v0.4.5 to v0.4.6)
+- Replace grpc-js-0.2-modified with @grpc/grpc-js
 ### Removed
 
 ## 1.20.0
