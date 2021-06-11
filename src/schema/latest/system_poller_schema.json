@@ -131,6 +131,7 @@
         },
         "systemPollerPointerRef": {
             "type": "string",
+            "minLength": 1,
             "declarationClass": "Telemetry_System_Poller"
         },
         "systemPollerObjectRef": {
