@@ -22,7 +22,9 @@ const constants = require('../../src/lib/constants');
 const deviceUtil = require('../../src/lib/utils/device');
 const persistentStorage = require('../../src/lib/persistentStorage');
 const stubs = require('./shared/stubs');
+const schemaValidationUtil = require('./shared/schemaValidation');
 const teemReporter = require('../../src/lib/teemReporter');
+const testUtil = require('./shared/util');
 const utilMisc = require('../../src/lib/utils/misc');
 
 chai.use(chaiAsPromised);
@@ -407,6 +409,48 @@ describe('Declarations', () => {
                     }
                 };
                 return assert.isRejected(configWorker.processDeclaration(data), /should have property username when property passphrase is present/);
+            });
+
+            it('should not allow empty username', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_iHealth: {
+                        class: 'Telemetry_iHealth_Poller',
+                        username: 'username',
+                        passphrase: {
+                            cipherText: 'cipherText'
+                        },
+                        proxy: {
+                            host: 'localhost',
+                            username: '',
+                            passphrase: {
+                                cipherText: 'passphrase'
+                            }
+                        }
+                    }
+                };
+                return assert.isRejected(configWorker.processDeclaration(data), /minLength.*username.*should NOT be shorter than 1 character/);
+            });
+
+            it('should not allow empty host', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_iHealth: {
+                        class: 'Telemetry_iHealth_Poller',
+                        username: 'username',
+                        passphrase: {
+                            cipherText: 'cipherText'
+                        },
+                        proxy: {
+                            host: '',
+                            username: 'username',
+                            passphrase: {
+                                cipherText: 'passphrase'
+                            }
+                        }
+                    }
+                };
+                return assert.isRejected(configWorker.processDeclaration(data), /minLength.*host.*should NOT be shorter than 1 character/);
             });
         });
 
@@ -831,6 +875,39 @@ describe('Declarations', () => {
                     }
                 };
                 return assert.isRejected(configWorker.processDeclaration(data), /missing cipherText or environmentVar/);
+            });
+
+            it('should accept environment variable value as valid passphrase property', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Poller: {
+                        class: 'Telemetry_System_Poller',
+                        passphrase: {
+                            environmentVar: 'MY_ENV_SECRET'
+                        }
+                    }
+                };
+                return configWorker.processDeclaration(data)
+                    .then(() => {
+                        assert.deepStrictEqual(data.My_Poller.passphrase, {
+                            class: 'Secret',
+                            protected: 'plainText',
+                            environmentVar: 'MY_ENV_SECRET'
+                        });
+                    });
+            });
+
+            it('should fail when setting environmentVar to empty string', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Poller: {
+                        class: 'Telemetry_System_Poller',
+                        passphrase: {
+                            environmentVar: ''
+                        }
+                    }
+                };
+                return assert.isRejected(configWorker.processDeclaration(data), /minLength.*environmentVar.*should NOT be shorter than 1 character/);
             });
         });
 
@@ -2006,6 +2083,56 @@ describe('Declarations', () => {
                 });
         });
 
+        it('should not allow empty username', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Poller: {
+                    class: 'Telemetry_System_Poller',
+                    username: ''
+                }
+            };
+            return assert.isRejected(configWorker.processDeclaration(data), /minLength.*username.*should NOT be shorter than 1 characters/);
+        });
+
+        it('should not allow empty host', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Poller: {
+                    class: 'Telemetry_System_Poller',
+                    host: ''
+                }
+            };
+            return assert.isRejected(configWorker.processDeclaration(data), /minLength.*host.*should NOT be shorter than 1 characters/);
+        });
+
+        it('should not allow empty application tag', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Poller: {
+                    class: 'Telemetry_System_Poller',
+                    tag: {
+                        tenant: '`B`',
+                        application: ''
+                    }
+                }
+            };
+            return assert.isRejected(configWorker.processDeclaration(data), /minLength.*application.*should NOT be shorter than 1 characters/);
+        });
+
+        it('should not allow empty tenant tag', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Poller: {
+                    class: 'Telemetry_System_Poller',
+                    tag: {
+                        tenant: '',
+                        application: '`C`'
+                    }
+                }
+            };
+            return assert.isRejected(configWorker.processDeclaration(data), /minLength.*tenant.*should NOT be shorter than 1 characters/);
+        });
+
         it('should not allow JMESPath in the action object', () => {
             const data = {
                 class: 'Telemetry',
@@ -2460,6 +2587,95 @@ describe('Declarations', () => {
             return assert.isRejected(configWorker.processDeclaration(data), /My_Listener\/actions\/0.*should NOT have additional properties/);
         });
 
+        it('should not allow empty application tag', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Listener: {
+                    class: 'Telemetry_Listener',
+                    tag: {
+                        tenant: '`B`',
+                        application: ''
+                    }
+                }
+            };
+            return assert.isRejected(configWorker.processDeclaration(data), /minLength.*application.*should NOT be shorter than 1 characters/);
+        });
+
+        it('should not allow empty tenant tag', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Listener: {
+                    class: 'Telemetry_Listener',
+                    tag: {
+                        tenant: '',
+                        application: '`C`'
+                    }
+                }
+            };
+            return assert.isRejected(configWorker.processDeclaration(data), /minLength.*tenant.*should NOT be shorter than 1 characters/);
+        });
+
+        describe('trace', () => {
+            it('should allow enabling tracing (value = true)', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Listener: {
+                        class: 'Telemetry_Listener',
+                        trace: true
+                    }
+                };
+                return configWorker.processDeclaration(data)
+                    .then((validConfig) => {
+                        const listener = validConfig.My_Listener;
+                        assert.notStrictEqual(listener, undefined);
+                        assert.strictEqual(listener.trace, true);
+                    });
+            });
+
+            it('should allow disabling tracing (value = false)', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Listener: {
+                        class: 'Telemetry_Listener',
+                        trace: false
+                    }
+                };
+                return configWorker.processDeclaration(data)
+                    .then((validConfig) => {
+                        const listener = validConfig.My_Listener;
+                        assert.notStrictEqual(listener, undefined);
+                        assert.strictEqual(listener.trace, false);
+                    });
+            });
+
+            it('should allow enabling tracing via custom path (value = path)', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Listener: {
+                        class: 'Telemetry_Listener',
+                        trace: '/my/path'
+                    }
+                };
+                return configWorker.processDeclaration(data)
+                    .then((validConfig) => {
+                        const listener = validConfig.My_Listener;
+                        assert.notStrictEqual(listener, undefined);
+                        assert.strictEqual(listener.trace, '/my/path');
+                    });
+            });
+
+            it('should fail when setting trace to empty string', () => {
+                const data = {
+                    class: 'Telemetry',
+                    My_Listener: {
+                        class: 'Telemetry_Listener',
+                        trace: ''
+                    }
+                };
+                return assert.isRejected(configWorker.processDeclaration(data), /minLength.*trace.*should NOT be shorter than 1 character/);
+            });
+        });
+
         describe('tracer v2', () => {
             describe('config object', () => {
                 it('should allow set tracer to object (type = "output")', () => {
@@ -2539,7 +2755,7 @@ describe('Declarations', () => {
                             trace: { type: 'input', path: '' }
                         }
                     };
-                    return assert.isRejected(configWorker.processDeclaration(data), /should NOT be shorter than 1 character/);
+                    return assert.isRejected(configWorker.processDeclaration(data), /minLength.*path.*should NOT be shorter than 1 character/);
                 });
 
                 it('should not allow set tracer without "type"', () => {
@@ -2659,7 +2875,7 @@ describe('Declarations', () => {
                             trace: [{ type: 'input', path: '' }, { type: 'output', path: 'path' }]
                         }
                     };
-                    return assert.isRejected(configWorker.processDeclaration(data), /should NOT be shorter than 1 character/);
+                    return assert.isRejected(configWorker.processDeclaration(data), /minLength.*path.*should NOT be shorter than 1 character/);
                 });
 
                 it('should not allow set tracer without "type"', () => {
@@ -3234,6 +3450,56 @@ describe('Declarations', () => {
             return assert.isRejected(configWorker.processDeclaration(data), /systemPoller.*should NOT have additional properties/);
         });
 
+        it('should not allow empty username', () => {
+            const data = {
+                class: 'Telemetry',
+                My_System: {
+                    class: 'Telemetry_System',
+                    username: '',
+                    systemPoller: {
+                        host: 'localhost'
+                    }
+                }
+            };
+            return assert.isRejected(configWorker.processDeclaration(data), /minLength.*username.*should NOT be shorter than 1 characters/);
+        });
+
+        it('should not allow empty host', () => {
+            const data = {
+                class: 'Telemetry',
+                My_System: {
+                    class: 'Telemetry_System',
+                    host: '',
+                    systemPoller: {
+                        host: 'localhost'
+                    }
+                }
+            };
+            return assert.isRejected(configWorker.processDeclaration(data), /minLength.*host.*should NOT be shorter than 1 characters/);
+        });
+
+        it('should not allow empty iHealthPollerPointerRef', () => {
+            const data = {
+                class: 'Telemetry',
+                My_System: {
+                    class: 'Telemetry_System',
+                    iHealthPoller: ''
+                }
+            };
+            return assert.isRejected(configWorker.processDeclaration(data), /minLength.*iHealthPoller.*should NOT be shorter than 1 characters/);
+        });
+
+        it('should not allow empty systemPollerPointerRef', () => {
+            const data = {
+                class: 'Telemetry',
+                My_System: {
+                    class: 'Telemetry_System',
+                    systemPoller: ''
+                }
+            };
+            return assert.isRejected(configWorker.processDeclaration(data), /minLength.*systemPoller.*should NOT be shorter than 1 characters/);
+        });
+
         it('should allow to attach inline iHealth Poller minimal declaration', () => {
             const data = {
                 class: 'Telemetry',
@@ -3720,25 +3986,30 @@ describe('Declarations', () => {
             }
             return configWorker.processDeclaration(targetDeclaration, options)
                 .then((validConfig) => {
-                    assert.deepStrictEqual(validConfig.My_Consumer, expectedTarget);
+                    if (expectedProps) {
+                        assert.deepStrictEqual(validConfig.My_Consumer, expectedTarget);
+                    }
+                    return validConfig.My_Consumer;
                 });
         };
 
         const validateMinimal = (consumerProps, expectedProps, addtlContext) => validate(
-            minimalDeclaration,
+            testUtil.deepCopy(minimalDeclaration),
             consumerProps,
-            minimalExpected,
+            testUtil.deepCopy(minimalExpected),
             expectedProps,
             addtlContext
         );
 
         const validateFull = (consumerProps, expectedProps, addtlContext) => validate(
-            fullDeclaration,
+            testUtil.deepCopy(fullDeclaration),
             consumerProps,
-            fullExpected,
+            testUtil.deepCopy(fullExpected),
             expectedProps,
             addtlContext
         );
+
+        const basicSchemaTestsValidator = decl => validateMinimal(decl);
 
         beforeEach(() => {
             minimalDeclaration = {
@@ -3799,23 +4070,56 @@ describe('Declarations', () => {
 
         describe('AWS_CloudWatch', () => {
             describe('dataType', () => {
-                it('should not allow invalid value', () => assert.isRejected(
-                    validateMinimal({
-                        type: 'AWS_CloudWatch',
-                        dataType: 'newlyInvented',
-                        region: 'region'
-                    }),
-                    /enum.*dataType.*("allowedValues":\["logs",null\]|"allowedValues":\["metrics"])/
-                ));
+                describe('dataType === logs', () => {
+                    schemaValidationUtil.generateBasicSchemaTests(
+                        basicSchemaTestsValidator,
+                        {
+                            type: 'AWS_CloudWatch',
+                            dataType: 'logs',
+                            region: 'PNW',
+                            logGroup: 'pine',
+                            logStream: 'tree',
+                            username: 'username',
+                            passphrase: {
+                                cipherText: 'sshSecret'
+                            }
+                        },
+                        [
+                            {
+                                property: 'dataType',
+                                enumTests: {
+                                    allowed: ['logs'],
+                                    notAllowed: ['', 'metrics', 'newlyInvented']
+                                },
+                                ignoreOther: true
+                            },
+                            'logGroup',
+                            'logStream',
+                            'region',
+                            'username'
+                        ],
+                        { stringLengthTests: true }
+                    );
+                });
 
-                it('should not allow empty string for dataType', () => assert.isRejected(
-                    validateMinimal({
-                        type: 'AWS_CloudWatch',
-                        dataType: '',
-                        region: 'region'
-                    }),
-                    /enum.*dataType.*("allowedValues":\["logs",null\]|"allowedValues":\["metrics"])/
-                ));
+                describe('dataType === metric', () => {
+                    schemaValidationUtil.generateBasicSchemaTests(
+                        basicSchemaTestsValidator,
+                        {
+                            type: 'AWS_CloudWatch',
+                            region: 'region',
+                            dataType: 'metrics',
+                            metricNamespace: 'metricNamespace'
+                        },
+                        {
+                            property: 'dataType',
+                            enumTests: {
+                                allowed: ['metrics'],
+                                notAllowed: ['logs', 'newlyInvented', '', 'null']
+                            }
+                        }
+                    );
+                });
             });
 
             describe('username and passphrase', () => {
@@ -3841,6 +4145,7 @@ describe('Declarations', () => {
                     /should NOT be valid/
                 ));
             });
+
             describe('Logs (default)', () => {
                 it('should pass minimal declaration', () => validateMinimal(
                     {
@@ -3885,24 +4190,6 @@ describe('Declarations', () => {
                     }
                 ));
 
-                it('should require logGroup', () => assert.isRejected(
-                    validateMinimal({
-                        type: 'AWS_CloudWatch',
-                        region: 'regionThingee',
-                        logStream: 'streamThingee'
-                    }),
-                    /should have required property 'logGroup'/
-                ));
-
-                it('should require logStream', () => assert.isRejected(
-                    validateMinimal({
-                        type: 'AWS_CloudWatch',
-                        region: 'regionThingee',
-                        logGroup: 'logGroupThingee'
-                    }),
-                    /should have required property 'logStream'/
-                ));
-
                 it('should not allow non-log related properties', () => assert.isRejected(
                     validateMinimal({
                         type: 'AWS_CloudWatch',
@@ -3913,7 +4200,23 @@ describe('Declarations', () => {
                     }),
                     /should match exactly one schema in oneOf/
                 ));
+
+                schemaValidationUtil.generateBasicSchemaTests(
+                    basicSchemaTestsValidator,
+                    {
+                        type: 'AWS_CloudWatch',
+                        region: 'region',
+                        logGroup: 'logGroup',
+                        logStream: 'logStream'
+                    },
+                    [
+                        'logGroup',
+                        'logStream'
+                    ],
+                    { requiredTests: true }
+                );
             });
+
             describe('Metrics', () => {
                 it('should pass minimal declaration', () => validateMinimal(
                     {
@@ -3955,25 +4258,6 @@ describe('Declarations', () => {
                     }
                 ));
 
-                it('should require metricNamespace', () => assert.isRejected(
-                    validateMinimal({
-                        type: 'AWS_CloudWatch',
-                        dataType: 'metrics',
-                        region: 'region'
-                    }),
-                    /should have required property 'metricNamespace'/
-                ));
-
-                it('should not allow empty string for metricNamespace', () => assert.isRejected(
-                    validateMinimal({
-                        type: 'AWS_CloudWatch',
-                        dataType: 'metrics',
-                        region: 'region',
-                        metricNamespace: ''
-                    }),
-                    /metricNamespace\/minLength.*should NOT be shorter than 1 characters/
-                ));
-
                 it('should not allow non-metrics properties', () => assert.isRejected(
                     validateMinimal({
                         type: 'AWS_CloudWatch',
@@ -3985,6 +4269,18 @@ describe('Declarations', () => {
                     }),
                     /should match exactly one schema in oneOf/
                 ));
+
+                schemaValidationUtil.generateBasicSchemaTests(
+                    basicSchemaTestsValidator,
+                    {
+                        type: 'AWS_CloudWatch',
+                        region: 'region',
+                        dataType: 'metrics',
+                        metricNamespace: 'metricsThingee'
+                    },
+                    'metricNamespace',
+                    { stringLengthTests: true, requiredTests: true }
+                );
             });
         });
 
@@ -4000,26 +4296,6 @@ describe('Declarations', () => {
                     region: 'region',
                     bucket: 'bucket'
                 }
-            ));
-
-            it('should require passphrase when username is specified', () => assert.isRejected(
-                validateMinimal({
-                    type: 'AWS_S3',
-                    region: 'region',
-                    bucket: 'bucket',
-                    username: 'chilibeans'
-                }),
-                /should have property passphrase when property username is present/
-            ));
-
-            it('should require username when passphrase is specified', () => assert.isRejected(
-                validateMinimal({
-                    type: 'AWS_S3',
-                    region: 'region',
-                    bucket: 'bucket',
-                    passphrase: { cipherText: 'locomoco' }
-                }),
-                /should have property username when property passphrase is present/
             ));
 
             it('should allow full declaration', () => validateFull(
@@ -4044,6 +4320,26 @@ describe('Declarations', () => {
                     }
                 }
             ));
+
+            schemaValidationUtil.generateBasicSchemaTests(
+                basicSchemaTestsValidator,
+                {
+                    type: 'AWS_S3',
+                    region: 'region',
+                    bucket: 'bucket',
+                    username: 'username',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                [
+                    'bucket',
+                    { property: 'passphrase', dependenciesTests: 'username', ignoreOther: true },
+                    'region',
+                    { property: 'username', dependenciesTests: 'passphrase' }
+                ],
+                { stringLengthTests: true }
+            );
         });
 
         describe('Azure_Log_Analytics', () => {
@@ -4090,23 +4386,6 @@ describe('Declarations', () => {
                 }
             ));
 
-            it('should require passphrase when useManagedIdentity is omitted', () => assert.isRejected(
-                validateMinimal({
-                    type: 'Azure_Log_Analytics',
-                    workspaceId: 'someId'
-                }),
-                /should have required property 'passphrase'/
-            ));
-
-            it('should require passphrase when useManagedIdentity is false', () => assert.isRejected(
-                validateFull({
-                    type: 'Azure_Log_Analytics',
-                    workspaceId: 'someId',
-                    useManagedIdentity: false
-                }),
-                /should have required property 'passphrase'/
-            ));
-
             it('should not allow passphrase when useManagedIdentity is true', () => assert.isRejected(
                 validateFull({
                     type: 'Azure_Log_Analytics',
@@ -4118,6 +4397,39 @@ describe('Declarations', () => {
                 }),
                 /useManagedIdentity\/const.*"allowedValue":false/
             ));
+
+            schemaValidationUtil.generateBasicSchemaTests(
+                basicSchemaTestsValidator,
+                {
+                    type: 'Azure_Log_Analytics',
+                    workspaceId: 'workspaceId',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                [
+                    { property: 'passphrase', requiredTests: true, ignoreOther: true },
+                    'region',
+                    'workspaceId'
+                ],
+                { stringLengthTests: true }
+            );
+
+            describe('useManagedIdentity === false', () => {
+                schemaValidationUtil.generateBasicSchemaTests(
+                    basicSchemaTestsValidator,
+                    {
+                        type: 'Azure_Log_Analytics',
+                        workspaceId: 'workspaceId',
+                        useManagedIdentity: false,
+                        passphrase: {
+                            cipherText: 'cipherText'
+                        }
+                    },
+                    'passphrase',
+                    { requiredTests: true }
+                );
+            });
         });
 
         describe('Azure_Application_Insights', () => {
@@ -4286,92 +4598,6 @@ describe('Declarations', () => {
                 }
             ));
 
-            it('should require instrumentationKey if useManagedIdentity is omitted', () => assert.isRejected(
-                validateMinimal({
-                    type: 'Azure_Application_Insights'
-                }),
-                /should have required property 'instrumentationKey'/
-            ));
-
-            it('should require at least one item if customOpts property is specified', () => assert.isRejected(
-                validateFull({
-                    type: 'Azure_Application_Insights',
-                    instrumentationKey: 'cheddar-swiss-gouda',
-                    customOpts: []
-                }),
-                /customOpts.*should NOT have fewer than 1 items/
-            ));
-
-            it('should not allow less than 1000 for maxBatchIntervalMs', () => assert.isRejected(
-                validateMinimal({
-                    type: 'Azure_Application_Insights',
-                    instrumentationKey: 'cosmic-palace',
-                    maxBatchIntervalMs: 10
-                }),
-                /maxBatchIntervalMs\/minimum.*should be >= 1000/
-            ));
-
-            it('should not allow less than 1 for maxBatchSize', () => assert.isRejected(
-                validateMinimal({
-                    type: 'Azure_Application_Insights',
-                    instrumentationKey: 'somewhere-void',
-                    maxBatchSize: 0
-                }),
-                /maxBatchSize\/minimum.*should be >= 1/
-            ));
-
-            it('should require at least 1 character for instrumentationKey (string)', () => assert.isRejected(
-                validateMinimal({
-                    type: 'Azure_Application_Insights',
-                    instrumentationKey: ''
-                }),
-                /instrumentationKey.*should NOT be shorter than 1 characters/
-            ));
-
-            it('should require at least 1 character for instrumentationKey (array item)', () => assert.isRejected(
-                validateMinimal({
-                    type: 'Azure_Application_Insights',
-                    instrumentationKey: ['']
-                }),
-                /instrumentationKey.*items\/minLength.*should NOT be shorter than 1 characters/
-            ));
-
-            it('should require at least 1 item for instrumentationKey (array)', () => assert.isRejected(
-                validateMinimal({
-                    type: 'Azure_Application_Insights',
-                    instrumentationKey: []
-                }),
-                /instrumentationKey.*minItems.*should NOT have fewer than 1 items/
-            ));
-
-            it('should require at least 1 character for customOpts name', () => assert.isRejected(
-                validateMinimal({
-                    type: 'Azure_Application_Insights',
-                    instrumentationKey: 'somewhere-void',
-                    customOpts: [
-                        {
-                            name: '',
-                            value: false
-                        }
-                    ]
-                }),
-                /customOpts\/0\/name.*should NOT be shorter than 1 characters/
-            ));
-
-            it('should require at least 1 character for customOpts value', () => assert.isRejected(
-                validateMinimal({
-                    type: 'Azure_Application_Insights',
-                    instrumentationKey: 'somewhere-void',
-                    customOpts: [
-                        {
-                            name: 'test',
-                            value: ''
-                        }
-                    ]
-                }),
-                /customOpts\/0\/value.*should NOT be shorter than 1 characters/
-            ));
-
             it('should not allow instrumentationKey when useManagedIdentity is true', () => assert.isRejected(
                 validateMinimal({
                     type: 'Azure_Application_Insights',
@@ -4418,6 +4644,85 @@ describe('Declarations', () => {
                 }),
                 /dependencies\/instrumentationKey\/allOf\/1\/not/
             ));
+
+            describe('common basic tests', () => {
+                schemaValidationUtil.generateBasicSchemaTests(
+                    basicSchemaTestsValidator,
+                    {
+                        customOpts: [
+                            {
+                                name: 'name',
+                                value: 'value'
+                            }
+                        ],
+                        instrumentationKey: 'some-key-here',
+                        maxBatchIntervalMs: 2000,
+                        maxBatchSize: 2,
+                        type: 'Azure_Application_Insights'
+                    },
+                    [
+                        'customOpts.0.name',
+                        'customOpts.0.value',
+                        {
+                            property: 'customOpts',
+                            ignoreOther: true,
+                            arrayLengthTests: {
+                                minItems: 1
+                            }
+                        },
+                        { property: 'instrumentationKey', requiredTests: true },
+                        {
+                            property: 'maxBatchIntervalMs',
+                            ignoreOther: true,
+                            numberRangeTests: {
+                                minimum: 1000
+                            }
+                        },
+                        {
+                            property: 'maxBatchSize',
+                            ignoreOther: true,
+                            numberRangeTests: {
+                                minimum: 1
+                            }
+                        },
+                        'region'
+                    ],
+                    { stringLengthTests: true }
+                );
+            });
+
+            describe('instrumentationKey === array', () => {
+                schemaValidationUtil.generateBasicSchemaTests(
+                    basicSchemaTestsValidator,
+                    {
+                        instrumentationKey: ['some-key-here'],
+                        type: 'Azure_Application_Insights'
+                    },
+                    [
+                        'instrumentationKey.0',
+                        {
+                            property: 'instrumentationKey',
+                            ignoreOther: true,
+                            arrayLengthTests: {
+                                minItems: 1
+                            }
+                        }
+                    ],
+                    { stringLengthTests: true }
+                );
+            });
+
+            describe('useManagedIdentity === true', () => {
+                schemaValidationUtil.generateBasicSchemaTests(
+                    basicSchemaTestsValidator,
+                    {
+                        type: 'Azure_Application_Insights',
+                        useManagedIdentity: true
+                    },
+                    'appInsightsResourceName',
+                    { stringLengthTests: true }
+                );
+            });
         });
 
         describe('ElasticSearch', () => {
@@ -4469,6 +4774,23 @@ describe('Declarations', () => {
                     dataType: 'dataType'
                 }
             ));
+
+            schemaValidationUtil.generateBasicSchemaTests(
+                basicSchemaTestsValidator,
+                {
+                    type: 'ElasticSearch',
+                    host: 'host',
+                    index: 'index'
+                },
+                [
+                    'apiVersion',
+                    'dataType',
+                    'index',
+                    'path',
+                    'username'
+                ],
+                { stringLengthTests: true }
+            );
         });
 
         describe('Generic_HTTP', () => {
@@ -4517,26 +4839,6 @@ describe('Declarations', () => {
                     }
                 }
             ));
-
-            it('should require privateKey when client certificate is provided', () => assert.isRejected(validateFull(
-                {
-                    type: 'Generic_HTTP',
-                    host: 'host',
-                    clientCertificate: {
-                        cipherText: 'myCert'
-                    }
-                }
-            ), /should have required property 'privateKey'/));
-
-            it('should require client certificate when privateKey is provided', () => assert.isRejected(validateFull(
-                {
-                    type: 'Generic_HTTP',
-                    host: 'host',
-                    privateKey: {
-                        cipherText: 'myKey'
-                    }
-                }
-            ), /should have required property 'clientCertificate'/));
 
             it('should not allow the includeData \'action\' in the declaration', () => assert.isRejected(validateFull(
                 {
@@ -4695,6 +4997,43 @@ describe('Declarations', () => {
                     }
                 }
             ));
+
+            schemaValidationUtil.generateBasicSchemaTests(
+                basicSchemaTestsValidator,
+                {
+                    actions: [
+                        {
+                            JMESPath: {},
+                            expression: 'test'
+                        }
+                    ],
+                    clientCertificate: {
+                        cipherText: 'myCert'
+                    },
+                    fallbackHosts: ['fallbackHost'],
+                    host: 'host',
+                    privateKey: {
+                        cipherText: 'myKey'
+                    },
+                    type: 'Generic_HTTP'
+                },
+                [
+                    'actions.0.expression',
+                    { property: 'clientCertificate', ignoreOther: true, requiredTests: true },
+                    'fallbackHosts.0',
+                    {
+                        property: 'fallbackHosts',
+                        ignoreOther: true,
+                        arrayLengthTests: {
+                            minItems: 1
+                        }
+                    },
+                    'host',
+                    'path',
+                    { property: 'privateKey', ignoreOther: true, requiredTests: true }
+                ],
+                { stringLengthTests: true }
+            );
         });
 
         describe('Google_Cloud_Monitoring', () => {
@@ -4766,6 +5105,25 @@ describe('Declarations', () => {
                     serviceEmail: 'serviceEmail'
                 }
             ));
+
+            schemaValidationUtil.generateBasicSchemaTests(
+                basicSchemaTestsValidator,
+                {
+                    type: 'Google_Cloud_Monitoring',
+                    projectId: 'projectId',
+                    privateKeyId: 'privateKeyId',
+                    privateKey: {
+                        cipherText: 'privateKey'
+                    },
+                    serviceEmail: 'serviceEmail'
+                },
+                [
+                    'projectId',
+                    'privateKeyId',
+                    'serviceEmail'
+                ],
+                { stringLengthTests: true }
+            );
         });
 
         describe('Graphite', () => {
@@ -4799,6 +5157,16 @@ describe('Declarations', () => {
                     path: 'path'
                 }
             ));
+
+            schemaValidationUtil.generateBasicSchemaTests(
+                basicSchemaTestsValidator,
+                {
+                    type: 'Graphite',
+                    host: 'host'
+                },
+                'path',
+                { stringLengthTests: true }
+            );
         });
 
         describe('Kafka', () => {
@@ -4923,15 +5291,6 @@ describe('Declarations', () => {
                 }
             ));
 
-            it('should require privateKey when using TLS client auth', () => assert.isRejected(validateFull(
-                {
-                    type: 'Kafka',
-                    host: 'host',
-                    topic: 'topic',
-                    authenticationProtocol: 'TLS'
-                }
-            ), /should have required property 'privateKey'/));
-
             it('should require protocol=binaryTcpTls when using TLS client auth', () => assert.isRejected(validateFull(
                 {
                     type: 'Kafka',
@@ -4965,6 +5324,34 @@ describe('Declarations', () => {
                     }
                 }
             ), /should NOT be valid/));
+
+            describe('authenticationProtocol === SASL-PLAIN', () => {
+                schemaValidationUtil.generateBasicSchemaTests(
+                    basicSchemaTestsValidator,
+                    {
+                        type: 'Kafka',
+                        host: 'host',
+                        topic: 'topic',
+                        authenticationProtocol: 'SASL-PLAIN'
+                    },
+                    'username',
+                    { stringLengthTests: true }
+                );
+            });
+
+            describe('authenticationProtocol === TLS', () => {
+                schemaValidationUtil.generateBasicSchemaTests(
+                    basicSchemaTestsValidator,
+                    {
+                        type: 'Kafka',
+                        host: 'host',
+                        topic: 'topic',
+                        authenticationProtocol: 'TLS'
+                    },
+                    'privateKey',
+                    { requiredTests: true }
+                );
+            });
         });
 
         describe('Splunk', () => {
@@ -5042,7 +5429,8 @@ describe('Declarations', () => {
                 }
             ));
 
-            it('should accept none as valid value for compressionType', () => validateMinimal(
+            schemaValidationUtil.generateBasicSchemaTests(
+                basicSchemaTestsValidator,
                 {
                     type: 'Splunk',
                     host: 'host',
@@ -5052,30 +5440,13 @@ describe('Declarations', () => {
                     compressionType: 'none'
                 },
                 {
-                    type: 'Splunk',
-                    host: 'host',
-                    protocol: 'https',
-                    port: 8088,
-                    format: 'default',
-                    passphrase: {
-                        class: 'Secret',
-                        protected: 'SecureVault',
-                        cipherText: '$M$cipherText'
-                    },
-                    compressionType: 'none'
+                    property: 'compressionType',
+                    enumTests: {
+                        allowed: ['none', 'gzip'],
+                        notAllowed: ['compressionType']
+                    }
                 }
-            ));
-
-            it('should not accept invalid values for compressionType', () => assert.isRejected(validateFull(
-                {
-                    type: 'Splunk',
-                    host: 'host',
-                    passphrase: {
-                        cipherText: 'cipherText'
-                    },
-                    compressionType: 'compression'
-                }
-            ), /should be equal to one of the allowed values/));
+            );
         });
 
         describe('Statsd', () => {
@@ -5107,14 +5478,21 @@ describe('Declarations', () => {
                 }
             ));
 
-            it('should only accept valid protocols', () => assert.isRejected(validateFull(
+            schemaValidationUtil.generateBasicSchemaTests(
+                basicSchemaTestsValidator,
                 {
                     type: 'Statsd',
                     host: 'host',
-                    protocol: 'https',
                     port: 80
+                },
+                {
+                    property: 'protocol',
+                    enumTests: {
+                        allowed: ['tcp', 'udp'],
+                        notAllowed: ['https']
+                    }
                 }
-            ), /should be equal to one of the allowed values/));
+            );
         });
 
         describe('Sumo_Logic', () => {
@@ -5164,143 +5542,25 @@ describe('Declarations', () => {
                     }
                 }
             ));
+
+            schemaValidationUtil.generateBasicSchemaTests(
+                basicSchemaTestsValidator,
+                {
+                    type: 'Sumo_Logic',
+                    host: 'host',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    }
+                },
+                'path',
+                { stringLengthTests: true }
+            );
         });
 
         describe('F5_Cloud', () => {
             beforeEach(() => {
                 coreStub.utilMisc.getRuntimeInfo.value(() => ({ nodeVersion: '8.12.0' }));
             });
-
-            it('should fail because authType is not valid', () => assert.isRejected(
-                validateMinimal({
-                    class: 'Telemetry_Consumer',
-                    type: 'F5_Cloud',
-                    f5csTenantId: 'a-blabla-a',
-                    f5csSensorId: '12345',
-                    payloadSchemaNid: 'f5',
-                    serviceAccount: {
-                        authType: 'goog',
-                        type: 'not_used',
-                        projectId: 'deos-dev',
-                        privateKeyId: '11111111111111111111111',
-                        privateKey: {
-                            cipherText: 'privateKeyVal'
-                        },
-                        clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
-                        clientId: '1212121212121212121212',
-                        authUri: 'https://accounts.google.com/o/oauth2/auth',
-                        tokenUri: 'https://oauth2.googleapis.com/token',
-                        authProviderX509CertUrl: 'https://www.googleapis.com/oauth2/v1/certs',
-                        clientX509CertUrl: 'https://www.googleapis.com/robot/v1/metadata/x509/test%40deos-dev.iam.gserviceaccount.com'
-                    },
-                    targetAudience: 'deos-ingest'
-                }),
-                'should be equal to one of the allowed values'
-            ));
-
-            it('should require f5csTenantId property', () => assert.isRejected(
-                validateMinimal({
-                    class: 'Telemetry_Consumer',
-                    type: 'F5_Cloud',
-                    f5csSensorId: '12345',
-                    payloadSchemaNid: 'f5',
-                    serviceAccount: {
-                        authType: 'google-auth',
-                        type: 'not_used',
-                        projectId: 'deos-dev',
-                        privateKeyId: '11111111111111111111111',
-                        privateKey: {
-                            cipherText: 'privateKeyVal'
-                        },
-                        clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
-                        clientId: '1212121212121212121212',
-                        authUri: 'https://accounts.google.com/o/oauth2/auth',
-                        tokenUri: 'https://oauth2.googleapis.com/token',
-                        authProviderX509CertUrl: 'https://www.googleapis.com/oauth2/v1/certs',
-                        clientX509CertUrl: 'https://www.googleapis.com/robot/v1/metadata/x509/test%40deos-dev.iam.gserviceaccount.com'
-                    },
-                    targetAudience: 'deos-ingest'
-                }),
-                /should have required property 'f5csTenantId'/
-            ));
-
-            it('should require f5csSensorId property', () => assert.isRejected(
-                validateMinimal({
-                    class: 'Telemetry_Consumer',
-                    type: 'F5_Cloud',
-                    f5csTenantId: 'a-blabla-a',
-                    payloadSchemaNid: 'f5',
-                    serviceAccount: {
-                        authType: 'google-auth',
-                        type: 'not_used',
-                        projectId: 'deos-dev',
-                        privateKeyId: '11111111111111111111111',
-                        privateKey: {
-                            cipherText: 'privateKeyValue'
-                        },
-                        clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
-                        clientId: '1212121212121212121212',
-                        authUri: 'https://accounts.google.com/o/oauth2/auth',
-                        tokenUri: 'https://oauth2.googleapis.com/token',
-                        authProviderX509CertUrl: 'https://www.googleapis.com/oauth2/v1/certs',
-                        clientX509CertUrl: 'https://www.googleapis.com/robot/v1/metadata/x509/test%40deos-dev.iam.gserviceaccount.com'
-                    },
-                    targetAudience: 'deos-ingest'
-                }),
-                /should have required property 'f5csSensorId'/
-            ));
-
-            it('should require payloadSchemaNid property', () => assert.isRejected(
-                validateMinimal({
-                    class: 'Telemetry_Consumer',
-                    type: 'F5_Cloud',
-                    f5csTenantId: 'a-blabla-a',
-                    f5csSensorId: '12345',
-                    serviceAccount: {
-                        authType: 'google-auth',
-                        type: 'not_used',
-                        projectId: 'deos-dev',
-                        privateKeyId: '11111111111111111111111',
-                        privateKey: {
-                            cipherText: 'privateKeyValue'
-                        },
-                        clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
-                        clientId: '1212121212121212121212',
-                        authUri: 'https://accounts.google.com/o/oauth2/auth',
-                        tokenUri: 'https://oauth2.googleapis.com/token',
-                        authProviderX509CertUrl: 'https://www.googleapis.com/oauth2/v1/certs',
-                        clientX509CertUrl: 'https://www.googleapis.com/robot/v1/metadata/x509/test%40deos-dev.iam.gserviceaccount.com'
-                    },
-                    targetAudience: 'deos-ingest'
-                }),
-                /should have required property 'payloadSchemaNid'/
-            ));
-
-            it('should require privateKeyId property', () => assert.isRejected(
-                validateMinimal({
-                    class: 'Telemetry_Consumer',
-                    type: 'F5_Cloud',
-                    f5csTenantId: 'a-blabla-a',
-                    f5csSensorId: '12345',
-                    payloadSchemaNid: 'f5',
-                    serviceAccount: {
-                        authType: 'google-auth',
-                        type: 'not_used',
-                        projectId: 'deos-dev',
-                        privateKey: {
-                            cipherText: 'privateKeyValue'
-                        },
-                        clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
-                        clientId: '1212121212121212121212',
-                        authUri: 'https://accounts.google.com/o/oauth2/auth',
-                        tokenUri: 'https://oauth2.googleapis.com/token',
-                        authProviderX509CertUrl: 'https://www.googleapis.com/oauth2/v1/certs',
-                        clientX509CertUrl: 'https://www.googleapis.com/robot/v1/metadata/x509/test%40deos-dev.iam.gserviceaccount.com'
-                    },
-                    targetAudience: 'deos-ingest'
-                }),
-                /should have required property 'privateKeyId'/
-            ));
 
             it('should pass minimal declaration', () => validateMinimal(
                 {
@@ -5416,6 +5676,56 @@ describe('Declarations', () => {
                     type: 'F5_Cloud'
                 }
             ));
+
+            schemaValidationUtil.generateBasicSchemaTests(
+                basicSchemaTestsValidator,
+                {
+                    type: 'F5_Cloud',
+                    f5csTenantId: 'a-blabla-a',
+                    f5csSensorId: '12345',
+                    payloadSchemaNid: 'f5',
+                    serviceAccount: {
+                        authType: 'google-auth',
+                        type: 'not_used',
+                        projectId: 'deos-dev',
+                        privateKeyId: '11111111111111111111111',
+                        privateKey: {
+                            cipherText: 'privateKeyValue'
+                        },
+                        clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
+                        clientId: '1212121212121212121212',
+                        authUri: 'https://accounts.google.com/o/oauth2/auth',
+                        tokenUri: 'https://oauth2.googleapis.com/token',
+                        authProviderX509CertUrl: 'https://www.googleapis.com/oauth2/v1/certs',
+                        clientX509CertUrl: 'https://www.googleapis.com/robot/v1/metadata/x509/test%40deos-dev.iam.gserviceaccount.com'
+                    },
+                    targetAudience: 'deos-ingest'
+                },
+                [
+                    { property: 'f5csSensorId', requiredTests: true },
+                    { property: 'f5csTenantId', requiredTests: true },
+                    { property: 'payloadSchemaNid', requiredTests: true },
+                    'serviceAccount.authProviderX509CertUrl',
+                    {
+                        property: 'serviceAccount.authType',
+                        enumTests: {
+                            allowed: 'google-auth',
+                            notAllowed: 'other-auth'
+                        },
+                        ignoreOther: true
+                    },
+                    'serviceAccount.authUri',
+                    'serviceAccount.clientEmail',
+                    'serviceAccount.clientId',
+                    'serviceAccount.clientX509CertUrl',
+                    { property: 'serviceAccount.privateKeyId', requiredTests: true },
+                    'serviceAccount.projectId',
+                    'serviceAccount.tokenUri',
+                    'serviceAccount.type',
+                    { property: 'targetAudience', requiredTests: true }
+                ],
+                { stringLengthTests: true }
+            );
         });
     });
 

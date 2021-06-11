@@ -13,6 +13,7 @@
         "trace": {
             "title": "Trace",
             "description": "Enables data dumping to file. Boolean uses pre-defined file location, however value could be a string which contains path to a specific file instead" ,
+            "minLength": 1,
             "type": ["boolean", "string"]
         },
         "traceConfig": {
@@ -71,7 +72,8 @@
                 },
                 "environmentVar": {
                     "title": "Environment Variable: this contains the named env var where the secret resides",
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 1
                 },
                 "protected": {
                     "$comment": "Meta property primarily used to determine if 'cipherText' needs to be encrypted",
@@ -90,7 +92,8 @@
         "username": {
             "$comment": "Common field for username to use everywhere in scheme",
             "title": "Username",
-            "type": "string"
+            "type": "string",
+            "minLength": 1
         },
         "stringOrSecret": {
             "allOf": [
@@ -128,11 +131,13 @@
             "properties": {
                 "tenant": {
                     "title": "Tenant tag",
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 1
                 },
                 "application": {
                     "title": "Application tag",
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 1
                 }
             },
             "additionalProperties": true
@@ -304,6 +309,7 @@
             "title": "Host",
             "description": "" ,
             "type": "string",
+            "minLength": 1,
             "anyOf": [
                 { "format": "ipv4" },
                 { "format": "ipv6" },

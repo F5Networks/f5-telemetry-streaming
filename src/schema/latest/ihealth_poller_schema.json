@@ -170,6 +170,7 @@
         },
         "iHealthPollerPointerRef": {
             "type": "string",
+            "minLength": 1,
             "declarationClass": "Telemetry_iHealth_Poller"
         },
         "iHealthPollerObjectRef": {

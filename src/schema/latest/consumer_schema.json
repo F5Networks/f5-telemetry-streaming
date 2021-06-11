@@ -29,7 +29,8 @@
                             "expression": {
                                 "title": "Expression",
                                 "description": "The JMESPath expression to be applied to the incoming data payload",
-                                "type": "string"
+                                "type": "string",
+                                "minLength": 1
                             }
                         },
                         "additionalProperties": false,
@@ -58,6 +59,7 @@
             "title": "Host",
             "description": "FQDN or IP address" ,
             "type": "string",
+            "minLength": 1,
             "anyOf": [
                 { "format": "ipv4" },
                 { "format": "ipv6" },
@@ -85,6 +87,7 @@
             "title": "Path",
             "description": "Path to post data to",
             "type": ["string", "object"],
+            "minLength": 1,
             "f5expand": true,
             "allOf": [
                 {
@@ -185,6 +188,7 @@
             "$comment": "Required for certain consumers: standard property",
             "title": "Username",
             "description": "" ,
+            "minLength": 1,
             "type": "string",
             "f5expand": true
         },
@@ -193,6 +197,7 @@
             "title": "Region",
             "description": "" ,
             "type": "string",
+            "minLength": 1,
             "f5expand": true
         },
         "bucket": {
@@ -200,6 +205,7 @@
             "title": "Bucket",
             "description": "" ,
             "type": "string",
+            "minLength": 1,
             "f5expand": true
         },
         "logGroup": {
@@ -207,6 +213,7 @@
             "title": "Log Group",
             "description": "" ,
             "type": "string",
+            "minLength": 1,
             "f5expand": true
         },
         "logStream": {
@@ -214,6 +221,7 @@
             "title": "Log Stream",
             "description": "" ,
             "type": "string",
+            "minLength": 1,
             "f5expand": true
         },
         "metricNamespace": {
@@ -229,6 +237,7 @@
             "title": "Workspace ID",
             "description": "" ,
             "type": "string",
+            "minLength": 1,
             "f5expand": true
         },
         "useManagedIdentity": {
@@ -242,7 +251,8 @@
             "$comment": "Required for certain consumers: Azure_Application_Insights",
             "title": "Application Insights Resource Name (Pattern)",
             "description": "Name filter used to determine which App Insights resource to send metrics to. If not provided, TS will send metrics to App Insights in the subscription in which the managed identity has permissions to",
-            "type": "string"
+            "type": "string",
+            "minLength": 1
         },
         "instrumentationKey": {
             "$comment": "Required for certain consumers: Azure_Application_Insights",
@@ -293,6 +303,7 @@
             "title": "Index Name",
             "description": "" ,
             "type": "string",
+            "minLength": 1,
             "f5expand": true
         },
         "apiVersion": {
@@ -300,6 +311,7 @@
             "title": "API Version",
             "description": "" ,
             "type": "string",
+            "minLength": 1,
             "f5expand": true
         },
         "dataType": {
@@ -350,6 +362,7 @@
             "title": "Project ID",
             "description": "The ID of the relevant project.",
             "type": "string",
+            "minLength": 1,
             "f5expand": true
         },
         "serviceEmail": {
@@ -357,6 +370,7 @@
             "title": "Service Email",
             "description": "The service email.",
             "type": "string",
+            "minLength": 1,
             "f5expand": true
         },
         "privateKeyId": {
@@ -364,6 +378,7 @@
             "title": "Private Key ID",
             "description": "The private key ID.",
             "type": "string",
+            "minLength": 1,
             "f5expand": true
         },
         "privateKey": {
@@ -383,6 +398,7 @@
             "title": "F5CS Tenant ID",
             "description": "" ,
             "type": "string",
+            "minLength": 1,
             "f5expand": true
         },
         "f5csSensorId": {
@@ -390,6 +406,7 @@
             "title": "F5CS Sensor ID",
             "description": "" ,
             "type": "string",
+            "minLength": 1,
             "f5expand": true
         },
         "payloadSchemaNid": {
@@ -397,6 +414,7 @@
             "title": "Namespace ID for payloadSchema",
             "description": "" ,
             "type": "string",
+            "minLength": 1,
             "f5expand": true
         },
         "serviceAccount": {
@@ -417,6 +435,7 @@
                         "title": "SA Type",
                         "description": "" ,
                         "type": "string",
+                        "minLength": 1,
                         "f5expand": true
                     },
                     "projectId": {
@@ -424,6 +443,7 @@
                         "title": "Project Id",
                         "description": "" ,
                         "type": "string",
+                        "minLength": 1,
                         "f5expand": true
                     },
                     "privateKeyId": {
@@ -431,6 +451,7 @@
                         "title": "Private Key Id",
                         "description": "" ,
                         "type": "string",
+                        "minLength": 1,
                         "f5expand": true
                     },
                     "privateKey": {
@@ -441,6 +462,7 @@
                         "title": "Client Email",
                         "description": "" ,
                         "type": "string",
+                        "minLength": 1,
                         "f5expand": true
                     },
                     "clientId": {
@@ -448,6 +470,7 @@
                         "title": "Client Id",
                         "description": "" ,
                         "type": "string",
+                        "minLength": 1,
                         "f5expand": true
                     },
                     "authUri": {
@@ -455,6 +478,7 @@
                         "title": "Auth Uri",
                         "description": "" ,
                         "type": "string",
+                        "minLength": 1,
                         "f5expand": true
                     },
                     "tokenUri": {
@@ -462,6 +486,7 @@
                         "title": "Token Uri",
                         "description": "" ,
                         "type": "string",
+                        "minLength": 1,
                         "f5expand": true
                     },
                     "authProviderX509CertUrl": {
@@ -469,6 +494,7 @@
                         "title": "Auth Provider X509 Cert Url",
                         "description": "" ,
                         "type": "string",
+                        "minLength": 1,
                         "f5expand": true
                     },
                     "clientX509CertUrl": {
@@ -476,6 +502,7 @@
                         "title": "Client X509 Cert Url",
                         "description": "" ,
                         "type": "string",
+                        "minLength": 1,
                         "f5expand": true
                     }
                 },
@@ -505,6 +532,7 @@
             "title": "Target Audience",
             "description": "" ,
             "type": "string",
+            "minLength": 1,
             "f5expand": true
         },
         "useSSL": {
@@ -976,7 +1004,11 @@
                                 "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
                                 "apiVersion": { "$ref": "#/definitions/apiVersion"},
                                 "index": { "$ref": "#/definitions/index" },
-                                "dataType": { "$ref": "#/definitions/dataType", "default": "f5.telemetry" }
+                                "dataType": {
+                                    "$ref": "#/definitions/dataType",
+                                    "default": "f5.telemetry",
+                                    "minLength": 1
+                                }
                             }
                         },
                         "else": {}
