@@ -34,6 +34,15 @@ function timeStrToTuple(timeStr) {
 }
 
 /**
+ * Gets the current time (Unix Epoch time) in seconds
+ *
+ * @returns {Number} Number of seconds
+ */
+function getCurrentUnixTimeInSeconds() {
+    return Math.floor(Date.now() / 1000);
+}
+
+/**
  * Get the last day of month for provided date
  * Note: UTC only
  *
@@ -252,6 +261,7 @@ function getNextFireDate(schedule, fromDate, allowNow, utcOnly) {
 
 
 module.exports = {
+    getCurrentUnixTimeInSeconds,
     getLastDayOfMonth,
     getNextFireDate,
     getWeekDayNo,
