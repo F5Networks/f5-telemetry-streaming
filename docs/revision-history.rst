@@ -11,6 +11,10 @@ Document Revision History
         - Description
         - Date
 
+      * - 1.21.0
+        - Updated the documentation for Telemetry Streaming v1.21.0. This release contains a number of minor bug fixes, stability enhancements, and foundational elements for some upcoming features. 
+        - 6-28-21
+      
       * - 1.20.0
         - Updated the documentation for Telemetry Streaming v1.20.0. This release contains the following changes: |br| * Added support for customizing the Telemetry Streaming payload (see :doc:`customizing-data` and the related :ref:`example<custompl>`) |br| * Added a new troubleshooting entry for writing an Event Listener's incoming raw data to a trace file (see :ref:`Troubleshooting<trace>`), also added a new note to the description of :doc:`event-listener` about tracing. |br| * Added data tracing and 'success' message to Google Cloud Monitoring consumer  |br| * Added system.configSyncSucceeded to default output and f5_system_configSyncSucceeded to Prometheus output, `GitHub #74 <https://github.com/F5Networks/f5-telemetry-streaming/issues/74>`_ |br| * Added Capacity_Float to system.diskStorage, `GitHub #119 <https://github.com/F5Networks/f5-telemetry-streaming/issues/119>`_ |br| |br| Issues Resolved: |br| * Fixed issue where 'long' fields in ASM events were causing ASM events to become malformed. Individual event fields are now permitted to be <= MAX_BUFFER_SIZE (16k), `GitHub #127 <https://github.com/F5Networks/f5-telemetry-streaming/issues/127>`_ |br| * AWS S3 date path was incorrect |br| * Should not create multiple Tracer instances that point to the same file
         - 5-18-21
