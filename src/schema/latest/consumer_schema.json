@@ -5,54 +5,46 @@
     "description": "",
     "type": "object",
     "definitions": {
-        "actions": {
-            "title": "Actions",
-            "description": "Actions to be performed on the Consumer.",
-            "type": "array",
-            "items": {
-                "allOf": [
-                    {
-                        "title": "JMES Actions",
-                        "properties": {
-                            "enable": {
-                                "title": "Enable",
-                                "description": "Whether to enable this action in the declaration or not.",
-                                "type": "boolean",
-                                "default": true
-                            },
-                            "JMESPath": {
-                                "title": "JMESPath",
-                                "description": "Will use a JMESPath expression to modify the incoming data payload",
-                                "type": "object",
-                                "additionalProperties": false
-                            },
-                            "expression": {
-                                "title": "Expression",
-                                "description": "The JMESPath expression to be applied to the incoming data payload",
-                                "type": "string",
-                                "minLength": 1
-                            }
+        "jmesPathAction": {
+            "title": "JMESPath Action",
+            "description": "Will use a JMESPath expression to modify the incoming data payload",
+            "type": "object",
+            "allOf": [
+                { "$ref": "actions_schema.json#/definitions/baseActionObject" },
+                {
+                    "properties": {
+                        "JMESPath": {
+                            "title": "JMESPath",
+                            "description": "Will use a JMESPath expression to modify the incoming data payload",
+                            "type": "object",
+                            "additionalProperties": false
                         },
-                        "additionalProperties": false,
-                        "dependencies": {
-                            "expression": {
-                                "allOf": [
-                                    {
-                                        "required": ["JMESPath"]
-                                    }
-                                ]
-                            },
-                            "JMESPath": {
-                                "allOf": [
-                                    {
-                                        "required": ["expression"]
-                                    }
-                                ]
-                            }
-                        }
+                        "expression": {
+                            "title": "Expression",
+                            "description": "The JMESPath expression to be applied to the incoming data payload",
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "enable": {}
+                    },
+                    "additionalProperties": false,
+                    "required": ["JMESPath", "expression"]
+                }
+            ]
+        },
+        "genericHttpActions": {
+            "title": "Actions",
+            "description": "Actions to be performed on the Generic HTTP Consumer.",
+            "allOf": [
+                { "$ref": "actions_schema.json#/definitions/baseActionsChain" },
+                {
+                    "items": {
+                        "oneOf": [
+                            { "$ref": "#/definitions/jmesPathAction" }
+                        ]
                     }
-                ]
-            }
+                }
+            ]
         },
         "host": {
             "$comment": "Required for certain consumers: standard property",
@@ -715,7 +707,7 @@
                                 "privateKey": { "$ref": "#/definitions/privateKey" },
                                 "clientCertificate": { "$ref": "#/definitions/clientCertificate" },
                                 "rootCertificate": { "$ref": "#/definitions/rootCertificate" },
-                                "actions": { "$ref": "#/definitions/actions" }
+                                "actions": { "$ref": "#/definitions/genericHttpActions" }
                             },
                             "allOf": [
                                 {

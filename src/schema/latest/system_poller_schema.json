@@ -39,14 +39,6 @@
                 "actions": {
                     "title": "Actions",
                     "description": "Actions to be performed on the systemPoller.",
-                    "type": "array",
-                    "items": {
-                        "allOf": [
-                            {
-                                "$ref": "base_schema.json#/definitions/action"
-                            }
-                        ]
-                    },
                     "default": [
                         {
                             "setTag": {
@@ -54,7 +46,8 @@
                                 "application": "`A`"
                             }
                         }
-                    ]
+                    ],
+                    "allOf": [{ "$ref": "actions_schema.json#/definitions/inputDataStreamActionsChain" }]
                 },
                 "endpointList": {
                     "title": "Endpoint List",
