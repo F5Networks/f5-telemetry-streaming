@@ -20,6 +20,7 @@ const sinon = require('sinon');
 const configWorker = require('../../src/lib/config');
 const constants = require('../../src/lib/constants');
 const deviceUtil = require('../../src/lib/utils/device');
+const fileLogger = require('../winstonLogger').logger;
 const persistentStorage = require('../../src/lib/persistentStorage');
 const stubs = require('./shared/stubs');
 const schemaValidationUtil = require('./shared/schemaValidation');
@@ -69,7 +70,7 @@ describe('Declarations', () => {
         files.forEach((file) => {
             it(`should validate example: ${file}`, () => {
                 const data = JSON.parse(fs.readFileSync(`${baseDir}/${file}`));
-                return assert.isFulfilled(configWorker.processDeclaration(data));
+                return assert.isFulfilled(declValidator(data));
             });
         });
     });
@@ -115,8 +116,8 @@ describe('Declarations', () => {
                 }
             };
             return assert.isFulfilled(Promise.all([
-                configWorker.processDeclaration(decl1),
-                configWorker.processDeclaration(decl2)
+                declValidator(decl1),
+                declValidator(decl2)
             ]));
         });
 
@@ -188,7 +189,7 @@ describe('Declarations', () => {
                 }
             };
             const errors = {};
-            const validate = (name, decl) => configWorker.processDeclaration(decl).catch((e) => {
+            const validate = (name, decl) => declValidator(decl).catch((e) => {
                 errors[name] = e.message || e;
             });
             return Promise.all([
@@ -236,7 +237,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return configWorker.processDeclaration(data)
+                return declValidator(data)
                     .then((validConfig) => {
                         const proxy = validConfig.My_iHealth.proxy;
                         assert.strictEqual(proxy.protocol, 'http');
@@ -273,7 +274,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return configWorker.processDeclaration(data)
+                return declValidator(data)
                     .then((validConfig) => {
                         const proxy = validConfig.My_iHealth.proxy;
                         assert.strictEqual(proxy.protocol, 'https');
@@ -298,7 +299,7 @@ describe('Declarations', () => {
                         proxy: {}
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data), /host.*should have required property 'host'/);
+                return assert.isRejected(declValidator(data), /host.*should have required property 'host'/);
             });
 
             it('should fail when invalid port specified', () => {
@@ -316,7 +317,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data), /proxy\/port.*should be <=/);
+                return assert.isRejected(declValidator(data), /proxy\/port.*should be <=/);
             });
 
             it('should fail when invalid protocol specified', () => {
@@ -334,7 +335,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data), /proxy\/protocol.*should be equal to one of the allowed values/);
+                return assert.isRejected(declValidator(data), /proxy\/protocol.*should be equal to one of the allowed values/);
             });
 
             it('should fail when invalid allowSelfSignedCert specified', () => {
@@ -352,7 +353,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data), /proxy\/allowSelfSignedCert.*should be boolean/);
+                return assert.isRejected(declValidator(data), /proxy\/allowSelfSignedCert.*should be boolean/);
             });
 
             it('should fail when invalid enableHostConnectivityCheck specified', () => {
@@ -370,7 +371,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data), /proxy\/enableHostConnectivityCheck.*should be boolean/);
+                return assert.isRejected(declValidator(data), /proxy\/enableHostConnectivityCheck.*should be boolean/);
             });
 
             it('should not allow additional properties', () => {
@@ -388,7 +389,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data), /someProp.*should NOT have additional properties/);
+                return assert.isRejected(declValidator(data), /someProp.*should NOT have additional properties/);
             });
 
             it('should fail when passphrase specified alone', () => {
@@ -408,7 +409,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data), /should have property username when property passphrase is present/);
+                return assert.isRejected(declValidator(data), /should have property username when property passphrase is present/);
             });
 
             it('should not allow empty username', () => {
@@ -429,7 +430,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data), /minLength.*username.*should NOT be shorter than 1 character/);
+                return assert.isRejected(declValidator(data), /minLength.*username.*should NOT be shorter than 1 character/);
             });
 
             it('should not allow empty host', () => {
@@ -450,264 +451,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data), /minLength.*host.*should NOT be shorter than 1 character/);
-            });
-        });
-
-        describe('actions', () => {
-            it('should fail when multiple actions are in the same action object', () => {
-                const data = {
-                    class: 'Telemetry',
-                    My_Poller: {
-                        class: 'Telemetry_System_Poller',
-                        interval: 90,
-                        actions: [
-                            {
-                                enable: true,
-                                includeData: {},
-                                excludeData: {},
-                                locations: {
-                                    system: true
-                                }
-                            }
-                        ]
-                    }
-                };
-                return assert.isRejected(configWorker.processDeclaration(data), /My_Poller\/actions\/0.*should NOT be valid/);
-            });
-
-            describe('locations', () => {
-                it('should pass with empty locations', () => {
-                    const data = {
-                        class: 'Telemetry',
-                        My_System: {
-                            class: 'Telemetry_System',
-                            systemPoller: {
-                                actions: [
-                                    {
-                                        setTag: {
-                                            newTag: 'tag value'
-                                        },
-                                        locations: {}
-                                    }
-                                ]
-                            }
-                        }
-                    };
-                    return configWorker.processDeclaration(data)
-                        .then((validConfig) => {
-                            const actions = validConfig.My_System.systemPoller.actions;
-                            assert.deepStrictEqual(actions[0].locations, {});
-                        });
-                });
-
-                it('should pass with location type of boolean', () => {
-                    const data = {
-                        class: 'Telemetry',
-                        My_System: {
-                            class: 'Telemetry_System',
-                            systemPoller: {
-                                actions: [
-                                    {
-                                        setTag: {
-                                            newTag: 'tag value'
-                                        },
-                                        locations: {
-                                            a: true
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    };
-                    return configWorker.processDeclaration(data)
-                        .then((validConfig) => {
-                            const actions = validConfig.My_System.systemPoller.actions;
-                            assert.deepStrictEqual(actions[0].locations, { a: true });
-                        });
-                });
-
-                it('should fail with location type boolean with value of false', () => {
-                    const data = {
-                        class: 'Telemetry',
-                        My_System: {
-                            class: 'Telemetry_System',
-                            systemPoller: {
-                                actions: [
-                                    {
-                                        setTag: {
-                                            newTag: 'tag value'
-                                        },
-                                        locations: {
-                                            a: false
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    };
-                    return assert.isRejected(configWorker.processDeclaration(data), /should match exactly one schema in oneOf/);
-                });
-
-                it('should pass with object type location with single property', () => {
-                    const data = {
-                        class: 'Telemetry',
-                        My_System: {
-                            class: 'Telemetry_System',
-                            systemPoller: {
-                                actions: [
-                                    {
-                                        setTag: {
-                                            newTag: 'tag value'
-                                        },
-                                        locations: {
-                                            a: {
-                                                b: true
-                                            }
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    };
-                    return configWorker.processDeclaration(data)
-                        .then((validConfig) => {
-                            const actions = validConfig.My_System.systemPoller.actions;
-                            assert.deepStrictEqual(actions[0].locations, { a: { b: true } });
-                        });
-                });
-
-                it('should pass with object type location with multiple properties', () => {
-                    const data = {
-                        class: 'Telemetry',
-                        My_System: {
-                            class: 'Telemetry_System',
-                            systemPoller: {
-                                actions: [
-                                    {
-                                        setTag: {
-                                            newTag: 'tag value'
-                                        },
-                                        locations: {
-                                            a: {
-                                                b: true,
-                                                c: {
-                                                    d: true
-                                                }
-                                            }
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    };
-                    return configWorker.processDeclaration(data)
-                        .then((validConfig) => {
-                            const actions = validConfig.My_System.systemPoller.actions;
-                            assert.deepStrictEqual(actions[0].locations, { a: { b: true, c: { d: true } } });
-                        });
-                });
-
-                it('should fail with object type location with multiple properties and one is false', () => {
-                    const data = {
-                        class: 'Telemetry',
-                        My_System: {
-                            class: 'Telemetry_System',
-                            systemPoller: {
-                                actions: [
-                                    {
-                                        setTag: {
-                                            newTag: 'tag value'
-                                        },
-                                        locations: {
-                                            a: {
-                                                b: true,
-                                                c: {
-                                                    d: false
-                                                }
-                                            }
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    };
-                    return assert.isRejected(configWorker.processDeclaration(data), /should match exactly one schema in oneOf.*locations/);
-                });
-
-                it('should fail with object type location with multiple properties and one is invalid type', () => {
-                    const data = {
-                        class: 'Telemetry',
-                        My_System: {
-                            class: 'Telemetry_System',
-                            systemPoller: {
-                                actions: [
-                                    {
-                                        setTag: {
-                                            newTag: 'tag value'
-                                        },
-                                        locations: {
-                                            a: {
-                                                b: true,
-                                                c: {
-                                                    d: []
-                                                }
-                                            }
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    };
-                    return assert.isRejected(configWorker.processDeclaration(data), /should match exactly one schema in oneOf.*locations/);
-                });
-
-                it('should fail when a location is not provided with includeData action', () => {
-                    const data = {
-                        class: 'Telemetry',
-                        My_Poller: {
-                            class: 'Telemetry_System_Poller',
-                            interval: 90,
-                            actions: [
-                                {
-                                    enable: true,
-                                    excludeData: {}
-                                }
-                            ]
-                        }
-                    };
-                    return assert.isRejected(configWorker.processDeclaration(data), /dependencies\/excludeData\/allOf\/0\/required.*should have required property 'locations'/);
-                });
-
-                it('should pass when regexes are used in action locations', () => {
-                    const data = {
-                        class: 'Telemetry',
-                        My_Poller: {
-                            class: 'Telemetry_System_Poller',
-                            interval: 90,
-                            actions: [
-                                {
-                                    enable: true,
-                                    includeData: {},
-                                    locations: {
-                                        virtualServers: {
-                                            vs$: true
-                                        },
-                                        pools: {
-                                            '^/Common/Shared/': true
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    };
-                    return configWorker.processDeclaration(data)
-                        .then((validConfig) => {
-                            const poller = validConfig.My_Poller;
-                            assert.deepStrictEqual(poller.actions[0].locations.virtualServers, { vs$: true });
-                            assert.deepStrictEqual(poller.actions[0].locations.pools, { '^/Common/Shared/': true });
-                        });
-                });
+                return assert.isRejected(declValidator(data), /minLength.*host.*should NOT be shorter than 1 character/);
             });
         });
     });
@@ -742,12 +486,12 @@ describe('Declarations', () => {
 
             it('should fail because node version too low', () => {
                 coreStub.utilMisc.getRuntimeInfo.value(() => ({ nodeVersion: '8.6.0' }));
-                return assert.isRejected(configWorker.processDeclaration(data), 'requested node version');
+                return assert.isRejected(declValidator(data), 'requested node version');
             });
 
             it('should succeed because node version is higher then required', () => {
                 coreStub.utilMisc.getRuntimeInfo.value(() => ({ nodeVersion: '8.12.0' }));
-                return assert.isFulfilled(configWorker.processDeclaration(data));
+                return assert.isFulfilled(declValidator(data));
             });
         });
 
@@ -771,7 +515,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data), /downloadFolder.*Unable to access path/);
+                return assert.isRejected(declValidator(data), /downloadFolder.*Unable to access path/);
             });
 
             it('should be able to access directory from iHealth declaration', () => {
@@ -793,7 +537,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isFulfilled(configWorker.processDeclaration(data));
+                return assert.isFulfilled(declValidator(data));
             });
         });
 
@@ -810,7 +554,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return assert.isRejected(configWorker.processDeclaration(data), /requires running on BIG-IP/);
+                return assert.isRejected(declValidator(data), /requires running on BIG-IP/);
             });
 
             it('should not re-encrypt', () => {
@@ -825,7 +569,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return configWorker.processDeclaration(data)
+                return declValidator(data)
                     .then(() => {
                         assert.strictEqual(data.My_Poller.passphrase.cipherText, cipher);
                     });
@@ -844,9 +588,9 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return configWorker.processDeclaration(data)
-                    .then(() => {
-                        assert.strictEqual(data.My_Poller.passphrase.cipherText, '$M$f5secret');
+                return declValidator(data)
+                    .then((validated) => {
+                        assert.strictEqual(validated.My_Poller.passphrase.cipherText, '$M$f5secret');
                     });
             });
 
@@ -861,7 +605,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data), /should be encrypted by BIG-IP when.*protected.*SecureVault/);
+                return assert.isRejected(declValidator(data), /should be encrypted by BIG-IP when.*protected.*SecureVault/);
             });
 
             it('should fail when cipherText or environmentVar missed', () => {
@@ -874,7 +618,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data), /missing cipherText or environmentVar/);
+                return assert.isRejected(declValidator(data), /missing cipherText or environmentVar/);
             });
 
             it('should accept environment variable value as valid passphrase property', () => {
@@ -887,9 +631,9 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return configWorker.processDeclaration(data)
-                    .then(() => {
-                        assert.deepStrictEqual(data.My_Poller.passphrase, {
+                return declValidator(data)
+                    .then((validated) => {
+                        assert.deepStrictEqual(validated.My_Poller.passphrase, {
                             class: 'Secret',
                             protected: 'plainText',
                             environmentVar: 'MY_ENV_SECRET'
@@ -907,7 +651,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data), /minLength.*environmentVar.*should NOT be shorter than 1 character/);
+                return assert.isRejected(declValidator(data), /minLength.*environmentVar.*should NOT be shorter than 1 character/);
             });
         });
 
@@ -930,7 +674,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return configWorker.processDeclaration(data, { expanded: true })
+                return declValidator(data, { options: { expanded: true } })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Consumer.path, '/foo');
                     });
@@ -970,7 +714,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return configWorker.processDeclaration(data, { expanded: true })
+                return declValidator(data, { options: { expanded: true } })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Namespace.My_NS_Consumer.path, '/nsfoo');
                         assert.strictEqual(validated.My_Consumer.path, '/upperfoo');
@@ -988,7 +732,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return configWorker.processDeclaration(data, { expanded: true })
+                return declValidator(data, { options: { expanded: true } })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Consumer.path, '192.0.2.1');
                     });
@@ -1008,7 +752,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return configWorker.processDeclaration(data, { expanded: true })
+                return declValidator(data, { options: { expanded: true } })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Namespace.My_NS_Consumer.path, '192.0.2.1');
                     });
@@ -1031,7 +775,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return configWorker.processDeclaration(data, { expanded: true })
+                return declValidator(data, { options: { expanded: true } })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Consumer.headers[0].value, '192.0.2.1');
                     });
@@ -1057,7 +801,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return configWorker.processDeclaration(data, { expanded: true })
+                return declValidator(data, { options: { expanded: true } })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Namespace.My_NS_Consumer.headers[0].value, '192.0.2.1');
                     });
@@ -1082,7 +826,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return configWorker.processDeclaration(data, { expanded: true })
+                return declValidator(data, { options: { expanded: true } })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Consumer.path, '/foo/bar/baz');
                     });
@@ -1106,7 +850,7 @@ describe('Declarations', () => {
                     }
                 };
 
-                return configWorker.processDeclaration(data, { expanded: true })
+                return declValidator(data, { options: { expanded: true } })
                     .then((validated) => {
                         assert.strictEqual(validated.My_Consumer.path, 'foo');
                     });
@@ -1145,11 +889,11 @@ describe('Declarations', () => {
                     }
                 };
 
-                return configWorker.processDeclaration(data, { expanded: true })
+                return declValidator(data, { options: { expanded: true } })
                     .then((validated) => {
                         assert.deepStrictEqual(validated.My_Consumer.path, expectedValue);
                         assert.deepStrictEqual(validated.My_Consumer.headers[0].value, expectedValue);
-                        return assert.isFulfilled(configWorker.processDeclaration(validated));
+                        return assert.isFulfilled(declValidator(validated));
                     });
             });
 
@@ -1166,7 +910,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data, { expanded: true }), /syntax requires single pointer/);
+                return assert.isRejected(declValidator(data, { options: { expanded: true } }), /syntax requires single pointer/);
             });
 
             it('should fail pointer (absolute) outside \'Shared\'', () => {
@@ -1179,7 +923,7 @@ describe('Declarations', () => {
                         path: '`=/class`'
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data, { expanded: true }), /requires pointers root to be 'Shared'/);
+                return assert.isRejected(declValidator(data, { options: { expanded: true } }), /requires pointers root to be 'Shared'/);
             });
 
             it('should fail expanding pointer (absolute) outside of Namespace', () => {
@@ -1202,7 +946,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data, { expanded: true }), /Cannot read property 'constants' of undefined/);
+                return assert.isRejected(declValidator(data, { options: { expanded: true } }), /Cannot read property 'constants' of undefined/);
             });
 
             it('should fail with correct dataPath when pointer is outside of Namespace', () => {
@@ -1225,7 +969,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data, { expanded: true }), /dataPath":"\/My_Namespace\/My_NS_Consumer\/path/);
+                return assert.isRejected(declValidator(data, { options: { expanded: true } }), /dataPath":"\/My_Namespace\/My_NS_Consumer\/path/);
             });
         });
 
@@ -1240,7 +984,7 @@ describe('Declarations', () => {
                         enableHostConnectivityCheck: true
                     }
                 };
-                return configWorker.processDeclaration(data)
+                return declValidator(data)
                     .then(() => {
                         assert.strictEqual(coreStub.utilMisc.networkCheck.called, true);
                     });
@@ -1281,7 +1025,7 @@ describe('Declarations', () => {
                         enableHostConnectivityCheck: true
                     }
                 };
-                return configWorker.processDeclaration(data)
+                return declValidator(data)
                     .then(() => {
                         // sort just in case
                         called.sort();
@@ -1340,7 +1084,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return configWorker.processDeclaration(data)
+                return declValidator(data)
                     .then(() => {
                         assert.deepStrictEqual(called, expected);
                     });
@@ -1359,7 +1103,7 @@ describe('Declarations', () => {
                         enableHostConnectivityCheck: true
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data), new RegExp(errMsg));
+                return assert.isRejected(declValidator(data), new RegExp(errMsg));
             });
         });
 
@@ -1390,7 +1134,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isFulfilled(configWorker.processDeclaration(data));
+                return assert.isFulfilled(declValidator(data));
             });
 
             it('should resolve full item in Namespace', () => {
@@ -1418,7 +1162,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isFulfilled(configWorker.processDeclaration(data));
+                return assert.isFulfilled(declValidator(data));
             });
 
             it('should trim leading and trailing backslashes', () => {
@@ -1447,7 +1191,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isFulfilled(configWorker.processDeclaration(data));
+                return assert.isFulfilled(declValidator(data));
             });
 
             it('should return error when full item path cannot be resolved', () => {
@@ -1474,7 +1218,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = 'Unable to find \\"My_Endpoints/items/i_dont_exist\\"';
-                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
+                return assert.isRejected(declValidator(data), errMsg);
             });
 
             it('should return error when value is not valid declarationClassProp', () => {
@@ -1500,7 +1244,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = '\\"Non_Existing\\" does not follow format \\"ObjectName/key1\\"';
-                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
+                return assert.isRejected(declValidator(data), errMsg);
             });
 
             it('should return error when object referenced is not correct class', () => {
@@ -1520,7 +1264,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = '\\"My_Endpoints\\" must be of object type and class \\"Telemetry_Endpoints\\"';
-                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
+                return assert.isRejected(declValidator(data), errMsg);
             });
 
             it('should return error when object referenced is not in the named Namespace', () => {
@@ -1549,7 +1293,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = '\\"My_Endpoints\\" must be of object type and class \\"Telemetry_Endpoints\\"';
-                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
+                return assert.isRejected(declValidator(data), errMsg);
             });
 
             it('should return error when object referenced is not in the default Namespace', () => {
@@ -1578,7 +1322,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = '\\"My_Endpoints\\" must be of object type and class \\"Telemetry_Endpoints\\"';
-                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
+                return assert.isRejected(declValidator(data), errMsg);
             });
 
             it('should return error when object referenced is not in the default Namespace, even when using Namespace prefix', () => {
@@ -1607,7 +1351,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = '\\"My_Namespace/My_Endpoints/a\\" does not follow format \\"ObjectName/key1\\"';
-                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
+                return assert.isRejected(declValidator(data), errMsg);
             });
 
             it('should fail to resolve when instance property matches class property', () => {
@@ -1633,7 +1377,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isFulfilled(configWorker.processDeclaration(declaration)
+                return assert.isFulfilled(declValidator(declaration)
                     .then((data) => {
                         assert.notStrictEqual(data.My_System.systemPoller.endpointList[0], 'My_Endpoints/items/items');
                     }));
@@ -1652,7 +1396,7 @@ describe('Declarations', () => {
                         systemPoller: 'My_Poller'
                     }
                 };
-                return assert.isFulfilled(configWorker.processDeclaration(data));
+                return assert.isFulfilled(declValidator(data));
             });
 
             it('should pass when object only exists in user-defined Namespace', () => {
@@ -1669,7 +1413,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isFulfilled(configWorker.processDeclaration(data));
+                return assert.isFulfilled(declValidator(data));
             });
 
             it('should pass when object exists in multiple Namespaces', () => {
@@ -1696,7 +1440,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isFulfilled(configWorker.processDeclaration(data));
+                return assert.isFulfilled(declValidator(data));
             });
 
             it('should return error when object referenced is in a different Namespace', () => {
@@ -1724,7 +1468,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = 'declaration with name \\"My_Poller_Two\\" and class \\"Telemetry_System_Poller\\" doesn\'t exist';
-                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
+                return assert.isRejected(declValidator(data), errMsg);
             });
 
             it('should return return correct dataPath in error when object referenced is in a different Namespace', () => {
@@ -1745,7 +1489,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = /dataPath":"\/My_Namespace_One\/My_System\/systemPoller/;
-                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
+                return assert.isRejected(declValidator(data), errMsg);
             });
 
             it('should return error when object referenced is not correct class', () => {
@@ -1760,7 +1504,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = 'declaration with name \\"My_Poller\\" and class \\"Telemetry_System_Poller\\" doesn\'t exist';
-                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
+                return assert.isRejected(declValidator(data), errMsg);
             });
 
             it('should return error when object referenced is not "object" type', () => {
@@ -1772,7 +1516,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = 'declaration with name \\"class\\" and class \\"Telemetry_System_Poller\\" doesn\'t exist';
-                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
+                return assert.isRejected(declValidator(data), errMsg);
             });
 
             it('should return error when object not exist', () => {
@@ -1784,7 +1528,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = 'declaration with name \\"Non_Existing_Poller\\" and class \\"Telemetry_System_Poller\\" doesn\'t exist';
-                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
+                return assert.isRejected(declValidator(data), errMsg);
             });
         });
     });
@@ -1818,12 +1562,12 @@ describe('Declarations', () => {
                         }
                     };
                     if (testCase.expectedToPass) {
-                        return configWorker.processDeclaration(data)
+                        return declValidator(data)
                             .then((validConfig) => {
                                 assert.strictEqual(validConfig.Controls.logLevel, testCase.logLevel, `'should match "${testCase.logLevel}"`);
                             });
                     }
-                    return assert.isRejected(configWorker.processDeclaration(data), /logLevel.*should be equal to one of the allowed value/);
+                    return assert.isRejected(declValidator(data), /logLevel.*should be equal to one of the allowed value/);
                 });
             });
         });
@@ -1852,12 +1596,12 @@ describe('Declarations', () => {
                         }
                     };
                     if (testCase.expectedToPass) {
-                        return configWorker.processDeclaration(data)
+                        return declValidator(data)
                             .then((validConfig) => {
                                 assert.strictEqual(validConfig.Controls.debug, testCase.debug, `'should match "${testCase.debug}"`);
                             });
                     }
-                    return assert.isRejected(configWorker.processDeclaration(data), /debug.*should be boolean/);
+                    return assert.isRejected(declValidator(data), /debug.*should be boolean/);
                 });
             });
         });
@@ -1901,18 +1645,25 @@ describe('Declarations', () => {
                         }
                     };
                     if (testCase.expectedToPass) {
-                        return configWorker.processDeclaration(data)
+                        return declValidator(data)
                             .then((validConfig) => {
                                 assert.strictEqual(validConfig.Controls.memoryThresholdPercent, testCase.memoryThresholdPercent, `'should match "${testCase.memoryThresholdPercent}"`);
                             });
                     }
-                    return assert.isRejected(configWorker.processDeclaration(data), testCase.errorMsg);
+                    return assert.isRejected(declValidator(data), testCase.errorMsg);
                 });
             });
         });
     });
 
     describe('Telemetry_System_Poller', () => {
+        describe('"actions" tests for system poller', () => generateInputActionsTests({
+            class: 'Telemetry',
+            My_Poller: {
+                class: 'Telemetry_System_Poller'
+            }
+        }, ['My_Poller']));
+
         it('should pass minimal declaration', () => {
             const data = {
                 class: 'Telemetry',
@@ -1920,7 +1671,7 @@ describe('Declarations', () => {
                     class: 'Telemetry_System_Poller'
                 }
             };
-            return configWorker.processDeclaration(data)
+            return declValidator(data)
                 .then((validConfig) => {
                     const poller = validConfig.My_Poller;
                     assert.notStrictEqual(poller, undefined);
@@ -2033,7 +1784,7 @@ describe('Declarations', () => {
                     ]
                 }
             };
-            return configWorker.processDeclaration(data)
+            return declValidator(data)
                 .then((validConfig) => {
                     const poller = validConfig.My_Poller;
                     assert.notStrictEqual(poller, undefined);
@@ -2091,7 +1842,7 @@ describe('Declarations', () => {
                     username: ''
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /minLength.*username.*should NOT be shorter than 1 characters/);
+            return assert.isRejected(declValidator(data), /minLength.*username.*should NOT be shorter than 1 characters/);
         });
 
         it('should not allow empty host', () => {
@@ -2102,7 +1853,7 @@ describe('Declarations', () => {
                     host: ''
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /minLength.*host.*should NOT be shorter than 1 characters/);
+            return assert.isRejected(declValidator(data), /minLength.*host.*should NOT be shorter than 1 characters/);
         });
 
         it('should not allow empty application tag', () => {
@@ -2116,7 +1867,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /minLength.*application.*should NOT be shorter than 1 characters/);
+            return assert.isRejected(declValidator(data), /minLength.*application.*should NOT be shorter than 1 characters/);
         });
 
         it('should not allow empty tenant tag', () => {
@@ -2130,81 +1881,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /minLength.*tenant.*should NOT be shorter than 1 characters/);
-        });
-
-        it('should not allow JMESPath in the action object', () => {
-            const data = {
-                class: 'Telemetry',
-                My_Poller: {
-                    class: 'Telemetry_System_Poller',
-                    interval: 90,
-                    actions: [
-                        {
-                            JMESPath: {},
-                            expression: '{ message: @, service: telemetryEventCategory, hostname: hostname }'
-                        }
-                    ]
-                }
-            };
-            return assert.isRejected(configWorker.processDeclaration(data), /My_Poller\/actions\/0.*should NOT have additional properties/);
-        });
-
-        it('should not allow ifAnyMatch and ifAllMatch in same action', () => {
-            const data = {
-                class: 'Telemetry',
-                My_Poller: {
-                    class: 'Telemetry_System_Poller',
-                    actions: [
-                        {
-                            setTag: {
-                                tag1: 'tag1 value'
-                            },
-                            ifAllMatch: {
-                                system: {
-                                    location: 'system_location'
-                                }
-                            },
-                            ifAnyMatch: [{
-                                system: {
-                                    hostname: 'system_hostname'
-                                }
-                            }],
-                            locations: {
-                                virtualServers: {
-                                    '.*': true
-                                }
-                            }
-                        }
-                    ]
-                }
-            };
-            return assert.isRejected(configWorker.processDeclaration(data), /should NOT be valid/);
-        });
-
-        it('should not allow an ifAnyMatch block that is not an array', () => {
-            const data = {
-                class: 'Telemetry',
-                My_Poller: {
-                    class: 'Telemetry_System_Poller',
-                    actions: [
-                        {
-                            setTag: {
-                                tag1: 'tag1 value'
-                            },
-                            ifAnyMatch: {
-                                top: 'level value'
-                            },
-                            locations: {
-                                virtualServers: {
-                                    '.*': true
-                                }
-                            }
-                        }
-                    ]
-                }
-            };
-            return assert.isRejected(configWorker.processDeclaration(data), /should be array/);
+            return assert.isRejected(declValidator(data), /minLength.*tenant.*should NOT be shorter than 1 characters/);
         });
 
         it('should not allow additional properties', () => {
@@ -2215,7 +1892,7 @@ describe('Declarations', () => {
                     someProp: 'someValue'
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /someProp.*should NOT have additional properties/);
+            return assert.isRejected(declValidator(data), /someProp.*should NOT have additional properties/);
         });
 
         describe('interval', () => {
@@ -2232,7 +1909,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return configWorker.processDeclaration(data)
+                return declValidator(data)
                     .then(validated => assert.strictEqual(validated.My_Poller.interval, 0));
             });
 
@@ -2244,7 +1921,7 @@ describe('Declarations', () => {
                         interval: 0
                     }
                 };
-                return configWorker.processDeclaration(data)
+                return declValidator(data)
                     .then(validated => assert.strictEqual(validated.My_Poller.interval, 0));
             });
 
@@ -2257,7 +1934,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = /interval\/minimum.*should be >= 60/;
-                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
+                return assert.isRejected(declValidator(data), errMsg);
             });
 
             it('should restrict maximum to 6000 when endpointList is NOT specified', () => {
@@ -2269,7 +1946,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = /interval\/maximum.*should be <= 6000/;
-                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
+                return assert.isRejected(declValidator(data), errMsg);
             });
 
             it('should not restrict maximum to 6000 when endpointList is specified', () => {
@@ -2285,7 +1962,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return configWorker.processDeclaration(data)
+                return declValidator(data)
                     .then(validated => assert.strictEqual(validated.My_Poller.interval, 100000));
             });
         });
@@ -2346,7 +2023,7 @@ describe('Declarations', () => {
                         ]
                     }
                 };
-                return configWorker.processDeclaration(data)
+                return declValidator(data)
                     .then((validConfig) => {
                         const poller = validConfig.My_Poller;
                         assert.deepStrictEqual(
@@ -2384,7 +2061,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = 'should NOT have fewer than 1 items';
-                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
+                return assert.isRejected(declValidator(data), errMsg);
             });
 
             it('should not allow endpointList to be empty object', () => {
@@ -2396,7 +2073,7 @@ describe('Declarations', () => {
                     }
                 };
                 const errMsg = 'should have required property \'items\'';
-                return assert.isRejected(configWorker.processDeclaration(data), errMsg);
+                return assert.isRejected(declValidator(data), errMsg);
             });
 
             it('should allow endpointList as Telemetry_Endpoints (as single reference)', () => {
@@ -2414,7 +2091,7 @@ describe('Declarations', () => {
                         endpointList: 'My_Endpoints'
                     }
                 };
-                return configWorker.processDeclaration(data)
+                return declValidator(data)
                     .then((validConfig) => {
                         const poller = validConfig.My_Poller;
                         assert.deepStrictEqual(poller.endpointList, 'My_Endpoints');
@@ -2434,7 +2111,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return configWorker.processDeclaration(data)
+                return declValidator(data)
                     .then((validConfig) => {
                         const poller = validConfig.My_Poller;
                         assert.deepStrictEqual(poller.endpointList,
@@ -2455,6 +2132,13 @@ describe('Declarations', () => {
     });
 
     describe('Telemetry_Listener', () => {
+        describe('"actions" tests for event listener', () => generateInputActionsTests({
+            class: 'Telemetry',
+            My_Listener: {
+                class: 'Telemetry_Listener'
+            }
+        }, ['My_Listener']));
+
         it('should pass minimal declaration', () => {
             const data = {
                 class: 'Telemetry',
@@ -2462,7 +2146,7 @@ describe('Declarations', () => {
                     class: 'Telemetry_Listener'
                 }
             };
-            return configWorker.processDeclaration(data)
+            return declValidator(data)
                 .then((validConfig) => {
                     const listener = validConfig.My_Listener;
                     assert.notStrictEqual(listener, undefined);
@@ -2533,7 +2217,7 @@ describe('Declarations', () => {
                     ]
                 }
             };
-            return configWorker.processDeclaration(data)
+            return declValidator(data)
                 .then((validConfig) => {
                     const listener = validConfig.My_Listener;
                     assert.notStrictEqual(listener, undefined);
@@ -2567,24 +2251,7 @@ describe('Declarations', () => {
                     someProp: 'someValue'
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /someProp.*should NOT have additional properties/);
-        });
-
-        it('should not allow JMESPath in the action object', () => {
-            const data = {
-                class: 'Telemetry',
-                My_Listener: {
-                    class: 'Telemetry_Listener',
-                    port: 6514,
-                    actions: [
-                        {
-                            JMESPath: {},
-                            expression: '{ message: @, service: telemetryEventCategory, hostname: hostname }'
-                        }
-                    ]
-                }
-            };
-            return assert.isRejected(configWorker.processDeclaration(data), /My_Listener\/actions\/0.*should NOT have additional properties/);
+            return assert.isRejected(declValidator(data), /someProp.*should NOT have additional properties/);
         });
 
         it('should not allow empty application tag', () => {
@@ -2598,7 +2265,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /minLength.*application.*should NOT be shorter than 1 characters/);
+            return assert.isRejected(declValidator(data), /minLength.*application.*should NOT be shorter than 1 characters/);
         });
 
         it('should not allow empty tenant tag', () => {
@@ -2612,7 +2279,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /minLength.*tenant.*should NOT be shorter than 1 characters/);
+            return assert.isRejected(declValidator(data), /minLength.*tenant.*should NOT be shorter than 1 characters/);
         });
 
         describe('trace', () => {
@@ -2624,7 +2291,7 @@ describe('Declarations', () => {
                         trace: true
                     }
                 };
-                return configWorker.processDeclaration(data)
+                return declValidator(data)
                     .then((validConfig) => {
                         const listener = validConfig.My_Listener;
                         assert.notStrictEqual(listener, undefined);
@@ -2640,7 +2307,7 @@ describe('Declarations', () => {
                         trace: false
                     }
                 };
-                return configWorker.processDeclaration(data)
+                return declValidator(data)
                     .then((validConfig) => {
                         const listener = validConfig.My_Listener;
                         assert.notStrictEqual(listener, undefined);
@@ -2656,7 +2323,7 @@ describe('Declarations', () => {
                         trace: '/my/path'
                     }
                 };
-                return configWorker.processDeclaration(data)
+                return declValidator(data)
                     .then((validConfig) => {
                         const listener = validConfig.My_Listener;
                         assert.notStrictEqual(listener, undefined);
@@ -2672,7 +2339,7 @@ describe('Declarations', () => {
                         trace: ''
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data), /minLength.*trace.*should NOT be shorter than 1 character/);
+                return assert.isRejected(declValidator(data), /minLength.*trace.*should NOT be shorter than 1 character/);
             });
         });
 
@@ -2686,7 +2353,7 @@ describe('Declarations', () => {
                             trace: { type: 'output' }
                         }
                     };
-                    return configWorker.processDeclaration(data)
+                    return declValidator(data)
                         .then((validConfig) => {
                             const listener = validConfig.My_Listener;
                             assert.notStrictEqual(listener, undefined);
@@ -2709,7 +2376,7 @@ describe('Declarations', () => {
                             trace: { type: 'input' }
                         }
                     };
-                    return configWorker.processDeclaration(data)
+                    return declValidator(data)
                         .then((validConfig) => {
                             const listener = validConfig.My_Listener;
                             assert.notStrictEqual(listener, undefined);
@@ -2732,7 +2399,7 @@ describe('Declarations', () => {
                             trace: { type: 'output', path: 'path' }
                         }
                     };
-                    return configWorker.processDeclaration(data)
+                    return declValidator(data)
                         .then((validConfig) => {
                             const listener = validConfig.My_Listener;
                             assert.notStrictEqual(listener, undefined);
@@ -2755,7 +2422,7 @@ describe('Declarations', () => {
                             trace: { type: 'input', path: '' }
                         }
                     };
-                    return assert.isRejected(configWorker.processDeclaration(data), /minLength.*path.*should NOT be shorter than 1 character/);
+                    return assert.isRejected(declValidator(data), /minLength.*path.*should NOT be shorter than 1 character/);
                 });
 
                 it('should not allow set tracer without "type"', () => {
@@ -2766,7 +2433,7 @@ describe('Declarations', () => {
                             trace: {}
                         }
                     };
-                    return assert.isRejected(configWorker.processDeclaration(data), /should have required property 'type'/);
+                    return assert.isRejected(declValidator(data), /should have required property 'type'/);
                 });
 
                 it('should not allow set invalid value to tracer "type"', () => {
@@ -2777,7 +2444,7 @@ describe('Declarations', () => {
                             trace: { type: 'invalidType' }
                         }
                     };
-                    return assert.isRejected(configWorker.processDeclaration(data), /trace.*type.*enum.*should be equal to one of the allowed values/);
+                    return assert.isRejected(declValidator(data), /trace.*type.*enum.*should be equal to one of the allowed values/);
                 });
             });
 
@@ -2790,7 +2457,7 @@ describe('Declarations', () => {
                             trace: [{ type: 'output' }, { type: 'input' }]
                         }
                     };
-                    return configWorker.processDeclaration(data)
+                    return declValidator(data)
                         .then((validConfig) => {
                             const listener = validConfig.My_Listener;
                             assert.notStrictEqual(listener, undefined);
@@ -2814,7 +2481,7 @@ describe('Declarations', () => {
                             trace: [{ type: 'output', path: 'outputPath' }, { type: 'input', path: 'inputPath' }]
                         }
                     };
-                    return configWorker.processDeclaration(data)
+                    return declValidator(data)
                         .then((validConfig) => {
                             const listener = validConfig.My_Listener;
                             assert.notStrictEqual(listener, undefined);
@@ -2838,7 +2505,7 @@ describe('Declarations', () => {
                             trace: [{ type: 'output', path: 'outputPath' }, { type: 'output', path: 'inputPath' }]
                         }
                     };
-                    return assert.isRejected(configWorker.processDeclaration(data), /should pass .*uniqueItemProperties.* keyword validation/);
+                    return assert.isRejected(declValidator(data), /should pass .*uniqueItemProperties.* keyword validation/);
                 });
 
                 it('should not allow set tracer to an empty array', () => {
@@ -2849,7 +2516,7 @@ describe('Declarations', () => {
                             trace: []
                         }
                     };
-                    return assert.isRejected(configWorker.processDeclaration(data), /should NOT have fewer than 1 items/);
+                    return assert.isRejected(declValidator(data), /should NOT have fewer than 1 items/);
                 });
 
                 it('should not allow set tracer to an array with 3+ elements', () => {
@@ -2864,7 +2531,7 @@ describe('Declarations', () => {
                             ]
                         }
                     };
-                    return assert.isRejected(configWorker.processDeclaration(data), /should NOT have more than 2 items/);
+                    return assert.isRejected(declValidator(data), /should NOT have more than 2 items/);
                 });
 
                 it('should not allow set tracer path to empty string', () => {
@@ -2875,7 +2542,7 @@ describe('Declarations', () => {
                             trace: [{ type: 'input', path: '' }, { type: 'output', path: 'path' }]
                         }
                     };
-                    return assert.isRejected(configWorker.processDeclaration(data), /minLength.*path.*should NOT be shorter than 1 character/);
+                    return assert.isRejected(declValidator(data), /minLength.*path.*should NOT be shorter than 1 character/);
                 });
 
                 it('should not allow set tracer without "type"', () => {
@@ -2886,7 +2553,7 @@ describe('Declarations', () => {
                             trace: [{}]
                         }
                     };
-                    return assert.isRejected(configWorker.processDeclaration(data), /should have required property 'type'/);
+                    return assert.isRejected(declValidator(data), /should have required property 'type'/);
                 });
 
                 it('should not allow set invalid value to tracer "type"', () => {
@@ -2897,7 +2564,7 @@ describe('Declarations', () => {
                             trace: [{ type: 'invalidType' }]
                         }
                     };
-                    return assert.isRejected(configWorker.processDeclaration(data), /trace.*type.*enum.*should be equal to one of the allowed values/);
+                    return assert.isRejected(declValidator(data), /trace.*type.*enum.*should be equal to one of the allowed values/);
                 });
             });
         });
@@ -2921,7 +2588,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return configWorker.processDeclaration(data)
+            return declValidator(data)
                 .then((validConfig) => {
                     const poller = validConfig.My_iHealth_Poller;
                     assert.notStrictEqual(poller, undefined);
@@ -2968,7 +2635,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return configWorker.processDeclaration(data)
+            return declValidator(data)
                 .then((validConfig) => {
                     const poller = validConfig.My_iHealth_Poller;
                     assert.notStrictEqual(poller, undefined);
@@ -3006,7 +2673,7 @@ describe('Declarations', () => {
                     someProp: 'someValue'
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /someProp.*should NOT have additional properties/);
+            return assert.isRejected(declValidator(data), /someProp.*should NOT have additional properties/);
         });
 
         it('should not allow empty string as downloadFolder\' value', () => {
@@ -3021,7 +2688,7 @@ describe('Declarations', () => {
                     downloadFolder: ''
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /downloadFolder.*minLength/);
+            return assert.isRejected(declValidator(data), /downloadFolder.*minLength/);
         });
 
         describe('interval', () => {
@@ -3043,7 +2710,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isFulfilled(configWorker.processDeclaration(data));
+                return assert.isFulfilled(declValidator(data));
             });
 
             it('should pass full declaration', () => {
@@ -3065,7 +2732,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isFulfilled(configWorker.processDeclaration(data));
+                return assert.isFulfilled(declValidator(data));
             });
 
             it('should not allow additional properties', () => {
@@ -3088,7 +2755,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data), /someProp.*should NOT have additional properties/);
+                return assert.isRejected(declValidator(data), /someProp.*should NOT have additional properties/);
             });
 
             it('should fail parse invalid time string', () => {
@@ -3109,7 +2776,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data), /interval.timeWindow.start.*should match pattern/);
+                return assert.isRejected(declValidator(data), /interval.timeWindow.start.*should match pattern/);
             });
 
             it('should preserve difference between start and end time (2hr min)', () => {
@@ -3130,7 +2797,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data), /interval.timeWindow.*specify window with size of a/);
+                return assert.isRejected(declValidator(data), /interval.timeWindow.*specify window with size of a/);
             });
 
             it('should fail when invalid weekly day name specified', () => {
@@ -3152,7 +2819,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data), /interval.day.*should match pattern/);
+                return assert.isRejected(declValidator(data), /interval.day.*should match pattern/);
             });
 
             it('should fail when invalid weekly day specified', () => {
@@ -3174,7 +2841,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data), /interval.day.*should be <= 7/);
+                return assert.isRejected(declValidator(data), /interval.day.*should be <= 7/);
             });
 
             it('should fail when invalid monthly day specified', () => {
@@ -3196,12 +2863,33 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(configWorker.processDeclaration(data), /interval.day.*should be <= 31/);
+                return assert.isRejected(declValidator(data), /interval.day.*should be <= 31/);
             });
         });
     });
 
     describe('Telemetry_System', () => {
+        describe('"actions" tests for single system poller', () => generateInputActionsTests({
+            class: 'Telemetry',
+            My_System: {
+                class: 'Telemetry_System',
+                systemPoller: {
+                    interval: 90
+                }
+            }
+        }, ['My_System', 'systemPoller']));
+
+        describe('"actions" tests for array of system pollers', () => generateInputActionsTests({
+            class: 'Telemetry',
+            My_System: {
+                class: 'Telemetry_System',
+                systemPoller: [
+                    { interval: 90 },
+                    { interval: 100 }
+                ]
+            }
+        }, ['My_System', 'systemPoller', '0']));
+
         it('should pass minimal declaration', () => {
             const data = {
                 class: 'Telemetry',
@@ -3209,7 +2897,7 @@ describe('Declarations', () => {
                     class: 'Telemetry_System'
                 }
             };
-            return configWorker.processDeclaration(data)
+            return declValidator(data)
                 .then((validConfig) => {
                     const system = validConfig.My_System;
                     assert.notStrictEqual(system, undefined);
@@ -3267,7 +2955,7 @@ describe('Declarations', () => {
                     iHealthPoller: 'My_iHealth_Poller'
                 }
             };
-            return configWorker.processDeclaration(data)
+            return declValidator(data)
                 .then((validConfig) => {
                     const system = validConfig.My_System;
                     assert.notStrictEqual(system, undefined);
@@ -3309,7 +2997,7 @@ describe('Declarations', () => {
                     someProp: 'someValue'
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /someProp.*should NOT have additional properties/);
+            return assert.isRejected(declValidator(data), /someProp.*should NOT have additional properties/);
         });
 
         it('should allow to attach poller declaration by name', () => {
@@ -3323,7 +3011,7 @@ describe('Declarations', () => {
                     systemPoller: 'My_System_Poller'
                 }
             };
-            return assert.isFulfilled(configWorker.processDeclaration(data));
+            return assert.isFulfilled(declValidator(data));
         });
 
         it('should fail when non-existing poller declaration attached', () => {
@@ -3334,7 +3022,7 @@ describe('Declarations', () => {
                     systemPoller: 'My_System_Poller_Non_existing'
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /declaration with name.*(Telemetry_System_Poller|My_System_Poller_Non_existing)/);
+            return assert.isRejected(declValidator(data), /declaration with name.*(Telemetry_System_Poller|My_System_Poller_Non_existing)/);
         });
 
         it('should fail when poller declaration specified by name with invalid type', () => {
@@ -3348,7 +3036,7 @@ describe('Declarations', () => {
                     systemPoller: 'My_System_2'
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /declaration with name.*(Telemetry_System_Poller|My_System_2)/);
+            return assert.isRejected(declValidator(data), /declaration with name.*(Telemetry_System_Poller|My_System_2)/);
         });
 
         it('should allow to attach inline System Poller minimal declaration', () => {
@@ -3360,7 +3048,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return configWorker.processDeclaration(data)
+            return declValidator(data)
                 .then((validConfig) => {
                     const poller = validConfig.My_System.systemPoller;
                     assert.notStrictEqual(poller, undefined);
@@ -3415,7 +3103,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return configWorker.processDeclaration(data)
+            return declValidator(data)
                 .then((validConfig) => {
                     const poller = validConfig.My_System.systemPoller;
                     assert.notStrictEqual(poller, undefined);
@@ -3447,7 +3135,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /systemPoller.*should NOT have additional properties/);
+            return assert.isRejected(declValidator(data), /systemPoller.*should NOT have additional properties/);
         });
 
         it('should not allow empty username', () => {
@@ -3461,7 +3149,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /minLength.*username.*should NOT be shorter than 1 characters/);
+            return assert.isRejected(declValidator(data), /minLength.*username.*should NOT be shorter than 1 characters/);
         });
 
         it('should not allow empty host', () => {
@@ -3475,7 +3163,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /minLength.*host.*should NOT be shorter than 1 characters/);
+            return assert.isRejected(declValidator(data), /minLength.*host.*should NOT be shorter than 1 characters/);
         });
 
         it('should not allow empty iHealthPollerPointerRef', () => {
@@ -3486,7 +3174,7 @@ describe('Declarations', () => {
                     iHealthPoller: ''
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /minLength.*iHealthPoller.*should NOT be shorter than 1 characters/);
+            return assert.isRejected(declValidator(data), /minLength.*iHealthPoller.*should NOT be shorter than 1 characters/);
         });
 
         it('should not allow empty systemPollerPointerRef', () => {
@@ -3497,7 +3185,7 @@ describe('Declarations', () => {
                     systemPoller: ''
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /minLength.*systemPoller.*should NOT be shorter than 1 characters/);
+            return assert.isRejected(declValidator(data), /minLength.*systemPoller.*should NOT be shorter than 1 characters/);
         });
 
         it('should allow to attach inline iHealth Poller minimal declaration', () => {
@@ -3519,7 +3207,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return configWorker.processDeclaration(data)
+            return declValidator(data)
                 .then((validConfig) => {
                     const poller = validConfig.My_System.iHealthPoller;
                     assert.notStrictEqual(poller, undefined);
@@ -3567,7 +3255,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return configWorker.processDeclaration(data)
+            return declValidator(data)
                 .then((validConfig) => {
                     const poller = validConfig.My_System.iHealthPoller;
                     assert.notStrictEqual(poller, undefined);
@@ -3612,7 +3300,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /iHealthPoller.*should NOT have additional properties/);
+            return assert.isRejected(declValidator(data), /iHealthPoller.*should NOT have additional properties/);
         });
 
         it('should allow to attach inline declaration for System Poller and iHealth Poller', () => {
@@ -3637,7 +3325,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return assert.isFulfilled(configWorker.processDeclaration(data));
+            return assert.isFulfilled(declValidator(data));
         });
 
         it('should allow systemPoller as an array (inline object)', () => {
@@ -3656,7 +3344,7 @@ describe('Declarations', () => {
                     ]
                 }
             };
-            return configWorker.processDeclaration(data)
+            return declValidator(data)
                 .then((validConfig) => {
                     const poller = validConfig.My_System.systemPoller;
                     assert.deepStrictEqual(poller,
@@ -3702,7 +3390,7 @@ describe('Declarations', () => {
                     trace: true
                 }
             };
-            return assert.isFulfilled(configWorker.processDeclaration(data));
+            return assert.isFulfilled(declValidator(data));
         });
 
         it('should allow systemPoller as an array (mixed ref and object)', () => {
@@ -3722,7 +3410,7 @@ describe('Declarations', () => {
                     interval: 80
                 }
             };
-            return assert.isFulfilled(configWorker.processDeclaration(data));
+            return assert.isFulfilled(declValidator(data));
         });
 
         it('should not allow a systemPoller as empty array', () => {
@@ -3734,7 +3422,7 @@ describe('Declarations', () => {
                 }
             };
             const errMsg = 'should NOT have fewer than 1 items';
-            return assert.isRejected(configWorker.processDeclaration(data), errMsg);
+            return assert.isRejected(declValidator(data), errMsg);
         });
 
         it('should not allow a systemPoller with empty endpointList object', () => {
@@ -3749,7 +3437,7 @@ describe('Declarations', () => {
                 }
             };
             const errMsg = 'should have required property \'items\'';
-            return assert.isRejected(configWorker.processDeclaration(data), errMsg);
+            return assert.isRejected(declValidator(data), errMsg);
         });
 
         it('should not allow a systemPoller with empty items in endpointList object', () => {
@@ -3766,7 +3454,7 @@ describe('Declarations', () => {
                 }
             };
             const errMsg = 'should NOT have fewer than 1 properties';
-            return assert.isRejected(configWorker.processDeclaration(data), errMsg);
+            return assert.isRejected(declValidator(data), errMsg);
         });
 
         it('should not allow a systemPoller with empty endpointList array', () => {
@@ -3781,7 +3469,7 @@ describe('Declarations', () => {
                 }
             };
             const errMsg = 'should NOT have fewer than 1 items';
-            return assert.isRejected(configWorker.processDeclaration(data), errMsg);
+            return assert.isRejected(declValidator(data), errMsg);
         });
 
         it('should not allow a systemPoller with empty items in endpointList array', () => {
@@ -3800,7 +3488,7 @@ describe('Declarations', () => {
                 }
             };
             const errMsg = 'should NOT have fewer than 1 properties';
-            return assert.isRejected(configWorker.processDeclaration(data), errMsg);
+            return assert.isRejected(declValidator(data), errMsg);
         });
     });
 
@@ -3817,7 +3505,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return configWorker.processDeclaration(data)
+            return declValidator(data)
                 .then((validConfig) => {
                     const endpoints = validConfig.My_Endpoints;
                     assert.deepStrictEqual(endpoints.items, {
@@ -3845,7 +3533,7 @@ describe('Declarations', () => {
                     something: true
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /something.*should NOT have additional properties/);
+            return assert.isRejected(declValidator(data), /something.*should NOT have additional properties/);
         });
 
         it('should allow full declaration', () => {
@@ -3869,7 +3557,7 @@ describe('Declarations', () => {
                 }
             };
 
-            return configWorker.processDeclaration(data)
+            return declValidator(data)
                 .then((validConfig) => {
                     const endpoints = validConfig.My_Endpoints;
                     assert.deepStrictEqual(endpoints.items, {
@@ -3895,7 +3583,7 @@ describe('Declarations', () => {
                     items: {}
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /\/My_Endpoints\/items.*items\/minProperties.*limit":1/);
+            return assert.isRejected(declValidator(data), /\/My_Endpoints\/items.*items\/minProperties.*limit":1/);
         });
 
         it('should not allow items that are not of type object', () => {
@@ -3909,7 +3597,7 @@ describe('Declarations', () => {
                     ]
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /\/My_Endpoints\/items.*should be object/);
+            return assert.isRejected(declValidator(data), /\/My_Endpoints\/items.*should be object/);
         });
 
         it('should not allow additional properties in items', () => {
@@ -3927,7 +3615,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /\/My_Endpoints\/items.*should NOT have additional properties/);
+            return assert.isRejected(declValidator(data), /\/My_Endpoints\/items.*should NOT have additional properties/);
         });
 
         it('should not allow empty name', () => {
@@ -3944,7 +3632,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /\/My_Endpoints\/items\/first\/name.*should NOT be shorter than/);
+            return assert.isRejected(declValidator(data), /\/My_Endpoints\/items\/first\/name.*should NOT be shorter than/);
         });
 
         it('should not allow empty path', () => {
@@ -3960,7 +3648,7 @@ describe('Declarations', () => {
                     }
                 }
             };
-            return assert.isRejected(configWorker.processDeclaration(data), /\/My_Endpoints\/items\/first\/path.*should NOT be shorter than/);
+            return assert.isRejected(declValidator(data), /\/My_Endpoints\/items\/first\/path.*should NOT be shorter than/);
         });
     });
 
@@ -4071,7 +3759,7 @@ describe('Declarations', () => {
         describe('AWS_CloudWatch', () => {
             describe('dataType', () => {
                 describe('dataType === logs', () => {
-                    schemaValidationUtil.generateBasicSchemaTests(
+                    schemaValidationUtil.generateSchemaBasicTests(
                         basicSchemaTestsValidator,
                         {
                             type: 'AWS_CloudWatch',
@@ -4103,7 +3791,7 @@ describe('Declarations', () => {
                 });
 
                 describe('dataType === metric', () => {
-                    schemaValidationUtil.generateBasicSchemaTests(
+                    schemaValidationUtil.generateSchemaBasicTests(
                         basicSchemaTestsValidator,
                         {
                             type: 'AWS_CloudWatch',
@@ -4201,7 +3889,7 @@ describe('Declarations', () => {
                     /should match exactly one schema in oneOf/
                 ));
 
-                schemaValidationUtil.generateBasicSchemaTests(
+                schemaValidationUtil.generateSchemaBasicTests(
                     basicSchemaTestsValidator,
                     {
                         type: 'AWS_CloudWatch',
@@ -4270,7 +3958,7 @@ describe('Declarations', () => {
                     /should match exactly one schema in oneOf/
                 ));
 
-                schemaValidationUtil.generateBasicSchemaTests(
+                schemaValidationUtil.generateSchemaBasicTests(
                     basicSchemaTestsValidator,
                     {
                         type: 'AWS_CloudWatch',
@@ -4321,7 +4009,7 @@ describe('Declarations', () => {
                 }
             ));
 
-            schemaValidationUtil.generateBasicSchemaTests(
+            schemaValidationUtil.generateSchemaBasicTests(
                 basicSchemaTestsValidator,
                 {
                     type: 'AWS_S3',
@@ -4398,7 +4086,7 @@ describe('Declarations', () => {
                 /useManagedIdentity\/const.*"allowedValue":false/
             ));
 
-            schemaValidationUtil.generateBasicSchemaTests(
+            schemaValidationUtil.generateSchemaBasicTests(
                 basicSchemaTestsValidator,
                 {
                     type: 'Azure_Log_Analytics',
@@ -4416,7 +4104,7 @@ describe('Declarations', () => {
             );
 
             describe('useManagedIdentity === false', () => {
-                schemaValidationUtil.generateBasicSchemaTests(
+                schemaValidationUtil.generateSchemaBasicTests(
                     basicSchemaTestsValidator,
                     {
                         type: 'Azure_Log_Analytics',
@@ -4646,7 +4334,7 @@ describe('Declarations', () => {
             ));
 
             describe('common basic tests', () => {
-                schemaValidationUtil.generateBasicSchemaTests(
+                schemaValidationUtil.generateSchemaBasicTests(
                     basicSchemaTestsValidator,
                     {
                         customOpts: [
@@ -4692,7 +4380,7 @@ describe('Declarations', () => {
             });
 
             describe('instrumentationKey === array', () => {
-                schemaValidationUtil.generateBasicSchemaTests(
+                schemaValidationUtil.generateSchemaBasicTests(
                     basicSchemaTestsValidator,
                     {
                         instrumentationKey: ['some-key-here'],
@@ -4713,7 +4401,7 @@ describe('Declarations', () => {
             });
 
             describe('useManagedIdentity === true', () => {
-                schemaValidationUtil.generateBasicSchemaTests(
+                schemaValidationUtil.generateSchemaBasicTests(
                     basicSchemaTestsValidator,
                     {
                         type: 'Azure_Application_Insights',
@@ -4775,7 +4463,7 @@ describe('Declarations', () => {
                 }
             ));
 
-            schemaValidationUtil.generateBasicSchemaTests(
+            schemaValidationUtil.generateSchemaBasicTests(
                 basicSchemaTestsValidator,
                 {
                     type: 'ElasticSearch',
@@ -4840,64 +4528,6 @@ describe('Declarations', () => {
                 }
             ));
 
-            it('should not allow the includeData \'action\' in the declaration', () => assert.isRejected(validateFull(
-                {
-                    type: 'Generic_HTTP',
-                    host: 'host',
-                    actions: [
-                        {
-                            includeData: {},
-                            locations: {
-                                system: true
-                            }
-                        }
-                    ]
-                }
-            ), /\/My_Consumer\/actions\/0.*("additionalProperty":"includeData").*should NOT have additional properties/));
-
-            it('should not allow the excludeData \'action\' in the declaration', () => assert.isRejected(validateFull(
-                {
-                    type: 'Generic_HTTP',
-                    host: 'host',
-                    actions: [
-                        {
-                            excludeData: {},
-                            locations: {
-                                system: true
-                            }
-                        }
-                    ]
-                }
-            ), /\/My_Consumer\/actions\/0.*("additionalProperty":"excludeData").*should NOT have additional properties/));
-
-            it('should allow JMESPath in \'actions\' block', () => validateMinimal(
-                {
-                    type: 'Generic_HTTP',
-                    host: 'host',
-                    actions: [
-                        {
-                            JMESPath: {},
-                            expression: '{ message: @ }'
-                        }
-                    ]
-                },
-                {
-                    type: 'Generic_HTTP',
-                    host: 'host',
-                    protocol: 'https',
-                    port: 443,
-                    path: '/',
-                    method: 'POST',
-                    actions: [
-                        {
-                            enable: true,
-                            JMESPath: {},
-                            expression: '{ message: @ }'
-                        }
-                    ]
-                }
-            ));
-
             it('should allow full declaration', () => validateFull(
                 {
                     type: 'Generic_HTTP',
@@ -4941,7 +4571,13 @@ describe('Declarations', () => {
                     },
                     rootCertificate: {
                         cipherText: 'myCA'
-                    }
+                    },
+                    actions: [
+                        {
+                            JMESPath: {},
+                            expression: '{ message: @ }'
+                        }
+                    ]
                 },
                 {
                     type: 'Generic_HTTP',
@@ -4994,11 +4630,18 @@ describe('Declarations', () => {
                         cipherText: '$M$myCA',
                         class: 'Secret',
                         protected: 'SecureVault'
-                    }
+                    },
+                    actions: [
+                        {
+                            enable: true,
+                            JMESPath: {},
+                            expression: '{ message: @ }'
+                        }
+                    ]
                 }
             ));
 
-            schemaValidationUtil.generateBasicSchemaTests(
+            schemaValidationUtil.generateSchemaBasicTests(
                 basicSchemaTestsValidator,
                 {
                     actions: [
@@ -5030,7 +4673,39 @@ describe('Declarations', () => {
                     },
                     'host',
                     'path',
-                    { property: 'privateKey', ignoreOther: true, requiredTests: true }
+                    { property: 'privateKey', ignoreOther: true, requiredTests: true },
+                    {
+                        property: ['actions', '1'],
+                        ignoreOther: true,
+                        valueTests: {
+                            subTitle: 'not allow the excludeData action',
+                            invalid: { excludeData: {}, locations: { system: true } }
+                        }
+                    },
+                    {
+                        property: ['actions', '1'],
+                        ignoreOther: true,
+                        valueTests: {
+                            subTitle: 'not allow the includeData action',
+                            invalid: { includeData: {}, locations: { system: true } }
+                        }
+                    },
+                    {
+                        property: ['actions', '1'],
+                        ignoreOther: true,
+                        valueTests: {
+                            subTitle: 'not allow the setTag action',
+                            invalid: { setTag: { tag: '`T`' } }
+                        }
+                    },
+                    {
+                        property: ['actions', '1'],
+                        ignoreOther: true,
+                        valueTests: {
+                            subTitle: 'allow the JMESPath action',
+                            valid: { JMESPath: {}, expression: 'test' }
+                        }
+                    }
                 ],
                 { stringLengthTests: true }
             );
@@ -5106,7 +4781,7 @@ describe('Declarations', () => {
                 }
             ));
 
-            schemaValidationUtil.generateBasicSchemaTests(
+            schemaValidationUtil.generateSchemaBasicTests(
                 basicSchemaTestsValidator,
                 {
                     type: 'Google_Cloud_Monitoring',
@@ -5158,7 +4833,7 @@ describe('Declarations', () => {
                 }
             ));
 
-            schemaValidationUtil.generateBasicSchemaTests(
+            schemaValidationUtil.generateSchemaBasicTests(
                 basicSchemaTestsValidator,
                 {
                     type: 'Graphite',
@@ -5326,27 +5001,34 @@ describe('Declarations', () => {
             ), /should NOT be valid/));
 
             describe('authenticationProtocol === SASL-PLAIN', () => {
-                schemaValidationUtil.generateBasicSchemaTests(
+                schemaValidationUtil.generateSchemaBasicTests(
                     basicSchemaTestsValidator,
                     {
                         type: 'Kafka',
                         host: 'host',
                         topic: 'topic',
-                        authenticationProtocol: 'SASL-PLAIN'
+                        authenticationProtocol: 'SASL-PLAIN',
+                        username: 'username'
                     },
                     'username',
-                    { stringLengthTests: true }
+                    { requiredTests: true, stringLengthTests: true }
                 );
             });
 
             describe('authenticationProtocol === TLS', () => {
-                schemaValidationUtil.generateBasicSchemaTests(
+                schemaValidationUtil.generateSchemaBasicTests(
                     basicSchemaTestsValidator,
                     {
                         type: 'Kafka',
                         host: 'host',
                         topic: 'topic',
-                        authenticationProtocol: 'TLS'
+                        authenticationProtocol: 'TLS',
+                        privateKey: {
+                            cipherText: 'privateKey'
+                        },
+                        clientCertificate: {
+                            cipherText: 'clientCertificate'
+                        }
                     },
                     'privateKey',
                     { requiredTests: true }
@@ -5429,7 +5111,7 @@ describe('Declarations', () => {
                 }
             ));
 
-            schemaValidationUtil.generateBasicSchemaTests(
+            schemaValidationUtil.generateSchemaBasicTests(
                 basicSchemaTestsValidator,
                 {
                     type: 'Splunk',
@@ -5478,7 +5160,7 @@ describe('Declarations', () => {
                 }
             ));
 
-            schemaValidationUtil.generateBasicSchemaTests(
+            schemaValidationUtil.generateSchemaBasicTests(
                 basicSchemaTestsValidator,
                 {
                     type: 'Statsd',
@@ -5543,7 +5225,7 @@ describe('Declarations', () => {
                 }
             ));
 
-            schemaValidationUtil.generateBasicSchemaTests(
+            schemaValidationUtil.generateSchemaBasicTests(
                 basicSchemaTestsValidator,
                 {
                     type: 'Sumo_Logic',
@@ -5677,7 +5359,7 @@ describe('Declarations', () => {
                 }
             ));
 
-            schemaValidationUtil.generateBasicSchemaTests(
+            schemaValidationUtil.generateSchemaBasicTests(
                 basicSchemaTestsValidator,
                 {
                     type: 'F5_Cloud',
@@ -5998,3 +5680,323 @@ describe('Declarations', () => {
         ));
     });
 });
+
+
+function declValidator(decl, addtlContext) {
+    let options;
+    decl = testUtil.deepCopy(decl);
+    if (addtlContext) {
+        options = addtlContext.options || { expanded: true };
+        if (addtlContext.constants) {
+            decl.Shared = testUtil.assignDefaults(decl.Shared, {
+                class: 'Shared',
+                constants: {
+                    class: 'Constants'
+                }
+            });
+            decl.Shared.constants = testUtil.assignDefaults(decl.Shared.constants, addtlContext.constants);
+        }
+    }
+    // TODO: remove later when logger mock will be updated
+    fileLogger.debug('Validating declaration', decl);
+    return configWorker.processDeclaration(decl, options)
+        .catch((err) => {
+            fileLogger.debug('Error caught on attempt to validate declaration', err);
+            return Promise.reject(err);
+        });
+}
+
+function generateInputActionsTests(baseDeclaration, parentPath) {
+    const locationsTests = [
+        { valueTests: { valid: {}, checkValue: true, subTitle: 'empty locations' } },
+        { valueTests: { valid: { a: true }, checkValue: true, subTitle: 'type of boolean' } },
+        { valueTests: { valid: { a: { b: true } }, checkValue: true, subTitle: 'with single property' } },
+        { valueTests: { valid: { a: { b: true, c: { d: true } } }, checkValue: true, subTitle: 'multiple properties' } },
+        {
+            valueTests: {
+                valid: { virtualServers: { vs$: true }, pools: { '^/Common/Shared/': true } },
+                checkValue: true,
+                subTitle: 'regexp are used in locations'
+            }
+        },
+        { valueTests: { invalid: { a: false }, subTitle: '"false" as destination' } },
+        { valueTests: { invalid: { a: { b: false, c: true } }, subTitle: 'nested "false" as destination' } },
+        { valueTests: { invalid: { a: { b: { d: [] } }, c: true }, subTitle: 'invalid type (array) as destination' } }
+    ];
+
+    const actionsValidator = schemaValidationUtil.wrapValidatorForSchemaBasicTests(
+        declValidator,
+        baseDeclaration,
+        parentPath,
+        { mergeStrategy: 'merge' }
+    );
+    schemaValidationUtil.generateSchemaBasicTests(
+        actionsValidator,
+        {
+            actions: [
+                {
+                    setTag: {
+                        tag: 'value'
+                    }
+                },
+                {
+                    includeData: {},
+                    locations: {
+                        path: true
+                    }
+                },
+                {
+                    excludeData: {},
+                    locations: {
+                        path: true
+                    }
+                }
+            ]
+        },
+        [
+            // validate merged declaration at first
+            { validateDeclarationTests: true },
+            // check default values for Input actions
+            {
+                property: 'actions',
+                tests: [
+                    {
+                        defaultValueTests: [
+                            {
+                                enable: true,
+                                setTag: { application: '`A`', tenant: '`T`' }
+                            }
+                        ],
+                        valueTests: {
+                            subTitle: 'allow empty array',
+                            valid: []
+                        }
+                    }
+                ]
+            },
+            // setTagAction tests
+            {
+                property: ['actions', '0'],
+                tests: [
+                    {
+                        additionalPropsTests: {
+                            combinations: true,
+                            notAllowed: true, // random property
+                            failing: {
+                                excludeData: {},
+                                includeData: {}
+                            }
+                        },
+                        optionalPropTests: {
+                            combinations: true,
+                            properties: {
+                                locations: { path: true },
+                                enable: true,
+                                ifAllMatch: { path: true }
+                            }
+                        },
+                        requiredTests: 'setTag'
+                    },
+                    {
+                        additionalPropsTests: {
+                            subTitle: 'can\'t be set at the same time',
+                            failing: {
+                                ifAllMatch: { path: 'value' },
+                                ifAnyMatch: [{ path: 'value' }]
+                            }
+                        },
+                        optionalPropTests: {
+                            combinations: true,
+                            properties: {
+                                locations: { path: true },
+                                enable: true,
+                                ifAnyMatch: [{ path: true }]
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                property: ['actions', '0', 'locations'],
+                tests: testUtil.deepCopy(locationsTests)
+            },
+            {
+                property: ['actions', '0', 'ifAnyMatch'],
+                valueTests: {
+                    subTitle: 'ifAnyMatch should be wrapped into array',
+                    valid: [{
+                        insideOfArray: true
+                    }],
+                    invalid: {
+                        shouldBeArray: true
+                    }
+                }
+            },
+            {
+                property: ['actions', '0', 'ifAllMatch'],
+                valueTests: {
+                    subTitle: 'ifAllMatch should be wrapped into object',
+                    invalid: [{
+                        shouldBeObject: true
+                    }],
+                    valid: {
+                        isObject: true
+                    }
+                }
+            },
+            // includeDataAction tests
+            {
+                property: ['actions', '1'],
+                tests: [
+                    {
+                        additionalPropsTests: {
+                            combinations: true,
+                            notAllowed: true, // random property
+                            failing: {
+                                excludeData: {},
+                                setTag: { tenant: '`T`' }
+                            }
+                        },
+                        optionalPropTests: {
+                            combinations: true,
+                            properties: {
+                                enable: true,
+                                ifAllMatch: { path: true }
+                            }
+                        },
+                        requiredTests: {
+                            combinations: true,
+                            properties: ['includeData', 'locations']
+                        }
+                    },
+                    {
+                        additionalPropsTests: {
+                            subTitle: 'can\'t be set at the same time',
+                            failing: {
+                                ifAllMatch: { path: 'value' },
+                                ifAnyMatch: [{ path: 'value' }]
+                            }
+                        },
+                        optionalPropTests: {
+                            combinations: true,
+                            properties: {
+                                enable: true,
+                                ifAnyMatch: [{ path: true }]
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                property: ['actions', '1', 'locations'],
+                tests: testUtil.deepCopy(locationsTests)
+            },
+            {
+                property: ['actions', '1', 'ifAnyMatch'],
+                valueTests: {
+                    subTitle: 'ifAnyMatch should be wrapped into array',
+                    valid: [{
+                        insideOfArray: true
+                    }],
+                    invalid: {
+                        shouldBeArray: true
+                    }
+                }
+            },
+            {
+                property: ['actions', '1', 'ifAllMatch'],
+                valueTests: {
+                    subTitle: 'ifAllMatch should be wrapped into object',
+                    invalid: [{
+                        shouldBeObject: true
+                    }],
+                    valid: {
+                        isObject: true
+                    }
+                }
+            },
+            // excludeDataAction tests
+            {
+                property: ['actions', '2'],
+                tests: [
+                    {
+                        additionalPropsTests: {
+                            combinations: true,
+                            notAllowed: true, // random property
+                            failing: {
+                                includeData: {},
+                                setTag: { tenant: '`T`' }
+                            }
+                        },
+                        optionalPropTests: {
+                            combinations: true,
+                            properties: {
+                                enable: true,
+                                ifAllMatch: { path: true }
+                            }
+                        },
+                        requiredTests: {
+                            combinations: true,
+                            properties: ['excludeData', 'locations']
+                        }
+                    },
+                    {
+                        additionalPropsTests: {
+                            subTitle: 'can\'t be set at the same time',
+                            failing: {
+                                ifAllMatch: { path: 'value' },
+                                ifAnyMatch: [{ path: 'value' }]
+                            }
+                        },
+                        optionalPropTests: {
+                            combinations: true,
+                            properties: {
+                                enable: true,
+                                ifAnyMatch: [{ path: true }]
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                property: ['actions', '2', 'locations'],
+                tests: testUtil.deepCopy(locationsTests)
+            },
+            {
+                property: ['actions', '2', 'ifAnyMatch'],
+                valueTests: {
+                    subTitle: 'ifAnyMatch should be wrapped into array',
+                    valid: [{
+                        insideOfArray: true
+                    }],
+                    invalid: {
+                        shouldBeArray: true
+                    }
+                }
+            },
+            {
+                property: ['actions', '2', 'ifAllMatch'],
+                valueTests: {
+                    subTitle: 'ifAllMatch should be wrapped into object',
+                    invalid: [{
+                        shouldBeObject: true
+                    }],
+                    valid: {
+                        isObject: true
+                    }
+                }
+            },
+            // consumer actions are not allowed
+            {
+                property: ['actions', '3'],
+                valueTests: {
+                    subTitle: 'JMESPath not allowed',
+                    invalid: {
+                        JMESPath: {},
+                        expression: '{ message: @, service: telemetryEventCategory, hostname: hostname }'
+                    }
+                }
+            }
+        ]
+    );
+}
