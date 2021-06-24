@@ -1,6 +1,17 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.21.0
+### Added
+- AUTOTOOL-2555: Add new property "addTags" to StatsD consumer that makes Consumer to send tags along with metrics (experimental feature)
+### Fixed
+- AUTOTOOL-2555: Fix scrapper code to make StatsD consumer to send more metrics
+### Changed
+- AUTOTOOL-2510: Update npm packages (@f5devcentral/f5-teem from v1.4.6 to v1.5.0, aws-sdk from v2.885.0 to v2.914.0, mustache from v4.1.0 to v4.2.0, statsd-client from v0.4.5 to v0.4.6)
+- Replace grpc-js-0.2-modified with @grpc/grpc-js
+- AUTOTOOL-2535: Refactor Google Cloud (used by the Google Cloud Monitoring Consumer) authentication, and add support for caching short-lived authentication tokens
+### Removed
+
 ## 1.20.0
 ### Added
 - AUTOTOOL-2311: [GitHub #119](https://github.com/F5Networks/f5-telemetry-streaming/issues/119): Added Capacity_Float to system.diskStorage
@@ -9,9 +20,9 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-2312: [GitHub #114](https://github.com/F5Networks/f5-telemetry-streaming/issues/114): Added support to the Generic HTTP Consumer for additional modification of data payloads, including the addition of the 'JMESPathQuery' action
 - AUTOTOOL-2456: Added new Event Listener feature to trace incoming data and save it to a file for further debugging
 ### Fixed
-- AUTOTOOL-2451: [GitHub #127](https://github.com/F5Networks/f5-telemetry-streaming/issues/127): Fixed issue where 'long' fields in ASM events where causing ASM events to become malformed. Individual event fields are now permitted to be <= MAX_BUFFER_SIZE (16k)
-- AUTOTOOL-2464: AWS S3 date path is incorrect
-- AUTOTOOL-2488: Should not create multiple Tracer instances that points to the same file
+- AUTOTOOL-2451: [GitHub #127](https://github.com/F5Networks/f5-telemetry-streaming/issues/127): Fixed issue where 'long' fields in ASM events were causing ASM events to become malformed. Individual event fields are now permitted to be <= MAX_BUFFER_SIZE (16k)
+- AUTOTOOL-2464: AWS S3 date path was incorrect
+- AUTOTOOL-2488: Should not create multiple Tracer instances that point to the same file
 ### Changed
 - AUTOTOOL-2297: Update npm packages (aws-sdk from v2.854.0 to v2.885.0)
 ### Removed

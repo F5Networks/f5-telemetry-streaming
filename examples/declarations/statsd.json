@@ -6,5 +6,15 @@
         "host": "192.0.2.1",
         "protocol": "udp",
         "port": 8125
+    },
+    "My_Consumer_with_AutoTagging": {
+        "class": "Telemetry_Consumer",
+        "type": "Statsd",
+        "host": "192.0.2.1",
+        "protocol": "udp",
+        "port": 8125,
+        "addTags": {
+            "method": "sibling"
+        }
     }
 }

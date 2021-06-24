@@ -15,6 +15,7 @@ const CLASSES = require('./constants').CONFIG_CLASSES;
 const customKeywords = require('./customKeywords');
 const util = require('./utils/misc');
 
+const actionsSchema = require('../schema/latest/actions_schema.json');
 const baseSchema = require('../schema/latest/base_schema.json');
 const consumerSchema = require('../schema/latest/consumer_schema.json');
 const controlsSchema = require('../schema/latest/controls_schema.json');
@@ -64,6 +65,7 @@ module.exports = {
      */
     getValidators() {
         const schemas = {
+            actions: actionsSchema,
             base: baseSchema,
             consumer: consumerSchema,
             pullConsumer: pullConsumerSchema,
