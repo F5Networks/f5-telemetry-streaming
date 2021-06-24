@@ -14,9 +14,9 @@ require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
-const jwt = require('jsonwebtoken');
 const nock = require('nock');
 const sinon = require('sinon');
+const jwt = require('jsonwebtoken');
 
 const cloudMonitoringIndex = require('../../../src/lib/consumers/Google_Cloud_Monitoring/index');
 const logger = require('../../../src/lib/logger');
@@ -61,7 +61,7 @@ describe('Google_Cloud_Monitoring', () => {
             privateKey: 'theprivatekeyvalue'
         }
     };
-    const originTimeSeries = {
+    const getOriginTimeSeries = () => ({
         timeSeries: [
             {
                 metric: {
@@ -74,7 +74,7 @@ describe('Google_Cloud_Monitoring', () => {
                         },
                         interval: {
                             endTime: {
-                                seconds: 1000
+                                seconds: Date.now() / 1000
                             }
                         }
                     }
@@ -99,7 +99,7 @@ describe('Google_Cloud_Monitoring', () => {
                         },
                         interval: {
                             endTime: {
-                                seconds: 1000
+                                seconds: Date.now() / 1000
                             }
                         }
                     }
@@ -114,53 +114,54 @@ describe('Google_Cloud_Monitoring', () => {
                 }
             }
         ]
+    });
+    const metricDescriptors = {
+        onGet: {
+            metricDescriptors: [
+                {
+                    name: 'projects/projectId/metricDescriptors/custom.googleapis.com/system/tmmCpu',
+                    metricKind: 'GAUGE',
+                    valueType: 'INT64',
+                    type: 'custom.googleapis.com/system/tmmCpu'
+                }
+            ]
+        },
+        onPost: {
+            type: 'custom.googleapis.com/system/tmmTraffic/clientSideTraffic.bitsIn',
+            metricKind: 'GAUGE',
+            valueType: 'INT64'
+        }
     };
+    const tokenDuration = 3600;
 
     let context;
+    let clock;
     let loggerStub;
     let tracerStub;
+    let persistentTime = 0;
+
+    const incrementPersistentTime = () => {
+        persistentTime += tokenDuration * 1000;
+        clock.clockForward(tokenDuration * 1000, { repeat: 1 });
+    };
 
     beforeEach(() => {
-        stubs.clock({ fakeTimersOpts: 1000000 });
+        clock = stubs.clock({ fakeTimersOpts: persistentTime });
+        // Increment persistent time before each test, so any cached tokens are are expired
+        incrementPersistentTime();
+
         loggerStub = stubs.logger(logger);
         tracerStub = stubs.tracer(tracer);
+        // Returned signed JWT in format: privateKeyId::privateKey
+        sinon.stub(jwt, 'sign').callsFake((_, secret, options) => `${options.header.kid}::${secret}`);
 
         context = testUtil.deepCopy(originContext);
         context.logger = logger.getChild('gcm');
         context.tracer = tracer.fromConfig({ path: 'gcm' });
-
-        sinon.stub(jwt, 'sign').returns('somejsonwebtoken');
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors')
-            .get('')
-            .reply(
-                200,
-                {
-                    metricDescriptors: [
-                        {
-                            name: 'projects/projectId/metricDescriptors/custom.googleapis.com/system/tmmCpu',
-                            metricKind: 'GAUGE',
-                            valueType: 'INT64',
-                            type: 'custom.googleapis.com/system/tmmCpu'
-                        }
-                    ]
-                }
-            );
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors')
-            .post(
-                '',
-                {
-                    type: 'custom.googleapis.com/system/tmmTraffic/clientSideTraffic.bitsIn',
-                    metricKind: 'GAUGE',
-                    valueType: 'INT64'
-                }
-            )
-            .reply(200, {});
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/timeSeries')
-            .post('', testUtil.deepCopy(originTimeSeries))
-            .reply(200, {});
     });
 
     afterEach(() => {
+        testUtil.checkNockActiveMocks(nock);
         nock.cleanAll();
         sinon.restore();
     });
@@ -178,14 +179,215 @@ describe('Google_Cloud_Monitoring', () => {
 
     it('should process systemInfo data', () => {
         nock('https://oauth2.googleapis.com/token')
-            .post('')
-            .reply(200, { access_token: 'hereHaveSomeAccess' });
+            .post('', body => body.assertion === '12345::theprivatekeyvalue')
+            .reply(200, { access_token: 'aToken', expires_in: tokenDuration });
+
+        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+            reqheaders: {
+                authorization: 'Bearer aToken'
+            }
+        })
+            .get('')
+            .reply(200, metricDescriptors.onGet);
+
+        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+            reqheaders: {
+                authorization: 'Bearer aToken'
+            }
+        })
+            .post('', metricDescriptors.onPost)
+            .reply(200, {});
+
+        nock('https://monitoring.googleapis.com/v3/projects/theProject/timeSeries', {
+            reqheaders: {
+                authorization: 'Bearer aToken'
+            }
+        })
+            .post('', testUtil.deepCopy(getOriginTimeSeries()))
+            .reply(200, {});
 
         return cloudMonitoringIndex(context)
             .then(() => {
-                assert.ok(nock.isDone());
-                assert.deepStrictEqual(tracerStub.data.gcm, [originTimeSeries], 'should write data to tracer');
+                assert.deepStrictEqual(tracerStub.data.gcm, [getOriginTimeSeries()], 'should write data to tracer');
                 testAssert.includeMatch(loggerStub.messages.all, '[telemetry.gcm] success', 'should log success message');
+            });
+    });
+
+    it('should process systemInfo data, with a cached access token', () => {
+        nock('https://oauth2.googleapis.com/token')
+            .post('', body => body.assertion === '12345::theprivatekeyvalue')
+            .times(2)
+            .reply(200, { access_token: 'aToken', expires_in: tokenDuration });
+
+        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+            reqheaders: {
+                authorization: 'Bearer aToken'
+            }
+        })
+            .get('')
+            .times(3)
+            .reply(200, metricDescriptors.onGet);
+
+        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+            reqheaders: {
+                authorization: 'Bearer aToken'
+            }
+        })
+            .post('', metricDescriptors.onPost)
+            .times(3)
+            .reply(200, {});
+
+        nock('https://monitoring.googleapis.com/v3/projects/theProject/timeSeries', {
+            reqheaders: {
+                authorization: 'Bearer aToken'
+            }
+        })
+            .post('', testUtil.deepCopy(getOriginTimeSeries()))
+            .times(2)
+            .reply(200, {});
+
+        return cloudMonitoringIndex(context)
+            .then(() => cloudMonitoringIndex(context))
+            .then(() => {
+                // Increment the clock, to expire token
+                incrementPersistentTime();
+                nock('https://monitoring.googleapis.com/v3/projects/theProject/timeSeries', {
+                    reqheaders: {
+                        authorization: 'Bearer aToken'
+                    }
+                })
+                    .post('', testUtil.deepCopy(getOriginTimeSeries()))
+                    .times(1)
+                    .reply(200, {});
+                return cloudMonitoringIndex(context);
+            })
+            .then(() => {
+                assert.deepStrictEqual(loggerStub.messages.all,
+                    Array(3).fill('[telemetry.gcm] success'), 'should log success message');
+            });
+    });
+
+    it('should process systemInfo data, with multiple cached access tokens', () => {
+        // Private Key 1 nocks
+        nock('https://oauth2.googleapis.com/token')
+            .post('', body => body.assertion === 'privateKey1::firstKey')
+            .reply(200, { access_token: 'accessTokenOne', expires_in: tokenDuration });
+
+        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+            reqheaders: {
+                authorization: 'Bearer accessTokenOne'
+            }
+        })
+            .get('')
+            .times(2)
+            .reply(200, metricDescriptors.onGet);
+
+        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+            reqheaders: {
+                authorization: 'Bearer accessTokenOne'
+            }
+        })
+            .post('', metricDescriptors.onPost)
+            .times(2)
+            .reply(200, {});
+
+        nock('https://monitoring.googleapis.com/v3/projects/theProject/timeSeries', {
+            reqheaders: {
+                authorization: 'Bearer accessTokenOne'
+            }
+        })
+            .post('', testUtil.deepCopy(getOriginTimeSeries()))
+            .times(2)
+            .reply(200, {});
+
+        // Private Key 2 nocks
+        nock('https://oauth2.googleapis.com/token')
+            .post('', body => body.assertion === 'privateKey2::secondKey')
+            .reply(200, { access_token: 'accessTokenTwo', expires_in: tokenDuration });
+
+        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+            reqheaders: {
+                authorization: 'Bearer accessTokenTwo'
+            }
+        })
+            .get('')
+            .times(2)
+            .reply(200, metricDescriptors.onGet);
+
+        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+            reqheaders: {
+                authorization: 'Bearer accessTokenTwo'
+            }
+        })
+            .post('', metricDescriptors.onPost)
+            .times(2)
+            .reply(200, {});
+
+        nock('https://monitoring.googleapis.com/v3/projects/theProject/timeSeries', {
+            reqheaders: {
+                authorization: 'Bearer accessTokenTwo'
+            }
+        })
+            .post('', testUtil.deepCopy(getOriginTimeSeries()))
+            .times(2)
+            .reply(200, {});
+
+        const context1 = testUtil.deepCopy(context);
+        Object.assign(context1.config, { privateKeyId: 'privateKey1', privateKey: 'firstKey' });
+        const context2 = testUtil.deepCopy(context);
+        Object.assign(context2.config, { privateKeyId: 'privateKey2', privateKey: 'secondKey' });
+
+        return cloudMonitoringIndex(context1)
+            .then(() => cloudMonitoringIndex(context2))
+            .then(() => cloudMonitoringIndex(context1))
+            .then(() => cloudMonitoringIndex(context2))
+            .then(() => assert.deepStrictEqual(loggerStub.messages.all,
+                Array(4).fill('[telemetry.gcm] success'), 'should log success message'));
+    });
+
+    it('should invalidate token if Unauthorized error on sending data', () => {
+        let tokenCounter = 0;
+
+        nock('https://oauth2.googleapis.com/token')
+            .post('', body => body.assertion === '12345::theprivatekeyvalue')
+            .times(2)
+            .reply(200, () => {
+                tokenCounter += 1;
+                return { access_token: `token:${tokenCounter}`, expires_in: tokenDuration };
+            });
+
+        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+            reqheaders: {
+                authorization: a => a === `Bearer token:${tokenCounter}`
+            }
+        })
+            .get('')
+            .times(2)
+            .reply(200, metricDescriptors.onGet);
+
+        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+            reqheaders: {
+                authorization: a => a === `Bearer token:${tokenCounter}`
+            }
+        })
+            .post('', metricDescriptors.onPost)
+            .times(2)
+            .reply(200, {});
+
+        nock('https://monitoring.googleapis.com/v3/projects/theProject/timeSeries', {
+            reqheaders: {
+                authorization: a => a === `Bearer token:${tokenCounter}`
+            }
+        })
+            .post('', testUtil.deepCopy(getOriginTimeSeries()))
+            .reply(401, 'Unauthorized')
+            .post('', testUtil.deepCopy(getOriginTimeSeries()))
+            .reply(200, {});
+
+        return cloudMonitoringIndex(context)
+            .then(() => cloudMonitoringIndex(context))
+            .then(() => {
+                testAssert.includeMatch(loggerStub.messages.all, '[telemetry.gcm] error: Bad status code: 401');
             });
     });
 });

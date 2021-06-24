@@ -439,14 +439,10 @@ StatsD
 ------
 |StatsD|
 
-.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
-
-  TCP support to the StatsD consumer is available in TS 1.12 and later.
-
 Required Information:
- - Host: The address of the StatsD instance.
- - Protocol: The protocol of the StatsD instance. Options: TCP (TS 1.12+) or UDP. The default is UDP.
- - Port: The port of the Statsd instance
+    - Host: The address of the StatsD instance.
+    - Protocol: The protocol of the StatsD instance. Options: TCP (TS 1.12+) or UDP. The default is UDP.
+    - Port: The port of the StatsD instance
 
 .. IMPORTANT:: In TS v1.15 and later, if Telemetry Streaming is unable to locate the hostname in the systemPoller data, it sends the metric with hostname value **host.unknown**. This gets transformed to **hostname-unknown** as required by StatsD. This is because StatsD uses a **.** as a delimiter, and TS automatically replaces it with a **-**. For example: |br| |bold| { |br| |sp| |sp| |sp| metricName: 'f5telemetry.hostname-unknown.customStats.clientSideTraffic-bitsIn', |br| |sp| |sp| |sp| metricValue: 111111030 |br| } |boldclose| 
 
@@ -454,10 +450,23 @@ Required Information:
 
 To see more information about installing StatsD, see |StatsDWiki|.
 
-Example Declaration:
+.. _addtags: 
+
+addTags (experimental)
+``````````````````````
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+    The EXPERIMENTAL feature addTags for StatsD is available in Telemetry Streaming 1.20 and later.
+
+Telemetry Streaming 1.20 adds a new property for the StatsD consumer: **addTags**.  This feature causes TS to parse the incoming payload for values to automatically add as tags. Currently only the **sibling** method is supported.  
+
+|
+
+Example Declaration (updated with the **experimental** feature *addTags* introduced in TS 1.20 (see below). If using a prior version, **remove** the highlighted lines, and the comma in line 9):
 
 .. literalinclude:: ../examples/declarations/statsd.json
     :language: json
+    :emphasize-lines: 10-19
 
 |
 

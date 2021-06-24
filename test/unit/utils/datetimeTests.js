@@ -14,6 +14,7 @@ require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
+const sinon = require('sinon');
 
 const constants = require('../../../src/lib/constants');
 const datetimeUtil = require('../../../src/lib/utils/datetime');
@@ -23,6 +24,23 @@ chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe('Date and Time utils', () => {
+    let clock;
+
+    describe('getCurrentUnixTimeInSeconds', () => {
+        beforeEach(() => {
+            clock = sinon.useFakeTimers();
+        });
+
+        afterEach(() => {
+            clock.restore();
+        });
+
+        it('should return current time, in seconds', () => {
+            clock.tick(13 * 1000); // tick for 13 seconds
+            assert.strictEqual(datetimeUtil.getCurrentUnixTimeInSeconds(), 13);
+        });
+    });
+
     describe('getLastDayOfMonth', () => {
         // 2019 year
         const lastDaysMapping = {

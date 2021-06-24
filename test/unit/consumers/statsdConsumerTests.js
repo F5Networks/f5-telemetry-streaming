@@ -37,12 +37,23 @@ describe('Statsd', () => {
 
     const statsDClientStub = {
         close: () => {},
-        gauge: (metricName, metricValue) => {
-            metrics.push({
-                metricName,
-                metricValue
+        gauge: (metricName, metricValue, metricTags) => {
+            const data = { metricName, metricValue };
+            if (metricTags) {
+                data.metricTags = metricTags;
+            }
+            metrics.push(data);
+        }
+    };
+
+    const getExpectedData = (withTags) => {
+        const dataCopy = testUtil.deepCopy(statsdExpectedData.systemData[0].expectedData);
+        if (!withTags) {
+            dataCopy.forEach((dataSet) => {
+                delete dataSet.metricTags;
             });
         }
+        return dataCopy;
     };
 
     before(() => {
@@ -106,7 +117,16 @@ describe('Statsd', () => {
                 config: defaultConsumerConfig
             });
             return statsDIndex(context)
-                .then(() => assert.sameDeepMembers(metrics, statsdExpectedData.systemData[0].expectedData));
+                .then(() => assert.sameDeepMembers(metrics, getExpectedData()));
+        });
+
+        it('should process systemInfo data and apply auto-tagging (siblings only)', () => {
+            const context = testUtil.buildConsumerContext({
+                eventType: 'systemInfo',
+                config: Object.assign({ addTags: { method: 'sibling' } }, defaultConsumerConfig)
+            });
+            return statsDIndex(context)
+                .then(() => assert.sameDeepMembers(metrics, getExpectedData(true)));
         });
 
         it('should process systemInfo data with default hostname value if missing from systemInfo', () => {
@@ -181,7 +201,7 @@ describe('Statsd', () => {
                     const traceData = context.tracer.write.firstCall.args[0];
                     assert.ok(Array.isArray(traceData), 'should be formatted as an array');
                     const expectedTraceLine = 'f5telemetry.telemetry-bigip-com.system.cpu: 0';
-                    assert.ok(traceData.find(d => d === expectedTraceLine), 'should find expected line in trace');
+                    assert.ok(traceData.find(d => d[0] === expectedTraceLine), 'should find expected line in trace');
                 });
         });
     });

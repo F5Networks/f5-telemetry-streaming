@@ -10,7 +10,7 @@
 
 const BaseRequestHandler = require('./baseHandler');
 const errors = require('../errors');
-const HttpError = require('./httpErrors.js').HttpError;
+const HttpError = require('./httpErrors').HttpError;
 
 /**
  * Handler for errors encountered during requests

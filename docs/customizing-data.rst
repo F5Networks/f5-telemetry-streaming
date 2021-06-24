@@ -5,9 +5,11 @@ Customizing the Telemetry Streaming payload
 
 Telemetry Streaming 1.20 introduced a feature that allows you to restructure the data coming out of the Telemetry Streaming Generic HTTP consumer so it fits the format of 3rd party systems.  This is useful when you want the Telemetry Streaming payload in the format of a system that does not have a specific Telemetry Streaming consumer.  It also helps when trying to get log data into any kind of HTTP API.
 
-This feature is enabled as a JMES path expression (using a JMES path library) in the Telemetry Consumer class as an **action** for the Generic HTTP consumer. TS takes the JMES expression with the string that you provide, and applies the expression to the data received by the consumer.
+This feature is enabled as a JMESPath expression (using a JMESPath library) in the Telemetry Consumer class as an **action** for the Generic HTTP consumer. TS takes the JMESPath expression with the string that you provide, and applies the expression to the data received by the consumer.
 
-.. IMPORTANT:: Currently, you can only use this with the Generic HTTP consumer and only with JMES path expressions.
+For information on JMESPath, including the JMESPath specification, additional examples, and an interactive query tool, see https://jmespath.org/.
+
+.. IMPORTANT:: Currently, you can only use this with the Generic HTTP consumer and only with JMESPath expressions.
 
 For example, if we take a declaration similar to the :ref:`Quick Start declaration<qs-example>`, but using the Generic_HTTP consumer, it looks like:
 

@@ -8,10 +8,12 @@
 
 'use strict';
 
-const jwt = require('jsonwebtoken');
+const gcpUtil = require('./../shared/gcpUtil');
 
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 const requestsUtil = require('../../utils/requests');
+
+const BASE_GCM_URI = 'https://monitoring.googleapis.com/v3/projects';
 
 function checkMetricDescriptors(data, descriptors, currentPath, metrics) {
     Object.keys(data).forEach((key) => {
@@ -42,46 +44,24 @@ module.exports = function (context) {
         return Promise.resolve();
     }
 
-    const baseUri = 'https://monitoring.googleapis.com/v3/projects';
-    const projectId = context.config.projectId;
+    const projectMonitoringUri = `${BASE_GCM_URI}/${context.config.projectId}`;
     const options = {};
-    let Authorization;
-    const newJwt = jwt.sign(
-        {
-            iss: context.config.serviceEmail,
-            scope: 'https://www.googleapis.com/auth/monitoring',
-            aud: 'https://oauth2.googleapis.com/token',
-            exp: Math.floor(Date.now() / 1000) + 3600,
-            iat: Math.floor(Date.now() / 1000)
-        },
-        context.config.privateKey,
-        {
-            algorithm: 'RS256',
-            header: {
-                kid: context.config.privateKeyId,
-                typ: 'JWT',
-                alg: 'RS256'
-            }
-        }
-    );
-
-    options.method = 'POST';
-    options.headers = {};
-    options.fullURI = 'https://oauth2.googleapis.com/token';
-    options.form = {
-        grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-        assertion: newJwt
+    const serviceAccount = {
+        serviceEmail: context.config.serviceEmail,
+        privateKeyId: context.config.privateKeyId,
+        privateKey: context.config.privateKey
     };
-    options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
 
-    return requestsUtil.makeRequest(options)
-        .then((result) => {
-            delete options.headers['Content-Type'];
-            delete options.form;
-            Authorization = `Bearer ${result.access_token}`;
-            options.headers.Authorization = Authorization;
+    let Authorization;
+
+    return gcpUtil.getAccessToken(serviceAccount)
+        .then((accessToken) => {
+            Authorization = `Bearer ${accessToken}`;
+            options.headers = {
+                Authorization
+            };
             options.method = 'GET';
-            options.fullURI = `${baseUri}/${projectId}/metricDescriptors`;
+            options.fullURI = `${projectMonitoringUri}/metricDescriptors`;
             return requestsUtil.makeRequest(options);
         })
         .then((results) => {
@@ -102,7 +82,7 @@ module.exports = function (context) {
                     const promiseOptions = {
                         body: metricDescriptor,
                         method: 'POST',
-                        fullURI: `${baseUri}/${projectId}/metricDescriptors`,
+                        fullURI: `${projectMonitoringUri}/metricDescriptors`,
                         headers: {
                             Authorization
                         }
@@ -157,13 +137,16 @@ module.exports = function (context) {
                 context.tracer.write(timeSeries);
             }
 
-            options.fullURI = `${baseUri}/${projectId}/timeSeries`;
+            options.fullURI = `${projectMonitoringUri}/timeSeries`;
             options.body = timeSeries;
             options.method = 'POST';
             return requestsUtil.makeRequest(options);
         })
         .then(() => context.logger.debug('success'))
         .catch((err) => {
+            if (err.message && err.message.indexOf('Bad status code: 401') > -1) {
+                gcpUtil.invalidateToken(serviceAccount);
+            }
             context.logger.error(`error: ${err.message ? err.message : err}`);
         });
 };

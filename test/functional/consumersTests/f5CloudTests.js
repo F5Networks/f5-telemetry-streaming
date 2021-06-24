@@ -94,7 +94,8 @@ function setup() {
         ));
     });
 
-    describe('Consumer Setup: configuration', () => {
+    // .skip() until F5_Cloud interactions resolved
+    describe.skip('Consumer Setup: configuration', () => {
         it('should pull grpc-mock-server docker image', () => runRemoteCmd(`docker pull ${GRPC_MOCK_SERVER_DOCKER}`));
 
         it('should delete proto file if exist', () => runRemoteCmd('rm -f ~/deos.proto'));
@@ -152,7 +153,9 @@ function setup() {
 function test() {
     const testDataTimestamp = Date.now();
     const msg = hostName => `hostname="${hostName}",testDataTimestamp="${testDataTimestamp}",test="true",testType="${F5_CLOUD_NAME}"`;
-    describe('Consumer Test: F5 Cloud - Configure TS', () => {
+
+    // .skip() until F5_Cloud interactions resolved
+    describe.skip('Consumer Test: F5 Cloud - Configure TS', () => {
         DUTS.forEach(dut => it(`should configure TS - ${dut.hostalias}`, function () {
             if (!SHOULD_RUN_TESTS[dut.hostalias]) {
                 this.skip();
@@ -182,7 +185,8 @@ function test() {
         }));
     });
 
-    describe('Consumer Test: F5 Cloud - Test', () => {
+    // .skip() until F5_Cloud interactions resolved
+    describe.skip('Consumer Test: F5 Cloud - Test', () => {
         DUTS.forEach(dut => it(`should find the right interactions on mock server - ${dut.hostalias}`, function () {
             if (!SHOULD_RUN_TESTS[dut.hostalias]) {
                 this.skip();
@@ -216,7 +220,8 @@ function test() {
 }
 
 function teardown() {
-    describe('Consumer Test: teardown mock server', () => {
+    // .skip() until F5_Cloud interactions resolved
+    describe.skip('Consumer Test: teardown mock server', () => {
         it(`should remove ${MOCK_SERVER_NAME} container`, () => runRemoteCmd(`docker container rm -f ${MOCK_SERVER_NAME}`));
     });
 }

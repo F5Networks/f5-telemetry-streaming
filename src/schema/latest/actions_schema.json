@@ -1,0 +1,187 @@
+{
+    "$id": "actions_schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry Streaming Actions schema",
+    "description": "",
+    "type": "object",
+    "definitions": {
+        "baseActionsChain": {
+            "title": "Chain of Actions",
+            "description": "Actions to be performed on the data.",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/baseActionObject"
+            }
+        },
+        "baseActionObject": {
+            "title": "Base Action object",
+            "description": "Base object to build actions.",
+            "type": "object",
+            "properties": {
+                "enable": {
+                    "title": "Enable",
+                    "description": "Whether to enable this action in the declaration or not.",
+                    "type": "boolean",
+                    "default": true
+                }
+            }
+        },
+        "baseConditionalActionObject": {
+            "title": "Base Action object with support for conditional statements",
+            "description": "Base Action object with support for conditional statements.",
+            "type": "object",
+            "allOf": [
+                { "$ref": "#/definitions/baseActionObject" },
+                {
+                    "anyOf": [
+                        {
+                            "properties": {
+                                "ifAllMatch": {
+                                    "title": "If All Match",
+                                    "description": "The conditions that will be checked against. All must be true.",
+                                    "type": "object",
+                                    "additionalProperties": true
+                                }
+                            },
+                            "not": { "required": ["ifAnyMatch"] }
+                        },
+                        {
+                            "properties": {
+                                "ifAnyMatch": {
+                                    "title": "If Any Match",
+                                    "description": "An array of ifAllMatch objects. Any individual ifAllMatch object may match, but each condition within an ifAllMatch object must be true",
+                                    "type": "array"
+                                }
+                            },
+                            "not": { "required": ["ifAllMatch"] }
+                        }
+                    ]
+                }
+            ]
+        },
+        "subLocation": {
+            "title": "Location",
+            "description": "Used to specify a location in TS data. Use boolean type with value true to specify the location.",
+            "oneOf": [
+                {
+                    "type": "boolean",
+                    "const": true
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/subLocation"
+                    }
+                }
+            ]
+        },
+        "locations": {
+            "title": "Location",
+            "description": "The location(s) to apply the action.",
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/subLocation"
+            }
+        },
+        "setTagAction": {
+            "title": "setTag Action",
+            "description": "Action to assign a tag(s) to particular or default location",
+            "type": "object",
+            "allOf": [
+                { "$ref": "#/definitions/baseConditionalActionObject" },
+                {
+                    "properties": {
+                        "setTag": {
+                            "title": "Set Tag",
+                            "description": "The tag values to be added.",
+                            "type": "object",
+                            "additionalProperties": true
+                        },
+                        "locations": {
+                            "title": "Location",
+                            "description": "The location(s) to apply the action.",
+                            "allOf": [{ "$ref": "#/definitions/locations" }]
+                        },
+                        "enable": {},
+                        "ifAllMatch": {},
+                        "ifAnyMatch": {}
+                    },
+                    "additionalProperties": false,
+                    "required": ["setTag"]
+                }
+            ]
+        },
+        "includeDataAction": {
+            "title": "includeData Action",
+            "description": "Action to specify data fields to include in the output",
+            "type": "object",
+            "allOf": [
+                { "$ref": "#/definitions/baseConditionalActionObject" },
+                {
+                    "properties": {
+                        "includeData": {
+                            "title": "Include Data",
+                            "description": "The data fields to include in the output",
+                            "type": "object",
+                            "additionalProperties": false
+                        },
+                        "locations": {
+                            "title": "Location",
+                            "description": "The location(s) to apply the action.",
+                            "allOf": [{ "$ref": "#/definitions/locations" }]
+                        },
+                        "enable": {},
+                        "ifAllMatch": {},
+                        "ifAnyMatch": {}
+                    },
+                    "additionalProperties": false,
+                    "required": ["includeData", "locations"]
+                }
+            ]
+        },
+        "excludeDataAction": {
+            "title": "excludeData Action",
+            "description": "Action to specify data fields to exclude form the output",
+            "type": "object",
+            "allOf": [
+                { "$ref": "#/definitions/baseConditionalActionObject" },
+                {
+                    "properties": {
+                        "excludeData": {
+                            "title": "Exclude Data",
+                            "description": "The data fields to exclude from the output",
+                            "type": "object",
+                            "additionalProperties": false
+                        },
+                        "locations": {
+                            "title": "Location",
+                            "description": "The location(s) to apply the action.",
+                            "allOf": [{ "$ref": "#/definitions/locations" }]
+                        },
+                        "enable": {},
+                        "ifAllMatch": {},
+                        "ifAnyMatch": {}
+                    },
+                    "additionalProperties": false,
+                    "required": ["excludeData", "locations"]
+                }
+            ]
+        },
+        "inputDataStreamActionsChain": {
+            "title": "",
+            "description": "",
+            "allOf": [
+                { "$ref": "#/definitions/baseActionsChain" },
+                {
+                    "items": {
+                        "oneOf": [
+                            { "$ref": "#/definitions/excludeDataAction" },
+                            { "$ref": "#/definitions/includeDataAction" },
+                            { "$ref": "#/definitions/setTagAction" }
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+}

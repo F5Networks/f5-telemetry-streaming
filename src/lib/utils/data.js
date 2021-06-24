@@ -363,7 +363,7 @@ function preserveStrictMatches(data, matchObj, strict, cb) {
 }
 
 /**
- * Applies the provided JMESPath expresion to the input data.
+ * Applies the provided JMESPath expression to the input data.
  *
  * Note:
  *  - dataCtx.data will be modified in place - make a copy (if needed) before passing to this function.
