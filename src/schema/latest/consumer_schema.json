@@ -32,6 +32,21 @@
                 }
             ]
         },
+        "autoTaggingStatsd": {
+            "title": "Statsd auto tagging",
+            "description": "Will parse incoming payload for values to automatically add as tags.",
+            "type": "object",
+            "properties": {
+                "method": {
+                    "title": "AutoTagging method",
+                    "description": "AutoTagging method to use to fetch tags",
+                    "type": "string",
+                    "enum": ["sibling"]
+                }
+            },
+            "additionalProperties": false,
+            "required": ["method"]
+        },
         "genericHttpActions": {
             "title": "Actions",
             "description": "Actions to be performed on the Generic HTTP Consumer.",
@@ -611,6 +626,7 @@
                     {
                         "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a separate block",
                         "properties": {
+                            "addTags": {},
                             "actions": {},
                             "class": {},
                             "enable": {},
@@ -1036,7 +1052,8 @@
                                     "enum": [ "tcp", "udp" ],
                                     "default": "udp"
                                 },
-                                "port": { "$ref": "#/definitions/port", "default": 8125 }
+                                "port": { "$ref": "#/definitions/port", "default": 8125 },
+                                "addTags": { "$ref": "#/definitions/autoTaggingStatsd" }
                             }
                         },
                         "else": {}
