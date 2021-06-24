@@ -3663,16 +3663,12 @@ describe('Declarations', () => {
             Object.assign(targetDeclaration.My_Consumer, consumerProps);
             Object.assign(expectedTarget || {}, expectedProps || {});
             if (addtlContext) {
-                options = { expanded: true };
-                targetDeclaration.Shared = {
-                    class: 'Shared',
-                    constants: {
-                        class: 'Constants'
-                    }
+                options = {
+                    options: { expanded: true },
+                    constants: addtlContext.constants
                 };
-                Object.assign(targetDeclaration.Shared.constants, addtlContext.constants);
             }
-            return configWorker.processDeclaration(targetDeclaration, options)
+            return declValidator(targetDeclaration, options)
                 .then((validConfig) => {
                     if (expectedProps) {
                         assert.deepStrictEqual(validConfig.My_Consumer, expectedTarget);
@@ -3753,7 +3749,7 @@ describe('Declarations', () => {
                     }
                 ]
             }),
-            /My_Consumer\/type.*"allowedValue":"Generic_HTTP".*should be equal to constant/
+            /My_Consumer\/type.*"allowedValue".*"Generic_HTTP".*should be equal to constant/
         ));
 
         describe('AWS_CloudWatch', () => {
@@ -4705,6 +4701,14 @@ describe('Declarations', () => {
                             subTitle: 'allow the JMESPath action',
                             valid: { JMESPath: {}, expression: 'test' }
                         }
+                    },
+                    {
+                        property: 'actions',
+                        ignoreOther: true,
+                        valueTests: {
+                            subTitle: 'allow empty array',
+                            valid: []
+                        }
                     }
                 ],
                 { stringLengthTests: true }
@@ -5165,15 +5169,25 @@ describe('Declarations', () => {
                 {
                     type: 'Statsd',
                     host: 'host',
-                    port: 80
+                    port: 80,
+                    addTags: { method: 'sibling' }
                 },
-                {
-                    property: 'protocol',
-                    enumTests: {
-                        allowed: ['tcp', 'udp'],
-                        notAllowed: ['https']
+                [
+                    {
+                        property: 'protocol',
+                        enumTests: { allowed: ['tcp', 'udp'], notAllowed: ['https'] }
+                    },
+                    {
+                        property: 'addTags.method',
+                        enumTests: { allowed: ['sibling'], notAllowed: ['parent'] },
+                        requiredTests: true
+                    },
+                    {
+                        property: 'addTags',
+                        additionalPropsTests: { notAllowed: true },
+                        optionalPropTests: true
                     }
-                }
+                ]
             );
         });
 
