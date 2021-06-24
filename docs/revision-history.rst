@@ -11,6 +11,10 @@ Document Revision History
         - Description
         - Date
 
+      * - 1.20.1
+        - Released Telemetry Streaming v1.21.1 as a LTS (Long Term Support) version. See the Telemetry Streaming |supportmd| for information about the Telemetry Streaming support policy.
+        - 6-24-21
+
       * - 1.20.0
         - Updated the documentation for Telemetry Streaming v1.20.0. This release contains the following changes: |br| * Added data tracing and 'success' message to Google Cloud Monitoring consumer |br| * Added system.configSyncSucceeded to default output and f5_system_configSyncSucceeded to Prometheus output, `GitHub #74 <https://github.com/F5Networks/f5-telemetry-streaming/issues/74>`_  |br| * Added Capacity_Float to system.diskStorage, `GitHub #119 <https://github.com/F5Networks/f5-telemetry-streaming/issues/119>`_ |br| |br| Issues Resolved: |br| * 
         - 5-18-21
