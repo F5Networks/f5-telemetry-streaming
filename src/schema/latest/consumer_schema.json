@@ -400,6 +400,14 @@
                 }
             ]
         },
+        "eventSchemaVersion": {
+            "$comment": "Required for certain consumers: F5_Cloud",
+            "title": "Event Schema Version",
+            "description": "" ,
+            "type": "integer",
+            "minLength": 1,
+            "f5expand": true
+        },
         "f5csTenantId": {
             "$comment": "Required for certain consumers: F5_Cloud",
             "title": "F5CS Tenant ID",
@@ -667,6 +675,7 @@
                             "clientCertificate": {},
                             "rootCertificate": {},
                             "fallbackHosts": {},
+                            "eventSchemaVersion": {},
                             "f5csTenantId": {},
                             "f5csSensorId": {},
                             "payloadSchemaNid": {},
@@ -1082,6 +1091,7 @@
                         "if": { "properties": { "type": { "const": "F5_Cloud" } } },
                         "then": {
                             "required": [
+                                "eventSchemaVersion",
                                 "f5csTenantId",
                                 "f5csSensorId",
                                 "payloadSchemaNid",
@@ -1090,6 +1100,7 @@
                             ],
                             "properties": {
                                 "port": { "$ref": "#/definitions/port", "default": 443 },
+                                "eventSchemaVersion": { "$ref": "#/definitions/eventSchemaVersion" },
                                 "f5csTenantId": { "$ref": "#/definitions/f5csTenantId" },
                                 "f5csSensorId": { "$ref": "#/definitions/f5csSensorId" },
                                 "payloadSchemaNid": { "$ref": "#/definitions/payloadSchemaNid" },

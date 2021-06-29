@@ -107,14 +107,14 @@ module.exports = function (context) {
                 timestamp_usec: Date.now() * 1000,
                 signature_type: 0,
                 serialization_type: 1,
-                payload: Buffer.from(JSON.stringify(data), 'utf8'),
-                payload_schema: `urn:${context.config.payloadSchemaNid}:big-ip:event-schema:${configSchema.toLowerCase()}:v1`
+                payload: Buffer.from(data.data), 'utf8'),
+                payload_schema: `urn:${context.config.payloadSchemaNid}:big-ip:event-schema:${configSchema.toLowerCase()}:v${context.config.event_schema_version}`
             };
 
             context.logger.debug(`account_id : ${ingestionRequest.account_id}`);
             context.logger.debug(`source_id : ${ingestionRequest.source_id}`);
             context.logger.debug(`payload_schema : ${ingestionRequest.payload_schema}`);
-            context.logger.debug(`data : ${JSON.stringify(data)}`);
+            context.logger.debug(`data : ${data.data}`);
 
             return new Promise((resolve) => {
                 client.post(ingestionRequest, metadata, (err, response) => {
