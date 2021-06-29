@@ -107,7 +107,7 @@ module.exports = function (context) {
                 timestamp_usec: Date.now() * 1000,
                 signature_type: 0,
                 serialization_type: 1,
-                payload: Buffer.from(data.data), 'utf8'),
+                payload: Buffer.from(data.data, 'utf8'),
                 payload_schema: `urn:${context.config.payloadSchemaNid}:big-ip:event-schema:${configSchema.toLowerCase()}:v${context.config.event_schema_version}`
             };
 
