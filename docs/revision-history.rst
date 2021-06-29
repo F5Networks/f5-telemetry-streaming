@@ -12,8 +12,12 @@ Document Revision History
         - Date
 
       * - 1.20.1
-        - Released Telemetry Streaming v1.21.1 as a LTS (Long Term Support) version. See the Telemetry Streaming |supportmd| for information about the Telemetry Streaming support policy.
-        - 6-24-21
+        - Released Telemetry Streaming v1.20.1 as a LTS (Long Term Support) version. See the Telemetry Streaming |supportmd| for information about the Telemetry Streaming support policy.
+        - 6-30-21
+
+      * - 1.21.0
+        - Updated the documentation for Telemetry Streaming v1.21.0. This release contains the following changes: |br| * An **experimental** property for the StatsD consumer (see :ref:`StatsD addTags<addtags>`) |br| * A number of minor bug fixes, stability enhancements, and foundational elements for some upcoming features. 
+        - 6-28-21
 
       * - 1.20.0
         - Updated the documentation for Telemetry Streaming v1.20.0. This release contains the following changes: |br| * Added data tracing and 'success' message to Google Cloud Monitoring consumer |br| * Added system.configSyncSucceeded to default output and f5_system_configSyncSucceeded to Prometheus output, `GitHub #74 <https://github.com/F5Networks/f5-telemetry-streaming/issues/74>`_  |br| * Added Capacity_Float to system.diskStorage, `GitHub #119 <https://github.com/F5Networks/f5-telemetry-streaming/issues/119>`_ |br| |br| Issues Resolved: |br| * 
@@ -127,3 +131,7 @@ Document Revision History
 .. |schemalink| raw:: html
 
    <a href="https://github.com/F5Networks/f5-telemetry-streaming/tree/master/src/schema" target="_blank">schema files</a>
+
+.. |supportmd| raw:: html
+
+   <a href="https://github.com/F5Networks/f5-telemetry-streaming/blob/master/SUPPORT.md" target="_blank">Support information on GitHub</a>
