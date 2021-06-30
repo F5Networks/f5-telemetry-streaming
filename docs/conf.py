@@ -21,6 +21,7 @@ import sys
 sys.path.insert(0, os.path.abspath('.'))
 
 import f5_sphinx_theme
+import re
 
 
 # -- General configuration ------------------------------------------------
@@ -153,14 +154,16 @@ todo_include_todos = False
 #
 html_theme = 'f5_sphinx_theme'
 html_theme_path = f5_sphinx_theme.get_html_theme_path()
+
 html_theme_options = {
-    'next_prev_link': True
+    'next_prev_link': True,
+    'version_selector': True}
+
+html_context = {
+ 'version_meta_path': '/products/extensions/f5-telemetry-streaming/versions.json',
+ 'project_safe': re.sub('[^A-Za-z0-9]+', '', project)
 }
 
-# html_context = {
-# 'version_meta_path': '/products/extensions/f5-telemetry-streaming/versions.json',
-# 'project_safe': re.sub('[^A-Za-z0-9]+', '', project)
-# }
 
 
 # Theme options are theme-specific and customize the look and feel of a theme
