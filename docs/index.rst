@@ -123,7 +123,6 @@ You can click the following links to go directly to a specific :doc:`setting-up-
    revision-history
 
 
-
 .. |video| raw:: html
 
     <iframe width="560" height="315" src="https://www.youtube.com/embed/YeEAovBvUkY" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
