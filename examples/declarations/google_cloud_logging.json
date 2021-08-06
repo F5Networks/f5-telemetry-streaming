@@ -1,0 +1,15 @@
+{
+    "class": "Telemetry",
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Google_Cloud_Logging",
+        "logScope": "projects",
+        "logScopeId": "yourProjectId",
+        "logId": "yourLogId",
+        "privateKey": {
+            "cipherText": "yourPrivateKey"
+    	},
+        "privateKeyId": "yourPrivateKeyId",
+        "serviceEmail": "yourServiceEmail"
+    }
+}

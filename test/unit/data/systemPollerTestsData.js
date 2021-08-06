@@ -173,7 +173,7 @@ module.exports = {
             },
             sysOrPollerName: 'testSystem',
             expectedConfig: [{
-                name: 'testSystem::SystemPoller_1'
+                name: 'f5telemetry_default::testSystem::SystemPoller_1'
             }]
         },
         {
@@ -191,7 +191,7 @@ module.exports = {
             },
             sysOrPollerName: 'testSystem',
             expectedConfig: [{
-                name: 'testSystem::systemPoller'
+                name: 'f5telemetry_default::testSystem::systemPoller'
             }]
         },
         {
@@ -224,7 +224,7 @@ module.exports = {
             },
             sysOrPollerName: 'systemPoller',
             expectedConfig: [{
-                name: 'systemPoller::systemPoller'
+                name: 'f5telemetry_default::systemPoller::systemPoller'
             }]
         },
         {
@@ -251,13 +251,13 @@ module.exports = {
             sysOrPollerName: 'testSystem',
             expectedConfig: [
                 {
-                    name: 'testSystem::systemPoller'
+                    name: 'f5telemetry_default::testSystem::systemPoller'
                 },
                 {
-                    name: 'testSystem::SystemPoller_1'
+                    name: 'f5telemetry_default::testSystem::SystemPoller_1'
                 },
                 {
-                    name: 'testSystem::SystemPoller_2'
+                    name: 'f5telemetry_default::testSystem::SystemPoller_2'
                 }
             ]
         },
@@ -300,9 +300,9 @@ module.exports = {
             },
             sysOrPollerName: 'My_System',
             expectedConfig: [
-                { name: 'My_System::My_System_Poller' },
-                { name: 'My_System::The_Other_System_Poller' },
-                { name: 'My_System::SystemPoller_2' }
+                { name: 'f5telemetry_default::My_System::My_System_Poller' },
+                { name: 'f5telemetry_default::My_System::The_Other_System_Poller' },
+                { name: 'f5telemetry_default::My_System::SystemPoller_2' }
             ]
         },
         {
@@ -316,7 +316,7 @@ module.exports = {
             },
             sysOrPollerName: 'systemPoller',
             expectedConfig: [{
-                name: 'systemPoller::systemPoller'
+                name: 'f5telemetry_default::systemPoller::systemPoller'
             }]
         },
         {
@@ -335,7 +335,7 @@ module.exports = {
                 includeDisabled: false
             },
             expectedConfig: [{
-                name: 'testSystem::SystemPoller_1'
+                name: 'f5telemetry_default::testSystem::SystemPoller_1'
             }]
         },
         {
@@ -354,7 +354,7 @@ module.exports = {
                 includeDisabled: true
             },
             expectedConfig: [{
-                name: 'testSystem::SystemPoller_1'
+                name: 'f5telemetry_default::testSystem::SystemPoller_1'
             }]
         },
         {
@@ -375,7 +375,7 @@ module.exports = {
                 includeDisabled: true
             },
             expectedConfig: [{
-                name: 'testSystem::systemPoller'
+                name: 'f5telemetry_default::testSystem::systemPoller'
             }]
         },
         {
@@ -397,7 +397,7 @@ module.exports = {
                 includeDisabled: true
             },
             expectedConfig: [{
-                name: 'testSystem::systemPoller'
+                name: 'f5telemetry_default::testSystem::systemPoller'
             }]
         },
         {
@@ -427,13 +427,13 @@ module.exports = {
             },
             expectedConfig: [
                 {
-                    name: 'testSystem::systemPoller'
+                    name: 'f5telemetry_default::testSystem::systemPoller'
                 },
                 {
-                    name: 'testSystem::SystemPoller_1'
+                    name: 'f5telemetry_default::testSystem::SystemPoller_1'
                 },
                 {
-                    name: 'testSystem::SystemPoller_2'
+                    name: 'f5telemetry_default::testSystem::SystemPoller_2'
                 }
             ]
         },
@@ -451,7 +451,7 @@ module.exports = {
                 includeDisabled: true
             },
             expectedConfig: [{
-                name: 'systemPoller::systemPoller'
+                name: 'f5telemetry_default::systemPoller::systemPoller'
             }]
         }
     ],
@@ -473,15 +473,15 @@ module.exports = {
                 enable: true,
                 interval: 300,
                 name: 'My_System_Poller',
-                id: 'My_System_Poller::My_System_Poller',
+                id: 'f5telemetry_default::My_System_Poller::My_System_Poller',
                 namespace: 'f5telemetry_default',
-                traceName: 'My_System_Poller::My_System_Poller',
+                traceName: 'f5telemetry_default::My_System_Poller::My_System_Poller',
                 systemName: 'My_System_Poller',
                 trace: {
                     enable: false,
                     encoding: 'utf8',
                     maxRecords: 10,
-                    path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_Poller::My_System_Poller',
+                    path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_System_Poller::My_System_Poller',
                     type: 'output'
                 },
                 connection: {
@@ -584,15 +584,15 @@ module.exports = {
                 enable: true,
                 interval: 300,
                 name: 'My_System_Poller',
-                id: 'My_System::My_System_Poller',
+                id: 'f5telemetry_default::My_System::My_System_Poller',
                 namespace: 'f5telemetry_default',
                 systemName: 'My_System',
-                traceName: 'My_System::My_System_Poller',
+                traceName: 'f5telemetry_default::My_System::My_System_Poller',
                 trace: {
                     enable: false,
                     encoding: 'utf8',
                     maxRecords: 10,
-                    path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::My_System_Poller',
+                    path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_System::My_System_Poller',
                     type: 'output'
                 },
                 connection: {
@@ -713,15 +713,15 @@ module.exports = {
                 enable: true,
                 interval: 300,
                 name: 'My_System_Poller',
-                id: 'My_System::My_System_Poller',
+                id: 'f5telemetry_default::My_System::My_System_Poller',
                 systemName: 'My_System',
                 namespace: 'f5telemetry_default',
-                traceName: 'My_System::My_System_Poller',
+                traceName: 'f5telemetry_default::My_System::My_System_Poller',
                 trace: {
                     enable: false,
                     encoding: 'utf8',
                     maxRecords: 10,
-                    path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::My_System_Poller',
+                    path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_System::My_System_Poller',
                     type: 'output'
                 },
                 connection: {
@@ -853,15 +853,15 @@ module.exports = {
                 enable: true,
                 interval: 300,
                 name: 'My_Desired_Poller',
-                id: 'My_System::My_Desired_Poller',
+                id: 'f5telemetry_default::My_System::My_Desired_Poller',
                 systemName: 'My_System',
                 namespace: 'f5telemetry_default',
-                traceName: 'My_System::My_Desired_Poller',
+                traceName: 'f5telemetry_default::My_System::My_Desired_Poller',
                 trace: {
                     enable: false,
                     encoding: 'utf8',
                     maxRecords: 10,
-                    path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::My_Desired_Poller',
+                    path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_System::My_Desired_Poller',
                     type: 'output'
                 },
                 connection: {
@@ -1007,15 +1007,15 @@ module.exports = {
                 enable: true,
                 interval: 300,
                 name: 'SystemPoller_1',
-                id: 'My_System::SystemPoller_1',
+                id: 'f5telemetry_default::My_System::SystemPoller_1',
                 systemName: 'My_System',
                 namespace: 'f5telemetry_default',
-                traceName: 'My_System::SystemPoller_1',
+                traceName: 'f5telemetry_default::My_System::SystemPoller_1',
                 trace: {
                     enable: false,
                     encoding: 'utf8',
                     maxRecords: 10,
-                    path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1',
+                    path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_System::SystemPoller_1',
                     type: 'output'
                 },
                 connection: {

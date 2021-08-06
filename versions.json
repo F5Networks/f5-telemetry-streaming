@@ -1,0 +1,10 @@
+{
+  "versionMetaTimestamp": 1540928503,
+  "latestVersion": {
+    "name": "1.22 (non-LTS)",
+    "url": "/products/extensions/f5-telemetry/latest/"
+  },
+  "otherVersions": [
+    { "name": "1.20.1 (LTS)", "url": "/products/extensions/f5-telemetry/1.20/"}
+  ]
+}

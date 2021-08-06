@@ -86,10 +86,10 @@ module.exports = {
                 mappings: {},
                 components: [
                     {
-                        id: 'My_Listener_1',
+                        id: 'f5telemetry_default::My_Listener_1',
                         name: 'My_Listener_1',
                         namespace: 'f5telemetry_default',
-                        traceName: 'My_Listener_1',
+                        traceName: 'f5telemetry_default::My_Listener_1',
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
@@ -97,14 +97,14 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 9999,
-                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Listener_1',
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.f5telemetry_default::My_Listener_1',
                             type: 'input'
                         },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1',
+                            path: '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_1',
                             type: 'output'
                         },
                         match: '',
@@ -120,10 +120,10 @@ module.exports = {
                         ]
                     },
                     {
-                        id: 'My_Listener_2',
+                        id: 'f5telemetry_default::My_Listener_2',
                         name: 'My_Listener_2',
                         namespace: 'f5telemetry_default',
-                        traceName: 'My_Listener_2',
+                        traceName: 'f5telemetry_default::My_Listener_2',
                         class: 'Telemetry_Listener',
                         port: 4567,
                         enable: false,
@@ -260,10 +260,10 @@ module.exports = {
                 mappings: {},
                 components: [
                     {
-                        id: 'My_Listener_1',
+                        id: 'f5telemetry_default::My_Listener_1',
                         name: 'My_Listener_1',
                         namespace: 'f5telemetry_default',
-                        traceName: 'My_Listener_1',
+                        traceName: 'f5telemetry_default::My_Listener_1',
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
@@ -271,14 +271,14 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 9999,
-                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Listener_1',
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.f5telemetry_default::My_Listener_1',
                             type: 'input'
                         },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1',
+                            path: '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_1',
                             type: 'output'
                         },
                         match: '',
@@ -294,10 +294,10 @@ module.exports = {
                         ]
                     },
                     {
-                        id: 'My_Listener_2',
+                        id: 'f5telemetry_default::My_Listener_2',
                         name: 'My_Listener_2',
                         namespace: 'f5telemetry_default',
-                        traceName: 'My_Listener_2',
+                        traceName: 'f5telemetry_default::My_Listener_2',
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
@@ -305,14 +305,14 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 9999,
-                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Listener_2',
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.f5telemetry_default::My_Listener_2',
                             type: 'input'
                         },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_2',
+                            path: '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_2',
                             type: 'output'
                         },
                         match: '',
@@ -441,8 +441,8 @@ module.exports = {
             },
             expected: {
                 mappings: {
-                    My_Listener_1: ['Consumer_1'],
-                    My_Listener_2: ['Consumer_1'],
+                    'f5telemetry_default::My_Listener_1': ['f5telemetry_default::Consumer_1'],
+                    'f5telemetry_default::My_Listener_2': ['f5telemetry_default::Consumer_1'],
                     'My_Namespace::My_Listener_1': ['My_Namespace::Consumer_1'],
                     'My_Namespace::My_Listener_2': ['My_Namespace::Consumer_1'],
                     'My_Namespace_2::My_Listener_1': ['My_Namespace_2::Consumer_1'],
@@ -450,10 +450,10 @@ module.exports = {
                 },
                 components: [
                     {
-                        id: 'My_Listener_1',
+                        id: 'f5telemetry_default::My_Listener_1',
                         name: 'My_Listener_1',
                         namespace: 'f5telemetry_default',
-                        traceName: 'My_Listener_1',
+                        traceName: 'f5telemetry_default::My_Listener_1',
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
@@ -461,14 +461,14 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 9999,
-                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Listener_1',
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.f5telemetry_default::My_Listener_1',
                             type: 'input'
                         },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1',
+                            path: '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_1',
                             type: 'output'
                         },
                         match: '',
@@ -484,10 +484,10 @@ module.exports = {
                         ]
                     },
                     {
-                        id: 'My_Listener_2',
+                        id: 'f5telemetry_default::My_Listener_2',
                         name: 'My_Listener_2',
                         namespace: 'f5telemetry_default',
-                        traceName: 'My_Listener_2',
+                        traceName: 'f5telemetry_default::My_Listener_2',
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
@@ -495,14 +495,14 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 9999,
-                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Listener_2',
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.f5telemetry_default::My_Listener_2',
                             type: 'input'
                         },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_2',
+                            path: '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_2',
                             type: 'output'
                         },
                         match: '',
@@ -521,15 +521,15 @@ module.exports = {
                         allowSelfSignedCert: false,
                         class: 'Telemetry_Consumer',
                         enable: true,
-                        id: 'Consumer_1',
+                        id: 'f5telemetry_default::Consumer_1',
                         name: 'Consumer_1',
-                        traceName: 'Consumer_1',
+                        traceName: 'f5telemetry_default::Consumer_1',
                         namespace: 'f5telemetry_default',
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1',
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Consumer_1',
                             type: 'output'
                         },
                         type: 'default'
@@ -762,8 +762,8 @@ module.exports = {
             },
             expected: {
                 mappings: {
-                    My_Listener_1: ['Consumer_1', 'Consumer_2'],
-                    My_Listener_2: ['Consumer_1', 'Consumer_2'],
+                    'f5telemetry_default::My_Listener_1': ['f5telemetry_default::Consumer_1', 'f5telemetry_default::Consumer_2'],
+                    'f5telemetry_default::My_Listener_2': ['f5telemetry_default::Consumer_1', 'f5telemetry_default::Consumer_2'],
                     'My_Namespace::My_Listener_1': ['My_Namespace::Consumer_1', 'My_Namespace::Consumer_2'],
                     'My_Namespace::My_Listener_2': ['My_Namespace::Consumer_1', 'My_Namespace::Consumer_2'],
                     'My_Namespace_2::My_Listener_1': ['My_Namespace_2::Consumer_1', 'My_Namespace_2::Consumer_2'],
@@ -771,10 +771,10 @@ module.exports = {
                 },
                 components: [
                     {
-                        id: 'My_Listener_1',
+                        id: 'f5telemetry_default::My_Listener_1',
                         name: 'My_Listener_1',
                         namespace: 'f5telemetry_default',
-                        traceName: 'My_Listener_1',
+                        traceName: 'f5telemetry_default::My_Listener_1',
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
@@ -782,14 +782,14 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 9999,
-                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Listener_1',
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.f5telemetry_default::My_Listener_1',
                             type: 'input'
                         },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_1',
+                            path: '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_1',
                             type: 'output'
                         },
                         match: '',
@@ -805,10 +805,10 @@ module.exports = {
                         ]
                     },
                     {
-                        id: 'My_Listener_2',
+                        id: 'f5telemetry_default::My_Listener_2',
                         name: 'My_Listener_2',
                         namespace: 'f5telemetry_default',
-                        traceName: 'My_Listener_2',
+                        traceName: 'f5telemetry_default::My_Listener_2',
                         class: 'Telemetry_Listener',
                         port: 6514,
                         enable: true,
@@ -816,14 +816,14 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 9999,
-                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.My_Listener_2',
+                            path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.f5telemetry_default::My_Listener_2',
                             type: 'input'
                         },
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Listener.My_Listener_2',
+                            path: '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_2',
                             type: 'output'
                         },
                         match: '',
@@ -842,15 +842,15 @@ module.exports = {
                         allowSelfSignedCert: false,
                         class: 'Telemetry_Consumer',
                         enable: true,
-                        id: 'Consumer_1',
+                        id: 'f5telemetry_default::Consumer_1',
                         name: 'Consumer_1',
-                        traceName: 'Consumer_1',
+                        traceName: 'f5telemetry_default::Consumer_1',
                         namespace: 'f5telemetry_default',
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1',
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Consumer_1',
                             type: 'output'
                         },
                         type: 'default'
@@ -859,15 +859,15 @@ module.exports = {
                         allowSelfSignedCert: false,
                         class: 'Telemetry_Consumer',
                         enable: true,
-                        id: 'Consumer_2',
+                        id: 'f5telemetry_default::Consumer_2',
                         name: 'Consumer_2',
-                        traceName: 'Consumer_2',
+                        traceName: 'f5telemetry_default::Consumer_2',
                         namespace: 'f5telemetry_default',
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_2',
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Consumer_2',
                             type: 'output'
                         },
                         type: 'default'

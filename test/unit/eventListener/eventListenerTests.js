@@ -121,13 +121,13 @@ describe('Event Listener', () => {
                 .then(() => {
                     const listeners = EventListener.instances;
                     assert.lengthOf(Object.keys(listeners), 1);
-                    assert.deepStrictEqual(gatherIds(), ['Listener1']);
-                    assertListener(listeners.Listener1, {
+                    assert.deepStrictEqual(gatherIds(), ['f5telemetry_default::Listener1']);
+                    assertListener(listeners['f5telemetry_default::Listener1'], {
                         tags: { tenant: '`T`', application: '`A`' }
                     });
                     testAssert.sameOrderedMatches(registeredTracerPaths(), [
-                        'INPUT.Telemetry_Listener.Listener1',
-                        'Telemetry_Listener.Listener1'
+                        'INPUT.Telemetry_Listener.f5telemetry_default::Listener1',
+                        'Telemetry_Listener.f5telemetry_default::Listener1'
                     ]);
                     assert.lengthOf(EventListener.receiversManager.getAll(), 1);
                 });
@@ -147,7 +147,7 @@ describe('Event Listener', () => {
             let loggerSpy;
 
             beforeEach(() => {
-                loggerSpy = sinon.spy(EventListener.instances.Listener1.logger, 'exception');
+                loggerSpy = sinon.spy(EventListener.instances['f5telemetry_default::Listener1'].logger, 'exception');
             });
             eventListenerTestData.onMessagesHandler.forEach((testSet) => {
                 testUtil.getCallableIt(testSet)(testSet.name, () => EventListener.receiversManager
@@ -155,7 +155,7 @@ describe('Event Listener', () => {
                     .emitAsync('messages', testSet.rawEvents)
                     .then(() => {
                         assert.isTrue(loggerSpy.notCalled);
-                        assert.deepStrictEqual(actualData[EventListener.instances.Listener1.id], testSet.expectedData);
+                        assert.deepStrictEqual(actualData[EventListener.instances['f5telemetry_default::Listener1'].id], testSet.expectedData);
                     }));
             });
         });
@@ -171,34 +171,34 @@ describe('Event Listener', () => {
             newDecl.Listener3 = {
                 class: 'Telemetry_Listener',
                 match: 'somePattern2',
-                trace: { type: 'input', path: 'INPUT.listener3' }
+                trace: { type: 'input', path: 'INPUT.f5telemetry_default::listener3' }
             };
 
             return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
                 .then(() => {
                     testAssert.sameOrderedMatches(registeredTracerPaths(), [
-                        'INPUT.Telemetry_Listener.Listener1',
-                        'Telemetry_Listener.Listener1',
-                        'Telemetry_Listener.Listener2',
-                        'INPUT.listener3'
+                        'INPUT.Telemetry_Listener.f5telemetry_default::Listener1',
+                        'Telemetry_Listener.f5telemetry_default::Listener1',
+                        'Telemetry_Listener.f5telemetry_default::Listener2',
+                        'INPUT.f5telemetry_default::listener3'
                     ]);
                     assert.lengthOf(EventListener.receiversManager.getAll(), 2);
-                    assert.sameDeepMembers(gatherIds(), ['Listener1', 'Listener2', 'Listener3']);
+                    assert.sameDeepMembers(gatherIds(), ['f5telemetry_default::Listener1', 'f5telemetry_default::Listener2', 'f5telemetry_default::Listener3']);
 
                     const listeners = EventListener.instances;
-                    assertListener(listeners.Listener1, {
+                    assertListener(listeners['f5telemetry_default::Listener1'], {
                         tags: { tenant: '`T`', application: '`A`' }
                     });
-                    assertListener(listeners.Listener2, { hasFilterFunc: true });
-                    assertListener(listeners.Listener3, { hasFilterFunc: true });
+                    assertListener(listeners['f5telemetry_default::Listener2'], { hasFilterFunc: true });
+                    assertListener(listeners['f5telemetry_default::Listener3'], { hasFilterFunc: true });
 
                     return Promise.all([
                         EventListener.receiversManager.getMessageStream(defaultDeclarationPort).emitAsync('messages', ['virtual_name="somePattern"']),
                         EventListener.receiversManager.getMessageStream(defaultTestPort).emitAsync('messages', ['1234'])
                     ])
                         .then(() => assert.deepStrictEqual(actualData, {
-                            [listeners.Listener1.id]: [{ data: '1234', telemetryEventCategory: 'event' }],
-                            [listeners.Listener2.id]: [{ virtual_name: 'somePattern', telemetryEventCategory: 'LTM' }]
+                            [listeners['f5telemetry_default::Listener1'].id]: [{ data: '1234', telemetryEventCategory: 'event' }],
+                            [listeners['f5telemetry_default::Listener2'].id]: [{ virtual_name: 'somePattern', telemetryEventCategory: 'LTM' }]
                         }));
                 });
         });
@@ -223,10 +223,10 @@ describe('Event Listener', () => {
             return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
                 .then(() => {
                     assert.isEmpty(registeredTracerPaths());
-                    assert.deepStrictEqual(gatherIds(), ['Listener1']);
+                    assert.deepStrictEqual(gatherIds(), ['f5telemetry_default::Listener1']);
 
                     const listeners = EventListener.instances;
-                    assertListener(listeners.Listener1, {
+                    assertListener(listeners['f5telemetry_default::Listener1'], {
                         tags: { tenant: '`T`', application: '`A`' }
                     });
                     // one for each protocol
@@ -240,7 +240,7 @@ describe('Event Listener', () => {
 
                     return existingMessageStream.emitAsync('messages', ['6514'])
                         .then(() => assert.deepStrictEqual(actualData, {
-                            [listeners.Listener1.id]: [{ data: '6514', telemetryEventCategory: 'event' }]
+                            [listeners['f5telemetry_default::Listener1'].id]: [{ data: '6514', telemetryEventCategory: 'event' }]
                         }));
                 });
         });
@@ -261,15 +261,15 @@ describe('Event Listener', () => {
             return configWorker.processNamespaceDeclaration(testUtil.deepCopy(newDecl), 'newNamespace')
                 .then(() => {
                     testAssert.sameOrderedMatches(registeredTracerPaths(), [
-                        'INPUT.Telemetry_Listener.Listener1',
+                        'INPUT.Telemetry_Listener.f5telemetry_default::Listener1',
                         'INPUT.Telemetry_Listener.newNamespace::Listener1',
-                        'Telemetry_Listener.Listener1',
+                        'Telemetry_Listener.f5telemetry_default::Listener1',
                         'Telemetry_Listener.newNamespace::Listener1'
                     ]);
-                    assert.sameDeepMembers(gatherIds(), ['Listener1', 'newNamespace::Listener1']);
+                    assert.sameDeepMembers(gatherIds(), ['f5telemetry_default::Listener1', 'newNamespace::Listener1']);
 
                     const listeners = EventListener.instances;
-                    assertListener(listeners.Listener1, {
+                    assertListener(listeners['f5telemetry_default::Listener1'], {
                         tags: { tenant: '`T`', application: '`A`' }
                     });
                     assertListener(listeners['newNamespace::Listener1'], {});
@@ -306,18 +306,18 @@ describe('Event Listener', () => {
             return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
                 .then(() => {
                     testAssert.sameOrderedMatches(registeredTracerPaths(), [
-                        'INPUT.Telemetry_Listener.Listener1',
-                        'Telemetry_Listener.Listener1',
-                        'Telemetry_Listener.New::Listener1'
+                        'INPUT.Telemetry_Listener.f5telemetry_default::Listener1',
+                        'Telemetry_Listener.New::Listener1',
+                        'Telemetry_Listener.f5telemetry_default::Listener1'
                     ]);
                     assert.lengthOf(EventListener.getAll(), 2);
                     assert.lengthOf(EventListener.receiversManager.getAll(), 1);
-                    assert.sameDeepMembers(gatherIds(), ['Listener1', 'New::Listener1']);
+                    assert.sameDeepMembers(gatherIds(), ['f5telemetry_default::Listener1', 'New::Listener1']);
                     const listeners = EventListener.instances;
 
                     return EventListener.receiversManager.getMessageStream(newDecl.Listener1.port).emitAsync('messages', ['6514'])
                         .then(() => assert.deepStrictEqual(actualData, {
-                            [listeners.Listener1.id]: [{ data: '6514', telemetryEventCategory: 'event' }],
+                            [listeners['f5telemetry_default::Listener1'].id]: [{ data: '6514', telemetryEventCategory: 'event' }],
                             [listeners['New::Listener1'].id]: [{ data: '6514', telemetryEventCategory: 'event' }]
                         }));
                 });
@@ -343,13 +343,13 @@ describe('Event Listener', () => {
             };
             return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
                 .then(() => {
-                    testAssert.sameOrderedMatches(registeredTracerPaths(), ['Telemetry_Listener.Listener1']);
+                    testAssert.sameOrderedMatches(registeredTracerPaths(), ['Telemetry_Listener.f5telemetry_default::Listener1']);
                     assert.lengthOf(EventListener.getAll(), 1);
                     assert.lengthOf(EventListener.receiversManager.getAll(), 1);
-                    assert.deepStrictEqual(gatherIds(), ['Listener1']);
+                    assert.deepStrictEqual(gatherIds(), ['f5telemetry_default::Listener1']);
                     const listeners = EventListener.instances;
 
-                    assertListener(listeners.Listener1, {
+                    assertListener(listeners['f5telemetry_default::Listener1'], {
                         tags: { tenant: 'Tenant', application: 'Application' },
                         hasFilterFunc: true,
                         actions: [{
@@ -363,7 +363,7 @@ describe('Event Listener', () => {
 
                     return EventListener.receiversManager.getMessageStream(9999).emitAsync('messages', ['virtual_name="test"'])
                         .then(() => assert.deepStrictEqual(actualData, {
-                            [listeners.Listener1.id]: [{
+                            [listeners['f5telemetry_default::Listener1'].id]: [{
                                 virtual_name: 'test',
                                 telemetryEventCategory: 'LTM',
                                 tenant: 'Tenant',
@@ -383,14 +383,14 @@ describe('Event Listener', () => {
                     assert.lengthOf(EventListener.getAll(), 1);
                     assert.lengthOf(EventListener.receiversManager.getAll(), 1);
                     assert.isEmpty(registeredTracerPaths());
-                    assert.deepStrictEqual(gatherIds(), ['Listener1']);
+                    assert.deepStrictEqual(gatherIds(), ['f5telemetry_default::Listener1']);
                     const listeners = EventListener.instances;
 
-                    assertListener(listeners.Listener1, {});
+                    assertListener(listeners['f5telemetry_default::Listener1'], {});
 
                     return EventListener.receiversManager.getMessageStream(defaultDeclarationPort).emitAsync('messages', ['data'])
                         .then(() => assert.deepStrictEqual(actualData, {
-                            [listeners.Listener1.id]: [{
+                            [listeners['f5telemetry_default::Listener1'].id]: [{
                                 data: 'data',
                                 telemetryEventCategory: 'event'
                             }]
@@ -471,14 +471,14 @@ describe('Event Listener', () => {
             return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
                 .then(() => {
                     testAssert.sameOrderedMatches(registeredTracerPaths(), [
-                        'INPUT.Telemetry_Listener.Listener1',
-                        'INPUT.Telemetry_Listener.Listener2',
-                        'INPUT.Telemetry_Listener.Listener3',
-                        'INPUT.Telemetry_Listener.Listener4',
-                        'Telemetry_Listener.Listener1',
-                        'Telemetry_Listener.Listener2',
-                        'Telemetry_Listener.Listener3',
-                        'Telemetry_Listener.Listener4'
+                        'INPUT.Telemetry_Listener.f5telemetry_default::Listener1',
+                        'INPUT.Telemetry_Listener.f5telemetry_default::Listener2',
+                        'INPUT.Telemetry_Listener.f5telemetry_default::Listener3',
+                        'INPUT.Telemetry_Listener.f5telemetry_default::Listener4',
+                        'Telemetry_Listener.f5telemetry_default::Listener1',
+                        'Telemetry_Listener.f5telemetry_default::Listener2',
+                        'Telemetry_Listener.f5telemetry_default::Listener3',
+                        'Telemetry_Listener.f5telemetry_default::Listener4'
                     ]);
 
                     return Promise.all([
@@ -500,7 +500,7 @@ describe('Event Listener', () => {
                 })
                 .then(() => {
                     assert.deepStrictEqual(
-                        getTracerData('INPUT.Telemetry_Listener.Listener1'),
+                        getTracerData('INPUT.Telemetry_Listener.f5telemetry_default::Listener1'),
                         [{
                             data: Buffer.from('12345').toString('hex'), // in hex
                             hrtime: [0, 0],
@@ -510,9 +510,9 @@ describe('Event Listener', () => {
                         }]
                     );
                     [
-                        'INPUT.Telemetry_Listener.Listener2',
-                        'INPUT.Telemetry_Listener.Listener3',
-                        'INPUT.Telemetry_Listener.Listener4'
+                        'INPUT.Telemetry_Listener.f5telemetry_default::Listener2',
+                        'INPUT.Telemetry_Listener.f5telemetry_default::Listener3',
+                        'INPUT.Telemetry_Listener.f5telemetry_default::Listener4'
                     ].forEach(tracerPath => assert.deepStrictEqual(
                         getTracerData(tracerPath),
                         [{
@@ -544,7 +544,7 @@ describe('Event Listener', () => {
                 ]))
                 .then(() => {
                     assert.includeDeepMembers(
-                        getTracerData('INPUT.Telemetry_Listener.Listener1'),
+                        getTracerData('INPUT.Telemetry_Listener.f5telemetry_default::Listener1'),
                         [{
                             data: Buffer.from('6789').toString('hex'), // in hex
                             hrtime: [0, 0],
@@ -554,8 +554,8 @@ describe('Event Listener', () => {
                         }]
                     );
                     [
-                        'INPUT.Telemetry_Listener.Listener2',
-                        'INPUT.Telemetry_Listener.Listener3'
+                        'INPUT.Telemetry_Listener.f5telemetry_default::Listener2',
+                        'INPUT.Telemetry_Listener.f5telemetry_default::Listener3'
                     ].forEach(tracerPath => assert.includeDeepMembers(
                         getTracerData(tracerPath),
                         [{
@@ -567,7 +567,7 @@ describe('Event Listener', () => {
                         }]
                     ));
                     assert.sameDeepMembers(
-                        getTracerData('INPUT.Telemetry_Listener.Listener4'),
+                        getTracerData('INPUT.Telemetry_Listener.f5telemetry_default::Listener4'),
                         [{
                             data: Buffer.from('12345').toString('hex'), // in hex
                             hrtime: [0, 0],
@@ -598,7 +598,7 @@ describe('Event Listener', () => {
                 ]))
                 .then(() => {
                     assert.includeDeepMembers(
-                        getTracerData('INPUT.Telemetry_Listener.Listener1'),
+                        getTracerData('INPUT.Telemetry_Listener.f5telemetry_default::Listener1'),
                         [{
                             data: Buffer.from('ABC').toString('hex'), // in hex
                             hrtime: [0, 0],
@@ -608,7 +608,7 @@ describe('Event Listener', () => {
                         }]
                     );
                     assert.includeDeepMembers(
-                        getTracerData('INPUT.Telemetry_Listener.Listener2'),
+                        getTracerData('INPUT.Telemetry_Listener.f5telemetry_default::Listener2'),
                         [{
                             data: Buffer.from('ABC').toString('hex'), // in hex
                             hrtime: [0, 0],
@@ -618,7 +618,7 @@ describe('Event Listener', () => {
                         }]
                     );
                     assert.notDeepInclude(
-                        getTracerData('INPUT.Telemetry_Listener.Listener3'),
+                        getTracerData('INPUT.Telemetry_Listener.f5telemetry_default::Listener3'),
                         {
                             data: Buffer.from('ABC').toString('hex'), // in hex
                             hrtime: [0, 0],
@@ -629,7 +629,7 @@ describe('Event Listener', () => {
                         'should not write raw data to from disabled listener'
                     );
                     assert.sameDeepMembers(
-                        getTracerData('INPUT.Telemetry_Listener.Listener4'),
+                        getTracerData('INPUT.Telemetry_Listener.f5telemetry_default::Listener4'),
                         [{
                             data: '3132333435', // in hex
                             hrtime: [0, 0],
@@ -660,16 +660,16 @@ describe('Event Listener', () => {
                     })
                 ]))
                 .then(() => [
-                    'INPUT.Telemetry_Listener.Listener1',
-                    'INPUT.Telemetry_Listener.Listener2',
-                    'INPUT.Telemetry_Listener.Listener3',
-                    'INPUT.Telemetry_Listener.Listener4'
+                    'INPUT.Telemetry_Listener.f5telemetry_default::Listener1',
+                    'INPUT.Telemetry_Listener.f5telemetry_default::Listener2',
+                    'INPUT.Telemetry_Listener.f5telemetry_default::Listener3',
+                    'INPUT.Telemetry_Listener.f5telemetry_default::Listener4'
                 ].forEach(tracerPath => assert.notDeepInclude(
                     getTracerData(tracerPath),
                     {
                         data: Buffer.from('final').toString('hex'), // in hex
                         hrtime: [0, 0],
-                        protocol: tracerPath.indexOf('Listener1') !== -1 ? 'udp' : 'tcp',
+                        protocol: tracerPath.indexOf('f5telemetry_default::Listener1') !== -1 ? 'udp' : 'tcp',
                         senderKey: 'senderKey',
                         timestamp: 0
                     },

@@ -1,0 +1,8 @@
+{
+    "class": "Telemetry",
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "DataDog",
+        "apiKey": "api_key"
+    }
+}

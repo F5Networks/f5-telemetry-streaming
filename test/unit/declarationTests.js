@@ -4409,6 +4409,42 @@ describe('Declarations', () => {
             });
         });
 
+        describe('DataDog', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'DataDog',
+                    apiKey: 'test'
+                },
+                {
+                    type: 'DataDog',
+                    apiKey: 'test'
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'DataDog',
+                    apiKey: 'test'
+                },
+                {
+                    type: 'DataDog',
+                    apiKey: 'test'
+                }
+            ));
+
+            schemaValidationUtil.generateSchemaBasicTests(
+                basicSchemaTestsValidator,
+                {
+                    type: 'DataDog',
+                    apiKey: 'test',
+                    index: 'index'
+                },
+                [
+                    { property: 'apiKey', requiredTests: true, stringLengthTests: true }
+                ]
+            );
+        });
+
         describe('ElasticSearch', () => {
             it('should pass minimal declaration', () => validateMinimal(
                 {
@@ -4715,6 +4751,109 @@ describe('Declarations', () => {
             );
         });
 
+        describe('Google_Cloud_Logging', () => {
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'Google_Cloud_Logging',
+                    logScopeId: 'myProject',
+                    logId: 'allMyLogs',
+                    privateKeyId: 'privateKeyId',
+                    privateKey: {
+                        cipherText: 'privateKey'
+                    },
+                    serviceEmail: 'serviceEmail'
+                },
+                {
+                    type: 'Google_Cloud_Logging',
+                    logScope: 'projects',
+                    logScopeId: 'myProject',
+                    logId: 'allMyLogs',
+                    privateKeyId: 'privateKeyId',
+                    privateKey: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$privateKey'
+                    },
+                    serviceEmail: 'serviceEmail',
+                    reportInstanceMetadata: false
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'Google_Cloud_Logging',
+                    logScope: 'organizations',
+                    logScopeId: 'myOrganization',
+                    logId: 'allMyLogs',
+                    privateKeyId: 'privateKeyId',
+                    privateKey: {
+                        cipherText: 'privateKey'
+                    },
+                    serviceEmail: 'serviceEmail',
+                    reportInstanceMetadata: true
+                },
+                {
+                    type: 'Google_Cloud_Logging',
+                    logScope: 'organizations',
+                    logScopeId: 'myOrganization',
+                    logId: 'allMyLogs',
+                    privateKeyId: 'privateKeyId',
+                    privateKey: {
+                        class: 'Secret',
+                        protected: 'SecureVault',
+                        cipherText: '$M$privateKey'
+                    },
+                    serviceEmail: 'serviceEmail',
+                    reportInstanceMetadata: true
+                }
+            ));
+
+            it('should restrict allowable characters for logId', () => assert.isRejected(validateFull(
+                {
+                    type: 'Google_Cloud_Logging',
+                    logScope: 'organizations',
+                    logScopeId: 'myOrganization',
+                    logId: 'allM yLogs',
+                    privateKeyId: 'privateKeyId',
+                    privateKey: {
+                        cipherText: 'privateKey'
+                    },
+                    serviceEmail: 'serviceEmail',
+                    reportInstanceMetadata: true
+                }
+            ), /#\/definitions\/logId\/pattern.*should match pattern.*\^\[a-zA-z0-9._-\]\+\$/));
+
+            schemaValidationUtil.generateSchemaBasicTests(
+                basicSchemaTestsValidator,
+                {
+                    type: 'Google_Cloud_Logging',
+                    logScope: 'organizations',
+                    logScopeId: 'myOrganization',
+                    logId: 'allMyLogs',
+                    privateKeyId: 'privateKeyId',
+                    privateKey: {
+                        cipherText: 'privateKey'
+                    },
+                    serviceEmail: 'serviceEmail'
+                },
+                [
+                    {
+                        property: 'logScope',
+                        enumTests: {
+                            allowed: ['projects', 'organizations', 'billingAccounts', 'folders'],
+                            notAllowed: ['', 'what?', 'newlyInvented']
+                        },
+                        ignoreOther: true
+                    },
+                    'logScopeId',
+                    'logId',
+                    'privateKeyId',
+                    'serviceEmail'
+                ],
+                { stringLengthTests: true }
+            );
+        });
+
         describe('Google_Cloud_Monitoring', () => {
             it('should pass minimal declaration', () => validateMinimal(
                 {
@@ -4735,7 +4874,8 @@ describe('Declarations', () => {
                         protected: 'SecureVault',
                         cipherText: '$M$privateKey'
                     },
-                    serviceEmail: 'serviceEmail'
+                    serviceEmail: 'serviceEmail',
+                    reportInstanceMetadata: false
                 }
             ));
 
@@ -4758,7 +4898,8 @@ describe('Declarations', () => {
                         protected: 'SecureVault',
                         cipherText: '$M$privateKey'
                     },
-                    serviceEmail: 'serviceEmail'
+                    serviceEmail: 'serviceEmail',
+                    reportInstanceMetadata: false
                 }
             ));
 
@@ -4781,7 +4922,8 @@ describe('Declarations', () => {
                         protected: 'SecureVault',
                         cipherText: '$M$privateKey'
                     },
-                    serviceEmail: 'serviceEmail'
+                    serviceEmail: 'serviceEmail',
+                    reportInstanceMetadata: false
                 }
             ));
 

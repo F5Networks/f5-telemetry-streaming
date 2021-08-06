@@ -17,6 +17,7 @@ const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
 const azureUtil = require('../../../src/lib/consumers/shared/azureUtil');
+const gcpUtil = require('../../../src/lib/consumers/shared/gcpUtil');
 const metadataUtil = require('../../../src/lib/utils/metadata');
 
 chai.use(chaiAsPromised);
@@ -28,7 +29,7 @@ describe('Metadata Util', () => {
     });
 
     describe('.getInstanceMetadata', () => {
-        const sampleAzure = {
+        const azureMetadata = {
             compute: {
                 azEnvironment: 'AZUREPUBLICCLOUD',
                 location: 'westus',
@@ -54,8 +55,22 @@ describe('Metadata Util', () => {
             }
         };
 
-        it('should return metadata available for applicable consumer(s)', () => {
-            sinon.stub(azureUtil, 'getInstanceMetadata').resolves(sampleAzure);
+        const googleMetadata = {
+            attributes: {},
+            cpuPlatform: 'Intel Broadwell',
+            description: '',
+            hostname: 'myHost.a.project.internal',
+            id: 12345678,
+            image: 'projects/ubuntu-os-cloud/global/images/ubuntu',
+            machineType: 'projects/1234/machineTypes/n1-standard-1',
+            maintenanceEvent: 'NONE',
+            name: 'myHost',
+            tags: [],
+            zone: 'projects/1234/zones/us-west1-b'
+        };
+
+        it('should return metadata available for applicable consumer (Azure Log Analytics)', () => {
+            sinon.stub(azureUtil, 'getInstanceMetadata').resolves(azureMetadata);
             const mockConsumer = {
                 config: {
                     type: 'Azure_Log_Analytics'
@@ -63,7 +78,20 @@ describe('Metadata Util', () => {
             };
             return metadataUtil.getInstanceMetadata(mockConsumer)
                 .then((metadata) => {
-                    assert.deepStrictEqual(metadata, sampleAzure);
+                    assert.deepStrictEqual(metadata, azureMetadata);
+                });
+        });
+
+        it('should return metadata available for applicable consumer (Google Cloud Monitoring)', () => {
+            sinon.stub(gcpUtil, 'getInstanceMetadata').resolves(googleMetadata);
+            const mockConsumer = {
+                config: {
+                    type: 'Google_Cloud_Monitoring'
+                }
+            };
+            return metadataUtil.getInstanceMetadata(mockConsumer)
+                .then((metadata) => {
+                    assert.deepStrictEqual(metadata, googleMetadata);
                 });
         });
 
@@ -99,7 +127,7 @@ describe('Metadata Util', () => {
             const apiCallStub = sinon.stub(azureUtil, 'getInstanceMetadata');
             apiCallStub.onCall(0).rejects({ message: 'Let\'s say this failed' });
             apiCallStub.onCall(1).rejects({ message: 'Let\'s say this failed yet again' });
-            apiCallStub.onCall(2).resolves(sampleAzure);
+            apiCallStub.onCall(2).resolves(azureMetadata);
             const mockConsumer = {
                 config: {
                     type: 'Azure_Log_Analytics'

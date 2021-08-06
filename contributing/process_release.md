@@ -56,6 +56,7 @@
     * 1.19.0 - 14.1 MB
     * 1.20.0 - 14.4 MB
     * 1.21.0 - 15.5 MB
+    * 1.22.0 - 15.6 MB
   * Install build to BIG-IP, navigate to folder `/var/config/rest/iapps/f5-telemetry/` and check following:
     * Run `du -sh` and check that folder's size (shouldn't be much greater than previous versions):
       * 1.4.0 - 65 MB
@@ -74,9 +75,10 @@
       * 1.17.0 - 95 MB (NOTE: grpc module deps increase)
       * 1.18.0 - 100 MB
       * 1.19.0 - 101 MB
-      * 1.20.0 - 103MB
-      * 1.21.0 - 111MB
-    * Check `nodejs/node_modules` folder - if you see `eslint`, `mocha` or something else from [package.json](package.json) `devDependencies` section - something wrong with build process. Probably some `npm` flags are work as not expected and it MUST BE FIXED before publishing.
+      * 1.20.0 - 103 MB
+      * 1.21.0 - 111 MB
+      * 1.22.0 - 112 MB
+    * Check `node_modules` folder - if you see `eslint`, `mocha` or something else from [package.json](package.json) `devDependencies` section - something wrong with build process. Probably some `npm` flags are work as not expected and it MUST BE FIXED before publishing.
 * Ensure that all tests (unit tests and functional tests passed)
 * Optional: Ensure that your local tags match remote. If not, remove all and re-fetch:
   * git tag -l -n
@@ -91,6 +93,17 @@
   * update the git tags in the `TS` repository
   * push the new build artifacts to the 'f5-automation-toolchain-generic/f5-telemetry' Artifactory repository
   * send the release candidate email with features, bugs, artifactory URL
+
+## LTS Release process (developers only)
+
+Following list of changes should be done for both master/develop and LTS branches:
+
+* Update [SUPPORT.md](SUPPORT.md) - set release type "LTS" and update support dates for LTS release
+* Update [CHANGELOG.md](CHANGELOG.md) - add *Promoted to LTS* to **Changed** section
+* Schema changes:
+  * Create new folder for LTS version (with name X.Y.Z) in [src/schema](src/schema)
+  * All schemas that are "newer" than LTS release should be updated to support LTS version. Update *base_schema.json* file only for each applicable version
+  * **LTS branch only** - update [src/schema/latest](src/schema/latest) to match LTS schema
 
 ## Release process
 

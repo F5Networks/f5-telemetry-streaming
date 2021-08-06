@@ -60,24 +60,24 @@ module.exports = {
             },
             expected: {
                 mappings: {
-                    'My_System_1::SystemPoller_1': ['My_Consumer_1'],
-                    'My_System_1::SystemPoller_2': ['My_Consumer_1'],
-                    'My_System_2::SystemPoller_1': ['My_Consumer_1'],
-                    'My_System_2::SystemPoller_2': ['My_Consumer_1']
+                    'f5telemetry_default::My_System_1::SystemPoller_1': ['f5telemetry_default::My_Consumer_1'],
+                    'f5telemetry_default::My_System_1::SystemPoller_2': ['f5telemetry_default::My_Consumer_1'],
+                    'f5telemetry_default::My_System_2::SystemPoller_1': ['f5telemetry_default::My_Consumer_1'],
+                    'f5telemetry_default::My_System_2::SystemPoller_2': ['f5telemetry_default::My_Consumer_1']
                 },
                 components: [
                     {
-                        id: 'My_System_1::SystemPoller_1',
+                        id: 'f5telemetry_default::My_System_1::SystemPoller_1',
                         name: 'SystemPoller_1',
                         class: 'Telemetry_System_Poller',
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_1::SystemPoller_1',
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_System_1::SystemPoller_1',
                             type: 'output'
                         },
-                        traceName: 'My_System_1::SystemPoller_1',
+                        traceName: 'f5telemetry_default::My_System_1::SystemPoller_1',
                         systemName: 'My_System_1',
                         namespace: 'f5telemetry_default',
                         enable: true,
@@ -107,17 +107,17 @@ module.exports = {
                         }
                     },
                     {
-                        id: 'My_System_1::SystemPoller_2',
+                        id: 'f5telemetry_default::My_System_1::SystemPoller_2',
                         name: 'SystemPoller_2',
                         class: 'Telemetry_System_Poller',
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_1::SystemPoller_2',
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_System_1::SystemPoller_2',
                             type: 'output'
                         },
-                        traceName: 'My_System_1::SystemPoller_2',
+                        traceName: 'f5telemetry_default::My_System_1::SystemPoller_2',
                         systemName: 'My_System_1',
                         namespace: 'f5telemetry_default',
                         enable: true,
@@ -149,8 +149,8 @@ module.exports = {
                     {
                         class: 'Telemetry_System_Poller',
                         name: 'SystemPoller_2',
-                        id: 'My_System_2::SystemPoller_2',
-                        traceName: 'My_System_2::SystemPoller_2',
+                        id: 'f5telemetry_default::My_System_2::SystemPoller_2',
+                        traceName: 'f5telemetry_default::My_System_2::SystemPoller_2',
                         systemName: 'My_System_2',
                         namespace: 'f5telemetry_default',
                         enable: true,
@@ -159,7 +159,7 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_2::SystemPoller_2',
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_System_2::SystemPoller_2',
                             type: 'output'
                         },
                         dataOpts: {
@@ -187,17 +187,17 @@ module.exports = {
                         }
                     },
                     {
-                        id: 'My_System_2::SystemPoller_1',
+                        id: 'f5telemetry_default::My_System_2::SystemPoller_1',
                         name: 'SystemPoller_1',
                         class: 'Telemetry_System_Poller',
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_2::SystemPoller_1',
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_System_2::SystemPoller_1',
                             type: 'output'
                         },
-                        traceName: 'My_System_2::SystemPoller_1',
+                        traceName: 'f5telemetry_default::My_System_2::SystemPoller_1',
                         systemName: 'My_System_2',
                         namespace: 'f5telemetry_default',
                         enable: true,
@@ -230,15 +230,15 @@ module.exports = {
                         allowSelfSignedCert: false,
                         class: 'Telemetry_Consumer',
                         enable: true,
-                        id: 'My_Consumer_1',
+                        id: 'f5telemetry_default::My_Consumer_1',
                         name: 'My_Consumer_1',
-                        traceName: 'My_Consumer_1',
+                        traceName: 'f5telemetry_default::My_Consumer_1',
                         namespace: 'f5telemetry_default',
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1',
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer_1',
                             type: 'output'
                         },
                         type: 'default'
@@ -328,14 +328,14 @@ module.exports = {
             },
             expected: {
                 mappings: {
-                    'My_System_1::SystemPoller_1': ['My_Consumer_1'],
+                    'f5telemetry_default::My_System_1::SystemPoller_1': ['f5telemetry_default::My_Consumer_1'],
                     'My_Namespace::My_System_1::SystemPoller_1': ['My_Namespace::My_Consumer_1'],
                     'My_Namespace_2::My_System_1::SystemPoller_1': ['My_Namespace_2::My_Consumer_1']
                 },
                 components: [
                     {
                         name: 'SystemPoller_1',
-                        id: 'My_System_1::SystemPoller_1',
+                        id: 'f5telemetry_default::My_System_1::SystemPoller_1',
                         class: 'Telemetry_System_Poller',
                         namespace: 'f5telemetry_default',
                         enable: true,
@@ -343,11 +343,11 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_1::SystemPoller_1',
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_System_1::SystemPoller_1',
                             type: 'output'
                         },
                         systemName: 'My_System_1',
-                        traceName: 'My_System_1::SystemPoller_1',
+                        traceName: 'f5telemetry_default::My_System_1::SystemPoller_1',
                         interval: 300,
                         dataOpts: {
                             actions: [
@@ -375,8 +375,8 @@ module.exports = {
                     },
                     {
                         name: 'My_Consumer_1',
-                        traceName: 'My_Consumer_1',
-                        id: 'My_Consumer_1',
+                        traceName: 'f5telemetry_default::My_Consumer_1',
+                        id: 'f5telemetry_default::My_Consumer_1',
                         namespace: 'f5telemetry_default',
                         allowSelfSignedCert: false,
                         class: 'Telemetry_Consumer',
@@ -395,7 +395,7 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1',
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer_1',
                             type: 'output'
                         },
                         compressionType: 'gzip'
@@ -613,11 +613,11 @@ module.exports = {
             },
             expected: {
                 mappings: {
-                    'System_Nested_Poller_Single::SystemPoller_1': ['My_Consumer_1'],
-                    'System_Ref_Poller::Poller1': ['My_Consumer_1'],
-                    'System_Nested_Poller_Array::SystemPoller_1': ['My_Consumer_1'],
-                    'System_Nested_Poller_Array::Poller1': ['My_Consumer_1'],
-                    'System_Nested_Poller_Array::Poller2': ['My_Consumer_1'],
+                    'f5telemetry_default::System_Nested_Poller_Single::SystemPoller_1': ['f5telemetry_default::My_Consumer_1'],
+                    'f5telemetry_default::System_Ref_Poller::Poller1': ['f5telemetry_default::My_Consumer_1'],
+                    'f5telemetry_default::System_Nested_Poller_Array::SystemPoller_1': ['f5telemetry_default::My_Consumer_1'],
+                    'f5telemetry_default::System_Nested_Poller_Array::Poller1': ['f5telemetry_default::My_Consumer_1'],
+                    'f5telemetry_default::System_Nested_Poller_Array::Poller2': ['f5telemetry_default::My_Consumer_1'],
                     'My_Namespace::System_Nested_Poller_Single::SystemPoller_1': ['My_Namespace::My_Consumer_1'],
                     'My_Namespace::System_Ref_Poller::Poller1': ['My_Namespace::My_Consumer_1'],
                     'My_Namespace::System_Nested_Poller_Array::SystemPoller_1': ['My_Namespace::My_Consumer_1'],
@@ -627,7 +627,7 @@ module.exports = {
                 components: [
                     {
                         name: 'SystemPoller_1',
-                        id: 'System_Nested_Poller_Single::SystemPoller_1',
+                        id: 'f5telemetry_default::System_Nested_Poller_Single::SystemPoller_1',
                         namespace: 'f5telemetry_default',
                         class: 'Telemetry_System_Poller',
                         enable: true,
@@ -636,10 +636,10 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_System_Poller.System_Nested_Poller_Single::SystemPoller_1',
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::System_Nested_Poller_Single::SystemPoller_1',
                             type: 'output'
                         },
-                        traceName: 'System_Nested_Poller_Single::SystemPoller_1',
+                        traceName: 'f5telemetry_default::System_Nested_Poller_Single::SystemPoller_1',
                         systemName: 'System_Nested_Poller_Single',
                         dataOpts: {
                             actions: [
@@ -667,7 +667,7 @@ module.exports = {
                     },
                     {
                         name: 'Poller1',
-                        id: 'System_Ref_Poller::Poller1',
+                        id: 'f5telemetry_default::System_Ref_Poller::Poller1',
                         namespace: 'f5telemetry_default',
                         class: 'Telemetry_System_Poller',
                         enable: true,
@@ -676,10 +676,10 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_System_Poller.System_Ref_Poller::Poller1',
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::System_Ref_Poller::Poller1',
                             type: 'output'
                         },
-                        traceName: 'System_Ref_Poller::Poller1',
+                        traceName: 'f5telemetry_default::System_Ref_Poller::Poller1',
                         systemName: 'System_Ref_Poller',
                         dataOpts: {
                             actions: [
@@ -707,7 +707,7 @@ module.exports = {
                     },
                     {
                         name: 'Poller2',
-                        id: 'System_Nested_Poller_Array::Poller2',
+                        id: 'f5telemetry_default::System_Nested_Poller_Array::Poller2',
                         namespace: 'f5telemetry_default',
                         class: 'Telemetry_System_Poller',
                         enable: true,
@@ -716,10 +716,10 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_System_Poller.System_Nested_Poller_Array::Poller2',
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::System_Nested_Poller_Array::Poller2',
                             type: 'output'
                         },
-                        traceName: 'System_Nested_Poller_Array::Poller2',
+                        traceName: 'f5telemetry_default::System_Nested_Poller_Array::Poller2',
                         systemName: 'System_Nested_Poller_Array',
                         dataOpts: {
                             actions: [
@@ -747,7 +747,7 @@ module.exports = {
                     },
                     {
                         name: 'SystemPoller_1',
-                        id: 'System_Nested_Poller_Array::SystemPoller_1',
+                        id: 'f5telemetry_default::System_Nested_Poller_Array::SystemPoller_1',
                         namespace: 'f5telemetry_default',
                         class: 'Telemetry_System_Poller',
                         enable: true,
@@ -756,10 +756,10 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_System_Poller.System_Nested_Poller_Array::SystemPoller_1',
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::System_Nested_Poller_Array::SystemPoller_1',
                             type: 'output'
                         },
-                        traceName: 'System_Nested_Poller_Array::SystemPoller_1',
+                        traceName: 'f5telemetry_default::System_Nested_Poller_Array::SystemPoller_1',
                         systemName: 'System_Nested_Poller_Array',
                         dataOpts: {
                             actions: [
@@ -786,7 +786,7 @@ module.exports = {
                         }
                     },
                     {
-                        id: 'System_Nested_Poller_Array::Poller1',
+                        id: 'f5telemetry_default::System_Nested_Poller_Array::Poller1',
                         name: 'Poller1',
                         namespace: 'f5telemetry_default',
                         class: 'Telemetry_System_Poller',
@@ -796,10 +796,10 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_System_Poller.System_Nested_Poller_Array::Poller1',
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::System_Nested_Poller_Array::Poller1',
                             type: 'output'
                         },
-                        traceName: 'System_Nested_Poller_Array::Poller1',
+                        traceName: 'f5telemetry_default::System_Nested_Poller_Array::Poller1',
                         systemName: 'System_Nested_Poller_Array',
                         dataOpts: {
                             actions: [
@@ -829,15 +829,15 @@ module.exports = {
                         allowSelfSignedCert: false,
                         class: 'Telemetry_Consumer',
                         enable: true,
-                        id: 'My_Consumer_1',
+                        id: 'f5telemetry_default::My_Consumer_1',
                         name: 'My_Consumer_1',
-                        traceName: 'My_Consumer_1',
+                        traceName: 'f5telemetry_default::My_Consumer_1',
                         namespace: 'f5telemetry_default',
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1',
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer_1',
                             type: 'output'
                         },
                         type: 'default'
@@ -1198,9 +1198,9 @@ module.exports = {
             },
             expected: {
                 mappings: {
-                    'System_Trace_Undef_Poller_String::SystemPoller_1': ['My_Consumer_1'],
-                    'System_Remote_Ref_Poller::Poller_Trace_True': ['My_Consumer_1'],
-                    'System_Localhost_Ref_Poller::Poller_Trace_False': ['My_Consumer_1'],
+                    'f5telemetry_default::System_Trace_Undef_Poller_String::SystemPoller_1': ['f5telemetry_default::My_Consumer_1'],
+                    'f5telemetry_default::System_Remote_Ref_Poller::Poller_Trace_True': ['f5telemetry_default::My_Consumer_1'],
+                    'f5telemetry_default::System_Localhost_Ref_Poller::Poller_Trace_False': ['f5telemetry_default::My_Consumer_1'],
                     'My_Namespace::System_Trace_Undef_Poller_String::SystemPoller_1': ['My_Namespace::My_Consumer_1'],
                     'My_Namespace::System_Remote_Ref_Poller::Poller_Trace_True': ['My_Namespace::My_Consumer_1'],
                     'My_Namespace::System_Localhost_Ref_Poller::Poller_Trace_False': ['My_Namespace::My_Consumer_1']
@@ -1217,11 +1217,11 @@ module.exports = {
                         enable: true,
                         interval: 300,
                         class: 'Telemetry_System_Poller',
-                        id: 'System_Trace_Undef_Poller_String::SystemPoller_1',
+                        id: 'f5telemetry_default::System_Trace_Undef_Poller_String::SystemPoller_1',
                         name: 'SystemPoller_1',
                         namespace: 'f5telemetry_default',
                         systemName: 'System_Trace_Undef_Poller_String',
-                        traceName: 'System_Trace_Undef_Poller_String::SystemPoller_1',
+                        traceName: 'f5telemetry_default::System_Trace_Undef_Poller_String::SystemPoller_1',
                         connection: {
                             host: 'host1',
                             port: 8100,
@@ -1258,15 +1258,15 @@ module.exports = {
                         },
                         enable: true,
                         name: 'Poller_Trace_True',
-                        id: 'System_Remote_Ref_Poller::Poller_Trace_True',
+                        id: 'f5telemetry_default::System_Remote_Ref_Poller::Poller_Trace_True',
                         namespace: 'f5telemetry_default',
                         systemName: 'System_Remote_Ref_Poller',
-                        traceName: 'System_Remote_Ref_Poller::Poller_Trace_True',
+                        traceName: 'f5telemetry_default::System_Remote_Ref_Poller::Poller_Trace_True',
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_System_Poller.System_Remote_Ref_Poller::Poller_Trace_True',
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::System_Remote_Ref_Poller::Poller_Trace_True',
                             type: 'output'
                         },
                         connection: {
@@ -1304,15 +1304,15 @@ module.exports = {
                         },
                         enable: true,
                         name: 'Poller_Trace_False',
-                        id: 'System_Localhost_Ref_Poller::Poller_Trace_False',
+                        id: 'f5telemetry_default::System_Localhost_Ref_Poller::Poller_Trace_False',
                         namespace: 'f5telemetry_default',
                         systemName: 'System_Localhost_Ref_Poller',
-                        traceName: 'System_Localhost_Ref_Poller::Poller_Trace_False',
+                        traceName: 'f5telemetry_default::System_Localhost_Ref_Poller::Poller_Trace_False',
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_System_Poller.System_Localhost_Ref_Poller::Poller_Trace_False',
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::System_Localhost_Ref_Poller::Poller_Trace_False',
                             type: 'output'
                         },
                         connection: {
@@ -1342,15 +1342,15 @@ module.exports = {
                         allowSelfSignedCert: false,
                         class: 'Telemetry_Consumer',
                         enable: true,
-                        id: 'My_Consumer_1',
+                        id: 'f5telemetry_default::My_Consumer_1',
                         name: 'My_Consumer_1',
-                        traceName: 'My_Consumer_1',
+                        traceName: 'f5telemetry_default::My_Consumer_1',
                         namespace: 'f5telemetry_default',
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1',
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer_1',
                             type: 'output'
                         },
                         type: 'default'

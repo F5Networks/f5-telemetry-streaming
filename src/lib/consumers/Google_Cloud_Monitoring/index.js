@@ -122,14 +122,28 @@ module.exports = function (context) {
                         }
                     }
                 ];
-                const resource = {
-                    type: 'generic_node',
-                    labels: {
+
+                // Attaches time-series metrics to a 'resource' - label resource as best as we can
+                const resource = {};
+                if (context.config.reportInstanceMetadata
+                    && context.metadata
+                    && context.metadata.id
+                    && context.metadata.zone) {
+                    // Get zone name from full zone string: projects/<id>/zones/<zone>
+                    const zone = context.metadata.zone.split('/').pop();
+                    resource.type = 'gce_instance';
+                    resource.labels = {
+                        instance_id: context.metadata.id.toString(),
+                        zone
+                    };
+                } else {
+                    resource.type = 'generic_node';
+                    resource.labels = {
                         namespace: context.event.data.system.hostname,
                         node_id: context.event.data.system.machineId,
                         location: 'global'
-                    }
-                };
+                    };
+                }
                 timeSeries.timeSeries.push({ metric, points, resource });
             });
 

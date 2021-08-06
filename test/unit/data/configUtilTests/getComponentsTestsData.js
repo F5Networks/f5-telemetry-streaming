@@ -39,15 +39,15 @@ module.exports = {
                     allowSelfSignedCert: false,
                     class: 'Telemetry_Consumer',
                     enable: true,
-                    id: 'Consumer_1',
+                    id: 'f5telemetry_default::Consumer_1',
                     name: 'Consumer_1',
-                    traceName: 'Consumer_1',
+                    traceName: 'f5telemetry_default::Consumer_1',
                     namespace: 'f5telemetry_default',
                     trace: {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Consumer_1',
                         type: 'output'
                     },
                     type: 'default'
@@ -104,15 +104,15 @@ module.exports = {
                     allowSelfSignedCert: false,
                     class: 'Telemetry_Consumer',
                     enable: true,
-                    id: 'Consumer_1',
+                    id: 'f5telemetry_default::Consumer_1',
                     name: 'Consumer_1',
-                    traceName: 'Consumer_1',
+                    traceName: 'f5telemetry_default::Consumer_1',
                     namespace: 'f5telemetry_default',
                     trace: {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Consumer_1',
                         type: 'output'
                     },
                     type: 'default'
@@ -121,15 +121,15 @@ module.exports = {
                     allowSelfSignedCert: false,
                     class: 'Telemetry_Consumer',
                     enable: true,
-                    id: 'Consumer_2',
+                    id: 'f5telemetry_default::Consumer_2',
                     name: 'Consumer_2',
-                    traceName: 'Consumer_2',
+                    traceName: 'f5telemetry_default::Consumer_2',
                     namespace: 'f5telemetry_default',
                     trace: {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_2',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Consumer_2',
                         type: 'output'
                     },
                     type: 'default'
@@ -203,15 +203,15 @@ module.exports = {
                     allowSelfSignedCert: false,
                     class: 'Telemetry_Consumer',
                     enable: true,
-                    id: 'Consumer_1',
+                    id: 'f5telemetry_default::Consumer_1',
                     name: 'Consumer_1',
-                    traceName: 'Consumer_1',
+                    traceName: 'f5telemetry_default::Consumer_1',
                     namespace: 'f5telemetry_default',
                     trace: {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Consumer_1',
                         type: 'output'
                     },
                     type: 'default'
@@ -276,7 +276,7 @@ module.exports = {
                         }
                     ],
                     enable: true,
-                    id: 'Listener1',
+                    id: 'f5telemetry_default::Listener1',
                     match: '',
                     name: 'Listener1',
                     namespace: 'f5telemetry_default',
@@ -286,31 +286,31 @@ module.exports = {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 9999,
-                        path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.Listener1',
+                        path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.f5telemetry_default::Listener1',
                         type: 'input'
                     },
                     trace: {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Listener.Listener1',
+                        path: '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::Listener1',
                         type: 'output'
                     },
-                    traceName: 'Listener1'
+                    traceName: 'f5telemetry_default::Listener1'
                 },
                 {
                     allowSelfSignedCert: false,
                     class: 'Telemetry_Consumer',
                     enable: true,
-                    id: 'Consumer_1',
+                    id: 'f5telemetry_default::Consumer_1',
                     name: 'Consumer_1',
-                    traceName: 'Consumer_1',
+                    traceName: 'f5telemetry_default::Consumer_1',
                     namespace: 'f5telemetry_default',
                     trace: {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Consumer_1',
                         type: 'output'
                     },
                     type: 'default'
@@ -319,15 +319,15 @@ module.exports = {
                     allowSelfSignedCert: false,
                     class: 'Telemetry_Consumer',
                     enable: true,
-                    id: 'Consumer_2',
+                    id: 'f5telemetry_default::Consumer_2',
                     name: 'Consumer_2',
-                    traceName: 'Consumer_2',
+                    traceName: 'f5telemetry_default::Consumer_2',
                     namespace: 'f5telemetry_default',
                     trace: {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_2',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Consumer_2',
                         type: 'output'
                     },
                     type: 'default'
@@ -433,15 +433,15 @@ module.exports = {
                     allowSelfSignedCert: false,
                     class: 'Telemetry_Consumer',
                     enable: true,
-                    id: 'Consumer_1',
+                    id: 'f5telemetry_default::Consumer_1',
                     name: 'Consumer_1',
-                    traceName: 'Consumer_1',
+                    traceName: 'f5telemetry_default::Consumer_1',
                     namespace: 'f5telemetry_default',
                     trace: {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Consumer_1',
                         type: 'output'
                     },
                     type: 'default'
@@ -450,15 +450,15 @@ module.exports = {
                     allowSelfSignedCert: false,
                     class: 'Telemetry_Consumer',
                     enable: true,
-                    id: 'Consumer_2',
+                    id: 'f5telemetry_default::Consumer_2',
                     name: 'Consumer_2',
-                    traceName: 'Consumer_2',
+                    traceName: 'f5telemetry_default::Consumer_2',
                     namespace: 'f5telemetry_default',
                     trace: {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_2',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Consumer_2',
                         type: 'output'
                     },
                     type: 'default'
@@ -498,15 +498,15 @@ module.exports = {
                     allowSelfSignedCert: false,
                     class: 'Telemetry_Consumer',
                     enable: true,
-                    id: 'Consumer_1',
+                    id: 'f5telemetry_default::Consumer_1',
                     name: 'Consumer_1',
-                    traceName: 'Consumer_1',
+                    traceName: 'f5telemetry_default::Consumer_1',
                     namespace: 'f5telemetry_default',
                     trace: {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.Consumer_1',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Consumer_1',
                         type: 'output'
                     },
                     type: 'default'

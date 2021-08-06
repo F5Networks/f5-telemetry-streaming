@@ -72,8 +72,8 @@ describe('Config', () => {
                     mappings: {},
                     components: [{
                         name: 'My_Consumer',
-                        traceName: 'My_Consumer',
-                        id: 'My_Consumer',
+                        traceName: 'f5telemetry_default::My_Consumer',
+                        id: 'f5telemetry_default::My_Consumer',
                         class: 'Telemetry_Consumer',
                         type: 'default',
                         enable: true,
@@ -81,7 +81,7 @@ describe('Config', () => {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer',
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
                             type: 'output'
                         },
                         allowSelfSignedCert: false,
@@ -133,16 +133,16 @@ describe('Config', () => {
                         components: [{
                             class: 'Telemetry_Consumer',
                             type: 'default',
-                            id: 'My_Consumer',
+                            id: 'f5telemetry_default::My_Consumer',
                             name: 'My_Consumer',
                             namespace: 'f5telemetry_default',
-                            traceName: 'My_Consumer',
+                            traceName: 'f5telemetry_default::My_Consumer',
                             enable: true,
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer',
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
                                 type: 'output'
                             },
                             allowSelfSignedCert: false
@@ -345,16 +345,16 @@ describe('Config', () => {
                 components: [{
                     class: 'Telemetry_Consumer',
                     type: 'default',
-                    id: 'My_Consumer',
+                    id: 'f5telemetry_default::My_Consumer',
                     name: 'My_Consumer',
                     namespace: 'f5telemetry_default',
-                    traceName: 'My_Consumer',
+                    traceName: 'f5telemetry_default::My_Consumer',
                     enable: true,
                     trace: {
                         enable: false,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer',
+                        path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
                         type: 'output'
                     },
                     allowSelfSignedCert: false

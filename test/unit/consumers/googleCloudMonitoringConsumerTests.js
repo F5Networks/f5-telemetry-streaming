@@ -213,6 +213,93 @@ describe('Google_Cloud_Monitoring', () => {
             });
     });
 
+    it('should process systemInfo data, when metadata reporting enabled', () => {
+        const expectedTimeSeries = testUtil.deepCopy(getOriginTimeSeries());
+        expectedTimeSeries.timeSeries.forEach((series) => {
+            series.resource = {
+                type: 'gce_instance',
+                labels: {
+                    instance_id: '12345678',
+                    zone: 'us-west1-a'
+                }
+            };
+        });
+
+        nock('https://oauth2.googleapis.com/token')
+            .post('', body => body.assertion === '12345::theprivatekeyvalue')
+            .reply(200, { access_token: 'aToken', expires_in: tokenDuration });
+
+        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+            reqheaders: {
+                authorization: 'Bearer aToken'
+            }
+        })
+            .get('')
+            .reply(200, metricDescriptors.onGet);
+
+        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+            reqheaders: {
+                authorization: 'Bearer aToken'
+            }
+        })
+            .post('', metricDescriptors.onPost)
+            .reply(200, {});
+
+        nock('https://monitoring.googleapis.com/v3/projects/theProject/timeSeries', {
+            reqheaders: {
+                authorization: 'Bearer aToken'
+            }
+        })
+            .post('', expectedTimeSeries)
+            .reply(200, {});
+
+        context.config.reportInstanceMetadata = true;
+        context.metadata = {
+            hostname: 'myHost',
+            id: 12345678,
+            zone: 'projects/87654321/zones/us-west1-a'
+        };
+        return cloudMonitoringIndex(context);
+    });
+
+    it('should process systemInfo data, when metadata reporting disabled', () => {
+        nock('https://oauth2.googleapis.com/token')
+            .post('', body => body.assertion === '12345::theprivatekeyvalue')
+            .reply(200, { access_token: 'aToken', expires_in: tokenDuration });
+
+        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+            reqheaders: {
+                authorization: 'Bearer aToken'
+            }
+        })
+            .get('')
+            .reply(200, metricDescriptors.onGet);
+
+        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+            reqheaders: {
+                authorization: 'Bearer aToken'
+            }
+        })
+            .post('', metricDescriptors.onPost)
+            .reply(200, {});
+
+        nock('https://monitoring.googleapis.com/v3/projects/theProject/timeSeries', {
+            reqheaders: {
+                authorization: 'Bearer aToken'
+            }
+        })
+            .post('', getOriginTimeSeries())
+            .reply(200, {});
+
+        context.config.reportInstanceMetadata = false;
+        context.metadata = {
+            hostname: 'myHost',
+            id: 12345678,
+            zone: 'projects/87654321/zones/us-west1-a'
+        };
+        return cloudMonitoringIndex(context);
+    });
+
     it('should process systemInfo data, with a cached access token', () => {
         nock('https://oauth2.googleapis.com/token')
             .post('', body => body.assertion === '12345::theprivatekeyvalue')

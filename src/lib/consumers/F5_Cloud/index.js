@@ -108,7 +108,7 @@ module.exports = function (context) {
                 signature_type: 0,
                 serialization_type: 1,
                 payload: Buffer.from(JSON.stringify(data), 'utf8'),
-                payload_schema: `urn:${context.config.payloadSchemaNid}:big-ip:event-schema:${configSchema.toLowerCase()}:v1`
+                payload_schema: `urn:${context.config.payloadSchemaNid}:big-ip:event-schema:${configSchema.toLowerCase()}:v${context.config.eventSchemaVersion}`
             };
 
             context.logger.debug(`account_id : ${ingestionRequest.account_id}`);

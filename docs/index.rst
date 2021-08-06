@@ -3,7 +3,7 @@ F5 Telemetry Streaming
 
 Welcome to the F5 Telemetry Streaming User Guide. To provide feedback on this documentation, you can file a GitHub Issue, or email us at solutionsfeedback@f5.com. |br|
 
-For information on supported versions of Telemetry Streaming, see |supportmd|.
+.. IMPORTANT:: This the documentation for the **latest** version of Telemetry Streaming, if you want to see the documentation for a long term support (LTS) version, use the version selector on the top left (for details, see |supportmd|). 
 
 Introduction
 ------------

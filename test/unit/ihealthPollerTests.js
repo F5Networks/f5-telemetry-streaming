@@ -372,7 +372,7 @@ describe('IHealthPoller', () => {
                     passphrase: { cipherText: 'test_pass_3' }
                 }
             });
-            instanceID = 'System::iHealthPoller_1'; // traceName
+            instanceID = 'f5telemetry_default::System::iHealthPoller_1'; // traceName
             instanceName = 'iHealthPoller_1'; // auto-generated name
             instance = IHealthPoller.create(instanceID, { name: instanceName });
             coreStub.utilMisc.generateUuid.numbersOnly = false;
@@ -442,9 +442,9 @@ describe('IHealthPoller', () => {
                 instance.getConfig(),
                 dummies.configuration.ihealthPoller.full.encrypted({
                     name: 'iHealthPoller_1',
-                    id: 'System::iHealthPoller_1',
+                    id: 'f5telemetry_default::System::iHealthPoller_1',
                     trace: true,
-                    traceName: 'System::iHealthPoller_1',
+                    traceName: 'f5telemetry_default::System::iHealthPoller_1',
                     iHealth: {
                         name: 'iHealthPoller_1',
                         credentials: {
@@ -491,7 +491,7 @@ describe('IHealthPoller', () => {
                     },
                     demoMode: false,
                     disabled: false,
-                    id: 'System::iHealthPoller_1',
+                    id: 'f5telemetry_default::System::iHealthPoller_1',
                     name: 'iHealthPoller_1',
                     nextFireDate: 'not set',
                     state: 'uninitialized',
@@ -546,7 +546,7 @@ describe('IHealthPoller', () => {
                                 reportCollectRetries: 0
                             },
                             timeUntilNextExecution: info.timeUntilNextExecution, // not care
-                            id: 'System::iHealthPoller_1',
+                            id: 'f5telemetry_default::System::iHealthPoller_1',
                             name: 'iHealthPoller_1 (DEMO)'
                         }, 'should match expected data');
                     });

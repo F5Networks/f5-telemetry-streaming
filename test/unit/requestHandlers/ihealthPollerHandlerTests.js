@@ -113,7 +113,7 @@ describe('IHealthPollerHandler', () => {
                     assert.sameDeepMembers(
                         restOpMock.getBody().message.map(s => s.name),
                         [
-                            'System::iHealthPoller_1',
+                            'f5telemetry_default::System::iHealthPoller_1',
                             'Namespace::System::iHealthPoller_1'
                         ],
                         'should return expected body'
@@ -165,7 +165,7 @@ describe('IHealthPollerHandler', () => {
                 .then(() => {
                     assert.strictEqual(restOpMock.getStatusCode(), 201, 'should return expected code');
                     assert.strictEqual(restOpMock.getBody().code, 201, 'should return expected code');
-                    assert.deepStrictEqual(restOpMock.getBody().state.name, 'System::iHealthPoller_1 (DEMO)', 'should return expected body');
+                    assert.deepStrictEqual(restOpMock.getBody().state.name, 'f5telemetry_default::System::iHealthPoller_1 (DEMO)', 'should return expected body');
                 });
         });
 
@@ -175,7 +175,7 @@ describe('IHealthPollerHandler', () => {
                 .then(() => {
                     assert.strictEqual(restOpMock.getStatusCode(), 201, 'should return expected code');
                     assert.strictEqual(restOpMock.getBody().code, 201, 'should return expected code');
-                    assert.deepStrictEqual(restOpMock.getBody().state.name, 'System::iHealthPoller_1 (DEMO)', 'should return expected body');
+                    assert.deepStrictEqual(restOpMock.getBody().state.name, 'f5telemetry_default::System::iHealthPoller_1 (DEMO)', 'should return expected body');
 
                     restOpMock = new testUtil.MockRestOperation({ method: 'GET' });
                     restOpMock.parseAndSetURI('http://localhost:8100/ihealthpoller/System');
@@ -184,7 +184,7 @@ describe('IHealthPollerHandler', () => {
                 .then(() => {
                     assert.strictEqual(restOpMock.getStatusCode(), 202, 'should return expected code');
                     assert.strictEqual(restOpMock.getBody().code, 202, 'should return expected code');
-                    assert.deepStrictEqual(restOpMock.getBody().state.name, 'System::iHealthPoller_1 (DEMO)', 'should return expected body');
+                    assert.deepStrictEqual(restOpMock.getBody().state.name, 'f5telemetry_default::System::iHealthPoller_1 (DEMO)', 'should return expected body');
                 });
         });
     });
