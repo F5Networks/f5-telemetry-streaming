@@ -461,7 +461,7 @@ pages:
         # only update on designated, stable branch
         - develop
         - doc-release-branch
-        - joes-ts-wip
+        - joes-new-ts-wip
 
 # Publish docs to clouddocs.f5.com
 publish_docs_to_production:
@@ -478,6 +478,6 @@ publish_docs_to_production:
     script:
         # Uncomment and set to create desired version format
         - aws s3 sync docs/_build/html s3://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest
-        # - aws s3 cp versions.json s3://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/versions.json
+        - aws s3 cp versions.json s3://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/versions.json
         # create invalidation to clear cloudfront cache
         - aws cloudfront create-invalidation --distribution-id $AWS_DIST --paths /products/extensions/f5-telemetry-streaming/latest

@@ -16,17 +16,7 @@ const StatsD = require('statsd-client');
 const net = require('net');
 
 const constants = require('../../constants');
-const deepCopy = require('../../utils/misc').deepCopy;
-
-
-const FLOAT_REGEXP = /^-?\d+(?:[.,]\d*?)?$/;
-const ISO_DATE_REGEXP = /^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(.[0-9]+)?(Z)?$/;
-const TS_METRIC_KEYS_TO_IGNORE = [
-    'name'
-];
-const TS_TAG_KEYS_TO_IGNORE = [
-    'Capacity'
-];
+const metricUtils = require('../shared/metricsUtil');
 
 /**
  * See {@link ../README.md#context} for documentation
@@ -62,7 +52,8 @@ module.exports = function (context) {
 
     return tcpCheck
         .then(() => {
-            const data = deepCopy(context.event.data);
+            // should  be a copy already, see 'forwarder.js', search for 'filter.apply'
+            const data = context.event.data;
             // collect individual metrics, to trace full 'payload' of data
             const tracePayload = [];
 
@@ -80,16 +71,20 @@ module.exports = function (context) {
 
             // instantiate client
             const client = new StatsD({ host, port, tcp: useTcp });
-            findMetrics(data, collectTags, (metricValue, metricPath, metricTags) => {
-                const metricName = `${metricPrefix}.${makePath(metricPath)}`;
-                if (context.tracer) {
-                    tracePayload.push([`${metricName}: ${metricValue}`, metricTags]);
+            metricUtils.findMetricsAndTags(data, {
+                collectTags,
+                parseMetrics: true,
+                onMetric: (metricPath, metricValue, metricTags) => {
+                    const metricName = `${metricPrefix}.${makePath(metricPath)}`;
+                    if (context.tracer) {
+                        tracePayload.push([`${metricName}: ${metricValue}`, metricTags]);
+                    }
+                    client.gauge(
+                        metricName,
+                        metricValue,
+                        metricTags
+                    );
                 }
-                client.gauge(
-                    metricName,
-                    metricValue,
-                    metricTags
-                );
             });
 
             if (context.tracer) {
@@ -110,66 +105,4 @@ module.exports = function (context) {
  */
 function makePath(paths) {
     return paths.map(i => i.replace(/\.|\/|:/g, '-')).join('.');
-}
-
-/**
- * @param {object} tsData - system poller's data
- * @param {function} cb - callback
- */
-function findMetrics(tsData, collectTags, cb) {
-    (function inner(data, stack) {
-        const tags = collectTags ? {} : undefined;
-
-        // convert strings to numbers and collect tags (if needed) on first iteration
-        Object.keys(data).forEach((itemKey) => {
-            const itemData = data[itemKey];
-            if (typeof itemData === 'string' && TS_METRIC_KEYS_TO_IGNORE.indexOf(itemKey) === -1) {
-                const parsedVal = parseNumber(itemData);
-                if (parsedVal !== false) {
-                    data[itemKey] = parsedVal;
-                    return; // early return, metric was found and converted
-                }
-            }
-            if (collectTags && TS_TAG_KEYS_TO_IGNORE.indexOf(itemKey) === -1 && canBeTag(itemData)) {
-                tags[itemKey] = itemData;
-            }
-        });
-
-        // traversing object and reporting metrics (and tags) on second iteration
-        Object.keys(data).forEach((itemKey) => {
-            const itemData = data[itemKey];
-            if (typeof itemData === 'object') {
-                stack.push(itemKey);
-                inner(itemData, stack);
-                stack.pop();
-            } else if (Number.isFinite(itemData)) {
-                cb(itemData, stack.concat(itemKey), tags);
-            }
-        });
-    }(tsData, []));
-}
-
-/**
- * @param {any} val - value
- * @returns {boolean} true if value can be used as tag
- */
-function canBeTag(val) {
-    return (typeof val === 'string' && val.trim() && !ISO_DATE_REGEXP.test(val)) || typeof val === 'boolean';
-}
-
-/**
- * Parse string to integer or float
- *
- * @param {string} val - string to parse
- *
- * @returns {number | boolean} parsed number or false if unable to parse it
- */
-function parseNumber(val) {
-    if (FLOAT_REGEXP.test(val)) {
-        val = parseFloat(val);
-        if (typeof val === 'number' && Number.isFinite(val)) {
-            return val;
-        }
-    }
-    return false;
 }

@@ -19,49 +19,7 @@ module.exports = {
      * - The metrics are created as "gauges", allowing for metric values to be set to arbitrary values
      */
     expectedData: {
-        unfiltered: `# HELP f5_clientside_bitsIn clientside.bitsIn
-# TYPE f5_clientside_bitsIn gauge
-f5_clientside_bitsIn{virtualServers="/Common/shared"} 5504
-f5_clientside_bitsIn{virtualServers="/Sample_01/A1/serviceMain"} 52896
-f5_clientside_bitsIn{virtualServers="/Sample_02/A1/serviceMain"} 227168
-f5_clientside_bitsIn{virtualServers="/Sample_02/another"} 31504
-
-# HELP f5_clientside_bitsOut clientside.bitsOut
-# TYPE f5_clientside_bitsOut gauge
-f5_clientside_bitsOut{virtualServers="/Common/shared"} 3072
-f5_clientside_bitsOut{virtualServers="/Sample_01/A1/serviceMain"} 32480
-f5_clientside_bitsOut{virtualServers="/Sample_02/A1/serviceMain"} 139360
-f5_clientside_bitsOut{virtualServers="/Sample_02/another"} 17856
-
-# HELP f5_clientside_curConns clientside.curConns
-# TYPE f5_clientside_curConns gauge
-f5_clientside_curConns{virtualServers="/Common/shared"} 0
-f5_clientside_curConns{virtualServers="/Sample_01/A1/serviceMain"} 0
-f5_clientside_curConns{virtualServers="/Sample_02/A1/serviceMain"} 0
-f5_clientside_curConns{virtualServers="/Sample_02/another"} 0
-
-# HELP f5_1024_blocks 1024-blocks
-# TYPE f5_1024_blocks gauge
-f5_1024_blocks{diskStorage="/"} 428150
-f5_1024_blocks{diskStorage="/dev"} 8208412
-f5_1024_blocks{diskStorage="/dev/shm"} 8217452
-f5_1024_blocks{diskStorage="/run"} 8217452
-f5_1024_blocks{diskStorage="/sys/fs/cgroup"} 8217452
-f5_1024_blocks{diskStorage="/usr"} 5186648
-f5_1024_blocks{diskStorage="/shared"} 15350768
-f5_1024_blocks{diskStorage="/shared/rrd.1.2"} 8217452
-f5_1024_blocks{diskStorage="/config"} 2171984
-f5_1024_blocks{diskStorage="/var"} 3030800
-f5_1024_blocks{diskStorage="/var/prompt"} 4096
-f5_1024_blocks{diskStorage="/var/tmstat"} 8217452
-f5_1024_blocks{diskStorage="/var/log"} 2958224
-f5_1024_blocks{diskStorage="/appdata"} 25717852
-f5_1024_blocks{diskStorage="/var/loipc"} 8217452
-f5_1024_blocks{diskStorage="/var/apm/mount/apmclients-7180.2019.119.331-4683.0.iso"} 304366
-f5_1024_blocks{diskStorage="/run/user/91"} 1643492
-f5_1024_blocks{diskStorage="/mnt/sshplugin_tempfs"} 8217452
-
-# HELP f5_Capacity_Float Capacity_Float
+        unfiltered: `# HELP f5_Capacity_Float Capacity_Float
 # TYPE f5_Capacity_Float gauge
 f5_Capacity_Float{diskStorage="/"} 0.48
 f5_Capacity_Float{diskStorage="/dev"} 0.01
@@ -81,55 +39,6 @@ f5_Capacity_Float{diskStorage="/var/loipc"} 0
 f5_Capacity_Float{diskStorage="/var/apm/mount/apmclients-7180.2019.119.331-4683.0.iso"} 1
 f5_Capacity_Float{diskStorage="/run/user/91"} 0
 f5_Capacity_Float{diskStorage="/mnt/sshplugin_tempfs"} 0
-
-# HELP f5_r_s r/s
-# TYPE f5_r_s gauge
-f5_r_s{diskLatency="sda"} 1.05
-f5_r_s{diskLatency="dm-0"} 0
-f5_r_s{diskLatency="dm-1"} 0
-f5_r_s{diskLatency="dm-2"} 0.01
-f5_r_s{diskLatency="dm-3"} 0.01
-f5_r_s{diskLatency="dm-4"} 0
-f5_r_s{diskLatency="dm-5"} 0
-f5_r_s{diskLatency="dm-6"} 0.03
-f5_r_s{diskLatency="dm-7"} 0
-f5_r_s{diskLatency="dm-8"} 0.01
-
-# HELP f5_w_s w/s
-# TYPE f5_w_s gauge
-f5_w_s{diskLatency="sda"} 7.41
-f5_w_s{diskLatency="dm-0"} 0
-f5_w_s{diskLatency="dm-1"} 3.16
-f5_w_s{diskLatency="dm-2"} 4.48
-f5_w_s{diskLatency="dm-3"} 2.66
-f5_w_s{diskLatency="dm-4"} 0.01
-f5_w_s{diskLatency="dm-5"} 0.81
-f5_w_s{diskLatency="dm-6"} 0
-f5_w_s{diskLatency="dm-7"} 0.16
-f5_w_s{diskLatency="dm-8"} 3.83
-
-# HELP f5__util %util
-# TYPE f5__util gauge
-f5__util{diskLatency="sda"} 1.36
-f5__util{diskLatency="dm-0"} 0
-f5__util{diskLatency="dm-1"} 0.25
-f5__util{diskLatency="dm-2"} 0.31
-f5__util{diskLatency="dm-3"} 0.24
-f5__util{diskLatency="dm-4"} 0
-f5__util{diskLatency="dm-5"} 0.09
-f5__util{diskLatency="dm-6"} 0
-f5__util{diskLatency="dm-7"} 0.01
-f5__util{diskLatency="dm-8"} 0.31
-
-# HELP f5_counters_bitsIn counters.bitsIn
-# TYPE f5_counters_bitsIn gauge
-f5_counters_bitsIn{networkInterfaces="1.0"} 13619749722248
-f5_counters_bitsIn{networkInterfaces="mgmt"} 28643376254552
-
-# HELP f5_counters_bitsOut counters.bitsOut
-# TYPE f5_counters_bitsOut gauge
-f5_counters_bitsOut{networkInterfaces="1.0"} 9802738696
-f5_counters_bitsOut{networkInterfaces="mgmt"} 12929625080
 
 # HELP f5_name name
 # TYPE f5_name gauge
@@ -166,54 +75,6 @@ f5_lowestPriogrp{pools="/Sample_01/A1/web_pool"} 0
 f5_lowestPriogrp{pools="/Sample_01/A1/web_pool1"} 0
 f5_lowestPriogrp{pools="/Sample_02/A1/web_pool"} 0
 f5_lowestPriogrp{pools="/Sample_02/A1/web_pool1"} 0
-
-# HELP f5_serverside_bitsIn serverside.bitsIn
-# TYPE f5_serverside_bitsIn gauge
-f5_serverside_bitsIn{pools="/Common/h.4"} 0
-f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool"} 0
-f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.10:80"} 0
-f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.11:80"} 0
-f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool1"} 0
-f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.12:80"} 0
-f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.13:80"} 0
-f5_serverside_bitsIn{pools="/Sample_02/A1/web_pool"} 0
-f5_serverside_bitsIn{pools="/Sample_02/A1/web_pool",members="/Sample_02/192.0.2.10:80"} 0
-f5_serverside_bitsIn{pools="/Sample_02/A1/web_pool",members="/Sample_02/192.0.2.11:80"} 0
-f5_serverside_bitsIn{pools="/Sample_02/A1/web_pool1"} 0
-f5_serverside_bitsIn{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.12:80"} 0
-f5_serverside_bitsIn{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.13:80"} 0
-
-# HELP f5_serverside_bitsOut serverside.bitsOut
-# TYPE f5_serverside_bitsOut gauge
-f5_serverside_bitsOut{pools="/Common/h.4"} 0
-f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool"} 0
-f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.10:80"} 0
-f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.11:80"} 0
-f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool1"} 0
-f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.12:80"} 0
-f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.13:80"} 0
-f5_serverside_bitsOut{pools="/Sample_02/A1/web_pool"} 0
-f5_serverside_bitsOut{pools="/Sample_02/A1/web_pool",members="/Sample_02/192.0.2.10:80"} 0
-f5_serverside_bitsOut{pools="/Sample_02/A1/web_pool",members="/Sample_02/192.0.2.11:80"} 0
-f5_serverside_bitsOut{pools="/Sample_02/A1/web_pool1"} 0
-f5_serverside_bitsOut{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.12:80"} 0
-f5_serverside_bitsOut{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.13:80"} 0
-
-# HELP f5_serverside_curConns serverside.curConns
-# TYPE f5_serverside_curConns gauge
-f5_serverside_curConns{pools="/Common/h.4"} 0
-f5_serverside_curConns{pools="/Sample_01/A1/web_pool"} 0
-f5_serverside_curConns{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.10:80"} 0
-f5_serverside_curConns{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.11:80"} 0
-f5_serverside_curConns{pools="/Sample_01/A1/web_pool1"} 0
-f5_serverside_curConns{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.12:80"} 0
-f5_serverside_curConns{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.13:80"} 0
-f5_serverside_curConns{pools="/Sample_02/A1/web_pool"} 0
-f5_serverside_curConns{pools="/Sample_02/A1/web_pool",members="/Sample_02/192.0.2.10:80"} 0
-f5_serverside_curConns{pools="/Sample_02/A1/web_pool",members="/Sample_02/192.0.2.11:80"} 0
-f5_serverside_curConns{pools="/Sample_02/A1/web_pool1"} 0
-f5_serverside_curConns{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.12:80"} 0
-f5_serverside_curConns{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.13:80"} 0
 
 # HELP f5_port port
 # TYPE f5_port gauge
@@ -343,342 +204,6 @@ f5_activeHandshakeRejected{serverSslProfiles="/Common/serverssl"} 0
 f5_activeHandshakeRejected{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
 f5_activeHandshakeRejected{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
 f5_activeHandshakeRejected{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_cipherUses_adhKeyxchg cipherUses.adhKeyxchg
-# TYPE f5_cipherUses_adhKeyxchg gauge
-f5_cipherUses_adhKeyxchg{clientSslProfiles="/Common/clientssl"} 0
-f5_cipherUses_adhKeyxchg{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_cipherUses_adhKeyxchg{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_cipherUses_adhKeyxchg{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_cipherUses_adhKeyxchg{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_cipherUses_adhKeyxchg{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_cipherUses_adhKeyxchg{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_cipherUses_adhKeyxchg{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_cipherUses_adhKeyxchg{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_cipherUses_adhKeyxchg{serverSslProfiles="/Common/serverssl"} 0
-f5_cipherUses_adhKeyxchg{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_cipherUses_adhKeyxchg{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_cipherUses_adhKeyxchg{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_cipherUses_aesBulk cipherUses.aesBulk
-# TYPE f5_cipherUses_aesBulk gauge
-f5_cipherUses_aesBulk{clientSslProfiles="/Common/clientssl"} 0
-f5_cipherUses_aesBulk{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_cipherUses_aesBulk{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_cipherUses_aesBulk{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_cipherUses_aesBulk{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_cipherUses_aesBulk{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_cipherUses_aesBulk{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_cipherUses_aesBulk{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_cipherUses_aesBulk{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_cipherUses_aesBulk{serverSslProfiles="/Common/serverssl"} 0
-f5_cipherUses_aesBulk{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_cipherUses_aesBulk{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_cipherUses_aesBulk{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_cipherUses_aesGcmBulk cipherUses.aesGcmBulk
-# TYPE f5_cipherUses_aesGcmBulk gauge
-f5_cipherUses_aesGcmBulk{clientSslProfiles="/Common/clientssl"} 0
-f5_cipherUses_aesGcmBulk{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_cipherUses_aesGcmBulk{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_cipherUses_aesGcmBulk{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_cipherUses_aesGcmBulk{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_cipherUses_aesGcmBulk{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_cipherUses_aesGcmBulk{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_cipherUses_aesGcmBulk{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_cipherUses_aesGcmBulk{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_cipherUses_aesGcmBulk{serverSslProfiles="/Common/serverssl"} 0
-f5_cipherUses_aesGcmBulk{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_cipherUses_aesGcmBulk{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_cipherUses_aesGcmBulk{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_cipherUses_camelliaBulk cipherUses.camelliaBulk
-# TYPE f5_cipherUses_camelliaBulk gauge
-f5_cipherUses_camelliaBulk{clientSslProfiles="/Common/clientssl"} 0
-f5_cipherUses_camelliaBulk{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_cipherUses_camelliaBulk{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_cipherUses_camelliaBulk{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_cipherUses_camelliaBulk{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_cipherUses_camelliaBulk{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_cipherUses_camelliaBulk{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_cipherUses_camelliaBulk{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_cipherUses_camelliaBulk{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_cipherUses_camelliaBulk{serverSslProfiles="/Common/serverssl"} 0
-f5_cipherUses_camelliaBulk{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_cipherUses_camelliaBulk{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_cipherUses_camelliaBulk{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_cipherUses_chacha20Poly1305Bulk cipherUses.chacha20Poly1305Bulk
-# TYPE f5_cipherUses_chacha20Poly1305Bulk gauge
-f5_cipherUses_chacha20Poly1305Bulk{clientSslProfiles="/Common/clientssl"} 0
-f5_cipherUses_chacha20Poly1305Bulk{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_cipherUses_chacha20Poly1305Bulk{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_cipherUses_chacha20Poly1305Bulk{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_cipherUses_chacha20Poly1305Bulk{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_cipherUses_chacha20Poly1305Bulk{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_cipherUses_chacha20Poly1305Bulk{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_cipherUses_chacha20Poly1305Bulk{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_cipherUses_chacha20Poly1305Bulk{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_cipherUses_chacha20Poly1305Bulk{serverSslProfiles="/Common/serverssl"} 0
-f5_cipherUses_chacha20Poly1305Bulk{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_cipherUses_chacha20Poly1305Bulk{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_cipherUses_chacha20Poly1305Bulk{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_cipherUses_desBulk cipherUses.desBulk
-# TYPE f5_cipherUses_desBulk gauge
-f5_cipherUses_desBulk{clientSslProfiles="/Common/clientssl"} 0
-f5_cipherUses_desBulk{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_cipherUses_desBulk{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_cipherUses_desBulk{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_cipherUses_desBulk{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_cipherUses_desBulk{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_cipherUses_desBulk{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_cipherUses_desBulk{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_cipherUses_desBulk{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_cipherUses_desBulk{serverSslProfiles="/Common/serverssl"} 0
-f5_cipherUses_desBulk{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_cipherUses_desBulk{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_cipherUses_desBulk{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_cipherUses_dhRsaKeyxchg cipherUses.dhRsaKeyxchg
-# TYPE f5_cipherUses_dhRsaKeyxchg gauge
-f5_cipherUses_dhRsaKeyxchg{clientSslProfiles="/Common/clientssl"} 0
-f5_cipherUses_dhRsaKeyxchg{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_cipherUses_dhRsaKeyxchg{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_cipherUses_dhRsaKeyxchg{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_cipherUses_dhRsaKeyxchg{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_cipherUses_dhRsaKeyxchg{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_cipherUses_dhRsaKeyxchg{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_cipherUses_dhRsaKeyxchg{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_cipherUses_dhRsaKeyxchg{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_cipherUses_dhRsaKeyxchg{serverSslProfiles="/Common/serverssl"} 0
-f5_cipherUses_dhRsaKeyxchg{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_cipherUses_dhRsaKeyxchg{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_cipherUses_dhRsaKeyxchg{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_cipherUses_dheDssKeyxchg cipherUses.dheDssKeyxchg
-# TYPE f5_cipherUses_dheDssKeyxchg gauge
-f5_cipherUses_dheDssKeyxchg{clientSslProfiles="/Common/clientssl"} 0
-f5_cipherUses_dheDssKeyxchg{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_cipherUses_dheDssKeyxchg{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_cipherUses_dheDssKeyxchg{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_cipherUses_dheDssKeyxchg{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_cipherUses_dheDssKeyxchg{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_cipherUses_dheDssKeyxchg{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_cipherUses_dheDssKeyxchg{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_cipherUses_dheDssKeyxchg{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_cipherUses_dheDssKeyxchg{serverSslProfiles="/Common/serverssl"} 0
-f5_cipherUses_dheDssKeyxchg{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_cipherUses_dheDssKeyxchg{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_cipherUses_dheDssKeyxchg{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_cipherUses_ecdhEcdsaKeyxchg cipherUses.ecdhEcdsaKeyxchg
-# TYPE f5_cipherUses_ecdhEcdsaKeyxchg gauge
-f5_cipherUses_ecdhEcdsaKeyxchg{clientSslProfiles="/Common/clientssl"} 0
-f5_cipherUses_ecdhEcdsaKeyxchg{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_cipherUses_ecdhEcdsaKeyxchg{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_cipherUses_ecdhEcdsaKeyxchg{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_cipherUses_ecdhEcdsaKeyxchg{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_cipherUses_ecdhEcdsaKeyxchg{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_cipherUses_ecdhEcdsaKeyxchg{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_cipherUses_ecdhEcdsaKeyxchg{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_cipherUses_ecdhEcdsaKeyxchg{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_cipherUses_ecdhEcdsaKeyxchg{serverSslProfiles="/Common/serverssl"} 0
-f5_cipherUses_ecdhEcdsaKeyxchg{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_cipherUses_ecdhEcdsaKeyxchg{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_cipherUses_ecdhEcdsaKeyxchg{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_cipherUses_ecdhRsaKeyxchg cipherUses.ecdhRsaKeyxchg
-# TYPE f5_cipherUses_ecdhRsaKeyxchg gauge
-f5_cipherUses_ecdhRsaKeyxchg{clientSslProfiles="/Common/clientssl"} 0
-f5_cipherUses_ecdhRsaKeyxchg{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_cipherUses_ecdhRsaKeyxchg{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_cipherUses_ecdhRsaKeyxchg{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_cipherUses_ecdhRsaKeyxchg{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_cipherUses_ecdhRsaKeyxchg{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_cipherUses_ecdhRsaKeyxchg{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_cipherUses_ecdhRsaKeyxchg{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_cipherUses_ecdhRsaKeyxchg{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_cipherUses_ecdhRsaKeyxchg{serverSslProfiles="/Common/serverssl"} 0
-f5_cipherUses_ecdhRsaKeyxchg{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_cipherUses_ecdhRsaKeyxchg{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_cipherUses_ecdhRsaKeyxchg{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_cipherUses_ecdheEcdsaKeyxchg cipherUses.ecdheEcdsaKeyxchg
-# TYPE f5_cipherUses_ecdheEcdsaKeyxchg gauge
-f5_cipherUses_ecdheEcdsaKeyxchg{clientSslProfiles="/Common/clientssl"} 0
-f5_cipherUses_ecdheEcdsaKeyxchg{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_cipherUses_ecdheEcdsaKeyxchg{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_cipherUses_ecdheEcdsaKeyxchg{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_cipherUses_ecdheEcdsaKeyxchg{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_cipherUses_ecdheEcdsaKeyxchg{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_cipherUses_ecdheEcdsaKeyxchg{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_cipherUses_ecdheEcdsaKeyxchg{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_cipherUses_ecdheEcdsaKeyxchg{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_cipherUses_ecdheEcdsaKeyxchg{serverSslProfiles="/Common/serverssl"} 0
-f5_cipherUses_ecdheEcdsaKeyxchg{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_cipherUses_ecdheEcdsaKeyxchg{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_cipherUses_ecdheEcdsaKeyxchg{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_cipherUses_ecdheRsaKeyxchg cipherUses.ecdheRsaKeyxchg
-# TYPE f5_cipherUses_ecdheRsaKeyxchg gauge
-f5_cipherUses_ecdheRsaKeyxchg{clientSslProfiles="/Common/clientssl"} 0
-f5_cipherUses_ecdheRsaKeyxchg{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_cipherUses_ecdheRsaKeyxchg{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_cipherUses_ecdheRsaKeyxchg{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_cipherUses_ecdheRsaKeyxchg{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_cipherUses_ecdheRsaKeyxchg{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_cipherUses_ecdheRsaKeyxchg{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_cipherUses_ecdheRsaKeyxchg{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_cipherUses_ecdheRsaKeyxchg{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_cipherUses_ecdheRsaKeyxchg{serverSslProfiles="/Common/serverssl"} 0
-f5_cipherUses_ecdheRsaKeyxchg{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_cipherUses_ecdheRsaKeyxchg{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_cipherUses_ecdheRsaKeyxchg{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_cipherUses_edhRsaKeyxchg cipherUses.edhRsaKeyxchg
-# TYPE f5_cipherUses_edhRsaKeyxchg gauge
-f5_cipherUses_edhRsaKeyxchg{clientSslProfiles="/Common/clientssl"} 0
-f5_cipherUses_edhRsaKeyxchg{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_cipherUses_edhRsaKeyxchg{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_cipherUses_edhRsaKeyxchg{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_cipherUses_edhRsaKeyxchg{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_cipherUses_edhRsaKeyxchg{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_cipherUses_edhRsaKeyxchg{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_cipherUses_edhRsaKeyxchg{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_cipherUses_edhRsaKeyxchg{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_cipherUses_edhRsaKeyxchg{serverSslProfiles="/Common/serverssl"} 0
-f5_cipherUses_edhRsaKeyxchg{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_cipherUses_edhRsaKeyxchg{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_cipherUses_edhRsaKeyxchg{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_cipherUses_ideaBulk cipherUses.ideaBulk
-# TYPE f5_cipherUses_ideaBulk gauge
-f5_cipherUses_ideaBulk{clientSslProfiles="/Common/clientssl"} 0
-f5_cipherUses_ideaBulk{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_cipherUses_ideaBulk{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_cipherUses_ideaBulk{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_cipherUses_ideaBulk{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_cipherUses_ideaBulk{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_cipherUses_ideaBulk{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_cipherUses_ideaBulk{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_cipherUses_ideaBulk{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_cipherUses_ideaBulk{serverSslProfiles="/Common/serverssl"} 0
-f5_cipherUses_ideaBulk{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_cipherUses_ideaBulk{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_cipherUses_ideaBulk{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_cipherUses_md5Digest cipherUses.md5Digest
-# TYPE f5_cipherUses_md5Digest gauge
-f5_cipherUses_md5Digest{clientSslProfiles="/Common/clientssl"} 0
-f5_cipherUses_md5Digest{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_cipherUses_md5Digest{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_cipherUses_md5Digest{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_cipherUses_md5Digest{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_cipherUses_md5Digest{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_cipherUses_md5Digest{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_cipherUses_md5Digest{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_cipherUses_md5Digest{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_cipherUses_md5Digest{serverSslProfiles="/Common/serverssl"} 0
-f5_cipherUses_md5Digest{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_cipherUses_md5Digest{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_cipherUses_md5Digest{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_cipherUses_nullBulk cipherUses.nullBulk
-# TYPE f5_cipherUses_nullBulk gauge
-f5_cipherUses_nullBulk{clientSslProfiles="/Common/clientssl"} 0
-f5_cipherUses_nullBulk{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_cipherUses_nullBulk{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_cipherUses_nullBulk{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_cipherUses_nullBulk{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_cipherUses_nullBulk{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_cipherUses_nullBulk{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_cipherUses_nullBulk{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_cipherUses_nullBulk{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_cipherUses_nullBulk{serverSslProfiles="/Common/serverssl"} 0
-f5_cipherUses_nullBulk{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_cipherUses_nullBulk{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_cipherUses_nullBulk{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_cipherUses_nullDigest cipherUses.nullDigest
-# TYPE f5_cipherUses_nullDigest gauge
-f5_cipherUses_nullDigest{clientSslProfiles="/Common/clientssl"} 0
-f5_cipherUses_nullDigest{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_cipherUses_nullDigest{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_cipherUses_nullDigest{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_cipherUses_nullDigest{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_cipherUses_nullDigest{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_cipherUses_nullDigest{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_cipherUses_nullDigest{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_cipherUses_nullDigest{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_cipherUses_nullDigest{serverSslProfiles="/Common/serverssl"} 0
-f5_cipherUses_nullDigest{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_cipherUses_nullDigest{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_cipherUses_nullDigest{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_cipherUses_rc2Bulk cipherUses.rc2Bulk
-# TYPE f5_cipherUses_rc2Bulk gauge
-f5_cipherUses_rc2Bulk{clientSslProfiles="/Common/clientssl"} 0
-f5_cipherUses_rc2Bulk{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_cipherUses_rc2Bulk{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_cipherUses_rc2Bulk{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_cipherUses_rc2Bulk{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_cipherUses_rc2Bulk{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_cipherUses_rc2Bulk{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_cipherUses_rc2Bulk{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_cipherUses_rc2Bulk{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_cipherUses_rc2Bulk{serverSslProfiles="/Common/serverssl"} 0
-f5_cipherUses_rc2Bulk{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_cipherUses_rc2Bulk{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_cipherUses_rc2Bulk{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_cipherUses_rc4Bulk cipherUses.rc4Bulk
-# TYPE f5_cipherUses_rc4Bulk gauge
-f5_cipherUses_rc4Bulk{clientSslProfiles="/Common/clientssl"} 0
-f5_cipherUses_rc4Bulk{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_cipherUses_rc4Bulk{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_cipherUses_rc4Bulk{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_cipherUses_rc4Bulk{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_cipherUses_rc4Bulk{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_cipherUses_rc4Bulk{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_cipherUses_rc4Bulk{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_cipherUses_rc4Bulk{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_cipherUses_rc4Bulk{serverSslProfiles="/Common/serverssl"} 0
-f5_cipherUses_rc4Bulk{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_cipherUses_rc4Bulk{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_cipherUses_rc4Bulk{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_cipherUses_rsaKeyxchg cipherUses.rsaKeyxchg
-# TYPE f5_cipherUses_rsaKeyxchg gauge
-f5_cipherUses_rsaKeyxchg{clientSslProfiles="/Common/clientssl"} 0
-f5_cipherUses_rsaKeyxchg{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_cipherUses_rsaKeyxchg{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_cipherUses_rsaKeyxchg{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_cipherUses_rsaKeyxchg{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_cipherUses_rsaKeyxchg{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_cipherUses_rsaKeyxchg{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_cipherUses_rsaKeyxchg{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_cipherUses_rsaKeyxchg{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_cipherUses_rsaKeyxchg{serverSslProfiles="/Common/serverssl"} 0
-f5_cipherUses_rsaKeyxchg{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_cipherUses_rsaKeyxchg{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_cipherUses_rsaKeyxchg{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_cipherUses_shaDigest cipherUses.shaDigest
-# TYPE f5_cipherUses_shaDigest gauge
-f5_cipherUses_shaDigest{clientSslProfiles="/Common/clientssl"} 0
-f5_cipherUses_shaDigest{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_cipherUses_shaDigest{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_cipherUses_shaDigest{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_cipherUses_shaDigest{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_cipherUses_shaDigest{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_cipherUses_shaDigest{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_cipherUses_shaDigest{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_cipherUses_shaDigest{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_cipherUses_shaDigest{serverSslProfiles="/Common/serverssl"} 0
-f5_cipherUses_shaDigest{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_cipherUses_shaDigest{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_cipherUses_shaDigest{serverSslProfiles="/Common/wom-default-serverssl"} 0
 
 # HELP f5_currentCompatibleConnections currentCompatibleConnections
 # TYPE f5_currentCompatibleConnections gauge
@@ -887,118 +412,6 @@ f5_peercertValid{serverSslProfiles="/Common/serverssl"} 0
 f5_peercertValid{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
 f5_peercertValid{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
 f5_peercertValid{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_protocolUses_dtlsv1 protocolUses.dtlsv1
-# TYPE f5_protocolUses_dtlsv1 gauge
-f5_protocolUses_dtlsv1{clientSslProfiles="/Common/clientssl"} 0
-f5_protocolUses_dtlsv1{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_protocolUses_dtlsv1{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_protocolUses_dtlsv1{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_protocolUses_dtlsv1{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_protocolUses_dtlsv1{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_protocolUses_dtlsv1{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_protocolUses_dtlsv1{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_protocolUses_dtlsv1{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_protocolUses_dtlsv1{serverSslProfiles="/Common/serverssl"} 0
-f5_protocolUses_dtlsv1{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_protocolUses_dtlsv1{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_protocolUses_dtlsv1{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_protocolUses_sslv2 protocolUses.sslv2
-# TYPE f5_protocolUses_sslv2 gauge
-f5_protocolUses_sslv2{clientSslProfiles="/Common/clientssl"} 0
-f5_protocolUses_sslv2{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_protocolUses_sslv2{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_protocolUses_sslv2{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_protocolUses_sslv2{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_protocolUses_sslv2{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_protocolUses_sslv2{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_protocolUses_sslv2{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_protocolUses_sslv2{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_protocolUses_sslv2{serverSslProfiles="/Common/serverssl"} 0
-f5_protocolUses_sslv2{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_protocolUses_sslv2{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_protocolUses_sslv2{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_protocolUses_sslv3 protocolUses.sslv3
-# TYPE f5_protocolUses_sslv3 gauge
-f5_protocolUses_sslv3{clientSslProfiles="/Common/clientssl"} 0
-f5_protocolUses_sslv3{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_protocolUses_sslv3{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_protocolUses_sslv3{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_protocolUses_sslv3{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_protocolUses_sslv3{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_protocolUses_sslv3{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_protocolUses_sslv3{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_protocolUses_sslv3{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_protocolUses_sslv3{serverSslProfiles="/Common/serverssl"} 0
-f5_protocolUses_sslv3{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_protocolUses_sslv3{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_protocolUses_sslv3{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_protocolUses_tlsv1 protocolUses.tlsv1
-# TYPE f5_protocolUses_tlsv1 gauge
-f5_protocolUses_tlsv1{clientSslProfiles="/Common/clientssl"} 0
-f5_protocolUses_tlsv1{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_protocolUses_tlsv1{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_protocolUses_tlsv1{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_protocolUses_tlsv1{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_protocolUses_tlsv1{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_protocolUses_tlsv1{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_protocolUses_tlsv1{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_protocolUses_tlsv1{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_protocolUses_tlsv1{serverSslProfiles="/Common/serverssl"} 0
-f5_protocolUses_tlsv1{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_protocolUses_tlsv1{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_protocolUses_tlsv1{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_protocolUses_tlsv1_1 protocolUses.tlsv1_1
-# TYPE f5_protocolUses_tlsv1_1 gauge
-f5_protocolUses_tlsv1_1{clientSslProfiles="/Common/clientssl"} 0
-f5_protocolUses_tlsv1_1{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_protocolUses_tlsv1_1{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_protocolUses_tlsv1_1{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_protocolUses_tlsv1_1{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_protocolUses_tlsv1_1{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_protocolUses_tlsv1_1{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_protocolUses_tlsv1_1{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_protocolUses_tlsv1_1{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_protocolUses_tlsv1_1{serverSslProfiles="/Common/serverssl"} 0
-f5_protocolUses_tlsv1_1{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_protocolUses_tlsv1_1{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_protocolUses_tlsv1_1{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_protocolUses_tlsv1_2 protocolUses.tlsv1_2
-# TYPE f5_protocolUses_tlsv1_2 gauge
-f5_protocolUses_tlsv1_2{clientSslProfiles="/Common/clientssl"} 0
-f5_protocolUses_tlsv1_2{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_protocolUses_tlsv1_2{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_protocolUses_tlsv1_2{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_protocolUses_tlsv1_2{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_protocolUses_tlsv1_2{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_protocolUses_tlsv1_2{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_protocolUses_tlsv1_2{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_protocolUses_tlsv1_2{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_protocolUses_tlsv1_2{serverSslProfiles="/Common/serverssl"} 0
-f5_protocolUses_tlsv1_2{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_protocolUses_tlsv1_2{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_protocolUses_tlsv1_2{serverSslProfiles="/Common/wom-default-serverssl"} 0
-
-# HELP f5_protocolUses_tlsv1_3 protocolUses.tlsv1_3
-# TYPE f5_protocolUses_tlsv1_3 gauge
-f5_protocolUses_tlsv1_3{clientSslProfiles="/Common/clientssl"} 0
-f5_protocolUses_tlsv1_3{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
-f5_protocolUses_tlsv1_3{clientSslProfiles="/Common/clientssl-secure"} 0
-f5_protocolUses_tlsv1_3{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
-f5_protocolUses_tlsv1_3{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
-f5_protocolUses_tlsv1_3{clientSslProfiles="/Common/wom-default-clientssl"} 0
-f5_protocolUses_tlsv1_3{serverSslProfiles="/Common/apm-default-serverssl"} 0
-f5_protocolUses_tlsv1_3{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
-f5_protocolUses_tlsv1_3{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
-f5_protocolUses_tlsv1_3{serverSslProfiles="/Common/serverssl"} 0
-f5_protocolUses_tlsv1_3{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
-f5_protocolUses_tlsv1_3{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
-f5_protocolUses_tlsv1_3{serverSslProfiles="/Common/wom-default-serverssl"} 0
 
 # HELP f5_recordsIn recordsIn
 # TYPE f5_recordsIn gauge
@@ -1554,6 +967,597 @@ f5_system_tmmCpu 3
 # TYPE f5_system_tmmMemory gauge
 f5_system_tmmMemory 17
 
+# HELP f5_telemetryServiceInfo_pollingInterval telemetryServiceInfo_pollingInterval
+# TYPE f5_telemetryServiceInfo_pollingInterval gauge
+f5_telemetryServiceInfo_pollingInterval 0
+
+# HELP f5_clientside_bitsIn clientside.bitsIn
+# TYPE f5_clientside_bitsIn gauge
+f5_clientside_bitsIn{virtualServers="/Common/shared"} 5504
+f5_clientside_bitsIn{virtualServers="/Sample_01/A1/serviceMain"} 52896
+f5_clientside_bitsIn{virtualServers="/Sample_02/A1/serviceMain"} 227168
+f5_clientside_bitsIn{virtualServers="/Sample_02/another"} 31504
+
+# HELP f5_clientside_bitsOut clientside.bitsOut
+# TYPE f5_clientside_bitsOut gauge
+f5_clientside_bitsOut{virtualServers="/Common/shared"} 3072
+f5_clientside_bitsOut{virtualServers="/Sample_01/A1/serviceMain"} 32480
+f5_clientside_bitsOut{virtualServers="/Sample_02/A1/serviceMain"} 139360
+f5_clientside_bitsOut{virtualServers="/Sample_02/another"} 17856
+
+# HELP f5_clientside_curConns clientside.curConns
+# TYPE f5_clientside_curConns gauge
+f5_clientside_curConns{virtualServers="/Common/shared"} 0
+f5_clientside_curConns{virtualServers="/Sample_01/A1/serviceMain"} 0
+f5_clientside_curConns{virtualServers="/Sample_02/A1/serviceMain"} 0
+f5_clientside_curConns{virtualServers="/Sample_02/another"} 0
+
+# HELP f5_1024_blocks 1024-blocks
+# TYPE f5_1024_blocks gauge
+f5_1024_blocks{diskStorage="/"} 428150
+f5_1024_blocks{diskStorage="/dev"} 8208412
+f5_1024_blocks{diskStorage="/dev/shm"} 8217452
+f5_1024_blocks{diskStorage="/run"} 8217452
+f5_1024_blocks{diskStorage="/sys/fs/cgroup"} 8217452
+f5_1024_blocks{diskStorage="/usr"} 5186648
+f5_1024_blocks{diskStorage="/shared"} 15350768
+f5_1024_blocks{diskStorage="/shared/rrd.1.2"} 8217452
+f5_1024_blocks{diskStorage="/config"} 2171984
+f5_1024_blocks{diskStorage="/var"} 3030800
+f5_1024_blocks{diskStorage="/var/prompt"} 4096
+f5_1024_blocks{diskStorage="/var/tmstat"} 8217452
+f5_1024_blocks{diskStorage="/var/log"} 2958224
+f5_1024_blocks{diskStorage="/appdata"} 25717852
+f5_1024_blocks{diskStorage="/var/loipc"} 8217452
+f5_1024_blocks{diskStorage="/var/apm/mount/apmclients-7180.2019.119.331-4683.0.iso"} 304366
+f5_1024_blocks{diskStorage="/run/user/91"} 1643492
+f5_1024_blocks{diskStorage="/mnt/sshplugin_tempfs"} 8217452
+
+# HELP f5_r_s r/s
+# TYPE f5_r_s gauge
+f5_r_s{diskLatency="sda"} 1.05
+f5_r_s{diskLatency="dm-0"} 0
+f5_r_s{diskLatency="dm-1"} 0
+f5_r_s{diskLatency="dm-2"} 0.01
+f5_r_s{diskLatency="dm-3"} 0.01
+f5_r_s{diskLatency="dm-4"} 0
+f5_r_s{diskLatency="dm-5"} 0
+f5_r_s{diskLatency="dm-6"} 0.03
+f5_r_s{diskLatency="dm-7"} 0
+f5_r_s{diskLatency="dm-8"} 0.01
+
+# HELP f5_w_s w/s
+# TYPE f5_w_s gauge
+f5_w_s{diskLatency="sda"} 7.41
+f5_w_s{diskLatency="dm-0"} 0
+f5_w_s{diskLatency="dm-1"} 3.16
+f5_w_s{diskLatency="dm-2"} 4.48
+f5_w_s{diskLatency="dm-3"} 2.66
+f5_w_s{diskLatency="dm-4"} 0.01
+f5_w_s{diskLatency="dm-5"} 0.81
+f5_w_s{diskLatency="dm-6"} 0
+f5_w_s{diskLatency="dm-7"} 0.16
+f5_w_s{diskLatency="dm-8"} 3.83
+
+# HELP f5__util %util
+# TYPE f5__util gauge
+f5__util{diskLatency="sda"} 1.36
+f5__util{diskLatency="dm-0"} 0
+f5__util{diskLatency="dm-1"} 0.25
+f5__util{diskLatency="dm-2"} 0.31
+f5__util{diskLatency="dm-3"} 0.24
+f5__util{diskLatency="dm-4"} 0
+f5__util{diskLatency="dm-5"} 0.09
+f5__util{diskLatency="dm-6"} 0
+f5__util{diskLatency="dm-7"} 0.01
+f5__util{diskLatency="dm-8"} 0.31
+
+# HELP f5_counters_bitsIn counters.bitsIn
+# TYPE f5_counters_bitsIn gauge
+f5_counters_bitsIn{networkInterfaces="1.0"} 13619749722248
+f5_counters_bitsIn{networkInterfaces="mgmt"} 28643376254552
+
+# HELP f5_counters_bitsOut counters.bitsOut
+# TYPE f5_counters_bitsOut gauge
+f5_counters_bitsOut{networkInterfaces="1.0"} 9802738696
+f5_counters_bitsOut{networkInterfaces="mgmt"} 12929625080
+
+# HELP f5_serverside_bitsIn serverside.bitsIn
+# TYPE f5_serverside_bitsIn gauge
+f5_serverside_bitsIn{pools="/Common/h.4"} 0
+f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool"} 0
+f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.10:80"} 0
+f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.11:80"} 0
+f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool1"} 0
+f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.12:80"} 0
+f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.13:80"} 0
+f5_serverside_bitsIn{pools="/Sample_02/A1/web_pool"} 0
+f5_serverside_bitsIn{pools="/Sample_02/A1/web_pool",members="/Sample_02/192.0.2.10:80"} 0
+f5_serverside_bitsIn{pools="/Sample_02/A1/web_pool",members="/Sample_02/192.0.2.11:80"} 0
+f5_serverside_bitsIn{pools="/Sample_02/A1/web_pool1"} 0
+f5_serverside_bitsIn{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.12:80"} 0
+f5_serverside_bitsIn{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.13:80"} 0
+
+# HELP f5_serverside_bitsOut serverside.bitsOut
+# TYPE f5_serverside_bitsOut gauge
+f5_serverside_bitsOut{pools="/Common/h.4"} 0
+f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool"} 0
+f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.10:80"} 0
+f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.11:80"} 0
+f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool1"} 0
+f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.12:80"} 0
+f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.13:80"} 0
+f5_serverside_bitsOut{pools="/Sample_02/A1/web_pool"} 0
+f5_serverside_bitsOut{pools="/Sample_02/A1/web_pool",members="/Sample_02/192.0.2.10:80"} 0
+f5_serverside_bitsOut{pools="/Sample_02/A1/web_pool",members="/Sample_02/192.0.2.11:80"} 0
+f5_serverside_bitsOut{pools="/Sample_02/A1/web_pool1"} 0
+f5_serverside_bitsOut{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.12:80"} 0
+f5_serverside_bitsOut{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.13:80"} 0
+
+# HELP f5_serverside_curConns serverside.curConns
+# TYPE f5_serverside_curConns gauge
+f5_serverside_curConns{pools="/Common/h.4"} 0
+f5_serverside_curConns{pools="/Sample_01/A1/web_pool"} 0
+f5_serverside_curConns{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.10:80"} 0
+f5_serverside_curConns{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.11:80"} 0
+f5_serverside_curConns{pools="/Sample_01/A1/web_pool1"} 0
+f5_serverside_curConns{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.12:80"} 0
+f5_serverside_curConns{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.13:80"} 0
+f5_serverside_curConns{pools="/Sample_02/A1/web_pool"} 0
+f5_serverside_curConns{pools="/Sample_02/A1/web_pool",members="/Sample_02/192.0.2.10:80"} 0
+f5_serverside_curConns{pools="/Sample_02/A1/web_pool",members="/Sample_02/192.0.2.11:80"} 0
+f5_serverside_curConns{pools="/Sample_02/A1/web_pool1"} 0
+f5_serverside_curConns{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.12:80"} 0
+f5_serverside_curConns{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.13:80"} 0
+
+# HELP f5_cipherUses_adhKeyxchg cipherUses.adhKeyxchg
+# TYPE f5_cipherUses_adhKeyxchg gauge
+f5_cipherUses_adhKeyxchg{clientSslProfiles="/Common/clientssl"} 0
+f5_cipherUses_adhKeyxchg{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_cipherUses_adhKeyxchg{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_cipherUses_adhKeyxchg{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_cipherUses_adhKeyxchg{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_cipherUses_adhKeyxchg{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_cipherUses_adhKeyxchg{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_cipherUses_adhKeyxchg{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_cipherUses_adhKeyxchg{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_cipherUses_adhKeyxchg{serverSslProfiles="/Common/serverssl"} 0
+f5_cipherUses_adhKeyxchg{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_cipherUses_adhKeyxchg{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_cipherUses_adhKeyxchg{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_cipherUses_aesBulk cipherUses.aesBulk
+# TYPE f5_cipherUses_aesBulk gauge
+f5_cipherUses_aesBulk{clientSslProfiles="/Common/clientssl"} 0
+f5_cipherUses_aesBulk{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_cipherUses_aesBulk{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_cipherUses_aesBulk{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_cipherUses_aesBulk{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_cipherUses_aesBulk{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_cipherUses_aesBulk{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_cipherUses_aesBulk{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_cipherUses_aesBulk{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_cipherUses_aesBulk{serverSslProfiles="/Common/serverssl"} 0
+f5_cipherUses_aesBulk{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_cipherUses_aesBulk{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_cipherUses_aesBulk{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_cipherUses_aesGcmBulk cipherUses.aesGcmBulk
+# TYPE f5_cipherUses_aesGcmBulk gauge
+f5_cipherUses_aesGcmBulk{clientSslProfiles="/Common/clientssl"} 0
+f5_cipherUses_aesGcmBulk{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_cipherUses_aesGcmBulk{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_cipherUses_aesGcmBulk{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_cipherUses_aesGcmBulk{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_cipherUses_aesGcmBulk{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_cipherUses_aesGcmBulk{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_cipherUses_aesGcmBulk{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_cipherUses_aesGcmBulk{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_cipherUses_aesGcmBulk{serverSslProfiles="/Common/serverssl"} 0
+f5_cipherUses_aesGcmBulk{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_cipherUses_aesGcmBulk{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_cipherUses_aesGcmBulk{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_cipherUses_camelliaBulk cipherUses.camelliaBulk
+# TYPE f5_cipherUses_camelliaBulk gauge
+f5_cipherUses_camelliaBulk{clientSslProfiles="/Common/clientssl"} 0
+f5_cipherUses_camelliaBulk{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_cipherUses_camelliaBulk{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_cipherUses_camelliaBulk{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_cipherUses_camelliaBulk{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_cipherUses_camelliaBulk{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_cipherUses_camelliaBulk{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_cipherUses_camelliaBulk{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_cipherUses_camelliaBulk{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_cipherUses_camelliaBulk{serverSslProfiles="/Common/serverssl"} 0
+f5_cipherUses_camelliaBulk{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_cipherUses_camelliaBulk{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_cipherUses_camelliaBulk{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_cipherUses_chacha20Poly1305Bulk cipherUses.chacha20Poly1305Bulk
+# TYPE f5_cipherUses_chacha20Poly1305Bulk gauge
+f5_cipherUses_chacha20Poly1305Bulk{clientSslProfiles="/Common/clientssl"} 0
+f5_cipherUses_chacha20Poly1305Bulk{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_cipherUses_chacha20Poly1305Bulk{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_cipherUses_chacha20Poly1305Bulk{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_cipherUses_chacha20Poly1305Bulk{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_cipherUses_chacha20Poly1305Bulk{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_cipherUses_chacha20Poly1305Bulk{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_cipherUses_chacha20Poly1305Bulk{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_cipherUses_chacha20Poly1305Bulk{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_cipherUses_chacha20Poly1305Bulk{serverSslProfiles="/Common/serverssl"} 0
+f5_cipherUses_chacha20Poly1305Bulk{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_cipherUses_chacha20Poly1305Bulk{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_cipherUses_chacha20Poly1305Bulk{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_cipherUses_desBulk cipherUses.desBulk
+# TYPE f5_cipherUses_desBulk gauge
+f5_cipherUses_desBulk{clientSslProfiles="/Common/clientssl"} 0
+f5_cipherUses_desBulk{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_cipherUses_desBulk{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_cipherUses_desBulk{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_cipherUses_desBulk{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_cipherUses_desBulk{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_cipherUses_desBulk{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_cipherUses_desBulk{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_cipherUses_desBulk{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_cipherUses_desBulk{serverSslProfiles="/Common/serverssl"} 0
+f5_cipherUses_desBulk{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_cipherUses_desBulk{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_cipherUses_desBulk{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_cipherUses_dhRsaKeyxchg cipherUses.dhRsaKeyxchg
+# TYPE f5_cipherUses_dhRsaKeyxchg gauge
+f5_cipherUses_dhRsaKeyxchg{clientSslProfiles="/Common/clientssl"} 0
+f5_cipherUses_dhRsaKeyxchg{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_cipherUses_dhRsaKeyxchg{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_cipherUses_dhRsaKeyxchg{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_cipherUses_dhRsaKeyxchg{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_cipherUses_dhRsaKeyxchg{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_cipherUses_dhRsaKeyxchg{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_cipherUses_dhRsaKeyxchg{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_cipherUses_dhRsaKeyxchg{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_cipherUses_dhRsaKeyxchg{serverSslProfiles="/Common/serverssl"} 0
+f5_cipherUses_dhRsaKeyxchg{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_cipherUses_dhRsaKeyxchg{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_cipherUses_dhRsaKeyxchg{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_cipherUses_dheDssKeyxchg cipherUses.dheDssKeyxchg
+# TYPE f5_cipherUses_dheDssKeyxchg gauge
+f5_cipherUses_dheDssKeyxchg{clientSslProfiles="/Common/clientssl"} 0
+f5_cipherUses_dheDssKeyxchg{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_cipherUses_dheDssKeyxchg{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_cipherUses_dheDssKeyxchg{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_cipherUses_dheDssKeyxchg{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_cipherUses_dheDssKeyxchg{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_cipherUses_dheDssKeyxchg{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_cipherUses_dheDssKeyxchg{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_cipherUses_dheDssKeyxchg{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_cipherUses_dheDssKeyxchg{serverSslProfiles="/Common/serverssl"} 0
+f5_cipherUses_dheDssKeyxchg{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_cipherUses_dheDssKeyxchg{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_cipherUses_dheDssKeyxchg{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_cipherUses_ecdhEcdsaKeyxchg cipherUses.ecdhEcdsaKeyxchg
+# TYPE f5_cipherUses_ecdhEcdsaKeyxchg gauge
+f5_cipherUses_ecdhEcdsaKeyxchg{clientSslProfiles="/Common/clientssl"} 0
+f5_cipherUses_ecdhEcdsaKeyxchg{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_cipherUses_ecdhEcdsaKeyxchg{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_cipherUses_ecdhEcdsaKeyxchg{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_cipherUses_ecdhEcdsaKeyxchg{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_cipherUses_ecdhEcdsaKeyxchg{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_cipherUses_ecdhEcdsaKeyxchg{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_cipherUses_ecdhEcdsaKeyxchg{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_cipherUses_ecdhEcdsaKeyxchg{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_cipherUses_ecdhEcdsaKeyxchg{serverSslProfiles="/Common/serverssl"} 0
+f5_cipherUses_ecdhEcdsaKeyxchg{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_cipherUses_ecdhEcdsaKeyxchg{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_cipherUses_ecdhEcdsaKeyxchg{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_cipherUses_ecdhRsaKeyxchg cipherUses.ecdhRsaKeyxchg
+# TYPE f5_cipherUses_ecdhRsaKeyxchg gauge
+f5_cipherUses_ecdhRsaKeyxchg{clientSslProfiles="/Common/clientssl"} 0
+f5_cipherUses_ecdhRsaKeyxchg{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_cipherUses_ecdhRsaKeyxchg{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_cipherUses_ecdhRsaKeyxchg{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_cipherUses_ecdhRsaKeyxchg{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_cipherUses_ecdhRsaKeyxchg{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_cipherUses_ecdhRsaKeyxchg{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_cipherUses_ecdhRsaKeyxchg{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_cipherUses_ecdhRsaKeyxchg{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_cipherUses_ecdhRsaKeyxchg{serverSslProfiles="/Common/serverssl"} 0
+f5_cipherUses_ecdhRsaKeyxchg{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_cipherUses_ecdhRsaKeyxchg{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_cipherUses_ecdhRsaKeyxchg{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_cipherUses_ecdheEcdsaKeyxchg cipherUses.ecdheEcdsaKeyxchg
+# TYPE f5_cipherUses_ecdheEcdsaKeyxchg gauge
+f5_cipherUses_ecdheEcdsaKeyxchg{clientSslProfiles="/Common/clientssl"} 0
+f5_cipherUses_ecdheEcdsaKeyxchg{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_cipherUses_ecdheEcdsaKeyxchg{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_cipherUses_ecdheEcdsaKeyxchg{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_cipherUses_ecdheEcdsaKeyxchg{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_cipherUses_ecdheEcdsaKeyxchg{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_cipherUses_ecdheEcdsaKeyxchg{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_cipherUses_ecdheEcdsaKeyxchg{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_cipherUses_ecdheEcdsaKeyxchg{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_cipherUses_ecdheEcdsaKeyxchg{serverSslProfiles="/Common/serverssl"} 0
+f5_cipherUses_ecdheEcdsaKeyxchg{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_cipherUses_ecdheEcdsaKeyxchg{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_cipherUses_ecdheEcdsaKeyxchg{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_cipherUses_ecdheRsaKeyxchg cipherUses.ecdheRsaKeyxchg
+# TYPE f5_cipherUses_ecdheRsaKeyxchg gauge
+f5_cipherUses_ecdheRsaKeyxchg{clientSslProfiles="/Common/clientssl"} 0
+f5_cipherUses_ecdheRsaKeyxchg{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_cipherUses_ecdheRsaKeyxchg{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_cipherUses_ecdheRsaKeyxchg{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_cipherUses_ecdheRsaKeyxchg{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_cipherUses_ecdheRsaKeyxchg{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_cipherUses_ecdheRsaKeyxchg{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_cipherUses_ecdheRsaKeyxchg{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_cipherUses_ecdheRsaKeyxchg{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_cipherUses_ecdheRsaKeyxchg{serverSslProfiles="/Common/serverssl"} 0
+f5_cipherUses_ecdheRsaKeyxchg{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_cipherUses_ecdheRsaKeyxchg{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_cipherUses_ecdheRsaKeyxchg{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_cipherUses_edhRsaKeyxchg cipherUses.edhRsaKeyxchg
+# TYPE f5_cipherUses_edhRsaKeyxchg gauge
+f5_cipherUses_edhRsaKeyxchg{clientSslProfiles="/Common/clientssl"} 0
+f5_cipherUses_edhRsaKeyxchg{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_cipherUses_edhRsaKeyxchg{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_cipherUses_edhRsaKeyxchg{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_cipherUses_edhRsaKeyxchg{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_cipherUses_edhRsaKeyxchg{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_cipherUses_edhRsaKeyxchg{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_cipherUses_edhRsaKeyxchg{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_cipherUses_edhRsaKeyxchg{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_cipherUses_edhRsaKeyxchg{serverSslProfiles="/Common/serverssl"} 0
+f5_cipherUses_edhRsaKeyxchg{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_cipherUses_edhRsaKeyxchg{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_cipherUses_edhRsaKeyxchg{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_cipherUses_ideaBulk cipherUses.ideaBulk
+# TYPE f5_cipherUses_ideaBulk gauge
+f5_cipherUses_ideaBulk{clientSslProfiles="/Common/clientssl"} 0
+f5_cipherUses_ideaBulk{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_cipherUses_ideaBulk{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_cipherUses_ideaBulk{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_cipherUses_ideaBulk{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_cipherUses_ideaBulk{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_cipherUses_ideaBulk{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_cipherUses_ideaBulk{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_cipherUses_ideaBulk{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_cipherUses_ideaBulk{serverSslProfiles="/Common/serverssl"} 0
+f5_cipherUses_ideaBulk{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_cipherUses_ideaBulk{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_cipherUses_ideaBulk{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_cipherUses_md5Digest cipherUses.md5Digest
+# TYPE f5_cipherUses_md5Digest gauge
+f5_cipherUses_md5Digest{clientSslProfiles="/Common/clientssl"} 0
+f5_cipherUses_md5Digest{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_cipherUses_md5Digest{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_cipherUses_md5Digest{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_cipherUses_md5Digest{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_cipherUses_md5Digest{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_cipherUses_md5Digest{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_cipherUses_md5Digest{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_cipherUses_md5Digest{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_cipherUses_md5Digest{serverSslProfiles="/Common/serverssl"} 0
+f5_cipherUses_md5Digest{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_cipherUses_md5Digest{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_cipherUses_md5Digest{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_cipherUses_nullBulk cipherUses.nullBulk
+# TYPE f5_cipherUses_nullBulk gauge
+f5_cipherUses_nullBulk{clientSslProfiles="/Common/clientssl"} 0
+f5_cipherUses_nullBulk{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_cipherUses_nullBulk{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_cipherUses_nullBulk{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_cipherUses_nullBulk{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_cipherUses_nullBulk{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_cipherUses_nullBulk{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_cipherUses_nullBulk{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_cipherUses_nullBulk{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_cipherUses_nullBulk{serverSslProfiles="/Common/serverssl"} 0
+f5_cipherUses_nullBulk{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_cipherUses_nullBulk{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_cipherUses_nullBulk{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_cipherUses_nullDigest cipherUses.nullDigest
+# TYPE f5_cipherUses_nullDigest gauge
+f5_cipherUses_nullDigest{clientSslProfiles="/Common/clientssl"} 0
+f5_cipherUses_nullDigest{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_cipherUses_nullDigest{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_cipherUses_nullDigest{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_cipherUses_nullDigest{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_cipherUses_nullDigest{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_cipherUses_nullDigest{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_cipherUses_nullDigest{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_cipherUses_nullDigest{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_cipherUses_nullDigest{serverSslProfiles="/Common/serverssl"} 0
+f5_cipherUses_nullDigest{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_cipherUses_nullDigest{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_cipherUses_nullDigest{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_cipherUses_rc2Bulk cipherUses.rc2Bulk
+# TYPE f5_cipherUses_rc2Bulk gauge
+f5_cipherUses_rc2Bulk{clientSslProfiles="/Common/clientssl"} 0
+f5_cipherUses_rc2Bulk{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_cipherUses_rc2Bulk{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_cipherUses_rc2Bulk{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_cipherUses_rc2Bulk{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_cipherUses_rc2Bulk{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_cipherUses_rc2Bulk{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_cipherUses_rc2Bulk{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_cipherUses_rc2Bulk{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_cipherUses_rc2Bulk{serverSslProfiles="/Common/serverssl"} 0
+f5_cipherUses_rc2Bulk{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_cipherUses_rc2Bulk{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_cipherUses_rc2Bulk{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_cipherUses_rc4Bulk cipherUses.rc4Bulk
+# TYPE f5_cipherUses_rc4Bulk gauge
+f5_cipherUses_rc4Bulk{clientSslProfiles="/Common/clientssl"} 0
+f5_cipherUses_rc4Bulk{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_cipherUses_rc4Bulk{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_cipherUses_rc4Bulk{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_cipherUses_rc4Bulk{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_cipherUses_rc4Bulk{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_cipherUses_rc4Bulk{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_cipherUses_rc4Bulk{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_cipherUses_rc4Bulk{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_cipherUses_rc4Bulk{serverSslProfiles="/Common/serverssl"} 0
+f5_cipherUses_rc4Bulk{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_cipherUses_rc4Bulk{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_cipherUses_rc4Bulk{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_cipherUses_rsaKeyxchg cipherUses.rsaKeyxchg
+# TYPE f5_cipherUses_rsaKeyxchg gauge
+f5_cipherUses_rsaKeyxchg{clientSslProfiles="/Common/clientssl"} 0
+f5_cipherUses_rsaKeyxchg{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_cipherUses_rsaKeyxchg{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_cipherUses_rsaKeyxchg{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_cipherUses_rsaKeyxchg{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_cipherUses_rsaKeyxchg{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_cipherUses_rsaKeyxchg{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_cipherUses_rsaKeyxchg{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_cipherUses_rsaKeyxchg{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_cipherUses_rsaKeyxchg{serverSslProfiles="/Common/serverssl"} 0
+f5_cipherUses_rsaKeyxchg{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_cipherUses_rsaKeyxchg{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_cipherUses_rsaKeyxchg{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_cipherUses_shaDigest cipherUses.shaDigest
+# TYPE f5_cipherUses_shaDigest gauge
+f5_cipherUses_shaDigest{clientSslProfiles="/Common/clientssl"} 0
+f5_cipherUses_shaDigest{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_cipherUses_shaDigest{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_cipherUses_shaDigest{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_cipherUses_shaDigest{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_cipherUses_shaDigest{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_cipherUses_shaDigest{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_cipherUses_shaDigest{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_cipherUses_shaDigest{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_cipherUses_shaDigest{serverSslProfiles="/Common/serverssl"} 0
+f5_cipherUses_shaDigest{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_cipherUses_shaDigest{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_cipherUses_shaDigest{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_protocolUses_dtlsv1 protocolUses.dtlsv1
+# TYPE f5_protocolUses_dtlsv1 gauge
+f5_protocolUses_dtlsv1{clientSslProfiles="/Common/clientssl"} 0
+f5_protocolUses_dtlsv1{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_protocolUses_dtlsv1{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_protocolUses_dtlsv1{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_protocolUses_dtlsv1{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_protocolUses_dtlsv1{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_protocolUses_dtlsv1{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_protocolUses_dtlsv1{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_protocolUses_dtlsv1{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_protocolUses_dtlsv1{serverSslProfiles="/Common/serverssl"} 0
+f5_protocolUses_dtlsv1{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_protocolUses_dtlsv1{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_protocolUses_dtlsv1{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_protocolUses_sslv2 protocolUses.sslv2
+# TYPE f5_protocolUses_sslv2 gauge
+f5_protocolUses_sslv2{clientSslProfiles="/Common/clientssl"} 0
+f5_protocolUses_sslv2{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_protocolUses_sslv2{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_protocolUses_sslv2{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_protocolUses_sslv2{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_protocolUses_sslv2{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_protocolUses_sslv2{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_protocolUses_sslv2{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_protocolUses_sslv2{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_protocolUses_sslv2{serverSslProfiles="/Common/serverssl"} 0
+f5_protocolUses_sslv2{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_protocolUses_sslv2{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_protocolUses_sslv2{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_protocolUses_sslv3 protocolUses.sslv3
+# TYPE f5_protocolUses_sslv3 gauge
+f5_protocolUses_sslv3{clientSslProfiles="/Common/clientssl"} 0
+f5_protocolUses_sslv3{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_protocolUses_sslv3{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_protocolUses_sslv3{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_protocolUses_sslv3{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_protocolUses_sslv3{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_protocolUses_sslv3{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_protocolUses_sslv3{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_protocolUses_sslv3{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_protocolUses_sslv3{serverSslProfiles="/Common/serverssl"} 0
+f5_protocolUses_sslv3{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_protocolUses_sslv3{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_protocolUses_sslv3{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_protocolUses_tlsv1 protocolUses.tlsv1
+# TYPE f5_protocolUses_tlsv1 gauge
+f5_protocolUses_tlsv1{clientSslProfiles="/Common/clientssl"} 0
+f5_protocolUses_tlsv1{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_protocolUses_tlsv1{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_protocolUses_tlsv1{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_protocolUses_tlsv1{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_protocolUses_tlsv1{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_protocolUses_tlsv1{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_protocolUses_tlsv1{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_protocolUses_tlsv1{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_protocolUses_tlsv1{serverSslProfiles="/Common/serverssl"} 0
+f5_protocolUses_tlsv1{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_protocolUses_tlsv1{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_protocolUses_tlsv1{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_protocolUses_tlsv1_1 protocolUses.tlsv1_1
+# TYPE f5_protocolUses_tlsv1_1 gauge
+f5_protocolUses_tlsv1_1{clientSslProfiles="/Common/clientssl"} 0
+f5_protocolUses_tlsv1_1{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_protocolUses_tlsv1_1{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_protocolUses_tlsv1_1{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_protocolUses_tlsv1_1{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_protocolUses_tlsv1_1{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_protocolUses_tlsv1_1{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_protocolUses_tlsv1_1{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_protocolUses_tlsv1_1{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_protocolUses_tlsv1_1{serverSslProfiles="/Common/serverssl"} 0
+f5_protocolUses_tlsv1_1{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_protocolUses_tlsv1_1{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_protocolUses_tlsv1_1{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_protocolUses_tlsv1_2 protocolUses.tlsv1_2
+# TYPE f5_protocolUses_tlsv1_2 gauge
+f5_protocolUses_tlsv1_2{clientSslProfiles="/Common/clientssl"} 0
+f5_protocolUses_tlsv1_2{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_protocolUses_tlsv1_2{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_protocolUses_tlsv1_2{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_protocolUses_tlsv1_2{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_protocolUses_tlsv1_2{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_protocolUses_tlsv1_2{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_protocolUses_tlsv1_2{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_protocolUses_tlsv1_2{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_protocolUses_tlsv1_2{serverSslProfiles="/Common/serverssl"} 0
+f5_protocolUses_tlsv1_2{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_protocolUses_tlsv1_2{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_protocolUses_tlsv1_2{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
+# HELP f5_protocolUses_tlsv1_3 protocolUses.tlsv1_3
+# TYPE f5_protocolUses_tlsv1_3 gauge
+f5_protocolUses_tlsv1_3{clientSslProfiles="/Common/clientssl"} 0
+f5_protocolUses_tlsv1_3{clientSslProfiles="/Common/clientssl-insecure-compatible"} 0
+f5_protocolUses_tlsv1_3{clientSslProfiles="/Common/clientssl-secure"} 0
+f5_protocolUses_tlsv1_3{clientSslProfiles="/Common/crypto-server-default-clientssl"} 0
+f5_protocolUses_tlsv1_3{clientSslProfiles="/Common/splitsession-default-clientssl"} 0
+f5_protocolUses_tlsv1_3{clientSslProfiles="/Common/wom-default-clientssl"} 0
+f5_protocolUses_tlsv1_3{serverSslProfiles="/Common/apm-default-serverssl"} 0
+f5_protocolUses_tlsv1_3{serverSslProfiles="/Common/crypto-client-default-serverssl"} 0
+f5_protocolUses_tlsv1_3{serverSslProfiles="/Common/pcoip-default-serverssl"} 0
+f5_protocolUses_tlsv1_3{serverSslProfiles="/Common/serverssl"} 0
+f5_protocolUses_tlsv1_3{serverSslProfiles="/Common/serverssl-insecure-compatible"} 0
+f5_protocolUses_tlsv1_3{serverSslProfiles="/Common/splitsession-default-serverssl"} 0
+f5_protocolUses_tlsv1_3{serverSslProfiles="/Common/wom-default-serverssl"} 0
+
 # HELP f5_system_tmmTraffic_clientSideTraffic_bitsIn system_tmmTraffic_clientSideTraffic.bitsIn
 # TYPE f5_system_tmmTraffic_clientSideTraffic_bitsIn gauge
 f5_system_tmmTraffic_clientSideTraffic_bitsIn 60258692504
@@ -1569,10 +1573,6 @@ f5_system_tmmTraffic_serverSideTraffic_bitsIn 8458221624
 # HELP f5_system_tmmTraffic_serverSideTraffic_bitsOut system_tmmTraffic_serverSideTraffic.bitsOut
 # TYPE f5_system_tmmTraffic_serverSideTraffic_bitsOut gauge
 f5_system_tmmTraffic_serverSideTraffic_bitsOut 862169712
-
-# HELP f5_telemetryServiceInfo_pollingInterval telemetryServiceInfo_pollingInterval
-# TYPE f5_telemetryServiceInfo_pollingInterval gauge
-f5_telemetryServiceInfo_pollingInterval 0
 `,
         virtualServers: `# HELP f5_clientside_bitsIn clientside.bitsIn
 # TYPE f5_clientside_bitsIn gauge
@@ -1628,6 +1628,17 @@ f5_lowestPriogrp{pools="/Sample_01/A1/web_pool1"} 0
 f5_lowestPriogrp{pools="/Sample_02/A1/web_pool"} 0
 f5_lowestPriogrp{pools="/Sample_02/A1/web_pool1"} 0
 
+# HELP f5_port port
+# TYPE f5_port gauge
+f5_port{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.10:80"} 80
+f5_port{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.11:80"} 80
+f5_port{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.12:80"} 80
+f5_port{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.13:80"} 80
+f5_port{pools="/Sample_02/A1/web_pool",members="/Sample_02/192.0.2.10:80"} 80
+f5_port{pools="/Sample_02/A1/web_pool",members="/Sample_02/192.0.2.11:80"} 80
+f5_port{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.12:80"} 80
+f5_port{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.13:80"} 80
+
 # HELP f5_serverside_bitsIn serverside.bitsIn
 # TYPE f5_serverside_bitsIn gauge
 f5_serverside_bitsIn{pools="/Common/h.4"} 0
@@ -1675,17 +1686,6 @@ f5_serverside_curConns{pools="/Sample_02/A1/web_pool",members="/Sample_02/192.0.
 f5_serverside_curConns{pools="/Sample_02/A1/web_pool1"} 0
 f5_serverside_curConns{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.12:80"} 0
 f5_serverside_curConns{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.13:80"} 0
-
-# HELP f5_port port
-# TYPE f5_port gauge
-f5_port{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.10:80"} 80
-f5_port{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.11:80"} 80
-f5_port{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.12:80"} 80
-f5_port{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.13:80"} 80
-f5_port{pools="/Sample_02/A1/web_pool",members="/Sample_02/192.0.2.10:80"} 80
-f5_port{pools="/Sample_02/A1/web_pool",members="/Sample_02/192.0.2.11:80"} 80
-f5_port{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.12:80"} 80
-f5_port{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.13:80"} 80
 `
     }
 };

@@ -8,6 +8,7 @@
     	},
         "projectId": "yourGoogleCloudMonitoringProjectId",
         "privateKeyId": "yourPrivateKeyId",
-        "serviceEmail": "yourServiceEmail"
+        "serviceEmail": "yourServiceEmail",
+        "reportInstanceMetadata": false
     }
 }

@@ -456,13 +456,15 @@ addTags (experimental)
 ``````````````````````
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-    The EXPERIMENTAL feature addTags for StatsD is available in Telemetry Streaming 1.20 and later.
+    The EXPERIMENTAL feature addTags for StatsD is available in Telemetry Streaming 1.21 and later.
 
-Telemetry Streaming 1.20 adds a new property for the StatsD consumer: **addTags**.  This feature causes TS to parse the incoming payload for values to automatically add as tags. Currently only the **sibling** method is supported.  
+Telemetry Streaming 1.21 adds a new property for the StatsD consumer: **addTags**.  This feature causes TS to parse the incoming payload for values to automatically add as tags. Currently only the **sibling** method is supported.  
+
+To see an example and the output from **addTags**, see :ref:`addTags example<addtagex>`.
 
 |
 
-Example Declaration (updated with the **experimental** feature *addTags* introduced in TS 1.20 (see below). If using a prior version, **remove** the highlighted lines, and the comma in line 9):
+Example Declaration (updated with the **experimental** feature *addTags* introduced in TS 1.21. If using a prior version, **remove** the highlighted lines, and the comma in line 9):
 
 .. literalinclude:: ../examples/declarations/statsd.json
     :language: json

@@ -29,11 +29,14 @@ if (typeof kafka.KafkaClient.prototype.deleteDisconnected !== 'undefined') {
 }
 
 /**
- * See {@link ../README.md#context} for documentation
+ * Construct Kafka client options from Consumer config
+ *
+ * @param {String} kafkaHost    Connection string to Kafka host in 'kafka-host1:9092' format
+ * @param {Object} config       Consumer configuration object
+ *
+ * @returns {Object} Kafka Client options object
  */
-module.exports = function (context) {
-    const config = context.config;
-
+function buildKafkaClientOptions(kafkaHost, config) {
     // adding sslOptions to client options at all is the signal to invoke TLS
     let tlsOptions = null;
     if (config.protocol === 'binaryTcpTls') {
@@ -57,44 +60,98 @@ module.exports = function (context) {
         });
     }
 
-    const clientOptions = {
-        kafkaHost: `${config.host}:${config.port || 9092}`, // format: 'kafka-host1:9092'
+    return {
+        kafkaHost,
         connectTimeout: 3 * 1000, // shorten timeout
         requestTimeout: 5 * 1000, // shorten timeout
         sslOptions: tlsOptions,
         sasl: saslOptions
     };
+}
 
-    const client = new kafka.KafkaClient(clientOptions);
-    client.on('f5error', (err) => {
-        context.logger.exception('Unexpected error in KafkaClient', err);
-    });
-
-    const producer = new kafka.Producer(client);
-    const payload = [
-        {
-            topic: config.topic,
-            messages: JSON.stringify(context.event.data)
-        }
-    ];
-
-    if (context.tracer) {
-        context.tracer.write(payload);
+/**
+ * Caching class for Kafka connections
+ *
+ * @property {Object} connectionCache   Object containing cached Kafka connections
+ */
+class ConnectionCache {
+    constructor() {
+        this.connectionCache = {};
     }
 
-    producer.on('ready', () => {
-        // eslint-disable-next-line no-unused-vars
-        producer.send(payload, (error, data) => {
-            if (error) {
-                context.logger.error(`error: ${error.message ? error.message : error}`);
-            } else {
-                context.logger.debug('success');
-            }
-        });
-    });
+    /**
+     * Creates and returns an object containing a Kafka Client and Producer.
+     * If a cached connection exists, the cached connection is returned.
+     *
+     * @param {Object} config   Consumer configuration object
+     *
+     * @returns {Object}    Object containing the Kafka Client and Producer
+     */
+    makeConnection(config) {
+        const kafkaHost = `${config.host}:${config.port || 9092}`; // format: 'kafka-host1:9092'
 
-    // use this to catch any errors
-    producer.on('error', (error) => {
-        context.logger.error(`error: ${error.message ? error.message : error}`);
-    });
+        const cacheEntry = this.connectionCache[kafkaHost];
+        if (typeof cacheEntry !== 'undefined') {
+            return Promise.resolve(cacheEntry);
+        }
+
+        this.connectionCache[kafkaHost] = new Promise((resolve, reject) => {
+            const clientOptions = buildKafkaClientOptions(kafkaHost, config);
+            const client = new kafka.KafkaClient(clientOptions);
+            client.on('f5error', (err) => {
+                context.logger.exception('Unexpected error in KafkaClient', err);
+            });
+
+            const producer = new kafka.Producer(client);
+            producer.on('ready', () => {
+                const connection = {
+                    client,
+                    producer
+                };
+                this.connectionCache[kafkaHost] = connection;
+                resolve(connection);
+            });
+
+            producer.on('error', (error) => {
+                this.connectionCache[kafkaHost] = undefined;
+                reject(error);
+            });
+        });
+
+        return Promise.resolve(this.connectionCache[kafkaHost]);
+    }
+}
+
+const connectionCache = new ConnectionCache();
+
+/**
+ * See {@link ../README.md#context} for documentation
+ */
+module.exports = function (context) {
+    const config = context.config;
+    return Promise.resolve()
+        .then(() => connectionCache.makeConnection(config))
+        .then((connection) => {
+            const payload = [
+                {
+                    topic: config.topic,
+                    messages: JSON.stringify(context.event.data)
+                }
+            ];
+
+            if (context.tracer) {
+                context.tracer.write(payload);
+            }
+
+            connection.producer.send(payload, (error) => {
+                if (error) {
+                    context.logger.error(`error: ${error.message ? error.message : error}`);
+                } else {
+                    context.logger.debug('success');
+                }
+            });
+        })
+        .catch((error) => {
+            context.logger.error(`error: ${error.message ? error.message : error}`);
+        });
 };

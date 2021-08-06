@@ -93,7 +93,7 @@ In order to have hostname information available in the data sent to your consume
 
 Creating System Pollers specific to the custom endpoint
 -------------------------------------------------------
-Because you might want to specify different polling intervals for the custom endpoints, v1.10.0 also enables the ability to create an system poller specific to an endpoint or array of endpoints.  To do this, you use the new **endpointList** property in your system poller definition.
+Because you may want to specify different polling intervals for the custom endpoints, v1.10.0 also enables the ability to create an system poller specific to an endpoint or array of endpoints.  To do this, you use the new **endpointList** property in your system poller definition.
 
 EndpointList is simply a list of endpoints to use in data collection, and can include the following types:
 

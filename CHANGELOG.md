@@ -1,6 +1,22 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.22.0
+### Added
+- AUTOTOOL-622: [GitHub #94](https://github.com/F5Networks/f5-telemetry-streaming/issues/94): Add Data Dog consumer (experimental feature)
+- AUTOTOOL-2600: [GitHub #125](https://github.com/F5Networks/f5-telemetry-streaming/issues/125): Added "slowKilled" and "evictedConns" properties to "clientside" of virtual servers
+- AUTOTOOL-2605: [GitHub #141](https://github.com/F5Networks/f5-telemetry-streaming/issues/141): Add "eventSchemaVersion" property to F5_Cloud consumer
+- AUTOTOOL-2453: [GitHub #143](https://github.com/F5Networks/f5-telemetry-streaming/issues/143): Add new Google Cloud Logging consumer
+- AUTOTOOL-2623: Added new property "reportInstanceMetadata" to "Google_Cloud_Monitoring" consumer to control metadata reporting
+### Fixed
+- AUTOTOOL-2543: [GitHub #134](https://github.com/F5Networks/f5-telemetry-streaming/issues/134): Fixed issue where Prometheus consumer encounters an error when a metric name is registered more than once
+- AUTOTOOL-2591: Fixed issue where the Kafka Consumer would create a new Kafka connection on each Telemetry Streaming payload
+### Changed
+- AUTOTOOL-2411: The default namespace (f5telemetry_default) is now stated explicitly in traceName and paths of the to the trace files. 
+- AUTOTOOL-2573: Google Cloud Monitoring Consumer now uses instance_id and zone as time-series resource labels for BIG-IPs that run in Google Cloud
+- AUTOTOOL-2613: Update npm packages (@grpc/grpc-js from v1.3.0 to v1.3.4, aws-sdk from v2.914.0 to v2.943.0, statsd-client from v0.4.6 to v0.4.7)
+### Removed
+
 ## 1.21.0
 ### Added
 - AUTOTOOL-2555: Add new property "addTags" to StatsD consumer that makes Consumer to send tags along with metrics (experimental feature)
@@ -10,6 +26,7 @@ Changes to this project are documented in this file. More detail and links can b
 - AUTOTOOL-2510: Update npm packages (@f5devcentral/f5-teem from v1.4.6 to v1.5.0, aws-sdk from v2.885.0 to v2.914.0, mustache from v4.1.0 to v4.2.0, statsd-client from v0.4.5 to v0.4.6)
 - Replace grpc-js-0.2-modified with @grpc/grpc-js
 - AUTOTOOL-2535: Refactor Google Cloud (used by the Google Cloud Monitoring Consumer) authentication, and add support for caching short-lived authentication tokens
+### Removed
 
 ## 1.20.1
 ### Added

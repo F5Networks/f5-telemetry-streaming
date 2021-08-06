@@ -170,7 +170,29 @@ function invalidateToken(serviceAccount) {
     tokenCache.removeToken(serviceAccount.privateKeyId);
 }
 
+// Google's metadata service
+const METADATA_URL = 'http://metadata.google.internal/computeMetadata';
+
+function getInstanceMetadata(context) {
+    const metadataOpts = {
+        fullURI: `${METADATA_URL}/v1/instance/?recursive=true`,
+        headers: {
+            'Metadata-Flavor': 'Google'
+        },
+        allowSelfSignedCert: context.config.allowSelfSignedCert,
+        // by default request lib will reuse connections
+        // which is problematic when instance is not on cloud and no metadata
+        // ECONNRESETs happen and sockets not managed correctly resulting in memory leak
+        // apparent when we process event listener data due to volume and number of calls
+        agentOptions: { keepAlive: false },
+        timeout: 5 * 1000 // Only wait 5s for Metadata Service response
+    };
+
+    return requestsUtil.makeRequest(metadataOpts);
+}
+
 module.exports = {
     getAccessToken,
-    invalidateToken
+    invalidateToken,
+    getInstanceMetadata
 };

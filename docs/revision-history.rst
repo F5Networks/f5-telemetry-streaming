@@ -11,13 +11,16 @@ Document Revision History
         - Description
         - Date
 
-      * - 1.21.0
-        - Updated the documentation for Telemetry Streaming v1.21.0. This release contains the following changes: |br| * An **experimental** property for the StatsD consumer (see :ref:`StatsD addTags<addtags>`) |br| * A number of minor bug fixes, stability enhancements, and foundational elements for some upcoming features. 
-        - 6-28-21
-        
+      * - 1.22.0
+        - Updated the documentation for Telemetry Streaming v1.22.0. This release contains the following changes: |br| * Added  **clientside.slowKilled** and **clientside.evictedConns** to virtual server output (see :ref:`System information output<sysinfo>`) |br| |br| Issues Resolved: |br| * Fixed issue where Prometheus consumer encounters an error when a metric name is registered more than once, `GitHub #134 <https://github.com/F5Networks/f5-telemetry-streaming/issues/134>`_ |br| * Fixed issue where the Kafka Consumer would create a new Kafka connection on each Telemetry Streaming payload |br| * Google Cloud Monitoring Consumer now uses instance_id and zone as time-series resource labels for BIG-IPs that run in Google Cloud
+        - 8-9-21
+
+      * - 1.20.1
+        - Released Telemetry Streaming v1.20.1 as a LTS (Long Term Support) version. See the Telemetry Streaming |supportmd| for information about the Telemetry Streaming support policy.
+        - 6-30-21
       
       * - 1.21.0
-        - Updated the documentation for Telemetry Streaming v1.21.0. This release contains a number of minor bug fixes, stability enhancements, and foundational elements for some upcoming features. 
+        - Updated the documentation for Telemetry Streaming v1.21.0. This release contains the following changes: |br| * An **experimental** property for the StatsD consumer (see :ref:`StatsD addTags<addtags>`) |br| * A number of minor bug fixes, stability enhancements, and foundational elements for some upcoming features. 
         - 6-28-21
       
       * - 1.20.0
@@ -132,3 +135,7 @@ Document Revision History
 .. |schemalink| raw:: html
 
    <a href="https://github.com/F5Networks/f5-telemetry-streaming/tree/master/src/schema" target="_blank">schema files</a>
+
+.. |supportmd| raw:: html
+
+   <a href="https://github.com/F5Networks/f5-telemetry-streaming/blob/master/SUPPORT.md" target="_blank">Support information on GitHub</a>

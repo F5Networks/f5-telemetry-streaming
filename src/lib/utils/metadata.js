@@ -9,6 +9,7 @@
 'use strict';
 
 const azureUtil = require('../consumers/shared/azureUtil');
+const gcpUtil = require('../consumers/shared/gcpUtil');
 const logger = require('../logger');
 const retryPromise = require('./promise').retry;
 const util = require('./misc');
@@ -31,6 +32,8 @@ function getInstanceMetadata(consumerContext) {
     let promise = Promise.resolve();
     if (consumerType.indexOf('Azure') > -1) {
         promise = retryPromise(() => azureUtil.getInstanceMetadata(consumerContext), { maxTries: 1 });
+    } else if (consumerType.indexOf('Google') > -1) {
+        promise = retryPromise(() => gcpUtil.getInstanceMetadata(consumerContext), { maxTries: 1 });
     }
 
     return promise

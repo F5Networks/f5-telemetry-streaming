@@ -718,6 +718,23 @@ module.exports = {
                     }
                 },
                 {
+                    metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Common-app-app-app_vs.clientside-evictedConns',
+                    metricValue: 0,
+                    metricTags: {
+                        destination: '10.5.6.7:80',
+                        availabilityState: 'offline',
+                        enabledState: 'enabled',
+                        'status.statusReason': 'The virtual server is available',
+                        mask: '255.255.255.255',
+                        name: '/Common/foofoo.app/foofoo_vs',
+                        appService: '/Common/foofoo.app/foofoo',
+                        ipProtocol: 'tcp',
+                        tenant: 'Common',
+                        pool: '/Common/foofoo.app/foofoo_pool',
+                        application: 'foofoo.app'
+                    }
+                },
+                {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Common-app-app-app_vs.clientside-maxConns',
                     metricValue: 0,
                     metricTags: {
@@ -753,6 +770,23 @@ module.exports = {
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Common-app-app-app_vs.clientside-pktsOut',
+                    metricValue: 0,
+                    metricTags: {
+                        destination: '10.5.6.7:80',
+                        availabilityState: 'offline',
+                        enabledState: 'enabled',
+                        'status.statusReason': 'The virtual server is available',
+                        mask: '255.255.255.255',
+                        name: '/Common/foofoo.app/foofoo_vs',
+                        appService: '/Common/foofoo.app/foofoo',
+                        ipProtocol: 'tcp',
+                        tenant: 'Common',
+                        pool: '/Common/foofoo.app/foofoo_pool',
+                        application: 'foofoo.app'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Common-app-app-app_vs.clientside-slowKilled',
                     metricValue: 0,
                     metricTags: {
                         destination: '10.5.6.7:80',
@@ -834,6 +868,22 @@ module.exports = {
                     }
                 },
                 {
+                    metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-evictedConns',
+                    metricValue: 0,
+                    metricTags: {
+                        destination: '192.0.2.11:443',
+                        availabilityState: 'offline',
+                        enabledState: 'enabled',
+                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
+                        mask: '255.255.255.0',
+                        name: '/Example_Tenant/A1/serviceMain',
+                        ipProtocol: 'tcp',
+                        tenant: 'Example_Tenant',
+                        pool: '/Example_Tenant/A1/barbar_pool',
+                        application: 'A1'
+                    }
+                },
+                {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-maxConns',
                     metricValue: 0,
                     metricTags: {
@@ -867,6 +917,22 @@ module.exports = {
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-pktsOut',
+                    metricValue: 0,
+                    metricTags: {
+                        destination: '192.0.2.11:443',
+                        availabilityState: 'offline',
+                        enabledState: 'enabled',
+                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
+                        mask: '255.255.255.0',
+                        name: '/Example_Tenant/A1/serviceMain',
+                        ipProtocol: 'tcp',
+                        tenant: 'Example_Tenant',
+                        pool: '/Example_Tenant/A1/barbar_pool',
+                        application: 'A1'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-slowKilled',
                     metricValue: 0,
                     metricTags: {
                         destination: '192.0.2.11:443',
@@ -937,6 +1003,19 @@ module.exports = {
                     }
                 },
                 {
+                    metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-evictedConns',
+                    metricValue: 0,
+                    metricTags: {
+                        destination: '192.0.2.11:80',
+                        availabilityState: 'unknown',
+                        enabledState: 'enabled',
+                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
+                        name: '/Example_Tenant/A1/serviceMain-Redirect',
+                        tenant: 'Example_Tenant',
+                        application: 'A1'
+                    }
+                },
+                {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-maxConns',
                     metricValue: 0,
                     metricTags: {
@@ -964,6 +1043,19 @@ module.exports = {
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-pktsOut',
+                    metricValue: 0,
+                    metricTags: {
+                        destination: '192.0.2.11:80',
+                        availabilityState: 'unknown',
+                        enabledState: 'enabled',
+                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
+                        name: '/Example_Tenant/A1/serviceMain-Redirect',
+                        tenant: 'Example_Tenant',
+                        application: 'A1'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-slowKilled',
                     metricValue: 0,
                     metricTags: {
                         destination: '192.0.2.11:80',
@@ -1085,17 +1177,6 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-app-app-app_pool.members.-Common-10-0-3-5-80.port',
-                    metricValue: 0,
-                    metricTags: {
-                        addr: '10.0.3.5',
-                        monitorStatus: 'up',
-                        availabilityState: 'available',
-                        enabledState: 'enabled',
-                        'status.statusReason': 'Pool member is available'
-                    }
-                },
-                {
                     metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-app-app-app_pool.members.-Common-10-0-3-5-80.serverside-bitsIn',
                     metricValue: 0,
                     metricTags: {
@@ -1103,6 +1184,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1114,6 +1196,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1125,6 +1208,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1136,6 +1220,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1147,6 +1232,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1158,6 +1244,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1169,6 +1256,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1261,17 +1349,6 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-telemetry-local.members.-Common-10-0-1-100-6514.port',
-                    metricValue: 0,
-                    metricTags: {
-                        addr: '10.0.1.100',
-                        monitorStatus: 'down',
-                        availabilityState: 'available',
-                        enabledState: 'enabled',
-                        'status.statusReason': 'Pool member has been marked down by a monitor'
-                    }
-                },
-                {
                     metricName: 'f5telemetry.telemetry-bigip-com.pools.-Common-telemetry-local.members.-Common-10-0-1-100-6514.serverside-bitsIn',
                     metricValue: 0,
                     metricTags: {
@@ -1279,6 +1356,7 @@ module.exports = {
                         monitorStatus: 'down',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member has been marked down by a monitor'
                     }
                 },
@@ -1290,6 +1368,7 @@ module.exports = {
                         monitorStatus: 'down',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member has been marked down by a monitor'
                     }
                 },
@@ -1301,6 +1380,7 @@ module.exports = {
                         monitorStatus: 'down',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member has been marked down by a monitor'
                     }
                 },
@@ -1312,6 +1392,7 @@ module.exports = {
                         monitorStatus: 'down',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member has been marked down by a monitor'
                     }
                 },
@@ -1323,6 +1404,7 @@ module.exports = {
                         monitorStatus: 'down',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member has been marked down by a monitor'
                     }
                 },
@@ -1334,6 +1416,7 @@ module.exports = {
                         monitorStatus: 'down',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member has been marked down by a monitor'
                     }
                 },
@@ -1345,6 +1428,7 @@ module.exports = {
                         monitorStatus: 'down',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member has been marked down by a monitor'
                     }
                 },
@@ -1445,17 +1529,6 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-hsl_pool.members.-Example_Tenant-192-168-120-6-514.port',
-                    metricValue: 0,
-                    metricTags: {
-                        addr: '192.168.120.6',
-                        monitorStatus: 'up',
-                        availabilityState: 'offline',
-                        enabledState: 'enabled',
-                        'status.statusReason': 'Pool member is available'
-                    }
-                },
-                {
                     metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-hsl_pool.members.-Example_Tenant-192-168-120-6-514.serverside-bitsIn',
                     metricValue: 0,
                     metricTags: {
@@ -1463,6 +1536,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1474,6 +1548,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1485,6 +1560,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1496,6 +1572,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1507,6 +1584,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1518,6 +1596,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1529,6 +1608,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1629,17 +1709,6 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-12-80.port',
-                    metricValue: 0,
-                    metricTags: {
-                        addr: '192.0.2.12',
-                        monitorStatus: 'up',
-                        availabilityState: 'offline',
-                        enabledState: 'enabled',
-                        'status.statusReason': 'Pool member is available'
-                    }
-                },
-                {
                     metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-12-80.serverside-bitsIn',
                     metricValue: 0,
                     metricTags: {
@@ -1647,6 +1716,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1658,6 +1728,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1669,6 +1740,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1680,6 +1752,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1691,6 +1764,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1702,6 +1776,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1713,17 +1788,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'Pool member is available'
-                    }
-                },
-                {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-13-80.port',
-                    metricValue: 0,
-                    metricTags: {
-                        addr: '192.0.2.13',
-                        monitorStatus: 'up',
-                        availabilityState: 'offline',
-                        enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1735,6 +1800,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1746,6 +1812,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1757,6 +1824,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1768,6 +1836,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1779,6 +1848,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1790,6 +1860,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },
@@ -1801,6 +1872,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
                 },

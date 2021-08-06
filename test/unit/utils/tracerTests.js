@@ -709,7 +709,7 @@ describe('Tracer', () => {
                 const registered = tracer.registered();
                 assert.sameDeepMembers(
                     registered.map(t => t.path),
-                    ['/var/tmp/telemetry/Telemetry_Consumer.My_Consumer', 'listener'],
+                    ['/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer', 'listener'],
                     'should configure destination as expected'
                 );
                 return configWorker.processDeclaration({ class: 'Telemetry' })
@@ -748,7 +748,7 @@ describe('Tracer', () => {
                 const registered = tracer.registered();
                 assert.sameDeepMembers(
                     registered.map(t => t.path),
-                    ['/var/tmp/telemetry/Telemetry_Consumer.My_Consumer', 'listener'],
+                    ['/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer', 'listener'],
                     'should configure destination as expected'
                 );
                 return configWorker.processDeclaration({
@@ -781,7 +781,7 @@ describe('Tracer', () => {
                 assert.sameDeepMembers(
                     tracer.registered().map(t => t.path),
                     [
-                        '/var/tmp/telemetry/Telemetry_System_Poller.My_Enabled_Poller_With_Disabled_Trace::My_Enabled_Poller_With_Disabled_Trace',
+                        '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_Enabled_Poller_With_Disabled_Trace::My_Enabled_Poller_With_Disabled_Trace',
                         'listener2'
                     ],
                     'should configure destination as expected'
@@ -818,7 +818,7 @@ describe('Tracer', () => {
                 const registered = tracer.registered(); // remember those instances - should survive all updates
                 assert.sameDeepMembers(
                     registered.map(t => t.path),
-                    ['/var/tmp/telemetry/Telemetry_Consumer.My_Consumer', 'listener'],
+                    ['/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer', 'listener'],
                     'should configure destination as expected'
                 );
                 return configWorker.processNamespaceDeclaration({
@@ -843,7 +843,7 @@ describe('Tracer', () => {
                 assert.sameDeepMembers(
                     tracer.registered().map(t => t.path),
                     [
-                        '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer',
+                        '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
                         'listener',
                         '/var/tmp/telemetry/Telemetry_Consumer.Namespace::My_Consumer',
                         'listener2'
@@ -872,7 +872,7 @@ describe('Tracer', () => {
                 assert.sameDeepMembers(
                     tracer.registered().map(t => t.path),
                     [
-                        '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer',
+                        '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
                         'listener',
                         'listener2'
                     ],
@@ -889,7 +889,7 @@ describe('Tracer', () => {
                 });
                 assert.sameDeepMembers(
                     tracer.registered().map(t => t.path),
-                    ['/var/tmp/telemetry/Telemetry_Consumer.My_Consumer', 'listener'],
+                    ['/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer', 'listener'],
                     'should configure destination as expected'
                 );
             }));

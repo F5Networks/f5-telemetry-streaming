@@ -78,8 +78,8 @@ module.exports = {
                 mappings: {
                     'My_Namespace::My_System::SystemPoller_1': ['My_Namespace::My_Consumer'],
                     'My_Namespace::My_System::iHealthPoller_1': ['My_Namespace::My_Consumer'],
-                    'My_System::SystemPoller_1': ['My_Consumer'],
-                    'My_System::iHealthPoller_1': ['My_Consumer']
+                    'f5telemetry_default::My_System::SystemPoller_1': ['f5telemetry_default::My_Consumer'],
+                    'f5telemetry_default::My_System::iHealthPoller_1': ['f5telemetry_default::My_Consumer']
                 },
                 components: [
                     {
@@ -108,7 +108,7 @@ module.exports = {
                             tags: undefined
                         },
                         enable: true,
-                        id: 'My_System::SystemPoller_1',
+                        id: 'f5telemetry_default::My_System::SystemPoller_1',
                         interval: 60,
                         name: 'SystemPoller_1',
                         namespace: 'f5telemetry_default',
@@ -117,10 +117,10 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1',
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_System::SystemPoller_1',
                             type: 'output'
                         },
-                        traceName: 'My_System::SystemPoller_1'
+                        traceName: 'f5telemetry_default::My_System::SystemPoller_1'
                     },
                     {
                         class: 'Telemetry_iHealth_Poller',
@@ -130,7 +130,7 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System::iHealthPoller_1',
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.f5telemetry_default::My_System::iHealthPoller_1',
                             type: 'output'
                         },
                         iHealth: {
@@ -178,26 +178,26 @@ module.exports = {
                                 passphrase: undefined
                             }
                         },
-                        id: 'My_System::iHealthPoller_1',
+                        id: 'f5telemetry_default::My_System::iHealthPoller_1',
                         namespace: 'f5telemetry_default',
                         systemName: 'My_System',
-                        traceName: 'My_System::iHealthPoller_1'
+                        traceName: 'f5telemetry_default::My_System::iHealthPoller_1'
                     },
                     {
                         class: 'Telemetry_Consumer',
                         allowSelfSignedCert: false,
                         enable: true,
-                        id: 'My_Consumer',
+                        id: 'f5telemetry_default::My_Consumer',
                         name: 'My_Consumer',
                         namespace: 'f5telemetry_default',
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer',
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
                             type: 'output'
                         },
-                        traceName: 'My_Consumer',
+                        traceName: 'f5telemetry_default::My_Consumer',
                         type: 'default'
                     },
                     {
@@ -376,7 +376,7 @@ module.exports = {
             expected: {
                 mappings: {
                     'My_Namespace::My_System::My_iHealth_Poller': ['My_Namespace::My_Consumer'],
-                    'My_System::My_iHealth_Poller': ['My_Consumer']
+                    'f5telemetry_default::My_System::My_iHealth_Poller': ['f5telemetry_default::My_Consumer']
                 },
                 components: [
                     {
@@ -386,7 +386,7 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System::My_iHealth_Poller',
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.f5telemetry_default::My_System::My_iHealth_Poller',
                             type: 'output'
                         },
                         iHealth: {
@@ -434,27 +434,27 @@ module.exports = {
                                 passphrase: undefined
                             }
                         },
-                        id: 'My_System::My_iHealth_Poller',
+                        id: 'f5telemetry_default::My_System::My_iHealth_Poller',
                         name: 'My_iHealth_Poller',
                         systemName: 'My_System',
                         namespace: 'f5telemetry_default',
-                        traceName: 'My_System::My_iHealth_Poller'
+                        traceName: 'f5telemetry_default::My_System::My_iHealth_Poller'
                     },
                     {
                         class: 'Telemetry_Consumer',
                         allowSelfSignedCert: false,
                         enable: true,
-                        id: 'My_Consumer',
+                        id: 'f5telemetry_default::My_Consumer',
                         name: 'My_Consumer',
                         namespace: 'f5telemetry_default',
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer',
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
                             type: 'output'
                         },
-                        traceName: 'My_Consumer',
+                        traceName: 'f5telemetry_default::My_Consumer',
                         type: 'default'
                     },
                     {
@@ -616,8 +616,8 @@ module.exports = {
                 mappings: {
                     'My_Namespace::My_System_1::My_iHealth_Poller': ['My_Namespace::My_Consumer'],
                     'My_Namespace::My_System_2::My_iHealth_Poller': ['My_Namespace::My_Consumer'],
-                    'My_System_1::My_iHealth_Poller': ['My_Consumer'],
-                    'My_System_2::My_iHealth_Poller': ['My_Consumer']
+                    'f5telemetry_default::My_System_1::My_iHealth_Poller': ['f5telemetry_default::My_Consumer'],
+                    'f5telemetry_default::My_System_2::My_iHealth_Poller': ['f5telemetry_default::My_Consumer']
                 },
                 components: [
                     {
@@ -627,7 +627,7 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System_1::My_iHealth_Poller',
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.f5telemetry_default::My_System_1::My_iHealth_Poller',
                             type: 'output'
                         },
                         iHealth: {
@@ -675,11 +675,11 @@ module.exports = {
                                 passphrase: undefined
                             }
                         },
-                        id: 'My_System_1::My_iHealth_Poller',
+                        id: 'f5telemetry_default::My_System_1::My_iHealth_Poller',
                         name: 'My_iHealth_Poller',
                         namespace: 'f5telemetry_default',
                         systemName: 'My_System_1',
-                        traceName: 'My_System_1::My_iHealth_Poller'
+                        traceName: 'f5telemetry_default::My_System_1::My_iHealth_Poller'
                     },
                     {
                         class: 'Telemetry_iHealth_Poller',
@@ -688,7 +688,7 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System_2::My_iHealth_Poller',
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.f5telemetry_default::My_System_2::My_iHealth_Poller',
                             type: 'output'
                         },
                         iHealth: {
@@ -736,27 +736,27 @@ module.exports = {
                                 passphrase: undefined
                             }
                         },
-                        id: 'My_System_2::My_iHealth_Poller',
+                        id: 'f5telemetry_default::My_System_2::My_iHealth_Poller',
                         name: 'My_iHealth_Poller',
                         namespace: 'f5telemetry_default',
                         systemName: 'My_System_2',
-                        traceName: 'My_System_2::My_iHealth_Poller'
+                        traceName: 'f5telemetry_default::My_System_2::My_iHealth_Poller'
                     },
                     {
                         class: 'Telemetry_Consumer',
                         allowSelfSignedCert: false,
                         enable: true,
-                        id: 'My_Consumer',
+                        id: 'f5telemetry_default::My_Consumer',
                         name: 'My_Consumer',
                         namespace: 'f5telemetry_default',
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer',
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
                             type: 'output'
                         },
-                        traceName: 'My_Consumer',
+                        traceName: 'f5telemetry_default::My_Consumer',
                         type: 'default'
                     },
                     {
@@ -1051,7 +1051,7 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System::iHealthPoller_1',
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.f5telemetry_default::My_System::iHealthPoller_1',
                             type: 'output'
                         },
                         iHealth: {
@@ -1099,10 +1099,10 @@ module.exports = {
                                 passphrase: undefined
                             }
                         },
-                        id: 'My_System::iHealthPoller_1',
+                        id: 'f5telemetry_default::My_System::iHealthPoller_1',
                         namespace: 'f5telemetry_default',
                         systemName: 'My_System',
-                        traceName: 'My_System::iHealthPoller_1'
+                        traceName: 'f5telemetry_default::My_System::iHealthPoller_1'
                     },
                     {
                         class: 'Telemetry_iHealth_Poller',
@@ -1111,7 +1111,7 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System_2::My_iHealth_Poller',
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.f5telemetry_default::My_System_2::My_iHealth_Poller',
                             type: 'output'
                         },
                         iHealth: {
@@ -1159,11 +1159,11 @@ module.exports = {
                                 passphrase: undefined
                             }
                         },
-                        id: 'My_System_2::My_iHealth_Poller',
+                        id: 'f5telemetry_default::My_System_2::My_iHealth_Poller',
                         name: 'My_iHealth_Poller',
                         systemName: 'My_System_2',
                         namespace: 'f5telemetry_default',
-                        traceName: 'My_System_2::My_iHealth_Poller'
+                        traceName: 'f5telemetry_default::My_System_2::My_iHealth_Poller'
                     },
                     {
                         class: 'Telemetry_iHealth_Poller',
@@ -1424,8 +1424,8 @@ module.exports = {
                     'My_Namespace::My_System_2::My_iHealth_Poller': ['My_Namespace::My_Consumer_1'],
                     'My_Namespace_2::My_System::iHealthPoller_1': ['My_Namespace_2::My_Consumer_1'],
                     'My_Namespace_2::My_System_2::My_iHealth_Poller': ['My_Namespace_2::My_Consumer_1'],
-                    'My_System::iHealthPoller_1': ['My_Consumer_1'],
-                    'My_System_2::My_iHealth_Poller': ['My_Consumer_1']
+                    'f5telemetry_default::My_System::iHealthPoller_1': ['f5telemetry_default::My_Consumer_1'],
+                    'f5telemetry_default::My_System_2::My_iHealth_Poller': ['f5telemetry_default::My_Consumer_1']
                 },
                 components: [
                     {
@@ -1436,7 +1436,7 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System::iHealthPoller_1',
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.f5telemetry_default::My_System::iHealthPoller_1',
                             type: 'output'
                         },
                         iHealth: {
@@ -1484,10 +1484,10 @@ module.exports = {
                                 passphrase: undefined
                             }
                         },
-                        id: 'My_System::iHealthPoller_1',
+                        id: 'f5telemetry_default::My_System::iHealthPoller_1',
                         namespace: 'f5telemetry_default',
                         systemName: 'My_System',
-                        traceName: 'My_System::iHealthPoller_1'
+                        traceName: 'f5telemetry_default::My_System::iHealthPoller_1'
                     },
                     {
                         class: 'Telemetry_iHealth_Poller',
@@ -1496,7 +1496,7 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System_2::My_iHealth_Poller',
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.f5telemetry_default::My_System_2::My_iHealth_Poller',
                             type: 'output'
                         },
                         iHealth: {
@@ -1544,27 +1544,27 @@ module.exports = {
                                 passphrase: undefined
                             }
                         },
-                        id: 'My_System_2::My_iHealth_Poller',
+                        id: 'f5telemetry_default::My_System_2::My_iHealth_Poller',
                         name: 'My_iHealth_Poller',
                         systemName: 'My_System_2',
                         namespace: 'f5telemetry_default',
-                        traceName: 'My_System_2::My_iHealth_Poller'
+                        traceName: 'f5telemetry_default::My_System_2::My_iHealth_Poller'
                     },
                     {
                         class: 'Telemetry_Consumer',
                         allowSelfSignedCert: false,
                         enable: true,
-                        id: 'My_Consumer_1',
+                        id: 'f5telemetry_default::My_Consumer_1',
                         name: 'My_Consumer_1',
                         namespace: 'f5telemetry_default',
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1',
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer_1',
                             type: 'output'
                         },
-                        traceName: 'My_Consumer_1',
+                        traceName: 'f5telemetry_default::My_Consumer_1',
                         type: 'default'
                     },
                     {
@@ -1988,8 +1988,8 @@ module.exports = {
                     'My_Namespace::My_System_2::My_iHealth_Poller': ['My_Namespace::My_Consumer_1', 'My_Namespace::My_Consumer_2'],
                     'My_Namespace_2::My_System::iHealthPoller_1': ['My_Namespace_2::My_Consumer_1', 'My_Namespace_2::My_Consumer_2'],
                     'My_Namespace_2::My_System_2::My_iHealth_Poller': ['My_Namespace_2::My_Consumer_1', 'My_Namespace_2::My_Consumer_2'],
-                    'My_System::iHealthPoller_1': ['My_Consumer_1', 'My_Consumer_2'],
-                    'My_System_2::My_iHealth_Poller': ['My_Consumer_1', 'My_Consumer_2']
+                    'f5telemetry_default::My_System::iHealthPoller_1': ['f5telemetry_default::My_Consumer_1', 'f5telemetry_default::My_Consumer_2'],
+                    'f5telemetry_default::My_System_2::My_iHealth_Poller': ['f5telemetry_default::My_Consumer_1', 'f5telemetry_default::My_Consumer_2']
                 },
                 components: [
                     {
@@ -2000,7 +2000,7 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System::iHealthPoller_1',
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.f5telemetry_default::My_System::iHealthPoller_1',
                             type: 'output'
                         },
                         iHealth: {
@@ -2048,10 +2048,10 @@ module.exports = {
                                 passphrase: undefined
                             }
                         },
-                        id: 'My_System::iHealthPoller_1',
+                        id: 'f5telemetry_default::My_System::iHealthPoller_1',
                         namespace: 'f5telemetry_default',
                         systemName: 'My_System',
-                        traceName: 'My_System::iHealthPoller_1'
+                        traceName: 'f5telemetry_default::My_System::iHealthPoller_1'
                     },
                     {
                         class: 'Telemetry_iHealth_Poller',
@@ -2060,7 +2060,7 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System_2::My_iHealth_Poller',
+                            path: '/var/tmp/telemetry/Telemetry_iHealth_Poller.f5telemetry_default::My_System_2::My_iHealth_Poller',
                             type: 'output'
                         },
                         iHealth: {
@@ -2108,44 +2108,44 @@ module.exports = {
                                 passphrase: undefined
                             }
                         },
-                        id: 'My_System_2::My_iHealth_Poller',
+                        id: 'f5telemetry_default::My_System_2::My_iHealth_Poller',
                         name: 'My_iHealth_Poller',
                         systemName: 'My_System_2',
                         namespace: 'f5telemetry_default',
-                        traceName: 'My_System_2::My_iHealth_Poller'
+                        traceName: 'f5telemetry_default::My_System_2::My_iHealth_Poller'
                     },
                     {
                         class: 'Telemetry_Consumer',
                         allowSelfSignedCert: false,
                         enable: true,
-                        id: 'My_Consumer_1',
+                        id: 'f5telemetry_default::My_Consumer_1',
                         name: 'My_Consumer_1',
                         namespace: 'f5telemetry_default',
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_1',
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer_1',
                             type: 'output'
                         },
-                        traceName: 'My_Consumer_1',
+                        traceName: 'f5telemetry_default::My_Consumer_1',
                         type: 'default'
                     },
                     {
                         class: 'Telemetry_Consumer',
                         allowSelfSignedCert: false,
                         enable: true,
-                        id: 'My_Consumer_2',
+                        id: 'f5telemetry_default::My_Consumer_2',
                         name: 'My_Consumer_2',
                         namespace: 'f5telemetry_default',
                         trace: {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer_2',
+                            path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer_2',
                             type: 'output'
                         },
-                        traceName: 'My_Consumer_2',
+                        traceName: 'f5telemetry_default::My_Consumer_2',
                         type: 'default'
                     },
                     {

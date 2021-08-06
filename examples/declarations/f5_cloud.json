@@ -90,7 +90,8 @@
       "authProviderX509CertUrl": "https://www.googleapis.com/oauth2/v1/certs",
       "clientX509CertUrl": "https://www.googleapis.com/robot/v1/metadata/x509/test%40deos-dev.iam.gserviceaccount.com"
     },
-    "targetAudience": "deos-ingest"
+    "targetAudience": "deos-ingest",
+    "eventSchemaVersion": "5"
   },
   "schemaVersion": "1.15.0"
 }

@@ -51,10 +51,10 @@ describe('iHealth', () => {
         const components = [
             dummies.configuration.ihealthPoller.full.encrypted({
                 name: 'iHealthPoller_1',
-                id: 'System::iHealthPoller_1',
+                id: 'f5telemetry_default::System::iHealthPoller_1',
                 namespace: 'f5telemetry_default',
                 systemName: 'System',
-                traceName: 'System::iHealthPoller_1',
+                traceName: 'f5telemetry_default::System::iHealthPoller_1',
                 iHealth: {
                     name: 'iHealthPoller_1',
                     credentials: { username: 'test_user_2', passphrase: { cipherText: '$M$test_passphrase_2' } },
@@ -209,7 +209,7 @@ describe('iHealth', () => {
         declaration.Namespace.DefaultConsumer = dummies.declaration.consumer.default.decrypted();
         preExistingConfigIDs = [
             'Namespace::System::iHealthPoller_1',
-            'System::iHealthPoller_1'
+            'f5telemetry_default::System::iHealthPoller_1'
         ];
         // slow down polling process
         ihealthStub.ihealthUtil.QkviewManager.process.rejects(new Error('expected error'));
@@ -260,7 +260,7 @@ describe('iHealth', () => {
                 .then(() => {
                     restStorageData = coreStub.persistentStorage.savedData;
                     assert.deepStrictEqual(restStorageData.ihealth.nonExistingInstance, undefined, 'should remove data for non-existing instance');
-                    assert.notDeepEqual(restStorageData.ihealth['System::iHealthPoller_1'], undefined, 'should keep data for existing instance');
+                    assert.notDeepEqual(restStorageData.ihealth['f5telemetry_default::System::iHealthPoller_1'], undefined, 'should keep data for existing instance');
                 });
         });
 
@@ -314,8 +314,8 @@ describe('iHealth', () => {
                             };
                         }),
                         [
-                            { id: 'System::iHealthPoller_1', demo: true, consumers: ['DefaultConsumer'] },
-                            { id: 'System::iHealthPoller_1', demo: false, consumers: ['DefaultConsumer'] },
+                            { id: 'f5telemetry_default::System::iHealthPoller_1', demo: true, consumers: ['f5telemetry_default::DefaultConsumer'] },
+                            { id: 'f5telemetry_default::System::iHealthPoller_1', demo: false, consumers: ['f5telemetry_default::DefaultConsumer'] },
                             { id: 'Namespace::System::iHealthPoller_1', demo: true, consumers: ['Namespace::DefaultConsumer'] },
                             { id: 'Namespace::System::iHealthPoller_1', demo: false, consumers: ['Namespace::DefaultConsumer'] }
                         ],
@@ -340,7 +340,7 @@ describe('iHealth', () => {
                 .then(() => {
                     instancesBefore = IHealthPoller.getAll({ includeDemo: true });
                     // demo ID for default namespace only
-                    configIDsBeforeUpdate = preExistingConfigIDs.concat(['System::iHealthPoller_1']);
+                    configIDsBeforeUpdate = preExistingConfigIDs.concat(['f5telemetry_default::System::iHealthPoller_1']);
                     const namespaceDeclaration = testUtil.deepCopy(declaration.Namespace);
                     // should remove demo instance from namespace
                     return configWorker.processNamespaceDeclaration(namespaceDeclaration, 'Namespace');
@@ -391,8 +391,8 @@ describe('iHealth', () => {
                             };
                         }),
                         [
-                            { id: 'System::iHealthPoller_1', demo: true, consumers: ['DefaultConsumer'] },
-                            { id: 'System::iHealthPoller_1', demo: false, consumers: ['DefaultConsumer'] },
+                            { id: 'f5telemetry_default::System::iHealthPoller_1', demo: true, consumers: ['f5telemetry_default::DefaultConsumer'] },
+                            { id: 'f5telemetry_default::System::iHealthPoller_1', demo: false, consumers: ['f5telemetry_default::DefaultConsumer'] },
                             { id: 'Namespace::System::iHealthPoller_1', demo: false, consumers: ['Namespace::DefaultConsumer'] }
                         ],
                         'should collect report from running pollers'
@@ -577,14 +577,14 @@ describe('iHealth', () => {
                 assert.ownInclude(response, {
                     demoMode: true,
                     disabled: false,
-                    id: 'System::iHealthPoller_1',
-                    name: 'System::iHealthPoller_1 (DEMO)',
+                    id: 'f5telemetry_default::System::iHealthPoller_1',
+                    name: 'f5telemetry_default::System::iHealthPoller_1 (DEMO)',
                     isRunning: false,
                     message: 'iHealth Poller for System "System" started'
                 });
                 assert.sameMembers(
                     IHealthPoller.getAll({ demoOnly: true }).map(p => p.id),
-                    ['System::iHealthPoller_1'],
+                    ['f5telemetry_default::System::iHealthPoller_1'],
                     'should create instance with expected ID'
                 );
                 return ihealth.startPoller('System');
@@ -593,8 +593,8 @@ describe('iHealth', () => {
                 assert.ownInclude(response, {
                     demoMode: true,
                     disabled: false,
-                    id: 'System::iHealthPoller_1',
-                    name: 'System::iHealthPoller_1 (DEMO)',
+                    id: 'f5telemetry_default::System::iHealthPoller_1',
+                    name: 'f5telemetry_default::System::iHealthPoller_1 (DEMO)',
                     isRunning: true,
                     message: 'iHealth Poller for System "System" started already'
                 });
@@ -636,8 +636,8 @@ describe('iHealth', () => {
                 assert.ownInclude(responses[0], {
                     demoMode: true,
                     disabled: false,
-                    id: 'Disabled_System::iHealthPoller_1',
-                    name: 'Disabled_System::iHealthPoller_1 (DEMO)',
+                    id: 'f5telemetry_default::Disabled_System::iHealthPoller_1',
+                    name: 'f5telemetry_default::Disabled_System::iHealthPoller_1 (DEMO)',
                     isRunning: false,
                     message: 'iHealth Poller for System "Disabled_System" started'
                 });
@@ -652,7 +652,7 @@ describe('iHealth', () => {
                 assert.sameMembers(
                     IHealthPoller.getAll({ demoOnly: true }).map(p => p.id),
                     [
-                        'Disabled_System::iHealthPoller_1',
+                        'f5telemetry_default::Disabled_System::iHealthPoller_1',
                         'Namespace::Disabled_System::iHealthPoller_1'
                     ],
                     'should create instance with expected ID'
@@ -666,8 +666,8 @@ describe('iHealth', () => {
                 assert.ownInclude(responses[0], {
                     demoMode: true,
                     disabled: false,
-                    id: 'Disabled_System::iHealthPoller_1',
-                    name: 'Disabled_System::iHealthPoller_1 (DEMO)',
+                    id: 'f5telemetry_default::Disabled_System::iHealthPoller_1',
+                    name: 'f5telemetry_default::Disabled_System::iHealthPoller_1 (DEMO)',
                     isRunning: true,
                     message: 'iHealth Poller for System "Disabled_System" started already'
                 });
@@ -742,7 +742,7 @@ describe('iHealth', () => {
             assert.sameDeepMembers(
                 ihealth.getCurrentState().map(s => s.name),
                 [
-                    'System::iHealthPoller_1',
+                    'f5telemetry_default::System::iHealthPoller_1',
                     'Namespace::System::iHealthPoller_1'
                 ],
                 'should return all registered pollers'
@@ -767,9 +767,9 @@ describe('iHealth', () => {
                 assert.sameDeepMembers(
                     ihealth.getCurrentState().map(s => s.name),
                     [
-                        'System::iHealthPoller_1 (DEMO)',
+                        'f5telemetry_default::System::iHealthPoller_1 (DEMO)',
                         'Namespace::System::iHealthPoller_1 (DEMO)',
-                        'System::iHealthPoller_1',
+                        'f5telemetry_default::System::iHealthPoller_1',
                         'Namespace::System::iHealthPoller_1'
                     ],
                     'should return all registered pollers'

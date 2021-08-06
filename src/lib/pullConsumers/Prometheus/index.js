@@ -8,7 +8,7 @@
 
 'use strict';
 
-const client = require('prom-client');
+const promClient = require('prom-client');
 const mergeObjectArray = require('../../utils/misc').mergeObjectArray;
 const deepCopy = require('../../utils/misc').deepCopy;
 
@@ -78,12 +78,37 @@ module.exports = function (context) {
             reject(new Error(msg));
         }
 
-        const metricCollection = collectMetricData(event);
         // Create a custom metric registry each time, as the default registry will persist across API calls
-        const registry = new client.Registry();
+        const registry = new promClient.Registry();
 
-        // create prometheus metrics for all collected metrics
-        applyPrometheusFormatting(metricCollection, registry);
+        // Collect metrics from event
+        const collectedMetrics = collectMetrics(event);
+        const prioritizedMetrics = prioritizeCollectedMetrics(collectedMetrics);
+
+        const orderedPriorityKeys = Object.keys(prioritizedMetrics).sort((a, b) => a - b);
+
+        orderedPriorityKeys.forEach((priorityKey) => {
+            prioritizedMetrics[priorityKey].forEach((metricObject) => {
+                let metricName = `f5_${metricObject.metricName}`;
+                // Check if already registered
+                if (typeof registry.getSingleMetric(metricName) !== 'undefined') {
+                    metricName = `f5_${toPrometheusMetricFormat(metricObject.originalMetricName, true).metricName}`;
+                }
+                try {
+                    const gauge = new promClient.Gauge({
+                        name: metricName,
+                        help: metricObject.originalMetricName,
+                        registers: [registry],
+                        labelNames: metricObject.labelNames
+                    });
+                    metricObject.labels.forEach((labelObj) => {
+                        gauge.set(labelObj.labels, labelObj.value);
+                    });
+                } catch (err) {
+                    logger.error(`Unable to register metric for: ${metricObject.originalMetricName}. ${err.message || err}`);
+                }
+            });
+        });
 
         // Return metrics from the registry
         const output = registry.metrics();
@@ -103,7 +128,7 @@ module.exports = function (context) {
  *
  * @returns {Object} Returns an Object containing metrics, metric values and any associated metadata
  */
-function collectMetricData(event) {
+function collectMetrics(event) {
     const filteredEvents = event
         .filter(d => (typeof d !== 'undefined' && Object.keys(d).indexOf('data') !== -1));
 
@@ -122,41 +147,82 @@ function collectMetricData(event) {
     return mergeObjectArray(metrics);
 }
 
-/**
- * Apply Prometheus formatting to the provided metrics collection.
- * Will rename metric names to comply with Prometheus naming rules, create a Prometheus Gauge,
- *  and set the gauge value for each metric.
- *
- * @param {Object}      data     - Data to format according to Prometheus spec
- * @param {Registry}    registry - Prometheus 'Registry' to register each Metric to
- */
-function applyPrometheusFormatting(data, registry) {
-    Object.keys(data).forEach((metricName) => {
-        const labelNames = Array.from(data[metricName].labels || []);
 
-        const gauge = new client.Gauge({
-            name: `f5_${formatPrometheusName(metricName)}`, // Prefix metric names with 'f5' to differentiate F5 metrics
-            help: metricName,
-            registers: [registry],
-            labelNames
-        });
-        data[metricName].values.forEach((valueObj) => {
-            // Pass labels Object or Empty Object (prom-client has logic to handle empty objects) to gauge
-            const gaugeLabels = (typeof valueObj.labels === 'undefined') ? {} : valueObj.labels;
-            gauge.set(gaugeLabels, valueObj.value);
+/**
+ * Prioritizes metrics by the number of transformations that were required to convert a metric name
+ *  into a valid Prometheus metric name.
+ *
+ * @param {Object} collectedMetrics - Metrics collection
+ *
+ * @returns {Object} Returns a prioritized object with required data for Prometheus formatted metrics.
+ *  Example object:
+ *  {
+ *      0: [
+ *          {
+ *              metricName,
+ *              originalMetricName,
+ *              labelNames,
+ *              labels
+ *          }, ...
+ *      ],
+ *      1: [...],
+ *      ...
+ *  }
+ */
+function prioritizeCollectedMetrics(collectedMetrics) {
+    const prioritizedMetrics = {};
+
+    Object.keys(collectedMetrics).forEach((originalMetricName) => {
+        const formattedMetric = toPrometheusMetricFormat(originalMetricName);
+        const labelNames = Array.from(collectedMetrics[originalMetricName].labels || []);
+
+        if (typeof prioritizedMetrics[formattedMetric.transformCount] === 'undefined') {
+            prioritizedMetrics[formattedMetric.transformCount] = [];
+        }
+        prioritizedMetrics[formattedMetric.transformCount].push({
+            metricName: formattedMetric.metricName,
+            originalMetricName,
+            labelNames,
+            labels: collectedMetrics[originalMetricName].values.map((valueObj) => {
+                const gaugeLabels = (typeof valueObj.labels === 'undefined') ? {} : valueObj.labels;
+                return { labels: gaugeLabels, value: valueObj.value };
+            })
         });
     });
+
+    return prioritizedMetrics;
 }
 
 /**
+ * Generates a Prometheus formatted metric name from a provided string.
+ * Optionally replaces invalid metric name characters with hex code values
  *
- * @param {String} name - string to reformat to match Prometheus requirements
+ * @param {String}  name                - Original metric name
+ * @param {Boolean} useHexFormatting    - Whether to replace invalid characters with hex codes (default=false)
  *
- * @returns {String} Returns string with unsupported characters replaced
+ * @returns {Object} Returns an object with the Prometheus formatted metric name, and the number of character blocks
+ *                      that were replaced
  */
-function formatPrometheusName(name) {
+function toPrometheusMetricFormat(name, useHexFormatting) {
     const prometheusNameRegex = /[^a-zA-Z0-9_:]+/g;
-    return name.replace(prometheusNameRegex, '_');
+    let newName;
+    let transformCount = 0;
+
+    if (useHexFormatting) {
+        newName = name.replace(/[^a-zA-Z0-9_]+/g, (match) => {
+            transformCount += 1;
+            return `__x${Buffer.from(match).toString('hex').toUpperCase()}__`;
+        });
+    } else {
+        newName = name.replace(prometheusNameRegex, () => {
+            transformCount += 1;
+            return '_';
+        });
+    }
+    return {
+        metricName: newName,
+        transformCount
+    };
 }
 
 /**
@@ -277,7 +343,7 @@ function getMetricLabels(pathItems) {
         // Iterate by +2 - code in loop will the index to locate the key and value of the key-value pair
         for (let i = 0; i < pathItems.length; i += 2) {
             if (typeof pathItems[i] !== 'undefined' && typeof pathItems[i + 1] !== 'undefined') {
-                labels[formatPrometheusName(pathItems[i])] = pathItems[i + 1];
+                labels[toPrometheusMetricFormat(pathItems[i]).metricName] = pathItems[i + 1];
             }
         }
     }

@@ -45,6 +45,13 @@ request:
         _copy: request/software/bigip_16_0
       type: bigip
       flavor: F5-BIGIP-small
+    - harness:
+        _copy: request/hypervisor
+      name: bigip_16_1
+      software:
+        _copy: request/software/bigip_16_1
+      type: bigip
+      flavor: F5-BIGIP-small
   hypervisor: VIO
   software:
     bigip_13_1:
@@ -53,33 +60,42 @@ request:
         image: BIGIP-13.0.0.0.0.1650
       desired:
         branch: ''
-        build: 0.0.4
+        build: 0.0.3
         iso_file: ''
-        version: 13.1.3.6
+        version: 13.1.4.1
     bigip_14_1:
       default:
         force: false
         image: BIGIP-13.0.0.0.0.1650
       desired:
         branch: ''
-        build: 0.0.4
+        build: 0.0.8
         iso_file: ''
-        version: 14.1.4.1
+        version: 14.1.4.3
     bigip_15_1:
       default:
         force: false
         image: BIGIP-13.0.0.0.0.1650
       desired:
         branch: ''
-        build: 0.0.7
+        build: 0.0.18
         iso_file: ''
-        version: 15.1.2.1
+        version: 15.1.3.1
     bigip_16_0:
       default:
         force: false
         image: BIGIP-16.0.0-0.0.12
       desired:
         branch: ''
-        build: 0.0.6
+        build: 0.0.8
         iso_file: ''
-        version: 16.0.1.1
+        version: 16.0.1.2
+    bigip_16_1:
+      default:
+        force: false
+        image: BIGIP-16.0.0-0.0.12
+      desired:
+        branch: ''
+        build: 0.0.19
+        iso_file: ''
+        version: 16.1.0

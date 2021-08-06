@@ -246,8 +246,8 @@ module.exports = {
                         },
                         {
                             name: 'My_Consumer',
-                            traceName: 'My_Consumer',
-                            id: 'My_Consumer',
+                            traceName: 'f5telemetry_default::My_Consumer',
+                            id: 'f5telemetry_default::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -260,7 +260,7 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer',
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
                                 type: 'output'
                             },
                             allowSelfSignedCert: false,
@@ -317,8 +317,8 @@ module.exports = {
                         },
                         {
                             name: 'My_Consumer',
-                            traceName: 'My_Consumer',
-                            id: 'My_Consumer',
+                            traceName: 'f5telemetry_default::My_Consumer',
+                            id: 'f5telemetry_default::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -331,7 +331,7 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer',
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
                                 type: 'output'
                             },
                             allowSelfSignedCert: false,
@@ -770,8 +770,8 @@ module.exports = {
                         },
                         {
                             name: 'My_Consumer',
-                            traceName: 'My_Consumer',
-                            id: 'My_Consumer',
+                            traceName: 'f5telemetry_default::My_Consumer',
+                            id: 'f5telemetry_default::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -784,7 +784,7 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer',
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
                                 type: 'output'
                             },
                             allowSelfSignedCert: false,
@@ -842,8 +842,8 @@ module.exports = {
                         },
                         {
                             name: 'My_Consumer',
-                            traceName: 'My_Consumer',
-                            id: 'My_Consumer',
+                            traceName: 'f5telemetry_default::My_Consumer',
+                            id: 'f5telemetry_default::My_Consumer',
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
                             enable: true,
@@ -856,7 +856,7 @@ module.exports = {
                                 enable: false,
                                 encoding: 'utf8',
                                 maxRecords: 10,
-                                path: '/var/tmp/telemetry/Telemetry_Consumer.My_Consumer',
+                                path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
                                 type: 'output'
                             },
                             allowSelfSignedCert: false,

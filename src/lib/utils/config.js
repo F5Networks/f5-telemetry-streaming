@@ -155,12 +155,9 @@ function getPollerTraceValue(systemTrace, pollerTrace) {
 /**
  * @param {Component} component - component
  *
- * @returns {string} trace prefix
+ * @returns {string} trace prefix, which is the namespace (even for the default namespace)
  */
 function getTracePrefix(component) {
-    if (component.namespace === constants.DEFAULT_UNNAMED_NAMESPACE) {
-        return ''; // keep current behavior
-    }
     return `${component.namespace}::`;
 }
 

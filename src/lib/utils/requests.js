@@ -95,7 +95,6 @@ const buildProxyURL = function (proxyOpts) {
  * @param {String}  [options.method = 'GET'] - HTTP method
  * @param {Any}     [options.body] - HTTP body, must be a Buffer, String or ReadStream or JSON-serializable object
  * @param {Boolean} [options.json = true] - sets HTTP body to JSON representation of value
- *      and adds Content-type: application/json header
  * @param {Object}  [options.headers] - HTTP headers
  * @param {Object}  [options.continueOnErrorCode = false]  - continue on non-successful response code
  * @param {Boolean} [options.allowSelfSignedCert = false]  - do not require SSL certificates be valid

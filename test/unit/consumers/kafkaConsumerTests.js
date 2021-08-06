@@ -25,8 +25,10 @@ const assert = chai.assert;
 
 describe('Kafka', () => {
     let sendStub;
+    let kafkaProducerStub;
     let passedClientOptions;
 
+    let portCount = 9090;
     const defaultConsumerConfig = {
         host: 'kafka-host1',
         port: '9092',
@@ -34,6 +36,7 @@ describe('Kafka', () => {
     };
 
     beforeEach(() => {
+        defaultConsumerConfig.port = portCount.toString();
         sinon.stub(kafka, 'KafkaClient').callsFake((opts) => {
             passedClientOptions = opts;
             const events = {};
@@ -46,8 +49,13 @@ describe('Kafka', () => {
                 }
             };
         });
-        sinon.stub(kafka, 'Producer').returns({
+        kafkaProducerStub = sinon.stub(kafka, 'Producer').returns({
             on: (event, cb) => {
+                // No errors, this is a happy place
+                if (event === 'error') {
+                    return;
+                }
+
                 cb();
             },
             send: (payload, cb) => sendStub(payload, cb)
@@ -55,6 +63,7 @@ describe('Kafka', () => {
     });
 
     afterEach(() => {
+        portCount += 1;
         sinon.restore();
     });
 
@@ -70,7 +79,7 @@ describe('Kafka', () => {
             });
             const expectedOptions = {
                 connectTimeout: 3000,
-                kafkaHost: 'kafka-host1:9092',
+                kafkaHost: `kafka-host1:${portCount}`,
                 requestTimeout: 5000,
                 sasl: null,
                 sslOptions: null
@@ -210,6 +219,96 @@ describe('Kafka', () => {
             };
 
             kafkaIndex(context);
+        });
+
+        it('should cache clients between calls', (done) => {
+            const context = testUtil.buildConsumerContext({
+                eventType: 'systemInfo',
+                config: defaultConsumerConfig
+            });
+
+            let repeatCall = false;
+            let sendCount = 0;
+            sendStub = () => {
+                sendCount += 1;
+                if (!repeatCall) {
+                    repeatCall = true;
+                    return;
+                }
+
+                try {
+                    assert.strictEqual(kafka.KafkaClient.callCount, 1, 'should only create 1 Kafka Client');
+                    assert.strictEqual(sendCount, 2, 'should send data 2 times');
+                    done();
+                } catch (err) {
+                    // done() with parameter is treated as an error.
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
+                    done(err);
+                }
+            };
+
+            kafkaIndex(context);
+            kafkaIndex(context);
+        });
+
+        it('should not attempt to create multiple Kafka Clients during client initialization', (done) => {
+            const context = testUtil.buildConsumerContext({
+                eventType: 'systemInfo',
+                config: defaultConsumerConfig
+            });
+
+            kafkaProducerStub.returns({
+                on: (event, cb) => {
+                    // This is not a happy place
+                    if (event === 'error') {
+                        return;
+                    }
+                    setTimeout(cb, 100);
+                },
+                send: (payload, cb) => sendStub(payload, cb)
+            });
+
+            let sendCount = 0;
+            sendStub = () => {
+                sendCount += 1;
+                if (sendCount < 3) {
+                    return;
+                }
+
+                try {
+                    assert.strictEqual(kafka.KafkaClient.callCount, 1, 'should only create 1 Kafka Client');
+                    assert.strictEqual(sendCount, 3, 'should send data 2 times');
+                    done();
+                } catch (err) {
+                    // done() with parameter is treated as an error.
+                    // Use catch back to pass thrown error from assert.deepStrictEqual to done() callback
+                    done(err);
+                }
+            };
+
+            kafkaIndex(context);
+            kafkaIndex(context);
+            kafkaIndex(context);
+        });
+
+        it('should not reject on error connecting to Kafka', () => {
+            kafkaProducerStub.returns({
+                on: (event, cb) => {
+                    // This is not a happy place
+                    if (event === 'error') {
+                        cb(new Error('connect ECONNREFUSED'));
+                    }
+                }
+            });
+            sendStub = sinon.stub();
+
+            const context = testUtil.buildConsumerContext({
+                eventType: 'systemInfo',
+                config: defaultConsumerConfig
+            });
+
+            return kafkaIndex(context)
+                .then(() => assert.isFalse(sendStub.called, 'should not call producer.send()'));
         });
     });
 });

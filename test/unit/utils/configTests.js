@@ -278,7 +278,7 @@ describe('Config Util', () => {
             return parseDeclaration(decl)
                 .then(() => {
                     const parsedConf = configWorker.currentConfig;
-                    assert.deepStrictEqual(parsedConf.mappings, { My_Listener: ['My_Consumer'] });
+                    assert.deepStrictEqual(parsedConf.mappings, { 'f5telemetry_default::My_Listener': ['f5telemetry_default::My_Consumer'] });
                     assert.lengthOf(parsedConf.components, 3);
 
                     configUtil.removeComponents(parsedConf);
@@ -320,13 +320,13 @@ describe('Config Util', () => {
                 .then(() => {
                     const parsedConf = configWorker.currentConfig;
                     assert.deepStrictEqual(parsedConf.mappings, {
-                        My_Listener: ['My_Consumer', 'My_Consumer_2', 'My_Consumer_3'],
+                        'f5telemetry_default::My_Listener': ['f5telemetry_default::My_Consumer', 'f5telemetry_default::My_Consumer_2', 'f5telemetry_default::My_Consumer_3'],
                         'My_Namespace::My_Listener': ['My_Namespace::My_Consumer']
                     });
 
                     configUtil.removeComponents(parsedConf, { filter: c => c.name === 'My_Consumer' });
                     assert.deepStrictEqual(parsedConf.mappings, {
-                        My_Listener: ['My_Consumer_2', 'My_Consumer_3']
+                        'f5telemetry_default::My_Listener': ['f5telemetry_default::My_Consumer_2', 'f5telemetry_default::My_Consumer_3']
                     });
                     assert.lengthOf(configUtil.getTelemetryListeners(parsedConf), 2);
                     assert.lengthOf(configUtil.getTelemetryConsumers(parsedConf), 2);

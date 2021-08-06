@@ -233,8 +233,118 @@ Customizing the Generic HTTP consumer payload
 
 |
 
+.. _addtagex:
+
+Using the addTags property for the StatsD consumer
+--------------------------------------------------
+.. IMPORTANT:: The addTags property is available in TS v1.21.0 and later. See :ref:`StatsD addTags<addtags>` for more information on this feature.
+
+The following example shows a declaration with a systemPoller, a Listener, and a StatsD consumer with **addTags** using the **sibling** method.
+
+.. code-block:: json
+
+    {
+        "class": "Telemetry",
+        "My_System": {
+            "class": "Telemetry_System",
+            "systemPoller": {
+                "interval": 60
+            }
+        },
+        "My_Consumer_with_AutoTagging": {
+            "class": "Telemetry_Consumer",
+            "type": "Statsd",
+            "host": "192.0.2.1",
+            "protocol": "udp",
+            "port": 8125,
+            "addTags": {
+                "method": "sibling"
+            }
+        }
+    }
+
+|
+
+Next, we show the output from the System poller:
+
+.. code-block:: json
+
+    {
+        "pools": {
+            "/Common/app.app/app_pool": {
+                "activeMemberCnt": 0,
+                "serverside.bitsIn": 0,
+                "serverside.bitsOut": 0,
+                "serverside.curConns": 0,
+                "serverside.maxConns": 0,
+                "serverside.pktsIn": 0,
+                "serverside.pktsOut": 0,
+                "serverside.totConns": 0,
+                "availabilityState": "available",
+                "enabledState": "enabled",
+                "status.statusReason": "The pool is available",
+                "name": "/Common/app.app/app_pool",
+                "members": {
+                    "/Common/10.0.3.5:80": {
+                        "addr": "10.0.3.5",
+                        "monitorStatus": "up",
+                        "port": 0,
+                        "serverside.bitsIn": 0,
+                        "serverside.bitsOut": 0,
+                        "serverside.curConns": 0,
+                        "serverside.maxConns": 0,
+                        "serverside.pktsIn": 0,
+                        "serverside.pktsOut": 0,
+                        "serverside.totConns": 0,
+                        "availabilityState": "available",
+                        "enabledState": "enabled",
+                        "status.statusReason": "Pool member is available"
+                    }
+                },
+                "tenant": "Common",
+                "application": "app.app"
+            }
+        }
+    }
+
+|
+
+Without the **addTags** property, the StatsD consumer sends only numeric metrics like **serverside.bitsIn** and so on.
+
+With the **addTags** property, the StatsD consumer also sends numeric metrics but also sends the following tags along with each metric
+
+- For nested metrics under **pools.-Common-app.app-app_pool**, it sends following tags:
+
+  .. code-block:: json
+
+      {
+         "availabilityState": "available",
+         "enabledState": "enabled",
+         "status.statusReason": "The pool is available",
+         "name": "/Common/app.app/app_pool",
+         "tenant": "Common",
+         "application": "app.app"
+      }
 
 
+- For nested metrics under **pools.-Common-app.app-app_pool.memebers.-Common-10-0-3-5-80**, it sends following tags:
+
+  .. code-block:: json
+     
+      {                   
+         "addr": "10.0.3.5",
+         "monitorStatus": "up",
+         "availabilityState": "available",
+         "enabledState": "enabled",
+         "status.statusReason": "Pool member is available"
+      }
+    
+
+|
+
+:ref:`Back to top<examples>`
+
+|
 
 
 

@@ -143,7 +143,7 @@ function generateDeclarationAndExpectedOutput(trace) {
                         tags: undefined
                     },
                     enable: true,
-                    id: 'My_Poller_2::My_Poller_2',
+                    id: 'f5telemetry_default::My_Poller_2::My_Poller_2',
                     interval: 300,
                     name: 'My_Poller_2',
                     namespace: 'f5telemetry_default',
@@ -152,10 +152,10 @@ function generateDeclarationAndExpectedOutput(trace) {
                         enable: !!trace.systemPoller,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: typeof trace.systemPoller === 'string' ? trace.systemPoller : '/var/tmp/telemetry/Telemetry_System_Poller.My_Poller_2::My_Poller_2',
+                        path: typeof trace.systemPoller === 'string' ? trace.systemPoller : '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_Poller_2::My_Poller_2',
                         type: 'output'
                     },
-                    traceName: 'My_Poller_2::My_Poller_2'
+                    traceName: 'f5telemetry_default::My_Poller_2::My_Poller_2'
                 },
                 {
                     class: 'Telemetry_System_Poller',
@@ -183,7 +183,7 @@ function generateDeclarationAndExpectedOutput(trace) {
                         tags: undefined
                     },
                     enable: true,
-                    id: 'My_System::My_Poller_1',
+                    id: 'f5telemetry_default::My_System::My_Poller_1',
                     interval: 300,
                     name: 'My_Poller_1',
                     namespace: 'f5telemetry_default',
@@ -192,10 +192,10 @@ function generateDeclarationAndExpectedOutput(trace) {
                         enable: !!trace.expectedSystemPoller,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: typeof trace.expectedSystemPoller === 'string' ? trace.expectedSystemPoller : '/var/tmp/telemetry/Telemetry_System_Poller.My_System::My_Poller_1',
+                        path: typeof trace.expectedSystemPoller === 'string' ? trace.expectedSystemPoller : '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_System::My_Poller_1',
                         type: 'output'
                     },
-                    traceName: 'My_System::My_Poller_1'
+                    traceName: 'f5telemetry_default::My_System::My_Poller_1'
                 },
                 {
                     class: 'Telemetry_System_Poller',
@@ -223,7 +223,7 @@ function generateDeclarationAndExpectedOutput(trace) {
                         tags: undefined
                     },
                     enable: true,
-                    id: 'My_System::SystemPoller_1',
+                    id: 'f5telemetry_default::My_System::SystemPoller_1',
                     interval: 60,
                     name: 'SystemPoller_1',
                     namespace: 'f5telemetry_default',
@@ -232,10 +232,10 @@ function generateDeclarationAndExpectedOutput(trace) {
                         enable: !!trace.expectedSystemPoller,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: typeof trace.expectedSystemPoller === 'string' ? trace.expectedSystemPoller : '/var/tmp/telemetry/Telemetry_System_Poller.My_System::SystemPoller_1',
+                        path: typeof trace.expectedSystemPoller === 'string' ? trace.expectedSystemPoller : '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_System::SystemPoller_1',
                         type: 'output'
                     },
-                    traceName: 'My_System::SystemPoller_1'
+                    traceName: 'f5telemetry_default::My_System::SystemPoller_1'
                 },
                 {
                     class: 'Telemetry_iHealth_Poller',
@@ -245,7 +245,7 @@ function generateDeclarationAndExpectedOutput(trace) {
                         enable: !!trace.expectedIHealthPoller,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: typeof trace.expectedIHealthPoller === 'string' ? trace.expectedIHealthPoller : '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System::iHealthPoller_1',
+                        path: typeof trace.expectedIHealthPoller === 'string' ? trace.expectedIHealthPoller : '/var/tmp/telemetry/Telemetry_iHealth_Poller.f5telemetry_default::My_System::iHealthPoller_1',
                         type: 'output'
                     },
                     iHealth: {
@@ -293,10 +293,10 @@ function generateDeclarationAndExpectedOutput(trace) {
                             passphrase: undefined
                         }
                     },
-                    id: 'My_System::iHealthPoller_1',
+                    id: 'f5telemetry_default::My_System::iHealthPoller_1',
                     namespace: 'f5telemetry_default',
                     systemName: 'My_System',
-                    traceName: 'My_System::iHealthPoller_1'
+                    traceName: 'f5telemetry_default::My_System::iHealthPoller_1'
                 },
                 {
                     class: 'Telemetry_iHealth_Poller',
@@ -306,7 +306,7 @@ function generateDeclarationAndExpectedOutput(trace) {
                         enable: !!trace.expectedIHealthPoller,
                         encoding: 'utf8',
                         maxRecords: 10,
-                        path: typeof trace.expectedIHealthPoller === 'string' ? trace.expectedIHealthPoller : '/var/tmp/telemetry/Telemetry_iHealth_Poller.My_System_2::My_iHealth_Poller',
+                        path: typeof trace.expectedIHealthPoller === 'string' ? trace.expectedIHealthPoller : '/var/tmp/telemetry/Telemetry_iHealth_Poller.f5telemetry_default::My_System_2::My_iHealth_Poller',
                         type: 'output'
                     },
                     iHealth: {
@@ -354,10 +354,10 @@ function generateDeclarationAndExpectedOutput(trace) {
                             passphrase: undefined
                         }
                     },
-                    id: 'My_System_2::My_iHealth_Poller',
+                    id: 'f5telemetry_default::My_System_2::My_iHealth_Poller',
                     namespace: 'f5telemetry_default',
                     systemName: 'My_System_2',
-                    traceName: 'My_System_2::My_iHealth_Poller'
+                    traceName: 'f5telemetry_default::My_System_2::My_iHealth_Poller'
                 }
             ]
         }

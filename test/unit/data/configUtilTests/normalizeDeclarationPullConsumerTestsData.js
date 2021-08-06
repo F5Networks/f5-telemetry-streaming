@@ -136,12 +136,12 @@ module.exports = {
             },
             expected: {
                 mappings: {
-                    My_Pull_Consumer: [
-                        'My_System::Pull_Poller_1',
-                        'My_System_2::Pull_Poller_2',
-                        'My_System_3::Pull_Poller_1',
-                        'My_System_3::Pull_Poller_2',
-                        'Pull_Poller_3::Pull_Poller_3'
+                    'f5telemetry_default::My_Pull_Consumer': [
+                        'f5telemetry_default::My_System::Pull_Poller_1',
+                        'f5telemetry_default::My_System_2::Pull_Poller_2',
+                        'f5telemetry_default::My_System_3::Pull_Poller_1',
+                        'f5telemetry_default::My_System_3::Pull_Poller_2',
+                        'f5telemetry_default::Pull_Poller_3::Pull_Poller_3'
                     ],
                     'My_Namespace::My_Pull_Consumer': [
                         'My_Namespace::My_System::Pull_Poller_1',
@@ -160,18 +160,18 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Pull_Consumer.My_Pull_Consumer',
+                            path: '/var/tmp/telemetry/Telemetry_Pull_Consumer.f5telemetry_default::My_Pull_Consumer',
                             type: 'output'
                         },
                         name: 'My_Pull_Consumer',
                         namespace: 'f5telemetry_default',
-                        traceName: 'My_Pull_Consumer',
+                        traceName: 'f5telemetry_default::My_Pull_Consumer',
                         systemPollers: [
                             'Pull_Poller_1',
                             'Pull_Poller_2',
                             'Pull_Poller_3'
                         ],
-                        id: 'My_Pull_Consumer'
+                        id: 'f5telemetry_default::My_Pull_Consumer'
                     },
                     {
                         class: 'Telemetry_Pull_Consumer',
@@ -205,10 +205,10 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System::Pull_Poller_1',
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_System::Pull_Poller_1',
                             type: 'output'
                         },
-                        traceName: 'My_System::Pull_Poller_1',
+                        traceName: 'f5telemetry_default::My_System::Pull_Poller_1',
                         connection: {
                             host: 'host1',
                             port: 8100,
@@ -232,7 +232,7 @@ module.exports = {
                             username: undefined,
                             passphrase: undefined
                         },
-                        id: 'My_System::Pull_Poller_1'
+                        id: 'f5telemetry_default::My_System::Pull_Poller_1'
                     },
                     {
                         class: 'Telemetry_System_Poller',
@@ -245,10 +245,10 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_2::Pull_Poller_2',
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_System_2::Pull_Poller_2',
                             type: 'output'
                         },
-                        traceName: 'My_System_2::Pull_Poller_2',
+                        traceName: 'f5telemetry_default::My_System_2::Pull_Poller_2',
                         connection: {
                             host: 'host1',
                             port: 8100,
@@ -272,7 +272,7 @@ module.exports = {
                             username: undefined,
                             passphrase: undefined
                         },
-                        id: 'My_System_2::Pull_Poller_2'
+                        id: 'f5telemetry_default::My_System_2::Pull_Poller_2'
                     },
                     {
                         class: 'Telemetry_System_Poller',
@@ -285,10 +285,10 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_3::Pull_Poller_1',
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_System_3::Pull_Poller_1',
                             type: 'output'
                         },
-                        traceName: 'My_System_3::Pull_Poller_1',
+                        traceName: 'f5telemetry_default::My_System_3::Pull_Poller_1',
                         connection: {
                             host: 'host1',
                             port: 8100,
@@ -312,7 +312,7 @@ module.exports = {
                             username: undefined,
                             passphrase: undefined
                         },
-                        id: 'My_System_3::Pull_Poller_1'
+                        id: 'f5telemetry_default::My_System_3::Pull_Poller_1'
                     },
                     {
                         class: 'Telemetry_System_Poller',
@@ -325,10 +325,10 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_3::Pull_Poller_2',
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_System_3::Pull_Poller_2',
                             type: 'output'
                         },
-                        traceName: 'My_System_3::Pull_Poller_2',
+                        traceName: 'f5telemetry_default::My_System_3::Pull_Poller_2',
                         connection: {
                             host: 'host1',
                             port: 8100,
@@ -352,7 +352,7 @@ module.exports = {
                             username: undefined,
                             passphrase: undefined
                         },
-                        id: 'My_System_3::Pull_Poller_2'
+                        id: 'f5telemetry_default::My_System_3::Pull_Poller_2'
                     },
                     {
                         interval: 90,
@@ -365,10 +365,10 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_3::SystemPoller_1',
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_System_3::SystemPoller_1',
                             type: 'output'
                         },
-                        traceName: 'My_System_3::SystemPoller_1',
+                        traceName: 'f5telemetry_default::My_System_3::SystemPoller_1',
                         connection: {
                             host: 'host1',
                             port: 8100,
@@ -392,7 +392,7 @@ module.exports = {
                             username: undefined,
                             passphrase: undefined
                         },
-                        id: 'My_System_3::SystemPoller_1'
+                        id: 'f5telemetry_default::My_System_3::SystemPoller_1'
                     },
                     {
                         class: 'Telemetry_System_Poller',
@@ -405,10 +405,10 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_System_Poller.My_System_3::Regular_Poller_1',
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_System_3::Regular_Poller_1',
                             type: 'output'
                         },
-                        traceName: 'My_System_3::Regular_Poller_1',
+                        traceName: 'f5telemetry_default::My_System_3::Regular_Poller_1',
                         connection: {
                             host: 'host1',
                             port: 8100,
@@ -432,7 +432,7 @@ module.exports = {
                             username: undefined,
                             passphrase: undefined
                         },
-                        id: 'My_System_3::Regular_Poller_1'
+                        id: 'f5telemetry_default::My_System_3::Regular_Poller_1'
                     },
                     {
                         class: 'Telemetry_System_Poller',
@@ -685,10 +685,10 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_System_Poller.Pull_Poller_3::Pull_Poller_3',
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::Pull_Poller_3::Pull_Poller_3',
                             type: 'output'
                         },
-                        traceName: 'Pull_Poller_3::Pull_Poller_3',
+                        traceName: 'f5telemetry_default::Pull_Poller_3::Pull_Poller_3',
                         connection: {
                             host: 'localhost',
                             port: 8100,
@@ -712,7 +712,7 @@ module.exports = {
                             username: undefined,
                             passphrase: undefined
                         },
-                        id: 'Pull_Poller_3::Pull_Poller_3'
+                        id: 'f5telemetry_default::Pull_Poller_3::Pull_Poller_3'
                     },
                     {
                         class: 'Telemetry_System_Poller',
@@ -725,10 +725,10 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_System_Poller.Pull_Poller_4::Pull_Poller_4',
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::Pull_Poller_4::Pull_Poller_4',
                             type: 'output'
                         },
-                        traceName: 'Pull_Poller_4::Pull_Poller_4',
+                        traceName: 'f5telemetry_default::Pull_Poller_4::Pull_Poller_4',
                         connection: {
                             host: 'localhost',
                             port: 8100,
@@ -752,7 +752,7 @@ module.exports = {
                             username: undefined,
                             passphrase: undefined
                         },
-                        id: 'Pull_Poller_4::Pull_Poller_4'
+                        id: 'f5telemetry_default::Pull_Poller_4::Pull_Poller_4'
                     },
                     {
                         class: 'Telemetry_System_Poller',
@@ -865,8 +865,8 @@ module.exports = {
             },
             expected: {
                 mappings: {
-                    My_Pull_Consumer: [
-                        'Pull_Poller_1::Pull_Poller_1'
+                    'f5telemetry_default::My_Pull_Consumer': [
+                        'f5telemetry_default::Pull_Poller_1::Pull_Poller_1'
                     ],
                     'My_Namespace::My_Pull_Consumer': [
                         'My_Namespace::Pull_Poller_1::Pull_Poller_1'
@@ -881,16 +881,16 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_Pull_Consumer.My_Pull_Consumer',
+                            path: '/var/tmp/telemetry/Telemetry_Pull_Consumer.f5telemetry_default::My_Pull_Consumer',
                             type: 'output'
                         },
                         name: 'My_Pull_Consumer',
                         namespace: 'f5telemetry_default',
-                        traceName: 'My_Pull_Consumer',
+                        traceName: 'f5telemetry_default::My_Pull_Consumer',
                         systemPollers: [
                             'Pull_Poller_1'
                         ],
-                        id: 'My_Pull_Consumer'
+                        id: 'f5telemetry_default::My_Pull_Consumer'
                     },
                     {
                         class: 'Telemetry_Pull_Consumer',
@@ -922,10 +922,10 @@ module.exports = {
                             enable: false,
                             encoding: 'utf8',
                             maxRecords: 10,
-                            path: '/var/tmp/telemetry/Telemetry_System_Poller.Pull_Poller_1::Pull_Poller_1',
+                            path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::Pull_Poller_1::Pull_Poller_1',
                             type: 'output'
                         },
-                        traceName: 'Pull_Poller_1::Pull_Poller_1',
+                        traceName: 'f5telemetry_default::Pull_Poller_1::Pull_Poller_1',
                         connection: {
                             host: 'localhost',
                             port: 8100,
@@ -949,7 +949,7 @@ module.exports = {
                             username: undefined,
                             passphrase: undefined
                         },
-                        id: 'Pull_Poller_1::Pull_Poller_1'
+                        id: 'f5telemetry_default::Pull_Poller_1::Pull_Poller_1'
                     },
                     {
                         class: 'Telemetry_System_Poller',
