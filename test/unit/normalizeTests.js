@@ -141,6 +141,41 @@ describe('Normalize', () => {
             const result = normalize.event(event, options);
             assert.deepStrictEqual(result, expectedResult);
         });
+
+        it('should not normalize event and format timestamps, when event is in json format', () => {
+            const event = '{"key":"value","date_time":"January 01, 2019 01:00:00 UTC"}';
+            const expectedResult = {
+                data: event,
+                telemetryEventCategory: EVENT_TYPES.EVENT_LISTENER
+            };
+            const options = {
+                formatTimestamps: ['date_time']
+            };
+            const result = normalize.event(event, options);
+            assert.deepStrictEqual(result, expectedResult);
+        });
+
+        it('do not normalize event, when event is in json format and event category is not raw', () => {
+            const event = '{"key1":"value1","$F5TelemetryEventCategory":"unrecognized","key3":"value3"}';
+            const expectedResult = {
+                data: event,
+                telemetryEventCategory: EVENT_TYPES.EVENT_LISTENER
+            };
+            const options = {};
+            const result = normalize.event(event, options);
+            assert.deepStrictEqual(result, expectedResult);
+        });
+
+        it('set event category to raw for raw event and do not normalize it, when event is in json format', () => {
+            const event = '{"key1":"value1","$F5TelemetryEventCategory":"raw","key3":"value3"}';
+            const expectedResult = {
+                data: event,
+                telemetryEventCategory: EVENT_TYPES.RAW_EVENT
+            };
+            const options = {};
+            const result = normalize.event(event, options);
+            assert.deepStrictEqual(result, expectedResult);
+        });
     });
 
     describe('data', () => {

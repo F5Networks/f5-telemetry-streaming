@@ -877,13 +877,14 @@ module.exports = {
     /**
      * Send request to the device
      *
-     * @param {String} host                           - HTTP host
-     * @param {String} uri                            - HTTP uri
-     * @param {Object} [options]                      - function options, similar to 'makeRequest'.
-     *                                                  Copy it before pass to function.
-     * @param {Object} [options.credentials]          - authorization data
-     * @param {String} [options.credentials.username] - username for authorization. Ignored when 'token' specified
-     * @param {String} [options.credentials.token]    - authorization token
+     * @param {String}  host                            - HTTP host
+     * @param {String}  uri                             - HTTP uri
+     * @param {Object}  [options]                       - function options, similar to 'makeRequest'.
+     *                                                      Copy it before pass to function.
+     * @param {Object}  [options.credentials]           - authorization data
+     * @param {String}  [options.credentials.username]  - username for authorization. Ignored when 'token' specified
+     * @param {String}  [options.credentials.token]     - authorization token
+     * @param {Boolean} [options.rawResponseBody]       - return response as Buffer object with binary data
      *
      * @returns {Object} Returns promise resolved with response
      */

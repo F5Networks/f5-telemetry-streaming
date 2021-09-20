@@ -272,12 +272,13 @@ EndpointLoader.prototype.substituteData = function (baseData, dataArray, shallow
 /**
  * Get data for specific endpoint
  *
- * @param {String}   uri                      - uri where data resides
- * @param {Object}   [options]                - function options
- * @param {String}   [options.name]           - name of key to store as, will override default of uri
- * @param {String}   [options.body]           - body to send, sent via POST request
- * @param {String}   [options.refKey]         - reference key
- * @param {String[]} [options.endpointFields] - restrict collection to these fields
+ * @param {String}   uri                            - uri where data resides
+ * @param {Object}   [options]                      - function options
+ * @param {String}   [options.name]                 - name of key to store as, will override default of uri
+ * @param {String}   [options.body]                 - body to send, sent via POST request
+ * @param {String}   [options.refKey]               - reference key
+ * @param {String[]} [options.endpointFields]       - restrict collection to these fields
+ * @param {Boolean}  [options.parseDuplicateKeys]   - whether or not to support parsing JSON with duplicate keys
  *
  * @returns {Promise<module:EndpointLoader~FetchedData>} resolved with FetchedData
  */
@@ -286,11 +287,15 @@ EndpointLoader.prototype.getData = function (uri, options) {
 
     options = options || {};
     const httpOptions = Object.assign({}, this.options.connection);
+    const parseDuplicateKeys = options.parseDuplicateKeys === true;
 
     httpOptions.credentials = {
         username: this.options.credentials.username,
         token: this.options.credentials.token
     };
+    if (parseDuplicateKeys) {
+        httpOptions.rawResponseBody = options.parseDuplicateKeys;
+    }
     if (options.body) {
         httpOptions.method = 'POST';
         httpOptions.body = options.body;
@@ -302,6 +307,9 @@ EndpointLoader.prototype.getData = function (uri, options) {
     const fullUri = options.endpointFields ? `${uri}?$select=${options.endpointFields.join(',')}` : uri;
     return retryPromise(() => deviceUtil.makeDeviceRequest(this.host, fullUri, httpOptions), retryOpts)
         .then((data) => {
+            if (parseDuplicateKeys) {
+                data = util.parseJsonWithDuplicatekeys(data.toString());
+            }
             const ret = {
                 name: options.name !== undefined ? options.name : uri,
                 data

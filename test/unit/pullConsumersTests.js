@@ -203,8 +203,8 @@ describe('Pull Consumers', () => {
 
             return configWorker.processDeclaration(testUtil.deepCopy(declaration))
                 .then(() => pullConsumers.getData(testConf.consumerName, testConf.namespace))
-                .then((data) => {
-                    assert.sameDeepMembers(data, testConf.expectedResponse);
+                .then((response) => {
+                    assert.sameDeepMembers(response.data, testConf.expectedResponse);
                 }, (err) => {
                     if (testConf.errorRegExp) {
                         return assert.match(err, testConf.errorRegExp, 'should match error reg exp');

@@ -243,6 +243,34 @@ describe('Endpoint Loader', () => {
                     assert.deepStrictEqual(fields, ['field1', 'field2', 'field3']);
                 });
         });
+
+        it('should apply typical JSON parsing by default (parseDuplicateKeys = undefined)', () => {
+            nock('http://localhost:8100')
+                .get('/dupKeysEndpoint')
+                .reply(200, '{"dupKey": "hello", "dupKey": "from nock", "notADup": "unique"}');
+
+            return eLoader.getData('/dupKeysEndpoint')
+                .then((data) => {
+                    assert.deepStrictEqual(data.data, {
+                        notADup: 'unique',
+                        dupKey: 'from nock'
+                    });
+                });
+        });
+
+        it('should allow conversion of dulicate JSON keys (parseDuplicateKeys = true)', () => {
+            nock('http://localhost:8100')
+                .get('/dupKeysEndpoint')
+                .reply(200, '{"dupKey": "hello", "dupKey": "from nock", "notADup": "unique"}');
+
+            return eLoader.getData('/dupKeysEndpoint', { parseDuplicateKeys: true })
+                .then((data) => {
+                    assert.deepStrictEqual(data.data, {
+                        notADup: 'unique',
+                        dupKey: ['hello', 'from nock']
+                    });
+                });
+        });
     });
 
     describe('.loadEndpoint()', () => {

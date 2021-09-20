@@ -97,7 +97,7 @@ See :doc:`custom-endpoints` for more information on this feature.
 
 Value-based matching
 --------------------
-.. IMPORTANT:: Value-based matching is available in TS v1.10.0 and later. See :ref:`valuebased` for more information on this feature.
+See :ref:`valuebased` for more information on this feature.
 
 .. literalinclude:: ../examples/declarations/action_matching.json
     :language: json
@@ -124,9 +124,9 @@ For more details about pointers see the section on :ref:`pointersyntax`.
 
 Specifying fallback hosts for Generic HTTP consumers
 ----------------------------------------------------
-.. IMPORTANT:: Configuring fallback hosts for Generic HTTP consumers is currently EXPERIMENTAL and is available in TS v1.14 and later. 
+Configuring fallback hosts for Generic HTTP consumers is supported as of TS 1.23 (was experimental in 1.14-1.22). 
 
-This example shows how you can use the experimental **fallbackHosts** property to specify fallback IP address(es) for a consumer.
+This example shows how you can use the **fallbackHosts** property to specify fallback IP address(es) for a consumer.
 
 .. literalinclude:: ../examples/declarations/generic_http_fallback.json
     :language: json

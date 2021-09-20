@@ -255,6 +255,116 @@ module.exports = {
                             level: 'nominal',
                             name: 'ltm'
                         }
+                    },
+                    throughputPerformance: {
+                        clientBitsIn: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'clientBitsIn'
+                        },
+                        clientBitsOut: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'clientBitsOut'
+                        },
+                        clientIn: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'clientIn'
+                        },
+                        clientOut: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'clientOut'
+                        },
+                        compression: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'compression'
+                        },
+                        inBits: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'inBits'
+                        },
+                        inPackets: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'inPackets'
+                        },
+                        managementBitsIn: {
+                            average: 2969820,
+                            current: 846485,
+                            max: 36591317,
+                            name: 'managementBitsIn'
+                        },
+                        managementBitsOut: {
+                            average: 133,
+                            current: 0,
+                            max: 12478,
+                            name: 'managementBitsOut'
+                        },
+                        outBits: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'outBits'
+                        },
+                        outPackets: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'outPackets'
+                        },
+                        serverBitsIn: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'serverBitsIn'
+                        },
+                        serverBitsOut: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'serverBitsOut'
+                        },
+                        serverIn: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'serverIn'
+                        },
+                        serverOut: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'serverOut'
+                        },
+                        serviceBits: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'serviceBits'
+                        },
+                        servicePackets: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'servicePackets'
+                        },
+                        sslTps: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'sslTps'
+                        }
                     }
                 }
             },
@@ -757,6 +867,37 @@ module.exports = {
                     }
                 },
                 {
+                    endpoint: '/mgmt/tm/asm/policies',
+                    options: {
+                        times: 2
+                    },
+                    response: {
+                        kind: 'tm:asm:policies:policycollectionstate',
+                        selfLink: 'https://localhost/mgmt/tm/asm/policies?ver=14.1.4',
+                        totalItems: 3,
+                        items: [
+                            {
+                                createdDatetime: '2019-07-01T17:32:44Z',
+                                name: 'Policy_one',
+                                versionDatetime: '2019-07-31T17:34:32Z',
+                                isModified: false
+                            },
+                            {
+                                createdDatetime: '2020-01-04T17:32:44Z',
+                                name: 'Policy_two',
+                                versionDatetime: '2020-01-17T17:34:32Z',
+                                isModified: false
+                            },
+                            {
+                                createdDatetime: '2020-01-01T17:32:44Z',
+                                name: 'Policy_three',
+                                versionDatetime: '2020-01-24T03:47:29Z',
+                                isModified: false
+                            }
+                        ]
+                    }
+                },
+                {
                     endpoint: '/mgmt/tm/util/bash',
                     method: 'post',
                     request: {
@@ -778,18 +919,6 @@ module.exports = {
                     response: {
                         kind: 'tm:util:bash:runstate',
                         commandResult: 'Device:,rrqm/s,wrqm/s,r/s,w/s,rkB/s,wkB/s,avgrq-sz,avgqu-sz,await,r_await,w_await,svctm,%util\nnvme0n1,0.16,3.60,2.77,4.80,95.04,54.34,39.44,0.01,1.77,2.39,1.41,0.25,0.19\n\n'
-                    }
-                },
-                {
-                    endpoint: '/mgmt/tm/util/bash',
-                    options: {
-                        times: 2
-                    },
-                    method: 'post',
-                    request: body => body.utilCmdArgs.indexOf('Policies Consistent') !== -1,
-                    response: {
-                        kind: 'tm:util:bash:runstate',
-                        commandResult: 'asm_state,last_asm_change\nPolicies Consistent,1579837649\n'
                     }
                 },
                 {
@@ -843,6 +972,339 @@ module.exports = {
                         selfLink: 'https://localhost/mgmt/tm/sys/db/gtm.configtime?ver=14.1.0',
                         value: '1579837649'
                     }
+                },
+                {
+                    endpoint: '/mgmt/tm/sys/performance/throughput?options=detail',
+                    response: `{
+                        "kind": "tm:sys:performance:throughput:throughputstats",
+                        "selfLink": "https://localhost/mgmt/tm/sys/performance/throughput/stats?options=detail&ver=13.1.0",
+                        "entries": {
+                            "https://localhost/mgmt/tm/sys/performance/throughput/Client%20Bits%20In/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2021_08_06T19:26:28Z)": {
+                                            "description": "0"
+                                        },
+                                        "TMM ClientSide Throughput": {
+                                            "description": "Client Bits In"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/throughput/Client%20Bits%20Out/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2021_08_06T19:26:28Z)": {
+                                            "description": "0"
+                                        },
+                                        "TMM ClientSide Throughput": {
+                                            "description": "Client Bits Out"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/throughput/Client%20In/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2021_08_06T19:26:28Z)": {
+                                            "description": "0"
+                                        },
+                                        "TMM ClientSide Throughput": {
+                                            "description": "Client In"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/throughput/Client%20Out/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2021_08_06T19:26:28Z)": {
+                                            "description": "0"
+                                        },
+                                        "TMM ClientSide Throughput": {
+                                            "description": "Client Out"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/throughput/Compression/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "HTTP Compression Rate": {
+                                            "description": "Compression"
+                                        },
+                                        "Max(since 2021_08_06T19:26:28Z)": {
+                                            "description": "0"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/throughput/In/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2021_08_06T19:26:28Z)": {
+                                            "description": "0"
+                                        },
+                                        "Throughput(bits)": {
+                                            "description": "In"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/throughput/In/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2021_08_06T19:26:28Z)": {
+                                            "description": "0"
+                                        },
+                                        "Throughput(packets)": {
+                                            "description": "In"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/throughput/Management%20Bits%20In/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "2969820"
+                                        },
+                                        "Current": {
+                                            "description": "846485"
+                                        },
+                                        "Management Interface": {
+                                            "description": "Management Bits In"
+                                        },
+                                        "Max(since 2021_08_06T19:26:28Z)": {
+                                            "description": "36591317"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/throughput/Management%20Bits%20Out/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "133"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Management Interface": {
+                                            "description": "Management Bits Out"
+                                        },
+                                        "Max(since 2021_08_06T19:26:28Z)": {
+                                            "description": "12478"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/throughput/Out/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2021_08_06T19:26:28Z)": {
+                                            "description": "0"
+                                        },
+                                        "Throughput(bits)": {
+                                            "description": "Out"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/throughput/Out/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2021_08_06T19:26:28Z)": {
+                                            "description": "0"
+                                        },
+                                        "Throughput(packets)": {
+                                            "description": "Out"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/throughput/SSL%20TPS/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2021_08_06T19:26:28Z)": {
+                                            "description": "0"
+                                        },
+                                        "SSL Transactions": {
+                                            "description": "SSL TPS"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/throughput/Server%20Bits%20In/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2021_08_06T19:26:28Z)": {
+                                            "description": "0"
+                                        },
+                                        "TMM ServerSide Throughput": {
+                                            "description": "Server Bits In"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/throughput/Server%20Bits%20Out/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2021_08_06T19:26:28Z)": {
+                                            "description": "0"
+                                        },
+                                        "TMM ServerSide Throughput": {
+                                            "description": "Server Bits Out"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/throughput/Server%20In/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2021_08_06T19:26:28Z)": {
+                                            "description": "0"
+                                        },
+                                        "TMM ServerSide Throughput": {
+                                            "description": "Server In"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/throughput/Server%20Out/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2021_08_06T19:26:28Z)": {
+                                            "description": "0"
+                                        },
+                                        "TMM ServerSide Throughput": {
+                                            "description": "Server Out"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/throughput/Service/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2021_08_06T19:26:28Z)": {
+                                            "description": "0"
+                                        },
+                                        "Throughput(bits)": {
+                                            "description": "Service"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/throughput/Service/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2021_08_06T19:26:28Z)": {
+                                            "description": "0"
+                                        },
+                                        "Throughput(packets)": {
+                                            "description": "Service"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }`
                 }
             ]
         },
@@ -1238,7 +1700,8 @@ module.exports = {
                     diskLatency: {},
                     diskStorage: {},
                     networkInterfaces: {},
-                    provisioning: {}
+                    provisioning: {},
+                    throughputPerformance: {}
                 }
             },
             endpoints: [
@@ -1385,17 +1848,6 @@ module.exports = {
                         times: 2
                     },
                     method: 'post',
-                    request: body => body.utilCmdArgs.indexOf('Policies Consistent') !== -1,
-                    response: {
-                        kind: 'tm:util:bash:runstate'
-                    }
-                },
-                {
-                    endpoint: '/mgmt/tm/util/bash',
-                    options: {
-                        times: 2
-                    },
-                    method: 'post',
                     request: body => body.utilCmdArgs.indexOf('profile_access_misc_stat') !== -1,
                     response: {
                         kind: 'tm:util:bash:runstate'
@@ -1423,6 +1875,13 @@ module.exports = {
                     response: {
                         kind: 'tm:sys:db:dbstate',
                         selfLink: 'https://localhost/mgmt/tm/sys/db/gtm.configtime?ver=14.1.0'
+                    }
+                },
+                {
+                    endpoint: '/mgmt/tm/sys/performance/throughput?options=detail',
+                    response: {
+                        kind: 'tm:sys:performance:throughput:throughputstats',
+                        selfLink: 'https://localhost/mgmt/tm/sys/performance/throughput?options=detail&ver=14.1.0'
                     }
                 }
             ]
@@ -1475,7 +1934,8 @@ module.exports = {
                     diskLatency: {},
                     diskStorage: {},
                     networkInterfaces: {},
-                    provisioning: {}
+                    provisioning: {},
+                    throughputPerformance: {}
                 }
             },
             endpoints: [
@@ -1619,17 +2079,6 @@ module.exports = {
                         times: 2
                     },
                     method: 'post',
-                    request: body => body.utilCmdArgs.indexOf('Policies Consistent') !== -1,
-                    response: {
-                        kind: 'tm:util:bash:runstate'
-                    }
-                },
-                {
-                    endpoint: '/mgmt/tm/util/bash',
-                    options: {
-                        times: 2
-                    },
-                    method: 'post',
                     request: body => body.utilCmdArgs.indexOf('profile_access_misc_stat') !== -1,
                     response: {
                         kind: 'tm:util:bash:runstate'
@@ -1657,6 +2106,13 @@ module.exports = {
                     response: {
                         kind: 'tm:sys:db:dbstate',
                         selfLink: 'https://localhost/mgmt/tm/sys/db/gtm.configtime?ver=14.1.0'
+                    }
+                },
+                {
+                    endpoint: '/mgmt/tm/sys/performance/throughput?options=detail',
+                    response: {
+                        kind: 'tm:sys:performance:throughput:throughputstats',
+                        selfLink: 'https://localhost/mgmt/tm/sys/performance/throughput?options=detail&ver=14.1.0'
                     }
                 }
             ]

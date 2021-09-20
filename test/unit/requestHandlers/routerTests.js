@@ -84,6 +84,24 @@ describe('Requests Router', () => {
             });
     });
 
+    it('should process rest operation with custom contentType', () => {
+        class CustomContentTypeHandler extends CustomRequestHandler {
+            getContentType() {
+                return 'Custom Content Type';
+            }
+        }
+        requestRouter.register('GET', '/test', CustomContentTypeHandler);
+        const restOp = new testUtil.MockRestOperation({ method: 'GET' });
+        restOp.uri = testUtil.parseURL('http://localhost/test');
+
+        return requestRouter.processRestOperation(restOp)
+            .then(() => {
+                assert.strictEqual(restOp.statusCode, 999, 'should set code to 999');
+                assert.strictEqual(restOp.contentType, 'Custom Content Type', 'should set contentType');
+                assert.deepStrictEqual(restOp.body, 'body', 'should set body');
+            });
+    });
+
     it('should pass matched params to handler', () => {
         requestRouter.register('GET', '/test/:param1/:param2', CustomRequestHandler);
         sinon.stub(CustomRequestHandler.prototype, 'getBody').callsFake(function () {

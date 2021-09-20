@@ -55,7 +55,9 @@ class RequestRouter extends SafeEventEmitter {
         })
             .then((handler) => {
                 logger.info(`${handler.getCode()} ${restOperation.getMethod().toUpperCase()} ${restOperation.getUri().pathname}`);
-                restOperationResponder.call(this, restOperation, handler.getCode(), handler.getBody());
+                restOperationResponder.call(
+                    this, restOperation, handler.getCode(), handler.getBody(), handler.getContentType()
+                );
             })
             .catch((fatalError) => {
                 // in case if .then above failed
@@ -176,13 +178,17 @@ function processRestOperation(restOperation, uriPrefix) {
  * LX rest operation responder
  *
  * @this RequestRouter
- * @param {Object} restOperation  - restOperation to complete
- * @param {String} status         - HTTP status
- * @param {String} body           - HTTP body
+ * @param {Object} restOperation    - restOperation to complete
+ * @param {String} status           - HTTP status
+ * @param {String} body             - HTTP body
+ * @param {String} [contentType]    - HTTP Content-Type Header value
  */
-function restOperationResponder(restOperation, status, body) {
+function restOperationResponder(restOperation, status, body, contentType) {
     restOperation.setStatusCode(status);
     restOperation.setBody(body);
+    if (contentType) {
+        restOperation.setContentType(contentType);
+    }
     restOperation.complete();
 }
 

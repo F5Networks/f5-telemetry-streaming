@@ -30,6 +30,12 @@ const SYSLOG_REGEX = new RegExp([
     /(.+)/ // message
 ].map(regex => regex.source).join(''), 'i');
 
+/*
+ * Lumen might set "$F5TelemetryEventCategory" to "raw", to indicate that the processing is not required
+ * Lumen is well-formed JSON, so looking for " , not '
+ */
+const F5_TELEMETRY_EVT_CAT_REGEX = /"\$F5TelemetryEventCategory"\s*:\s*"([^"]*)"/;
+
 const SYSLOG_HOSTNAME_IDX = 7;
 const SYSLOG_MSG_IDX = 11;
 
@@ -413,6 +419,18 @@ module.exports = {
      * @returns {Object} Returns normalized event
      */
     event(data, options) {
+        // No processing is required for raw event data
+        const F5EventCategory = data.match(F5_TELEMETRY_EVT_CAT_REGEX);
+        if (F5EventCategory) {
+            if (F5EventCategory[1] === 'raw') {
+                return {
+                    data,
+                    telemetryEventCategory: constants.EVENT_TYPES.RAW_EVENT
+                };
+            }
+            logger.warning(`Event property $F5TelemetryEventCategory has unrecognized value "${F5EventCategory[1]}". It is ignored.`);
+        }
+
         options = options || {};
         let hostname;
         let isSyslogMsg = false;

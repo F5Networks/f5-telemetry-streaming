@@ -177,12 +177,7 @@
         },
         {
             "name": "asmQuery",
-            "path": "/mgmt/tm/util/bash",
-            "ignoreCached": true,
-            "body": {
-                "command": "run",
-                "utilCmdArgs": "-c \"/bin/mysql -uroot -p$(/bin/perl -MPassCrypt -nle 'print PassCrypt::decrypt_password($_)' /var/db/mysqlpw) PLC -B -e 'select CASE WHEN max(event_time) IS NOT NULL THEN \\\"Pending Policy Changes\\\" ELSE \\\"Policies Consistent\\\" END as asm_state, max(event_time) as last_asm_change from PL_CONFIG_LOG where event_type <> 2 and element_type <> 18 and event_time > (select max(from_date) as asm_last_changed from PL_POLICY_HISTORY)' | sed 's/\\t/,/'\""
-            }
+            "path": "/mgmt/tm/asm/policies"
         },
         {
             "name": "apmState",
@@ -221,6 +216,11 @@
         {
             "name": "deviceInfo",
             "path": "/mgmt/shared/identified-devices/config/device-info"
+        },
+        {
+            "name": "throughputPerformance",
+            "path": "/mgmt/tm/sys/performance/throughput?options=detail",
+            "parseDuplicateKeys": true
         }
     ]
 }

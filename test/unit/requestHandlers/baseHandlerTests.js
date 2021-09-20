@@ -63,4 +63,10 @@ describe('BaseRequestHandler', () => {
                 assert.deepStrictEqual(inst, requestHandler, 'should return same instance');
             }));
     });
+
+    describe('.getContentType()', () => {
+        it('should return undefined', () => {
+            assert.isUndefined(requestHandler.getContentType(), 'should return undefined by default');
+        });
+    });
 });

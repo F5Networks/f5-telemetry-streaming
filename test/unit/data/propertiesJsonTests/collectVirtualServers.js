@@ -92,6 +92,8 @@ module.exports = {
                         'clientside.totConns': 0,
                         destination: '10.11.0.2:80',
                         enabledState: 'enabled',
+                        isAvailable: true,
+                        isEnabled: true,
                         ipProtocol: 'tcp',
                         mask: '255.255.255.255',
                         name: '/Common/app/test_vs_0',
@@ -102,7 +104,7 @@ module.exports = {
                         totRequests: 0
                     },
                     '/Common/app/192.168.1.10%10': {
-                        availabilityState: 'unknown',
+                        availabilityState: 'offline',
                         'clientside.bitsIn': 0,
                         'clientside.bitsOut': 0,
                         'clientside.curConns': 0,
@@ -113,7 +115,9 @@ module.exports = {
                         'clientside.slowKilled': 0,
                         'clientside.totConns': 0,
                         destination: '192.168.1.10%10',
-                        enabledState: 'enabled',
+                        enabledState: 'disabled',
+                        isAvailable: false,
+                        isEnabled: false,
                         ipProtocol: 'tcp',
                         mask: '255.255.255.255',
                         name: '/Common/app/192.168.1.10%10',
@@ -396,10 +400,10 @@ module.exports = {
                                             value: 0
                                         },
                                         'status.availabilityState': {
-                                            description: 'unknown'
+                                            description: 'offline'
                                         },
                                         'status.enabledState': {
-                                            description: 'enabled'
+                                            description: 'disabled'
                                         },
                                         'status.statusReason': {
                                             description: 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet'
@@ -469,6 +473,8 @@ module.exports = {
                         'clientside.totConns': 0,
                         destination: '10.11.0.2:80',
                         enabledState: 'enabled',
+                        isAvailable: true,
+                        isEnabled: true,
                         ipProtocol: 'tcp',
                         mask: '255.255.255.255',
                         name: '/Common/test_vs_0',
@@ -713,6 +719,8 @@ module.exports = {
                         'clientside.totConns': 0,
                         destination: '10.11.0.2:80',
                         enabledState: 'enabled',
+                        isAvailable: true,
+                        isEnabled: true,
                         ipProtocol: 'tcp',
                         mask: '255.255.255.255',
                         name: '/Common/test_vs_0',
@@ -924,6 +932,8 @@ module.exports = {
                         'clientside.totConns': 0,
                         destination: '10.11.0.2:80',
                         enabledState: 'enabled',
+                        isAvailable: true,
+                        isEnabled: true,
                         ipProtocol: 'tcp',
                         mask: '255.255.255.255',
                         name: '/Common/test_vs_0',

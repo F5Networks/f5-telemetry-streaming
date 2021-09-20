@@ -214,7 +214,7 @@ function generateRestructuredText(map) {
         char = char || ' ';
         return splitLines(data).map(line => char.repeat(num) + line).join('\n');
     }
-    const mainTitle = 'Appendix C: Telemetry Streaming Default Output Reference';
+    const mainTitle = 'Appendix B: Telemetry Streaming Default Output Reference';
     const rstLines = [
         '.. _poller-default-output-reference:\n',
         mainTitle,

@@ -51,6 +51,16 @@ class BaseRequestHandler {
     }
 
     /**
+     * Get HTTP Content-Type
+     * Base Handler returns undefined, allowing iControlRest to set Content-Type
+     *
+     * @returns {undefined} HTTP Content-Type header value
+     */
+    getContentType() {
+        return undefined;
+    }
+
+    /**
      * Process request
      *
      * @returns {Promise<BaseRequestHandler>} resolved with instance of BaseRequestHandler

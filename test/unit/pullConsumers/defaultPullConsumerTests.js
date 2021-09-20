@@ -56,8 +56,16 @@ describe('Default Pull Consumer', () => {
     it('should not reject on missing event data', () => {
         sinon.stub(context, 'event').value([[]]);
         return defaultConsumer(context)
-            .then((data) => {
-                assert.deepStrictEqual(data, []);
+            .then((response) => {
+                assert.deepStrictEqual(response, { data: [] });
+            });
+    });
+
+    it('should not set ContentType', () => {
+        sinon.stub(context, 'event').value([[]]);
+        return defaultConsumer(context)
+            .then((response) => {
+                assert.deepStrictEqual(response, { data: [] });
             });
     });
 

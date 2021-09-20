@@ -20,6 +20,7 @@ const urllib = require('url');
 
 const systemPollerData = require('../../../examples/output/system_poller/output.json');
 const avrData = require('../consumers/data/avrData.json');
+const ltmData = require('../consumers/data/ltmData.json');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -119,6 +120,9 @@ module.exports = {
             break;
         case 'AVR':
             data = this.deepCopy(avrData);
+            break;
+        case 'LTM':
+            data = this.deepCopy(ltmData);
             break;
         default:
             data = {};

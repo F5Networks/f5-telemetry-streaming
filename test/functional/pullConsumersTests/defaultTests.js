@@ -25,12 +25,16 @@ const NAMESPACE_DECL = JSON.parse(fs.readFileSync(constants.DECL.PULL_CONSUMER_W
 
 function test() {
     const verifyResponseData = (response) => {
-        assert.strictEqual(response.length, 1);
+        const body = JSON.parse(response.body);
+        const headers = response.headers;
+
+        assert.strictEqual(body.length, 1);
         assert.notStrictEqual(
-            Object.keys(response[0].system).indexOf('hostname'),
+            Object.keys(body[0].system).indexOf('hostname'),
             -1,
             'should have \'hostname\' in expected data position'
         );
+        assert.ok(headers['content-type'].includes('application/json'), 'content-type should include application/json type');
     };
 
     describe('Pull Consumer Test: default consumer type - no namespace', () => {
@@ -45,13 +49,15 @@ function test() {
             const pullConsumerName = 'My_Pull_Consumer';
             DUTS.forEach((dut) => {
                 it(`should get the Pull Consumer's formatted data from: ${dut.hostalias}`,
-                    () => dutUtils.getPullConsumerData(dut, pullConsumerName)
+                    () => dutUtils.getPullConsumerData(dut, pullConsumerName, { rawResponse: true })
                         .then((response) => {
                             verifyResponseData(response);
                         }));
 
                 it(`should get the Pull Consumer's formatted data from: ${dut.hostalias} (using namespace endpoint)`,
-                    () => dutUtils.getPullConsumerData(dut, pullConsumerName, DEFAULT_UNNAMED_NAMESPACE)
+                    () => dutUtils.getPullConsumerData(
+                        dut, pullConsumerName, { namespace: DEFAULT_UNNAMED_NAMESPACE, rawResponse: true }
+                    )
                         .then((response) => {
                             verifyResponseData(response);
                         }));
@@ -72,7 +78,7 @@ function test() {
             const namespace = 'Second_Namespace';
             DUTS.forEach((dut) => {
                 it(`should get the Pull Consumer's formatted data from: ${dut.hostalias}`,
-                    () => dutUtils.getPullConsumerData(dut, pullConsumerName, namespace)
+                    () => dutUtils.getPullConsumerData(dut, pullConsumerName, { namespace, rawResponse: true })
                         .then((response) => {
                             verifyResponseData(response);
                         }));

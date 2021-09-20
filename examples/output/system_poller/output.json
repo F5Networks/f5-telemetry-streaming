@@ -281,6 +281,116 @@
                 "name": "urldb",
                 "level": "none"
             }
+        },
+        "throughputPerformance": {
+            "clientBitsIn": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "clientBitsIn"
+            },
+            "clientBitsOut": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "clientBitsOut"
+            },
+            "clientIn": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "clientIn"
+            },
+            "clientOut": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "clientOut"
+            },
+            "compression": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "compression"
+            },
+            "inBits": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "inBits"
+            },
+            "inPackets": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "inPackets"
+            },
+            "managementBitsIn": {
+                "average": 2969820,
+                "current": 846485,
+                "max": 36591317,
+                "name": "managementBitsIn"
+            },
+            "managementBitsOut": {
+                "average": 133,
+                "current": 0,
+                "max": 12478,
+                "name": "managementBitsOut"
+            },
+            "outBits": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "outBits"
+            },
+            "outPackets": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "outPackets"
+            },
+            "serverBitsIn": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "serverBitsIn"
+            },
+            "serverBitsOut": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "serverBitsOut"
+            },
+            "serverIn": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "serverIn"
+            },
+            "serverOut": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "serverOut"
+            },
+            "serviceBits": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "serviceBits"
+            },
+            "servicePackets": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "servicePackets"
+            },
+            "sslTps": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "sslTps"
+            }
         }
     },
     "virtualServers": {
@@ -297,6 +407,8 @@
             "destination": "10.5.6.7:80",
             "availabilityState": "offline",
             "enabledState": "enabled",
+            "isAvailable": false,
+            "isEnabled": true,
             "status.statusReason": "The virtual server is available",
             "mask": "255.255.255.255",
             "name": "/Common/foofoo.app/foofoo_vs",
@@ -331,6 +443,8 @@
             "destination": "192.0.2.11:443",
             "availabilityState": "offline",
             "enabledState": "enabled",
+            "isAvailable": false,
+            "isEnabled": true,
             "status.statusReason": "The children pool member(s) either don't have service checking enabled, or service check results are not available yet",
             "mask": "255.255.255.0",
             "name": "/Example_Tenant/A1/serviceMain",
@@ -353,6 +467,8 @@
             "destination": "192.0.2.11:80",
             "availabilityState": "unknown",
             "enabledState": "enabled",
+            "isAvailable": true,
+            "isEnabled": true,
             "status.statusReason": "The children pool member(s) either don't have service checking enabled, or service check results are not available yet",
             "name": "/Example_Tenant/A1/serviceMain-Redirect",
             "tenant": "Example_Tenant",

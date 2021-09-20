@@ -3,6 +3,7 @@
     "My_Consumer": {
         "class": "Telemetry_Consumer",
         "type": "DataDog",
-        "apiKey": "api_key"
+        "apiKey": "api_key",
+        "compressionType": "gzip"
     }
 }

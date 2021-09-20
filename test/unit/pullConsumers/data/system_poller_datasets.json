@@ -282,6 +282,116 @@
                         "level": "none"
                     }
                 },
+                "throughputPerformance": {
+                    "clientBitsIn": {
+                        "average": 11,
+                        "current": 102,
+                        "max": 140,
+                        "name": "clientBitsIn"
+                    },
+                    "clientBitsOut": {
+                        "average": 21,
+                        "current": 202,
+                        "max": 250,
+                        "name": "clientBitsOut"
+                    },
+                    "clientIn": {
+                        "average": 31,
+                        "current": 301,
+                        "max": 350,
+                        "name": "clientIn"
+                    },
+                    "clientOut": {
+                        "average": 41,
+                        "current": 401,
+                        "max": 440,
+                        "name": "clientOut"
+                    },
+                    "compression": {
+                        "average": 51,
+                        "current": 501,
+                        "max": 550,
+                        "name": "compression"
+                    },
+                    "inBits": {
+                        "average": 61,
+                        "current": 601,
+                        "max": 660,
+                        "name": "inBits"
+                    },
+                    "inPackets": {
+                        "average": 71,
+                        "current": 701,
+                        "max": 770,
+                        "name": "inPackets"
+                    },
+                    "managementBitsIn": {
+                        "average": 2969820,
+                        "current": 846485,
+                        "max": 36591317,
+                        "name": "managementBitsIn"
+                    },
+                    "managementBitsOut": {
+                        "average": 133,
+                        "current": 0,
+                        "max": 12478,
+                        "name": "managementBitsOut"
+                    },
+                    "outBits": {
+                        "average": 81,
+                        "current": 801,
+                        "max": 881,
+                        "name": "outBits"
+                    },
+                    "outPackets": {
+                        "average": 90,
+                        "current": 901,
+                        "max": 990,
+                        "name": "outPackets"
+                    },
+                    "serverBitsIn": {
+                        "average": 101,
+                        "current": 1001,
+                        "max": 1110,
+                        "name": "serverBitsIn"
+                    },
+                    "serverBitsOut": {
+                        "average": 201,
+                        "current": 2010,
+                        "max": 2200,
+                        "name": "serverBitsOut"
+                    },
+                    "serverIn": {
+                        "average": 310,
+                        "current": 3100,
+                        "max": 3310,
+                        "name": "serverIn"
+                    },
+                    "serverOut": {
+                        "average": 410,
+                        "current": 4010,
+                        "max": 4401,
+                        "name": "serverOut"
+                    },
+                    "serviceBits": {
+                        "average": 501,
+                        "current": 5010,
+                        "max": 5510,
+                        "name": "serviceBits"
+                    },
+                    "servicePackets": {
+                        "average": 610,
+                        "current": 6010,
+                        "max": 6600,
+                        "name": "servicePackets"
+                    },
+                    "sslTps": {
+                        "average": 701,
+                        "current": 7100,
+                        "max": 7700,
+                        "name": "sslTps"
+                    }
+                },
                 "asmState": "Policies Consistent",
                 "afmState": "quiescent",
                 "lastAfmDeploy": "2020-03-12T16:27:58.000Z",
@@ -449,6 +559,8 @@
                     "enabledState": "enabled",
                     "name": "/Common/shared",
                     "ipProtocol": "tcp",
+                    "isAvailable": true,
+                    "isEnabled": true,
                     "mask": "255.255.255.255",
                     "profiles": {
                         "/Common/tcp": {
@@ -465,6 +577,8 @@
                     "enabledState": "enabled",
                     "name": "/Sample_01/A1/serviceMain",
                     "ipProtocol": "tcp",
+                    "isAvailable": false,
+                    "isEnabled": true,
                     "mask": "255.255.255.255",
                     "pool": "/Sample_01/A1/web_pool",
                     "profiles": {
@@ -485,6 +599,8 @@
                     "enabledState": "enabled",
                     "name": "/Sample_02/A1/serviceMain",
                     "ipProtocol": "tcp",
+                    "isAvailable": false,
+                    "isEnabled": true,
                     "mask": "255.255.255.255",
                     "pool": "/Sample_02/A1/web_pool",
                     "profiles": {
@@ -505,6 +621,8 @@
                     "enabledState": "enabled",
                     "name": "/Sample_02/another",
                     "ipProtocol": "tcp",
+                    "isAvailable": false,
+                    "isEnabled": true,
                     "mask": "255.255.255.255",
                     "pool": "/Sample_02/A1/web_pool",
                     "profiles": {
@@ -797,6 +915,116 @@
                     "urldb": {
                         "name": "urldb",
                         "level": "none"
+                    }
+                },
+                "throughputPerformance": {
+                    "clientBitsIn": {
+                        "average": 11,
+                        "current": 102,
+                        "max": 140,
+                        "name": "clientBitsIn"
+                    },
+                    "clientBitsOut": {
+                        "average": 21,
+                        "current": 202,
+                        "max": 250,
+                        "name": "clientBitsOut"
+                    },
+                    "clientIn": {
+                        "average": 31,
+                        "current": 301,
+                        "max": 350,
+                        "name": "clientIn"
+                    },
+                    "clientOut": {
+                        "average": 41,
+                        "current": 401,
+                        "max": 440,
+                        "name": "clientOut"
+                    },
+                    "compression": {
+                        "average": 51,
+                        "current": 501,
+                        "max": 550,
+                        "name": "compression"
+                    },
+                    "inBits": {
+                        "average": 61,
+                        "current": 601,
+                        "max": 660,
+                        "name": "inBits"
+                    },
+                    "inPackets": {
+                        "average": 71,
+                        "current": 701,
+                        "max": 770,
+                        "name": "inPackets"
+                    },
+                    "managementBitsIn": {
+                        "average": 2969820,
+                        "current": 846485,
+                        "max": 36591317,
+                        "name": "managementBitsIn"
+                    },
+                    "managementBitsOut": {
+                        "average": 133,
+                        "current": 0,
+                        "max": 12478,
+                        "name": "managementBitsOut"
+                    },
+                    "outBits": {
+                        "average": 81,
+                        "current": 801,
+                        "max": 881,
+                        "name": "outBits"
+                    },
+                    "outPackets": {
+                        "average": 90,
+                        "current": 901,
+                        "max": 990,
+                        "name": "outPackets"
+                    },
+                    "serverBitsIn": {
+                        "average": 101,
+                        "current": 1001,
+                        "max": 1110,
+                        "name": "serverBitsIn"
+                    },
+                    "serverBitsOut": {
+                        "average": 201,
+                        "current": 2010,
+                        "max": 2200,
+                        "name": "serverBitsOut"
+                    },
+                    "serverIn": {
+                        "average": 310,
+                        "current": 3100,
+                        "max": 3310,
+                        "name": "serverIn"
+                    },
+                    "serverOut": {
+                        "average": 410,
+                        "current": 4010,
+                        "max": 4401,
+                        "name": "serverOut"
+                    },
+                    "serviceBits": {
+                        "average": 501,
+                        "current": 5010,
+                        "max": 5510,
+                        "name": "serviceBits"
+                    },
+                    "servicePackets": {
+                        "average": 610,
+                        "current": 6010,
+                        "max": 6600,
+                        "name": "servicePackets"
+                    },
+                    "sslTps": {
+                        "average": 701,
+                        "current": 7100,
+                        "max": 7700,
+                        "name": "sslTps"
                     }
                 },
                 "asmState": "Policies Consistent",
@@ -1268,6 +1496,8 @@
                     "enabledState": "enabled",
                     "name": "/Common/shared",
                     "ipProtocol": "tcp",
+                    "isAvailable": true,
+                    "isEnabled": true,
                     "mask": "255.255.255.255",
                     "profiles": {
                         "/Common/tcp": {
@@ -1285,6 +1515,8 @@
                     "enabledState": "enabled",
                     "name": "/Sample_01/A1/serviceMain",
                     "ipProtocol": "tcp",
+                    "isAvailable": false,
+                    "isEnabled": true,
                     "mask": "255.255.255.255",
                     "pool": "/Sample_01/A1/web_pool",
                     "profiles": {
@@ -1307,6 +1539,8 @@
                     "enabledState": "enabled",
                     "name": "/Sample_02/A1/serviceMain",
                     "ipProtocol": "tcp",
+                    "isAvailable": false,
+                    "isEnabled": true,
                     "mask": "255.255.255.255",
                     "pool": "/Sample_02/A1/web_pool",
                     "profiles": {
@@ -1329,6 +1563,8 @@
                     "enabledState": "enabled",
                     "name": "/Sample_02/another",
                     "ipProtocol": "tcp",
+                    "isAvailable": false,
+                    "isEnabled": true,
                     "mask": "255.255.255.255",
                     "pool": "/Sample_02/A1/web_pool",
                     "profiles": {

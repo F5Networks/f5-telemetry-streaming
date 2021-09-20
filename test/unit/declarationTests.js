@@ -946,7 +946,7 @@ describe('Declarations', () => {
                         }
                     }
                 };
-                return assert.isRejected(declValidator(data, { options: { expanded: true } }), /Cannot read property 'constants' of undefined/);
+                return assert.isRejected(declValidator(data, { options: { expanded: true } }), /Unable to expand JSON-pointer '`=\/Shared\/constants\/path`'/);
             });
 
             it('should fail with correct dataPath when pointer is outside of Namespace', () => {
@@ -4417,18 +4417,21 @@ describe('Declarations', () => {
                 },
                 {
                     type: 'DataDog',
-                    apiKey: 'test'
+                    apiKey: 'test',
+                    compressionType: 'none'
                 }
             ));
 
             it('should allow full declaration', () => validateFull(
                 {
                     type: 'DataDog',
-                    apiKey: 'test'
+                    apiKey: 'test',
+                    compressionType: 'gzip'
                 },
                 {
                     type: 'DataDog',
-                    apiKey: 'test'
+                    apiKey: 'test',
+                    compressionType: 'gzip'
                 }
             ));
 
@@ -4440,7 +4443,14 @@ describe('Declarations', () => {
                     index: 'index'
                 },
                 [
-                    { property: 'apiKey', requiredTests: true, stringLengthTests: true }
+                    { property: 'apiKey', requiredTests: true, stringLengthTests: true },
+                    {
+                        property: 'compressionType',
+                        enumTests: {
+                            allowed: ['none', 'gzip'],
+                            notAllowed: ['compressionType']
+                        }
+                    }
                 ]
             );
         });
@@ -5561,6 +5571,66 @@ describe('Declarations', () => {
                     'serviceAccount.tokenUri',
                     'serviceAccount.type',
                     { property: 'targetAudience', requiredTests: true }
+                ],
+                { stringLengthTests: true }
+            );
+        });
+
+        describe('OpenTelemetry_Exporter', () => {
+            beforeEach(() => {
+                coreStub.utilMisc.getRuntimeInfo.value(() => ({ nodeVersion: '8.12.0' }));
+            });
+
+            it('should pass minimal declaration', () => validateMinimal(
+                {
+                    type: 'OpenTelemetry_Exporter',
+                    host: 'host',
+                    port: 55681
+                },
+                {
+                    type: 'OpenTelemetry_Exporter',
+                    host: 'host',
+                    port: 55681
+                }
+            ));
+
+            it('should allow full declaration', () => validateFull(
+                {
+                    type: 'OpenTelemetry_Exporter',
+                    host: 'host',
+                    port: 55681,
+                    path: '/v1/metrics',
+                    headers: [
+                        {
+                            name: 'headerName',
+                            value: 'headerValue'
+                        }
+                    ]
+                },
+                {
+                    type: 'OpenTelemetry_Exporter',
+                    host: 'host',
+                    port: 55681,
+                    path: '/v1/metrics',
+                    headers: [
+                        {
+                            name: 'headerName',
+                            value: 'headerValue'
+                        }
+                    ]
+                }
+            ));
+
+            schemaValidationUtil.generateSchemaBasicTests(
+                basicSchemaTestsValidator,
+                {
+                    host: 'host',
+                    type: 'OpenTelemetry_Exporter',
+                    port: 80
+                },
+                [
+                    'host',
+                    'metricsPath'
                 ],
                 { stringLengthTests: true }
             );

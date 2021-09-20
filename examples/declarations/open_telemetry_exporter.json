@@ -1,0 +1,16 @@
+{
+    "class": "Telemetry",
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "OpenTelemetry_Exporter",
+        "host": "192.0.2.1",
+        "port": 55681,
+        "metricsPath": "/v1/metrics",
+        "headers": [
+            {
+                "name": "x-access-token",
+                "value": "YOUR_TOKEN"
+            }
+        ]
+    }
+}

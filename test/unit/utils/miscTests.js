@@ -118,7 +118,7 @@ describe('Misc Util', () => {
         });
 
         it('should fail on timeout', () => {
-            socketMock.testCallback = () => {};
+            socketMock.testCallback = () => { };
             return assert.isRejected(
                 util.networkCheck('localhost', 0, { timeout: 10, period: 2 }),
                 /networkCheck.*timeout exceeded/
@@ -126,7 +126,7 @@ describe('Misc Util', () => {
         });
 
         it('should use timeout as period', () => {
-            socketMock.testCallback = () => {};
+            socketMock.testCallback = () => { };
             return assert.isRejected(
                 util.networkCheck('localhost', 0, { timeout: 10, period: 100 }),
                 /networkCheck.*timeout exceeded/
@@ -189,6 +189,241 @@ describe('Misc Util', () => {
             // let's check that copy is deep
             src.schedule.frequency = 'frequency';
             assert.notStrictEqual(copy.schedule.frequency, src.schedule.frequency, 'should not be equal');
+        });
+    });
+
+    describe('.parseJsonWithDuplicatekeys()', () => {
+        it('should parse JSON string without duplicate keys', () => {
+            const input = JSON.stringify({
+                singleValue: 'value',
+                nestedObject: {
+                    topLevel: 'anotherValue',
+                    nestedAgain: {
+                        bottomLevel: 'endOfTheRoad'
+                    }
+                },
+                arrayToo: [
+                    'justAValue',
+                    {
+                        shouldIncludeObjects: {
+                            objectValue: '11'
+                        }
+                    }
+                ]
+            });
+            const expectedOutput = util.copy(JSON.parse(input));
+            assert.deepStrictEqual(util.parseJsonWithDuplicatekeys(input), expectedOutput);
+        });
+
+        it('should parse JSON string with duplicate keys (values = strings)', () => {
+            const input = `{
+                "dupKey": "value",
+                "nonDupKey": {
+                    "why": "prove it can re-traverse object structure"
+                },
+                "dupKey": "value2"
+            }`;
+            assert.deepStrictEqual(util.parseJsonWithDuplicatekeys(input), {
+                dupKey: [
+                    'value',
+                    'value2'
+                ],
+                nonDupKey: {
+                    why: 'prove it can re-traverse object structure'
+                }
+            });
+        });
+
+        it('should parse JSON string with duplicate keys (values = objects)', () => {
+            const input = `{
+                "dupKey": {
+                    "key1": "value1"
+                },
+                "dupKey": {
+                    "why": "should support objects too"
+                }
+            }`;
+            assert.deepStrictEqual(util.parseJsonWithDuplicatekeys(input), {
+                dupKey: [
+                    { key1: 'value1' },
+                    { why: 'should support objects too' }
+                ]
+            });
+        });
+
+        it('should parse JSON string with duplicate keys (values = arrays)', () => {
+            const input = `{
+                "dupKey": [1, 2, 3],
+                "dupKey": ["one", "two", "three"]
+            }`;
+            assert.deepStrictEqual(util.parseJsonWithDuplicatekeys(input), {
+                dupKey: [1, 2, 3, 'one', 'two', 'three']
+            });
+        });
+
+        it('should parse JSON string with duplicate keys (first duplicate = string, second duplicate = array)', () => {
+            const input = `{
+                "dupKey": "just a string value",
+                "dupKey": [1, 2, 3]
+            }`;
+            assert.deepStrictEqual(util.parseJsonWithDuplicatekeys(input), {
+                dupKey: ['just a string value', 1, 2, 3]
+            });
+        });
+
+        it('should parse JSON string with duplicate keys (first duplicate = array, second duplicate = string)', () => {
+            const input = `{
+                "dupKey": [1, 2, 3],
+                "dupKey": {
+                    "key1": "value1",
+                    "key2": "value2"
+                }
+            }`;
+            assert.deepStrictEqual(util.parseJsonWithDuplicatekeys(input), {
+                dupKey: [1, 2, 3, {
+                    key1: 'value1',
+                    key2: 'value2'
+                }]
+            });
+        });
+
+        it('should parse JSON string with duplicate keys in iControlRest output (endpoint = mgmt/tm/sys/performance/throughput)', () => {
+            const input = `{
+                "kind": "tm:sys:performance:throughput:throughputstats",
+                "selfLink": "https://localhost/mgmt/tm/sys/performance/throughput?ver=14.1.4.2",
+                "entries": {
+                    "https://localhost/mgmt/tm/sys/performance/throughput/In": {
+                        "nestedStats": {
+                            "entries": {
+                                "Average": {
+                                    "description": "1260859"
+                                },
+                                "Throughput(bits)": {
+                                    "description": "In"
+                                }
+                            }
+                        }
+                    },
+                    "https://localhost/mgmt/tm/sys/performance/throughput/In": {
+                        "nestedStats": {
+                            "entries": {
+                                "Average": {
+                                    "description": "398"
+                                },
+                                "Throughput(packets)": {
+                                    "description": "In"
+                                }
+                            }
+                        }
+                    },
+                    "https://localhost/mgmt/tm/sys/performance/throughput/Out": {
+                        "nestedStats": {
+                            "entries": {
+                                "Average": {
+                                    "description": "37263"
+                                },
+                                "Throughput(bits)": {
+                                    "description": "Out"
+                                }
+                            }
+                        }
+                    },
+                    "https://localhost/mgmt/tm/sys/performance/throughput/Out": {
+                        "nestedStats": {
+                            "entries": {
+                                "Average": {
+                                    "description": "7"
+                                },
+                                "Throughput(packets)": {
+                                    "description": "Out"
+                                }
+                            }
+                        }
+                    },
+                    "https://localhost/mgmt/tm/sys/performance/throughput/SSL%20TPS": {
+                        "nestedStats": {
+                            "entries": {
+                                "Average": {
+                                    "description": "0"
+                                },
+                                "SSL Transactions": {
+                                    "description": "SSL TPS"
+                                }
+                            }
+                        }
+                    }
+                }
+            }`;
+            assert.deepStrictEqual(util.parseJsonWithDuplicatekeys(input), {
+                kind: 'tm:sys:performance:throughput:throughputstats',
+                selfLink: 'https://localhost/mgmt/tm/sys/performance/throughput?ver=14.1.4.2',
+                entries: {
+                    'https://localhost/mgmt/tm/sys/performance/throughput/In': [
+                        {
+                            nestedStats: {
+                                entries: {
+                                    Average: {
+                                        description: '1260859'
+                                    },
+                                    'Throughput(bits)': {
+                                        description: 'In'
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            nestedStats: {
+                                entries: {
+                                    Average: {
+                                        description: '398'
+                                    },
+                                    'Throughput(packets)': {
+                                        description: 'In'
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    'https://localhost/mgmt/tm/sys/performance/throughput/Out': [
+                        {
+                            nestedStats: {
+                                entries: {
+                                    Average: {
+                                        description: '37263'
+                                    },
+                                    'Throughput(bits)': {
+                                        description: 'Out'
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            nestedStats: {
+                                entries: {
+                                    Average: {
+                                        description: '7'
+                                    },
+                                    'Throughput(packets)': {
+                                        description: 'Out'
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    'https://localhost/mgmt/tm/sys/performance/throughput/SSL%20TPS': {
+                        nestedStats: {
+                            entries: {
+                                Average: {
+                                    description: '0'
+                                },
+                                'SSL Transactions': {
+                                    description: 'SSL TPS'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         });
     });
 
@@ -737,6 +972,25 @@ describe('Misc Util', () => {
                 assert.include(util.maskSecrets(masked), expectedMsg, 'should keep message the same when secrets masked already');
                 expectedMsg = JSON.stringify(expectedMsg);
             }
+        });
+    });
+
+    describe('.generateUniquePropName', () => {
+        it('should return originKey when it doesn\'t exist in the object', () => {
+            assert.deepStrictEqual(util.generateUniquePropName({}, 'key'), 'key', 'should return originKey');
+        });
+
+        it('should return unique key for the object', () => {
+            assert.deepStrictEqual(util.generateUniquePropName({ key: 1 }, 'key'), 'key0', 'should return unique key');
+        });
+
+        it('should return unique key for the object after couple attempts', () => {
+            assert.deepStrictEqual(util.generateUniquePropName({
+                key: 1,
+                key0: 2,
+                key1: 10,
+                key3: 20
+            }, 'key'), 'key2', 'should return unique key');
         });
     });
 });

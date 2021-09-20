@@ -33,7 +33,7 @@ const deosProto = grpc.loadPackageDefinition(packageDefinition).deos.ingestion.v
  * See {@link ../README.md#context} for documentation
  */
 module.exports = function (context) {
-    const data = context.event.data;
+    const data = context.event.type === constants.EVENT_TYPES.RAW_EVENT ? context.event.data.data : context.event.data;
     const targetAudience = context.config.targetAudience;
     const serviceAccount = context.config.serviceAccount;
     // convert service account from camelCase
@@ -107,7 +107,7 @@ module.exports = function (context) {
                 timestamp_usec: Date.now() * 1000,
                 signature_type: 0,
                 serialization_type: 1,
-                payload: Buffer.from(JSON.stringify(data), 'utf8'),
+                payload: Buffer.from(context.event.type === constants.EVENT_TYPES.RAW_EVENT ? data : JSON.stringify(data), 'utf8'),
                 payload_schema: `urn:${context.config.payloadSchemaNid}:big-ip:event-schema:${configSchema.toLowerCase()}:v${context.config.eventSchemaVersion}`
             };
 

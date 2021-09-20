@@ -83,6 +83,18 @@ You can click the following links to go directly to a specific :doc:`setting-up-
       * - :ref:`stackdrive`
         - yes (metrics only)
         - no
+  
+      * - :ref:`gcl`
+        - yes 
+        - yes
+
+      * - :ref:`datadog`
+        - yes 
+        - yes
+        - 
+      * - :ref:`opent`
+        - yes (metrics only)
+        - partial (converts logs to metrics)
 
 
 .. list-table::
@@ -116,9 +128,10 @@ You can click the following links to go directly to a specific :doc:`setting-up-
    declarations
    output-example
    data-modification
+   namespaces
    troubleshooting
    schema-reference
-   namespaces
+   
    poller-default-output-reference
    revision-history
 

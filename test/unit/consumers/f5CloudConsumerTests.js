@@ -8,38 +8,31 @@
 
 'use strict';
 
-/* eslint-disable import/order */
-/* eslint-disable global-require */
-
 require('../shared/restoreCache')();
 const sinon = require('sinon');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
+
 const testUtil = require('../shared/util');
 const util = require('../../../src/lib/utils/misc');
 
-let f5CloudIndex;
-let google;
-let auth;
-try {
-    f5CloudIndex = require('../../../src/lib/consumers/F5_Cloud/index');
-    google = require('google-auth-library');
-    auth = google.auth;
-} catch (e) {
-    f5CloudIndex = null;
-    google = null;
-    google = null;
-    auth = null;
-}
-chai.use(chaiAsPromised);
 const assert = chai.assert;
 const F5_CLOUD_NODE_SUPPORTED_VERSION = '8.11.1';
 const PROTO_PATH = `${__dirname}/../../../src/lib/consumers/F5_Cloud/deos.proto`;
+
+chai.use(chaiAsPromised);
 
 describe('F5_Cloud', () => {
     if (util.compareVersionStrings(process.version.substring(1), '<', F5_CLOUD_NODE_SUPPORTED_VERSION)) {
         return;
     }
+    // Require libraries that need later versions of Node after Node version check
+    /* eslint-disable global-require */
+    const f5CloudIndex = require('../../../src/lib/consumers/F5_Cloud/index');
+    const grpcMock = require('grpc-mock');
+    const googleAuthMock = require('google-auth-library').auth;
+    /* eslint-enable global-require */
+
     const DEFAULT_CONSUMER_CONFIG = {
         allowSelfSignedCert: true,
         class: 'Telemetry_Consumer',
@@ -63,21 +56,18 @@ describe('F5_Cloud', () => {
             authProviderX509CertUrl: 'https://www.googleapis.com/oauth2/v1/certs',
             clientX509CertUrl: 'https://www.googleapis.com/robot/v1/metadata/x509/test%40deos-dev.iam.gserviceaccount.com'
         },
+        eventSchemaVersion: '1',
         targetAudience: '0.0.0.0',
         useSSL: false,
         port: 50051
     };
 
     const mockBadAuthClient = {
-        authorize: () => new Promise((resolve, reject) => {
-            reject(new Error('failed!'));
-        })
+        authorize: () => Promise.reject(new Error('reject in mock'))
     };
 
     const mockGoodAuthClient = {
-        authorize: () => new Promise(((resolve) => {
-            resolve();
-        })),
+        authorize: () => Promise.resolve(),
         gtoken: {
             rawToken: {
                 id_token: 'fakeIdToken'
@@ -85,7 +75,6 @@ describe('F5_Cloud', () => {
         }
     };
 
-    const grpcMock = require('grpc-mock'); // eslint-disable-line global-require
     const mockServer = grpcMock.createMockServer({
         protoPath: PROTO_PATH,
         packageName: 'deos.ingestion.v1alpa1',
@@ -95,23 +84,25 @@ describe('F5_Cloud', () => {
         ]
     });
 
-    before((done) => {
-        sinon.stub(auth, 'fromJSON').callsFake((serviceAccount) => {
-            if (serviceAccount.type) {
+    before(() => {
+        mockServer.listen('0.0.0.0:50051');
+    });
+
+    beforeEach(() => {
+        sinon.stub(googleAuthMock, 'fromJSON').callsFake((serviceAccount) => {
+            if (serviceAccount.auth_type) {
                 return mockGoodAuthClient;
             }
             return mockBadAuthClient;
         });
-        mockServer.listen('0.0.0.0:50051');
-        done();
     });
 
     afterEach(() => {
+        sinon.restore();
         mockServer.clearInteractions();
     });
 
     after(() => {
-        sinon.restore();
         mockServer.close(true);
     });
 
@@ -123,9 +114,8 @@ describe('F5_Cloud', () => {
             });
             return f5CloudIndex(context)
                 .then((client) => {
-                    if (client) {
-                        client.close();
-                    }
+                    client.close();
+                    assert.isFalse(context.logger.exception.called, 'should not have logged an exception');
                 });
         });
 
@@ -134,15 +124,15 @@ describe('F5_Cloud', () => {
                 config: DEFAULT_CONSUMER_CONFIG,
                 eventType: 'systemInfo'
             });
-            const expectedData = testUtil.deepCopy(context.event.data);
+            const expectedData = JSON.stringify(context.event.data);
             return f5CloudIndex(context)
                 .then((client) => {
-                    if (client) {
-                        const a = mockServer.getInteractionsOn('Post');
-                        assert.lengthOf(a, 1);
-                        assert.equal(JSON.stringify(expectedData), a[0].payload.toString('utf8'));
-                        client.close();
-                    }
+                    const mockResponses = mockServer.getInteractionsOn('Post');
+                    assert.lengthOf(mockResponses, 1);
+                    assert.strictEqual(mockResponses[0].accountId, 'urn:f5_cs::account:a-blabla-a');
+                    assert.strictEqual(mockResponses[0].payloadSchema, 'urn:f5:big-ip:event-schema:systeminfo-event:v1');
+                    assert.strictEqual(mockResponses[0].payload.toString('utf8'), expectedData);
+                    client.close();
                 });
         });
 
@@ -168,26 +158,49 @@ describe('F5_Cloud', () => {
             context.event.isCustom = true;
             return f5CloudIndex(context)
                 .then((client) => {
-                    if (client) {
-                        const a = mockServer.getInteractionsOn('Post');
-                        assert.lengthOf(a, 1);
-                        const decodedData = JSON.parse(a[0].payload.toString('utf8'));
-                        assert.deepStrictEqual(expectedData, decodedData);
-                        assert.equal(expectedSchemaLabel, a[0].payloadSchema.split(':')[4]);
-                        client.close();
-                    }
-                })
-                .catch(err => assert(false, err));
+                    const mockResponses = mockServer.getInteractionsOn('Post');
+                    const decodedData = JSON.parse(mockResponses[0].payload.toString('utf8'));
+                    assert.lengthOf(mockResponses, 1);
+                    assert.deepStrictEqual(decodedData, expectedData);
+                    assert.strictEqual(mockResponses[0].payloadSchema, 'urn:f5:big-ip:event-schema:custom:v1');
+                    client.close();
+                });
+        });
+
+        it('should send raw event data in correct format', () => {
+            const context = testUtil.buildConsumerContext({
+                config: DEFAULT_CONSUMER_CONFIG,
+                eventType: 'raw'
+            });
+            context.event.data = {
+                data: '{"key1":"value1","$F5TelemetryEventCategory":"raw","key3":"value3"}'
+            };
+            const expectedData = testUtil.deepCopy(context.event.data.data);
+            return f5CloudIndex(context)
+                .then((client) => {
+                    const mockResponses = mockServer.getInteractionsOn('Post');
+                    assert.lengthOf(mockResponses, 1);
+                    assert.strictEqual(mockResponses[0].accountId, 'urn:f5_cs::account:a-blabla-a');
+                    assert.strictEqual(mockResponses[0].payloadSchema, 'urn:f5:big-ip:event-schema:raw-event:v1');
+                    assert.strictEqual(mockResponses[0].payload.toString('utf8'), expectedData);
+                    client.close();
+                });
         });
 
         it('should fail in GCP auth', () => {
-            const configCopy = testUtil.deepCopy(DEFAULT_CONSUMER_CONFIG);
-            configCopy.serviceAccount = {};
             const context = testUtil.buildConsumerContext({
-                config: configCopy,
+                config: DEFAULT_CONSUMER_CONFIG,
                 eventType: 'systemInfo'
             });
-            return f5CloudIndex(context);
+            context.config.serviceAccount = {};
+            return f5CloudIndex(context)
+                .then(() => {
+                    assert.deepStrictEqual(
+                        context.logger.exception.args[0][0].message,
+                        'reject in mock',
+                        'should have logged an exception on error'
+                    );
+                });
         });
     });
 });

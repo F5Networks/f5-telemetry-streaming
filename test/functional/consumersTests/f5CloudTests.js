@@ -41,25 +41,6 @@ function runRemoteCmd(cmd) {
     );
 }
 
-function getBigipVersion(dut) {
-    const uri = '/mgmt/tm/sys/clock';
-    const host = dut.ip;
-    const user = dut.username;
-    const password = dut.password;
-    return sharedUtil.getAuthToken(host, user, password)
-        .then((data) => {
-            const postOptions = {
-                method: 'GET',
-                headers: {
-                    'x-f5-auth-token': data.token
-                }
-            };
-            return sharedUtil.makeRequest(host, uri, postOptions);
-        })
-        .then(response => response.selfLink.split('ver=')[1])
-        .catch(() => assert(false, 'bigip doesnt answer clock api'));
-}
-
 /*
     --- Notes about viktorfefilovf5/magneto-grpc-mock-server:0.0.7 ---
     custom extension of https://github.com/tokopedia/gripmock
@@ -86,7 +67,7 @@ function setup() {
     describe('Consumer Setup Check: check bigip requirements', () => {
         DUTS.forEach(dut => it(
             `get bigip version and check if version is good for F5 Cloud - ${dut.hostalias}`,
-            () => getBigipVersion(dut)
+            () => sharedUtil.getBigipVersion(dut)
                 .then((response) => {
                     // F5 Cloud should support bigip 14 and above
                     SHOULD_RUN_TESTS[dut.hostalias] = util.compareVersionStrings(response, '>=', '14.0.0');

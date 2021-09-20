@@ -678,6 +678,8 @@ module.exports = {
                         name: '/Common/foofoo.app/foofoo_vs',
                         appService: '/Common/foofoo.app/foofoo',
                         ipProtocol: 'tcp',
+                        isAvailable: false,
+                        isEnabled: true,
                         tenant: 'Common',
                         pool: '/Common/foofoo.app/foofoo_pool',
                         application: 'foofoo.app'
@@ -695,6 +697,8 @@ module.exports = {
                         name: '/Common/foofoo.app/foofoo_vs',
                         appService: '/Common/foofoo.app/foofoo',
                         ipProtocol: 'tcp',
+                        isAvailable: false,
+                        isEnabled: true,
                         tenant: 'Common',
                         pool: '/Common/foofoo.app/foofoo_pool',
                         application: 'foofoo.app'
@@ -712,6 +716,8 @@ module.exports = {
                         name: '/Common/foofoo.app/foofoo_vs',
                         appService: '/Common/foofoo.app/foofoo',
                         ipProtocol: 'tcp',
+                        isAvailable: false,
+                        isEnabled: true,
                         tenant: 'Common',
                         pool: '/Common/foofoo.app/foofoo_pool',
                         application: 'foofoo.app'
@@ -729,6 +735,8 @@ module.exports = {
                         name: '/Common/foofoo.app/foofoo_vs',
                         appService: '/Common/foofoo.app/foofoo',
                         ipProtocol: 'tcp',
+                        isAvailable: false,
+                        isEnabled: true,
                         tenant: 'Common',
                         pool: '/Common/foofoo.app/foofoo_pool',
                         application: 'foofoo.app'
@@ -746,6 +754,8 @@ module.exports = {
                         name: '/Common/foofoo.app/foofoo_vs',
                         appService: '/Common/foofoo.app/foofoo',
                         ipProtocol: 'tcp',
+                        isAvailable: false,
+                        isEnabled: true,
                         tenant: 'Common',
                         pool: '/Common/foofoo.app/foofoo_pool',
                         application: 'foofoo.app'
@@ -763,6 +773,8 @@ module.exports = {
                         name: '/Common/foofoo.app/foofoo_vs',
                         appService: '/Common/foofoo.app/foofoo',
                         ipProtocol: 'tcp',
+                        isAvailable: false,
+                        isEnabled: true,
                         tenant: 'Common',
                         pool: '/Common/foofoo.app/foofoo_pool',
                         application: 'foofoo.app'
@@ -780,6 +792,8 @@ module.exports = {
                         name: '/Common/foofoo.app/foofoo_vs',
                         appService: '/Common/foofoo.app/foofoo',
                         ipProtocol: 'tcp',
+                        isAvailable: false,
+                        isEnabled: true,
                         tenant: 'Common',
                         pool: '/Common/foofoo.app/foofoo_pool',
                         application: 'foofoo.app'
@@ -797,6 +811,8 @@ module.exports = {
                         name: '/Common/foofoo.app/foofoo_vs',
                         appService: '/Common/foofoo.app/foofoo',
                         ipProtocol: 'tcp',
+                        isAvailable: false,
+                        isEnabled: true,
                         tenant: 'Common',
                         pool: '/Common/foofoo.app/foofoo_pool',
                         application: 'foofoo.app'
@@ -814,6 +830,8 @@ module.exports = {
                         name: '/Common/foofoo.app/foofoo_vs',
                         appService: '/Common/foofoo.app/foofoo',
                         ipProtocol: 'tcp',
+                        isAvailable: false,
+                        isEnabled: true,
                         tenant: 'Common',
                         pool: '/Common/foofoo.app/foofoo_pool',
                         application: 'foofoo.app'
@@ -830,6 +848,8 @@ module.exports = {
                         mask: '255.255.255.0',
                         name: '/Example_Tenant/A1/serviceMain',
                         ipProtocol: 'tcp',
+                        isAvailable: false,
+                        isEnabled: true,
                         tenant: 'Example_Tenant',
                         pool: '/Example_Tenant/A1/barbar_pool',
                         application: 'A1'
@@ -846,6 +866,8 @@ module.exports = {
                         mask: '255.255.255.0',
                         name: '/Example_Tenant/A1/serviceMain',
                         ipProtocol: 'tcp',
+                        isAvailable: false,
+                        isEnabled: true,
                         tenant: 'Example_Tenant',
                         pool: '/Example_Tenant/A1/barbar_pool',
                         application: 'A1'
@@ -862,6 +884,8 @@ module.exports = {
                         mask: '255.255.255.0',
                         name: '/Example_Tenant/A1/serviceMain',
                         ipProtocol: 'tcp',
+                        isAvailable: false,
+                        isEnabled: true,
                         tenant: 'Example_Tenant',
                         pool: '/Example_Tenant/A1/barbar_pool',
                         application: 'A1'
@@ -878,6 +902,8 @@ module.exports = {
                         mask: '255.255.255.0',
                         name: '/Example_Tenant/A1/serviceMain',
                         ipProtocol: 'tcp',
+                        isAvailable: false,
+                        isEnabled: true,
                         tenant: 'Example_Tenant',
                         pool: '/Example_Tenant/A1/barbar_pool',
                         application: 'A1'
@@ -894,6 +920,8 @@ module.exports = {
                         mask: '255.255.255.0',
                         name: '/Example_Tenant/A1/serviceMain',
                         ipProtocol: 'tcp',
+                        isAvailable: false,
+                        isEnabled: true,
                         tenant: 'Example_Tenant',
                         pool: '/Example_Tenant/A1/barbar_pool',
                         application: 'A1'
@@ -910,6 +938,8 @@ module.exports = {
                         mask: '255.255.255.0',
                         name: '/Example_Tenant/A1/serviceMain',
                         ipProtocol: 'tcp',
+                        isAvailable: false,
+                        isEnabled: true,
                         tenant: 'Example_Tenant',
                         pool: '/Example_Tenant/A1/barbar_pool',
                         application: 'A1'
@@ -926,6 +956,8 @@ module.exports = {
                         mask: '255.255.255.0',
                         name: '/Example_Tenant/A1/serviceMain',
                         ipProtocol: 'tcp',
+                        isAvailable: false,
+                        isEnabled: true,
                         tenant: 'Example_Tenant',
                         pool: '/Example_Tenant/A1/barbar_pool',
                         application: 'A1'
@@ -942,6 +974,8 @@ module.exports = {
                         mask: '255.255.255.0',
                         name: '/Example_Tenant/A1/serviceMain',
                         ipProtocol: 'tcp',
+                        isAvailable: false,
+                        isEnabled: true,
                         tenant: 'Example_Tenant',
                         pool: '/Example_Tenant/A1/barbar_pool',
                         application: 'A1'
@@ -958,6 +992,8 @@ module.exports = {
                         mask: '255.255.255.0',
                         name: '/Example_Tenant/A1/serviceMain',
                         ipProtocol: 'tcp',
+                        isAvailable: false,
+                        isEnabled: true,
                         tenant: 'Example_Tenant',
                         pool: '/Example_Tenant/A1/barbar_pool',
                         application: 'A1'
@@ -970,6 +1006,8 @@ module.exports = {
                         destination: '192.0.2.11:80',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
+                        isAvailable: true,
+                        isEnabled: true,
                         'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
                         name: '/Example_Tenant/A1/serviceMain-Redirect',
                         tenant: 'Example_Tenant',
@@ -983,6 +1021,8 @@ module.exports = {
                         destination: '192.0.2.11:80',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
+                        isAvailable: true,
+                        isEnabled: true,
                         'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
                         name: '/Example_Tenant/A1/serviceMain-Redirect',
                         tenant: 'Example_Tenant',
@@ -996,6 +1036,8 @@ module.exports = {
                         destination: '192.0.2.11:80',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
+                        isAvailable: true,
+                        isEnabled: true,
                         'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
                         name: '/Example_Tenant/A1/serviceMain-Redirect',
                         tenant: 'Example_Tenant',
@@ -1009,6 +1051,8 @@ module.exports = {
                         destination: '192.0.2.11:80',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
+                        isAvailable: true,
+                        isEnabled: true,
                         'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
                         name: '/Example_Tenant/A1/serviceMain-Redirect',
                         tenant: 'Example_Tenant',
@@ -1022,6 +1066,8 @@ module.exports = {
                         destination: '192.0.2.11:80',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
+                        isAvailable: true,
+                        isEnabled: true,
                         'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
                         name: '/Example_Tenant/A1/serviceMain-Redirect',
                         tenant: 'Example_Tenant',
@@ -1035,6 +1081,8 @@ module.exports = {
                         destination: '192.0.2.11:80',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
+                        isAvailable: true,
+                        isEnabled: true,
                         'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
                         name: '/Example_Tenant/A1/serviceMain-Redirect',
                         tenant: 'Example_Tenant',
@@ -1048,6 +1096,8 @@ module.exports = {
                         destination: '192.0.2.11:80',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
+                        isAvailable: true,
+                        isEnabled: true,
                         'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
                         name: '/Example_Tenant/A1/serviceMain-Redirect',
                         tenant: 'Example_Tenant',
@@ -1061,6 +1111,8 @@ module.exports = {
                         destination: '192.0.2.11:80',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
+                        isAvailable: true,
+                        isEnabled: true,
                         'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
                         name: '/Example_Tenant/A1/serviceMain-Redirect',
                         tenant: 'Example_Tenant',
@@ -1074,6 +1126,8 @@ module.exports = {
                         destination: '192.0.2.11:80',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
+                        isAvailable: true,
+                        isEnabled: true,
                         'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
                         name: '/Example_Tenant/A1/serviceMain-Redirect',
                         tenant: 'Example_Tenant',
@@ -8657,6 +8711,384 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.telemetryServiceInfo.pollingInterval',
                     metricValue: 0,
                     metricTags: {}
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.clientBitsIn.average',
+                    metricTags: {
+                        name: 'clientBitsIn'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.clientBitsIn.current',
+                    metricTags: {
+                        name: 'clientBitsIn'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.clientBitsIn.max',
+                    metricTags: {
+                        name: 'clientBitsIn'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.clientBitsOut.average',
+                    metricTags: {
+                        name: 'clientBitsOut'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.clientBitsOut.current',
+                    metricTags: {
+                        name: 'clientBitsOut'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.clientBitsOut.max',
+                    metricTags: {
+                        name: 'clientBitsOut'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.clientIn.average',
+                    metricTags: {
+                        name: 'clientIn'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.clientIn.current',
+                    metricTags: {
+                        name: 'clientIn'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.clientIn.max',
+                    metricTags: {
+                        name: 'clientIn'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.clientOut.average',
+                    metricTags: {
+                        name: 'clientOut'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.clientOut.current',
+                    metricTags: {
+                        name: 'clientOut'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.clientOut.max',
+                    metricTags: {
+                        name: 'clientOut'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.compression.average',
+                    metricTags: {
+                        name: 'compression'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.compression.current',
+                    metricTags: {
+                        name: 'compression'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.compression.max',
+                    metricTags: {
+                        name: 'compression'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.inBits.average',
+                    metricTags: {
+                        name: 'inBits'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.inBits.current',
+                    metricTags: {
+                        name: 'inBits'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.inBits.max',
+                    metricTags: {
+                        name: 'inBits'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.inPackets.average',
+                    metricTags: {
+                        name: 'inPackets'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.inPackets.current',
+                    metricTags: {
+                        name: 'inPackets'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.inPackets.max',
+                    metricTags: {
+                        name: 'inPackets'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.managementBitsIn.average',
+                    metricTags: {
+                        name: 'managementBitsIn'
+                    },
+                    metricValue: 2969820
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.managementBitsIn.current',
+                    metricTags: {
+                        name: 'managementBitsIn'
+                    },
+                    metricValue: 846485
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.managementBitsIn.max',
+                    metricTags: {
+                        name: 'managementBitsIn'
+                    },
+                    metricValue: 36591317
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.managementBitsOut.average',
+                    metricTags: {
+                        name: 'managementBitsOut'
+                    },
+                    metricValue: 133
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.managementBitsOut.current',
+                    metricTags: {
+                        name: 'managementBitsOut'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.managementBitsOut.max',
+                    metricTags: {
+                        name: 'managementBitsOut'
+                    },
+                    metricValue: 12478
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.outBits.average',
+                    metricTags: {
+                        name: 'outBits'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.outBits.current',
+                    metricTags: {
+                        name: 'outBits'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.outBits.max',
+                    metricTags: {
+                        name: 'outBits'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.outPackets.average',
+                    metricTags: {
+                        name: 'outPackets'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.outPackets.current',
+                    metricTags: {
+                        name: 'outPackets'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.outPackets.max',
+                    metricTags: {
+                        name: 'outPackets'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.serverBitsIn.average',
+                    metricTags: {
+                        name: 'serverBitsIn'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.serverBitsIn.current',
+                    metricTags: {
+                        name: 'serverBitsIn'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.serverBitsIn.max',
+                    metricTags: {
+                        name: 'serverBitsIn'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.serverBitsOut.average',
+                    metricTags: {
+                        name: 'serverBitsOut'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.serverBitsOut.current',
+                    metricTags: {
+                        name: 'serverBitsOut'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.serverBitsOut.max',
+                    metricTags: {
+                        name: 'serverBitsOut'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.serverIn.average',
+                    metricTags: {
+                        name: 'serverIn'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.serverIn.current',
+                    metricTags: {
+                        name: 'serverIn'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.serverIn.max',
+                    metricTags: {
+                        name: 'serverIn'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.serverOut.average',
+                    metricTags: {
+                        name: 'serverOut'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.serverOut.current',
+                    metricTags: {
+                        name: 'serverOut'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.serverOut.max',
+                    metricTags: {
+                        name: 'serverOut'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.serviceBits.average',
+                    metricTags: {
+                        name: 'serviceBits'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.serviceBits.current',
+                    metricTags: {
+                        name: 'serviceBits'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.serviceBits.max',
+                    metricTags: {
+                        name: 'serviceBits'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.servicePackets.average',
+                    metricTags: {
+                        name: 'servicePackets'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.servicePackets.current',
+                    metricTags: {
+                        name: 'servicePackets'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.servicePackets.max',
+                    metricTags: {
+                        name: 'servicePackets'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.sslTps.average',
+                    metricTags: {
+                        name: 'sslTps'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.sslTps.current',
+                    metricTags: {
+                        name: 'sslTps'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.throughputPerformance.sslTps.max',
+                    metricTags: {
+                        name: 'sslTps'
+                    },
+                    metricValue: 0
                 }
             ]
         }

@@ -14,9 +14,13 @@ Telemetry Streaming for BIG-IP
 
 %prep
 cp -r %{main}/src/ %{_builddir}/src/
+cp -r %{main}/opensource/ %{_builddir}/src/opensource
 rm -r %{_builddir}/src/schema/[0-9]*
 cp %{main}/package*.json %{_builddir}/src
 npm ci --no-optional --only=prod --prefix %{_builddir}/src 
+find %{_builddir}/src/opensource -maxdepth 1 -mindepth 1 -type d -exec basename {} \; | xargs -I{} echo %{_builddir}/src/node_modules/{} | xargs rm
+mv %{_builddir}/src/opensource/* %{_builddir}/src/node_modules/.
+rm -r %{_builddir}/src/opensource
 echo -n %{version}-%{release} > %{_builddir}/src/version
 
 %install

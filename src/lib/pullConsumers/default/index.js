@@ -48,5 +48,5 @@ module.exports = function (context) {
         // pretty JSON dump
         tracer.write(formattedData);
     }
-    return Promise.resolve(formattedData);
+    return Promise.resolve({ data: formattedData });
 };

@@ -16,6 +16,7 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 
 const normalizeUtil = require('../../../src/lib/utils/normalize');
+const util = require('../shared/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -785,6 +786,77 @@ describe('Normalize Util', () => {
         });
     });
 
+    describe('.virtualServerPostProcessing()', () => {
+        it('should not isEnabled and isAvailable properties when source properties don\'t exist', () => {
+            const data = {
+                vs1: {
+                    'clientside.bitsIn': 0,
+                    'clientside.bitsOut': 0,
+                    'clientside.curConns': 0
+                }
+            };
+            const expected = {
+                vs1: {
+                    'clientside.bitsIn': 0,
+                    'clientside.bitsOut': 0,
+                    'clientside.curConns': 0
+                }
+            };
+            assert.deepStrictEqual(normalizeUtil.virtualServerPostProcessing({ data }), expected);
+        });
+
+        it('should set isEnabled property correctly according to enabledState', () => {
+            const data = {
+                vs1: {
+                    enabledState: 'enabled'
+                },
+                vs2: {
+                    enabledState: 'disabled'
+                }
+            };
+            const expected = {
+                vs1: {
+                    enabledState: 'enabled',
+                    isEnabled: true
+                },
+                vs2: {
+                    enabledState: 'disabled',
+                    isEnabled: false
+                }
+            };
+            assert.deepStrictEqual(normalizeUtil.virtualServerPostProcessing({ data }), expected);
+        });
+
+        it('should set isAvailable property correctly according to availabilityState', () => {
+            const data = {
+                vs1: {
+                    availabilityState: 'unknown'
+                },
+                vs2: {
+                    availabilityState: 'offline'
+                },
+                vs3: {
+                    availabilityState: 'available'
+                }
+            };
+            const expected = {
+                vs1: {
+                    availabilityState: 'unknown',
+                    isAvailable: true
+                },
+                vs2: {
+                    availabilityState: 'offline',
+                    isAvailable: false
+                },
+                vs3: {
+                    availabilityState: 'available',
+                    isAvailable: true
+                }
+            };
+            assert.deepStrictEqual(normalizeUtil.virtualServerPostProcessing({ data }), expected);
+        });
+    });
+
     describe('.convertEmptyToObject()', () => {
         it('should convert empty data to object', () => {
             let actual = normalizeUtil.convertEmptyToObject({ data: [] });
@@ -841,6 +913,157 @@ describe('Normalize Util', () => {
 
             actual = normalizeUtil.diskStoragePercentsToFloating({ data: { '/': { name: '/', Capacity: 50 } } });
             assert.deepStrictEqual(actual, { '/': { name: '/', Capacity: 50, Capacity_Float: 0.5 } }, 'should convert value');
+        });
+    });
+
+    describe('.throughputPerformancePreProcessing()', () => {
+        it('should convert array to mapping and set appropriate keys according to description', () => {
+            const actual = normalizeUtil.throughputPerformancePreProcessing({
+                data: {
+                    statsArray: [
+                        { val: 20, 'Throughput(packets)': 'stats' },
+                        { val: 30, 'Throughput(bits)': 'stats' },
+                        { val: 40 },
+                        { val: 50 },
+                        { val: 60, 'Throughput(bits)': 'stats' }
+                    ],
+                    stats: { val: 40 },
+                    statsArray0: { val: 70 },
+                    'statsArray Bits0': { val: 80 }
+                }
+            });
+            assert.deepStrictEqual(actual, {
+                'statsArray Packets': { val: 20, 'Throughput(packets)': 'stats' },
+                'statsArray Bits': { val: 30, 'Throughput(bits)': 'stats' },
+                statsArray: { val: 40 },
+                statsArray1: { val: 50 },
+                'statsArray Bits1': { val: 60, 'Throughput(bits)': 'stats' },
+                stats: { val: 40 },
+                statsArray0: { val: 70 },
+                'statsArray Bits0': { val: 80 }
+            });
+        });
+    });
+
+    describe('.throughputPerformancePostProcessing()', () => {
+        it('should convert keys to camelCase and include only average, current and max properties', () => {
+            const actual = normalizeUtil.throughputPerformancePostProcessing({
+                data: {
+                    'statsArray Packets': {
+                        average: '100',
+                        current: '20',
+                        max: '10000',
+                        'Throughput(packets)': 'stats',
+                        otherProps: true
+                    },
+                    'statsArray Bits': {
+                        average: '101',
+                        current: '21',
+                        max: '10001',
+                        'Throughput(bits)': 'stats',
+                        otherProps: true
+                    },
+                    statsArray_Bits: {
+                        average: '101',
+                        current: '21',
+                        max: '10001',
+                        'Throughput(bits)': 'stats',
+                        otherProps: true
+                    },
+                    'stats stats stats': {
+                        average: '102',
+                        current: '22',
+                        max: '10002',
+                        otherProps: true
+                    }
+                }
+            });
+            assert.deepStrictEqual(actual, {
+                statsArrayPackets: {
+                    average: 100,
+                    current: 20,
+                    max: 10000
+                },
+                statsArrayBits: {
+                    average: 101,
+                    current: 21,
+                    max: 10001
+                },
+                statsArrayBits0: {
+                    average: 101,
+                    current: 21,
+                    max: 10001
+                },
+                statsStatsStats: {
+                    average: 102,
+                    current: 22,
+                    max: 10002
+                }
+            });
+        });
+    });
+
+    describe('ASM Functions', () => {
+        const inputData = {
+            data: [
+                {
+                    createdDatetime: '2019-07-01T17:32:44Z',
+                    name: 'Policy_one',
+                    isModified: false
+                },
+                {
+                    createdDatetime: '2020-01-04T17:32:44Z',
+                    name: 'Policy_two',
+                    versionDatetime: '2020-01-17T17:34:32Z',
+                    isModified: false
+                },
+                {
+                    createdDatetime: '2020-01-01T17:32:44Z',
+                    name: 'Policy_three',
+                    versionDatetime: '2020-01-24T03:47:29Z'
+                },
+                {
+                    createdDatetime: '2020-01-01T17:32:44Z',
+                    name: 'Policy_three',
+                    versionDatetime: 'blah'
+                },
+                {
+                    createdDatetime: '2017-01-04T17:32:44Z',
+                    name: 'Policy_two',
+                    versionDatetime: '2019-01-17T17:34:32Z',
+                    isModified: false
+                }
+            ]
+        };
+        describe('.getAsmState', () => {
+            it('should return \'Policies Consistent\' when no policies are modified', () => {
+                assert.strictEqual(normalizeUtil.getAsmState(inputData), 'Policies Consistent');
+            });
+
+            it('should return \'Pending Policy Changes\' when a policy is modified', () => {
+                const actual = util.deepCopy(inputData);
+                actual.data.push({
+                    createdDatetime: '2020-01-04T17:32:44Z',
+                    name: 'Policy_four',
+                    versionDatetime: '2020-01-17T17:34:32Z',
+                    isModified: true
+                });
+                assert.strictEqual(normalizeUtil.getAsmState(actual), 'Pending Policy Changes');
+            });
+
+            it('should return \'Policies Consistent\' if no policies exist', () => {
+                assert.strictEqual(normalizeUtil.getAsmState({ data: [] }), 'Policies Consistent');
+            });
+        });
+
+        describe('.getLastAsmChange', () => {
+            it('should get the latest ASM change date', () => {
+                assert.strictEqual(normalizeUtil.getLastAsmChange(inputData), '2020-01-24T03:47:29.000Z');
+            });
+
+            it('should return empty string if no policies exist', () => {
+                assert.strictEqual(normalizeUtil.getLastAsmChange({ data: [] }), '');
+            });
         });
     });
 });

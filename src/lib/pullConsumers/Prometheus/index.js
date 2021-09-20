@@ -116,7 +116,10 @@ module.exports = function (context) {
         if (tracer) {
             tracer.write(output);
         }
-        resolve(output);
+        resolve({
+            data: output,
+            contentType: promClient.contentType
+        });
     });
 };
 

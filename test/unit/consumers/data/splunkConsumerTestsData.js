@@ -1522,6 +1522,8 @@ module.exports = {
                         destination: '10.5.6.7:80',
                         enabledState: 'enabled',
                         ipProtocol: 'tcp',
+                        isAvailable: false,
+                        isEnabled: true,
                         mask: '255.255.255.255',
                         'metric_name:clientside.bitsIn': 0,
                         'metric_name:clientside.bitsOut': 0,
@@ -1550,6 +1552,8 @@ module.exports = {
                         destination: '192.0.2.11:443',
                         enabledState: 'enabled',
                         ipProtocol: 'tcp',
+                        isAvailable: false,
+                        isEnabled: true,
                         mask: '255.255.255.0',
                         'metric_name:clientside.bitsIn': 0,
                         'metric_name:clientside.bitsOut': 0,
@@ -1577,6 +1581,8 @@ module.exports = {
                         availabilityState: 'unknown',
                         destination: '192.0.2.11:80',
                         enabledState: 'enabled',
+                        isAvailable: true,
+                        isEnabled: true,
                         'metric_name:clientside.bitsIn': 0,
                         'metric_name:clientside.bitsOut': 0,
                         'metric_name:clientside.curConns': 0,
@@ -3423,6 +3429,240 @@ module.exports = {
                         'status.statusReason': 'No Wide IPs available: No enabled pools available',
                         telemetryStreamingStatisticSet: 'srvPools.members',
                         vsName: ' '
+                    },
+                    host: 'telemetry.bigip.com',
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    time: 1546304461000
+                },
+                {
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'clientBitsIn',
+                        telemetryStreamingStatisticSet: 'system.throughputPerformance'
+                    },
+                    host: 'telemetry.bigip.com',
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    time: 1546304461000
+                },
+                {
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'clientBitsOut',
+                        telemetryStreamingStatisticSet: 'system.throughputPerformance'
+                    },
+                    host: 'telemetry.bigip.com',
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    time: 1546304461000
+                },
+                {
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'clientIn',
+                        telemetryStreamingStatisticSet: 'system.throughputPerformance'
+                    },
+                    host: 'telemetry.bigip.com',
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    time: 1546304461000
+                },
+                {
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'clientOut',
+                        telemetryStreamingStatisticSet: 'system.throughputPerformance'
+                    },
+                    host: 'telemetry.bigip.com',
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    time: 1546304461000
+                },
+                {
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'compression',
+                        telemetryStreamingStatisticSet: 'system.throughputPerformance'
+                    },
+                    host: 'telemetry.bigip.com',
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    time: 1546304461000
+                },
+                {
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'inBits',
+                        telemetryStreamingStatisticSet: 'system.throughputPerformance'
+                    },
+                    host: 'telemetry.bigip.com',
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    time: 1546304461000
+                },
+                {
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'inPackets',
+                        telemetryStreamingStatisticSet: 'system.throughputPerformance'
+                    },
+                    host: 'telemetry.bigip.com',
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    time: 1546304461000
+                },
+                {
+                    fields: {
+                        'metric_name:average': 2969820,
+                        'metric_name:current': 846485,
+                        'metric_name:max': 36591317,
+                        name: 'managementBitsIn',
+                        telemetryStreamingStatisticSet: 'system.throughputPerformance'
+                    },
+                    host: 'telemetry.bigip.com',
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    time: 1546304461000
+                },
+                {
+                    fields: {
+                        'metric_name:average': 133,
+                        'metric_name:current': 0,
+                        'metric_name:max': 12478,
+                        name: 'managementBitsOut',
+                        telemetryStreamingStatisticSet: 'system.throughputPerformance'
+                    },
+                    host: 'telemetry.bigip.com',
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    time: 1546304461000
+                },
+                {
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'outBits',
+                        telemetryStreamingStatisticSet: 'system.throughputPerformance'
+                    },
+                    host: 'telemetry.bigip.com',
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    time: 1546304461000
+                },
+                {
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'outPackets',
+                        telemetryStreamingStatisticSet: 'system.throughputPerformance'
+                    },
+                    host: 'telemetry.bigip.com',
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    time: 1546304461000
+                },
+                {
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'serverBitsIn',
+                        telemetryStreamingStatisticSet: 'system.throughputPerformance'
+                    },
+                    host: 'telemetry.bigip.com',
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    time: 1546304461000
+                },
+                {
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'serverBitsOut',
+                        telemetryStreamingStatisticSet: 'system.throughputPerformance'
+                    },
+                    host: 'telemetry.bigip.com',
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    time: 1546304461000
+                },
+                {
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'serverIn',
+                        telemetryStreamingStatisticSet: 'system.throughputPerformance'
+                    },
+                    host: 'telemetry.bigip.com',
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    time: 1546304461000
+                },
+                {
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'serverOut',
+                        telemetryStreamingStatisticSet: 'system.throughputPerformance'
+                    },
+                    host: 'telemetry.bigip.com',
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    time: 1546304461000
+                },
+                {
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'serviceBits',
+                        telemetryStreamingStatisticSet: 'system.throughputPerformance'
+                    },
+                    host: 'telemetry.bigip.com',
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    time: 1546304461000
+                },
+                {
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'servicePackets',
+                        telemetryStreamingStatisticSet: 'system.throughputPerformance'
+                    },
+                    host: 'telemetry.bigip.com',
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    time: 1546304461000
+                },
+                {
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'sslTps',
+                        telemetryStreamingStatisticSet: 'system.throughputPerformance'
                     },
                     host: 'telemetry.bigip.com',
                     source: 'f5-telemetry',

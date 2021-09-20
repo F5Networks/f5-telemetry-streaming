@@ -157,6 +157,27 @@ describe('Data Pipeline', () => {
             });
     });
 
+    it('should ignore actions for raw event data', () => {
+        const dataCtx = {
+            data: {
+                foo: 'bar'
+            },
+            type: EVENT_TYPES.RAW_EVENT
+        };
+        const options = {
+            actions: [
+                {
+                    enable: true,
+                    setTag: {}
+                }
+            ]
+        };
+        return dataPipeline.process(dataCtx, options)
+            .then(() => {
+                assert.isEmpty(processActionsData);
+            });
+    });
+
     it('should pass deviceCtx as param for dataTagging handleAction if event is systemPoller', () => {
         const dataCtx = {
             data: {

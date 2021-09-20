@@ -107,6 +107,7 @@ describe('Constants', () => {
                 ASM_EVENT: 'ASM',
                 AFM_EVENT: 'AFM',
                 LTM_EVENT: 'LTM',
+                RAW_EVENT: 'raw',
                 CGNAT_EVENT: 'CGNAT',
                 SYSLOG_EVENT: 'syslog',
                 EVENT_LISTENER: 'event',

@@ -292,19 +292,34 @@
                 }
             ]
         },
+        "throughputPerformance": {
+            "structure": { "parentKey": "system" },
+            "key": "throughputPerformance",
+            "normalization": [
+                {
+                    "renameKeys": { "patterns": { "sys/performance/throughput": { "pattern": "sys/performance/throughput\/(.*)/stats", "group": 1 } } }
+                },
+                {
+                    "runFunctions": [ { "name": "throughputPerformancePreProcessing" } ]
+                },
+                {
+                    "renameKeys": { "patterns": { "Max(": { "constant": "Max" } } }
+                },
+                {
+                    "runFunctions": [ { "name": "throughputPerformancePostProcessing" } ]
+                }
+            ]
+        },
         "asmState": {
             "structure": { "parentKey": "system" },
             "if": {
                 "isModuleProvisioned": "asm"
             },
             "then": {
-                "key": "asmQuery::commandResult",
+                "key": "asmQuery::items",
                 "normalization": [
                     {
-                        "runFunctions": [
-                            { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "asm_state" } },
-                            { "name": "getFirstKey" }
-                        ]
+                        "runFunctions": [ { "name": "getAsmState" } ]
                     }
                 ]
             },
@@ -318,13 +333,10 @@
                 "isModuleProvisioned": "asm"
             },
             "then": {
-                "key": "asmQuery::commandResult",
+                "key": "asmQuery::items",
                 "normalization": [
                     {
-                        "runFunctions": [
-                            { "name": "formatAsJson", "args": { "type": "csv", "mapKey": "last_asm_change", "renameKeys": { "patterns": { "NULL": { "constant": "" } } } } },
-                            { "name": "getFirstKey" }
-                        ]
+                        "runFunctions": [ { "name": "getLastAsmChange" } ]
                     }
                 ]
             },
@@ -784,7 +796,8 @@
                 },
                 {
                     "runFunctions": [
-                        { "name": "restructureVirtualServerProfiles" }
+                        { "name": "restructureVirtualServerProfiles" },
+                        { "name": "virtualServerPostProcessing" }
                     ]
                 }
             ]

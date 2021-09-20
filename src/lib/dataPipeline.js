@@ -85,7 +85,9 @@ function process(dataCtx, options) {
             dataCtx.data.telemetryEventCategory = dataCtx.type;
         }
         // iHealthPoller doesn't support actions (filtering and tagging)
-        if (dataCtx.type !== EVENT_TYPES.IHEALTH_POLLER && !util.isObjectEmpty(options.actions)) {
+        // raw events also should not go through any processing
+        if (dataCtx.type !== EVENT_TYPES.IHEALTH_POLLER && dataCtx.type !== EVENT_TYPES.RAW_EVENT
+                && !util.isObjectEmpty(options.actions)) {
             actionProcessor.processActions(dataCtx, options.actions, options.deviceContext);
         }
         if (options.tracer) {

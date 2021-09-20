@@ -149,6 +149,7 @@ module.exports = {
         AFM_EVENT: 'AFM',
         LTM_EVENT: 'LTM',
         CGNAT_EVENT: 'CGNAT',
+        RAW_EVENT: 'raw',
         SYSLOG_EVENT: 'syslog',
         EVENT_LISTENER: 'event',
         SYSTEM_POLLER: 'systemInfo',

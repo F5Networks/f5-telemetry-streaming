@@ -12,6 +12,8 @@
 
 'use strict';
 
+const zlib = require('zlib');
+
 const DEFAULT_HOSTNAME = require('../../constants').DEFAULT_HOSTNAME;
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 const metricsUtil = require('../shared/metricsUtil');
@@ -113,17 +115,40 @@ module.exports = function (context) {
         });
     }
 
-    return requestsUtil.makeRequest({
-        body: ddData,
+    const headers = {
+        'Content-Type': 'application/json',
+        'DD-API-KEY': context.config.apiKey
+    };
+    const needGzip = context.config.compressionType === 'gzip';
+    let gzipPromise = Promise.resolve(ddData);
+
+    if (needGzip) {
+        const encoding = ddType === 'log' ? 'gzip' : 'deflate';
+        const zlibMeth = ddType === 'log' ? zlib.gzip : zlib.deflate;
+
+        Object.assign(headers, {
+            'Accept-Encoding': encoding,
+            'Content-Encoding': encoding
+        });
+        gzipPromise = gzipPromise.then(payload => new Promise((resolve, reject) => {
+            zlibMeth.call(zlib, JSON.stringify(payload), (err, buffer) => {
+                if (!err) {
+                    resolve(buffer);
+                } else {
+                    reject(err);
+                }
+            });
+        }));
+    }
+
+    return gzipPromise.then(payload => requestsUtil.makeRequest({
+        body: payload,
         expectedResponseCode: [200, 202],
         fullURI: ddType === 'log' ? DATA_DOG_LOGS_GATEWAY : DATA_DOG_METRICS_GATEWAY,
-        headers: {
-            'Content-Type': 'application/json',
-            'DD-API-KEY': context.config.apiKey
-        },
-        json: true,
+        headers,
+        json: !needGzip,
         method: 'POST'
-    })
+    }))
         .then(() => {
             context.logger.debug('success');
         })

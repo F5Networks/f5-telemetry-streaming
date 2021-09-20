@@ -11,6 +11,7 @@
 const assignDefaults = require('lodash/defaultsDeep');
 const cloneDeep = require('lodash/cloneDeep');
 const clone = require('lodash/clone');
+const hasKey = require('lodash/has');
 const mergeWith = require('lodash/mergeWith');
 const trim = require('lodash/trim');
 const objectGet = require('lodash/get');
@@ -19,6 +20,7 @@ const fs = require('fs');
 const net = require('net');
 // deep require support is deprecated for versions 7+ (requires node8+)
 const uuidv4 = require('uuid/v4');
+const jsonDuplicateKeyHandle = require('json-duplicate-key-handle');
 
 /** @module miscUtil */
 /* General helper functions (objects, primitives, etc)
@@ -190,6 +192,36 @@ module.exports = {
         }
         // First Object in array has been merged with all other Objects - it has the complete data set.
         return collection[0] || {};
+    },
+
+    /**
+     * Parses a JSON string into an object, while preserving any duplicate keys in the JSON object.
+     * Duplicate keys convert the JSON key type to an array.
+     *
+     * Example:
+     * input is { dup: 'yes', nonDup: 12, dup: { inside: 74 } }
+     * returned object is { dup: ['yes', { inside: 74 } ], nonDup: 12 }
+     *
+     * @param {String}  data    - JSON data as a string
+     *
+     * @returns {Object}    Object with the parsed JSON data
+     */
+    parseJsonWithDuplicatekeys(data) {
+        const arrayHandler = (keys, key, values, value) => {
+            const existingKey = keys.indexOf(key.value);
+            if (existingKey !== -1) {
+                const existingValue = values[existingKey];
+                if (Array.isArray(existingValue)) {
+                    values[existingKey] = existingValue.concat(value.value);
+                } else {
+                    values[existingKey] = [existingValue].concat(value.value);
+                }
+            } else {
+                keys.push(key.value);
+                values.push(value.value);
+            }
+        };
+        return jsonDuplicateKeyHandle.parse(data, arrayHandler);
     },
 
     /**
@@ -461,6 +493,30 @@ module.exports = {
             // just continue
         }
         return ret;
+    },
+
+    /**
+     * Generates a unique property name that the object doesn't have
+     *
+     * - 'originKey' will be returned if it doesn't exist in the object
+     *
+     * @param {object} object - object
+     * @param {string} originKey - origin key
+     *
+     * @returns {string} unique key
+     */
+    generateUniquePropName(object, originKey) {
+        // flexibility for args can be added later
+        const sep = '';
+        let startIdx = 0;
+
+        if (!hasKey(object, originKey)) {
+            return originKey;
+        }
+        while (hasKey(object, `${originKey}${sep}${startIdx}`)) {
+            startIdx += 1;
+        }
+        return `${originKey}${sep}${startIdx}`;
     },
 
     /**

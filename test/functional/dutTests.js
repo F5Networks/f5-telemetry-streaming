@@ -105,9 +105,20 @@ function sendDataToEventListeners(callback, numOfMsg, delay) {
     return Promise.all(duts.map(dut => sendDataToEventListener(dut, callback(dut), { numOfMsg, delay })));
 }
 
-
-function getPullConsumerData(dut, pullConsumerName, namespace) {
-    const namespacePath = namespace ? `/namespace/${namespace}` : '';
+/**
+ * Query a given PullConsumer for data.
+ *
+ * @param {Object}  dut                     - Device Under Test object
+ * @param {String}  pullConsumerName        - Name of the configured Pull Consumer
+ * @param {String}  [options.namespace]     - Optional namespace name
+ * @param {Boolean} [options.rawResponse]   - Whether or not to return full HTTP response, or just the HTTP body
+ *
+ * @returns {Object} Promise resolved with HTTP body, or full HTTP response
+ */
+function getPullConsumerData(dut, pullConsumerName, options) {
+    options = options || {};
+    const namespacePath = options.namespace ? `/namespace/${options.namespace}` : '';
+    const rawResponse = options.rawResponse;
     const uri = `${constants.BASE_ILX_URI}${namespacePath}/pullconsumer/${pullConsumerName}`;
     const host = dut.ip;
     const user = dut.username;
@@ -119,7 +130,8 @@ function getPullConsumerData(dut, pullConsumerName, namespace) {
                 method: 'GET',
                 headers: {
                     'x-f5-auth-token': data.token
-                }
+                },
+                rawResponse
             };
             return util.makeRequest(host, uri, postOptions);
         });

@@ -8,6 +8,8 @@
 
 'use strict';
 
+const toCamelCase = require('lodash/camelCase');
+
 const logger = require('../logger'); // eslint-disable-line no-unused-vars
 const util = require('./misc');
 const constants = require('../constants');
@@ -616,6 +618,30 @@ module.exports = {
     },
 
     /**
+     * Final touch for VS stats
+     *
+     * @param {Object} args              - args object
+     * @param {Object} [args.data]       - data to process (always included)
+     *
+     * @returns {Object} Returns formatted data
+     */
+    virtualServerPostProcessing(args) {
+        const data = args.data;
+        if (data) {
+            Object.keys(data).forEach((vsName) => {
+                const vsObj = data[vsName];
+                if (vsObj.enabledState) { // it should be a string
+                    vsObj.isEnabled = vsObj.enabledState === 'enabled';
+                }
+                if (vsObj.availabilityState) { // it should be a string
+                    vsObj.isAvailable = vsObj.availabilityState !== 'offline';
+                }
+            });
+        }
+        return data;
+    },
+
+    /**
      * Get value by key/path
      *
      * @param {Object} args               - args object
@@ -679,5 +705,114 @@ module.exports = {
      */
     configSyncColorToBool(args) {
         return args.data === 'green';
+    },
+
+    /**
+     * Pre-process Throughput Performance stats
+     *
+     * - Converts array data into mapping based on 'description' field or assigns unique key
+     *
+     * @param {Object} args               - args object
+     * @param {Object} [args.data]        - data to process (always included)
+     * @param {Array<String>} [args.path] - path to fetch data from
+     *
+     * @returns {Object} Returns updated data
+     */
+    throughputPerformancePreProcessing(args) {
+        const throughput = args.data;
+        Object.keys(throughput).forEach((key) => {
+            const val = throughput[key];
+            if (Array.isArray(val)) {
+                // duplicated keys were put in array
+                delete throughput[key];
+                val.forEach((subData) => {
+                    let newKey;
+                    if (subData['Throughput(packets)']) {
+                        newKey = util.generateUniquePropName(throughput, `${key} Packets`);
+                    } else if (subData['Throughput(bits)']) {
+                        newKey = util.generateUniquePropName(throughput, `${key} Bits`);
+                    } else {
+                        newKey = util.generateUniquePropName(throughput, key);
+                    }
+                    throughput[newKey] = subData;
+                });
+            }
+        });
+        return throughput;
+    },
+
+    /**
+     * Post-process Throughput Performance stats
+     *
+     * - Converts keys to camelCase
+     * - Excludes all keys except metric keys
+     *
+     * @param {Object} args               - args object
+     * @param {Object} [args.data]        - data to process (always included)
+     * @param {Array<String>} [args.path] - path to fetch data from
+     *
+     * @returns {Object} Returns updated data
+     */
+    throughputPerformancePostProcessing(args) {
+        const allowedKeys = ['average', 'current', 'max'];
+        const throughput = args.data;
+        const formatted = {};
+        Object.keys(throughput).forEach((key) => {
+            const val = throughput[key];
+            const newVal = {};
+            Object.keys(val).forEach((vkey) => {
+                const lcKey = vkey.toLowerCase();
+                if (allowedKeys.indexOf(lcKey) !== -1) {
+                    newVal[lcKey] = parseFloat(val[vkey]);
+                }
+            });
+            formatted[util.generateUniquePropName(formatted, toCamelCase(key))] = newVal;
+        });
+        return formatted;
+    },
+
+    /**
+     * Convert a collection of ASM Policy 'isModified' values to an ASM State value
+     * If any ASM Policy has isModified === true, then report 'Pending Policy Changes'
+     *
+     * @param {Object} args               - args object
+     * @param {Object} [args.data]        - data to process (always included)
+     *
+     * @returns {Object} Returns updated data
+     */
+    getAsmState(args) {
+        const asmPolicies = args.data;
+        let asmState = 'Policies Consistent';
+
+        asmPolicies.forEach((policy) => {
+            if (policy.isModified === true) {
+                asmState = 'Pending Policy Changes';
+            }
+        });
+        return asmState;
+    },
+
+    /**
+     * Get the latest 'versionDatetime' from a collection of ASM Policies
+     *
+     * @param {Object} args               - args object
+     * @param {Object} [args.data]        - data to process (always included)
+     *
+     * @returns {Object} Returns updated data
+     */
+    getLastAsmChange(args) {
+        const asmPolicies = args.data;
+        if (asmPolicies.length === 0) {
+            return '';
+        }
+        let latestModifiedDate = 0;
+
+        asmPolicies.forEach((policy) => {
+            const versionInUnixTime = Date.parse(policy.versionDatetime);
+            if (!Number.isNaN(versionInUnixTime) && versionInUnixTime > latestModifiedDate) {
+                latestModifiedDate = versionInUnixTime;
+            }
+        });
+        return new Date(latestModifiedDate).toISOString();
     }
 };

@@ -467,7 +467,15 @@ function f5expandCheck(schemaCtx, dataCtx) {
     }
 
     const namespace = dataCtx.namespace;
-    dataCtx.parentData[dataCtx.propertyName] = expandPointers(dataCtx.data, namespace.scopedData, namespace.dataPath);
+    try {
+        dataCtx.parentData[dataCtx.propertyName] = expandPointers(
+            dataCtx.data,
+            namespace.scopedData,
+            namespace.dataPath
+        );
+    } catch (err) {
+        throw new Error(`Unable to expand JSON-pointer '${dataCtx.data}': ${err}`);
+    }
     return true;
 }
 /**

@@ -124,6 +124,9 @@
                 },
                 "gtmConfigTime": {
                     "type": "string"
+                },
+                "throughputPerformance": {
+                    "type": "object"
                 }
             },
             "additionalProperties": false,

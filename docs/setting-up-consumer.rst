@@ -106,10 +106,6 @@ To see more information about sending data to Log Analytics, see |HTTP Data Coll
 
 Region property
 ```````````````
-.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
-
-   Support for the **region** property is available in Telemetry Streaming 1.11 and later. 
-
 Telemetry Streaming v1.11 adds the **region** property for Azure Log Analytics and Application Insights. This is in part to support the Azure Government regions.
 
 - This optional property is used to determine cloud type (public/commercial, govcloud) so that the correct API URLs can be used (example values: westeurope, japanwest, centralus, usgovvirginia, and so on).  
@@ -160,10 +156,6 @@ Microsoft Azure Application Insights
 ------------------------------------
 |azure_img|
 
-.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
-
-   Support for Azure Application Insights is available in Telemetry Streaming 1.11 and later. 
-
 Required Information:
 
 - **Instrumentation Key**: If provided, **Use Managed Identity** must be *false* or omitted (default). Navigate to :guilabel:`Application Insights > {AppinsightsName} > Overview`
@@ -185,10 +177,6 @@ To see more information about Azure Application Insights, see |appinsight|.
 
 Region property
 ```````````````
-.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
-
-   Support for the **region** property is available in Telemetry Streaming 1.11 and later. 
-
 Telemetry Streaming v1.11 adds the **region** property for Azure Log Analytics and Application Insights. This is in part to support the Azure Government regions.
 
 - This optional property is used to determine cloud type (public/commercial, govcloud) so that the correct API URLs can be used (example values: westeurope, japanwest, centralus, usgovvirginia, and so on).  
@@ -260,10 +248,6 @@ Example Declaration:
 
 AWS CloudWatch Metrics
 ``````````````````````
-.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
-
-   Support for CloudWatch Metrics is available in Telemetry Streaming 1.14 and later.
-
 Telemetry Streaming 1.14 introduced support for AWS CloudWatch Metrics.  To specify CloudWatch Metrics, use the new **dataType** property with a value of **metrics** as shown in the example.
 
 Notes for CloudWatch Metrics:
@@ -582,10 +566,6 @@ Google Cloud Operations Suite's Cloud Monitoring
 ------------------------------------------------
 |Google Cloud|
 
-.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
-
-   Support for Google StackDriver/Cloud Monitoring is available in TS 1.8.0 and later.  
-
 .. NOTE:: Google recently changed the name of their StackDriver product to Cloud Operations Suite with the monitoring product named *Cloud Monitoring*.
 
 Required Information:
@@ -596,14 +576,48 @@ Required Information:
 
 For complete information on deploying Google Cloud Operations Suite, see |sddocs|.
 
+**New in TS 1.22** |br|
+Telemetry Streaming 1.22 adds a new property **reportInstanceMetadata** to this consumer. This allows you to enable or disable metadata reporting.  The default is **false**.
+
 **Finding the Data**  |br|
 Once you have configured the Google Cloud Monitoring consumer and sent a Telemetry Streaming declaration, Telemetry Streaming creates custom MetricDescriptors to which it sends metrics.  These metrics can be found under a path such as **custom/system/cpu**. To make it easier to find data that is relevant to a specific device, TS uses the **Generic Node** resource type, and assigns machine ID to the **node_id** label to identify which device the data is from.
 
 .. IMPORTANT:: There is a quota of 500 custom MetricDescriptors for Google Cloud Monitoring. Telemetry Streaming creates these MetricDescriptors, and if this quota is ever reached, you must delete some of these MetricDescriptors.
 
-Example Declaration:
+Example Declaration (updated to include **reportInstanceMetadata** in 1.22, remove this line in previous versions):
 
 .. literalinclude:: ../examples/declarations/google_cloud_monitoring.json
+    :language: json
+
+
+|
+
+.. _gcl:
+
+Google Cloud Logging
+--------------------
+|Google Cloud|
+
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+   Support for Google Cloud Logging is available in TS 1.22 and later.  
+
+Required Information:
+ - serviceEmail: The email for the Google Service Account. To check if you have an existing Service Account, from the GCP left menu, select **IAM & admin**, and then click **Service Accounts**. If you do not have a Service Account, you must create one.
+ - privateKeyId: The ID of the private key the user created for the Service Account (if you do not have a key, from the Account page, click **Create Key** with a type of **JSON**. The Private key is in the file that was created when making the account).
+ - privateKey: The private key given to the user when a private key was added to the service account.
+ - logScopeId: The ID of the scope specified in the **logScope** property. If using a logScope of **projects**, this is the ID for your project.
+ - logId: The Google Cloud logging LOG_ID where log entries will be written.
+ 
+
+For complete information, see the |gcldocs|.
+
+**Finding the Data**  |br|
+Once you have configured the Google Cloud Logging consumer and sent a Telemetry Streaming declaration, Telemetry Streaming sends log entries directly to Google Cloud Logging. Log entries are written to a *logName* in Google Cloud Logging, where the logName is generated from the properties in the Telemetry Streaming declaration, using the following format: ``[logScope]/[logScopeId/logs/[logId] (example: “projects/yourProjectId/logs/yourLogId”)``.
+
+Example Declaration:
+
+.. literalinclude:: ../examples/declarations/google_cloud_logging.json
     :language: json
 
 
@@ -617,14 +631,81 @@ The F5 Cloud Consumer is a part of F5's internal, digital experience operating s
 
 .. IMPORTANT:: This F5 Cloud consumer is for **F5 internal use only**, and its API is subject to change. We are including it on this page of Push consumers because you may see it in a Telemetry Streaming declaration.
 
-Example Declaration:
+**New in TS 1.22** |br|
+Telemetry Streaming 1.22 adds the **eventSchemaVersion** property.  This allows you to select the appropriate event schema instead of using a hard-coded value.
+
+|
+
+Example Declaration (if using a version prior to 1.22, remove line 94 (highlighted in yellow):
 
 
 .. literalinclude:: ../examples/declarations/f5_cloud.json
     :language: json
-
+    :emphasize-lines: 94
 
 |
+
+.. _datadog:
+
+DataDog (EXPERIMENTAL)
+----------------------
+|datadog|
+
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+    The DataDog consumer was introduced as an EXPERIMENTAL consumer in TS 1.22. The **compressionType** property was introduced in 1.23.
+
+Telemetry Streaming 1.23 added the **compressionType** property to the DataDog consumer.  The acceptable values are **none** for no compression (the default), or **gzip**, where the payload will be compressed using gzip. 
+
+
+.. IMPORTANT:: Be aware of the following before deploying this consumer: |br| * The DataDog consumer is an experimental feature and will change in future releases based on feedback. |br| * There is a possibility this consumer might crash Telemetry Streaming, and send incorrectly formatted data or incomplete metrics. |br| * Some metrics might lack tags or context (such as iRule events) that will be addressed in future updates. |br| * The DataDog consumer was not tested on configurations with thousands of objects, so it is unknown if the DataDog API will accept or reject such huge payloads. |br| * Telemetry Streaming expects the Data Dog service will be responsible for formatting the names and values of metrics and tags.
+
+Example Declaration:
+
+.. literalinclude:: ../examples/declarations/data_dog.json
+    :language: json
+    
+    
+|
+
+.. _opent:
+
+OpenTelemetry Exporter (EXPERIMENTAL)
+-------------------------------------
+|opentelemetry|
+
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+    The OpenTelemetry Exporter consumer was introduced as an EXPERIMENTAL consumer in TS 1.23. 
+
+The OpenTelemetry Exporter Consumer exports telemetry data to an OpenTelemetry Collector, or OpenTelemetry Protocol compatible API.
+
+
+.. IMPORTANT:: Be aware of the following before deploying this consumer: |br| * The OpenTelemetry Exporter consumer is an experimental feature and will change in future releases based on feedback. |br| * There is a possibility this consumer might crash Telemetry Streaming, and send incorrectly formatted data or incomplete metrics. |br| * Some metrics might lack tags or context (such as iRule events) that will be addressed in future updates.
+
+Required Information:
+ - Host: The address of the OpenTelemetry Collector, or OpenTelemetry Protocol compatible API
+ - Port: The port of the OpenTelemetry Collector, or OpenTelemetry Protocol compatible API
+
+Optional Properties:
+ - metricsPath: The URL path to send metrics telemetry to
+ - headers: Any required HTTP headers, required to send metrics telemetry to an OpenTelemetry Protocol compatible API
+
+**Note**:
+As of Telemetry Streaming 1.23, this consumer:
+ - Only exports OpenTelemetry metrics (logs and traces are not supported)
+ - Exports telemetry data using protobufs over HTTP
+ - Extracts metrics from Event Listener log messages. Any integer or float values in Event Listener log messages will be converted to an OpenTelemetry metric, and exported as a metric.
+
+
+Example Declaration:
+
+.. literalinclude:: ../examples/declarations/open_telemetry_exporter.json
+    :language: json
+    
+    
+|
+
 |
 
 .. _azreg:
@@ -803,7 +884,14 @@ In the following table, we list the Azure Government regions.
    :target: https://www.f5.com/products/beacon-visibility-and-analytics
    :alt: F5 Beacon
 
+.. |datadog| image:: /images/dd_logo.png
+   :target: https://www.datadoghq.com/
+   :alt: DataDog
    
+.. |opentelemetry| image:: /images/ot_logo.png
+   :target: https://opentelemetry.io/
+   :alt: OpenTelemetry
+
 .. |Azure documentation| raw:: html
 
    <a href="https://docs.microsoft.com/en-us/azure/azure-monitor/platform/data-collector-api" target="_blank">Azure documentation</a>
@@ -905,3 +993,9 @@ In the following table, we list the Azure Government regions.
 .. |splunkmm| raw:: html
 
    <a href="https://docs.splunk.com/Documentation/Splunk/8.1.0/Metrics/GetMetricsInOther#The_multiple-metric_JSON_format" target="_blank">Splunk documentation</a>
+
+.. |gcldocs| raw:: html
+
+   <a href="https://cloud.google.com/logging" target="_blank">Google Cloud Logging documentation</a>
+
+   

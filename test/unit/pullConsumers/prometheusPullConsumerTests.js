@@ -56,8 +56,8 @@ describe('Prometheus Pull Consumer', () => {
     it('should not reject on missing event data', () => {
         eventStub.value([[]]);
         return prometheusConsumer(context)
-            .then((data) => {
-                assert.strictEqual(data, '', 'should be empty string');
+            .then((response) => {
+                assert.strictEqual(response.data, '', 'should be empty string');
             });
     });
 
@@ -66,28 +66,36 @@ describe('Prometheus Pull Consumer', () => {
         return assert.isFulfilled(prometheusConsumer(context));
     });
 
+    it('should set correct ContentType', () => {
+        eventStub.value([[]]);
+        return prometheusConsumer(context)
+            .then((response) => {
+                assert.strictEqual(response.contentType, 'text/plain; version=0.0.4; charset=utf-8', 'should be text/plain ContentType');
+            });
+    });
+
     describe('formatting System Poller data', () => {
         it('should format data (unfiltered)', () => {
             eventStub.value([SYSTEM_POLLER_DATA.unfiltered]);
             return prometheusConsumer(context)
-                .then((data) => {
-                    assert.strictEqual(data, EXPECTED_DATA.unfiltered);
+                .then((response) => {
+                    assert.strictEqual(response.data, EXPECTED_DATA.unfiltered);
                 });
         });
 
         it('should format data (just virtualServers)', () => {
             eventStub.value([SYSTEM_POLLER_DATA.virtualServers]);
             return prometheusConsumer(context)
-                .then((data) => {
-                    assert.strictEqual(data, EXPECTED_DATA.virtualServers);
+                .then((response) => {
+                    assert.strictEqual(response.data, EXPECTED_DATA.virtualServers);
                 });
         });
 
         it('should format data from 2 System Pollers (virtualServers and pools)', () => {
             eventStub.value([SYSTEM_POLLER_DATA.virtualServers, SYSTEM_POLLER_DATA.pools]);
             return prometheusConsumer(context)
-                .then((data) => {
-                    assert.strictEqual(data, EXPECTED_DATA.poolsAndVirtuals);
+                .then((response) => {
+                    assert.strictEqual(response.data, EXPECTED_DATA.poolsAndVirtuals);
                 });
         });
 
@@ -112,8 +120,8 @@ describe('Prometheus Pull Consumer', () => {
             ]);
 
             return prometheusConsumer(context)
-                .then((data) => {
-                    assert.strictEqual(data, expectedData);
+                .then((response) => {
+                    assert.strictEqual(response.data, expectedData);
                 });
         });
 
@@ -136,8 +144,8 @@ describe('Prometheus Pull Consumer', () => {
                 ]);
 
                 return prometheusConsumer(context)
-                    .then((data) => {
-                        assert.strictEqual(data, expectedData);
+                    .then((response) => {
+                        assert.strictEqual(response.data, expectedData);
                     });
             });
 
@@ -149,8 +157,8 @@ describe('Prometheus Pull Consumer', () => {
                 );
 
                 return prometheusConsumer(context)
-                    .then((data) => {
-                        assert.strictEqual(data, expectedData);
+                    .then((response) => {
+                        assert.strictEqual(response.data, expectedData);
                     });
             });
 
@@ -178,8 +186,8 @@ describe('Prometheus Pull Consumer', () => {
                 ]);
 
                 return prometheusConsumer(context)
-                    .then((data) => {
-                        assert.strictEqual(data, expectedData);
+                    .then((response) => {
+                        assert.strictEqual(response.data, expectedData);
                     });
             });
 
@@ -207,12 +215,12 @@ describe('Prometheus Pull Consumer', () => {
                 ]);
 
                 return prometheusConsumer(context)
-                    .then((data) => {
+                    .then((response) => {
                         assert.deepStrictEqual(
                             context.logger.error.getCalls()[0].args[0],
                             'Unable to register metric for: memory_my name_allocated. A metric with the name f5_memory_my__x20__name_allocated has already been registered.'
                         );
-                        assert.strictEqual(data, expectedData);
+                        assert.strictEqual(response.data, expectedData);
                     });
             });
         });

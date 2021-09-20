@@ -17,6 +17,10 @@ The following shows the system information that Telemetry Streaming collects.
 
 Telemetry Streaming 1.22 introduced additional virtual server output: **clientside.slowKilled** and **clientside.evictedConns**.  These do not appear in earlier versions.
 
+Telemetry Streaming 1.23 introduced the following, which do not appear in earlier versions:
+- Virtual server output: **isAvailable** and **isEnabled** (both boolean), which monitor virtual server availability, particularly for the Prometheus consumer.  
+- System output: **throughtputPerformance**, which provides throughput performance information.
+
 .. literalinclude:: ../examples/output/system_poller/output.json
     :language: json
 

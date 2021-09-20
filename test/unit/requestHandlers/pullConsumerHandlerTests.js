@@ -52,6 +52,20 @@ describe('PullConsumerHandler', () => {
             });
     };
 
+    const shouldReportContentType = (expectedData) => {
+        const expectedContentType = 'text/plain; version=0.0.4';
+        sinon.stub(pullConsumers, 'getData').callsFake(
+            () => Promise.resolve(testUtil.deepCopy({ data: expectedData, contentType: expectedContentType }))
+        );
+        return requestHandler.process()
+            .then((handler) => {
+                assert.ok(handler === requestHandler, 'should return a reference to original handler');
+                assert.strictEqual(requestHandler.getCode(), 200, 'should return expected code');
+                assert.deepStrictEqual(requestHandler.getBody(), expectedData, 'should return expected body');
+                assert.strictEqual(requestHandler.getContentType(), expectedContentType, 'should return undefined by default');
+            });
+    };
+
     describe('/pullconsumer/:consumer', () => {
         beforeEach(() => {
             restOpMock = new testUtil.MockRestOperation({ method: 'GET' });
@@ -64,15 +78,21 @@ describe('PullConsumerHandler', () => {
             const expectedData = { pullconsumer: 'pullconsumer' };
             sinon.stub(pullConsumers, 'getData').callsFake((consumerName) => {
                 consumerNameFromRequest = consumerName;
-                return Promise.resolve(testUtil.deepCopy(expectedData));
+                return Promise.resolve({ data: testUtil.deepCopy(expectedData) });
             });
             return requestHandler.process()
                 .then((handler) => {
                     assert.ok(handler === requestHandler, 'should return a reference to original handler');
                     assert.strictEqual(requestHandler.getCode(), 200, 'should return expected code');
                     assert.deepStrictEqual(requestHandler.getBody(), expectedData, 'should return expected body');
+                    assert.isUndefined(requestHandler.getContentType(), 'should return undefined by default');
                     assert.strictEqual(consumerNameFromRequest, 'consumer', 'should match name from request');
                 });
+        });
+
+        it('should return contentType when specified', () => {
+            const expectedData = { pullconsumer: 'pullconsumer' };
+            return shouldReportContentType(expectedData);
         });
 
         it('should return 404 when unable to make config lookup', assertConfigLookupError);
@@ -94,16 +114,22 @@ describe('PullConsumerHandler', () => {
             sinon.stub(pullConsumers, 'getData').callsFake((consumerName, namespace) => {
                 consumerNameFromRequest = consumerName;
                 namespaceFromRequest = namespace;
-                return Promise.resolve(testUtil.deepCopy(expectedData));
+                return Promise.resolve({ data: testUtil.deepCopy(expectedData) });
             });
             return requestHandler.process()
                 .then((handler) => {
                     assert.ok(handler === requestHandler, 'should return a reference to original handler');
                     assert.strictEqual(requestHandler.getCode(), 200, 'should return expected code');
                     assert.deepStrictEqual(requestHandler.getBody(), expectedData, 'should return expected body');
+                    assert.isUndefined(requestHandler.getContentType(), 'should return undefined by default');
                     assert.strictEqual(consumerNameFromRequest, 'consumer', 'should match consumer name from request');
                     assert.strictEqual(namespaceFromRequest, 'somenamespace', 'should match namespace from request');
                 });
+        });
+
+        it('should return contentType when specified (with namespace in path)', () => {
+            const expectedData = { name: 'consumer', namespace: 'somenamespace' };
+            return shouldReportContentType(expectedData);
         });
 
         it('should return 404 when unable to make config lookup', assertConfigLookupError);

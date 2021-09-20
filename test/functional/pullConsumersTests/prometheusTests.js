@@ -23,29 +23,34 @@ const DUTS = util.getHosts('BIGIP');
 const BASIC_DECL = JSON.parse(fs.readFileSync(constants.DECL.PULL_CONSUMER_BASIC));
 const NAMESPACE_DECL = JSON.parse(fs.readFileSync(constants.DECL.PULL_CONSUMER_WITH_NAMESPACE));
 const PROMETHEUS_PULL_CONSUMER_TYPE = 'Prometheus';
+const PROMETHEUS_CONTENT_TYPE = 'text/plain; version=0.0.4; charset=utf-8';
 
 function test() {
     const verifyResponseData = (response) => {
+        const body = response.body;
+        const headers = response.headers;
+
         assert.notStrictEqual(
-            response.indexOf('# HELP f5_counters_bitsIn counters.bitsIn'),
+            body.indexOf('# HELP f5_counters_bitsIn counters.bitsIn'),
             -1,
             'help text should exist, and contain original metric name'
         );
         assert.notStrictEqual(
-            response.indexOf('f5_counters_bitsIn{networkInterfaces="mgmt"}'),
+            body.indexOf('f5_counters_bitsIn{networkInterfaces="mgmt"}'),
             -1,
             'metric should include label with label value'
         );
         assert.notStrictEqual(
-            response.indexOf('f5_system_tmmTraffic_serverSideTraffic_bitsIn'),
+            body.indexOf('f5_system_tmmTraffic_serverSideTraffic_bitsIn'),
             -1,
             'metrics without labels should store path in metric name'
         );
         assert.notStrictEqual(
-            response.match(/(f5_system_memory )[0-9]{1,2}\n/),
+            body.match(/(f5_system_memory )[0-9]{1,2}\n/),
             null,
             'metric\'s value should only be a numeric, followed by a newline'
         );
+        assert.strictEqual(headers['content-type'], PROMETHEUS_CONTENT_TYPE, 'content-type should be of type text/plain');
     };
 
     describe('Pull Consumer Test: Prometheus - no namespace', () => {
@@ -64,13 +69,15 @@ function test() {
         describe('Prometheus - Tests', () => {
             DUTS.forEach((dut) => {
                 it(`should the Pull Consumer's formatted data from: ${dut.hostalias}`,
-                    () => dutUtils.getPullConsumerData(dut, pullConsumerName)
+                    () => dutUtils.getPullConsumerData(dut, pullConsumerName, { rawResponse: true })
                         .then((response) => {
                             verifyResponseData(response);
                         }));
 
                 it(`should the Pull Consumer's formatted data from: ${dut.hostalias} (using namespace endpoint)`,
-                    () => dutUtils.getPullConsumerData(dut, pullConsumerName, DEFAULT_UNNAMED_NAMESPACE)
+                    () => dutUtils.getPullConsumerData(
+                        dut, pullConsumerName, { namespace: DEFAULT_UNNAMED_NAMESPACE, rawResponse: true }
+                    )
                         .then((response) => {
                             verifyResponseData(response);
                         }));
@@ -96,7 +103,7 @@ function test() {
         describe('Prometheus with namespace - Tests', () => {
             DUTS.forEach((dut) => {
                 it(`should the Pull Consumer's formatted data from: ${dut.hostalias}`,
-                    () => dutUtils.getPullConsumerData(dut, pullConsumerName, namespace)
+                    () => dutUtils.getPullConsumerData(dut, pullConsumerName, { namespace, rawResponse: true })
                         .then((response) => {
                             verifyResponseData(response);
                         }));

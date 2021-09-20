@@ -324,6 +324,116 @@ module.exports = {
                                     name: 'urldb'
                                 }
                             },
+                            throughputPerformance: {
+                                clientBitsIn: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'clientBitsIn'
+                                },
+                                clientBitsOut: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'clientBitsOut'
+                                },
+                                clientIn: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'clientIn'
+                                },
+                                clientOut: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'clientOut'
+                                },
+                                compression: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'compression'
+                                },
+                                inBits: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'inBits'
+                                },
+                                inPackets: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'inPackets'
+                                },
+                                managementBitsIn: {
+                                    average: 2969820,
+                                    current: 846485,
+                                    max: 36591317,
+                                    name: 'managementBitsIn'
+                                },
+                                managementBitsOut: {
+                                    average: 133,
+                                    current: 0,
+                                    max: 12478,
+                                    name: 'managementBitsOut'
+                                },
+                                outBits: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'outBits'
+                                },
+                                outPackets: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'outPackets'
+                                },
+                                serverBitsIn: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'serverBitsIn'
+                                },
+                                serverBitsOut: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'serverBitsOut'
+                                },
+                                serverIn: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'serverIn'
+                                },
+                                serverOut: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'serverOut'
+                                },
+                                serviceBits: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'serviceBits'
+                                },
+                                servicePackets: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'servicePackets'
+                                },
+                                sslTps: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'sslTps'
+                                }
+                            },
                             configSyncSucceeded: true,
                             syncColor: 'green',
                             syncMode: 'standalone',
@@ -345,7 +455,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:7Qvg23cc+JUi7xlcTMaAvciJbMqG6IokCH0V4kEopHE=',
+                        Authorization: 'SharedKey myWorkspace:MhUFMWpArwFubi+PU40UVysA1CXL4su+O251IU8/uPQ=',
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_system',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -371,6 +481,8 @@ module.exports = {
                                 'clientside.totConns': 0,
                                 destination: '10.5.6.7:80',
                                 enabledState: 'enabled',
+                                isAvailable: false,
+                                isEnabled: true,
                                 ipProtocol: 'tcp',
                                 mask: '255.255.255.255',
                                 name: '/Common/foofoo.app/foofoo_vs',
@@ -403,6 +515,8 @@ module.exports = {
                                 'clientside.totConns': 0,
                                 destination: '192.0.2.11:443',
                                 enabledState: 'enabled',
+                                isAvailable: false,
+                                isEnabled: true,
                                 ipProtocol: 'tcp',
                                 mask: '255.255.255.0',
                                 name: '/Example_Tenant/A1/serviceMain',
@@ -424,6 +538,8 @@ module.exports = {
                                 'clientside.slowKilled': 0,
                                 'clientside.totConns': 0,
                                 destination: '192.0.2.11:80',
+                                isAvailable: true,
+                                isEnabled: true,
                                 enabledState: 'enabled',
                                 name: '/Example_Tenant/A1/serviceMain-Redirect',
                                 profiles: {
@@ -444,7 +560,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:jVwsICVnUV3jSoXSPImXFeWC14MWlB/CgInCUSObMis=',
+                        Authorization: 'SharedKey myWorkspace:Ljrkg5HfQ5gH5GFUZz+lBrJngdOxnqD4cIqkY+CQvsQ=',
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_virtualServers',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'

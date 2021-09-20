@@ -129,14 +129,15 @@ module.exports = {
     /**
      * Perform HTTP request
      *
-     * @param {String}  host               - HTTP host
-     * @param {String}  uri                - HTTP uri
-     * @param {Object}  options            - function options
-     * @param {Integer} [options.port]     - HTTP port, default is 443
-     * @param {String}  [options.protocol] - HTTP protocol, default is https
-     * @param {String}  [options.method]   - HTTP method, default is GET
-     * @param {String}  [options.body]     - HTTP body
-     * @param {Object}  [options.headers]  - HTTP headers
+     * @param {String}  host                    - HTTP host
+     * @param {String}  uri                     - HTTP uri
+     * @param {Object}  options                 - function options
+     * @param {Integer} [options.port]          - HTTP port, default is 443
+     * @param {String}  [options.protocol]      - HTTP protocol, default is https
+     * @param {String}  [options.method]        - HTTP method, default is GET
+     * @param {String}  [options.body]          - HTTP body
+     * @param {Object}  [options.headers]       - HTTP headers
+     * @param {Boolean} [otions.rawResponse]    - Whether or not to return raw HTTP response. Default=false
      *
      * @returns {Object} Returns promise resolved with response
      */
@@ -163,10 +164,14 @@ module.exports = {
                 if (err) {
                     reject(new Error(`HTTP error for '${fullUri}' : ${err}`));
                 } else if (res.statusCode >= 200 && res.statusCode <= 299) {
-                    try {
-                        resolve(JSON.parse(body));
-                    } catch (e) {
-                        resolve(body);
+                    if (options.rawResponse) {
+                        resolve(res);
+                    } else {
+                        try {
+                            resolve(JSON.parse(body));
+                        } catch (e) {
+                            resolve(body);
+                        }
                     }
                 } else {
                     const msg = `Bad status code: ${res.statusCode} ${res.statusMessage} ${res.body} for '${fullUri}'`;
@@ -502,5 +507,33 @@ module.exports = {
      */
     sleep(sleepTime) {
         return new Promise(resolve => setTimeout(resolve, sleepTime));
+    },
+
+    /**
+     * Gets the full version of the Device Under Test (dut)
+     *
+     * @param {Object} dut              - Device Under Test object
+     * @param {String} dut.ip           - DUT IP address
+     * @param {String} dut.username     - DUT username
+     * @param {String} dut.password     - DUT password
+     *
+     * @returns {Promise} Promise resolved with full version of the DUT (ex: '14.1.4.2')
+     */
+    getBigipVersion(dut) {
+        const uri = '/mgmt/tm/sys/clock';
+        const host = dut.ip;
+        const user = dut.username;
+        const password = dut.password;
+        return this.getAuthToken(host, user, password)
+            .then((data) => {
+                const postOptions = {
+                    method: 'GET',
+                    headers: {
+                        'x-f5-auth-token': data.token
+                    }
+                };
+                return this.makeRequest(host, uri, postOptions);
+            })
+            .then(response => response.selfLink.split('ver=')[1]);
     }
 };

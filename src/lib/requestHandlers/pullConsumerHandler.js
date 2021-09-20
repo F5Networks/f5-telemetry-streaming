@@ -36,6 +36,15 @@ class PullConsumerEndpointHandler extends BaseRequestHandler {
     }
 
     /**
+     * Get HTTP Content-Type
+     *
+     * @returns {String} HTTP Content-Type header value
+     */
+    getContentType() {
+        return this.contentType;
+    }
+
+    /**
      * Process request
      *
      * @returns {Promise<PullConsumerEndpointHandler>} resolved with instance of PullConsumerEndpointHandler
@@ -43,9 +52,10 @@ class PullConsumerEndpointHandler extends BaseRequestHandler {
      */
     process() {
         return pullConsumers.getData(this.params.consumer, this.params.namespace)
-            .then((data) => {
+            .then((response) => {
                 this.code = 200;
-                this.body = data;
+                this.body = response.data;
+                this.contentType = response.contentType || undefined; // If not set, default to iControlRest response
                 return this;
             }).catch(error => new ErrorHandler(error).process());
     }
