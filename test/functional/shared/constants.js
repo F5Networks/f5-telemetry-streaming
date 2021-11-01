@@ -101,5 +101,6 @@ module.exports = {
     CONSUMERS_DIR: `${__dirname}/../consumersTests`,
     PULL_CONSUMERS_DIR: `${__dirname}/../pullConsumersTests`,
     ARTIFACTS_DIR: `${__dirname}/../../artifacts`,
-    BASE_ILX_URI: '/mgmt/shared/telemetry'
+    BASE_ILX_URI: '/mgmt/shared/telemetry',
+    ARTIFACTORY_DOCKER_HUB_PREFIX: process.env.ARTIFACTORY_DOCKER_HUB ? `${process.env.ARTIFACTORY_DOCKER_HUB}/` : ''
 };

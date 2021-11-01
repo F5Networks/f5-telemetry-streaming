@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -26,6 +25,7 @@ const errors = require('../../../src/lib/errors');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
 
 describe('EventListenerHandler', () => {
     const buildRequestHandler = (opts) => {
@@ -35,6 +35,10 @@ describe('EventListenerHandler', () => {
         restOpMock.body = opts.body || { data: 'testData' };
         return new EventListenerHandler(restOpMock, opts.handlerOpts || { eventListener: 'My_Listener' });
     };
+
+    before(() => {
+        moduleCache.restore();
+    });
 
     afterEach(() => {
         sinon.restore();

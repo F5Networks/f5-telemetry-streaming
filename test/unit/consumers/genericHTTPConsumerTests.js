@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -24,6 +23,8 @@ const httpUtil = require('../../../src/lib/consumers/shared/httpUtil');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Generic_HTTP', () => {
     // Note: if a test has no explicit assertions then it relies on 'checkNockActiveMocks' in 'afterEach'
     const defaultConsumerConfig = {
@@ -32,6 +33,10 @@ describe('Generic_HTTP', () => {
     };
 
     const redactString = '*****';
+
+    before(() => {
+        moduleCache.restore();
+    });
 
     afterEach(() => {
         testUtil.checkNockActiveMocks(nock);

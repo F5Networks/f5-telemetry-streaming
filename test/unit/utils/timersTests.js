@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -25,6 +24,8 @@ const timers = require('../../../src/lib/utils/timers');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Timer Tests', () => {
     let fakeClock;
     let loggerStub;
@@ -35,6 +36,9 @@ describe('Timer Tests', () => {
         });
     };
 
+    before(() => {
+        moduleCache.restore();
+    });
 
     beforeEach(() => {
         fakeClock = stubs.clock();

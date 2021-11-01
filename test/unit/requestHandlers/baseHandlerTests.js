@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -21,9 +20,15 @@ const testUtil = require('../shared/util');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('BaseRequestHandler', () => {
     let restOpMock;
     let requestHandler;
+
+    before(() => {
+        moduleCache.restore();
+    });
 
     beforeEach(() => {
         restOpMock = new testUtil.MockRestOperation({ method: 'get' });

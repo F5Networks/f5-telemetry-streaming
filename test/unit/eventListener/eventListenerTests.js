@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -33,7 +32,13 @@ const utilMisc = require('../../../src/lib/utils/misc');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Event Listener', () => {
+    before(() => {
+        moduleCache.restore();
+    });
+
     describe('Message Stream', () => {
         /**
          * 'change' event is the only one 'true' way to test EventLister because

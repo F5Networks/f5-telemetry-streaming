@@ -9,9 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('./shared/restoreCache')();
-
+const moduleCache = require('./shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -32,12 +30,18 @@ const EVENT_TYPES = constants.EVENT_TYPES;
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Data Pipeline', () => {
     let forwardFlag;
     let forwardedData;
     let forwardError;
     let processActionsData;
     let processActionsStub;
+
+    before(() => {
+        moduleCache.restore();
+    });
 
     beforeEach(() => {
         forwardedData = undefined;

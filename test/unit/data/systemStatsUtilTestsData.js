@@ -52,6 +52,16 @@ module.exports = {
             errorMessage: /isModuleProvisioned: context has no property 'provisioning'/
         },
         {
+            name: 'should fail when no bashDisabled in contextData',
+            contextData: {},
+            propertyData: {
+                if: {
+                    isBashDisabled: true
+                }
+            },
+            errorMessage: /isBashDisabled: context has no property 'bashDisabled'/
+        },
+        {
             name: 'should resolve conditional when device version is greater or equal',
             contextData: {
                 deviceVersion: '11.6.5'
@@ -139,6 +149,40 @@ module.exports = {
             propertyData: {
                 if: {
                     isModuleProvisioned: 'afm'
+                },
+                else: {
+                    truth: false
+                }
+            },
+            expectedData: {
+                truth: false
+            }
+        },
+        {
+            name: 'should resolve conditional when bash is disabled (bashDisabled = true)',
+            contextData: {
+                bashDisabled: true
+            },
+            propertyData: {
+                if: {
+                    isBashDisabled: true
+                },
+                then: {
+                    truth: true
+                }
+            },
+            expectedData: {
+                truth: true
+            }
+        },
+        {
+            name: 'should resolve conditional when bash is not disabled (bashDisabled = false)',
+            contextData: {
+                bashDisabled: false
+            },
+            propertyData: {
+                if: {
+                    isBashDisabled: true
                 },
                 else: {
                     truth: false

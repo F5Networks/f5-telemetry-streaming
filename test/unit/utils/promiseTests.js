@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -20,7 +19,13 @@ const promiseUtil = require('../../../src/lib/utils/promise');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Promise Util', () => {
+    before(() => {
+        moduleCache.restore();
+    });
+
     describe('.allSettled()', () => {
         it('should resolve when all settled', () => assert.becomes(
             promiseUtil.allSettled([

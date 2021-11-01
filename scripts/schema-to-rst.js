@@ -246,9 +246,13 @@ function conditionalDescription(definition, props, defName) {
         const conditionalProps = definition.then;
         if (conditionalProps.properties) {
             const conditionalKey = Object.keys(definition.if.properties)[0];
-            let conditionalValue = definition.if.properties[conditionalKey].const;
-            if (!conditionalValue) {
+            let conditionalValue;
+            if (definition.if.properties[conditionalKey].const) {
+                conditionalValue = definition.if.properties[conditionalKey].const;
+            } else if (definition.if.properties[conditionalKey].enum) {
                 conditionalValue = `one of [${definition.if.properties[conditionalKey].enum.join(', ')}]`;
+            } else if (definition.if.properties[conditionalKey].pattern) {
+                conditionalValue = `matches pattern: ${definition.if.properties[conditionalKey].pattern}`;
             }
             Object.keys(conditionalProps.properties).forEach((prop) => {
                 if (conditionalProps.properties[prop].type && conditionalProps.properties[prop].description

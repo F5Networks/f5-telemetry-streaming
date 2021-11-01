@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -27,6 +26,8 @@ const tracer = require('../../../src/lib/utils/tracer');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
+
+moduleCache.remember();
 
 describe('Google_Cloud_Monitoring', () => {
     const originContext = {
@@ -144,6 +145,10 @@ describe('Google_Cloud_Monitoring', () => {
         persistentTime += tokenDuration * 1000;
         clock.clockForward(tokenDuration * 1000, { repeat: 1 });
     };
+
+    before(() => {
+        moduleCache.restore();
+    });
 
     beforeEach(() => {
         clock = stubs.clock({ fakeTimersOpts: persistentTime });

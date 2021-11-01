@@ -216,7 +216,7 @@ const _module = module.exports = {
         };
         ctx.decryptSecret.callsFake(data => Promise.resolve(data.slice(3)));
         ctx.encryptSecret.callsFake(data => Promise.resolve(`$M$${data}`));
-        ctx.getDeviceType.resolves(constants.DEVICE_TYPE.BIG_IP);
+        ctx.getDeviceType.callsFake(() => Promise.resolve(constants.DEVICE_TYPE.BIG_IP));
         return ctx;
     },
 
@@ -314,10 +314,10 @@ const _module = module.exports = {
         ctx.DeviceAPI.removeFile.resolves();
         ctx.IHealthManager.fetchQkviewDiagnostics.callsFake(() => Promise.resolve(deepCopy(qkviewReportExample)));
         ctx.IHealthManager.isQkviewReportReady.resolves(true);
-        ctx.IHealthManager.initialize.callsFake(function init() { return this; });
-        ctx.IHealthManager.uploadQkview.resolves(qkviewURI);
-        ctx.QkviewManager.initialize.callsFake(function init() { return this; });
-        ctx.QkviewManager.process.resolves(qkviewFile);
+        ctx.IHealthManager.initialize.callsFake(function init() { return Promise.resolve(this); });
+        ctx.IHealthManager.uploadQkview.callsFake(() => Promise.resolve(deepCopy(qkviewURI)));
+        ctx.QkviewManager.initialize.callsFake(function init() { return Promise.resolve(this); });
+        ctx.QkviewManager.process.callsFake(() => Promise.resolve(deepCopy(qkviewFile)));
         return ctx;
     },
 
@@ -458,7 +458,10 @@ const _module = module.exports = {
             declarations: [],
             process: sinon.stub(teemReporter.TeemReporter.prototype, 'process')
         };
-        ctx.process.callsFake(declaration => ctx.declarations.push(declaration));
+        ctx.process.callsFake((declaration) => {
+            ctx.declarations.push(declaration);
+            return Promise.resolve();
+        });
         return ctx;
     },
 
@@ -477,6 +480,7 @@ const _module = module.exports = {
         ctx.write.callsFake(function write(data) {
             ctx.data[this.path] = ctx.data[this.path] || [];
             ctx.data[this.path].push(data);
+            return Promise.resolve();
         });
         return ctx;
     },
@@ -508,7 +512,9 @@ const _module = module.exports = {
             ctx.generateUuid.uuidCounter += 1;
             return `uuid${ctx.generateUuid.uuidCounter}`;
         });
-        ctx.getRuntimeInfo.value(() => ({ nodeVersion: '4.6.0' }));
+
+        ctx.getRuntimeInfo.nodeVersion = '4.6.0';
+        ctx.getRuntimeInfo.callsFake(() => ({ nodeVersion: ctx.getRuntimeInfo.nodeVersion }));
         ctx.networkCheck.resolves();
         return ctx;
     }

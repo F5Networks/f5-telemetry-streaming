@@ -100,19 +100,32 @@ Required Information:
 
 .. IMPORTANT:: The Azure Log Analytics Consumer only supports sending 500 items. Each configuration item (such as virtual server, pool, node) uses part of this limit.
 
-To see more information about sending data to Log Analytics, see |HTTP Data Collector API|.
+Format property
+```````````````
+Telemetry Streaming 1.24 adds the **format** property for Azure Log Analytics. This was added to reduce the number of columns in the output which prevents a potential Azure error stating ``Data of Type F5Telemetry was dropped because number of field is above the limit of 500``. 
 
-.. NOTE:: The following example has been updated with the **useManagedIdentity** and **region** properties. |br| See :ref:`Using Managed Identities<mi>` following the example for information about using Azure Managed Identities and Telemetry Streaming. 
+The values for **format** are:
+
+- **default** - This is the default value, and does not change the behavior from previous versions. In this mode, each unique item gets a set of columns.  With some properties such as Client and Server SSL profiles, the number of columns exceeds the maximum allowed by Azure.  |br| For example, with a CA bundle certificate, there may be fields for expirationDate, expirationString, issuer, name, and subject.  TS creates a column named **ca-bundle_crt_expirationDate** and four additional columns for the other four properties.  The **name** value is a prefix for every column.
+- **propertyBased** - This value causes Telemetry Streaming to create fewer columns by using the property name for the column.  In the example above, the column (property) name is just **expirationDate**, and all certificates use this column for the expiration dates.  |br| Note this happens only if the property **name** exists, and it matches the declared object name at the top. Otherwise, the naming mode goes back to default.
+
+|
+
+To see more information about sending data to Log Analytics, see |HTTP Data Collector API|.
 
 Region property
 ```````````````
-Telemetry Streaming v1.11 adds the **region** property for Azure Log Analytics and Application Insights. This is in part to support the Azure Government regions.
+The **region** property for Azure Log Analytics and Application Insights was added in part to support the Azure Government regions.
 
 - This optional property is used to determine cloud type (public/commercial, govcloud) so that the correct API URLs can be used (example values: westeurope, japanwest, centralus, usgovvirginia, and so on).  
 - If you do not provide a region, Telemetry Streaming attempts to look it up from the instance metadata. 
 - If it is unable to extract metadata, TS defaults to public/commercial
 - Check the |azregion| for product/region compatibility for Azure Government.
 - See the Azure documentation for a valid list of regions (resource location), and :ref:`Region list<azreg>` for example values from the Azure CLI.
+
+|
+
+.. NOTE:: The following example has been updated with the **useManagedIdentity**, **region**, and **format** properties. You must be using a TS version that supports these properties (TS 1.24 for **format**) |br| See :ref:`Using Managed Identities<mi>` following the example for information about using Azure Managed Identities and Telemetry Streaming. 
 
 
 Example Declaration:
@@ -653,18 +666,25 @@ DataDog (EXPERIMENTAL)
 
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-    The DataDog consumer was introduced as an EXPERIMENTAL consumer in TS 1.22. The **compressionType** property was introduced in 1.23.
+    The DataDog consumer was introduced as an EXPERIMENTAL consumer in TS 1.22. |br| The **compressionType** property was introduced in 1.23. |br| The **region** and **service** properties were introduced in TS 1.24
 
 Telemetry Streaming 1.23 added the **compressionType** property to the DataDog consumer.  The acceptable values are **none** for no compression (the default), or **gzip**, where the payload will be compressed using gzip. 
 
+Telemetry Streaming 1.24 added the following properties to the DataDog consumer:
+
+- **region**: The acceptable values are **US1** (the default), **US3**, **EU1**, and **US1-FED**.
+- **service**: The name of the service generating telemetry data (string). The default is **f5-telemetry**.  This property exposes the **DATA_DOG_SERVICE_FIELD** value that is sent to the DataDog API.
+
 
 .. IMPORTANT:: Be aware of the following before deploying this consumer: |br| * The DataDog consumer is an experimental feature and will change in future releases based on feedback. |br| * There is a possibility this consumer might crash Telemetry Streaming, and send incorrectly formatted data or incomplete metrics. |br| * Some metrics might lack tags or context (such as iRule events) that will be addressed in future updates. |br| * The DataDog consumer was not tested on configurations with thousands of objects, so it is unknown if the DataDog API will accept or reject such huge payloads. |br| * Telemetry Streaming expects the Data Dog service will be responsible for formatting the names and values of metrics and tags.
+
+**NOTE**: The following declaration includes the **region** and **service** properties introduced in TS 1.24. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the lines highlighted in yellow (and the comma from line 7).
 
 Example Declaration:
 
 .. literalinclude:: ../examples/declarations/data_dog.json
     :language: json
-    
+    :emphasize-lines: 8-9 
     
 |
 
@@ -691,8 +711,7 @@ Optional Properties:
  - metricsPath: The URL path to send metrics telemetry to
  - headers: Any required HTTP headers, required to send metrics telemetry to an OpenTelemetry Protocol compatible API
 
-**Note**:
-As of Telemetry Streaming 1.23, this consumer:
+Note: As of Telemetry Streaming 1.23, this consumer:
  - Only exports OpenTelemetry metrics (logs and traces are not supported)
  - Exports telemetry data using protobufs over HTTP
  - Extracts metrics from Event Listener log messages. Any integer or float values in Event Listener log messages will be converted to an OpenTelemetry metric, and exported as a metric.
@@ -702,8 +721,7 @@ Example Declaration:
 
 .. literalinclude:: ../examples/declarations/open_telemetry_exporter.json
     :language: json
-    
-    
+
 |
 
 |

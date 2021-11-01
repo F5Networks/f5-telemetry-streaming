@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -29,6 +28,8 @@ const F5_CLOUD_NODE_SUPPORTED_VERSION = '8.11.1';
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('OpenTelemetry_Exporter', () => {
     if (util.compareVersionStrings(process.version.substring(1), '<', F5_CLOUD_NODE_SUPPORTED_VERSION)) {
         return;
@@ -46,6 +47,7 @@ describe('OpenTelemetry_Exporter', () => {
     let ExportRequestProto;
 
     before(() => {
+        moduleCache.restore();
         const dir = path.resolve(__dirname, '../../../', 'node_modules/@opentelemetry/exporter-collector-proto/build/protos');
         const root = new protobufjs.Root();
         root.resolvePath = function (_, target) {

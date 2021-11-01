@@ -7,6 +7,7 @@
         "index": "testindex",
         "port": 9200,
         "protocol": "https",
-        "dataType": "f5.telemetry"
+        "dataType": "f5.telemetry",
+        "apiVersion": "6.7.2"
     }
 }

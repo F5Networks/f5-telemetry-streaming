@@ -215,7 +215,8 @@ module.exports = {
                 ],
                 deviceCtx: {
                     deviceVersion: '13.0.0.0',
-                    provisioning: { ltm: { name: 'ltm', level: 'nominal' } }
+                    provisioning: { ltm: { name: 'ltm', level: 'nominal' } },
+                    bashDisabled: false
                 },
                 expectedCtx: {
                     data: {
@@ -583,7 +584,8 @@ module.exports = {
                 ],
                 deviceCtx: {
                     deviceVersion: '13.0.0.0',
-                    provisioning: { ltm: { name: 'ltm', level: 'nominal' } }
+                    provisioning: { ltm: { name: 'ltm', level: 'nominal' } },
+                    bashDisabled: false
                 },
                 expectedCtx: {
                     data: {
@@ -661,7 +663,8 @@ module.exports = {
                 ],
                 deviceCtx: {
                     deviceVersion: '13.0.0.0',
-                    provisioning: { ltm: { name: 'ltm', level: 'nominal' }, gtm: { name: 'gtm', level: 'minimum' } }
+                    provisioning: { ltm: { name: 'ltm', level: 'nominal' }, gtm: { name: 'gtm', level: 'minimum' } },
+                    bashDisabled: false
                 },
                 expectedCtx: {
                     data: {
@@ -834,7 +837,8 @@ module.exports = {
                 ],
                 deviceCtx: {
                     deviceVersion: '13.0.0.0',
-                    provisioning: { ltm: { name: 'ltm', level: 'nominal' }, gtm: { name: 'gtm', level: 'minimum' } }
+                    provisioning: { ltm: { name: 'ltm', level: 'nominal' }, gtm: { name: 'gtm', level: 'minimum' } },
+                    bashDisabled: false
                 },
                 expectedCtx: {
                     data: {

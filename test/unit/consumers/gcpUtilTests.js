@@ -9,9 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
-
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -24,7 +22,13 @@ const nock = require('nock');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Google Cloud Util Tests', () => {
+    before(() => {
+        moduleCache.restore();
+    });
+
     describe('getAccessToken', () => {
         const accessTokenResponse = {
             access_token: 'hereHaveSomeAccess',

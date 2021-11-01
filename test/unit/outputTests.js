@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('./shared/restoreCache')();
+const moduleCache = require('./shared/restoreCache')();
 
 const Ajv = require('ajv');
 const chai = require('chai');
@@ -20,7 +19,13 @@ const fs = require('fs');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Example Output', () => {
+    before(() => {
+        moduleCache.restore();
+    });
+
     function validateAgainstSchema(data, schema) {
         const ajv = new Ajv({ useDefaults: true });
         const validator = ajv.compile(schema);

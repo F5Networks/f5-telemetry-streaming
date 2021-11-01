@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const sinon = require('sinon');
 const chai = require('chai');
@@ -22,11 +21,16 @@ const testUtil = require('./../shared/util');
 const awsUtil = require('../../../src/lib/consumers/shared/awsUtil');
 const awsUtilTestsData = require('./data/awsUtilTestsData');
 
-
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('AWS Util Tests', () => {
+    before(() => {
+        moduleCache.restore();
+    });
+
     afterEach(() => {
         sinon.restore();
     });

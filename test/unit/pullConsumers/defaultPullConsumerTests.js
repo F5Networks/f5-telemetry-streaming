@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -20,6 +19,8 @@ const defaultConsumer = require('../../../src/lib/pullConsumers/default');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
+
+moduleCache.remember();
 
 describe('Default Pull Consumer', () => {
     const tracerMock = {
@@ -38,6 +39,10 @@ describe('Default Pull Consumer', () => {
         tracer: tracerMock,
         logger: loggerMock
     };
+
+    before(() => {
+        moduleCache.restore();
+    });
 
     afterEach(() => {
         sinon.restore();

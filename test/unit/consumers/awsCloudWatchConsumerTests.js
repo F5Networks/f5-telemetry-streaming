@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const AWS = require('aws-sdk');
 const chai = require('chai');
@@ -24,7 +23,13 @@ const awsUtil = require('../../../src/lib/consumers/shared/awsUtil');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('AWS_CloudWatch', () => {
+    before(() => {
+        moduleCache.restore();
+    });
+
     afterEach(() => {
         sinon.restore();
     });

@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -29,12 +28,18 @@ const utilMisc = require('../../../src/lib/utils/misc');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Config Util', () => {
     let coreStub;
 
     const parseDeclaration = (declaration, options) => configWorker.processDeclaration(
         testUtil.deepCopy(declaration), options
     );
+
+    before(() => {
+        moduleCache.restore();
+    });
 
     beforeEach(() => {
         coreStub = stubs.coreStub({
@@ -438,5 +443,388 @@ describe('Config Util', () => {
             };
             return assert.becomes(configUtil.decryptSecrets(encrypted), decrypted);
         });
+    });
+
+    describe('.getTelemetryPullConsumerSystemPollerGroupForPullConsumer()', () => {
+        const declaration = {
+            class: 'Telemetry',
+            Pull_Poller_1: {
+                class: 'Telemetry_System_Poller',
+                interval: 0
+            },
+            Pull_Poller_2: {
+                class: 'Telemetry_System_Poller',
+                interval: 0
+            },
+            Pull_Poller_3: {
+                class: 'Telemetry_System_Poller',
+                interval: 0
+            },
+            My_Pull_Consumer_1: {
+                class: 'Telemetry_Pull_Consumer',
+                type: 'default',
+                systemPoller: [
+                    'Pull_Poller_1',
+                    'Pull_Poller_2'
+                ]
+            },
+            My_Pull_Consumer_2: {
+                class: 'Telemetry_Pull_Consumer',
+                type: 'default',
+                systemPoller: [
+                    'Pull_Poller_2',
+                    'Pull_Poller_3'
+                ]
+            },
+            My_Namespace: {
+                class: 'Telemetry_Namespace',
+                Pull_Poller_1: {
+                    class: 'Telemetry_System_Poller',
+                    interval: 0
+                },
+                Pull_Poller_2: {
+                    class: 'Telemetry_System_Poller',
+                    interval: 0
+                },
+                Pull_Poller_3: {
+                    class: 'Telemetry_System_Poller',
+                    interval: 0
+                },
+                My_Pull_Consumer_1: {
+                    class: 'Telemetry_Pull_Consumer',
+                    type: 'default',
+                    systemPoller: [
+                        'Pull_Poller_1',
+                        'Pull_Poller_2'
+                    ]
+                },
+                My_Pull_Consumer_2: {
+                    class: 'Telemetry_Pull_Consumer',
+                    type: 'default',
+                    systemPoller: [
+                        'Pull_Poller_2',
+                        'Pull_Poller_3'
+                    ]
+                }
+            }
+        };
+
+        it('should return Telemetry_Pull_Consumer_System_Poller_Group for each consumer', () => parseDeclaration(declaration)
+            .then(() => {
+                const pullConsumer1 = configUtil.getTelemetryPullConsumers(configWorker.currentConfig, 'f5telemetry_default')
+                    .find(pc => pc.name === 'My_Pull_Consumer_1');
+                assert.isNotEmpty(pullConsumer1);
+                assert.deepStrictEqual(
+                    configUtil.getTelemetryPullConsumerSystemPollerGroupForPullConsumer(
+                        configWorker.currentConfig, pullConsumer1
+                    ),
+                    {
+                        class: 'Telemetry_Pull_Consumer_System_Poller_Group',
+                        enable: true,
+                        id: 'f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_1',
+                        name: 'Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_1',
+                        namespace: 'f5telemetry_default',
+                        pullConsumer: 'My_Pull_Consumer_1',
+                        traceName: 'f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_1',
+                        trace: {
+                            enable: false
+                        },
+                        systemPollers: [
+                            'Pull_Poller_1',
+                            'Pull_Poller_2'
+                        ]
+                    },
+                    'should return Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_1'
+                );
+                const pullConsumer2 = configUtil.getTelemetryPullConsumers(configWorker.currentConfig, 'f5telemetry_default')
+                    .find(pc => pc.name === 'My_Pull_Consumer_2');
+                assert.isNotEmpty(pullConsumer1);
+                assert.deepStrictEqual(
+                    configUtil.getTelemetryPullConsumerSystemPollerGroupForPullConsumer(
+                        configWorker.currentConfig, pullConsumer2
+                    ),
+                    {
+                        class: 'Telemetry_Pull_Consumer_System_Poller_Group',
+                        enable: true,
+                        id: 'f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_2',
+                        name: 'Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_2',
+                        namespace: 'f5telemetry_default',
+                        pullConsumer: 'My_Pull_Consumer_2',
+                        traceName: 'f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_2',
+                        trace: {
+                            enable: false
+                        },
+                        systemPollers: [
+                            'Pull_Poller_2',
+                            'Pull_Poller_3'
+                        ]
+                    },
+                    'should return Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_2'
+                );
+                const pullConsumer3 = configUtil.getTelemetryPullConsumers(configWorker.currentConfig, 'My_Namespace')
+                    .find(pc => pc.name === 'My_Pull_Consumer_1');
+                assert.isNotEmpty(pullConsumer1);
+                assert.deepStrictEqual(
+                    configUtil.getTelemetryPullConsumerSystemPollerGroupForPullConsumer(
+                        configWorker.currentConfig, pullConsumer3
+                    ),
+                    {
+                        class: 'Telemetry_Pull_Consumer_System_Poller_Group',
+                        enable: true,
+                        id: 'My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_1',
+                        name: 'Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_1',
+                        namespace: 'My_Namespace',
+                        pullConsumer: 'My_Pull_Consumer_1',
+                        traceName: 'My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_1',
+                        trace: {
+                            enable: false
+                        },
+                        systemPollers: [
+                            'Pull_Poller_1',
+                            'Pull_Poller_2'
+                        ]
+                    },
+                    'should return Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_1'
+                );
+                const pullConsumer4 = configUtil.getTelemetryPullConsumers(configWorker.currentConfig, 'My_Namespace')
+                    .find(pc => pc.name === 'My_Pull_Consumer_2');
+                assert.isNotEmpty(pullConsumer1);
+                assert.deepStrictEqual(
+                    configUtil.getTelemetryPullConsumerSystemPollerGroupForPullConsumer(
+                        configWorker.currentConfig, pullConsumer4
+                    ),
+                    {
+                        class: 'Telemetry_Pull_Consumer_System_Poller_Group',
+                        enable: true,
+                        id: 'My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_2',
+                        name: 'Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_2',
+                        namespace: 'My_Namespace',
+                        pullConsumer: 'My_Pull_Consumer_2',
+                        traceName: 'My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_2',
+                        trace: {
+                            enable: false
+                        },
+                        systemPollers: [
+                            'Pull_Poller_2',
+                            'Pull_Poller_3'
+                        ]
+                    },
+                    'should return Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_2'
+                );
+            }));
+    });
+
+    describe('.getTelemetrySystemPollersForGroup()', () => {
+        const declaration = {
+            class: 'Telemetry',
+            Pull_Poller_1: {
+                class: 'Telemetry_System_Poller',
+                interval: 0
+            },
+            Pull_Poller_2: {
+                class: 'Telemetry_System_Poller',
+                interval: 0,
+                enable: false
+            },
+            Pull_Poller_3: {
+                class: 'Telemetry_System_Poller',
+                interval: 0
+            },
+            Pull_Poller_4: {
+                class: 'Telemetry_System_Poller',
+                interval: 0
+            },
+            Pull_System_1: {
+                class: 'Telemetry_System',
+                host: 'host1',
+                systemPoller: 'Pull_Poller_2'
+            },
+            Pull_System_2: {
+                class: 'Telemetry_System',
+                host: 'host2',
+                systemPoller: 'Pull_Poller_4'
+            },
+            Pull_System_3: {
+                class: 'Telemetry_System',
+                enable: true,
+                host: 'host3',
+                systemPoller: 'Pull_Poller_2'
+            },
+            Pull_System_4: {
+                class: 'Telemetry_System',
+                host: 'host4',
+                enable: false,
+                systemPoller: 'Pull_Poller_4'
+            },
+            My_Pull_Consumer_1: {
+                class: 'Telemetry_Pull_Consumer',
+                type: 'default',
+                systemPoller: [
+                    'Pull_Poller_1',
+                    'Pull_Poller_2',
+                    'Pull_Poller_4'
+                ]
+            },
+            My_Pull_Consumer_2: {
+                class: 'Telemetry_Pull_Consumer',
+                type: 'default',
+                systemPoller: [
+                    'Pull_Poller_2',
+                    'Pull_Poller_3',
+                    'Pull_Poller_4'
+                ]
+            },
+            My_Namespace: {
+                class: 'Telemetry_Namespace',
+                Pull_Poller_1: {
+                    class: 'Telemetry_System_Poller',
+                    interval: 0
+                },
+                Pull_Poller_2: {
+                    class: 'Telemetry_System_Poller',
+                    interval: 0,
+                    enable: false
+                },
+                Pull_Poller_3: {
+                    class: 'Telemetry_System_Poller',
+                    interval: 0
+                },
+                Pull_Poller_4: {
+                    class: 'Telemetry_System_Poller',
+                    interval: 0
+                },
+                Pull_System_1: {
+                    class: 'Telemetry_System',
+                    host: 'host1',
+                    systemPoller: 'Pull_Poller_2'
+                },
+                Pull_System_2: {
+                    class: 'Telemetry_System',
+                    host: 'host2',
+                    systemPoller: 'Pull_Poller_4'
+                },
+                Pull_System_3: {
+                    class: 'Telemetry_System',
+                    enable: true,
+                    host: 'host3',
+                    systemPoller: 'Pull_Poller_2'
+                },
+                Pull_System_4: {
+                    class: 'Telemetry_System',
+                    host: 'host4',
+                    enable: false,
+                    systemPoller: 'Pull_Poller_4'
+                },
+                My_Pull_Consumer_1: {
+                    class: 'Telemetry_Pull_Consumer',
+                    type: 'default',
+                    systemPoller: [
+                        'Pull_Poller_1',
+                        'Pull_Poller_2',
+                        'Pull_Poller_4'
+                    ]
+                },
+                My_Pull_Consumer_2: {
+                    class: 'Telemetry_Pull_Consumer',
+                    type: 'default',
+                    systemPoller: [
+                        'Pull_Poller_2',
+                        'Pull_Poller_3',
+                        'Pull_Poller_4'
+                    ]
+                }
+            }
+        };
+
+        it('should return Telemetry_System_Poller for each group', () => parseDeclaration(declaration)
+            .then(() => {
+                const pullConsumer1 = configUtil.getTelemetryPullConsumers(configWorker.currentConfig, 'f5telemetry_default')
+                    .find(pc => pc.name === 'My_Pull_Consumer_1');
+                assert.isNotEmpty(pullConsumer1);
+
+                const pollerGroup1 = configUtil.getTelemetryPullConsumerSystemPollerGroupForPullConsumer(
+                    configWorker.currentConfig, pullConsumer1
+                );
+                assert.isNotEmpty(pollerGroup1);
+                assert.deepStrictEqual(pollerGroup1.traceName, 'f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_1');
+                assert.sameDeepMembers(
+                    configUtil.getTelemetrySystemPollersForGroup(configWorker.currentConfig, pollerGroup1)
+                        .map(sp => sp.traceName),
+                    [
+                        'f5telemetry_default::Pull_System_1::Pull_Poller_2',
+                        'f5telemetry_default::Pull_System_2::Pull_Poller_4',
+                        'f5telemetry_default::Pull_System_3::Pull_Poller_2',
+                        'f5telemetry_default::Pull_System_4::Pull_Poller_4',
+                        'f5telemetry_default::Pull_Poller_1::Pull_Poller_1'
+                    ],
+                    'should return Telemetry_System_Poller objects for f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_1 group'
+                );
+
+                const pullConsumer2 = configUtil.getTelemetryPullConsumers(configWorker.currentConfig, 'f5telemetry_default')
+                    .find(pc => pc.name === 'My_Pull_Consumer_2');
+                assert.isNotEmpty(pullConsumer2);
+
+                const pollerGroup2 = configUtil.getTelemetryPullConsumerSystemPollerGroupForPullConsumer(
+                    configWorker.currentConfig, pullConsumer2
+                );
+                assert.isNotEmpty(pollerGroup2);
+                assert.deepStrictEqual(pollerGroup2.traceName, 'f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_2');
+                assert.sameDeepMembers(
+                    configUtil.getTelemetrySystemPollersForGroup(configWorker.currentConfig, pollerGroup2)
+                        .map(sp => sp.traceName),
+                    [
+                        'f5telemetry_default::Pull_System_1::Pull_Poller_2',
+                        'f5telemetry_default::Pull_System_2::Pull_Poller_4',
+                        'f5telemetry_default::Pull_System_3::Pull_Poller_2',
+                        'f5telemetry_default::Pull_System_4::Pull_Poller_4',
+                        'f5telemetry_default::Pull_Poller_3::Pull_Poller_3'
+                    ],
+                    'should return Telemetry_System_Poller objects for f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_2 group'
+                );
+
+                const pullConsumer3 = configUtil.getTelemetryPullConsumers(configWorker.currentConfig, 'My_Namespace')
+                    .find(pc => pc.name === 'My_Pull_Consumer_1');
+                assert.isNotEmpty(pullConsumer3);
+
+                const pollerGroup3 = configUtil.getTelemetryPullConsumerSystemPollerGroupForPullConsumer(
+                    configWorker.currentConfig, pullConsumer3
+                );
+                assert.isNotEmpty(pollerGroup3);
+                assert.deepStrictEqual(pollerGroup3.traceName, 'My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_1');
+                assert.sameDeepMembers(
+                    configUtil.getTelemetrySystemPollersForGroup(configWorker.currentConfig, pollerGroup3)
+                        .map(sp => sp.traceName),
+                    [
+                        'My_Namespace::Pull_System_1::Pull_Poller_2',
+                        'My_Namespace::Pull_System_2::Pull_Poller_4',
+                        'My_Namespace::Pull_System_3::Pull_Poller_2',
+                        'My_Namespace::Pull_System_4::Pull_Poller_4',
+                        'My_Namespace::Pull_Poller_1::Pull_Poller_1'
+                    ],
+                    'should return Telemetry_System_Poller objects for My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_1 group'
+                );
+
+                const pullConsumer4 = configUtil.getTelemetryPullConsumers(configWorker.currentConfig, 'My_Namespace')
+                    .find(pc => pc.name === 'My_Pull_Consumer_2');
+                assert.isNotEmpty(pullConsumer4);
+
+                const pollerGroup4 = configUtil.getTelemetryPullConsumerSystemPollerGroupForPullConsumer(
+                    configWorker.currentConfig, pullConsumer4
+                );
+                assert.isNotEmpty(pollerGroup4);
+                assert.deepStrictEqual(pollerGroup4.traceName, 'My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_2');
+                assert.sameDeepMembers(
+                    configUtil.getTelemetrySystemPollersForGroup(configWorker.currentConfig, pollerGroup4)
+                        .map(sp => sp.traceName),
+                    [
+                        'My_Namespace::Pull_System_1::Pull_Poller_2',
+                        'My_Namespace::Pull_System_2::Pull_Poller_4',
+                        'My_Namespace::Pull_System_3::Pull_Poller_2',
+                        'My_Namespace::Pull_System_4::Pull_Poller_4',
+                        'My_Namespace::Pull_Poller_3::Pull_Poller_3'
+                    ],
+                    'should return Telemetry_System_Poller objects for My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_2 group'
+                );
+            }));
     });
 });

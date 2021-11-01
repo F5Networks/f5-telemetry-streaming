@@ -12,9 +12,19 @@ const httpUtil = require('./../shared/httpUtil');
 const util = require('../../utils/misc');
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 
+const DEFAULT_DOC_TYPE = '_doc';
+
+/**
+ * Checks if the dataType property is deprecated, given the apiVersion of ElasticSearch
+ *
+ * @param {Object} config      - Consumer configuration
+ *
+ * @returns {Boolean}   Whether or not the dataType property is deprecated
+ */
+const dataTypeIsDeprecated = config => util.compareVersionStrings(config.apiVersion, '>=', '7.0');
+
 /**
  * Returns the appropriate http URI, given the consumer's context.
- * NOTE: This function does not conform to ElasticSearch 7 REST APIs.
  *
  * @param {Object} config - Consumer configuration
  *
@@ -23,7 +33,8 @@ const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 const formatURI = (config) => {
     const path = util.trimString(config.path || '', '/');
     const index = util.trimString(config.index, '/');
-    return `/${path.length ? `${path}/` : ''}${index}/${config.dataType}`;
+    const dataType = dataTypeIsDeprecated(config) ? DEFAULT_DOC_TYPE : config.dataType;
+    return `/${path.length ? `${path}/` : ''}${index}/${dataType}`;
 };
 
 /**
@@ -43,6 +54,11 @@ module.exports = function (context) {
     if (config.username && config.passphrase) {
         const auth = Buffer.from(`${config.username}:${config.passphrase}`).toString('base64');
         headers.Authorization = `Basic ${auth}`;
+    }
+
+    // If an invalid dataType value is used for the given ElasticSearch API version, log a warning
+    if (dataTypeIsDeprecated(config) && typeof config.dataType !== 'undefined' && config.dataType !== DEFAULT_DOC_TYPE) {
+        context.logger.warning(`ElasticSearch with apiVersion ${config.apiVersion} has deprecated specifying dataType in requests. Using '${DEFAULT_DOC_TYPE}' instead.`);
     }
 
     util.renameKeys(context.event.data, /([.])+\1/g, '.'); // remove consecutive periods from TMOS names

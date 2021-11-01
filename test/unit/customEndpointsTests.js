@@ -8,6 +8,9 @@
 
 'use strict';
 
+/* eslint-disable import/order */
+const moduleCache = require('./shared/restoreCache')();
+
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
@@ -19,7 +22,13 @@ const customEndpointsTestsData = require('./data/customEndpointsTestsData');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Custom Endpoints (Telemetry_Endpoints)', () => {
+    before(() => {
+        moduleCache.restore();
+    });
+
     const DEFAULT_TOTAL_ATTEMPTS = 10;
 
     const checkResponse = (endpointMock, response) => {

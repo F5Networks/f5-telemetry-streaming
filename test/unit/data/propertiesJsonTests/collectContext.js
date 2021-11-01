@@ -78,11 +78,26 @@ module.exports = {
                         version: '12.1.5.1',
                         machineId: '00000000-0000-0000-0000-000000000000'
                     }
+                },
+                {
+                    endpoint: '/mgmt/tm/sys/db/systemauth.disablebash',
+                    response: {
+                        kind: 'tm:sys:db:dbstate',
+                        name: 'systemauth.disablebash',
+                        fullPath: 'systemauth.disablebash',
+                        generation: 1,
+                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2.3',
+                        defaultValue: 'false',
+                        scfConfig: 'true',
+                        value: 'false',
+                        valueRange: 'false true'
+                    }
                 }
             ],
             expectedData: {
                 HOSTNAME: 'bigip1',
                 BASE_MAC_ADDR: '00:01:02:0A:0B:D0',
+                bashDisabled: false,
                 deviceVersion: '12.1.5.1',
                 provisioning: {
                     afm: {
@@ -126,11 +141,19 @@ module.exports = {
                         kind: 'shared:resolver:device-groups:deviceinfostate',
                         selfLink: 'https://localhost/mgmt/shared/identified-devices/config/device-info'
                     }
+                },
+                {
+                    endpoint: '/mgmt/tm/sys/db/systemauth.disablebash',
+                    response: {
+                        kind: 'tm:sys:db:dbstate',
+                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2.3'
+                    }
                 }
             ],
             expectedData: {
                 HOSTNAME: 'missing data',
                 BASE_MAC_ADDR: 'missing data',
+                bashDisabled: false,
                 deviceVersion: 'missing data',
                 provisioning: {}
             }
@@ -160,11 +183,19 @@ module.exports = {
                         kind: 'shared:resolver:device-groups:deviceinfostate',
                         selfLink: 'https://localhost/mgmt/shared/identified-devices/config/device-info'
                     }
+                },
+                {
+                    endpoint: '/mgmt/tm/sys/db/systemauth.disablebash',
+                    response: {
+                        kind: 'tm:sys:db:dbstate',
+                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2.3'
+                    }
                 }
             ],
             expectedData: {
                 HOSTNAME: 'missing data',
                 BASE_MAC_ADDR: 'missing data',
+                bashDisabled: false,
                 deviceVersion: 'missing data',
                 provisioning: {}
             }

@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const AWS = require('aws-sdk');
 const chai = require('chai');
@@ -23,6 +22,8 @@ const testUtil = require('../shared/util');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('AWS_S3', () => {
     let clock;
     let awsConfigUpdate;
@@ -34,6 +35,10 @@ describe('AWS_S3', () => {
         username: 'awsuser',
         passphrase: 'awssecret'
     };
+
+    before(() => {
+        moduleCache.restore();
+    });
 
     beforeEach(() => {
         awsConfigUpdate = sinon.stub(AWS.config, 'update').resolves();

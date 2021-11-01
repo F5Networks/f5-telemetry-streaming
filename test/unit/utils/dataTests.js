@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -22,7 +21,13 @@ const testUtil = require('../shared/util');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Data Util', () => {
+    before(() => {
+        moduleCache.restore();
+    });
+
     describe('getMatches', () => {
         dataUtilTestsData.getMatches.forEach((testConf) => {
             testUtil.getCallableIt(testConf)(testConf.name, () => {

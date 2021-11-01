@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('./shared/restoreCache')();
+const moduleCache = require('./shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -31,8 +30,14 @@ const utilMisc = require('../../src/lib/utils/misc');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Declarations', () => {
     let coreStub;
+
+    before(() => {
+        moduleCache.restore();
+    });
 
     beforeEach(() => {
         coreStub = stubs.coreStub({
@@ -61,8 +66,7 @@ describe('Declarations', () => {
                     originFsAccess.apply(null, arguments);
                 }
             });
-            // added for F5_Cloud tests
-            sinon.stub(utilMisc, 'getRuntimeInfo').value(() => ({ nodeVersion: '8.12.0' }));
+            coreStub.utilMisc.getRuntimeInfo.nodeVersion = '8.12.0';
         });
         // first let's validate all example declarations
         const baseDir = `${__dirname}/../../examples/declarations`;
@@ -4038,6 +4042,7 @@ describe('Declarations', () => {
                 {
                     type: 'Azure_Log_Analytics',
                     workspaceId: 'workspaceId',
+                    format: 'default',
                     useManagedIdentity: false,
                     passphrase: {
                         class: 'Secret',
@@ -4051,6 +4056,7 @@ describe('Declarations', () => {
                 {
                     type: 'Azure_Log_Analytics',
                     workspaceId: 'workspaceId',
+                    format: 'propertyBased',
                     useManagedIdentity: false,
                     passphrase: {
                         cipherText: 'cipherText'
@@ -4060,6 +4066,7 @@ describe('Declarations', () => {
                 {
                     type: 'Azure_Log_Analytics',
                     workspaceId: 'workspaceId',
+                    format: 'propertyBased',
                     useManagedIdentity: false,
                     passphrase: {
                         class: 'Secret',
@@ -4094,7 +4101,15 @@ describe('Declarations', () => {
                 [
                     { property: 'passphrase', requiredTests: true, ignoreOther: true },
                     'region',
-                    'workspaceId'
+                    'workspaceId',
+                    {
+                        property: 'format',
+                        ignoreOther: true,
+                        enumTests: {
+                            allowed: ['default', 'propertyBased'],
+                            notAllowed: ['format']
+                        }
+                    }
                 ],
                 { stringLengthTests: true }
             );
@@ -4418,7 +4433,9 @@ describe('Declarations', () => {
                 {
                     type: 'DataDog',
                     apiKey: 'test',
-                    compressionType: 'none'
+                    compressionType: 'none',
+                    region: 'US1',
+                    service: 'f5-telemetry'
                 }
             ));
 
@@ -4426,12 +4443,16 @@ describe('Declarations', () => {
                 {
                     type: 'DataDog',
                     apiKey: 'test',
-                    compressionType: 'gzip'
+                    compressionType: 'gzip',
+                    region: 'EU1',
+                    service: 'my-great-application'
                 },
                 {
                     type: 'DataDog',
                     apiKey: 'test',
-                    compressionType: 'gzip'
+                    compressionType: 'gzip',
+                    region: 'EU1',
+                    service: 'my-great-application'
                 }
             ));
 
@@ -4444,11 +4465,19 @@ describe('Declarations', () => {
                 },
                 [
                     { property: 'apiKey', requiredTests: true, stringLengthTests: true },
+                    { property: 'service', stringLengthTests: true },
                     {
                         property: 'compressionType',
                         enumTests: {
                             allowed: ['none', 'gzip'],
                             notAllowed: ['compressionType']
+                        }
+                    },
+                    {
+                        property: 'region',
+                        enumTests: {
+                            allowed: ['US1', 'US3', 'EU1', 'US1-FED'],
+                            notAllowed: ['region']
                         }
                     }
                 ]
@@ -4468,8 +4497,71 @@ describe('Declarations', () => {
                     index: 'index',
                     dataType: 'f5.telemetry',
                     port: 9200,
-                    protocol: 'https'
+                    protocol: 'https',
+                    apiVersion: '6.0'
                 }
+            ));
+
+            const generateApiVersionTests = () => {
+                const createTestCase = (apiVersion, additionalProps) => ({
+                    apiVersion,
+                    expectedProps: Object.assign({
+                        type: 'ElasticSearch',
+                        host: 'host',
+                        index: 'index',
+                        port: 9200,
+                        protocol: 'https',
+                        apiVersion
+                    }, additionalProps)
+                });
+
+                return [
+                    {
+                        apiVersion: '6',
+                        additionalProps: { dataType: 'f5.telemetry' }
+                    },
+                    {
+                        apiVersion: '6.7.2',
+                        additionalProps: { dataType: 'f5.telemetry' }
+                    },
+                    {
+                        apiVersion: '7',
+                        additionalProps: { dataType: '_doc' }
+                    },
+                    {
+                        apiVersion: '7.11',
+                        additionalProps: { dataType: '_doc' }
+                    },
+                    {
+                        apiVersion: '8.1'
+                    },
+                    {
+                        apiVersion: 'blah'
+                    }
+                ].map(apiVerionTest => createTestCase(apiVerionTest.apiVersion, apiVerionTest.additionalProps));
+            };
+
+            generateApiVersionTests().forEach((apiVersionTest) => {
+                it(`should pass declaration (apiVersion = ${apiVersionTest.apiVersion})`, () => validateMinimal(
+                    {
+                        type: 'ElasticSearch',
+                        host: 'host',
+                        index: 'index',
+                        apiVersion: apiVersionTest.apiVersion
+                    },
+                    apiVersionTest.expectedProps
+                ));
+            });
+
+            it('should not allow dataType when apiVersion = 8.1', () => assert.isRejected(
+                validateMinimal({
+                    type: 'ElasticSearch',
+                    host: 'host',
+                    index: 'index',
+                    apiVersion: '8.1',
+                    dataType: 'custom'
+                }),
+                /keyword.*not.*dataPath.*should NOT be valid/
             ));
 
             it('should allow full declaration', () => validateFull(

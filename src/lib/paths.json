@@ -221,6 +221,10 @@
             "name": "throughputPerformance",
             "path": "/mgmt/tm/sys/performance/throughput?options=detail",
             "parseDuplicateKeys": true
+        },
+        {
+            "name": "bashDisabled",
+            "path": "/mgmt/tm/sys/db/systemauth.disablebash"
         }
     ]
 }

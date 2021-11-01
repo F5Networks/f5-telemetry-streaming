@@ -272,7 +272,7 @@ function generateDeclarationAndExpectedOutput(trace) {
                                 host: undefined,
                                 port: undefined,
                                 protocol: undefined,
-                                allowSelfSignedCert: undefined
+                                allowSelfSignedCert: false
                             },
                             credentials: {
                                 username: undefined,
@@ -333,7 +333,7 @@ function generateDeclarationAndExpectedOutput(trace) {
                                 host: undefined,
                                 port: undefined,
                                 protocol: undefined,
-                                allowSelfSignedCert: undefined
+                                allowSelfSignedCert: false
                             },
                             credentials: {
                                 username: undefined,

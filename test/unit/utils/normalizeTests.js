@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -21,7 +20,13 @@ const util = require('../shared/util');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Normalize Util', () => {
+    before(() => {
+        moduleCache.restore();
+    });
+
     describe('._convertArrayToMap()', () => {
         it('should convert array to map with single key', () => {
             const array = [
@@ -913,6 +918,20 @@ describe('Normalize Util', () => {
 
             actual = normalizeUtil.diskStoragePercentsToFloating({ data: { '/': { name: '/', Capacity: 50 } } });
             assert.deepStrictEqual(actual, { '/': { name: '/', Capacity: 50, Capacity_Float: 0.5 } }, 'should convert value');
+        });
+    });
+
+    describe('.convertToBoolean()', () => {
+        it('should convert string values to booleans', () => {
+            const truthyValues = ['true', 'TRUE', '1', 'on', 'ON', 'yes', 'YES'];
+            truthyValues.forEach((val) => {
+                assert.isTrue(normalizeUtil.convertStringToTruthyBoolean({ data: val }), `should convert string (${val})`);
+            });
+
+            const falseyValues = ['false', 'FALSE', '0', 'off', 'OFF', 'no', 'NO', 'invalid', 'NotValid'];
+            falseyValues.forEach((val) => {
+                assert.isNotTrue(normalizeUtil.convertStringToTruthyBoolean({ data: val }), `should convert string (${val})`);
+            });
         });
     });
 

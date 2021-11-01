@@ -4,6 +4,8 @@
         "class": "Telemetry_Consumer",
         "type": "DataDog",
         "apiKey": "api_key",
-        "compressionType": "gzip"
+        "compressionType": "gzip",
+        "region": "US1",
+        "service": "f5-telemetry"
     }
 }

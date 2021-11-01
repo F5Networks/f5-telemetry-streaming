@@ -47,7 +47,12 @@ function getData(consumerName, namespace) {
                 throw new ModuleNotLoadedError(`Pull Consumer of type '${consumerConfig.type}' is not loaded`);
             }
 
-            const pollerConfigs = getEnabledPollersForConsumer(config, consumerConfig);
+            const pollerGroup = configUtil.getTelemetryPullConsumerSystemPollerGroupForPullConsumer(
+                config, consumerConfig
+            );
+            const pollerConfigs = configUtil.getTelemetrySystemPollersForGroup(config, pollerGroup)
+                .filter(sp => sp.enable);
+
             return systemPoller.fetchPollersData(util.deepCopy(pollerConfigs), true);
         })
         .then(pollerData => invokeConsumer(consumerConfig, pollerData));
@@ -73,10 +78,6 @@ function invokeConsumer(consumerConfig, dataCtxs) {
         tracer: consumer.tracer
     };
     return consumer.consumer(context);
-}
-
-function getEnabledPollersForConsumer(config, consumer) {
-    return configUtil.getReceivers(config, consumer).filter(c => c.enable);
 }
 
 function getConsumerConfig(config, consumerName, namespace) {

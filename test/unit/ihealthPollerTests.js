@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('./shared/restoreCache')();
+const moduleCache = require('./shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -32,9 +31,15 @@ const utilMisc = require('../../src/lib/utils/misc');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('IHealthPoller', () => {
     let coreStub;
     let ihealthStub;
+
+    before(() => {
+        moduleCache.restore();
+    });
 
     beforeEach(() => {
         coreStub = stubs.coreStub({
@@ -1076,7 +1081,7 @@ describe('IHealthPoller', () => {
                         }, 'should pass decrypted iHealth credentials');
                         assert.deepStrictEqual(ihmArgs[1].proxy, {
                             connection: {
-                                allowSelfSignedCert: undefined,
+                                allowSelfSignedCert: false,
                                 host: undefined,
                                 port: undefined,
                                 protocol: undefined

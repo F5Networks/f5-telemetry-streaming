@@ -8,7 +8,9 @@
 
 'use strict';
 
-require('../shared/restoreCache')();
+/* eslint-disable import/order */
+const moduleCache = require('../shared/restoreCache')();
+
 const sinon = require('sinon');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -21,6 +23,8 @@ const F5_CLOUD_NODE_SUPPORTED_VERSION = '8.11.1';
 const PROTO_PATH = `${__dirname}/../../../src/lib/consumers/F5_Cloud/deos.proto`;
 
 chai.use(chaiAsPromised);
+
+moduleCache.remember();
 
 describe('F5_Cloud', () => {
     if (util.compareVersionStrings(process.version.substring(1), '<', F5_CLOUD_NODE_SUPPORTED_VERSION)) {
@@ -85,6 +89,7 @@ describe('F5_Cloud', () => {
     });
 
     before(() => {
+        moduleCache.restore();
         mockServer.listen('0.0.0.0:50051');
     });
 

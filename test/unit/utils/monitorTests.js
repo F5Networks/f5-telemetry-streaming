@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -29,6 +28,8 @@ const timers = require('../../../src/lib/utils/timers');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 /**
  * TODO: refactor tests:
  * - add more complex and reliable tests
@@ -36,6 +37,10 @@ const assert = chai.assert;
 describe('Monitor Util', () => {
     let disabledEnvVarStub;
     let loggerStub;
+
+    before(() => {
+        moduleCache.restore();
+    });
 
     beforeEach(() => {
         // disabled by default, otherwise test imports can trigger multiple monitor instance starts

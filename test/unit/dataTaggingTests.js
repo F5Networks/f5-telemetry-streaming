@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('./shared/restoreCache')();
+const moduleCache = require('./shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -20,7 +19,13 @@ const dataTagging = require('../../src/lib/dataTagging');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Data Tagging', () => {
+    before(() => {
+        moduleCache.restore();
+    });
+
     describe('addTag', () => {
         it('should make deep copy of tag\'s value (example 1)', () => {
             const actionCtx = {

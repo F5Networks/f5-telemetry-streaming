@@ -157,7 +157,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,
@@ -275,7 +275,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,
@@ -413,7 +413,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,
@@ -491,7 +491,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,
@@ -654,7 +654,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,
@@ -715,7 +715,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,
@@ -793,7 +793,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,
@@ -854,7 +854,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,
@@ -1078,7 +1078,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,
@@ -1138,7 +1138,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,
@@ -1200,7 +1200,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,
@@ -1260,7 +1260,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,
@@ -1463,7 +1463,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,
@@ -1523,7 +1523,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,
@@ -1602,7 +1602,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,
@@ -1662,7 +1662,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,
@@ -1741,7 +1741,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,
@@ -1801,7 +1801,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,
@@ -2027,7 +2027,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,
@@ -2087,7 +2087,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,
@@ -2183,7 +2183,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,
@@ -2243,7 +2243,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,
@@ -2339,7 +2339,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,
@@ -2399,7 +2399,7 @@ module.exports = {
                                     host: undefined,
                                     port: undefined,
                                     protocol: undefined,
-                                    allowSelfSignedCert: undefined
+                                    allowSelfSignedCert: false
                                 },
                                 credentials: {
                                     username: undefined,

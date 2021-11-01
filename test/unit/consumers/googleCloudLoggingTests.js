@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -24,6 +23,8 @@ const testUtil = require('../shared/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
+
+moduleCache.remember();
 
 // Note: if a test has no explicit assertions then it relies on 'checkNockActiveMocks' in 'afterEach'
 describe('Google_Cloud_Logging', () => {
@@ -61,6 +62,10 @@ describe('Google_Cloud_Logging', () => {
             entries
         };
     };
+
+    before(() => {
+        moduleCache.restore();
+    });
 
     beforeEach(() => {
         clock = stubs.clock({ fakeTimersOpts: persistentTime });

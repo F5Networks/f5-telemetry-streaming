@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('./shared/restoreCache')();
+const moduleCache = require('./shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -20,7 +19,13 @@ const dataFilter = require('../../src/lib/dataFilter');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Data Filter', () => {
+    before(() => {
+        moduleCache.restore();
+    });
+
     describe('DataFilter', () => {
         it('should ignore tmstats if consumer is not Splunk legacy', () => {
             const consumerConfig = {

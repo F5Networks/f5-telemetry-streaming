@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('./shared/restoreCache')();
+const moduleCache = require('./shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -22,6 +21,8 @@ const stubs = require('./shared/stubs');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Logger', () => {
     const logLevels = [
         'notset',
@@ -32,6 +33,10 @@ describe('Logger', () => {
     ];
 
     let coreStub;
+
+    before(() => {
+        moduleCache.restore();
+    });
 
     beforeEach(() => {
         coreStub = stubs.coreStub({

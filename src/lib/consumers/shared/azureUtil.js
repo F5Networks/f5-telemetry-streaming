@@ -321,11 +321,66 @@ function getInstrumentationKeys(context) {
         });
 }
 
+/**
+ *
+ * Check if keys of data can be dropped because there is enough info in values.
+ * Usually, they originate from TMM configuration and have 'name' property
+ *
+ * @param {Object} data - data to send to the consumer
+ * @param {String} type - type of the data
+ *
+ * @returns {Boolean} true if keys can be dropped
+ */
+function isConfigItems(data, type) {
+    // is it of type sslCerts or keys are of format of format /.../...
+    if (type === 'sslCerts' || Object.keys(data).every(key => /\/[^/]*\/.*/.test(key))) {
+        // check that the key is the same as property 'name'
+        return Object.keys(data)
+            .every(key => typeof data[key] === 'object' && key === data[key].name);
+    }
+    return false;
+}
+
+/**
+ *
+ * Drop the keys and return the values of data
+ *
+ * @param {Object} data - data to send to the consumer
+ *
+ * @returns {Array} values of data
+ */
+function transformConfigItems(data) {
+    return Object.keys(data).map(key => data[key]);
+}
+
+/**
+ *
+ * Some columns are reserved for Azure Log Analytics.
+ * Rename keys with these names.
+ *
+ * @param {Object} data - data to send to the consumer
+ */
+function scrubReservedKeys(data) {
+    // rename/prefix certain reserved keywords, this is necessary because Azure LA
+    // will accept messages and then silently drop them in post-processing if
+    // they contain certain top-level keys such as 'tenant'
+    const reserved = ['tenant'];
+    reserved.forEach((item) => {
+        if (typeof data[item] !== 'undefined') {
+            data[`f5${item}`] = data[item];
+            delete data[item];
+        }
+    });
+}
+
 module.exports = {
     signSharedKey,
     getSharedKey,
     getMetrics,
     getInstrumentationKeys,
     getApiUrl,
-    getInstanceMetadata
+    getInstanceMetadata,
+    isConfigItems,
+    transformConfigItems,
+    scrubReservedKeys
 };

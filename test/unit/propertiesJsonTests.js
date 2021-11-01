@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('./shared/restoreCache')();
+const moduleCache = require('./shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -28,7 +27,13 @@ const pathsStateValidator = testUtil.getSpoiledDataValidator(defaultPaths);
 const propertiesStateValidator = testUtil.getSpoiledDataValidator(defaultProperties);
 const testsDataPath = './data/propertiesJsonTests';
 
+moduleCache.remember();
+
 describe('properties.json', () => {
+    before(() => {
+        moduleCache.restore();
+    });
+
     const TOTAL_ATTEMPTS = 10;
 
     const checkResponse = (endpointMock, response) => {

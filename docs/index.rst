@@ -91,7 +91,7 @@ You can click the following links to go directly to a specific :doc:`setting-up-
       * - :ref:`datadog`
         - yes 
         - yes
-        - 
+  
       * - :ref:`opent`
         - yes (metrics only)
         - partial (converts logs to metrics)

@@ -24,7 +24,7 @@ Best practices:
 - Use ```nock``` to mimic network interaction.
 - Use ```assert``` from ```chai.assert``` for assertions.
 - Put ```require('./shared/restoreCache')();``` on top of test file. See other ```*Test.js``` for examples.
-- Avoid ```require``` statements inside of ```describe```, ```before```, ```beforeEach``` and etc. If you are really need it then it will be better to put all your imports along with ```require('./shared/restoreCache')()``` to ```before``` and do not forget to put ```require('./shared/restoreCache')()``` in ```after``` to restore ```require.cache``` state to avoid impact to other tests. This will still allows you to keep ```require.cache``` clean.
+- Avoid ```require``` statements inside of ```describe```, ```before```, ```beforeEach``` and etc. If you are really need it then it will be better to put all your imports along with ```moduleCache = require('./shared/restoreCache')()``` to before any ```require``` in a file and then invoke ```module.remember()``` after all imports and ```moduleCache.restore()``` (usually in ```before()```) to restore ```require.cache``` state to avoid impact to other tests. This will still allows you to keep ```require.cache``` clean.
 - Keep the folder structure flat, this project is not that large or complex.
 - Monitor and enforce coverage, but avoid writing tests simply to increase coverage when there is no other perceived value.
 - With that being said, **enforce coverage** in automated test.
@@ -32,7 +32,6 @@ Best practices:
   - These support sets of data to check actual and expected results only. If you need some additional check feel free to add additionalproperty or write separate tests.
   - You can specify 'testOpts' property on the same level as 'name'. The following options available:
     - only (bool) - run this test only (it.only)
-
 
 ## Functional
 
@@ -138,6 +137,9 @@ If you already have an existing set of devices, you can run the functional tests
         SKIP_DUT_TESTS - set value to 1 or true to skip package tests against BIG-IP. DUT device setup/teardown will still run.
         SKIP_CONSUMER_TESTS - set value to 1 or true to skip package tests against Consumers
         CONSUMER_TYPE_REGEX - specify RegEx to filter Consumers by name
+        SKIP_PULL_CONSUMER_TESTS - set value to 1 or true to skip package tests against Pull Consumers
+        TEST_HARNESS_FILE - set to the filepath of the test harness file; example harness file above
+        ARTIFACTORY_DOCKER_HUB - set to the Docker Hub mirror of your choice. If ommitted, will pull Docker images from Docker Hub
 
 3. Trigger the test run with `npm run test-functional`.
 
@@ -149,7 +151,9 @@ If you already have an existing set of devices, you can run the functional tests
         export SKIP_DUT_TESTS="true"
         export SKIP_CONSUMER_TESTS="false"
         export CONSUMER_TYPE_REGEX="splunk"
+        export SKIP_PULL_CONSUMER_TESTS="true"
         export TEST_HARNESS_FILE="/path/to/harness_facts_flat.json"
+        export ARTIFACTORY_DOCKER_HUB="mymirror.test.com/path"
         npm run test-functional
 
 #### Google Cloud Monitoring consumer tests

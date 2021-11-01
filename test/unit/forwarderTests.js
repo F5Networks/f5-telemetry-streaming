@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('./shared/restoreCache')();
+const moduleCache = require('./shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -24,6 +23,8 @@ const consumers = require('../../src/lib/consumers');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Forwarder', () => {
     const config = {
         type: 'consumerType',
@@ -32,6 +33,10 @@ describe('Forwarder', () => {
     const type = 'dataType';
     const data = { foo: 'bar' };
     const metadata = { compute: { onlyWhenAvailable: true } };
+
+    before(() => {
+        moduleCache.restore();
+    });
 
     afterEach(() => {
         sinon.restore();

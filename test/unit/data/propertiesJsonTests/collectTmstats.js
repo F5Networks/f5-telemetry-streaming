@@ -12,6 +12,42 @@ const defaultProperties = require('../../../../src/lib/properties.json');
 
 const TMCTL_CMD_REGEXP = /'tmctl\s+-c\s+(.*)'/;
 
+const ADD_DEFAULT_CONTEXT_ENDPOINTS = testEndpoints => testEndpoints.concat([
+    {
+        endpoint: '/mgmt/tm/sys/db/systemauth.disablebash',
+        method: 'get',
+        response: {
+            kind: 'tm:sys:db:dbstate',
+            name: 'systemauth.disablebash',
+            fullPath: 'systemauth.disablebash',
+            generation: 1,
+            selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2.3',
+            defaultValue: 'false',
+            scfConfig: 'true',
+            value: 'false',
+            valueRange: 'false true'
+        }
+    },
+    {
+        endpoint: '/mgmt/tm/sys/provision',
+        response: {
+            kind: 'tm:sys:provision:provisioncollectionstate',
+            selfLink: 'https://localhost/mgmt/tm/sys/provision?ver=14.1.0',
+            items: []
+        }
+    },
+    {
+        endpoint: '/mgmt/shared/identified-devices/config/device-info',
+        options: {
+            times: 999
+        },
+        response: {
+            kind: 'shared:resolver:device-groups:deviceinfostate',
+            selfLink: 'https://localhost/mgmt/shared/identified-devices/config/device-info'
+        }
+    }
+]);
+
 /* eslint-disable no-useless-escape */
 
 /**
@@ -61,7 +97,7 @@ module.exports = {
                 });
                 return ret;
             },
-            contextToCollect: [],
+            contextToCollect: context => context,
             expectedData: {
                 tmstats: {
                     asmCpuUtilStats: [
@@ -809,7 +845,7 @@ module.exports = {
                     ]
                 }
             },
-            endpoints: [
+            endpoints: ADD_DEFAULT_CONTEXT_ENDPOINTS([
                 {
                     endpoint: '/mgmt/tm/util/bash',
                     method: 'post',
@@ -828,9 +864,9 @@ module.exports = {
 
                         Object.keys(defaultProperties.stats).some((statKey) => {
                             const stat = defaultProperties.stats[statKey];
-                            if (stat.structure && stat.structure.parentKey === 'tmstats'
-                                && stat.keyArgs.replaceStrings['\\$tmctlArgs'].indexOf(tmctlTable) !== -1) {
-                                tmctlStat = stat;
+                            if (stat.structure && stat.structure.parentKey === 'tmstats' && stat.then
+                                && stat.then.keyArgs.replaceStrings['\\$tmctlArgs'].indexOf(tmctlTable) !== -1) {
+                                tmctlStat = stat.then;
                                 return true;
                             }
                             return false;
@@ -859,7 +895,7 @@ module.exports = {
                         };
                     }
                 }
-            ]
+            ])
         },
         /**
          * TEST DATA STARTS HERE
@@ -878,11 +914,11 @@ module.exports = {
                 });
                 return ret;
             },
-            contextToCollect: [],
+            contextToCollect: context => context,
             expectedData: {
                 tmstats: { }
             },
-            endpoints: [
+            endpoints: ADD_DEFAULT_CONTEXT_ENDPOINTS([
                 {
                     endpoint: '/mgmt/tm/util/bash',
                     method: 'post',
@@ -901,9 +937,9 @@ module.exports = {
 
                         Object.keys(defaultProperties.stats).some((statKey) => {
                             const stat = defaultProperties.stats[statKey];
-                            if (stat.structure && stat.structure.parentKey === 'tmstats'
-                                && stat.keyArgs.replaceStrings['\\$tmctlArgs'].indexOf(tmctlTable) !== -1) {
-                                tmctlStat = stat;
+                            if (stat.structure && stat.structure.parentKey === 'tmstats' && stat.then
+                                && stat.then.keyArgs.replaceStrings['\\$tmctlArgs'].indexOf(tmctlTable) !== -1) {
+                                tmctlStat = stat.then;
                                 return true;
                             }
                             return false;
@@ -920,7 +956,7 @@ module.exports = {
                         };
                     }
                 }
-            ]
+            ])
         },
         /**
          * TEST DATA STARTS HERE
@@ -939,11 +975,11 @@ module.exports = {
                 });
                 return ret;
             },
-            contextToCollect: [],
+            contextToCollect: context => context,
             expectedData: {
                 tmstats: { }
             },
-            endpoints: [
+            endpoints: ADD_DEFAULT_CONTEXT_ENDPOINTS([
                 {
                     endpoint: '/mgmt/tm/util/bash',
                     method: 'post',
@@ -956,7 +992,7 @@ module.exports = {
                         commandResult: 'tmctl: qwerty: No such table'
                     }
                 }
-            ]
+            ])
         }
     ]
 };

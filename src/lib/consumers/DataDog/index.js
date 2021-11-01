@@ -19,11 +19,37 @@ const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 const metricsUtil = require('../shared/metricsUtil');
 const requestsUtil = require('../../utils/requests');
 
-
-const DATA_DOG_LOGS_GATEWAY = 'https://http-intake.logs.datadoghq.com/v1/input';
-const DATA_DOG_METRICS_GATEWAY = 'https://api.datadoghq.com/api/v1/series';
-const DATA_DOG_SERVICE_FIELD = 'f5-telemetry';
 const DATA_DOG_METRIC_TYPE = 'gauge';
+const DATA_DOG_REGIONAL_GATEWAYS = {
+    US1: {
+        LOGS_GATEWAY: 'https://http-intake.logs.datadoghq.com/v1/input',
+        METRICS_GATEWAY: 'https://api.datadoghq.com/api/v1/series'
+    },
+    US3: {
+        LOGS_GATEWAY: 'https://http-intake.logs.us3.datadoghq.com/v1/input',
+        METRICS_GATEWAY: 'https://api.us3.datadoghq.com/api/v1/series'
+    },
+    EU1: {
+        LOGS_GATEWAY: 'https://http-intake.logs.datadoghq.eu/v1/input',
+        METRICS_GATEWAY: 'https://api.datadoghq.eu/api/v1/series'
+    },
+    'US1-FED': {
+        LOGS_GATEWAY: 'https://http-intake.logs.ddog-gov.com/v1/input',
+        METRICS_GATEWAY: 'https://api.ddog-gov.com/api/v1/series'
+    }
+};
+
+/**
+ * Get the correct DataDog Gateway URL for the provided DataDog region and telemetry type
+ *
+ * @param {String} region   - DataDog region
+ * @param {String} type     - Telemetry type (metrics or log)
+ *
+ * @returns {String}    The correct DataDog Gateway URL to send telemetry to
+ */
+const getDataDogGateway = (region, type) => (
+    type === 'log' ? DATA_DOG_REGIONAL_GATEWAYS[region].LOGS_GATEWAY : DATA_DOG_REGIONAL_GATEWAYS[region].METRICS_GATEWAY
+);
 
 /**
  * See {@link ../README.md#context} for documentation
@@ -39,6 +65,8 @@ module.exports = function (context) {
     const eventType = context.event.type;
     const hostname = (data.system && data.system.hostname) || data.hostname || DEFAULT_HOSTNAME;
     const interval = (data.telemetryServiceInfo && data.telemetryServiceInfo.pollingInterval) || undefined;
+    const ddService = context.config.service;
+    const ddRegion = context.config.region;
     // for now use current time, ideally should try to fetch it from event data
     const timestamp = Date.now() / 1000;
 
@@ -53,7 +81,7 @@ module.exports = function (context) {
             ddtags: buildTags({ telemetryEventCategory: eventType }, true),
             hostname,
             message: data.data,
-            service: DATA_DOG_SERVICE_FIELD
+            service: ddService
         };
     } else {
         ddType = 'metrics';
@@ -104,13 +132,13 @@ module.exports = function (context) {
             ddtags: buildTags(ddtags, true),
             hostname,
             message: JSON.stringify(data),
-            service: DATA_DOG_SERVICE_FIELD
+            service: ddService
         };
     }
 
     if (context.tracer) {
         context.tracer.write({
-            url: ddType === 'log' ? DATA_DOG_LOGS_GATEWAY : DATA_DOG_METRICS_GATEWAY,
+            url: getDataDogGateway(ddRegion, ddType),
             data: ddData
         });
     }
@@ -144,7 +172,7 @@ module.exports = function (context) {
     return gzipPromise.then(payload => requestsUtil.makeRequest({
         body: payload,
         expectedResponseCode: [200, 202],
-        fullURI: ddType === 'log' ? DATA_DOG_LOGS_GATEWAY : DATA_DOG_METRICS_GATEWAY,
+        fullURI: getDataDogGateway(ddRegion, ddType),
         headers,
         json: !needGzip,
         method: 'POST'

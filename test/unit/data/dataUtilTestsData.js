@@ -170,6 +170,30 @@ module.exports = {
                     }
                 }
             }
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
+            name: 'should set data to empty object when non-existing identifier was used',
+            dataCtx: {
+                data: {
+                    virtualServers: {
+                        '/test/gjd_ftp': {
+                            'serverside.bitsIn': true,
+                            enabledState: 'enabled'
+                        },
+                        virtual2: {
+                            'serverside.bitsIn': true
+                        }
+                    },
+                    system: {
+                        hostname: 'bigip.example.com'
+                    }
+                }
+            },
+            expression: 'badIdentifier',
+            expectedCtx: {
+                data: {}
+            }
         }
     ],
     checkConditions: [

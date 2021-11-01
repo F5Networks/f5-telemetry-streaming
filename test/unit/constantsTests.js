@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('./shared/restoreCache')();
+const moduleCache = require('./shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -22,7 +21,13 @@ const schemaInfo = require('../../src/schema/latest/base_schema.json').propertie
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Constants', () => {
+    before(() => {
+        moduleCache.restore();
+    });
+
     /**
      * ATTENTION:
      *
@@ -53,16 +58,17 @@ describe('Constants', () => {
                 }
             },
             CONFIG_CLASSES: {
-                ROOT_CLASS: 'Telemetry',
                 CONSUMER_CLASS_NAME: 'Telemetry_Consumer',
-                PULL_CONSUMER_CLASS_NAME: 'Telemetry_Pull_Consumer',
                 CONTROLS_CLASS_NAME: 'Controls',
                 ENDPOINTS_CLASS_NAME: 'Telemetry_Endpoints',
                 EVENT_LISTENER_CLASS_NAME: 'Telemetry_Listener',
                 IHEALTH_POLLER_CLASS_NAME: 'Telemetry_iHealth_Poller',
+                NAMESPACE_CLASS_NAME: 'Telemetry_Namespace',
+                PULL_CONSUMER_CLASS_NAME: 'Telemetry_Pull_Consumer',
+                PULL_CONSUMER_SYSTEM_POLLER_GROUP_CLASS_NAME: 'Telemetry_Pull_Consumer_System_Poller_Group',
+                ROOT_CLASS: 'Telemetry',
                 SYSTEM_CLASS_NAME: 'Telemetry_System',
-                SYSTEM_POLLER_CLASS_NAME: 'Telemetry_System_Poller',
-                NAMESPACE_CLASS_NAME: 'Telemetry_Namespace'
+                SYSTEM_POLLER_CLASS_NAME: 'Telemetry_System_Poller'
             },
             CONFIG_WORKER: {
                 STORAGE_KEY: 'config'

@@ -119,6 +119,7 @@ Following list of changes should be done for both master/develop and LTS branche
 * After that merge `rc-master-branch` to `master` branch:
   * git checkout master
   * git merge --squash rc-master-branch
+  * git commit -m 'merge vX.Y.Z into master branch'
   * git push origin
 * Optional: Ensure that your local tags match remote. If not, remove all and re-fetch:
   * git tag -l -n

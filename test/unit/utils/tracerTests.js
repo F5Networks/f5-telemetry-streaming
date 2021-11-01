@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -21,6 +20,7 @@ const sinon = require('sinon');
 
 const configWorker = require('../../../src/lib/config');
 const deviceUtil = require('../../../src/lib/utils/device');
+const dummies = require('../shared/dummies');
 const logger = require('../../../src/lib/logger');
 const persistentStorage = require('../../../src/lib/persistentStorage');
 const stubs = require('../shared/stubs');
@@ -33,7 +33,13 @@ const utilMisc = require('../../../src/lib/utils/misc');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Tracer', () => {
+    before(() => {
+        moduleCache.restore();
+    });
+
     afterEach(() => {
         sinon.restore();
     });
@@ -677,42 +683,52 @@ describe('Tracer', () => {
                 utilMisc
             });
 
-            return configWorker.processDeclaration({ class: 'Telemetry' })
+            return configWorker.processDeclaration(dummies.declaration.base.decrypted())
                 .then(() => {
                     assert.isEmpty(tracer.registered(), 'should have no registered tracers');
                 });
         });
 
-        it('should register enabled tracers and then unregister all when removed from config', () => configWorker.processDeclaration({
-            class: 'Telemetry',
-            My_Consumer: {
-                class: 'Telemetry_Consumer',
-                type: 'default',
-                trace: true
-            },
-            My_Listener: {
-                class: 'Telemetry_Listener',
-                trace: 'listener'
-            },
-            My_Disabled_Listener: {
-                class: 'Telemetry_Listener',
-                trace: 'listener2',
-                enable: false
-            },
-            My_Enabled_Poller_With_Disabled_Trace: {
-                class: 'Telemetry_System_Poller',
-                enable: true,
-                trace: false
-            }
-        })
+        it('should register enabled tracers and then unregister all when removed from config', () => configWorker.processDeclaration(
+            dummies.declaration.base.decrypted({
+                My_Consumer: dummies.declaration.consumer.default.decrypted({ trace: true }),
+                My_Listener: dummies.declaration.listener.minimal.decrypted({ trace: 'listener' }),
+                My_Disabled_Listener: dummies.declaration.listener.minimal.decrypted({
+                    enable: false,
+                    trace: 'listener2'
+                }),
+                My_Listener_With_Dual_Tracing: dummies.declaration.listener.minimal.decrypted({
+                    trace: [
+                        { type: 'output' },
+                        { type: 'input' }
+                    ]
+                }),
+                My_Listener_With_Dual_Tracing_And_Path: dummies.declaration.listener.minimal.decrypted({
+                    trace: [
+                        { type: 'output', path: 'listener3_output' },
+                        { type: 'input', path: 'listener3_input' }
+                    ]
+                }),
+                My_Enabled_Poller_With_Disabled_Trace: dummies.declaration.systemPoller.minimal.decrypted({
+                    trace: false
+                })
+            })
+        )
             .then(() => {
                 const registered = tracer.registered();
                 assert.sameDeepMembers(
                     registered.map(t => t.path),
-                    ['/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer', 'listener'],
+                    [
+                        '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
+                        '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
+                        '/var/tmp/telemetry/INPUT.Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
+                        'listener',
+                        'listener3_input',
+                        'listener3_output'
+                    ],
                     'should configure destination as expected'
                 );
-                return configWorker.processDeclaration({ class: 'Telemetry' })
+                return configWorker.processDeclaration(dummies.declaration.base.decrypted())
                     .then(() => registered);
             })
             .then((registeredBefore) => {
@@ -722,56 +738,61 @@ describe('Tracer', () => {
                 });
             }));
 
-        it('should register enabled tracers and then unregister disabled', () => configWorker.processDeclaration({
-            class: 'Telemetry',
-            My_Consumer: {
-                class: 'Telemetry_Consumer',
-                type: 'default',
-                trace: true
-            },
-            My_Listener: {
-                class: 'Telemetry_Listener',
-                trace: 'listener'
-            },
-            My_Disabled_Listener: {
-                class: 'Telemetry_Listener',
-                trace: 'listener2',
-                enable: false
-            },
-            My_Enabled_Poller_With_Disabled_Trace: {
-                class: 'Telemetry_System_Poller',
-                enable: true,
-                trace: false
-            }
-        })
+        it('should register enabled tracers and then unregister disabled', () => configWorker.processDeclaration(
+            dummies.declaration.base.decrypted({
+                My_Consumer: dummies.declaration.consumer.default.decrypted({ trace: true }),
+                My_Listener: dummies.declaration.listener.minimal.decrypted({ trace: 'listener' }),
+                My_Disabled_Listener: dummies.declaration.listener.minimal.decrypted({
+                    enable: false,
+                    trace: 'listener2'
+                }),
+                My_Listener_With_Dual_Tracing: dummies.declaration.listener.minimal.decrypted({
+                    trace: [
+                        { type: 'output' },
+                        { type: 'input' }
+                    ]
+                }),
+                My_Listener_With_Dual_Tracing_And_Path: dummies.declaration.listener.minimal.decrypted({
+                    trace: [
+                        { type: 'output', path: 'listener3_output' },
+                        { type: 'input', path: 'listener3_input' }
+                    ]
+                }),
+                My_Enabled_Poller_With_Disabled_Trace: dummies.declaration.systemPoller.minimal.decrypted({
+                    trace: false
+                })
+            })
+        )
             .then(() => {
                 const registered = tracer.registered();
                 assert.sameDeepMembers(
                     registered.map(t => t.path),
-                    ['/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer', 'listener'],
+                    [
+                        '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
+                        '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
+                        '/var/tmp/telemetry/INPUT.Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
+                        'listener',
+                        'listener3_input',
+                        'listener3_output'
+                    ],
                     'should configure destination as expected'
                 );
-                return configWorker.processDeclaration({
-                    class: 'Telemetry',
-                    My_Consumer: {
-                        class: 'Telemetry_Consumer',
-                        type: 'default',
-                        trace: false
-                    },
-                    My_Listener: {
-                        class: 'Telemetry_Listener',
-                        trace: 'listener',
-                        enable: false
-                    },
-                    My_Disabled_Listener: {
-                        class: 'Telemetry_Listener',
-                        trace: 'listener2'
-                    },
-                    My_Enabled_Poller_With_Disabled_Trace: {
-                        class: 'Telemetry_System_Poller',
-                        trace: true
-                    }
-                })
+                return configWorker.processDeclaration(
+                    dummies.declaration.base.decrypted({
+                        My_Consumer: dummies.declaration.consumer.default.decrypted({ trace: false }),
+                        My_Listener: dummies.declaration.listener.minimal.decrypted({
+                            enable: false, trace: 'listener'
+                        }),
+                        My_Disabled_Listener: dummies.declaration.listener.minimal.decrypted({ trace: 'listener2' }),
+                        My_Listener_With_Dual_Tracing: dummies.declaration.listener.minimal.decrypted({ trace: false }),
+                        My_Listener_With_Dual_Tracing_And_Path: dummies.declaration.listener.minimal.decrypted({
+                            trace: false
+                        }),
+                        My_Enabled_Poller_With_Disabled_Trace: dummies.declaration.systemPoller.minimal.decrypted({
+                            trace: true
+                        })
+                    })
+                )
                     .then(() => registered);
             })
             .then((registeredBefore) => {
@@ -792,48 +813,68 @@ describe('Tracer', () => {
          * Idea of the test below is to be sure that pre-existing instances were not disabled/re-created and etc. -
          * in other words those instances should survive all config updates
          */
-        it('should keep pre-existing tracers untouched when processing a new namespace declaration', () => configWorker.processDeclaration({
-            class: 'Telemetry',
-            My_Consumer: {
-                class: 'Telemetry_Consumer',
-                type: 'default',
-                trace: true
-            },
-            My_Listener: {
-                class: 'Telemetry_Listener',
-                trace: 'listener'
-            },
-            My_Disabled_Listener: {
-                class: 'Telemetry_Listener',
-                trace: 'listener2',
-                enable: false
-            },
-            My_Enabled_Poller_With_Disabled_Trace: {
-                class: 'Telemetry_System_Poller',
-                enable: true,
-                trace: false
-            }
-        })
+        it('should keep pre-existing tracers untouched when processing a new namespace declaration', () => configWorker.processDeclaration(
+            dummies.declaration.base.decrypted({
+                My_Consumer: dummies.declaration.consumer.default.decrypted({ trace: true }),
+                My_Listener: dummies.declaration.listener.minimal.decrypted({ trace: 'listener' }),
+                My_Disabled_Listener: dummies.declaration.listener.minimal.decrypted({
+                    enable: false,
+                    trace: 'listener2'
+                }),
+                My_Listener_With_Dual_Tracing: dummies.declaration.listener.minimal.decrypted({
+                    trace: [
+                        { type: 'output' },
+                        { type: 'input' }
+                    ]
+                }),
+                My_Listener_With_Dual_Tracing_And_Path: dummies.declaration.listener.minimal.decrypted({
+                    trace: [
+                        { type: 'output', path: 'listener3_output' },
+                        { type: 'input', path: 'listener3_input' }
+                    ]
+                }),
+                My_Enabled_Poller_With_Disabled_Trace: dummies.declaration.systemPoller.minimal.decrypted({
+                    trace: false
+                })
+            })
+        )
             .then(() => {
                 const registered = tracer.registered(); // remember those instances - should survive all updates
                 assert.sameDeepMembers(
                     registered.map(t => t.path),
-                    ['/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer', 'listener'],
+                    [
+                        '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
+                        '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
+                        '/var/tmp/telemetry/INPUT.Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
+                        'listener',
+                        'listener3_input',
+                        'listener3_output'
+                    ],
                     'should configure destination as expected'
                 );
-                return configWorker.processNamespaceDeclaration({
-                    class: 'Telemetry_Namespace',
-                    My_Consumer: {
-                        class: 'Telemetry_Consumer',
-                        type: 'default',
-                        trace: true
-                    },
-                    My_Listener: {
-                        class: 'Telemetry_Listener',
-                        trace: 'listener2',
-                        enable: true
-                    }
-                }, 'Namespace')
+                return configWorker.processNamespaceDeclaration(
+                    dummies.declaration.namespace.base.decrypted({
+                        My_Consumer: dummies.declaration.consumer.default.decrypted({ trace: true }),
+                        My_Listener: dummies.declaration.listener.minimal.decrypted({ trace: 'listener2' }),
+                        My_Disabled_Listener: dummies.declaration.listener.minimal.decrypted({
+                            enable: false,
+                            trace: 'listener2'
+                        }),
+                        My_Listener_With_Dual_Tracing: dummies.declaration.listener.minimal.decrypted({
+                            trace: [
+                                { type: 'output' },
+                                { type: 'input' }
+                            ]
+                        }),
+                        My_Listener_With_Dual_Tracing_And_Path: dummies.declaration.listener.minimal.decrypted({
+                            trace: [
+                                { type: 'output', path: 'listener3_output' },
+                                { type: 'input', path: 'listener3_input' }
+                            ]
+                        })
+                    }),
+                    'Namespace'
+                )
                     .then(() => registered);
             })
             .then((registeredBefore) => {
@@ -844,25 +885,25 @@ describe('Tracer', () => {
                     tracer.registered().map(t => t.path),
                     [
                         '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
-                        'listener',
+                        '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
+                        '/var/tmp/telemetry/INPUT.Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
                         '/var/tmp/telemetry/Telemetry_Consumer.Namespace::My_Consumer',
+                        '/var/tmp/telemetry/Telemetry_Listener.Namespace::My_Listener_With_Dual_Tracing',
+                        '/var/tmp/telemetry/INPUT.Telemetry_Listener.Namespace::My_Listener_With_Dual_Tracing',
+                        'listener',
+                        'listener3_input',
+                        'listener3_output',
                         'listener2'
                     ],
                     'should configure destination as expected'
                 );
-                return configWorker.processNamespaceDeclaration({
-                    class: 'Telemetry_Namespace',
-                    My_Consumer: {
-                        class: 'Telemetry_Consumer',
-                        type: 'default',
-                        enable: false
-                    },
-                    My_Listener: {
-                        class: 'Telemetry_Listener',
-                        trace: 'listener2',
-                        enable: true
-                    }
-                }, 'Namespace')
+                return configWorker.processNamespaceDeclaration(
+                    dummies.declaration.namespace.base.decrypted({
+                        My_Consumer: dummies.declaration.consumer.default.decrypted({ enable: false }),
+                        My_Listener: dummies.declaration.listener.minimal.decrypted({ trace: 'listener2' })
+                    }),
+                    'Namespace'
+                )
                     .then(() => registeredBefore);
             })
             .then((registeredBefore) => {
@@ -873,14 +914,16 @@ describe('Tracer', () => {
                     tracer.registered().map(t => t.path),
                     [
                         '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
+                        '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
+                        '/var/tmp/telemetry/INPUT.Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
                         'listener',
+                        'listener3_input',
+                        'listener3_output',
                         'listener2'
                     ],
                     'should configure destination as expected'
                 );
-                return configWorker.processNamespaceDeclaration({
-                    class: 'Telemetry_Namespace'
-                }, 'Namespace')
+                return configWorker.processNamespaceDeclaration(dummies.declaration.namespace.base.decrypted(), 'Namespace')
                     .then(() => registeredBefore);
             })
             .then((registeredBefore) => {
@@ -889,9 +932,70 @@ describe('Tracer', () => {
                 });
                 assert.sameDeepMembers(
                     tracer.registered().map(t => t.path),
-                    ['/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer', 'listener'],
+                    [
+                        '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
+                        '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
+                        '/var/tmp/telemetry/INPUT.Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
+                        'listener',
+                        'listener3_input',
+                        'listener3_output'
+                    ],
                     'should configure destination as expected'
                 );
+            }));
+
+        // verify that all classes are supported
+        it('should register enabled tracers and then unregister all when removed from config (ALL classes)', () => configWorker.processDeclaration(
+            dummies.declaration.base.decrypted({
+                Default_Push_Consumer: dummies.declaration.consumer.default.decrypted({ trace: true }),
+                Default_Pull_Consumer: dummies.declaration.pullConsumer.default.decrypted({
+                    systemPoller: ['System_Poller'],
+                    trace: true
+                }),
+                System_With_Inline_Pollers: dummies.declaration.system.full.decrypted({
+                    iHealthPoller: dummies.declaration.ihealthPoller.inlineMinimal.decrypted({ trace: true }),
+                    systemPoller: dummies.declaration.systemPoller.inlineMinimal.decrypted({ trace: true }),
+                    trace: true
+                }),
+                System_With_Referenced_Pollers: dummies.declaration.system.full.decrypted({
+                    iHealthPoller: 'iHealth_Poller',
+                    systemPoller: 'System_Poller',
+                    trace: true
+                }),
+                System_Poller: dummies.declaration.systemPoller.minimal.decrypted({ trace: true }),
+                iHealth_Poller: dummies.declaration.ihealthPoller.minimal.decrypted({ trace: true }),
+                Event_Listener: dummies.declaration.listener.minimal.decrypted({
+                    trace: [
+                        { type: 'input' },
+                        { type: 'output' }
+                    ]
+                })
+            })
+        )
+            .then(() => {
+                const registered = tracer.registered();
+                assert.sameDeepMembers(
+                    registered.map(t => t.path),
+                    [
+                        '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Default_Push_Consumer',
+                        '/var/tmp/telemetry/Telemetry_Pull_Consumer.f5telemetry_default::Default_Pull_Consumer',
+                        '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::Event_Listener',
+                        '/var/tmp/telemetry/INPUT.Telemetry_Listener.f5telemetry_default::Event_Listener',
+                        '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::System_With_Inline_Pollers::SystemPoller_1',
+                        '/var/tmp/telemetry/Telemetry_iHealth_Poller.f5telemetry_default::System_With_Inline_Pollers::iHealthPoller_1',
+                        '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::System_With_Referenced_Pollers::System_Poller',
+                        '/var/tmp/telemetry/Telemetry_iHealth_Poller.f5telemetry_default::System_With_Referenced_Pollers::iHealth_Poller'
+                    ],
+                    'should configure destination as expected'
+                );
+                return configWorker.processDeclaration(dummies.declaration.base.decrypted())
+                    .then(() => registered);
+            })
+            .then((registeredBefore) => {
+                assert.isEmpty(tracer.registered(), 'should have no registered tracers');
+                registeredBefore.forEach((tracerInst) => {
+                    assert.isTrue(tracerInst.disabled, 'should be disabled once unregistered');
+                });
             }));
     });
 });

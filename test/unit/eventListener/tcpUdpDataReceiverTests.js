@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -25,6 +24,8 @@ const stubs = require('../shared/stubs');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('TCP and UDP Receivers', () => {
     let clock;
     let dataCallbackSpy;
@@ -33,6 +34,10 @@ describe('TCP and UDP Receivers', () => {
     const testPort = 6514;
     const testAddr = 'localhost10';
     const testAddr6 = '::localhost10';
+
+    before(() => {
+        moduleCache.restore();
+    });
 
     beforeEach(() => {
         sinon.stub(tcpUdpDataReceiver.TcpUdpBaseDataReceiver, 'RESTART_DELAY').value(1);

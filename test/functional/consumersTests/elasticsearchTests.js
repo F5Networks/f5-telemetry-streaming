@@ -28,10 +28,10 @@ const ES_PROTOCOL = 'http';
 const ES_HTTP_PORT = 9200;
 const ES_TRANSPORT_PORT = 9300;
 const ES_CONSUMER_NAME = 'Consumer_ElasticSearch';
-const ES_API_VERSION = '6.5';
-const ES_DOCKER_TAG = '6.7.2';
-const ES_IMAGE_NAME = `docker.elastic.co/elasticsearch/elasticsearch:${ES_DOCKER_TAG}`;
+const ES_IMAGE_PREFIX = 'docker.elastic.co/elasticsearch/elasticsearch';
 const ES_MAX_FIELDS = 5000;
+
+const ES_VERSIONS_TO_TEST = ['6.7.2', '7.14.1'];
 
 function runRemoteCmd(cmd) {
     return util.performRemoteCmd(CONSUMER_HOST.ip, CONSUMER_HOST.username, cmd, { password: CONSUMER_HOST.password });
@@ -48,8 +48,10 @@ function removeESContainer() {
 }
 
 function setup() {
-    describe('Consumer Setup: Elastic Search - pull docker image', () => {
-        it(`should pull container image ${ES_DOCKER_TAG}`, () => runRemoteCmd(`docker pull ${ES_IMAGE_NAME}`));
+    describe('Consumer Setup: Elastic Search - pull docker images', () => {
+        ES_VERSIONS_TO_TEST.forEach((version) => {
+            it(`should pull container image: ${version}`, () => runRemoteCmd(`docker pull ${ES_IMAGE_PREFIX}:${version}`));
+        });
     });
 }
 
@@ -59,153 +61,160 @@ function test() {
     describe('Consumer Test: ElasticSearch - Configure Service', () => {
         DUTS.forEach((dut) => {
             describe(`Device Under Test - ${dut.hostalias}`, () => {
-                let systemPollerData;
+                ES_VERSIONS_TO_TEST.forEach((version) => {
+                    describe(`ElasticSearch version - ${version}`, () => {
+                        describe('Consumer service setup', () => {
+                            it('should start container', () => {
+                                const portArgs = `-p ${ES_HTTP_PORT}:${ES_HTTP_PORT} -p ${ES_TRANSPORT_PORT}:${ES_TRANSPORT_PORT} -e "discovery.type=single-node" -e "indices.query.bool.max_clause_count=${ES_MAX_FIELDS}"`;
+                                const cmd = `docker run -d --restart=always --name ${ES_CONTAINER_NAME} ${portArgs} ${ES_IMAGE_PREFIX}:${version}`;
 
-                describe('Consumer service setup', () => {
-                    it('should start container', () => {
-                        const portArgs = `-p ${ES_HTTP_PORT}:${ES_HTTP_PORT} -p ${ES_TRANSPORT_PORT}:${ES_TRANSPORT_PORT} -e "discovery.type=single-node" -e "indices.query.bool.max_clause_count=${ES_MAX_FIELDS}"`;
-                        const cmd = `docker run -d --restart=always --name ${ES_CONTAINER_NAME} ${portArgs} ${ES_IMAGE_NAME}`;
-
-                        return runRemoteCmd(`docker ps | grep ${ES_CONTAINER_NAME}`)
-                            .then((data) => {
-                                if (data) {
-                                    return Promise.resolve();
-                                }
-                                return runRemoteCmd(cmd);
+                                return runRemoteCmd(`docker ps | grep ${ES_CONTAINER_NAME}`)
+                                    .then((data) => {
+                                        if (data) {
+                                            return Promise.resolve();
+                                        }
+                                        return runRemoteCmd(cmd);
+                                    });
                             });
-                    });
 
-                    it('should check service is up', () => {
-                        const uri = '/_nodes';
-                        const options = {
-                            protocol: ES_PROTOCOL,
-                            port: ES_HTTP_PORT
-                        };
+                            it('should check service is up', () => {
+                                const uri = '/_nodes';
+                                const options = {
+                                    protocol: ES_PROTOCOL,
+                                    port: ES_HTTP_PORT
+                                };
 
-                        return new Promise(resolve => setTimeout(resolve, 5000))
-                            .then(() => util.makeRequest(CONSUMER_HOST.ip, uri, options))
-                            .then((data) => {
-                                const nodeInfo = data._nodes;
-                                assert.strictEqual(nodeInfo.total, 1);
-                                assert.strictEqual(nodeInfo.successful, 1);
+                                return new Promise(resolve => setTimeout(resolve, 5000))
+                                    .then(() => util.makeRequest(CONSUMER_HOST.ip, uri, options))
+                                    .then((data) => {
+                                        const nodeInfo = data._nodes;
+                                        assert.strictEqual(nodeInfo.total, 1);
+                                        assert.strictEqual(nodeInfo.successful, 1);
+                                    });
                             });
-                    });
 
-                    it('should configure index limits', () => {
-                        const uri = `/${ES_CONTAINER_NAME}`;
-                        const options = {
-                            protocol: ES_PROTOCOL,
-                            port: ES_HTTP_PORT,
-                            method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: {
-                                settings: {
-                                    'index.mapping.total_fields.limit': ES_MAX_FIELDS
-                                }
-                            }
-                        };
-                        return util.makeRequest(CONSUMER_HOST.ip, uri, options);
-                    });
-                });
-
-                describe('Consumer Test: ElasticSearch - Configure TS', () => {
-                    it('should configure TS', () => {
-                        const consumerDeclaration = util.deepCopy(DECLARATION);
-                        consumerDeclaration[ES_CONSUMER_NAME] = {
-                            class: 'Telemetry_Consumer',
-                            type: 'ElasticSearch',
-                            host: CONSUMER_HOST.ip,
-                            protocol: ES_PROTOCOL,
-                            port: ES_HTTP_PORT,
-                            index: ES_CONTAINER_NAME,
-                            apiVersion: ES_API_VERSION
-                        };
-                        return dutUtils.postDeclarationToDUT(dut, consumerDeclaration);
-                    });
-
-                    it('should send event to TS Event Listener', () => {
-                        const msg = `hostname="${dut.hostname}",testDataTimestamp="${testDataTimestamp}",test="true",testType="${ES_CONSUMER_NAME}"`;
-                        return dutUtils.sendDataToEventListener(dut, msg);
-                    });
-
-                    it('should retrieve SystemPoller data', () => dutUtils.getSystemPollerData(dut, constants.DECL.SYSTEM_NAME)
-                        .then((data) => {
-                            systemPollerData = data[0];
-                            assert.notStrictEqual(systemPollerData, undefined);
-                            assert.notStrictEqual(systemPollerData.system, undefined);
-                        }));
-                });
-
-                describe('Consumer Test: ElasticSearch - Test', () => {
-                    const query = (searchString) => {
-                        const uri = `/${ES_CONTAINER_NAME}/_search?${searchString}`;
-                        const options = {
-                            port: ES_HTTP_PORT,
-                            protocol: ES_PROTOCOL
-                        };
-                        util.logger.info(`ElasticSearch search query - ${uri}`);
-                        return util.makeRequestWithRetry(
-                            () => util.makeRequest(CONSUMER_HOST.ip, uri, options),
-                            30000,
-                            5
-                        );
-                    };
-
-                    it('should check for event listener data for', () => new Promise(resolve => setTimeout(resolve, 10000))
-                        .then(() => query(`size=1&q=data.testType:${ES_CONSUMER_NAME}%20AND%20data.hostname=${dut.hostname}`))
-                        .then((data) => {
-                            util.logger.info('ElasticSearch response:', data);
-                            const esData = data.hits.hits;
-                            assert.notStrictEqual(esData.length, 0, 'ElasticSearch should return search results');
-
-                            let found = false;
-                            esData.forEach((hit) => {
-                                const eventData = hit._source.data;
-                                if (eventData && eventData.hostname === dut.hostname) {
-                                    assert.strictEqual(eventData.testDataTimestamp, testDataTimestamp.toString());
-                                    found = true;
-                                }
-                            });
-                            if (!found) {
-                                return Promise.reject(new Error('Event not found'));
-                            }
-                            return Promise.resolve();
-                        }));
-
-                    it('should have system poller data', () => new Promise(resolve => setTimeout(resolve, 10000))
-                        .then(() => query(`size=1&q=system.hostname:${dut.hostname}`))
-                        .then((data) => {
-                            util.logger.info('ElasticSearch response:', data);
-                            const esData = data.hits.hits;
-                            assert.notStrictEqual(esData.length, 0, 'ElasticSearch should return search results');
-
-                            let found = false;
-                            esData.forEach((hit) => {
-                                const sysData = hit._source;
-                                if (sysData && sysData.system && sysData.system.hostname === dut.hostname) {
-                                    const schema = JSON.parse(fs.readFileSync(constants.DECL.SYSTEM_POLLER_SCHEMA));
-                                    const valid = util.validateAgainstSchema(sysData, schema);
-                                    if (valid !== true) {
-                                        assert.fail(`output is not valid: ${JSON.stringify(valid.errors)}`);
+                            it('should configure index limits', () => {
+                                const uri = `/${ES_CONTAINER_NAME}`;
+                                const options = {
+                                    protocol: ES_PROTOCOL,
+                                    port: ES_HTTP_PORT,
+                                    method: 'PUT',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: {
+                                        settings: {
+                                            'index.mapping.total_fields.limit': ES_MAX_FIELDS
+                                        }
                                     }
-                                    found = true;
-                                }
+                                };
+                                return util.makeRequest(CONSUMER_HOST.ip, uri, options);
                             });
-                            if (!found) {
-                                return Promise.reject(new Error('System Poller data not found'));
-                            }
-                            return Promise.resolve();
-                        }));
-                });
+                        });
 
-                describe('TS cleanup - remove ElasticSearch consumer', () => {
-                    it('should remove consumer from TS declaration', () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(DECLARATION)));
-                });
+                        describe('Consumer Test: ElasticSearch - Configure TS', () => {
+                            it('should configure TS', () => {
+                                const consumerDeclaration = util.deepCopy(DECLARATION);
+                                consumerDeclaration[ES_CONSUMER_NAME] = {
+                                    class: 'Telemetry_Consumer',
+                                    type: 'ElasticSearch',
+                                    host: CONSUMER_HOST.ip,
+                                    protocol: ES_PROTOCOL,
+                                    port: ES_HTTP_PORT,
+                                    index: ES_CONTAINER_NAME,
+                                    apiVersion: version
+                                };
+                                return dutUtils.postDeclarationToDUT(dut, consumerDeclaration);
+                            });
 
-                describe('Consumer service teardown', () => {
-                    it('should remove container', () => removeESContainer());
+                            it('should send event to TS Event Listener', () => {
+                                const msg = `hostname="${dut.hostname}",testDataTimestamp="${testDataTimestamp}",test="true",testType="${ES_CONSUMER_NAME}"`;
+                                return dutUtils.sendDataToEventListener(dut, msg);
+                            });
+
+                            it('should retrieve SystemPoller data', () => dutUtils.getSystemPollerData(dut, constants.DECL.SYSTEM_NAME)
+                                .then((data) => {
+                                    const systemPollerData = data[0];
+                                    assert.notStrictEqual(systemPollerData, undefined);
+                                    assert.notStrictEqual(systemPollerData.system, undefined);
+                                }));
+                        });
+
+                        describe('Consumer Test: ElasticSearch - Test', () => {
+                            const query = (searchString) => {
+                                const uri = `/${ES_CONTAINER_NAME}/_search?${searchString}`;
+                                const options = {
+                                    port: ES_HTTP_PORT,
+                                    protocol: ES_PROTOCOL
+                                };
+                                util.logger.info(`ElasticSearch search query - ${uri}`);
+                                return util.makeRequestWithRetry(
+                                    () => util.makeRequest(CONSUMER_HOST.ip, uri, options),
+                                    30000,
+                                    5
+                                );
+                            };
+
+                            it('should check for event listener data for', () => new Promise(resolve => setTimeout(resolve, 10000))
+                                .then(() => query(`size=1&q=data.testType:${ES_CONSUMER_NAME}%20AND%20data.hostname=${dut.hostname}`))
+                                .then((data) => {
+                                    util.logger.info('ElasticSearch response:', data);
+                                    const esData = data.hits.hits;
+                                    assert.notStrictEqual(esData.length, 0, 'ElasticSearch should return search results');
+
+                                    let found = false;
+                                    esData.forEach((hit) => {
+                                        const eventData = hit._source.data;
+                                        if (eventData && eventData.hostname === dut.hostname) {
+                                            assert.strictEqual(
+                                                eventData.testDataTimestamp,
+                                                testDataTimestamp.toString()
+                                            );
+                                            found = true;
+                                        }
+                                    });
+                                    if (!found) {
+                                        return Promise.reject(new Error('Event not found'));
+                                    }
+                                    return Promise.resolve();
+                                }));
+
+                            it('should have system poller data', () => new Promise(resolve => setTimeout(resolve, 10000))
+                                .then(() => query(`size=1&q=system.hostname:${dut.hostname}`))
+                                .then((data) => {
+                                    util.logger.info('ElasticSearch response:', data);
+                                    const esData = data.hits.hits;
+                                    assert.notStrictEqual(esData.length, 0, 'ElasticSearch should return search results');
+
+                                    let found = false;
+                                    esData.forEach((hit) => {
+                                        const sysData = hit._source;
+                                        if (sysData && sysData.system && sysData.system.hostname === dut.hostname) {
+                                            const schema = JSON.parse(
+                                                fs.readFileSync(constants.DECL.SYSTEM_POLLER_SCHEMA)
+                                            );
+                                            const valid = util.validateAgainstSchema(sysData, schema);
+                                            if (valid !== true) {
+                                                assert.fail(`output is not valid: ${JSON.stringify(valid.errors)}`);
+                                            }
+                                            found = true;
+                                        }
+                                    });
+                                    if (!found) {
+                                        return Promise.reject(new Error('System Poller data not found'));
+                                    }
+                                    return Promise.resolve();
+                                }));
+                        });
+
+                        describe('TS cleanup - remove ElasticSearch consumer', () => {
+                            it('should remove consumer from TS declaration', () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(DECLARATION)));
+                        });
+
+                        describe('Consumer service teardown', () => {
+                            it('should remove container', () => removeESContainer());
+                        });
+                    });
                 });
             });
         });

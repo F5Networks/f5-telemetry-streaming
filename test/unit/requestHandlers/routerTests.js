@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -28,6 +27,7 @@ const testUtil = require('../shared/util');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
 
 class CustomRequestHandler extends BaseRequestHandler {
     constructor(restOperation, params) {
@@ -59,6 +59,10 @@ class CustomRequestHandler extends BaseRequestHandler {
 
 
 describe('Requests Router', () => {
+    before(() => {
+        moduleCache.restore();
+    });
+
     beforeEach(() => {
         stubs.coreStub({
             configWorker,

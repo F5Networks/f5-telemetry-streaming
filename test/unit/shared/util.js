@@ -64,6 +64,7 @@ function MockLogger(options) {
     this.debug = sinon.stub();
     this.info = sinon.stub();
     this.exception = sinon.stub();
+    this.warning = sinon.stub();
     // returns() returns the value passed at initialization - callsFake() uses CURRENT value
     this.getLevelName = sinon.stub().callsFake(() => this.logLevel);
 }

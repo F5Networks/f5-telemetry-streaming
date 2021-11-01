@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -22,6 +21,8 @@ const testUtil = require('../shared/util');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Base Data Receiver', () => {
     const BaseDataReceiver = baseDataReceiver.BaseDataReceiver;
     let receiverInst;
@@ -30,6 +31,10 @@ describe('Base Data Receiver', () => {
     let stopHandlerStub;
 
     const fetchStates = () => stateChangedSpy.args.map(callArgs => callArgs[0].current);
+
+    before(() => {
+        moduleCache.restore();
+    });
 
     beforeEach(() => {
         receiverInst = new BaseDataReceiver();

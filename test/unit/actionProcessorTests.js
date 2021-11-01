@@ -8,7 +8,8 @@
 
 'use strict';
 
-require('./shared/restoreCache')();
+/* eslint-disable import/order */
+const moduleCache = require('./shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -25,7 +26,13 @@ const EVENT_TYPES = require('../../src/lib/constants').EVENT_TYPES;
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Action Processor', () => {
+    before(() => {
+        moduleCache.restore();
+    });
+
     describe('processActions', () => {
         ['dataTagging', 'dataFiltering', 'JMESPath', 'combinations'].forEach((actionType) => {
             describe(actionType, () => {
@@ -33,7 +40,8 @@ describe('Action Processor', () => {
                     testUtil.getCallableIt(testConf)(testConf.name, () => {
                         const deviceCtx = testConf.deviceCtx || {
                             deviceVersion: '13.0.0.0',
-                            provisioning: { ltm: { name: 'ltm', level: 'nominal' } }
+                            provisioning: { ltm: { name: 'ltm', level: 'nominal' } },
+                            bashDisabled: false
                         };
 
                         actionProcessor.processActions(testConf.dataCtx, testConf.actions, deviceCtx);

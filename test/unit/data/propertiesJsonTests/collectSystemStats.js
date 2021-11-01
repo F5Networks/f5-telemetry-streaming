@@ -431,6 +431,20 @@ module.exports = {
                     }
                 },
                 {
+                    endpoint: '/mgmt/tm/sys/db/systemauth.disablebash',
+                    response: {
+                        kind: 'tm:sys:db:dbstate',
+                        name: 'systemauth.disablebash',
+                        fullPath: 'systemauth.disablebash',
+                        generation: 1,
+                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2.3',
+                        defaultValue: 'false',
+                        scfConfig: 'true',
+                        value: 'false',
+                        valueRange: 'false true'
+                    }
+                },
+                {
                     endpoint: '/mgmt/tm/cm/device',
                     options: {
                         times: 999
@@ -1545,6 +1559,20 @@ module.exports = {
                         kind: 'tm:sys:provision:provisioncollectionstate',
                         selfLink: 'https://localhost/mgmt/tm/sys/provision?ver=14.1.0'
                     }
+                },
+                {
+                    endpoint: '/mgmt/tm/sys/db/systemauth.disablebash',
+                    response: {
+                        kind: 'tm:sys:db:dbstate',
+                        name: 'systemauth.disablebash',
+                        fullPath: 'systemauth.disablebash',
+                        generation: 1,
+                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2.3',
+                        defaultValue: 'false',
+                        scfConfig: 'true',
+                        value: 'false',
+                        valueRange: 'false true'
+                    }
                 }
             ]
         },
@@ -1649,6 +1677,13 @@ module.exports = {
                         kind: 'tm:sys:provision:provisioncollectionstate',
                         selfLink: 'https://localhost/mgmt/tm/sys/provision?ver=14.1.0'
                     }
+                },
+                {
+                    endpoint: '/mgmt/tm/sys/db/systemauth.disablebash',
+                    response: {
+                        kind: 'tm:sys:db:dbstate',
+                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2.3'
+                    }
                 }
             ]
         },
@@ -1697,11 +1732,11 @@ module.exports = {
                     tmmCpu: NaN, // should be fixed and set to missing data
                     tmmMemory: NaN, // should be fixed and set to missing data
                     tmmTraffic: {},
-                    diskLatency: {},
-                    diskStorage: {},
                     networkInterfaces: {},
                     provisioning: {},
-                    throughputPerformance: {}
+                    throughputPerformance: {},
+                    diskLatency: {},
+                    diskStorage: {}
                 }
             },
             endpoints: [
@@ -1724,6 +1759,13 @@ module.exports = {
                     response: {
                         kind: 'shared:resolver:device-groups:deviceinfostate',
                         selfLink: 'https://localhost/mgmt/shared/identified-devices/config/device-info'
+                    }
+                },
+                {
+                    endpoint: '/mgmt/tm/sys/db/systemauth.disablebash',
+                    response: {
+                        kind: 'tm:sys:db:dbstate',
+                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2.3'
                     }
                 },
                 {
@@ -1931,11 +1973,11 @@ module.exports = {
                     tmmCpu: NaN, // should be fixed and set to missing data
                     tmmMemory: NaN, // should be fixed and set to missing data
                     tmmTraffic: {},
-                    diskLatency: {},
-                    diskStorage: {},
                     networkInterfaces: {},
                     provisioning: {},
-                    throughputPerformance: {}
+                    throughputPerformance: {},
+                    diskLatency: {},
+                    diskStorage: {}
                 }
             },
             endpoints: [
@@ -1957,6 +1999,13 @@ module.exports = {
                     response: {
                         kind: 'shared:resolver:device-groups:deviceinfostate',
                         selfLink: 'https://localhost/mgmt/shared/identified-devices/config/device-info'
+                    }
+                },
+                {
+                    endpoint: '/mgmt/tm/sys/db/systemauth.disablebash',
+                    response: {
+                        kind: 'tm:sys:db:dbstate',
+                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2.3'
                     }
                 },
                 {

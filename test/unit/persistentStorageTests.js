@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('./shared/restoreCache')();
+const moduleCache = require('./shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -23,9 +22,15 @@ const stubs = require('./shared/stubs');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Persistent Storage', () => {
     let persistentStorageInst;
     let persistentStorageStub;
+
+    before(() => {
+        moduleCache.restore();
+    });
 
     beforeEach(() => {
         persistentStorageInst = persistentStorage.persistentStorage;

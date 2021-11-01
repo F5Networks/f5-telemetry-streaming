@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -24,9 +23,14 @@ const testUtil = require('../shared/util');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
 
 describe('ElasticSearch', () => {
     let sendToConsumerMock;
+
+    before(() => {
+        moduleCache.restore();
+    });
 
     beforeEach(() => {
         sendToConsumerMock = sinon.stub(httpUtil, 'sendToConsumer').resolves();
@@ -39,7 +43,8 @@ describe('ElasticSearch', () => {
         index: 'ts_elasticsearch_consumer',
         dataType: 'f5telemetry',
         allowSelfSignedCert: true,
-        protocol: 'http'
+        protocol: 'http',
+        apiVersion: '6.0'
     };
 
     afterEach(() => {
@@ -146,7 +151,7 @@ describe('ElasticSearch', () => {
                     protocol: 'http',
                     username: 'myUser',
                     passphrase: 'myPassword',
-                    apiVersion: '12'
+                    apiVersion: '6'
                 }
             });
 
@@ -164,6 +169,71 @@ describe('ElasticSearch', () => {
                         'Content-Type': 'application/json'
                     });
                 });
+        });
+
+        describe('ElasticSearch Mapping Type API changes', () => {
+            it('should log deprecation notice, and update type, if custom dataType is used (apiVersion = 7.11)', () => {
+                const context = testUtil.buildConsumerContext({
+                    config: defaultConsumerConfig
+                });
+
+                context.config.apiVersion = '7.11';
+                context.config.dataType = 'custom.datatype';
+
+                return elasticSearchIndex(context)
+                    .then(() => {
+                        const passedConfig = sendToConsumerMock.firstCall.args[0];
+                        assert.deepStrictEqual(
+                            passedConfig.logger.warning.args,
+                            [['ElasticSearch with apiVersion 7.11 has deprecated specifying dataType in requests. Using \'_doc\' instead.']]
+                        );
+                        assert.strictEqual(
+                            passedConfig.uri,
+                            '/espath/ts_elasticsearch_consumer/_doc',
+                            'shoud update type to \'_doc\''
+                        );
+                    });
+            });
+
+            it('should not log deprecation notice if dataType = \'_doc\' (apiVersion = 7.11)', () => {
+                const context = testUtil.buildConsumerContext({
+                    config: defaultConsumerConfig
+                });
+
+                context.config.apiVersion = '7.11';
+                context.config.dataType = '_doc';
+
+                return elasticSearchIndex(context)
+                    .then(() => {
+                        const passedConfig = sendToConsumerMock.firstCall.args[0];
+                        assert.notOk(passedConfig.logger.warning.called, 'should not log deprecation notice');
+                        assert.strictEqual(
+                            passedConfig.uri,
+                            '/espath/ts_elasticsearch_consumer/_doc',
+                            'shoud still use default dataType'
+                        );
+                    });
+            });
+
+            it('should handle when dataType is not provided (apiVersion = 8.0)', () => {
+                const context = testUtil.buildConsumerContext({
+                    config: defaultConsumerConfig
+                });
+
+                context.config.apiVersion = '8.00';
+                delete context.config.dataType;
+
+                return elasticSearchIndex(context)
+                    .then(() => {
+                        const passedConfig = sendToConsumerMock.firstCall.args[0];
+                        assert.notOk(passedConfig.logger.warning.called, 'should not log deprecation notice');
+                        assert.strictEqual(
+                            passedConfig.uri,
+                            '/espath/ts_elasticsearch_consumer/_doc',
+                            'shoud still use default dataType'
+                        );
+                    });
+            });
         });
     });
 });

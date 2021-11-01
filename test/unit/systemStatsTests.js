@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('./shared/restoreCache')();
+const moduleCache = require('./shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -26,7 +25,13 @@ const assert = chai.assert;
 
 const defaultPropertiesStateValidator = testUtil.getSpoiledDataValidator(defaultProperties);
 
+moduleCache.remember();
+
 describe('System Stats', () => {
+    before(() => {
+        moduleCache.restore();
+    });
+
     afterEach(() => {
         defaultPropertiesStateValidator();
     });

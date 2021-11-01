@@ -19,6 +19,7 @@ const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 module.exports = function (context) {
     const fullURI = azureUtil.getApiUrl(context, 'opinsights');
     const workspaceId = context.config.workspaceId;
+    const format = context.config.format;
     const sharedKey = context.config.passphrase;
     const logType = context.config.logType || 'F5Telemetry';
 
@@ -40,19 +41,15 @@ module.exports = function (context) {
                 if (typeof data !== 'object') {
                     data = { value: data }; // make data an object
                 }
-                // rename/prefix certain reserved keywords, this is necessary because Azure LA
-                // will accept messages and then silently drop them in post-processing if
-                // they contain certain top-level keys such as 'tenant'
-                const reserved = ['tenant'];
-                reserved.forEach((item) => {
-                    if (Object.keys(data).indexOf(item) !== -1) {
-                        data[`f5${item}`] = data[item];
-                        delete data[item];
-                    }
-                });
+
+                if ((format === 'propertyBased') && azureUtil.isConfigItems(data, type)) {
+                    data = azureUtil.transformConfigItems(data);
+                } else {
+                    data = [data]; // place in array per API spec
+                }
+                data.forEach(d => azureUtil.scrubReservedKeys(d));
 
                 const date = new Date().toUTCString();
-                data = [data]; // place in array per API spec
                 const bodyString = JSON.stringify(data);
                 const signedKey = azureUtil.signSharedKey(keyToUse, date, bodyString);
 

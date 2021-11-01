@@ -22,7 +22,7 @@ const MODULE_REQUIREMENTS = { DOCKER: true };
 const DUTS = util.getHosts('BIGIP');
 
 const CONSUMER_HOST = util.getHosts('CONSUMER')[0]; // only expect one
-const FLUENTD_IMAGE_NAME = 'fluent/fluentd:v1.6-debian-1';
+const FLUENTD_IMAGE_NAME = `${constants.ARTIFACTORY_DOCKER_HUB_PREFIX}fluent/fluentd:v1.6-debian-1`;
 const FLUENTD_NAME = 'fluentd-server';
 const FLUENTD_HOST = CONSUMER_HOST.ip;
 const FLUENTD_FOLDER = 'fluentd';

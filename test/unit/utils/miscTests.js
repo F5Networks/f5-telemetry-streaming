@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -21,7 +20,13 @@ const util = require('../../../src/lib/utils/misc');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Misc Util', () => {
+    before(() => {
+        moduleCache.restore();
+    });
+
     describe('.stringify()', () => {
         it('should stringify object', () => {
             assert.strictEqual(

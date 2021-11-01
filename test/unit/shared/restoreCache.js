@@ -68,13 +68,16 @@ function checkCache(cache) {
  * attempt to import them. All *Tests.js file will have their own instances of 'fs', 'os' and etc.
  *
  * @param {Object} preExistedCache - copy of require.cache
+ * @param {boolean} [allowSrcDir] - allow modules from './src'
  */
-function restoreCache(preExistedCache) {
+function restoreCache(preExistedCache, allowSrcDir) {
     Object.keys(require.cache).forEach((key) => {
         delete require.cache[key];
     });
     Object.assign(require.cache, preExistedCache);
-    checkCache(require.cache);
+    if (!allowSrcDir) {
+        checkCache(require.cache);
+    }
 }
 
 /**
@@ -85,10 +88,28 @@ function restoreCache(preExistedCache) {
 module.exports = (function () {
     console.info('Saving initial \'require.cache\' state');
     console.info(`Source code directory - ${SRC_DIR}`);
+
     // just to be sure that modules from /src are not imported yet
     checkCache(require.cache);
     const preExistedCache = Object.assign({}, require.cache);
-    return function restore() {
+
+    class ModuleCache {
+        constructor() {
+            this.cacheStack = [];
+        }
+
+        remember() {
+            this.cacheStack.push(Object.assign({}, require.cache));
+        }
+
+        restore() {
+            const allowSrcDir = this.cacheStack.length > 0;
+            restoreCache(this.cacheStack.pop() || preExistedCache, allowSrcDir);
+        }
+    }
+
+    return function () {
         restoreCache(preExistedCache);
+        return new ModuleCache();
     };
 }());

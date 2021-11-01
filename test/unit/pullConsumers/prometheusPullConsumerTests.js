@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -26,11 +25,17 @@ const SYSTEM_POLLER_DATA = require('./data/system_poller_datasets.json');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 const arraysToPromLines = input => lodash.flatten(input).join('\n');
 
 describe('Prometheus Pull Consumer', () => {
     let context;
     let eventStub;
+
+    before(() => {
+        moduleCache.restore();
+    });
 
     beforeEach(() => {
         context = testUtil.buildConsumerContext({

@@ -25,7 +25,7 @@ const SHOULD_SKIP_TESTS = {};
 
 const CONSUMER_HOST = testUtil.getHosts('CONSUMER')[0]; // only expect one
 const OTEL_METRICS_PATH = '/v1/metrics';
-const OTEL_COLLECTOR_IMAGE_NAME = 'otel/opentelemetry-collector-contrib';
+const OTEL_COLLECTOR_IMAGE_NAME = `${constants.ARTIFACTORY_DOCKER_HUB_PREFIX}otel/opentelemetry-collector-contrib`;
 const OTEL_COLLECTOR_NAME = 'otel-collector';
 const OTEL_COLLECTOR_HOST = CONSUMER_HOST.ip;
 const OTEL_COLLECTOR_FOLDER = 'otel';

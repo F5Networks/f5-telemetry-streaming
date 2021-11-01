@@ -1,0 +1,101 @@
+{
+    "$id": "pull_consumer_schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry Streaming Pull Consumer schema",
+    "description": "",
+    "type": "object",
+    "allOf": [
+        {
+            "if": { "properties": { "class": { "const": "Telemetry_Pull_Consumer" } } },
+            "then": {
+                "required": [
+                    "class",
+                    "type",
+                    "systemPoller"
+                ],
+                "properties": {
+                    "class": {
+                        "title": "Class",
+                        "description": "Telemetry Streaming Pull Consumer class",
+                        "type": "string",
+                        "enum": [ "Telemetry_Pull_Consumer" ]
+                    },
+                    "enable": {
+                        "default": true,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/enable"
+                            }
+                        ]
+                    },
+                    "trace": {
+                        "default": false,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/trace"
+                            }
+                        ]
+                    },
+                    "type": {
+                        "title": "Type",
+                        "description": "" ,
+                        "type": "string",
+                        "enum": [
+                            "default",
+                            "Prometheus"
+                        ]
+                    },
+                    "systemPoller": {
+                        "title": "Pointer to System Poller(s)",
+                        "anyOf": [
+                            {
+                                "$ref": "system_poller_schema.json#/definitions/systemPollerPointerRef"
+                            },
+                            {
+                                "type": "array",
+                                "items": {
+                                    "anyOf": [
+                                        {
+                                            "$ref": "system_poller_schema.json#/definitions/systemPollerPointerRef"
+                                        }
+                                    ]
+                                },
+                                "minItems": 1
+                            }
+                        ]
+                    }
+                },
+                "allOf": [
+                    {
+                        "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a separate block",
+                        "properties": {
+                            "class": {},
+                            "enable": {},
+                            "trace": {},
+                            "type": {},
+                            "systemPoller": {}
+                        },
+                        "additionalProperties": false
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "default" } } },
+                        "then": {
+                            "required": [],
+                            "properties": {}
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "Prometheus" } } },
+                        "then": {
+                            "required": [],
+                            "properties": {}
+                        },
+                        "else": {}
+                    }
+                ]
+            },
+            "else": {}
+        }
+    ]
+}

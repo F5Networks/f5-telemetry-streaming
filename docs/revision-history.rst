@@ -11,6 +11,10 @@ Document Revision History
         - Description
         - Date
   
+      * - 1.24.0
+        - Updated the documentation for Telemetry Streaming v1.24.0. This release contains the following changes: |br| * Added support for the **region** and **service** properties for the Experimental DataDog consumer (see :ref:`DataDog<datadog>`) |br| * Added support for the **format** property for Azure Log Analytics (see :ref:`Azure Log Analytics<azure-ref>`) |br| |br| Issues Resolved: |br| * 
+        - 11-2-21
+
       * - 1.23.0
         - Updated the documentation for Telemetry Streaming v1.23.0. This release contains the following changes: |br| * Added a new EXPERIMENTAL Push consumer for OpenTelemetry Exporter (see :ref:`OpenTelemetry Exporter<opent>`) |br| * Added  **isAvailable** and **isEnabled** to virtual server output (see :ref:`System information output<sysinfo>`), `GitHub #152 <https://github.com/F5Networks/f5-telemetry-streaming/issues/152>`_ |br| * Added  **throughtputPerformance** to System output (see :ref:`System information output<sysinfo>`), `GitHub #129 <https://github.com/F5Networks/f5-telemetry-streaming/issues/129>`_ |br| * Added the **compressionType** property to the experimental DataDog consumer (see :ref:`DataDog<datadog>`), `GitHub #157 <https://github.com/F5Networks/f5-telemetry-streaming/issues/157>`_  |br| * Added functionality to handle responses from iControlREST that contain duplicate JSON keys |br| * Added support for TS Namespaces (was experimental), see :doc:`namespaces` |br| * Added support for specifying fallback hosts for Generic HTTP consumers (was experimental) :ref:`Fallback hosts<fallback>` |br| |br| Issues Resolved: |br| * Fixed issue where Prometheus consumer did not return the correct Content-Type HTTP Header, `GitHub #148 <https://github.com/F5Networks/f5-telemetry-streaming/issues/148>`_ |br| * Fixed issue where asmState could report incorrect state value. asmState and lastAsmChange properties are now retrieved from iControlREST, `GitHub #151 <https://github.com/F5Networks/f5-telemetry-streaming/issues/151>`_
         - 9-21-21

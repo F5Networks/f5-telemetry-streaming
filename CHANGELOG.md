@@ -1,6 +1,18 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.24.0
+### Added
+- AUTOTOOL-2752: [GitHub #159](https://github.com/F5Networks/f5-telemetry-streaming/issues/159) and [GitHub #162](https://github.com/F5Networks/f5-telemetry-streaming/issues/162): Added "region" property to DataDog consumer
+- AUTOTOOL-2753: [GitHub #161](https://github.com/F5Networks/f5-telemetry-streaming/issues/161): Added "service" property to DataDog consumer
+- AUTOTOOL-2701: [GitHub #156](https://github.com/F5Networks/f5-telemetry-streaming/issues/156): Added "format" property to Azure_Log_Analytics consumer
+### Fixed
+- AUTOTOOL-2709: Fixed an issue where Telemetry Streaming would not collect System Poller data if bash was disabled on the BIG-IP device. Properties that require the bash endpoint are now skipped if bash is not available on the target BIG-IP.
+### Changed
+- AUTOTOOL-2282: Support ElasticSearch 7 by handling ElasticSearch's 'type' deprecation
+- AUTOTOOL-2723: Update npm packages (aws-sdk from v2.980.0 to v2.991.0)
+### Removed
+
 ## 1.23.0
 ### Added
 - AUTOTOOL-2492: [GitHub #129](https://github.com/F5Networks/f5-telemetry-streaming/issues/129): Added "throughtputPerformance" stats to "system"

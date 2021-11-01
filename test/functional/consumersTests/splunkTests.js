@@ -27,7 +27,7 @@ const MODULE_REQUIREMENTS = { DOCKER: true };
 
 const DUTS = util.getHosts('BIGIP');
 const CONSUMER_HOST = util.getHosts('CONSUMER')[0]; // only expect one
-const SPLUNK_IMAGE_NAME = 'splunk/splunk:latest';
+const SPLUNK_IMAGE_NAME = `${constants.ARTIFACTORY_DOCKER_HUB_PREFIX}splunk/splunk:latest`;
 const SPLUNK_CONTAINER_NAME = 'ts_splunk_consumer';
 const SPLUNK_USERNAME = 'admin';
 const SPLUNK_PASSWORD = `${CONSUMER_HOST.password}splunk!`; // might want to generate one instead

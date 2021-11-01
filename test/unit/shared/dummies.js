@@ -214,6 +214,27 @@ module.exports = {
                     class: 'Telemetry_Consumer',
                     type: 'default'
                 })
+            },
+            genericHttp: {
+                minimal: {
+                    decrypted: declarationComponentGenerator({
+                        class: 'Telemetry_Consumer',
+                        type: 'Generic_HTTP',
+                        host: '192.168.100.1'
+                    })
+                }
+            },
+            splunk: {
+                minimal: {
+                    decrypted: declarationComponentGenerator({
+                        class: 'Telemetry_Consumer',
+                        type: 'Splunk',
+                        host: '192.168.100.1',
+                        passphrase: {
+                            cipherText: 'test_passphrase_1'
+                        }
+                    })
+                }
             }
         },
         controls: {
@@ -255,20 +276,6 @@ module.exports = {
                     }
                 })
             },
-            inlineMinimal: {
-                decrypted: declarationComponentGenerator({
-                    username: 'test_user_1',
-                    passphrase: {
-                        cipherText: 'test_passphrase_1'
-                    },
-                    interval: {
-                        timeWindow: {
-                            start: '00:00',
-                            end: '03:00'
-                        }
-                    }
-                })
-            },
             inlineFull: {
                 decrypted: declarationComponentGenerator({
                     trace: true,
@@ -298,6 +305,20 @@ module.exports = {
                     }
                 })
             },
+            inlineMinimal: {
+                decrypted: declarationComponentGenerator({
+                    username: 'test_user_1',
+                    passphrase: {
+                        cipherText: 'test_passphrase_1'
+                    },
+                    interval: {
+                        timeWindow: {
+                            start: '00:00',
+                            end: '03:00'
+                        }
+                    }
+                })
+            },
             minimal: {
                 decrypted: declarationComponentGenerator({
                     class: 'Telemetry_iHealth_Poller',
@@ -314,9 +335,35 @@ module.exports = {
                 })
             }
         },
+        listener: {
+            full: {
+                decrypted: declarationComponentGenerator({
+                    class: 'Telemetry_Listener',
+                    enable: true,
+                    trace: true,
+                    port: 6514,
+                    tag: {
+                        tenant: '`T`',
+                        application: '`A`'
+                    },
+                    match: ''
+                })
+            },
+            minimal: {
+                decrypted: declarationComponentGenerator({ class: 'Telemetry_Listener' })
+            }
+        },
         namespace: {
             base: {
                 decrypted: declarationComponentGenerator({ class: 'Telemetry_Namespace' })
+            }
+        },
+        pullConsumer: {
+            default: {
+                decrypted: declarationComponentGenerator({
+                    class: 'Telemetry_Pull_Consumer',
+                    type: 'default'
+                })
             }
         },
         system: {
@@ -339,6 +386,48 @@ module.exports = {
             minimal: {
                 decrypted: declarationComponentGenerator({
                     class: 'Telemetry_System'
+                })
+            }
+        },
+        systemPoller: {
+            full: {
+                decrypted: declarationComponentGenerator({
+                    class: 'Telemetry_System_Poller',
+                    enable: true,
+                    trace: true,
+                    interval: 150,
+                    tag: {
+                        tenant: '`B`',
+                        application: '`C`'
+                    },
+                    host: 'somehost',
+                    port: 5000,
+                    protocol: 'http',
+                    allowSelfSignedCert: true,
+                    enableHostConnectivityCheck: false,
+                    username: 'username',
+                    passphrase: {
+                        cipherText: 'passphrase'
+                    }
+                })
+            },
+            inlineFull: {
+                decrypted: declarationComponentGenerator({
+                    enable: true,
+                    trace: true,
+                    interval: 150,
+                    tag: {
+                        tenant: '`B`',
+                        application: '`C`'
+                    }
+                })
+            },
+            inlineMinimal: {
+                decrypted: declarationComponentGenerator({})
+            },
+            minimal: {
+                decrypted: declarationComponentGenerator({
+                    class: 'Telemetry_System_Poller'
                 })
             }
         }

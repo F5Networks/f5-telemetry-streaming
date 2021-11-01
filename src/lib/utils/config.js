@@ -40,6 +40,20 @@ const IHEALTH_POLLER_KEYS = {
 let _module;
 
 /**
+ * Returns correct value for 'allowSelfSignedCert' property
+ *
+ * @param {object} config - config
+ * @param {boolean} [config.allowSelfSignedCert]
+ *
+ * @returns {boolean}
+ */
+function getAllowSelfSignedCertVal(config) {
+    return typeof config.allowSelfSignedCert === 'undefined'
+        ? !constants.STRICT_TLS_REQUIRED
+        : config.allowSelfSignedCert;
+}
+
+/**
  * Remove useless components
  *
  * Note: This method mutates 'convertedConfig'.
@@ -85,6 +99,15 @@ function componentizeConfig(originConfig, convertedConfig) {
                     component.name = k;
                     component.namespace = namespace || constants.DEFAULT_UNNAMED_NAMESPACE;
                     convertedConfig.components.push(component);
+
+                    if (v.class === CLASSES.PULL_CONSUMER_CLASS_NAME) {
+                        const pollerGroup = {
+                            class: CLASSES.PULL_CONSUMER_SYSTEM_POLLER_GROUP_CLASS_NAME,
+                            namespace: namespace || constants.DEFAULT_UNNAMED_NAMESPACE,
+                            pullConsumer: component.name
+                        };
+                        convertedConfig.components.push(pollerGroup);
+                    }
                 }
             }
         });
@@ -163,7 +186,7 @@ function getTracePrefix(component) {
 
 /**
  * @param {Component} component - component
- * @param {object} [traceConfig] - trace config to process instead of component.trace
+ * @param {boolean | object | string} [traceConfig] - trace config to process instead of component.trace
  *
  * @returns {TypedTracerConfig} Tracer config
  */
@@ -178,7 +201,7 @@ function getTracerConfig(component, traceConfig) {
          */
         return getTracerConfig(component, {
             enable: !!traceConfig,
-            path: typeof traceConfig === 'string' ? traceConfig : undefined, // undefined will be converted to default pass by assignDefaults,
+            path: typeof traceConfig === 'string' ? traceConfig : undefined, // undefined will be converted to default path by assignDefaults,
             type: 'output'
         });
     }
@@ -236,20 +259,22 @@ function mapComponents(convertedConfig) {
     //   for pull consumer: map consumer to the poller so we can look up configuration to use to then fetch data
     _module.getComponents(convertedConfig).forEach((component) => {
         if (useForMapping(component.class)) {
+            const systemNameLog = component.systemName ? `system = ${component.systemName}, ` : '';
             let receivers;
-            if (component.class === CLASSES.PULL_CONSUMER_CLASS_NAME) {
-                receivers = _module.getTelemetrySystemPollers(convertedConfig, component.namespace)
-                    .filter(p => component.systemPollers.indexOf(p.name) !== -1);
+
+            if (component.class === CLASSES.PULL_CONSUMER_SYSTEM_POLLER_GROUP_CLASS_NAME) {
+                receivers = _module.getTelemetryPullConsumers(convertedConfig, component.namespace)
+                    .filter(pc => pc.name === component.pullConsumer);
             } else {
                 receivers = _module.getTelemetryConsumers(convertedConfig, component.namespace);
             }
             if (receivers.length) {
                 convertedConfig.mappings[component.id] = receivers.map((p) => {
-                    logger.debug(`Creating a route for data from "${p.name}" (${p.class}) to "${component.name}" (${component.class}) [${component.systemName ? `system = ${component.systemName}, ` : ''}namespace = ${component.namespace}]`);
+                    logger.debug(`Creating a route for data to "${p.name}" (${p.class}) from "${component.name}" (${component.class}) [${systemNameLog}namespace = ${component.namespace}]`);
                     return p.id;
                 });
             } else {
-                logger.debug(`No data route created for "${component.name}" (${component.class}) - no data sources/receivers [${component.systemName ? `system = ${component.systemName}, ` : ''}namespace = ${component.namespace}]]`);
+                logger.debug(`No data route created for "${component.name}" (${component.class}) - no data sources/receivers [${systemNameLog}namespace = ${component.namespace}]]`);
             }
         }
     });
@@ -270,6 +295,7 @@ function normalizeComponents(convertedConfig) {
         .then((defaults) => {
             normalizeTelemetrySystems(convertedConfig);
             normalizeTelemetrySystemPollers(convertedConfig, defaults);
+            normalizeTelemetryPullConsumerSystemPollerGroups(convertedConfig);
             normalizeTelemetryIHealthPollers(convertedConfig, defaults);
             normalizeTelemetryEndpoints(convertedConfig);
             normalizeTelemetryListeners(convertedConfig);
@@ -463,6 +489,7 @@ function normalizeTelemetryConsumers(convertedConfig) {
     consumers.forEach((consumer) => {
         consumer.traceName = `${getTracePrefix(consumer)}${consumer.name}`;
         consumer.trace = getTracerConfig(consumer);
+        consumer.allowSelfSignedCert = getAllowSelfSignedCertVal(consumer);
     });
 }
 
@@ -483,7 +510,6 @@ function normalizeTelemetryPullConsumers(convertedConfig) {
     pullConsumers.forEach((consumer) => {
         consumer.traceName = `${getTracePrefix(consumer)}${consumer.name}`;
         consumer.trace = getTracerConfig(consumer);
-        consumer.systemPollers = Array.isArray(consumer.systemPoller) ? consumer.systemPoller : [consumer.systemPoller];
         delete consumer.systemPoller;
     });
 }
@@ -528,9 +554,7 @@ function normalizeTelemetrySystems(convertedConfig) {
             system.systemPollers = Array.isArray(system.systemPoller) ? system.systemPoller : [system.systemPoller];
             delete system.systemPoller;
         }
-        if (typeof system.allowSelfSignedCert === 'undefined') {
-            system.allowSelfSignedCert = !constants.STRICT_TLS_REQUIRED;
-        }
+        system.allowSelfSignedCert = getAllowSelfSignedCertVal(system);
         system.systemPollers.forEach((systemPoller) => {
             // systemPoller is a string ref
             let pollerObj;
@@ -634,6 +658,47 @@ function normalizeTelemetrySystemPollers(convertedConfig, componentDefaults) {
 }
 
 /**
+ * Normalize Telemetry_Pull_Consumer_System_Poller_Group objects
+ *
+ * Note: This method mutates 'convertedConfig'.
+ *
+ * @param {Configuration} convertedConfig - object to save normalized config to
+ * @param {object} componentDefaults - default components values
+ *
+ * @returns {void} once Telemetry_Pull_Consumer_System_Poller_Group objects normalized
+ */
+function normalizeTelemetryPullConsumerSystemPollerGroups(convertedConfig) {
+    // at that point Telemetry_System and Telemetry_System_Poller
+    // objects should be normalized already. Should happen BEFORE
+    // Telemetry_Pull_Consumer normalization
+    /**
+     * Combination of (class, namespace, name) is unique because:
+     * - component's name is unique withing namespace
+     * - Telemetry_Pull_Consumer_System_Poller_Group is not public class
+     * As result:
+     * - safe to assign name based on component's name
+     *   without checking for existence
+     * - safe to refer to a pull consumer by name within namespace scope
+     */
+    const systemPollerGroups = _module.getTelemetryPullConsumerSystemPollerGroups(convertedConfig);
+    const pullConsumers = _module.getTelemetryPullConsumers(convertedConfig);
+
+    systemPollerGroups.forEach((pollerGroup) => {
+        const pullConsumer = pullConsumers
+            .find(pc => pc.namespace === pollerGroup.namespace && pc.name === pollerGroup.pullConsumer);
+
+        pollerGroup.enable = pullConsumer.enable;
+        pollerGroup.name = `${pollerGroup.class}_${pullConsumer.name}`;
+        pollerGroup.traceName = `${getTracePrefix(pollerGroup)}${pollerGroup.name}`;
+        // disable tracing, rely on pull consumer and system poller(s) tracing
+        pollerGroup.trace = { enable: false };
+        pollerGroup.systemPollers = Array.isArray(pullConsumer.systemPoller)
+            ? pullConsumer.systemPoller
+            : [pullConsumer.systemPoller];
+    });
+}
+
+/**
  * Note: This method mutates 'pollerConfig'.
  *
  * @param {Component} systemConfig - config for instance of Telemetry_System
@@ -653,7 +718,7 @@ function updateSystemPollerConfig(systemConfig, pollerConfig, fetchTMStats) {
         host: systemConfig.host,
         port: systemConfig.port,
         protocol: systemConfig.protocol,
-        allowSelfSignedCert: systemConfig.allowSelfSignedCert
+        allowSelfSignedCert: getAllowSelfSignedCertVal(systemConfig)
     };
     pollerConfig.dataOpts = {
         tags: pollerConfig.tag,
@@ -708,7 +773,7 @@ function updateIHealthPollerConfig(systemConfig, pollerConfig) {
             host: ihProxy.host,
             port: ihProxy.port,
             protocol: ihProxy.protocol,
-            allowSelfSignedCert: ihProxy.allowSelfSignedCert
+            allowSelfSignedCert: getAllowSelfSignedCertVal(ihProxy)
         },
         credentials: {
             username: ihProxy.username,
@@ -721,7 +786,7 @@ function updateIHealthPollerConfig(systemConfig, pollerConfig) {
         connection: {
             port: systemConfig.port,
             protocol: systemConfig.protocol,
-            allowSelfSignedCert: systemConfig.allowSelfSignedCert
+            allowSelfSignedCert: getAllowSelfSignedCertVal(systemConfig)
         },
         credentials: {
             username: systemConfig.username,
@@ -745,10 +810,9 @@ function updateIHealthPollerConfig(systemConfig, pollerConfig) {
 function useForMapping(className) {
     const dataSourceClasses = [
         CLASSES.EVENT_LISTENER_CLASS_NAME,
-        CLASSES.SYSTEM_POLLER_CLASS_NAME,
         CLASSES.IHEALTH_POLLER_CLASS_NAME,
-        // also add mapping for pull consumer so we can look up poller config
-        CLASSES.PULL_CONSUMER_CLASS_NAME
+        CLASSES.SYSTEM_POLLER_CLASS_NAME,
+        CLASSES.PULL_CONSUMER_SYSTEM_POLLER_GROUP_CLASS_NAME
     ];
     return dataSourceClasses.indexOf(className) > -1;
 }
@@ -935,6 +999,50 @@ _module = module.exports = {
      */
     getTelemetrySystemPollers(config, namespace) {
         return _module.getComponents(config, { class: CLASSES.SYSTEM_POLLER_CLASS_NAME, namespace });
+    },
+
+    /**
+     * Get Telemetry_System_Poller objects for Telemetry_Pull_Consumer_System_Poller_Group
+     *
+     * @public
+     * @param {Configuration} config - config
+     * @param {Component} pollerGroup - Telemetry_Pull_Consumer_System_Poller_Group object
+     *
+     * @returns {Array<Component>} array of Telemetry_System_Poller objects
+     */
+    getTelemetrySystemPollersForGroup(config, pollerGroup) {
+        return _module.getTelemetrySystemPollers(config, pollerGroup.namespace)
+            .filter(sp => pollerGroup.systemPollers.indexOf(sp.name) !== -1);
+    },
+
+    /**
+     * Get Telemetry_Pull_Consumer_System_Poller_Group objects
+     *
+     * @public
+     * @param {Configuration} config - config
+     * @param {string | function} [namespace] - namespace name or function to use as filter
+     *
+     * @returns {Array<Component>} array of Telemetry_Pull_Consumer_System_Poller_Group objects
+     */
+    getTelemetryPullConsumerSystemPollerGroups(config, namespace) {
+        return _module.getComponents(config, {
+            class: CLASSES.PULL_CONSUMER_SYSTEM_POLLER_GROUP_CLASS_NAME, namespace
+        });
+    },
+
+    /**
+     * Get Telemetry_Pull_Consumer_System_Poller_Group object for Telemetry_Pull_Consumer
+     *
+     * @public
+     * @param {Configuration} config - config
+     * @param {Component} pullConsumer - Telemetry_Pull_Consumer object
+     *
+     * @returns {Component} Telemetry_Pull_Consumer_System_Poller_Group object
+     */
+    getTelemetryPullConsumerSystemPollerGroupForPullConsumer(config, pullConsumer) {
+        return _module.getTelemetryPullConsumerSystemPollerGroups(config, pullConsumer.namespace)
+            .filter(pg => pg.pullConsumer === pullConsumer.name)
+            .find(pg => config.mappings[pg.id].indexOf(pullConsumer.id) !== -1);
     },
 
     /**

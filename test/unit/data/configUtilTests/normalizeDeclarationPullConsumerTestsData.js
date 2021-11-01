@@ -76,6 +76,19 @@ module.exports = {
                         'Pull_Poller_3'
                     ]
                 },
+                My_Disabled_Pull_Consumer: {
+                    class: 'Telemetry_Pull_Consumer',
+                    enable: false,
+                    type: 'Prometheus',
+                    systemPoller: [
+                        // My_System and My_System_3
+                        'Pull_Poller_1',
+                        // My_System_2 and My_System_3
+                        'Pull_Poller_2',
+                        // Pull_Poller_3 itself
+                        'Pull_Poller_3'
+                    ]
+                },
                 My_Namespace: {
                     class: 'Telemetry_Namespace',
                     Pull_Poller_1: {
@@ -131,24 +144,35 @@ module.exports = {
                             // Pull_Poller_3 itself
                             'Pull_Poller_3'
                         ]
+                    },
+                    My_Disabled_Pull_Consumer: {
+                        class: 'Telemetry_Pull_Consumer',
+                        enable: false,
+                        type: 'Prometheus',
+                        systemPoller: [
+                            // My_System and My_System_3
+                            'Pull_Poller_1',
+                            // My_System_2 and My_System_3
+                            'Pull_Poller_2',
+                            // Pull_Poller_3 itself
+                            'Pull_Poller_3'
+                        ]
                     }
                 }
             },
             expected: {
                 mappings: {
-                    'f5telemetry_default::My_Pull_Consumer': [
-                        'f5telemetry_default::My_System::Pull_Poller_1',
-                        'f5telemetry_default::My_System_2::Pull_Poller_2',
-                        'f5telemetry_default::My_System_3::Pull_Poller_1',
-                        'f5telemetry_default::My_System_3::Pull_Poller_2',
-                        'f5telemetry_default::Pull_Poller_3::Pull_Poller_3'
+                    'f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer': [
+                        'f5telemetry_default::My_Pull_Consumer'
                     ],
-                    'My_Namespace::My_Pull_Consumer': [
-                        'My_Namespace::My_System::Pull_Poller_1',
-                        'My_Namespace::My_System_2::Pull_Poller_2',
-                        'My_Namespace::My_System_3::Pull_Poller_1',
-                        'My_Namespace::My_System_3::Pull_Poller_2',
-                        'My_Namespace::Pull_Poller_3::Pull_Poller_3'
+                    'f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Disabled_Pull_Consumer': [
+                        'f5telemetry_default::My_Disabled_Pull_Consumer'
+                    ],
+                    'My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer': [
+                        'My_Namespace::My_Pull_Consumer'
+                    ],
+                    'My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Disabled_Pull_Consumer': [
+                        'My_Namespace::My_Disabled_Pull_Consumer'
                     ]
                 },
                 components: [
@@ -166,12 +190,57 @@ module.exports = {
                         name: 'My_Pull_Consumer',
                         namespace: 'f5telemetry_default',
                         traceName: 'f5telemetry_default::My_Pull_Consumer',
+                        id: 'f5telemetry_default::My_Pull_Consumer'
+                    },
+                    {
+                        class: 'Telemetry_Pull_Consumer_System_Poller_Group',
+                        enable: true,
+                        name: 'Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer',
+                        namespace: 'f5telemetry_default',
+                        traceName: 'f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer',
+                        trace: {
+                            enable: false
+                        },
+                        pullConsumer: 'My_Pull_Consumer',
                         systemPollers: [
                             'Pull_Poller_1',
                             'Pull_Poller_2',
                             'Pull_Poller_3'
                         ],
-                        id: 'f5telemetry_default::My_Pull_Consumer'
+                        id: 'f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer'
+                    },
+                    {
+                        class: 'Telemetry_Pull_Consumer',
+                        type: 'Prometheus',
+                        enable: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Pull_Consumer.f5telemetry_default::My_Disabled_Pull_Consumer',
+                            type: 'output'
+                        },
+                        name: 'My_Disabled_Pull_Consumer',
+                        namespace: 'f5telemetry_default',
+                        traceName: 'f5telemetry_default::My_Disabled_Pull_Consumer',
+                        id: 'f5telemetry_default::My_Disabled_Pull_Consumer'
+                    },
+                    {
+                        class: 'Telemetry_Pull_Consumer_System_Poller_Group',
+                        enable: false,
+                        name: 'Telemetry_Pull_Consumer_System_Poller_Group_My_Disabled_Pull_Consumer',
+                        namespace: 'f5telemetry_default',
+                        traceName: 'f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Disabled_Pull_Consumer',
+                        trace: {
+                            enable: false
+                        },
+                        pullConsumer: 'My_Disabled_Pull_Consumer',
+                        systemPollers: [
+                            'Pull_Poller_1',
+                            'Pull_Poller_2',
+                            'Pull_Poller_3'
+                        ],
+                        id: 'f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Disabled_Pull_Consumer'
                     },
                     {
                         class: 'Telemetry_Pull_Consumer',
@@ -187,12 +256,57 @@ module.exports = {
                         name: 'My_Pull_Consumer',
                         namespace: 'My_Namespace',
                         traceName: 'My_Namespace::My_Pull_Consumer',
+                        id: 'My_Namespace::My_Pull_Consumer'
+                    },
+                    {
+                        class: 'Telemetry_Pull_Consumer_System_Poller_Group',
+                        enable: true,
+                        name: 'Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer',
+                        namespace: 'My_Namespace',
+                        traceName: 'My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer',
+                        trace: {
+                            enable: false
+                        },
+                        pullConsumer: 'My_Pull_Consumer',
                         systemPollers: [
                             'Pull_Poller_1',
                             'Pull_Poller_2',
                             'Pull_Poller_3'
                         ],
-                        id: 'My_Namespace::My_Pull_Consumer'
+                        id: 'My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer'
+                    },
+                    {
+                        class: 'Telemetry_Pull_Consumer',
+                        type: 'Prometheus',
+                        enable: false,
+                        trace: {
+                            enable: false,
+                            encoding: 'utf8',
+                            maxRecords: 10,
+                            path: '/var/tmp/telemetry/Telemetry_Pull_Consumer.My_Namespace::My_Disabled_Pull_Consumer',
+                            type: 'output'
+                        },
+                        name: 'My_Disabled_Pull_Consumer',
+                        namespace: 'My_Namespace',
+                        traceName: 'My_Namespace::My_Disabled_Pull_Consumer',
+                        id: 'My_Namespace::My_Disabled_Pull_Consumer'
+                    },
+                    {
+                        class: 'Telemetry_Pull_Consumer_System_Poller_Group',
+                        enable: false,
+                        name: 'Telemetry_Pull_Consumer_System_Poller_Group_My_Disabled_Pull_Consumer',
+                        namespace: 'My_Namespace',
+                        traceName: 'My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Disabled_Pull_Consumer',
+                        trace: {
+                            enable: false
+                        },
+                        pullConsumer: 'My_Disabled_Pull_Consumer',
+                        systemPollers: [
+                            'Pull_Poller_1',
+                            'Pull_Poller_2',
+                            'Pull_Poller_3'
+                        ],
+                        id: 'My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Disabled_Pull_Consumer'
                     },
                     {
                         class: 'Telemetry_System_Poller',
@@ -865,11 +979,11 @@ module.exports = {
             },
             expected: {
                 mappings: {
-                    'f5telemetry_default::My_Pull_Consumer': [
-                        'f5telemetry_default::Pull_Poller_1::Pull_Poller_1'
+                    'f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer': [
+                        'f5telemetry_default::My_Pull_Consumer'
                     ],
-                    'My_Namespace::My_Pull_Consumer': [
-                        'My_Namespace::Pull_Poller_1::Pull_Poller_1'
+                    'My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer': [
+                        'My_Namespace::My_Pull_Consumer'
                     ]
                 },
                 components: [
@@ -887,10 +1001,22 @@ module.exports = {
                         name: 'My_Pull_Consumer',
                         namespace: 'f5telemetry_default',
                         traceName: 'f5telemetry_default::My_Pull_Consumer',
+                        id: 'f5telemetry_default::My_Pull_Consumer'
+                    },
+                    {
+                        class: 'Telemetry_Pull_Consumer_System_Poller_Group',
+                        enable: true,
+                        name: 'Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer',
+                        namespace: 'f5telemetry_default',
+                        traceName: 'f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer',
+                        trace: {
+                            enable: false
+                        },
+                        pullConsumer: 'My_Pull_Consumer',
                         systemPollers: [
                             'Pull_Poller_1'
                         ],
-                        id: 'f5telemetry_default::My_Pull_Consumer'
+                        id: 'f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer'
                     },
                     {
                         class: 'Telemetry_Pull_Consumer',
@@ -906,10 +1032,22 @@ module.exports = {
                         name: 'My_Pull_Consumer',
                         namespace: 'My_Namespace',
                         traceName: 'My_Namespace::My_Pull_Consumer',
+                        id: 'My_Namespace::My_Pull_Consumer'
+                    },
+                    {
+                        class: 'Telemetry_Pull_Consumer_System_Poller_Group',
+                        enable: true,
+                        name: 'Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer',
+                        namespace: 'My_Namespace',
+                        traceName: 'My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer',
+                        trace: {
+                            enable: false
+                        },
+                        pullConsumer: 'My_Pull_Consumer',
                         systemPollers: [
                             'Pull_Poller_1'
                         ],
-                        id: 'My_Namespace::My_Pull_Consumer'
+                        id: 'My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer'
                     },
                     {
                         class: 'Telemetry_System_Poller',

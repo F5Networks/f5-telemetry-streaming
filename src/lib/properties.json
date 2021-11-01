@@ -245,24 +245,40 @@
         },
         "diskStorage": {
             "structure": { "parentKey": "system" },
-            "key": "diskStorage::commandResult",
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Mounted", "filterKeys": { "include": [ "/", "Capacity", "1024-blocks" ] } } }]
-                },
-                {
-                    "runFunctions": [ { "name": "diskStoragePercentsToFloating" } ]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "diskStorage::commandResult",
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Mounted", "filterKeys": { "include": [ "/", "Capacity", "1024-blocks" ] } } }]
+                    },
+                    {
+                        "runFunctions": [ { "name": "diskStoragePercentsToFloating" } ]
+                    }
+                ]   
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "diskLatency": {
             "structure": { "parentKey": "system" },
-            "key": "diskLatency::commandResult",
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Device:", "filterKeys": { "exclude": [ "Device:", "await", "r_await", "w_await", "svctm", "avgrq-sz", "avgqu-sz", "rkB/s", "wkB/s", "rsec/s", "wsec/s", "rrqm/s", "wrqm/s" ] }, "renameKeys": { "patterns": { "rsec/s": { "constant": "rkB/s" }, "wsec/s": { "constant": "wkB/s" } } } } }]
-                }
-            ],
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "diskLatency::commandResult",
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "Device:", "filterKeys": { "exclude": [ "Device:", "await", "r_await", "w_await", "svctm", "avgrq-sz", "avgqu-sz", "rkB/s", "wkB/s", "rsec/s", "wsec/s", "rrqm/s", "wrqm/s" ] }, "renameKeys": { "patterns": { "rsec/s": { "constant": "rkB/s" }, "wsec/s": { "constant": "wkB/s" } } } } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            },
             "comment": "14.1+ uses wkB/s instead of wsec/s, equivalent for read.  Ignore both for now."
         },
         "networkInterfaces": {
@@ -347,7 +363,8 @@
         "apmState": {
             "structure": { "parentKey": "system" },
             "if": {
-                "isModuleProvisioned": "apm"
+                "isModuleProvisioned": "apm",
+                "isBashDisabled": false
             },
             "then": {
                 "key": "apmState::commandResult",
@@ -950,575 +967,951 @@
         },
         "asmCpuUtilStats": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c asm_cpu_util_stats" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
-                },
-                {
-                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
-                },
-                {
-                    "runFunctions": [{ "name": "convertMapToArray" }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c asm_cpu_util_stats" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                    },
+                    {
+                        "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                    },
+                    {
+                        "runFunctions": [{ "name": "convertMapToArray" }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "cpuInfoStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c cpu_info_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c cpu_info_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "diskInfoStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c disk_info_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c disk_info_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "dnsCacheResolverStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c dns_cache_resolver_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c dns_cache_resolver_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "dnsexpressZoneStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c dnsexpress_zone_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c dnsexpress_zone_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "dosStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c dos_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
-                },
-                {
-                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
-                },
-                {
-                    "runFunctions": [{ "name": "convertMapToArray" }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c dos_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                    },
+                    {
+                        "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                    },
+                    {
+                        "runFunctions": [{ "name": "convertMapToArray" }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "dosl7PluginStats": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c dosl7_plugin_stats" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c dosl7_plugin_stats" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "dosl7dStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c dosl7d_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c dosl7d_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "flowEvictionPolicyStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c flow_eviction_policy_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "context_name" } }]
-                },
-                {
-                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
-                },
-                {
-                    "runFunctions": [{ "name": "convertMapToArray" }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c flow_eviction_policy_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "context_name" } }]
+                    },
+                    {
+                        "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                    },
+                    {
+                        "runFunctions": [{ "name": "convertMapToArray" }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "gtmDcStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c gtm_dc_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c gtm_dc_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "gtmWideipStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c gtm_wideip_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c gtm_wideip_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "hostInfoStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c host_info_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c host_info_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "ifcStats": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c ifc_stats" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c ifc_stats" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "interfaceStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c interface_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c interface_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "ipIntelligenceStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c ip_intelligence_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c ip_intelligence_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "ipStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c ip_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c ip_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "iprepdStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c iprepd_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c iprepd_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "kvmVcpuStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c kvm_vcpu_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c kvm_vcpu_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "kvmVmStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c kvm_vm_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c kvm_vm_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "mcpRequestStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c mcp_request_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c mcp_request_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "mcpTransactionStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c mcp_transaction_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c mcp_transaction_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "memoryUsageStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c memory_usage_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c memory_usage_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "monitorInstanceStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c monitor_instance_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c monitor_instance_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "monitorStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c monitor_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c monitor_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "poolMemberStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c pool_member_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": [ "pool_name", "addr", "port"] } }]
-                },
-                {
-                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
-                },
-                {
-                    "runFunctions": [{ "name": "convertMapToArray" }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c pool_member_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": [ "pool_name", "addr", "port"] } }]
+                    },
+                    {
+                        "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                    },
+                    {
+                        "runFunctions": [{ "name": "convertMapToArray" }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "poolStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c pool_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c pool_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "procPidStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c proc_pid_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c proc_pid_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "profileBigprotoStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_bigproto_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
-                },
-                {
-                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
-                },
-                {
-                    "runFunctions": [{ "name": "convertMapToArray" }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_bigproto_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                    },
+                    {
+                        "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                    },
+                    {
+                        "runFunctions": [{ "name": "convertMapToArray" }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "profileClientsslStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_clientssl_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
-                },
-                {
-                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
-                },
-                {
-                    "runFunctions": [{ "name": "convertMapToArray" }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_clientssl_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                    },
+                    {
+                        "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                    },
+                    {
+                        "runFunctions": [{ "name": "convertMapToArray" }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "profileConnpoolStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_connpool_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
-                },
-                {
-                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
-                },
-                {
-                    "runFunctions": [{ "name": "convertMapToArray" }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_connpool_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                    },
+                    {
+                        "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                    },
+                    {
+                        "runFunctions": [{ "name": "convertMapToArray" }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "profileDnsStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_dns_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
-                },
-                {
-                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
-                },
-                {
-                    "runFunctions": [{ "name": "convertMapToArray" }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_dns_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                    },
+                    {
+                        "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                    },
+                    {
+                        "runFunctions": [{ "name": "convertMapToArray" }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "profileFtpStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_ftp_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
-                },
-                {
-                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
-                },
-                {
-                    "runFunctions": [{ "name": "convertMapToArray" }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_ftp_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                    },
+                    {
+                        "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                    },
+                    {
+                        "runFunctions": [{ "name": "convertMapToArray" }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "profileHttpStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_http_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
-                },
-                {
-                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
-                },
-                {
-                    "runFunctions": [{ "name": "convertMapToArray" }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_http_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                    },
+                    {
+                        "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                    },
+                    {
+                        "runFunctions": [{ "name": "convertMapToArray" }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "profileHttpcompressionStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_httpcompression_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
-                },
-                {
-                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
-                },
-                {
-                    "runFunctions": [{ "name": "convertMapToArray" }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_httpcompression_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                    },
+                    {
+                        "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                    },
+                    {
+                        "runFunctions": [{ "name": "convertMapToArray" }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "profileServersslStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_serverssl_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
-                },
-                {
-                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
-                },
-                {
-                    "runFunctions": [{ "name": "convertMapToArray" }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_serverssl_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                    },
+                    {
+                        "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                    },
+                    {
+                        "runFunctions": [{ "name": "convertMapToArray" }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "profileTcpStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_tcp_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
-                },
-                {
-                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
-                },
-                {
-                    "runFunctions": [{ "name": "convertMapToArray" }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_tcp_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                    },
+                    {
+                        "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                    },
+                    {
+                        "runFunctions": [{ "name": "convertMapToArray" }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "profileUdpStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_udp_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
-                },
-                {
-                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
-                },
-                {
-                    "runFunctions": [{ "name": "convertMapToArray" }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_udp_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                    },
+                    {
+                        "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                    },
+                    {
+                        "runFunctions": [{ "name": "convertMapToArray" }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "profileWebaccelerationStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_webacceleration_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
-                },
-                {
-                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
-                },
-                {
-                    "runFunctions": [{ "name": "convertMapToArray" }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c profile_webacceleration_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "vs_name" } }]
+                    },
+                    {
+                        "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                    },
+                    {
+                        "runFunctions": [{ "name": "convertMapToArray" }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "ruleStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c rule_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c rule_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "tmmStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c tmm_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c tmm_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "tmmdnsServerStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c tmmdns_server_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c tmmdns_server_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "tmmdnsZoneStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c tmmdns_zone_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c tmmdns_zone_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "vcmpGlobalStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c vcmp_global_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c vcmp_global_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "vcmpStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c vcmp_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c vcmp_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "virtualServerConnStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c virtual_server_conn_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "$comment": "can't dump table on 12.0+" } }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c virtual_server_conn_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "$comment": "can't dump table on 12.0+" } }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "virtualServerCpuStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c virtual_server_cpu_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "name" } }]
-                },
-                {
-                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
-                },
-                {
-                    "runFunctions": [{ "name": "convertMapToArray" }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c virtual_server_cpu_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "name" } }]
+                    },
+                    {
+                        "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                    },
+                    {
+                        "runFunctions": [{ "name": "convertMapToArray" }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         },
         "virtualServerStat": {
             "structure": { "parentKey": "tmstats" },
-            "key": "tmctl::commandResult",
-            "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c virtual_server_stat" } },
-            "normalization": [
-                {
-                    "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "name" } }]
-                },
-                {
-                    "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
-                },
-                {
-                    "runFunctions": [{ "name": "convertMapToArray" }]
-                }
-            ]
+            "if": {
+                "isBashDisabled": false
+            },
+            "then": {
+                "key": "tmctl::commandResult",
+                "keyArgs": { "replaceStrings": { "\\$tmctlArgs": "-c virtual_server_stat" } },
+                "normalization": [
+                    {
+                        "runFunctions": [{ "name": "formatAsJson", "args": { "type": "csv", "mapKey": "name" } }]
+                    },
+                    {
+                        "addKeysByTag": { "tags": { "tenant": "`T`", "application": "`A`" } }
+                    },
+                    {
+                        "runFunctions": [{ "name": "convertMapToArray" }]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
         }
     },
     "events": {
@@ -1577,6 +1970,14 @@
                 },
                 {
                     "renameKeys": { "patterns": { "name/": { "pattern": "name\/(.*)", "group": 1 } } }
+                }
+            ]
+        },
+        "bashDisabled": {
+            "key": "bashDisabled::value",
+            "normalization": [
+                {
+                    "runFunctions": [{ "name": "convertStringToTruthyBoolean" }]
                 }
             ]
         }

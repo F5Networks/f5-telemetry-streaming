@@ -9,9 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
-
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -25,7 +23,13 @@ const testUtil = require('./../shared/util');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Azure Util Tests', () => {
+    before(() => {
+        moduleCache.restore();
+    });
+
     describe('Managed Identities', () => {
         before(() => {
             sinon.stub(requestsUtil, 'makeRequest').callsFake((reqOpts) => {
@@ -338,6 +342,185 @@ describe('Azure Util Tests', () => {
                     assert.strictEqual(actualUrl, testConf.expected);
                 }));
             });
+        });
+    });
+
+    describe('isConfigItems', () => {
+        it('not sslCerts and not "proper path" records', () => {
+            const testData = {
+                topLevelKey1: {
+                    name: 'topLevelKey1'
+                }
+            };
+            assert.isFalse(azureUtil.isConfigItems(testData, 'someType'));
+        });
+
+        it('"proper path" record, but not matching name', () => {
+            const testData = {
+                '/path1a/path1b': {
+                    key1: 'value1',
+                    key2: 'value2',
+                    name: 'bad name'
+                }
+            };
+            assert.isFalse(azureUtil.isConfigItems(testData, 'someType'));
+        });
+
+        it('two "proper path" records, first name does not match', () => {
+            const testData = {
+                '/path1a/path1b': {
+                    name: 'bad name'
+                },
+                '/path2a/path2b': {
+                    name: '/path2a/path2b'
+                }
+            };
+            assert.isFalse(azureUtil.isConfigItems(testData, 'someType'));
+        });
+
+        it('two "proper path" records, second name does not match', () => {
+            const testData = {
+                '/path1a/path1b': {
+                    name: '/path1a/path1b'
+                },
+                '/path2a/path2b': {
+                    name: 'bad name'
+                }
+            };
+            assert.isFalse(azureUtil.isConfigItems(testData, 'someType'));
+        });
+
+        it('"proper path" records with matching names', () => {
+            const testData = {
+                '/path1a/path1b': {
+                    name: '/path1a/path1b'
+                },
+                '/path2a/path2b': {
+                    key1: 'value1',
+                    key2: 'value2',
+                    name: '/path2a/path2b'
+                }
+            };
+            assert.isTrue(azureUtil.isConfigItems(testData, 'someType'));
+        });
+
+        it('one "proper path" record, one not', () => {
+            const testData = {
+                '/path1a/path1b': {
+                    name: '/path1a/path1b'
+                },
+                '/badPath': {
+                    name: '/badPath'
+                }
+            };
+            assert.isFalse(azureUtil.isConfigItems(testData, 'someType'));
+        });
+
+        it('sslCerts type with matching name', () => {
+            const testData = {
+                topLevelKey1: {
+                    key1: 'value1',
+                    name: 'topLevelKey1'
+                }
+            };
+            assert.isTrue(azureUtil.isConfigItems(testData, 'sslCerts'));
+        });
+
+        it('sslCerts type with name does not match', () => {
+            const testData = {
+                topLevelKey1: {
+                    key1: 'value1',
+                    name: 'topLevelKey1'
+                },
+                topLevelKey2: {
+                    key1: 'value1',
+                    name: 'badKey'
+                }
+            };
+            assert.isFalse(azureUtil.isConfigItems(testData, 'sslCerts'));
+        });
+
+        it('sslCerts type with missing name', () => {
+            const testData = {
+                topLevelKey1: {
+                    key1: 'value1',
+                    name: 'topLevelKey1'
+                },
+                topLevelKey2: {
+                    key1: 'value1'
+                }
+            };
+            assert.isFalse(azureUtil.isConfigItems(testData, 'sslCerts'));
+        });
+    });
+
+    describe('transformConfigItems', () => {
+        it('single key object', () => {
+            const inputData = {
+                topLevelKey1: {
+                    name: 'topLevelKey1'
+                }
+            };
+            const expectedData = [{ name: 'topLevelKey1' }];
+            assert.deepStrictEqual(azureUtil.transformConfigItems(inputData), expectedData);
+        });
+
+        it('object with two keys', () => {
+            const inputData = {
+                topLevelKey1: {
+                    name: 'topLevelKey1'
+                },
+                topLevelKey2: {
+                    key1: 'value1',
+                    key2: 'value2'
+                }
+            };
+            const expectedData = [{ name: 'topLevelKey1' }, { key1: 'value1', key2: 'value2' }];
+            assert.deepStrictEqual(azureUtil.transformConfigItems(inputData), expectedData);
+        });
+
+        it('nested object', () => {
+            const inputData = {
+                topLevelKey1: {
+                    name: 'topLevelKey1'
+                },
+                topLevelKey2: {
+                    key1: 'value1',
+                    key2: {
+                        leaf1: 'leaf value 1',
+                        leaf2: 'leaf value 2'
+                    }
+                }
+            };
+            const expectedData = [
+                {
+                    name: 'topLevelKey1'
+                },
+                {
+                    key1: 'value1',
+                    key2: {
+                        leaf1: 'leaf value 1',
+                        leaf2: 'leaf value 2'
+                    }
+                }
+            ];
+            assert.deepStrictEqual(azureUtil.transformConfigItems(inputData), expectedData);
+        });
+    });
+
+    describe('scrubReservedKeys', () => {
+        it('no key "tenant" - no change', () => {
+            const inputData = { key1: 'value1', key2: 'value2' };
+            const expectedData = inputData;
+            azureUtil.scrubReservedKeys(inputData);
+            assert.deepStrictEqual(inputData, expectedData);
+        });
+
+        it('key "tenant" replaced by key "f5tenant"', () => {
+            const inputData = { tenant: 'value1', key2: 'value2' };
+            const expectedData = { f5tenant: 'value1', key2: 'value2' };
+            azureUtil.scrubReservedKeys(inputData);
+            assert.deepStrictEqual(inputData, expectedData);
         });
     });
 });

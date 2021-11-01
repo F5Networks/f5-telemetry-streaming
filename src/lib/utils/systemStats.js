@@ -52,6 +52,23 @@ const CONDITIONAL_FUNCS = {
             throw new Error('isModuleProvisioned: context has no property \'provisioning\'');
         }
         return ((provisioning[moduleToCompare] || {}).level || 'none') !== 'none';
+    },
+
+    /**
+     * Compares Bash state between device and expected Bash state
+     *
+     * @param {Object}  contextData                 - context data
+     * @param {Boolean} contextData.bashDisabled    - whether or not Bash has been disabled
+     * @param {Boolean} stateToCompare              - state of Bash to check against
+     *
+     * @returns {boolean} true when device's bash state is the same as the desired state
+     */
+    isBashDisabled(contextData, stateToCompare) {
+        const bashDisabled = contextData.bashDisabled;
+        if (bashDisabled === undefined) {
+            throw new Error('isBashDisabled: context has no property \'bashDisabled\'');
+        }
+        return bashDisabled === stateToCompare;
     }
 };
 

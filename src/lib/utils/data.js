@@ -382,6 +382,18 @@ function applyJMESPathExpression(dataCtx, expression) {
     } catch (err) {
         logger.exception(`applyExpression error (expression = "${expression}")`, err);
     }
+    /**
+     * From https://jmespath.org/specification.html:
+     * An identifier is the most basic expression and can be used to extract a single element from a JSON document.
+     * The return value for an identifier is the value associated with the identifier.
+     * If the identifier does not exist in the JSON document, than a null value is returned.
+     *
+     * TS Devs:
+     * to avoid unexpected errors in DataPipeline better to assign empty 'object' in this case
+     */
+    if (dataCtx.data === null) {
+        dataCtx.data = {};
+    }
 }
 
 module.exports = {

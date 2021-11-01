@@ -14,6 +14,7 @@ const logger = require('../logger'); // eslint-disable-line no-unused-vars
 const util = require('./misc');
 const constants = require('../constants');
 
+const TRUTHY_REGEXP = /^\s*(true|1|on|yes)\s*$/i;
 
 module.exports = {
     /**
@@ -705,6 +706,18 @@ module.exports = {
      */
     configSyncColorToBool(args) {
         return args.data === 'green';
+    },
+
+    /**
+     * Converts a truthy String value to a Boolean
+     *
+     * @param {Object} args             - args object
+     * @param {String} [args.data]      - data to process (always included)
+     *
+     * @returns {Boolean} Returns boolean
+     */
+    convertStringToTruthyBoolean(args) {
+        return typeof args.data === 'string' && TRUTHY_REGEXP.test(args.data);
     },
 
     /**

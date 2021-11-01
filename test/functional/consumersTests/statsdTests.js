@@ -23,7 +23,7 @@ const MODULE_REQUIREMENTS = { DOCKER: true };
 
 const DUTS = util.getHosts('BIGIP');
 const CONSUMER_HOST = util.getHosts('CONSUMER')[0]; // only expect one
-const STATSD_IMAGE_NAME = 'graphiteapp/graphite-statsd:latest';
+const STATSD_IMAGE_NAME = `${constants.ARTIFACTORY_DOCKER_HUB_PREFIX}graphiteapp/graphite-statsd:latest`;
 const STATSD_CONTAINER_NAME = 'ts_statsd_consumer';
 const STATSD_HTTP_PROTO = 'http';
 const STATSD_HTTP_PORT = 80;

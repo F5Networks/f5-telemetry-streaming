@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -27,6 +26,7 @@ const testUtil = require('../shared/util');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
 
 describe('Splunk', () => {
     let clock;
@@ -67,6 +67,10 @@ describe('Splunk', () => {
     function decodeNockGzip(data) {
         return zlib.gunzipSync(Buffer.from(data, 'hex')).toString();
     }
+
+    before(() => {
+        moduleCache.restore();
+    });
 
     beforeEach(() => {
         splunkHost = 'localhost';

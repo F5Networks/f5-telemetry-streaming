@@ -22,8 +22,8 @@ const MODULE_REQUIREMENTS = { DOCKER: true };
 
 const DUTS = util.getHosts('BIGIP');
 const CONSUMER_HOST = util.getHosts('CONSUMER')[0]; // only expect one
-const KAFKA_IMAGE_NAME = 'bitnami/kafka:latest';
-const ZOOKEEPER_IMAGE_NAME = 'bitnami/zookeeper:latest';
+const KAFKA_IMAGE_NAME = `${constants.ARTIFACTORY_DOCKER_HUB_PREFIX}bitnami/kafka:latest`;
+const ZOOKEEPER_IMAGE_NAME = `${constants.ARTIFACTORY_DOCKER_HUB_PREFIX}bitnami/zookeeper:latest`;
 const ZOOKEEPER_NAME = 'zookeeper-server';
 const KAFKA_NAME = 'kafka-server';
 const KAFKA_HOST = CONSUMER_HOST.ip;

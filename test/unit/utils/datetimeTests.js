@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -23,8 +22,14 @@ const fileLogger = require('../../winstonLogger').logger;
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('Date and Time utils', () => {
     let clock;
+
+    before(() => {
+        moduleCache.restore();
+    });
 
     describe('getCurrentUnixTimeInSeconds', () => {
         beforeEach(() => {

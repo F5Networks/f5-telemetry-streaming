@@ -9,8 +9,7 @@
 'use strict';
 
 /* eslint-disable import/order */
-
-require('../shared/restoreCache')();
+const moduleCache = require('../shared/restoreCache')();
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -26,7 +25,13 @@ const util = require('../../../src/lib/utils/misc');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+moduleCache.remember();
+
 describe('HTTP Util Tests', () => {
+    before(() => {
+        moduleCache.restore();
+    });
+
     afterEach(() => {
         testUtil.checkNockActiveMocks(nock);
         nock.cleanAll();
