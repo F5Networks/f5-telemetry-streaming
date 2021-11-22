@@ -188,6 +188,11 @@ class ConfigWorker extends SafeEventEmitter {
      * @returns {Promise<object>} resolved with copy of validated declaration resolved on success
      */
     processDeclaration(declaration, options) {
+        
+        //save declaration to save in support config file
+        const declaration_as_submitted=JSON.stringify(declaration,null,2); 
+        //fs required to save support config file
+        const fs = require('fs');
         const setConfigOpts = {};
         const storageData = util.deepCopy(BASE_STORAGE_DATA);
         let expandedConfig = {};
@@ -222,7 +227,12 @@ class ConfigWorker extends SafeEventEmitter {
                         this.currentConfig
                     );
                 }
+            
+                // write config as declared and saved to /var/config/rest/iapps/f5-telemetry/telemetry_declaration.txt
+            	fs.writeFile("/var/config/rest/iapps/f5-telemetry/telemetry_declaration.txt", "\nAs declared:\n"+declaration_as_submitted+"\n\nAs saved:\n"+JSON.stringify(storageData,null,2)+"\n\n");
+
                 // normalize the whole config, will generate new UUIDs
+            
                 return configUtil.normalizeDeclaration(expandedConfig);
             })
             .then((conf) => {
