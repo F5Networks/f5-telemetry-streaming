@@ -52,6 +52,6 @@ class InfoEndpointHandler extends BaseRequestHandler {
     }
 }
 
-router.on('register', routerInst => routerInst.register('GET', '/info', InfoEndpointHandler));
+router.on('register', (routerInst) => routerInst.register('GET', '/info', InfoEndpointHandler));
 
 module.exports = InfoEndpointHandler;

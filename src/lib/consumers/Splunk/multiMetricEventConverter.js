@@ -242,7 +242,7 @@ const DEFAULT_OPTS = {
     castCb: DEFAULT_CAST_CB,
     // ignore References to sub collection
     ignoreSubCollectionCb: (key, value) => key.endsWith('Reference') && value.link,
-    skipCb: key => DEFAULT_PROPS_TO_SKIP.indexOf(key) !== -1
+    skipCb: (key) => DEFAULT_PROPS_TO_SKIP.indexOf(key) !== -1
 };
 
 // options to process keys like - aWideIps, aaaaWideIps and etc.
@@ -326,8 +326,8 @@ const PROPERTIES_TO_HANDLERS = {
                     }
                     return DEFAULT_CAST_CB(key, value);
                 },
-                deleteCb: key => key === 'Capacity_Float',
-                renameCb: key => (key === 'Capacity' ? 'Capacity%' : key)
+                deleteCb: (key) => key === 'Capacity_Float',
+                renameCb: (key) => (key === 'Capacity' ? 'Capacity%' : key)
             },
             tmmTraffic: {
                 handler: processObject
@@ -345,7 +345,7 @@ const PROPERTIES_TO_HANDLERS = {
             }
             return DEFAULT_CAST_CB(key, value);
         },
-        deleteCb: key => [
+        deleteCb: (key) => [
             'diskLatency',
             'diskStorage',
             'networkInterfaces',

@@ -57,7 +57,7 @@ class PullConsumerEndpointHandler extends BaseRequestHandler {
                 this.body = response.data;
                 this.contentType = response.contentType || undefined; // If not set, default to iControlRest response
                 return this;
-            }).catch(error => new ErrorHandler(error).process());
+            }).catch((error) => new ErrorHandler(error).process());
     }
 }
 

@@ -698,5 +698,126 @@ describe('Metrics Util Tests', () => {
                 ['metric', 10, {}]
             ], 'should collect all expected metrics');
         });
+
+        describe('converting booleans', () => {
+            let origin;
+            beforeEach(() => {
+                origin = {
+                    metric: 10,
+                    trueBoolMetric: true,
+                    falseBoolMetric: false,
+                    thirdBoolMetric: true,
+                    trueBoolInString: 'true',
+                    falseBoolInString: 'false'
+                };
+            });
+            const booleanMetricTests = [
+                {
+                    name: 'should not convert booleans to integers by default',
+                    expectedTags: {
+                        trueBoolMetric: true,
+                        falseBoolMetric: false,
+                        thirdBoolMetric: true,
+                        trueBoolInString: 'true',
+                        falseBoolInString: 'false'
+                    },
+                    expectedMetrics: [
+                        ['metric', 10]
+                    ]
+                },
+                {
+                    name: 'should allow for booleans to be converted to integers',
+                    options: { boolsToMetrics: true },
+                    expectedTags: {
+                        trueBoolInString: 'true',
+                        falseBoolInString: 'false'
+                    },
+                    expectedMetrics: [
+                        ['metric', 10],
+                        ['trueBoolMetric', 1],
+                        ['falseBoolMetric', 0],
+                        ['thirdBoolMetric', 1]
+                    ]
+                },
+                {
+                    name: 'should ignore boolean metric if included in \'metricsToIgnore\'',
+                    options: { boolsToMetrics: true, metricsToIgnore: ['falseBoolMetric'] },
+                    expectedTags: {
+                        falseBoolMetric: false,
+                        trueBoolInString: 'true',
+                        falseBoolInString: 'false'
+                    },
+                    expectedMetrics: [
+                        ['metric', 10],
+                        ['trueBoolMetric', 1],
+                        ['thirdBoolMetric', 1]
+                    ]
+                },
+                {
+                    name: 'should keep a boolean-metric as a tag if included in \'metricsToTags\'',
+                    options: { boolsToMetrics: true, metricsToTags: ['falseBoolMetric'] },
+                    expectedTags: {
+                        falseBoolMetric: false,
+                        trueBoolInString: 'true',
+                        falseBoolInString: 'false'
+                    },
+                    expectedMetrics: [
+                        ['metric', 10],
+                        ['trueBoolMetric', 1],
+                        ['thirdBoolMetric', 1]
+                    ]
+                },
+                {
+                    name: 'should only filter boolean-as-tag if included in \'tagsToIgnore\'',
+                    options: { boolsToMetrics: true, metricsToTags: ['falseBoolMetric', 'thirdBoolMetric'], tagsToIgnore: ['falseBoolMetric'] },
+                    expectedTags: {
+                        thirdBoolMetric: true,
+                        trueBoolInString: 'true',
+                        falseBoolInString: 'false'
+                    },
+                    expectedMetrics: [
+                        ['metric', 10],
+                        ['trueBoolMetric', 1]
+                    ]
+                },
+                {
+                    name: 'should still perform boolean-to-metric conversion if \'tagsToMetrics\' is used',
+                    options: { boolsToMetrics: true, tagsToMetrics: ['falseBoolMetric', 'trueBoolInString'] },
+                    expectedTags: {
+                        falseBoolInString: 'false'
+                    },
+                    expectedMetrics: [
+                        ['metric', 10],
+                        ['trueBoolMetric', 1],
+                        ['falseBoolMetric', 0],
+                        ['thirdBoolMetric', 1]
+                    ]
+                }
+            ];
+
+            booleanMetricTests.forEach((bTest) => {
+                it(bTest.name, () => {
+                    metricsUtil.findMetricsAndTags(
+                        origin,
+                        Object.assign(defaultOptions, { excludeNameFromPath: true }, bTest.options)
+                    );
+
+                    const expectedMetrics = bTest.expectedMetrics.map((expectedMetric) => {
+                        expectedMetric.push(bTest.expectedTags);
+                        return expectedMetric;
+                    });
+
+                    assert.sameDeepMembers(
+                        collectedMetrics,
+                        expectedMetrics,
+                        'should collect all expected metrics'
+                    );
+
+                    assert.sameDeepMembers(collectedTags, [
+                        ['', bTest.expectedTags]
+                    ], 'should collect all expected tags');
+                });
+            });
+        });
     });
 });

@@ -55,7 +55,7 @@ describe('Custom Endpoints (Telemetry_Endpoints)', () => {
                         endpoints: testConf.endpointList
                     };
                     const getCollectedData = testConf.getCollectedData
-                        ? testConf.getCollectedData : promise => promise;
+                        ? testConf.getCollectedData : (promise) => promise;
 
                     const stats = new SystemStats(options);
 

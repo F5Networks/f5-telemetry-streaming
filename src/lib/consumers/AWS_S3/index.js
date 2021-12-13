@@ -9,7 +9,7 @@
 'use strict';
 
 const AWS = require('aws-sdk');
-const awsUtil = require('./../shared/awsUtil');
+const awsUtil = require('../shared/awsUtil');
 const util = require('../../utils/misc');
 /**
  * See {@link ../README.md#context} for documentation
@@ -29,7 +29,11 @@ module.exports = function (context) {
 
     return awsUtil.initializeConfig(context)
         .then(() => {
-            s3 = new AWS.S3({ apiVersion: '2006-03-01' });
+            const clientProperties = { apiVersion: '2006-03-01' };
+            if (context.config.endpointUrl) {
+                clientProperties.endpoint = new AWS.Endpoint(context.config.endpointUrl);
+            }
+            s3 = new AWS.S3(clientProperties);
             const params = {
                 // fallback to host if no bucket
                 Bucket: context.config.bucket || context.config.host,

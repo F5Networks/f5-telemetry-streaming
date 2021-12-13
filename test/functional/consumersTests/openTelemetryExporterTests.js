@@ -55,7 +55,6 @@ service:
 // read in example config
 const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
 
-
 function runRemoteCmd(cmd) {
     return testUtil.performRemoteCmd(
         CONSUMER_HOST.ip, CONSUMER_HOST.username, cmd, { password: CONSUMER_HOST.password }
@@ -82,7 +81,7 @@ function setup() {
                 });
         });
 
-        DUTS.forEach(dut => it(
+        DUTS.forEach((dut) => it(
             `get bigip version and check if version is high enough for OpenTelemetry Exporter - ${dut.hostalias}`,
             () => testUtil.getBigipVersion(dut)
                 .then((response) => {
@@ -164,7 +163,7 @@ function test() {
                 testUtil.logger.info('Delay 15000ms to ensure data is sent to OpenTelemetry Collector');
                 return testUtil.sleep(15 * 1000)
                     .then(() => testUtil.makeRequest(OTEL_COLLECTOR_HOST, '/metrics', httpOptions))
-                    .then(response => verifyResponse(response, dut.hostname));
+                    .then((response) => verifyResponse(response, dut.hostname));
             });
         });
     });

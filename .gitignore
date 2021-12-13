@@ -9,6 +9,8 @@ _build/
 # coverage
 coverage/
 .nyc_output/
+# mutation
+reports/
 # local test directory/files
 test/functional/logs/
 test/functional/*_harness_file.json

@@ -17,7 +17,7 @@ const chaiAsPromised = require('chai-as-promised');
 const aws = require('aws-sdk');
 const https = require('https');
 
-const testUtil = require('./../shared/util');
+const testUtil = require('../shared/util');
 const awsUtil = require('../../../src/lib/consumers/shared/awsUtil');
 const awsUtilTestsData = require('./data/awsUtilTestsData');
 
@@ -107,7 +107,7 @@ describe('AWS Util Tests', () => {
             const certs = awsUtil.getAWSRootCerts();
             assert.ok(Array.isArray(certs), 'certs should be a valid array');
             assert.ok(certs.every(
-                i => i.startsWith('-----BEGIN CERTIFICATE-----')
+                (i) => i.startsWith('-----BEGIN CERTIFICATE-----')
             ), 'certs should have \'BEGIN CERTIFICATE\' header');
         });
     });
@@ -124,7 +124,7 @@ describe('AWS Util Tests', () => {
 
         describe('getDefaultDimensions', () => {
             const testSet = awsUtilTestsData.getDefaultDimensions;
-            testSet.tests.forEach(testConf => testUtil.getCallableIt(testConf)(testConf.name, () => {
+            testSet.tests.forEach((testConf) => testUtil.getCallableIt(testConf)(testConf.name, () => {
                 const actualMetrics = awsUtil.getDefaultDimensions(testConf.input.data);
                 return assert.deepStrictEqual(actualMetrics, testConf.expected);
             }));
@@ -132,7 +132,7 @@ describe('AWS Util Tests', () => {
 
         describe('getMetrics', () => {
             const testSet = awsUtilTestsData.getMetrics;
-            testSet.tests.forEach(testConf => testUtil.getCallableIt(testConf)(testConf.name, () => {
+            testSet.tests.forEach((testConf) => testUtil.getCallableIt(testConf)(testConf.name, () => {
                 clock = sinon.useFakeTimers(new Date(testSet.timestamp));
                 const actualMetrics = awsUtil.getMetrics(testConf.input.data, testConf.input.defDimensions);
                 return assert.deepStrictEqual(actualMetrics, testConf.expected);
@@ -146,7 +146,7 @@ describe('AWS Util Tests', () => {
             beforeEach(() => {
                 batches = [];
                 sinon.stub(aws, 'CloudWatch').returns({
-                    putMetricData: batch => ({
+                    putMetricData: (batch) => ({
                         promise: () => putMetricsStub(batch)
                     })
                 });
@@ -157,7 +157,7 @@ describe('AWS Util Tests', () => {
             });
 
             const testSet = awsUtilTestsData.sendMetrics;
-            testSet.tests.forEach(testConf => testUtil.getCallableIt(testConf)(testConf.name, () => {
+            testSet.tests.forEach((testConf) => testUtil.getCallableIt(testConf)(testConf.name, () => {
                 clock = sinon.useFakeTimers(testSet.timestamp);
                 const context = testUtil.buildConsumerContext({
                     eventType: 'systemInfo',
@@ -182,7 +182,7 @@ describe('AWS Util Tests', () => {
 
             beforeEach(() => {
                 sinon.stub(aws, 'CloudWatch').returns({
-                    putMetricData: batch => ({
+                    putMetricData: (batch) => ({
                         promise: () => putMetricsStub(batch)
                     })
                 });

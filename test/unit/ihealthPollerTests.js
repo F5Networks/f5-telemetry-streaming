@@ -55,8 +55,8 @@ describe('IHealthPoller', () => {
         });
 
         return Promise.all(IHealthPoller.getAll({ includeDemo: true })
-            .map(poller => IHealthPoller.disable(poller, true)))
-            .then(retObjs => Promise.all(retObjs.map(obj => obj.stopPromise)))
+            .map((poller) => IHealthPoller.disable(poller, true)))
+            .then((retObjs) => Promise.all(retObjs.map((obj) => obj.stopPromise)))
             .then(() => {
                 assert.isEmpty(IHealthPoller.getAll({ includeDemo: true }), 'should have no running iHealth Pollers before any test');
                 return persistentStorage.persistentStorage.load();
@@ -64,8 +64,8 @@ describe('IHealthPoller', () => {
     });
 
     afterEach(() => Promise.all(IHealthPoller.getAll({ includeDemo: true })
-        .map(poller => IHealthPoller.disable(poller, true)))
-        .then(retObjs => Promise.all(retObjs.map(obj => obj.stopPromise)))
+        .map((poller) => IHealthPoller.disable(poller, true)))
+        .then((retObjs) => Promise.all(retObjs.map((obj) => obj.stopPromise)))
         .then(() => {
             assert.isEmpty(IHealthPoller.getAll({ includeDemo: true }), 'should have no running iHealth Pollers');
             sinon.restore();
@@ -104,22 +104,22 @@ describe('IHealthPoller', () => {
                 const poller = IHealthPoller.create('poller1');
                 assert.instanceOf(poller, IHealthPoller, 'should be instance of IHealthPoller');
                 assert.deepStrictEqual(
-                    IHealthPoller.getAll({ includeDemo: true }).map(p => p.id),
+                    IHealthPoller.getAll({ includeDemo: true }).map((p) => p.id),
                     ['poller1'],
                     'should register iHealth Poller'
                 );
-                assert.isEmpty(IHealthPoller.getAll({ demoOnly: true }).map(p => p.id), 'should have no demo instances');
+                assert.isEmpty(IHealthPoller.getAll({ demoOnly: true }).map((p) => p.id), 'should have no demo instances');
             });
 
             it('should create and register instance (demo instance)', () => {
                 const poller = IHealthPoller.create('demoPoller1', { demo: true });
                 assert.instanceOf(poller, IHealthPoller, 'should be instance of IHealthPoller');
                 assert.deepStrictEqual(
-                    IHealthPoller.getAll({ includeDemo: true }).map(p => p.id),
+                    IHealthPoller.getAll({ includeDemo: true }).map((p) => p.id),
                     ['demoPoller1'],
                     'should register demo iHealth Poller'
                 );
-                assert.isEmpty(IHealthPoller.getAll({ includeDemo: false }).map(p => p.id), 'should have no non-demo instances');
+                assert.isEmpty(IHealthPoller.getAll({ includeDemo: false }).map((p) => p.id), 'should have no non-demo instances');
             });
 
             it('should throw error when instance exists already', () => {
@@ -154,12 +154,12 @@ describe('IHealthPoller', () => {
                 const poller = IHealthPoller.createDemo('poller1');
                 assert.instanceOf(poller, IHealthPoller, 'should be instance of IHealthPoller');
                 assert.deepStrictEqual(
-                    IHealthPoller.getAll({ includeDemo: true }).map(p => p.id),
+                    IHealthPoller.getAll({ includeDemo: true }).map((p) => p.id),
                     ['poller1'],
                     'should register iHealth Poller'
                 );
                 assert.deepStrictEqual(
-                    IHealthPoller.getAll({ demoOnly: true }).map(p => p.id),
+                    IHealthPoller.getAll({ demoOnly: true }).map((p) => p.id),
                     ['poller1'],
                     'should register as demo instance'
                 );
@@ -232,7 +232,7 @@ describe('IHealthPoller', () => {
             it('should return null when demo instance with such ID registered too', () => {
                 IHealthPoller.createDemo('id');
                 assert.deepStrictEqual(
-                    IHealthPoller.get('id').find(p => !p.isDemoModeEnabled()),
+                    IHealthPoller.get('id').find((p) => !p.isDemoModeEnabled()),
                     undefined,
                     'should have no instance with such ID'
                 );
@@ -247,7 +247,7 @@ describe('IHealthPoller', () => {
             it('should return null when non-demo instance with such ID registered too', () => {
                 IHealthPoller.create('id');
                 assert.deepStrictEqual(
-                    IHealthPoller.get('id').find(p => p.isDemoModeEnabled()),
+                    IHealthPoller.get('id').find((p) => p.isDemoModeEnabled()),
                     undefined,
                     'should have no instance with such ID'
                 );
@@ -299,9 +299,9 @@ describe('IHealthPoller', () => {
         });
 
         describe('.unregister()', () => {
-            const getOrCreate = (id, opts) => IHealthPoller.get(id).find(p => !p.isDemoModeEnabled())
+            const getOrCreate = (id, opts) => IHealthPoller.get(id).find((p) => !p.isDemoModeEnabled())
                 || IHealthPoller.create(id, opts);
-            const getOrCreateDemo = (id, opts) => IHealthPoller.get(id).find(p => p.isDemoModeEnabled())
+            const getOrCreateDemo = (id, opts) => IHealthPoller.get(id).find((p) => p.isDemoModeEnabled())
                 || IHealthPoller.createDemo(id, opts);
 
             it('should unregister instance', () => {
@@ -561,7 +561,7 @@ describe('IHealthPoller', () => {
         describe('.start() & .stop() and polling cycle', () => {
             const startPoller = (poller, options) => new Promise((resolve, reject) => {
                 options = options || {};
-                poller.on('died', error => (error ? reject(error) : resolve()));
+                poller.on('died', (error) => (error ? reject(error) : resolve()));
                 if (!options.waitTillDied) {
                     poller.on('completed', () => {
                         if (!options.waitTillCycleCompleted
@@ -609,8 +609,8 @@ describe('IHealthPoller', () => {
             });
 
             it('should stop on attempt so start and stop and the same time (start and stop)', () => Promise.all([
-                instance.start().catch(error => error),
-                instance.stop().catch(error => error)
+                instance.start().catch((error) => error),
+                instance.stop().catch((error) => error)
             ])
                 .then((results) => {
                     assert.isFalse(instance.isActive(), 'should be inactive');
@@ -620,8 +620,8 @@ describe('IHealthPoller', () => {
                 }));
             // try different order of execution
             it('should stop on attempt so start and stop and the same time (stop and start)', () => Promise.all([
-                instance.stop().catch(error => error),
-                instance.start().catch(error => error)
+                instance.stop().catch((error) => error),
+                instance.start().catch((error) => error)
             ])
                 .then((results) => {
                     assert.isFalse(instance.isActive(), 'should be inactive');
@@ -716,7 +716,7 @@ describe('IHealthPoller', () => {
                 const reports = [];
                 let storageCopy;
 
-                instance.on('report', report => reports.push(report));
+                instance.on('report', (report) => reports.push(report));
                 const clockStub = stubs.clock();
                 clockStub.clockForward(30 * 60 * 1000, { promisify: true });
                 return startPoller(instance, { waitTillCycleCompleted: 2 }) // wait till 2 cycles will be completed
@@ -778,7 +778,7 @@ describe('IHealthPoller', () => {
                             reportCollect: 0
                         });
 
-                        const removedFiles = ihealthStub.ihealthUtil.DeviceAPI.removeFile.args.map(args => args[0]);
+                        const removedFiles = ihealthStub.ihealthUtil.DeviceAPI.removeFile.args.map((args) => args[0]);
                         assert.includeMembers(
                             removedFiles,
                             [
@@ -899,7 +899,7 @@ describe('IHealthPoller', () => {
                 let timeToRestore;
                 let uploadQkviewCallCount;
 
-                const stopOnceDataSaved = state => new Promise((resolve) => {
+                const stopOnceDataSaved = (state) => new Promise((resolve) => {
                     coreStub.persistentStorage.saveCbAfter = (ctx) => {
                         if (ctx.savedData.ihealth[instance.storageKey].lastKnownState === state) {
                             lastSavedData = testUtil.deepCopy(ctx.savedData);
@@ -908,7 +908,7 @@ describe('IHealthPoller', () => {
                     };
                 })
                     .then(() => IHealthPoller.disable(instance))
-                    .then(ret => ret.stopPromise)
+                    .then((ret) => ret.stopPromise)
                     .then(() => {
                         instance = null;
                     });

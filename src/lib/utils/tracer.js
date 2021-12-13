@@ -213,7 +213,7 @@ class Tracer {
                 this.logger.debug(`Creating dir '${baseDir}'`);
                 return util.fs.mkdir(baseDir);
             })
-            .catch(mkdirError => (mkdirError.code === 'EEXIST' ? Promise.resolve() : Promise.reject(mkdirError)));
+            .catch((mkdirError) => (mkdirError.code === 'EEXIST' ? Promise.resolve() : Promise.reject(mkdirError)));
     }
 
     /**
@@ -304,8 +304,8 @@ class Tracer {
                 this._cacheReset = true;
                 return this._mergeAndResetCache(readData);
             })
-            .then(data => util.maskSecrets(util.stringify(data, true)))
-            .then(dataToWrite => util.fs.ftruncate(this.fd, 0)
+            .then((data) => util.maskSecrets(util.stringify(data, true)))
+            .then((dataToWrite) => util.fs.ftruncate(this.fd, 0)
                 .then(() => util.fs.write(this.fd, dataToWrite, 0, this.encoding)))
             .catch((err) => {
                 // close trace, lost data
@@ -376,7 +376,7 @@ function fromConfig(config) {
  * @returns {Array<Tracer>} registered tracers
  */
 function registered() {
-    return Object.keys(INSTANCES).map(key => INSTANCES[key]);
+    return Object.keys(INSTANCES).map((key) => INSTANCES[key]);
 }
 
 /**
@@ -395,7 +395,7 @@ function unregister(tracer, catchErr) {
         // new tracer will be created if needed
         promise = promise.then(() => tracer.stop());
         if (catchErr) {
-            promise = promise.catch(err => logger.debugException(`Uncaught error on attempt to unregister tracer for file '${tracer.path}'`, err));
+            promise = promise.catch((err) => logger.debugException(`Uncaught error on attempt to unregister tracer for file '${tracer.path}'`, err));
         }
         delete INSTANCES[tracer.path];
     }
@@ -408,11 +408,11 @@ function unregister(tracer, catchErr) {
  * @returns {Promise} resolved once all tracers registered
  */
 function unregisterAll() {
-    return Promise.all(registered().map(tracer => unregister(tracer, true)));
+    return Promise.all(registered().map((tracer) => unregister(tracer, true)));
 }
 
 // config worker change event
-configWorker.on('change', config => Promise.resolve()
+configWorker.on('change', (config) => Promise.resolve()
     .then(() => {
         /**
          * This event might be handled by other listeners already
@@ -436,9 +436,9 @@ configWorker.on('change', config => Promise.resolve()
                 acc.push(component.traceInput);
                 return acc;
             }, [])
-            .filter(traceConf => traceConf)
-            .map(traceConf => fromConfig(traceConf))
-            .filter(tracer => tracer);
+            .filter((traceConf) => traceConf)
+            .map((traceConf) => fromConfig(traceConf))
+            .filter((tracer) => tracer);
 
         registeredTracers.forEach((tracer) => {
             if (configuredTracers.indexOf(tracer) === -1) {

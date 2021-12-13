@@ -11,6 +11,7 @@
                 "name": "x-access-token",
                 "value": "YOUR_TOKEN"
             }
-        ]
+        ],
+        "convertBooleansToMetrics": false
     }
 }

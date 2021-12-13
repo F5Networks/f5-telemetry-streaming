@@ -42,7 +42,6 @@ describe('System Poller', () => {
         moduleCache.restore();
     });
 
-
     beforeEach(() => {
         coreStub = stubs.coreStub({
             configWorker,
@@ -140,12 +139,12 @@ describe('System Poller', () => {
 
     describe('.getPollersConfig', () => {
         /* eslint-disable implicit-arrow-linebreak */
-        systemPollerConfigTestsData.getPollersConfig.forEach(testConf =>
+        systemPollerConfigTestsData.getPollersConfig.forEach((testConf) =>
             testUtil.getCallableIt(testConf)(
                 testConf.name, () => configWorker.processDeclaration(testUtil.deepCopy(testConf.declaration))
                     .then(() => systemPoller.getPollersConfig(testConf.sysOrPollerName, testConf.funcOptions))
                     .then((pollersConfig) => {
-                        pollersConfig = pollersConfig.map(p => ({ name: p.traceName }));
+                        pollersConfig = pollersConfig.map((p) => ({ name: p.traceName }));
                         assert.sameDeepMembers(pollersConfig, testConf.expectedConfig);
                         // assert.isTrue(coreStub.deviceUtil.decryptSecret.called);
                     }, (error) => {
@@ -159,7 +158,7 @@ describe('System Poller', () => {
 
     describe('.findSystemOrPollerConfigs', () => {
         /* eslint-disable implicit-arrow-linebreak */
-        systemPollerConfigTestsData.findSystemOrPollerConfigs.forEach(testConf =>
+        systemPollerConfigTestsData.findSystemOrPollerConfigs.forEach((testConf) =>
             testUtil.getCallableIt(testConf)(
                 testConf.name, () => configWorker.processDeclaration(testUtil.deepCopy(testConf.rawConfig))
                     .then(() => {
@@ -184,7 +183,7 @@ describe('System Poller', () => {
 
         beforeEach(() => {
             processStub = sinon.stub(systemPoller, 'process');
-            processStub.callsFake(config => Promise.resolve({ data: { poller: config.name } }));
+            processStub.callsFake((config) => Promise.resolve({ data: { poller: config.name } }));
         });
 
         it('should return empty array when no config passed', () => {
@@ -208,7 +207,6 @@ describe('System Poller', () => {
             ];
             return assert.becomes(systemPoller.fetchPollersData(pollerConfigs), expected);
         });
-
 
         it('should fetch data using multiple poller configs', () => {
             const pollerConfigs = [
@@ -308,7 +306,7 @@ describe('System Poller', () => {
             let pollerTimersBefore;
 
             const registeredTracerPaths = () => {
-                const paths = tracer.registered().map(t => t.path);
+                const paths = tracer.registered().map((t) => t.path);
                 paths.sort();
                 return paths;
             };
@@ -522,7 +520,7 @@ describe('System Poller', () => {
                                         path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_System_New::My_Poller',
                                         type: 'output'
                                     },
-                                    tracer: tracer.registered().find(t => /Telemetry_System_Poller.f5telemetry_default::My_System_New::My_Poller/.test(t.path)),
+                                    tracer: tracer.registered().find((t) => /Telemetry_System_Poller.f5telemetry_default::My_System_New::My_Poller/.test(t.path)),
                                     credentials: {
                                         username: undefined,
                                         passphrase: undefined
@@ -569,7 +567,7 @@ describe('System Poller', () => {
                                         type: 'output'
                                     },
                                     systemName: 'My_System_New',
-                                    tracer: tracer.registered().find(t => /Telemetry_System_Poller.f5telemetry_default::My_System_New::SystemPoller_1/.test(t.path)),
+                                    tracer: tracer.registered().find((t) => /Telemetry_System_Poller.f5telemetry_default::My_System_New::SystemPoller_1/.test(t.path)),
                                     traceName: 'f5telemetry_default::My_System_New::SystemPoller_1',
                                     credentials: {
                                         username: undefined,

@@ -89,7 +89,7 @@ describe('Google_Cloud_Logging', () => {
         });
 
         nock('https://oauth2.googleapis.com/token')
-            .post('', body => body.assertion === '12345::theprivatekeyvalue')
+            .post('', (body) => body.assertion === '12345::theprivatekeyvalue')
             .reply(200, { access_token: 'aToken', expires_in: tokenDuration });
 
         nock('https://logging.googleapis.com/v2/entries:write', {
@@ -112,7 +112,7 @@ describe('Google_Cloud_Logging', () => {
         });
 
         nock('https://oauth2.googleapis.com/token')
-            .post('', body => body.assertion === '12345::theprivatekeyvalue')
+            .post('', (body) => body.assertion === '12345::theprivatekeyvalue')
             .reply(200, { access_token: 'aToken', expires_in: tokenDuration });
 
         nock('https://logging.googleapis.com/v2/entries:write', {
@@ -147,7 +147,7 @@ describe('Google_Cloud_Logging', () => {
         );
 
         nock('https://oauth2.googleapis.com/token')
-            .post('', body => body.assertion === '12345::theprivatekeyvalue')
+            .post('', (body) => body.assertion === '12345::theprivatekeyvalue')
             .reply(200, { access_token: 'aToken', expires_in: tokenDuration });
 
         nock('https://logging.googleapis.com/v2/entries:write', {
@@ -171,7 +171,7 @@ describe('Google_Cloud_Logging', () => {
         );
 
         nock('https://oauth2.googleapis.com/token')
-            .post('', body => body.assertion === '12345::theprivatekeyvalue')
+            .post('', (body) => body.assertion === '12345::theprivatekeyvalue')
             .reply(200, { access_token: 'aToken', expires_in: tokenDuration });
 
         nock('https://logging.googleapis.com/v2/entries:write', {
@@ -221,7 +221,7 @@ describe('Google_Cloud_Logging', () => {
         );
 
         nock('https://oauth2.googleapis.com/token')
-            .post('', body => body.assertion === '12345::theprivatekeyvalue')
+            .post('', (body) => body.assertion === '12345::theprivatekeyvalue')
             .reply(200, { access_token: 'aToken', expires_in: tokenDuration });
 
         nock('https://logging.googleapis.com/v2/entries:write', {
@@ -251,7 +251,7 @@ describe('Google_Cloud_Logging', () => {
         );
 
         nock('https://oauth2.googleapis.com/token')
-            .post('', body => body.assertion === '12345::theprivatekeyvalue')
+            .post('', (body) => body.assertion === '12345::theprivatekeyvalue')
             .reply(200, { access_token: 'aToken', expires_in: tokenDuration });
 
         nock('https://logging.googleapis.com/v2/entries:write', {
@@ -276,7 +276,7 @@ describe('Google_Cloud_Logging', () => {
         );
 
         nock('https://oauth2.googleapis.com/token')
-            .post('', body => body.assertion === '12345::theprivatekeyvalue')
+            .post('', (body) => body.assertion === '12345::theprivatekeyvalue')
             .times(2)
             .reply(200, { access_token: 'aToken', expires_in: tokenDuration });
 
@@ -324,11 +324,11 @@ describe('Google_Cloud_Logging', () => {
         );
 
         nock('https://oauth2.googleapis.com/token')
-            .post('', body => body.assertion === 'privateKey1::firstKey')
+            .post('', (body) => body.assertion === 'privateKey1::firstKey')
             .reply(200, { access_token: 'tokenA', expires_in: tokenDuration });
 
         nock('https://oauth2.googleapis.com/token')
-            .post('', body => body.assertion === 'privateKey2::secondKey')
+            .post('', (body) => body.assertion === 'privateKey2::secondKey')
             .reply(200, { access_token: 'tokenB', expires_in: tokenDuration });
 
         nock('https://logging.googleapis.com/v2/entries:write', {
@@ -367,7 +367,7 @@ describe('Google_Cloud_Logging', () => {
         let tokenCounter = 0;
 
         nock('https://oauth2.googleapis.com/token')
-            .post('', body => body.assertion === '12345::theprivatekeyvalue')
+            .post('', (body) => body.assertion === '12345::theprivatekeyvalue')
             .times(2)
             .reply(200, () => {
                 tokenCounter += 1;
@@ -376,7 +376,7 @@ describe('Google_Cloud_Logging', () => {
 
         nock('https://logging.googleapis.com/v2/entries:write', {
             reqheaders: {
-                authorization: a => a === `Bearer token:${tokenCounter}`
+                authorization: (a) => a === `Bearer token:${tokenCounter}`
             }
         })
             .post('')

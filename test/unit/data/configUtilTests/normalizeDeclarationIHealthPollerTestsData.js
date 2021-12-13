@@ -615,9 +615,7 @@ module.exports = {
             expected: {
                 mappings: {
                     'My_Namespace::My_System_1::My_iHealth_Poller': ['My_Namespace::My_Consumer'],
-                    'My_Namespace::My_System_2::My_iHealth_Poller': ['My_Namespace::My_Consumer'],
-                    'f5telemetry_default::My_System_1::My_iHealth_Poller': ['f5telemetry_default::My_Consumer'],
-                    'f5telemetry_default::My_System_2::My_iHealth_Poller': ['f5telemetry_default::My_Consumer']
+                    'f5telemetry_default::My_System_1::My_iHealth_Poller': ['f5telemetry_default::My_Consumer']
                 },
                 components: [
                     {

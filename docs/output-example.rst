@@ -21,6 +21,9 @@ Telemetry Streaming 1.23 introduced the following, which do not appear in earlie
 - Virtual server output: **isAvailable** and **isEnabled** (both boolean), which monitor virtual server availability, particularly for the Prometheus consumer.  
 - System output: **throughtputPerformance**, which provides throughput performance information.
 
+In Telemetry Streaming 1.24 and later, properties that require the bash endpoint are now skipped if bash is not available on the target BIG-IP: system.diskStorage, system.diskLatency, system.apmState, and all tmstats properties (used with “Splunk legacy” format).
+
+
 .. literalinclude:: ../examples/output/system_poller/output.json
     :language: json
 

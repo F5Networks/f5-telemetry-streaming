@@ -11,7 +11,6 @@
 const constants = require('../constants');
 const util = require('./misc');
 
-
 /**
  * Parse HH:MM string to tuple(integer, integer)
  *
@@ -212,14 +211,14 @@ function getNextFireDate(schedule, fromDate, allowNow, utcOnly) {
     } else if (schedule.frequency === 'weekly') {
         const dayOfWeek = getWeekDayNo(schedule.day);
         // move time forward for a week
-        adjustment = date => setNextWeekDay(date, dayOfWeek);
+        adjustment = (date) => setNextWeekDay(date, dayOfWeek);
         // simply check if day is desired week day
-        isOnSchedule = date => date.getUTCDay() === dayOfWeek;
+        isOnSchedule = (date) => date.getUTCDay() === dayOfWeek;
     } else {
         // monthly schedule, day of month
         const dayOfMonth = schedule.day;
         // move date to desired dayOfMonth and to next month if needed
-        adjustment = date => setNextMonthDay(date, dayOfMonth);
+        adjustment = (date) => setNextMonthDay(date, dayOfMonth);
         // simply check current date against desired
         isOnSchedule = function (date) {
             const lastDayOfMonth = getLastDayOfMonth(date);
@@ -258,7 +257,6 @@ function getNextFireDate(schedule, fromDate, allowNow, utcOnly) {
     startExecDate.setTime(startExecDate.getTime() + Math.floor(util.getRandomArbitrary(0, windowSize)));
     return utcOnly ? startExecDate : transformUTCToLocalDate(startExecDate);
 }
-
 
 module.exports = {
     getCurrentUnixTimeInSeconds,

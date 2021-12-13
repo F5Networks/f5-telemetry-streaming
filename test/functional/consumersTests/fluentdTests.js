@@ -44,7 +44,6 @@ const FLUENTD_CONF = `<source>
 // read in example config
 const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
 
-
 function runRemoteCmd(cmd) {
     return util.performRemoteCmd(CONSUMER_HOST.ip, CONSUMER_HOST.username, cmd, { password: CONSUMER_HOST.password });
 }
@@ -90,14 +89,14 @@ function test() {
                 }
             ]
         };
-        DUTS.forEach(dut => it(
+        DUTS.forEach((dut) => it(
             `should configure TS - ${dut.hostalias}`,
             () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(consumerDeclaration))
         ));
 
         it('should send event to TS Event Listener', () => {
             const msg = `testDataTimestamp="${testDataTimestamp}",test="true",testType="${FLUENTD_CONSUMER_NAME}"`;
-            return dutUtils.sendDataToEventListeners(dut => `hostname="${dut.hostname}",${msg}`);
+            return dutUtils.sendDataToEventListeners((dut) => `hostname="${dut.hostname}",${msg}`);
         });
     });
 
@@ -105,7 +104,7 @@ function test() {
         const systemPollerData = {};
         const fluentLogs = [];
 
-        before(() => new Promise(resolve => setTimeout(resolve, 30 * 1000))
+        before(() => new Promise((resolve) => setTimeout(resolve, 30 * 1000))
             .then(() => dutUtils.getSystemPollersData((hostObj, data) => {
                 systemPollerData[hostObj.hostname] = data[0];
             })));

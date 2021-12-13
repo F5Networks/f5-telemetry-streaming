@@ -197,7 +197,7 @@ module.exports = {
                     }
                 }
             },
-            classFilter: c => c.name === 'Consumer_1',
+            classFilter: (c) => c.name === 'Consumer_1',
             expected: [
                 {
                     allowSelfSignedCert: false,
@@ -361,7 +361,7 @@ module.exports = {
                     }
                 }
             },
-            namespaceFilter: c => c.namespace === 'My_Namespace',
+            namespaceFilter: (c) => c.namespace === 'My_Namespace',
             expected: [
                 {
                     allowSelfSignedCert: false,
@@ -427,7 +427,7 @@ module.exports = {
                 }
             },
             classFilter: 'Telemetry_Consumer',
-            namespaceFilter: c => c.namespace === 'f5telemetry_default',
+            namespaceFilter: (c) => c.namespace === 'f5telemetry_default',
             expected: [
                 {
                     allowSelfSignedCert: false,
@@ -492,7 +492,7 @@ module.exports = {
                     }
                 }
             },
-            filter: c => c.name === 'Consumer_1',
+            filter: (c) => c.name === 'Consumer_1',
             expected: [
                 {
                     allowSelfSignedCert: false,

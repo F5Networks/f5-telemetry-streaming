@@ -63,18 +63,18 @@ module.exports = {
                     testConf.properties.length
                 );
                 combinations.forEach((propSets) => {
-                    utils.testControls.getSubTestDescribe(testConf)(`test for optional properties - ${propSets.map(idx => testConf.properties[idx].name).join(', ')}`, () => {
+                    utils.testControls.getSubTestDescribe(testConf)(`test for optional properties - ${propSets.map((idx) => testConf.properties[idx].name).join(', ')}`, () => {
                         it('should not fail when optional child properties are not set', () => {
                             const testDecl = lodash.cloneDeep(ctx.declaration);
                             const targetObj = lodash.get(testDecl, ctx.property);
-                            propSets.forEach(idx => lodash.unset(targetObj, testConf.properties[idx].name));
+                            propSets.forEach((idx) => lodash.unset(targetObj, testConf.properties[idx].name));
                             lodash.set(testDecl, ctx.property, targetObj);
                             return assert.isFulfilled(
                                 ctx.validator(testDecl),
                                 `should not fail when optional child properties for "${ctx.propFullName}" are not set`
                             );
                         });
-                        if (lodash.some(propSets.map(idx => lodash.has(testConf.properties[idx], 'value')))) {
+                        if (lodash.some(propSets.map((idx) => lodash.has(testConf.properties[idx], 'value')))) {
                             it('should not fail when optional child properties are set', () => {
                                 const testDecl = lodash.cloneDeep(ctx.declaration);
                                 const targetObj = lodash.get(testDecl, ctx.property);
@@ -119,7 +119,7 @@ module.exports = {
                 });
             }
             if (lodash.isObject(opts)) {
-                return Object.keys(opts).map(prop => ({ name: prop, value: opts[prop] }));
+                return Object.keys(opts).map((prop) => ({ name: prop, value: opts[prop] }));
             }
             return assert.fail(`optionalPropTests expected to be string, array of strings or object, got "${typeof opts}" instead`);
         };

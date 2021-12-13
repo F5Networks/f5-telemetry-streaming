@@ -79,7 +79,7 @@ describe('Timer Tests', () => {
                 name: 'SlidingTimer',
                 TimerClass: timers.SlidingTimer
             }
-        ].forEach(testConf => testUtil.getCallableDescribe(testConf)(testConf.name, () => {
+        ].forEach((testConf) => testUtil.getCallableDescribe(testConf)(testConf.name, () => {
             let timerInst;
 
             beforeEach(() => {
@@ -1063,7 +1063,7 @@ describe('Timer Tests', () => {
                         timestamps.push(Date.now());
                         if (callCount < 4) {
                             callCount += 1;
-                            return new Promise(innerResolve => setTimeout(innerResolve, 1100 + callCount * 100));
+                            return new Promise((innerResolve) => setTimeout(innerResolve, 1100 + callCount * 100));
                         }
                         return timerInst.stop().then(resolve, reject);
                     }, 1);
@@ -1207,7 +1207,7 @@ describe('Timer Tests', () => {
         it('should catch error (function=promise)', () => assert.isFulfilled(
             new Promise((resolve, reject) => {
                 intervalID = timers.setSlidingInterval(
-                    arg => Promise.reject(new Error(arg)),
+                    (arg) => Promise.reject(new Error(arg)),
                     {
                         interval: 1000,
                         onError: (error) => {
@@ -1258,7 +1258,7 @@ describe('Timer Tests', () => {
                             timestamps.push(Date.now());
                             if (callCount < 4) {
                                 callCount += 1;
-                                return new Promise(innerResolve => setTimeout(innerResolve, 1100 + callCount * 100));
+                                return new Promise((innerResolve) => setTimeout(innerResolve, 1100 + callCount * 100));
                             }
                             return timers.clearSlidingInterval(intervalID, resolve);
                         },
@@ -1281,13 +1281,13 @@ describe('Timer Tests', () => {
                         3500 // third starts immediately after second - 2200 + 1300 delay
                     ], 200, 'should adjust interval');
                     assertApproximatelyArray(
-                        durations.slice(0, 3).map(p => p[0]),
+                        durations.slice(0, 3).map((p) => p[0]),
                         [1200, 1300, 1400],
                         200,
                         'should match expected duration'
                     );
                     assert.deepStrictEqual(
-                        durations.slice(0, 3).map(p => p[1]),
+                        durations.slice(0, 3).map((p) => p[1]),
                         [1000, 1000, 1000],
                         'should pass configured interval value'
                     );
@@ -1312,7 +1312,7 @@ describe('Timer Tests', () => {
                         },
                         {
                             interval: 1000,
-                            onError: () => new Promise(innerResolve => setTimeout(
+                            onError: () => new Promise((innerResolve) => setTimeout(
                                 innerResolve, 1100 + callCount * 100
                             )),
                             onIntervalSlide: (duration, interval) => {
@@ -1331,13 +1331,13 @@ describe('Timer Tests', () => {
                         3500 // third starts immediately after second - 2200 + 1300 delay
                     ], 200, 'should adjust interval');
                     assertApproximatelyArray(
-                        durations.slice(0, 3).map(p => p[0]),
+                        durations.slice(0, 3).map((p) => p[0]),
                         [1200, 1300, 1400],
                         200,
                         'should match expected duration'
                     );
                     assert.deepStrictEqual(
-                        durations.slice(0, 3).map(p => p[1]),
+                        durations.slice(0, 3).map((p) => p[1]),
                         [1000, 1000, 1000],
                         'should pass configured interval value'
                     );
@@ -1356,7 +1356,7 @@ describe('Timer Tests', () => {
                 .then(() => {
                     assert.strictEqual(spy.callCount, 0, 'should not call function once canceled');
                     assert.deepStrictEqual(
-                        cancelSpy.args.map(args => args[0]),
+                        cancelSpy.args.map((args) => args[0]),
                         ['sync', 'async'],
                         'should run callback in async way'
                     );
@@ -1368,7 +1368,7 @@ describe('Timer Tests', () => {
             intervalID = timers.setSlidingInterval(spy, 30);
             fakeClock.clockForward(1, { promisify: true });
             return testUtil.sleep(5)
-                .then(() => new Promise(resolve => timers.clearSlidingInterval(intervalID, resolve)))
+                .then(() => new Promise((resolve) => timers.clearSlidingInterval(intervalID, resolve)))
                 .then(() => testUtil.sleep(30))
                 .then(() => {
                     assert.strictEqual(spy.callCount, 0, 'should not call function once canceled');

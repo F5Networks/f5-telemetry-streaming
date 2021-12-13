@@ -33,6 +33,7 @@ module.exports = function (context) {
     const protocol = context.config.protocol;
     const useTcp = protocol === 'tcp';
     const collectTags = context.config.addTags && context.config.addTags.method === 'sibling';
+    const boolsToMetrics = context.config.convertBooleansToMetrics || false;
 
     const tcpCheck = new Promise((resolve, reject) => {
         if (useTcp) {
@@ -74,6 +75,7 @@ module.exports = function (context) {
             metricUtils.findMetricsAndTags(data, {
                 collectTags,
                 parseMetrics: true,
+                boolsToMetrics,
                 onMetric: (metricPath, metricValue, metricTags) => {
                     const metricName = `${metricPrefix}.${makePath(metricPath)}`;
                     if (context.tracer) {
@@ -95,7 +97,7 @@ module.exports = function (context) {
             client.close();
             context.logger.debug('success');
         })
-        .catch(err => context.logger.exception('Unable to forward to statsd client', err));
+        .catch((err) => context.logger.exception('Unable to forward to statsd client', err));
 };
 
 /**
@@ -104,5 +106,5 @@ module.exports = function (context) {
  * @returns {string} path to statsd metric
  */
 function makePath(paths) {
-    return paths.map(i => i.replace(/\.|\/|:/g, '-')).join('.');
+    return paths.map((i) => i.replace(/\.|\/|:/g, '-')).join('.');
 }

@@ -79,7 +79,7 @@ function safeProcess() {
  */
 function createReportCallback(poller, pollerConfig, globalConfig) {
     const ctx = {
-        destinationIDs: configUtil.getReceivers(globalConfig, pollerConfig).map(r => r.id),
+        destinationIDs: configUtil.getReceivers(globalConfig, pollerConfig).map((r) => r.id),
         pollerID: pollerConfig.id,
         demoMode: poller.isDemoModeEnabled(),
         tracer: tracer.fromConfig(pollerConfig.trace)
@@ -99,10 +99,10 @@ function getCurrentState(namespaceName) {
         const ids = configUtil.getTelemetryIHealthPollers(
             configWorker.currentConfig, namespaceName || constants.DEFAULT_UNNAMED_NAMESPACE
         )
-            .map(pc => pc.traceName);
-        instances = instances.filter(poller => ids.indexOf(poller.id) !== -1);
+            .map((pc) => pc.traceName);
+        instances = instances.filter((poller) => ids.indexOf(poller.id) !== -1);
     }
-    return instances.map(poller => poller.info());
+    return instances.map((poller) => poller.info());
 }
 
 /**
@@ -120,7 +120,7 @@ function startPoller(systemName, namespaceName) {
             const pollerConfig = configUtil.getTelemetryIHealthPollers(
                 config, namespaceName || constants.DEFAULT_UNNAMED_NAMESPACE
             )
-                .find(pc => pc.systemName === systemName);
+                .find((pc) => pc.systemName === systemName);
 
             if (util.isObjectEmpty(pollerConfig)) {
                 throw new errors.ObjectNotFoundInConfigError('System or iHealth Poller declaration not found');
@@ -131,7 +131,7 @@ function startPoller(systemName, namespaceName) {
                 message: `iHealth Poller for System "${systemName}"${namespaceName ? ` (namespace "${namespaceName}")` : ''} started`
             };
             let retPromise = Promise.resolve();
-            let poller = iHealthPoller.get(pollerConfig.traceName).find(p => p.isDemoModeEnabled());
+            let poller = iHealthPoller.get(pollerConfig.traceName).find((p) => p.isDemoModeEnabled());
 
             if (poller) {
                 response.isRunning = true;
@@ -147,7 +147,7 @@ function startPoller(systemName, namespaceName) {
                     // check if poller was disabled already to avoid concurrency with 'config.change' event
                     if (!poller.isDisabled()) {
                         iHealthPoller.disable(poller)
-                            .catch(disableError => poller.logger.debugException('Unexpected error on attempt to disable', disableError));
+                            .catch((disableError) => poller.logger.debugException('Unexpected error on attempt to disable', disableError));
                     } else {
                         poller.logger.debug('Disabled already!');
                     }
@@ -167,7 +167,7 @@ function startPoller(systemName, namespaceName) {
 }
 
 // config worker change event
-configWorker.on('change', config => Promise.resolve()
+configWorker.on('change', (config) => Promise.resolve()
     .then(() => {
         logger.debug('configWorker change event in iHealthPoller'); // helpful debug
         const configuredPollers = configUtil.getTelemetryIHealthPollers(config);
@@ -180,7 +180,7 @@ configWorker.on('change', config => Promise.resolve()
         function cleanupInactive() {
             // - stop all removed pollers - doesn't matter even if namespace only was updated
             return iHealthPoller.getAll({ includeDemo: true })
-                .filter(poller => !configuredPollers.find(conf => conf.traceName === poller.id))
+                .filter((poller) => !configuredPollers.find((conf) => conf.traceName === poller.id))
                 .map((poller) => {
                     logger.debug(`Removing iHealth Poller "${poller.name}". Reason - removed from configuration.`);
                     return iHealthPoller.disable(poller);
@@ -242,10 +242,9 @@ configWorker.on('change', config => Promise.resolve()
             });
     })
     .then(() => logger.info(`${iHealthPoller.getAll().length} iHealth Poller(s) running`))
-    .catch(error => logger.exception('Uncaught exception on attempt to process iHealth Pollers configuration', error))
+    .catch((error) => logger.exception('Uncaught exception on attempt to process iHealth Pollers configuration', error))
     .then(() => iHealthPoller.cleanupOrphanedStorageData())
-    .catch(error => logger.debugException('Uncaught exception on attempt to cleanup orphaned data', error)));
-
+    .catch((error) => logger.debugException('Uncaught exception on attempt to cleanup orphaned data', error)));
 
 module.exports = {
     getCurrentState,

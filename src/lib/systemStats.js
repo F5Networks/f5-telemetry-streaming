@@ -108,10 +108,10 @@ SystemStats.prototype._getNormalizationOpts = function (property) {
     const options = {};
     const defaultTags = { name: { pattern: '(.*)', group: 1 } };
     const addKeysByTagIsObject = property.normalization
-        && property.normalization.find(n => n.addKeysByTag && typeof n.addKeysByTag === 'object');
+        && property.normalization.find((n) => n.addKeysByTag && typeof n.addKeysByTag === 'object');
 
     if (property.normalization) {
-        const filterKeysIndex = property.normalization.findIndex(i => i.filterKeys);
+        const filterKeysIndex = property.normalization.findIndex((i) => i.filterKeys);
         if (filterKeysIndex > -1) {
             property.normalization[filterKeysIndex] = {
                 filterKeys: [
@@ -123,7 +123,7 @@ SystemStats.prototype._getNormalizationOpts = function (property) {
             options.filterKeys = [this.global.filterKeys];
         }
 
-        const renameKeysIndex = property.normalization.findIndex(i => i.renameKeys);
+        const renameKeysIndex = property.normalization.findIndex((i) => i.renameKeys);
         if (renameKeysIndex > -1) {
             property.normalization[renameKeysIndex] = {
                 renameKeys: [
@@ -135,7 +135,7 @@ SystemStats.prototype._getNormalizationOpts = function (property) {
             options.renameKeys = [this.global.renameKeys];
         }
 
-        const addKeysByTagIndex = property.normalization.findIndex(i => i.addKeysByTag);
+        const addKeysByTagIndex = property.normalization.findIndex((i) => i.addKeysByTag);
         if (addKeysByTagIndex > -1) {
             property.normalization[addKeysByTagIndex] = {
                 addKeysByTag: {
@@ -279,7 +279,7 @@ SystemStats.prototype._processProperty = function (key, property) {
 SystemStats.prototype._computeContextData = function () {
     if (this.contextProps) {
         const promises = Object.keys(this.contextProps)
-            .map(key => this._processProperty(key, this.contextProps[key]));
+            .map((key) => this._processProperty(key, this.contextProps[key]));
 
         return Promise.all(promises).then(() => {
             Object.assign(this.contextData, this.collectedData);
@@ -437,7 +437,6 @@ SystemStats.prototype._convertToProperty = function (keyName, endpoint) {
     };
 };
 
-
 /**
  * Compute properties
  *
@@ -447,7 +446,7 @@ SystemStats.prototype._convertToProperty = function (keyName, endpoint) {
  */
 SystemStats.prototype._computePropertiesData = function () {
     return Promise.all(Object.keys(this.stats)
-        .map(key => this._processProperty(key, this.stats[key])));
+        .map((key) => this._processProperty(key, this.stats[key])));
 };
 
 /**
@@ -526,7 +525,6 @@ SystemStats.prototype.collect = function () {
             return Promise.resolve(collectedData);
         });
 };
-
 
 /**
  * Helpers for stats filtering

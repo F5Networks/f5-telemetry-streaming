@@ -8,7 +8,6 @@
 
 'use strict';
 
-
 module.exports = {
     collectVirtualServersCustom: {
         name: 'virtual servers and stats',

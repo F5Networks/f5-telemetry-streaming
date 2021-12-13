@@ -84,7 +84,7 @@ function test() {
                                     port: ES_HTTP_PORT
                                 };
 
-                                return new Promise(resolve => setTimeout(resolve, 5000))
+                                return new Promise((resolve) => setTimeout(resolve, 5000))
                                     .then(() => util.makeRequest(CONSUMER_HOST.ip, uri, options))
                                     .then((data) => {
                                         const nodeInfo = data._nodes;
@@ -155,7 +155,7 @@ function test() {
                                 );
                             };
 
-                            it('should check for event listener data for', () => new Promise(resolve => setTimeout(resolve, 10000))
+                            it('should check for event listener data for', () => new Promise((resolve) => setTimeout(resolve, 10000))
                                 .then(() => query(`size=1&q=data.testType:${ES_CONSUMER_NAME}%20AND%20data.hostname=${dut.hostname}`))
                                 .then((data) => {
                                     util.logger.info('ElasticSearch response:', data);
@@ -179,7 +179,7 @@ function test() {
                                     return Promise.resolve();
                                 }));
 
-                            it('should have system poller data', () => new Promise(resolve => setTimeout(resolve, 10000))
+                            it('should have system poller data', () => new Promise((resolve) => setTimeout(resolve, 10000))
                                 .then(() => query(`size=1&q=system.hostname:${dut.hostname}`))
                                 .then((data) => {
                                     util.logger.info('ElasticSearch response:', data);

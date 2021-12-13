@@ -38,12 +38,7 @@ describe('OpenTelemetry_Exporter', () => {
     openTelemetryExporter = require('../../../src/lib/consumers/OpenTelemetry_Exporter/index');
 
     // Note: if a test has no explicit assertions then it relies on 'checkNockActiveMocks' in 'afterEach'
-    const defaultConsumerConfig = {
-        port: 80,
-        host: 'localhost',
-        metricsPath: '/v1/metrics'
-    };
-
+    let defaultConsumerConfig;
     let ExportRequestProto;
 
     before(() => {
@@ -61,6 +56,14 @@ describe('OpenTelemetry_Exporter', () => {
             'opentelemetry/proto/collector/metrics/v1/metrics_service.proto'
         ]);
         ExportRequestProto = proto.lookupType('ExportMetricsServiceRequest');
+    });
+
+    beforeEach(() => {
+        defaultConsumerConfig = {
+            port: 80,
+            host: 'localhost',
+            metricsPath: '/v1/metrics'
+        };
     });
 
     afterEach(() => {
@@ -104,8 +107,8 @@ describe('OpenTelemetry_Exporter', () => {
                     results.push({
                         name: metric.name,
                         description: metric.description,
-                        dataPoints: metric.doubleSum.dataPoints.map(p => ({
-                            labels: p.labels.map(l => ({ key: l.key, value: l.value })),
+                        dataPoints: metric.doubleSum.dataPoints.map((p) => ({
+                            labels: p.labels.map((l) => ({ key: l.key, value: l.value })),
                             value: p.value
                         }))
                     });
@@ -176,7 +179,35 @@ describe('OpenTelemetry_Exporter', () => {
                     .post('/v1/metrics')
                     .reply(200, (_, requestBody) => {
                         const metrics = convertExportedMetrics(requestBody);
+                        const systemCpuLabels = metrics.find((metric) => metric.name === 'system_cpu').dataPoints[0].labels;
+
                         assert.deepStrictEqual(metrics, openTelemetryExpectedData.systemData[0].expectedData);
+                        assert.isDefined(
+                            systemCpuLabels.find((label) => label.key === 'configSyncSucceeded'),
+                            'should find configSyncSucceeded as a label'
+                        );
+                    });
+                return openTelemetryExporter(context);
+            });
+
+            it('should process systemInfo data, and convert booleans to metrics', () => {
+                const context = testUtil.buildConsumerContext({
+                    eventType: 'systemInfo',
+                    config: Object.assign(defaultConsumerConfig, { convertBooleansToMetrics: true })
+                });
+
+                nock('http://localhost:80')
+                    .post('/v1/metrics')
+                    .reply(200, (_, requestBody) => {
+                        const metrics = convertExportedMetrics(requestBody);
+                        const systemCpuLabels = metrics.find((metric) => metric.name === 'system_cpu').dataPoints[0].labels;
+                        const configSyncSucceeded = metrics.find((metric) => metric.name === 'system_configSyncSucceeded');
+
+                        assert.isDefined(configSyncSucceeded, 'should include \'system_configSyncSucceeded\' as a metric');
+                        assert.isUndefined(
+                            systemCpuLabels.find((label) => label.key === 'configSyncSucceeded'),
+                            'should not include configSyncSucceeded as a label'
+                        );
                     });
                 return openTelemetryExporter(context);
             });
@@ -227,7 +258,6 @@ describe('OpenTelemetry_Exporter', () => {
                         assert.isFalse(context.logger.error.called, 'should not have logged an error');
                     });
             });
-
 
             it('should pass http headers when provided', () => {
                 const configWithHeaders = Object.assign(defaultConsumerConfig, {

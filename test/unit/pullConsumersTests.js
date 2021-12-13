@@ -110,7 +110,7 @@ describe('Pull Consumers', () => {
             // config will not pass schema validation
             // but this test allows catching if consumer module/dir is not configured properly
             return configUtil.normalizeDeclaration(exampleConfig)
-                .then(normalized => configWorker.emitAsync('change', normalized))
+                .then((normalized) => configWorker.emitAsync('change', normalized))
                 .then(() => {
                     const loadedConsumers = pullConsumers.getConsumers();
                     assert.strictEqual(Object.keys(loadedConsumers).indexOf('unknowntype'), -1,
@@ -140,7 +140,7 @@ describe('Pull Consumers', () => {
                     const loadedConsumers = pullConsumers.getConsumers();
                     assert.isEmpty(loadedConsumers, 'should unload default consumer');
                 })
-                .catch(err => Promise.reject(err));
+                .catch((err) => Promise.reject(err));
         });
 
         it('should not reload existing pull consumer when processing a new namespace declaration', () => {
@@ -171,7 +171,7 @@ describe('Pull Consumers', () => {
                 })
                 .then(() => configWorker.processNamespaceDeclaration(namespaceConfig, 'NewNamespace'))
                 .then(() => {
-                    const loadedConsumerIds = pullConsumers.getConsumers().map(c => c.id);
+                    const loadedConsumerIds = pullConsumers.getConsumers().map((c) => c.id);
                     assert.lengthOf(loadedConsumerIds, 2, 'should load new consumer');
                     assert.deepStrictEqual(loadedConsumerIds[0], existingConsumer.id);
                     assert.isTrue(moduleLoaderSpy.calledTwice);
@@ -200,7 +200,7 @@ describe('Pull Consumers', () => {
             });
         });
 
-        const runTestCase = testConf => testUtil.getCallableIt(testConf)(testConf.name, () => {
+        const runTestCase = (testConf) => testUtil.getCallableIt(testConf)(testConf.name, () => {
             declaration = testConf.declaration;
             if (typeof testConf.returnCtx !== 'undefined') {
                 returnCtx = testConf.returnCtx;
@@ -218,7 +218,7 @@ describe('Pull Consumers', () => {
                 });
         });
 
-        describe('default (no namespace)', () => pullConsumersTestsData.getData.forEach(testConf => runTestCase(testConf)));
+        describe('default (no namespace)', () => pullConsumersTestsData.getData.forEach((testConf) => runTestCase(testConf)));
 
         describe('default (no namespace), lookup using f5telemetry_default name',
             () => pullConsumersTestsData.getData.forEach((testConf) => {

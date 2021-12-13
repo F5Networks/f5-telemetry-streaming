@@ -17,7 +17,6 @@ const SafeEventEmitter = require('../utils/eventEmitter').SafeEventEmitter;
 class BaseDataReceiverError extends errors.BaseError {}
 class StateTransitionError extends BaseDataReceiverError {}
 
-
 /**
  * Base class for Data Receivers (base on EventEmitter2)
  *
@@ -200,9 +199,9 @@ class BaseDataReceiver extends SafeEventEmitter {
         return this._setState(this.constructor.STATE.RESTARTING)
             .then(() => new Promise((resolve, reject) => {
                 const inner = () => this.stop()
-                    .catch(stopError => this.logger.exception('caught error on attempt to stop during restart', stopError))
+                    .catch((stopError) => this.logger.exception('caught error on attempt to stop during restart', stopError))
                     .then(() => this.start())
-                    .catch(restartErr => this._setState(this.constructor.STATE.FAILED_TO_RESTART)
+                    .catch((restartErr) => this._setState(this.constructor.STATE.FAILED_TO_RESTART)
                         .then(() => {
                             if ((attempts === true || options.attempts > 1) && this.isRestartAllowed()) {
                                 this.logger.exception('re-trying to restart due error', restartErr);

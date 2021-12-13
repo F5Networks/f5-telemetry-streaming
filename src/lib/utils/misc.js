@@ -94,7 +94,6 @@ const KEYWORDS_TO_MASK = [
     }
 ];
 
-
 module.exports = {
     /**
      * Assign defaults to object (uses lodash.defaultsDeep under the hood)
@@ -152,7 +151,6 @@ module.exports = {
     deepCopy(obj) {
         return cloneDeep(obj);
     },
-
 
     /**
      * Merges an Array of Objects into a single Object (uses lodash.mergeWith under the hood).

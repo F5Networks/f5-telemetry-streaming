@@ -24,7 +24,7 @@ const subTests = {
     propertyTests: {}
 };
 Object.keys(subTests)
-    .forEach(parentDir => fs.readdirSync(path.join(__dirname, parentDir))
+    .forEach((parentDir) => fs.readdirSync(path.join(__dirname, parentDir))
         .forEach((subModule) => {
             // eslint-disable-next-line global-require, import/no-dynamic-require
             const lib = require(path.join(__dirname, parentDir, subModule));
@@ -71,7 +71,7 @@ module.exports = {
                 if (!propConf.tests) {
                     propConf.tests = [lodash.cloneDeep(propConf)];
                 }
-                propConf.tests = propConf.tests.map(testConf => processOptions(testConf, options));
+                propConf.tests = propConf.tests.map((testConf) => processOptions(testConf, options));
                 propConf.tests.forEach((testConf) => {
                     const baseCtx = {
                         declaration: lodash.cloneDeep(validDecl),
@@ -83,7 +83,7 @@ module.exports = {
                          * Simply verify that path is string(s)
                          */
                         if (Array.isArray(propConf.property)) {
-                            propConf.property.forEach(p => assert.isString(
+                            propConf.property.forEach((p) => assert.isString(
                                 p, `Property path ${JSON.stringify(propConf.property)} should contain strings only`
                             ));
                         } else {
@@ -152,11 +152,10 @@ module.exports = {
                 ));
             }
             return validator(rootDeclCopy)
-                .then(validated => lodash.get(validated, pathToSubDecl));
+                .then((validated) => lodash.get(validated, pathToSubDecl));
         };
     }
 };
-
 
 /**
  * Set control properties for test config
@@ -177,7 +176,6 @@ function setControlProperties(testConf) {
         testConf.skip = false;
     }
 }
-
 
 /**
  * Process and normalize test options

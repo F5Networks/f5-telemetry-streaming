@@ -98,7 +98,7 @@ describe('Promise Util', () => {
                     Promise.resolve(1),
                     Promise.reject(err2)
                 ])
-                    .then(statuses => promiseUtil.getValues(statuses, true)),
+                    .then((statuses) => promiseUtil.getValues(statuses, true)),
                 [1, undefined]
             );
         });

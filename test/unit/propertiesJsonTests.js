@@ -95,7 +95,7 @@ describe('properties.json', () => {
                     };
 
                     const getCollectedData = testConf.getCollectedData
-                        ? testConf.getCollectedData : promise => promise;
+                        ? testConf.getCollectedData : (promise) => promise;
 
                     const stats = new SystemStats(options);
 

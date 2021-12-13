@@ -7,6 +7,8 @@ The Telemetry System class sets up the system poller and optionally, the iHealth
 
 The minimal declaration defines ``My_System_Minimal`` targeted to ``localhost`` on port ``8100``, using the ``http`` protocol, and the user is ``admin``.
 
+.. _syspoller: 
+
 System poller
 `````````````
 The system poller collects and normalizes statistics from a system, such as BIG-IP, on a configurable interval for information such as device statistics, virtual server statistics, pool statistics, individual pool member statistics, and more.

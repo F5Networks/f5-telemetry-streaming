@@ -81,7 +81,7 @@ describe('DeclareHandler', () => {
     }
 
     function assertMultiRequestResults(mockConfig, expectedResponses, params) {
-        const fetchResponseInfo = handler => ({
+        const fetchResponseInfo = (handler) => ({
             code: handler.getCode(),
             body: handler.getBody()
         });

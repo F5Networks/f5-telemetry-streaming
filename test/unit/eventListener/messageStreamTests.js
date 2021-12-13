@@ -74,7 +74,7 @@ describe('Message Stream Receiver', () => {
         destroy() {}
     }
 
-    const getServerMock = (cls, ipv6) => serverMocks.find(mock => mock instanceof cls && (ipv6 === undefined || (ipv6 && mock.opts.type === 'udp6') || (!ipv6 && mock.opts.type === 'udp4')));
+    const getServerMock = (cls, ipv6) => serverMocks.find((mock) => mock instanceof cls && (ipv6 === undefined || (ipv6 && mock.opts.type === 'udp6') || (!ipv6 && mock.opts.type === 'udp4')));
     const createServerMock = (Cls, opts) => {
         const mock = new Cls();
         mock.setInitArgs(opts);
@@ -116,8 +116,8 @@ describe('Message Stream Receiver', () => {
 
         sinon.stub(messageStream.MessageStream, 'MAX_BUFFER_TIMEOUT').value(testBufferTimeout);
 
-        sinon.stub(udp, 'createSocket').callsFake(opts => createServerMock(MockUdpServer, opts));
-        sinon.stub(net, 'createServer').callsFake(opts => createServerMock(MockTcpServer, opts));
+        sinon.stub(udp, 'createSocket').callsFake((opts) => createServerMock(MockUdpServer, opts));
+        sinon.stub(net, 'createServer').callsFake((opts) => createServerMock(MockTcpServer, opts));
         onMockCreatedCallback = (serverMock) => {
             serverMock.on('listenMock', () => serverMock.emit('listening'));
             serverMock.on('closeMock', (inst, args) => {
@@ -401,7 +401,7 @@ describe('Message Stream Receiver', () => {
             const fetchEvents = () => {
                 const events = [];
                 dataCallbackSpy.args.forEach((args) => {
-                    args[0].forEach(arg => events.push(arg));
+                    args[0].forEach((arg) => events.push(arg));
                 });
                 return events;
             };
@@ -417,7 +417,7 @@ describe('Message Stream Receiver', () => {
                         .then(() => {
                             const socketInfo = createSocketInfo(MockUdpServer, false);
                             const server = getServerMock(MockUdpServer, false);
-                            testConf.chunks.forEach(chunk => server.emit('message', chunk.replace(/\{sep\}/g, sep), socketInfo));
+                            testConf.chunks.forEach((chunk) => server.emit('message', chunk.replace(/\{sep\}/g, sep), socketInfo));
                             clock.clockForward(100, { promisify: true });
                             return testUtil.sleep(testBufferTimeout * 4); // sleep to process pending tasks
                         })
@@ -441,9 +441,9 @@ describe('Message Stream Receiver', () => {
             })
             .then(() => {
                 assert.lengthOf(serverMocks, 6, 'should create 3 more sockets');
-                assert.lengthOf(serverMocks.filter(mock => mock.opts.type === 'udp4'), 2, 'should have 2 udp4 sockets');
-                assert.lengthOf(serverMocks.filter(mock => mock.opts.type === 'udp6'), 2, 'should have 2 udp6 sockets');
-                assert.lengthOf(serverMocks.filter(mock => mock.opts.allowHalfOpen === false), 2, 'should have 2 tcp sockets');
+                assert.lengthOf(serverMocks.filter((mock) => mock.opts.type === 'udp4'), 2, 'should have 2 udp4 sockets');
+                assert.lengthOf(serverMocks.filter((mock) => mock.opts.type === 'udp6'), 2, 'should have 2 udp6 sockets');
+                assert.lengthOf(serverMocks.filter((mock) => mock.opts.allowHalfOpen === false), 2, 'should have 2 tcp sockets');
             }));
     });
 

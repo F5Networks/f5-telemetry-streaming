@@ -189,19 +189,118 @@ describe('DataDog', () => {
             describe(`region === "${region}"`, () => {
                 DATA_DOG_COMPRESSION_TYPES.forEach((compressionType) => {
                     describe(`compressionType === "${compressionType}"`, () => {
-                        it('should process systemInfo data', () => {
+                        const metricPrefixTests = [
+                            {
+                                testName: 'no metricPrefix',
+                                isDefined: 'system.cpu',
+                                isUndefined: 'f5.bigip.system.cpu'
+                            },
+                            {
+                                testName: 'custom metricPrefix, length = 1',
+                                metricPrefix: ['f5'],
+                                isDefined: 'f5.system.cpu',
+                                isUndefined: 'system.cpu'
+                            },
+                            {
+                                testName: 'custom metricPrefix, length = 3',
+                                metricPrefix: ['f5', 'bigip', 'device'],
+                                isDefined: 'f5.bigip.device.system.cpu',
+                                isUndefined: 'system.cpu'
+                            }
+                        ];
+
+                        metricPrefixTests.forEach((metricPrefixTest) => {
+                            it(`should process systemInfo data (${metricPrefixTest.testName})`, () => {
+                                const context = testUtil.buildConsumerContext({
+                                    eventType: 'systemInfo',
+                                    config: addGzipConfigIfNeed(defaultConsumerConfig, compressionType)
+                                });
+                                context.config.metricPrefix = metricPrefixTest.metricPrefix;
+                                context.config.region = region;
+                                const reqConfig = getRequestConfig(DATA_DOG_TYPES.METRICS, region);
+
+                                setupDataDogMockEndpoint(addGzipReqHeadersIfNeed(reqConfig, compressionType, 'deflate'));
+                                return dataDogIndex(context)
+                                    .then(() => {
+                                        const timeSeries = dataDogRequestData[0].request.series;
+                                        const systemCpu = timeSeries.find(
+                                            (series) => series.metric === metricPrefixTest.isDefined
+                                        );
+
+                                        assert.lengthOf(dataDogRequestData, 1, 'should log 1 request');
+                                        assert.isNotEmpty(timeSeries, 'should have some metric data');
+                                        assert.isDefined(
+                                            timeSeries.find((series) => series.metric === metricPrefixTest.isDefined),
+                                            `should have found '${metricPrefixTest.isDefined}' metric name`
+                                        );
+                                        assert.isUndefined(
+                                            timeSeries.find((series) => series.metric === metricPrefixTest.isUndefined),
+                                            `should have found '${metricPrefixTest.isDefined}' metric name`
+                                        );
+                                        assert.includeMembers(
+                                            systemCpu.tags,
+                                            ['configSyncSucceeded:true'],
+                                            'should have configSyncSucceeded boolean tag on \'system.cpu\' metric'
+                                        );
+                                        checkGzipReqHeadersIfNeeded(dataDogRequestData[0], compressionType, 'deflate');
+                                    });
+                            });
+                        });
+
+                        it('should process systemInfo data, and append custom tags', () => {
                             const context = testUtil.buildConsumerContext({
                                 eventType: 'systemInfo',
                                 config: addGzipConfigIfNeed(defaultConsumerConfig, compressionType)
                             });
                             context.config.region = region;
+                            context.config.customTags = [
+                                { name: 'deploymentName', value: 'best version' },
+                                { name: 'instanceId', value: 'instance1' }
+                            ];
                             const reqConfig = getRequestConfig(DATA_DOG_TYPES.METRICS, region);
 
                             setupDataDogMockEndpoint(addGzipReqHeadersIfNeed(reqConfig, compressionType, 'deflate'));
                             return dataDogIndex(context)
                                 .then(() => {
+                                    const timeSeriesTagsSample = dataDogRequestData[0].request.series
+                                        .filter((_, index) => index % 10 === 0); // Sample 10%
+
+                                    assert.isAbove(timeSeriesTagsSample.length, 1, 'should have multiple time series');
+                                    timeSeriesTagsSample.forEach((tagSet) => {
+                                        assert.includeMembers(tagSet.tags, ['deploymentName:best version', 'instanceId:instance1']);
+                                    });
+                                    checkGzipReqHeadersIfNeeded(dataDogRequestData[0], compressionType, 'deflate');
+                                });
+                        });
+
+                        it('should process systemInfo data, and convert booleans to metrics', () => {
+                            const context = testUtil.buildConsumerContext({
+                                eventType: 'systemInfo',
+                                config: addGzipConfigIfNeed(defaultConsumerConfig, compressionType)
+                            });
+                            context.config.region = region;
+                            context.config.convertBooleansToMetrics = true;
+                            const reqConfig = getRequestConfig(DATA_DOG_TYPES.METRICS, region);
+
+                            setupDataDogMockEndpoint(addGzipReqHeadersIfNeed(reqConfig, compressionType, 'deflate'));
+                            return dataDogIndex(context)
+                                .then(() => {
+                                    const timeSeries = dataDogRequestData[0].request.series;
+                                    const configSyncSucceeded = timeSeries.find(
+                                        (series) => series.metric === 'system.configSyncSucceeded'
+                                    );
+                                    const systemCpu = timeSeries.find(
+                                        (series) => series.metric === 'system.cpu'
+                                    );
+
                                     assert.lengthOf(dataDogRequestData, 1, 'should log 1 request');
-                                    assert.isNotEmpty(dataDogRequestData[0].request.series, 'should have some metric data');
+                                    assert.isNotEmpty(timeSeries, 'should have some metric data');
+                                    assert.isDefined(configSyncSucceeded, 'should include \'system.configSyncSucceeded\' as a metric');
+                                    assert.notIncludeMembers(
+                                        systemCpu.tags,
+                                        ['configSyncSucceeded:true'],
+                                        'should not have configSyncSucceeded tag on \'system.cpu\' metric'
+                                    );
                                     checkGzipReqHeadersIfNeeded(dataDogRequestData[0], compressionType, 'deflate');
                                 });
                         });
@@ -217,8 +316,10 @@ describe('DataDog', () => {
                             setupDataDogMockEndpoint(addGzipReqHeadersIfNeed(reqConfig, compressionType, 'deflate'));
                             return dataDogIndex(context)
                                 .then(() => {
+                                    const timeSeries = dataDogRequestData[0].request.series;
+
                                     assert.lengthOf(dataDogRequestData, 1, 'should log 1 request');
-                                    assert.isNotEmpty(dataDogRequestData[0].request.series, 'should have some metric data');
+                                    assert.isNotEmpty(timeSeries, 'should have some metric data');
                                     checkGzipReqHeadersIfNeeded(dataDogRequestData[0], compressionType, 'deflate');
                                 });
                         });
@@ -241,6 +342,35 @@ describe('DataDog', () => {
                                     assert.lengthOf(dataDogRequestData, 1, 'should log 1 request');
                                     assert.deepStrictEqual(dataDogRequestData[0].request.ddsource, 'LTM', 'should set source type to LTM');
                                     assert.deepStrictEqual(dataDogRequestData[0].request.service, 'f5-telemetry', 'should set service to default');
+                                    assert.strictEqual(dataDogRequestData[0].request.ddtags, 'telemetryEventCategory:LTM,key:value', 'should set tags from event data');
+                                    checkGzipReqHeadersIfNeeded(dataDogRequestData[0], compressionType, 'gzip');
+                                });
+                        });
+
+                        it('should process event listener event log without metrics (LTM), and append custom tags', () => {
+                            const context = testUtil.buildConsumerContext({
+                                config: addGzipConfigIfNeed(defaultConsumerConfig, compressionType)
+                            });
+                            context.event.type = 'LTM';
+                            context.event.data = {
+                                key: 'value',
+                                telemetryEventCategory: 'LTM'
+                            };
+                            context.config.region = region;
+                            context.config.customTags = [
+                                { name: 'deploymentName', value: 'best version' },
+                                { name: 'instanceId', value: 'instance1' }
+                            ];
+                            const reqConfig = getRequestConfig(DATA_DOG_TYPES.LOGS, region);
+
+                            setupDataDogMockEndpoint(addGzipReqHeadersIfNeed(reqConfig, compressionType, 'gzip'));
+                            return dataDogIndex(context)
+                                .then(() => {
+                                    assert.lengthOf(dataDogRequestData, 1, 'should log 1 request');
+                                    assert.deepStrictEqual(dataDogRequestData[0].request.ddsource, 'LTM', 'should set source type to LTM');
+                                    assert.deepStrictEqual(dataDogRequestData[0].request.service, 'f5-telemetry', 'should set service to default');
+                                    assert.include(dataDogRequestData[0].request.ddtags, 'telemetryEventCategory:LTM,key:value', 'should not overwrite dynamic tags');
+                                    assert.include(dataDogRequestData[0].request.ddtags, 'deploymentName:best version,instanceId:instance1', 'should include custom tags');
                                     checkGzipReqHeadersIfNeeded(dataDogRequestData[0], compressionType, 'gzip');
                                 });
                         });
@@ -264,6 +394,36 @@ describe('DataDog', () => {
                                     assert.lengthOf(dataDogRequestData, 1, 'should log 1 request');
                                     assert.deepStrictEqual(dataDogRequestData[0].request.ddsource, 'syslog', 'should set source type to syslog');
                                     assert.deepStrictEqual(dataDogRequestData[0].request.service, 'f5-telemetry', 'should set service to default');
+                                    assert.strictEqual(dataDogRequestData[0].request.ddtags, 'telemetryEventCategory:syslog', 'should set tags from event data');
+                                    checkGzipReqHeadersIfNeeded(dataDogRequestData[0], compressionType, 'gzip');
+                                });
+                        });
+
+                        it('should process event listener event log without metrics (syslog), and append custom tags', () => {
+                            const context = testUtil.buildConsumerContext({
+                                config: addGzipConfigIfNeed(defaultConsumerConfig, compressionType)
+                            });
+                            context.event.type = 'syslog';
+                            context.event.data = {
+                                data: '<134>Jul  6 22:37:49 bigip14.1.2.3.test info httpd(pam_audit)[13810]: 01070417:6: AUDIT - user admin - RAW: httpd(pam_audit): user=admin(admin) partition=[All] level=Administrator tty=(unknown) host=172.18.5.167 attempts=1 start="Mon Jul  6 22:37:49 2020" end="Mon Jul  6 22:37:49 2020"',
+                                hostname: 'bigip14.1.2.3.test',
+                                telemetryEventCategory: 'syslog'
+                            };
+                            context.config.region = region;
+                            context.config.customTags = [
+                                { name: 'deploymentName', value: 'best version' },
+                                { name: 'instanceId', value: 'instance1' }
+                            ];
+                            const reqConfig = getRequestConfig(DATA_DOG_TYPES.LOGS, region);
+
+                            setupDataDogMockEndpoint(addGzipReqHeadersIfNeed(reqConfig, compressionType, 'gzip'));
+                            return dataDogIndex(context)
+                                .then(() => {
+                                    assert.lengthOf(dataDogRequestData, 1, 'should log 1 request');
+                                    assert.deepStrictEqual(dataDogRequestData[0].request.ddsource, 'syslog', 'should set source type to syslog');
+                                    assert.deepStrictEqual(dataDogRequestData[0].request.service, 'f5-telemetry', 'should set service to default');
+                                    assert.include(dataDogRequestData[0].request.ddtags, 'telemetryEventCategory:syslog', 'should not overwrite dynamic tags');
+                                    assert.include(dataDogRequestData[0].request.ddtags, 'deploymentName:best version,instanceId:instance1', 'should include custom tags');
                                     checkGzipReqHeadersIfNeeded(dataDogRequestData[0], compressionType, 'gzip');
                                 });
                         });

@@ -12,7 +12,6 @@ const request = require('request');
 const constants = require('../constants');
 const util = require('./misc');
 
-
 /** @module requestsUtil */
 /* Helper functions for making requests
  */

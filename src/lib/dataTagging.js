@@ -53,7 +53,7 @@ function addTags(dataCtx, actionCtx, deviceCtx) {
                     if (typeof items === 'object'
                             && !util.isObjectEmpty(items)
                             && statProp.normalization
-                            && statProp.normalization.find(norm => norm.addKeysByTag)) {
+                            && statProp.normalization.find((norm) => norm.addKeysByTag)) {
                         Object.keys(items).forEach((itemKey) => {
                             Object.keys(tags).forEach((tagKey) => {
                                 addTag(items[itemKey], tagKey, tags[tagKey], itemKey, statProp);
@@ -180,7 +180,6 @@ function addTag(data, tagKey, tagVal, location, statProp) {
         data[tagKey] = tagVal;
     }
 }
-
 
 module.exports = {
     addTags

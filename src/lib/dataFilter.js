@@ -84,7 +84,6 @@ function applyExcludeList(data) {
     });
 }
 
-
 module.exports = {
     DataFilter
 };

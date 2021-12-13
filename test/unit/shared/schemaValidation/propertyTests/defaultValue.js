@@ -40,7 +40,7 @@ module.exports = {
                 const testDecl = lodash.cloneDeep(ctx.declaration);
                 lodash.unset(testDecl, ctx.property);
                 return ctx.validator(testDecl)
-                    .then(validDecl => assert.deepStrictEqual(
+                    .then((validDecl) => assert.deepStrictEqual(
                         lodash.get(validDecl, ctx.property),
                         testConf.defaultValue,
                         `should return default value when property "${ctx.propFullName}" not set`

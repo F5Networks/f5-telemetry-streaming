@@ -132,7 +132,7 @@ module.exports = {
                     }
                 }
             },
-            classFilter: c => c.name === 'Consumer_1',
+            classFilter: (c) => c.name === 'Consumer_1',
             expected: true
         },
         {
@@ -200,7 +200,7 @@ module.exports = {
                     }
                 }
             },
-            namespaceFilter: c => c.namespace === 'My_Namespace',
+            namespaceFilter: (c) => c.namespace === 'My_Namespace',
             expected: true
         },
         {
@@ -235,7 +235,7 @@ module.exports = {
                 }
             },
             classFilter: 'Telemetry_Consumer',
-            namespaceFilter: c => c.namespace === 'f5telemetry_default',
+            namespaceFilter: (c) => c.namespace === 'f5telemetry_default',
             expected: true
         },
         {
@@ -269,7 +269,7 @@ module.exports = {
                     }
                 }
             },
-            filter: c => c.name === 'Consumer_1',
+            filter: (c) => c.name === 'Consumer_1',
             expected: true
         }
     ]

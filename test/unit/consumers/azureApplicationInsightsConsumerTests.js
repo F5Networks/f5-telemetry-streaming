@@ -15,6 +15,8 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 const appInsights = require('applicationinsights');
+// eslint-disable-next-line import/no-dynamic-require
+const appInsightsLogging = require(require.resolve('applicationinsights/out/Library/Logging'));
 
 const requestsUtil = require('../../../src/lib/utils/requests');
 const azureAppInsightsIndex = require('../../../src/lib/consumers/Azure_Application_Insights/index');
@@ -39,6 +41,7 @@ describe('Azure_Application_Insights', () => {
         sinon.stub(aiSpy.TelemetryClient.prototype, 'trackMetric').callsFake((metric) => {
             requests.push(metric);
         });
+        sinon.stub(appInsightsLogging, 'warn');
         // stub metadata calls
         sinon.stub(requestsUtil, 'makeRequest').resolves({});
     });
@@ -87,7 +90,7 @@ describe('Azure_Application_Insights', () => {
                         aiSpy.setup.withArgs('should-not-be-called-guid').notCalled,
                         'The app insights client should not be setup when skipping metrics'
                     );
-                    assert.strictEqual(aiSpy.TelemetryClient.getCalls().find(c => c.args[0] === 'should-not-be-called-guid'), undefined);
+                    assert.strictEqual(aiSpy.TelemetryClient.getCalls().find((c) => c.args[0] === 'should-not-be-called-guid'), undefined);
                     assert.isEmpty(requests);
                 });
         });
@@ -120,7 +123,7 @@ describe('Azure_Application_Insights', () => {
             return azureAppInsightsIndex(context)
                 .then(() => {
                     const actualClientConfig = aiSpy.TelemetryClient.getCalls()
-                        .find(c => c.args[0] === 'the-instr-key-guid').returnValue.config;
+                        .find((c) => c.args[0] === 'the-instr-key-guid').returnValue.config;
 
                     assert.strictEqual(actualClientConfig.maxBatchSize, 250);
                     assert.strictEqual(actualClientConfig.maxBatchIntervalMs, 5000);
@@ -161,7 +164,7 @@ describe('Azure_Application_Insights', () => {
             return azureAppInsightsIndex(context)
                 .then(() => {
                     const actualClientConfig = aiSpy.TelemetryClient.getCalls()
-                        .find(c => c.args[0] === 'InstrumentationKey=customized-instr-key-guid;EndpointSuffix=applicationinsights.us').returnValue.config;
+                        .find((c) => c.args[0] === 'InstrumentationKey=customized-instr-key-guid;EndpointSuffix=applicationinsights.us').returnValue.config;
                     // note that maxBatchSize prop overrides value provided in customOpts
                     assert.strictEqual(actualClientConfig.maxBatchSize, 222);
                     assert.strictEqual(actualClientConfig.maxBatchIntervalMs, 3333);
@@ -196,8 +199,8 @@ describe('Azure_Application_Insights', () => {
             return azureAppInsightsIndex(context)
                 .then(() => {
                     const setupCalls = aiSpy.TelemetryClient.getCalls();
-                    assert.notStrictEqual(setupCalls.find(c => c.args[0] === 'app1-moooooo-mi-guid'), undefined);
-                    assert.notStrictEqual(setupCalls.find(c => c.args[0] === 'InstrumentationKey=optional-conn-props;EndpointSuffix=also-optional'), undefined);
+                    assert.notStrictEqual(setupCalls.find((c) => c.args[0] === 'app1-moooooo-mi-guid'), undefined);
+                    assert.notStrictEqual(setupCalls.find((c) => c.args[0] === 'InstrumentationKey=optional-conn-props;EndpointSuffix=also-optional'), undefined);
 
                     const expectedMetric1 = { name: 'F5_num', value: 1234 };
                     const expectedMetric2 = { name: 'F5_strNum', value: 24.1 };

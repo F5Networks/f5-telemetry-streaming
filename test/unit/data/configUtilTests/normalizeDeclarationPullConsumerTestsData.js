@@ -165,14 +165,8 @@ module.exports = {
                     'f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer': [
                         'f5telemetry_default::My_Pull_Consumer'
                     ],
-                    'f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Disabled_Pull_Consumer': [
-                        'f5telemetry_default::My_Disabled_Pull_Consumer'
-                    ],
                     'My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer': [
                         'My_Namespace::My_Pull_Consumer'
-                    ],
-                    'My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Disabled_Pull_Consumer': [
-                        'My_Namespace::My_Disabled_Pull_Consumer'
                     ]
                 },
                 components: [
@@ -201,11 +195,13 @@ module.exports = {
                         trace: {
                             enable: false
                         },
-                        pullConsumer: 'My_Pull_Consumer',
+                        pullConsumer: 'f5telemetry_default::My_Pull_Consumer',
                         systemPollers: [
-                            'Pull_Poller_1',
-                            'Pull_Poller_2',
-                            'Pull_Poller_3'
+                            'f5telemetry_default::My_System::Pull_Poller_1',
+                            'f5telemetry_default::My_System_2::Pull_Poller_2',
+                            'f5telemetry_default::My_System_3::Pull_Poller_1',
+                            'f5telemetry_default::My_System_3::Pull_Poller_2',
+                            'f5telemetry_default::Pull_Poller_3::Pull_Poller_3'
                         ],
                         id: 'f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer'
                     },
@@ -234,11 +230,13 @@ module.exports = {
                         trace: {
                             enable: false
                         },
-                        pullConsumer: 'My_Disabled_Pull_Consumer',
+                        pullConsumer: 'f5telemetry_default::My_Disabled_Pull_Consumer',
                         systemPollers: [
-                            'Pull_Poller_1',
-                            'Pull_Poller_2',
-                            'Pull_Poller_3'
+                            'f5telemetry_default::My_System::Pull_Poller_1',
+                            'f5telemetry_default::My_System_2::Pull_Poller_2',
+                            'f5telemetry_default::My_System_3::Pull_Poller_1',
+                            'f5telemetry_default::My_System_3::Pull_Poller_2',
+                            'f5telemetry_default::Pull_Poller_3::Pull_Poller_3'
                         ],
                         id: 'f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Disabled_Pull_Consumer'
                     },
@@ -267,11 +265,13 @@ module.exports = {
                         trace: {
                             enable: false
                         },
-                        pullConsumer: 'My_Pull_Consumer',
+                        pullConsumer: 'My_Namespace::My_Pull_Consumer',
                         systemPollers: [
-                            'Pull_Poller_1',
-                            'Pull_Poller_2',
-                            'Pull_Poller_3'
+                            'My_Namespace::My_System::Pull_Poller_1',
+                            'My_Namespace::My_System_2::Pull_Poller_2',
+                            'My_Namespace::My_System_3::Pull_Poller_1',
+                            'My_Namespace::My_System_3::Pull_Poller_2',
+                            'My_Namespace::Pull_Poller_3::Pull_Poller_3'
                         ],
                         id: 'My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer'
                     },
@@ -300,11 +300,13 @@ module.exports = {
                         trace: {
                             enable: false
                         },
-                        pullConsumer: 'My_Disabled_Pull_Consumer',
+                        pullConsumer: 'My_Namespace::My_Disabled_Pull_Consumer',
                         systemPollers: [
-                            'Pull_Poller_1',
-                            'Pull_Poller_2',
-                            'Pull_Poller_3'
+                            'My_Namespace::My_System::Pull_Poller_1',
+                            'My_Namespace::My_System_2::Pull_Poller_2',
+                            'My_Namespace::My_System_3::Pull_Poller_1',
+                            'My_Namespace::My_System_3::Pull_Poller_2',
+                            'My_Namespace::Pull_Poller_3::Pull_Poller_3'
                         ],
                         id: 'My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Disabled_Pull_Consumer'
                     },
@@ -1012,9 +1014,9 @@ module.exports = {
                         trace: {
                             enable: false
                         },
-                        pullConsumer: 'My_Pull_Consumer',
+                        pullConsumer: 'f5telemetry_default::My_Pull_Consumer',
                         systemPollers: [
-                            'Pull_Poller_1'
+                            'f5telemetry_default::Pull_Poller_1::Pull_Poller_1'
                         ],
                         id: 'f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer'
                     },
@@ -1043,9 +1045,9 @@ module.exports = {
                         trace: {
                             enable: false
                         },
-                        pullConsumer: 'My_Pull_Consumer',
+                        pullConsumer: 'My_Namespace::My_Pull_Consumer',
                         systemPollers: [
-                            'Pull_Poller_1'
+                            'My_Namespace::Pull_Poller_1::Pull_Poller_1'
                         ],
                         id: 'My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer'
                     },

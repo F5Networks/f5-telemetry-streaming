@@ -199,7 +199,7 @@ describe('System Stats', () => {
                 // not strict, just verifies that properties are not in skip list
                 // so, if property in skip list -> it is an error
                 const shouldKeep = (testConf.shouldKeep || testConf.shouldKeepOnly || []).filter(
-                    statKey => activeStats.indexOf(statKey) === -1
+                    (statKey) => activeStats.indexOf(statKey) === -1
                 );
                 assert.isEmpty(shouldKeep, `[shouldKeep] should keep following properties - '${JSON.stringify(shouldKeep)}'`);
 
@@ -207,7 +207,7 @@ describe('System Stats', () => {
                 // so, if property not in skip list -> it is an error
                 const shouldRemove = (testConf.shouldRemove || testConf.shouldRemoveOnly || []).filter(
                     // stats key SHOULD be in skip list
-                    statKey => activeStats.indexOf(statKey) !== -1
+                    (statKey) => activeStats.indexOf(statKey) !== -1
                 );
                 assert.isEmpty(shouldRemove, `[shouldRemove] should remove following properties - '${JSON.stringify(shouldRemove)}'`);
 
@@ -216,7 +216,7 @@ describe('System Stats', () => {
                 let notRemoved = [];
                 if (testConf.shouldKeepOnly) {
                     notRemoved = Object.keys(stats).filter(
-                        statKey => activeStats.indexOf(statKey) !== -1
+                        (statKey) => activeStats.indexOf(statKey) !== -1
                             && testConf.shouldKeepOnly.indexOf(statKey) === -1
                     );
                 }
@@ -227,7 +227,7 @@ describe('System Stats', () => {
                 let notKept = [];
                 if (testConf.shouldRemoveOnly) {
                     notKept = Object.keys(stats).filter(
-                        statKey => activeStats.indexOf(statKey) === -1
+                        (statKey) => activeStats.indexOf(statKey) === -1
                             && testConf.shouldRemoveOnly.indexOf(statKey) === -1
                     );
                 }

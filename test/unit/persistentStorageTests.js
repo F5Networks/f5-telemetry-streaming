@@ -55,15 +55,15 @@ describe('Persistent Storage', () => {
                     value.push(6);
                     return persistentStorageInst.get('somekey');
                 })
-                .then(value => assert.deepStrictEqual(value, [1, 2, 3, 4, 5])));
+                .then((value) => assert.deepStrictEqual(value, [1, 2, 3, 4, 5])));
 
             it('should return data (one level key)', () => persistentStorageInst.load()
                 .then(() => persistentStorageInst.get('somekey'))
-                .then(value => assert.deepStrictEqual(value, [1, 2, 3, 4, 5])));
+                .then((value) => assert.deepStrictEqual(value, [1, 2, 3, 4, 5])));
 
             it('should return data (multi level key)', () => persistentStorageInst.load()
                 .then(() => persistentStorageInst.get('somekey[1]'))
-                .then(value => assert.deepStrictEqual(value, 2)));
+                .then((value) => assert.deepStrictEqual(value, 2)));
 
             it('should return data (multi level key as array)', () => {
                 persistentStorageStub.loadData = {
@@ -73,7 +73,7 @@ describe('Persistent Storage', () => {
                 };
                 return persistentStorageInst.load()
                     .then(() => persistentStorageInst.get(['somekey', 'key.with.dot']))
-                    .then(value => assert.deepStrictEqual(value, 10));
+                    .then((value) => assert.deepStrictEqual(value, 10));
             });
         });
 
@@ -86,22 +86,22 @@ describe('Persistent Storage', () => {
                     return promise;
                 })
                 .then(() => persistentStorageInst.get('somekey'))
-                .then(value => assert.deepStrictEqual(value, [1])));
+                .then((value) => assert.deepStrictEqual(value, [1])));
 
             it('should set data (one level key)', () => persistentStorageInst.load()
                 .then(() => persistentStorageInst.set('somekey', 1))
                 .then(() => persistentStorageInst.get('somekey'))
-                .then(value => assert.deepStrictEqual(value, 1)));
+                .then((value) => assert.deepStrictEqual(value, 1)));
 
             it('should set data (multi level key)', () => persistentStorageInst.load()
                 .then(() => persistentStorageInst.set('somekey.first.second', 10))
                 .then(() => persistentStorageInst.get('somekey'))
-                .then(value => assert.deepStrictEqual(value, { first: { second: 10 } })));
+                .then((value) => assert.deepStrictEqual(value, { first: { second: 10 } })));
 
             it('should set data (multi level key as array)', () => persistentStorageInst.load()
                 .then(() => persistentStorageInst.set(['somekey', 'first', 'second'], 10))
                 .then(() => persistentStorageInst.get('somekey'))
-                .then(value => assert.deepStrictEqual(value, { first: { second: 10 } })));
+                .then((value) => assert.deepStrictEqual(value, { first: { second: 10 } })));
 
             it('should set data (multiple requests)', () => {
                 persistentStorageStub.loadData = {};
@@ -114,9 +114,9 @@ describe('Persistent Storage', () => {
                         persistentStorageInst.get('a.a'),
                         persistentStorageInst.get('a.b')
                     ]))
-                    .then(results => assert.deepStrictEqual(results, [10, 20]))
+                    .then((results) => assert.deepStrictEqual(results, [10, 20]))
                     .then(() => persistentStorageInst.get('a'))
-                    .then(value => assert.deepStrictEqual(value, { a: 10, b: 20 }));
+                    .then((value) => assert.deepStrictEqual(value, { a: 10, b: 20 }));
             });
 
             it('should override data (multiple requests)', () => {
@@ -148,7 +148,7 @@ describe('Persistent Storage', () => {
                     return persistentStorageInst.remove('somekey');
                 })
                 .then(() => persistentStorageInst.get('somekey'))
-                .then(value => assert.deepStrictEqual(value, undefined)));
+                .then((value) => assert.deepStrictEqual(value, undefined)));
 
             it('should remove data (multi level key)', () => persistentStorageInst.load()
                 .then(() => persistentStorageInst.set('somekey.first.second', 10))
@@ -158,7 +158,7 @@ describe('Persistent Storage', () => {
                     return persistentStorageInst.remove('somekey.first.second');
                 })
                 .then(() => persistentStorageInst.get('somekey'))
-                .then(value => assert.deepStrictEqual(value, { first: { } })));
+                .then((value) => assert.deepStrictEqual(value, { first: { } })));
 
             it('should remove data (multi level key as array)', () => persistentStorageInst.load()
                 .then(() => persistentStorageInst.set('somekey.first.second', 10))
@@ -168,7 +168,7 @@ describe('Persistent Storage', () => {
                     return persistentStorageInst.remove(['somekey', 'first', 'second']);
                 })
                 .then(() => persistentStorageInst.get('somekey'))
-                .then(value => assert.deepStrictEqual(value, { first: { } })));
+                .then((value) => assert.deepStrictEqual(value, { first: { } })));
         });
     });
 
@@ -206,7 +206,6 @@ describe('Persistent Storage', () => {
                         assert.deepStrictEqual(persistentStorageInst.storage._cache, { _data_: {} });
                     });
             });
-
 
             it('should load empty state', () => {
                 persistentStorageStub.loadState = null;

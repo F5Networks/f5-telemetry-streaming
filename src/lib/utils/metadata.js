@@ -41,7 +41,7 @@ function getInstanceMetadata(consumerContext) {
             logger.debug(`Unable to retrieve instance metadata for consumer ${consumerType}. ${err.messsage}`);
         })
         // ensure this does not cause promise rejection if error occurs
-        .then(metadata => Promise.resolve(util.isObjectEmpty(metadata) ? null : metadata));
+        .then((metadata) => Promise.resolve(util.isObjectEmpty(metadata) ? null : metadata));
 }
 
 module.exports = {

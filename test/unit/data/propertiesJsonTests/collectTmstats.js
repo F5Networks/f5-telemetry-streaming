@@ -12,7 +12,7 @@ const defaultProperties = require('../../../../src/lib/properties.json');
 
 const TMCTL_CMD_REGEXP = /'tmctl\s+-c\s+(.*)'/;
 
-const ADD_DEFAULT_CONTEXT_ENDPOINTS = testEndpoints => testEndpoints.concat([
+const ADD_DEFAULT_CONTEXT_ENDPOINTS = (testEndpoints) => testEndpoints.concat([
     {
         endpoint: '/mgmt/tm/sys/db/systemauth.disablebash',
         method: 'get',
@@ -97,7 +97,7 @@ module.exports = {
                 });
                 return ret;
             },
-            contextToCollect: context => context,
+            contextToCollect: (context) => context,
             expectedData: {
                 tmstats: {
                     asmCpuUtilStats: [
@@ -852,7 +852,7 @@ module.exports = {
                     options: {
                         times: 47
                     },
-                    request: body => body && body.utilCmdArgs && body.utilCmdArgs.indexOf('tmctl') !== -1,
+                    request: (body) => body && body.utilCmdArgs && body.utilCmdArgs.indexOf('tmctl') !== -1,
                     response: (uri, requestBody) => {
                         // requestBody is string
                         let tmctlTable = requestBody.match(TMCTL_CMD_REGEXP);
@@ -914,7 +914,7 @@ module.exports = {
                 });
                 return ret;
             },
-            contextToCollect: context => context,
+            contextToCollect: (context) => context,
             expectedData: {
                 tmstats: { }
             },
@@ -925,7 +925,7 @@ module.exports = {
                     options: {
                         times: 47
                     },
-                    request: body => body && body.utilCmdArgs && body.utilCmdArgs.indexOf('tmctl') !== -1,
+                    request: (body) => body && body.utilCmdArgs && body.utilCmdArgs.indexOf('tmctl') !== -1,
                     response: (uri, requestBody) => {
                         // requestBody is string
                         let tmctlTable = requestBody.match(TMCTL_CMD_REGEXP);
@@ -975,7 +975,7 @@ module.exports = {
                 });
                 return ret;
             },
-            contextToCollect: context => context,
+            contextToCollect: (context) => context,
             expectedData: {
                 tmstats: { }
             },
@@ -986,7 +986,7 @@ module.exports = {
                     options: {
                         times: 47
                     },
-                    request: body => body && body.utilCmdArgs && body.utilCmdArgs.indexOf('tmctl') !== -1,
+                    request: (body) => body && body.utilCmdArgs && body.utilCmdArgs.indexOf('tmctl') !== -1,
                     response: {
                         kind: 'tm:util:bash:runstate',
                         commandResult: 'tmctl: qwerty: No such table'

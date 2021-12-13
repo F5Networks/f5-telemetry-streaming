@@ -569,7 +569,7 @@ describe('TCP and UDP Receivers', () => {
 
         let serverMocks;
         let onMockCreatedCallback;
-        const getServerMock = ipv6 => serverMocks.find(mock => (ipv6 && mock.opts.type === 'udp6') || (!ipv6 && mock.opts.type === 'udp4'));
+        const getServerMock = (ipv6) => serverMocks.find((mock) => (ipv6 && mock.opts.type === 'udp6') || (!ipv6 && mock.opts.type === 'udp4'));
 
         beforeEach(() => {
             serverMocks = [];
@@ -655,8 +655,8 @@ describe('TCP and UDP Receivers', () => {
                 })
                 .then(() => {
                     assert.lengthOf(serverMocks, 4, 'should create 2 more sockets');
-                    assert.lengthOf(serverMocks.filter(mock => mock.opts.type === 'udp4'), 2, 'should have 2 udp4 sockets');
-                    assert.lengthOf(serverMocks.filter(mock => mock.opts.type === 'udp6'), 2, 'should have 2 udp6 sockets');
+                    assert.lengthOf(serverMocks.filter((mock) => mock.opts.type === 'udp4'), 2, 'should have 2 udp4 sockets');
+                    assert.lengthOf(serverMocks.filter((mock) => mock.opts.type === 'udp6'), 2, 'should have 2 udp6 sockets');
                 }));
         });
 

@@ -395,7 +395,7 @@ class SlidingInterval {
      * @returns {boolean} true if instance was disabled
      */
     isDisabled() {
-        return !SlidingInterval.INSTANCES.some(si => si === this);
+        return !SlidingInterval.INSTANCES.some((si) => si === this);
     }
 
     /**
@@ -418,7 +418,7 @@ class SlidingInterval {
              */
             new Promise((resolve, reject) => Promise.resolve(this.func.apply(null, this.args))
                 .then(resolve, reject))
-                .catch(error => (this.onError ? this.onError(error) : Promise.reject(error)))
+                .catch((error) => (this.onError ? this.onError(error) : Promise.reject(error)))
                 .then(() => {
                     const duration = Date.now() - startTime;
                     if (duration > this.interval && this.onIntervalSlide) {
@@ -442,8 +442,7 @@ SlidingInterval.INSTANCES = [];
  *
  * @returns {SlidingInterval | undefined} SlidingInterval instance or undefined if not found
  */
-SlidingInterval.findByRef = ref => SlidingInterval.INSTANCES.find(si => si.ref === ref);
-
+SlidingInterval.findByRef = (ref) => SlidingInterval.INSTANCES.find((si) => si.ref === ref);
 
 module.exports = {
     TimerInterface,

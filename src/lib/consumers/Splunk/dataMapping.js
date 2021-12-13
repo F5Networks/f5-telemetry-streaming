@@ -110,7 +110,7 @@ const STAT_2_TMCTL_TABLE = {
 };
 
 function getTemplate(sourceName, data, cache) {
-    let deviceGroup = Object.keys(data.deviceGroups || {}).find(dgKey => data.deviceGroups[dgKey].type === 'sync-failover');
+    let deviceGroup = Object.keys(data.deviceGroups || {}).find((dgKey) => data.deviceGroups[dgKey].type === 'sync-failover');
     deviceGroup = (deviceGroup || '').split('/').pop();
 
     return {
@@ -176,7 +176,7 @@ function ihealth(request) {
         const solutions = diagnostic.solution || [];
         const versions = diagnostic.version || [];
 
-        const verStr = verObj => `${verObj.major}.${verObj.minor}.${verObj.maintenance}.${verObj.point}`;
+        const verStr = (verObj) => `${verObj.major}.${verObj.minor}.${verObj.maintenance}.${verObj.point}`;
 
         newData.event = {
             Category: diagnostic.importance,
@@ -184,8 +184,8 @@ function ihealth(request) {
             Internal: 'no',
             Title: diagnostic.header,
             Description: diagnostic.summary,
-            Solutions: solutions.map(s => s.id).join(' '),
-            'Solution Hyperlinks': solutions.map(s => s.value).join(' '),
+            Solutions: solutions.map((s) => s.id).join(' '),
+            'Solution Hyperlinks': solutions.map((s) => s.value).join(' '),
             version: versions.map(verStr).join(' '),
             hostname: system.hostname,
             ihealth_link: system.ihealthLink,
@@ -195,7 +195,6 @@ function ihealth(request) {
     });
     return output;
 }
-
 
 const stats = [
     function (request) {
@@ -466,7 +465,6 @@ const stats = [
         return output;
     }
 ];
-
 
 module.exports = {
     overall,

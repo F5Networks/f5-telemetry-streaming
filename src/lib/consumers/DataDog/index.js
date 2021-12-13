@@ -67,6 +67,12 @@ module.exports = function (context) {
     const interval = (data.telemetryServiceInfo && data.telemetryServiceInfo.pollingInterval) || undefined;
     const ddService = context.config.service;
     const ddRegion = context.config.region;
+    const metricPrefix = context.config.metricPrefix ? `${context.config.metricPrefix.join('.')}.` : '';
+    const boolsToMetrics = context.config.convertBooleansToMetrics || false;
+    const customTags = (context.config.customTags || []).reduce((result, tag) => {
+        result[tag.name] = tag.value;
+        return result;
+    }, {});
     // for now use current time, ideally should try to fetch it from event data
     const timestamp = Date.now() / 1000;
 
@@ -78,7 +84,7 @@ module.exports = function (context) {
         ddData = {
             ddsource: context.event.type,
             // usually there is nothing along this data that can be used as a tag
-            ddtags: buildTags({ telemetryEventCategory: eventType }, true),
+            ddtags: buildTags(Object.assign({ telemetryEventCategory: eventType }, customTags), true),
             hostname,
             message: data.data,
             service: ddService
@@ -92,6 +98,7 @@ module.exports = function (context) {
             collectTags: true,
             excludeNameFromPath: true,
             parseMetrics: true,
+            boolsToMetrics,
             onMetric: (metricPath, metricValue, metricTags) => {
                 // ignore timestamps and intervals
                 if (metricPath[metricPath.length - 1].indexOf('imestamp') === -1
@@ -99,9 +106,9 @@ module.exports = function (context) {
                     ddData.series.push({
                         host: hostname,
                         interval,
-                        metric: buildMetricName(metricPath),
+                        metric: buildMetricName(metricPrefix, metricPath),
                         points: [[timestamp, metricValue]],
-                        tags: buildTags(metricTags),
+                        tags: buildTags(Object.assign(metricTags, customTags)),
                         type: DATA_DOG_METRIC_TYPE
                     });
                 }
@@ -116,6 +123,7 @@ module.exports = function (context) {
          * Looks like no metrics were found, then let's
          * transform this event into log message and attach
          * all possible tags to it
+         * Ex: LTM data
          */
         let ddtags = { telemetryEventCategory: eventType };
         metricsUtil.findMetricsAndTags(data, {
@@ -129,7 +137,7 @@ module.exports = function (context) {
         ddType = 'log';
         ddData = {
             ddsource: context.event.type,
-            ddtags: buildTags(ddtags, true),
+            ddtags: buildTags(Object.assign(ddtags, customTags), true),
             hostname,
             message: JSON.stringify(data),
             service: ddService
@@ -158,7 +166,7 @@ module.exports = function (context) {
             'Accept-Encoding': encoding,
             'Content-Encoding': encoding
         });
-        gzipPromise = gzipPromise.then(payload => new Promise((resolve, reject) => {
+        gzipPromise = gzipPromise.then((payload) => new Promise((resolve, reject) => {
             zlibMeth.call(zlib, JSON.stringify(payload), (err, buffer) => {
                 if (!err) {
                     resolve(buffer);
@@ -169,7 +177,7 @@ module.exports = function (context) {
         }));
     }
 
-    return gzipPromise.then(payload => requestsUtil.makeRequest({
+    return gzipPromise.then((payload) => requestsUtil.makeRequest({
         body: payload,
         expectedResponseCode: [200, 202],
         fullURI: getDataDogGateway(ddRegion, ddType),
@@ -186,26 +194,27 @@ module.exports = function (context) {
 };
 
 /**
- * Builds metric name from path
+ * Builds metric name from metric prefix and the metric path
  *
- * @param {Array<string>} mpath - metric' path
+ * @param {Array<string>} metricPrefix  - prefix for each metric name
+ * @param {Array<string>} metricPath    - metric path
  *
  * @returns {string} metric name
  */
-function buildMetricName(mpath) {
-    return mpath.join('.');
+function buildMetricName(metricPrefix, metricPath) {
+    return `${metricPrefix}${metricPath.join('.')}`;
 }
 
 /**
  * Builds metric tags
  *
- * @param {object} tags - metric' tags
+ * @param {object} tags - metric tags
  * @param {boolean} [joinAll = false] - join all tags into a string
  *
  * @returns {Array<string> | string} tags
  */
 function buildTags(tags, joinAll) {
-    tags = Object.keys(tags).map(key => `${key}:${tags[key]}`);
+    tags = Object.keys(tags).map((key) => `${key}:${tags[key]}`);
     if (joinAll) {
         tags = tags.join(',');
     }

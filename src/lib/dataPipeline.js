@@ -52,11 +52,10 @@ function buildSkippedDataLog(dataCtx) {
     });
 
     const consumers = consumersHandler.getConsumers()
-        .filter(c => dataCtx.destinationIds.indexOf(c.id) > -1)
-        .map(c => c.name);
+        .filter((c) => dataCtx.destinationIds.indexOf(c.id) > -1)
+        .map((c) => c.name);
     return `Skipped Data - Category: "${dataCtx.data.telemetryEventCategory}" | Consumers: ${JSON.stringify(consumers)} | Addtl Info: ${timestampInfo}`;
 }
-
 
 /**
 * Pipeline to process data
@@ -101,7 +100,7 @@ function process(dataCtx, options) {
                 promise = promise.then(() => {
                     // detach forwarding process from here
                     forwarder.forward(dataCtx)
-                        .catch(err => logger.exception('Error on attempt to forward data to consumers', err));
+                        .catch((err) => logger.exception('Error on attempt to forward data to consumers', err));
                 });
             }
         }
@@ -112,7 +111,7 @@ function process(dataCtx, options) {
     });
 }
 
-monitor.on('check', status => new Promise((resolve) => {
+monitor.on('check', (status) => new Promise((resolve) => {
     const monitorChecksOk = status === APP_THRESHOLDS.MEMORY.OK;
     // only log on status change to minimize entries
     if (processingEnabled !== monitorChecksOk) {

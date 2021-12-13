@@ -263,7 +263,7 @@ module.exports = {
         for (let i = 0; i < arguments.length; i += 1) {
             validators.push(getValidator(i, this.deepCopy(arguments[i]), arguments[i]));
         }
-        return () => validators.every(validator => validator());
+        return () => validators.every((validator) => validator());
     },
 
     /**
@@ -275,7 +275,7 @@ module.exports = {
         if (process.versions.node.startsWith('4.')) {
             return urllib.parse;
         }
-        return url => new urllib.URL(url);
+        return (url) => new urllib.URL(url);
     }()),
 
     /**
@@ -329,6 +329,6 @@ module.exports = {
      * @returns {Promise} resolved once N .ms passed
      */
     sleep(sleepTime) {
-        return new Promise(resolve => setTimeout(resolve, sleepTime));
+        return new Promise((resolve) => setTimeout(resolve, sleepTime));
     }
 };

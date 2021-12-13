@@ -9,7 +9,7 @@
 'use strict';
 
 const util = require('../../utils/misc');
-const azureUtil = require('./../shared/azureUtil');
+const azureUtil = require('../shared/azureUtil');
 const requestsUtil = require('../../utils/requests');
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 
@@ -47,7 +47,7 @@ module.exports = function (context) {
                 } else {
                     data = [data]; // place in array per API spec
                 }
-                data.forEach(d => azureUtil.scrubReservedKeys(d));
+                data.forEach((d) => azureUtil.scrubReservedKeys(d));
 
                 const date = new Date().toUTCString();
                 const bodyString = JSON.stringify(data);
@@ -65,7 +65,6 @@ module.exports = function (context) {
                     body: data,
                     allowSelfSignedCert: context.config.allowSelfSignedCert
                 };
-
 
                 if (context.metadata && context.metadata.compute && context.metadata.compute.resourceId) {
                     requestOptions.headers['x-ms-AzureResourceId'] = context.metadata.compute.resourceId;

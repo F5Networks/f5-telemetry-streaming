@@ -45,8 +45,8 @@ describe('iHealth', () => {
     let processedReports;
 
     const disabledAllPollers = () => Promise.all(IHealthPoller.getAll({ includeDemo: true })
-        .map(poller => IHealthPoller.disable(poller, true)))
-        .then(retObjs => Promise.all(retObjs.map(obj => obj.stopPromise)));
+        .map((poller) => IHealthPoller.disable(poller, true)))
+        .then((retObjs) => Promise.all(retObjs.map((obj) => obj.stopPromise)));
 
     const expectedConfiguration = (includeDisabled) => {
         const components = [
@@ -109,18 +109,18 @@ describe('iHealth', () => {
     };
 
     const registeredTracerPaths = () => {
-        const paths = tracer.registered().map(t => t.path);
+        const paths = tracer.registered().map((t) => t.path);
         paths.sort();
         return paths;
     };
     const toTracerPaths = (ids) => {
-        const tracerPaths = ids.map(id => `Telemetry_iHealth_Poller.${id}`);
+        const tracerPaths = ids.map((id) => `Telemetry_iHealth_Poller.${id}`);
         tracerPaths.sort();
         return tracerPaths;
     };
 
-    const verifyPollersConfig = (pollers, expectedConfigs) => Promise.all(pollers.map(p => p.getConfig()))
-        .then(configs => assert.sameDeepMembers(configs, expectedConfigs, 'should match expected configuration'));
+    const verifyPollersConfig = (pollers, expectedConfigs) => Promise.all(pollers.map((p) => p.getConfig()))
+        .then((configs) => assert.sameDeepMembers(configs, expectedConfigs, 'should match expected configuration'));
 
     const waitForReport = (cb) => {
         processedReports = [];
@@ -239,7 +239,7 @@ describe('iHealth', () => {
             return configWorker.processDeclaration(testUtil.deepCopy(declaration))
                 .then(() => {
                     assert.sameMembers(
-                        IHealthPoller.getAll({ includeDemo: true }).map(p => p.id),
+                        IHealthPoller.getAll({ includeDemo: true }).map((p) => p.id),
                         preExistingConfigIDs,
                         'should create instances with expected IDs'
                     );
@@ -297,7 +297,7 @@ describe('iHealth', () => {
                 .then(() => {
                     const newInstances = IHealthPoller.getAll({ includeDemo: true });
                     assert.sameDeepMembers(
-                        newInstances.map(p => p.id),
+                        newInstances.map((p) => p.id),
                         preExistingConfigIDs,
                         'should create instances with expected IDs'
                     );
@@ -353,7 +353,7 @@ describe('iHealth', () => {
                 .then(() => {
                     const newInstances = IHealthPoller.getAll({ includeDemo: true });
                     assert.sameDeepMembers(
-                        newInstances.map(p => p.id),
+                        newInstances.map((p) => p.id),
                         configIDsBeforeUpdate,
                         'should create instances with expected IDs'
                     );
@@ -364,7 +364,7 @@ describe('iHealth', () => {
                         'should create tracers with expected IDs'
                     );
                     // ignoring Namespace' 'demo' instance
-                    instancesBefore = instancesBefore.filter(inst => configIDsBeforeUpdate.indexOf(inst.id) !== -1);
+                    instancesBefore = instancesBefore.filter((inst) => configIDsBeforeUpdate.indexOf(inst.id) !== -1);
                     instancesBefore.forEach((inst) => {
                         if (inst.id.startsWith('Namespace')) {
                             assert.notDeepInclude(newInstances, inst, 'should create new instance on update');
@@ -419,7 +419,7 @@ describe('iHealth', () => {
                 .then(() => {
                     const newInstances = IHealthPoller.getAll({ includeDemo: true });
                     assert.deepStrictEqual(
-                        newInstances.map(p => p.id),
+                        newInstances.map((p) => p.id),
                         ['Namespace::System::iHealthPoller_1'],
                         'should disable disabled only'
                     );
@@ -475,7 +475,7 @@ describe('iHealth', () => {
                 .then(() => {
                     const newInstances = IHealthPoller.getAll({ includeDemo: true });
                     assert.sameDeepMembers(
-                        newInstances.map(p => p.id),
+                        newInstances.map((p) => p.id),
                         preExistingConfigIDs,
                         'should create instances with expected IDs'
                     );
@@ -529,7 +529,7 @@ describe('iHealth', () => {
                 .then(() => {
                     const newInstances = IHealthPoller.getAll({ includeDemo: true });
                     assert.sameDeepMembers(
-                        newInstances.map(p => p.id),
+                        newInstances.map((p) => p.id),
                         preExistingConfigIDs,
                         'should create instances with expected IDs'
                     );
@@ -549,7 +549,7 @@ describe('iHealth', () => {
             return configWorker.processDeclaration(testUtil.deepCopy(declaration))
                 .then(() => {
                     assert.sameMembers(
-                        IHealthPoller.getAll({ includeDemo: true }).map(p => p.id),
+                        IHealthPoller.getAll({ includeDemo: true }).map((p) => p.id),
                         preExistingConfigIDs,
                         'should create instances with expected IDs'
                     );
@@ -572,7 +572,7 @@ describe('iHealth', () => {
             declaration.Namespace.System.enable = false;
             return configWorker.processDeclaration(testUtil.deepCopy(declaration))
                 .then(() => {
-                    assert.isEmpty(IHealthPoller.getAll({ includeDemo: true }).map(p => p.id), 'should not create instances');
+                    assert.isEmpty(IHealthPoller.getAll({ includeDemo: true }).map((p) => p.id), 'should not create instances');
                     assert.isEmpty(registeredTracerPaths(), 'should not create tracers');
                 });
         });
@@ -588,7 +588,7 @@ describe('iHealth', () => {
                     message: 'iHealth Poller for System "System" started'
                 });
                 assert.sameMembers(
-                    IHealthPoller.getAll({ demoOnly: true }).map(p => p.id),
+                    IHealthPoller.getAll({ demoOnly: true }).map((p) => p.id),
                     ['f5telemetry_default::System::iHealthPoller_1'],
                     'should create instance with expected ID'
                 );
@@ -616,7 +616,7 @@ describe('iHealth', () => {
                     message: 'iHealth Poller for System "System" (namespace "Namespace") started'
                 });
                 assert.sameMembers(
-                    IHealthPoller.getAll({ demoOnly: true }).map(p => p.id),
+                    IHealthPoller.getAll({ demoOnly: true }).map((p) => p.id),
                     ['Namespace::System::iHealthPoller_1'],
                     'should create instance with expected ID'
                 );
@@ -655,7 +655,7 @@ describe('iHealth', () => {
                     message: 'iHealth Poller for System "Disabled_System" (namespace "Namespace") started'
                 });
                 assert.sameMembers(
-                    IHealthPoller.getAll({ demoOnly: true }).map(p => p.id),
+                    IHealthPoller.getAll({ demoOnly: true }).map((p) => p.id),
                     [
                         'f5telemetry_default::Disabled_System::iHealthPoller_1',
                         'Namespace::Disabled_System::iHealthPoller_1'
@@ -720,7 +720,7 @@ describe('iHealth', () => {
             return configWorker.processDeclaration(testUtil.deepCopy(declaration))
                 .then(() => {
                     assert.sameMembers(
-                        IHealthPoller.getAll({ includeDemo: true }).map(p => p.id),
+                        IHealthPoller.getAll({ includeDemo: true }).map((p) => p.id),
                         preExistingConfigIDs,
                         'should create instances with expected IDs'
                     );
@@ -745,7 +745,7 @@ describe('iHealth', () => {
 
         it('should return statuses for all pollers', () => {
             assert.sameDeepMembers(
-                ihealth.getCurrentState().map(s => s.name),
+                ihealth.getCurrentState().map((s) => s.name),
                 [
                     'f5telemetry_default::System::iHealthPoller_1',
                     'Namespace::System::iHealthPoller_1'
@@ -756,7 +756,7 @@ describe('iHealth', () => {
 
         it('should return statuses for pollers in namespace', () => {
             assert.sameDeepMembers(
-                ihealth.getCurrentState('Namespace').map(s => s.name),
+                ihealth.getCurrentState('Namespace').map((s) => s.name),
                 [
                     'Namespace::System::iHealthPoller_1'
                 ],
@@ -770,7 +770,7 @@ describe('iHealth', () => {
         ])
             .then(() => {
                 assert.sameDeepMembers(
-                    ihealth.getCurrentState().map(s => s.name),
+                    ihealth.getCurrentState().map((s) => s.name),
                     [
                         'f5telemetry_default::System::iHealthPoller_1 (DEMO)',
                         'Namespace::System::iHealthPoller_1 (DEMO)',

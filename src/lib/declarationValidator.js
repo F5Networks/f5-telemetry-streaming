@@ -28,7 +28,6 @@ const sharedSchema = require('../schema/latest/shared_schema.json');
 const systemPollerSchema = require('../schema/latest/system_poller_schema.json');
 const systemSchema = require('../schema/latest/system_schema.json');
 
-
 /**
  * Process errors
  *
@@ -140,7 +139,7 @@ module.exports = {
 
         errors = [];
         const deferred = context.deferred;
-        const safeWrapper = promiseFn => promiseFn().catch(e => errors.push(e));
+        const safeWrapper = (promiseFn) => promiseFn().catch((e) => errors.push(e));
 
         const processDeferred = (idx) => {
             if (idx >= customKeywords.asyncOrder.length) {

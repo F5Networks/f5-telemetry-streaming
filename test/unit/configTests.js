@@ -19,9 +19,12 @@ const configTestsData = require('./data/configTestsData');
 const configWorker = require('../../src/lib/config');
 const constants = require('../../src/lib/constants');
 const deviceUtil = require('../../src/lib/utils/device');
+const dummies = require('./shared/dummies');
+const logger = require('../../src/lib/logger');
 const persistentStorage = require('../../src/lib/persistentStorage');
 const stubs = require('./shared/stubs');
 const teemReporter = require('../../src/lib/teemReporter');
+const testAssert = require('./shared/assert');
 const testUtil = require('./shared/util');
 const utilMisc = require('../../src/lib/utils/misc');
 
@@ -41,6 +44,7 @@ describe('Config', () => {
         coreStub = stubs.coreStub({
             configWorker,
             deviceUtil,
+            logger,
             persistentStorage,
             teemReporter,
             utilMisc
@@ -458,11 +462,11 @@ describe('Config', () => {
         const testSuites = [
             {
                 suite: configTestsData.processDeclaration,
-                entryPoint: options => configWorker.processDeclaration(declaration, options)
+                entryPoint: (options) => configWorker.processDeclaration(declaration, options)
             },
             {
                 suite: configTestsData.processNamespaceDeclaration,
-                entryPoint: options => configWorker.processNamespaceDeclaration(declaration, namespaceName, options)
+                entryPoint: (options) => configWorker.processNamespaceDeclaration(declaration, namespaceName, options)
             }
         ];
         testSuites.forEach((testSuite) => {
@@ -583,5 +587,35 @@ describe('Config', () => {
                 });
             });
         });
+    });
+
+    describe('\'error\' event', () => {
+        it('should log error if caught', () => configWorker.safeEmitAsync('error', new Error('expected error'))
+            .then(() => {
+                testAssert.includeMatch(
+                    coreStub.logger.messages.all,
+                    /Unhandled error in ConfigWorker[\s\S]+expected error/gm,
+                    'should log error message'
+                );
+            }));
+    });
+
+    describe('\'change\' event', () => {
+        it('should set log level', () => configWorker.processDeclaration(dummies.declaration.base.decrypted({
+            controls: dummies.declaration.controls.full.decrypted({
+                logLevel: 'error'
+            })
+        }))
+            .then(() => {
+                assert.deepStrictEqual(coreStub.logger.logLevelHistory.slice(-1), ['error'], 'should set log level to error');
+                return configWorker.processDeclaration(dummies.declaration.base.decrypted({
+                    controls: dummies.declaration.controls.full.decrypted({
+                        logLevel: 'debug'
+                    })
+                }));
+            })
+            .then(() => {
+                assert.deepStrictEqual(coreStub.logger.logLevelHistory.slice(-1), ['debug'], 'should set log level to debug');
+            }));
     });
 });

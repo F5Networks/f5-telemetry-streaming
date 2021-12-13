@@ -77,7 +77,7 @@ describe('TeemReporter', () => {
                 'addJsonObject',
                 'calculateAssetId'
             ];
-            const teemSpies = methods.map(m => ({ name: m, instance: sinon.spy(TeemRecord.prototype, m) }));
+            const teemSpies = methods.map((m) => ({ name: m, instance: sinon.spy(TeemRecord.prototype, m) }));
 
             const reportRecordStub = sinon.stub(teemDevice, 'reportRecord');
             reportRecordStub.callsFake((record) => {
@@ -106,7 +106,6 @@ describe('TeemReporter', () => {
                 });
         });
     });
-
 
     describe('.fetchExtraData()', () => {
         const teemReporter = new TeemReporter();

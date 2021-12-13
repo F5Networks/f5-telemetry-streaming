@@ -39,13 +39,13 @@ describe('Azure_Log_Analytics', () => {
     };
 
     const getOpsInsightsReq = () => {
-        const opInsightsReq = requests.find(r => r.fullURI === 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01');
+        const opInsightsReq = requests.find((r) => r.fullURI === 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01');
         assert.notStrictEqual(opInsightsReq, undefined);
         return opInsightsReq;
     };
 
     const getAllOpsInsightsReqs = () => {
-        const opInsightsReqs = requests.filter(r => r.fullURI === 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01');
+        const opInsightsReqs = requests.filter((r) => r.fullURI === 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01');
         assert.notStrictEqual(opInsightsReqs, undefined);
         return opInsightsReqs;
     };

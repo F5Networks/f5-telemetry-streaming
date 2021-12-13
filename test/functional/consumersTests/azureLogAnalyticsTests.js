@@ -29,7 +29,6 @@ const AZURE_LA_CONSUMER_NAME = 'Azure_LA_Consumer';
 
 let oauthToken = null;
 
-
 function setup() {
     describe('Consumer Setup: Azure Log Analytics - OAuth token', () => {
         it('should get OAuth token', () => azureUtil.getOAuthToken(CLIENT_ID, CLIENT_SECRET, TENANT_ID)
@@ -57,14 +56,14 @@ function test() {
                 cipherText: PASSPHRASE
             }
         };
-        DUTS.forEach(dut => it(
+        DUTS.forEach((dut) => it(
             `should configure TS - ${dut.hostalias}`,
             () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(consumerDeclaration))
         ));
 
         it('should send event to TS Event Listener', () => {
             const msg = `timestamp="${testDataTimestamp}",test="${testDataTimestamp}",testType="${AZURE_LA_CONSUMER_NAME}"`;
-            return dutUtils.sendDataToEventListeners(dut => `hostname="${dut.hostname}",${msg}`);
+            return dutUtils.sendDataToEventListeners((dut) => `hostname="${dut.hostname}",${msg}`);
         });
     });
 
@@ -79,7 +78,7 @@ function test() {
                     `where hostname_s == "${dut.hostname}"`,
                     'where TimeGenerated > ago(5m)'
                 ].join(' | ');
-                return new Promise(resolve => setTimeout(resolve, 30000))
+                return new Promise((resolve) => setTimeout(resolve, 30000))
                     .then(() => azureUtil.queryLogs(oauthToken, WORKSPACE_ID, queryString))
                     .then((results) => {
                         util.logger.info('Response from Log Analytics:', { hostname: dut.hostname, results });
@@ -95,7 +94,7 @@ function test() {
                     `where hostname_s == "${dut.hostname}"`,
                     `where test_s == "${testDataTimestamp}"`
                 ].join(' | ');
-                return new Promise(resolve => setTimeout(resolve, 10000))
+                return new Promise((resolve) => setTimeout(resolve, 10000))
                     .then(() => azureUtil.queryLogs(oauthToken, WORKSPACE_ID, queryString))
                     .then((results) => {
                         util.logger.info('Response from Log Analytics:', { hostname: dut.hostname, results });

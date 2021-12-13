@@ -65,7 +65,7 @@ function setup() {
     assert.ok(VALID_SERVICE_ACCOUNT.type, 'service account is not valid');
 
     describe('Consumer Setup Check: check bigip requirements', () => {
-        DUTS.forEach(dut => it(
+        DUTS.forEach((dut) => it(
             `get bigip version and check if version is good for F5 Cloud - ${dut.hostalias}`,
             () => sharedUtil.getBigipVersion(dut)
                 .then((response) => {
@@ -133,11 +133,11 @@ function setup() {
 
 function test() {
     const testDataTimestamp = Date.now();
-    const msg = hostName => `hostname="${hostName}",testDataTimestamp="${testDataTimestamp}",test="true",testType="${F5_CLOUD_NAME}"`;
+    const msg = (hostName) => `hostname="${hostName}",testDataTimestamp="${testDataTimestamp}",test="true",testType="${F5_CLOUD_NAME}"`;
 
     // .skip() until F5_Cloud interactions resolved
     describe.skip('Consumer Test: F5 Cloud - Configure TS', () => {
-        DUTS.forEach(dut => it(`should configure TS - ${dut.hostalias}`, function () {
+        DUTS.forEach((dut) => it(`should configure TS - ${dut.hostalias}`, function () {
             if (!SHOULD_RUN_TESTS[dut.hostalias]) {
                 this.skip();
             }
@@ -158,7 +158,7 @@ function test() {
             };
             return dutUtils.postDeclarationToDUT(dut, sharedUtil.deepCopy(consumerDeclaration));
         }));
-        DUTS.forEach(dut => it(`should send event to TS Event Listener - ${dut.hostalias}`, function () {
+        DUTS.forEach((dut) => it(`should send event to TS Event Listener - ${dut.hostalias}`, function () {
             if (!SHOULD_RUN_TESTS[dut.hostalias]) {
                 this.skip();
             }
@@ -168,7 +168,7 @@ function test() {
 
     // .skip() until F5_Cloud interactions resolved
     describe.skip('Consumer Test: F5 Cloud - Test', () => {
-        DUTS.forEach(dut => it(`should find the right interactions on mock server - ${dut.hostalias}`, function () {
+        DUTS.forEach((dut) => it(`should find the right interactions on mock server - ${dut.hostalias}`, function () {
             if (!SHOULD_RUN_TESTS[dut.hostalias]) {
                 this.skip();
             }
@@ -190,8 +190,8 @@ function test() {
                             responseDataJSONList.push(jsonData);
                         }
                     });
-                    assert(responseDataJSONList.some(responseDataJSON => responseDataJSON.hostname === dut.hostname), `Test Error: ${dut.hostname} does not exist`);
-                    assert(responseDataJSONList.every(responseDataJSON => responseDataJSON.testDataTimestamp === testDataTimestamp.toString()), `Test Error: testDataTimestamp should be ${testDataTimestamp}`);
+                    assert(responseDataJSONList.some((responseDataJSON) => responseDataJSON.hostname === dut.hostname), `Test Error: ${dut.hostname} does not exist`);
+                    assert(responseDataJSONList.every((responseDataJSON) => responseDataJSON.testDataTimestamp === testDataTimestamp.toString()), `Test Error: testDataTimestamp should be ${testDataTimestamp}`);
                 } else {
                     assert(false, 'no response from mock server');
                 }

@@ -68,7 +68,6 @@ describe('SystemPollerHandler', () => {
             });
     });
 
-
     it('should return 404 when unable to make config lookup', () => {
         sinon.stub(systemPoller, 'getPollersConfig').rejects(new errors.ConfigLookupError('expectedError'));
         return requestHandler.process()

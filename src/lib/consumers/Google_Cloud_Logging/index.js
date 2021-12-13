@@ -8,7 +8,7 @@
 
 'use strict';
 
-const gcpUtil = require('./../shared/gcpUtil');
+const gcpUtil = require('../shared/gcpUtil');
 const requestsUtil = require('../../utils/requests');
 
 const CLOUD_LOGGING_WRITE_URL = 'https://logging.googleapis.com/v2/entries:write';
@@ -21,8 +21,10 @@ module.exports = function (context) {
     const serviceAccount = {
         serviceEmail: config.serviceEmail,
         privateKeyId: config.privateKeyId,
-        privateKey: config.privateKey
+        privateKey: config.privateKey,
+        useServiceAccountToken: config.useServiceAccountToken
     };
+
     // Should be in format projects/[PROJECT_ID]/logs/[LOG_ID]
     const logName = `${config.logScope}/${config.logScopeId}/logs/${config.logId}`;
 

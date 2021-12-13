@@ -49,7 +49,6 @@ const schemaInfo = (function () {
 const VERSION = packageVersionInfo[0];
 const RELEASE = packageVersionInfo[1];
 
-
 /**
  * Create new Object with value => key mapping from source Object
  *
@@ -64,7 +63,6 @@ function valuesToKeys(srcObj) {
     });
     return dstObj;
 }
-
 
 const PROTO_TO_PORT = {
     http: 80,
@@ -83,7 +81,6 @@ const DAY_NAME_TO_WEEKDAY = {
 };
 const WEEKDAY_TO_DAY_NAME = valuesToKeys(DAY_NAME_TO_WEEKDAY);
 WEEKDAY_TO_DAY_NAME[7] = 'sunday';
-
 
 module.exports = {
     RELEASE,

@@ -30,7 +30,7 @@ describe('Base Data Receiver', () => {
     let startHandlerStub;
     let stopHandlerStub;
 
-    const fetchStates = () => stateChangedSpy.args.map(callArgs => callArgs[0].current);
+    const fetchStates = () => stateChangedSpy.args.map((callArgs) => callArgs[0].current);
 
     before(() => {
         moduleCache.restore();
@@ -274,7 +274,7 @@ describe('Base Data Receiver', () => {
         it('should not wait till completion of previous operation', () => {
             const errors = [];
             return new Promise((resolve, reject) => {
-                stopHandlerStub.callsFake(() => receiverInst.start(false).catch(err => errors.push(err)));
+                stopHandlerStub.callsFake(() => receiverInst.start(false).catch((err) => errors.push(err)));
                 receiverInst.stop().then(resolve).catch(reject);
             })
                 .then(() => {
@@ -323,7 +323,7 @@ describe('Base Data Receiver', () => {
         it('should not wait till completion of previous operation', () => {
             const errors = [];
             return new Promise((resolve, reject) => {
-                startHandlerStub.callsFake(() => receiverInst.stop(false).catch(err => errors.push(err)));
+                startHandlerStub.callsFake(() => receiverInst.stop(false).catch((err) => errors.push(err)));
                 receiverInst.start().then(resolve).catch(reject);
             })
                 .then(() => {

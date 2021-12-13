@@ -36,7 +36,7 @@ module.exports = {
     tests(ctx, testConf) {
         const subTitle = utils.testControls.fmtSubTitle(testConf);
         utils.testControls.getSubTestDescribe(testConf)(`"enum" keyword tests${subTitle}`, () => {
-            testConf.notAllowed.forEach(negVal => it(`should not allow value "${negVal}"`, () => {
+            testConf.notAllowed.forEach((negVal) => it(`should not allow value "${negVal}"`, () => {
                 const testDecl = lodash.cloneDeep(ctx.declaration);
                 lodash.set(testDecl, ctx.property, negVal);
                 return assert.isRejected(
@@ -45,7 +45,7 @@ module.exports = {
                     `should not allow to set value "${negVal}" that not defined in enum`
                 );
             }));
-            testConf.allowed.forEach(posVal => it(`should allow value "${posVal}"`, () => {
+            testConf.allowed.forEach((posVal) => it(`should allow value "${posVal}"`, () => {
                 const testDecl = lodash.cloneDeep(ctx.declaration);
                 lodash.set(testDecl, ctx.property, posVal);
                 return assert.isFulfilled(

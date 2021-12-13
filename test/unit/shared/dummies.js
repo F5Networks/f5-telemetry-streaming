@@ -28,7 +28,7 @@ function mergeData(object) {
     if (arguments.length < 2) {
         return object;
     }
-    const setValueToObj = pair => setByKey(object, pair.key, pair.value);
+    const setValueToObj = (pair) => setByKey(object, pair.key, pair.value);
     for (let i = 1; i < arguments.length; i += 1) {
         const source = arguments[i];
         if (Array.isArray(source)) {

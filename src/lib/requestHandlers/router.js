@@ -192,9 +192,8 @@ function restOperationResponder(restOperation, status, body, contentType) {
     restOperation.complete();
 }
 
-
 const defaultRouter = new RequestRouter();
-configWorker.on('change', config => new Promise((resolve) => {
+configWorker.on('change', (config) => new Promise((resolve) => {
     logger.debug('configWorker change event in RequestRouter'); // helpful debug
     defaultRouter.removeAllHandlers();
     defaultRouter.registerAllHandlers(configUtil.getTelemetryControls(config).debug);

@@ -45,7 +45,7 @@ class IHealthPollerEndpointHandler extends BaseRequestHandler {
         let responsePromise = Promise.resolve();
         if (!this.params.system) {
             responsePromise = responsePromise.then(() => new Promise(
-                resolve => resolve(ihealth.getCurrentState(this.params.namespace))
+                (resolve) => resolve(ihealth.getCurrentState(this.params.namespace))
             )
                 .then((statuses) => {
                     this.code = 200;
@@ -66,7 +66,7 @@ class IHealthPollerEndpointHandler extends BaseRequestHandler {
                     return this;
                 }));
         }
-        return responsePromise.catch(error => new ErrorHandler(error).process());
+        return responsePromise.catch((error) => new ErrorHandler(error).process());
     }
 }
 

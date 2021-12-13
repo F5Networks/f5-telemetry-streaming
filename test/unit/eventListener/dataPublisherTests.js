@@ -87,7 +87,7 @@ describe('Data Publisher', () => {
                 sentData = data;
                 cb();
             };
-            sinon.stub(net, 'createConnection').callsFake(opts => new MockNetConnection(opts));
+            sinon.stub(net, 'createConnection').callsFake((opts) => new MockNetConnection(opts));
             return configWorker.processDeclaration(getDefaultDeclaration());
         });
 

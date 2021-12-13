@@ -23,12 +23,27 @@ If you want to specify proxy settings for Splunk consumers in TS 1.17 and later,
 
 .. NOTE:: When using the :doc:`custom endpoints feature<custom-endpoints>`, be sure to include **/mgmt/tm/sys/global-settings** in your endpoints for Telemetry Streaming to be able to find the hostname.
 
-**NEW in TS 1.19** |br|
-Be sure to see :ref:`Memory usage spikes<splunkmem>` in the Troubleshooting section for information on the **compressionType** property introduced in TS 1.19. When set to **none**, this property stops TS from compressing data before sending it to Splunk, which can help reduce memory usage.
+Additions to the Splunk consumer
+````````````````````````````````
+The following items have been added to the Splunk consumer since it was introduced.
+
+.. list-table::
+      :widths: 25 25 200
+      :header-rows: 1
+
+      * - TS Version
+        - Property
+        - Description
+  
+      * - 1.19
+        - **compressionType**
+        - Sets the type of compression.  Be sure to see :ref:`Memory usage spikes<splunkmem>` in the Troubleshooting section for information on the **compressionType** property. When set to **none**, this property stops TS from compressing data before sending it to Splunk, which can help reduce memory usage.
+        - 
+
+**IMPORTANT**: The following declaration includes the additional properties shown in the table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the highlighted line(s), and the comma from the previous line. 
+
 
 Example Declaration:
-
-.. IMPORTANT:: This example has been updated with the **compressionType** property introduced in TS 1.19.  If you are using a previous version of Telemetry Streaming, this declaration will fail.  When using a previous version, remove the **compressionType** line and the preceding comma (highlighted in yellow).
 
 .. literalinclude:: ../examples/declarations/splunk.json
     :language: json
@@ -40,7 +55,7 @@ Example Declaration:
 
 Splunk Legacy format (Deprecated)
 `````````````````````````````````
-.. IMPORTANT:: The Splunk Legacy format has been deprecated as of Telemetry Streaming 1.17, and has entered maintenance mode. This means there will be no further TS development for the Splunk Legacy format. |br| We recommend using the :ref:`Splunk default format<splunk-ref>`, or :ref:`multi-metric` (currently experimental).
+.. IMPORTANT:: The Splunk Legacy format has been deprecated as of Telemetry Streaming 1.17, and has entered maintenance mode. This means there will be no further TS development for the Splunk Legacy format. |br| We recommend using the :ref:`Splunk default format<splunk-ref>`, or :ref:`multi-metric`.
 
 The **format** property can be set to **legacy** for Splunk users who wish to convert the stats output similar to the |splunk app|. To see more information, see |Analytics|. To see more information about using the HEC, see |HEC|.  See the following example.
 
@@ -69,15 +84,15 @@ Splunk multi-metric format
 ``````````````````````````
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-   Splunk multi-metric format is available in TS v1.17 and later
+   Splunk multi-metric format is available in TS v1.17 and later, and requires Splunk 8.0.0 or later.
 
-.. WARNING:: Splunk multi-metric format is currently EXPERIMENTAL.  It requires Splunk version 8.0.0 or later.
+.. IMPORTANT:: Splunk multi-metric format requires Splunk version 8.0.0 or later.
 
-Telemetry Streaming 1.17 introduces the ability to use Splunk multi-metric format (currently experimental) for Splunk 8.0.0 and later.  Splunk multi-metric format allows each JSON object to contain measurements for multiple metrics, which generate multiple-measurement metric data points, taking up less space on disk and improving search performance.
+Telemetry Streaming 1.17 introduced the ability to use Splunk multi-metric format (experimental in TS 1.17-1.24) for Splunk 8.0.0 and later.  Splunk multi-metric format allows each JSON object to contain measurements for multiple metrics, which generate multiple-measurement metric data points, taking up less space on disk and improving search performance.
 
 See the |splunkmm| for more information.
 
-.. IMPORTANT:: Only canonical (default) system poller output is supported. Custom endpoints are NOT supported with the multi-metric format.
+.. WARNING:: Only canonical (default) system poller output is supported. Custom endpoints are NOT supported with the multi-metric format.
 
 To use this feature, the **format** of the Splunk Telemetry_Consumer must be set to **multiMetric** as shown in the example.
 
@@ -100,32 +115,41 @@ Required Information:
 
 .. IMPORTANT:: The Azure Log Analytics Consumer only supports sending 500 items. Each configuration item (such as virtual server, pool, node) uses part of this limit.
 
-Format property
-```````````````
-Telemetry Streaming 1.24 adds the **format** property for Azure Log Analytics. This was added to reduce the number of columns in the output which prevents a potential Azure error stating ``Data of Type F5Telemetry was dropped because number of field is above the limit of 500``. 
+Additions to the Azure Log Analytics consumer
+`````````````````````````````````````````````
+The following items have been added to the Azure Log Analytics consumer since it was introduced.
 
-The values for **format** are:
+.. list-table::
+      :widths: 25 25 200
+      :header-rows: 1
 
-- **default** - This is the default value, and does not change the behavior from previous versions. In this mode, each unique item gets a set of columns.  With some properties such as Client and Server SSL profiles, the number of columns exceeds the maximum allowed by Azure.  |br| For example, with a CA bundle certificate, there may be fields for expirationDate, expirationString, issuer, name, and subject.  TS creates a column named **ca-bundle_crt_expirationDate** and four additional columns for the other four properties.  The **name** value is a prefix for every column.
-- **propertyBased** - This value causes Telemetry Streaming to create fewer columns by using the property name for the column.  In the example above, the column (property) name is just **expirationDate**, and all certificates use this column for the expiration dates.  |br| Note this happens only if the property **name** exists, and it matches the declared object name at the top. Otherwise, the naming mode goes back to default.
+      * - TS Version
+        - Property
+        - Description
+  
+      * - 1.24
+        - **format**
+        - This was added to reduce the number of columns in the output which prevents a potential Azure error stating ``Data of Type F5Telemetry was dropped because number of field is above the limit of 500``. The values for **format** are:
 
-|
+      * - 
+        - 
+        - **default**: This is the default value, and does not change the behavior from previous versions. In this mode, each unique item gets a set of columns.  With some properties such as Client and Server SSL profiles, the number of columns exceeds the maximum allowed by Azure.  |br| For example, with a CA bundle certificate, there may be fields for expirationDate, expirationString, issuer, name, and subject.  TS creates a column named **ca-bundle_crt_expirationDate** and four additional columns for the other four properties.  The **name** value is a prefix for every column.
+
+      * - 
+        - 
+        - **propertyBased** - This value causes Telemetry Streaming to create fewer columns by using the property name for the column.  In the example above, the column (property) name is just **expirationDate**, and all certificates use this column for the expiration dates.  |br| Note this happens only if the property **name** exists, and it matches the declared object name at the top. Otherwise, the naming mode goes back to default.
+
+      * - 1.24
+        - **region**
+        - The **region** property for Azure Log Analytics and Application Insights was added in part to support the Azure Government regions. |br| - This optional property is used to determine cloud type (public/commercial, govcloud) so that the correct API URLs can be used (example values: westeurope, japanwest, centralus, usgovvirginia, and so on). |br| - If you do not provide a region, Telemetry Streaming attempts to look it up from the instance metadata. |br| - If it is unable to extract metadata, TS defaults to public/commercial |br| - Check the |azregion| for product/region compatibility for Azure Government. |br| - See the Azure documentation for a valid list of regions (resource location), and :ref:`Region list<azreg>` for example values from the Azure CLI.
+
+
 
 To see more information about sending data to Log Analytics, see |HTTP Data Collector API|.
 
-Region property
-```````````````
-The **region** property for Azure Log Analytics and Application Insights was added in part to support the Azure Government regions.
-
-- This optional property is used to determine cloud type (public/commercial, govcloud) so that the correct API URLs can be used (example values: westeurope, japanwest, centralus, usgovvirginia, and so on).  
-- If you do not provide a region, Telemetry Streaming attempts to look it up from the instance metadata. 
-- If it is unable to extract metadata, TS defaults to public/commercial
-- Check the |azregion| for product/region compatibility for Azure Government.
-- See the Azure documentation for a valid list of regions (resource location), and :ref:`Region list<azreg>` for example values from the Azure CLI.
-
 |
 
-.. NOTE:: The following example has been updated with the **useManagedIdentity**, **region**, and **format** properties. You must be using a TS version that supports these properties (TS 1.24 for **format**) |br| See :ref:`Using Managed Identities<mi>` following the example for information about using Azure Managed Identities and Telemetry Streaming. 
+.. IMPORTANT:: The following example has been updated with the **useManagedIdentity**, **region**, and **format** properties. You must be using a TS version that supports these properties (TS 1.24 for **format**) |br| See :ref:`Using Managed Identities<mi>` following the example for information about using Azure Managed Identities and Telemetry Streaming. 
 
 
 Example Declaration:
@@ -188,21 +212,31 @@ To see more information about Azure Application Insights, see |appinsight|.
 
 .. _region:
 
-Region property
-```````````````
-Telemetry Streaming v1.11 adds the **region** property for Azure Log Analytics and Application Insights. This is in part to support the Azure Government regions.
+Additions to the Application Insights consumer
+``````````````````````````````````````````````
+The following items have been added to the Azure Application Insights consumer since it was introduced.
 
-- This optional property is used to determine cloud type (public/commercial, govcloud) so that the correct API URLs can be used (example values: westeurope, japanwest, centralus, usgovvirginia, and so on).  
-- If you do not provide a region, Telemetry Streaming attempts to look it up from the instance metadata. 
-- If it is unable to extract metadata, TS defaults to public/commercial
-- Check the |azregion| for product/region compatibility for Azure Government.
-- See the Azure documentation for a valid list of regions (resource location), and :ref:`Region list<azreg>` for example values from the Azure CLI.
+.. list-table::
+      :widths: 25 25 200
+      :header-rows: 1
 
+      * - TS Version
+        - Property
+        - Description
+
+      * - 1.24
+        - **region**
+        - The **region** property for Azure Log Analytics and Application Insights was added in part to support the Azure Government regions. |br| - This optional property is used to determine cloud type (public/commercial, govcloud) so that the correct API URLs can be used (example values: westeurope, japanwest, centralus, usgovvirginia, and so on). |br| - If you do not provide a region, Telemetry Streaming attempts to look it up from the instance metadata. |br| - If it is unable to extract metadata, TS defaults to public/commercial |br| - Check the |azregion| for product/region compatibility for Azure Government. |br| - See the Azure documentation for a valid list of regions (resource location), and :ref:`Region list<azreg>` for example values from the Azure CLI.
+
+|
+
+**IMPORTANT**: The following declaration includes the additional properties shown in the table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the highlighted line(s), and the comma from the previous line. 
 
 Example Declaration:
 
 .. literalinclude:: ../examples/declarations/azure_application_insights.json
     :language: json
+    :emphasize-lines: 16
 
 | 
 
@@ -232,11 +266,32 @@ AWS CloudWatch
 --------------
 |aws_img|   
 
-AWS CloudWatch has two consumers: CloudWatch Logs, and :ref:`CloudWatch Metrics<cw-metrics>` (new in TS 1.14).  If you do not use the new **dataType** property, the system defaults to CloudWatch Logs.
+AWS CloudWatch has two consumers: CloudWatch Logs, and :ref:`CloudWatch Metrics<cw-metrics>`.  If you do not use the new **dataType** property, the system defaults to CloudWatch Logs.
 
 .. IMPORTANT:: In TS 1.9.0 and later, the **username** and **passphrase** for CloudWatch are optional.  This is because a user can send data from a BIG-IP that has an appropriate IAM role in AWS to AWS CloudWatch without a username and passphrase.
 
 In TS 1.18 and later, the root certificates for AWS services are now embedded within Telemetry Streaming and are the only root certificates used in requests made to AWS services per AWS's move to its own Certificate Authority, noted in https://aws.amazon.com/blogs/security/how-to-prepare-for-aws-move-to-its-own-certificate-authority/.
+
+Additions to the AWS CloudWatch consumer
+````````````````````````````````````````
+The following items have been added to the CloudWatch consumer since it was introduced.
+
+
+.. list-table::
+      :widths: 25 25 200
+      :header-rows: 1
+
+      * - TS Version
+        - Property
+        - Description
+  
+      * - 1.25
+        - **endpointUrl**
+        - This optional property for AWS CloudWatch (Logs and Metrics) allows you to specify the full AWS endpoint URL for service requests. In particular, it can be an interface VPC endpoint for AWS Direct Connect. See the following CloudWatch Logs and Metrics examples for usage.
+
+
+|
+
 
 AWS CloudWatch Logs (default)
 `````````````````````````````
@@ -250,10 +305,13 @@ Required information:
 
 To see more information about creating and using IAM roles, see the |IAM roles|.
 
+**IMPORTANT**: The following declaration includes the additional properties shown in the Additions to CloudWatch consumer table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the highlighted line(s), and the comma from the previous line. 
+
 Example Declaration:
 
 .. literalinclude:: ../examples/declarations/aws_cloudwatch_logs.json
     :language: json
+    :emphasize-lines: 13
 
 |
 
@@ -277,10 +335,13 @@ Required Information:
  - Passphrase: Navigate to :guilabel:`IAM > Users`
 
 
+**IMPORTANT**: The following declaration includes the additional properties shown in the Additions to CloudWatch consumer table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the highlighted line(s), and the comma from the previous line. 
+
 Example Declaration:
 
 .. literalinclude:: ../examples/declarations/aws_cloudwatch_metrics.json
     :language: json
+    :emphasize-lines: 13
 
 |
 
@@ -299,14 +360,35 @@ Required Information:
 
 To see more information about creating and using IAM roles, see the |IAM roles|.
 
-.. IMPORTANT:: In TS 1.12.0 and later, the **username** and **passphrase** for S3 are optional.  This is because a user can send data from a BIG-IP that has an appropriate IAM role in AWS to AWS S3 without a username and passphrase.
+.. IMPORTANT:: Rhe **username** and **passphrase** for S3 are optional.  This is because a user can send data from a BIG-IP that has an appropriate IAM role in AWS to AWS S3 without a username and passphrase.
 
-In TS 1.18 and later, the root certificates for AWS services are now embedded within Telemetry Streaming and are the only root certificates used in requests made to AWS services per AWS's move to its own Certificate Authority, noted in https://aws.amazon.com/blogs/security/how-to-prepare-for-aws-move-to-its-own-certificate-authority/.
+The root certificates for AWS services are embedded within Telemetry Streaming and are the only root certificates used in requests made to AWS services per AWS's move to its own Certificate Authority, noted in https://aws.amazon.com/blogs/security/how-to-prepare-for-aws-move-to-its-own-certificate-authority/.
+
+Additions to the AWS S3 consumer
+````````````````````````````````
+The following items have been added to the S3 consumer since it was introduced.
+
+
+.. list-table::
+      :widths: 25 25 200
+      :header-rows: 1
+
+      * - TS Version
+        - Property
+        - Description
+  
+      * - 1.25
+        - **endpointUrl**
+        - This optional property for AWS S3 allows you to specify the full AWS endpoint URL for service requests. In particular, it can be an interface VPC endpoint for AWS Direct Connect.  
+
+
+**IMPORTANT**: The following declaration includes the additional properties shown in the table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the highlighted line(s), and the comma from the previous line. 
 
 Example Declaration:
 
 .. literalinclude:: ../examples/declarations/aws_s3.json
     :language: json
+    :emphasize-lines: 12
 
 |
 
@@ -347,26 +429,34 @@ Required Information:
 
 .. NOTE:: To see more information about installing Kafka, see |Installing Kafka|.
 
-New in TS 1.17
-``````````````
-Telemetry Streaming 1.17 and later adds the ability to add TLS client authentication to the Kafka consumer using the **TLS** authentication protocol.  This protocol configures Telemetry Streaming to provide the required private key and certificate(s) when the Kafka broker is configured to use SSL/TLS Client authentication. 
-
-You can find more information on Kafka's client authentication on the Confluent pages: https://docs.confluent.io/5.5.0/kafka/authentication_ssl.html.
-
-There are 3 new properties on the Kafka consumer:
-
-+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Property           | Description                                                                                                                                                                                                                                |
-+====================+============================================================================================================================================================================================================================================+
-| privateKey         | The Private Key for the SSL certificate. Must be formatted as a 1-line string, with literal new line characters.                                                                                                                           |
-+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| clientCertificate  | The client certificate chain. Must be formatted as a 1-line string, with literal new line characters.                                                                                                                                      |
-+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| rootCertificate    | The Certificate Authority root certificate, used to validate the client certificate. Certificate verification can be disabled by setting allowSelfSignedCert=true. Must be formatted as a 1-line string, with literal new line characters. |
-+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+Additions to the Kafka consumer
+```````````````````````````````
+The following items have been added to the Kafka consumer since it was introduced.
 
 
-.. IMPORTANT:: The following declaration has been updated to include the new TLS authentication protocol introduced in TS 1.17.  If you attempt to use this declaration on a previous version, it will fail. To use this declaration on previous versions, remove the highlighted lines (and the comma from line 23).
+.. list-table::
+      :widths: 25 25 200
+      :header-rows: 1
+
+      * - TS Version
+        - Property
+        - Description
+  
+      * - 1.17
+        - **privateKey**
+        - This and the following properties provide the ability to add TLS client authentication to the Kafka consumer using the **TLS** authentication protocol.  This protocol configures Telemetry Streaming to provide the required private key and certificate(s) when the Kafka broker is configured to use SSL/TLS Client authentication.  You can find more information on Kafka's client authentication on the Confluent pages: https://docs.confluent.io/5.5.0/kafka/authentication_ssl.html. |br| |br| **privateKey** is the Private Key for the SSL certificate. Must be formatted as a 1-line string, with literal new line characters. 
+
+      * - 
+        - **clientCertificate**
+        - The client certificate chain. Must be formatted as a 1-line string, with literal new line characters. 
+
+      * - 
+        - **rootCertificate**
+        - The Certificate Authority root certificate, used to validate the client certificate. Certificate verification can be disabled by setting allowSelfSignedCert=true. Must be formatted as a 1-line string, with literal new line characters.
+
+
+
+**IMPORTANT**: The following declaration includes the additional properties shown in the table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the highlighted line(s), and the comma from the previous line. 
 
 Example Declaration:
 
@@ -383,7 +473,7 @@ ElasticSearch
 -------------
 |ElasticSearch|
 
-.. IMPORTANT:: TS currently does not support sending data to ElasticSearch 7.
+.. NOTE:: TS 1.24 adds support for sending data to ElasticSearch 7. 
 
 Required Information:
  - Host: The address of the ElasticSearch system.
@@ -394,12 +484,16 @@ Optional Parameters:
  - Protocol: The protocol of the ElasticSearch system. Options: http or https. Default is http.
  - Allow Self Signed Cert: allow TS to skip Cert validation. Options: true or false. Default is false.
  - Path: The path to use when sending data to the ElasticSearch system.
- - Data Type: The type of data posted to the ElasticSearch system. Default is f5.telemetry
- - API Version: The API version of the ElasticSearch system.
+ - Data Type: The type of data posted to the ElasticSearch system. 
+ - API Version: The API version of the ElasticSearch system. Options: Any version string matching the ElasticSearch node(s) version.  The default is 6.0.
  - Username: The username to use when sending data to the ElasticSearch system.
  - Passphrase: The secret/password to use when sending data to the ElasticSearch system.
 
-.. NOTE:: To see more information about installing ElasticSearch, see |Installing ElasticSearch|.
+.. IMPORTANT:: Telemetry Streaming 1.24 and later use the API Version value to determine the appropriate defaults to use for the Data Type parameter. |br| When the API Version is 6.X or earlier, **f5.telemetry** is used as the default Data Type. |br| When the API Version is 7.0 until the last 7.X version, **_doc** is used as the default Data Type. |br| In API Version 8.0 and later, the Data Type value is not supported, and will not be accepted in the Telemetry Streaming declaration.
+
+|
+
+To see more information about installing ElasticSearch, see |Installing ElasticSearch|.
 
 Example Declaration:
 
@@ -445,27 +539,37 @@ Required Information:
 
 .. NOTE:: When using the :doc:`custom endpoints feature<custom-endpoints>`, be sure to include **/mgmt/tm/sys/global-settings** in your endpoints for Telemetry Streaming to be able to find the hostname.
 
-To see more information about installing StatsD, see |StatsDWiki|.
+For more information about installing StatsD, see |StatsDWiki|.
 
 .. _addtags: 
 
-addTags (experimental)
-``````````````````````
-.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+Additions to the StatsD consumer
+````````````````````````````````
+The following items have been added to the StatsD consumer since it was introduced.
 
-    The EXPERIMENTAL feature addTags for StatsD is available in Telemetry Streaming 1.21 and later.
+.. list-table::
+      :widths: 25 25 200
+      :header-rows: 1
 
-Telemetry Streaming 1.21 adds a new property for the StatsD consumer: **addTags**.  This feature causes TS to parse the incoming payload for values to automatically add as tags. Currently only the **sibling** method is supported.  
+      * - TS Version
+        - Property
+        - Description
 
-To see an example and the output from **addTags**, see :ref:`addTags example<addtagex>`.
+      * - 1.21
+        - **addTags**
+        - This feature (experimental in TS 1.21-1.24) causes Telemetry Streaming to parse the incoming payload for values to automatically add as tags. Currently only the **sibling** method is supported. To see an example and the output from **addTags**, see :ref:`addTags example<addtagex>`.
 
-|
+      * - 1.25
+        - **convertBooleansToMetrics**
+        - This property allows you to choose whether or not to convert boolean values to metrics (true becomes 1, false (default0) becomes 0). |br| By default, Telemetry Streaming uses Boolean values as tag values that are attached to individual metrics. If **convertBooleansToMetrics** is set to **true**, any Boolean values are instead converted to numeric values, which are then sent to the consumer(s) as a metric. |br| Note: Telemetry Streaming does not send a Boolean as both a tag and a metric; a Boolean value is sent to the consumer(s) as either a tag or as a metric.
+        - 
 
-Example Declaration (updated with the **experimental** feature *addTags* introduced in TS 1.21. If using a prior version, **remove** the highlighted lines, and the comma in line 9):
+**IMPORTANT**: The following declaration includes the additional properties shown in the table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the highlighted line(s), and the comma from the previous line. 
+
 
 .. literalinclude:: ../examples/declarations/statsd.json
     :language: json
-    :emphasize-lines: 10-19
+    :emphasize-lines: 9, 10-19
 
 |
 
@@ -490,23 +594,40 @@ Optional Properties:
 
 .. NOTE:: Since this consumer is designed to be generic and flexible, how authentication is performed is left up to the web service. To ensure the secrets are encrypted within Telemetry Streaming please note the use of JSON pointers. The secret to protect should be stored inside ``passphrase`` and referenced in the desired destination property, such as an API token in a header as shown in this example. 
 
-New in TS 1.18
-``````````````
-Telemetry Streaming 1.17 and later adds the ability to add TLS client authentication to the Generic HTTP consumer using the **TLS** authentication protocol.  This protocol configures Telemetry Streaming to provide the required private key and certificate(s) when the specified HTTP endpoint is configured to use SSL/TLS Client authentication. 
+Additions to the Generic HTTP consumer
+``````````````````````````````````````
+The following items have been added to the Generic HTTP consumer since it was introduced.
 
-You can find more information on Kafka's client authentication on the Confluent pages: https://docs.confluent.io/5.5.0/kafka/authentication_ssl.html.
 
-There are 3 new properties:
+.. list-table::
+      :widths: 25 25 200
+      :header-rows: 1
 
-+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Property           | Description                                                                                                                                                                                                                                |
-+====================+============================================================================================================================================================================================================================================+
-| privateKey         | The Private Key for the SSL certificate. Must be formatted as a 1-line string, with literal new line characters.                                                                                                                           |
-+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| clientCertificate  | The client certificate chain. Must be formatted as a 1-line string, with literal new line characters.                                                                                                                                      |
-+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| rootCertificate    | The Certificate Authority root certificate, used to validate the client certificate. Certificate verification can be disabled by setting allowSelfSignedCert=true. Must be formatted as a 1-line string, with literal new line characters. |
-+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+      * - TS Version
+        - Property
+        - Description
+  
+      * - 1.18
+        - **privateKey**
+        - This and the following properties provide the ability to add TLS client authentication to the Generic HTTP consumer using the **TLS** authentication protocol.  This protocol configures Telemetry Streaming to provide the required private key and certificate(s) when the Generic HTTP consumer is configured to use SSL/TLS Client authentication.  |br| |br| **privateKey** is the Private Key for the SSL certificate. Must be formatted as a 1-line string, with literal new line characters. 
+
+      * - 
+        - **clientCertificate**
+        - The client certificate chain. Must be formatted as a 1-line string, with literal new line characters. 
+
+      * - 
+        - **rootCertificate**
+        - The Certificate Authority root certificate, used to validate the client certificate. Certificate verification can be disabled by setting allowSelfSignedCert=true. Must be formatted as a 1-line string, with literal new line characters.
+
+|
+
+**IMPORTANT**: The following declaration includes the additional properties shown in the table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the highlighted line(s), and the comma from the previous line. 
+
+Example Declaration:
+
+.. literalinclude:: ../examples/declarations/generic_http.json
+    :language: json
+
 
 |
 
@@ -516,18 +637,13 @@ There are 3 new properties:
 - Generic HTTP with proxy settings in TS 1.17 and later, see :ref:`proxy`.
 - An EXPERIMENTAL feature where you can specify fallback IP address(es) for the Generic HTTP consumer, see :ref:`fallback`.
 - Generic HTTP with TLS authentication, see :ref:`httptls`.
-
+  
 |
-
-Example Declaration:
-
-.. literalinclude:: ../examples/declarations/generic_http.json
-    :language: json
 
 .. _beacon-ref:
 
 F5 Beacon
-`````````
+---------
 |beaconlogo|
 
 F5 Beacon, a SaaS offering, provides visibility and actionable insights into the health and performance of applications. 
@@ -584,24 +700,62 @@ Google Cloud Operations Suite's Cloud Monitoring
 Required Information:
  - projectId: The ID of the GCP project.
  - serviceEmail: The email for the Google Service Account. To check if you have an existing Service Account, from the left menu of GCP, select **IAM & admin**, and then click **Service Accounts**. If you do not have a Service Account, you must create one.
- - privateKeyId: The ID of the private key that the user created for the Service Account (if you do not have a key, from the account page, click **Create Key** with a type of **JSON**. The Private key is in the file that was created when making the account).
- - privateKey: The private key given to the user when a private key was added to the service account.
+ - privateKeyId: The ID of the private key that the user created for the Service Account (if you do not have a key, from the account page, click **Create Key** with a type of **JSON**. The Private key is in the file that was created when making the account). If you are using IAM roles, introduced in 1.25 do not use this property and see :ref:`gcmiam`.
+ - privateKey: The private key given to the user when a private key was added to the service account. If you are using IAM roles, introduced in 1.25 do not use this property and see :ref:`gcmiam`.
 
 For complete information on deploying Google Cloud Operations Suite, see |sddocs|.
-
-**New in TS 1.22** |br|
-Telemetry Streaming 1.22 adds a new property **reportInstanceMetadata** to this consumer. This allows you to enable or disable metadata reporting.  The default is **false**.
 
 **Finding the Data**  |br|
 Once you have configured the Google Cloud Monitoring consumer and sent a Telemetry Streaming declaration, Telemetry Streaming creates custom MetricDescriptors to which it sends metrics.  These metrics can be found under a path such as **custom/system/cpu**. To make it easier to find data that is relevant to a specific device, TS uses the **Generic Node** resource type, and assigns machine ID to the **node_id** label to identify which device the data is from.
 
 .. IMPORTANT:: There is a quota of 500 custom MetricDescriptors for Google Cloud Monitoring. Telemetry Streaming creates these MetricDescriptors, and if this quota is ever reached, you must delete some of these MetricDescriptors.
 
-Example Declaration (updated to include **reportInstanceMetadata** in 1.22, remove this line in previous versions):
+Additions to the Cloud Monitoring consumer
+``````````````````````````````````````````
+The following items have been added to the Google Cloud Operations Suite's Cloud Monitoring consumer since it was introduced.
+
+
+.. list-table::
+      :widths: 25 25 200
+      :header-rows: 1
+
+      * - TS Version
+        - Property
+        - Description
+  
+      * - 1.22
+        - **reportInstanceMetadata**
+        - This property allows you to enable or disable metadata reporting.  The default is **false**.
+
+
+**IMPORTANT**: The following declaration includes the additional properties shown in the table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the highlighted line(s), and the comma from the previous line. 
+
+
+Example Declaration:
 
 .. literalinclude:: ../examples/declarations/google_cloud_monitoring.json
     :language: json
 
+|
+
+.. _gcmiam:
+
+Using IAM roles for Google Cloud Monitoring
+```````````````````````````````````````````
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+   Support for GCP IAM roles is available in TS v1.25 and later
+
+Telemetry Streaming 1.25 added support for using IAM roles for Google Cloud Monitoring.  This means the Cloud Monitoring consumer can send data without specifying credentials if IAM roles are properly configured for the BIG-IP instance in GCP.
+
+IAM roles are enabled by using the new **useServiceAccountToken** property set to **true** (the default is **false**).  When set to true, the **privateKey** and **privateKeyId** properties are not used. 
+
+When using this feature, the authentication token is fetched from metadata at ``${METADATA_URL}/v1/instance/service-accounts/${serviceAccount.serviceEmail}/token``, meaning that **serviceEmail** in the declaration should match the service account email associated with the VM. 
+
+Example Declaration:
+
+.. literalinclude:: ../examples/declarations/google_cloud_monitoring_sat.json
+    :language: json
 
 |
 
@@ -617,8 +771,8 @@ Google Cloud Logging
 
 Required Information:
  - serviceEmail: The email for the Google Service Account. To check if you have an existing Service Account, from the GCP left menu, select **IAM & admin**, and then click **Service Accounts**. If you do not have a Service Account, you must create one.
- - privateKeyId: The ID of the private key the user created for the Service Account (if you do not have a key, from the Account page, click **Create Key** with a type of **JSON**. The Private key is in the file that was created when making the account).
- - privateKey: The private key given to the user when a private key was added to the service account.
+ - privateKeyId: The ID of the private key the user created for the Service Account (if you do not have a key, from the Account page, click **Create Key** with a type of **JSON**. The Private key is in the file that was created when making the account). If you are using IAM roles introduced in 1.25, do not use this property and see :ref:`gcmiam`.
+ - privateKey: The private key given to the user when a private key was added to the service account. If you are using IAM roles introduced in 1.25, do not use this property and see :ref:`gcliam`.
  - logScopeId: The ID of the scope specified in the **logScope** property. If using a logScope of **projects**, this is the ID for your project.
  - logId: The Google Cloud logging LOG_ID where log entries will be written.
  
@@ -633,6 +787,26 @@ Example Declaration:
 .. literalinclude:: ../examples/declarations/google_cloud_logging.json
     :language: json
 
+|
+
+.. _gcliam:
+
+Using IAM roles for Google Cloud Logging
+````````````````````````````````````````
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+   Support for GCP IAM roles is available in TS v1.25 and later
+
+Telemetry Streaming 1.25 added support for using IAM roles for Google Cloud Logging.  This means the Cloud Logging consumer can send data without specifying credentials if IAM roles are properly configured for the BIG-IP instance in GCP.
+
+IAM roles are enabled by using the new **useServiceAccountToken** property set to **true** (the default is **false**).  When set to true, the **privateKey** and **privateKeyId** properties are not used. 
+
+When using this feature, the authentication token is fetched from metadata at ``${METADATA_URL}/v1/instance/service-accounts/${serviceAccount.serviceEmail}/token``, meaning that **serviceEmail** in the declaration should match the service account email associated with the VM. 
+
+Example Declaration:
+
+.. literalinclude:: ../examples/declarations/google_cloud_logging_sat.json
+    :language: json
 
 |
 
@@ -644,12 +818,28 @@ The F5 Cloud Consumer is a part of F5's internal, digital experience operating s
 
 .. IMPORTANT:: This F5 Cloud consumer is for **F5 internal use only**, and its API is subject to change. We are including it on this page of Push consumers because you may see it in a Telemetry Streaming declaration.
 
-**New in TS 1.22** |br|
-Telemetry Streaming 1.22 adds the **eventSchemaVersion** property.  This allows you to select the appropriate event schema instead of using a hard-coded value.
+Additions to the F5 Cloud consumer
+``````````````````````````````````
+The following items have been added to the F5 Cloud consumer since it was introduced.
 
-|
 
-Example Declaration (if using a version prior to 1.22, remove line 94 (highlighted in yellow):
+.. list-table::
+      :widths: 25 25 200
+      :header-rows: 1
+
+      * - TS Version
+        - Property
+        - Description
+  
+      * - 1.22
+        - **eventSchemaVersion**
+        -  This allows you to select the appropriate event schema instead of using a hard-coded value.
+
+
+**IMPORTANT**: The following declaration includes the additional properties shown in the table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the highlighted line(s), and the comma from the previous line. 
+
+
+Example Declaration:
 
 
 .. literalinclude:: ../examples/declarations/f5_cloud.json
@@ -660,31 +850,62 @@ Example Declaration (if using a version prior to 1.22, remove line 94 (highlight
 
 .. _datadog:
 
-DataDog (EXPERIMENTAL)
-----------------------
+DataDog
+-------
 |datadog|
 
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-    The DataDog consumer was introduced as an EXPERIMENTAL consumer in TS 1.22. |br| The **compressionType** property was introduced in 1.23. |br| The **region** and **service** properties were introduced in TS 1.24
+    The DataDog consumer was introduced as an experimental consumer in TS 1.22. |br| The **compressionType** property was added in 1.23. |br| The **region** and **service** properties were added in TS 1.24 |br| The **metricPrefix** property was added in 1.25.
 
-Telemetry Streaming 1.23 added the **compressionType** property to the DataDog consumer.  The acceptable values are **none** for no compression (the default), or **gzip**, where the payload will be compressed using gzip. 
+Required Information:
+ - apiKey: The DataDog API key required to submit metrics and events to DataDog
 
-Telemetry Streaming 1.24 added the following properties to the DataDog consumer:
+Additions to the DataDog consumer
+`````````````````````````````````
+The following items have been added to the DataDog consumer since it was introduced.
 
-- **region**: The acceptable values are **US1** (the default), **US3**, **EU1**, and **US1-FED**.
-- **service**: The name of the service generating telemetry data (string). The default is **f5-telemetry**.  This property exposes the **DATA_DOG_SERVICE_FIELD** value that is sent to the DataDog API.
+.. list-table::
+      :widths: 25 25 200
+      :header-rows: 1
+
+      * - TS Version
+        - Property
+        - Description
+  
+      * - 1.23
+        - **compressionType**
+        - Sets the type of compression.  The acceptable values are **none** for no compression (the default), or **gzip**, where the payload will be compressed using gzip. 
+
+      * - 1.24
+        - **region**
+        - Sets the region. The acceptable values are **US1** (the default), **US3**, **EU1**, and **US1-FED**.
+
+      * - 
+        - **service**
+        - The name of the service generating telemetry data (string). The default is **f5-telemetry**.  This property exposes the **DATA_DOG_SERVICE_FIELD** value that is sent to the DataDog API.
+
+      * - 1.25
+        - **metricPrefix**
+        - This property allows you to provide a string value to be used as a metric prefix.  For example, in the following declaration, the **metricPrefix** is set to **"f5", "bigip"**, which would add **f5.bigip** as a prefix (i.e. **system.cpu** would become **f5.bigip.system.cpu**).
+
+      * - 
+        - **convertBooleansToMetrics**
+        - This property allows you to choose whether or not to convert boolean values to metrics (true becomes 1, false (default0) becomes 0). |br| By default, Telemetry Streaming uses Boolean values as tag values that are attached to individual metrics. If **convertBooleansToMetrics** is set to **true**, any Boolean values are instead converted to numeric values, which are then sent to the consumer(s) as a metric. |br| Note: Telemetry Streaming does not send a Boolean as both a tag and a metric; a Boolean value is sent to the consumer(s) as either a tag or as a metric.
+
+      * - 
+        - **customTags**
+        - This property allows you to add custom tags that are appended to the dynamically generated telemetry tags. You specify tags as an array of **name** and **value** pairs.  You can set more than one tag in a declaration, but if you use this property, you must specify at least one custom tag. 
 
 
-.. IMPORTANT:: Be aware of the following before deploying this consumer: |br| * The DataDog consumer is an experimental feature and will change in future releases based on feedback. |br| * There is a possibility this consumer might crash Telemetry Streaming, and send incorrectly formatted data or incomplete metrics. |br| * Some metrics might lack tags or context (such as iRule events) that will be addressed in future updates. |br| * The DataDog consumer was not tested on configurations with thousands of objects, so it is unknown if the DataDog API will accept or reject such huge payloads. |br| * Telemetry Streaming expects the Data Dog service will be responsible for formatting the names and values of metrics and tags.
 
-**NOTE**: The following declaration includes the **region** and **service** properties introduced in TS 1.24. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the lines highlighted in yellow (and the comma from line 7).
+**IMPORTANT**: The following declaration includes all of the additional properties shown in the table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the lines highlighted in yellow (and the comma from line 7).
 
 Example Declaration:
 
 .. literalinclude:: ../examples/declarations/data_dog.json
     :language: json
-    :emphasize-lines: 8-9 
+    :emphasize-lines: 8-17
     
 |
 
@@ -715,12 +936,32 @@ Note: As of Telemetry Streaming 1.23, this consumer:
  - Only exports OpenTelemetry metrics (logs and traces are not supported)
  - Exports telemetry data using protobufs over HTTP
  - Extracts metrics from Event Listener log messages. Any integer or float values in Event Listener log messages will be converted to an OpenTelemetry metric, and exported as a metric.
+  
 
+Additions to the OpenTelemetry Exporter consumer
+````````````````````````````````````````````````
+The following items have been added to the OpenTelemetry consumer since it was introduced.
+
+.. list-table::
+      :widths: 25 25 200
+      :header-rows: 1
+
+      * - TS Version
+        - Property
+        - Description
+
+      * - 1.25
+        - **convertBooleansToMetrics**
+        - This property allows you to choose whether or not to convert boolean values to metrics (true becomes 1, false (default0) becomes 0). |br| By default, Telemetry Streaming uses Boolean values as tag values that are attached to individual metrics. If **convertBooleansToMetrics** is set to **true**, any Boolean values are instead converted to numeric values, which are then sent to the consumer(s) as a metric. |br| Note: Telemetry Streaming does not send a Boolean as both a tag and a metric; a Boolean value is sent to the consumer(s) as either a tag or as a metric.
+
+
+**IMPORTANT**: The following declaration includes all of the additional properties shown in the table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the highlighted line.
 
 Example Declaration:
 
 .. literalinclude:: ../examples/declarations/open_telemetry_exporter.json
     :language: json
+    :emphasize-lines: 15
 
 |
 
@@ -1015,5 +1256,3 @@ In the following table, we list the Azure Government regions.
 .. |gcldocs| raw:: html
 
    <a href="https://cloud.google.com/logging" target="_blank">Google Cloud Logging documentation</a>
-
-   

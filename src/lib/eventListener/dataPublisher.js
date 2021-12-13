@@ -33,7 +33,7 @@ function sendDataToListener(data, listenerName, options) {
     return Promise.resolve()
         .then(() => {
             const eventListener = configUtil.getTelemetryListeners(configWorker.currentConfig, opts.namespace)
-                .find(el => el.name === listenerName);
+                .find((el) => el.name === listenerName);
 
             let error;
             const namespaceSuffix = `${opts.namespace ? ` in Namespace: ${opts.namespace}` : ''}.`;
@@ -81,7 +81,7 @@ function sendDataToListener(data, listenerName, options) {
                 });
             });
         })
-        .catch(error => Promise.reject(error));
+        .catch((error) => Promise.reject(error));
 }
 
 module.exports = {

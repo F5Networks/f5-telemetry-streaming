@@ -580,7 +580,7 @@ describe('Declarations', () => {
             });
 
             it('should base64 decode cipherText', () => {
-                coreStub.deviceUtil.encryptSecret.callsFake(data => Promise.resolve(`$M$${data}`));
+                coreStub.deviceUtil.encryptSecret.callsFake((data) => Promise.resolve(`$M$${data}`));
                 const cipher = 'ZjVzZWNyZXQ='; // f5secret
                 const data = {
                     class: 'Telemetry',
@@ -1914,7 +1914,7 @@ describe('Declarations', () => {
                     }
                 };
                 return declValidator(data)
-                    .then(validated => assert.strictEqual(validated.My_Poller.interval, 0));
+                    .then((validated) => assert.strictEqual(validated.My_Poller.interval, 0));
             });
 
             it('should allow interval=0 when endpointList is not specified', () => {
@@ -1926,7 +1926,7 @@ describe('Declarations', () => {
                     }
                 };
                 return declValidator(data)
-                    .then(validated => assert.strictEqual(validated.My_Poller.interval, 0));
+                    .then((validated) => assert.strictEqual(validated.My_Poller.interval, 0));
             });
 
             it('should restrict minimum to 60 when endpointList is NOT specified', () => {
@@ -1967,7 +1967,7 @@ describe('Declarations', () => {
                     }
                 };
                 return declValidator(data)
-                    .then(validated => assert.strictEqual(validated.My_Poller.interval, 100000));
+                    .then((validated) => assert.strictEqual(validated.My_Poller.interval, 100000));
             });
         });
 
@@ -3697,7 +3697,7 @@ describe('Declarations', () => {
             addtlContext
         );
 
-        const basicSchemaTestsValidator = decl => validateMinimal(decl);
+        const basicSchemaTestsValidator = (decl) => validateMinimal(decl);
 
         beforeEach(() => {
             minimalDeclaration = {
@@ -3770,7 +3770,8 @@ describe('Declarations', () => {
                             username: 'username',
                             passphrase: {
                                 cipherText: 'sshSecret'
-                            }
+                            },
+                            endpointUrl: 'userDefinedUrl'
                         },
                         [
                             {
@@ -3784,7 +3785,8 @@ describe('Declarations', () => {
                             'logGroup',
                             'logStream',
                             'region',
-                            'username'
+                            'username',
+                            'endpointUrl'
                         ],
                         { stringLengthTests: true }
                     );
@@ -3861,7 +3863,8 @@ describe('Declarations', () => {
                         passphrase: {
                             cipherText: 'cipherText'
                         },
-                        dataType: 'logs'
+                        dataType: 'logs',
+                        endpointUrl: 'userDefinedUrl'
                     },
                     {
                         type: 'AWS_CloudWatch',
@@ -3874,7 +3877,8 @@ describe('Declarations', () => {
                             protected: 'SecureVault',
                             cipherText: '$M$cipherText'
                         },
-                        dataType: 'logs'
+                        dataType: 'logs',
+                        endpointUrl: 'userDefinedUrl'
                     }
                 ));
 
@@ -3930,7 +3934,8 @@ describe('Declarations', () => {
                         username: 'username',
                         passphrase: {
                             cipherText: 'cipherText'
-                        }
+                        },
+                        endpointUrl: 'userDefinedUrl'
                     },
                     {
                         type: 'AWS_CloudWatch',
@@ -3942,7 +3947,8 @@ describe('Declarations', () => {
                             class: 'Secret',
                             protected: 'SecureVault',
                             cipherText: '$M$cipherText'
-                        }
+                        },
+                        endpointUrl: 'userDefinedUrl'
                     }
                 ));
 
@@ -3969,6 +3975,19 @@ describe('Declarations', () => {
                     'metricNamespace',
                     { stringLengthTests: true, requiredTests: true }
                 );
+
+                schemaValidationUtil.generateSchemaBasicTests(
+                    basicSchemaTestsValidator,
+                    {
+                        type: 'AWS_CloudWatch',
+                        region: 'region',
+                        dataType: 'metrics',
+                        metricNamespace: 'metricsThingee',
+                        endpointUrl: 'userDefinedUrl'
+                    },
+                    'endpointUrl',
+                    { stringLengthTests: true }
+                );
             });
         });
 
@@ -3994,7 +4013,8 @@ describe('Declarations', () => {
                     username: 'username',
                     passphrase: {
                         cipherText: 'cipherText'
-                    }
+                    },
+                    endpointUrl: 'userDefinedUrl'
                 },
                 {
                     type: 'AWS_S3',
@@ -4005,7 +4025,8 @@ describe('Declarations', () => {
                         class: 'Secret',
                         protected: 'SecureVault',
                         cipherText: '$M$cipherText'
-                    }
+                    },
+                    endpointUrl: 'userDefinedUrl'
                 }
             ));
 
@@ -4018,13 +4039,15 @@ describe('Declarations', () => {
                     username: 'username',
                     passphrase: {
                         cipherText: 'cipherText'
-                    }
+                    },
+                    endpointUrl: 'userDefinedUrl'
                 },
                 [
                     'bucket',
                     { property: 'passphrase', dependenciesTests: 'username', ignoreOther: true },
                     'region',
-                    { property: 'username', dependenciesTests: 'passphrase' }
+                    { property: 'username', dependenciesTests: 'passphrase' },
+                    'endpointUrl'
                 ],
                 { stringLengthTests: true }
             );
@@ -4435,7 +4458,8 @@ describe('Declarations', () => {
                     apiKey: 'test',
                     compressionType: 'none',
                     region: 'US1',
-                    service: 'f5-telemetry'
+                    service: 'f5-telemetry',
+                    convertBooleansToMetrics: false
                 }
             ));
 
@@ -4445,14 +4469,20 @@ describe('Declarations', () => {
                     apiKey: 'test',
                     compressionType: 'gzip',
                     region: 'EU1',
-                    service: 'my-great-application'
+                    service: 'my-great-application',
+                    metricPrefix: ['f5', 'bigip'],
+                    convertBooleansToMetrics: true,
+                    customTags: [{ name: 'deploymentName', value: 'best version' }]
                 },
                 {
                     type: 'DataDog',
                     apiKey: 'test',
                     compressionType: 'gzip',
                     region: 'EU1',
-                    service: 'my-great-application'
+                    service: 'my-great-application',
+                    metricPrefix: ['f5', 'bigip'],
+                    convertBooleansToMetrics: true,
+                    customTags: [{ name: 'deploymentName', value: 'best version' }]
                 }
             ));
 
@@ -4461,7 +4491,9 @@ describe('Declarations', () => {
                 {
                     type: 'DataDog',
                     apiKey: 'test',
-                    index: 'index'
+                    index: 'index',
+                    metricPrefix: ['f5', 'bigip'],
+                    customTags: [{ name: 'deploymentName', value: 'best version' }]
                 },
                 [
                     { property: 'apiKey', requiredTests: true, stringLengthTests: true },
@@ -4479,9 +4511,32 @@ describe('Declarations', () => {
                             allowed: ['US1', 'US3', 'EU1', 'US1-FED'],
                             notAllowed: ['region']
                         }
+                    },
+                    {
+                        property: 'metricPrefix',
+                        ignoreOther: true,
+                        arrayLengthTests: {
+                            minItems: 1
+                        }
+                    },
+                    {
+                        property: 'customTags',
+                        ignoreOther: true,
+                        arrayLengthTests: {
+                            minItems: 1
+                        }
                     }
                 ]
             );
+
+            it('should fail when invalid \'convertBooleansToMetrics\' value specified', () => assert.isRejected(
+                validateMinimal({
+                    type: 'DataDog',
+                    apiKey: 'test',
+                    convertBooleansToMetrics: 'something'
+                }),
+                /convertBooleansToMetrics\/type.*should be boolean/
+            ));
         });
 
         describe('ElasticSearch', () => {
@@ -4538,7 +4593,7 @@ describe('Declarations', () => {
                     {
                         apiVersion: 'blah'
                     }
-                ].map(apiVerionTest => createTestCase(apiVerionTest.apiVersion, apiVerionTest.additionalProps));
+                ].map((apiVerionTest) => createTestCase(apiVerionTest.apiVersion, apiVerionTest.additionalProps));
             };
 
             generateApiVersionTests().forEach((apiVersionTest) => {
@@ -4877,7 +4932,27 @@ describe('Declarations', () => {
                         cipherText: '$M$privateKey'
                     },
                     serviceEmail: 'serviceEmail',
-                    reportInstanceMetadata: false
+                    reportInstanceMetadata: false,
+                    useServiceAccountToken: false
+                }
+            ));
+
+            it('should pass minimal declaration (useServiceAccountToken = true)', () => validateMinimal(
+                {
+                    type: 'Google_Cloud_Logging',
+                    logScopeId: 'myProject',
+                    logId: 'allMyLogs',
+                    serviceEmail: 'serviceEmail',
+                    useServiceAccountToken: true
+                },
+                {
+                    type: 'Google_Cloud_Logging',
+                    logScope: 'projects',
+                    logScopeId: 'myProject',
+                    logId: 'allMyLogs',
+                    serviceEmail: 'serviceEmail',
+                    reportInstanceMetadata: false,
+                    useServiceAccountToken: true
                 }
             ));
 
@@ -4906,7 +4981,8 @@ describe('Declarations', () => {
                         cipherText: '$M$privateKey'
                     },
                     serviceEmail: 'serviceEmail',
-                    reportInstanceMetadata: true
+                    reportInstanceMetadata: true,
+                    useServiceAccountToken: false
                 }
             ));
 
@@ -4924,6 +5000,34 @@ describe('Declarations', () => {
                     reportInstanceMetadata: true
                 }
             ), /#\/definitions\/logId\/pattern.*should match pattern.*\^\[a-zA-z0-9._-\]\+\$/));
+
+            it('should not allow privateKeyId when useServiceAccountToken is true', () => assert.isRejected(validateFull(
+                {
+                    type: 'Google_Cloud_Logging',
+                    logScope: 'organizations',
+                    logScopeId: 'myOrganization',
+                    logId: 'allM yLogs',
+                    privateKeyId: 'privateKeyId',
+                    serviceEmail: 'serviceEmail',
+                    reportInstanceMetadata: true,
+                    useServiceAccountToken: true
+                }
+            ), /useServiceAccountToken\/const.*"allowedValue":false/));
+
+            it('should not allow privateKey when useServiceAccountToken is true', () => assert.isRejected(validateFull(
+                {
+                    type: 'Google_Cloud_Logging',
+                    logScope: 'organizations',
+                    logScopeId: 'myOrganization',
+                    logId: 'allM yLogs',
+                    privateKey: {
+                        cipherText: 'privateKey'
+                    },
+                    serviceEmail: 'serviceEmail',
+                    reportInstanceMetadata: true,
+                    useServiceAccountToken: true
+                }
+            ), /useServiceAccountToken\/const.*"allowedValue":false/));
 
             schemaValidationUtil.generateSchemaBasicTests(
                 basicSchemaTestsValidator,
@@ -4977,7 +5081,24 @@ describe('Declarations', () => {
                         cipherText: '$M$privateKey'
                     },
                     serviceEmail: 'serviceEmail',
-                    reportInstanceMetadata: false
+                    reportInstanceMetadata: false,
+                    useServiceAccountToken: false
+                }
+            ));
+
+            it('should pass minimal declaration (useServiceAccountToken = true)', () => validateMinimal(
+                {
+                    type: 'Google_Cloud_Monitoring',
+                    projectId: 'projectId',
+                    serviceEmail: 'serviceEmail',
+                    useServiceAccountToken: true
+                },
+                {
+                    type: 'Google_Cloud_Monitoring',
+                    projectId: 'projectId',
+                    serviceEmail: 'serviceEmail',
+                    reportInstanceMetadata: false,
+                    useServiceAccountToken: true
                 }
             ));
 
@@ -5001,7 +5122,8 @@ describe('Declarations', () => {
                         cipherText: '$M$privateKey'
                     },
                     serviceEmail: 'serviceEmail',
-                    reportInstanceMetadata: false
+                    reportInstanceMetadata: false,
+                    useServiceAccountToken: false
                 }
             ));
 
@@ -5025,9 +5147,32 @@ describe('Declarations', () => {
                         cipherText: '$M$privateKey'
                     },
                     serviceEmail: 'serviceEmail',
-                    reportInstanceMetadata: false
+                    reportInstanceMetadata: false,
+                    useServiceAccountToken: false
                 }
             ));
+
+            it('should not allow privateKeyId when useServiceAccountToken is true', () => assert.isRejected(validateFull(
+                {
+                    type: 'Google_Cloud_Monitoring',
+                    projectId: 'projectId',
+                    privateKeyId: 'privateKeyId',
+                    serviceEmail: 'serviceEmail',
+                    useServiceAccountToken: true
+                }
+            ), /useServiceAccountToken\/const.*"allowedValue":false/));
+
+            it('should not allow privateKey when useServiceAccountToken is true', () => assert.isRejected(validateFull(
+                {
+                    type: 'Google_Cloud_Monitoring',
+                    projectId: 'projectId',
+                    privateKey: {
+                        cipherText: 'privateKey'
+                    },
+                    serviceEmail: 'serviceEmail',
+                    useServiceAccountToken: true
+                }
+            ), /useServiceAccountToken\/const.*"allowedValue":false/));
 
             schemaValidationUtil.generateSchemaBasicTests(
                 basicSchemaTestsValidator,
@@ -5389,7 +5534,8 @@ describe('Declarations', () => {
                     type: 'Statsd',
                     host: 'host',
                     protocol: 'udp',
-                    port: 8125
+                    port: 8125,
+                    convertBooleansToMetrics: false
                 }
             ));
 
@@ -5398,13 +5544,15 @@ describe('Declarations', () => {
                     type: 'Statsd',
                     host: 'host',
                     protocol: 'tcp',
-                    port: 80
+                    port: 80,
+                    convertBooleansToMetrics: true
                 },
                 {
                     type: 'Statsd',
                     host: 'host',
                     protocol: 'tcp',
-                    port: 80
+                    port: 80,
+                    convertBooleansToMetrics: true
                 }
             ));
 
@@ -5433,6 +5581,15 @@ describe('Declarations', () => {
                     }
                 ]
             );
+
+            it('should fail when invalid \'convertBooleansToMetrics\' value specified', () => assert.isRejected(
+                validateMinimal({
+                    type: 'Statsd',
+                    host: 'host',
+                    convertBooleansToMetrics: 'something'
+                }),
+                /convertBooleansToMetrics\/type.*should be boolean/
+            ));
         });
 
         describe('Sumo_Logic', () => {
@@ -5682,7 +5839,8 @@ describe('Declarations', () => {
                 {
                     type: 'OpenTelemetry_Exporter',
                     host: 'host',
-                    port: 55681
+                    port: 55681,
+                    convertBooleansToMetrics: false
                 }
             ));
 
@@ -5697,7 +5855,8 @@ describe('Declarations', () => {
                             name: 'headerName',
                             value: 'headerValue'
                         }
-                    ]
+                    ],
+                    convertBooleansToMetrics: true
                 },
                 {
                     type: 'OpenTelemetry_Exporter',
@@ -5709,7 +5868,8 @@ describe('Declarations', () => {
                             name: 'headerName',
                             value: 'headerValue'
                         }
-                    ]
+                    ],
+                    convertBooleansToMetrics: true
                 }
             ));
 
@@ -5726,6 +5886,16 @@ describe('Declarations', () => {
                 ],
                 { stringLengthTests: true }
             );
+
+            it('should fail when invalid \'convertBooleansToMetrics\' value specified', () => assert.isRejected(
+                validateMinimal({
+                    type: 'OpenTelemetry_Exporter',
+                    host: 'host',
+                    port: 55681,
+                    convertBooleansToMetrics: 'something'
+                }),
+                /convertBooleansToMetrics\/type.*should be boolean/
+            ));
         });
     });
 
@@ -5998,7 +6168,6 @@ describe('Declarations', () => {
         ));
     });
 });
-
 
 function declValidator(decl, addtlContext) {
     let options;

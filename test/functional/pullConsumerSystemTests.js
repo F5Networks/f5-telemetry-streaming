@@ -27,7 +27,7 @@ function loadPullConsumers() {
     // filter consumers by module name if needed
     if (pullConsumerFilter) {
         util.logger.info(`Using filter '${pullConsumerFilter}' to filter modules from '${pullConsumerDir}'`);
-        pullConsumers = pullConsumers.filter(fName => fName.match(new RegExp(pullConsumerFilter, 'i')) !== null);
+        pullConsumers = pullConsumers.filter((fName) => fName.match(new RegExp(pullConsumerFilter, 'i')) !== null);
     }
 
     const mapping = {};

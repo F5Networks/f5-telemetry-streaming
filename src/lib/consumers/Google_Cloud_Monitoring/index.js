@@ -8,7 +8,7 @@
 
 'use strict';
 
-const gcpUtil = require('./../shared/gcpUtil');
+const gcpUtil = require('../shared/gcpUtil');
 
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 const requestsUtil = require('../../utils/requests');
@@ -29,7 +29,7 @@ function checkMetricDescriptors(data, descriptors, currentPath, metrics) {
                 key,
                 value: data[key],
                 path,
-                new: descriptors.findIndex(element => element.type.includes(path)) === -1
+                new: descriptors.findIndex((element) => element.type.includes(path)) === -1
             };
             metrics.push(metric);
         }
@@ -49,7 +49,8 @@ module.exports = function (context) {
     const serviceAccount = {
         serviceEmail: context.config.serviceEmail,
         privateKeyId: context.config.privateKeyId,
-        privateKey: context.config.privateKey
+        privateKey: context.config.privateKey,
+        useServiceAccountToken: context.config.useServiceAccountToken
     };
 
     let Authorization;

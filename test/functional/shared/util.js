@@ -45,7 +45,6 @@ const makeRequestWithRetry = function (makeRequest, interval, maxRetries) {
     });
 };
 
-
 module.exports = {
 
     makeRequestWithRetry,
@@ -106,7 +105,7 @@ module.exports = {
         const dir = `${__dirname}/../../../dist`;
 
         const distFiles = fs.readdirSync(dir);
-        const packageFiles = distFiles.filter(f => f.endsWith('.rpm'));
+        const packageFiles = distFiles.filter((f) => f.endsWith('.rpm'));
 
         // get latest rpm file (by timestamp since epoch)
         // note: this might not work if the artifact resets the timestamps
@@ -207,7 +206,7 @@ module.exports = {
         };
 
         return this.makeRequest(host, uri, postOptions)
-            .then(data => ({ token: data.token.token }))
+            .then((data) => ({ token: data.token.token }))
             .catch((err) => {
                 const msg = `getAuthToken: ${err}`;
                 throw new Error(msg);
@@ -387,9 +386,9 @@ module.exports = {
         if (testHarnessFile && fs.existsSync(testHarnessFile)) {
             let filter;
             if (harnessType === 'BIGIP') {
-                filter = item => item.is_f5_device && item.type === 'bigip';
+                filter = (item) => item.is_f5_device && item.type === 'bigip';
             } else {
-                filter = item => !item.is_f5_device;
+                filter = (item) => !item.is_f5_device;
             }
             // eslint-disable-next-line import/no-dynamic-require, global-require
             hosts = require(testHarnessFile).filter(filter).map((item) => {
@@ -412,7 +411,7 @@ module.exports = {
             });
         } else if (envVars && envVars.IP && process.env[envVars.IP]) {
             // straight up environment variables - could be 1+ hosts: x.x.x.x,x.x.x.y
-            hosts = process.env[envVars.IP].split(',').map(host => ({
+            hosts = process.env[envVars.IP].split(',').map((host) => ({
                 ip: host,
                 username: process.env[envVars.USER],
                 password: process.env[envVars.PWD]
@@ -506,7 +505,7 @@ module.exports = {
      * @returns {Promise}
      */
     sleep(sleepTime) {
-        return new Promise(resolve => setTimeout(resolve, sleepTime));
+        return new Promise((resolve) => setTimeout(resolve, sleepTime));
     },
 
     /**
@@ -534,6 +533,6 @@ module.exports = {
                 };
                 return this.makeRequest(host, uri, postOptions);
             })
-            .then(response => response.selfLink.split('ver=')[1]);
+            .then((response) => response.selfLink.split('ver=')[1]);
     }
 };

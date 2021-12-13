@@ -65,7 +65,7 @@ module.exports = {
                             const ajvProp = ctx.propFullName.split('.').slice(-1)[0];
                             const testDecl = lodash.cloneDeep(ctx.declaration);
                             const targetObj = lodash.get(testDecl, ctx.property);
-                            propSets.forEach(prop => lodash.unset(targetObj, prop));
+                            propSets.forEach((prop) => lodash.unset(targetObj, prop));
                             lodash.set(testDecl, ctx.property, targetObj);
                             return assert.isRejected(
                                 ctx.validator(testDecl),

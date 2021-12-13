@@ -34,7 +34,6 @@ const STATSD_PROTOCOLS = ['tcp', 'udp'];
 // read in example config
 const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
 
-
 function runRemoteCmd(cmd) {
     return util.performRemoteCmd(CONSUMER_HOST.ip, CONSUMER_HOST.username, cmd, { password: CONSUMER_HOST.password });
 }
@@ -46,7 +45,7 @@ function setup() {
 }
 
 function test() {
-    STATSD_PROTOCOLS.forEach(protocol => describe(`Consumer Test: Statsd | Protocol: ${protocol}`, () => {
+    STATSD_PROTOCOLS.forEach((protocol) => describe(`Consumer Test: Statsd | Protocol: ${protocol}`, () => {
         const containerName = `${STATSD_CONTAINER_NAME}-${protocol}`;
         describe('Consumer Test: Statsd - Configure Service', () => {
             it('should start container', () => {
@@ -73,7 +72,7 @@ function test() {
                 };
 
                 // splunk container takes about 15 seconds to come up
-                return new Promise(resolve => setTimeout(resolve, 1500))
+                return new Promise((resolve) => setTimeout(resolve, 1500))
                     .then(() => util.makeRequest(CONSUMER_HOST.ip, uri, options))
                     .then((data) => {
                         util.logger.info('Statsd response:', data);
@@ -92,7 +91,7 @@ function test() {
                 protocol,
                 port: STATSD_DATA_PORT
             };
-            DUTS.forEach(dut => it(
+            DUTS.forEach((dut) => it(
                 `should configure TS - ${dut.hostalias}`,
                 () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(consumerDeclaration))
             ));
@@ -112,7 +111,7 @@ function test() {
                 };
 
                 return util.makeRequest(CONSUMER_HOST.ip, uri, options)
-                    .then(data => Promise.resolve([searchString, data]));
+                    .then((data) => Promise.resolve([searchString, data]));
             };
 
             const stripMetrics = (data) => {
@@ -135,10 +134,10 @@ function test() {
                 const hostnamePrefix = data.system ? data.system.hostname : DEFAULT_HOSTNAME;
 
                 // account for item in path having '.' or '/'
-                return diff.map(item => [
+                return diff.map((item) => [
                     basePrefix,
                     hostnamePrefix
-                ].concat(item.path).map(i => i.replace(/\.|\/|:/g, '-')).join('.'));
+                ].concat(item.path).map((i) => i.replace(/\.|\/|:/g, '-')).join('.'));
             };
 
             const verifyMetrics = (metrics) => {
@@ -178,7 +177,7 @@ function test() {
                              * Sleep for 30 second(s) and return Promise.reject to allow retry
                              */
                             util.logger.info('Waiting for data to be indexed...');
-                            return new Promise(resolveTimer => setTimeout(resolveTimer, 30000))
+                            return new Promise((resolveTimer) => setTimeout(resolveTimer, 30000))
                                 .then(() => Promise.reject(new Error('Metrics are empty / not indexed')));
                         });
                 };
@@ -215,7 +214,7 @@ function test() {
 
 function teardown() {
     describe('Consumer Test: Statsd - teardown', () => {
-        STATSD_PROTOCOLS.forEach(protocol => it(
+        STATSD_PROTOCOLS.forEach((protocol) => it(
             `should remove ${protocol} container(s)`, () => runRemoteCmd(`docker container rm -f ${STATSD_CONTAINER_NAME}-${protocol}`)
         ));
     });

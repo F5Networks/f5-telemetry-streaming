@@ -116,7 +116,7 @@ describe('IHealthPollerHandler', () => {
                     assert.strictEqual(restOpMock.getStatusCode(), 200, 'should return expected code');
                     assert.strictEqual(restOpMock.getBody().code, 200, 'should return expected code');
                     assert.sameDeepMembers(
-                        restOpMock.getBody().message.map(s => s.name),
+                        restOpMock.getBody().message.map((s) => s.name),
                         [
                             'f5telemetry_default::System::iHealthPoller_1',
                             'Namespace::System::iHealthPoller_1'
@@ -202,7 +202,7 @@ describe('IHealthPollerHandler', () => {
                     assert.strictEqual(restOpMock.getStatusCode(), 200, 'should return expected code');
                     assert.strictEqual(restOpMock.getBody().code, 200, 'should return expected code');
                     assert.sameDeepMembers(
-                        restOpMock.getBody().message.map(s => s.name),
+                        restOpMock.getBody().message.map((s) => s.name),
                         [
                             'Namespace::System::iHealthPoller_1'
                         ],
@@ -217,7 +217,7 @@ describe('IHealthPollerHandler', () => {
                 .then(() => {
                     assert.strictEqual(restOpMock.getStatusCode(), 200, 'should return expected code');
                     assert.strictEqual(restOpMock.getBody().code, 200, 'should return expected code');
-                    assert.isEmpty(restOpMock.getBody().message.map(s => s.name), 'should return expected body');
+                    assert.isEmpty(restOpMock.getBody().message.map((s) => s.name), 'should return expected body');
                 });
         });
 

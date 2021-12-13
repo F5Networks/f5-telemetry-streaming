@@ -1238,6 +1238,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        poolName: '/Common/app.app/app_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1250,6 +1251,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        poolName: '/Common/app.app/app_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1262,6 +1264,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        poolName: '/Common/app.app/app_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1274,6 +1277,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        poolName: '/Common/app.app/app_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1286,6 +1290,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        poolName: '/Common/app.app/app_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1298,6 +1303,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        poolName: '/Common/app.app/app_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1310,6 +1316,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        poolName: '/Common/app.app/app_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1410,6 +1417,7 @@ module.exports = {
                         monitorStatus: 'down',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        poolName: '/Common/telemetry-local',
                         port: 0,
                         'status.statusReason': 'Pool member has been marked down by a monitor'
                     }
@@ -1422,6 +1430,7 @@ module.exports = {
                         monitorStatus: 'down',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        poolName: '/Common/telemetry-local',
                         port: 0,
                         'status.statusReason': 'Pool member has been marked down by a monitor'
                     }
@@ -1434,6 +1443,7 @@ module.exports = {
                         monitorStatus: 'down',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        poolName: '/Common/telemetry-local',
                         port: 0,
                         'status.statusReason': 'Pool member has been marked down by a monitor'
                     }
@@ -1446,6 +1456,7 @@ module.exports = {
                         monitorStatus: 'down',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        poolName: '/Common/telemetry-local',
                         port: 0,
                         'status.statusReason': 'Pool member has been marked down by a monitor'
                     }
@@ -1458,6 +1469,7 @@ module.exports = {
                         monitorStatus: 'down',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        poolName: '/Common/telemetry-local',
                         port: 0,
                         'status.statusReason': 'Pool member has been marked down by a monitor'
                     }
@@ -1470,6 +1482,7 @@ module.exports = {
                         monitorStatus: 'down',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        poolName: '/Common/telemetry-local',
                         port: 0,
                         'status.statusReason': 'Pool member has been marked down by a monitor'
                     }
@@ -1482,6 +1495,7 @@ module.exports = {
                         monitorStatus: 'down',
                         availabilityState: 'available',
                         enabledState: 'enabled',
+                        poolName: '/Common/telemetry-local',
                         port: 0,
                         'status.statusReason': 'Pool member has been marked down by a monitor'
                     }
@@ -1590,6 +1604,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        poolName: '/Example_Tenant/A1/hsl_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1602,6 +1617,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        poolName: '/Example_Tenant/A1/hsl_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1614,6 +1630,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        poolName: '/Example_Tenant/A1/hsl_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1626,6 +1643,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        poolName: '/Example_Tenant/A1/hsl_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1638,6 +1656,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        poolName: '/Example_Tenant/A1/hsl_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1650,6 +1669,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        poolName: '/Example_Tenant/A1/hsl_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1662,6 +1682,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        poolName: '/Example_Tenant/A1/hsl_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1770,6 +1791,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        poolName: '/Example_Tenant/A1/web_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1782,6 +1804,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        poolName: '/Example_Tenant/A1/web_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1794,6 +1817,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        poolName: '/Example_Tenant/A1/web_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1806,6 +1830,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        poolName: '/Example_Tenant/A1/web_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1818,6 +1843,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        poolName: '/Example_Tenant/A1/web_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1830,6 +1856,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        poolName: '/Example_Tenant/A1/web_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1842,6 +1869,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        poolName: '/Example_Tenant/A1/web_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1854,6 +1882,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        poolName: '/Example_Tenant/A1/web_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1866,6 +1895,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        poolName: '/Example_Tenant/A1/web_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1878,6 +1908,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        poolName: '/Example_Tenant/A1/web_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1890,6 +1921,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        poolName: '/Example_Tenant/A1/web_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1902,6 +1934,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        poolName: '/Example_Tenant/A1/web_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1914,6 +1947,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        poolName: '/Example_Tenant/A1/web_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
@@ -1926,6 +1960,7 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
+                        poolName: '/Example_Tenant/A1/web_pool',
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }

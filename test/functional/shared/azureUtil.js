@@ -10,7 +10,6 @@
 
 const util = require('./util');
 
-
 function getOAuthToken(clientId, clientSecret, tenantId, cloudType) {
     const loginDomain = cloudType === 'gov' ? 'login.microsoftonline.us' : 'login.microsoftonline.com';
     const resource = cloudType === 'gov' ? 'https://api.loganalytics.us/' : 'https://api.loganalytics.io/';

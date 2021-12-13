@@ -29,6 +29,7 @@ include:
 .install_unittest_packages_cmd: &install_unittest_packages_cmd
 - nodeFullVer=$(node --version)
 - echo "Node.js version - $nodeFullVer"
+- echo "NPM origin version - $(npm --version)"
 - ver=$(echo $nodeFullVer | head -c 3)
 - if [[ "$ver" == "v4." ]]; then
 -   npm install --global npm@5.10.0
@@ -45,6 +46,7 @@ include:
 - else
 -   npm run install-test
 - fi
+- echo "NPM updated version - $(npm --version)"
 
 .run_unittest_cmd: &run_unittest_cmd
 - npm run test-only
@@ -149,7 +151,7 @@ include:
 lint:
     extends:
         - .test_job_definition
-    image: ${ARTIFACTORY_DOCKER_HUB}/node:8
+    image: ${ARTIFACTORY_DOCKER_HUB}/node:12
     stage: lint
     script:
         - *install_unittest_packages_cmd
@@ -185,8 +187,22 @@ test_node12:
         - .run_unittest
     image: ${ARTIFACTORY_DOCKER_HUB}/node:12
 
+# Node 14 LTS (active, maintenance)
+test_node14:
+    extends:
+        - .run_unittest
+    image: ${ARTIFACTORY_DOCKER_HUB}/node:14
+
+# Node 16 LTS (active, maintenance)
+test_node16:
+    extends:
+        - .run_unittest
+    image: ${ARTIFACTORY_DOCKER_HUB}/node:16
+
 # mostly for containers, unittests only (without coverage check)
-test_node_latest:
+# disabled for now, npm has one issue with DNS (IPv6), probably
+# docker image issue. Node version 17.x, npm version 8.1.0
+.test_node_latest:
     extends:
         - .run_unittest
     image: ${ARTIFACTORY_DOCKER_HUB}/node:latest

@@ -22,7 +22,6 @@ const tracers = require('../utils/tracer');
 
 /** @module EventListener */
 
-
 const normalizationOpts = {
     global: properties.global,
     events: properties.events,
@@ -72,7 +71,7 @@ class ReceiversManager {
      * @returns {Promise} resolved once all receivers destroyed
      */
     destroyAll() {
-        return promiseUtil.allSettled(this.getAll().map(receiver => receiver.destroy()))
+        return promiseUtil.allSettled(this.getAll().map((receiver) => receiver.destroy()))
             .then((ret) => {
                 this.registered = {};
                 return ret;
@@ -85,7 +84,7 @@ class ReceiversManager {
      * @returns {Array<Object>} registered receivers
      */
     getAll() {
-        return Object.keys(this.registered).map(key => this.registered[key]);
+        return Object.keys(this.registered).map((key) => this.registered[key]);
     }
 
     /**
@@ -121,8 +120,8 @@ class ReceiversManager {
             }
         });
         return promiseUtil.allSettled(
-            receivers.map(r => r.restart({ attempts: 10 }) // without delay for now (REST API is sync)
-                .catch(err => r.stop() // stop to avoid resources leaking
+            receivers.map((r) => r.restart({ attempts: 10 }) // without delay for now (REST API is sync)
+                .catch((err) => r.stop() // stop to avoid resources leaking
                     .then(() => Promise.reject(err))))
         )
             .then(promiseUtil.getValues);
@@ -144,8 +143,8 @@ class ReceiversManager {
                 }
             }
         });
-        return promiseUtil.allSettled(receivers.map(r => r.destroy()
-            .catch(destroyErr => r.logger.exception('unable to stop and destroy receiver', destroyErr))));
+        return promiseUtil.allSettled(receivers.map((r) => r.destroy()
+            .catch((destroyErr) => r.logger.exception('unable to stop and destroy receiver', destroyErr))));
     }
 }
 
@@ -238,7 +237,7 @@ class EventListener {
                     destinationIds: this.destinationIds
                 };
                 const p = dataPipeline.process(dataCtx, { tracer: this.tracer, actions: this.actions })
-                    .catch(err => this.logger.exception('EventListener:_processEvents unexpected error from dataPipeline:process', err));
+                    .catch((err) => this.logger.exception('EventListener:_processEvents unexpected error from dataPipeline:process', err));
                 promises.push(p);
             }
         });
@@ -339,7 +338,7 @@ EventListener.getByName = function (name) {
  * @returns {Array<EventListener>} current listeners
  */
 EventListener.getAll = function () {
-    return Object.keys(EventListener.instances).map(key => EventListener.instances[key]);
+    return Object.keys(EventListener.instances).map((key) => EventListener.instances[key]);
 };
 
 /**
@@ -361,7 +360,7 @@ configWorker.on('change', (config) => {
 
     // stop all removed listeners
     EventListener.getAll().forEach((listener) => {
-        const configMatch = configuredListeners.find(n => n.traceName === listener.name);
+        const configMatch = configuredListeners.find((n) => n.traceName === listener.name);
         if (!configMatch) {
             logger.debug(`Removing event listener - ${listener.name} [port = ${listener.messageStream.port}]. Reason - removed from configuration.`);
             EventListener.remove(listener);
@@ -390,7 +389,7 @@ configWorker.on('change', (config) => {
         const listener = EventListener.get(name, port);
         listener.updateConfig({
             actions: listenerConfig.actions,
-            destinationIds: configUtil.getReceivers(config, listenerConfig).map(r => r.id),
+            destinationIds: configUtil.getReceivers(config, listenerConfig).map((r) => r.id),
             filterFunc: buildFilterFunc(listenerConfig),
             id: listenerConfig.id,
             tags: listenerConfig.tag,
@@ -403,7 +402,7 @@ configWorker.on('change', (config) => {
     return EventListener.receiversManager.stopAndRemoveInactive()
         .then(() => EventListener.receiversManager.start())
         .then(() => logger.debug(`${EventListener.getAll().length} event listener(s) listening`))
-        .catch(err => logger.exception('Unable to start some (or all) of the event listeners', err));
+        .catch((err) => logger.exception('Unable to start some (or all) of the event listeners', err));
 });
 
 function sendShutdownEvent() {

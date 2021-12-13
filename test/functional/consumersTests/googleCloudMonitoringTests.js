@@ -84,7 +84,7 @@ function test() {
             serviceEmail: SERVICE_EMAIL,
             privateKeyId: PRIVATE_KEY_ID
         };
-        DUTS.forEach(dut => it(
+        DUTS.forEach((dut) => it(
             `should configure TS - ${dut.hostalias}`,
             () => dutUtils.postDeclarationToDUT(dut, sharedUtil.deepCopy(consumerDeclaration))
         ));
@@ -113,7 +113,7 @@ function test() {
                     `interval.endTime=${timeEnd}`,
                     `filter=metric.type="custom.googleapis.com/system/tmmCpu" AND resource.labels.namespace="${dut.hostname}"`
                 ].join('&');
-                return new Promise(resolve => setTimeout(resolve, 30000))
+                return new Promise((resolve) => setTimeout(resolve, 30000))
                     .then(() => queryGoogle(queryString))
                     .then((timeSeries) => {
                         sharedUtil.logger.info('Response from Google Cloud Monitoring:', { hostname: dut.hostname, timeSeries });

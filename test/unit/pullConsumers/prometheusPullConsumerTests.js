@@ -27,7 +27,7 @@ const assert = chai.assert;
 
 moduleCache.remember();
 
-const arraysToPromLines = input => lodash.flatten(input).join('\n');
+const arraysToPromLines = (input) => lodash.flatten(input).join('\n');
 
 describe('Prometheus Pull Consumer', () => {
     let context;

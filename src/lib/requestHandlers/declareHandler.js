@@ -78,7 +78,7 @@ class DeclareEndpointHandler extends BaseRequestHandler {
             };
             return this;
         })
-            .catch(error => new ErrorHandler(error).process());
+            .catch((error) => new ErrorHandler(error).process());
     }
 }
 

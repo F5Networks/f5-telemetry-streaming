@@ -44,7 +44,6 @@ configListenerModulesToLoad.forEach((module) => {
     }
 });
 
-
 /**
  * Rest Worker class processes user's requests and responsible for
  * application state/stop. See more details on F5 DevCentral.

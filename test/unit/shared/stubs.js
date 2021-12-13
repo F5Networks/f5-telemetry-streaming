@@ -197,7 +197,7 @@ const _module = module.exports = {
     configWorker(configWorker) {
         const ctx = _module.eventEmitter(configWorker);
         ctx.configs = [];
-        configWorker.on('change', config => ctx.configs.push(config));
+        configWorker.on('change', (config) => ctx.configs.push(config));
         return ctx;
     },
 
@@ -214,8 +214,8 @@ const _module = module.exports = {
             encryptSecret: sinon.stub(deviceUtil, 'encryptSecret'),
             getDeviceType: sinon.stub(deviceUtil, 'getDeviceType')
         };
-        ctx.decryptSecret.callsFake(data => Promise.resolve(data.slice(3)));
-        ctx.encryptSecret.callsFake(data => Promise.resolve(`$M$${data}`));
+        ctx.decryptSecret.callsFake((data) => Promise.resolve(data.slice(3)));
+        ctx.encryptSecret.callsFake((data) => Promise.resolve(`$M$${data}`));
         ctx.getDeviceType.callsFake(() => Promise.resolve(constants.DEVICE_TYPE.BIG_IP));
         return ctx;
     },
@@ -238,7 +238,7 @@ const _module = module.exports = {
         addStubRestore(ctx.stub, () => {
             emitter.removeAllListeners();
             Object.keys(ctx.preExistingListeners).forEach((evtName) => {
-                ctx.preExistingListeners[evtName].forEach(listener => emitter.on(evtName, listener));
+                ctx.preExistingListeners[evtName].forEach((listener) => emitter.on(evtName, listener));
             });
         });
         return ctx;

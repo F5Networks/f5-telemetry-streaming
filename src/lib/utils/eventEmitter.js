@@ -52,7 +52,7 @@ class SafeEventEmitter extends EventEmitter2 {
     safeEmitAsync() {
         try {
             return this.emitAsync.apply(this, arguments)
-                .catch(error => logSafeEmitException.call(this, arguments[0], error));
+                .catch((error) => logSafeEmitException.call(this, arguments[0], error));
         } catch (emitErr) {
             return Promise.resolve(logSafeEmitException.call(this, arguments[0], emitErr));
         }
