@@ -57,8 +57,8 @@ function resolvePointer(origin, pointer, srcPointer, options) {
     };
 
     let ret = '';
-    const pointers = pointer.split('/').filter(i => (i !== '' && i !== '@')); // strip '' or leading '@'
-    const sourcePointers = srcPointer.split('/').filter(i => (i !== '')); // strip ''
+    const pointers = pointer.split('/').filter((i) => (i !== '' && i !== '@')); // strip '' or leading '@'
+    const sourcePointers = srcPointer.split('/').filter((i) => (i !== '')); // strip ''
 
     // first character in path indicates "relativeness"
     const fC = pointer[0];
@@ -242,7 +242,7 @@ function declarationClassPropCheck(schemaCtx, dataCtx) {
     const options = schemaCtx.schema;
 
     // remove leading and trailing '/'
-    const trimPath = val => val.substring(
+    const trimPath = (val) => val.substring(
         val.startsWith('/') ? 1 : 0,
         val.endsWith('/') ? (val.length - 1) : val.length
     );
@@ -273,7 +273,7 @@ function declarationClassPropCheck(schemaCtx, dataCtx) {
 
     const pathParts = schemaParts.slice(1).concat(dataParts.slice(1));
     /* eslint-disable no-return-assign */
-    if (!pathParts.every(key => typeof (objInstance = objInstance[key]) !== 'undefined')) {
+    if (!pathParts.every((key) => typeof (objInstance = objInstance[key]) !== 'undefined')) {
         const resolvedPath = `${classInstanceName}/${pathParts.join('/')}`;
         throw new Error(`Unable to find "${resolvedPath}"`);
     }
@@ -445,7 +445,6 @@ function nodeSupportVersionCheck(schemaObj) {
     return true;
 }
 
-
 /**
  * Expand JSON pointer
  *
@@ -538,7 +537,7 @@ function runValidationFunction(func, schemaCtx, dataCtx) {
  */
 function wrapAsyncValidationFunction(func, schemaCtx, dataCtx) {
     return () => func()
-        .catch(err => Promise.reject(getValidationError(err, schemaCtx, dataCtx)));
+        .catch((err) => Promise.reject(getValidationError(err, schemaCtx, dataCtx)));
 }
 
 /**

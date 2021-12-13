@@ -39,7 +39,7 @@ function test() {
 
     describe('Pull Consumer Test: default consumer type - no namespace', () => {
         describe('default - Configure TS', () => {
-            DUTS.forEach(dut => it(
+            DUTS.forEach((dut) => it(
                 `should configure TS - ${dut.hostalias}`,
                 () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(BASIC_DECL))
             ));
@@ -67,7 +67,7 @@ function test() {
 
     describe('Pull Consumer Test: default consumer type - with namespace', () => {
         describe('default with namespace - Configure TS', () => {
-            DUTS.forEach(dut => it(
+            DUTS.forEach((dut) => it(
                 `should configure TS - ${dut.hostalias}`,
                 () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(NAMESPACE_DECL))
             ));

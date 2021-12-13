@@ -332,7 +332,7 @@ EndpointLoader.prototype.getAndExpandData = function (endpointObj) {
     return this.getData(endpointObj.path, endpointObj)
         // Promise below will be resolved with array of 2 elements:
         // [ baseData, [refData, refData] ]
-        .then(baseData => Promise.all([
+        .then((baseData) => Promise.all([
             Promise.resolve(baseData),
             this.expandReferences(endpointObj, baseData)
         ]))

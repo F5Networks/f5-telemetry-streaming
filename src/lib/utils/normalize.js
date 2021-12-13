@@ -177,7 +177,7 @@ module.exports = {
      */
     _checkDataHasKeys(data, keys, options) {
         options = options || {};
-        const func = key => data[key] !== undefined;
+        const func = (key) => data[key] !== undefined;
 
         if (options.all) {
             return keys.every(func);
@@ -295,7 +295,7 @@ module.exports = {
             }
             values.push(data[k][key]);
         });
-        const averageFunc = arr => Math.round(arr.reduce((a, b) => a + b, 0) / arr.length);
+        const averageFunc = (arr) => Math.round(arr.reduce((a, b) => a + b, 0) / arr.length);
         return averageFunc(values);
     },
 
@@ -368,7 +368,7 @@ module.exports = {
         const data = args.data;
 
         const accumulateSubKeys = (arg, dataKeys) => dataKeys
-            .map(key => data[key][arg])
+            .map((key) => data[key][arg])
             .reduce((acc, val) => acc + val);
 
         if (args.nestedObjects && typeof data === 'object') {
@@ -380,7 +380,7 @@ module.exports = {
         }
 
         // this should result in a number between 0 and 100 (percentage)
-        let ret = Math.round(data[args.partialKey] / data[args.totalKey] * 100);
+        let ret = Math.round((data[args.partialKey] / data[args.totalKey]) * 100);
         ret = args.inverse ? 100 - ret : ret;
         return ret;
     },
@@ -466,7 +466,7 @@ module.exports = {
             throw new Error(`convertMapToArray() object required: ${util.stringify(data)}`);
         }
 
-        Object.keys(data).forEach(key => ret.push(data[key]));
+        Object.keys(data).forEach((key) => ret.push(data[key]));
         return ret;
     },
 
@@ -488,7 +488,7 @@ module.exports = {
                     const vsAndServer = statsEntry.nestedStats.selfLink.split('/members/')[1].split('/stats')[0];
                     const vs = vsAndServer.split(':')[0];
                     const server = vsAndServer.split(':')[1];
-                    const item = data.membersReference.items.find(i => i.selfLink.includes(`${server}:${vs}`));
+                    const item = data.membersReference.items.find((i) => i.selfLink.includes(`${server}:${vs}`));
                     Object.assign(data.membersReference.entries[key].nestedStats.entries, item);
                 });
             } else {
@@ -517,12 +517,12 @@ module.exports = {
         Object.keys(data).forEach((key) => {
             const item = data[key];
             if (item.pools) {
-                item.pools = item.pools.map(p => buildFullPath(p));
+                item.pools = item.pools.map((p) => buildFullPath(p));
             }
 
             if (item.poolsCname) {
                 item.pools = item.pools || [];
-                item.pools = item.pools.concat(item.poolsCname.map(p => buildFullPath(p)));
+                item.pools = item.pools.concat(item.poolsCname.map((p) => buildFullPath(p)));
             }
 
             if (item.lastResortPool) {

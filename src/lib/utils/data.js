@@ -43,7 +43,7 @@ function checkConditions(dataCtx, actionCtx) {
 
 function checkAnyMatches(data, matchObjects) {
     // Use 'Array.prototype.some' to check whether at least 1 condition is true
-    return matchObjects.some(conditions => checkAllMatches(data, conditions));
+    return matchObjects.some((conditions) => checkAllMatches(data, conditions));
 }
 
 function checkAllMatches(data, conditions) {
@@ -59,7 +59,7 @@ function checkAllMatches(data, conditions) {
         const conditionVals = conditions[conditionKey];
 
         if (typeof conditionVals !== 'object') {
-            return matches.every(match => checkScalarValue(data[match], conditionVals));
+            return matches.every((match) => checkScalarValue(data[match], conditionVals));
         }
 
         if (Array.isArray(conditionVals)) {
@@ -78,7 +78,7 @@ function checkAllMatches(data, conditions) {
         }
 
         // the next condition is an object (and not array); do recursion and matches for the key have been found
-        return matches.every(match => checkAllMatches(data[match], conditionVals));
+        return matches.every((match) => checkAllMatches(data[match], conditionVals));
     });
 }
 
@@ -129,7 +129,7 @@ function getMatches(data, property, propAsKey) {
     if (Object.prototype.hasOwnProperty.call(data, property)) {
         return [property];
     }
-    const checkFx = propAsKey ? (key => property.match(key)) : (key => key.match(property));
+    const checkFx = propAsKey ? ((key) => property.match(key)) : ((key) => key.match(property));
     return Object.keys(data).filter(checkFx);
 }
 
@@ -195,7 +195,7 @@ function getDeepMatches(data, matchObj) {
  */
 function searchAnyMatches(data, matchObj, cb) {
     if (Array.isArray(matchObj)) {
-        matchObj.forEach(matchItem => searchAnyMatches(data, matchItem, cb));
+        matchObj.forEach((matchItem) => searchAnyMatches(data, matchItem, cb));
     } else {
         Object.keys(matchObj).forEach((matchKey) => {
             getMatches(data, matchKey).forEach((key) => {

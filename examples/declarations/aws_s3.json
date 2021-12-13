@@ -8,6 +8,7 @@
         "username": "accesskey",
         "passphrase": {
             "cipherText": "secretkey"
-        }
+        },
+        "endpointUrl": "your_VPC_endpoint_ID.s3.us-west-1.vpce.amazonaws.com"
     }
 }

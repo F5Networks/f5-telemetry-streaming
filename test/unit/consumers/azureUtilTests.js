@@ -15,10 +15,10 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const azureUtil = require('./../../../src/lib/consumers/shared/azureUtil');
+const azureUtil = require('../../../src/lib/consumers/shared/azureUtil');
 const azureUtilTestsData = require('./data/azureUtilTestsData');
-const requestsUtil = require('./../../../src/lib/utils/requests');
-const testUtil = require('./../shared/util');
+const requestsUtil = require('../../../src/lib/utils/requests');
+const testUtil = require('../shared/util');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -166,7 +166,7 @@ describe('Azure Util Tests', () => {
                     }
                 });
                 return azureUtil.getSharedKey(context)
-                    .then(key => assert.strictEqual(key, 'the-hidden-key'));
+                    .then((key) => assert.strictEqual(key, 'the-hidden-key'));
             });
         });
 
@@ -334,7 +334,7 @@ describe('Azure Util Tests', () => {
         Object.keys(azureUtilTestsData).forEach((testSetKey) => {
             const testSet = azureUtilTestsData[testSetKey];
             testUtil.getCallableDescribe(testSet)(testSet.name, () => {
-                testSet.tests.forEach(testConf => testUtil.getCallableIt(testConf)(testConf.name, () => {
+                testSet.tests.forEach((testConf) => testUtil.getCallableIt(testConf)(testConf.name, () => {
                     const context = testUtil.buildConsumerContext({
                         config: testConf.config, metadata: testConf.metadata
                     });

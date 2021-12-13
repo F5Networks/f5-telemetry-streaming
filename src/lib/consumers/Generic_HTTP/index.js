@@ -8,7 +8,7 @@
 
 'use strict';
 
-const httpUtil = require('./../shared/httpUtil');
+const httpUtil = require('../shared/httpUtil');
 const util = require('../../utils/misc');
 
 /**

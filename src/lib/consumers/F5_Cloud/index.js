@@ -84,7 +84,7 @@ module.exports = function (context) {
              */
             if (context.event.isCustom
                 && context.event.type === constants.EVENT_TYPES.SYSTEM_POLLER
-                && Object.keys(data).every(key => key.indexOf(':') !== -1
+                && Object.keys(data).every((key) => key.indexOf(':') !== -1
                     || key === 'telemetryEventCategory'
                     || key === 'telemetryServiceInfo')) {
                 Object.keys(data).forEach((key) => {

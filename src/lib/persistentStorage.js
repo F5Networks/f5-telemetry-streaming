@@ -15,7 +15,6 @@ const unsetData = require('lodash/unset');
 const logger = require('./logger');
 const util = require('./utils/misc');
 
-
 /** @module persistentStorage */
 
 /**
@@ -406,7 +405,6 @@ class RestStorage extends StorageInterface {
         return newState;
     }
 }
-
 
 module.exports = {
     /**

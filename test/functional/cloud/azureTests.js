@@ -9,9 +9,9 @@
 'use strict';
 
 const assert = require('assert');
-const constants = require('./../shared/constants');
-const testUtil = require('./../shared/util');
-const azureUtil = require('./../shared/azureUtil');
+const constants = require('../shared/constants');
+const testUtil = require('../shared/util');
+const azureUtil = require('../shared/azureUtil');
 
 const VM_HOSTNAME = process.env[constants.ENV_VARS.AZURE.VM_HOSTNAME];
 const VM_IP = process.env[constants.ENV_VARS.AZURE.VM_IP];
@@ -37,7 +37,7 @@ describe('Azure Cloud-based Tests', function () {
         password: VM_PWD
     };
 
-    const assertPost = declaration => testUtil.postDeclaration(deviceInfo, declaration)
+    const assertPost = (declaration) => testUtil.postDeclaration(deviceInfo, declaration)
         .then((response) => {
             testUtil.logger.info('Response from declaration post', { hostname: VM_HOSTNAME, response });
             return assert.strictEqual(response.message, 'success', 'POST declaration should return success');
@@ -72,7 +72,7 @@ describe('Azure Cloud-based Tests', function () {
         it('should verify TS service is running', () => {
             const uri = `${constants.BASE_ILX_URI}/info`;
 
-            return new Promise(resolve => setTimeout(resolve, 5000))
+            return new Promise((resolve) => setTimeout(resolve, 5000))
                 .then(() => testUtil.makeRequest(VM_IP, uri, options))
                 .then((data) => {
                     data = data || {};
@@ -119,7 +119,7 @@ describe('Azure Cloud-based Tests', function () {
                     'where TimeGenerated > ago(5m)'
                 ].join(' | ');
 
-                return new Promise(resolve => setTimeout(resolve, 60000))
+                return new Promise((resolve) => setTimeout(resolve, 60000))
                     .then(() => azureUtil.queryLogs(laReaderToken, WORKSPACE_ID, queryString, CLOUD_TYPE))
                     .then((results) => {
                         testUtil.logger.info('Response from Log Analytics:', { hostname: VM_HOSTNAME, results });
@@ -158,7 +158,7 @@ describe('Azure Cloud-based Tests', function () {
 
             it('should retrieve system poller info from Application Insights', () => {
                 testUtil.logger.info('Delay 120000ms to ensure App Insights api data ready');
-                return new Promise(resolve => setTimeout(resolve, 120000))
+                return new Promise((resolve) => setTimeout(resolve, 120000))
                     .then(() => azureUtil.queryAppInsights(APPINS_APP_ID, APPINS_API_KEY, CLOUD_TYPE))
                     .then((response) => {
                         testUtil.logger.info(response);

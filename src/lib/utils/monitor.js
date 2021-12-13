@@ -145,7 +145,7 @@ class Monitor extends SafeEventEmitter {
                 const usedMemPercent = Math.round((usedMem / this.memoryLimit) * 100);
                 logger.debug(`MEMORY_USAGE: ${usedMem} MB (${usedMemPercent}%, limit = ${this.memoryLimit} MB)`);
                 const newInterval = MEM_PERCENT_TO_INTERVAL_SEC.find(
-                    mapping => usedMemPercent >= mapping.min && usedMemPercent <= mapping.max
+                    (mapping) => usedMemPercent >= mapping.min && usedMemPercent <= mapping.max
                 ).interval;
                 if (this.timer.intervalInS !== newInterval) {
                     return this.update(this.memoryThresholdPercent, newInterval);
@@ -172,7 +172,7 @@ monitor.on('error', (err) => {
     logger.exception('An unexpected error occurred in monitor checks', err);
 });
 
-configWorker.on('change', config => Promise.resolve()
+configWorker.on('change', (config) => Promise.resolve()
     .then(() => {
         logger.debug('configWorker change event in monitor');
         const controls = configUtil.getTelemetryControls(config);

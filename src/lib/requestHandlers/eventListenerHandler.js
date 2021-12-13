@@ -53,7 +53,7 @@ class EventListenerEndpointHandler extends BaseRequestHandler {
                 this.code = 200;
                 return this;
             })
-            .catch(error => new ErrorHandler(error).process());
+            .catch((error) => new ErrorHandler(error).process());
     }
 }
 

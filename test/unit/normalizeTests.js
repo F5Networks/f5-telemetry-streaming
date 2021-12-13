@@ -696,7 +696,6 @@ describe('Normalize', () => {
             });
         });
 
-
         describe('formatTimestamps', () => {
             it('should format timestamps', () => {
                 const data = {

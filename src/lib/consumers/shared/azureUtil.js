@@ -100,7 +100,7 @@ function getAccessTokenFromMetadata(context, mgmtUrl) {
         allowSelfSignedCert: context.config.allowSelfSignedCert
     };
     return requestsUtil.makeRequest(accessTokenOpts)
-        .then(resp => resp.access_token)
+        .then((resp) => resp.access_token)
         .catch((err) => {
             context.logger.error(`Unable to generate access token. Error: ${err.message}`);
             return Promise.reject(err);
@@ -118,13 +118,12 @@ function listSubscriptions(accessToken, url) {
     return requestsUtil.makeRequest(listSubOpts);
 }
 
-
 function listWorkspaces(context, accessToken) {
     const mgmtUrl = getApiUrl(context, AZURE_API_TYPES.MGMT);
 
     return listSubscriptions(accessToken, mgmtUrl)
         .then((resp) => {
-            const listWorkspaceBySubOpts = resp.value.map(v => ({
+            const listWorkspaceBySubOpts = resp.value.map((v) => ({
                 fullURI: `${mgmtUrl}/subscriptions/${v.subscriptionId}/providers/Microsoft.OperationalInsights/workspaces?api-version=2015-11-01-preview`,
                 headers: {
                     Authorization: `Bearer ${accessToken}`
@@ -133,8 +132,8 @@ function listWorkspaces(context, accessToken) {
             }));
 
             const workspacePromises = listWorkspaceBySubOpts
-                .map(o => requestsUtil.makeRequest(o)
-                    .then(items => items.value)
+                .map((o) => requestsUtil.makeRequest(o)
+                    .then((items) => items.value)
                     .catch((e) => {
                         context.logger.exception('Error when listing workspaces', e);
                         // don't reject right away when one of the subscription list action failed for some reason
@@ -144,7 +143,7 @@ function listWorkspaces(context, accessToken) {
             return Promise.all(workspacePromises)
                 .then((results) => {
                     const values = Array.prototype.concat.apply([], results);
-                    const workspaces = values.filter(r => r.properties && r.properties.customerId);
+                    const workspaces = values.filter((r) => r.properties && r.properties.customerId);
                     if (workspaces.length === 0) {
                         return Promise.reject(new Error('Unable to list workspaces for subscription(s)'));
                     }
@@ -157,7 +156,7 @@ function getWorkspaceResourceId(context, accessToken) {
     const workspaceGuid = context.config.workspaceId;
     return listWorkspaces(context, accessToken)
         .then((resp) => {
-            const matched = resp.filter(v => v.properties.customerId === workspaceGuid);
+            const matched = resp.filter((v) => v.properties.customerId === workspaceGuid);
             if (!matched) {
                 return Promise.reject(new Error(`Unable to find matching workspace with id ${workspaceGuid}`));
             }
@@ -193,7 +192,7 @@ function getSharedKey(context) {
                 allowSelfSignedCert: context.config.allowSelfSignedCert
             };
             return requestsUtil.makeRequest(sharedKeysOpts)
-                .then(response => response.primarySharedKey)
+                .then((response) => response.primarySharedKey)
                 .catch((err) => {
                     context.logger.error(`Unable to get sharedKey. err: ${err.message}`);
                     return Promise.reject(err);
@@ -264,7 +263,7 @@ function getInstrumentationKeys(context) {
                 const region = getInstanceRegion(context);
                 let keys;
                 if (Array.isArray(context.config.instrumentationKey)) {
-                    keys = context.config.instrumentationKey.map(iKey => ({
+                    keys = context.config.instrumentationKey.map((iKey) => ({
                         instrKey: iKey,
                         connString: buildAppInsConnString(iKey, region)
                     }));
@@ -288,7 +287,7 @@ function getInstrumentationKeys(context) {
             return listSubscriptions(accessToken, mgmtUrl);
         })
         .then((resp) => {
-            const listAppInsightsBySubOpts = resp.value.map(v => ({
+            const listAppInsightsBySubOpts = resp.value.map((v) => ({
                 fullURI: `${mgmtUrl}/subscriptions/${v.subscriptionId}/providers/Microsoft.Insights/components?api-version=2015-05-01`,
                 headers: {
                     Authorization: `Bearer ${accessToken}`
@@ -297,8 +296,8 @@ function getInstrumentationKeys(context) {
             }));
 
             const aiResourcesPromises = listAppInsightsBySubOpts
-                .map(o => requestsUtil.makeRequest(o)
-                    .then(items => items.value)
+                .map((o) => requestsUtil.makeRequest(o)
+                    .then((items) => items.value)
                     .catch((e) => {
                         context.logger.error(`Error when listing Application Insights resources: ${e.stack}`);
                         // don't reject right away when one of the subscription list action failed for some reason
@@ -309,12 +308,12 @@ function getInstrumentationKeys(context) {
         })
         .then((results) => {
             const values = Array.prototype.concat.apply([], results);
-            const aiResources = values.filter(r => r.properties && r.properties.InstrumentationKey
+            const aiResources = values.filter((r) => r.properties && r.properties.InstrumentationKey
                 && (aiNamePattern ? r.name.match(aiNamePattern) : true));
             if (aiResources.length === 0) {
                 return Promise.reject(new Error(`Unable to find Application Insights resources for subscription(s). Name filter: ${aiNamePattern || 'none'}`));
             }
-            const instrKeys = aiResources.map(a => (
+            const instrKeys = aiResources.map((a) => (
                 { name: a.name, instrKey: a.properties.InstrumentationKey, connString: a.properties.ConnectionString }
             ));
             return instrKeys;
@@ -333,10 +332,10 @@ function getInstrumentationKeys(context) {
  */
 function isConfigItems(data, type) {
     // is it of type sslCerts or keys are of format of format /.../...
-    if (type === 'sslCerts' || Object.keys(data).every(key => /\/[^/]*\/.*/.test(key))) {
+    if (type === 'sslCerts' || Object.keys(data).every((key) => /\/[^/]*\/.*/.test(key))) {
         // check that the key is the same as property 'name'
         return Object.keys(data)
-            .every(key => typeof data[key] === 'object' && key === data[key].name);
+            .every((key) => typeof data[key] === 'object' && key === data[key].name);
     }
     return false;
 }
@@ -350,7 +349,7 @@ function isConfigItems(data, type) {
  * @returns {Array} values of data
  */
 function transformConfigItems(data) {
-    return Object.keys(data).map(key => data[key]);
+    return Object.keys(data).map((key) => data[key]);
 }
 
 /**

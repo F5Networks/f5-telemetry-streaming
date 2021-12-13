@@ -504,6 +504,7 @@
                 "/Common/10.0.3.5:80": {
                     "addr": "10.0.3.5",
                     "monitorStatus": "up",
+                    "poolName": "/Common/app.app/app_pool",
                     "port": 0,
                     "serverside.bitsIn": 0,
                     "serverside.bitsOut": 0,
@@ -537,6 +538,7 @@
                 "/Common/10.0.1.100:6514": {
                     "addr": "10.0.1.100",
                     "monitorStatus": "down",
+                    "poolName": "/Common/telemetry-local",
                     "port": 0,
                     "serverside.bitsIn": 0,
                     "serverside.bitsOut": 0,
@@ -570,6 +572,7 @@
                 "/Example_Tenant/192.168.120.6:514": {
                     "addr": "192.168.120.6",
                     "monitorStatus": "up",
+                    "poolName": "/Example_Tenant/A1/hsl_pool",
                     "port": 0,
                     "serverside.bitsIn": 0,
                     "serverside.bitsOut": 0,
@@ -603,6 +606,7 @@
                 "/Example_Tenant/192.0.2.12:80": {
                     "addr": "192.0.2.12",
                     "monitorStatus": "up",
+                    "poolName": "/Example_Tenant/A1/web_pool",
                     "port": 0,
                     "serverside.bitsIn": 0,
                     "serverside.bitsOut": 0,
@@ -618,6 +622,7 @@
                 "/Example_Tenant/192.0.2.13:80": {
                     "addr": "192.0.2.13",
                     "monitorStatus": "up",
+                    "poolName": "/Example_Tenant/A1/web_pool",
                     "port": 0,
                     "serverside.bitsIn": 0,
                     "serverside.bitsOut": 0,

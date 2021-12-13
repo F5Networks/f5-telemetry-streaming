@@ -430,6 +430,7 @@
                     "members": {
                         "/Sample_01/192.0.1.10:80": {
                             "addr": "192.0.1.10",
+                            "poolName": "/Sample_01/A1/web_pool",
                             "port": 80,
                             "serverside.bitsIn": 0,
                             "serverside.bitsOut": 0,
@@ -439,6 +440,7 @@
                         },
                         "/Sample_01/192.0.1.11:80": {
                             "addr": "192.0.1.11",
+                            "poolName": "/Sample_01/A1/web_pool",
                             "port": 80,
                             "serverside.bitsIn": 0,
                             "serverside.bitsOut": 0,
@@ -462,6 +464,7 @@
                     "members": {
                         "/Sample_01/192.0.1.12:80": {
                             "addr": "192.0.1.12",
+                            "poolName": "/Sample_01/A1/web_pool1",
                             "port": 80,
                             "serverside.bitsIn": 0,
                             "serverside.bitsOut": 0,
@@ -471,6 +474,7 @@
                         },
                         "/Sample_01/192.0.1.13:80": {
                             "addr": "192.0.1.13",
+                            "poolName": "/Sample_01/A1/web_pool1",
                             "port": 80,
                             "serverside.bitsIn": 0,
                             "serverside.bitsOut": 0,
@@ -494,6 +498,7 @@
                     "members": {
                         "/Sample_02/192.0.2.10:80": {
                             "addr": "192.0.2.10",
+                            "poolName": "/Sample_02/A1/web_pool",
                             "port": 80,
                             "serverside.bitsIn": 0,
                             "serverside.bitsOut": 0,
@@ -503,6 +508,7 @@
                         },
                         "/Sample_02/192.0.2.11:80": {
                             "addr": "192.0.2.11",
+                            "poolName": "/Sample_02/A1/web_pool",
                             "port": 80,
                             "serverside.bitsIn": 0,
                             "serverside.bitsOut": 0,
@@ -526,6 +532,7 @@
                     "members": {
                         "/Sample_02/192.0.2.12:80": {
                             "addr": "192.0.2.12",
+                            "poolName": "/Sample_02/A1/web_pool1",
                             "port": 80,
                             "serverside.bitsIn": 0,
                             "serverside.bitsOut": 0,
@@ -535,6 +542,7 @@
                         },
                         "/Sample_02/192.0.2.13:80": {
                             "addr": "192.0.2.13",
+                            "poolName": "/Sample_02/A1/web_pool1",
                             "port": 80,
                             "serverside.bitsIn": 0,
                             "serverside.bitsOut": 0,
@@ -1604,6 +1612,7 @@
                     "members": {
                         "/Sample_01/192.0.1.10:80": {
                             "addr": "192.0.1.10",
+                            "poolName": "/Sample_01/A1/web_pool",
                             "port": 80,
                             "serverside.bitsIn": 0,
                             "serverside.bitsOut": 0,
@@ -1613,6 +1622,7 @@
                         },
                         "/Sample_01/192.0.1.11:80": {
                             "addr": "192.0.1.11",
+                            "poolName": "/Sample_01/A1/web_pool",
                             "port": 80,
                             "serverside.bitsIn": 0,
                             "serverside.bitsOut": 0,
@@ -1638,6 +1648,7 @@
                     "members": {
                         "/Sample_01/192.0.1.12:80": {
                             "addr": "192.0.1.12",
+                            "poolName": "/Sample_01/A1/web_pool1",
                             "port": 80,
                             "serverside.bitsIn": 0,
                             "serverside.bitsOut": 0,
@@ -1647,6 +1658,7 @@
                         },
                         "/Sample_01/192.0.1.13:80": {
                             "addr": "192.0.1.13",
+                            "poolName": "/Sample_01/A1/web_pool1",
                             "port": 80,
                             "serverside.bitsIn": 0,
                             "serverside.bitsOut": 0,
@@ -1672,6 +1684,7 @@
                     "members": {
                         "/Sample_02/192.0.2.10:80": {
                             "addr": "192.0.2.10",
+                            "poolName": "/Sample_02/A1/web_pool",
                             "port": 80,
                             "serverside.bitsIn": 0,
                             "serverside.bitsOut": 0,
@@ -1681,6 +1694,7 @@
                         },
                         "/Sample_02/192.0.2.11:80": {
                             "addr": "192.0.2.11",
+                            "poolName": "/Sample_02/A1/web_pool",
                             "port": 80,
                             "serverside.bitsIn": 0,
                             "serverside.bitsOut": 0,
@@ -1706,6 +1720,7 @@
                     "members": {
                         "/Sample_02/192.0.2.12:80": {
                             "addr": "192.0.2.12",
+                            "poolName": "/Sample_02/A1/web_pool1",
                             "port": 80,
                             "serverside.bitsIn": 0,
                             "serverside.bitsOut": 0,
@@ -1715,6 +1730,7 @@
                         },
                         "/Sample_02/192.0.2.13:80": {
                             "addr": "192.0.2.13",
+                            "poolName": "/Sample_02/A1/web_pool1",
                             "port": 80,
                             "serverside.bitsIn": 0,
                             "serverside.bitsOut": 0,

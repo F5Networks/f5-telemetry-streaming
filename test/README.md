@@ -33,6 +33,15 @@ Best practices:
   - You can specify 'testOpts' property on the same level as 'name'. The following options available:
     - only (bool) - run this test only (it.only)
 
+#### Running individual unit tests
+Running the ```npm run test``` command will execute all of the tests in the `./test/unit/` directory (recursively).
+
+However, individual unit tests can be run via mocha, by running the `npm run test-specific` command, along with a custom file glob.
+
+Examples:
+* `npm run test-specific -- test/unit/systemPollerTests.js`
+* `npm run test-specific -- test/unit/system*`
+
 ## Functional
 
 All functional tests reside inside the ```functional``` folder and are run using ```npm run test-functional```.

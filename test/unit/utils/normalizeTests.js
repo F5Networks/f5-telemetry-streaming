@@ -329,7 +329,6 @@ describe('Normalize Util', () => {
             assert.deepStrictEqual(result, expectedResult);
         });
 
-
         it('should format as json and filter/rename', () => {
             const data = 'named_key,key1,key2,key3\nname,value,value,value';
             const expectedResult = {

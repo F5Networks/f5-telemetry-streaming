@@ -950,7 +950,7 @@ describe('Device Util (DeviceAsyncCLI)', () => {
     if (process.versions.node.startsWith('4.')) {
         parseURL = urllib.parse;
     } else {
-        parseURL = url => new urllib.URL(url);
+        parseURL = (url) => new urllib.URL(url);
     }
 
     const testScriptName = 'testScriptName';

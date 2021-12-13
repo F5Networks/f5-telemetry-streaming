@@ -28,6 +28,7 @@ describe('AWS_S3', () => {
     let clock;
     let awsConfigUpdate;
     let s3PutObjectParams;
+    let s3ConstructorParams;
 
     const defaultConsumerConfig = {
         region: 'us-west-1',
@@ -42,12 +43,16 @@ describe('AWS_S3', () => {
 
     beforeEach(() => {
         awsConfigUpdate = sinon.stub(AWS.config, 'update').resolves();
-        sinon.stub(AWS, 'S3').returns({
-            putObject: (params, cb) => {
-                s3PutObjectParams = params;
-                cb(null, '');
-            }
+        sinon.stub(AWS, 'S3').callsFake((s3Params) => {
+            s3ConstructorParams = s3Params;
+            return {
+                putObject: (params, cb) => {
+                    s3PutObjectParams = params;
+                    cb(null, '');
+                }
+            };
         });
+
         // stub getDate() since it attempts to convert into 'local' time.
         sinon.stub(Date.prototype, 'getDate').returns('4');
         // Fake the clock to get a consistent S3 object Key value (which are partitioned by time)
@@ -96,6 +101,21 @@ describe('AWS_S3', () => {
             .then(() => {
                 assert.strictEqual(optionsParam.region, 'us-east-1');
                 assert.strictEqual(optionsParam.credentials, undefined);
+            });
+    });
+
+    it('should supply endpointUrl to AWS client', () => {
+        sinon.stub(AWS, 'Endpoint').callsFake((params) => ({ params }));
+
+        const context = testUtil.buildConsumerContext({
+            config: {
+                endpointUrl: 'full-endpoint-url'
+            }
+        });
+
+        return awsS3Index(context)
+            .then(() => {
+                assert.deepStrictEqual(s3ConstructorParams.endpoint, { params: 'full-endpoint-url' });
             });
     });
 

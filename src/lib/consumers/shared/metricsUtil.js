@@ -49,6 +49,8 @@ module.exports = {
      *      example: e.g. string is 'disk space left 2500Kb only' - it will fetch '2500' and
      *      if next time string will be 'disk space left 4.5mb' - it will fetch '4.5' that
      *      actually is bigger than 2500 (mb > kb) but numbers without units gives us misleading info
+     * - 'boolsToMetrics' setting will convert boolean values to metrics. true -> 1 and false -> 0
+     *      - booleans will be treated as metrics, and will ignore 'tagsToIgnore' and 'tagsToMetrics'
      *
      * @param {object} tsData - TS data to inspect
      * @param {object} [options] - options
@@ -63,6 +65,7 @@ module.exports = {
      * @param {boolean} [options.parseMetrics = false] - parse and re-assign metrics
      * @param {Array<string>} [options.tagsToIgnore] - tags to ignore
      * @param {Array<string>} [options.tagsToMetrics] - tags to metrics
+     * @param {boolean} [options.boolsToMetrics = false] - whether to convert boolean values to metrics
      *
      * @returns {void} once done with inspecting a data
      */
@@ -96,6 +99,12 @@ module.exports = {
                 isCollectionOfObjects = false;
                 if (metricsToTags.indexOf(itemKey) === -1) {
                     let parsedVal = itemData;
+                    if (typeof parsedVal === 'boolean'
+                        && options.boolsToMetrics
+                        && metricsToIgnore.indexOf(itemKey) === -1) {
+                        data[itemKey] = parsedVal ? 1 : 0;
+                        return; // early return, within "if" to stop evaluating 'parsedVal'
+                    }
                     if (typeof parsedVal === 'string') {
                         // still have to parse data despite on "options.parseMetrics" value
                         // to differentiate between "metric" and "non-metric" data

@@ -15,8 +15,8 @@ const path = require('path');
 const winston = require('winston');
 
 const LOG_FILE = `${__dirname}/artifacts/testoutput.log`;
-const LOG_DST = ['console', 'file'].find(item => item === (process.env.LOG_DST || 'file').trim());
-const LOG_SECRETS_ENABLED = !!['1', 'true'].find(item => item === process.env.LOG_SECRETS);
+const LOG_DST = ['console', 'file'].find((item) => item === (process.env.LOG_DST || 'file').trim());
+const LOG_SECRETS_ENABLED = !!['1', 'true'].find((item) => item === process.env.LOG_SECRETS);
 
 const SECRETS_MASK = '*********';
 const KEYWORDS_TO_MASK = [
@@ -94,10 +94,9 @@ function maskSecrets(msg) {
     return ret;
 }
 
-
 const timestamp = () => (new Date()).toISOString();
 /* eslint-disable prefer-template */
-const formatter = options => `[${options.timestamp()}][${options.level.toUpperCase()}] `
+const formatter = (options) => `[${options.timestamp()}][${options.level.toUpperCase()}] `
     + `${maskSecrets(options.message ? options.message : '')}`
     + `${maskSecrets(options.meta && Object.keys(options.meta).length ? ('\n' + JSON.stringify(options.meta, null, 4)) : '')}`;
 

@@ -99,7 +99,7 @@ describe('EventListenerHandler', () => {
         requestRouter.on('register', spy);
         requestRouter.removeAllHandlers();
         requestRouter.registerAllHandlers(true);
-        const routePaths = spy.firstCall.args[0].router.routes.map(r => r.path);
+        const routePaths = spy.firstCall.args[0].router.routes.map((r) => r.path);
 
         assert.isTrue(routePaths.indexOf('/eventListener/:eventListener') > -1);
         assert.isTrue(routePaths.indexOf('/namespace/:namespace/eventListener/:eventListener') > -1);
@@ -110,7 +110,7 @@ describe('EventListenerHandler', () => {
         requestRouter.on('register', spy);
         requestRouter.removeAllHandlers();
         requestRouter.registerAllHandlers();
-        const routePaths = spy.firstCall.args[0].router.routes.map(r => r.path);
+        const routePaths = spy.firstCall.args[0].router.routes.map((r) => r.path);
 
         assert.strictEqual(routePaths.indexOf('/eventListener/:eventListener'), -1);
         assert.strictEqual(routePaths.indexOf('/namespace/:namespace/eventListener/:eventListener'), -1);

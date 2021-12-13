@@ -212,7 +212,7 @@ const IHealthPollerFSM = machina.Fsm.extend({
                 if (!this._diedPromise) {
                     this._diedPromise = this.safeEmitter.waitFor('died');
                     // catch and resolve errors in case of cancellation
-                    this._diedPromise.catch(error => error);
+                    this._diedPromise.catch((error) => error);
                 }
                 // need to emit 'disabling' event to
                 // - interrupt 'sleep'
@@ -387,7 +387,7 @@ const IHealthPollerFSM = machina.Fsm.extend({
                     this.data.currentCycle.succeed = false;
                     this.data.currentCycle.errorMsg = `${error}`;
                 }, { reject: true })
-                    .catch(innerError => innerError)
+                    .catch((innerError) => innerError)
                     .then((innerError) => {
                         if (this.isDemoModeEnabled() || this.isDisabled()) {
                             this.transition('died', innerError || error);
@@ -530,7 +530,7 @@ const IHealthPollerFSM = machina.Fsm.extend({
                     return;
                 }
                 fsmRun.call(this, () => checkNextExecutionTime.call(this)
-                    .then(allowedToStart => this.handle(allowedToStart ? 'ready' : 'sleep')));
+                    .then((allowedToStart) => this.handle(allowedToStart ? 'ready' : 'sleep')));
             },
             ready: 'collectQkview',
             sleep: function sleep() {
@@ -726,7 +726,7 @@ class IHealthPoller extends SafeEventEmitter {
         return Promise.resolve()
             .then(() => {
                 const pollerConfig = configUtil.getTelemetryIHealthPollers(configWorker.currentConfig)
-                    .find(ihpConf => ihpConf.traceName === this.id);
+                    .find((ihpConf) => ihpConf.traceName === this.id);
 
                 if (util.isObjectEmpty(pollerConfig)) {
                     return Promise.reject(new Error(`Configuration for iHealth Poller "${this.name}" (${this.id}) not found!`));
@@ -779,7 +779,7 @@ class IHealthPoller extends SafeEventEmitter {
         if (!this._startPromise) {
             this._startPromise = Promise.resolve()
                 .then(() => this._fsm.start())
-                .catch(error => error)
+                .catch((error) => error)
                 .then((error) => {
                     delete this._startPromise;
                     return error ? Promise.reject(error) : Promise.resolve();
@@ -832,7 +832,7 @@ IHealthPoller.cleanupOrphanedStorageData = function cleanupOrphanedStorageData()
         .then((storageData) => {
             storageData = storageData || {};
             // ignoring 'demo' instances - they are restricted from storing the data
-            const existingKeys = IHealthPoller.getAll().map(poller => poller.storageKey);
+            const existingKeys = IHealthPoller.getAll().map((poller) => poller.storageKey);
             Object.keys(storageData).forEach((skey) => {
                 if (existingKeys.indexOf(skey) === -1) {
                     delete storageData[skey];
@@ -850,7 +850,7 @@ IHealthPoller.cleanupOrphanedStorageData = function cleanupOrphanedStorageData()
  */
 IHealthPoller.create = function create(id, options) {
     options = options || {};
-    let poller = IHealthPoller._instances.find(p => p.id === id);
+    let poller = IHealthPoller._instances.find((p) => p.id === id);
 
     if (poller && poller.isDemoModeEnabled() === !!options.demo) {
         throw new Error(`iHealthPoller instance with ID "${poller.id}" created already (demo = ${poller.isDemoModeEnabled()})`);
@@ -893,7 +893,7 @@ IHealthPoller.disable = function disable(poller) {
                     poller.logger.exception('Unexpected exception on attempt to stop', error);
                 })
                 .then(() => poller.cleanup())
-                .catch(error => poller.logger.exception('Unexpected exception on attempt to stop', error))
+                .catch((error) => poller.logger.exception('Unexpected exception on attempt to stop', error))
         };
     });
 };
@@ -904,7 +904,7 @@ IHealthPoller.disable = function disable(poller) {
  * @returns {Array<IHealthPoller>} iHealth Poller instances (non-demo and/or demo)
  */
 IHealthPoller.get = function get(id) {
-    return IHealthPoller._instances.filter(p => p.id === id);
+    return IHealthPoller._instances.filter((p) => p.id === id);
 };
 
 /**
@@ -921,10 +921,10 @@ IHealthPoller.getAll = function getAll(options) {
     });
     let instances = [];
     if (!options.demoOnly) {
-        instances = instances.concat(IHealthPoller._instances.filter(p => !p.isDemoModeEnabled()));
+        instances = instances.concat(IHealthPoller._instances.filter((p) => !p.isDemoModeEnabled()));
     }
     if (options.demoOnly || options.includeDemo) {
-        instances = instances.concat(IHealthPoller._instances.filter(p => p.isDemoModeEnabled()));
+        instances = instances.concat(IHealthPoller._instances.filter((p) => p.isDemoModeEnabled()));
     }
     return instances;
 };
@@ -973,7 +973,7 @@ function cleanupSensitiveData() {
  */
 function collectQkview() {
     return createQkviewManager.call(this)
-        .then(qkviewMgr => qkviewMgr.process())
+        .then((qkviewMgr) => qkviewMgr.process())
         .then((qkviewFilePath) => {
             this.data.currentCycle.qkview.qkviewFile = qkviewFilePath;
             this.data.stats.qkviewsCollected += 1;
@@ -1076,7 +1076,6 @@ function fetchQkviewReport() {
             };
         });
 }
-
 
 /**
  * Do transition to 'disabled' if needed
@@ -1295,7 +1294,7 @@ function removeQkview() {
         return Promise.resolve();
     }
     return createQkviewManager.call(this)
-        .then(qkviewMgr => qkviewMgr.localDevice.removeFile(qkviewPath));
+        .then((qkviewMgr) => qkviewMgr.localDevice.removeFile(qkviewPath));
 }
 
 /**
@@ -1355,7 +1354,7 @@ function timeUntilNextExecution() {
  */
 function uploadQkview() {
     return createIHealthManager.call(this)
-        .then(ihealthMgr => ihealthMgr.uploadQkview(this.data.currentCycle.qkview.qkviewFile))
+        .then((ihealthMgr) => ihealthMgr.uploadQkview(this.data.currentCycle.qkview.qkviewFile))
         .then((qkviewURI) => {
             this.data.currentCycle.qkview.qkviewURI = qkviewURI;
             this.data.stats.qkviewsUploaded += 1;

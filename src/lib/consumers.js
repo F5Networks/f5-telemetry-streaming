@@ -45,15 +45,15 @@ function loadConsumers(config) {
         return Promise.resolve([]);
     }
 
-    const enabledConsumers = config.filter(c => c.enable);
+    const enabledConsumers = config.filter((c) => c.enable);
     if (enabledConsumers.length === 0) {
         logger.debug('No enabled consumer(s) to load');
         return Promise.resolve([]);
     }
 
     logger.debug(`Loading consumer specific plug-ins from ${CONSUMERS_DIR}`);
-    const loadPromises = enabledConsumers.map(consumerConfig => new Promise((resolve) => {
-        const existingConsumer = CONSUMERS.find(c => c.id === consumerConfig.id);
+    const loadPromises = enabledConsumers.map((consumerConfig) => new Promise((resolve) => {
+        const existingConsumer = CONSUMERS.find((c) => c.id === consumerConfig.id);
         if (consumerConfig.skipUpdate && existingConsumer) {
             resolve(existingConsumer);
         } else {
@@ -86,7 +86,7 @@ function loadConsumers(config) {
         }
     }));
     return Promise.all(loadPromises)
-        .then(loadedConsumers => loadedConsumers.filter(c => c !== undefined));
+        .then((loadedConsumers) => loadedConsumers.filter((c) => c !== undefined));
 }
 
 /**
@@ -96,7 +96,7 @@ function loadConsumers(config) {
  */
 function getLoadedConsumerTypes() {
     if (CONSUMERS.length > 0) {
-        return new Set(CONSUMERS.map(consumer => consumer.config.type));
+        return new Set(CONSUMERS.map((consumer) => consumer.config.type));
     }
     return new Set();
 }
@@ -122,7 +122,7 @@ function unloadUnusedModules(before) {
 }
 
 // config worker change event
-configWorker.on('change', config => Promise.resolve()
+configWorker.on('change', (config) => Promise.resolve()
     .then(() => {
         logger.debug('configWorker change event in consumers');
 
@@ -138,7 +138,6 @@ configWorker.on('change', config => Promise.resolve()
             })
             .then(() => unloadUnusedModules(typesBefore));
     }));
-
 
 module.exports = {
     getConsumers: () => CONSUMERS

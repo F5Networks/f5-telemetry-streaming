@@ -13,7 +13,7 @@ const CollectorMetricExporter = require('@opentelemetry/exporter-collector-proto
 const otelApi = require('@opentelemetry/api');
 
 const metricsUtil = require('../shared/metricsUtil');
-const httpUtil = require('./../shared/httpUtil');
+const httpUtil = require('../shared/httpUtil');
 
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 
@@ -78,6 +78,7 @@ module.exports = function (context) {
     const port = context.config.port;
     const metricsPath = context.config.metricsPath || '';
     const headers = httpUtil.processHeaders(context.config.headers); // no defaults - provide all headers needed
+    const boolsToMetrics = context.config.convertBooleansToMetrics || false;
 
     // We cannot process ihealth/syslog/raw/event data, so don't even try.
     // Other event types may not contain metrics, but handle later
@@ -89,7 +90,7 @@ module.exports = function (context) {
         return Promise.resolve();
     }
 
-    const metrics = createMetrics(context.event.data);
+    const metrics = createMetrics(context.event.data, { boolsToMetrics });
     if (Object.keys(metrics).length === 0) {
         context.logger.debug('Event did not contain any metrics, skipping');
         return Promise.resolve();
@@ -107,7 +108,6 @@ module.exports = function (context) {
         exporter,
         interval: 60 * 1000 // give us 60s to initialize/set metric set
     }).getMeter('telemetry-streaming');
-
 
     if (context.tracer) {
         context.tracer.write(metrics);
@@ -135,15 +135,19 @@ module.exports = function (context) {
 /**
  * Convert Telemetry Streaming data into a collection of OpenTelemetry compatible metrics
  *
- * @param {Object} data     - Telemetry Streaming metric data
+ * @param {Object}  data                    - Telemetry Streaming metric data
+ * @param {Object}  [opts]                  - Options for creating metrics
+ * @param {Boolean} [opts.boolsToMetrics]   - Whether to convert booleans values to metrics
  */
-function createMetrics(data) {
+function createMetrics(data, opts) {
+    opts = opts || {};
     const otelMetrics = {};
 
     metricsUtil.findMetricsAndTags(data, {
         collectTags: true,
         excludeNameFromPath: true,
         parseMetrics: true,
+        boolsToMetrics: opts.boolsToMetrics,
         onMetric: (metricPath, value, tags) => {
             // ignore timestamps and intervals
             if (metricPath[metricPath.length - 1].indexOf('imestamp') === -1

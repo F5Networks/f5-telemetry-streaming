@@ -266,7 +266,6 @@ describe('Monitor Util', () => {
             memUsageStub = sinon.stub(monitor, 'getProcessMemUsage');
         });
 
-
         const usageIntervals = [
             { sec: 30, memUsagePercent: 24, name: 'should configure <25%' },
             { sec: 15, memUsagePercent: 49, name: 'should configure >=25% and < 50%' },

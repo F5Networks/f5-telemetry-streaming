@@ -119,7 +119,7 @@ class TCPDataReceiver extends TcpUdpBaseDataReceiver {
      */
     connectionHandler(conn) {
         addTcpConnection.call(this, conn);
-        conn.on('data', data => callDataCallback.call(this, data, conn))
+        conn.on('data', (data) => callDataCallback.call(this, data, conn))
             .on('error', () => conn.destroy()) // destroy emits 'close' event
             .on('close', () => removeTcpConnection.call(this, conn))
             .on('end', () => {}); // allowHalfOpen is false by default, no need to call 'end' explicitly
@@ -308,7 +308,6 @@ class UDPDataReceiver extends TcpUdpBaseDataReceiver {
     }
 }
 
-
 /**
  * Data Receiver over UDPv4 and UDPv6
  *
@@ -356,7 +355,7 @@ class DualUDPDataReceiver extends TcpUdpBaseDataReceiver {
             return Promise.reject(this.getStateTransitionError(this.constructor.STATE.STARTING));
         }
         this.createReceivers();
-        return promiseUtil.allSettled(this._receivers.map(receiver => receiver.start()))
+        return promiseUtil.allSettled(this._receivers.map((receiver) => receiver.start()))
             .then(promiseUtil.getValues);
     }
 
@@ -372,7 +371,7 @@ class DualUDPDataReceiver extends TcpUdpBaseDataReceiver {
         }
         // stop to listen for 'data' event
         this.stopListeningTo();
-        return promiseUtil.allSettled(this._receivers.map(receiver => receiver.destroy()))
+        return promiseUtil.allSettled(this._receivers.map((receiver) => receiver.destroy()))
             .then((statuses) => {
                 this._receivers = null;
                 return promiseUtil.getValues(statuses);
@@ -417,7 +416,7 @@ function callDataCallback(data, connInfo) {
 function closeAllTcpConnections() {
     this.logger.debug('closing all client connections');
     // do .slice in case if ._removeConnection will be called
-    this._connections.slice(0).forEach(conn => conn.destroy());
+    this._connections.slice(0).forEach((conn) => conn.destroy());
     this._connections = [];
 }
 

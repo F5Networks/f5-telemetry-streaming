@@ -60,11 +60,11 @@ function findSystemOrPollerConfigs(originalConfig, sysOrPollerName, pollerName, 
 
     if (sysOrPollerName && pollerName) {
         // probably system's and poller's names
-        pollers = systemPollers.filter(p => p.name === pollerName && p.systemName === sysOrPollerName);
+        pollers = systemPollers.filter((p) => p.name === pollerName && p.systemName === sysOrPollerName);
     } else {
         // each object has unique name per namespace
         // so, one of the system or poller will be 'undefined'
-        pollers = systemPollers.filter(p => p.systemName === sysOrPollerName);
+        pollers = systemPollers.filter((p) => p.systemName === sysOrPollerName);
     }
 
     if (pollers.length === 0) {
@@ -81,9 +81,8 @@ function getEnabledPollerConfigs(originalConfig, includeDisabled) {
     if (includeDisabled) {
         return pollers;
     }
-    return pollers.filter(p => p.enable);
+    return pollers.filter((p) => p.enable);
 }
-
 
 function applyConfig(originalConfig) {
     const currPollers = module.exports.getPollerTimers();
@@ -99,18 +98,18 @@ function applyConfig(originalConfig) {
             pollerConfig.tracer = tracers.fromConfig(pollerConfig.trace);
             const baseMsg = `system poller ${key}. Interval = ${pollerConfig.interval} sec.`;
             // add to data context to track source poller config and destination(s)
-            pollerConfig.destinationIds = configUtil.getReceivers(originalConfig, pollerConfig).map(r => r.id);
+            pollerConfig.destinationIds = configUtil.getReceivers(originalConfig, pollerConfig).map((r) => r.id);
             if (pollerConfig.interval === 0) {
                 logger.info(`Configuring non-polling ${baseMsg}`);
                 if (currPollers[key] && currPollers[key].timer) {
                     promises.push(currPollers[key].timer.stop()
-                        .catch((error => logger.exception(`Unable to stop timer for System Poller "${key}"`, error))));
+                        .catch(((error) => logger.exception(`Unable to stop timer for System Poller "${key}"`, error))));
                 }
                 currPollers[key] = undefined;
             } else if (currPollers[key] && currPollers[key].timer) {
                 logger.info(`Updating ${baseMsg}`);
                 promises.push(currPollers[key].timer.update(safeProcess, pollerConfig.interval, pollerConfig)
-                    .catch((error => logger.exception(`Unable to update timer for System Poller "${key}"`, error))));
+                    .catch(((error) => logger.exception(`Unable to update timer for System Poller "${key}"`, error))));
                 currPollers[key].config = pollerConfig;
             } else {
                 logger.info(`Starting ${baseMsg}`);
@@ -123,7 +122,7 @@ function applyConfig(originalConfig) {
                     config: pollerConfig
                 };
                 promises.push(currPollers[key].timer.start()
-                    .catch((error => logger.exception(`Unable to start timer for System Poller "${key}"`, error))));
+                    .catch(((error) => logger.exception(`Unable to start timer for System Poller "${key}"`, error))));
             }
         }
     });
@@ -134,7 +133,7 @@ function applyConfig(originalConfig) {
             // for pollers with interval=0, the key exists, but value is undefined
             if (!util.isObjectEmpty(currPollers[key]) && currPollers[key].timer) {
                 promises.push(currPollers[key].timer.stop()
-                    .catch((error => logger.exception(`Unable to stop timer for System Poller "${key}"`, error))));
+                    .catch(((error) => logger.exception(`Unable to stop timer for System Poller "${key}"`, error))));
             }
             delete currPollers[key];
         }
@@ -154,7 +153,7 @@ function enablePollers() {
             if (poller.timer) {
                 // Update timer to enable/re-enable the poller
                 promises.push(poller.timer.update(safeProcess, poller.config.interval, poller.config)
-                    .catch((error => logger.exception(`Unable to update timer for System Poller "${pollerKey}"`, error))));
+                    .catch(((error) => logger.exception(`Unable to update timer for System Poller "${pollerKey}"`, error))));
             } else {
                 poller.timer = new timers.SlidingTimer(safeProcess, {
                     abortOnFailure: false,
@@ -162,7 +161,7 @@ function enablePollers() {
                     logger: logger.getChild(`${poller.config.traceName}.timer`)
                 }, poller.config);
                 promises.push(poller.timer.start()
-                    .catch((error => logger.exception(`Unable to start timer for System Poller "${pollerKey}"`, error))));
+                    .catch(((error) => logger.exception(`Unable to start timer for System Poller "${pollerKey}"`, error))));
             }
         }
     });
@@ -179,7 +178,7 @@ function disablePollers() {
             logger.info(`Disabling system poller ${pollerKey}`);
             if (poller.timer) {
                 promises.push(poller.timer.stop()
-                    .catch((error => logger.exception(`Unable to stop timer for System Poller "${pollerKey}"`, error))));
+                    .catch(((error) => logger.exception(`Unable to stop timer for System Poller "${pollerKey}"`, error))));
             }
         }
     });
@@ -288,13 +287,13 @@ function getPollersConfig(sysOrPollerName, options) {
         .then(() => findSystemOrPollerConfigs(
             configWorker.currentConfig, sysOrPollerName, options.pollerName, options.namespace
         ))
-        .then(config => configUtil.decryptSecrets(config))
+        .then((config) => configUtil.decryptSecrets(config))
         .then((configs) => {
             if (configs.length === 0) {
                 // unexpected, something went wrong
                 throw new errors.ObjectNotFoundInConfigError(`No System or System Poller with name '${sysOrPollerName}' configured`);
             }
-            configs = configs.filter(c => c.enable || includeDisabled);
+            configs = configs.filter((c) => c.enable || includeDisabled);
             return configs;
         });
 }
@@ -316,8 +315,8 @@ function fetchPollersData(pollerConfigs, decryptSecrets) {
 
     return promise
         .then((decryptedConf) => {
-            const processPollers = decryptedConf.map(pollerConf => safeProcess(pollerConf, { requestFromUser: true })
-                .catch(err => caughtErrors.push(err)));
+            const processPollers = decryptedConf.map((pollerConf) => safeProcess(pollerConf, { requestFromUser: true })
+                .catch((err) => caughtErrors.push(err)));
             return Promise.all(processPollers);
         })
         .then((data) => {
@@ -329,7 +328,7 @@ function fetchPollersData(pollerConfigs, decryptSecrets) {
 }
 
 // config worker change event
-configWorker.on('change', config => Promise.resolve()
+configWorker.on('change', (config) => Promise.resolve()
     .then(() => {
         logger.debug('configWorker change event in systemPoller');
         // reset for monitor check
@@ -337,9 +336,9 @@ configWorker.on('change', config => Promise.resolve()
         return applyConfig(util.deepCopy(config));
     })
     .then(() => logger.debug(`${Object.keys(getPollerTimers()).length} system poller(s) running`))
-    .catch(error => logger.exception('Uncaught error during System Poller(s) configuration', error)));
+    .catch((error) => logger.exception('Uncaught error during System Poller(s) configuration', error)));
 
-monitor.on('check', status => new Promise((resolve) => {
+monitor.on('check', (status) => new Promise((resolve) => {
     const monitorChecksOk = status === APP_THRESHOLDS.MEMORY.OK;
     // only enable/disable when there is change in state
     if (processingEnabled !== monitorChecksOk) {

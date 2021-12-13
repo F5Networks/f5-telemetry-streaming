@@ -8,7 +8,7 @@
 
 'use strict';
 
-const httpUtil = require('./../shared/httpUtil');
+const httpUtil = require('../shared/httpUtil');
 const util = require('../../utils/misc');
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 
@@ -21,7 +21,7 @@ const DEFAULT_DOC_TYPE = '_doc';
  *
  * @returns {Boolean}   Whether or not the dataType property is deprecated
  */
-const dataTypeIsDeprecated = config => util.compareVersionStrings(config.apiVersion, '>=', '7.0');
+const dataTypeIsDeprecated = (config) => util.compareVersionStrings(config.apiVersion, '>=', '7.0');
 
 /**
  * Returns the appropriate http URI, given the consumer's context.

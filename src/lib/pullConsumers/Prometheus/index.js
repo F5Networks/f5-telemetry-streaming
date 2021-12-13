@@ -133,7 +133,7 @@ module.exports = function (context) {
  */
 function collectMetrics(event) {
     const filteredEvents = event
-        .filter(d => (typeof d !== 'undefined' && Object.keys(d).indexOf('data') !== -1));
+        .filter((d) => (typeof d !== 'undefined' && Object.keys(d).indexOf('data') !== -1));
 
     const metrics = [];
     filteredEvents.forEach((eventObj) => {
@@ -149,7 +149,6 @@ function collectMetrics(event) {
     });
     return mergeObjectArray(metrics);
 }
-
 
 /**
  * Prioritizes metrics by the number of transformations that were required to convert a metric name
@@ -307,7 +306,7 @@ function storeMetric(pathOrKey, metricValue, metrics) {
             if (typeof metricPointer.labels === 'undefined') {
                 metricPointer.labels = new Set();
             }
-            labelKeys.forEach(l => metricPointer.labels.add(l));
+            labelKeys.forEach((l) => metricPointer.labels.add(l));
             newMetricValue.labels = labels;
         }
         metricPointer.values.push(newMetricValue);

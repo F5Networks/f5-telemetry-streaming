@@ -26,7 +26,7 @@ function forwardData(dataCtx) {
     if (!Array.isArray(consumers)) {
         return Promise.resolve();
     }
-    consumers = consumers.filter(c => dataCtx.destinationIds.indexOf(c.id) > -1);
+    consumers = consumers.filter((c) => dataCtx.destinationIds.indexOf(c.id) > -1);
     // don't rely on plugins' code, wrap consumer's call to Promise
     // eslint-disable-next-line
     return Promise.all(consumers.map((consumer) => {
@@ -59,7 +59,6 @@ function forwardData(dataCtx) {
         });
     }));
 }
-
 
 module.exports = {
     forward: forwardData

@@ -109,7 +109,7 @@ describe('restWorker', () => {
         });
 
         it('should gather host device info', () => new Promise((resolve, reject) => {
-            restWorker.onStartCompleted(resolve, msg => reject(new Error(msg || 'no message provided')));
+            restWorker.onStartCompleted(resolve, (msg) => reject(new Error(msg || 'no message provided')));
         })
             .then(() => new Promise((resolve, reject) => {
                 setTimeout(() => {
@@ -126,7 +126,7 @@ describe('restWorker', () => {
         it('should not fail when unable to gather host device info', () => {
             gatherHostDeviceInfoStub.rejects(new Error('expected error'));
             return new Promise((resolve, reject) => {
-                restWorker.onStartCompleted(resolve, msg => reject(new Error(msg || 'no message provided')));
+                restWorker.onStartCompleted(resolve, (msg) => reject(new Error(msg || 'no message provided')));
             });
         });
     });
@@ -145,7 +145,7 @@ describe('restWorker', () => {
         };
         Object.keys(httpMethodsMapping).forEach((httpMethod) => {
             it(`should pass ${httpMethod} request to requests router`, () => new Promise((resolve, reject) => {
-                restWorker.onStartCompleted(resolve, msg => reject(new Error(msg || 'no message provided')));
+                restWorker.onStartCompleted(resolve, (msg) => reject(new Error(msg || 'no message provided')));
             })
                 .then(() => {
                     assert.notOk(requestsProcessStub.called, 'should not be called yet');

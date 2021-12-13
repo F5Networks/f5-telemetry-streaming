@@ -11,8 +11,8 @@
 const fs = require('fs');
 const assert = require('assert');
 const AWS = require('aws-sdk');
-const constants = require('./../shared/constants');
-const testUtil = require('./../shared/util');
+const constants = require('../shared/constants');
+const testUtil = require('../shared/util');
 const awsUtil = require('../../../src/lib/consumers/shared/awsUtil');
 
 const ENV_FILE = process.env[constants.ENV_VARS.CLOUD.FILE];
@@ -42,7 +42,7 @@ describe('AWS Cloud-based Tests', function () {
         password: VM_PWD
     };
 
-    const assertPost = declaration => testUtil.postDeclaration(deviceInfo, declaration)
+    const assertPost = (declaration) => testUtil.postDeclaration(deviceInfo, declaration)
         .then((response) => {
             testUtil.logger.info('Response from declaration post', { host: VM_IP, response });
             return assert.strictEqual(response.message, 'success', 'POST declaration should return success');
@@ -86,7 +86,7 @@ describe('AWS Cloud-based Tests', function () {
         it('should verify TS service is running', () => {
             const uri = `${constants.BASE_ILX_URI}/info`;
 
-            return new Promise(resolve => setTimeout(resolve, 5000))
+            return new Promise((resolve) => setTimeout(resolve, 5000))
                 .then(() => testUtil.makeRequest(VM_IP, uri, options))
                 .then((data) => {
                     data = data || {};
@@ -120,7 +120,7 @@ describe('AWS Cloud-based Tests', function () {
             it('should retrieve systemPoller info from bucket', function () {
                 this.timeout(180000);
 
-                return new Promise(resolve => setTimeout(resolve, 90000))
+                return new Promise((resolve) => setTimeout(resolve, 90000))
                     .then(() => new Promise((resolve, reject) => {
                         s3.listObjects({ Bucket: BUCKET, MaxKeys: 5 }, (err, data) => {
                             if (err) reject(err);
@@ -130,7 +130,7 @@ describe('AWS Cloud-based Tests', function () {
                             resolve(bucketContents);
                         });
                     }))
-                    .then(bucketContents => new Promise((resolve, reject) => {
+                    .then((bucketContents) => new Promise((resolve, reject) => {
                         const key = bucketContents[0].Key;
                         s3.getObject({ Bucket: BUCKET, Key: key, ResponseContentType: 'application/json' }, (err, data) => {
                             if (err) reject(err);
@@ -184,7 +184,7 @@ describe('AWS Cloud-based Tests', function () {
 
                 const startTime = new Date().toISOString();
                 // metrics take around 2-3 minutes to show up
-                return new Promise(resolve => setTimeout(resolve, 180000))
+                return new Promise((resolve) => setTimeout(resolve, 180000))
                     .then(() => {
                         // get system poller data
                         const uri = `${constants.BASE_ILX_URI}/systempoller/My_System`;

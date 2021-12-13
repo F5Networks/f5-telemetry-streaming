@@ -1,6 +1,19 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.25.0
+### Added
+- AUTOTOOL-2798: [GitHub #154](https://github.com/F5Networks/f5-telemetry-streaming/issues/154): Allow keyless (service account based) authorization for GCP Metrics and Logging consumers.
+- AUTOTOOL-2794: [GitHub #158](https://github.com/F5Networks/f5-telemetry-streaming/issues/158): Added "metricPrefix" property to DataDog consumer, which allows a custom prefix to be added to each DataDog metric
+- AUTOTOOL-2815: Added the "convertBooleansToMetrics" property to the DataDog, Statsd and OpenTelemetry_Exporter consumers, which determines whether boolean values are converted to metrics
+- AUTOTOOL-2842: [GitHub #173](https://github.com/F5Networks/f5-telemetry-streaming/issues/173): Added optional service endpoint URL property to AWS consumers. Used to overwrite the implicit endpoints based on the region.
+- AUTOTOOL-2795: [GitHub #160](https://github.com/F5Networks/f5-telemetry-streaming/issues/160): Added "customTags" property to DataDog consumer, which allows specifying custom tags to attach to DataDog metrics and logs
+- AUTOTOOL-2800: [GitHub #170](https://github.com/F5Networks/f5-telemetry-streaming/issues/170): Added "poolName" tag to pool member metrics.
+### Fixed
+### Changed
+- AUTOTOOL-2769: Update npm packages (@grpc/grpc-js from v1.3.4 to v1.4.2, @opentelemetry/exporter-collector-proto from v0.24.0 to 0.25.0, @opentelemetry/sdk-metrics-base from 0.24.1-alpha.4 to 0.26.0,  aws-sdk from v2.991.0 to v2.1018.0, eventemitter2 from v6.4.4 to v6.4.5)
+### Removed
+
 ## 1.24.0
 ### Added
 - AUTOTOOL-2752: [GitHub #159](https://github.com/F5Networks/f5-telemetry-streaming/issues/159) and [GitHub #162](https://github.com/F5Networks/f5-telemetry-streaming/issues/162): Added "region" property to DataDog consumer

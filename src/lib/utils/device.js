@@ -18,7 +18,6 @@ const promiseUtil = require('./promise');
 const requestsUtil = require('./requests');
 const util = require('./misc');
 
-
 /**
  * Cache for info about the device TS is running on
  *
@@ -223,7 +222,7 @@ DeviceAsyncCLI.prototype._request = function (uri, options) {
  */
 DeviceAsyncCLI.prototype._upsertTemporaryCLIscriptOnDevice = function (script) {
     return this._createTemporaryCLIscriptOnDevice(script)
-        .then(retVal => (retVal && Promise.resolve()) || this._updateTemporaryCLIscriptOnDevice(script));
+        .then((retVal) => (retVal && Promise.resolve()) || this._updateTemporaryCLIscriptOnDevice(script));
 };
 
 /**
@@ -531,7 +530,6 @@ function isVersionAffectedBySecretsBug(version) {
     return util.compareVersionStrings(version.version, '>=', '14.1')
         && util.compareVersionStrings(version.version, '<', '15.0');
 }
-
 
 module.exports = {
     /**
@@ -930,7 +928,7 @@ module.exports = {
             utilCmdArgs: `-c "${command}"`
         };
         return this.makeDeviceRequest(host, uri, options)
-            .then(res => res.commandResult || '');
+            .then((res) => res.commandResult || '');
     },
 
     /**
@@ -959,7 +957,7 @@ module.exports = {
         };
 
         return this.makeDeviceRequest(host, uri, options)
-            .then(data => ({ token: data.token.token }));
+            .then((data) => ({ token: data.token.token }));
     },
 
     /**
@@ -1009,7 +1007,7 @@ module.exports = {
         }
         return promise.then(() => {
             const splitData = data.match(/(.|\n){1,500}/g);
-            return encryptSecretHelper(splitData, [], 0, affectedByBug).then(result => result.join(','));
+            return encryptSecretHelper(splitData, [], 0, affectedByBug).then((result) => result.join(','));
         });
     },
 
@@ -1024,7 +1022,7 @@ module.exports = {
         const splitData = data.split(',');
         const args = [`${__dirname}/decryptConfValue.php`].concat(splitData);
         return util.childProcess.execFile('/usr/bin/php', args)
-            .then(ret => ret[0]);
+            .then((ret) => ret[0]);
     },
 
     /**
@@ -1190,7 +1188,7 @@ module.exports = {
         options.includeResponseObject = false;
 
         return this.makeDeviceRequest(host, uri, options)
-            .then(res => ({
+            .then((res) => ({
                 baseMac: res.baseMac,
                 build: res.build,
                 chassisSerialNumber: res.chassisSerialNumber,

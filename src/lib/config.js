@@ -18,7 +18,7 @@ const SafeEventEmitter = require('./utils/eventEmitter').SafeEventEmitter;
 const TeemReporter = require('./teemReporter').TeemReporter;
 const util = require('./utils/misc');
 
-/** @module ConfigWorker */
+/** @module config */
 
 const BASE_CONFIG = {
     components: [],
@@ -34,15 +34,15 @@ const BASE_STORAGE_DATA = {};
  *
  * @event change - config was validated and can be propagated
  *
- * @property {Configuration} currentConfig - copy of current configuration
- * @property {Logger} logger - logger instance
+ * @property {configUtil.Configuration} currentConfig - copy of current configuration
+ * @property {logger.Logger} logger - logger instance
  * @property {TeemReporter} teemReporter - TeemReporter instance
  * @property {object} validators - AJV validators
  */
 class ConfigWorker extends SafeEventEmitter {
     /**
      * @public
-     * @returns {Configuration} copy of current configuration
+     * @returns {configUtil.Configuration} copy of current configuration
      */
     get currentConfig() {
         return util.deepCopy(this._currentConfig || BASE_CONFIG);
@@ -50,7 +50,7 @@ class ConfigWorker extends SafeEventEmitter {
 
     /**
      * @public
-     * @returns {Logger} instance
+     * @returns {logger.Logger} instance
      */
     get logger() {
         // lazy initialization
@@ -99,7 +99,7 @@ class ConfigWorker extends SafeEventEmitter {
      * Get raw (original) config
      *
      * @public
-     * @param {string} namespace - namespace name
+     * @param {string} [namespace] - namespace name
      *
      * @returns {Promise<object>} resolved with raw (original) config - full declaration
      *     if no namespace param provided, otherwise just the namespace config
@@ -127,7 +127,7 @@ class ConfigWorker extends SafeEventEmitter {
      */
     load() {
         return this.getDeclaration()
-            .then(declaration => this.processDeclaration(declaration))
+            .then((declaration) => this.processDeclaration(declaration))
             .catch((error) => {
                 this.logger.exception('Unable to load and validate existing declaration', error);
                 this.logger.warning('Going to try to load default empty declaration. Old declaration is still accessible via API');
@@ -167,7 +167,7 @@ class ConfigWorker extends SafeEventEmitter {
                 options.namespaceToUpdate = namespace;
                 declaration[namespace] = namespaceDeclaration;
                 return this.processDeclaration(declaration, options)
-                    .then(fullConfig => (fullConfig[namespace] || {}));
+                    .then((fullConfig) => (fullConfig[namespace] || {}));
             });
     }
 
@@ -283,7 +283,7 @@ function expandDeclaration(declaration) {
  * NOTE: it mutates 'newConfig'.
  *
  * @this ConfigWorker
- * @param {Configuration} newConfig - new config
+ * @param {configUtil.Configuration} newConfig - new config
  * @param {object} options - options when setting config
  * @param {string} options.namespaceToUpdate - namespace of components
  *     that are the only ones that need updating instead of all config
@@ -314,7 +314,7 @@ function notifyConfigChange(newConfig, options) {
              * the config must make its own local copy.
              *
              * @event ConfigWorker#change
-             * @type {Configuration}
+             * @type {configUtil.Configuration}
              */
             return this.emitAsync('change', decryptedConfig);
         })
@@ -346,7 +346,7 @@ function saveToStorage(storageData) {
  *
  * @this ConfigWorker
  * @param {object} declaration - declaration to validate against config schema
- * @param {object} options    - optional validation settings
+ * @param {object} options - optional validation settings
  * @param {string} options.schemaType - type of schema to validate against. Defaults to full (whole schema)
  * @param {object} options.context - additional context to pass through to validator
  *
@@ -358,17 +358,17 @@ function validate(declaration, options) {
     if (typeof validatorFunc !== 'undefined') {
         // AJV validators mutates 'declaration'
         return configUtil.validate(validatorFunc, declaration, options.context)
-            .catch(err => Promise.reject(new errors.ValidationError(err)));
+            .catch((err) => Promise.reject(new errors.ValidationError(err)));
     }
     return Promise.reject(new Error('Validator is not available'));
 }
 
-
 // initialize singleton
 const configWorker = new ConfigWorker();
+configWorker.setMaxListeners(20);
 
 // config worker change event, should be first in the handlers chain
-configWorker.on('change', config => new Promise((resolve) => {
+configWorker.on('change', (config) => new Promise((resolve) => {
     const settings = configUtil.getTelemetryControls(config);
     if (!util.isObjectEmpty(settings)) {
         // default value should be 'info'
@@ -379,7 +379,7 @@ configWorker.on('change', config => new Promise((resolve) => {
 
 // handle EventEmitter errors to avoid NodeJS crashing
 configWorker.on('error', (err) => {
-    this.logger.exception('Unhandled error in ConfigWorker', err);
+    configWorker.logger.exception('Unhandled error in ConfigWorker', err);
 });
 
 module.exports = configWorker;

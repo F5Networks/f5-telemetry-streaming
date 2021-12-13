@@ -16,7 +16,6 @@ const mochaDescribe = require('mocha').describe;
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
-
 module.exports = {
     /**
      * All combinations from array

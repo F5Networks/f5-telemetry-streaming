@@ -345,9 +345,7 @@ module.exports = {
             },
             expected: {
                 mappings: {
-                    'f5telemetry_default::My_System_1::My_Poller_1': ['f5telemetry_default::My_Consumer_1'],
                     'f5telemetry_default::My_System_2::My_Poller_1': ['f5telemetry_default::My_Consumer_1'],
-                    'My_Namespace::My_System_1::My_Poller_1': ['My_Namespace::My_Consumer_1'],
                     'My_Namespace::My_System_2::My_Poller_1': ['My_Namespace::My_Consumer_1']
                 },
                 components: [
@@ -627,10 +625,7 @@ module.exports = {
                 }
             },
             expected: {
-                mappings: {
-                    'f5telemetry_default::My_Poller_1::My_Poller_1': ['f5telemetry_default::My_Consumer_1'],
-                    'My_Namespace::My_Poller_1::My_Poller_1': ['My_Namespace::My_Consumer_1']
-                },
+                mappings: {},
                 components: [
                     {
                         class: 'Telemetry_System_Poller',
@@ -864,10 +859,7 @@ module.exports = {
                 }
             },
             expected: {
-                mappings: {
-                    'f5telemetry_default::My_System::My_Poller_1': ['f5telemetry_default::My_Consumer_1'],
-                    'My_Namespace::My_System::My_Poller_1': ['My_Namespace::My_Consumer_1']
-                },
+                mappings: {},
                 components: [
                     {
                         class: 'Telemetry_System_Poller',

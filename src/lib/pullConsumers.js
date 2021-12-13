@@ -43,7 +43,7 @@ function getData(consumerName, namespace) {
 
             consumerConfig = getConsumerConfig(config, consumerName, namespace);
             // Don't bother collecting stats if requested Consumer Type is not loaded
-            if (!PULL_CONSUMERS.find(pc => pc.config.type === consumerConfig.type)) {
+            if (!PULL_CONSUMERS.find((pc) => pc.config.type === consumerConfig.type)) {
                 throw new ModuleNotLoadedError(`Pull Consumer of type '${consumerConfig.type}' is not loaded`);
             }
 
@@ -51,11 +51,11 @@ function getData(consumerName, namespace) {
                 config, consumerConfig
             );
             const pollerConfigs = configUtil.getTelemetrySystemPollersForGroup(config, pollerGroup)
-                .filter(sp => sp.enable);
+                .filter((sp) => sp.enable);
 
             return systemPoller.fetchPollersData(util.deepCopy(pollerConfigs), true);
         })
-        .then(pollerData => invokeConsumer(consumerConfig, pollerData));
+        .then((pollerData) => invokeConsumer(consumerConfig, pollerData));
 }
 
 /**
@@ -69,7 +69,7 @@ function getData(consumerName, namespace) {
  * @returns {Promise} Promise which is resolved with data formatted by the requested Pull Consumer
  */
 function invokeConsumer(consumerConfig, dataCtxs) {
-    const consumer = PULL_CONSUMERS.find(pc => pc.id === consumerConfig.id);
+    const consumer = PULL_CONSUMERS.find((pc) => pc.id === consumerConfig.id);
 
     const context = {
         config: consumerConfig,
@@ -84,7 +84,7 @@ function getConsumerConfig(config, consumerName, namespace) {
     const consumers = configUtil.getTelemetryPullConsumers(config, namespace);
     const namespaceInfo = namespace ? ` (namespace: ${namespace})` : '';
     if (consumers.length > 0) {
-        const consumer = consumers.find(c => c.name === consumerName);
+        const consumer = consumers.find((c) => c.name === consumerName);
         if (util.isObjectEmpty(consumer)) {
             throw new errors.ObjectNotFoundInConfigError(`Pull Consumer with name '${consumerName}' doesn't exist${namespaceInfo}`);
         }
@@ -119,7 +119,7 @@ function loadConsumers(config) {
         logger.info('No pull consumer(s) to load, define in configuration first');
         return Promise.resolve([]);
     }
-    const enabledConsumers = config.filter(c => c.enable);
+    const enabledConsumers = config.filter((c) => c.enable);
     if (enabledConsumers.length === 0) {
         logger.debug('No enabled pull consumer(s) to load');
         return Promise.resolve([]);
@@ -127,8 +127,8 @@ function loadConsumers(config) {
 
     logger.debug(`Loading pull consumer specific plug-ins from ${PULL_CONSUMERS_DIR}`);
 
-    const loadPromises = enabledConsumers.map(consumerConfig => new Promise((resolve) => {
-        const existingConsumer = PULL_CONSUMERS.find(c => c.id === consumerConfig.id);
+    const loadPromises = enabledConsumers.map((consumerConfig) => new Promise((resolve) => {
+        const existingConsumer = PULL_CONSUMERS.find((c) => c.id === consumerConfig.id);
         if (consumerConfig.skipUpdate && existingConsumer) {
             resolve(existingConsumer);
         } else {
@@ -155,7 +155,7 @@ function loadConsumers(config) {
     }));
 
     return Promise.all(loadPromises)
-        .then(loadedConsumers => loadedConsumers.filter(c => c !== undefined));
+        .then((loadedConsumers) => loadedConsumers.filter((c) => c !== undefined));
 }
 
 /**
@@ -165,11 +165,10 @@ function loadConsumers(config) {
  */
 function getLoadedConsumerTypes() {
     if (PULL_CONSUMERS.length > 0) {
-        return new Set(PULL_CONSUMERS.map(consumer => consumer.config.type));
+        return new Set(PULL_CONSUMERS.map((consumer) => consumer.config.type));
     }
     return new Set();
 }
-
 
 /**
  * Unload unused modules from cache
@@ -193,7 +192,7 @@ function unloadUnusedModules(before) {
 }
 
 // config worker change event
-configWorker.on('change', config => Promise.resolve()
+configWorker.on('change', (config) => Promise.resolve()
     .then(() => {
         logger.debug('configWorker change event in Pull Consumers');
 

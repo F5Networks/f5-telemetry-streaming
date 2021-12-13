@@ -30,11 +30,7 @@ describe('Statsd', () => {
 
     let passedClientParams;
     let metrics = [];
-
-    const defaultConsumerConfig = {
-        host: 'statsd-host',
-        port: '8125'
-    };
+    let defaultConsumerConfig;
 
     const statsDClientStub = {
         close: () => {},
@@ -65,6 +61,13 @@ describe('Statsd', () => {
                 return statsDClientStub;
             })
         });
+    });
+
+    beforeEach(() => {
+        defaultConsumerConfig = {
+            host: 'statsd-host',
+            port: '8125'
+        };
     });
 
     afterEach(() => {
@@ -120,6 +123,20 @@ describe('Statsd', () => {
             });
             return statsDIndex(context)
                 .then(() => assert.sameDeepMembers(metrics, getExpectedData()));
+        });
+
+        it('should process systemInfo data, and convert booleans to metrics', () => {
+            const context = testUtil.buildConsumerContext({
+                eventType: 'systemInfo',
+                config: Object.assign(defaultConsumerConfig, { convertBooleansToMetrics: true })
+            });
+            return statsDIndex(context)
+                .then(() => {
+                    const configSyncSucceeded = metrics.find(
+                        (metric) => metric.metricName === 'f5telemetry.telemetry-bigip-com.system.configSyncSucceeded'
+                    );
+                    assert.deepStrictEqual(configSyncSucceeded, { metricName: 'f5telemetry.telemetry-bigip-com.system.configSyncSucceeded', metricValue: 1 });
+                });
         });
 
         it('should process systemInfo data and apply auto-tagging (siblings only)', () => {
@@ -203,7 +220,7 @@ describe('Statsd', () => {
                     const traceData = context.tracer.write.firstCall.args[0];
                     assert.ok(Array.isArray(traceData), 'should be formatted as an array');
                     const expectedTraceLine = 'f5telemetry.telemetry-bigip-com.system.cpu: 0';
-                    assert.ok(traceData.find(d => d[0] === expectedTraceLine), 'should find expected line in trace');
+                    assert.ok(traceData.find((d) => d[0] === expectedTraceLine), 'should find expected line in trace');
                 });
         });
     });

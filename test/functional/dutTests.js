@@ -27,7 +27,6 @@ const packageDetails = util.getPackageDetails();
 const basicDeclaration = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
 const namespaceDeclaration = JSON.parse(fs.readFileSync(constants.DECL.BASIC_NAMESPACE));
 
-
 /**
  * Post declaration to TS on DUT
  *
@@ -56,7 +55,7 @@ function postDeclarationToDUT(dut, declaration) {
  * @returns {Object} Promise resolved when all requests succeed
  */
 function postDeclarationToDUTs(callback) {
-    return Promise.all(duts.map(dut => postDeclarationToDUT(dut, callback(dut))));
+    return Promise.all(duts.map((dut) => postDeclarationToDUT(dut, callback(dut))));
 }
 
 /**
@@ -83,7 +82,7 @@ function sendDataToEventListener(dut, message, opts) {
                 resolve();
                 return;
             }
-            new Promise(timeoutResolve => setTimeout(timeoutResolve, opts.delay))
+            new Promise((timeoutResolve) => setTimeout(timeoutResolve, opts.delay))
                 .then(() => util.sendEvent(dut.ip, message))
                 .then(() => sendData(i + 1))
                 .catch(reject);
@@ -102,7 +101,7 @@ function sendDataToEventListener(dut, message, opts) {
  * @returns {Object} Promise resolved when all messages were sent to Event Listeners
  */
 function sendDataToEventListeners(callback, numOfMsg, delay) {
-    return Promise.all(duts.map(dut => sendDataToEventListener(dut, callback(dut), { numOfMsg, delay })));
+    return Promise.all(duts.map((dut) => sendDataToEventListener(dut, callback(dut), { numOfMsg, delay })));
 }
 
 /**
@@ -174,8 +173,8 @@ function getSystemPollerData(dut, sysPollerName) {
  */
 function getSystemPollersData(callback) {
     return Promise.all(duts.map(
-        dut => getSystemPollerData(dut, constants.DECL.SYSTEM_NAME)
-            .then(data => callback(dut, data))
+        (dut) => getSystemPollerData(dut, constants.DECL.SYSTEM_NAME)
+            .then((data) => callback(dut, data))
     ));
 }
 
@@ -194,9 +193,9 @@ function uninstallAllTSpackages(host, authToken, options) {
     let data;
 
     return util.getInstalledPackages(host, authToken)
-        .then(installedPackages => Promise.all(installedPackages
-            .filter(pkg => pkg.packageName.includes('f5-telemetry'))
-            .map(pkg => util.uninstallPackage(host, authToken, pkg.packageName))))
+        .then((installedPackages) => Promise.all(installedPackages
+            .filter((pkg) => pkg.packageName.includes('f5-telemetry'))
+            .map((pkg) => util.uninstallPackage(host, authToken, pkg.packageName))))
         .then(() => util.makeRequest(host, uri, options))
         .then((resp) => {
             data = resp;
@@ -213,7 +212,6 @@ function uninstallAllTSpackages(host, authToken, options) {
             }
         });
 }
-
 
 function setup() {
     // get package details
@@ -302,7 +300,7 @@ function setup() {
             it('should verify installation', () => {
                 const uri = `${constants.BASE_ILX_URI}/info`;
 
-                return new Promise(resolve => setTimeout(resolve, 5000))
+                return new Promise((resolve) => setTimeout(resolve, 5000))
                     .then(() => util.makeRequest(host, uri, options))
                     .then((data) => {
                         data = data || {};
@@ -343,7 +341,7 @@ function setup() {
                     .then(() => util.makeRequest(host, uri, options))
                     .then((data) => {
                         // check if rule already exists
-                        if (data.items.some(i => i.name === ruleName) === true) {
+                        if (data.items.some((i) => i.name === ruleName) === true) {
                             // exists, delete the rule
                             const deleteOptions = {
                                 method: 'DELETE',
@@ -366,7 +364,7 @@ function setup() {
                                     constants.EVENT_LISTENER_SECONDARY_PORT,
                                     constants.EVENT_LISTENER_NAMESPACE_PORT,
                                     constants.EVENT_LISTENER_NAMESPACE_SECONDARY_PORT
-                                ].map(port => ({ name: String(port) }))
+                                ].map((port) => ({ name: String(port) }))
                             }
                         });
                         const postOptions = {
@@ -560,7 +558,6 @@ function test() {
                                 });
                         });
 
-
                         it('should get response from systempoller endpoint', () => {
                             const uri = `${constants.BASE_ILX_URI}${namespacePath}/systempoller/${constants.DECL.SYSTEM_NAME}`;
                             // wait 500ms in case if config was not applied yet
@@ -581,7 +578,7 @@ function test() {
                         });
 
                         it('should ensure event listener is up', () => {
-                            const connectToEventListener = port => new Promise((resolve, reject) => {
+                            const connectToEventListener = (port) => new Promise((resolve, reject) => {
                                 const client = net.createConnection({ host, port }, () => {
                                     client.end();
                                 });
@@ -594,12 +591,12 @@ function test() {
                             });
 
                             // ports = { opened: [], closed: [] }
-                            const checkPorts = ports => Promise.all(
+                            const checkPorts = (ports) => Promise.all(
                                 (ports.opened || []).map(
-                                    openedPort => assert.isFulfilled(connectToEventListener(openedPort))
+                                    (openedPort) => assert.isFulfilled(connectToEventListener(openedPort))
                                 ).concat(
                                     (ports.closed || []).map(
-                                        closedPort => connectToEventListener(closedPort)
+                                        (closedPort) => connectToEventListener(closedPort)
                                             .then(
                                                 () => Promise.reject(new Error(`Port ${closedPort} expected to be closed`)),
                                                 () => {} // do nothing on catch
@@ -613,14 +610,14 @@ function test() {
                                     if (obj.class === 'Telemetry_Listener') {
                                         cb(obj);
                                     } else {
-                                        Object.keys(obj).forEach(key => findListeners(obj[key], cb));
+                                        Object.keys(obj).forEach((key) => findListeners(obj[key], cb));
                                     }
                                 }
                             };
 
                             const fetchListenerPorts = (decl) => {
                                 const ports = [];
-                                findListeners(decl, listener => ports.push(listener.port || 6514));
+                                findListeners(decl, (listener) => ports.push(listener.port || 6514));
                                 return ports;
                             };
 
@@ -650,14 +647,14 @@ function test() {
                                 })
                                 .then(() => {
                                     const ports = { opened: fetchListenerPorts(postOptions.body) };
-                                    ports.closed = allListenerPorts.filter(port => ports.opened.indexOf(port) === -1);
+                                    ports.closed = allListenerPorts.filter((port) => ports.opened.indexOf(port) === -1);
                                     return checkPorts(ports);
                                 })
                                 // post declaration again and check that listeners are still available
                                 .then(() => util.makeRequest(host, uri, util.deepCopy(postOptions)))
                                 .then(() => {
                                     const ports = { opened: fetchListenerPorts(postOptions.body) };
-                                    ports.closed = allListenerPorts.filter(port => ports.opened.indexOf(port) === -1);
+                                    ports.closed = allListenerPorts.filter((port) => ports.opened.indexOf(port) === -1);
                                     return checkPorts(ports);
                                 })
                                 .then(() => {
@@ -676,14 +673,14 @@ function test() {
                                 })
                                 .then(() => {
                                     const ports = { opened: fetchListenerPorts(postOptions.body) };
-                                    ports.closed = allListenerPorts.filter(port => ports.opened.indexOf(port) === -1);
+                                    ports.closed = allListenerPorts.filter((port) => ports.opened.indexOf(port) === -1);
                                     return checkPorts(ports);
                                 })
                                 // post declaration again and check that listeners are still available
                                 .then(() => util.makeRequest(host, uri, util.deepCopy(postOptions)))
                                 .then(() => {
                                     const ports = { opened: fetchListenerPorts(postOptions.body) };
-                                    ports.closed = allListenerPorts.filter(port => ports.opened.indexOf(port) === -1);
+                                    ports.closed = allListenerPorts.filter((port) => ports.opened.indexOf(port) === -1);
                                     return checkPorts(ports);
                                 })
                                 .then(() => {

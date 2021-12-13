@@ -71,7 +71,7 @@ describe('Tracer', () => {
                 fs.rmdirSync(dirPath);
             }
         };
-        const addTimestamps = data => data.map(item => ({ data: item, timestamp: new Date().toISOString() }));
+        const addTimestamps = (data) => data.map((item) => ({ data: item, timestamp: new Date().toISOString() }));
 
         beforeEach(() => {
             coreStub = stubs.coreStub({
@@ -402,7 +402,7 @@ describe('Tracer', () => {
                 1,
                 10,
                 100
-            ].forEach(maxRecords => it(`should write max ${maxRecords} records`, () => {
+            ].forEach((maxRecords) => it(`should write max ${maxRecords} records`, () => {
                 let totalRecords = 0;
                 let allWrittenData = [];
 
@@ -416,7 +416,7 @@ describe('Tracer', () => {
                     }
                     return Promise.all(promises).then(() => writtenData);
                 };
-                const getExpectedData = data => addTimestamps(data.slice(data.length - maxRecords));
+                const getExpectedData = (data) => addTimestamps(data.slice(data.length - maxRecords));
                 const validateTracerData = (writtenData) => {
                     allWrittenData = allWrittenData.concat(writtenData);
                     const data = readTraceFile(tracerFile);
@@ -717,7 +717,7 @@ describe('Tracer', () => {
             .then(() => {
                 const registered = tracer.registered();
                 assert.sameDeepMembers(
-                    registered.map(t => t.path),
+                    registered.map((t) => t.path),
                     [
                         '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
                         '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
@@ -766,7 +766,7 @@ describe('Tracer', () => {
             .then(() => {
                 const registered = tracer.registered();
                 assert.sameDeepMembers(
-                    registered.map(t => t.path),
+                    registered.map((t) => t.path),
                     [
                         '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
                         '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
@@ -800,7 +800,7 @@ describe('Tracer', () => {
                     assert.isTrue(tracerInst.disabled, 'should be disabled once unregistered');
                 });
                 assert.sameDeepMembers(
-                    tracer.registered().map(t => t.path),
+                    tracer.registered().map((t) => t.path),
                     [
                         '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_Enabled_Poller_With_Disabled_Trace::My_Enabled_Poller_With_Disabled_Trace',
                         'listener2'
@@ -841,7 +841,7 @@ describe('Tracer', () => {
             .then(() => {
                 const registered = tracer.registered(); // remember those instances - should survive all updates
                 assert.sameDeepMembers(
-                    registered.map(t => t.path),
+                    registered.map((t) => t.path),
                     [
                         '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
                         '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
@@ -882,7 +882,7 @@ describe('Tracer', () => {
                     assert.isFalse(tracerInst.disabled, 'should not disable pre-existing tracers');
                 });
                 assert.sameDeepMembers(
-                    tracer.registered().map(t => t.path),
+                    tracer.registered().map((t) => t.path),
                     [
                         '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
                         '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
@@ -911,7 +911,7 @@ describe('Tracer', () => {
                     assert.isFalse(tracerInst.disabled, 'should not disable pre-existing tracers');
                 });
                 assert.sameDeepMembers(
-                    tracer.registered().map(t => t.path),
+                    tracer.registered().map((t) => t.path),
                     [
                         '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
                         '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
@@ -931,7 +931,7 @@ describe('Tracer', () => {
                     assert.isFalse(tracerInst.disabled, 'should not disable pre-existing tracers');
                 });
                 assert.sameDeepMembers(
-                    tracer.registered().map(t => t.path),
+                    tracer.registered().map((t) => t.path),
                     [
                         '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
                         '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
@@ -975,7 +975,7 @@ describe('Tracer', () => {
             .then(() => {
                 const registered = tracer.registered();
                 assert.sameDeepMembers(
-                    registered.map(t => t.path),
+                    registered.map((t) => t.path),
                     [
                         '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Default_Push_Consumer',
                         '/var/tmp/telemetry/Telemetry_Pull_Consumer.f5telemetry_default::Default_Pull_Consumer',

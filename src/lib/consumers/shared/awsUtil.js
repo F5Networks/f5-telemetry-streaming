@@ -79,7 +79,11 @@ function sendLogs(context) {
     let params;
     return Promise.resolve()
         .then(() => {
-            cloudWatchLogs = new AWS.CloudWatchLogs({ apiVersion: '2014-03-28' });
+            const clientProperties = { apiVersion: '2014-03-28' };
+            if (context.config.endpointUrl) {
+                clientProperties.endpoint = new AWS.Endpoint(context.config.endpointUrl);
+            }
+            cloudWatchLogs = new AWS.CloudWatchLogs(clientProperties);
             const logGroup = context.config.logGroup;
             const logStream = context.config.logStream;
             const epochDate = new Date().getTime();
@@ -141,16 +145,16 @@ function getDefaultDimensions(data) {
             { Name: 'baseMac', Value: sysData.baseMac }
         ];
     }
-    return dimensions.filter(d => d.Value);
+    return dimensions.filter((d) => d.Value);
 }
 
 function buildMetric(key, value, dimensions) {
     let dims;
     // if metric is on pool level, remove redundant dimension poolName
-    const nameDim = dimensions.find(d => d.Name === 'name');
-    const poolNameDim = dimensions.find(d => d.Name === 'poolName');
+    const nameDim = dimensions.find((d) => d.Name === 'name');
+    const poolNameDim = dimensions.find((d) => d.Name === 'poolName');
     if (poolNameDim && (nameDim.Value === poolNameDim.Value)) {
-        dims = dimensions.filter(d => d.Name !== 'poolName');
+        dims = dimensions.filter((d) => d.Name !== 'poolName');
     }
     return {
         // Metric Name must be max 255 and ASCII chars
@@ -203,7 +207,7 @@ function getMetrics(data, dimensions, key, metrics) {
     if (typeof data === 'object') {
         let newKey;
         let newDims = util.deepCopy(dimensions);
-        let nameDim = newDims.find(d => d.Name === 'name');
+        let nameDim = newDims.find((d) => d.Name === 'name');
         if (!nameDim) {
             newDims.push({ Name: 'name' });
             nameDim = newDims[newDims.length - 1];
@@ -248,7 +252,7 @@ function getMetrics(data, dimensions, key, metrics) {
                     nameDim.Value = data[dataKey].name;
                     newKey = key || dataKey;
                     if (key === 'pools') {
-                        const poolDim = newDims.find(d => d.Name === 'poolName');
+                        const poolDim = newDims.find((d) => d.Name === 'poolName');
                         if (poolDim) {
                             poolDim.Value = data[dataKey].name;
                         } else {
@@ -265,7 +269,7 @@ function getMetrics(data, dimensions, key, metrics) {
                     // }
                     newKey = key ? `${key}_${dataKey}` : dataKey;
                 }
-                newDims = newDims.filter(d => d.Value);
+                newDims = newDims.filter((d) => d.Value);
                 getMetrics(data[dataKey], newDims, newKey, metrics);
             });
         }
@@ -290,7 +294,11 @@ function sendMetrics(context, metrics) {
 
     return Promise.resolve()
         .then(() => {
-            const cloudWatchMetrics = new AWS.CloudWatch({ apiVersion: '2010-08-01' });
+            const clientProperties = { apiVersion: '2010-08-01' };
+            if (context.config.endpointUrl) {
+                clientProperties.endpoint = new AWS.Endpoint(context.config.endpointUrl);
+            }
+            const cloudWatchMetrics = new AWS.CloudWatch(clientProperties);
             const putPromises = [];
             for (let i = 0; i < metrics.length; i += METRICS_BATCH_SIZE) {
                 const metricsBatch = metrics.slice(i, i + METRICS_BATCH_SIZE);

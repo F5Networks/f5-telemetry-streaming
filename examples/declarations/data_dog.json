@@ -6,6 +6,14 @@
         "apiKey": "api_key",
         "compressionType": "gzip",
         "region": "US1",
-        "service": "f5-telemetry"
+        "service": "f5-telemetry",
+        "metricPrefix": ["f5", "bigip"],
+        "convertBooleansToMetrics": true,
+        "customTags": [
+            {
+                "name": "instanceId",
+                "value": "instance-1"
+            }
+        ]
     }
 }

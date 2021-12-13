@@ -9,7 +9,7 @@
 'use strict';
 
 const appInsights = require('applicationinsights');
-const azureUtil = require('./../shared/azureUtil');
+const azureUtil = require('../shared/azureUtil');
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 
 /**

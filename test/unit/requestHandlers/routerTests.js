@@ -57,7 +57,6 @@ class CustomRequestHandler extends BaseRequestHandler {
     }
 }
 
-
 describe('Requests Router', () => {
     before(() => {
         moduleCache.restore();

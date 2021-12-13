@@ -9,6 +9,7 @@
         "username": "accesskey",
         "passphrase": {
             "cipherText": "secretkey"
-        }
+        },
+        "endpointUrl": "https://your_VPC_endpoint_ID.monitoring.us-west-1.vpce.amazonaws.com"
     }
 }

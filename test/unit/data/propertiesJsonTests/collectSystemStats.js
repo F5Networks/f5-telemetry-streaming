@@ -137,7 +137,7 @@ module.exports = {
                 });
                 return ret;
             },
-            contextToCollect: context => context,
+            contextToCollect: (context) => context,
             expectedData: {
                 system: {
                     hostname: 'test.local',
@@ -941,7 +941,7 @@ module.exports = {
                         times: 2
                     },
                     method: 'post',
-                    request: body => body.utilCmdArgs.indexOf('profile_access_misc_stat') !== -1,
+                    request: (body) => body.utilCmdArgs.indexOf('profile_access_misc_stat') !== -1,
                     response: {
                         kind: 'tm:util:bash:runstate',
                         commandResult: 'apm_state\nPending Policy Changes'
@@ -1328,7 +1328,7 @@ module.exports = {
         {
             name: 'should collect cpuInfo on a multi CPU device',
             statsToCollect: ['system', 'cpu'],
-            contextToCollect: context => context,
+            contextToCollect: (context) => context,
             expectedData: {
                 system: {
                     cpu: 20
@@ -1582,7 +1582,7 @@ module.exports = {
         {
             name: 'should collect memory-host on a multi host device',
             statsToCollect: ['system', 'memory', 'tmmMemory', 'swap'],
-            contextToCollect: context => context,
+            contextToCollect: (context) => context,
             expectedData: {
                 system: {
                     memory: 70,
@@ -1704,7 +1704,7 @@ module.exports = {
                 });
                 return ret;
             },
-            contextToCollect: context => context,
+            contextToCollect: (context) => context,
             expectedData: {
                 system: {
                     hostname: 'missing data',
@@ -1890,7 +1890,7 @@ module.exports = {
                         times: 2
                     },
                     method: 'post',
-                    request: body => body.utilCmdArgs.indexOf('profile_access_misc_stat') !== -1,
+                    request: (body) => body.utilCmdArgs.indexOf('profile_access_misc_stat') !== -1,
                     response: {
                         kind: 'tm:util:bash:runstate'
                     }
@@ -1945,7 +1945,7 @@ module.exports = {
                 });
                 return ret;
             },
-            contextToCollect: context => context,
+            contextToCollect: (context) => context,
             expectedData: {
                 system: {
                     hostname: 'missing data',
@@ -2128,7 +2128,7 @@ module.exports = {
                         times: 2
                     },
                     method: 'post',
-                    request: body => body.utilCmdArgs.indexOf('profile_access_misc_stat') !== -1,
+                    request: (body) => body.utilCmdArgs.indexOf('profile_access_misc_stat') !== -1,
                     response: {
                         kind: 'tm:util:bash:runstate'
                     }

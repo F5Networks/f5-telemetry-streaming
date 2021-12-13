@@ -66,10 +66,10 @@ module.exports = {
      * given promises have either fulfilled or rejected
      */
     allSettled(promises) {
-        return Promise.all(promises.map(p => Promise.resolve(p)
+        return Promise.all(promises.map((p) => Promise.resolve(p)
             .then(
-                val => ({ status: 'fulfilled', value: val }),
-                err => ({ status: 'rejected', reason: err })
+                (val) => ({ status: 'fulfilled', value: val }),
+                (err) => ({ status: 'rejected', reason: err })
             )));
     },
 

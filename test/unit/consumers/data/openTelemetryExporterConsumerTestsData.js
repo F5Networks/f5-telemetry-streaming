@@ -5060,6 +5060,10 @@ module.exports = {
                                     value: 'up'
                                 },
                                 {
+                                    key: 'poolName',
+                                    value: '/Common/app.app/app_pool'
+                                },
+                                {
                                     key: 'port',
                                     value: '0'
                                 },
@@ -5095,6 +5099,10 @@ module.exports = {
                                     value: 'down'
                                 },
                                 {
+                                    key: 'poolName',
+                                    value: '/Common/telemetry-local'
+                                },
+                                {
                                     key: 'port',
                                     value: '0'
                                 },
@@ -5130,39 +5138,8 @@ module.exports = {
                                     value: 'up'
                                 },
                                 {
-                                    key: 'port',
-                                    value: '0'
-                                },
-                                {
-                                    key: 'availabilityState',
-                                    value: 'offline'
-                                },
-                                {
-                                    key: 'enabledState',
-                                    value: 'enabled'
-                                },
-                                {
-                                    key: 'status.statusReason',
-                                    value: 'Pool member is available'
-                                }
-                            ],
-                            value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_bitsIn',
-                    description: 'pools.members.serverside.bitsIn',
-                    dataPoints: [
-                        {
-                            labels: [
-                                {
-                                    key: 'addr',
-                                    value: '192.0.2.12'
-                                },
-                                {
-                                    key: 'monitorStatus',
-                                    value: 'up'
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/hsl_pool'
                                 },
                                 {
                                     key: 'port',
@@ -5193,11 +5170,54 @@ module.exports = {
                             labels: [
                                 {
                                     key: 'addr',
+                                    value: '192.0.2.12'
+                                },
+                                {
+                                    key: 'monitorStatus',
+                                    value: 'up'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
+                                },
+                                {
+                                    key: 'port',
+                                    value: '0'
+                                },
+                                {
+                                    key: 'availabilityState',
+                                    value: 'offline'
+                                },
+                                {
+                                    key: 'enabledState',
+                                    value: 'enabled'
+                                },
+                                {
+                                    key: 'status.statusReason',
+                                    value: 'Pool member is available'
+                                }
+                            ],
+                            value: 0
+                        }
+                    ]
+                },
+                {
+                    name: 'pools_members_serverside_bitsIn',
+                    description: 'pools.members.serverside.bitsIn',
+                    dataPoints: [
+                        {
+                            labels: [
+                                {
+                                    key: 'addr',
                                     value: '192.0.2.13'
                                 },
                                 {
                                     key: 'monitorStatus',
                                     value: 'up'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
                                 },
                                 {
                                     key: 'port',
@@ -5235,6 +5255,10 @@ module.exports = {
                                     value: 'up'
                                 },
                                 {
+                                    key: 'poolName',
+                                    value: '/Common/app.app/app_pool'
+                                },
+                                {
                                     key: 'port',
                                     value: '0'
                                 },
@@ -5270,6 +5294,10 @@ module.exports = {
                                     value: 'down'
                                 },
                                 {
+                                    key: 'poolName',
+                                    value: '/Common/telemetry-local'
+                                },
+                                {
                                     key: 'port',
                                     value: '0'
                                 },
@@ -5305,39 +5333,8 @@ module.exports = {
                                     value: 'up'
                                 },
                                 {
-                                    key: 'port',
-                                    value: '0'
-                                },
-                                {
-                                    key: 'availabilityState',
-                                    value: 'offline'
-                                },
-                                {
-                                    key: 'enabledState',
-                                    value: 'enabled'
-                                },
-                                {
-                                    key: 'status.statusReason',
-                                    value: 'Pool member is available'
-                                }
-                            ],
-                            value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_bitsOut',
-                    description: 'pools.members.serverside.bitsOut',
-                    dataPoints: [
-                        {
-                            labels: [
-                                {
-                                    key: 'addr',
-                                    value: '192.0.2.12'
-                                },
-                                {
-                                    key: 'monitorStatus',
-                                    value: 'up'
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/hsl_pool'
                                 },
                                 {
                                     key: 'port',
@@ -5368,11 +5365,54 @@ module.exports = {
                             labels: [
                                 {
                                     key: 'addr',
+                                    value: '192.0.2.12'
+                                },
+                                {
+                                    key: 'monitorStatus',
+                                    value: 'up'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
+                                },
+                                {
+                                    key: 'port',
+                                    value: '0'
+                                },
+                                {
+                                    key: 'availabilityState',
+                                    value: 'offline'
+                                },
+                                {
+                                    key: 'enabledState',
+                                    value: 'enabled'
+                                },
+                                {
+                                    key: 'status.statusReason',
+                                    value: 'Pool member is available'
+                                }
+                            ],
+                            value: 0
+                        }
+                    ]
+                },
+                {
+                    name: 'pools_members_serverside_bitsOut',
+                    description: 'pools.members.serverside.bitsOut',
+                    dataPoints: [
+                        {
+                            labels: [
+                                {
+                                    key: 'addr',
                                     value: '192.0.2.13'
                                 },
                                 {
                                     key: 'monitorStatus',
                                     value: 'up'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
                                 },
                                 {
                                     key: 'port',
@@ -5410,6 +5450,10 @@ module.exports = {
                                     value: 'up'
                                 },
                                 {
+                                    key: 'poolName',
+                                    value: '/Common/app.app/app_pool'
+                                },
+                                {
                                     key: 'port',
                                     value: '0'
                                 },
@@ -5443,6 +5487,10 @@ module.exports = {
                                 {
                                     key: 'monitorStatus',
                                     value: 'down'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Common/telemetry-local'
                                 },
                                 {
                                     key: 'port',
@@ -5480,6 +5528,10 @@ module.exports = {
                                     value: 'up'
                                 },
                                 {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/hsl_pool'
+                                },
+                                {
                                     key: 'port',
                                     value: '0'
                                 },
@@ -5515,6 +5567,10 @@ module.exports = {
                                     value: 'up'
                                 },
                                 {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
+                                },
+                                {
                                     key: 'port',
                                     value: '0'
                                 },
@@ -5548,6 +5604,10 @@ module.exports = {
                                 {
                                     key: 'monitorStatus',
                                     value: 'up'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
                                 },
                                 {
                                     key: 'port',
@@ -5585,6 +5645,10 @@ module.exports = {
                                     value: 'up'
                                 },
                                 {
+                                    key: 'poolName',
+                                    value: '/Common/app.app/app_pool'
+                                },
+                                {
                                     key: 'port',
                                     value: '0'
                                 },
@@ -5618,6 +5682,10 @@ module.exports = {
                                 {
                                     key: 'monitorStatus',
                                     value: 'down'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Common/telemetry-local'
                                 },
                                 {
                                     key: 'port',
@@ -5655,6 +5723,10 @@ module.exports = {
                                     value: 'up'
                                 },
                                 {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/hsl_pool'
+                                },
+                                {
                                     key: 'port',
                                     value: '0'
                                 },
@@ -5690,6 +5762,10 @@ module.exports = {
                                     value: 'up'
                                 },
                                 {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
+                                },
+                                {
                                     key: 'port',
                                     value: '0'
                                 },
@@ -5723,6 +5799,10 @@ module.exports = {
                                 {
                                     key: 'monitorStatus',
                                     value: 'up'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
                                 },
                                 {
                                     key: 'port',
@@ -5760,6 +5840,10 @@ module.exports = {
                                     value: 'up'
                                 },
                                 {
+                                    key: 'poolName',
+                                    value: '/Common/app.app/app_pool'
+                                },
+                                {
                                     key: 'port',
                                     value: '0'
                                 },
@@ -5793,6 +5877,10 @@ module.exports = {
                                 {
                                     key: 'monitorStatus',
                                     value: 'down'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Common/telemetry-local'
                                 },
                                 {
                                     key: 'port',
@@ -5830,6 +5918,10 @@ module.exports = {
                                     value: 'up'
                                 },
                                 {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/hsl_pool'
+                                },
+                                {
                                     key: 'port',
                                     value: '0'
                                 },
@@ -5865,6 +5957,10 @@ module.exports = {
                                     value: 'up'
                                 },
                                 {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
+                                },
+                                {
                                     key: 'port',
                                     value: '0'
                                 },
@@ -5898,6 +5994,10 @@ module.exports = {
                                 {
                                     key: 'monitorStatus',
                                     value: 'up'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
                                 },
                                 {
                                     key: 'port',
@@ -5935,6 +6035,10 @@ module.exports = {
                                     value: 'up'
                                 },
                                 {
+                                    key: 'poolName',
+                                    value: '/Common/app.app/app_pool'
+                                },
+                                {
                                     key: 'port',
                                     value: '0'
                                 },
@@ -5968,6 +6072,10 @@ module.exports = {
                                 {
                                     key: 'monitorStatus',
                                     value: 'down'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Common/telemetry-local'
                                 },
                                 {
                                     key: 'port',
@@ -6005,6 +6113,10 @@ module.exports = {
                                     value: 'up'
                                 },
                                 {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/hsl_pool'
+                                },
+                                {
                                     key: 'port',
                                     value: '0'
                                 },
@@ -6040,6 +6152,10 @@ module.exports = {
                                     value: 'up'
                                 },
                                 {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
+                                },
+                                {
                                     key: 'port',
                                     value: '0'
                                 },
@@ -6073,6 +6189,10 @@ module.exports = {
                                 {
                                     key: 'monitorStatus',
                                     value: 'up'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
                                 },
                                 {
                                     key: 'port',
@@ -6110,6 +6230,10 @@ module.exports = {
                                     value: 'up'
                                 },
                                 {
+                                    key: 'poolName',
+                                    value: '/Common/app.app/app_pool'
+                                },
+                                {
                                     key: 'port',
                                     value: '0'
                                 },
@@ -6143,6 +6267,10 @@ module.exports = {
                                 {
                                     key: 'monitorStatus',
                                     value: 'down'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Common/telemetry-local'
                                 },
                                 {
                                     key: 'port',
@@ -6180,6 +6308,10 @@ module.exports = {
                                     value: 'up'
                                 },
                                 {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/hsl_pool'
+                                },
+                                {
                                     key: 'port',
                                     value: '0'
                                 },
@@ -6215,6 +6347,10 @@ module.exports = {
                                     value: 'up'
                                 },
                                 {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
+                                },
+                                {
                                     key: 'port',
                                     value: '0'
                                 },
@@ -6248,6 +6384,10 @@ module.exports = {
                                 {
                                     key: 'monitorStatus',
                                     value: 'up'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
                                 },
                                 {
                                     key: 'port',

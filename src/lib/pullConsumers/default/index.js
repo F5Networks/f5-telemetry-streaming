@@ -40,8 +40,8 @@ module.exports = function (context) {
 
     // Re-format event data into array of objects
     const formattedData = event
-        .filter(d => (typeof d !== 'undefined' && Object.keys(d).indexOf('data') !== -1))
-        .map(d => d.data);
+        .filter((d) => (typeof d !== 'undefined' && Object.keys(d).indexOf('data') !== -1))
+        .map((d) => d.data);
 
     logger.info('success');
     if (tracer) {

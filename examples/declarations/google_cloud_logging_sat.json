@@ -1,0 +1,12 @@
+{
+    "class": "Telemetry",
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Google_Cloud_Logging",
+        "logScope": "projects",
+        "logScopeId": "yourProjectId",
+        "logId": "yourLogId",
+        "serviceEmail": "yourServiceEmail",
+        "useServiceAccountToken": true
+    }
+}

@@ -58,7 +58,7 @@ class TeemReporter {
             .then(() => teemRecord.addClassCount(config))
             .then(() => teemRecord.addJsonObject(this.fetchExtraData(config)))
             .then(() => this.teemDevice.reportRecord(teemRecord))
-            .catch(err => this.logger.debugException('Unable to send analytics data', err));
+            .catch((err) => this.logger.debugException('Unable to send analytics data', err));
     }
 
     /**

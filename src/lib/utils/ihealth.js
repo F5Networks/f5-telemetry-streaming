@@ -324,7 +324,7 @@ class DeviceAPI {
     removeFile(fpath) {
         this.logger.debug(`Removing "${fpath}"`);
         return deviceUtil.removePath(fpath, this.host, this.getDefaultRequestOptions())
-            .catch(removeErr => this.logger.debugException(`Unable to remove "${fpath}"`, removeErr));
+            .catch((removeErr) => this.logger.debugException(`Unable to remove "${fpath}"`, removeErr));
     }
 
     /**
@@ -654,7 +654,7 @@ class IHealthAPI {
                 requestOptions.includeResponseObject = true;
                 return this.sendRequest(requestOptions);
             })
-            .then(res => Promise.resolve(res[1].statusCode === 200));
+            .then((res) => Promise.resolve(res[1].statusCode === 200));
     }
 
     /**
@@ -720,7 +720,6 @@ class IHealthAPI {
             });
     }
 }
-
 
 /**
  * iHealth Manager to upload Qkview and poll diagnostics from the local device

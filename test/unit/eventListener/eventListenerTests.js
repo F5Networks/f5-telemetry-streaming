@@ -74,13 +74,13 @@ describe('Event Listener', () => {
         };
 
         const gatherIds = () => {
-            const ids = EventListener.getAll().map(inst => inst.id);
+            const ids = EventListener.getAll().map((inst) => inst.id);
             ids.sort();
             return ids;
         };
 
         const registeredTracerPaths = () => {
-            const paths = tracer.registered().map(t => t.path);
+            const paths = tracer.registered().map((t) => t.path);
             paths.sort();
             return paths;
         };
@@ -435,20 +435,20 @@ describe('Event Listener', () => {
                 EventListener.receiversManager.getMessageStream(6514),
                 EventListener.receiversManager.getMessageStream(6515)
             ];
-            return Promise.all(receivers.map(r => r.start()))
+            return Promise.all(receivers.map((r) => r.start()))
                 .then(() => {
-                    receivers.forEach(r => assert.isTrue(r.isRunning(), 'should be in running state'));
+                    receivers.forEach((r) => assert.isTrue(r.isRunning(), 'should be in running state'));
                     return EventListener.receiversManager.destroyAll();
                 })
                 .then(() => {
-                    receivers.forEach(r => assert.isTrue(r.isDestroyed(), 'should be destroyed'));
+                    receivers.forEach((r) => assert.isTrue(r.isDestroyed(), 'should be destroyed'));
                     assert.deepStrictEqual(EventListener.receiversManager.registered, {}, 'should have no registered receivers');
                 });
         });
 
         it('should enable/disable input tracing', () => {
-            const getTracerData = tracerPath => coreStub.tracer.data[
-                Object.keys(coreStub.tracer.data).find(key => key.indexOf(tracerPath) !== -1)
+            const getTracerData = (tracerPath) => coreStub.tracer.data[
+                Object.keys(coreStub.tracer.data).find((key) => key.indexOf(tracerPath) !== -1)
             ];
 
             const newDecl = testUtil.deepCopy(origDecl);
@@ -518,7 +518,7 @@ describe('Event Listener', () => {
                         'INPUT.Telemetry_Listener.f5telemetry_default::Listener2',
                         'INPUT.Telemetry_Listener.f5telemetry_default::Listener3',
                         'INPUT.Telemetry_Listener.f5telemetry_default::Listener4'
-                    ].forEach(tracerPath => assert.deepStrictEqual(
+                    ].forEach((tracerPath) => assert.deepStrictEqual(
                         getTracerData(tracerPath),
                         [{
                             data: Buffer.from('12345').toString('hex'), // in hex
@@ -561,7 +561,7 @@ describe('Event Listener', () => {
                     [
                         'INPUT.Telemetry_Listener.f5telemetry_default::Listener2',
                         'INPUT.Telemetry_Listener.f5telemetry_default::Listener3'
-                    ].forEach(tracerPath => assert.includeDeepMembers(
+                    ].forEach((tracerPath) => assert.includeDeepMembers(
                         getTracerData(tracerPath),
                         [{
                             data: Buffer.from('6789').toString('hex'), // in hex
@@ -669,7 +669,7 @@ describe('Event Listener', () => {
                     'INPUT.Telemetry_Listener.f5telemetry_default::Listener2',
                     'INPUT.Telemetry_Listener.f5telemetry_default::Listener3',
                     'INPUT.Telemetry_Listener.f5telemetry_default::Listener4'
-                ].forEach(tracerPath => assert.notDeepInclude(
+                ].forEach((tracerPath) => assert.notDeepInclude(
                     getTracerData(tracerPath),
                     {
                         data: Buffer.from('final').toString('hex'), // in hex

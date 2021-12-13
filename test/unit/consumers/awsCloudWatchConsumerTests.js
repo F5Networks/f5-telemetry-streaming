@@ -73,6 +73,47 @@ describe('AWS_CloudWatch', () => {
         });
     });
 
+    describe('Endpoints', () => {
+        beforeEach(() => {
+            sinon.stub(AWS.config, 'update').resolves();
+            sinon.stub(AWS, 'Endpoint').callsFake((params) => ({ params }));
+        });
+
+        it('should supply endpointUrl to Monitoring Logs client', () => {
+            let cloudWatchLogsConstructorParams;
+            sinon.stub(AWS, 'CloudWatchLogs').callsFake((cloudWatchLogsParams) => {
+                cloudWatchLogsConstructorParams = cloudWatchLogsParams;
+            });
+
+            const context = testUtil.buildConsumerContext({
+                config: {
+                    endpointUrl: 'full-endpoint-url'
+                }
+            });
+
+            return awsCloudWatchIndex(context)
+                .then(() => assert.deepStrictEqual(cloudWatchLogsConstructorParams.endpoint, { params: 'full-endpoint-url' }));
+        });
+
+        it('should supply endpointUrl to Monitoring Metrics client', () => {
+            let cloudWatchConstructorParams;
+            sinon.stub(AWS, 'CloudWatch').callsFake((cloudWatchParams) => {
+                cloudWatchConstructorParams = cloudWatchParams;
+            });
+
+            const context = testUtil.buildConsumerContext({
+                eventType: 'systemInfo',
+                config: {
+                    dataType: 'metrics',
+                    endpointUrl: 'full-endpoint-url'
+                }
+            });
+
+            return awsCloudWatchIndex(context)
+                .then(() => assert.deepStrictEqual(cloudWatchConstructorParams.endpoint, { params: 'full-endpoint-url' }));
+        });
+    });
+
     describe('Logs', () => {
         let clock;
         let putLogEventsStub;
@@ -111,7 +152,7 @@ describe('AWS_CloudWatch', () => {
                         ]
                     })
                 }),
-                putLogEvents: params => ({
+                putLogEvents: (params) => ({
                     promise: () => putLogEventsStub(params)
                 })
             });
@@ -173,7 +214,7 @@ describe('AWS_CloudWatch', () => {
         beforeEach(() => {
             getMetricsSpy = sinon.spy(awsUtil, 'getMetrics');
             sinon.stub(AWS, 'CloudWatch').returns({
-                putMetricData: params => ({
+                putMetricData: (params) => ({
                     promise: () => putMetricsStub(params)
                 })
             });

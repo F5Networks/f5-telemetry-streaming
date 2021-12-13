@@ -1,6 +1,6 @@
 {
     "name": "f5-telemetry",
-    "version": "1.24.0-3",
+    "version": "1.25.0-2",
     "author": "F5 Networks",
     "license": "Apache-2.0",
     "repository": {
@@ -14,7 +14,10 @@
         "test-functional": "mocha \"./test/functional/testRunner.js\" --opts ./test/functional/.mocha.opts",
         "test-functional-cloud-azure": "mocha \"./test/functional/cloud/azureTests.js\" --opts ./test/functional/.mocha.opts",
         "test-functional-cloud-aws": "mocha \"./test/functional/cloud/awsTests.js\" --opts ./test/functional/.mocha.opts",
-        "test-only": "mocha --opts ./test/unit/.mocha.opts",
+        "test-mutation": "stryker run",
+        "test-only": "mocha --recursive --opts ./test/unit/.mocha.opts \"./test/unit/**/*.js\"",
+        "test-specific": "mocha --opts ./test/unit/.mocha.opts",
+        "test-specific-coverage": "nyc --all npm run test-specific",
         "test": "nyc --all npm run test-only",
         "build": "./scripts/build/buildRpm.sh"
     },
@@ -31,23 +34,24 @@
             "test/**",
             "scripts/**",
             "examples/**",
-            "**/node_modules/**"
+            "**/node_modules/**",
+            "stryker.conf.js"
         ]
     },
     "dependencies": {
         "@f5devcentral/f5-teem": "^1.5.0",
-        "@grpc/grpc-js": "^1.3.4",
+        "@grpc/grpc-js": "^1.4.2",
         "@grpc/proto-loader": "~0.3.0",
         "@opentelemetry/api": "^1.0.3",
-        "@opentelemetry/exporter-collector-proto": "^0.24.0",
-        "@opentelemetry/sdk-metrics-base": "^0.24.1-alpha.4",
+        "@opentelemetry/exporter-collector-proto": "^0.25.0",
+        "@opentelemetry/sdk-metrics-base": "^0.26.0",
         "ajv": "^6.12.6",
         "ajv-keywords": "^3.5.2",
         "applicationinsights": "^1.8.10",
-        "aws-sdk": "^2.991.0",
+        "aws-sdk": "2.1018.0",
         "commander": "^2.20.3",
         "deep-diff": "^1.0.2",
-        "eventemitter2": "^6.4.4",
+        "eventemitter2": "^6.4.5",
         "google-auth-library": "^6.1.6",
         "jmespath": "^0.15.0",
         "json-duplicate-key-handle": "file:opensource/json-duplicate-key-handle",
@@ -67,9 +71,12 @@
         "@f5devcentral/eslint-config-f5-atg": "latest",
         "chai": "^4.3.4",
         "chai-as-promised": "^7.1.1",
+        "eslint": "^8.1.0",
+        "eslint-config-airbnb-base": "^14.2.1",
+        "eslint-plugin-import": "^2.25.2",
         "grpc": "1.24.7",
         "grpc-mock": "^0.7.0",
-        "icrdk": "git://github.com/f5devcentral/f5-icontrollx-dev-kit.git#master",
+        "icrdk": "git+https://github.com/f5devcentral/f5-icontrollx-dev-kit.git#master",
         "mocha": "^7.2.0",
         "nock": "10.0.0",
         "node-scp": "0.0.14",
@@ -84,7 +91,8 @@
         "extends": "@f5devcentral/eslint-config-f5-atg",
         "rules": {
             "func-names": "off",
-            "prefer-spread": "off"
+            "prefer-spread": "off",
+            "max-classes-per-file": "off"
         }
     },
     "comments": {
@@ -93,6 +101,7 @@
             "ajv": "This package dropped support for older node versions and requires the ajv package to be recompiled. Use v6.X.Y for Node v4.",
             "ajv-keywords": "This package documents that v3 should be used when using ajv v6",
             "applicationinsights": "This package requires Node v8 in 2.0.0+ as it now includes OpenTelemetry packages. Use v1.X.Y for Node v4.",
+            "aws-sdk": "This package dropped support for older node versions. Use 2.1018.0 for Node < v10.",
             "commander": "This package dropped support for older node versions. Use v2.X.Y for Node v4.",
             "google-auth-library": "This package is used for GRPC connection, supports node v10 and above, but fromJSON function works in node v8.11.1 - should use v6.1.X only",
             "json-duplicate-key-handle": "This package is included locally to track updates and/or vulnerabilities. Included version is v1.0.0",
@@ -122,5 +131,9 @@
             "ssh2": "This packaged dropped support for older node versions. Use v0.X.Y for Node >= v5.2 and <= v10.16",
             "winston": "This package dropped support for older node versions. Use v2.X.Y for Node v4."
         }
+    },
+    "optionalDependencies": {
+        "@stryker-mutator/core": "^5.4.1",
+        "@stryker-mutator/mocha-runner": "^5.4.1"
     }
 }

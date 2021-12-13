@@ -727,7 +727,6 @@ describe('Misc Util', () => {
         });
     });
 
-
     describe('.generateUuid', () => {
         it('should return valid and unique values with multiple/consecutive calls', () => {
             const v4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -762,7 +761,6 @@ describe('Misc Util', () => {
         it('should return correct property value (primitive)', () => {
             assert.strictEqual(util.getProperty(obj, 'child1.prop1'), true);
         });
-
 
         it('should return correct property value (object)', () => {
             assert.deepStrictEqual(
@@ -827,7 +825,7 @@ describe('Misc Util', () => {
         it('should not be able to cancel once canceled', () => {
             const promise = util.sleep(50);
             assert.isTrue(promise.cancel());
-            return promise.catch(err => err)
+            return promise.catch((err) => err)
                 .then((err) => {
                     assert.isTrue(/canceled/.test(err));
                     assert.isFalse(promise.cancel(new Error('expected error')));

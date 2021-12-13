@@ -60,7 +60,7 @@ function test() {
             BASIC_DECL[pullConsumerName].type = PROMETHEUS_PULL_CONSUMER_TYPE;
         });
         describe('Prometheus - Configure TS', () => {
-            DUTS.forEach(dut => it(
+            DUTS.forEach((dut) => it(
                 `should configure TS - ${dut.hostalias}`,
                 () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(BASIC_DECL))
             ));
@@ -94,7 +94,7 @@ function test() {
             NAMESPACE_DECL[namespace][pullConsumerName].type = PROMETHEUS_PULL_CONSUMER_TYPE;
         });
         describe('Prometheus with namespace - Configure TS', () => {
-            DUTS.forEach(dut => it(
+            DUTS.forEach((dut) => it(
                 `should configure TS - ${dut.hostalias}`,
                 () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(NAMESPACE_DECL))
             ));

@@ -35,7 +35,7 @@ module.exports = {
         {
             name: 'should collect context data',
             statsToCollect: () => ({}),
-            contextToCollect: context => context,
+            contextToCollect: (context) => context,
             getCollectedData: (promise, stats) => promise.then(() => stats.contextData),
             endpoints: [
                 {
@@ -121,7 +121,7 @@ module.exports = {
         {
             name: 'should not fail when no data (with items property)',
             statsToCollect: () => ({}),
-            contextToCollect: context => context,
+            contextToCollect: (context) => context,
             getCollectedData: (promise, stats) => promise.then(() => stats.contextData),
             endpoints: [
                 {
@@ -164,7 +164,7 @@ module.exports = {
         {
             name: 'should not fail when no data (without items property)',
             statsToCollect: () => ({}),
-            contextToCollect: context => context,
+            contextToCollect: (context) => context,
             getCollectedData: (promise, stats) => promise.then(() => stats.contextData),
             endpoints: [
                 {

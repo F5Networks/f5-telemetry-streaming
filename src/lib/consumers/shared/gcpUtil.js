@@ -12,6 +12,9 @@ const jwt = require('jsonwebtoken');
 const requestsUtil = require('../../utils/requests');
 const getCurrentUnixTimeInSeconds = require('../../utils/datetime').getCurrentUnixTimeInSeconds;
 
+// Google's metadata service
+const METADATA_URL = 'http://metadata.google.internal/computeMetadata';
+
 /**
  * Caching mechanism for Access Tokens
  * Instead of requesting a new token on each request, can cache the token until it is set to expire.
@@ -102,76 +105,105 @@ class TokenCache {
 const tokenCache = new TokenCache();
 
 /**
+ * Sets tokenId for tokenCache to privateKeyId or serviceEmail, depending on whether useServiceAccountToken is used.
+ *
+ * @param {Object}  serviceAccount                          Google Cloud Service Account properties
+ * @param {String}  serviceAccount.serviceEmail             Service Account email address
+ * @param {String}  serviceAccount.privateKey               Service Account private key
+ * @param {Boolean} serviceAccount.useServiceAccountToken   sets if instance metadata token should be used
+ *
+ * @returns {String} tokenId
+*/
+function getTokenId(serviceAccount) {
+    if (!serviceAccount.useServiceAccountToken) {
+        return serviceAccount.privateKeyId;
+    }
+    return serviceAccount.serviceEmail;
+}
+
+/**
  * Given Google Cloud Access credentials, requests an Access Token from Google Cloud.
  * Will request following scopes when requesting an Access Token:
  *      - https://www.googleapis.com/auth/monitoring
  *      - https://www.googleapis.com/auth/logging.write
  *
- * @param {Object}  serviceAccount              Google Cloud Service Account properties
- * @param {String}  serviceAccount.serviceEmail Service Account email address
- * @param {String}  serviceAccount.privateKeyId Service Account private key ID
- * @param {String}  serviceAccount.privateKey   Service Account private key
+ * @param {Object}  serviceAccount                          Google Cloud Service Account properties
+ * @param {String}  serviceAccount.serviceEmail             Service Account email address
+ * @param {String}  serviceAccount.privateKeyId             Service Account private key ID
+ * @param {String}  serviceAccount.privateKey               Service Account private key
+ * @param {Boolean} serviceAccount.useServiceAccountToken   sets if instance metadata token should be used
  *
  * @returns {String} Access Token used to authenticate to Google Cloud APIs
  */
 function getAccessToken(serviceAccount) {
-    const privateKeyId = serviceAccount.privateKeyId;
-    const cachedToken = tokenCache.getToken(privateKeyId);
+    const tokenId = getTokenId(serviceAccount);
+    const cachedToken = tokenCache.getToken(tokenId);
     if (cachedToken && cachedToken.access_token) {
         return Promise.resolve(cachedToken.access_token);
     }
 
-    const scope = 'https://www.googleapis.com/auth/monitoring https://www.googleapis.com/auth/logging.write';
-    const jwtAge = 60 * 60; // 1 hour, in seconds
-    const jwtSigningOptions = {
-        algorithm: 'RS256',
-        header: {
-            kid: privateKeyId,
-            typ: 'JWT',
-            alg: 'RS256'
-        }
-    };
+    let httpOptions = {};
+    if (serviceAccount.useServiceAccountToken) {
+        httpOptions = {
+            headers: {
+                'Metadata-Flavor': 'Google'
+            },
+            method: 'GET',
+            fullURI: `${METADATA_URL}/v1/instance/service-accounts/${serviceAccount.serviceEmail}/token`
+        };
+    } else {
+        const scope = 'https://www.googleapis.com/auth/monitoring https://www.googleapis.com/auth/logging.write';
+        const jwtAge = 60 * 60; // 1 hour, in seconds
+        const jwtSigningOptions = {
+            algorithm: 'RS256',
+            header: {
+                kid: serviceAccount.privateKeyId,
+                typ: 'JWT',
+                alg: 'RS256'
+            }
+        };
 
-    const jwtRequest = jwt.sign(
-        {
-            iss: serviceAccount.serviceEmail,
-            scope,
-            aud: 'https://oauth2.googleapis.com/token',
-            exp: getCurrentUnixTimeInSeconds() + jwtAge,
-            iat: getCurrentUnixTimeInSeconds()
-        },
-        serviceAccount.privateKey,
-        jwtSigningOptions
-    );
+        const jwtRequest = jwt.sign(
+            {
+                iss: serviceAccount.serviceEmail,
+                scope,
+                aud: 'https://oauth2.googleapis.com/token',
+                exp: getCurrentUnixTimeInSeconds() + jwtAge,
+                iat: getCurrentUnixTimeInSeconds()
+            },
+            serviceAccount.privateKey,
+            jwtSigningOptions
+        );
 
-    const httpOptions = {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        fullURI: 'https://oauth2.googleapis.com/token',
-        form: {
-            grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-            assertion: jwtRequest
-        }
-    };
+        httpOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            fullURI: 'https://oauth2.googleapis.com/token',
+            form: {
+                grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                assertion: jwtRequest
+            }
+        };
+    }
 
     return requestsUtil.makeRequest(httpOptions)
-        .then(token => tokenCache.cacheToken(privateKeyId, token).access_token);
+        .then((token) => tokenCache.cacheToken(tokenId, token).access_token);
 }
 
 /**
  * Given a Google Service Account object, invalidates the cached tokens held by the Token Cache.
  *
- * @param {Object}  serviceAccount                  Service Account object
- * @param {String}  serviceAccount.privateKeyId     PrivateKeyID for the Service Account
+ * @param {Object}  serviceAccount                          Service Account object
+ * @param {String}  serviceAccount.serviceEmail             Service Account email address
+ * @param {String}  serviceAccount.privateKeyId             PrivateKeyID for the Service Account
+ * @param {Boolean} serviceAccount.useServiceAccountToken   sets if instance metadata token should be used
  */
 function invalidateToken(serviceAccount) {
-    tokenCache.removeToken(serviceAccount.privateKeyId);
+    const tokenId = getTokenId(serviceAccount);
+    tokenCache.removeToken(tokenId);
 }
-
-// Google's metadata service
-const METADATA_URL = 'http://metadata.google.internal/computeMetadata';
 
 function getInstanceMetadata(context) {
     const metadataOpts = {

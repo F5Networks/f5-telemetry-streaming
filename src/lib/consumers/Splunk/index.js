@@ -15,7 +15,6 @@ const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 const memConverter = require('./multiMetricEventConverter');
 const httpUtil = require('../shared/httpUtil');
 
-
 const MAX_CHUNK_SIZE = 99000;
 const HEC_EVENTS_URI = '/services/collector/event';
 const HEC_METRICS_URI = '/services/collector';
@@ -32,7 +31,7 @@ const DATA_FORMATS = {
  */
 module.exports = function (context) {
     return transformData(context)
-        .then(data => forwardData(data, context))
+        .then((data) => forwardData(data, context))
         .catch((err) => {
             context.logger.exception('Splunk data processing error', err);
         });
@@ -72,7 +71,7 @@ function safeDataTransform(cb, ctx) {
         .then((data) => {
             if (data) {
                 if (Array.isArray(data)) {
-                    data.forEach(part => appendData(ctx, part));
+                    data.forEach((part) => appendData(ctx, part));
                 } else {
                     appendData(ctx, data);
                 }
@@ -104,7 +103,7 @@ function multiMetricDataFormat(ctx) {
     return Promise.resolve()
         .then(() => {
             const events = [];
-            memConverter(ctx.event.data, event => events.push(JSON.stringify(event)));
+            memConverter(ctx.event.data, (event) => events.push(JSON.stringify(event)));
             return events;
         });
 }
@@ -147,7 +146,7 @@ function transformData(globalCtx) {
     let p = null;
     if (globalCtx.event.type === EVENT_TYPES.SYSTEM_POLLER && !globalCtx.event.isCustom) {
         requestCtx.cache.dataTimestamp = Date.parse(globalCtx.event.data.system.systemTimestamp);
-        p = Promise.all(dataMapping.stats.map(func => safeDataTransform(func, requestCtx)))
+        p = Promise.all(dataMapping.stats.map((func) => safeDataTransform(func, requestCtx)))
             .then(() => safeDataTransform(dataMapping.overall, requestCtx));
     } else if (globalCtx.event.type === EVENT_TYPES.IHEALTH_POLLER) {
         p = safeDataTransform(dataMapping.ihealth, requestCtx);

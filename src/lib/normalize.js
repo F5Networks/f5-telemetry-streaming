@@ -12,7 +12,6 @@ const logger = require('./logger'); // eslint-disable-line no-unused-vars
 const constants = require('./constants');
 const normalizeUtil = require('./utils/normalize');
 
-
 /**
  * RegExp for syslog message detection.
  */
@@ -28,7 +27,7 @@ const SYSLOG_REGEX = new RegExp([
     /([\w\-().0-9/]+)/, // process
     /(?:\[([a-z0-9-.]+)\])?:/, // pid
     /(.+)/ // message
-].map(regex => regex.source).join(''), 'i');
+].map((regex) => regex.source).join(''), 'i');
 
 /*
  * Lumen might set "$F5TelemetryEventCategory" to "raw", to indicate that the processing is not required
@@ -40,7 +39,6 @@ const SYSLOG_HOSTNAME_IDX = 7;
 const SYSLOG_MSG_IDX = 11;
 
 const USELESS_MESSAGE_PREFIX = /^((?:BigIP|ASM):)/;
-
 
 module.exports = {
     /**
@@ -351,7 +349,6 @@ module.exports = {
             return thisData;
         };
 
-
         if (data && typeof data === 'object' && !Array.isArray(data)) {
             // if we are classifying by keys (already defined) assume we are processing a flat
             // data structure
@@ -598,9 +595,9 @@ module.exports = {
                 if ((norm.convertArrayToMap || norm.includeFirstEntry) && !setReduced) {
                     // standard reduce data first
                     const reduceDataOptions = {
-                        convertArrayToMap: (options.normalization.find(n => n.convertArrayToMap)
+                        convertArrayToMap: (options.normalization.find((n) => n.convertArrayToMap)
                             || {}).convertArrayToMap,
-                        includeFirstEntry: (options.normalization.find(n => n.includeFirstEntry)
+                        includeFirstEntry: (options.normalization.find((n) => n.includeFirstEntry)
                             || {}).includeFirstEntry
                     };
                     ret = this._reduceData(norm.useCurrentData ? ret : data, reduceDataOptions);

@@ -50,10 +50,10 @@ class SystemPollerEndpointHandler extends BaseRequestHandler {
             .then(systemPoller.fetchPollersData.bind(systemPoller))
             .then((fetchedData) => {
                 this.code = 200;
-                this.body = fetchedData.map(d => d.data);
+                this.body = fetchedData.map((d) => d.data);
                 return this;
             })
-            .catch(error => new ErrorHandler(error).process());
+            .catch((error) => new ErrorHandler(error).process());
     }
 }
 

@@ -16,7 +16,7 @@ const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 const jwt = require('jsonwebtoken');
 
-const gcpUtil = require('./../../../src/lib/consumers/shared/gcpUtil');
+const gcpUtil = require('../../../src/lib/consumers/shared/gcpUtil');
 const nock = require('nock');
 
 chai.use(chaiAsPromised);
@@ -52,7 +52,11 @@ describe('Google Cloud Util Tests', () => {
                     return accessTokenResponse;
                 });
 
-            return gcpUtil.getAccessToken({ privateKey: 'key', privateKeyId: 'keyId' })
+            return gcpUtil.getAccessToken(
+                {
+                    useServiceAccountToken: false, privateKey: 'key', privateKeyId: 'keyId'
+                }
+            )
                 .then((token) => {
                     assert.isTrue(nock.isDone());
                     assert.strictEqual(token, 'hereHaveSomeAccess');
@@ -73,6 +77,25 @@ describe('Google Cloud Util Tests', () => {
                     assert.isTrue(nock.isDone());
                     assert.strictEqual(jwtSignStub.callCount, 2);
                     assert.deepStrictEqual(tokens, ['hereHaveSomeAccess', 'hereHaveSomeAccess']);
+                });
+        });
+    });
+
+    describe('getAccessToken', () => {
+        const accessTokenResponse = {
+            access_token: 'hereHaveSomeAccess',
+            expires_in: 1000
+        };
+
+        it('should get an Access Token from the instance metadata', () => {
+            nock('http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/abc')
+                .get('/token')
+                .reply(200, () => accessTokenResponse);
+
+            return gcpUtil.getAccessToken({ useServiceAccountToken: true, serviceEmail: 'abc' })
+                .then((token) => {
+                    assert.isTrue(nock.isDone());
+                    assert.strictEqual(token, 'hereHaveSomeAccess');
                 });
         });
     });

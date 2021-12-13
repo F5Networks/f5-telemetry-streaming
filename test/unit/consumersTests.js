@@ -118,7 +118,7 @@ describe('Consumers', () => {
             // config will not pass schema validation
             // but this test allows catching if consumer module/dir is not configured properly
             return configUtil.normalizeDeclaration(exampleConfig)
-                .then(normalized => configWorker.emitAsync('change', normalized))
+                .then((normalized) => configWorker.emitAsync('change', normalized))
                 .then(() => {
                     const loadedConsumers = consumers.getConsumers();
                     assert.strictEqual(Object.keys(loadedConsumers).indexOf('unknowntype'), -1,

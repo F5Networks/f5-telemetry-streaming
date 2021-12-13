@@ -40,7 +40,6 @@ const SPLUNK_CONSUMER_NAME = 'Splunk_Consumer';
 // read in example config
 const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
 
-
 function runRemoteCmd(cmd) {
     return util.performRemoteCmd(CONSUMER_HOST.ip, CONSUMER_HOST.username, cmd, { password: CONSUMER_HOST.password });
 }
@@ -84,7 +83,7 @@ function test() {
             };
 
             // splunk container takes about 30 seconds to come up
-            return new Promise(resolve => setTimeout(resolve, 10000))
+            return new Promise((resolve) => setTimeout(resolve, 10000))
                 .then(() => util.makeRequest(CONSUMER_HOST.ip, uri, options))
                 .then((data) => {
                     util.logger.info(`Splunk response ${uri}`, data);
@@ -116,7 +115,7 @@ function test() {
                     data = data || {};
                     // check for existence of the token first
                     if (data.entry && data.entry.length) {
-                        const exists = data.entry.filter(item => item.name.indexOf(tokenName) !== -1);
+                        const exists = data.entry.filter((item) => item.name.indexOf(tokenName) !== -1);
                         if (exists.length) {
                             return Promise.resolve({ entry: exists }); // exists, continue
                         }
@@ -169,7 +168,7 @@ function test() {
                     data = data || {};
                     // check for existence of the token first
                     if (data.entry && data.entry.length) {
-                        const exists = data.entry.filter(item => item.name.indexOf(tokenName) !== -1);
+                        const exists = data.entry.filter((item) => item.name.indexOf(tokenName) !== -1);
                         if (exists.length) {
                             return Promise.resolve({ entry: exists }); // exists, continue
                         }
@@ -246,7 +245,7 @@ function test() {
                     };
                 });
 
-                DUTS.forEach(dut => it(
+                DUTS.forEach((dut) => it(
                     `should configure TS - ${dut.hostalias}`,
                     () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(consumerDeclaration))
                 ));
@@ -258,7 +257,7 @@ function test() {
 
                     it('should send event to TS Event Listener', () => {
                         const msg = `testDataTimestamp="${testDataTimestamp}",test="true",testType="${SPLUNK_CONSUMER_NAME}"`;
-                        return dutUtils.sendDataToEventListeners(dut => `hostname="${dut.hostname}",${msg}`);
+                        return dutUtils.sendDataToEventListeners((dut) => `hostname="${dut.hostname}",${msg}`);
                     });
                 }
             });
@@ -296,7 +295,7 @@ function test() {
                             return new Promise((resolve, reject) => {
                                 const waitUntilDone = () => {
                                     uri = `${baseUri}/${sid}?${outputMode}`;
-                                    return new Promise(resolveTimer => setTimeout(resolveTimer, 100))
+                                    return new Promise((resolveTimer) => setTimeout(resolveTimer, 100))
                                         .then(() => util.makeRequest(CONSUMER_HOST.ip, uri, options))
                                         .then((status) => {
                                             const dispatchState = status.entry[0].content.dispatchState;
@@ -325,7 +324,7 @@ function test() {
                     const searchQueryEL = () => `search source=f5.telemetry | spath testType | search testType="${SPLUNK_CONSUMER_NAME}" | search hostname="${dut.hostname}" | search testDataTimestamp="${testDataTimestamp}" | head 1`;
 
                     if (testSetup.format.queryEventsTests) {
-                        it(`should check for system poller data from:${dut.hostalias}`, () => new Promise(resolve => setTimeout(resolve, 30000))
+                        it(`should check for system poller data from:${dut.hostalias}`, () => new Promise((resolve) => setTimeout(resolve, 30000))
                             .then(() => {
                                 util.logger.info(`Splunk search query for system poller data: ${searchQuerySP()}`);
                                 return query(searchQuerySP());
@@ -352,7 +351,7 @@ function test() {
                     }
 
                     if (testSetup.format.metricsTests) {
-                        it(`should check for system poller metrics from:${dut.hostalias}`, () => new Promise(resolve => setTimeout(resolve, 30000))
+                        it(`should check for system poller metrics from:${dut.hostalias}`, () => new Promise((resolve) => setTimeout(resolve, 30000))
                             .then(() => {
                                 util.logger.info(`Splunk search query for system poller data: ${searchMetrics()}`);
                                 return query(searchMetrics());
@@ -376,7 +375,7 @@ function test() {
                     }
 
                     if (testSetup.format.eventListenerTests) {
-                        it(`should check for event listener data from:${dut.hostalias}`, () => new Promise(resolve => setTimeout(resolve, 30000))
+                        it(`should check for event listener data from:${dut.hostalias}`, () => new Promise((resolve) => setTimeout(resolve, 30000))
                             .then(() => {
                                 util.logger.info(`Splunk search query for event listener data: ${searchQueryEL()}`);
                                 return query(searchQueryEL());

@@ -36,7 +36,6 @@ const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
  */
 let APPINS_API_DATA;
 
-
 function setup() {
     const fileName = process.env[constants.ENV_VARS.AZURE.APPINS_API_DATA];
     assert.ok(fileName, `should define env variable ${constants.ENV_VARS.AZURE.APPINS_API_DATA} (path to file with Azure App Insights API info)`);
@@ -79,7 +78,7 @@ function test() {
             instrumentationKey: null,
             maxBatchIntervalMs: 2000
         };
-        DUTS.forEach(dut => it(`should configure TS - ${dut.hostalias}`, () => {
+        DUTS.forEach((dut) => it(`should configure TS - ${dut.hostalias}`, () => {
             const declaration = testUtil.deepCopy(referenceDeclaration);
             const apiInfo = getAppInsightAPIInfo(dut.ip);
             declaration.My_Consumer.instrumentationKey = apiInfo.instrKey;

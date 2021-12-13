@@ -16,8 +16,7 @@ const deviceUtil = require('./device');
 const logger = require('../logger');
 const util = require('./misc');
 
-
-/** @module configUtil */
+/** @module utils/config */
 
 const CLASSES = constants.CONFIG_CLASSES;
 const POLLER_KEYS = {
@@ -112,7 +111,7 @@ function componentizeConfig(originConfig, convertedConfig) {
             }
         });
     };
-    if (convertedConfig.components.some(c => c.namespace === constants.DEFAULT_UNNAMED_NAMESPACE)) {
+    if (convertedConfig.components.some((c) => c.namespace === constants.DEFAULT_UNNAMED_NAMESPACE)) {
         // add 'default' namespace as object too, will be removed later
         convertedConfig.components.push({
             name: constants.DEFAULT_UNNAMED_NAMESPACE,
@@ -188,12 +187,12 @@ function getTracePrefix(component) {
  * @param {Component} component - component
  * @param {boolean | object | string} [traceConfig] - trace config to process instead of component.trace
  *
- * @returns {TypedTracerConfig} Tracer config
+ * @returns {TracerConfig} Tracer config
  */
 function getTracerConfig(component, traceConfig) {
     traceConfig = arguments.length > 1 ? traceConfig : component.trace;
     if (Array.isArray(traceConfig)) {
-        return traceConfig.map(config => getTracerConfig(component, config));
+        return traceConfig.map((config) => getTracerConfig(component, config));
     }
     if (typeof traceConfig !== 'object') {
         /**
@@ -227,7 +226,7 @@ function getTracerConfig(component, traceConfig) {
  */
 function generateComponentsIDs(convertedConfig) {
     _module.getComponents(convertedConfig).forEach((component) => {
-        // have to call 'generateUuid' with 'component' as context to be able to generate
+        // ATTENTION: have to call 'generateUuid' with 'component' as context to be able to generate
         // predictable IDs for testing
         component.id = util.generateUuid.call(component);
     });
@@ -241,7 +240,7 @@ function generateComponentsIDs(convertedConfig) {
  */
 function hasSplunkLegacy(config, namespace) {
     return _module.getTelemetryConsumers(config, namespace)
-        .some(c => c.type === 'Splunk' && c.format === 'legacy');
+        .some((c) => c.type === 'Splunk' && c.format === 'legacy');
 }
 
 /**
@@ -258,23 +257,25 @@ function mapComponents(convertedConfig) {
     //   then lookup the corresponding destinations (consumers to load)
     //   for pull consumer: map consumer to the poller so we can look up configuration to use to then fetch data
     _module.getComponents(convertedConfig).forEach((component) => {
-        if (useForMapping(component.class)) {
-            const systemNameLog = component.systemName ? `system = ${component.systemName}, ` : '';
-            let receivers;
-
+        if (useForMapping(component.class) && component.enable) {
+            const receivers = [];
             if (component.class === CLASSES.PULL_CONSUMER_SYSTEM_POLLER_GROUP_CLASS_NAME) {
-                receivers = _module.getTelemetryPullConsumers(convertedConfig, component.namespace)
-                    .filter(pc => pc.name === component.pullConsumer);
-            } else {
-                receivers = _module.getTelemetryConsumers(convertedConfig, component.namespace);
+                const pullConsumer = _module.getTelemetryPullConsumers(convertedConfig, component.namespace)
+                    .find((pc) => pc.id === component.pullConsumer);
+                receivers.push(pullConsumer);
+            } else if (!(component.class === CLASSES.SYSTEM_POLLER_CLASS_NAME && component.interval === 0)) {
+                _module.getTelemetryConsumers(convertedConfig, component.namespace)
+                    .forEach((c) => receivers.push(c));
             }
-            if (receivers.length) {
-                convertedConfig.mappings[component.id] = receivers.map((p) => {
-                    logger.debug(`Creating a route for data to "${p.name}" (${p.class}) from "${component.name}" (${component.class}) [${systemNameLog}namespace = ${component.namespace}]`);
+
+            const enabledReceivers = receivers.filter((r) => r.enable);
+            if (enabledReceivers.length) {
+                convertedConfig.mappings[component.id] = enabledReceivers.map((p) => {
+                    logger.debug(`Creating a route for data to "${p.traceName}" (${p.class}) from "${component.traceName}" (${component.class})`);
                     return p.id;
                 });
             } else {
-                logger.debug(`No data route created for "${component.name}" (${component.class}) - no data sources/receivers [${systemNameLog}namespace = ${component.namespace}]]`);
+                logger.debug(`No data route created for "${component.traceName}" (${component.class}) - no data sources/receivers`);
             }
         }
     });
@@ -302,6 +303,7 @@ function normalizeComponents(convertedConfig) {
             normalizeTelemetryConsumers(convertedConfig);
             normalizeTelemetryPullConsumers(convertedConfig);
             generateComponentsIDs(convertedConfig);
+            postProcessTelemetryPullConsumerSystemPollerGroups(convertedConfig);
         });
 }
 
@@ -364,12 +366,12 @@ function normalizeTelemetryEndpoints(convertedConfig) {
         if (typeof endpoint === 'object') {
             // array of definitions - can be all of the following
             if (Array.isArray(endpoint)) {
-                endpoint.forEach(innerEndpoint => processEndpoint(innerEndpoint, cb));
+                endpoint.forEach((innerEndpoint) => processEndpoint(innerEndpoint, cb));
             // endpoint is Telemetry_Endpoints
             } else if (endpoint.class === CLASSES.ENDPOINTS_CLASS_NAME || endpoint.items) {
                 // don't need to copy 'endpoint' because it was either reference or inline config
                 computeBasePath(endpoint);
-                Object.keys(endpoint.items).forEach(key => cb(parseEndpointItem(endpoint, key)));
+                Object.keys(endpoint.items).forEach((key) => cb(parseEndpointItem(endpoint, key)));
             // endpoint is Telemetry_Endpoint
             } else if (typeof endpoint.path === 'string') {
                 // it has 'name' and 'path' properties already (see endpoints_schema.json)
@@ -380,7 +382,7 @@ function normalizeTelemetryEndpoints(convertedConfig) {
             const refs = trimPath(endpoint).split('/');
             // reference to a Telemetry_Endpoints object
             // format is ObjectName/pathName
-            endpoint = telemetryEndpoints.find(e => e.name === refs[0]);
+            endpoint = telemetryEndpoints.find((e) => e.name === refs[0]);
             if (refs.length > 1) {
                 // reference to a child of Telemetry_Endpoints.items
                 endpoint = util.deepCopy(endpoint);
@@ -423,7 +425,6 @@ function normalizeTelemetryEndpoints(convertedConfig) {
  * Note: This method mutates 'convertedConfig'.
  *
  * @param {Configuration} convertedConfig - object to save normalized config to
- * @param {object} componentDefaults - default components values
  *
  * @returns {void} once Telemetry_iHealth_Poller objects normalized
  */
@@ -437,11 +438,11 @@ function normalizeTelemetryIHealthPollers(convertedConfig) {
      *     and should be attached to Telemetry_System instead
      */
     const pollersWithoutSystem = _module.getTelemetryIHealthPollers(convertedConfig)
-        .filter(poller => !poller.systemName);
+        .filter((poller) => !poller.systemName);
     // remove those pollers - we don't need them any more
     _module.removeComponents(convertedConfig, {
         class: CLASSES.IHEALTH_POLLER_CLASS_NAME,
-        filter: c => pollersWithoutSystem.indexOf(c) !== -1
+        filter: (c) => pollersWithoutSystem.indexOf(c) !== -1
     });
 }
 
@@ -465,9 +466,9 @@ function normalizeTelemetryListeners(convertedConfig) {
 
         let traceConfigs = getTracerConfig(listener);
         traceConfigs = Array.isArray(traceConfigs) ? traceConfigs : [traceConfigs];
-        listener.trace = traceConfigs.find(t => t.type === 'output')
+        listener.trace = traceConfigs.find((t) => t.type === 'output')
             || getTracerConfig(listener, false);
-        listener.traceInput = traceConfigs.find(t => t.type === 'input')
+        listener.traceInput = traceConfigs.find((t) => t.type === 'input')
             || getTracerConfig(listener, { enable: false, type: 'input' });
     });
 }
@@ -511,6 +512,46 @@ function normalizeTelemetryPullConsumers(convertedConfig) {
         consumer.traceName = `${getTracePrefix(consumer)}${consumer.name}`;
         consumer.trace = getTracerConfig(consumer);
         delete consumer.systemPoller;
+    });
+}
+
+/**
+ * Normalize Telemetry_Pull_Consumer_System_Poller_Group objects
+ *
+ * Note: This method mutates 'convertedConfig'.
+ *
+ * @param {Configuration} convertedConfig - object to save normalized config to
+ *
+ * @returns {void} once Telemetry_Pull_Consumer_System_Poller_Group objects normalized
+ */
+function normalizeTelemetryPullConsumerSystemPollerGroups(convertedConfig) {
+    // at that point Telemetry_System and Telemetry_System_Poller
+    // objects should be normalized already. Should happen BEFORE
+    // Telemetry_Pull_Consumer normalization
+    /**
+     * Combination of (class, namespace, name) is unique because:
+     * - component's name is unique withing namespace
+     * - Telemetry_Pull_Consumer_System_Poller_Group is not public class
+     * As result:
+     * - safe to assign name based on component's name
+     *   without checking for existence
+     * - safe to refer to a pull consumer by name within namespace scope
+     */
+    const systemPollerGroups = _module.getTelemetryPullConsumerSystemPollerGroups(convertedConfig);
+    const pullConsumers = _module.getTelemetryPullConsumers(convertedConfig);
+
+    systemPollerGroups.forEach((pollerGroup) => {
+        const pullConsumer = pullConsumers
+            .find((pc) => pc.namespace === pollerGroup.namespace && pc.name === pollerGroup.pullConsumer);
+
+        pollerGroup.enable = pullConsumer.enable;
+        pollerGroup.name = `${pollerGroup.class}_${pullConsumer.name}`;
+        pollerGroup.traceName = `${getTracePrefix(pollerGroup)}${pollerGroup.name}`;
+        // disable tracing, rely on pull consumer and system poller(s) tracing
+        pollerGroup.trace = { enable: false };
+        pollerGroup.systemPollers = Array.isArray(pullConsumer.systemPoller)
+            ? pullConsumer.systemPoller
+            : [pullConsumer.systemPoller];
     });
 }
 
@@ -561,7 +602,7 @@ function normalizeTelemetrySystems(convertedConfig) {
             if (typeof systemPoller === 'string') {
                 // looking for unbound pre-existing Telemetry_System_Poller in same namespace
                 pollerObj = preExistingTelemetrySystemPollers
-                    .find(p => p.namespace === system.namespace && p.name === systemPoller);
+                    .find((p) => p.namespace === system.namespace && p.name === systemPoller);
                 if (!pollerObj) {
                     logger.debug(`Unable to find Telemetry_System_Poller referenced by name "${systemPoller}" for Telemetry_System "${system.name}" in Telemetry_Namespace "${system.namespace}"`);
                     return;
@@ -573,8 +614,8 @@ function normalizeTelemetrySystems(convertedConfig) {
                 // refresh list of existing name within system
                 existingNames = _module.getTelemetrySystemPollers(
                     convertedConfig,
-                    p => p.namespace === system.namespace && p.systemName === system.name
-                ).map(p => p.name);
+                    (p) => p.namespace === system.namespace && p.systemName === system.name
+                ).map((p) => p.name);
                 assignPollerName('SystemPoller', pollerObj);
             }
             pollerObj = updateSystemPollerConfig(system, util.deepCopy(pollerObj), fetchTMStats);
@@ -591,7 +632,7 @@ function normalizeTelemetrySystems(convertedConfig) {
             if (typeof iHealthPoller === 'string') {
                 // looking for unbound pre-existing Telemetry_iHealth_Poller in same namespace
                 pollerObj = preExistingTelemetryIHealthPollers
-                    .find(p => p.namespace === system.namespace && p.name === iHealthPoller);
+                    .find((p) => p.namespace === system.namespace && p.name === iHealthPoller);
                 if (!pollerObj) {
                     logger.debug(`Unable to find Telemetry_iHealth_Poller referenced by name "${iHealthPoller}" for Telemetry_System "${system.name}" in Telemetry_Namespace "${system.namespace}"`);
                     return;
@@ -603,8 +644,8 @@ function normalizeTelemetrySystems(convertedConfig) {
                 // refresh list of existing name within system
                 existingNames = _module.getTelemetryIHealthPollers(
                     convertedConfig,
-                    p => p.namespace === system.namespace && p.systemName === system.name
-                ).map(p => p.name);
+                    (p) => p.namespace === system.namespace && p.systemName === system.name
+                ).map((p) => p.name);
                 assignPollerName('iHealthPoller', pollerObj);
             }
             pollerObj = updateIHealthPollerConfig(system, util.deepCopy(pollerObj));
@@ -628,11 +669,11 @@ function normalizeTelemetrySystems(convertedConfig) {
  */
 function normalizeTelemetrySystemPollers(convertedConfig, componentDefaults) {
     const pollersWithoutSystem = _module.getTelemetrySystemPollers(convertedConfig)
-        .filter(poller => !poller.systemName);
+        .filter((poller) => !poller.systemName);
     // remove those pollers - we don't need them any more
     _module.removeComponents(convertedConfig, {
         class: CLASSES.SYSTEM_POLLER_CLASS_NAME,
-        filter: c => pollersWithoutSystem.indexOf(c) !== -1
+        filter: (c) => pollersWithoutSystem.indexOf(c) !== -1
     });
 
     function createSystemFromSystemPoller(systemPoller) {
@@ -658,44 +699,28 @@ function normalizeTelemetrySystemPollers(convertedConfig, componentDefaults) {
 }
 
 /**
- * Normalize Telemetry_Pull_Consumer_System_Poller_Group objects
+ * Post Process Telemetry_Pull_Consumer_System_Poller_Group objects
  *
  * Note: This method mutates 'convertedConfig'.
  *
  * @param {Configuration} convertedConfig - object to save normalized config to
- * @param {object} componentDefaults - default components values
  *
- * @returns {void} once Telemetry_Pull_Consumer_System_Poller_Group objects normalized
+ * @returns {void} once Telemetry_Pull_Consumer_System_Poller_Group objects updated
  */
-function normalizeTelemetryPullConsumerSystemPollerGroups(convertedConfig) {
-    // at that point Telemetry_System and Telemetry_System_Poller
-    // objects should be normalized already. Should happen BEFORE
-    // Telemetry_Pull_Consumer normalization
-    /**
-     * Combination of (class, namespace, name) is unique because:
-     * - component's name is unique withing namespace
-     * - Telemetry_Pull_Consumer_System_Poller_Group is not public class
-     * As result:
-     * - safe to assign name based on component's name
-     *   without checking for existence
-     * - safe to refer to a pull consumer by name within namespace scope
-     */
-    const systemPollerGroups = _module.getTelemetryPullConsumerSystemPollerGroups(convertedConfig);
-    const pullConsumers = _module.getTelemetryPullConsumers(convertedConfig);
+function postProcessTelemetryPullConsumerSystemPollerGroups(convertedConfig) {
+    // at that point IDs should be generated already
+    _module.getTelemetryPullConsumerSystemPollerGroups(convertedConfig)
+        .forEach((pg) => {
+            // updating pull consumer info
+            const pullConsumer = _module.getTelemetryPullConsumers(convertedConfig, pg.namespace)
+                .find((pc) => pc.name === pg.pullConsumer);
 
-    systemPollerGroups.forEach((pollerGroup) => {
-        const pullConsumer = pullConsumers
-            .find(pc => pc.namespace === pollerGroup.namespace && pc.name === pollerGroup.pullConsumer);
-
-        pollerGroup.enable = pullConsumer.enable;
-        pollerGroup.name = `${pollerGroup.class}_${pullConsumer.name}`;
-        pollerGroup.traceName = `${getTracePrefix(pollerGroup)}${pollerGroup.name}`;
-        // disable tracing, rely on pull consumer and system poller(s) tracing
-        pollerGroup.trace = { enable: false };
-        pollerGroup.systemPollers = Array.isArray(pullConsumer.systemPoller)
-            ? pullConsumer.systemPoller
-            : [pullConsumer.systemPoller];
-    });
+            // convert all names/refs to IDs
+            pg.pullConsumer = pullConsumer.id;
+            pg.systemPollers = _module.getTelemetrySystemPollers(convertedConfig, pg.namespace)
+                .filter((sp) => sp.enable && pg.systemPollers.indexOf(sp.name) !== -1)
+                .map((sp) => sp.id);
+        });
 }
 
 /**
@@ -857,14 +882,14 @@ _module = module.exports = {
         if (options.class) {
             let filter = options.class;
             if (typeof filter !== 'function') {
-                filter = c => c.class === options.class;
+                filter = (c) => c.class === options.class;
             }
             components = components.filter(filter);
         }
         if (options.namespace) {
             let filter = options.namespace;
             if (typeof filter !== 'function') {
-                filter = c => c.namespace === options.namespace;
+                filter = (c) => c.namespace === options.namespace;
             }
             components = components.filter(filter);
         }
@@ -875,7 +900,7 @@ _module = module.exports = {
     },
 
     /**
-     * Get receivers for component
+     * Get configured and enabled receivers for component
      *
      * @public
      * @param {Configuration} config - config
@@ -889,7 +914,29 @@ _module = module.exports = {
             return [];
         }
         return _module.getComponents(config, {
-            filter: c => ids.indexOf(c.id) !== -1,
+            filter: (c) => ids.indexOf(c.id) !== -1,
+            namespace: component.namespace
+        });
+    },
+
+    /**
+     * Get configured and enabled data sources for component
+     *
+     * @public
+     * @param {Configuration} config - config
+     * @param {Component} component - component
+     *
+     * @returns {Array<Component>} array of data sources
+     */
+    getSources(config, component) {
+        const ids = Object.keys(config.mappings)
+            .filter((id) => config.mappings[id].indexOf(component.id) !== -1);
+
+        if (ids.length === 0) {
+            return [];
+        }
+        return _module.getComponents(config, {
+            filter: (c) => ids.indexOf(c.id) !== -1,
             namespace: component.namespace
         });
     },
@@ -1012,7 +1059,7 @@ _module = module.exports = {
      */
     getTelemetrySystemPollersForGroup(config, pollerGroup) {
         return _module.getTelemetrySystemPollers(config, pollerGroup.namespace)
-            .filter(sp => pollerGroup.systemPollers.indexOf(sp.name) !== -1);
+            .filter((sp) => pollerGroup.systemPollers.indexOf(sp.id) !== -1);
     },
 
     /**
@@ -1037,12 +1084,12 @@ _module = module.exports = {
      * @param {Configuration} config - config
      * @param {Component} pullConsumer - Telemetry_Pull_Consumer object
      *
-     * @returns {Component} Telemetry_Pull_Consumer_System_Poller_Group object
+     * @returns {Component | undefined} Telemetry_Pull_Consumer_System_Poller_Group object
      */
     getTelemetryPullConsumerSystemPollerGroupForPullConsumer(config, pullConsumer) {
         return _module.getTelemetryPullConsumerSystemPollerGroups(config, pullConsumer.namespace)
-            .filter(pg => pg.pullConsumer === pullConsumer.name)
-            .find(pg => config.mappings[pg.id].indexOf(pullConsumer.id) !== -1);
+            .filter((pg) => pg.pullConsumer === pullConsumer.id && config.mappings[pg.id])
+            .find((pg) => config.mappings[pg.id].indexOf(pullConsumer.id) !== -1);
     },
 
     /**
@@ -1073,7 +1120,7 @@ _module = module.exports = {
      * @returns {boolean} true if config has "enabled" components
      */
     hasEnabledComponents(config, options) {
-        return _module.getComponents(config, options).some(c => c.class !== CLASSES.CONTROLS_CLASS_NAME && c.enable);
+        return _module.getComponents(config, options).some((c) => c.class !== CLASSES.CONTROLS_CLASS_NAME && c.enable);
     },
 
     /**
@@ -1093,10 +1140,10 @@ _module = module.exports = {
             .then((newNormalizedConfig) => {
                 // all objects have .namespace property - get all namespaces in new config
                 const namespaces = _module.getComponents(newNormalizedConfig)
-                    .map(c => c.namespace)
+                    .map((c) => c.namespace)
                     .filter((val, index, self) => self.indexOf(val) === index);
                 // remove namespaces from existing config
-                _module.removeComponents(config, { namespace: c => namespaces.indexOf(c.namespace) !== -1 });
+                _module.removeComponents(config, { namespace: (c) => namespaces.indexOf(c.namespace) !== -1 });
                 cleanupComponents(newNormalizedConfig);
                 config.mappings = Object.assign(config.mappings, newNormalizedConfig.mappings);
                 config.components = config.components.concat(newNormalizedConfig.components);
@@ -1158,7 +1205,7 @@ _module = module.exports = {
             config.mappings = {};
             return;
         }
-        config.components = config.components.filter(c => componentsToRemove.indexOf(c) === -1);
+        config.components = config.components.filter((c) => componentsToRemove.indexOf(c) === -1);
         if (util.isObjectEmpty(config.mappings)) {
             return;
         }
@@ -1203,13 +1250,23 @@ _module = module.exports = {
  * @typedef Component
  * @type {object}
  * @property {string} class - class name a component belongs to
- * @property {string} id - unique ID
+ * @property {string} id - unique ID for config's current life span
  * @property {string} name - name
  * @property {string} namespace - namespace a component belongs to
  * @property {string} traceName - unique name computed using namespace and object's name,
  *     should be used for logging and etc.
  * @property {boolean} [enable] - true if component enabled
- * @property {boolean} [trace] - true if 'trace' enabled
+ * @property {TraceConfig} [trace] - true if 'trace' enabled
+ *
+ * Note:
+ * - component will have newly generated 'id' every time when:
+ *   - config loaded on application start
+ *   - declaration submitted to 'default' namespace (/declare) (every component
+ *     will have newly generated 'id' despite on namespace it belongs to)
+ *   - declaration submitted for a particular namespace (every component in a namespace will have newly generated 'id')
+ * - mappings contains only:
+ *   - enabled components
+ *   - if poller has 0 interval it will not be mapped to Telemetry_Consumer
  */
 /**
  * @typedef Configuration
@@ -1234,7 +1291,88 @@ _module = module.exports = {
  * }
  */
 /**
- * @typedef TypedTracerConfig
- * @type {TracerConfig}
- * @property {string} type - 'output' or 'input'
+ * @typedef ConsumerComponent
+ * @type {Component}
+ * @property {string} type - consumer's type
+ */
+/**
+ * @typedef DataAction
+ * @type {object}
+ * @property {boolean} enable - enable/disable
+ */
+/**
+ * @typedef DataActions
+ * @type {Array<ExcludeDataAction | IncludeDataAction | SetTagDataAction>}
+ */
+/**
+ * @typedef ExcludeDataAction
+ * @type {DataAction}
+ * @property {object} includeData
+ * @property {object} locations
+ * @property {object} [ifAllMatch]
+ * @property {object} [ifAnyMatch]
+ */
+/**
+ * @typedef IncludeDataAction
+ * @type {DataAction}
+ * @property {object} includeData
+ * @property {object} locations
+ * @property {object} [ifAllMatch]
+ * @property {object} [ifAnyMatch]
+ */
+/**
+ * @typedef PassphraseSecret
+ * @type {object}
+ * @property {string} cipherText - encrypted secret
+ * @property {string} class - class name
+ * @property {string} protected - type of protection
+ */
+/**
+ * @typedef PullConsumerSystemPollerGroup
+ * @type {Component}
+ * @property {Array<string>} systemPollers - list of System Pollers IDs (enabled only)
+ * @property {string} pullConsumer - pull consumer ID
+ */
+/**
+ * @typedef SetTagDataAction
+ * @type {DataAction}
+ * @property {object} setTag - tags to set
+ * @property {object} [locations]
+ * @property {object} [ifAllMatch]
+ * @property {object} [ifAnyMatch]
+ */
+/**
+ * @typedef SystemPollerComponent
+ * @type {Component}
+ * @property {object} connection - connection config
+ * @property {boolean} connection.allowSelfSignedCert
+ * @property {string} connection.host - host
+ * @property {number} connection.port - port
+ * @property {string} connection.protocol - protocol (http or https)
+ * @property {object} credentials - auth config
+ * @property {string} credentials.username
+ * @property {PassphraseSecret | string} credentials.passphrase
+ * @property {object} dataOpts - data modifications config
+ * @property {DataActions} dataOpts.actions
+ * @property {boolean} dataOpts.noTMStats - if 'true' then exclude 'tmstats' from stats
+ * @property {object<string, string>} dataOpts.tags - old-style tagging
+ * @property {Object<string, SystemPollerEndpoint>} endpoints - endpoints to poll data from
+ * @property {number} interval - polling interval in seconds
+ * @property {string} systemName - system's names it belongs to
+ */
+/**
+ * @typedef SystemPollerEndpoint
+ * @type {object}
+ * @property {boolean} enable - enabled/disabled
+ * @property {string} name - endpoint name
+ * @property {string} path - endpoint path
+ */
+/**
+ * @typedef TraceConfig
+ * @type {object}
+ * @property {boolean} enable - enabled/disabled
+ * @property {string} encoding - output encoding
+ * @property {number} maxRecords - max records to store
+ * @property {string} path - path to destination file
+ * @property {string} type - tracer's type - input or output
  */

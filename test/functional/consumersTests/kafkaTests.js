@@ -36,7 +36,6 @@ const KAFKA_CONSUMER_NAME = 'Consumer_Kafka';
 // read in example config
 const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
 
-
 function runRemoteCmd(cmd) {
     return util.performRemoteCmd(CONSUMER_HOST.ip, CONSUMER_HOST.username, cmd, { password: CONSUMER_HOST.password });
 }
@@ -44,7 +43,7 @@ function runRemoteCmd(cmd) {
 function setup() {
     describe('Consumer Setup: Kafka', () => {
         [KAFKA_IMAGE_NAME, ZOOKEEPER_IMAGE_NAME].forEach(
-            imageName => it(`should pull ${imageName} docker image`, () => runRemoteCmd(`docker pull ${imageName}`))
+            (imageName) => it(`should pull ${imageName} docker image`, () => runRemoteCmd(`docker pull ${imageName}`))
         );
 
         it('should start Zookeeper and Kafka docker containers', () => {
@@ -87,7 +86,7 @@ function test() {
             topic: KAFKA_TOPIC,
             authenticationProtocol: KAFKA_AUTH_PROTOCOL
         };
-        DUTS.forEach(dut => it(
+        DUTS.forEach((dut) => it(
             `should configure TS - ${dut.hostalias}`,
             () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(consumerDeclaration))
         ));

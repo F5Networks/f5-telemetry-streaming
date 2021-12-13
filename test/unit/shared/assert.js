@@ -25,8 +25,8 @@ module.exports = {
      */
     includeMatch(haystack, needle, message) {
         const checkFn = needle instanceof RegExp
-            ? (elem => needle.test(elem))
-            : (elem => elem.indexOf(needle) !== -1);
+            ? ((elem) => needle.test(elem))
+            : ((elem) => elem.indexOf(needle) !== -1);
         const ok = Array.isArray(haystack)
             ? haystack.some(checkFn)
             : checkFn(haystack);
@@ -64,8 +64,8 @@ module.exports = {
      */
     notIncludeMatch(haystack, needle, message) {
         const checkFn = needle instanceof RegExp
-            ? (elem => needle.test(elem))
-            : (elem => elem.indexOf(needle) !== -1);
+            ? ((elem) => needle.test(elem))
+            : ((elem) => elem.indexOf(needle) !== -1);
         const ok = Array.isArray(haystack)
             ? haystack.some(checkFn)
             : checkFn(haystack);

@@ -497,17 +497,17 @@ describe('Splunk', () => {
                                 return JSON.parse(`{${o}}`);
                             }
                             return undefined;
-                        }).filter(m => m !== undefined);
+                        }).filter((m) => m !== undefined);
                         assert.notStrictEqual(
-                            membersInOutput.find(m => m.event.name === '10.10.1.1:8080' && m.event.addr === '10.10.1.1'),
+                            membersInOutput.find((m) => m.event.name === '10.10.1.1:8080' && m.event.addr === '10.10.1.1'),
                             undefined, 'output should include poolMember 10.10.1.1:8080'
                         );
                         assert.notStrictEqual(
-                            membersInOutput.find(m => m.event.name === '10.9.8.100:443' && m.event.addr === '10.9.8.100'),
+                            membersInOutput.find((m) => m.event.name === '10.9.8.100:443' && m.event.addr === '10.9.8.100'),
                             undefined, 'output should include poolMember 10.9.8.100:443'
                         );
                         assert.notStrictEqual(
-                            membersInOutput.find(m => m.event.name === 'FE80:0000:0000:0000:0201:23FF:FE45:6701:8080' && m.event.addr === 'FE80:0000:0000:0000:0201:23FF:FE45:6701'),
+                            membersInOutput.find((m) => m.event.name === 'FE80:0000:0000:0000:0201:23FF:FE45:6701:8080' && m.event.addr === 'FE80:0000:0000:0000:0201:23FF:FE45:6701'),
                             undefined, 'output should include poolMember with addr 10.10.1.3'
                         );
                     });

@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
@@ -100,7 +99,7 @@ class MessageStream extends baseDataReceiver.BaseDataReceiver {
         }
 
         if (this._dataFwdCallbacks) {
-            this._dataFwdCallbacks.forEach(config => config.receiver.removeListener('data', config.callback));
+            this._dataFwdCallbacks.forEach((config) => config.receiver.removeListener('data', config.callback));
             this._dataFwdCallbacks = null;
         }
     }
@@ -153,7 +152,7 @@ class MessageStream extends baseDataReceiver.BaseDataReceiver {
             return Promise.reject(this.getStateTransitionError(this.constructor.STATE.STARTING));
         }
         this.createReceivers();
-        return promiseUtil.allSettled(this._receivers.map(receiver => receiver.receiver.start()))
+        return promiseUtil.allSettled(this._receivers.map((receiver) => receiver.receiver.start()))
             .then(promiseUtil.getValues);
     }
 
@@ -167,7 +166,7 @@ class MessageStream extends baseDataReceiver.BaseDataReceiver {
         if (!this.hasReceivers()) {
             return Promise.resolve();
         }
-        return promiseUtil.allSettled(this._receivers.map(receiver => receiver.receiver.destroy()))
+        return promiseUtil.allSettled(this._receivers.map((receiver) => receiver.receiver.destroy()))
             .then((statuses) => {
                 if (this._dataBuffers) {
                     Object.keys(this._dataBuffers).forEach((key) => {

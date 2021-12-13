@@ -49,7 +49,7 @@ function loadConsumers() {
     // filter consumers by module name if needed
     if (consumerFilter) {
         util.logger.info(`Using filter '${consumerFilter}' to filter modules from '${consumerDir}'`);
-        consumers = consumers.filter(fName => fName.match(new RegExp(consumerFilter, 'i')) !== null);
+        consumers = consumers.filter((fName) => fName.match(new RegExp(consumerFilter, 'i')) !== null);
     }
 
     const mapping = {};
@@ -99,7 +99,6 @@ function hasMeetRequirements(consumer) {
     }
     return meet;
 }
-
 
 function setup() {
     describe('Load modules with tests for consumers', () => {

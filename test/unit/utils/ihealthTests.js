@@ -22,7 +22,6 @@ const deviceUtil = require('../../../src/lib/utils/device');
 const ihealthUtil = require('../../../src/lib/utils/ihealth');
 const testUtil = require('../shared/util');
 
-
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
@@ -1490,7 +1489,7 @@ describe('iHealth Utils', () => {
             it('should fetch diagnostics', () => {
                 ihealthMgr.qkviewURI = 'qkviewURI';
                 sinon.stub(ihealthUtil.IHealthAPI.prototype, 'fetchQkviewDiagnostics')
-                    .callsFake(qkURI => Promise.resolve()
+                    .callsFake((qkURI) => Promise.resolve()
                         .then(() => {
                             assert.strictEqual(qkURI, 'qkviewURI');
                             return { diagnostics: 'JSON' };
@@ -1511,7 +1510,7 @@ describe('iHealth Utils', () => {
             it('should fetch diagnostics from URI passed as arg', () => {
                 ihealthMgr.qkviewURI = 'qkviewURI';
                 sinon.stub(ihealthUtil.IHealthAPI.prototype, 'fetchQkviewDiagnostics')
-                    .callsFake(qkURI => Promise.resolve()
+                    .callsFake((qkURI) => Promise.resolve()
                         .then(() => {
                             assert.strictEqual(qkURI, 'qkviewURI_arg');
                             return { diagnostics: 'JSON' };
@@ -1568,7 +1567,7 @@ describe('iHealth Utils', () => {
             it('should be able to check report status', () => {
                 ihealthMgr.qkviewURI = 'qkviewURI';
                 sinon.stub(ihealthUtil.IHealthAPI.prototype, 'isQkviewReportReady')
-                    .callsFake(qkURI => Promise.resolve()
+                    .callsFake((qkURI) => Promise.resolve()
                         .then(() => {
                             assert.strictEqual(qkURI, 'qkviewURI');
                             return true;
@@ -1586,7 +1585,7 @@ describe('iHealth Utils', () => {
             it('should be able to check report status using URI passed as arg', () => {
                 ihealthMgr.qkviewURI = 'qkviewURI';
                 sinon.stub(ihealthUtil.IHealthAPI.prototype, 'isQkviewReportReady')
-                    .callsFake(qkURI => Promise.resolve()
+                    .callsFake((qkURI) => Promise.resolve()
                         .then(() => {
                             assert.strictEqual(qkURI, 'qkviewURI_arg');
                             return true;
@@ -1604,7 +1603,7 @@ describe('iHealth Utils', () => {
             it('should be able to upload Qkview', () => {
                 ihealthMgr.qkviewFile = 'qkviewFile';
                 sinon.stub(ihealthUtil.IHealthAPI.prototype, 'uploadQkview')
-                    .callsFake(qkFile => Promise.resolve()
+                    .callsFake((qkFile) => Promise.resolve()
                         .then(() => {
                             assert.strictEqual(qkFile, 'qkviewFile');
                             return 'qkviewURIFromIHealth';
@@ -1623,7 +1622,7 @@ describe('iHealth Utils', () => {
             it('should be able to upload Qkview file passed as arg', () => {
                 ihealthMgr.qkviewFile = 'qkviewFile';
                 sinon.stub(ihealthUtil.IHealthAPI.prototype, 'uploadQkview')
-                    .callsFake(qkFile => Promise.resolve()
+                    .callsFake((qkFile) => Promise.resolve()
                         .then(() => {
                             assert.strictEqual(qkFile, 'qkviewFile_arg');
                             return 'qkviewURIFromIHealth';

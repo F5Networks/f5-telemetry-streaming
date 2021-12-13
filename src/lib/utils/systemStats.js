@@ -166,7 +166,6 @@ function preprocessProperty(contextData, property) {
     return property;
 }
 
-
 module.exports = {
     /**
      * Render property based on template and conditionals
