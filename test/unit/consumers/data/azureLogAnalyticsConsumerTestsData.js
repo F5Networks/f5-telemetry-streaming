@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -710,6 +710,42 @@ module.exports = {
                                         'serverside.pktsOut': 0,
                                         'serverside.totConns': 0,
                                         'status.statusReason': 'Pool member is available'
+                                    },
+                                    '/Example_Tenant/_auto_192.0.2.14:80': {
+                                        addr: '192.0.2.14',
+                                        availabilityState: 'unknown',
+                                        enabledState: 'enabled',
+                                        fqdn: 'bestwebsite.com',
+                                        monitorStatus: 'unchecked',
+                                        poolName: '/Example_Tenant/A1/web_pool',
+                                        port: 80,
+                                        'serverside.bitsIn': 0,
+                                        'serverside.bitsOut': 0,
+                                        'serverside.curConns': 0,
+                                        'serverside.maxConns': 0,
+                                        'serverside.pktsIn': 0,
+                                        'serverside.pktsOut': 0,
+                                        'serverside.totConns': 0,
+                                        'status.statusReason': 'Pool member does not have service checking enabled',
+                                        totRequests: 0
+                                    },
+                                    '/Example_Tenant/bestwebsite.com:80': {
+                                        addr: '::',
+                                        availabilityState: 'available',
+                                        enabledState: 'enabled',
+                                        fqdn: 'bestwebsite.com',
+                                        monitorStatus: 'fqdn-up',
+                                        poolName: '/Example_Tenant/A1/web_pool',
+                                        port: 80,
+                                        'serverside.bitsIn': 0,
+                                        'serverside.bitsOut': 0,
+                                        'serverside.curConns': 0,
+                                        'serverside.maxConns': 0,
+                                        'serverside.pktsIn': 0,
+                                        'serverside.pktsOut': 0,
+                                        'serverside.totConns': 0,
+                                        'status.statusReason': 'The DNS server(s) are available',
+                                        totRequests: 0
                                     }
                                 },
                                 name: '/Example_Tenant/A1/web_pool',
@@ -727,7 +763,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:3rxtwjADHseA7h/Ws12q1LhH0HMX+ubWNizGXTGKztg=',
+                        Authorization: 'SharedKey myWorkspace:nsGbMAv3YKQuRjBxZfkbgyutbfe0WUF0XXz7HU2EamA=',
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_pools',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'

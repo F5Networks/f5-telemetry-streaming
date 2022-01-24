@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -5241,6 +5241,92 @@ module.exports = {
                     ]
                 },
                 {
+                    name: 'pools_members_serverside_bitsIn',
+                    description: 'pools.members.serverside.bitsIn',
+                    dataPoints: [
+                        {
+                            labels: [
+                                {
+                                    key: 'addr',
+                                    value: '192.0.2.14'
+                                },
+                                {
+                                    key: 'monitorStatus',
+                                    value: 'unchecked'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
+                                },
+                                {
+                                    key: 'port',
+                                    value: '80'
+                                },
+                                {
+                                    key: 'availabilityState',
+                                    value: 'unknown'
+                                },
+                                {
+                                    key: 'enabledState',
+                                    value: 'enabled'
+                                },
+                                {
+                                    key: 'status.statusReason',
+                                    value: 'Pool member does not have service checking enabled'
+                                },
+                                {
+                                    key: 'fqdn',
+                                    value: 'bestwebsite.com'
+                                }
+                            ],
+                            value: 0
+                        }
+                    ]
+                },
+                {
+                    name: 'pools_members_serverside_bitsIn',
+                    description: 'pools.members.serverside.bitsIn',
+                    dataPoints: [
+                        {
+                            labels: [
+                                {
+                                    key: 'addr',
+                                    value: '::'
+                                },
+                                {
+                                    key: 'monitorStatus',
+                                    value: 'fqdn-up'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
+                                },
+                                {
+                                    key: 'port',
+                                    value: '80'
+                                },
+                                {
+                                    key: 'availabilityState',
+                                    value: 'available'
+                                },
+                                {
+                                    key: 'enabledState',
+                                    value: 'enabled'
+                                },
+                                {
+                                    key: 'status.statusReason',
+                                    value: 'The DNS server(s) are available'
+                                },
+                                {
+                                    key: 'fqdn',
+                                    value: 'bestwebsite.com'
+                                }
+                            ],
+                            value: 0
+                        }
+                    ]
+                },
+                {
                     name: 'pools_members_serverside_bitsOut',
                     description: 'pools.members.serverside.bitsOut',
                     dataPoints: [
@@ -5429,6 +5515,92 @@ module.exports = {
                                 {
                                     key: 'status.statusReason',
                                     value: 'Pool member is available'
+                                }
+                            ],
+                            value: 0
+                        }
+                    ]
+                },
+                {
+                    name: 'pools_members_serverside_bitsOut',
+                    description: 'pools.members.serverside.bitsOut',
+                    dataPoints: [
+                        {
+                            labels: [
+                                {
+                                    key: 'addr',
+                                    value: '192.0.2.14'
+                                },
+                                {
+                                    key: 'monitorStatus',
+                                    value: 'unchecked'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
+                                },
+                                {
+                                    key: 'port',
+                                    value: '80'
+                                },
+                                {
+                                    key: 'availabilityState',
+                                    value: 'unknown'
+                                },
+                                {
+                                    key: 'enabledState',
+                                    value: 'enabled'
+                                },
+                                {
+                                    key: 'status.statusReason',
+                                    value: 'Pool member does not have service checking enabled'
+                                },
+                                {
+                                    key: 'fqdn',
+                                    value: 'bestwebsite.com'
+                                }
+                            ],
+                            value: 0
+                        }
+                    ]
+                },
+                {
+                    name: 'pools_members_serverside_bitsOut',
+                    description: 'pools.members.serverside.bitsOut',
+                    dataPoints: [
+                        {
+                            labels: [
+                                {
+                                    key: 'addr',
+                                    value: '::'
+                                },
+                                {
+                                    key: 'monitorStatus',
+                                    value: 'fqdn-up'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
+                                },
+                                {
+                                    key: 'port',
+                                    value: '80'
+                                },
+                                {
+                                    key: 'availabilityState',
+                                    value: 'available'
+                                },
+                                {
+                                    key: 'enabledState',
+                                    value: 'enabled'
+                                },
+                                {
+                                    key: 'status.statusReason',
+                                    value: 'The DNS server(s) are available'
+                                },
+                                {
+                                    key: 'fqdn',
+                                    value: 'bestwebsite.com'
                                 }
                             ],
                             value: 0
@@ -5631,6 +5803,92 @@ module.exports = {
                     ]
                 },
                 {
+                    name: 'pools_members_serverside_curConns',
+                    description: 'pools.members.serverside.curConns',
+                    dataPoints: [
+                        {
+                            labels: [
+                                {
+                                    key: 'addr',
+                                    value: '192.0.2.14'
+                                },
+                                {
+                                    key: 'monitorStatus',
+                                    value: 'unchecked'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
+                                },
+                                {
+                                    key: 'port',
+                                    value: '80'
+                                },
+                                {
+                                    key: 'availabilityState',
+                                    value: 'unknown'
+                                },
+                                {
+                                    key: 'enabledState',
+                                    value: 'enabled'
+                                },
+                                {
+                                    key: 'status.statusReason',
+                                    value: 'Pool member does not have service checking enabled'
+                                },
+                                {
+                                    key: 'fqdn',
+                                    value: 'bestwebsite.com'
+                                }
+                            ],
+                            value: 0
+                        }
+                    ]
+                },
+                {
+                    name: 'pools_members_serverside_curConns',
+                    description: 'pools.members.serverside.curConns',
+                    dataPoints: [
+                        {
+                            labels: [
+                                {
+                                    key: 'addr',
+                                    value: '::'
+                                },
+                                {
+                                    key: 'monitorStatus',
+                                    value: 'fqdn-up'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
+                                },
+                                {
+                                    key: 'port',
+                                    value: '80'
+                                },
+                                {
+                                    key: 'availabilityState',
+                                    value: 'available'
+                                },
+                                {
+                                    key: 'enabledState',
+                                    value: 'enabled'
+                                },
+                                {
+                                    key: 'status.statusReason',
+                                    value: 'The DNS server(s) are available'
+                                },
+                                {
+                                    key: 'fqdn',
+                                    value: 'bestwebsite.com'
+                                }
+                            ],
+                            value: 0
+                        }
+                    ]
+                },
+                {
                     name: 'pools_members_serverside_maxConns',
                     description: 'pools.members.serverside.maxConns',
                     dataPoints: [
@@ -5826,6 +6084,92 @@ module.exports = {
                     ]
                 },
                 {
+                    name: 'pools_members_serverside_maxConns',
+                    description: 'pools.members.serverside.maxConns',
+                    dataPoints: [
+                        {
+                            labels: [
+                                {
+                                    key: 'addr',
+                                    value: '192.0.2.14'
+                                },
+                                {
+                                    key: 'monitorStatus',
+                                    value: 'unchecked'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
+                                },
+                                {
+                                    key: 'port',
+                                    value: '80'
+                                },
+                                {
+                                    key: 'availabilityState',
+                                    value: 'unknown'
+                                },
+                                {
+                                    key: 'enabledState',
+                                    value: 'enabled'
+                                },
+                                {
+                                    key: 'status.statusReason',
+                                    value: 'Pool member does not have service checking enabled'
+                                },
+                                {
+                                    key: 'fqdn',
+                                    value: 'bestwebsite.com'
+                                }
+                            ],
+                            value: 0
+                        }
+                    ]
+                },
+                {
+                    name: 'pools_members_serverside_maxConns',
+                    description: 'pools.members.serverside.maxConns',
+                    dataPoints: [
+                        {
+                            labels: [
+                                {
+                                    key: 'addr',
+                                    value: '::'
+                                },
+                                {
+                                    key: 'monitorStatus',
+                                    value: 'fqdn-up'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
+                                },
+                                {
+                                    key: 'port',
+                                    value: '80'
+                                },
+                                {
+                                    key: 'availabilityState',
+                                    value: 'available'
+                                },
+                                {
+                                    key: 'enabledState',
+                                    value: 'enabled'
+                                },
+                                {
+                                    key: 'status.statusReason',
+                                    value: 'The DNS server(s) are available'
+                                },
+                                {
+                                    key: 'fqdn',
+                                    value: 'bestwebsite.com'
+                                }
+                            ],
+                            value: 0
+                        }
+                    ]
+                },
+                {
                     name: 'pools_members_serverside_pktsIn',
                     description: 'pools.members.serverside.pktsIn',
                     dataPoints: [
@@ -6021,6 +6365,92 @@ module.exports = {
                     ]
                 },
                 {
+                    name: 'pools_members_serverside_pktsIn',
+                    description: 'pools.members.serverside.pktsIn',
+                    dataPoints: [
+                        {
+                            labels: [
+                                {
+                                    key: 'addr',
+                                    value: '192.0.2.14'
+                                },
+                                {
+                                    key: 'monitorStatus',
+                                    value: 'unchecked'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
+                                },
+                                {
+                                    key: 'port',
+                                    value: '80'
+                                },
+                                {
+                                    key: 'availabilityState',
+                                    value: 'unknown'
+                                },
+                                {
+                                    key: 'enabledState',
+                                    value: 'enabled'
+                                },
+                                {
+                                    key: 'status.statusReason',
+                                    value: 'Pool member does not have service checking enabled'
+                                },
+                                {
+                                    key: 'fqdn',
+                                    value: 'bestwebsite.com'
+                                }
+                            ],
+                            value: 0
+                        }
+                    ]
+                },
+                {
+                    name: 'pools_members_serverside_pktsIn',
+                    description: 'pools.members.serverside.pktsIn',
+                    dataPoints: [
+                        {
+                            labels: [
+                                {
+                                    key: 'addr',
+                                    value: '::'
+                                },
+                                {
+                                    key: 'monitorStatus',
+                                    value: 'fqdn-up'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
+                                },
+                                {
+                                    key: 'port',
+                                    value: '80'
+                                },
+                                {
+                                    key: 'availabilityState',
+                                    value: 'available'
+                                },
+                                {
+                                    key: 'enabledState',
+                                    value: 'enabled'
+                                },
+                                {
+                                    key: 'status.statusReason',
+                                    value: 'The DNS server(s) are available'
+                                },
+                                {
+                                    key: 'fqdn',
+                                    value: 'bestwebsite.com'
+                                }
+                            ],
+                            value: 0
+                        }
+                    ]
+                },
+                {
                     name: 'pools_members_serverside_pktsOut',
                     description: 'pools.members.serverside.pktsOut',
                     dataPoints: [
@@ -6216,6 +6646,92 @@ module.exports = {
                     ]
                 },
                 {
+                    name: 'pools_members_serverside_pktsOut',
+                    description: 'pools.members.serverside.pktsOut',
+                    dataPoints: [
+                        {
+                            labels: [
+                                {
+                                    key: 'addr',
+                                    value: '192.0.2.14'
+                                },
+                                {
+                                    key: 'monitorStatus',
+                                    value: 'unchecked'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
+                                },
+                                {
+                                    key: 'port',
+                                    value: '80'
+                                },
+                                {
+                                    key: 'availabilityState',
+                                    value: 'unknown'
+                                },
+                                {
+                                    key: 'enabledState',
+                                    value: 'enabled'
+                                },
+                                {
+                                    key: 'status.statusReason',
+                                    value: 'Pool member does not have service checking enabled'
+                                },
+                                {
+                                    key: 'fqdn',
+                                    value: 'bestwebsite.com'
+                                }
+                            ],
+                            value: 0
+                        }
+                    ]
+                },
+                {
+                    name: 'pools_members_serverside_pktsOut',
+                    description: 'pools.members.serverside.pktsOut',
+                    dataPoints: [
+                        {
+                            labels: [
+                                {
+                                    key: 'addr',
+                                    value: '::'
+                                },
+                                {
+                                    key: 'monitorStatus',
+                                    value: 'fqdn-up'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
+                                },
+                                {
+                                    key: 'port',
+                                    value: '80'
+                                },
+                                {
+                                    key: 'availabilityState',
+                                    value: 'available'
+                                },
+                                {
+                                    key: 'enabledState',
+                                    value: 'enabled'
+                                },
+                                {
+                                    key: 'status.statusReason',
+                                    value: 'The DNS server(s) are available'
+                                },
+                                {
+                                    key: 'fqdn',
+                                    value: 'bestwebsite.com'
+                                }
+                            ],
+                            value: 0
+                        }
+                    ]
+                },
+                {
                     name: 'pools_members_serverside_totConns',
                     description: 'pools.members.serverside.totConns',
                     dataPoints: [
@@ -6404,6 +6920,178 @@ module.exports = {
                                 {
                                     key: 'status.statusReason',
                                     value: 'Pool member is available'
+                                }
+                            ],
+                            value: 0
+                        }
+                    ]
+                },
+                {
+                    name: 'pools_members_serverside_totConns',
+                    description: 'pools.members.serverside.totConns',
+                    dataPoints: [
+                        {
+                            labels: [
+                                {
+                                    key: 'addr',
+                                    value: '192.0.2.14'
+                                },
+                                {
+                                    key: 'monitorStatus',
+                                    value: 'unchecked'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
+                                },
+                                {
+                                    key: 'port',
+                                    value: '80'
+                                },
+                                {
+                                    key: 'availabilityState',
+                                    value: 'unknown'
+                                },
+                                {
+                                    key: 'enabledState',
+                                    value: 'enabled'
+                                },
+                                {
+                                    key: 'status.statusReason',
+                                    value: 'Pool member does not have service checking enabled'
+                                },
+                                {
+                                    key: 'fqdn',
+                                    value: 'bestwebsite.com'
+                                }
+                            ],
+                            value: 0
+                        }
+                    ]
+                },
+                {
+                    name: 'pools_members_serverside_totConns',
+                    description: 'pools.members.serverside.totConns',
+                    dataPoints: [
+                        {
+                            labels: [
+                                {
+                                    key: 'addr',
+                                    value: '::'
+                                },
+                                {
+                                    key: 'monitorStatus',
+                                    value: 'fqdn-up'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
+                                },
+                                {
+                                    key: 'port',
+                                    value: '80'
+                                },
+                                {
+                                    key: 'availabilityState',
+                                    value: 'available'
+                                },
+                                {
+                                    key: 'enabledState',
+                                    value: 'enabled'
+                                },
+                                {
+                                    key: 'status.statusReason',
+                                    value: 'The DNS server(s) are available'
+                                },
+                                {
+                                    key: 'fqdn',
+                                    value: 'bestwebsite.com'
+                                }
+                            ],
+                            value: 0
+                        }
+                    ]
+                },
+                {
+                    name: 'pools_members_totRequests',
+                    description: 'pools.members.totRequests',
+                    dataPoints: [
+                        {
+                            labels: [
+                                {
+                                    key: 'addr',
+                                    value: '192.0.2.14'
+                                },
+                                {
+                                    key: 'monitorStatus',
+                                    value: 'unchecked'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
+                                },
+                                {
+                                    key: 'port',
+                                    value: '80'
+                                },
+                                {
+                                    key: 'availabilityState',
+                                    value: 'unknown'
+                                },
+                                {
+                                    key: 'enabledState',
+                                    value: 'enabled'
+                                },
+                                {
+                                    key: 'status.statusReason',
+                                    value: 'Pool member does not have service checking enabled'
+                                },
+                                {
+                                    key: 'fqdn',
+                                    value: 'bestwebsite.com'
+                                }
+                            ],
+                            value: 0
+                        }
+                    ]
+                },
+                {
+                    name: 'pools_members_totRequests',
+                    description: 'pools.members.totRequests',
+                    dataPoints: [
+                        {
+                            labels: [
+                                {
+                                    key: 'addr',
+                                    value: '::'
+                                },
+                                {
+                                    key: 'monitorStatus',
+                                    value: 'fqdn-up'
+                                },
+                                {
+                                    key: 'poolName',
+                                    value: '/Example_Tenant/A1/web_pool'
+                                },
+                                {
+                                    key: 'port',
+                                    value: '80'
+                                },
+                                {
+                                    key: 'availabilityState',
+                                    value: 'available'
+                                },
+                                {
+                                    key: 'enabledState',
+                                    value: 'enabled'
+                                },
+                                {
+                                    key: 'status.statusReason',
+                                    value: 'The DNS server(s) are available'
+                                },
+                                {
+                                    key: 'fqdn',
+                                    value: 'bestwebsite.com'
                                 }
                             ],
                             value: 0

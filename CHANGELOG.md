@@ -1,6 +1,14 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.26.0
+### Added
+- AUTOTOOL-2801: [GitHub #171](https://github.com/F5Networks/f5-telemetry-streaming/issues/171): Added fqdn property to pool members that use FQDNs
+### Fixed
+### Changed
+- AUTOTOOL-2890: Update npm packages (@grpc/proto-loader from ~0.3.0 to ^0.6.4)
+### Removed
+
 ## 1.25.0
 ### Added
 - AUTOTOOL-2798: [GitHub #154](https://github.com/F5Networks/f5-telemetry-streaming/issues/154): Allow keyless (service account based) authorization for GCP Metrics and Logging consumers.

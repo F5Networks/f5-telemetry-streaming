@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -190,16 +190,31 @@ describe('Splunk', () => {
             return splunkIndex(context)
                 .then(() => {
                     const traceData = context.tracer.write.firstCall.args[0];
-                    assert.notStrictEqual(traceData.consumer.passphrase.indexOf('*****'), -1,
-                        'consumer config passphrase should be redacted');
-                    assert.notStrictEqual(traceData.consumer.proxy.passphrase.indexOf('*****'), -1,
-                        'consumer proxy config passphrase should be redacted');
-                    assert.notStrictEqual(traceData.requestOpts.headers.Authorization.indexOf('*****'), -1,
-                        'passphrase in request headers should be redacted');
-                    assert.strictEqual(JSON.stringify(traceData).indexOf('superSecret'), -1,
-                        'passphrase should not be present anywhere in trace data');
-                    assert.notStrictEqual(traceData.requestOpts.proxy.passphrase.indexOf('*****'), -1,
-                        'consumer proxy config passphrase should be redacted');
+                    assert.notStrictEqual(
+                        traceData.consumer.passphrase.indexOf('*****'),
+                        -1,
+                        'consumer config passphrase should be redacted'
+                    );
+                    assert.notStrictEqual(
+                        traceData.consumer.proxy.passphrase.indexOf('*****'),
+                        -1,
+                        'consumer proxy config passphrase should be redacted'
+                    );
+                    assert.notStrictEqual(
+                        traceData.requestOpts.headers.Authorization.indexOf('*****'),
+                        -1,
+                        'passphrase in request headers should be redacted'
+                    );
+                    assert.strictEqual(
+                        JSON.stringify(traceData).indexOf('superSecret'),
+                        -1,
+                        'passphrase should not be present anywhere in trace data'
+                    );
+                    assert.notStrictEqual(
+                        traceData.requestOpts.proxy.passphrase.indexOf('*****'),
+                        -1,
+                        'consumer proxy config passphrase should be redacted'
+                    );
                 });
         });
 
@@ -396,18 +411,10 @@ describe('Splunk', () => {
                 return splunkIndex(context)
                     .then(() => {
                         const output = splunkRequestData[0].request;
-                        assert.notStrictEqual(
-                            output.indexOf('"counters_bytes_in":'), -1, 'output should include counters_bytes_in as a key'
-                        );
-                        assert.strictEqual(
-                            output.indexOf('"counters.bytes_in":'), -1, 'output should not include counters.bytes_in as a key'
-                        );
-                        assert.notStrictEqual(
-                            output.indexOf('"longer_key_name_with_periods":'), -1, 'output should include longer_key_name_with_periods as a key'
-                        );
-                        assert.strictEqual(
-                            output.indexOf('"longer.key.name.with.periods":'), -1, 'output should not include longer.key.name.with.periods as a key'
-                        );
+                        assert.notStrictEqual(output.indexOf('"counters_bytes_in":'), -1, 'output should include counters_bytes_in as a key');
+                        assert.strictEqual(output.indexOf('"counters.bytes_in":'), -1, 'output should not include counters.bytes_in as a key');
+                        assert.notStrictEqual(output.indexOf('"longer_key_name_with_periods":'), -1, 'output should include longer_key_name_with_periods as a key');
+                        assert.strictEqual(output.indexOf('"longer.key.name.with.periods":'), -1, 'output should not include longer.key.name.with.periods as a key');
                     });
             });
 
@@ -441,15 +448,9 @@ describe('Splunk', () => {
                 return splunkIndex(context)
                     .then(() => {
                         const output = splunkRequestData[0].request;
-                        assert.notStrictEqual(
-                            output.indexOf('"192.0.0.1"'), -1, 'output should remove ::FFFF from ::FFFF:192.0.0.1'
-                        );
-                        assert.notStrictEqual(
-                            output.indexOf('"192.0.0.2"'), -1, 'output should remove ::FFFF from ::ffff:192.0.0.2'
-                        );
-                        assert.notStrictEqual(
-                            output.indexOf('"192.0.0.3"'), -1, 'output should include 192.0.0.3'
-                        );
+                        assert.notStrictEqual(output.indexOf('"192.0.0.1"'), -1, 'output should remove ::FFFF from ::FFFF:192.0.0.1');
+                        assert.notStrictEqual(output.indexOf('"192.0.0.2"'), -1, 'output should remove ::FFFF from ::ffff:192.0.0.2');
+                        assert.notStrictEqual(output.indexOf('"192.0.0.3"'), -1, 'output should include 192.0.0.3');
                     });
             });
 
@@ -500,15 +501,18 @@ describe('Splunk', () => {
                         }).filter((m) => m !== undefined);
                         assert.notStrictEqual(
                             membersInOutput.find((m) => m.event.name === '10.10.1.1:8080' && m.event.addr === '10.10.1.1'),
-                            undefined, 'output should include poolMember 10.10.1.1:8080'
+                            undefined,
+                            'output should include poolMember 10.10.1.1:8080'
                         );
                         assert.notStrictEqual(
                             membersInOutput.find((m) => m.event.name === '10.9.8.100:443' && m.event.addr === '10.9.8.100'),
-                            undefined, 'output should include poolMember 10.9.8.100:443'
+                            undefined,
+                            'output should include poolMember 10.9.8.100:443'
                         );
                         assert.notStrictEqual(
                             membersInOutput.find((m) => m.event.name === 'FE80:0000:0000:0000:0201:23FF:FE45:6701:8080' && m.event.addr === 'FE80:0000:0000:0000:0201:23FF:FE45:6701'),
-                            undefined, 'output should include poolMember with addr 10.10.1.3'
+                            undefined,
+                            'output should include poolMember with addr 10.10.1.3'
                         );
                     });
             });
@@ -543,15 +547,9 @@ describe('Splunk', () => {
                 return splunkIndex(context)
                     .then(() => {
                         const output = splunkRequestData[0].request;
-                        assert.notStrictEqual(
-                            output.indexOf('"source":"192.0.0.1"'), -1, 'output should include 192.0.0.1'
-                        );
-                        assert.notStrictEqual(
-                            output.indexOf('"addr":"1000:0000:0000:0000:0000:FFF8:C000:0001"'), -1, 'output should include 1000:0000:0000:0000:0000:FFF8:C000:0001'
-                        );
-                        assert.notStrictEqual(
-                            output.indexOf('"destination":"192.0.0.3"'), -1, 'output should include 192.0.0.3'
-                        );
+                        assert.notStrictEqual(output.indexOf('"source":"192.0.0.1"'), -1, 'output should include 192.0.0.1');
+                        assert.notStrictEqual(output.indexOf('"addr":"1000:0000:0000:0000:0000:FFF8:C000:0001"'), -1, 'output should include 1000:0000:0000:0000:0000:FFF8:C000:0001');
+                        assert.notStrictEqual(output.indexOf('"destination":"192.0.0.3"'), -1, 'output should include 192.0.0.3');
                     });
             });
 
@@ -581,15 +579,9 @@ describe('Splunk', () => {
                 return splunkIndex(context)
                     .then(() => {
                         const output = splunkRequestData[0].request;
-                        assert.notStrictEqual(
-                            output.indexOf('"tenant":"tenant"'), -1, 'output should include tenant'
-                        );
-                        assert.notStrictEqual(
-                            output.indexOf('"application":"application"'), -1, 'output should include application'
-                        );
-                        assert.notStrictEqual(
-                            output.indexOf('"appComponent":""'), -1, 'output should include appComponent'
-                        );
+                        assert.notStrictEqual(output.indexOf('"tenant":"tenant"'), -1, 'output should include tenant');
+                        assert.notStrictEqual(output.indexOf('"application":"application"'), -1, 'output should include application');
+                        assert.notStrictEqual(output.indexOf('"appComponent":""'), -1, 'output should include appComponent');
                     });
             });
 
@@ -622,9 +614,7 @@ describe('Splunk', () => {
                 return splunkIndex(context)
                     .then(() => {
                         const output = splunkRequestData[0].request;
-                        assert.notStrictEqual(
-                            output.indexOf('"last_cycle_count":"10"'), -1, 'output should include last_cycle_count'
-                        );
+                        assert.notStrictEqual(output.indexOf('"last_cycle_count":"10"'), -1, 'output should include last_cycle_count');
                     });
             });
         });

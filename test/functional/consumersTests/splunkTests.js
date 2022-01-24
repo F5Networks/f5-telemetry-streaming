@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -83,7 +83,7 @@ function test() {
             };
 
             // splunk container takes about 30 seconds to come up
-            return new Promise((resolve) => setTimeout(resolve, 10000))
+            return new Promise((resolve) => { setTimeout(resolve, 10000); })
                 .then(() => util.makeRequest(CONSUMER_HOST.ip, uri, options))
                 .then((data) => {
                     util.logger.info(`Splunk response ${uri}`, data);
@@ -280,13 +280,16 @@ function test() {
                     let uri = `${baseUri}?${outputMode}`;
                     let sid;
 
-                    return util.makeRequest(CONSUMER_HOST.ip, uri,
+                    return util.makeRequest(
+                        CONSUMER_HOST.ip,
+                        uri,
                         Object.assign(util.deepCopy(options), {
                             method: 'POST',
                             body: querystring.stringify({
                                 search: searchString
                             })
-                        }))
+                        })
+                    )
                         .then((data) => {
                             sid = data.sid;
                             assert.notStrictEqual(sid, undefined);
@@ -295,7 +298,7 @@ function test() {
                             return new Promise((resolve, reject) => {
                                 const waitUntilDone = () => {
                                     uri = `${baseUri}/${sid}?${outputMode}`;
-                                    return new Promise((resolveTimer) => setTimeout(resolveTimer, 100))
+                                    return new Promise((resolveTimer) => { setTimeout(resolveTimer, 100); })
                                         .then(() => util.makeRequest(CONSUMER_HOST.ip, uri, options))
                                         .then((status) => {
                                             const dispatchState = status.entry[0].content.dispatchState;
@@ -324,7 +327,7 @@ function test() {
                     const searchQueryEL = () => `search source=f5.telemetry | spath testType | search testType="${SPLUNK_CONSUMER_NAME}" | search hostname="${dut.hostname}" | search testDataTimestamp="${testDataTimestamp}" | head 1`;
 
                     if (testSetup.format.queryEventsTests) {
-                        it(`should check for system poller data from:${dut.hostalias}`, () => new Promise((resolve) => setTimeout(resolve, 30000))
+                        it(`should check for system poller data from:${dut.hostalias}`, () => new Promise((resolve) => { setTimeout(resolve, 30000); })
                             .then(() => {
                                 util.logger.info(`Splunk search query for system poller data: ${searchQuerySP()}`);
                                 return query(searchQuerySP());
@@ -351,7 +354,7 @@ function test() {
                     }
 
                     if (testSetup.format.metricsTests) {
-                        it(`should check for system poller metrics from:${dut.hostalias}`, () => new Promise((resolve) => setTimeout(resolve, 30000))
+                        it(`should check for system poller metrics from:${dut.hostalias}`, () => new Promise((resolve) => { setTimeout(resolve, 30000); })
                             .then(() => {
                                 util.logger.info(`Splunk search query for system poller data: ${searchMetrics()}`);
                                 return query(searchMetrics());
@@ -375,7 +378,7 @@ function test() {
                     }
 
                     if (testSetup.format.eventListenerTests) {
-                        it(`should check for event listener data from:${dut.hostalias}`, () => new Promise((resolve) => setTimeout(resolve, 30000))
+                        it(`should check for event listener data from:${dut.hostalias}`, () => new Promise((resolve) => { setTimeout(resolve, 30000); })
                             .then(() => {
                                 util.logger.info(`Splunk search query for event listener data: ${searchQueryEL()}`);
                                 return query(searchQueryEL());

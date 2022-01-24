@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -354,8 +354,11 @@ describe('Google_Cloud_Monitoring', () => {
                 return cloudMonitoringIndex(context);
             })
             .then(() => {
-                assert.deepStrictEqual(loggerStub.messages.all,
-                    Array(3).fill('[telemetry.gcm] success'), 'should log success message');
+                assert.deepStrictEqual(
+                    loggerStub.messages.all,
+                    Array(3).fill('[telemetry.gcm] success'),
+                    'should log success message'
+                );
             });
     });
 
@@ -433,8 +436,11 @@ describe('Google_Cloud_Monitoring', () => {
             .then(() => cloudMonitoringIndex(context2))
             .then(() => cloudMonitoringIndex(context1))
             .then(() => cloudMonitoringIndex(context2))
-            .then(() => assert.deepStrictEqual(loggerStub.messages.all,
-                Array(4).fill('[telemetry.gcm] success'), 'should log success message'));
+            .then(() => assert.deepStrictEqual(
+                loggerStub.messages.all,
+                Array(4).fill('[telemetry.gcm] success'),
+                'should log success message'
+            ));
     });
 
     it('should invalidate token if Unauthorized error on sending data', () => {

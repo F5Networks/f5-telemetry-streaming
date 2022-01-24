@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -122,7 +122,10 @@ EndpointLoader.prototype.auth = function () {
     }
     const options = Object.assign({}, this.options.connection);
     return deviceUtil.getAuthToken(
-        this.host, this.options.credentials.username, this.options.credentials.passphrase, options
+        this.host,
+        this.options.credentials.username,
+        this.options.credentials.passphrase,
+        options
     )
         .then((token) => {
             this.options.credentials.token = token.token;
@@ -180,11 +183,12 @@ EndpointLoader.prototype.expandReferences = function (endpointObj, data) {
             const item = dataItems[i][referenceKey];
             if (item && item.link) {
                 let referenceEndpoint = this.getURIPath(item.link);
-                if (referenceObj.endpointSuffix) {
-                    referenceEndpoint = `${referenceEndpoint}${referenceObj.endpointSuffix}`;
-                }
+                // Process '/stats' endpoint first, before modifying referenceEndpoint url
                 if (referenceObj.includeStats) {
                     promises.push(this.getData(`${referenceEndpoint}/stats`, { name: i, refKey: referenceKey }));
+                }
+                if (referenceObj.endpointSuffix) {
+                    referenceEndpoint = `${referenceEndpoint}${referenceObj.endpointSuffix}`;
                 }
                 promises.push(this.getData(referenceEndpoint, { name: i, refKey: referenceKey }));
             }

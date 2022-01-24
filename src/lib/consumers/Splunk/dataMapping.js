@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -8,10 +8,10 @@
 
 'use strict';
 
-const TMSTATS_PERIOD_PREFIX = RegExp(/\./g);
+const TMSTATS_PERIOD_PREFIX = /\./g;
 const IPV4_REGEXP = /FFFF([A-Fa-f0-9].)([A-Fa-f0-9].)([A-Fa-f0-9].)([A-Fa-f0-9].)/;
 const IPV6_REGEXP = /([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})/;
-const IPV6_V4_PREFIX_REGEXP = RegExp(/::ffff:/ig);
+const IPV6_V4_PREFIX_REGEXP = /::ffff:/ig;
 
 // Canonical format
 function defaultFormat(globalCtx) {

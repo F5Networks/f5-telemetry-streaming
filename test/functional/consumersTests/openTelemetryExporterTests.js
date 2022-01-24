@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -57,7 +57,10 @@ const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
 
 function runRemoteCmd(cmd) {
     return testUtil.performRemoteCmd(
-        CONSUMER_HOST.ip, CONSUMER_HOST.username, cmd, { password: CONSUMER_HOST.password }
+        CONSUMER_HOST.ip,
+        CONSUMER_HOST.username,
+        cmd,
+        { password: CONSUMER_HOST.password }
     );
 }
 

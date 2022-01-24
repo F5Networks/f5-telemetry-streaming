@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -45,11 +45,14 @@ module.exports = {
                 combinations.forEach((propSets) => {
                     it(`should allow additional properties - ${propSets.join(', ')}`, () => {
                         const testDecl = lodash.cloneDeep(ctx.declaration);
-                        lodash.set(testDecl, ctx.property,
+                        lodash.set(
+                            testDecl,
+                            ctx.property,
                             Object.assign(
                                 lodash.get(testDecl, ctx.property),
                                 lodash.pick(testConf.allowed, propSets)
-                            ));
+                            )
+                        );
                         return assert.isFulfilled(
                             ctx.validator(testDecl),
                             `property "${ctx.propFullName}" should allow additional properties`
@@ -66,14 +69,17 @@ module.exports = {
                 combinations.forEach((propSets) => {
                     it(`should not allow additional properties - ${propSets.join(', ')}`, () => {
                         const testDecl = lodash.cloneDeep(ctx.declaration);
-                        lodash.set(testDecl, ctx.property,
+                        lodash.set(
+                            testDecl,
+                            ctx.property,
                             Object.assign(
                                 lodash.get(testDecl, ctx.property),
                                 lodash.pick(testConf.notAllowed, propSets)
-                            ));
+                            )
+                        );
                         return assert.isRejected(
                             ctx.validator(testDecl),
-                            new RegExp('"keyword":"additionalProperties"'), // check for keyword only (multiple props not allowed)
+                            /"keyword":"additionalProperties"/, // check for keyword only (multiple props not allowed)
                             `property "${ctx.propFullName}" should not allow additional properties`
                         );
                     });
@@ -89,11 +95,14 @@ module.exports = {
             combinations.forEach((propSets) => {
                 it(`should fail on attempt to set additional properties - ${propSets.join(', ')}${subTitle}`, () => {
                     const testDecl = lodash.cloneDeep(ctx.declaration);
-                    lodash.set(testDecl, ctx.property,
+                    lodash.set(
+                        testDecl,
+                        ctx.property,
                         Object.assign(
                             lodash.get(testDecl, ctx.property),
                             lodash.pick(testConf.failing, propSets)
-                        ));
+                        )
+                    );
                     return assert.isRejected(
                         ctx.validator(testDecl),
                         /keyword/,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -104,7 +104,7 @@ function test() {
         const systemPollerData = {};
         const fluentLogs = [];
 
-        before(() => new Promise((resolve) => setTimeout(resolve, 30 * 1000))
+        before(() => new Promise((resolve) => { setTimeout(resolve, 30 * 1000); })
             .then(() => dutUtils.getSystemPollersData((hostObj, data) => {
                 systemPollerData[hostObj.hostname] = data[0];
             })));
@@ -113,7 +113,7 @@ function test() {
             .then((data) => {
                 util.logger.info('Fluentd docker logs:', data);
                 // push all relevant logs lines into log array for later tests
-                const fluentdLogRegex = new RegExp(/\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}.\d{1,10}\s\+\d{1,5} /);
+                const fluentdLogRegex = /\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}.\d{1,10}\s\+\d{1,5} /;
                 const logLines = data.split(fluentdLogRegex);
                 logLines.forEach((line) => {
                     if (line.startsWith(FLUENTD_TAG_NAME)) {

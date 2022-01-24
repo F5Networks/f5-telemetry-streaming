@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -426,8 +426,10 @@ describe('Device Util', () => {
                     valueRange: 'false true'
                 }
             }]);
-            return assert.becomes(deviceUtil.getDeviceNodeMemoryLimit(constants.LOCAL_HOST),
-                constants.APP_THRESHOLDS.MEMORY.DEFAULT_MB);
+            return assert.becomes(
+                deviceUtil.getDeviceNodeMemoryLimit(constants.LOCAL_HOST),
+                constants.APP_THRESHOLDS.MEMORY.DEFAULT_MB
+            );
         });
 
         it('should return db value when db variables set', () => {
@@ -463,8 +465,10 @@ describe('Device Util', () => {
                 }
                 // no second mock to simulate failure to retrieve from provision.db endpoint
             }]);
-            return assert.becomes(deviceUtil.getDeviceNodeMemoryLimit(constants.LOCAL_HOST),
-                constants.APP_THRESHOLDS.MEMORY.DEFAULT_MB);
+            return assert.becomes(
+                deviceUtil.getDeviceNodeMemoryLimit(constants.LOCAL_HOST),
+                constants.APP_THRESHOLDS.MEMORY.DEFAULT_MB
+            );
         });
     });
 
@@ -692,7 +696,7 @@ describe('Device Util', () => {
                     const requestSecret = radiusRequests[0];
                     assert.lengthOf(radiusRequests, 2, 'largeSecret should be in 2 chunks');
                     assert.lengthOf(requestSecret, 500, 'length of chunk should be 500');
-                    assert.ok(new RegExp(/\n/).test(requestSecret), 'newlines should be preserved');
+                    assert.ok(/\n/.test(requestSecret), 'newlines should be preserved');
                 });
         });
 

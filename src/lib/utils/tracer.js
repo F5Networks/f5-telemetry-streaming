@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -304,7 +304,7 @@ class Tracer {
                 this._cacheReset = true;
                 return this._mergeAndResetCache(readData);
             })
-            .then((data) => util.maskSecrets(util.stringify(data, true)))
+            .then((data) => util.maskDefaultSecrets(util.stringify(data, true)))
             .then((dataToWrite) => util.fs.ftruncate(this.fd, 0)
                 .then(() => util.fs.write(this.fd, dataToWrite, 0, this.encoding)))
             .catch((err) => {
@@ -344,7 +344,7 @@ class Tracer {
         // it means we are still on time and we can resolve this promise once current attempt resolved
 
         // create a new promise to avoid accidental chaining to internal promises responsible for data writing
-        return new Promise((resolve, reject) => tryWriteDataPromise.then(resolve, reject));
+        return new Promise((resolve, reject) => { tryWriteDataPromise.then(resolve, reject); });
     }
 }
 

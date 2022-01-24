@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ('EULA') for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ('EULA') for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -140,42 +140,42 @@ describe('System Poller', () => {
     describe('.getPollersConfig', () => {
         /* eslint-disable implicit-arrow-linebreak */
         systemPollerConfigTestsData.getPollersConfig.forEach((testConf) =>
-            testUtil.getCallableIt(testConf)(
-                testConf.name, () => configWorker.processDeclaration(testUtil.deepCopy(testConf.declaration))
-                    .then(() => systemPoller.getPollersConfig(testConf.sysOrPollerName, testConf.funcOptions))
-                    .then((pollersConfig) => {
-                        pollersConfig = pollersConfig.map((p) => ({ name: p.traceName }));
-                        assert.sameDeepMembers(pollersConfig, testConf.expectedConfig);
-                        // assert.isTrue(coreStub.deviceUtil.decryptSecret.called);
-                    }, (error) => {
-                        if (testConf.errorRegExp) {
-                            return assert.match(error, testConf.errorRegExp, 'should match expected error message');
-                        }
-                        return Promise.reject(error);
-                    })
-            ));
+            testUtil.getCallableIt(testConf)(testConf.name, () => configWorker.processDeclaration(testUtil.deepCopy(
+                testConf.declaration
+            ))
+                .then(() => systemPoller.getPollersConfig(testConf.sysOrPollerName, testConf.funcOptions))
+                .then((pollersConfig) => {
+                    pollersConfig = pollersConfig.map((p) => ({ name: p.traceName }));
+                    assert.sameDeepMembers(pollersConfig, testConf.expectedConfig);
+                    // assert.isTrue(coreStub.deviceUtil.decryptSecret.called);
+                }, (error) => {
+                    if (testConf.errorRegExp) {
+                        return assert.match(error, testConf.errorRegExp, 'should match expected error message');
+                    }
+                    return Promise.reject(error);
+                })));
     });
 
     describe('.findSystemOrPollerConfigs', () => {
         /* eslint-disable implicit-arrow-linebreak */
         systemPollerConfigTestsData.findSystemOrPollerConfigs.forEach((testConf) =>
-            testUtil.getCallableIt(testConf)(
-                testConf.name, () => configWorker.processDeclaration(testUtil.deepCopy(testConf.rawConfig))
-                    .then(() => {
-                        let actual;
-                        try {
-                            actual = systemPoller.findSystemOrPollerConfigs(
-                                configWorker.currentConfig,
-                                testConf.sysOrPollerName,
-                                testConf.pollerName,
-                                testConf.namespaceName
-                            );
-                        } catch (err) {
-                            actual = err.message;
-                        }
-                        assert.deepStrictEqual(actual, testConf.expected);
-                    })
-            ));
+            testUtil.getCallableIt(testConf)(testConf.name, () => configWorker.processDeclaration(testUtil.deepCopy(
+                testConf.rawConfig
+            ))
+                .then(() => {
+                    let actual;
+                    try {
+                        actual = systemPoller.findSystemOrPollerConfigs(
+                            configWorker.currentConfig,
+                            testConf.sysOrPollerName,
+                            testConf.pollerName,
+                            testConf.namespaceName
+                        );
+                    } catch (err) {
+                        actual = err.message;
+                    }
+                    assert.deepStrictEqual(actual, testConf.expected);
+                })));
     });
 
     describe('.fetchPollersData', () => {

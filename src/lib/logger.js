@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -8,7 +8,7 @@
 
 'use strict';
 
-const maskSecrets = require('./utils/misc').maskSecrets;
+const maskDefaultSecrets = require('./utils/misc').maskDefaultSecrets;
 const stringify = require('./utils/misc').stringify;
 
 /** @module logger */
@@ -70,7 +70,7 @@ let CURRENT_LOG_LEVEL = NOTSET;
  * @returns {string} processed message
  */
 const processMessage = function (prefix, message) {
-    return `[${prefix}] ${maskSecrets(stringify(message))}`;
+    return `[${prefix}] ${maskDefaultSecrets(stringify(message))}`;
 };
 
 /**

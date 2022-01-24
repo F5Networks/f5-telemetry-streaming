@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -533,13 +533,16 @@ describe('Tracer', () => {
             });
 
             it('should mask secrets', () => {
+                const mask = '*********';
                 const data = {
-                    text: 'passphrase: { cipherText: \'test_passphrase\' }\n'
-                        + '"passphrase": {\ncipherText: "test_passphrase"\n}'
-                        + '\'passphrase": "test_passphrase"',
-                    passphrase: 'test_passphrase',
+                    text: JSON.stringify({
+                        cipherText: 'test_passphrase_1',
+                        passphrase: 'test_passphrase_2',
+                        passphrase1: { cipherText: 'test_passphrase_3' }
+                    }),
+                    passphrase: 'test_passphrase_4',
                     passphrase2: {
-                        cipherText: 'test_passphrase'
+                        cipherText: 'test_passphrase_5'
                     }
                 };
                 return tracerInst.write(data)
@@ -548,13 +551,14 @@ describe('Tracer', () => {
                         assert.deepStrictEqual(
                             traceData,
                             addTimestamps([{
-                                passphrase: '*********',
+                                passphrase: mask,
                                 passphrase2: {
-                                    cipherText: '*********'
+                                    cipherText: mask
                                 },
-                                text: 'passphrase: {*********}\n'
-                                + '"passphrase": {*********}'
-                                + '\'passphrase": "*********"'
+                                text: `{"cipherText":"${mask}",`
+                                    + `"passphrase":"${mask}",`
+                                    + `"passphrase1":{"cipherText":"${mask}"}`
+                                    + '}'
                             }])
                         );
                         return tracerInst.write(traceData[0].data);
@@ -563,23 +567,25 @@ describe('Tracer', () => {
                         assert.deepStrictEqual(
                             readTraceFile(tracerFile),
                             addTimestamps([{
-                                passphrase: '*********',
+                                passphrase: mask,
                                 passphrase2: {
-                                    cipherText: '*********'
+                                    cipherText: mask
                                 },
-                                text: 'passphrase: {*********}\n'
-                                + '"passphrase": {*********}'
-                                + '\'passphrase": "*********"'
+                                text: `{"cipherText":"${mask}",`
+                                    + `"passphrase":"${mask}",`
+                                    + `"passphrase1":{"cipherText":"${mask}"}`
+                                    + '}'
                             },
                             {
-                                passphrase: '*********',
+                                passphrase: mask,
                                 passphrase2: {
-                                    cipherText: '*********'
+                                    cipherText: mask
                                 },
-                                text: 'passphrase: {*********}\n'
-                                + '"passphrase": {*********}'
-                                + '\'passphrase": "*********"'
-                            }], 'should modify message when secrets masked already')
+                                text: `{"cipherText":"${mask}",`
+                                    + `"passphrase":"${mask}",`
+                                    + `"passphrase1":{"cipherText":"${mask}"}`
+                                    + '}'
+                            }], 'should not modify message when secrets masked already')
                         );
                         return tracerInst.write(data[0]);
                     });

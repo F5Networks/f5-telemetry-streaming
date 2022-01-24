@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -121,14 +121,16 @@ describe('Forwarder', () => {
         return assert.isFulfilled(forwarder.forward(mockContext)
             .then(() => {
                 assert.strictEqual(processActionsStub.calledOnce, true, 'should be called only once');
-                assert.deepStrictEqual(processActionsStub.firstCall.args[1],
+                assert.deepStrictEqual(
+                    processActionsStub.firstCall.args[1],
                     [
                         {
                             enable: true,
                             JMESPath: {},
                             expression: '{ message: @ }'
                         }
-                    ]);
+                    ]
+                );
                 assert.deepStrictEqual(consumersCalled, ['uuid1'], 'should still call consumer when actions are used');
             }));
     });
@@ -161,14 +163,16 @@ describe('Forwarder', () => {
         return assert.isFulfilled(forwarder.forward(mockContext)
             .then(() => {
                 assert.strictEqual(processActionsStub.calledOnce, true, 'should be called only once');
-                assert.deepStrictEqual(processActionsStub.firstCall.args[1],
+                assert.deepStrictEqual(
+                    processActionsStub.firstCall.args[1],
                     [
                         {
                             enable: true,
                             JMESPath: {},
                             expression: 'badexpression'
                         }
-                    ]);
+                    ]
+                );
                 assert.deepStrictEqual(processActionsStub.exceptions[0].message, 'ERROR');
                 assert.deepStrictEqual(consumersCalled, ['uuid1'], 'should still call consumer when actions are used');
             }));

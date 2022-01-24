@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -68,19 +68,24 @@ function test() {
 
         describe('Prometheus - Tests', () => {
             DUTS.forEach((dut) => {
-                it(`should the Pull Consumer's formatted data from: ${dut.hostalias}`,
+                it(
+                    `should the Pull Consumer's formatted data from: ${dut.hostalias}`,
                     () => dutUtils.getPullConsumerData(dut, pullConsumerName, { rawResponse: true })
                         .then((response) => {
                             verifyResponseData(response);
-                        }));
+                        })
+                );
 
-                it(`should the Pull Consumer's formatted data from: ${dut.hostalias} (using namespace endpoint)`,
-                    () => dutUtils.getPullConsumerData(
-                        dut, pullConsumerName, { namespace: DEFAULT_UNNAMED_NAMESPACE, rawResponse: true }
-                    )
+                it(
+                    `should the Pull Consumer's formatted data from: ${dut.hostalias} (using namespace endpoint)`,
+                    () => dutUtils.getPullConsumerData(dut, pullConsumerName, {
+                        namespace: DEFAULT_UNNAMED_NAMESPACE,
+                        rawResponse: true
+                    })
                         .then((response) => {
                             verifyResponseData(response);
-                        }));
+                        })
+                );
             });
         });
     });
@@ -102,11 +107,13 @@ function test() {
 
         describe('Prometheus with namespace - Tests', () => {
             DUTS.forEach((dut) => {
-                it(`should the Pull Consumer's formatted data from: ${dut.hostalias}`,
+                it(
+                    `should the Pull Consumer's formatted data from: ${dut.hostalias}`,
                     () => dutUtils.getPullConsumerData(dut, pullConsumerName, { namespace, rawResponse: true })
                         .then((response) => {
                             verifyResponseData(response);
-                        }));
+                        })
+                );
             });
         });
     });

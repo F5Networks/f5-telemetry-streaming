@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -210,8 +210,10 @@ describe('Promise Util', () => {
                     for (let i = 1; i < timestamps.length; i += 1) {
                         const actualDelay = timestamps[i] - timestamps[i - 1];
                         // sometimes it is less than expected
-                        assert.ok(actualDelay >= delay * 0.9,
-                            `Actual delay (${actualDelay}) is less than expected (${delay})`);
+                        assert.ok(
+                            actualDelay >= delay * 0.9,
+                            `Actual delay (${actualDelay}) is less than expected (${delay})`
+                        );
                     }
                 });
         }).timeout(2000);
@@ -241,8 +243,10 @@ describe('Promise Util', () => {
                             /* eslint-disable no-restricted-properties */
                             expectedDelay += backoff * Math.pow(2, i - 1);
                         }
-                        assert.ok(actualDelay >= expectedDelay * 0.9,
-                            `Actual delay (${actualDelay}) is less than expected (${expectedDelay})`);
+                        assert.ok(
+                            actualDelay >= expectedDelay * 0.9,
+                            `Actual delay (${actualDelay}) is less than expected (${expectedDelay})`
+                        );
                     }
                 });
         }).timeout(10000);

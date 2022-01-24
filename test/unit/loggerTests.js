@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -150,13 +150,43 @@ describe('Logger', () => {
     });
 
     it('should mask secrets', () => {
-        const msg = 'passphrase: { cipherText: \'test_passphrase\' }\n'
-            + '"passphrase": {\ncipherText: "test_passphrase"\n}'
-            + '\'passphrase": "test_passphrase"';
-        const expected = 'this contains secrets: passphrase: {*********}\n'
-        + '"passphrase": {\ncipherText: "*********"\n}'
-        + '\'passphrase": "*********"';
-        logger.info(`this contains secrets: ${msg}`);
+        const mask = '*********';
+        const decl = {
+            someSecretData: {
+                cipherText: 'test_passphrase_1'
+            },
+            someSecretData_2: {
+                passphrase: 'test_passphrase_2'
+            },
+            someSecretData_3: {
+                nestedData: {
+                    passphrase: {
+                        cipherText: 'test_passphrase_3'
+                    }
+                }
+            },
+            someSecretData_4: {
+                nestedData: {
+                    passphrase: 'test_passphrase_4'
+                }
+            },
+            jsonData: JSON.stringify({
+                someSecretData: {
+                    cipherText: 'test_passphrase_1'
+                },
+                someSecretData_2: {
+                    passphrase: 'test_passphrase_2'
+                }
+            }, null, 1)
+        };
+        const expected = 'this contains secrets: {'
+            + `"someSecretData":{"cipherText":"${mask}"},`
+            + `"someSecretData_2":{"passphrase":"${mask}"},`
+            + `"someSecretData_3":{"nestedData":{"passphrase":{"cipherText":"${mask}"}}},`
+            + `"someSecretData_4":{"nestedData":{"passphrase":"${mask}"}},`
+            + '"jsonData":"{\\n \\"someSecretData\\": {\\n  \\"cipherText\\": \\"*********\\"\\n },\\n \\"someSecretData_2\\": {\\n  \\"passphrase\\": \\"*********\\"\\n }\\n}"'
+            + '}';
+        logger.info(`this contains secrets: ${JSON.stringify(decl)}`);
         assert.include(coreStub.logger.messages.info[0], expected, 'should mask secrets');
 
         logger.info(coreStub.logger.messages.info[0]);

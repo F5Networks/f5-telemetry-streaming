@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -22,9 +22,15 @@ const net = require('net');
 const uuidv4 = require('uuid/v4');
 const jsonDuplicateKeyHandle = require('json-duplicate-key-handle');
 
-/** @module miscUtil */
-/* General helper functions (objects, primitives, etc)
-*/
+const constants = require('../constants');
+
+/** @module utils/misc */
+
+/*
+ * General helper functions (objects, primitives, etc)
+ */
+
+const VERSION_COMPARATORS = ['==', '===', '<', '<=', '>', '>=', '!=', '!=='];
 
 /**
  * Convert async callback function to promise-based funcs
@@ -56,45 +62,85 @@ function proxyForNodeCallbackFuncs(module, funcName) {
     };
 }
 
-const VERSION_COMPARATORS = ['==', '===', '<', '<=', '>', '>=', '!=', '!=='];
+/**
+ * Create function to mask secrets in well formed JSON data (e.g. from JSON.stringify).
+ * Also partially supports escaped JSON.
+ *
+ * @param {Array<string>} properties - properties to mask
+ * @param {string} mask - mask to use
+ *
+ * @returns {function(string): string} function to use to mask secrets. Function has read-only
+ *  property 'matchesFound' that returns number of matches found during last call
+ */
+function createJsonSecretsMaskFunc(properties, mask) {
+    mask = arguments.length > 1 ? mask : constants.SECRETS.MASK;
+    // matches counter, should be reset every time
+    let matches = 0;
 
-const SECRETS_MASK = '*********';
-const KEYWORDS_TO_MASK = [
-    {
-        /**
-         * single line:
-         *
-         * { "passphrase": { ...secret... } }
-         */
-        str: 'passphrase',
-        replace: /(\\{0,}["']{0,1}passphrase\\{0,}["']{0,1}\s*:\s*){.*?}/g,
-        with: `$1{${SECRETS_MASK}}`
-    },
-    {
-        /**
-         * {
-         *     "passphrase": "secret"
-         * }
-         */
-        str: 'passphrase',
-        replace: /(\\{0,}["']{0,1}passphrase\\{0,}["']{0,1}\s*:\s*)(\\{0,}["']{1}).*?\2/g,
-        with: `$1$2${SECRETS_MASK}$2`
-    },
-    {
-        /**
-         * {
-         *     someSecret: {
-         *         cipherText: "secret"
-         *     }
-         * }
-         */
-        str: 'cipherText',
-        replace: /(\\{0,}["']{0,1}cipherText\\{0,}["']{0,1}\s*:\s*)(\\{0,}["']{1}).*?\2/g,
-        with: `$1$2${SECRETS_MASK}$2`
+    const regExps = properties.map((propName) => ({
+        // it is not an ideal regexp (it is almost impossible to create such regexp) but it should work in most cases
+        replace: new RegExp([
+            [
+                '(',
+                // match leading ',' or '{' with spaces and new lines (or escaped  new lines)
+                '(?:(?:,|\\{)(?:\\s+|(?:(?:\\\\+r)?\\\\+n|\\\\+r)+)*)',
+                // match quoted property (escaped quotes too). Group #2 is leading quote.
+                // It will be used to match closing quote for property name and quotes for value if value is a string
+                `(?:(\\\\{0,}")${propName}\\2\\s*:\\s*)`,
+                ')'
+            ].join(''),
+            [
+                '(?:',
+                'true',
+                '|',
+                'false',
+                '|',
+                'null',
+                '|',
+                // JSON valid number
+                '-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?',
+                '|',
+                // string (with support for escaped quotes)
+                // it should ignore escaped quote(s) in of string
+                '\\2(?:\\\\+\\2|.*?)\\2',
+                '|',
+                // simple array handling
+                '\\[[\\s\\S]*?\\]',
+                ')'
+            ].join(''),
+            [
+                // match following ',' or '}' (with preceding spaces and new lines or escaped new lines)
+                '(,|(?:(?:\\s+|(?:(?:\\\\+r)?\\\\+n|\\\\+r)+)*\\}))'
+            ].join('')
+        ].join(''), 'g'),
+        with: (match, p1, p2, p3) => {
+            matches += 1;
+            return `${p1}${p2}${mask}${p2}${p3}`;
+        }
+    }));
+    function maskDefaultSecrets(data) {
+        matches = 0;
+        let maskedData = data;
+        try {
+            regExps.forEach((regexp) => {
+                maskedData = maskedData.replace(regexp.replace, regexp.with);
+            });
+        } catch (e) {
+            // simply ignore error
+        }
+        return maskedData;
     }
-];
+    Object.defineProperty(maskDefaultSecrets, 'matchesFound', {
+        get() {
+            return matches;
+        }
+    });
+    return maskDefaultSecrets;
+}
 
 module.exports = {
+    createJsonSecretsMaskFunc,
+
     /**
      * Assign defaults to object (uses lodash.defaultsDeep under the hood)
      * Note: check when working with arrays, as values may be merged incorrectly
@@ -474,24 +520,11 @@ module.exports = {
     /**
      * Mask Secrets (as needed)
      *
-     * @param {String} msg - message to mask
+     * @param {string} msg - message to mask
      *
-     * @returns {String} Masked message
+     * @returns {string} masked message
      */
-    maskSecrets(msg) {
-        let ret = msg;
-        // place in try/catch
-        try {
-            KEYWORDS_TO_MASK.forEach((keyword) => {
-                if (msg.indexOf(keyword.str) !== -1) {
-                    ret = ret.replace(keyword.replace, keyword.with);
-                }
-            });
-        } catch (e) {
-            // just continue
-        }
-        return ret;
-    },
+    maskDefaultSecrets: createJsonSecretsMaskFunc(constants.SECRETS.PROPS),
 
     /**
      * Generates a unique property name that the object doesn't have

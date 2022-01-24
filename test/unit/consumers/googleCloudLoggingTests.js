@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -98,9 +98,11 @@ describe('Google_Cloud_Logging', () => {
             }
         })
             .post('')
-            .reply(200, (_, req) => assert.deepStrictEqual(
-                req, getExpectedData([{ jsonPayload: testUtil.deepCopy(context.event.data) }])
-            ));
+            .reply(200, (_, req) => assert.deepStrictEqual(req, getExpectedData([{
+                jsonPayload: testUtil.deepCopy(
+                    context.event.data
+                )
+            }])));
 
         return cloudLoggingIndex(context);
     });
@@ -121,9 +123,11 @@ describe('Google_Cloud_Logging', () => {
             }
         })
             .post('')
-            .reply(200, (_, req) => assert.deepStrictEqual(
-                req, getExpectedData([{ jsonPayload: testUtil.deepCopy(context.event.data) }])
-            ));
+            .reply(200, (_, req) => assert.deepStrictEqual(req, getExpectedData([{
+                jsonPayload: testUtil.deepCopy(
+                    context.event.data
+                )
+            }])));
 
         return cloudLoggingIndex(context);
     });

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -96,9 +96,8 @@ function getCurrentState(namespaceName) {
     let instances = iHealthPoller.getAll({ includeDemo: true });
 
     if (instances.length > 0 && namespaceName) {
-        const ids = configUtil.getTelemetryIHealthPollers(
-            configWorker.currentConfig, namespaceName || constants.DEFAULT_UNNAMED_NAMESPACE
-        )
+        const ids = configUtil.getTelemetryIHealthPollers(configWorker.currentConfig, namespaceName
+            || constants.DEFAULT_UNNAMED_NAMESPACE)
             .map((pc) => pc.traceName);
         instances = instances.filter((poller) => ids.indexOf(poller.id) !== -1);
     }
@@ -117,9 +116,8 @@ function startPoller(systemName, namespaceName) {
     return Promise.resolve()
         .then(() => {
             const config = configWorker.currentConfig;
-            const pollerConfig = configUtil.getTelemetryIHealthPollers(
-                config, namespaceName || constants.DEFAULT_UNNAMED_NAMESPACE
-            )
+            const pollerConfig = configUtil.getTelemetryIHealthPollers(config, namespaceName
+                || constants.DEFAULT_UNNAMED_NAMESPACE)
                 .find((pc) => pc.systemName === systemName);
 
             if (util.isObjectEmpty(pollerConfig)) {

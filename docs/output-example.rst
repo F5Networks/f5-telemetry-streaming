@@ -7,21 +7,47 @@ Use this page to see the type of information that Telemetry Streaming collects. 
 
 .. IMPORTANT::  The following are just examples; the actual fields will vary depending on factors such as how the log/event source is configured, BIG-IP versions, and so on. 
 
+.. NOTE:: For some of the output to appear, you must have the applicable BIG-IP module licensed and provisioned (for example, you must have BIG-IP DNS provisioned to get GSLB wide IP and Pool information).
+
 .. _sysinfo:
 
 System Information
 ------------------
 The following shows the system information that Telemetry Streaming collects. 
 
-.. NOTE:: For some of the output to appear, you must have the applicable BIG-IP module licensed and provisioned (for example, you must have BIG-IP DNS provisioned to get GSLB wide IP and Pool information).
+.. NOTE:: In Telemetry Streaming 1.24 and later, properties that require the bash endpoint are skipped if bash is not available on the target BIG-IP: system.diskStorage, system.diskLatency, system.apmState, and all tmstats properties (used with “Splunk legacy” format).
 
-Telemetry Streaming 1.22 introduced additional virtual server output: **clientside.slowKilled** and **clientside.evictedConns**.  These do not appear in earlier versions.
+**Additional properties** |br|
+The following properties were introduced in recent Telemetry Streaming versions.  These properties do not appear in the output in previous versions.  The following table shows the TS version the property was introduced, the type of output, and property (with description if applicable).
 
-Telemetry Streaming 1.23 introduced the following, which do not appear in earlier versions:
-- Virtual server output: **isAvailable** and **isEnabled** (both boolean), which monitor virtual server availability, particularly for the Prometheus consumer.  
-- System output: **throughtputPerformance**, which provides throughput performance information.
+.. list-table::
+      :widths: 20 20 200 
+      :header-rows: 1
 
-In Telemetry Streaming 1.24 and later, properties that require the bash endpoint are now skipped if bash is not available on the target BIG-IP: system.diskStorage, system.diskLatency, system.apmState, and all tmstats properties (used with “Splunk legacy” format).
+      * - TS Version
+        - Type
+        - Property
+
+      * - 1.22
+        - Virtual Server
+        - **clientside.slowKilled**, **clientside.evictedConns**
+
+      * - 1.23
+        - Virtual Server
+        - **isAvailable**, **isEnabled** (both boolean), which monitor virtual server availability, particularly for the Prometheus consumer. 
+
+      * - 1.23
+        - System
+        - **throughtputPerformance**, which shows throughput performance information. 
+
+      * - 1.25
+        - Pool Member
+        - **poolName**, which shows the associated pool name.
+
+      * - 1.26
+        - Pool Member
+        - **fqdn**, which shows FQDN information for LTM pool member nodes that are FQDN nodes.
+
 
 
 .. literalinclude:: ../examples/output/system_poller/output.json
@@ -95,3 +121,8 @@ AVR Request Log
    
 
 :ref:`Back to top<outputexample-ref>`
+
+
+.. |br| raw:: html
+
+   <br />

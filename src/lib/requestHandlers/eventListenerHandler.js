@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -43,8 +43,11 @@ class EventListenerEndpointHandler extends BaseRequestHandler {
      */
     process() {
         const dataToSend = this.restOperation.getBody();
-        return dataPublisher.sendDataToListener(dataToSend, this.params.eventListener,
-            { namespace: this.params.namespace })
+        return dataPublisher.sendDataToListener(
+            dataToSend,
+            this.params.eventListener,
+            { namespace: this.params.namespace }
+        )
             .then(() => {
                 this.body = {
                     message: 'success',

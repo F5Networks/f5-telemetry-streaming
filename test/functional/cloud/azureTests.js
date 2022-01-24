@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -72,7 +72,7 @@ describe('Azure Cloud-based Tests', function () {
         it('should verify TS service is running', () => {
             const uri = `${constants.BASE_ILX_URI}/info`;
 
-            return new Promise((resolve) => setTimeout(resolve, 5000))
+            return new Promise((resolve) => { setTimeout(resolve, 5000); })
                 .then(() => testUtil.makeRequest(VM_IP, uri, options))
                 .then((data) => {
                     data = data || {};
@@ -119,7 +119,7 @@ describe('Azure Cloud-based Tests', function () {
                     'where TimeGenerated > ago(5m)'
                 ].join(' | ');
 
-                return new Promise((resolve) => setTimeout(resolve, 60000))
+                return new Promise((resolve) => { setTimeout(resolve, 60000); })
                     .then(() => azureUtil.queryLogs(laReaderToken, WORKSPACE_ID, queryString, CLOUD_TYPE))
                     .then((results) => {
                         testUtil.logger.info('Response from Log Analytics:', { hostname: VM_HOSTNAME, results });
@@ -158,7 +158,7 @@ describe('Azure Cloud-based Tests', function () {
 
             it('should retrieve system poller info from Application Insights', () => {
                 testUtil.logger.info('Delay 120000ms to ensure App Insights api data ready');
-                return new Promise((resolve) => setTimeout(resolve, 120000))
+                return new Promise((resolve) => { setTimeout(resolve, 120000); })
                     .then(() => azureUtil.queryAppInsights(APPINS_APP_ID, APPINS_API_KEY, CLOUD_TYPE))
                     .then((response) => {
                         testUtil.logger.info(response);

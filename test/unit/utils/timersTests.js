@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -224,7 +224,8 @@ describe('Timer Tests', () => {
                             intervalInS: 2,
                             logger: btLogger
                         },
-                        'arg1', 'arg2'
+                        'arg1',
+                        'arg2'
                     );
                     timerInst.start().catch(reject);
                     fakeClock.clockForward(1000, { promisify: true, repeat: 10 });
@@ -251,7 +252,8 @@ describe('Timer Tests', () => {
                             intervalInS: 2,
                             logger: btLogger
                         },
-                        'arg1', 'arg2'
+                        'arg1',
+                        'arg2'
                     );
                     timerInst.start().catch(reject);
                     fakeClock.clockForward(1000, { promisify: true, repeat: 3 });
@@ -275,7 +277,8 @@ describe('Timer Tests', () => {
                             intervalInS: 2,
                             logger: btLogger
                         },
-                        'arg1', 'arg2'
+                        'arg1',
+                        'arg2'
                     );
                     timerInst.start(targetFunc, 3).catch(reject);
                     fakeClock.clockForward(1000, { promisify: true, repeat: 3 });
@@ -322,7 +325,8 @@ describe('Timer Tests', () => {
                             intervalInS: 2,
                             logger: btLogger
                         },
-                        'arg1', 'arg2'
+                        'arg1',
+                        'arg2'
                     );
                     timerInst.start(targetFunc).catch(reject);
                     fakeClock.clockForward(1000, { promisify: true, repeat: 3 });
@@ -368,7 +372,8 @@ describe('Timer Tests', () => {
                             intervalInS: 2,
                             logger: btLogger
                         },
-                        'arg1', 'arg2'
+                        'arg1',
+                        'arg2'
                     )
                         .catch(reject);
                     fakeClock.clockForward(1000, { promisify: true, repeat: 3 });
@@ -393,7 +398,8 @@ describe('Timer Tests', () => {
                             intervalInS: 2,
                             logger: btLogger
                         },
-                        'arg1', 'arg2'
+                        'arg1',
+                        'arg2'
                     );
                     timerInst.start(
                         targetFunc,
@@ -421,7 +427,8 @@ describe('Timer Tests', () => {
                             intervalInS: 2,
                             logger: btLogger
                         },
-                        'arg1', 'arg2'
+                        'arg1',
+                        'arg2'
                     );
                     timerInst.start(
                         targetFunc,
@@ -620,7 +627,8 @@ describe('Timer Tests', () => {
                             intervalInS: 2,
                             logger: btLogger
                         },
-                        'arg1', 'arg2'
+                        'arg1',
+                        'arg2'
                     );
                     timerInst.update().catch(reject);
                     fakeClock.clockForward(1000, { promisify: true, repeat: 10 });
@@ -647,7 +655,8 @@ describe('Timer Tests', () => {
                             intervalInS: 2,
                             logger: btLogger
                         },
-                        'arg1', 'arg2'
+                        'arg1',
+                        'arg2'
                     );
                     timerInst.update().catch(reject);
                     fakeClock.clockForward(1000, { promisify: true, repeat: 3 });
@@ -671,7 +680,8 @@ describe('Timer Tests', () => {
                             intervalInS: 2,
                             logger: btLogger
                         },
-                        'arg1', 'arg2'
+                        'arg1',
+                        'arg2'
                     );
                     timerInst.update(targetFunc, 3).catch(reject);
                     fakeClock.clockForward(1000, { promisify: true, repeat: 3 });
@@ -718,7 +728,8 @@ describe('Timer Tests', () => {
                             intervalInS: 2,
                             logger: btLogger
                         },
-                        'arg1', 'arg2'
+                        'arg1',
+                        'arg2'
                     );
                     timerInst.update(targetFunc).catch(reject);
                     fakeClock.clockForward(1000, { promisify: true, repeat: 3 });
@@ -764,7 +775,8 @@ describe('Timer Tests', () => {
                             intervalInS: 2,
                             logger: btLogger
                         },
-                        'arg1', 'arg2'
+                        'arg1',
+                        'arg2'
                     )
                         .catch(reject);
                     fakeClock.clockForward(1000, { promisify: true, repeat: 3 });
@@ -789,7 +801,8 @@ describe('Timer Tests', () => {
                             intervalInS: 2,
                             logger: btLogger
                         },
-                        'arg1', 'arg2'
+                        'arg1',
+                        'arg2'
                     );
                     timerInst.update(
                         targetFunc,
@@ -817,7 +830,8 @@ describe('Timer Tests', () => {
                             intervalInS: 2,
                             logger: btLogger
                         },
-                        'arg1', 'arg2'
+                        'arg1',
+                        'arg2'
                     );
                     timerInst.update(
                         targetFunc,
@@ -1063,7 +1077,7 @@ describe('Timer Tests', () => {
                         timestamps.push(Date.now());
                         if (callCount < 4) {
                             callCount += 1;
-                            return new Promise((innerResolve) => setTimeout(innerResolve, 1100 + callCount * 100));
+                            return new Promise((innerResolve) => { setTimeout(innerResolve, 1100 + callCount * 100); });
                         }
                         return timerInst.stop().then(resolve, reject);
                     }, 1);
@@ -1258,7 +1272,9 @@ describe('Timer Tests', () => {
                             timestamps.push(Date.now());
                             if (callCount < 4) {
                                 callCount += 1;
-                                return new Promise((innerResolve) => setTimeout(innerResolve, 1100 + callCount * 100));
+                                return new Promise((innerResolve) => {
+                                    setTimeout(innerResolve, 1100 + callCount * 100);
+                                });
                             }
                             return timers.clearSlidingInterval(intervalID, resolve);
                         },
@@ -1312,9 +1328,12 @@ describe('Timer Tests', () => {
                         },
                         {
                             interval: 1000,
-                            onError: () => new Promise((innerResolve) => setTimeout(
-                                innerResolve, 1100 + callCount * 100
-                            )),
+                            onError: () => new Promise((innerResolve) => {
+                                setTimeout(
+                                    innerResolve,
+                                    1100 + callCount * 100
+                                );
+                            }),
                             onIntervalSlide: (duration, interval) => {
                                 durations.push([duration, interval]);
                             }
@@ -1368,7 +1387,7 @@ describe('Timer Tests', () => {
             intervalID = timers.setSlidingInterval(spy, 30);
             fakeClock.clockForward(1, { promisify: true });
             return testUtil.sleep(5)
-                .then(() => new Promise((resolve) => timers.clearSlidingInterval(intervalID, resolve)))
+                .then(() => new Promise((resolve) => { timers.clearSlidingInterval(intervalID, resolve); }))
                 .then(() => testUtil.sleep(30))
                 .then(() => {
                     assert.strictEqual(spy.callCount, 0, 'should not call function once canceled');

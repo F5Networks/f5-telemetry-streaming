@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -19,7 +19,7 @@ const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 
 // OpenTelemetry metics must match regex: /^[a-z][a-z0-9_.-]*$/i
 // However, the Prometheus exporter will silently convert invalid characters to an '_', so use Prometheus regex
-const METRIC_NAME_REGEX = new RegExp(/[^a-zA-Z0-9_:]+/g);
+const METRIC_NAME_REGEX = /[^a-zA-Z0-9_:]+/g;
 
 /**
  * Custom Log Handler to pass to the OpenTelemetry API

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -57,8 +57,10 @@ describe('AWS_CloudWatch', () => {
             return awsCloudWatchIndex(context)
                 .then(() => {
                     assert.strictEqual(optionsParam.region, 'us-west-1');
-                    assert.deepStrictEqual(optionsParam.credentials,
-                        new AWS.Credentials({ accessKeyId: 'awsuser', secretAccessKey: 'awssecret' }));
+                    assert.deepStrictEqual(
+                        optionsParam.credentials,
+                        new AWS.Credentials({ accessKeyId: 'awsuser', secretAccessKey: 'awssecret' })
+                    );
                 });
         });
 
@@ -301,11 +303,13 @@ describe('AWS_CloudWatch', () => {
 
                 return awsCloudWatchIndex(context)
                     .then(() => {
-                        assert.deepStrictEqual(actualParams,
+                        assert.deepStrictEqual(
+                            actualParams,
                             {
                                 MetricData: expectedMetrics,
                                 Namespace: 'my-metrics'
-                            });
+                            }
+                        );
                     });
             });
         });

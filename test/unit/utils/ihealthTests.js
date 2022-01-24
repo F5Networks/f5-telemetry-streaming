@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -1176,26 +1176,28 @@ describe('iHealth Utils', () => {
 
         describe('.authenticate()', () => {
             const setupNockEndpoint = (endpointOpts) => {
-                testUtil.mockEndpoints([Object.assign({
-                    endpoint: '/auth/pub/sso/login/ihealth-api',
-                    code: 200,
-                    method: 'post',
-                    request: {
-                        user_id: 'username',
-                        user_secret: 'passphrase'
-                    },
-                    requestHeaders: {
-                        'Content-Type': 'application/json'
-                    },
-                    responseHeaders: {
-                        'Set-Cookie': 'someCookie=someValue; Path=/; Domain=.f5.com'
+                testUtil.mockEndpoints(
+                    [Object.assign({
+                        endpoint: '/auth/pub/sso/login/ihealth-api',
+                        code: 200,
+                        method: 'post',
+                        request: {
+                            user_id: 'username',
+                            user_secret: 'passphrase'
+                        },
+                        requestHeaders: {
+                            'Content-Type': 'application/json'
+                        },
+                        responseHeaders: {
+                            'Set-Cookie': 'someCookie=someValue; Path=/; Domain=.f5.com'
+                        }
+                    }, endpointOpts || {})],
+                    {
+                        host: 'api.f5.com',
+                        port: 443,
+                        proto: 'https'
                     }
-                }, endpointOpts || {})],
-                {
-                    host: 'api.f5.com',
-                    port: 443,
-                    proto: 'https'
-                });
+                );
             };
 
             beforeEach(() => {
@@ -1219,23 +1221,25 @@ describe('iHealth Utils', () => {
         describe('.fetchQkviewDiagnostics()', () => {
             const qkviewURI = 'https://ihealth-api.f5.com/qkview/myLovelyQkview';
             const setupNockEndpoint = (endpointOpts) => {
-                testUtil.mockEndpoints([Object.assign({
-                    endpoint: '/qkview/myLovelyQkview/diagnostics.json',
-                    code: 200,
-                    method: 'get',
-                    requestHeaders: {
-                        Accept: 'application/vnd.f5.ihealth.api.v1.0+json',
-                        Cookie: 'someCookie=someValue'
-                    },
-                    response: {
-                        diagnostics: 'JSON'
+                testUtil.mockEndpoints(
+                    [Object.assign({
+                        endpoint: '/qkview/myLovelyQkview/diagnostics.json',
+                        code: 200,
+                        method: 'get',
+                        requestHeaders: {
+                            Accept: 'application/vnd.f5.ihealth.api.v1.0+json',
+                            Cookie: 'someCookie=someValue'
+                        },
+                        response: {
+                            diagnostics: 'JSON'
+                        }
+                    }, endpointOpts || {})],
+                    {
+                        host: 'ihealth-api.f5.com',
+                        port: 443,
+                        proto: 'https'
                     }
-                }, endpointOpts || {})],
-                {
-                    host: 'ihealth-api.f5.com',
-                    port: 443,
-                    proto: 'https'
-                });
+                );
             };
 
             it('should be able to fetch diagnostics JSON', () => {
@@ -1283,20 +1287,22 @@ describe('iHealth Utils', () => {
 
         describe('.isQkviewReportReady()', () => {
             const setupNockEndpoint = (endpointOpts) => {
-                testUtil.mockEndpoints([Object.assign({
-                    endpoint: '/qkview/myLovelyQkview',
-                    code: 200,
-                    method: 'get',
-                    requestHeaders: {
-                        Accept: 'application/vnd.f5.ihealth.api.v1.0',
-                        Cookie: 'someCookie=someValue'
+                testUtil.mockEndpoints(
+                    [Object.assign({
+                        endpoint: '/qkview/myLovelyQkview',
+                        code: 200,
+                        method: 'get',
+                        requestHeaders: {
+                            Accept: 'application/vnd.f5.ihealth.api.v1.0',
+                            Cookie: 'someCookie=someValue'
+                        }
+                    }, endpointOpts || {})],
+                    {
+                        host: 'ihealth-api.f5.com',
+                        port: 443,
+                        proto: 'https'
                     }
-                }, endpointOpts || {})],
-                {
-                    host: 'ihealth-api.f5.com',
-                    port: 443,
-                    proto: 'https'
-                });
+                );
             };
 
             it('should return true when Qkview report is ready', () => {
@@ -1322,24 +1328,26 @@ describe('iHealth Utils', () => {
             const createReadStreamOrigin = fs.createReadStream;
             const qkviewFileStreamFile = 'qkviewFileStreamFile';
             const setupNockEndpoint = (endpointOpts) => {
-                testUtil.mockEndpoints([Object.assign({
-                    endpoint: '/qkview-analyzer/api/qkviews',
-                    code: 200,
-                    method: 'post',
-                    requestHeaders: {
-                        Accept: 'application/vnd.f5.ihealth.api.v1.0+json',
-                        Cookie: 'someCookie=someValue'
-                    },
-                    response: {
-                        result: 'OK',
-                        location: 'qkviewLocationURI'
+                testUtil.mockEndpoints(
+                    [Object.assign({
+                        endpoint: '/qkview-analyzer/api/qkviews',
+                        code: 200,
+                        method: 'post',
+                        requestHeaders: {
+                            Accept: 'application/vnd.f5.ihealth.api.v1.0+json',
+                            Cookie: 'someCookie=someValue'
+                        },
+                        response: {
+                            result: 'OK',
+                            location: 'qkviewLocationURI'
+                        }
+                    }, endpointOpts || {})],
+                    {
+                        host: 'ihealth-api.f5.com',
+                        port: 443,
+                        proto: 'https'
                     }
-                }, endpointOpts || {})],
-                {
-                    host: 'ihealth-api.f5.com',
-                    port: 443,
-                    proto: 'https'
-                });
+                );
             };
 
             beforeEach(() => {

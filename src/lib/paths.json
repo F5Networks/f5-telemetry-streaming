@@ -130,7 +130,7 @@
             "name": "pools",
             "path": "/mgmt/tm/ltm/pool",
             "includeStats": true,
-            "expandReferences": { "membersReference": { "endpointSuffix": "/stats" } }
+            "expandReferences": { "membersReference": { "includeStats": true, "endpointSuffix": "?$select=fqdn,selfLink" } }
         },
         {
             "name": "ltmPolicies",

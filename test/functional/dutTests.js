@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -82,7 +82,7 @@ function sendDataToEventListener(dut, message, opts) {
                 resolve();
                 return;
             }
-            new Promise((timeoutResolve) => setTimeout(timeoutResolve, opts.delay))
+            new Promise((timeoutResolve) => { setTimeout(timeoutResolve, opts.delay); })
                 .then(() => util.sendEvent(dut.ip, message))
                 .then(() => sendData(i + 1))
                 .catch(reject);
@@ -300,7 +300,7 @@ function setup() {
             it('should verify installation', () => {
                 const uri = `${constants.BASE_ILX_URI}/info`;
 
-                return new Promise((resolve) => setTimeout(resolve, 5000))
+                return new Promise((resolve) => { setTimeout(resolve, 5000); })
                     .then(() => util.makeRequest(host, uri, options))
                     .then((data) => {
                         data = data || {};
@@ -889,7 +889,7 @@ function teardown() {
 
             it('should check restnoded log for errors in [telemetry] messages', () => {
                 let errCounter = 0;
-                const regexp = new RegExp(/\[telemetry][\S\s]*error/, 'i');
+                const regexp = /\[telemetry][\S\s]*error/i;
 
                 const rl = readline.createInterface({
                     input: fs.createReadStream(logFile)

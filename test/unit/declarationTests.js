@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -2118,7 +2118,8 @@ describe('Declarations', () => {
                 return declValidator(data)
                     .then((validConfig) => {
                         const poller = validConfig.My_Poller;
-                        assert.deepStrictEqual(poller.endpointList,
+                        assert.deepStrictEqual(
+                            poller.endpointList,
                             {
                                 enable: true,
                                 items: {
@@ -2129,7 +2130,8 @@ describe('Declarations', () => {
                                     }
                                 },
                                 basePath: ''
-                            });
+                            }
+                        );
                     });
             });
         });
@@ -3351,7 +3353,8 @@ describe('Declarations', () => {
             return declValidator(data)
                 .then((validConfig) => {
                     const poller = validConfig.My_System.systemPoller;
-                    assert.deepStrictEqual(poller,
+                    assert.deepStrictEqual(
+                        poller,
                         [
                             {
                                 actions: [{
@@ -3370,7 +3373,8 @@ describe('Declarations', () => {
                                 interval: 90,
                                 enable: true
                             }
-                        ]);
+                        ]
+                    );
                 });
         });
 

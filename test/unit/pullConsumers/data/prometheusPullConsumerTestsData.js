@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -94,12 +94,19 @@ f5_lowestPriogrp{pools="/Sample_02/A1/web_pool1"} 0
 # TYPE f5_port gauge
 f5_port{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.10:80"} 80
 f5_port{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.11:80"} 80
+f5_port{pools="/Sample_01/A1/web_pool",members="/Sample_01/_auto_192.0.1.12:80"} 80
+f5_port{pools="/Sample_01/A1/web_pool",members="/Sample_01/bestwebsite.com:80"} 80
 f5_port{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.12:80"} 80
 f5_port{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.13:80"} 80
 f5_port{pools="/Sample_02/A1/web_pool",members="/Sample_02/192.0.2.10:80"} 80
 f5_port{pools="/Sample_02/A1/web_pool",members="/Sample_02/192.0.2.11:80"} 80
 f5_port{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.12:80"} 80
 f5_port{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.13:80"} 80
+
+# HELP f5_totRequests totRequests
+# TYPE f5_totRequests gauge
+f5_totRequests{pools="/Sample_01/A1/web_pool",members="/Sample_01/_auto_192.0.1.12:80"} 0
+f5_totRequests{pools="/Sample_01/A1/web_pool",members="/Sample_01/bestwebsite.com:80"} 0
 
 # HELP f5_cookiePersistInserts cookiePersistInserts
 # TYPE f5_cookiePersistInserts gauge
@@ -1298,6 +1305,8 @@ f5_serverside_bitsIn{pools="/Common/h.4"} 0
 f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool"} 0
 f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.10:80"} 0
 f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.11:80"} 0
+f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool",members="/Sample_01/_auto_192.0.1.12:80"} 0
+f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool",members="/Sample_01/bestwebsite.com:80"} 0
 f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool1"} 0
 f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.12:80"} 0
 f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.13:80"} 0
@@ -1314,6 +1323,8 @@ f5_serverside_bitsOut{pools="/Common/h.4"} 0
 f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool"} 0
 f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.10:80"} 0
 f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.11:80"} 0
+f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool",members="/Sample_01/_auto_192.0.1.12:80"} 0
+f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool",members="/Sample_01/bestwebsite.com:80"} 0
 f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool1"} 0
 f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.12:80"} 0
 f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.13:80"} 0
@@ -1330,6 +1341,8 @@ f5_serverside_curConns{pools="/Common/h.4"} 0
 f5_serverside_curConns{pools="/Sample_01/A1/web_pool"} 0
 f5_serverside_curConns{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.10:80"} 0
 f5_serverside_curConns{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.11:80"} 0
+f5_serverside_curConns{pools="/Sample_01/A1/web_pool",members="/Sample_01/_auto_192.0.1.12:80"} 0
+f5_serverside_curConns{pools="/Sample_01/A1/web_pool",members="/Sample_01/bestwebsite.com:80"} 0
 f5_serverside_curConns{pools="/Sample_01/A1/web_pool1"} 0
 f5_serverside_curConns{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.12:80"} 0
 f5_serverside_curConns{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.13:80"} 0
@@ -1339,6 +1352,26 @@ f5_serverside_curConns{pools="/Sample_02/A1/web_pool",members="/Sample_02/192.0.
 f5_serverside_curConns{pools="/Sample_02/A1/web_pool1"} 0
 f5_serverside_curConns{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.12:80"} 0
 f5_serverside_curConns{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.13:80"} 0
+
+# HELP f5_serverside_maxConns serverside.maxConns
+# TYPE f5_serverside_maxConns gauge
+f5_serverside_maxConns{pools="/Sample_01/A1/web_pool",members="/Sample_01/_auto_192.0.1.12:80"} 0
+f5_serverside_maxConns{pools="/Sample_01/A1/web_pool",members="/Sample_01/bestwebsite.com:80"} 0
+
+# HELP f5_serverside_pktsIn serverside.pktsIn
+# TYPE f5_serverside_pktsIn gauge
+f5_serverside_pktsIn{pools="/Sample_01/A1/web_pool",members="/Sample_01/_auto_192.0.1.12:80"} 0
+f5_serverside_pktsIn{pools="/Sample_01/A1/web_pool",members="/Sample_01/bestwebsite.com:80"} 0
+
+# HELP f5_serverside_pktsOut serverside.pktsOut
+# TYPE f5_serverside_pktsOut gauge
+f5_serverside_pktsOut{pools="/Sample_01/A1/web_pool",members="/Sample_01/_auto_192.0.1.12:80"} 0
+f5_serverside_pktsOut{pools="/Sample_01/A1/web_pool",members="/Sample_01/bestwebsite.com:80"} 0
+
+# HELP f5_serverside_totConns serverside.totConns
+# TYPE f5_serverside_totConns gauge
+f5_serverside_totConns{pools="/Sample_01/A1/web_pool",members="/Sample_01/_auto_192.0.1.12:80"} 0
+f5_serverside_totConns{pools="/Sample_01/A1/web_pool",members="/Sample_01/bestwebsite.com:80"} 0
 
 # HELP f5_cipherUses_adhKeyxchg cipherUses.adhKeyxchg
 # TYPE f5_cipherUses_adhKeyxchg gauge
@@ -1876,6 +1909,8 @@ f5_lowestPriogrp{pools="/Sample_02/A1/web_pool1"} 0
 # TYPE f5_port gauge
 f5_port{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.10:80"} 80
 f5_port{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.11:80"} 80
+f5_port{pools="/Sample_01/A1/web_pool",members="/Sample_01/_auto_192.0.1.12:80"} 80
+f5_port{pools="/Sample_01/A1/web_pool",members="/Sample_01/bestwebsite.com:80"} 80
 f5_port{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.12:80"} 80
 f5_port{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.13:80"} 80
 f5_port{pools="/Sample_02/A1/web_pool",members="/Sample_02/192.0.2.10:80"} 80
@@ -1883,12 +1918,19 @@ f5_port{pools="/Sample_02/A1/web_pool",members="/Sample_02/192.0.2.11:80"} 80
 f5_port{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.12:80"} 80
 f5_port{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.13:80"} 80
 
+# HELP f5_totRequests totRequests
+# TYPE f5_totRequests gauge
+f5_totRequests{pools="/Sample_01/A1/web_pool",members="/Sample_01/_auto_192.0.1.12:80"} 0
+f5_totRequests{pools="/Sample_01/A1/web_pool",members="/Sample_01/bestwebsite.com:80"} 0
+
 # HELP f5_serverside_bitsIn serverside.bitsIn
 # TYPE f5_serverside_bitsIn gauge
 f5_serverside_bitsIn{pools="/Common/h.4"} 0
 f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool"} 0
 f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.10:80"} 0
 f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.11:80"} 0
+f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool",members="/Sample_01/_auto_192.0.1.12:80"} 0
+f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool",members="/Sample_01/bestwebsite.com:80"} 0
 f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool1"} 0
 f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.12:80"} 0
 f5_serverside_bitsIn{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.13:80"} 0
@@ -1905,6 +1947,8 @@ f5_serverside_bitsOut{pools="/Common/h.4"} 0
 f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool"} 0
 f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.10:80"} 0
 f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.11:80"} 0
+f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool",members="/Sample_01/_auto_192.0.1.12:80"} 0
+f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool",members="/Sample_01/bestwebsite.com:80"} 0
 f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool1"} 0
 f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.12:80"} 0
 f5_serverside_bitsOut{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.13:80"} 0
@@ -1921,6 +1965,8 @@ f5_serverside_curConns{pools="/Common/h.4"} 0
 f5_serverside_curConns{pools="/Sample_01/A1/web_pool"} 0
 f5_serverside_curConns{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.10:80"} 0
 f5_serverside_curConns{pools="/Sample_01/A1/web_pool",members="/Sample_01/192.0.1.11:80"} 0
+f5_serverside_curConns{pools="/Sample_01/A1/web_pool",members="/Sample_01/_auto_192.0.1.12:80"} 0
+f5_serverside_curConns{pools="/Sample_01/A1/web_pool",members="/Sample_01/bestwebsite.com:80"} 0
 f5_serverside_curConns{pools="/Sample_01/A1/web_pool1"} 0
 f5_serverside_curConns{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.12:80"} 0
 f5_serverside_curConns{pools="/Sample_01/A1/web_pool1",members="/Sample_01/192.0.1.13:80"} 0
@@ -1930,6 +1976,26 @@ f5_serverside_curConns{pools="/Sample_02/A1/web_pool",members="/Sample_02/192.0.
 f5_serverside_curConns{pools="/Sample_02/A1/web_pool1"} 0
 f5_serverside_curConns{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.12:80"} 0
 f5_serverside_curConns{pools="/Sample_02/A1/web_pool1",members="/Sample_02/192.0.2.13:80"} 0
+
+# HELP f5_serverside_maxConns serverside.maxConns
+# TYPE f5_serverside_maxConns gauge
+f5_serverside_maxConns{pools="/Sample_01/A1/web_pool",members="/Sample_01/_auto_192.0.1.12:80"} 0
+f5_serverside_maxConns{pools="/Sample_01/A1/web_pool",members="/Sample_01/bestwebsite.com:80"} 0
+
+# HELP f5_serverside_pktsIn serverside.pktsIn
+# TYPE f5_serverside_pktsIn gauge
+f5_serverside_pktsIn{pools="/Sample_01/A1/web_pool",members="/Sample_01/_auto_192.0.1.12:80"} 0
+f5_serverside_pktsIn{pools="/Sample_01/A1/web_pool",members="/Sample_01/bestwebsite.com:80"} 0
+
+# HELP f5_serverside_pktsOut serverside.pktsOut
+# TYPE f5_serverside_pktsOut gauge
+f5_serverside_pktsOut{pools="/Sample_01/A1/web_pool",members="/Sample_01/_auto_192.0.1.12:80"} 0
+f5_serverside_pktsOut{pools="/Sample_01/A1/web_pool",members="/Sample_01/bestwebsite.com:80"} 0
+
+# HELP f5_serverside_totConns serverside.totConns
+# TYPE f5_serverside_totConns gauge
+f5_serverside_totConns{pools="/Sample_01/A1/web_pool",members="/Sample_01/_auto_192.0.1.12:80"} 0
+f5_serverside_totConns{pools="/Sample_01/A1/web_pool",members="/Sample_01/bestwebsite.com:80"} 0
 `
     }
 };

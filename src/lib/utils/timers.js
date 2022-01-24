@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -105,8 +105,10 @@ class BasicTimer extends TimerInterface {
                     throw new Error('BasicTimer: No function to run');
                 }
                 const intervalID = setInterval(
-                    () => new Promise((resolve, reject) => Promise.resolve(this.func.apply(null, this.args || []))
-                        .then(resolve, reject))
+                    () => new Promise((resolve, reject) => {
+                        Promise.resolve(this.func.apply(null, this.args || []))
+                            .then(resolve, reject);
+                    })
                         .catch((error) => {
                             if (this.logger) {
                                 this.logger.exception('BasicTimer: execution error', error);
@@ -416,8 +418,10 @@ class SlidingInterval {
              * run target function inside of a Promise to track execution time
              * in case if target function returns a Promise
              */
-            new Promise((resolve, reject) => Promise.resolve(this.func.apply(null, this.args))
-                .then(resolve, reject))
+            new Promise((resolve, reject) => {
+                Promise.resolve(this.func.apply(null, this.args))
+                    .then(resolve, reject);
+            })
                 .catch((error) => (this.onError ? this.onError(error) : Promise.reject(error)))
                 .then(() => {
                     const duration = Date.now() - startTime;

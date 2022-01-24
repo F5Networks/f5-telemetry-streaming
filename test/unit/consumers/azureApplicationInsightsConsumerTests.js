@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -204,13 +204,15 @@ describe('Azure_Application_Insights', () => {
 
                     const expectedMetric1 = { name: 'F5_num', value: 1234 };
                     const expectedMetric2 = { name: 'F5_strNum', value: 24.1 };
-                    assert.deepStrictEqual(requests,
+                    assert.deepStrictEqual(
+                        requests,
                         [
                             expectedMetric1,
                             expectedMetric2,
                             expectedMetric1,
                             expectedMetric2
-                        ]);
+                        ]
+                    );
                 });
         });
 
@@ -236,11 +238,13 @@ describe('Azure_Application_Insights', () => {
                     context.logger.setLogLevel('info');
                     return azureAppInsightsIndex(context);
                 })
-                .then(() => assert.deepStrictEqual(logRequests,
+                .then(() => assert.deepStrictEqual(
+                    logRequests,
                     [
                         { debug: true, warn: true },
                         { debug: false, warn: false }
-                    ]));
+                    ]
+                ));
         });
 
         it('should configure default client once', () => assert(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -78,7 +78,7 @@ function test() {
                     `where hostname_s == "${dut.hostname}"`,
                     'where TimeGenerated > ago(5m)'
                 ].join(' | ');
-                return new Promise((resolve) => setTimeout(resolve, 30000))
+                return new Promise((resolve) => { setTimeout(resolve, 30000); })
                     .then(() => azureUtil.queryLogs(oauthToken, WORKSPACE_ID, queryString))
                     .then((results) => {
                         util.logger.info('Response from Log Analytics:', { hostname: dut.hostname, results });
@@ -94,7 +94,7 @@ function test() {
                     `where hostname_s == "${dut.hostname}"`,
                     `where test_s == "${testDataTimestamp}"`
                 ].join(' | ');
-                return new Promise((resolve) => setTimeout(resolve, 10000))
+                return new Promise((resolve) => { setTimeout(resolve, 10000); })
                     .then(() => azureUtil.queryLogs(oauthToken, WORKSPACE_ID, queryString))
                     .then((results) => {
                         util.logger.info('Response from Log Analytics:', { hostname: dut.hostname, results });

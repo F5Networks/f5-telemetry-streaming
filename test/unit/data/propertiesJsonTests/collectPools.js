@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ('EULA') for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ('EULA') for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -121,6 +121,42 @@ module.exports = {
                                 'serverside.totConns': 0,
                                 'status.statusReason': 'Pool member does not have service checking enabled',
                                 totRequests: 0
+                            },
+                            '/Common/_auto_192.0.2.2:80': {
+                                addr: '192.0.2.2',
+                                availabilityState: 'available',
+                                enabledState: 'enabled',
+                                monitorStatus: 'up',
+                                poolName: '/Common/test_pool_0',
+                                port: 80,
+                                'serverside.bitsIn': 0,
+                                'serverside.bitsOut': 0,
+                                'serverside.curConns': 0,
+                                'serverside.maxConns': 0,
+                                'serverside.pktsIn': 0,
+                                'serverside.pktsOut': 0,
+                                'serverside.totConns': 0,
+                                'status.statusReason': 'Pool member is available',
+                                totRequests: 0,
+                                fqdn: 'www.thebestwebsite.com'
+                            },
+                            '/Common/bestwebsite:80': {
+                                addr: '::',
+                                availabilityState: 'available',
+                                enabledState: 'enabled',
+                                monitorStatus: 'fqdn-up',
+                                poolName: '/Common/test_pool_0',
+                                port: 80,
+                                'serverside.bitsIn': 0,
+                                'serverside.bitsOut': 0,
+                                'serverside.curConns': 0,
+                                'serverside.maxConns': 0,
+                                'serverside.pktsIn': 0,
+                                'serverside.pktsOut': 0,
+                                'serverside.totConns': 0,
+                                'status.statusReason': 'The DNS server(s) are available',
+                                totRequests: 0,
+                                fqdn: 'www.thebestwebsite.com'
                             }
                         },
                         name: '/Common/test_pool_0',
@@ -174,6 +210,41 @@ module.exports = {
                                 gatewayFailsafeDeviceReference: {
                                     link: 'https://localhost/mgmt/tm/cm/device/~Common~localhost?ver=14.1.0',
                                     name: 'gatewayFailsafeDeviceReference'
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    endpoint: '/mgmt/tm/ltm/pool/~Common~test_pool_0/members?$select=fqdn,selfLink',
+                    response: {
+                        kind: 'tm:ltm:pool:members:memberscollectionstate',
+                        selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members?$select=fqdn%2CselfLink&ver=14.1.4.2',
+                        items: [
+                            {
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80?ver=14.1.4.2',
+                                fqdn: {
+                                    autopopulate: 'disabled'
+                                }
+                            },
+                            {
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2%2510:80?ver=14.1.4.2',
+                                fqdn: {
+                                    autopopulate: 'disabled'
+                                }
+                            },
+                            {
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.0.2.2:80?ver=14.1.4.2',
+                                fqdn: {
+                                    autopopulate: 'enabled',
+                                    tmName: 'www.thebestwebsite.com'
+                                }
+                            },
+                            {
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~bestwebsite:80?ver=14.1.4.2',
+                                fqdn: {
+                                    autopopulate: 'enabled',
+                                    tmName: 'www.thebestwebsite.com'
                                 }
                             }
                         ]
@@ -344,6 +415,172 @@ module.exports = {
                                         },
                                         'status.statusReason': {
                                             description: 'Pool member does not have service checking enabled'
+                                        },
+                                        totRequests: {
+                                            value: 0
+                                        }
+                                    }
+                                }
+                            },
+                            'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.0.2.2:80/stats': {
+                                nestedStats: {
+                                    kind: 'tm:ltm:pool:members:membersstats',
+                                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.0.2.2:80/stats?ver=14.1.0',
+                                    entries: {
+                                        addr: {
+                                            description: '192.0.2.2'
+                                        },
+                                        'connq.ageEdm': {
+                                            value: 0
+                                        },
+                                        'connq.ageEma': {
+                                            value: 0
+                                        },
+                                        'connq.ageHead': {
+                                            value: 0
+                                        },
+                                        'connq.ageMax': {
+                                            value: 0
+                                        },
+                                        'connq.depth': {
+                                            value: 0
+                                        },
+                                        'connq.serviced': {
+                                            value: 0
+                                        },
+                                        curSessions: {
+                                            value: 0
+                                        },
+                                        monitorRule: {
+                                            description: '/Common/http (pool monitor)'
+                                        },
+                                        monitorStatus: {
+                                            description: 'up'
+                                        },
+                                        nodeName: {
+                                            description: '/Common/_auto_192.0.2.2'
+                                        },
+                                        poolName: {
+                                            description: '/Common/test_pool_0'
+                                        },
+                                        port: {
+                                            value: 80
+                                        },
+                                        'serverside.bitsIn': {
+                                            value: 0
+                                        },
+                                        'serverside.bitsOut': {
+                                            value: 0
+                                        },
+                                        'serverside.curConns': {
+                                            value: 0
+                                        },
+                                        'serverside.maxConns': {
+                                            value: 0
+                                        },
+                                        'serverside.pktsIn': {
+                                            value: 0
+                                        },
+                                        'serverside.pktsOut': {
+                                            value: 0
+                                        },
+                                        'serverside.totConns': {
+                                            value: 0
+                                        },
+                                        sessionStatus: {
+                                            description: 'enabled'
+                                        },
+                                        'status.availabilityState': {
+                                            description: 'available'
+                                        },
+                                        'status.enabledState': {
+                                            description: 'enabled'
+                                        },
+                                        'status.statusReason': {
+                                            description: 'Pool member is available'
+                                        },
+                                        totRequests: {
+                                            value: 0
+                                        }
+                                    }
+                                }
+                            },
+                            'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~bestwebsite:80/stats': {
+                                nestedStats: {
+                                    kind: 'tm:ltm:pool:members:membersstats',
+                                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~bestwebsite:80/stats?ver=14.1.0',
+                                    entries: {
+                                        addr: {
+                                            description: '::'
+                                        },
+                                        'connq.ageEdm': {
+                                            value: 0
+                                        },
+                                        'connq.ageEma': {
+                                            value: 0
+                                        },
+                                        'connq.ageHead': {
+                                            value: 0
+                                        },
+                                        'connq.ageMax': {
+                                            value: 0
+                                        },
+                                        'connq.depth': {
+                                            value: 0
+                                        },
+                                        'connq.serviced': {
+                                            value: 0
+                                        },
+                                        curSessions: {
+                                            value: 0
+                                        },
+                                        monitorRule: {
+                                            description: '/Common/http (pool monitor)'
+                                        },
+                                        monitorStatus: {
+                                            description: 'fqdn-up'
+                                        },
+                                        nodeName: {
+                                            description: '/Common/bestwebsite'
+                                        },
+                                        poolName: {
+                                            description: '/Common/test_pool_0'
+                                        },
+                                        port: {
+                                            value: 80
+                                        },
+                                        'serverside.bitsIn': {
+                                            value: 0
+                                        },
+                                        'serverside.bitsOut': {
+                                            value: 0
+                                        },
+                                        'serverside.curConns': {
+                                            value: 0
+                                        },
+                                        'serverside.maxConns': {
+                                            value: 0
+                                        },
+                                        'serverside.pktsIn': {
+                                            value: 0
+                                        },
+                                        'serverside.pktsOut': {
+                                            value: 0
+                                        },
+                                        'serverside.totConns': {
+                                            value: 0
+                                        },
+                                        sessionStatus: {
+                                            description: 'enabled'
+                                        },
+                                        'status.availabilityState': {
+                                            description: 'available'
+                                        },
+                                        'status.enabledState': {
+                                            description: 'enabled'
+                                        },
+                                        'status.statusReason': {
+                                            description: 'The DNS server(s) are available'
                                         },
                                         totRequests: {
                                             value: 0

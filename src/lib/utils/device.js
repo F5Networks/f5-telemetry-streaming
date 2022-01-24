@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -174,7 +174,10 @@ DeviceAsyncCLI.prototype._auth = function () {
     // in case of optimization, replace with Object.assign
     const options = util.deepCopy(this.options.connection);
     return module.exports.getAuthToken(
-        this.host, this.options.credentials.username, this.options.credentials.passphrase, options
+        this.host,
+        this.options.credentials.username,
+        this.options.credentials.passphrase,
+        options
     )
         .then((token) => {
             this.options.credentials.token = token.token;
@@ -547,8 +550,10 @@ module.exports = {
             })
             .then((deviceVersion) => {
                 this.setHostDeviceInfo(HDC_KEYS.VERSION, deviceVersion);
-                this.setHostDeviceInfo(HDC_KEYS.RETRIEVE_SECRETS_FROM_TMSH,
-                    isVersionAffectedBySecretsBug(deviceVersion));
+                this.setHostDeviceInfo(
+                    HDC_KEYS.RETRIEVE_SECRETS_FROM_TMSH,
+                    isVersionAffectedBySecretsBug(deviceVersion)
+                );
                 return this.getDeviceNodeMemoryLimit(constants.LOCAL_HOST);
             })
             .then((deviceNodeMemLimit) => {
@@ -603,7 +608,7 @@ module.exports = {
         }
         return util.fs.readFile('/VERSION')
             .then((ret) => {
-                if ((new RegExp('product:\\s+big-ip', 'i')).test(ret[0].toString())) {
+                if (/product:\s+big-ip/i.test(ret[0].toString())) {
                     return Promise.resolve(constants.DEVICE_TYPE.BIG_IP);
                 }
                 return Promise.reject(new Error('Host is not BIG-IP'));

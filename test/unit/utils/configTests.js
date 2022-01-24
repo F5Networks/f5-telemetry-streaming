@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ('EULA') for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ('EULA') for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -34,7 +34,8 @@ describe('Config Util', () => {
     let coreStub;
 
     const parseDeclaration = (declaration, options) => configWorker.processDeclaration(
-        testUtil.deepCopy(declaration), options
+        testUtil.deepCopy(declaration),
+        options
     );
 
     before(() => {
@@ -294,7 +295,8 @@ describe('Config Util', () => {
             };
             return parseDeclaration(rawDecl)
                 .then(() => {
-                    assert.deepStrictEqual(configUtil.getTelemetryControls(configWorker.currentConfig),
+                    assert.deepStrictEqual(
+                        configUtil.getTelemetryControls(configWorker.currentConfig),
                         {
                             class: 'Controls',
                             name: 'controls',
@@ -303,7 +305,8 @@ describe('Config Util', () => {
                             id: 'f5telemetry_default::controls',
                             memoryThresholdPercent: 90,
                             debug: false
-                        });
+                        }
+                    );
                 });
         });
 
@@ -321,7 +324,8 @@ describe('Config Util', () => {
             };
             return parseDeclaration(rawDecl)
                 .then(() => {
-                    assert.deepStrictEqual(configUtil.getTelemetryControls(configWorker.currentConfig),
+                    assert.deepStrictEqual(
+                        configUtil.getTelemetryControls(configWorker.currentConfig),
                         {
                             class: 'Controls',
                             name: 'controls', // this is just a guess, depends on ordering
@@ -330,7 +334,8 @@ describe('Config Util', () => {
                             id: 'f5telemetry_default::controls',
                             memoryThresholdPercent: 90,
                             debug: false
-                        });
+                        }
+                    );
                 });
         });
 
@@ -700,7 +705,8 @@ describe('Config Util', () => {
                 assert.isNotEmpty(pullConsumer1);
                 assert.deepStrictEqual(
                     configUtil.getTelemetryPullConsumerSystemPollerGroupForPullConsumer(
-                        configWorker.currentConfig, pullConsumer1
+                        configWorker.currentConfig,
+                        pullConsumer1
                     ),
                     {
                         class: 'Telemetry_Pull_Consumer_System_Poller_Group',
@@ -725,7 +731,8 @@ describe('Config Util', () => {
                 assert.isNotEmpty(pullConsumer1);
                 assert.deepStrictEqual(
                     configUtil.getTelemetryPullConsumerSystemPollerGroupForPullConsumer(
-                        configWorker.currentConfig, pullConsumer2
+                        configWorker.currentConfig,
+                        pullConsumer2
                     ),
                     {
                         class: 'Telemetry_Pull_Consumer_System_Poller_Group',
@@ -750,7 +757,8 @@ describe('Config Util', () => {
                 assert.isNotEmpty(pullConsumer1);
                 assert.deepStrictEqual(
                     configUtil.getTelemetryPullConsumerSystemPollerGroupForPullConsumer(
-                        configWorker.currentConfig, pullConsumer3
+                        configWorker.currentConfig,
+                        pullConsumer3
                     ),
                     {
                         class: 'Telemetry_Pull_Consumer_System_Poller_Group',
@@ -775,7 +783,8 @@ describe('Config Util', () => {
                 assert.isNotEmpty(pullConsumer1);
                 assert.deepStrictEqual(
                     configUtil.getTelemetryPullConsumerSystemPollerGroupForPullConsumer(
-                        configWorker.currentConfig, pullConsumer4
+                        configWorker.currentConfig,
+                        pullConsumer4
                     ),
                     {
                         class: 'Telemetry_Pull_Consumer_System_Poller_Group',
@@ -956,7 +965,8 @@ describe('Config Util', () => {
                 assert.isNotEmpty(pullConsumer1);
 
                 const pollerGroup1 = configUtil.getTelemetryPullConsumerSystemPollerGroupForPullConsumer(
-                    configWorker.currentConfig, pullConsumer1
+                    configWorker.currentConfig,
+                    pullConsumer1
                 );
                 assert.isNotEmpty(pollerGroup1);
                 assert.deepStrictEqual(pollerGroup1.id, 'f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_1');
@@ -975,7 +985,8 @@ describe('Config Util', () => {
                 assert.isNotEmpty(pullConsumer2);
 
                 const pollerGroup2 = configUtil.getTelemetryPullConsumerSystemPollerGroupForPullConsumer(
-                    configWorker.currentConfig, pullConsumer2
+                    configWorker.currentConfig,
+                    pullConsumer2
                 );
                 assert.isNotEmpty(pollerGroup2);
                 assert.deepStrictEqual(pollerGroup2.id, 'f5telemetry_default::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_2');
@@ -994,7 +1005,8 @@ describe('Config Util', () => {
                 assert.isNotEmpty(pullConsumer3);
 
                 const pollerGroup3 = configUtil.getTelemetryPullConsumerSystemPollerGroupForPullConsumer(
-                    configWorker.currentConfig, pullConsumer3
+                    configWorker.currentConfig,
+                    pullConsumer3
                 );
                 assert.isNotEmpty(pollerGroup3);
                 assert.deepStrictEqual(pollerGroup3.id, 'My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_1');
@@ -1013,7 +1025,8 @@ describe('Config Util', () => {
                 assert.isNotEmpty(pullConsumer4);
 
                 const pollerGroup4 = configUtil.getTelemetryPullConsumerSystemPollerGroupForPullConsumer(
-                    configWorker.currentConfig, pullConsumer4
+                    configWorker.currentConfig,
+                    pullConsumer4
                 );
                 assert.isNotEmpty(pollerGroup4);
                 assert.deepStrictEqual(pollerGroup4.id, 'My_Namespace::Telemetry_Pull_Consumer_System_Poller_Group_My_Pull_Consumer_2');

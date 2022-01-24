@@ -5,18 +5,103 @@ Use this section to read about known issues and for common troubleshooting steps
 Telemetry Streaming general troubleshooting tips
 ------------------------------------------------
 
-- Examine the restnoded failure log at /var/log/restnoded/restnoded.log (this is where Telemetry Streaming records error messages)
+- Examine the restnoded failure log at **/var/log/restnoded/restnoded.log** (this is where Telemetry Streaming records error messages).
 
 - Examine the REST response:
 
-  - A 400-level response will carry an error message with it
-  - If this message is missing, incorrect, or misleading, please let us know by filing an issue on Github.
+  - A 400-level response carries an error message with it
+  - If this message is missing, incorrect, or misleading, let us know by filing an |issues|.
 
 - Use Telemetry's trace option to create a detailed trace of the configuration process for subsequent analysis. Telemetry's trace option can be a powerful tool to learn about its working details and to review Telemetry's operations in detail.
 
+Logging
+-------
+Telemetry Streaming writes log output to the file **/var/log/restnoded/restnoded.log** on the BIG-IP.
+The verbosity of the log output can be adjusted by submitting a Telemetry Streaming declaration with a Controls class.
+The allowed log levels (in increasing order of verbosity) are **error**, **info**, and **debug**.
+The following is an example declaration containing a Controls class that sets the logging level to debug.
 
-Troubleshooting
----------------
+.. code-block:: json
+   :emphasize-lines: 3-5
+
+    {
+        "class": "Telemetry",
+        "Controls": {
+            "logLevel": "debug"
+        },
+        "My_System": {
+            "class": "Telemetry_System",
+            "systemPoller": {
+                "interval": 60
+            }
+        },
+        "My_Listener": {
+            "class": "Telemetry_Listener",
+            "port": 6514
+        },
+        "My_Consumer": {
+            "class": "Telemetry_Consumer",
+            "type": "Splunk",
+            "host": "192.0.2.1",
+            "protocol": "https",
+            "port": 8088,
+            "passphrase": {
+                "cipherText": "apikey"
+            }
+        }
+    }
+
+
+Tracing
+-------
+While Telemetry Streaming is processing data, you can configure it to write the current state of the data at key points to files for further inspection.
+These files are known as trace files, and can be enabled for the Telemetry_System, Telemetry_System_Poller, Telemetry_Listener, and Telemetry_Consumer classes.
+The trace files are written to the BIG-IP file system in the **/var/tmp/telemetry** directory using a filename based on the class and the name it was given.
+
+To enable tracing, set the trace property to **true**. To override the default file output location, set the trace property to a string value containing the new path.
+
+The **Telemetry_Listener** trace setting is a little more complex, see :ref:`trace` for more information.
+
+The most common use for trace files is to determine how far data progresses through the path from the BIG-IP to the third party tool.
+**Telemetry_System**, **Telemetry_System_Poller**, and **Telemetry_Listener** trace files are useful for determining if data is making it from the BIG-IP to Telemetry Streaming.
+If these trace files are not being generated, or are empty, check the BIG-IP configuration that sets up the sending of data to Telemetry streaming.
+
+**Telemetry_Consumer** trace files are useful for determining if the data is being sent from Telemetry Streaming to the desired third party tool.
+If these trace files are not being generated, or are empty, then check your **Telemetry_Consumer** settings in the Telemetry Streaming declaration.
+Also, check the logs for any issues sending the data to the third party tool.
+If all trace files look correct, then check any settings, queries, and logs in the third party tool.
+
+The following is an example that enables tracing on the Telemetry_System and Telemetry_Consumer classes.
+
+.. code-block:: json
+
+    {
+        "class": "Telemetry",
+        "My_System": {
+            "class": "Telemetry_System",
+            "trace": true,
+            "systemPoller": {
+                "interval": 60
+            }
+        },
+        "My_Consumer": {
+            "class": "Telemetry_Consumer",
+            "trace": true,
+            "type": "Splunk",
+            "host": "192.0.2.1",
+            "protocol": "https",
+            "port": 8088,
+            "passphrase": {
+                "cipherText": "apikey"
+            }
+        }
+    }
+
+|
+
+
+Specific troubleshooting entries
+--------------------------------
 
 I'm receiving a path not registered error when I try to post a declaration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  
@@ -25,10 +110,10 @@ If you are receiving this error, it means either you did not install Telemetry S
 
 .. code-block:: shell
 
-    {
-        "code":404,
-        "message": "Public URI path no registered. Please see /var/log/restjavad.0.log and /var/log/restnoded/restnoded.log for details.".
-        ...
+   {
+       "code":404,
+       "message": "Public URI path no registered. Please see /var/log/restjavad.0.log and /var/log/restnoded/restnoded.log for details.".
+       ...
     }
 
 
@@ -351,3 +436,8 @@ Telemetry Streaming 1.19 and later includes the **compressionType** property in 
 .. |telemetryconsumer| raw:: html
  
    <a href="https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/schema-reference.html#telemetry-consumer" target="_blank">Telemetry_Consumer</a>
+
+
+.. |issues| raw:: html
+
+   <a href="https://github.com/F5Networks/f5-telemetry-streaming/issues" target="_blank">Issue on GitHub</a>

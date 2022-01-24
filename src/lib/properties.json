@@ -826,7 +826,7 @@
                     "convertArrayToMap": { "keyName": "selfLink", "keyNamePrefix": "name/" }
                 },
                 {
-                    "includeFirstEntry": { "pattern": "/stats", "excludePattern": "/members/" }
+                    "includeFirstEntry": { "pattern": "/stats", "excludePattern": "/members/", "runFunctions": [ {"name": "addFqdnToLtmPool" } ]  } 
                 },
                 {
                     "filterKeys": { "exclude": [ "tmName", "availableMemberCnt", "sessionStatus", "connqAll.ageEdm", "connqAll.ageEma", "connqAll.ageHead", "connqAll.ageMax", "connqAll.depth", "connqAll.serviced", "connq.ageEdm", "connq.ageEma", "connq.ageHead", "connq.ageMax", "connq.depth", "connq.serviced", "curSessions", "memberCnt", "minActiveMembers", "monitorRule", "ipTosToServer", "minUpMembersAction", "appService", "appServiceReference", "minUpMembersChecking", "kind","ignorePersistedWeight", "fullPath", "partition", "linkQosToClient", "linkQosToServer", "ipTosToClient", "generation", "serviceDownAction", "queueDepthLimit", "queueTimeLimit", "allowNat", "reselectTries", "minUpMembers", "nodeName", "allowSnat", "monitor", "selfLink", "subPath", "queueOnConnectionLimit", "loadBalancingMode", "slowRampTime", "gatewayFailsafeDeviceReference" ] }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -86,7 +86,7 @@ describe('AWS Cloud-based Tests', function () {
         it('should verify TS service is running', () => {
             const uri = `${constants.BASE_ILX_URI}/info`;
 
-            return new Promise((resolve) => setTimeout(resolve, 5000))
+            return new Promise((resolve) => { setTimeout(resolve, 5000); })
                 .then(() => testUtil.makeRequest(VM_IP, uri, options))
                 .then((data) => {
                     data = data || {};
@@ -120,7 +120,7 @@ describe('AWS Cloud-based Tests', function () {
             it('should retrieve systemPoller info from bucket', function () {
                 this.timeout(180000);
 
-                return new Promise((resolve) => setTimeout(resolve, 90000))
+                return new Promise((resolve) => { setTimeout(resolve, 90000); })
                     .then(() => new Promise((resolve, reject) => {
                         s3.listObjects({ Bucket: BUCKET, MaxKeys: 5 }, (err, data) => {
                             if (err) reject(err);
@@ -184,7 +184,7 @@ describe('AWS Cloud-based Tests', function () {
 
                 const startTime = new Date().toISOString();
                 // metrics take around 2-3 minutes to show up
-                return new Promise((resolve) => setTimeout(resolve, 180000))
+                return new Promise((resolve) => { setTimeout(resolve, 180000); })
                     .then(() => {
                         // get system poller data
                         const uri = `${constants.BASE_ILX_URI}/systempoller/My_System`;

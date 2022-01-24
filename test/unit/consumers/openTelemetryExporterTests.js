@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -124,10 +124,14 @@ describe('OpenTelemetry_Exporter', () => {
 
                 nock('http://localhost:80')
                     .post('/v1/metrics')
-                    .reply(() => {
+                    .reply();
+                return openTelemetryExporter(context)
+                    .then(() => {
+                        assert.deepStrictEqual(context.logger.debug.args, [['success']], 'should log a success');
+                        assert.isFalse(context.logger.error.called, 'should not have logged an error');
                         const traceData = context.tracer.write.firstCall.args[0];
 
-                        assert.strictEqual(Object.keys(traceData).length, 404, 'should have trace record for each metric');
+                        assert.strictEqual(Object.keys(traceData).length, 405, 'should have trace record for each metric');
                         assert.deepStrictEqual(traceData.system_diskLatency__util, {
                             description: 'system.diskLatency.%util',
                             measurements: [
@@ -145,11 +149,6 @@ describe('OpenTelemetry_Exporter', () => {
                             ]
                         }, 'should include measurements array for specific metric in trace data');
                     });
-                return openTelemetryExporter(context)
-                    .then(() => {
-                        assert.deepStrictEqual(context.logger.debug.args, [['success']], 'should log a success');
-                        assert.isFalse(context.logger.error.called, 'should not have logged an error');
-                    });
             });
 
             it('should process and export systemInfo data', () => {
@@ -164,7 +163,7 @@ describe('OpenTelemetry_Exporter', () => {
                         const metrics = convertExportedMetrics(requestBody);
 
                         assert.strictEqual(this.req.headers['content-type'], 'application/x-protobuf', 'should send protobuf data');
-                        assert.strictEqual(metrics.length, 710, 'should export correct number of metrics');
+                        assert.strictEqual(metrics.length, 726, 'should export correct number of metrics');
                     });
                 return openTelemetryExporter(context);
             });

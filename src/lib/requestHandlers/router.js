@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -56,7 +56,11 @@ class RequestRouter extends SafeEventEmitter {
             .then((handler) => {
                 logger.info(`${handler.getCode()} ${restOperation.getMethod().toUpperCase()} ${restOperation.getUri().pathname}`);
                 restOperationResponder.call(
-                    this, restOperation, handler.getCode(), handler.getBody(), handler.getContentType()
+                    this,
+                    restOperation,
+                    handler.getCode(),
+                    handler.getBody(),
+                    handler.getContentType()
                 );
             })
             .catch((fatalError) => {

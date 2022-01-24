@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -42,9 +42,9 @@ function addTags(dataCtx, actionCtx, deviceCtx) {
             // Apply tags to default locations (where addKeysByTag is true) for system info
             if (!dataCtx.isCustom) {
                 Object.keys(properties.stats).forEach((statKey) => {
-                    const statProp = systemStatsUtil.renderProperty(
-                        deviceCtx, util.deepCopy(properties.stats[statKey])
-                    );
+                    const statProp = systemStatsUtil.renderProperty(deviceCtx, util.deepCopy(
+                        properties.stats[statKey]
+                    ));
                     const items = statProp.structure && statProp.structure.parentKey
                         ? (data[statProp.structure.parentKey] || {})[statKey] : data[statKey];
 

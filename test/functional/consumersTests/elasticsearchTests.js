@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -84,7 +84,7 @@ function test() {
                                     port: ES_HTTP_PORT
                                 };
 
-                                return new Promise((resolve) => setTimeout(resolve, 5000))
+                                return new Promise((resolve) => { setTimeout(resolve, 5000); })
                                     .then(() => util.makeRequest(CONSUMER_HOST.ip, uri, options))
                                     .then((data) => {
                                         const nodeInfo = data._nodes;
@@ -155,7 +155,7 @@ function test() {
                                 );
                             };
 
-                            it('should check for event listener data for', () => new Promise((resolve) => setTimeout(resolve, 10000))
+                            it('should check for event listener data for', () => new Promise((resolve) => { setTimeout(resolve, 10000); })
                                 .then(() => query(`size=1&q=data.testType:${ES_CONSUMER_NAME}%20AND%20data.hostname=${dut.hostname}`))
                                 .then((data) => {
                                     util.logger.info('ElasticSearch response:', data);
@@ -179,7 +179,7 @@ function test() {
                                     return Promise.resolve();
                                 }));
 
-                            it('should have system poller data', () => new Promise((resolve) => setTimeout(resolve, 10000))
+                            it('should have system poller data', () => new Promise((resolve) => { setTimeout(resolve, 10000); })
                                 .then(() => query(`size=1&q=system.hostname:${dut.hostname}`))
                                 .then((data) => {
                                     util.logger.info('ElasticSearch response:', data);

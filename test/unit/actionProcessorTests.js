@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -105,9 +105,11 @@ describe('Action Processor', () => {
                 ];
 
                 actionProcessor.processActions(dataCtx, actions);
-                assert.deepStrictEqual(handlerCalls,
+                assert.deepStrictEqual(
+                    handlerCalls,
                     ['addTags', 'preserveStrictMatches', 'addTags', 'removeStrictMatches'],
-                    'should call handler functions and skip disabled actions');
+                    'should call handler functions and skip disabled actions'
+                );
             });
 
             it('should not fail if actions param is undefined', () => {
@@ -122,8 +124,11 @@ describe('Action Processor', () => {
                         myBadAction: {}
                     }
                 ];
-                assert.throws(() => actionProcessor.processActions(dataCtx, actions),
-                    /actionProcessor:processActions error: unknown action.*myBadAction/, 'should throw error if unknown action');
+                assert.throws(
+                    () => actionProcessor.processActions(dataCtx, actions),
+                    /actionProcessor:processActions error: unknown action.*myBadAction/,
+                    'should throw error if unknown action'
+                );
             });
         });
     });

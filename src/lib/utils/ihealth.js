@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -186,9 +186,7 @@ class DeviceAPI {
         }
         // in case of optimization, replace with Object.assign
         const options = util.deepCopy(this.connection);
-        return deviceUtil.getAuthToken(
-            this.host, this.credentials.username, this.credentials.passphrase, options
-        )
+        return deviceUtil.getAuthToken(this.host, this.credentials.username, this.credentials.passphrase, options)
             .then((token) => {
                 this.credentials.token = token.token;
             });

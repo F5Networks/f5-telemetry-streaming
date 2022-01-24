@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -912,9 +912,49 @@ module.exports = {
                     time: 1546304461000
                 },
                 {
+                    time: 1546304461000,
+                    host: 'telemetry.bigip.com',
+                    source: 'bigip.tmsh.pool_member_status',
+                    sourcetype: 'f5:bigip:status:iapp:json',
                     event: {
                         aggr_period: 0,
-                        bytes_transfered: 20044,
+                        device_base_mac: '00:0d:3a:30:34:51',
+                        devicegroup: 'example_device_group',
+                        facility: 'myFacility',
+                        pool_name: '/Example_Tenant/A1/web_pool',
+                        pool_member_name: '/Example_Tenant/_auto_192.0.2.14:80',
+                        callbackurl: '',
+                        address: '192.0.2.14',
+                        port: 80,
+                        session_status: '',
+                        availability_state: 'unknown',
+                        enabled_state: 'enabled'
+                    }
+                },
+                {
+                    time: 1546304461000,
+                    host: 'telemetry.bigip.com',
+                    source: 'bigip.tmsh.pool_member_status',
+                    sourcetype: 'f5:bigip:status:iapp:json',
+                    event: {
+                        aggr_period: 0,
+                        device_base_mac: '00:0d:3a:30:34:51',
+                        devicegroup: 'example_device_group',
+                        facility: 'myFacility',
+                        pool_name: '/Example_Tenant/A1/web_pool',
+                        pool_member_name: '/Example_Tenant/bestwebsite.com:80',
+                        callbackurl: '',
+                        address: '::',
+                        port: 80,
+                        session_status: '',
+                        availability_state: 'available',
+                        enabled_state: 'enabled'
+                    }
+                },
+                {
+                    event: {
+                        aggr_period: 0,
+                        bytes_transfered: 21005,
                         device_base_mac: '00:0d:3a:30:34:51',
                         devicegroup: 'example_device_group',
                         facility: 'myFacility',
@@ -1863,6 +1903,58 @@ module.exports = {
                     source: 'f5-telemetry',
                     sourcetype: 'f5:telemetry',
                     time: 1546304461000
+                },
+                {
+                    time: 1546304461000,
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    host: 'telemetry.bigip.com',
+                    fields: {
+                        addr: '192.0.2.14',
+                        monitorStatus: 'unchecked',
+                        poolName: '/Example_Tenant/A1/web_pool',
+                        port: '80',
+                        'metric_name:serverside.bitsIn': 0,
+                        'metric_name:serverside.bitsOut': 0,
+                        'metric_name:serverside.curConns': 0,
+                        'metric_name:serverside.maxConns': 0,
+                        'metric_name:serverside.pktsIn': 0,
+                        'metric_name:serverside.pktsOut': 0,
+                        'metric_name:serverside.totConns': 0,
+                        availabilityState: 'unknown',
+                        enabledState: 'enabled',
+                        'status.statusReason': 'Pool member does not have service checking enabled',
+                        'metric_name:totRequests': 0,
+                        fqdn: 'bestwebsite.com',
+                        name: '/Example_Tenant/_auto_192.0.2.14:80',
+                        telemetryStreamingStatisticSet: 'pools.members'
+                    }
+                },
+                {
+                    time: 1546304461000,
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    host: 'telemetry.bigip.com',
+                    fields: {
+                        addr: '::',
+                        monitorStatus: 'fqdn-up',
+                        poolName: '/Example_Tenant/A1/web_pool',
+                        port: '80',
+                        'metric_name:serverside.bitsIn': 0,
+                        'metric_name:serverside.bitsOut': 0,
+                        'metric_name:serverside.curConns': 0,
+                        'metric_name:serverside.maxConns': 0,
+                        'metric_name:serverside.pktsIn': 0,
+                        'metric_name:serverside.pktsOut': 0,
+                        'metric_name:serverside.totConns': 0,
+                        availabilityState: 'available',
+                        enabledState: 'enabled',
+                        'status.statusReason': 'The DNS server(s) are available',
+                        'metric_name:totRequests': 0,
+                        fqdn: 'bestwebsite.com',
+                        name: '/Example_Tenant/bestwebsite.com:80',
+                        telemetryStreamingStatisticSet: 'pools.members'
+                    }
                 },
                 {
                     fields: {

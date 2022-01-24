@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -204,8 +204,10 @@ describe('Statsd', () => {
             return statsDIndex(context)
                 .then(() => {
                     assert.strictEqual(context.logger.exception.callCount, 1);
-                    assert.deepEqual(context.logger.exception.firstCall.args,
-                        ['Unable to forward to statsd client', 'Connection failure to server']);
+                    assert.deepEqual(
+                        context.logger.exception.firstCall.args,
+                        ['Unable to forward to statsd client', 'Connection failure to server']
+                    );
                 });
         });
 

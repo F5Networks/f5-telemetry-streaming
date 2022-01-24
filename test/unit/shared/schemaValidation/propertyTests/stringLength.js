@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -41,12 +41,15 @@ module.exports = {
                     // no sense to test it when minLength is 0
                     it('should not allow to set string with length less than minLength', () => {
                         const testDecl = lodash.cloneDeep(ctx.declaration);
-                        lodash.set(testDecl, ctx.property,
+                        lodash.set(
+                            testDecl,
+                            ctx.property,
                             testConf.valueCb(
                                 testDecl,
                                 ctx.property,
                                 testConf.minLength - 1
-                            ));
+                            )
+                        );
                         return assert.isRejected(
                             ctx.validator(testDecl),
                             new RegExp(`"keyword":"minLength".*"dataPath":.*${ctx.propFullName}.*"message":"should NOT be shorter than ${testConf.minLength} characters"`),
@@ -57,12 +60,15 @@ module.exports = {
 
                 it('should allow to set string with length equal to minLength', () => {
                     const testDecl = lodash.cloneDeep(ctx.declaration);
-                    lodash.set(testDecl, ctx.property,
+                    lodash.set(
+                        testDecl,
+                        ctx.property,
                         testConf.valueCb(
                             testDecl,
                             ctx.property,
                             testConf.minLength
-                        ));
+                        )
+                    );
                     return assert.isFulfilled(
                         ctx.validator(testDecl),
                         `should allow to set string with length equal to ${testConf.minLength} characters`
@@ -74,12 +80,15 @@ module.exports = {
             utils.testControls.getSubTestDescribe(testConf)(`"maxLength" keyword tests (maxLength === ${testConf.maxLength})${subTitle}`, () => {
                 it('should not allow to set string with length more than maxLength', () => {
                     const testDecl = lodash.cloneDeep(ctx.declaration);
-                    lodash.set(testDecl, ctx.property,
+                    lodash.set(
+                        testDecl,
+                        ctx.property,
                         testConf.valueCb(
                             testDecl,
                             ctx.property,
                             testConf.maxLength + 1
-                        ));
+                        )
+                    );
                     return assert.isRejected(
                         ctx.validator(testDecl),
                         new RegExp(`"keyword":"maxLength".*"dataPath":.*${ctx.propFullName}.*"message":"should NOT be longer than ${testConf.maxLength} characters"`),
@@ -89,12 +98,15 @@ module.exports = {
 
                 it('should allow to set string with length equal to maxLength', () => {
                     const testDecl = lodash.cloneDeep(ctx.declaration);
-                    lodash.set(testDecl, ctx.property,
+                    lodash.set(
+                        testDecl,
+                        ctx.property,
                         testConf.valueCb(
                             testDecl,
                             ctx.property,
                             testConf.maxLength
-                        ));
+                        )
+                    );
                     return assert.isFulfilled(
                         ctx.validator(testDecl),
                         `should allow to set string with length equal to ${testConf.maxLength} characters`

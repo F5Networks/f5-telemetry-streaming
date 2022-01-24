@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ('EULA') for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ('EULA') for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -379,15 +379,15 @@ module.exports = {
                     }
                 },
                 {
-                    endpoint: '/anotherEndpoint/refObject/suffix/stats',
+                    endpoint: '/anotherEndpoint/refObject/stats',
                     response: {
                         kind: 'anotherEndpoint:stats',
-                        selfLink: 'https://localhost/anotherEndpoint/refObject/suffix/stats?ver=X.X.X',
+                        selfLink: 'https://localhost/anotherEndpoint/refObject/stats?ver=X.X.X',
                         entries: {
-                            'https://localhost/anotherEndpoint/refObject/suffix/stats': {
+                            'https://localhost/anotherEndpoint/refObject/stats': {
                                 nestedStats: {
                                     kind: 'anotherEndpoint:stats',
-                                    selfLink: 'https://localhost/anotherEndpoint/refObject/suffix/stats?ver=X.X.X',
+                                    selfLink: 'https://localhost/anotherEndpoint/refObject/stats?ver=X.X.X',
                                     name: 'anotherStats',
                                     statKey: 'statValue'
                                 }
@@ -423,10 +423,10 @@ module.exports = {
                                 kind: 'anotherEndpoint:state',
                                 selfLink: 'https://localhost/anotherEndpoint/refObject/suffix?ver=X.X.X',
                                 entries: {
-                                    'https://localhost/anotherEndpoint/refObject/suffix/stats': {
+                                    'https://localhost/anotherEndpoint/refObject/stats': {
                                         nestedStats: {
                                             kind: 'anotherEndpoint:stats',
-                                            selfLink: 'https://localhost/anotherEndpoint/refObject/suffix/stats?ver=X.X.X',
+                                            selfLink: 'https://localhost/anotherEndpoint/refObject/stats?ver=X.X.X',
                                             name: 'anotherStats',
                                             statKey: 'statValue'
                                         }

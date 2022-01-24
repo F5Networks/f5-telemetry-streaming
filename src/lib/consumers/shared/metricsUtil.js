@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -186,7 +186,7 @@ function canBeTag(data, options) {
  * @returns {boolean} true when object has at least one key
  */
 function objectHasKeys(obj) {
-    // eslint-disable-next-line guard-for-in, no-restricted-syntax, prefer-const
+    // eslint-disable-next-line guard-for-in, no-restricted-syntax, prefer-const, no-unreachable-loop
     for (let x in obj) {
         return true;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ('EULA') for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ('EULA') for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -668,6 +668,243 @@ describe('Normalize Util', () => {
             };
             const actual = normalizeUtil.restructureGslbPool(args);
             assert.deepStrictEqual(actual, expected);
+        });
+    });
+
+    describe('.addFqdnToLtmPool()', () => {
+        it('should add \'fqdn\' when pool member is fqdn node, and not add \'fqdn\' when not fqdn node', () => {
+            const args = {
+                data: {
+                    kind: 'tm:ltm:pool:poolstate',
+                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0?ver=14.1.0',
+                    name: 'test_pool_0',
+                    membersReference: {
+                        kind: 'tm:ltm:pool:members:memberscollectionstate',
+                        selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members?$select=fqdn%2CselfLink&ver=14.1.4.2',
+                        entries: {
+                            'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80/stats': {
+                                nestedStats: {
+                                    kind: 'tm:ltm:pool:members:membersstats',
+                                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80/stats?ver=14.1.0',
+                                    entries: {}
+                                }
+                            },
+                            'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2%2510:80/stats': {
+                                nestedStats: {
+                                    kind: 'tm:ltm:pool:members:membersstats',
+                                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2%2510:80/stats?ver=14.1.0',
+                                    entries: {}
+                                }
+                            },
+                            'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.0.2.2:80/stats': {
+                                nestedStats: {
+                                    kind: 'tm:ltm:pool:members:membersstats',
+                                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.0.2.2:80/stats?ver=14.1.0',
+                                    entries: {}
+                                }
+                            },
+                            'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~bestwebsite:80/stats': {
+                                nestedStats: {
+                                    kind: 'tm:ltm:pool:members:membersstats',
+                                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~bestwebsite:80/stats?ver=14.1.0',
+                                    entries: {}
+                                }
+                            }
+                        },
+                        items: [
+                            {
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80?ver=14.1.4.2',
+                                fqdn: {
+                                    autopopulate: 'disabled'
+                                }
+                            },
+                            {
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2%2510:80?ver=14.1.4.2',
+                                fqdn: {
+                                    autopopulate: 'disabled'
+                                }
+                            },
+                            {
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.0.2.2:80?ver=14.1.4.2',
+                                fqdn: {
+                                    autopopulate: 'enabled',
+                                    tmName: 'www.thebestwebsite.com'
+                                }
+                            },
+                            {
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~bestwebsite:80?ver=14.1.4.2',
+                                fqdn: {
+                                    autopopulate: 'enabled',
+                                    tmName: 'www.thebestwebsite.com'
+                                }
+                            }
+                        ]
+                    }
+                }
+            };
+            const expected = {
+                kind: 'tm:ltm:pool:poolstate',
+                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0?ver=14.1.0',
+                name: 'test_pool_0',
+                membersReference: {
+                    kind: 'tm:ltm:pool:members:memberscollectionstate',
+                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members?$select=fqdn%2CselfLink&ver=14.1.4.2',
+                    entries: {
+                        'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80/stats': {
+                            nestedStats: {
+                                kind: 'tm:ltm:pool:members:membersstats',
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80/stats?ver=14.1.0',
+                                entries: {}
+                            }
+                        },
+                        'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2%2510:80/stats': {
+                            nestedStats: {
+                                kind: 'tm:ltm:pool:members:membersstats',
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2%2510:80/stats?ver=14.1.0',
+                                entries: {}
+                            }
+                        },
+                        'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.0.2.2:80/stats': {
+                            nestedStats: {
+                                kind: 'tm:ltm:pool:members:membersstats',
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.0.2.2:80/stats?ver=14.1.0',
+                                entries: {
+                                    fqdn: 'www.thebestwebsite.com'
+                                }
+                            }
+                        },
+                        'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~bestwebsite:80/stats': {
+                            nestedStats: {
+                                kind: 'tm:ltm:pool:members:membersstats',
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~bestwebsite:80/stats?ver=14.1.0',
+                                entries: {
+                                    fqdn: 'www.thebestwebsite.com'
+                                }
+                            }
+                        }
+                    },
+                    items: [
+                        {
+                            selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80?ver=14.1.4.2',
+                            fqdn: {
+                                autopopulate: 'disabled'
+                            }
+                        },
+                        {
+                            selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2%2510:80?ver=14.1.4.2',
+                            fqdn: {
+                                autopopulate: 'disabled'
+                            }
+                        },
+                        {
+                            selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.0.2.2:80?ver=14.1.4.2',
+                            fqdn: {
+                                autopopulate: 'enabled',
+                                tmName: 'www.thebestwebsite.com'
+                            }
+                        },
+                        {
+                            selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~bestwebsite:80?ver=14.1.4.2',
+                            fqdn: {
+                                autopopulate: 'enabled',
+                                tmName: 'www.thebestwebsite.com'
+                            }
+                        }
+                    ]
+                }
+            };
+            assert.deepStrictEqual(normalizeUtil.addFqdnToLtmPool(args), expected, 'should add fqdn property when pool member is fqdn node');
+        });
+
+        it('should not fail when no fqdn property', () => {
+            const args = {
+                data: {
+                    kind: 'tm:ltm:pool:poolstate',
+                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0?ver=14.1.0',
+                    name: 'test_pool_0',
+                    membersReference: {
+                        kind: 'tm:ltm:pool:members:memberscollectionstate',
+                        selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members?$select=fqdn%2CselfLink&ver=14.1.4.2',
+                        entries: {
+                            'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80/stats': {
+                                nestedStats: {
+                                    kind: 'tm:ltm:pool:members:membersstats',
+                                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80/stats?ver=14.1.0',
+                                    entries: {}
+                                }
+                            },
+                            'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2%2510:80/stats': {
+                                nestedStats: {
+                                    kind: 'tm:ltm:pool:members:membersstats',
+                                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2%2510:80/stats?ver=14.1.0',
+                                    entries: {}
+                                }
+                            }
+                        },
+                        items: [
+                            {
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80?ver=14.1.4.2'
+                            },
+                            {
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2%2510:80?ver=14.1.4.2'
+                            }
+                        ]
+                    }
+                }
+            };
+            assert.doesNotThrow(() => { normalizeUtil.addFqdnToLtmPool(args); }, 'should not throw if no fqdn property in iControlRest');
+        });
+
+        it('should not fail when no pool members', () => {
+            const args = {
+                data: {
+                    kind: 'tm:ltm:pool:poolstate',
+                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0?ver=14.1.0',
+                    name: 'test_pool_0',
+                    membersReference: {
+                        kind: 'tm:ltm:pool:members:memberscollectionstate',
+                        selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members?$select=fqdn%2CselfLink&ver=14.1.4.2',
+                        items: []
+                    }
+                }
+            };
+            const expected = {
+                kind: 'tm:ltm:pool:poolstate',
+                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0?ver=14.1.0',
+                name: 'test_pool_0',
+                membersReference: {
+                    kind: 'tm:ltm:pool:members:memberscollectionstate',
+                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members?$select=fqdn%2CselfLink&ver=14.1.4.2'
+                }
+            };
+            assert.deepStrictEqual(normalizeUtil.addFqdnToLtmPool(args), expected, 'should add fqdn property when pool member is fqdn node');
+        });
+
+        it('should not fail when no pool member config data', () => {
+            const args = {
+                data: {
+                    kind: 'tm:ltm:pool:poolstate',
+                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0?ver=14.1.0',
+                    name: 'test_pool_0',
+                    membersReference: {
+                        kind: 'tm:ltm:pool:members:memberscollectionstate',
+                        selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members?$select=fqdn%2CselfLink&ver=14.1.4.2',
+                        entries: {
+                            'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80/stats': {
+                                nestedStats: {
+                                    kind: 'tm:ltm:pool:members:membersstats',
+                                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80/stats?ver=14.1.0',
+                                    entries: {}
+                                }
+                            }
+                        },
+                        items: []
+                    }
+                }
+            };
+            // Shouldn't need to modify data at all
+            const expected = util.deepCopy(args.data);
+            assert.deepStrictEqual(normalizeUtil.addFqdnToLtmPool(args), expected, 'should still succeed if not able to get pool member config data');
         });
     });
 

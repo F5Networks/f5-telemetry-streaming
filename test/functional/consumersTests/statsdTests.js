@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -72,7 +72,7 @@ function test() {
                 };
 
                 // splunk container takes about 15 seconds to come up
-                return new Promise((resolve) => setTimeout(resolve, 1500))
+                return new Promise((resolve) => { setTimeout(resolve, 1500); })
                     .then(() => util.makeRequest(CONSUMER_HOST.ip, uri, options))
                     .then((data) => {
                         util.logger.info('Statsd response:', data);
@@ -177,7 +177,7 @@ function test() {
                              * Sleep for 30 second(s) and return Promise.reject to allow retry
                              */
                             util.logger.info('Waiting for data to be indexed...');
-                            return new Promise((resolveTimer) => setTimeout(resolveTimer, 30000))
+                            return new Promise((resolveTimer) => { setTimeout(resolveTimer, 30000); })
                                 .then(() => Promise.reject(new Error('Metrics are empty / not indexed')));
                         });
                 };
@@ -214,9 +214,7 @@ function test() {
 
 function teardown() {
     describe('Consumer Test: Statsd - teardown', () => {
-        STATSD_PROTOCOLS.forEach((protocol) => it(
-            `should remove ${protocol} container(s)`, () => runRemoteCmd(`docker container rm -f ${STATSD_CONTAINER_NAME}-${protocol}`)
-        ));
+        STATSD_PROTOCOLS.forEach((protocol) => it(`should remove ${protocol} container(s)`, () => runRemoteCmd(`docker container rm -f ${STATSD_CONTAINER_NAME}-${protocol}`)));
     });
 }
 

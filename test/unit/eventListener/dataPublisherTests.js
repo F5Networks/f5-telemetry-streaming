@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ('EULA') for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ('EULA') for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -140,16 +140,20 @@ describe('Data Publisher', () => {
             netClientWriteFunction = () => {
                 throw new Error('throwing from client.write()');
             };
-            return assert.isRejected(dataPublisher.sendDataToListener('someString', 'MyListener'),
-                /throwing from client.write()/);
+            return assert.isRejected(
+                dataPublisher.sendDataToListener('someString', 'MyListener'),
+                /throwing from client.write()/
+            );
         });
 
         it('should reject if client.write() emits an error', () => {
             netClientWriteFunction = function () {
                 this.emit('error', 'emitting error from client.write()');
             };
-            return assert.isRejected(dataPublisher.sendDataToListener('someString', 'MyListener'),
-                /emitting error from client.write()/);
+            return assert.isRejected(
+                dataPublisher.sendDataToListener('someString', 'MyListener'),
+                /emitting error from client.write()/
+            );
         });
     });
 });

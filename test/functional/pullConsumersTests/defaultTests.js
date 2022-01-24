@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -48,19 +48,24 @@ function test() {
         describe('default - Tests', () => {
             const pullConsumerName = 'My_Pull_Consumer';
             DUTS.forEach((dut) => {
-                it(`should get the Pull Consumer's formatted data from: ${dut.hostalias}`,
+                it(
+                    `should get the Pull Consumer's formatted data from: ${dut.hostalias}`,
                     () => dutUtils.getPullConsumerData(dut, pullConsumerName, { rawResponse: true })
                         .then((response) => {
                             verifyResponseData(response);
-                        }));
+                        })
+                );
 
-                it(`should get the Pull Consumer's formatted data from: ${dut.hostalias} (using namespace endpoint)`,
-                    () => dutUtils.getPullConsumerData(
-                        dut, pullConsumerName, { namespace: DEFAULT_UNNAMED_NAMESPACE, rawResponse: true }
-                    )
+                it(
+                    `should get the Pull Consumer's formatted data from: ${dut.hostalias} (using namespace endpoint)`,
+                    () => dutUtils.getPullConsumerData(dut, pullConsumerName, {
+                        namespace: DEFAULT_UNNAMED_NAMESPACE,
+                        rawResponse: true
+                    })
                         .then((response) => {
                             verifyResponseData(response);
-                        }));
+                        })
+                );
             });
         });
     });
@@ -77,11 +82,13 @@ function test() {
             const pullConsumerName = 'Pull_Consumer';
             const namespace = 'Second_Namespace';
             DUTS.forEach((dut) => {
-                it(`should get the Pull Consumer's formatted data from: ${dut.hostalias}`,
+                it(
+                    `should get the Pull Consumer's formatted data from: ${dut.hostalias}`,
                     () => dutUtils.getPullConsumerData(dut, pullConsumerName, { namespace, rawResponse: true })
                         .then((response) => {
                             verifyResponseData(response);
-                        }));
+                        })
+                );
             });
         });
     });

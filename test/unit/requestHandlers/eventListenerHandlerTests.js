@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -52,11 +52,17 @@ describe('EventListenerHandler', () => {
             .then((handler) => {
                 assert.ok(handler === requestHandler, 'should return a reference to original handler');
                 assert.strictEqual(requestHandler.getCode(), 200, 'should return expected code');
-                assert.deepStrictEqual(requestHandler.getBody(),
-                    { data: { data: 'testData' }, message: 'success' }, 'should return expected body');
+                assert.deepStrictEqual(
+                    requestHandler.getBody(),
+                    { data: { data: 'testData' }, message: 'success' },
+                    'should return expected body'
+                );
                 assert.strictEqual(sendDataStub.callCount, 1, 'should be called once');
-                assert.deepStrictEqual(sendDataStub.firstCall.args,
-                    [{ data: 'testData' }, 'My_Listener', { namespace: undefined }], 'should be called once');
+                assert.deepStrictEqual(
+                    sendDataStub.firstCall.args,
+                    [{ data: 'testData' }, 'My_Listener', { namespace: undefined }],
+                    'should be called once'
+                );
             });
     });
 
@@ -72,11 +78,17 @@ describe('EventListenerHandler', () => {
             .then((handler) => {
                 assert.ok(handler === requestHandler, 'should return a reference to original handler');
                 assert.strictEqual(requestHandler.getCode(), 200, 'should return expected code');
-                assert.deepStrictEqual(requestHandler.getBody(),
-                    { data: { data: 'testData' }, message: 'success' }, 'should return expected body');
+                assert.deepStrictEqual(
+                    requestHandler.getBody(),
+                    { data: { data: 'testData' }, message: 'success' },
+                    'should return expected body'
+                );
                 assert.strictEqual(sendDataStub.callCount, 1, 'should be called once');
-                assert.deepStrictEqual(sendDataStub.firstCall.args,
-                    [{ data: 'testData' }, 'My_Listener', { namespace: 'My_Namespace' }], 'should be called once');
+                assert.deepStrictEqual(
+                    sendDataStub.firstCall.args,
+                    [{ data: 'testData' }, 'My_Listener', { namespace: 'My_Namespace' }],
+                    'should be called once'
+                );
             });
     });
 

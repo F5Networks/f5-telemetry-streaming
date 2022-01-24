@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -1964,6 +1964,230 @@ module.exports = {
                         port: 0,
                         'status.statusReason': 'Pool member is available'
                     }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-0-2-14-80.serverside-bitsIn',
+                    metricTags: {
+                        addr: '192.0.2.14',
+                        availabilityState: 'unknown',
+                        enabledState: 'enabled',
+                        fqdn: 'bestwebsite.com',
+                        monitorStatus: 'unchecked',
+                        poolName: '/Example_Tenant/A1/web_pool',
+                        port: 80,
+                        'status.statusReason': 'Pool member does not have service checking enabled'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-0-2-14-80.serverside-bitsOut',
+                    metricTags: {
+                        addr: '192.0.2.14',
+                        availabilityState: 'unknown',
+                        enabledState: 'enabled',
+                        fqdn: 'bestwebsite.com',
+                        monitorStatus: 'unchecked',
+                        poolName: '/Example_Tenant/A1/web_pool',
+                        port: 80,
+                        'status.statusReason': 'Pool member does not have service checking enabled'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-0-2-14-80.serverside-curConns',
+                    metricTags: {
+                        addr: '192.0.2.14',
+                        availabilityState: 'unknown',
+                        enabledState: 'enabled',
+                        fqdn: 'bestwebsite.com',
+                        monitorStatus: 'unchecked',
+                        poolName: '/Example_Tenant/A1/web_pool',
+                        port: 80,
+                        'status.statusReason': 'Pool member does not have service checking enabled'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-0-2-14-80.serverside-maxConns',
+                    metricTags: {
+                        addr: '192.0.2.14',
+                        availabilityState: 'unknown',
+                        enabledState: 'enabled',
+                        fqdn: 'bestwebsite.com',
+                        monitorStatus: 'unchecked',
+                        poolName: '/Example_Tenant/A1/web_pool',
+                        port: 80,
+                        'status.statusReason': 'Pool member does not have service checking enabled'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-0-2-14-80.serverside-pktsIn',
+                    metricTags: {
+                        addr: '192.0.2.14',
+                        availabilityState: 'unknown',
+                        enabledState: 'enabled',
+                        fqdn: 'bestwebsite.com',
+                        monitorStatus: 'unchecked',
+                        poolName: '/Example_Tenant/A1/web_pool',
+                        port: 80,
+                        'status.statusReason': 'Pool member does not have service checking enabled'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-0-2-14-80.serverside-pktsOut',
+                    metricTags: {
+                        addr: '192.0.2.14',
+                        availabilityState: 'unknown',
+                        enabledState: 'enabled',
+                        fqdn: 'bestwebsite.com',
+                        monitorStatus: 'unchecked',
+                        poolName: '/Example_Tenant/A1/web_pool',
+                        port: 80,
+                        'status.statusReason': 'Pool member does not have service checking enabled'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-0-2-14-80.serverside-totConns',
+                    metricTags: {
+                        addr: '192.0.2.14',
+                        availabilityState: 'unknown',
+                        enabledState: 'enabled',
+                        fqdn: 'bestwebsite.com',
+                        monitorStatus: 'unchecked',
+                        poolName: '/Example_Tenant/A1/web_pool',
+                        port: 80,
+                        'status.statusReason': 'Pool member does not have service checking enabled'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-0-2-14-80.totRequests',
+                    metricTags: {
+                        addr: '192.0.2.14',
+                        availabilityState: 'unknown',
+                        enabledState: 'enabled',
+                        fqdn: 'bestwebsite.com',
+                        monitorStatus: 'unchecked',
+                        poolName: '/Example_Tenant/A1/web_pool',
+                        port: 80,
+                        'status.statusReason': 'Pool member does not have service checking enabled'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-bestwebsite-com-80.serverside-bitsIn',
+                    metricTags: {
+                        addr: '::',
+                        availabilityState: 'available',
+                        enabledState: 'enabled',
+                        fqdn: 'bestwebsite.com',
+                        monitorStatus: 'fqdn-up',
+                        poolName: '/Example_Tenant/A1/web_pool',
+                        port: 80,
+                        'status.statusReason': 'The DNS server(s) are available'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-bestwebsite-com-80.serverside-bitsOut',
+                    metricTags: {
+                        addr: '::',
+                        availabilityState: 'available',
+                        enabledState: 'enabled',
+                        fqdn: 'bestwebsite.com',
+                        monitorStatus: 'fqdn-up',
+                        poolName: '/Example_Tenant/A1/web_pool',
+                        port: 80,
+                        'status.statusReason': 'The DNS server(s) are available'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-bestwebsite-com-80.serverside-curConns',
+                    metricTags: {
+                        addr: '::',
+                        availabilityState: 'available',
+                        enabledState: 'enabled',
+                        fqdn: 'bestwebsite.com',
+                        monitorStatus: 'fqdn-up',
+                        poolName: '/Example_Tenant/A1/web_pool',
+                        port: 80,
+                        'status.statusReason': 'The DNS server(s) are available'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-bestwebsite-com-80.serverside-maxConns',
+                    metricTags: {
+                        addr: '::',
+                        availabilityState: 'available',
+                        enabledState: 'enabled',
+                        fqdn: 'bestwebsite.com',
+                        monitorStatus: 'fqdn-up',
+                        poolName: '/Example_Tenant/A1/web_pool',
+                        port: 80,
+                        'status.statusReason': 'The DNS server(s) are available'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-bestwebsite-com-80.serverside-pktsIn',
+                    metricTags: {
+                        addr: '::',
+                        availabilityState: 'available',
+                        enabledState: 'enabled',
+                        fqdn: 'bestwebsite.com',
+                        monitorStatus: 'fqdn-up',
+                        poolName: '/Example_Tenant/A1/web_pool',
+                        port: 80,
+                        'status.statusReason': 'The DNS server(s) are available'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-bestwebsite-com-80.serverside-pktsOut',
+                    metricTags: {
+                        addr: '::',
+                        availabilityState: 'available',
+                        enabledState: 'enabled',
+                        fqdn: 'bestwebsite.com',
+                        monitorStatus: 'fqdn-up',
+                        poolName: '/Example_Tenant/A1/web_pool',
+                        port: 80,
+                        'status.statusReason': 'The DNS server(s) are available'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-bestwebsite-com-80.serverside-totConns',
+                    metricTags: {
+                        addr: '::',
+                        availabilityState: 'available',
+                        enabledState: 'enabled',
+                        fqdn: 'bestwebsite.com',
+                        monitorStatus: 'fqdn-up',
+                        poolName: '/Example_Tenant/A1/web_pool',
+                        port: 80,
+                        'status.statusReason': 'The DNS server(s) are available'
+                    },
+                    metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-bestwebsite-com-80.totRequests',
+                    metricTags: {
+                        addr: '::',
+                        availabilityState: 'available',
+                        enabledState: 'enabled',
+                        fqdn: 'bestwebsite.com',
+                        monitorStatus: 'fqdn-up',
+                        poolName: '/Example_Tenant/A1/web_pool',
+                        port: 80,
+                        'status.statusReason': 'The DNS server(s) are available'
+                    },
+                    metricValue: 0
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.ltmPolicies.-Common-app-app-app_policy.invoked',

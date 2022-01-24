@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -55,8 +55,10 @@ describe('AWS Util Tests', () => {
             return awsUtil.initializeConfig(context)
                 .then(() => {
                     assert.strictEqual(actualParams.region, 'us-east-1');
-                    assert.deepStrictEqual(actualParams.credentials,
-                        new aws.Credentials({ accessKeyId: 'awsuser', secretAccessKey: 'awssecret' }));
+                    assert.deepStrictEqual(
+                        actualParams.credentials,
+                        new aws.Credentials({ accessKeyId: 'awsuser', secretAccessKey: 'awssecret' })
+                    );
                 });
         });
 
@@ -98,8 +100,10 @@ describe('AWS Util Tests', () => {
             };
             return awsUtil.initializeConfig(context, configOptions)
                 .then(() => {
-                    assert.deepStrictEqual(actualParams,
-                        { region: 'us-west-1', httpOptions: { agent: 'myAgent' } });
+                    assert.deepStrictEqual(
+                        actualParams,
+                        { region: 'us-west-1', httpOptions: { agent: 'myAgent' } }
+                    );
                 });
         });
 

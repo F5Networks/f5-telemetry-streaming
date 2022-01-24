@@ -1,5 +1,5 @@
 /*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
  * may copy and modify this software product for its internal business purposes.
  * Further, Licensee may upload, publish and distribute the modified version of
@@ -15,6 +15,29 @@ const util = require('./misc');
 const constants = require('../constants');
 
 const TRUTHY_REGEXP = /^\s*(true|1|on|yes)\s*$/i;
+
+/**
+ * Iterate over an endpoint's memberReference entries, and execute entryFunc on each memberReference entry
+ *
+ * @param {Object}  data                            - data to process
+ * @param {Object}  [data.membersReference]         - memberReference object to process
+ * @param {Function<Object, String>}    entryFunc   - function to execute on each memberReference entry
+ *
+ * @returns {Object} Returns formatted data
+ */
+const iterateMemberReferenceEntries = (data, entryFunc) => {
+    if (data.membersReference) {
+        if (data.membersReference.entries) {
+            const statsKeys = Object.keys(data.membersReference.entries);
+            statsKeys.forEach((entryStatKey) => {
+                entryFunc(data, entryStatKey);
+            });
+        } else {
+            delete data.membersReference.items;
+        }
+    }
+    return data;
+};
 
 module.exports = {
     /**
@@ -479,23 +502,35 @@ module.exports = {
      * @returns {Object} Returns formatted data
      */
     restructureGslbPool(args) {
-        const data = args.data;
-        if (data.membersReference) {
-            if (data.membersReference.entries) {
-                const statsKeys = Object.keys(data.membersReference.entries);
-                statsKeys.forEach((key) => {
-                    const statsEntry = data.membersReference.entries[key];
-                    const vsAndServer = statsEntry.nestedStats.selfLink.split('/members/')[1].split('/stats')[0];
-                    const vs = vsAndServer.split(':')[0];
-                    const server = vsAndServer.split(':')[1];
-                    const item = data.membersReference.items.find((i) => i.selfLink.includes(`${server}:${vs}`));
-                    Object.assign(data.membersReference.entries[key].nestedStats.entries, item);
-                });
-            } else {
-                delete data.membersReference.items;
+        const entryFunc = (data, entryStatKey) => {
+            const statsEntry = data.membersReference.entries[entryStatKey];
+            const vsAndServer = statsEntry.nestedStats.selfLink.split('/members/')[1].split('/stats')[0];
+            const vs = vsAndServer.split(':')[0];
+            const server = vsAndServer.split(':')[1];
+            const item = data.membersReference.items.find((i) => i.selfLink.includes(`${server}:${vs}`));
+            Object.assign(data.membersReference.entries[entryStatKey].nestedStats.entries, item);
+        };
+        return iterateMemberReferenceEntries(args.data, entryFunc);
+    },
+
+    /**
+     * addFqdnToLtmPool
+     *
+     * @param {Object} args              - args object
+     * @param {Object} [args.data]       - data to process (always included)
+     *
+     * @returns {Object} Returns formatted data
+     */
+    addFqdnToLtmPool(args) {
+        const entryFunc = (data, entryStatKey) => {
+            const statsEntry = data.membersReference.entries[entryStatKey];
+            const poolLink = statsEntry.nestedStats.selfLink.split('/stats')[0];
+            const item = data.membersReference.items.find((i) => i.selfLink.split('?ver')[0] === poolLink);
+            if (item && item.fqdn && item.fqdn.tmName) {
+                data.membersReference.entries[entryStatKey].nestedStats.entries.fqdn = item.fqdn.tmName;
             }
-        }
-        return data;
+        };
+        return iterateMemberReferenceEntries(args.data, entryFunc);
     },
 
     /**
